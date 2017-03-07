@@ -349,23 +349,16 @@ namespace Engine.Common
                 foreach (Mesh mesh in dictionary.Values)
                 {
                     //Vertices
-                    bufferManager.Add(
-                        mesh.Name, 
-                        mesh.Vertices,
-                        false,
-                        mesh.Instanced ? instances : 0,
-                        out mesh.VertexBufferOffset, 
-                        out mesh.VertexBufferSlot);
+                    mesh.VertexBuffer = bufferManager.Add(mesh.Name, mesh.Vertices, false, mesh.Instanced ? instances : 0);
 
                     if (mesh.Indexed)
                     {
                         //Indices
-                        bufferManager.Add(
-                            mesh.Name,
-                            mesh.Indices,
-                            false,
-                            out mesh.IndexBufferOffset,
-                            out mesh.IndexBufferSlot);
+                        mesh.IndexBuffer = bufferManager.Add(mesh.Name, mesh.Indices, false);
+                    }
+                    else
+                    {
+                        mesh.IndexBuffer = new BufferDescriptor(-1, -1, 0);
                     }
                 }
             }

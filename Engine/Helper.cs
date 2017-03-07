@@ -149,6 +149,19 @@ namespace Engine
             return dictionary.Select(item => item.Key);
         }
         /// <summary>
+        /// Performs the specified action on each element of the System.Collections.Generic.IEnumerable<T>.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="enumeration">The enumeration instance</param>
+        /// <param name="action">The System.Action`1 delegate to perform on each element of the System.Collections.Generic.IEnumerable<T>.</param>
+        public static void ForEach<T>(this IEnumerable<T> enumeration, Action<T> action)
+        {
+            foreach (T item in enumeration)
+            {
+                action(item);
+            }
+        }
+        /// <summary>
         /// Gets the internal items of the KeyCollection into a list
         /// </summary>
         /// <typeparam name="TKey">Key type</typeparam>

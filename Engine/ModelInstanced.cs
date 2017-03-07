@@ -270,12 +270,12 @@ namespace Engine
                                         #endregion
 
                                         var mesh = dictionary[material];
-                                        this.BufferManager.SetIndexBuffer(mesh.IndexBufferSlot);
+                                        this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
                                         var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                                        this.BufferManager.SetInputAssembler(technique, mesh.VertexBufferSlot, mesh.Topology);
+                                        this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
-                                        count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
+                                        count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
                                         count *= instanceCount;
 
                                         for (int p = 0; p < technique.Description.PassCount; p++)

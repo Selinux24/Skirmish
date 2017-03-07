@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -13,17 +14,13 @@ namespace Engine
     public class TriangleListDrawer : Drawable
     {
         /// <summary>
-        /// Buffer offset
+        /// Vertex buffer descriptor
         /// </summary>
-        private int vertexBufferOffset = -1;
+        private BufferDescriptor vertexBuffer = null;
         /// <summary>
-        /// Buffer slot
+        /// Primitives to draw
         /// </summary>
-        private int vertexBufferSlot = -1;
-        /// <summary>
-        /// Vertex count
-        /// </summary>
-        private int vertexCount = 0;
+        private int drawCount = 0;
         /// <summary>
         /// Triangle dictionary by color
         /// </summary>
@@ -66,13 +63,13 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
-        public TriangleListDrawer(Game game, BufferManager bufferManager, TriangleListDrawerDescription description, Triangle[] triangles, Color4 color)
+        public TriangleListDrawer(Game game, BufferManager bufferManager, TriangleListDrawerDescription description, IEnumerable<Triangle> triangles, Color4 color)
             : base(game, bufferManager, description)
         {
             this.dictionary.Add(color, new List<Triangle>(triangles));
             this.dictionaryChanged = true;
 
-            this.InitializeBuffers(triangles.Length * 3);
+            this.InitializeBuffers(triangles.Count() * 3);
         }
         /// <summary>
         /// Internal resources disposition
@@ -100,12 +97,12 @@ namespace Engine
                 this.WriteDataInBuffer();
             }
 
-            if (this.vertexCount > 0)
+            if (this.drawCount > 0)
             {
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
                     Counters.InstancesPerFrame += this.dictionary.Count;
-                    Counters.PrimitivesPerFrame += this.vertexCount / 3;
+                    Counters.PrimitivesPerFrame += this.drawCount / 3;
                 }
 
                 var effect = DrawerPool.EffectDefaultBasic;
@@ -123,7 +120,7 @@ namespace Engine
 
                 #endregion
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
                 if (this.AlphaEnabled) this.Game.Graphics.SetBlendDefaultAlpha();
                 else this.Game.Graphics.SetBlendDefault();
@@ -132,7 +129,7 @@ namespace Engine
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    this.Game.Graphics.DeviceContext.Draw(this.vertexCount, this.vertexBufferOffset);
+                    this.Game.Graphics.DeviceContext.Draw(this.drawCount, this.vertexBuffer.Offset);
 
                     Counters.DrawCallsPerFrame++;
                 }
@@ -161,22 +158,16 @@ namespace Engine
         /// <param name="vertexCount">Vertex count</param>
         private void InitializeBuffers(int vertexCount)
         {
-            this.BufferManager.Add(
-                this.Name,
-                new VertexPositionColor[vertexCount],
-                true,
-                0,
-                out this.vertexBufferOffset,
-                out this.vertexBufferSlot);
+            this.vertexBuffer = this.BufferManager.Add(this.Name, new VertexPositionColor[vertexCount], true, 0);
         }
         /// <summary>
         /// Set triangle list
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Triangle list</param>
-        public void SetTriangles(Color4 color, Triangle[] triangle)
+        public void SetTriangles(Color4 color, IEnumerable<Triangle> triangle)
         {
-            if (triangle != null && triangle.Length > 0)
+            if (triangle != null && triangle.Count() > 0)
             {
                 if (!this.dictionary.ContainsKey(color))
                 {
@@ -206,7 +197,7 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Triangle list</param>
-        public void AddTriangles(Color4 color, Triangle[] triangle)
+        public void AddTriangles(Color4 color, IEnumerable<Triangle> triangle)
         {
             if (!this.dictionary.ContainsKey(color))
             {
@@ -262,10 +253,11 @@ namespace Engine
                     }
                 }
 
-                this.vertexCount = data.Count;
+                this.drawCount = data.Count;
+
                 if (data.Count > 0)
                 {
-                    this.BufferManager.WriteBuffer(this.vertexBufferSlot, this.vertexBufferOffset, data.ToArray());
+                    this.BufferManager.WriteBuffer(this.vertexBuffer.Slot, this.vertexBuffer.Offset, data.ToArray());
                 }
 
                 this.dictionaryChanged = false;

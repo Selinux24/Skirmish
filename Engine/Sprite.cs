@@ -71,29 +71,13 @@ namespace Engine
         private Matrix viewProjection;
 
         /// <summary>
-        /// Vertex buffer offset
+        /// Vertex buffer descriptor
         /// </summary>
-        private int vertexBufferOffset = -1;
+        private BufferDescriptor vertexBuffer = null;
         /// <summary>
-        /// Vertex buffer slot
+        /// Index buffer descriptor
         /// </summary>
-        private int vertexBufferSlot = -1;
-        /// <summary>
-        /// Vertex count
-        /// </summary>
-        private int vertexCount = 0;
-        /// <summary>
-        /// Index buffer offset
-        /// </summary>
-        private int indexBufferOffset = -1;
-        /// <summary>
-        /// Index buffer slot
-        /// </summary>
-        private int indexBufferSlot = -1;
-        /// <summary>
-        /// Index count
-        /// </summary>
-        private int indexCount = 0;
+        private BufferDescriptor indexBuffer = null;
         /// <summary>
         /// Sprite texture
         /// </summary>
@@ -218,7 +202,7 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            Helper.Dispose(this.spriteTexture);
+
         }
         /// <summary>
         /// Update
@@ -234,20 +218,20 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.indexCount > 0)
+            if (this.indexBuffer.Count > 0)
             {
-                this.BufferManager.SetIndexBuffer(this.indexBufferSlot);
+                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
                     Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexCount / 3;
+                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
                 }
 
                 var effect = DrawerPool.EffectDefaultSprite;
                 var technique = effect.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode);
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
                 #region Per frame update
 
@@ -265,7 +249,7 @@ namespace Engine
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, this.indexBufferOffset, this.vertexBufferOffset);
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
 
                     Counters.DrawCallsPerFrame++;
                 }
@@ -281,13 +265,10 @@ namespace Engine
             uint[] iData;
             GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, out vData, out uvs, out iData);
 
-            VertexPositionTexture[] vertices = VertexPositionTexture.Generate(vData, uvs);
+            var vertices = VertexPositionTexture.Generate(vData, uvs);
 
-            this.BufferManager.Add(this.Name, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.BufferManager.Add(this.Name, iData, false, out this.indexBufferOffset, out this.indexBufferSlot);
-
-            this.vertexCount = vertices.Length;
-            this.indexCount = iData.Length;
+            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, false, 0);
+            this.indexBuffer = this.BufferManager.Add(this.Name, iData, false);
         }
         /// <summary>
         /// Initialize textures

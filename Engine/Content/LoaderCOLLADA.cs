@@ -136,9 +136,9 @@ namespace Engine.Content
 
                                                     foreach (var submesh in modelContent.Geometry[meshName].Values)
                                                     {
-                                                        for (int v = 0; v < submesh.Vertices.Length; v++)
+                                                        foreach (var v in submesh.Vertices)
                                                         {
-                                                            submesh.Vertices[v].Transform(trn);
+                                                            v.Transform(trn);
                                                         }
                                                     }
                                                 }
@@ -189,9 +189,9 @@ namespace Engine.Content
                                                         {
                                                             if (!childTrn.IsIdentity)
                                                             {
-                                                                for (int v = 0; v < submesh.Vertices.Length; v++)
+                                                                foreach (var v in submesh.Vertices)
                                                                 {
-                                                                    submesh.Vertices[v].Transform(childTrn);
+                                                                    v.Transform(childTrn);
                                                                 }
                                                             }
                                                         }

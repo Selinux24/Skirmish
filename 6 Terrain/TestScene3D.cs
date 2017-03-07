@@ -601,6 +601,8 @@ namespace TerrainTest
             this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.tree1, this.tree2, this.rocks }, false);
             this.terrain.UpdateInternals();
 
+            this.lensFlare.ParentGround = this.terrain;
+
             Vector3 heliPos;
             Triangle heliTri;
             float heliDist;

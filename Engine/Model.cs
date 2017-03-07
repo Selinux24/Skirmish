@@ -275,12 +275,12 @@ namespace Engine
                             #endregion
 
                             var mesh = dictionary[material];
-                            this.BufferManager.SetIndexBuffer(mesh.IndexBufferSlot);
+                            this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
                             var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                            this.BufferManager.SetInputAssembler(technique, mesh.VertexBufferSlot, mesh.Topology);
+                            this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
-                            count += mesh.IndexCount > 0 ? mesh.IndexCount / 3 : mesh.VertexCount / 3;
+                            count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
 
                             for (int p = 0; p < technique.Description.PassCount; p++)
                             {
@@ -494,7 +494,7 @@ namespace Engine
         {
             if (refresh || this.boundingSphere == new BoundingSphere())
             {
-                Vector3[] positions = this.GetPoints(refresh);
+                var positions = this.GetPoints(refresh);
                 if (positions != null && positions.Length > 0)
                 {
                     this.boundingSphere = BoundingSphere.FromPoints(positions);
@@ -512,7 +512,7 @@ namespace Engine
         {
             if (refresh || this.boundingBox == new BoundingBox())
             {
-                Vector3[] positions = this.GetPoints(refresh);
+                var positions = this.GetPoints(refresh);
                 if (positions != null && positions.Length > 0)
                 {
                     this.boundingBox = BoundingBox.FromPoints(positions);
@@ -530,7 +530,7 @@ namespace Engine
         {
             if (refresh || this.orientedBoundingBox == new OrientedBoundingBox())
             {
-                Vector3[] positions = this.GetPoints(refresh);
+                var positions = this.GetPoints(refresh);
                 if (positions != null && positions.Length > 0)
                 {
                     this.orientedBoundingBox = new OrientedBoundingBox(positions);
@@ -567,7 +567,7 @@ namespace Engine
             BoundingSphere bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
-                Triangle[] triangles = this.GetTriangles();
+                var triangles = this.GetTriangles();
 
                 Vector3 pos;
                 Triangle tri;
@@ -602,7 +602,7 @@ namespace Engine
             BoundingSphere bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
-                Triangle[] triangles = this.GetTriangles();
+                var triangles = this.GetTriangles();
 
                 Vector3 pos;
                 Triangle tri;
@@ -637,7 +637,7 @@ namespace Engine
             BoundingSphere bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
-                Triangle[] tris = this.GetTriangles();
+                var tris = this.GetTriangles();
 
                 Vector3[] pos;
                 Triangle[] tri;

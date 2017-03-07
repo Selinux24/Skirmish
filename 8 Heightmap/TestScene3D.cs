@@ -489,11 +489,12 @@ namespace HeightmapTest
 
             #region Positioning
 
-            //Rocks
-            {
-                Random posRnd = new Random(1024);
+            Random posRnd = new Random(1024);
 
-                BoundingBox bbox = this.terrain.GetBoundingBox();
+            BoundingBox bbox = this.terrain.GetBoundingBox();
+
+            {
+                #region Rocks
 
                 for (int i = 0; i < this.rocks.Instances.Length; i++)
                 {
@@ -523,6 +524,12 @@ namespace HeightmapTest
                         this.rocks.Instances[i].Manipulator.SetScale(scale, true);
                     }
                 }
+
+                #endregion
+            }
+
+            {
+                #region Forest
 
                 bbox = new BoundingBox(new Vector3(-400, 0, -400), new Vector3(-1000, 1000, -1000));
 
@@ -561,52 +568,51 @@ namespace HeightmapTest
                         this.trees2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
                     }
                 }
+
+                #endregion
             }
 
-            //Torchs
             {
-                var bbox = this.terrain.GetBoundingBox();
+                #region Torchs
 
+                Vector3 position;
+                Triangle triangle;
+                float distance;
+                if (this.terrain.FindTopGroundPosition(5, 5, out position, out triangle, out distance))
                 {
-                    Vector3 position;
-                    Triangle triangle;
-                    float distance;
-                    if (this.terrain.FindTopGroundPosition(5, 5, out position, out triangle, out distance))
-                    {
-                        this.torchs.Instances[0].Manipulator.SetScale(1f, 1f, 1f, true);
-                        this.torchs.Instances[0].Manipulator.SetPosition(position, true);
-                        BoundingBox tbbox = this.torchs.Instances[0].GetBoundingBox();
+                    this.torchs.Instances[0].Manipulator.SetScale(1f, 1f, 1f, true);
+                    this.torchs.Instances[0].Manipulator.SetPosition(position, true);
+                    BoundingBox tbbox = this.torchs.Instances[0].GetBoundingBox();
 
-                        position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
+                    position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
 
-                        this.spotLight1 = new SceneLightSpot(
-                            "Red Spot",
-                            false,
-                            Color.Red,
-                            Color.Red,
-                            true,
-                            position,
-                            Vector3.Normalize(Vector3.One * -1f),
-                            25,
-                            25,
-                            100);
+                    this.spotLight1 = new SceneLightSpot(
+                        "Red Spot",
+                        false,
+                        Color.Red,
+                        Color.Red,
+                        true,
+                        position,
+                        Vector3.Normalize(Vector3.One * -1f),
+                        25,
+                        25,
+                        100);
 
-                        this.spotLight2 = new SceneLightSpot(
-                            "Blue Spot",
-                            false,
-                            Color.Blue,
-                            Color.Blue,
-                            true,
-                            position,
-                            Vector3.Normalize(Vector3.One * -1f),
-                            25,
-                            25,
-                            100);
+                    this.spotLight2 = new SceneLightSpot(
+                        "Blue Spot",
+                        false,
+                        Color.Blue,
+                        Color.Blue,
+                        true,
+                        position,
+                        Vector3.Normalize(Vector3.One * -1f),
+                        25,
+                        25,
+                        100);
 
-                        this.Lights.Add(this.spotLight1);
-                        this.Lights.Add(this.spotLight2);
-                    };
-                }
+                    this.Lights.Add(this.spotLight1);
+                    this.Lights.Add(this.spotLight2);
+                };
 
                 this.torchLights = new SceneLightPoint[this.torchs.Count - 1];
                 for (int i = 1; i < this.torchs.Count; i++)
@@ -647,14 +653,9 @@ namespace HeightmapTest
                     this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f });
                     this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
                 }
+
+                #endregion
             }
-
-            this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helicopter }, false);
-            this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.torchs, this.rocks }, false);
-            this.terrain.UpdateInternals();
-
-            this.gardener.ParentGround = this.terrain;
-            this.gardener2.ParentGround = this.terrain;
 
             //M24
             {
@@ -686,6 +687,14 @@ namespace HeightmapTest
                 this.helicopter2.AnimationController.AddPath(p);
                 this.helicopter2.AnimationController.Start();
             }
+
+            this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helicopter, this.helicopter2 }, false);
+            this.terrain.AttachCoarsePickingCoarsePathFinding(new ModelBase[] { this.torchs, this.rocks, this.trees, this.trees2 }, false);
+            this.terrain.UpdateInternals();
+
+            this.gardener.ParentGround = this.terrain;
+            this.gardener2.ParentGround = this.terrain;
+            this.lensFlare.ParentGround = this.terrain;
 
             //Player soldier
             {
@@ -746,7 +755,7 @@ namespace HeightmapTest
             this.Camera.FarPlaneDistance = far;
             this.Camera.Position = new Vector3(12, 8, 7);
             this.Camera.Interest = new Vector3(0, 7, 0);
-            this.Camera.MovementDelta *= 10f;
+            //this.Camera.MovementDelta *= 10f;
 
             this.skydom.RayleighScattering *= 0.8f;
             this.skydom.MieScattering *= 0.1f;
@@ -1009,7 +1018,7 @@ namespace HeightmapTest
             {
                 Color color = new Color(Color.Red.ToColor3(), 0.6f);
 
-                Triangle[] tris = this.soldier.GetTriangles(true);
+                var tris = this.soldier.GetTriangles(true);
                 if (this.soldierTris == null)
                 {
                     this.soldierTris = this.AddTriangleListDrawer(new TriangleListDrawerDescription() { DepthEnabled = false }, tris, color);

@@ -138,9 +138,7 @@ namespace Engine.Common
         {
             for (int i = 0; i < iKeys.Count; i++)
             {
-                var data = iKeys[i].Data.ToArray();
-
-                indexBuffers.Add(graphics.Device.CreateIndexBuffer(iKeys[i].Name, data, iKeys[i].Dynamic));
+                indexBuffers.Add(graphics.Device.CreateIndexBuffer(iKeys[i].Name, iKeys[i].Data.ToArray(), iKeys[i].Dynamic));
             }
         }
 
@@ -220,26 +218,26 @@ namespace Engine.Common
         /// <typeparam name="T">Type of vertex</typeparam>
         /// <param name="id">Id</param>
         /// <param name="vertexData">Vertex list</param>
-        /// <param name="offset">Returns the assigned offset in buffer</param>
-        /// <param name="slot">Returns the assigned buffer slot</param>
-        public void Add<T>(string id, T[] vertexData, bool dynamic, int instances, out int offset, out int slot) where T : struct, IVertexData
+        /// <param name="dynamic">Add to dynamic buffers</param>
+        /// <param name="instances">Add instancing space</param>
+        public BufferDescriptor Add<T>(string id, T[] vertexData, bool dynamic, int instances) where T : struct, IVertexData
         {
             List<IVertexData> verts = new List<IVertexData>();
-            Array.ForEach(vertexData, v => verts.Add(v));
+            vertexData.ForEach(v => verts.Add(v));
 
-            this.Add(id, verts.ToArray(), dynamic, instances, out offset, out slot);
+            return this.Add(id, verts.ToArray(), dynamic, instances);
         }
         /// <summary>
         /// Adds vertices to manager
         /// </summary>
         /// <param name="id">Id</param>
         /// <param name="vertexData">Vertex list</param>
-        /// <param name="offset">Returns the assigned offset in buffer</param>
-        /// <param name="slot">Returns the assigned buffer slot</param>
-        public void Add(string id, IVertexData[] vertexData, bool dynamic, int instances, out int offset, out int slot)
+        /// <param name="dynamic">Add to dynamic buffers</param>
+        /// <param name="instances">Add instancing space</param>
+        public BufferDescriptor Add(string id, IVertexData[] vertexData, bool dynamic, int instances)
         {
-            offset = -1;
-            slot = -1;
+            int offset = -1;
+            int slot = -1;
 
             if (vertexData != null && vertexData.Length > 0)
             {
@@ -262,17 +260,19 @@ namespace Engine.Common
 
                 slot = keyIndex;
             }
+
+            return new BufferDescriptor(slot, offset, vertexData.Length);
         }
         /// <summary>
         /// Adds indices to manager
         /// </summary>
         /// <param name="id">Id</param>
         /// <param name="indexData">Index list</param>
-        /// <param name="offset">Returns the assigned offset in buffer</param>
-        public void Add(string id, uint[] indexData, bool dynamic, out int offset, out int slot)
+        /// <param name="dynamic">Add to dynamic buffers</param>
+        public BufferDescriptor Add(string id, uint[] indexData, bool dynamic)
         {
-            offset = -1;
-            slot = -1;
+            int offset = -1;
+            int slot = -1;
 
             if (indexData != null && indexData.Length > 0)
             {
@@ -291,6 +291,8 @@ namespace Engine.Common
 
                 slot = keyIndex;
             }
+
+            return new BufferDescriptor(slot, offset, indexData.Length);
         }
 
         /// <summary>

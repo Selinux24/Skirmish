@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -38,29 +39,13 @@ namespace Engine
         }
 
         /// <summary>
-        /// Vertex buffer offset
+        /// Vertex buffer descriptor
         /// </summary>
-        private int vertexBufferOffset = -1;
+        private BufferDescriptor vertexBuffer = null;
         /// <summary>
-        /// Vertex buffer slot
+        /// Index buffer descriptor
         /// </summary>
-        private int vertexBufferSlot = -1;
-        /// <summary>
-        /// Vertex count
-        /// </summary>
-        private int vertexCount = 0;
-        /// <summary>
-        /// Index buffer offset
-        /// </summary>
-        private int indexBufferOffset = -1;
-        /// <summary>
-        /// Index buffer slot
-        /// </summary>
-        private int indexBufferSlot = -1;
-        /// <summary>
-        /// Index count
-        /// </summary>
-        private int indexCount = 0;
+        private BufferDescriptor indexBuffer = null;
         /// <summary>
         /// Rayleigh scattering constant value
         /// </summary>
@@ -276,20 +261,20 @@ namespace Engine
         public override void Draw(DrawContext context)
         {
             var keyLight = context.Lights.KeyLight;
-            if (keyLight != null && this.indexCount > 0)
+            if (keyLight != null && this.indexBuffer.Count > 0)
             {
-                this.BufferManager.SetIndexBuffer(this.indexBufferSlot);
+                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
                     Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexCount / 3;
+                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
                 }
 
                 var effect = DrawerPool.EffectDefaultSkyScattering;
                 var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
                 effect.UpdatePerFrame(
                     Matrix.Translation(context.EyePosition),
@@ -314,7 +299,7 @@ namespace Engine
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, this.indexBufferOffset, this.vertexBufferOffset);
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
 
                     Counters.DrawCallsPerFrame++;
                 }
@@ -330,19 +315,17 @@ namespace Engine
             uint[] iData;
             GeometryUtil.CreateSphere(1, 10, 75, out vData, out iData);
 
-            VertexPosition[] vertices = new VertexPosition[vData.Length];
-            for (int i = 0; i < vertices.Length; i++)
+            var vertices = new List<VertexPosition>();
+
+            foreach (var v in vData)
             {
-                vertices[i] = new VertexPosition() { Position = vData[i] };
+                vertices.Add(new VertexPosition() { Position = v });
             }
 
             var indices = GeometryUtil.ChangeCoordinate(iData);
 
-            this.BufferManager.Add(this.Name, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.BufferManager.Add(this.Name, indices, false, out this.indexBufferOffset, out this.indexBufferSlot);
-
-            this.vertexCount = vertices.Length;
-            this.indexCount = indices.Length;
+            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices.ToArray(), false, 0);
+            this.indexBuffer = this.BufferManager.Add(this.Name, indices, false);
         }
         /// <summary>
         /// Calc current scattering scale from sphere radius values

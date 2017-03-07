@@ -1,10 +1,8 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// 3D manipulator
     /// </summary>

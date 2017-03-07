@@ -13,17 +13,13 @@ namespace Engine
     public class LineListDrawer : Drawable
     {
         /// <summary>
-        /// Buffer offset
+        /// Vertex buffer descriptor
         /// </summary>
-        private int vertexBufferOffset = -1;
+        private BufferDescriptor vertexBuffer = null;
         /// <summary>
-        /// Buffer slot
+        /// Primitives to draw
         /// </summary>
-        private int vertexBufferSlot = -1;
-        /// <summary>
-        /// Vertex count
-        /// </summary>
-        private int vertexCount = 0;
+        private int drawCount = 0;
         /// <summary>
         /// Lines dictionary by color
         /// </summary>
@@ -118,12 +114,12 @@ namespace Engine
                 this.WriteDataInBuffer();
             }
 
-            if (this.vertexCount > 0)
+            if (this.drawCount > 0)
             {
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
                     Counters.InstancesPerFrame += this.dictionary.Count;
-                    Counters.PrimitivesPerFrame += this.vertexCount / 2;
+                    Counters.PrimitivesPerFrame += this.drawCount / 2;
                 }
 
                 var effect = DrawerPool.EffectDefaultBasic;
@@ -141,7 +137,7 @@ namespace Engine
 
                 #endregion
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.LineList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.LineList);
 
                 if (this.AlphaEnabled) this.Game.Graphics.SetBlendDefaultAlpha();
                 else this.Game.Graphics.SetBlendDefault();
@@ -150,7 +146,7 @@ namespace Engine
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    this.Game.Graphics.DeviceContext.Draw(this.vertexCount, this.vertexBufferOffset);
+                    this.Game.Graphics.DeviceContext.Draw(this.drawCount, this.vertexBuffer.Offset);
 
                     Counters.DrawCallsPerFrame++;
                 }
@@ -179,12 +175,7 @@ namespace Engine
         /// <param name="vertexCount">Vertex count</param>
         private void InitializeBuffers(int vertexCount)
         {
-            this.BufferManager.Add(
-                this.Name,
-                new VertexPositionColor[vertexCount],
-                true,
-                0,
-                out this.vertexBufferOffset, out this.vertexBufferSlot);
+            this.vertexBuffer = this.BufferManager.Add(this.Name, new VertexPositionColor[vertexCount], true, 0);
         }
         /// <summary>
         /// Set line
@@ -344,10 +335,11 @@ namespace Engine
                     }
                 }
 
-                this.vertexCount = data.Count;
+                this.drawCount = data.Count;
+
                 if (data.Count > 0)
                 {
-                    this.BufferManager.WriteBuffer(this.vertexBufferSlot, this.vertexBufferOffset, data.ToArray());
+                    this.BufferManager.WriteBuffer(this.vertexBuffer.Slot, this.vertexBuffer.Offset, data.ToArray());
                 }
 
                 this.dictionaryChanged = false;

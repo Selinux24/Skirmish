@@ -247,22 +247,14 @@ namespace Engine.Common
                         chr.Height,
                         0,
                         0,
+                        chr.X,
+                        chr.Y,
+                        FontMap.TEXTURESIZE,
                         out cv,
                         out cuv,
                         out ci);
 
-                    //Remap texture
-                    float u0 = (chr.X) / (float)FontMap.TEXTURESIZE;
-                    float v0 = (chr.Y) / (float)FontMap.TEXTURESIZE;
-                    float u1 = (chr.X + chr.Width) / (float)FontMap.TEXTURESIZE;
-                    float v1 = (chr.Y + chr.Height) / (float)FontMap.TEXTURESIZE;
-
-                    cuv[0] = new Vector2(u0, v0);
-                    cuv[1] = new Vector2(u1, v1);
-                    cuv[2] = new Vector2(u0, v1);
-                    cuv[3] = new Vector2(u1, v0);
-
-                    Array.ForEach(ci, (i) => { indexList.Add(i + (uint)vertList.Count); });
+                    ci.ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
 
                     vertList.AddRange(VertexPositionTexture.Generate(cv, cuv));
 

@@ -235,17 +235,13 @@ namespace Engine
             private static int ID = 0;
 
             /// <summary>
-            /// Buffer slot
+            /// Vertex buffer descriptor
             /// </summary>
-            public int vertexBufferSlot = -1;
-            /// <summary>
-            /// Vertex buffer offset
-            /// </summary>
-            private int vertexBufferOffset = -1;
+            public BufferDescriptor VertexBuffer = null;
             /// <summary>
             /// Vertex count
             /// </summary>
-            private int vertexCount = 0;
+            private int vertexDrawCount = 0;
 
             /// <summary>
             /// Game
@@ -276,13 +272,7 @@ namespace Engine
                 this.Game = game;
                 this.Id = ++ID;
 
-                bufferManager.Add(
-                    string.Format("{1}.{0}", this.Id, name),
-                    new VertexBillboard[FoliagePatch.MAX],
-                    true,
-                    0,
-                    out this.vertexBufferOffset,
-                    out this.vertexBufferSlot);
+                this.VertexBuffer = bufferManager.Add(string.Format("{1}.{0}", this.Id, name), new VertexBillboard[FoliagePatch.MAX], true, 0);
             }
             /// <summary>
             /// Dispose
@@ -300,7 +290,7 @@ namespace Engine
             /// <param name="bufferManager">Buffer manager</param>
             public void AttachFoliage(Vector3 eyePosition, FoliagePatch patch, BufferManager bufferManager)
             {
-                this.vertexCount = 0;
+                this.vertexDrawCount = 0;
                 this.Attached = false;
                 this.CurrentPatch = null;
 
@@ -317,11 +307,11 @@ namespace Engine
 
                     //Attach data
                     bufferManager.WriteBuffer(
-                        this.vertexBufferSlot,
-                        this.vertexBufferOffset,
+                        this.VertexBuffer.Slot,
+                        this.VertexBuffer.Offset,
                         patch.FoliageData);
 
-                    this.vertexCount = patch.FoliageData.Length;
+                    this.vertexDrawCount = patch.FoliageData.Length;
                     this.Attached = true;
                     this.CurrentPatch = patch;
                 }
@@ -333,19 +323,19 @@ namespace Engine
             /// <param name="technique">Technique</param>
             public void DrawFoliage(DrawContext context, EffectTechnique technique)
             {
-                if (this.vertexCount > 0)
+                if (this.vertexDrawCount > 0)
                 {
                     if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                     {
                         Counters.InstancesPerFrame++;
-                        Counters.PrimitivesPerFrame += this.vertexCount / 3;
+                        Counters.PrimitivesPerFrame += this.vertexDrawCount / 3;
                     }
 
                     for (int p = 0; p < technique.Description.PassCount; p++)
                     {
                         technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                        this.Game.Graphics.DeviceContext.Draw(this.vertexCount, this.vertexBufferOffset);
+                        this.Game.Graphics.DeviceContext.Draw(this.vertexDrawCount, this.VertexBuffer.Offset);
 
                         Counters.DrawCallsPerFrame++;
                     }
@@ -575,7 +565,7 @@ namespace Engine
                         });
 
                         var freeBuffers = this.foliageBuffers.FindAll(b =>
-                            b.CurrentPatch == null ||
+                            (b.CurrentPatch == null) ||
                             (b.CurrentPatch != null && !Array.Exists(visibleNodes, n => n == b.CurrentPatch.CurrentNode)));
 
                         if (freeBuffers.Count > 0)
@@ -656,7 +646,7 @@ namespace Engine
                                 {
                                     this.BufferManager.SetInputAssembler(
                                         vegetationTechnique,
-                                        buffer.vertexBufferSlot,
+                                        buffer.VertexBuffer.Slot,
                                         PrimitiveTopology.PointList);
 
                                     buffer.DrawFoliage(context, vegetationTechnique);

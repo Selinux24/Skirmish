@@ -30,7 +30,11 @@ namespace Engine
         /// Light projected direction
         /// </summary>
         private Vector2 lightProjectedDirection;
-
+     
+        /// <summary>
+        /// Parent ground
+        /// </summary>
+        public Ground ParentGround { get; set; }
         /// <summary>
         /// Maximum number of instances
         /// </summary>
@@ -105,6 +109,22 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null)
             {
+                if (this.ParentGround != null)
+                {
+                    Vector3 lightPosition = keyLight.GetPosition(1000);
+                    Vector3 direction = Vector3.Normalize(context.EyePosition - lightPosition);
+
+                    Ray ray = new Ray(lightPosition, direction);
+
+                    Vector3 position;
+                    Triangle tri;
+                    float distance;
+                    if (this.ParentGround.PickNearest(ref ray, false, out position, out tri, out distance))
+                    {
+                        if (Vector3.Distance(lightPosition, context.EyePosition) > distance) return;
+                    }
+                }
+
                 float dot = Math.Max(0, Vector3.Dot(context.EyeDirection, -keyLight.Direction));
 
                 float transparency = dot;

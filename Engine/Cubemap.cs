@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using System;
+using System.Collections.Generic;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine
@@ -15,33 +16,17 @@ namespace Engine
     public class Cubemap : Drawable
     {
         /// <summary>
+        /// Vertex buffer descriptor
+        /// </summary>
+        private BufferDescriptor vertexBuffer = null;
+        /// <summary>
+        /// Index buffer descriptor
+        /// </summary>
+        private BufferDescriptor indexBuffer = null;
+        /// <summary>
         /// Local transform
         /// </summary>
         private Matrix local = Matrix.Identity;
-        /// <summary>
-        /// Vertex buffer offset
-        /// </summary>
-        private int vertexBuferOffset;
-        /// <summary>
-        /// Vertex buffer offset
-        /// </summary>
-        private int vertexBufferSlot;
-        /// <summary>
-        /// Vertex count
-        /// </summary>
-        private int vertexCount;
-        /// <summary>
-        /// Index buffer offset
-        /// </summary>
-        private int indexBufferOffset;
-        /// <summary>
-        /// Index buffer slot
-        /// </summary>
-        private int indexBufferSlot;
-        /// <summary>
-        /// Index count
-        /// </summary>
-        private int indexCount = 0;
         /// <summary>
         /// Cube map texture
         /// </summary>
@@ -82,7 +67,7 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            
+
         }
 
         /// <summary>
@@ -101,20 +86,20 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.indexCount > 0)
+            if (this.indexBuffer.Count > 0)
             {
-                this.BufferManager.SetIndexBuffer(this.indexBufferSlot);
+                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
                     Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexCount / 3;
+                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
                 }
 
                 var effect = DrawerPool.EffectDefaultCubemap;
                 var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
                 #region Per frame update
 
@@ -132,7 +117,7 @@ namespace Engine
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, this.indexBufferOffset, this.vertexBuferOffset);
+                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
 
                     Counters.DrawCallsPerFrame++;
                 }
@@ -161,19 +146,16 @@ namespace Engine
             else if (geometry == CubemapDescription.CubeMapGeometryEnum.Sphere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
             else throw new ArgumentException("Bad geometry enum type");
 
-            VertexPosition[] vertices = new VertexPosition[vData.Length];
-            for (int i = 0; i < vertices.Length; i++)
+            var vertices = new List<VertexPosition>();
+            foreach (var v in vData)
             {
-                vertices[i] = new VertexPosition() { Position = vData[i] };
+                vertices.Add(new VertexPosition() { Position = v });
             }
 
             if (reverse) iData = GeometryUtil.ChangeCoordinate(iData);
 
-            this.BufferManager.Add(this.Name, vertices, false, 0, out this.vertexBuferOffset, out this.vertexBufferSlot);
-            this.BufferManager.Add(this.Name, iData, false, out this.indexBufferOffset, out this.indexBufferSlot);
-
-            this.vertexCount = vertices.Length;
-            this.indexCount = iData.Length;
+            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices.ToArray(), false, 0);
+            this.indexBuffer = this.BufferManager.Add(this.Name, iData, false);
         }
         /// <summary>
         /// Initialize textures

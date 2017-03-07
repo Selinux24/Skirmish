@@ -13,29 +13,13 @@ namespace Engine
     public class SpriteTexture : Drawable, IScreenFitted
     {
         /// <summary>
-        /// Vertex buffer offset
+        /// Vertex buffer descriptor
         /// </summary>
-        private int vertexBufferOffset = -1;
+        private BufferDescriptor vertexBuffer = null;
         /// <summary>
-        /// Vertex buffer slot
+        /// Index buffer descriptor
         /// </summary>
-        private int vertexBufferSlot = -1;
-        /// <summary>
-        /// Vertex count
-        /// </summary>
-        private int vertexCount = 0;
-        /// <summary>
-        /// Index buffer offset
-        /// </summary>
-        private int indexBufferOffset = -1;
-        /// <summary>
-        /// Index buffer slot
-        /// </summary>
-        private int indexBufferSlot = -1;
-        /// <summary>
-        /// Index count
-        /// </summary>
-        private int indexCount = 0;
+        private BufferDescriptor indexBuffer = null;
         /// <summary>
         /// View * projection for 2D projection
         /// </summary>
@@ -101,36 +85,15 @@ namespace Engine
                 out cuv,
                 out ci);
 
-            VertexPositionTexture[] vertices = VertexPositionTexture.Generate(cv, cuv);
+            var vertices = VertexPositionTexture.Generate(cv, cuv);
 
-            this.BufferManager.Add(this.Name, vertices, false, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.BufferManager.Add(this.Name, ci, false, out this.indexBufferOffset, out this.indexBufferSlot);
-
-            this.vertexCount = vertices.Length;
-            this.indexCount = ci.Length;
+            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, false, 0);
+            this.indexBuffer = this.BufferManager.Add(this.Name, ci, false);
 
             this.Channels = description.Channel;
 
-            this.InitializeContext(description.Left, description.Top, description.Width, description.Height);
-        }
-        /// <summary>
-        /// Dispose objects
-        /// </summary>
-        public override void Dispose()
-        {
-
-        }
-        /// <summary>
-        /// Initialize minimap context
-        /// </summary>
-        /// <param name="left">Left</param>
-        /// <param name="top">Top</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        private void InitializeContext(int left, int top, int width, int height)
-        {
-            this.Manipulator.SetPosition(left, top);
-            this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, width, height);
+            this.Manipulator.SetPosition(description.Left, description.Top);
+            this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, description.Width, description.Height);
 
             Matrix view;
             Matrix proj;
@@ -141,6 +104,13 @@ namespace Engine
                 out proj);
 
             this.viewProjection = view * proj;
+        }
+        /// <summary>
+        /// Dispose objects
+        /// </summary>
+        public override void Dispose()
+        {
+
         }
         /// <summary>
         /// Update state
@@ -156,17 +126,17 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            this.BufferManager.SetIndexBuffer(this.indexBufferSlot);
+            this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
             if (context.DrawerMode != DrawerModesEnum.ShadowMap)
             {
                 Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += this.indexCount / 3;
+                Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
             }
 
             var technique = DrawerPool.EffectDefaultSprite.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode, this.Channels);
 
-            this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
+            this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
             DrawerPool.EffectDefaultSprite.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
             DrawerPool.EffectDefaultSprite.UpdatePerObject(Color.White, this.Texture, 0);
@@ -175,7 +145,7 @@ namespace Engine
             {
                 technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
 
-                this.DeviceContext.DrawIndexed(this.indexCount, this.indexBufferOffset, this.vertexBufferOffset);
+                this.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
 
                 Counters.DrawCallsPerFrame++;
             }

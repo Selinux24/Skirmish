@@ -35,12 +35,9 @@ namespace Engine
             /// <returns>Returns the new buffer descriptor</returns>
             private static BufferDescriptor CreateDescriptor(MapGridShapeId shapeId, int trianglesPerNode, BufferManager bufferManager)
             {
-                uint[] indexList = GeometryUtil.GenerateIndices(shapeId.LevelOfDetail, shapeId.Shape, trianglesPerNode);
-                int offset;
-                int slot;
-                bufferManager.Add(string.Format("{0}.{1}", shapeId.LevelOfDetail, shapeId.Shape), indexList, false, out offset, out slot);
+                var indexList = GeometryUtil.GenerateIndices(shapeId.LevelOfDetail, shapeId.Shape, trianglesPerNode);
 
-                return new BufferDescriptor(slot, offset, indexList.Length);
+                return bufferManager.Add(string.Format("{0}.{1}", shapeId.LevelOfDetail, shapeId.Shape), indexList, false);
             }
 
             /// <summary>
@@ -160,11 +157,7 @@ namespace Engine
                 {
                     var data = VertexData.Convert(VertexTypes.Terrain, node.Vertices, null, null, Matrix.Identity);
 
-                    int offset;
-                    int slot;
-                    bufferManager.Add("", data, false, 1, out offset, out slot);
-
-                    this.dictVB.Add(node.Id, new BufferDescriptor(slot, offset, data.Length));
+                    this.dictVB.Add(node.Id, bufferManager.Add("", data, false, 1));
                 }
             }
             /// <summary>
@@ -714,7 +707,29 @@ namespace Engine
 
             #endregion
 
-            this.UpdateInternals();
+            //Get vertices and indices from heightmap
+            VertexData[] vertices;
+            uint[] indices;
+            this.BuildGeometry(
+                out vertices, out indices);
+
+            //Initialize Quadtree
+            this.groundPickingQuadtree = new PickingQuadTree(
+                vertices,
+                this.Description.Quadtree.MaximumDepth);
+
+            if (this.Map == null)
+            {
+                //Initialize map
+                int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(this.Description.Quadtree.MaximumDepth);
+
+                this.Map = new MapGrid(this.Game, this.groundPickingQuadtree, trianglesPerNode, this.BufferManager);
+            }
+
+            if (!groundDescription.DelayGeneration)
+            {
+                this.UpdateInternals();
+            }
         }
         /// <summary>
         /// Release of resources
@@ -741,7 +756,7 @@ namespace Engine
         /// <param name="context">Update context</param>
         public override void Update(UpdateContext context)
         {
-            var node = this.pickingQuadtree.FindNode(context.EyePosition);
+            var node = this.groundPickingQuadtree.FindNode(context.EyePosition);
 
             this.Map.Update(node);
         }
@@ -885,36 +900,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Updates internal objects
-        /// </summary>
-        public override void UpdateInternals()
-        {
-            //Get vertices and indices from heightmap
-            VertexData[] vertices;
-            uint[] indices;
-            this.BuildGeometry(
-                out vertices, out indices);
-
-            //Initialize Quadtree
-            this.pickingQuadtree = new PickingQuadTree(
-                vertices,
-                this.Description.Quadtree.MaximumDepth);
-
-            if (this.Map == null)
-            {
-                //Initialize map
-                int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(this.Description.Quadtree.MaximumDepth);
-
-                this.Map = new MapGrid(this.Game, this.pickingQuadtree, trianglesPerNode, this.BufferManager);
-            }
-
-            //Intialize Pathfinding Graph
-            if (this.Description != null && this.Description.PathFinder != null)
-            {
-                this.navigationGraph = PathFinder.Build(this.Description.PathFinder.Settings, vertices, indices);
-            }
-        }
-        /// <summary>
         /// Build geometry
         /// </summary>
         /// <param name="vertices">Geometry vertices</param>
@@ -928,51 +913,12 @@ namespace Engine
         }
 
         /// <summary>
-        /// Pick nearest position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Picked position if exists</param>
-        /// <param name="triangle">Picked triangle if exists</param>
-        /// <param name="distance">Distance to position</param>
-        /// <returns>Returns true if picked position found</returns>
-        public override bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
-        {
-            return this.pickingQuadtree.PickNearest(ref ray, facingOnly, out position, out triangle, out distance);
-        }
-        /// <summary>
-        /// Pick first position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Picked position if exists</param>
-        /// <param name="triangle">Picked triangle if exists</param>
-        /// <param name="distance">Distance to position</param>
-        /// <returns>Returns true if picked position found</returns>
-        public override bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
-        {
-            return this.pickingQuadtree.PickFirst(ref ray, facingOnly, out position, out triangle, out distance);
-        }
-        /// <summary>
-        /// Pick all positions
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="positions">Picked positions if exists</param>
-        /// <param name="triangles">Picked triangles if exists</param>
-        /// <param name="distances">Distances to positions</param>
-        /// <returns>Returns true if picked positions found</returns>
-        public override bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
-        {
-            return this.pickingQuadtree.PickAll(ref ray, facingOnly, out positions, out triangles, out distances);
-        }
-        /// <summary>
         /// Gets bounding sphere
         /// </summary>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public override BoundingSphere GetBoundingSphere()
         {
-            return this.pickingQuadtree != null ? this.pickingQuadtree.BoundingSphere : new BoundingSphere();
+            return this.groundPickingQuadtree != null ? this.groundPickingQuadtree.BoundingSphere : new BoundingSphere();
         }
         /// <summary>
         /// Gets bounding box
@@ -980,7 +926,7 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public override BoundingBox GetBoundingBox()
         {
-            return this.pickingQuadtree != null ? this.pickingQuadtree.BoundingBox : new BoundingBox();
+            return this.groundPickingQuadtree != null ? this.groundPickingQuadtree.BoundingBox : new BoundingBox();
         }
 
         /// <summary>
@@ -990,7 +936,7 @@ namespace Engine
         /// <returns>Returns terrain bounding boxes</returns>
         public BoundingBox[] GetBoundingBoxes(int level = 0)
         {
-            return this.pickingQuadtree.GetBoundingBoxes(level);
+            return this.groundPickingQuadtree.GetBoundingBoxes(level);
         }
         /// <summary>
         /// Gets the path finder grid nodes

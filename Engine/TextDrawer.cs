@@ -13,29 +13,21 @@ namespace Engine
     public class TextDrawer : Drawable, IScreenFitted
     {
         /// <summary>
+        /// Vertex buffer descriptor
+        /// </summary>
+        private BufferDescriptor vertexBuffer = null;
+        /// <summary>
+        /// Index buffer descriptor
+        /// </summary>
+        private BufferDescriptor indexBuffer = null;
+        /// <summary>
         /// Vertex couunt
         /// </summary>
-        private int vertexCount = 0;
-        /// <summary>
-        /// Vertex offset
-        /// </summary>
-        private int vertexBufferOffset = -1;
-        /// <summary>
-        /// Vertex buffer slot
-        /// </summary>
-        private int vertexBufferSlot = -1;
+        private int vertexDrawCount = 0;
         /// <summary>
         /// Index count
         /// </summary>
-        private int indexCount = 0;
-        /// <summary>
-        /// Index buffer offset
-        /// </summary>
-        private int indexBufferOffset = -1;
-        /// <summary>
-        /// Index buffer slot
-        /// </summary>
-        private int indexBufferSlot = -1;
+        private int indexDrawCount = 0;
         /// <summary>
         /// Vertices
         /// </summary>
@@ -213,11 +205,8 @@ namespace Engine
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
             uint[] indices = new uint[FontMap.MAXTEXTLENGTH * 6];
 
-            this.BufferManager.Add(this.Name, vertices, true, 0, out this.vertexBufferOffset, out this.vertexBufferSlot);
-            this.BufferManager.Add(this.Name, indices, true, out this.indexBufferOffset, out this.indexBufferSlot);
-
-            this.vertexCount = 0;
-            this.indexCount = 0;
+            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, true, 0);
+            this.indexBuffer = this.BufferManager.Add(this.Name, indices, true);
 
             this.TextColor = description.TextColor;
             this.ShadowColor = description.ShadowColor;
@@ -250,20 +239,20 @@ namespace Engine
             {
                 if (this.updateBuffers)
                 {
-                    this.BufferManager.WriteBuffer(this.vertexBufferSlot, this.vertexBufferOffset, this.vertices);
-                    this.BufferManager.WriteBuffer(this.indexBufferSlot, this.indexBufferOffset, this.indices);
+                    this.BufferManager.WriteBuffer(this.vertexBuffer.Slot, this.vertexBuffer.Offset, this.vertices);
+                    this.BufferManager.WriteBuffer(this.indexBuffer.Slot, this.indexBuffer.Offset, this.indices);
 
-                    this.vertexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
-                    this.indexCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
+                    this.vertexDrawCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
+                    this.indexDrawCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
 
                     this.updateBuffers = false;
                 }
 
-                this.BufferManager.SetIndexBuffer(this.indexBufferSlot);
+                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
                 var technique = DrawerPool.EffectDefaultFont.FontDrawer;
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBufferSlot, PrimitiveTopology.TriangleList);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
                 if (this.ShadowColor != Color.Transparent)
                 {
@@ -308,7 +297,7 @@ namespace Engine
             {
                 technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
-                this.Game.Graphics.DeviceContext.DrawIndexed(this.indexCount, this.indexBufferOffset, this.vertexBufferOffset);
+                this.Game.Graphics.DeviceContext.DrawIndexed(this.indexDrawCount, this.indexBuffer.Offset, this.vertexBuffer.Offset);
             }
         }
         /// <summary>

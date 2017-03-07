@@ -40,22 +40,6 @@ namespace Engine.Common
         /// Indices cache
         /// </summary>
         public uint[] Indices = null;
-        /// <summary>
-        /// Vertex buffer offset
-        /// </summary>
-        public int VertexBufferOffset = -1;
-        /// <summary>
-        /// Vertex buffer slot
-        /// </summary>
-        public int VertexBufferSlot = -1;
-        /// <summary>
-        /// Index buffer offset
-        /// </summary>
-        public int IndexBufferOffset = -1;
-        /// <summary>
-        /// Index buffer slot
-        /// </summary>
-        public int IndexBufferSlot = -1;
 
         /// <summary>
         /// Name
@@ -86,17 +70,18 @@ namespace Engine.Common
         /// </summary>
         public int VertexBufferStride { get; internal set; }
         /// <summary>
-        /// Vertex count
-        /// </summary>
-        public int VertexCount { get; internal set; }
-        /// <summary>
-        /// Index count
-        /// </summary>
-        public int IndexCount { get; internal set; }
-        /// <summary>
         /// Is instanced
         /// </summary>
         public bool Instanced { get; protected set; }
+
+        /// <summary>
+        /// Vertex buffer descriptor
+        /// </summary>
+        public BufferDescriptor VertexBuffer = null;
+        /// <summary>
+        /// Index buffer descriptor
+        /// </summary>
+        public BufferDescriptor IndexBuffer = null;
 
         /// <summary>
         /// Constructor
@@ -109,19 +94,19 @@ namespace Engine.Common
         /// <param name="instanced">Instanced</param>
         public Mesh(string name, string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced)
         {
+            var vFirst = vertices[0];
+
             this.Id = ++ID;
             this.Name = name;
             this.Material = material;
             this.Topology = topology;
             this.Vertices = vertices;
-            this.VertexCount = vertices.Length;
             this.Indexed = (indices != null && indices.Length > 0);
             this.Indices = indices;
-            this.IndexCount = (indices != null ? indices.Length : 0);
-            this.VertextType = vertices[0].VertexType;
-            this.VertexBufferStride = vertices[0].GetStride();
-            this.Textured = VertexData.IsTextured(vertices[0].VertexType);
-            this.Skinned = VertexData.IsSkinned(vertices[0].VertexType);
+            this.VertextType = vFirst.VertexType;
+            this.VertexBufferStride = vFirst.GetStride();
+            this.Textured = VertexData.IsTextured(vFirst.VertexType);
+            this.Skinned = VertexData.IsSkinned(vFirst.VertexType);
             this.Instanced = instanced;
         }
         /// <summary>
@@ -139,20 +124,20 @@ namespace Engine.Common
         {
             if (this.Indexed)
             {
-                if (this.IndexCount > 0)
+                if (this.IndexBuffer.Count > 0)
                 {
                     graphics.DeviceContext.DrawIndexed(
-                        this.IndexCount,
-                        this.IndexBufferOffset, this.VertexBufferOffset);
+                        this.IndexBuffer.Count,
+                        this.IndexBuffer.Offset, this.VertexBuffer.Offset);
                 }
             }
             else
             {
-                if (this.VertexCount > 0)
+                if (this.VertexBuffer.Count > 0)
                 {
                     graphics.DeviceContext.Draw(
-                        this.VertexCount,
-                        this.VertexBufferOffset);
+                        this.VertexBuffer.Count,
+                        this.VertexBuffer.Offset);
                 }
             }
         }
@@ -168,22 +153,22 @@ namespace Engine.Common
             {
                 if (this.Indexed)
                 {
-                    if (this.IndexCount > 0)
+                    if (this.IndexBuffer.Count > 0)
                     {
                         graphics.DeviceContext.DrawIndexedInstanced(
-                            this.IndexCount,
+                            this.IndexBuffer.Count,
                             count,
-                            this.IndexBufferOffset, this.VertexBufferOffset, startInstanceLocation);
+                            this.IndexBuffer.Offset, this.VertexBuffer.Offset, startInstanceLocation);
                     }
                 }
                 else
                 {
-                    if (this.VertexCount > 0)
+                    if (this.VertexBuffer.Count > 0)
                     {
                         graphics.DeviceContext.DrawInstanced(
-                            this.VertexCount,
+                            this.VertexBuffer.Count,
                             count,
-                            this.VertexBufferOffset, startInstanceLocation);
+                            this.VertexBuffer.Offset, startInstanceLocation);
                     }
                 }
             }
@@ -198,13 +183,13 @@ namespace Engine.Common
         {
             if (refresh || this.positionCache == null)
             {
-                List<Vector3> positionList = new List<Vector3>();
+                var positionList = new List<Vector3>();
 
                 if (this.Vertices != null && this.Vertices.Length > 0)
                 {
                     if (this.Vertices[0].HasChannel(VertexDataChannels.Position))
                     {
-                        Array.ForEach(this.Vertices, v =>
+                        this.Vertices.ForEach(v =>
                         {
                             positionList.Add(v.GetChannelValue<Vector3>(VertexDataChannels.Position));
                         });
@@ -226,14 +211,14 @@ namespace Engine.Common
         {
             if (refresh || this.positionCache == null)
             {
-                Vector3[] res = new Vector3[this.Vertices.Length];
+                var res = new List<Vector3>();
 
-                for (int i = 0; i < this.Vertices.Length; i++)
+                foreach (var v in this.Vertices)
                 {
-                    res[i] = VertexData.ApplyWeight(this.Vertices[i], boneTransforms);
+                    res.Add(VertexData.ApplyWeight(v, boneTransforms));
                 }
 
-                this.positionCache = res;
+                this.positionCache = res.ToArray();
             }
 
             return this.positionCache;
@@ -247,7 +232,7 @@ namespace Engine.Common
         {
             if (refresh || this.triangleCache == null)
             {
-                Vector3[] positions = this.GetPoints(refresh);
+                var positions = this.GetPoints(refresh);
                 if (positions != null && positions.Length > 0)
                 {
                     if (this.Indices != null && this.Indices.Length > 0)
@@ -273,7 +258,7 @@ namespace Engine.Common
         {
             if (refresh || this.triangleCache == null)
             {
-                Vector3[] positions = this.GetPoints(boneTransforms, refresh);
+                var positions = this.GetPoints(boneTransforms, refresh);
 
                 if (this.Indices != null && this.Indices.Length > 0)
                 {

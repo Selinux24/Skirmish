@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
@@ -150,12 +149,12 @@ namespace Engine
                         #endregion
 
                         var mesh = dictionary[material];
-                        bufferManager.SetIndexBuffer(mesh.IndexBufferSlot);
+                        bufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
                         var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                        bufferManager.SetInputAssembler(technique, mesh.VertexBufferSlot, mesh.Topology);
+                        bufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
-                        count += mesh.IndexCount > 0 ? mesh.IndexCount : mesh.VertexCount;
+                        count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count : mesh.VertexBuffer.Count;
 
                         for (int p = 0; p < technique.Description.PassCount; p++)
                         {
@@ -179,7 +178,7 @@ namespace Engine
             /// Gets all the used materials
             /// </summary>
             /// <returns>Returns the used materials array</returns>
-            public MeshMaterial[] GetMaterials()
+            public IEnumerable<MeshMaterial> GetMaterials()
             {
                 List<MeshMaterial> matList = new List<MeshMaterial>();
 
@@ -193,26 +192,8 @@ namespace Engine
                     }
                 }
 
-                return matList.ToArray();
+                return matList;
             }
-        }
-        /// <summary>
-        /// Usage enumeration for internal's update
-        /// </summary>
-        public enum UsageEnum
-        {
-            /// <summary>
-            /// None
-            /// </summary>
-            None,
-            /// <summary>
-            /// For picking test
-            /// </summary>
-            Picking,
-            /// <summary>
-            /// For path finding test
-            /// </summary>
-            PathFinding,
         }
 
         #endregion
@@ -222,13 +203,9 @@ namespace Engine
         /// </summary>
         private SceneryPatchDictionary patchDictionary = new SceneryPatchDictionary();
         /// <summary>
-        /// Cached triangle list
-        /// </summary>
-        private Triangle[] triangleCache = null;
-        /// <summary>
         /// Visible Nodes
         /// </summary>
-        private PickingQuadTreeNode[] visibleNodes;
+        private PickingQuadTreeNode[] visibleNodes = null;
 
         /// <summary>
         /// Gets the used material list
@@ -239,11 +216,11 @@ namespace Engine
             {
                 List<MeshMaterial> matList = new List<MeshMaterial>();
 
-                var nodes = this.pickingQuadtree.GetTailNodes();
+                var nodes = this.groundPickingQuadtree.GetTailNodes();
 
-                for (int i = 0; i < nodes.Length; i++)
+                foreach (var node in nodes)
                 {
-                    var mats = this.patchDictionary[nodes[i].Id].GetMaterials();
+                    var mats = this.patchDictionary[node.Id].GetMaterials();
                     if (mats != null)
                     {
                         matList.AddRange(mats);
@@ -285,13 +262,15 @@ namespace Engine
         {
             #region Patches
 
-            this.triangleCache = content.GetTriangles();
-            this.pickingQuadtree = new PickingQuadTree(this.triangleCache, description.Quadtree.MaximumDepth);
-            var nodes = this.pickingQuadtree.GetTailNodes();
-            for (int i = 0; i < nodes.Length; i++)
+            this.groundPickingQuadtree = new PickingQuadTree(content.GetTriangles(), description.Quadtree.MaximumDepth);
+
+            var nodes = this.groundPickingQuadtree.GetTailNodes();
+
+            foreach (var node in nodes)
             {
-                var patch = SceneryPatch.CreatePatch(game, this.BufferManager, content, nodes[i]);
-                this.patchDictionary.Add(nodes[i].Id, patch);
+                var patch = SceneryPatch.CreatePatch(game, this.BufferManager, content, node);
+
+                this.patchDictionary.Add(node.Id, patch);
             }
 
             #endregion
@@ -314,23 +293,21 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            this.visibleNodes = this.pickingQuadtree.GetNodesInVolume(ref context.Frustum);
+            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref context.Frustum);
             if (this.visibleNodes != null && this.visibleNodes.Length > 0)
             {
                 //Sort nodes - draw far nodes first
                 Array.Sort(this.visibleNodes, (n1, n2) =>
                 {
-                    var d1 = (n1.Center - context.EyePosition).LengthSquared();
-                    var d2 = (n2.Center - context.EyePosition).LengthSquared();
+                    float d1 = (n1.Center - context.EyePosition).LengthSquared();
+                    float d2 = (n2.Center - context.EyePosition).LengthSquared();
 
                     return -d1.CompareTo(d2);
                 });
 
-                for (int i = 0; i < this.visibleNodes.Length; i++)
+                foreach (var node in this.visibleNodes)
                 {
-                    var current = this.visibleNodes[i];
-
-                    this.patchDictionary[current.Id].Update(context, current);
+                    this.patchDictionary[node.Id].Update(context, node);
                 }
             }
         }
@@ -340,7 +317,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            PickingQuadTreeNode[] nodes = this.Cull ? this.visibleNodes : this.pickingQuadtree.GetTailNodes();
+            var nodes = this.Cull ? this.visibleNodes : this.groundPickingQuadtree.GetTailNodes();
 
             if (nodes != null && nodes.Length > 0)
             {
@@ -391,78 +368,20 @@ namespace Engine
 
                 this.Game.Graphics.SetBlendDefault();
 
-                for (int i = 0; i < nodes.Length; i++)
+                foreach (var node in nodes)
                 {
-                    this.patchDictionary[nodes[i].Id].DrawScenery(context, sceneryEffect, this.BufferManager);
+                    this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, this.BufferManager);
                 }
             }
         }
 
-        /// <summary>
-        /// Updates internal objects
-        /// </summary>
-        public override void UpdateInternals()
-        {
-            if (this.Description != null && this.Description.Quadtree != null)
-            {
-                var triangles = this.GetTriangles(UsageEnum.Picking);
-
-                this.pickingQuadtree = new PickingQuadTree(triangles, this.Description.Quadtree.MaximumDepth);
-            }
-
-            if (this.Description != null && this.Description.PathFinder != null)
-            {
-                var triangles = this.GetTriangles(UsageEnum.PathFinding);
-
-                this.navigationGraph = PathFinder.Build(this.Description.PathFinder.Settings, triangles);
-            }
-        }
-        /// <summary>
-        /// Pick nearest position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Picked position if exists</param>
-        /// <param name="triangle">Picked triangle if exists</param>
-        /// <param name="distance">Distance to position</param>
-        /// <returns>Returns true if picked position found</returns>
-        public override bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
-        {
-            return this.pickingQuadtree.PickNearest(ref ray, facingOnly, out position, out triangle, out distance);
-        }
-        /// <summary>
-        /// Pick first position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Picked position if exists</param>
-        /// <param name="triangle">Picked triangle if exists</param>
-        /// <param name="distance">Distance to position</param>
-        /// <returns>Returns true if picked position found</returns>
-        public override bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
-        {
-            return this.pickingQuadtree.PickFirst(ref ray, facingOnly, out position, out triangle, out distance);
-        }
-        /// <summary>
-        /// Pick all positions
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="positions">Picked positions if exists</param>
-        /// <param name="triangles">Picked triangles if exists</param>
-        /// <param name="distances">Distances to positions</param>
-        /// <returns>Returns true if picked positions found</returns>
-        public override bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
-        {
-            return this.pickingQuadtree.PickAll(ref ray, facingOnly, out positions, out triangles, out distances);
-        }
         /// <summary>
         /// Gets bounding sphere
         /// </summary>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public override BoundingSphere GetBoundingSphere()
         {
-            return this.pickingQuadtree.BoundingSphere;
+            return this.groundPickingQuadtree.BoundingSphere;
         }
         /// <summary>
         /// Gets bounding box
@@ -470,7 +389,7 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public override BoundingBox GetBoundingBox()
         {
-            return this.pickingQuadtree.BoundingBox;
+            return this.groundPickingQuadtree.BoundingBox;
         }
         /// <summary>
         /// Gets terrain bounding boxes at specified level
@@ -479,7 +398,7 @@ namespace Engine
         /// <returns>Returns terrain bounding boxes</returns>
         public BoundingBox[] GetBoundingBoxes(int level = 0)
         {
-            return this.pickingQuadtree.GetBoundingBoxes(level);
+            return this.groundPickingQuadtree.GetBoundingBoxes(level);
         }
         /// <summary>
         /// Gets the path finder grid nodes
@@ -496,93 +415,6 @@ namespace Engine
             }
 
             return nodes;
-        }
-
-        /// <summary>
-        /// Gets triangle list
-        /// </summary>
-        /// <returns>Returns triangle list. Empty if the vertex type hasn't position channel</returns>
-        private Triangle[] GetTriangles(UsageEnum usage = UsageEnum.None)
-        {
-            List<Triangle> tris = new List<Triangle>();
-
-            tris.AddRange(this.triangleCache);
-
-            for (int i = 0; i < this.GroundObjects.Count; i++)
-            {
-                var curr = this.GroundObjects[i];
-
-                if (curr.Model is Model)
-                {
-                    var model = (Model)curr.Model;
-
-                    model.Manipulator.UpdateInternals(true);
-
-                    if (usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) ||
-                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePathFinding))
-                    {
-                        var vTris = model.GetVolume();
-                        if (vTris != null && vTris.Length > 0)
-                        {
-                            //Use volume mesh
-                            tris.AddRange(vTris);
-                        }
-                        else
-                        {
-                            //Generate cylinder
-                            var cylinder = BoundingCylinder.FromPoints(model.GetPoints());
-                            tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
-                        }
-                    }
-                    else if (
-                        usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.FullPicking) ||
-                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.FullPathFinding))
-                    {
-                        //Use full mesh
-                        tris.AddRange(model.GetTriangles());
-                    }
-                }
-                else if (curr.Model is ModelInstanced)
-                {
-                    var model = (ModelInstanced)curr.Model;
-
-                    if (usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) ||
-                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePathFinding))
-                    {
-                        Array.ForEach(model.Instances, (m) =>
-                        {
-                            m.Manipulator.UpdateInternals(true);
-
-                            var vTris = m.GetVolume();
-                            if (vTris != null && vTris.Length > 0)
-                            {
-                                //Use volume mesh
-                                tris.AddRange(vTris);
-                            }
-                            else
-                            {
-                                //Generate cylinder
-                                var cylinder = BoundingCylinder.FromPoints(m.GetPoints());
-                                tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
-                            }
-                        });
-                    }
-                    else if (
-                        usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.FullPicking) ||
-                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.FullPathFinding))
-                    {
-                        Array.ForEach(model.Instances, (m) =>
-                        {
-                            m.Manipulator.UpdateInternals(true);
-
-                            //Use full mesh
-                            tris.AddRange(m.GetTriangles());
-                        });
-                    }
-                }
-            }
-
-            return tris.ToArray();
         }
 
         /// <summary>

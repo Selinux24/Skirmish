@@ -1,5 +1,7 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
+using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
@@ -14,13 +16,36 @@ namespace Engine
     public abstract class Ground : Drawable, IGround, IPickable
     {
         /// <summary>
+        /// Usage enumeration for internal's update
+        /// </summary>
+        public enum UsageEnum
+        {
+            /// <summary>
+            /// None
+            /// </summary>
+            None,
+            /// <summary>
+            /// For picking test
+            /// </summary>
+            Picking,
+            /// <summary>
+            /// For path finding test
+            /// </summary>
+            PathFinding,
+        }
+
+        /// <summary>
         /// Terrain attached objects
         /// </summary>
-        protected readonly List<AttachedModel> GroundObjects = new List<AttachedModel>();
+        protected List<AttachedModel> GroundObjects = new List<AttachedModel>();
         /// <summary>
-        /// Quadtree
+        /// Quadtree for base ground picking
         /// </summary>
-        protected PickingQuadTree pickingQuadtree = null;
+        protected PickingQuadTree groundPickingQuadtree = null;
+        /// <summary>
+        /// Quadtree for static objects picking
+        /// </summary>
+        protected PickingQuadTree objectsPickingQuadtree = null;
         /// <summary>
         /// Graph used for pathfinding
         /// </summary>
@@ -29,7 +54,7 @@ namespace Engine
         /// <summary>
         /// Instance description used for creation
         /// </summary>
-        public readonly GroundDescription Description = null;
+        public GroundDescription Description { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -140,7 +165,7 @@ namespace Engine
         /// <param name="models">Model list</param>
         /// <param name="use">Use</param>
         /// <param name="updateInternals">Update internal objects</param>
-        protected void Attach(IEnumerable<ModelBase> models, AttachedModelUsesEnum use, bool updateInternals = true)
+        protected void Attach(ModelBase[] models, AttachedModelUsesEnum use, bool updateInternals = true)
         {
             foreach (var model in models)
             {
@@ -161,7 +186,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachFullPickingFullPathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        public void AttachFullPickingFullPathFinding(ModelBase[] models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.FullPicking | AttachedModelUsesEnum.FullPathFinding, updateInternals);
         }
@@ -170,7 +195,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachCoarsePickingCoarsePathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        public void AttachCoarsePickingCoarsePathFinding(ModelBase[] models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.CoarsePicking | AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
         }
@@ -179,7 +204,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachCoarsePickingFullPathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        public void AttachCoarsePickingFullPathFinding(ModelBase[] models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.CoarsePicking | AttachedModelUsesEnum.FullPathFinding, updateInternals);
         }
@@ -188,7 +213,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachFullPickingCoarsePathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        public void AttachFullPickingCoarsePathFinding(ModelBase[] models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.FullPicking | AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
         }
@@ -197,7 +222,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachFullPicking(IEnumerable<ModelBase> models, bool updateInternals = true)
+        public void AttachFullPicking(ModelBase[] models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.FullPicking, updateInternals);
         }
@@ -206,7 +231,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachCoarsePicking(IEnumerable<ModelBase> models, bool updateInternals = true)
+        public void AttachCoarsePicking(ModelBase[] models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.CoarsePicking, updateInternals);
         }
@@ -215,7 +240,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachFullPathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        public void AttachFullPathFinding(ModelBase[] models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.FullPathFinding, updateInternals);
         }
@@ -224,15 +249,140 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachCoarsePathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
+        public void AttachCoarsePathFinding(ModelBase[] models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
         }
-        
+
         /// <summary>
         /// Updates internal objects
         /// </summary>
-        public abstract void UpdateInternals();
+        public virtual void UpdateInternals()
+        {
+            if (this.Description != null && this.Description.Quadtree != null)
+            {
+                var triangles = this.GetObjectTriangles(UsageEnum.Picking);
+                if (triangles != null && triangles.Length > 0)
+                {
+                    this.objectsPickingQuadtree = new PickingQuadTree(triangles, this.Description.Quadtree.MaximumDepth);
+                }
+            }
+
+            if (this.Description != null && this.Description.PathFinder != null)
+            {
+                var gTriangles = this.GetGroundTriangles(UsageEnum.PathFinding);
+                var oTriangles = this.GetObjectTriangles(UsageEnum.PathFinding);
+
+                List<Triangle> merged = new List<Triangle>();
+                merged.AddRange(gTriangles);
+                merged.AddRange(oTriangles);
+
+                this.navigationGraph = PathFinder.Build(this.Description.PathFinder.Settings, merged.ToArray());
+            }
+        }
+        /// <summary>
+        /// Gets ground triangle list
+        /// </summary>
+        /// <returns>Returns triangle list. Empty if the vertex type hasn't position channel</returns>
+        protected Triangle[] GetGroundTriangles(UsageEnum usage = UsageEnum.None)
+        {
+            List<Triangle> tris = new List<Triangle>();
+
+            var nodes = this.groundPickingQuadtree.GetTailNodes();
+            foreach (var node in nodes)
+            {
+                if (node.Triangles != null)
+                {
+                    tris.AddRange(node.Triangles);
+                }
+            }
+
+            return tris.ToArray();
+        }
+        /// <summary>
+        /// Gets attached objects triangle list
+        /// </summary>
+        /// <returns>Returns triangle list. Empty if the vertex type hasn't position channel</returns>
+        protected Triangle[] GetObjectTriangles(UsageEnum usage = UsageEnum.None)
+        {
+            List<Triangle> tris = new List<Triangle>();
+
+            for (int i = 0; i < this.GroundObjects.Count; i++)
+            {
+                var curr = this.GroundObjects[i];
+
+                if (curr.Model is Model)
+                {
+                    var model = (Model)curr.Model;
+
+                    model.Manipulator.UpdateInternals(true);
+
+                    if (usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) ||
+                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePathFinding))
+                    {
+                        var vTris = model.GetVolume();
+                        if (vTris != null && vTris.Length > 0)
+                        {
+                            //Use volume mesh
+                            tris.AddRange(vTris);
+                        }
+                        else
+                        {
+                            //Generate cylinder
+                            var cylinder = BoundingCylinder.FromPoints(model.GetPoints());
+                            tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
+                        }
+                    }
+                    else if (
+                        usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.FullPicking) ||
+                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.FullPathFinding))
+                    {
+                        //Use full mesh
+                        tris.AddRange(model.GetTriangles());
+                    }
+                }
+                else if (curr.Model is ModelInstanced)
+                {
+                    var model = (ModelInstanced)curr.Model;
+
+                    if (usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) ||
+                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePathFinding))
+                    {
+                        Array.ForEach(model.Instances, (m) =>
+                        {
+                            m.Manipulator.UpdateInternals(true);
+
+                            var vTris = m.GetVolume();
+                            if (vTris != null && vTris.Length > 0)
+                            {
+                                //Use volume mesh
+                                tris.AddRange(vTris);
+                            }
+                            else
+                            {
+                                //Generate cylinder
+                                var cylinder = BoundingCylinder.FromPoints(m.GetPoints());
+                                tris.AddRange(Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8));
+                            }
+                        });
+                    }
+                    else if (
+                        usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.FullPicking) ||
+                        usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.FullPathFinding))
+                    {
+                        Array.ForEach(model.Instances, (m) =>
+                        {
+                            m.Manipulator.UpdateInternals(true);
+
+                            //Use full mesh
+                            tris.AddRange(m.GetTriangles());
+                        });
+                    }
+                }
+            }
+
+            return tris.ToArray();
+        }
 
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -315,16 +465,16 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            Vector3[] positions;
-            Triangle[] tris;
-            float[] dists;
-            if (this.PickAll(ref ray, true, out positions, out tris, out dists))
+            Vector3[] pArray;
+            Triangle[] tArray;
+            float[] dArray;
+            if (this.PickAll(ref ray, true, out pArray, out tArray, out dArray))
             {
                 int index = -1;
                 float dist = float.MaxValue;
-                for (int i = 0; i < positions.Length; i++)
+                for (int i = 0; i < pArray.Length; i++)
                 {
-                    float d = Vector3.DistanceSquared(from, positions[i]);
+                    float d = Vector3.DistanceSquared(from, pArray[i]);
                     if (d <= dist)
                     {
                         dist = d;
@@ -333,9 +483,9 @@ namespace Engine
                     }
                 }
 
-                position = positions[index];
-                triangle = tris[index];
-                distance = dists[index];
+                position = pArray[index];
+                triangle = tArray[index];
+                distance = dArray[index];
 
                 return true;
             }
@@ -353,32 +503,159 @@ namespace Engine
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
         /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        public abstract bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance);
+        public virtual bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        {
+            bool res = false;
+
+            position = Vector3.Zero;
+            triangle = new Triangle();
+            distance = float.MaxValue;
+
+            if (this.objectsPickingQuadtree != null)
+            {
+                Vector3 oP;
+                Triangle oT;
+                float oD;
+                if (this.objectsPickingQuadtree.PickNearest(ref ray, facingOnly, out oP, out oT, out oD))
+                {
+                    position = oP;
+                    triangle = oT;
+                    distance = oD;
+
+                    res = true;
+                }
+            }
+
+            if (this.groundPickingQuadtree != null)
+            {
+                Vector3 gP;
+                Triangle gT;
+                float gD;
+                if (this.groundPickingQuadtree.PickNearest(ref ray, facingOnly, out gP, out gT, out gD))
+                {
+                    if (distance > gD)
+                    {
+                        position = gP;
+                        triangle = gT;
+                        distance = gD;
+                    }
+
+                    res = true;
+                }
+            }
+
+            return res;
+        }
         /// <summary>
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="position">Picked position if exists</param>
         /// <param name="triangle">Picked triangle if exists</param>
         /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        public abstract bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance);
+        public virtual bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        {
+            bool res = false;
+
+            position = Vector3.Zero;
+            triangle = new Triangle();
+            distance = float.MaxValue;
+
+            if (this.objectsPickingQuadtree != null)
+            {
+                Vector3 oP;
+                Triangle oT;
+                float oD;
+                if (this.objectsPickingQuadtree.PickFirst(ref ray, facingOnly, out oP, out oT, out oD))
+                {
+                    position = oP;
+                    triangle = oT;
+                    distance = oD;
+
+                    res = true;
+                }
+            }
+
+            if (this.groundPickingQuadtree != null)
+            {
+                Vector3 gP;
+                Triangle gT;
+                float gD;
+                if (this.groundPickingQuadtree.PickFirst(ref ray, facingOnly, out gP, out gT, out gD))
+                {
+                    if (distance > gD)
+                    {
+                        position = gP;
+                        triangle = gT;
+                        distance = gD;
+                    }
+
+                    res = true;
+                }
+            }
+
+            return res;
+        }
         /// <summary>
         /// Pick all positions
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="positions">Picked positions if exists</param>
         /// <param name="triangles">Picked triangles if exists</param>
-        /// <param name="distances">Distances to positions if exists</param>
+        /// <param name="distances">Distances to positions</param>
         /// <returns>Returns true if picked positions found</returns>
-        public abstract bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances);
+        public virtual bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        {
+            bool res = false;
+
+            List<Vector3> lPositions = new List<Vector3>();
+            List<Triangle> lTriangles = new List<Triangle>();
+            List<float> lDistances = new List<float>();
+
+            if (this.objectsPickingQuadtree != null)
+            {
+                Vector3[] oP;
+                Triangle[] oT;
+                float[] oD;
+                if (this.objectsPickingQuadtree.PickAll(ref ray, facingOnly, out oP, out oT, out oD))
+                {
+                    lPositions.AddRange(oP);
+                    lTriangles.AddRange(oT);
+                    lDistances.AddRange(oD);
+
+                    res = true;
+                }
+            }
+
+            if (this.groundPickingQuadtree != null)
+            {
+                Vector3[] gP;
+                Triangle[] gT;
+                float[] gD;
+                if (this.groundPickingQuadtree.PickAll(ref ray, facingOnly, out gP, out gT, out gD))
+                {
+                    lPositions.AddRange(gP);
+                    lTriangles.AddRange(gT);
+                    lDistances.AddRange(gD);
+
+                    res = true;
+                }
+            }
+
+            positions = lPositions.ToArray();
+            triangles = lTriangles.ToArray();
+            distances = lDistances.ToArray();
+
+            return res;
+        }
         /// <summary>
         /// Pick internal ground objects nearest position
         /// </summary>
