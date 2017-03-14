@@ -194,3 +194,6 @@ Thumbs.db
 
 #Blender
 *.blend1
+/.vs/SharpDXTests/v15/Browse.VC.opendb
+/.vs/SharpDXTests/v15/Browse.VC.db
+/.vs/SharpDXTests/v15

@@ -73,31 +73,30 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 
 	float4 lightPosition = mul(float4(input.positionWorld, 1), gPSLightViewProjection);
 
-	float4 litColor = ComputeLights(
-		gPSGlobalAmbient,
-		gPSDirLights,
-		gPSPointLights,
-		gPSSpotLights,
-		gPSLightCount.x,
-		gPSLightCount.y,
-		gPSLightCount.z,
-		gPSFogStart,
-		gPSFogRange,
-		gPSFogColor,
-		material,
-		input.positionWorld,
-		normal,
-		color,
-		specular,
-		1,
-		0,
-		gPSEyePositionWorld,
-		lightPosition,
-		gPSShadows,
-		gPSShadowMapStatic,
-		gPSShadowMapDynamic);
+	ComputeLightsInput lInput;
 
-	return litColor;
+	lInput.Ga = gPSGlobalAmbient;
+	lInput.dirLights = gPSDirLights;
+	lInput.pointLights = gPSPointLights;
+	lInput.spotLights = gPSSpotLights;
+	lInput.dirLightsCount = gPSLightCount.x;
+	lInput.pointLightsCount = gPSLightCount.y;
+	lInput.spotLightsCount = gPSLightCount.z;
+	lInput.fogStart = gPSFogStart;
+	lInput.fogRange = gPSFogRange;
+	lInput.fogColor = gPSFogColor;
+	lInput.k = material;
+	lInput.pPosition = input.positionWorld;
+	lInput.pNormal = normal;
+	lInput.pColorDiffuse = color;
+	lInput.pColorSpecular = 1;
+	lInput.ePosition = gPSEyePositionWorld;
+	lInput.sLightPosition = lightPosition;
+	lInput.shadows = gPSShadows;
+	lInput.shadowMapStatic = gPSShadowMapStatic;
+	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+
+	return ComputeLights(lInput);
 }
 
 float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
@@ -110,31 +109,30 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 
 	float4 lightPosition = mul(float4(input.positionWorld, 1), gPSLightViewProjection);
 
-	float4 litColor = ComputeLights(
-		gPSGlobalAmbient,
-		gPSDirLights,
-		gPSPointLights,
-		gPSSpotLights,
-		gPSLightCount.x,
-		gPSLightCount.y,
-		gPSLightCount.z,
-		gPSFogStart,
-		gPSFogRange,
-		gPSFogColor,
-		material,
-		input.positionWorld,
-		normal,
-		color,
-		specular,
-		1,
-		0,
-		gPSEyePositionWorld,
-		lightPosition,
-		gPSShadows,
-		gPSShadowMapStatic,
-		gPSShadowMapDynamic);
+	ComputeLightsInput lInput;
 
-	return litColor;
+	lInput.Ga = gPSGlobalAmbient;
+	lInput.dirLights = gPSDirLights;
+	lInput.pointLights = gPSPointLights;
+	lInput.spotLights = gPSSpotLights;
+	lInput.dirLightsCount = gPSLightCount.x;
+	lInput.pointLightsCount = gPSLightCount.y;
+	lInput.spotLightsCount = gPSLightCount.z;
+	lInput.fogStart = gPSFogStart;
+	lInput.fogRange = gPSFogRange;
+	lInput.fogColor = gPSFogColor;
+	lInput.k = material;
+	lInput.pPosition = input.positionWorld;
+	lInput.pNormal = normal;
+	lInput.pColorDiffuse = color;
+	lInput.pColorSpecular = 1;
+	lInput.ePosition = gPSEyePositionWorld;
+	lInput.sLightPosition = lightPosition;
+	lInput.shadows = gPSShadows;
+	lInput.shadowMapStatic = gPSShadowMapStatic;
+	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+
+	return ComputeLights(lInput);
 }
 
 float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
@@ -147,31 +145,30 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 
 	float4 lightPosition = mul(float4(input.positionWorld, 1), gPSLightViewProjection);
 
-	float4 litColor = ComputeLights(
-		gPSGlobalAmbient,
-		gPSDirLights,
-		gPSPointLights,
-		gPSSpotLights,
-		gPSLightCount.x,
-		gPSLightCount.y,
-		gPSLightCount.z,
-		gPSFogStart,
-		gPSFogRange,
-		gPSFogColor,
-		material,
-		input.positionWorld,
-		normal,
-		color,
-		specular,
-		1,
-		0,
-		gPSEyePositionWorld,
-		lightPosition,
-		gPSShadows,
-		gPSShadowMapStatic,
-		gPSShadowMapDynamic);
+	ComputeLightsInput lInput;
 
-	return litColor;
+	lInput.Ga = gPSGlobalAmbient;
+	lInput.dirLights = gPSDirLights;
+	lInput.pointLights = gPSPointLights;
+	lInput.spotLights = gPSSpotLights;
+	lInput.dirLightsCount = gPSLightCount.x;
+	lInput.pointLightsCount = gPSLightCount.y;
+	lInput.spotLightsCount = gPSLightCount.z;
+	lInput.fogStart = gPSFogStart;
+	lInput.fogRange = gPSFogRange;
+	lInput.fogColor = gPSFogColor;
+	lInput.k = material;
+	lInput.pPosition = input.positionWorld;
+	lInput.pNormal = normal;
+	lInput.pColorDiffuse = color;
+	lInput.pColorSpecular = 1;
+	lInput.ePosition = gPSEyePositionWorld;
+	lInput.sLightPosition = lightPosition;
+	lInput.shadows = gPSShadows;
+	lInput.shadowMapStatic = gPSShadowMapStatic;
+	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+
+	return ComputeLights(lInput);
 }
 
 /**********************************************************************************************************

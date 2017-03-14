@@ -136,29 +136,30 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 
 	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
 
-	float4 litColor = ComputeLights(
-		gGlobalAmbient, 
-		gDirLights,
-		gPointLights, 
-		gSpotLights,
-		gLightCount.x,
-		gLightCount.y,
-		gLightCount.z,
-		gFogStart,
-		gFogRange,
-		gFogColor,
-		material,
-		input.positionWorld,
-		input.normalWorld,
-		textureColor,
-		0,
-		true,
-		true,
-		gEyePositionWorld,
-		lightPosition,
-		gShadows,
-		gShadowMapStatic,
-		gShadowMapDynamic);
+	ComputeLightsInput lInput;
+
+	lInput.Ga = gGlobalAmbient;
+	lInput.dirLights = gDirLights;
+	lInput.pointLights = gPointLights;
+	lInput.spotLights = gSpotLights;
+	lInput.dirLightsCount = gLightCount.x;
+	lInput.pointLightsCount = gLightCount.y;
+	lInput.spotLightsCount = gLightCount.z;
+	lInput.fogStart = gFogStart;
+	lInput.fogRange = gFogRange;
+	lInput.fogColor = gFogColor;
+	lInput.k = material;
+	lInput.pPosition = input.positionWorld;
+	lInput.pNormal = input.normalWorld;
+	lInput.pColorDiffuse = textureColor;
+	lInput.pColorSpecular = 1;
+	lInput.ePosition = gEyePositionWorld;
+	lInput.sLightPosition = lightPosition;
+	lInput.shadows = gShadows;
+	lInput.shadowMapStatic = gShadowMapStatic;
+	lInput.shadowMapDynamic = gShadowMapDynamic;
+
+	float4 litColor = ComputeLights(lInput);
 
 	float distToEye = length(gEyePositionWorld - input.positionWorld);
 
