@@ -170,12 +170,22 @@ namespace Engine.Effects
             ShaderResourceView materialPalette, uint materialPaletteWidth,
             ShaderResourceView animationPalette, uint animationPaletteWidth)
         {
-            EffectDefaultBillboard.UpdateGlobals(materialPalette, materialPaletteWidth);
-            EffectDefaultBasic.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
-            EffectDefaultTerrain.UpdateGlobals(materialPalette, materialPaletteWidth);
+            EffectDefaultBillboard.UpdateGlobals(
+                materialPalette, materialPaletteWidth,
+                GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
+
+            EffectDefaultBasic.UpdateGlobals(
+                materialPalette, materialPaletteWidth, 
+                animationPalette, animationPaletteWidth, 
+                GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
+            EffectDefaultTerrain.UpdateGlobals(
+                materialPalette, materialPaletteWidth,
+                GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
 
             EffectDeferredBasic.UpdateGlobals(animationPalette, animationPaletteWidth);
-            EffectDeferredComposer.UpdateGlobals(materialPalette, materialPaletteWidth);
+            EffectDeferredComposer.UpdateGlobals(
+                materialPalette, materialPaletteWidth,
+                GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
 
             EffectShadowBasic.UpdateGlobals(animationPalette, animationPaletteWidth);
         }

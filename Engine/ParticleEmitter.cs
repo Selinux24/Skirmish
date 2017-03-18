@@ -77,7 +77,7 @@ namespace Engine
             this.EmissionRate = 1f;
             this.Duration = 0f;
             this.InfiniteDuration = false;
-            this.MaximumDistance = 100f;
+            this.MaximumDistance = GameEnvironment.LODDistanceLow;
             this.Distance = 0f;
         }
 

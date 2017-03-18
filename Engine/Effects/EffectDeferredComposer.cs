@@ -123,6 +123,10 @@ namespace Engine.Effects
         /// Materials palette
         /// </summary>
         private EffectShaderResourceVariable materialPalette = null;
+        /// <summary>
+        /// Level of detail ranges effect variable
+        /// </summary>
+        private EffectVectorVariable lod = null;
 
         /// <summary>
         /// Current target 1
@@ -516,6 +520,24 @@ namespace Engine.Effects
                 }
             }
         }
+        /// <summary>
+        /// Level of detail ranges
+        /// </summary>
+        protected Vector3 LOD
+        {
+            get
+            {
+                var v = this.lod.GetFloatVector();
+
+                return v.XYZ();
+            }
+            set
+            {
+                var v = new Vector4(value, 0);
+
+                this.lod.Set(v);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -553,6 +575,7 @@ namespace Engine.Effects
             this.lightMap = this.Effect.GetVariableByName("gLightMap").AsShaderResource();
             this.materialPaletteWidth = this.Effect.GetVariableByName("gMaterialPaletteWidth").AsScalar();
             this.materialPalette = this.Effect.GetVariableByName("gMaterialPalette").AsShaderResource();
+            this.lod = this.Effect.GetVariableByName("gLOD").AsVector();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -572,12 +595,20 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="materialPalette">Material palette texture</param>
         /// <param name="materialPaletteWidth">Material palette texture width</param>
+        /// <param name="lod1">High level of detail maximum distance</param>
+        /// <param name="lod2">Medium level of detail maximum distance</param>
+        /// <param name="lod3">Low level of detail maximum distance</param>
         public void UpdateGlobals(
             ShaderResourceView materialPalette,
-            uint materialPaletteWidth)
+            uint materialPaletteWidth,
+            float lod1,
+            float lod2,
+            float lod3)
         {
             this.MaterialPalette = materialPalette;
             this.MaterialPaletteWidth = materialPaletteWidth;
+
+            this.LOD = new Vector3(lod1, lod2, lod3);
         }
         /// <summary>
         /// Updates per frame variables

@@ -329,8 +329,28 @@ namespace Engine
         {
             this.visibleDirectionalLights = this.directionalLights.FindAll(l => l.Enabled == true).ToArray();
 
-            var pLights = this.pointLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
-            var sLights = this.spotLights.FindAll(l => l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint);
+            var pLights = this.pointLights.FindAll(l =>
+            {
+                if (l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
+                {
+                    float d = Vector3.Distance(viewerPosition, l.Position);
+
+                    return (l.Radius / d) >= (1f / GameEnvironment.LODDistanceLow);
+                }
+
+                return false;
+            });
+            var sLights = this.spotLights.FindAll(l =>
+            {
+                if (l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
+                {
+                    float d = Vector3.Distance(viewerPosition, l.Position);
+
+                    return (l.Radius / d) >= (1f / GameEnvironment.LODDistanceLow);
+                }
+
+                return false;
+            });
 
             this.visiblePositionLights.Clear();
             if (pLights.Count > 0) pLights.ForEach(l => this.visiblePositionLights.Add(l));

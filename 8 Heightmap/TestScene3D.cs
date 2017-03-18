@@ -1127,7 +1127,6 @@ namespace HeightmapTest
             {
                 EmissionRate = 0.01f,
                 Duration = 1,
-                MaximumDistance = 250f,
                 Position = pos,
                 Velocity = velocity,
             };

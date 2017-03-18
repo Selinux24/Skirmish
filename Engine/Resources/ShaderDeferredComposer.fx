@@ -4,18 +4,23 @@
 cbuffer cbGlobals : register (b0)
 {
 	uint gMaterialPaletteWidth;
+	float3 gLOD;
 };
 cbuffer cbPerFrame : register (b1)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
 	float3 gEyePositionWorld;
+	float PAD11;
 };
 cbuffer cbPerDirLight : register (b2)
 {
 	DirectionalLight gDirLight;
 	float4x4 gLightViewProjection;
 	uint gShadows;
+	uint PAD21;
+	uint PAD22;
+	uint PAD23;
 }
 cbuffer cbPerPointLight : register (b3)
 {
@@ -30,6 +35,8 @@ cbuffer cbCombineLights : register (b5)
 	float gGlobalAmbient;
 	float gFogStart;
 	float gFogRange;
+	float PAD51;
+	float PAD52;
 	float4 gFogColor;
 }
 
@@ -90,26 +97,22 @@ float4 PSDirectionalLight(PSLightInput input) : SV_TARGET
 
 		float4 lightPosition = mul(float4(position, 1), gLightViewProjection);
 
-		float4 diffuse = 0;
-		float4 specular = 0;
+		ComputeDirectionalLightsInput linput;
 
-		ComputeDirectionalLight(
-			gDirLight,
-			k.Shininess,
-			position,
-			normal,
-			gEyePositionWorld,
-			lightPosition,
-			gShadows,
-			gShadowMapStatic,
-			gShadowMapDynamic,
-			diffuse,
-			specular);
+		linput.dirLight = gDirLight;
+		linput.shininess = k.Shininess;
+		linput.pPosition = position;
+		linput.pNormal = normal;
+		linput.ePosition = gEyePositionWorld;
+		linput.sLightPosition = lightPosition;
+		linput.shadows = gShadows;
+		linput.shadowMapStatic = gShadowMapStatic;
+		linput.shadowMapDynamic = gShadowMapDynamic;
+		linput.lod = gLOD;
 
-		diffuse = k.Diffuse * diffuse;
-		specular = k.Specular * specular;
+		ComputeLightsOutput loutput = ComputeDirectionalLight(linput);
 
-		return diffuse + specular;
+		return (k.Diffuse * loutput.diffuse) + (k.Specular * loutput.specular);
 	}
 	else
 	{
@@ -135,22 +138,18 @@ float4 PSPointLight(PSLightInput input) : SV_TARGET
 	{
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
-		float4 diffuse = 0;
-		float4 specular = 0;
+		ComputePointLightsInput linput;
 
-		ComputePointLight(
-			gPointLight,
-			k.Shininess,
-			position,
-			normal,
-			gEyePositionWorld,
-			diffuse,
-			specular);
+		linput.pointLight = gPointLight;
+		linput.shininess = k.Shininess;
+		linput.pPosition = position;
+		linput.pNormal = normal;
+		linput.ePosition = gEyePositionWorld;
+		linput.lod = gLOD;
 
-		diffuse = k.Diffuse * diffuse;
-		specular = k.Specular * specular;
+		ComputeLightsOutput loutput = ComputePointLight(linput);
 
-		return diffuse + specular;
+		return (k.Diffuse * loutput.diffuse) + (k.Specular * loutput.specular);
 	}
 	else
 	{
@@ -176,22 +175,18 @@ float4 PSSpotLight(PSLightInput input) : SV_TARGET
 	{
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
-		float4 diffuse = 0;
-		float4 specular = 0;
+		ComputeSpotLightsInput linput;
 
-		ComputeSpotLight(
-			gSpotLight,
-			k.Shininess,
-			position,
-			normal,
-			gEyePositionWorld,
-			diffuse,
-			specular);
+		linput. spotLight= gSpotLight;
+		linput.shininess= k.Shininess;
+		linput.pPosition= position;
+		linput.pNormal= normal;
+		linput.ePosition= gEyePositionWorld;
+		linput.lod = gLOD;
 
-		diffuse = k.Diffuse * diffuse;
-		specular = k.Specular * specular;
+		ComputeLightsOutput loutput = ComputeSpotLight(linput);
 
-		return diffuse + specular;
+		return (k.Diffuse * loutput.diffuse) + (k.Specular * loutput.specular);
 	}
 	else
 	{

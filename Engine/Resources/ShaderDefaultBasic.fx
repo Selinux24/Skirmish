@@ -8,6 +8,10 @@ cbuffer cbGlobals : register (b0)
 {
 	uint gMaterialPaletteWidth;
 	uint gAnimationPaletteWidth;
+	uint PAD01;
+	uint PAD02;
+	float3 gLOD;
+	float PAD03;
 };
 Texture2D gMaterialPalette;
 Texture2D gAnimationPalette;
@@ -21,6 +25,9 @@ cbuffer cbVSPerFrame : register (b1)
 cbuffer cbVSPerInstance : register (b2)
 {
 	uint gVSAnimationOffset;
+	uint PAD21;
+	uint PAD22;
+	uint PAD23;
 };
 
 cbuffer cbPSPerFrame : register (b3)
@@ -33,8 +40,8 @@ cbuffer cbPSPerFrame : register (b3)
 	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
-	float PAD1;
-	float PAD2;
+	float PAD31;
+	float PAD32;
 	DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
@@ -46,6 +53,8 @@ cbuffer cbPSPerObject : register (b4)
 {
 	bool gPSUseColorDiffuse;
 	bool gPSUseColorSpecular;
+	bool PAD41;
+	bool PAD42;
 };
 Texture2DArray gPSDiffuseMapArray;
 Texture2DArray gPSNormalMapArray;
@@ -55,6 +64,8 @@ cbuffer cbPSPerInstance : register (b5)
 {
 	uint gPSMaterialIndex;
 	uint gPSTextureIndex;
+	bool PAD51;
+	bool PAD52;
 };
 
 /**********************************************************************************************************
@@ -240,6 +251,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
+	lInput.lod = gLOD;
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
 	lInput.fogColor = gPSFogColor;
@@ -493,6 +505,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
+	lInput.lod = gLOD;
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
 	lInput.fogColor = gPSFogColor;
@@ -638,6 +651,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
+	lInput.lod = gLOD;
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
 	lInput.fogColor = gPSFogColor;

@@ -6,7 +6,7 @@ BUFFERS & VARIABLES
 cbuffer cbGlobals : register (b0)
 {
 	uint gMaterialPaletteWidth;
-	uint3 PAD_B0;
+	float3 gLOD;
 };
 Texture2D gMaterialPalette;
 
@@ -15,7 +15,7 @@ cbuffer cbVSPerFrame : register (b1)
 	float4x4 gVSWorld;
 	float4x4 gVSWorldViewProjection;
 	float gVSTextureResolution;
-	float3 PAD_B1;
+	float3 PAD_11;
 };
 
 cbuffer cbPSPerFrame : register (b3)
@@ -28,7 +28,7 @@ cbuffer cbPSPerFrame : register (b3)
 	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
-	float2 PAD_B3;
+	float2 PAD_33;
 	DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
@@ -42,7 +42,7 @@ cbuffer cbPSPerObject : register (b4)
 	bool gPSUseColorDiffuse;
 	bool gPSUseColorSpecular;
 	uint gPSMaterialIndex;
-	uint PAD_B4;
+	uint PAD_44;
 };
 
 /**********************************************************************************************************
@@ -95,6 +95,7 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 	lInput.shadows = gPSShadows;
 	lInput.shadowMapStatic = gPSShadowMapStatic;
 	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+	lInput.lod = gLOD;
 
 	return ComputeLights(lInput);
 }
@@ -131,6 +132,7 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 	lInput.shadows = gPSShadows;
 	lInput.shadowMapStatic = gPSShadowMapStatic;
 	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+	lInput.lod = gLOD;
 
 	return ComputeLights(lInput);
 }
@@ -167,6 +169,7 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 	lInput.shadows = gPSShadows;
 	lInput.shadowMapStatic = gPSShadowMapStatic;
 	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+	lInput.lod = gLOD;
 
 	return ComputeLights(lInput);
 }

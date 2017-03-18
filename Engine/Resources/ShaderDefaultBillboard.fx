@@ -4,6 +4,7 @@
 cbuffer cbGlobal : register (b0)
 {
 	uint gMaterialPaletteWidth;
+	float3 gLOD;
 };
 Texture2D gMaterialPalette;
 Texture1D gTextureRandom;
@@ -158,6 +159,7 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 	lInput.shadows = gShadows;
 	lInput.shadowMapStatic = gShadowMapStatic;
 	lInput.shadowMapDynamic = gShadowMapDynamic;
+	lInput.lod = gLOD;
 
 	float4 litColor = ComputeLights(lInput);
 
