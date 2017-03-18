@@ -63,8 +63,12 @@ namespace Engine
         /// </summary>
         public string VegetationMap = null;
         /// <summary>
-        /// Red vegetation channel from map
+        /// Material
         /// </summary>
+        public MaterialDescription Material = new MaterialDescription();
+        /// <summary>
+                                                                                /// Red vegetation channel from map
+                                                                                /// </summary>
         public Channel ChannelRed = new Channel();
         /// <summary>
         /// Green vegetation channel from map

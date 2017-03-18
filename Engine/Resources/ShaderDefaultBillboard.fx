@@ -139,7 +139,7 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 
 	ComputeLightsInput lInput;
 
-	lInput.Ga = gGlobalAmbient;
+	lInput.Ga = 0;
 	lInput.dirLights = gDirLights;
 	lInput.pointLights = gPointLights;
 	lInput.spotLights = gSpotLights;

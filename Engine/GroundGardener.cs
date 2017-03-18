@@ -16,7 +16,7 @@ namespace Engine
     /// <summary>
     /// Ground garden planter
     /// </summary>
-    public class GroundGardener : Drawable, IDisposable
+    public class GroundGardener : Drawable, UseMaterials, IDisposable
     {
         #region Helper classes
 
@@ -208,6 +208,10 @@ namespace Engine
             /// </summary>
             public bool ToggleUV;
             /// <summary>
+            /// Foliage start radius
+            /// </summary>
+            public float StartRadius;
+            /// <summary>
             /// Foliage end radius
             /// </summary>
             public float EndRadius;
@@ -395,11 +399,26 @@ namespace Engine
         /// Foliage map channels for vegetation planting task
         /// </summary>
         private FoliageMapChannel[] foliageMapChannels = null;
+        /// <summary>
+        /// Material
+        /// </summary>
+        private MeshMaterial material;
 
         /// <summary>
         /// Parent ground
         /// </summary>
         public Ground ParentGround { get; set; }
+        /// <summary>
+        /// Material
+        /// </summary>
+        public MeshMaterial[] Materials
+        {
+            get
+            {
+                return new[] { this.material };
+            }
+        }
+
         /// <summary>
         /// Wind direction
         /// </summary>
@@ -426,6 +445,12 @@ namespace Engine
 
             if (description != null)
             {
+                //Material
+                this.material = new MeshMaterial()
+                {
+                    Material = description.Material != null ? description.Material.GetMaterial() : Material.Default
+                };
+
                 //Read foliage textures
                 string contentPath = description.ContentPath;
 
@@ -456,6 +481,7 @@ namespace Engine
                                 Saturation = channel.Saturation,
                                 MinSize = channel.MinSize,
                                 MaxSize = channel.MaxSize,
+                                StartRadius = channel.StartRadius,
                                 EndRadius = channel.EndRadius,
                                 TextureCount = (uint)foliageTextures.Count,
                                 Textures = game.ResourceManager.CreateResource(foliageTextures),
@@ -697,10 +723,10 @@ namespace Engine
                 this.WindStrength * this.foliageMapChannels[channel].WindEffect,
                 this.windTime * this.foliageMapChannels[channel].WindEffect,
                 this.textureRandom,
-                0,
+                this.foliageMapChannels[channel].StartRadius,
                 this.foliageMapChannels[channel].EndRadius,
+                (uint)this.material.ResourceIndex,
                 this.foliageMapChannels[channel].TextureCount,
-                0,
                 this.foliageMapChannels[channel].ToggleUV,
                 this.foliageMapChannels[channel].Textures);
 
@@ -736,7 +762,7 @@ namespace Engine
             #region Per object update
 
             effect.UpdatePerObject(
-                0,
+                this.foliageMapChannels[channel].StartRadius,
                 this.foliageMapChannels[channel].EndRadius,
                 this.foliageMapChannels[channel].TextureCount,
                 this.foliageMapChannels[channel].ToggleUV,

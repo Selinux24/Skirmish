@@ -169,6 +169,7 @@
     <Compile Include="GroundGardenerDescription.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="ISceneLightPosition.cs" />
+    <Compile Include="MaterialDescription.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />
     <Compile Include="ParticleSystemCPU.cs" />

@@ -298,7 +298,7 @@ namespace HeightmapTest
 
                         Proportion = 0.25f,
                     },
-                    Material = new HeightmapDescription.MaterialDescription
+                    Material = new MaterialDescription
                     {
                         Shininess = 10f,
                         SpecularColor = new Color4(0.1f, 0.1f, 0.1f, 1f),
@@ -331,6 +331,10 @@ namespace HeightmapTest
             {
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map.png",
+                Material = new MaterialDescription()
+                {
+                    DiffuseColor = Color.Gray,
+                },
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetarionTextures = new[] { "grass0.png" },
