@@ -106,7 +106,7 @@ namespace SceneTest
 
                 AmbientColor = new Color4(0.8f, 0.8f, 0.8f, 1f),
 
-                DiffuseColor = new Color4(1f, 1f, 1f, 1f),
+                DiffuseColor = new Color4(0.8f, 0.8f, 0.8f, 1f),
                 DiffuseTexture = "SceneMaterials/floor.png",
 
                 SpecularColor = new Color4(0.5f, 0.5f, 0.5f, 1f),

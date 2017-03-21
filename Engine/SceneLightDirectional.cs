@@ -71,7 +71,7 @@ namespace Engine
         /// <summary>
         /// Light direction
         /// </summary>
-        public Vector3 Direction = Vector3.Zero;
+        public Vector3 Direction { get; set; }
         /// <summary>
         /// Base brightness
         /// </summary>
@@ -79,7 +79,7 @@ namespace Engine
         /// <summary>
         /// Light brightness
         /// </summary>
-        public float Brightness = 1f;
+        public float Brightness { get; set; }
         /// <summary>
         /// Parent local transform matrix
         /// </summary>
@@ -109,7 +109,8 @@ namespace Engine
         protected SceneLightDirectional()
             : base()
         {
-
+            this.Direction = Vector3.Zero;
+            this.BaseBrightness = this.Brightness = 1f;
         }
         /// <summary>
         /// Constructor

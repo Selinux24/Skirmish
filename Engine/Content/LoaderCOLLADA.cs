@@ -1266,9 +1266,9 @@ namespace Engine.Content
 
             Color4 emissionColor = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
             Color4 ambientColor = new Color4(0.0f, 0.0f, 0.0f, 1.0f);
-            Color4 diffuseColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
+            Color4 diffuseColor = new Color4(0.8f, 0.8f, 0.8f, 1.0f);
             Color4 reflectiveColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
-            Color4 specularColor = new Color4(1.0f, 1.0f, 1.0f, 1.0f);
+            Color4 specularColor = new Color4(0.5f, 0.5f, 0.5f, 1.0f);
             Color4 transparentColor = new Color4(0.0f, 0.0f, 0.0f, 0.0f);
 
             float indexOfRefractionValue = 1.0f;
