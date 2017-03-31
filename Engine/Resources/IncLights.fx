@@ -267,6 +267,10 @@ inline float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shad
 
 	return 1.0f - (shadow / samples);
 }
+inline float CalcFogFactor(float distToEye, float fogStart, float fogRange)
+{
+	return saturate((distToEye - fogStart) / fogRange);
+}
 inline float4 ComputeFog(float4 litColor, float distToEye, float fogStart, float fogRange, float4 fogColor)
 {
 	float fogLerp = saturate((distToEye - fogStart) / fogRange);
@@ -285,17 +289,6 @@ inline float4 SpecularPhongPass(float4 lSpecular, float lShininess, float3 V, fl
 inline float4 SpecularBlinnPhongPass(float4 lSpecular, float lShininess, float3 L, float3 N, float3 V)
 {
 	return (pow(max(0, dot(N, normalize(L + V))), lShininess)) * lSpecular;
-}
-
-inline void Phong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, float3 N, float3 V, float3 R, out float4 diffuse, out float4 specular)
-{
-	diffuse = DiffusePass(lDiffuse, L, N);
-	specular = SpecularPhongPass(lSpecular, lShininess, V, R);
-}
-inline void BlinnPhong(float4 lDiffuse, float4 lSpecular, float lShininess, float3 L, float3 N, float3 V, float3 R, out float4 diffuse, out float4 specular)
-{
-	diffuse = DiffusePass(lDiffuse, L, N);
-	specular = SpecularBlinnPhongPass(lSpecular, lShininess, L, N, V);
 }
 
 inline float CalcSphericAttenuation(float intensity, float radius, float distance)
@@ -322,7 +315,7 @@ inline float CalcSpotCone(float3 lightDirection, float spotAngle, float3 L)
 	return smoothstep(minCos, maxCos, cosAngle);
 }
 
-inline float4 hdr(float4 color, float exposure) {
+inline float4 HDR(float4 color, float exposure) {
 	float4 hdrColor = float4(color.rgb * exposure, color.a);
 
 	hdrColor.r = hdrColor.r < 1.413f ? pow(abs(hdrColor.r) * 0.38317f, 1.0f / 2.2f) : 1.0f - exp(-hdrColor.r);
@@ -584,7 +577,7 @@ struct ComputeLightsInput
 	Texture2D shadowMapDynamic;
 };
 
-inline float4 ComputeLightsLOD1(ComputeLightsInput input, float distToEye)
+inline float4 ComputeLightsLOD1(ComputeLightsInput input)
 {
 	float4 lDiffuse = 0;
 	float4 lSpecular = 0;
@@ -651,14 +644,9 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input, float distToEye)
 
 	float4 color = (emissive + ambient + diffuse + specular) * input.pColorDiffuse;
 
-	if (input.fogRange > 0)
-	{
-		color = ComputeFog(color, distToEye, input.fogStart, input.fogRange, input.fogColor);
-	}
-
 	return saturate(color);
 }
-inline float4 ComputeLightsLOD2(ComputeLightsInput input, float distToEye)
+inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 {
 	float4 lDiffuse = 0;
 
@@ -711,14 +699,9 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input, float distToEye)
 
 	float4 color = (emissive + ambient + diffuse) * input.pColorDiffuse;
 
-	if (input.fogRange > 0)
-	{
-		color = ComputeFog(color, distToEye, input.fogStart, input.fogRange, input.fogColor);
-	}
-
 	return saturate(color);
 }
-inline float4 ComputeLightsLOD3(ComputeLightsInput input, float distToEye)
+inline float4 ComputeLightsLOD3(ComputeLightsInput input)
 {
 	float4 lDiffuse = 0;
 
@@ -746,14 +729,9 @@ inline float4 ComputeLightsLOD3(ComputeLightsInput input, float distToEye)
 
 	float4 color = (emissive + ambient + diffuse) * input.pColorDiffuse;
 
-	if (input.fogRange > 0)
-	{
-		color = ComputeFog(color, distToEye, input.fogStart, input.fogRange, input.fogColor);
-	}
-
 	return saturate(color);
 }
-inline float4 ComputeLightsLOD4(ComputeLightsInput input, float distToEye)
+inline float4 ComputeLightsLOD4(ComputeLightsInput input)
 {
 	float4 lDiffuse = 0;
 
@@ -775,27 +753,36 @@ inline float4 ComputeLightsLOD4(ComputeLightsInput input, float distToEye)
 
 	float4 color = (emissive + ambient + diffuse) * input.pColorDiffuse;
 
-	if (input.fogRange > 0)
-	{
-		color = ComputeFog(color, distToEye, input.fogStart, input.fogRange, input.fogColor);
-	}
-
 	return saturate(color);
 }
 inline float4 ComputeLights(ComputeLightsInput input)
 {
 	float distToEye = length(input.ePosition - input.pPosition);
 
-	if (distToEye < input.lod.x) {
-		return ComputeLightsLOD1(input, distToEye);
+	float fog = 0;
+	if (input.fogRange > 0)
+	{
+		fog = CalcFogFactor(distToEye, input.fogStart, input.fogRange);
 	}
-	else if (distToEye < input.lod.y) {
-		return ComputeLightsLOD2(input, distToEye);
-	}
-	else if (distToEye < input.lod.z) {
-		return ComputeLightsLOD3(input, distToEye);
+
+	if (fog >= 1) {
+		return input.fogColor;
 	}
 	else {
-		return ComputeLightsLOD4(input, distToEye);
+		float4 color = 0;
+		if (distToEye < input.lod.x) {
+			color = ComputeLightsLOD1(input);
+		}
+		else if (distToEye < input.lod.y) {
+			color = ComputeLightsLOD2(input);
+		}
+		else if (distToEye < input.lod.z) {
+			color = ComputeLightsLOD3(input);
+		}
+		else {
+			color = ComputeLightsLOD4(input);
+		}
+
+		return float4(lerp(color.rgb, input.fogColor.rgb, fog), color.a);
 	}
 }

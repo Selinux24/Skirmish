@@ -40,7 +40,7 @@ PSVertexSkyScattering VSScattering(VSVertexPosition input)
 
 float4 PSScattering(PSVertexSkyScattering input) : SV_TARGET
 {
-	return hdr(pixelPhase(gLightDirection, input.direction, input.colorR, input.colorM), gHDRExposure);
+	return HDR(pixelPhase(gLightDirection, input.direction, input.colorR, input.colorM), gHDRExposure);
 }
 
 /**********************************************************************************************************
