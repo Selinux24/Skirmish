@@ -197,3 +197,8 @@ Thumbs.db
 /.vs/SharpDXTests/v15/Browse.VC.opendb
 /.vs/SharpDXTests/v15/Browse.VC.db
 /.vs/SharpDXTests/v15
+/.vs
+/.vs
+*.sqlite
+*.json
+/.vs
