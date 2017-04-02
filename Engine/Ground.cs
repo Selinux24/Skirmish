@@ -13,7 +13,7 @@ namespace Engine
     /// Ground class
     /// </summary>
     /// <remarks>Used for picking tests and navigation over surfaces</remarks>
-    public abstract class Ground : Drawable, IGround, IPickable
+    public abstract class Ground : Drawable, IGround, IRayPickable<Triangle>
     {
         /// <summary>
         /// Usage enumeration for internal's update
@@ -41,11 +41,11 @@ namespace Engine
         /// <summary>
         /// Quadtree for base ground picking
         /// </summary>
-        protected PickingQuadTree groundPickingQuadtree = null;
+        protected PickingQuadTree<Triangle> groundPickingQuadtree = null;
         /// <summary>
         /// Quadtree for static objects picking
         /// </summary>
-        protected PickingQuadTree objectsPickingQuadtree = null;
+        protected PickingQuadTree<Triangle> objectsPickingQuadtree = null;
         /// <summary>
         /// Graph used for pathfinding
         /// </summary>
@@ -264,7 +264,7 @@ namespace Engine
                 var triangles = this.GetObjectTriangles(UsageEnum.Picking);
                 if (triangles != null && triangles.Length > 0)
                 {
-                    this.objectsPickingQuadtree = new PickingQuadTree(triangles, this.Description.Quadtree.MaximumDepth);
+                    this.objectsPickingQuadtree = new PickingQuadTree<Triangle>(triangles, this.Description.Quadtree.MaximumDepth);
                 }
             }
 
@@ -291,9 +291,9 @@ namespace Engine
             var nodes = this.groundPickingQuadtree.GetTailNodes();
             foreach (var node in nodes)
             {
-                if (node.Triangles != null)
+                if (node.Items != null)
                 {
-                    tris.AddRange(node.Triangles);
+                    tris.AddRange(node.Items);
                 }
             }
 
@@ -989,7 +989,9 @@ namespace Engine
         /// <summary>
         /// Gets the node list suitable for foliage planting
         /// </summary>
+        /// <param name="frustum">Camera frustum</param>
+        /// <param name="sph">Foliagle bounding sphere</param>
         /// <returns>Returns a node list</returns>
-        public abstract PickingQuadTreeNode[] GetFoliageNodes();
+        public abstract PickingQuadTreeNode<Triangle>[] GetFoliageNodes(BoundingFrustum frustum, BoundingSphere sph);
     }
 }

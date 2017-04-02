@@ -271,8 +271,8 @@ namespace HeightmapTest
 
             sw.Restart();
             var pfSettings = NavigationMeshGenerationSettings.Default;
-            pfSettings.CellHeight = 20f;
-            pfSettings.CellSize = 20f;
+            pfSettings.CellHeight = 5f;
+            pfSettings.CellSize = 5f;
             var hDesc =
                 new HeightmapDescription()
                 {
@@ -310,7 +310,7 @@ namespace HeightmapTest
                     Name = "Terrain",
                     Quadtree = new GroundDescription.QuadtreeDescription()
                     {
-                        MaximumDepth = 3,
+                        MaximumDepth = 5,
                     },
                     //PathFinder = new GroundDescription.PathFinderDescription()
                     //{

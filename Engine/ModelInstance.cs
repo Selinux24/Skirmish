@@ -9,7 +9,7 @@ namespace Engine
     /// <summary>
     /// Model instance
     /// </summary>
-    public class ModelInstance : IPickable
+    public class ModelInstance : IRayPickable<Triangle>
     {
         /// <summary>
         /// Global id counter
@@ -351,7 +351,7 @@ namespace Engine
                     Vector3 p;
                     Triangle t;
                     float d;
-                    if (Triangle.IntersectNearest(ref ray, triangles, facingOnly, out p, out t, out d))
+                    if (Intersection.IntersectNearest(ref ray, triangles, facingOnly, out p, out t, out d))
                     {
                         position = p;
                         triangle = t;
@@ -388,7 +388,7 @@ namespace Engine
                     Vector3 p;
                     Triangle t;
                     float d;
-                    if (Triangle.IntersectFirst(ref ray, triangles, facingOnly, out p, out t, out d))
+                    if (Intersection.IntersectFirst(ref ray, triangles, facingOnly, out p, out t, out d))
                     {
                         position = p;
                         triangle = t;
@@ -425,7 +425,7 @@ namespace Engine
                     Vector3[] p;
                     Triangle[] t;
                     float[] d;
-                    if (Triangle.IntersectAll(ref ray, ts, facingOnly, out p, out t, out d))
+                    if (Intersection.IntersectAll(ref ray, ts, facingOnly, out p, out t, out d))
                     {
                         positions = p;
                         triangles = t;

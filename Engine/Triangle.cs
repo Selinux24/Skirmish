@@ -9,7 +9,7 @@ namespace Engine
     /// <summary>
     /// Triangle
     /// </summary>
-    public struct Triangle
+    public struct Triangle : IVertexList, IRayIntersectable
     {
         /// <summary>
         /// First point
@@ -346,158 +346,6 @@ namespace Engine
 
             return trnTriangles;
         }
-        /// <summary>
-        /// Performs intersection test with ray and triangle list
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="triangles">Triangle list</param>
-        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
-        /// <param name="position">Result picked position</param>
-        /// <param name="triangle">Result picked triangle</param>
-        /// <param name="distance">Result distance to picked position</param>
-        /// <returns>Returns first intersection if exists</returns>
-        public static bool IntersectFirst(ref Ray ray, Triangle[] triangles, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
-        {
-            position = Vector3.Zero;
-            triangle = new Triangle();
-            distance = float.MaxValue;
-
-            for (int i = 0; i < triangles.Length; i++)
-            {
-                Triangle tri = triangles[i];
-
-                bool cull = false;
-                if (facingOnly == true)
-                {
-                    cull = Vector3.Dot(ray.Direction, tri.Normal) >= 0f;
-                }
-
-                if (!cull)
-                {
-                    Vector3 pos;
-                    float d;
-                    if (tri.Intersects(ref ray, out pos, out d))
-                    {
-                        position = pos;
-                        triangle = tri;
-                        distance = d;
-
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Performs intersection test with ray and triangle list
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="triangles">Triangle list</param>
-        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
-        /// <param name="position">Result picked position</param>
-        /// <param name="triangle">Result picked triangle</param>
-        /// <param name="distance">Result distance to picked position</param>
-        /// <returns>Returns nearest intersection if exists</returns>
-        public static bool IntersectNearest(ref Ray ray, Triangle[] triangles, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
-        {
-            position = Vector3.Zero;
-            triangle = new Triangle();
-            distance = float.MaxValue;
-
-            Vector3[] pickedPositions;
-            Triangle[] pickedTriangles;
-            float[] pickedDistances;
-            if (IntersectAll(ref ray, triangles, facingOnly, out pickedPositions, out pickedTriangles, out pickedDistances))
-            {
-                float distanceMin = float.MaxValue;
-
-                for (int i = 0; i < pickedPositions.Length; i++)
-                {
-                    float dist = pickedDistances[i];
-                    if (dist < distanceMin)
-                    {
-                        distanceMin = dist;
-                        position = pickedPositions[i];
-                        triangle = pickedTriangles[i];
-                        distance = pickedDistances[i];
-                    }
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Performs intersection test with ray and triangle list
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="triangles">Triangle list</param>
-        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
-        /// <param name="pickedPositions">Picked position list</param>
-        /// <param name="pickedTriangles">Picked triangle list</param>
-        /// <param name="pickedDistances">Distances to picked positions</param>
-        /// <returns>Returns all intersections if exists</returns>
-        public static bool IntersectAll(ref Ray ray, Triangle[] triangles, bool facingOnly, out Vector3[] pickedPositions, out Triangle[] pickedTriangles, out float[] pickedDistances)
-        {
-            SortedDictionary<float, Vector3> pickedPositionList = new SortedDictionary<float, Vector3>();
-            SortedDictionary<float, Triangle> pickedTriangleList = new SortedDictionary<float, Triangle>();
-            SortedDictionary<float, float> pickedDistancesList = new SortedDictionary<float, float>();
-
-            foreach (Triangle t in triangles)
-            {
-                bool cull = false;
-                if (facingOnly == true)
-                {
-                    cull = Vector3.Dot(ray.Direction, t.Normal) >= 0f;
-                }
-
-                if (!cull)
-                {
-                    Vector3 pos;
-                    float d;
-                    if (t.Intersects(ref ray, out pos, out d))
-                    {
-                        //Avoid duplicate picked positions
-                        if (!pickedPositionList.ContainsValue(pos))
-                        {
-                            float k = d;
-                            while (pickedPositionList.ContainsKey(k))
-                            {
-                                //Avoid duplicate distance keys
-                                k += 0.001f;
-                            }
-
-                            pickedPositionList.Add(k, pos);
-                            pickedTriangleList.Add(k, t);
-                            pickedDistancesList.Add(k, d);
-                        }
-                    }
-                }
-            }
-
-            if (pickedPositionList.Values.Count > 0)
-            {
-                pickedPositions = new Vector3[pickedPositionList.Values.Count];
-                pickedTriangles = new Triangle[pickedTriangleList.Values.Count];
-                pickedDistances = new float[pickedDistancesList.Values.Count];
-
-                pickedPositionList.Values.CopyTo(pickedPositions, 0);
-                pickedTriangleList.Values.CopyTo(pickedTriangles, 0);
-                pickedDistancesList.Values.CopyTo(pickedDistances, 0);
-
-                return true;
-            }
-            else
-            {
-                pickedPositions = null;
-                pickedTriangles = null;
-                pickedDistances = null;
-
-                return false;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -562,8 +410,9 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray)
         {
+            Vector3 position;
             float distance;
-            return Intersection.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out distance);
+            return this.Intersects(ref ray, false, out position, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -573,7 +422,8 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray, out float distance)
         {
-            return Intersection.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out distance);
+            Vector3 position;
+            return this.Intersects(ref ray, false, out position, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -584,13 +434,64 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray, out Vector3 point, out float distance)
         {
-            return Intersection.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out point, out distance);
+            return this.Intersects(ref ray, false, out point, out distance);
         }
         /// <summary>
-        /// Retrieves the three corners of the triangle.
+        /// Intersection test between ray and triangle
         /// </summary>
-        /// <returns>An array of points representing the three corners of the triangle.</returns>
-        public Vector3[] GetCorners()
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Test facing only triangles</param>
+        /// <returns>Returns true if ray intersects with this triangle</returns>
+        public bool Intersects(ref Ray ray, bool facingOnly)
+        {
+            Vector3 point;
+            float distance;
+            return this.Intersects(ref ray, facingOnly, out point, out distance);
+        }
+        /// <summary>
+        /// Intersection test between ray and triangle
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Test facing only triangles</param>
+        /// <param name="distance">Distance from ray origin and intersection point, if any</param>
+        /// <returns>Returns true if ray intersects with this triangle</returns>
+        public bool Intersects(ref Ray ray, bool facingOnly, out float distance)
+        {
+            Vector3 point;
+            return this.Intersects(ref ray, facingOnly, out point, out distance);
+        }
+        /// <summary>
+        /// Intersection test between ray and triangle
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Test facing only triangles</param>
+        /// <param name="point">Intersection point, if any</param>
+        /// <param name="distance">Distance from ray origin and intersection point, if any</param>
+        /// <returns>Returns true if ray intersects with this triangle</returns>
+        public bool Intersects(ref Ray ray, bool facingOnly, out Vector3 point, out float distance)
+        {
+            point = Vector3.Zero;
+            distance = 0;
+
+            bool cull = false;
+            if (facingOnly == true)
+            {
+                cull = Vector3.Dot(ray.Direction, this.Normal) >= 0f;
+            }
+
+            if (!cull)
+            {
+                return Intersection.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out point, out distance);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Retrieves the three vertices of the triangle.
+        /// </summary>
+        /// <returns>An array of points representing the three vertices of the triangle.</returns>
+        public Vector3[] GetVertices()
         {
             return new[]
             {

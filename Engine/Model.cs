@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Basic Model
     /// </summary>
-    public class Model : ModelBase, IPickable
+    public class Model : ModelBase, IRayPickable<Triangle>
     {
         /// <summary>
         /// Update point cache flag
@@ -558,7 +558,7 @@ namespace Engine
         /// <param name="triangle">Triangle found</param>
         /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if ground position found</returns>
-        public virtual bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
             position = new Vector3();
             triangle = new Triangle();
@@ -572,7 +572,7 @@ namespace Engine
                 Vector3 pos;
                 Triangle tri;
                 float d;
-                if (Triangle.IntersectNearest(ref ray, triangles, facingOnly, out pos, out tri, out d))
+                if (Intersection.IntersectNearest(ref ray, triangles, facingOnly, out pos, out tri, out d))
                 {
                     position = pos;
                     triangle = tri;
@@ -593,7 +593,7 @@ namespace Engine
         /// <param name="triangle">Triangle found</param>
         /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if ground position found</returns>
-        public virtual bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
             position = new Vector3();
             triangle = new Triangle();
@@ -607,7 +607,7 @@ namespace Engine
                 Vector3 pos;
                 Triangle tri;
                 float d;
-                if (Triangle.IntersectFirst(ref ray, triangles, facingOnly, out pos, out tri, out d))
+                if (Intersection.IntersectFirst(ref ray, triangles, facingOnly, out pos, out tri, out d))
                 {
                     position = pos;
                     triangle = tri;
@@ -628,7 +628,7 @@ namespace Engine
         /// <param name="triangles">Triangles found</param>
         /// <param name="distances">Distances to positions</param>
         /// <returns>Returns true if ground position found</returns>
-        public virtual bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
         {
             positions = null;
             triangles = null;
@@ -642,7 +642,7 @@ namespace Engine
                 Vector3[] pos;
                 Triangle[] tri;
                 float[] ds;
-                if (Triangle.IntersectAll(ref ray, tris, facingOnly, out pos, out tri, out ds))
+                if (Intersection.IntersectAll(ref ray, tris, facingOnly, out pos, out tri, out ds))
                 {
                     positions = pos;
                     triangles = tri;

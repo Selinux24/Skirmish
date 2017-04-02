@@ -52,8 +52,8 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Returns a navigation mesh</returns>
         public static NavigationMesh Build(Triangle[] triangles, NavigationMeshGenerationSettings settings)
         {
-            BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetCorners());
-            Array.ForEach(triangles, tri => bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(tri.GetCorners())));
+            BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetVertices());
+            Array.ForEach(triangles, tri => bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(tri.GetVertices())));
 
             var nm = new NavigationMesh();
 

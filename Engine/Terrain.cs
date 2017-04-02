@@ -27,6 +27,11 @@ namespace Engine
         class MapGrid : IDisposable
         {
             /// <summary>
+            /// Level of detail leves in map
+            /// </summary>
+            public const int LODLevels = 3;
+
+            /// <summary>
             /// Creates a new descriptor based on triangles per node count and shape Id parameters
             /// </summary>
             /// <param name="shapeId">Shape Id</param>
@@ -69,9 +74,13 @@ namespace Engine
             /// </summary>
             private Dictionary<MapGridShapeId, BufferDescriptor> dictIB = new Dictionary<MapGridShapeId, BufferDescriptor>();
             /// <summary>
+            /// Tree
+            /// </summary>
+            private QuadTree<VertexData> drawingQuadTree = null;
+            /// <summary>
             /// Last mapped node
             /// </summary>
-            private PickingQuadTreeNode lastNode = null;
+            private QuadTreeNode<VertexData> lastNode = null;
             /// <summary>
             /// Visible nodes of last draw call
             /// </summary>
@@ -93,10 +102,10 @@ namespace Engine
             /// Constructor
             /// </summary>
             /// <param name="game">Game instance</param>
-            /// <param name="tree">Quadtree</param>
+            /// <param name="vertices">Vertices to map</param>
             /// <param name="trianglesPerNode">Triangles per terrain node</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public MapGrid(Game game, PickingQuadTree tree, int trianglesPerNode, BufferManager bufferManager)
+            public MapGrid(Game game, VertexData[] vertices, int trianglesPerNode, BufferManager bufferManager)
             {
                 this.Game = game;
 
@@ -120,25 +129,25 @@ namespace Engine
 
                 var lodList = new[]
                 {
-                LevelOfDetailEnum.High,
-                LevelOfDetailEnum.Medium,
-                LevelOfDetailEnum.Low,
-                LevelOfDetailEnum.Minimum,
-            };
+                    LevelOfDetailEnum.High,
+                    LevelOfDetailEnum.Medium,
+                    LevelOfDetailEnum.Low,
+                    LevelOfDetailEnum.Minimum,
+                };
                 var shapeList = new[]
                 {
-                IndexBufferShapeEnum.Full,
+                    IndexBufferShapeEnum.Full,
 
-                IndexBufferShapeEnum.SideTop,
-                IndexBufferShapeEnum.SideBottom,
-                IndexBufferShapeEnum.SideLeft,
-                IndexBufferShapeEnum.SideRight,
+                    IndexBufferShapeEnum.SideTop,
+                    IndexBufferShapeEnum.SideBottom,
+                    IndexBufferShapeEnum.SideLeft,
+                    IndexBufferShapeEnum.SideRight,
 
-                IndexBufferShapeEnum.CornerTopLeft,
-                IndexBufferShapeEnum.CornerTopRight,
-                IndexBufferShapeEnum.CornerBottomLeft,
-                IndexBufferShapeEnum.CornerBottomRight,
-            };
+                    IndexBufferShapeEnum.CornerTopLeft,
+                    IndexBufferShapeEnum.CornerTopRight,
+                    IndexBufferShapeEnum.CornerBottomLeft,
+                    IndexBufferShapeEnum.CornerBottomRight,
+                };
 
                 //Populate shapes dictionaty
                 foreach (var lod in lodList)
@@ -151,11 +160,13 @@ namespace Engine
                     }
                 }
 
+                this.drawingQuadTree = new QuadTree<VertexData>(vertices, LODLevels);
+
                 //Populate nodes dictionary
-                var nodes = tree.GetTailNodes();
+                var nodes = this.drawingQuadTree.GetTailNodes();
                 foreach (var node in nodes)
                 {
-                    var data = VertexData.Convert(VertexTypes.Terrain, node.Vertices, null, null, Matrix.Identity);
+                    var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null, Matrix.Identity);
 
                     this.dictVB.Add(node.Id, bufferManager.Add("", data, false, 1));
                 }
@@ -177,9 +188,11 @@ namespace Engine
             /// <summary>
             /// Updates map from quad-tree and position
             /// </summary>
-            /// <param name="node">Closest quadtree node</param>
-            public void Update(PickingQuadTreeNode node)
+            /// <param name="eyePosition">Eye position</param>
+            public void Update(Vector3 eyePosition)
             {
+                var node = this.drawingQuadTree.FindNode(eyePosition);
+
                 if (node != null && this.lastNode != node)
                 {
                     this.lastNode = node;
@@ -361,7 +374,7 @@ namespace Engine
             /// <summary>
             /// Node
             /// </summary>
-            public PickingQuadTreeNode Node;
+            public QuadTreeNode<VertexData> Node;
             /// <summary>
             /// Vertex buffer descriptor
             /// </summary>
@@ -392,11 +405,11 @@ namespace Engine
                 LevelOfDetailEnum lod,
                 IndexBufferShapeEnum shape,
                 IndexBufferShapeEnum direction,
-                PickingQuadTreeNode node,
+                QuadTreeNode<VertexData> node,
                 Dictionary<int, BufferDescriptor> dictVB,
                 Dictionary<MapGridShapeId, BufferDescriptor> dictIB)
             {
-                PickingQuadTreeNode nNode = null;
+                QuadTreeNode<VertexData> nNode = null;
 
                 if (node != null)
                 {
@@ -543,7 +556,7 @@ namespace Engine
         /// Heightmap maximum height
         /// </summary>
         private float heightMapHeight;
-    
+
         /// <summary>
         /// Heightmap texture resolution
         /// </summary>
@@ -710,20 +723,29 @@ namespace Engine
             //Get vertices and indices from heightmap
             VertexData[] vertices;
             uint[] indices;
-            this.BuildGeometry(
-                out vertices, out indices);
+            this.BuildGeometry(out vertices, out indices);
 
-            //Initialize Quadtree
-            this.groundPickingQuadtree = new PickingQuadTree(
-                vertices,
+            List<Triangle> tris = new List<Triangle>();
+
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                tris.Add(new Triangle(
+                    vertices[indices[i]].Position.Value, 
+                    vertices[indices[i+2]].Position.Value, 
+                    vertices[indices[i+1]].Position.Value));
+            }
+
+            //Initialize quadtree for ray picking
+            this.groundPickingQuadtree = new PickingQuadTree<Triangle>(
+                tris.ToArray(),
                 this.Description.Quadtree.MaximumDepth);
 
             if (this.Map == null)
             {
                 //Initialize map
-                int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(this.Description.Quadtree.MaximumDepth);
+                int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
 
-                this.Map = new MapGrid(this.Game, this.groundPickingQuadtree, trianglesPerNode, this.BufferManager);
+                this.Map = new MapGrid(this.Game, vertices, trianglesPerNode, this.BufferManager);
             }
 
             if (!groundDescription.DelayGeneration)
@@ -749,18 +771,16 @@ namespace Engine
 
             Helper.Dispose(this.terrainMaterial);
         }
-       
+
         /// <summary>
         /// Updates the state of the terrain components
         /// </summary>
         /// <param name="context">Update context</param>
         public override void Update(UpdateContext context)
         {
-            var node = this.groundPickingQuadtree.FindNode(context.EyePosition);
-
-            this.Map.Update(node);
+            this.Map.Update(context.EyePosition);
         }
-      
+
         /// <summary>
         /// Draws the terrain components
         /// </summary>
@@ -958,20 +978,15 @@ namespace Engine
         /// <summary>
         /// Gets the node list suitable for foliage planting
         /// </summary>
+        /// <param name="frustum">Camera frustum</param>
+        /// <param name="sph">Foliagle bounding sphere</param>
         /// <returns>Returns a node list</returns>
-        public override PickingQuadTreeNode[] GetFoliageNodes()
+        public override PickingQuadTreeNode<Triangle>[] GetFoliageNodes(BoundingFrustum frustum, BoundingSphere sph)
         {
-            var visibleNodes = this.Map.GetVisibleNodesHigh();
+            var visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref frustum);
             if (visibleNodes != null && visibleNodes.Length > 0)
             {
-                PickingQuadTreeNode[] res = new PickingQuadTreeNode[visibleNodes.Length];
-
-                for (int i = 0; i < visibleNodes.Length; i++)
-                {
-                    res[i] = visibleNodes[i].Node;
-                }
-
-                return res;
+                return Array.FindAll(visibleNodes, n => sph.Contains(ref n.BoundingBox) != ContainmentType.Disjoint);
             }
 
             return null;

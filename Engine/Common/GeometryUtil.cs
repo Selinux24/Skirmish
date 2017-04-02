@@ -889,17 +889,17 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Generates a bounding box from a triangle list
+        /// Generates a bounding box from a vertex list item list
         /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <returns>Returns the minimum bounding box that contains all the specified triangles</returns>
-        public static BoundingBox CreateBoundingBox(Triangle[] triangles)
+        /// <param name="vertexListItems">Vertex list item list</param>
+        /// <returns>Returns the minimum bounding box that contains all the specified vertex list item list</returns>
+        public static BoundingBox CreateBoundingBox<T>(T[] vertexListItems) where T : IVertexList
         {
             BoundingBox bbox = new BoundingBox();
 
-            for (int i = 0; i < triangles.Length; i++)
+            for (int i = 0; i < vertexListItems.Length; i++)
             {
-                BoundingBox tbox = BoundingBox.FromPoints(triangles[i].GetCorners());
+                BoundingBox tbox = BoundingBox.FromPoints(vertexListItems[i].GetVertices());
 
                 if (i == 0)
                 {
@@ -914,17 +914,17 @@ namespace Engine.Common
             return bbox;
         }
         /// <summary>
-        /// Generates a bounding sphere from a triangle list
+        /// Generates a bounding sphere from a vertex list item list
         /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <returns>Returns the minimum bounding sphere that contains all the specified triangles</returns>
-        public static BoundingSphere CreateBoundingSphere(Triangle[] triangles)
+        /// <param name="vertexListItems">Vertex list item list</param>
+        /// <returns>Returns the minimum bounding sphere that contains all the specified vertex list item list</returns>
+        public static BoundingSphere CreateBoundingSphere<T>(T[] vertexListItems) where T : IVertexList
         {
             BoundingSphere bsph = new BoundingSphere();
 
-            for (int i = 0; i < triangles.Length; i++)
+            for (int i = 0; i < vertexListItems.Length; i++)
             {
-                BoundingSphere tsph = BoundingSphere.FromPoints(triangles[i].GetCorners());
+                BoundingSphere tsph = BoundingSphere.FromPoints(vertexListItems[i].GetVertices());
 
                 if (i == 0)
                 {

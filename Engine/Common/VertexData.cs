@@ -8,7 +8,7 @@ namespace Engine.Common
     /// Vertex helper
     /// </summary>
     [Serializable]
-    public struct VertexData
+    public struct VertexData : IVertexList
     {
         /// <summary>
         /// Face index
@@ -565,6 +565,14 @@ namespace Engine.Common
                     this.BiNormal = biNormal;
                 }
             }
+        }
+        /// <summary>
+        /// Gets the vertex list
+        /// </summary>
+        /// <returns>Returns a vertex list</returns>
+        public Vector3[] GetVertices()
+        {
+            return new Vector3[] { this.Position.Value };
         }
         /// <summary>
         /// Gets text representation of instance

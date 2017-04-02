@@ -41,7 +41,7 @@ namespace Engine
             /// <param name="content">Content</param>
             /// <param name="node">Quadtree node</param>
             /// <returns>Returns the new generated patch</returns>
-            public static SceneryPatch CreatePatch(Game game, BufferManager bufferManager, ModelContent content, PickingQuadTreeNode node)
+            public static SceneryPatch CreatePatch(Game game, BufferManager bufferManager, ModelContent content, PickingQuadTreeNode<Triangle> node)
             {
                 var desc = new DrawingDataDescription()
                 {
@@ -71,7 +71,7 @@ namespace Engine
             /// <summary>
             /// Current quadtree node
             /// </summary>
-            public PickingQuadTreeNode Current { get; private set; }
+            public PickingQuadTreeNode<Triangle> Current { get; private set; }
 
             /// <summary>
             /// Cosntructor
@@ -96,7 +96,7 @@ namespace Engine
             /// </summary>
             /// <param name="context">Context</param>
             /// <param name="node">Node</param>
-            public void Update(UpdateContext context, PickingQuadTreeNode node)
+            public void Update(UpdateContext context, PickingQuadTreeNode<Triangle> node)
             {
                 this.Current = node;
             }
@@ -205,7 +205,7 @@ namespace Engine
         /// <summary>
         /// Visible Nodes
         /// </summary>
-        private PickingQuadTreeNode[] visibleNodes = null;
+        private PickingQuadTreeNode<Triangle>[] visibleNodes = null;
 
         /// <summary>
         /// Gets the used material list
@@ -262,7 +262,7 @@ namespace Engine
         {
             #region Patches
 
-            this.groundPickingQuadtree = new PickingQuadTree(content.GetTriangles(), description.Quadtree.MaximumDepth);
+            this.groundPickingQuadtree = new PickingQuadTree<Triangle>(content.GetTriangles(), description.Quadtree.MaximumDepth);
 
             var nodes = this.groundPickingQuadtree.GetTailNodes();
 
@@ -420,8 +420,10 @@ namespace Engine
         /// <summary>
         /// Gets the node list suitable for foliage planting
         /// </summary>
+        /// <param name="frustum">Camera frustum</param>
+        /// <param name="sph">Foliagle bounding sphere</param>
         /// <returns>Returns a node list</returns>
-        public override PickingQuadTreeNode[] GetFoliageNodes()
+        public override PickingQuadTreeNode<Triangle>[] GetFoliageNodes(BoundingFrustum frustum, BoundingSphere sph)
         {
             return this.visibleNodes;
         }

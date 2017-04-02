@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Diagnostics;
 
 namespace Engine.Collections
@@ -7,14 +6,14 @@ namespace Engine.Collections
     using Engine.Common;
 
     /// <summary>
-    /// Quad tree
+    /// Picking quad tree
     /// </summary>
-    public class PickingQuadTree : IPickable
+    public class PickingQuadTree<T> : IRayPickable<T> where T : IVertexList, IRayIntersectable
     {
         /// <summary>
         /// Root node
         /// </summary>
-        public PickingQuadTreeNode Root { get; private set; }
+        public PickingQuadTreeNode<T> Root { get; private set; }
         /// <summary>
         /// Global bounding box
         /// </summary>
@@ -29,7 +28,7 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="triangles">Partitioning triangles</param>
         /// <param name="maxDepth">Maximum depth</param>
-        public PickingQuadTree(Triangle[] triangles, int maxDepth)
+        public PickingQuadTree(T[] triangles, int maxDepth)
         {
             BoundingBox bbox = GeometryUtil.CreateBoundingBox(triangles);
             BoundingSphere bsph = GeometryUtil.CreateBoundingSphere(triangles);
@@ -37,34 +36,9 @@ namespace Engine.Collections
             this.BoundingBox = bbox;
             this.BoundingSphere = bsph;
 
-            this.Root = PickingQuadTreeNode.CreatePartitions(
+            this.Root = PickingQuadTreeNode<T>.CreatePartitions(
                 this, null,
                 bbox, triangles,
-                maxDepth,
-                0);
-
-            this.Root.ConnectNodes();
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="maxDepth">Maximum depth</param>
-        public PickingQuadTree(VertexData[] vertices, int maxDepth)
-        {
-            long index = 0;
-            Vector3[] positions = new Vector3[vertices.Length];
-            Array.ForEach(vertices, v => positions[index++] = v.Position.Value);
-
-            BoundingBox bbox = BoundingBox.FromPoints(positions);
-            BoundingSphere bsph = BoundingSphere.FromPoints(positions);
-
-            this.BoundingBox = bbox;
-            this.BoundingSphere = bsph;
-
-            this.Root = PickingQuadTreeNode.CreatePartitions(
-                this, null,
-                bbox, vertices,
                 maxDepth,
                 0);
 
@@ -80,7 +54,7 @@ namespace Engine.Collections
         /// <param name="triangle">Hit triangle</param>
         /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out T triangle, out float distance)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -106,7 +80,7 @@ namespace Engine.Collections
         /// <param name="triangle">Hit triangle</param>
         /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out T triangle, out float distance)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -132,7 +106,7 @@ namespace Engine.Collections
         /// <param name="triangles">Hit triangles</param>
         /// <param name="distances">Distances to hits</param>
         /// <returns>Returns true if picked positions found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out T[] triangles, out float[] distances)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -163,7 +137,7 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
         /// <returns>Returns the nodes contained into the frustum</returns>
-        public PickingQuadTreeNode[] GetNodesInVolume(ref BoundingFrustum frustum)
+        public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingFrustum frustum)
         {
             return this.Root.GetNodesInVolume(ref frustum);
         }
@@ -171,7 +145,7 @@ namespace Engine.Collections
         /// Gets all tail nodes
         /// </summary>
         /// <returns>Returns all tais nodel</returns>
-        public PickingQuadTreeNode[] GetTailNodes()
+        public PickingQuadTreeNode<T>[] GetTailNodes()
         {
             return this.Root.GetTailNodes();
         }
@@ -180,11 +154,11 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="position">Position</param>
         /// <returns>Returns the closest node to the specified position</returns>
-        public PickingQuadTreeNode FindNode(Vector3 position)
+        public PickingQuadTreeNode<T> FindNode(Vector3 position)
         {
             var node = this.Root.GetNode(position);
 
-            if(node == null)
+            if (node == null)
             {
                 //Look for the closest node
                 var tailNodes = this.GetTailNodes();
@@ -212,11 +186,11 @@ namespace Engine.Collections
         {
             if (this.Root != null)
             {
-                return string.Format("QuadTree Levels {0}", this.Root.GetMaxLevel() + 1);
+                return string.Format("PickingQuadTree Levels {0}", this.Root.GetMaxLevel() + 1);
             }
             else
             {
-                return "QuadTree Empty";
+                return "PickingQuadTree Empty";
             }
         }
     }

@@ -7,9 +7,9 @@ namespace Engine.Collections
     using Engine.Common;
 
     /// <summary>
-    /// Quadtree node
+    /// Picking quad tree node
     /// </summary>
-    public class PickingQuadTreeNode : IPickable
+    public class PickingQuadTreeNode<T> : IRayPickable<T> where T : IVertexList, IRayIntersectable
     {
         /// <summary>
         /// Static node count
@@ -22,13 +22,13 @@ namespace Engine.Collections
         /// <param name="quadTree">Quadtree</param>
         /// <param name="parent">Parent node</param>
         /// <param name="bbox">Parent bounding box</param>
-        /// <param name="triangles">All triangles</param>
+        /// <param name="items">All items</param>
         /// <param name="maxDepth">Maximum depth</param>
         /// <param name="treeDepth">Current depth</param>
         /// <returns>Returns new node</returns>
-        public static PickingQuadTreeNode CreatePartitions(
-            PickingQuadTree quadTree, PickingQuadTreeNode parent,
-            BoundingBox bbox, Triangle[] triangles,
+        public static PickingQuadTreeNode<T> CreatePartitions(
+            PickingQuadTree<T> quadTree, PickingQuadTreeNode<T> parent,
+            BoundingBox bbox, T[] items,
             int maxDepth,
             int treeDepth)
         {
@@ -36,16 +36,16 @@ namespace Engine.Collections
 
             if (treeDepth <= maxDepth)
             {
-                Triangle[] nodeTriangles = Array.FindAll(triangles, t =>
+                var nodeTriangles = Array.FindAll(items, t =>
                 {
-                    BoundingBox tbox = BoundingBox.FromPoints(t.GetCorners());
+                    BoundingBox tbox = BoundingBox.FromPoints(t.GetVertices());
 
                     return Intersection.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
                 });
 
                 if (nodeTriangles.Length > 0)
                 {
-                    PickingQuadTreeNode node = new PickingQuadTreeNode(quadTree, parent)
+                    var node = new PickingQuadTreeNode<T>(quadTree, parent)
                     {
                         Id = -1,
                         Level = treeDepth,
@@ -56,7 +56,7 @@ namespace Engine.Collections
                     if (haltByDepth)
                     {
                         node.Id = NodeCount++;
-                        node.Triangles = nodeTriangles;
+                        node.Items = nodeTriangles;
                     }
                     else
                     {
@@ -73,112 +73,12 @@ namespace Engine.Collections
                         //+0-1+0   +1+1+1   -->   cmc    MMM
                         BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
 
-                        PickingQuadTreeNode topLeftChild = CreatePartitions(quadTree, node, topLeftBox, triangles, maxDepth, treeDepth + 1);
-                        PickingQuadTreeNode topRightChild = CreatePartitions(quadTree, node, topRightBox, triangles, maxDepth, treeDepth + 1);
-                        PickingQuadTreeNode bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, triangles, maxDepth, treeDepth + 1);
-                        PickingQuadTreeNode bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, triangles, maxDepth, treeDepth + 1);
+                        var topLeftChild = CreatePartitions(quadTree, node, topLeftBox, items, maxDepth, treeDepth + 1);
+                        var topRightChild = CreatePartitions(quadTree, node, topRightBox, items, maxDepth, treeDepth + 1);
+                        var bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, items, maxDepth, treeDepth + 1);
+                        var bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, items, maxDepth, treeDepth + 1);
 
-                        List<PickingQuadTreeNode> childList = new List<PickingQuadTreeNode>();
-
-                        if (topLeftChild != null) childList.Add(topLeftChild);
-                        if (topRightChild != null) childList.Add(topRightChild);
-                        if (bottomLeftChild != null) childList.Add(bottomLeftChild);
-                        if (bottomRightChild != null) childList.Add(bottomRightChild);
-
-                        if (childList.Count > 0)
-                        {
-                            node.Children = childList.ToArray();
-                            node.TopLeftChild = topLeftChild;
-                            node.TopRightChild = topRightChild;
-                            node.BottomLeftChild = bottomLeftChild;
-                            node.BottomRightChild = bottomRightChild;
-                        }
-                    }
-
-                    return node;
-                }
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Recursive partition creation
-        /// </summary>
-        /// <param name="quadTree">Quadtree</param>
-        /// <param name="parent">Parent node</param>
-        /// <param name="bbox">Parent bounding box</param>
-        /// <param name="vertices">Vertices contained into parent bounding box</param>
-        /// <param name="maxDepth">Maximum depth</param>
-        /// <param name="treeDepth">Current depth</param>
-        /// <returns>Returns new node</returns>
-        public static PickingQuadTreeNode CreatePartitions(
-            PickingQuadTree quadTree, PickingQuadTreeNode parent,
-            BoundingBox bbox, VertexData[] vertices,
-            int maxDepth,
-            int treeDepth)
-        {
-            if (parent == null) NodeCount = 0;
-
-            if (treeDepth <= maxDepth)
-            {
-                var nodeVertices = Array.FindAll(vertices, p =>
-                {
-                    var containment = bbox.Contains(p.Position.Value);
-
-                    return containment != ContainmentType.Disjoint;
-                });
-
-                if (nodeVertices.Length > 0)
-                {
-                    PickingQuadTreeNode node = new PickingQuadTreeNode(quadTree, parent)
-                    {
-                        Id = -1,
-                        Level = treeDepth,
-                        BoundingBox = bbox,
-                    };
-
-                    bool haltByDepth = treeDepth == maxDepth;
-                    if (haltByDepth)
-                    {
-                        node.Id = NodeCount++;
-                        node.Vertices = nodeVertices;
-
-                        //Get positions
-                        List<Vector3> positions = new List<Vector3>();
-                        Array.ForEach(nodeVertices, v => positions.Add(v.Position.Value));
-
-                        //Triangles per node
-                        int nodeSide = (int)Math.Sqrt(positions.Count) - 1;
-
-                        //Get indices
-                        uint[] indices = GeometryUtil.GenerateIndices(IndexBufferShapeEnum.Full, nodeSide * nodeSide * 2);
-
-                        node.Triangles = Triangle.ComputeTriangleList(
-                            SharpDX.Direct3D.PrimitiveTopology.TriangleList,
-                            positions.ToArray(),
-                            indices);
-                    }
-                    else
-                    {
-                        Vector3 M = bbox.Maximum;
-                        Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
-                        Vector3 m = bbox.Minimum;
-
-                        //-1-1-1   +0+1+0   -->   mmm    cMc
-                        BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-                        //-1-1+0   +0+1+1   -->   mmc    cMM
-                        BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
-                        //+0-1-1   +1+1+0   -->   cmm    MMc
-                        BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
-                        //+0-1+0   +1+1+1   -->   cmc    MMM
-                        BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
-
-                        PickingQuadTreeNode topLeftChild = CreatePartitions(quadTree, node, topLeftBox, nodeVertices, maxDepth, treeDepth + 1);
-                        PickingQuadTreeNode topRightChild = CreatePartitions(quadTree, node, topRightBox, nodeVertices, maxDepth, treeDepth + 1);
-                        PickingQuadTreeNode bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, nodeVertices, maxDepth, treeDepth + 1);
-                        PickingQuadTreeNode bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, nodeVertices, maxDepth, treeDepth + 1);
-
-                        List<PickingQuadTreeNode> childList = new List<PickingQuadTreeNode>();
+                        List<PickingQuadTreeNode<T>> childList = new List<PickingQuadTreeNode<T>>();
 
                         if (topLeftChild != null) childList.Add(topLeftChild);
                         if (topRightChild != null) childList.Add(topRightChild);
@@ -205,60 +105,60 @@ namespace Engine.Collections
         /// <summary>
         /// Parent
         /// </summary>
-        public PickingQuadTree QuadTree { get; private set; }
+        public PickingQuadTree<T> QuadTree { get; private set; }
         /// <summary>
         /// Parent node
         /// </summary>
-        public PickingQuadTreeNode Parent { get; private set; }
+        public PickingQuadTreeNode<T> Parent { get; private set; }
         /// <summary>
         /// Gets the child node al top lef position (from above)
         /// </summary>
-        public PickingQuadTreeNode TopLeftChild { get; private set; }
+        public PickingQuadTreeNode<T> TopLeftChild { get; private set; }
         /// <summary>
         /// Gets the child node al top right position (from above)
         /// </summary>
-        public PickingQuadTreeNode TopRightChild { get; private set; }
+        public PickingQuadTreeNode<T> TopRightChild { get; private set; }
         /// <summary>
         /// Gets the child node al bottom lef position (from above)
         /// </summary>
-        public PickingQuadTreeNode BottomLeftChild { get; private set; }
+        public PickingQuadTreeNode<T> BottomLeftChild { get; private set; }
         /// <summary>
         /// Gets the child node al bottom right position (from above)
         /// </summary>
-        public PickingQuadTreeNode BottomRightChild { get; private set; }
+        public PickingQuadTreeNode<T> BottomRightChild { get; private set; }
 
         /// <summary>
         /// Gets the neighbor at top position (from above)
         /// </summary>
-        public PickingQuadTreeNode TopNeighbor { get; private set; }
+        public PickingQuadTreeNode<T> TopNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at bottom position (from above)
         /// </summary>
-        public PickingQuadTreeNode BottomNeighbor { get; private set; }
+        public PickingQuadTreeNode<T> BottomNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at left position (from above)
         /// </summary>
-        public PickingQuadTreeNode LeftNeighbor { get; private set; }
+        public PickingQuadTreeNode<T> LeftNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at right position (from above)
         /// </summary>
-        public PickingQuadTreeNode RightNeighbor { get; private set; }
+        public PickingQuadTreeNode<T> RightNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at top left position (from above)
         /// </summary>
-        public PickingQuadTreeNode TopLeftNeighbor { get; private set; }
+        public PickingQuadTreeNode<T> TopLeftNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at top right position (from above)
         /// </summary>
-        public PickingQuadTreeNode TopRightNeighbor { get; private set; }
+        public PickingQuadTreeNode<T> TopRightNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at bottom left position (from above)
         /// </summary>
-        public PickingQuadTreeNode BottomLeftNeighbor { get; private set; }
+        public PickingQuadTreeNode<T> BottomLeftNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at bottom right position (from above)
         /// </summary>
-        public PickingQuadTreeNode BottomRightNeighbor { get; private set; }
+        public PickingQuadTreeNode<T> BottomRightNeighbor { get; private set; }
 
         /// <summary>
         /// Node Id
@@ -285,22 +185,18 @@ namespace Engine.Collections
         /// <summary>
         /// Children list
         /// </summary>
-        public PickingQuadTreeNode[] Children;
+        public PickingQuadTreeNode<T>[] Children;
         /// <summary>
-        /// Node vertices
+        /// Node items
         /// </summary>
-        internal VertexData[] Vertices;
-        /// <summary>
-        /// Node triangles
-        /// </summary>
-        internal Triangle[] Triangles;
+        internal T[] Items;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="quadTree">Quadtree</param>
         /// <param name="parent">Parent node</param>
-        public PickingQuadTreeNode(PickingQuadTree quadTree, PickingQuadTreeNode parent)
+        public PickingQuadTreeNode(PickingQuadTree<T> quadTree, PickingQuadTreeNode<T> parent)
         {
             this.QuadTree = quadTree;
             this.Parent = parent;
@@ -332,7 +228,7 @@ namespace Engine.Collections
         /// Searchs for the neighbor node at top position (from above)
         /// </summary>
         /// <returns>Returns the neighbor node at top position if exists.</returns>
-        private PickingQuadTreeNode FindNeighborNodeAtTop()
+        private PickingQuadTreeNode<T> FindNeighborNodeAtTop()
         {
             if (this.Parent != null)
             {
@@ -368,7 +264,7 @@ namespace Engine.Collections
         /// Searchs for the neighbor node at bottom position (from above)
         /// </summary>
         /// <returns>Returns the neighbor node at bottom position if exists.</returns>
-        private PickingQuadTreeNode FindNeighborNodeAtBottom()
+        private PickingQuadTreeNode<T> FindNeighborNodeAtBottom()
         {
             if (this.Parent != null)
             {
@@ -404,7 +300,7 @@ namespace Engine.Collections
         /// Searchs for the neighbor node at right position(from above)
         /// </summary>
         /// <returns>Returns the neighbor node at top position if exists.</returns>
-        private PickingQuadTreeNode FindNeighborNodeAtRight()
+        private PickingQuadTreeNode<T> FindNeighborNodeAtRight()
         {
             if (this.Parent != null)
             {
@@ -440,7 +336,7 @@ namespace Engine.Collections
         /// Searchs for the neighbor node at left position (from above)
         /// </summary>
         /// <returns>Returns the neighbor node at left position if exists.</returns>
-        private PickingQuadTreeNode FindNeighborNodeAtLeft()
+        private PickingQuadTreeNode<T> FindNeighborNodeAtLeft()
         {
             if (this.Parent != null)
             {
@@ -478,58 +374,58 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="position">Hit position</param>
-        /// <param name="triangle">Hit triangle</param>
+        /// <param name="item">Hit item</param>
         /// <returns>Returns true if picked position found</returns>
         /// <remarks>By default, result is constrained to front faces only</remarks>
-        public bool PickNearest(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public bool PickNearest(ref Ray ray, out Vector3 position, out T item)
         {
-            return this.PickNearest(ref ray, true, out position, out triangle);
+            return this.PickNearest(ref ray, true, out position, out item);
         }
         /// <summary>
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="facingOnly">Select only facing items</param>
         /// <param name="position">Hit position</param>
-        /// <param name="triangle">Hit triangle</param>
+        /// <param name="item">Hit item</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle)
+        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out T item)
         {
             float distance;
-            return this.PickNearest(ref ray, facingOnly, out position, out triangle, out distance);
+            return this.PickNearest(ref ray, facingOnly, out position, out item, out distance);
         }
         /// <summary>
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="facingOnly">Select only facing items</param>
         /// <param name="position">Hit position</param>
-        /// <param name="triangle">Hit triangle</param>
+        /// <param name="item">Hit item</param>
         /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
-            triangle = new Triangle();
+            item = default(T);
             distance = float.MaxValue;
 
             if (this.Children == null)
             {
-                if (this.Triangles != null && this.Triangles.Length > 0)
+                if (this.Items != null && this.Items.Length > 0)
                 {
                     #region Per bound test
 
                     float d;
                     if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
                     {
-                        #region Per triangle test
+                        #region Per item test
 
                         Vector3 pos;
-                        Triangle tri;
-                        if (Triangle.IntersectNearest(ref ray, this.Triangles, facingOnly, out pos, out tri, out d))
+                        T tri;
+                        if (Intersection.IntersectNearest(ref ray, this.Items, facingOnly, out pos, out tri, out d))
                         {
                             position = pos;
-                            triangle = tri;
+                            item = tri;
                             distance = d;
 
                             return true;
@@ -543,7 +439,7 @@ namespace Engine.Collections
             }
             else
             {
-                SortedDictionary<float, PickingQuadTreeNode> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode>();
+                SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
 
                 #region Find children contacts by distance to hit in bounding box
 
@@ -568,16 +464,16 @@ namespace Engine.Collections
                 {
                     bool intersect = false;
 
-                    #region Find closest triangle node by node, from closest to farthest
+                    #region Find closest item node by node, from closest to farthest
 
                     Vector3 bestHit = Vector3.Zero;
-                    Triangle bestTri = new Triangle();
+                    T bestTri = default(T);
                     float bestD = float.MaxValue;
 
                     foreach (var node in boxHitsByDistance.Values)
                     {
                         Vector3 thisHit;
-                        Triangle thisTri;
+                        T thisTri;
                         float thisD;
                         if (node.PickNearest(ref ray, facingOnly, out thisHit, out thisTri, out thisD))
                         {
@@ -596,7 +492,7 @@ namespace Engine.Collections
                     if (intersect)
                     {
                         position = bestHit;
-                        triangle = bestTri;
+                        item = bestTri;
                         distance = bestD;
                     }
 
@@ -613,58 +509,58 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="position">Hit position</param>
-        /// <param name="triangle">Hit triangle</param>
+        /// <param name="item">Hit item</param>
         /// <returns>Returns true if picked position found</returns>
         /// <remarks>By default, result is constrained to front faces only</remarks>
-        public bool PickFirst(ref Ray ray, out Vector3 position, out Triangle triangle)
+        public bool PickFirst(ref Ray ray, out Vector3 position, out T item)
         {
-            return this.PickFirst(ref ray, true, out position, out triangle);
+            return this.PickFirst(ref ray, true, out position, out item);
         }
         /// <summary>
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="facingOnly">Select only facing items</param>
         /// <param name="position">Hit position</param>
-        /// <param name="triangle">Hit triangle</param>
+        /// <param name="item">Hit item</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle)
+        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out T item)
         {
             float distance;
-            return this.PickFirst(ref ray, facingOnly, out position, out triangle, out distance);
+            return this.PickFirst(ref ray, facingOnly, out position, out item, out distance);
         }
         /// <summary>
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="facingOnly">Select only facing items</param>
         /// <param name="position">Hit position</param>
-        /// <param name="triangle">Hit triangle</param>
+        /// <param name="item">Hit item</param>
         /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
-            triangle = new Triangle();
+            item = default(T);
             distance = float.MaxValue;
 
             if (this.Children == null)
             {
-                if (this.Triangles != null && this.Triangles.Length > 0)
+                if (this.Items != null && this.Items.Length > 0)
                 {
                     #region Per bound test
 
                     float d;
                     if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
                     {
-                        #region Per triangle test
+                        #region Per item test
 
                         Vector3 pos;
-                        Triangle tri;
-                        if (Triangle.IntersectFirst(ref ray, this.Triangles, facingOnly, out pos, out tri, out d))
+                        T tri;
+                        if (Intersection.IntersectFirst(ref ray, this.Items, facingOnly, out pos, out tri, out d))
                         {
                             position = pos;
-                            triangle = tri;
+                            item = tri;
                             distance = d;
 
                             return true;
@@ -686,12 +582,12 @@ namespace Engine.Collections
                     if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
                     {
                         Vector3 thisHit;
-                        Triangle thisTri;
+                        T thisTri;
                         float thisD;
                         if (node.PickFirst(ref ray, facingOnly, out thisHit, out thisTri, out thisD))
                         {
                             position = thisHit;
-                            triangle = thisTri;
+                            item = thisTri;
                             distance = thisD;
 
                             return true;
@@ -709,59 +605,59 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="positions">Hit positions</param>
-        /// <param name="triangles">Hit triangles</param>
+        /// <param name="items">Hit items</param>
         /// <returns>Returns true if picked position found</returns>
         /// <remarks>By default, result is constrained to front faces only</remarks>
-        public bool PickAll(ref Ray ray, out Vector3[] positions, out Triangle[] triangles)
+        public bool PickAll(ref Ray ray, out Vector3[] positions, out T[] items)
         {
-            return this.PickAll(ref ray, true, out positions, out triangles);
+            return this.PickAll(ref ray, true, out positions, out items);
         }
         /// <summary>
         /// Pick all position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="facingOnly">Select only facing items</param>
         /// <param name="positions">Hit positions</param>
-        /// <param name="triangles">Hit triangles</param>
+        /// <param name="items">Hit items</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles)
+        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out T[] items)
         {
             float[] distances;
-            return this.PickAll(ref ray, facingOnly, out positions, out triangles, out distances);
+            return this.PickAll(ref ray, facingOnly, out positions, out items, out distances);
         }
         /// <summary>
         /// Pick all position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="facingOnly">Select only facing items</param>
         /// <param name="positions">Hit positions</param>
-        /// <param name="triangles">Hit triangles</param>
+        /// <param name="items">Hit items</param>
         /// <param name="distances">Distances to hits</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
         {
             positions = null;
-            triangles = null;
+            items = null;
             distances = null;
 
             if (this.Children == null)
             {
-                if (this.Triangles != null && this.Triangles.Length > 0)
+                if (this.Items != null && this.Items.Length > 0)
                 {
                     #region Per bound test
 
                     float d;
                     if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
                     {
-                        #region Per triangle test
+                        #region Per item test
 
                         Vector3[] pos;
-                        Triangle[] tri;
+                        T[] tri;
                         float[] ds;
-                        if (Triangle.IntersectAll(ref ray, this.Triangles, facingOnly, out pos, out tri, out ds))
+                        if (Intersection.IntersectAll(ref ray, this.Items, facingOnly, out pos, out tri, out ds))
                         {
                             positions = pos;
-                            triangles = tri;
+                            items = tri;
                             distances = ds;
 
                             return true;
@@ -780,7 +676,7 @@ namespace Engine.Collections
                 bool intersect = false;
 
                 List<Vector3> hits = new List<Vector3>();
-                List<Triangle> tris = new List<Triangle>();
+                List<T> tris = new List<T>();
                 List<float> dists = new List<float>();
 
                 foreach (var node in this.Children)
@@ -789,7 +685,7 @@ namespace Engine.Collections
                     if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
                     {
                         Vector3[] thisHits;
-                        Triangle[] thisTris;
+                        T[] thisTris;
                         float[] thisDs;
                         if (node.PickAll(ref ray, facingOnly, out thisHits, out thisTris, out thisDs))
                         {
@@ -811,7 +707,7 @@ namespace Engine.Collections
                 if (intersect)
                 {
                     positions = hits.ToArray();
-                    triangles = tris.ToArray();
+                    items = tris.ToArray();
                     distances = dists.ToArray();
                 }
 
@@ -886,9 +782,9 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
         /// <returns>Returns the tail nodes contained into the frustum</returns>
-        public PickingQuadTreeNode[] GetNodesInVolume(ref BoundingFrustum frustum)
+        public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingFrustum frustum)
         {
-            List<PickingQuadTreeNode> nodes = new List<PickingQuadTreeNode>();
+            List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
             if (this.Children == null)
             {
@@ -915,9 +811,9 @@ namespace Engine.Collections
         /// Gets all tail nodes
         /// </summary>
         /// <returns>Returns all tail nodes</returns>
-        public PickingQuadTreeNode[] GetTailNodes()
+        public PickingQuadTreeNode<T>[] GetTailNodes()
         {
-            List<PickingQuadTreeNode> nodes = new List<PickingQuadTreeNode>();
+            List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
             if (this.Children == null)
             {
@@ -942,7 +838,7 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="position">Position</param>
         /// <returns>Returns the tail node wich contains the specified position</returns>
-        public PickingQuadTreeNode GetNode(Vector3 position)
+        public PickingQuadTreeNode<T> GetNode(Vector3 position)
         {
             if (this.Children == null)
             {
@@ -975,12 +871,12 @@ namespace Engine.Collections
             if (this.Children == null)
             {
                 //Tail node
-                return string.Format("QuadTreeNode {0}; Depth {1}; Triangles {2}", this.Id, this.Level, this.Triangles.Length);
+                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Items {2}", this.Id, this.Level, this.Items.Length);
             }
             else
             {
                 //Node
-                return string.Format("QuadTreeNode {0}; Depth {1}; Childs {2}", this.Id, this.Level, this.Children.Length);
+                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Childs {2}", this.Id, this.Level, this.Children.Length);
             }
         }
     }

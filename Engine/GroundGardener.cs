@@ -46,7 +46,7 @@ namespace Engine
             /// <summary>
             /// Gets the node to wich this patch is currently assigned
             /// </summary>
-            public PickingQuadTreeNode CurrentNode { get; protected set; }
+            public PickingQuadTreeNode<Triangle> CurrentNode { get; protected set; }
             /// <summary>
             /// Foliage map channel
             /// </summary>
@@ -74,7 +74,7 @@ namespace Engine
             /// <param name="node">Node</param>
             /// <param name="map">Foliage map</param>
             /// <param name="description">Terrain vegetation description</param>
-            public void Plant(PickingQuadTreeNode node, FoliageMap map, FoliageMapChannel description)
+            public void Plant(PickingQuadTreeNode<Triangle> node, FoliageMap map, FoliageMapChannel description)
             {
                 if (!this.Planting)
                 {
@@ -95,7 +95,7 @@ namespace Engine
             /// <param name="map">Foliage map</param>
             /// <param name="description">Vegetation task</param>
             /// <returns>Returns generated vertex data</returns>
-            private static VertexBillboard[] PlantTask(PickingQuadTreeNode node, FoliageMap map, FoliageMapChannel description)
+            private static VertexBillboard[] PlantTask(PickingQuadTreeNode<Triangle> node, FoliageMap map, FoliageMapChannel description)
             {
                 List<VertexBillboard> vertexData = new List<VertexBillboard>(MAX);
 
@@ -366,7 +366,7 @@ namespace Engine
         /// <summary>
         /// Foliage patches list
         /// </summary>
-        private Dictionary<PickingQuadTreeNode, List<FoliagePatch>> foliagePatches = new Dictionary<PickingQuadTreeNode, List<FoliagePatch>>();
+        private Dictionary<PickingQuadTreeNode<Triangle>, List<FoliagePatch>> foliagePatches = new Dictionary<PickingQuadTreeNode<Triangle>, List<FoliagePatch>>();
         /// <summary>
         /// Foliage buffer list
         /// </summary>
@@ -403,6 +403,10 @@ namespace Engine
         /// Material
         /// </summary>
         private MeshMaterial material;
+        /// <summary>
+        /// Foliage visible sphere
+        /// </summary>
+        private BoundingSphere foliageSphere;
 
         /// <summary>
         /// Parent ground
@@ -445,6 +449,9 @@ namespace Engine
 
             if (description != null)
             {
+                //TODO: parametrize this
+                this.foliageSphere = new BoundingSphere(Vector3.Zero, 250);
+
                 //Material
                 this.material = new MeshMaterial()
                 {
@@ -522,7 +529,9 @@ namespace Engine
 
             if (this.ParentGround != null)
             {
-                var visibleNodes = this.ParentGround.GetFoliageNodes();
+                this.foliageSphere.Center = context.EyePosition;
+
+                var visibleNodes = this.ParentGround.GetFoliageNodes(context.Frustum, this.foliageSphere);
 
                 if (visibleNodes != null && visibleNodes.Length > 0)
                 {
@@ -620,18 +629,21 @@ namespace Engine
                     {
                         var nodes = this.foliagePatches.Keys.ToArray();
                         var notVisible = Array.FindAll(nodes, n => !Array.Exists(visibleNodes, v => v == n));
-                        Array.Sort(notVisible, (n1, n2) =>
+                        if (notVisible.Length > 0)
                         {
-                            float d1 = Vector3.DistanceSquared(n1.Center, context.EyePosition);
-                            float d2 = Vector3.DistanceSquared(n2.Center, context.EyePosition);
+                            Array.Sort(notVisible, (n1, n2) =>
+                            {
+                                float d1 = Vector3.DistanceSquared(n1.Center, context.EyePosition);
+                                float d2 = Vector3.DistanceSquared(n2.Center, context.EyePosition);
 
-                            return d2.CompareTo(d1);
-                        });
+                                return d2.CompareTo(d1);
+                            });
 
-                        int toDelete = this.foliagePatches.Keys.Count - MaxFoliagePatches;
-                        for (int i = 0; i < toDelete; i++)
-                        {
-                            this.foliagePatches.Remove(notVisible[i]);
+                            int toDelete = this.foliagePatches.Keys.Count - MaxFoliagePatches;
+                            for (int i = 0; i < toDelete; i++)
+                            {
+                                this.foliagePatches.Remove(notVisible[i]);
+                            }
                         }
                     }
 
@@ -647,7 +659,7 @@ namespace Engine
         {
             if (this.ParentGround != null)
             {
-                var visibleNodes = this.ParentGround.GetFoliageNodes();
+                var visibleNodes = this.ParentGround.GetFoliageNodes(context.Frustum, this.foliageSphere);
 
                 if (visibleNodes != null && visibleNodes.Length > 0)
                 {

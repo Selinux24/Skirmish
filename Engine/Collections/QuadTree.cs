@@ -2,33 +2,42 @@
 
 namespace Engine.Collections
 {
+    using Engine.Common;
+
     /// <summary>
     /// Quad tree
     /// </summary>
-    public class QuadTree
+    public class QuadTree<T> where T : IVertexList
     {
         /// <summary>
         /// Root node
         /// </summary>
-        public QuadTreeNode Root { get; private set; }
+        public QuadTreeNode<T> Root { get; private set; }
         /// <summary>
         /// Global bounding box
         /// </summary>
         public BoundingBox BoundingBox { get; private set; }
+        /// <summary>
+        /// Global bounding sphere
+        /// </summary>
+        public BoundingSphere BoundingSphere { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="bbox">Bounding box</param>
+        /// <param name="items">Partitioning items</param>
         /// <param name="maxDepth">Maximum depth</param>
-        public QuadTree(BoundingBox bbox, int maxDepth)
+        public QuadTree(T[] items, int maxDepth)
         {
-            this.BoundingBox = bbox;
+            BoundingBox bbox = GeometryUtil.CreateBoundingBox(items);
+            BoundingSphere bsph = GeometryUtil.CreateBoundingSphere(items);
 
-            this.Root = QuadTreeNode.CreatePartitions(
-                this,
-                null,
-                bbox,
+            this.BoundingBox = bbox;
+            this.BoundingSphere = bsph;
+
+            this.Root = QuadTreeNode<T>.CreatePartitions(
+                this, null,
+                bbox, items,
                 maxDepth,
                 0);
 
@@ -49,7 +58,7 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
         /// <returns>Returns the nodes contained into the frustum</returns>
-        public QuadTreeNode[] GetNodesInVolume(ref BoundingFrustum frustum)
+        public QuadTreeNode<T>[] GetNodesInVolume(ref BoundingFrustum frustum)
         {
             return this.Root.GetNodesInVolume(ref frustum);
         }
@@ -57,7 +66,7 @@ namespace Engine.Collections
         /// Gets all tail nodes
         /// </summary>
         /// <returns>Returns all tais nodel</returns>
-        public QuadTreeNode[] GetTailNodes()
+        public QuadTreeNode<T>[] GetTailNodes()
         {
             return this.Root.GetTailNodes();
         }
@@ -66,7 +75,7 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="position">Position</param>
         /// <returns>Returns the closest node to the specified position</returns>
-        public QuadTreeNode FindNode(Vector3 position)
+        public QuadTreeNode<T> FindNode(Vector3 position)
         {
             var node = this.Root.GetNode(position);
 

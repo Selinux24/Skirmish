@@ -71,7 +71,7 @@ namespace Engine
         }
         public static Line3D[] CreateWiredTriangle(Triangle triangle)
         {
-            return CreateWiredTriangle(triangle.GetCorners());
+            return CreateWiredTriangle(triangle.GetVertices());
         }
         public static Line3D[] CreateWiredTriangle(Vector3[] corners)
         {

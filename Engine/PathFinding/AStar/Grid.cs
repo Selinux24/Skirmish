@@ -108,8 +108,8 @@ namespace Engine.PathFinding.AStar
         {
             List<GridNode> result = new List<GridNode>();
 
-            BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetCorners());
-            Array.ForEach(triangles, tri => bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(tri.GetCorners())));
+            BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetVertices());
+            Array.ForEach(triangles, tri => bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(tri.GetVertices())));
 
             Dictionary<Vector2, GridCollisionInfo[]> dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
 
@@ -134,7 +134,7 @@ namespace Engine.PathFinding.AStar
                     Vector3[] pickedPoints;
                     Triangle[] pickedTriangles;
                     float[] pickedDistances;
-                    if (Triangle.IntersectAll(ref ray, triangles, true, out pickedPoints, out pickedTriangles, out pickedDistances))
+                    if (Intersection.IntersectAll(ref ray, triangles, true, out pickedPoints, out pickedTriangles, out pickedDistances))
                     {
                         info = new GridCollisionInfo[pickedPoints.Length];
 

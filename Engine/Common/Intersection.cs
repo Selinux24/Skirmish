@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.Common
 {
@@ -451,6 +452,141 @@ namespace Engine.Common
         private static float OP(Vector3 p1, Vector3 p2, Vector3 p3)
         {
             return ((p3.Z - p1.Z) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Z - p1.Z));
+        }
+
+        /// <summary>
+        /// Performs intersection test with ray and ray intersectable item list
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="items">Ray intersectable item list</param>
+        /// <param name="facingOnly">Select only items facing to ray origin</param>
+        /// <param name="position">Result picked position</param>
+        /// <param name="item">Result picked ray intersectable item</param>
+        /// <param name="distance">Result distance to picked position</param>
+        /// <returns>Returns first intersection if exists</returns>
+        public static bool IntersectFirst<T>(ref Ray ray, T[] items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
+        {
+            position = Vector3.Zero;
+            item = default(T);
+            distance = float.MaxValue;
+
+            for (int i = 0; i < items.Length; i++)
+            {
+                var cItem = items[i];
+
+                Vector3 pos;
+                float d;
+                if (cItem.Intersects(ref ray, facingOnly, out pos, out d))
+                {
+                    position = pos;
+                    item = cItem;
+                    distance = d;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Performs intersection test with ray and ray intersectable item list
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="items">Triangle list</param>
+        /// <param name="facingOnly">Select only items facing to ray origin</param>
+        /// <param name="position">Result picked position</param>
+        /// <param name="item">Result picked ray intersectable item</param>
+        /// <param name="distance">Result distance to picked position</param>
+        /// <returns>Returns nearest intersection if exists</returns>
+        public static bool IntersectNearest<T>(ref Ray ray, T[] items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
+        {
+            position = Vector3.Zero;
+            item = default(T);
+            distance = float.MaxValue;
+
+            Vector3[] pickedPositions;
+            T[] pickedTriangles;
+            float[] pickedDistances;
+            if (IntersectAll(ref ray, items, facingOnly, out pickedPositions, out pickedTriangles, out pickedDistances))
+            {
+                float distanceMin = float.MaxValue;
+
+                for (int i = 0; i < pickedPositions.Length; i++)
+                {
+                    float dist = pickedDistances[i];
+                    if (dist < distanceMin)
+                    {
+                        distanceMin = dist;
+                        position = pickedPositions[i];
+                        item = pickedTriangles[i];
+                        distance = pickedDistances[i];
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Performs intersection test with ray and ray intersectable item list
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="items">Triangle list</param>
+        /// <param name="facingOnly">Select only items facing to ray origin</param>
+        /// <param name="pickedPositions">Picked position list</param>
+        /// <param name="pickedItems">Picked ray intersectable item list</param>
+        /// <param name="pickedDistances">Distances to picked positions</param>
+        /// <returns>Returns all intersections if exists</returns>
+        public static bool IntersectAll<T>(ref Ray ray, T[] items, bool facingOnly, out Vector3[] pickedPositions, out T[] pickedItems, out float[] pickedDistances) where T : IRayIntersectable
+        {
+            SortedDictionary<float, Vector3> pickedPositionList = new SortedDictionary<float, Vector3>();
+            SortedDictionary<float, T> pickedTriangleList = new SortedDictionary<float, T>();
+            SortedDictionary<float, float> pickedDistancesList = new SortedDictionary<float, float>();
+
+            foreach (T t in items)
+            {
+                Vector3 pos;
+                float d;
+                if (t.Intersects(ref ray, facingOnly, out pos, out d))
+                {
+                    //Avoid duplicate picked positions
+                    if (!pickedPositionList.ContainsValue(pos))
+                    {
+                        float k = d;
+                        while (pickedPositionList.ContainsKey(k))
+                        {
+                            //Avoid duplicate distance keys
+                            k += 0.001f;
+                        }
+
+                        pickedPositionList.Add(k, pos);
+                        pickedTriangleList.Add(k, t);
+                        pickedDistancesList.Add(k, d);
+                    }
+                }
+            }
+
+            if (pickedPositionList.Values.Count > 0)
+            {
+                pickedPositions = new Vector3[pickedPositionList.Values.Count];
+                pickedItems = new T[pickedTriangleList.Values.Count];
+                pickedDistances = new float[pickedDistancesList.Values.Count];
+
+                pickedPositionList.Values.CopyTo(pickedPositions, 0);
+                pickedTriangleList.Values.CopyTo(pickedItems, 0);
+                pickedDistancesList.Values.CopyTo(pickedDistances, 0);
+
+                return true;
+            }
+            else
+            {
+                pickedPositions = null;
+                pickedItems = null;
+                pickedDistances = null;
+
+                return false;
+            }
         }
     }
 }
