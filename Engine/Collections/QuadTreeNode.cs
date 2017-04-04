@@ -36,14 +36,14 @@ namespace Engine.Collections
 
             if (treeDepth <= maxDepth)
             {
-                var nodeTs = Array.FindAll(items, i =>
+                var nodeItems = Array.FindAll(items, i =>
                 {
                     var tbox = BoundingBox.FromPoints(i.GetVertices());
 
                     return Intersection.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
                 });
 
-                if (nodeTs.Length > 0)
+                if (nodeItems.Length > 0)
                 {
                     var node = new QuadTreeNode<T>(quadTree, parent)
                     {
@@ -56,7 +56,7 @@ namespace Engine.Collections
                     if (haltByDepth)
                     {
                         node.Id = NodeCount++;
-                        node.Items = nodeTs;
+                        node.Items = nodeItems;
                     }
                     else
                     {
@@ -73,10 +73,10 @@ namespace Engine.Collections
                         //+0-1+0   +1+1+1   -->   cmc    MMM
                         BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
 
-                        QuadTreeNode<T> topLeftChild = CreatePartitions(quadTree, node, topLeftBox, items, maxDepth, treeDepth + 1);
-                        QuadTreeNode<T> topRightChild = CreatePartitions(quadTree, node, topRightBox, items, maxDepth, treeDepth + 1);
-                        QuadTreeNode<T> bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, items, maxDepth, treeDepth + 1);
-                        QuadTreeNode<T> bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, items, maxDepth, treeDepth + 1);
+                        var topLeftChild = CreatePartitions(quadTree, node, topLeftBox, nodeItems, maxDepth, treeDepth + 1);
+                        var topRightChild = CreatePartitions(quadTree, node, topRightBox, nodeItems, maxDepth, treeDepth + 1);
+                        var bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, nodeItems, maxDepth, treeDepth + 1);
+                        var bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, nodeItems, maxDepth, treeDepth + 1);
 
                         List<QuadTreeNode<T>> childList = new List<QuadTreeNode<T>>();
 

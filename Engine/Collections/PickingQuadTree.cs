@@ -26,19 +26,19 @@ namespace Engine.Collections
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="triangles">Partitioning triangles</param>
+        /// <param name="items">Partitioning items</param>
         /// <param name="maxDepth">Maximum depth</param>
-        public PickingQuadTree(T[] triangles, int maxDepth)
+        public PickingQuadTree(T[] items, int maxDepth)
         {
-            BoundingBox bbox = GeometryUtil.CreateBoundingBox(triangles);
-            BoundingSphere bsph = GeometryUtil.CreateBoundingSphere(triangles);
+            var bbox = GeometryUtil.CreateBoundingBox(items);
+            var bsph = GeometryUtil.CreateBoundingSphere(items);
 
             this.BoundingBox = bbox;
             this.BoundingSphere = bsph;
 
             this.Root = PickingQuadTreeNode<T>.CreatePartitions(
                 this, null,
-                bbox, triangles,
+                bbox, items,
                 maxDepth,
                 0);
 

@@ -29,8 +29,8 @@ namespace Engine.Collections
         /// <param name="maxDepth">Maximum depth</param>
         public QuadTree(T[] items, int maxDepth)
         {
-            BoundingBox bbox = GeometryUtil.CreateBoundingBox(items);
-            BoundingSphere bsph = GeometryUtil.CreateBoundingSphere(items);
+            var bbox = GeometryUtil.CreateBoundingBox(items);
+            var bsph = GeometryUtil.CreateBoundingSphere(items);
 
             this.BoundingBox = bbox;
             this.BoundingSphere = bsph;
