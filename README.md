@@ -18,6 +18,6 @@ There are several prototypes:
  - 7 Deferred: Deferred rendering tests
  - 8 Heightmap: Big scene with skyscattering component
  - 9 Animation: Animation controller tests
- - Z Game Logic: Turn base RPG game logic tests
+ - Z Game Logic: Turn based RPG game logic tests
  
  
