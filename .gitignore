@@ -192,6 +192,9 @@ Thumbs.db
 .nuget/
 *.cod
 
+#VS
+.vs/
+
 #Blender
 *.blend1
 /.vs/SharpDXTests/v15/Browse.VC.opendb
