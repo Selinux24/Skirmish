@@ -207,11 +207,11 @@ namespace Engine
         /// <summary>
         /// Back buffer format
         /// </summary>
-        protected Format BufferFormat = Texture2DFormats.R8G8B8A8_UNorm;
+        protected Format BufferFormat = BackBufferFormats.R8G8B8A8_UNorm;
         /// <summary>
         /// Depth buffer format
         /// </summary>
-        protected Format DepthFormat = BackBufferFormats.D24_UNorm_S8_UInt;
+        protected Format DepthFormat = DepthBufferFormats.D24_UNorm_S8_UInt;
 
         /// <summary>
         /// Graphics device
@@ -273,8 +273,8 @@ namespace Engine
         /// </summary>
         /// <param name="form">Game form</param>
         /// <param name="refreshRate">Refresh rate</param>
-        /// <param name="multiSampleCount">Multisample count</param>
-        public Graphics(EngineForm form, bool vsyncEnabled = false, int refreshRate = 0, int multiSampleCount = 0)
+        /// <param name="multiSampling">Enable multisampling</param>
+        public Graphics(EngineForm form, bool vsyncEnabled = false, int refreshRate = 0, bool multiSampling = false)
         {
             Adapter1 adapter = null;
             ModeDescription displayMode = this.FindModeDescription(
@@ -289,55 +289,52 @@ namespace Engine
             {
                 this.vsyncEnabled = vsyncEnabled && displayMode.RefreshRate != new Rational(0, 1);
 
-                using (Device tmpDevice = new Device(adapter))
+                if (multiSampling)
                 {
-                    int quality = tmpDevice.CheckMultisampleQualityLevels(this.BufferFormat, multiSampleCount);
-                    if (quality > 0)
+                    using (Device tmpDevice = new Device(adapter))
                     {
-                        this.msCount = multiSampleCount;
-                        this.msQuality = quality - 1;
+                        this.CheckMultisample(tmpDevice, out this.msCount, out this.msQuality);
                     }
                 }
 
-                DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
+                this.DeviceDescription = string.Format("{0}", adapter.Description1.Description);
+            }
+
+            DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
 
 #if DEBUG
-                creationFlags |= DeviceCreationFlags.Debug;
+            creationFlags |= DeviceCreationFlags.Debug;
 #endif
 
-                Device device = null;
-                Device.CreateWithSwapChain(
-                    adapter,
-                    creationFlags,
-                    new[] 
-                    {
-                        FeatureLevel.Level_11_0,
-                        FeatureLevel.Level_10_1,
-                        FeatureLevel.Level_10_0,
-                        FeatureLevel.Level_9_3,
-                        FeatureLevel.Level_9_2, 
-                        FeatureLevel.Level_9_1,
-                    },
-                    new SwapChainDescription()
-                    {
-                        BufferCount = 1,
-                        ModeDescription = displayMode,
-                        Usage = Usage.RenderTargetOutput,
-                        OutputHandle = form.Handle,
-                        SampleDescription = new SampleDescription(this.msCount, this.msQuality),
-                        IsWindowed = !form.IsFullscreen,
-                        SwapEffect = SwapEffect.Discard,
-                        Flags = SwapChainFlags.None,
-                    },
-                    out device,
-                    out this.swapChain);
+            Device device = null;
+            Device.CreateWithSwapChain(
+                DriverType.Hardware,
+                creationFlags,
+                new[]
+                {
+                    FeatureLevel.Level_11_0,
+                    FeatureLevel.Level_10_1,
+                    FeatureLevel.Level_10_0,
+                    FeatureLevel.Level_9_3,
+                    FeatureLevel.Level_9_2,
+                    FeatureLevel.Level_9_1,
+                },
+                new SwapChainDescription()
+                {
+                    BufferCount = 1,
+                    ModeDescription = displayMode,
+                    Usage = Usage.RenderTargetOutput,
+                    OutputHandle = form.Handle,
+                    SampleDescription = new SampleDescription(this.msCount, this.msQuality),
+                    IsWindowed = !form.IsFullscreen,
+                    SwapEffect = SwapEffect.Discard,
+                    Flags = SwapChainFlags.None,
+                },
+                out device,
+                out this.swapChain);
 
-                this.Device = device;
-                this.DeviceContext = device.ImmediateContext;
-                this.DeviceDescription = string.Format(
-                    "{0}",
-                    adapter.Description1.Description);
-            }
+            this.Device = device;
+            this.DeviceContext = device.ImmediateContext;
 
             this.PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -424,7 +421,7 @@ namespace Engine
                     Texture2D = new DepthStencilViewDescription.Texture2DResource()
                     {
                         MipSlice = 0
-                    }
+                    },
                 });
 
             #endregion
@@ -1330,6 +1327,31 @@ namespace Engine
         }
 
         /// <summary>
+        /// Checks the multi-sample maximum quality
+        /// </summary>
+        /// <param name="tmpDevice">Temporary device</param>
+        /// <param name="sampleCount">Sample count</param>
+        /// <param name="maxQualityLevel">Maximum quality level</param>
+        private void CheckMultisample(Device tmpDevice, out int sampleCount, out int maxQualityLevel)
+        {
+            sampleCount = 1;
+            maxQualityLevel = 0;
+            for (int count = 1; count <= Device.MultisampleCountMaximum; count++)
+            {
+                int maxQuality = tmpDevice.CheckMultisampleQualityLevels(this.BufferFormat, count);
+                if (maxQuality > 0)
+                {
+                    maxQuality--;
+                }
+
+                if (maxQuality > 0)
+                {
+                    sampleCount = count;
+                    maxQualityLevel = maxQuality;
+                }
+            }
+        }
+        /// <summary>
         /// Finds mode description
         /// </summary>
         /// <param name="format">Format</param>
@@ -1353,18 +1375,38 @@ namespace Engine
                     {
                         try
                         {
-                            ModeDescription[] displayModeList = adapterOutput.GetDisplayModeList(
+                            var displayModeList = adapterOutput.GetDisplayModeList(
                                 format,
                                 DisplayModeEnumerationFlags.Interlaced);
 
-                            ModeDescription[] displayModes = Array.FindAll(displayModeList, d =>
-                                d.Width == width &&
-                                d.Height == height &&
-                                (refreshRate == 0 || (d.RefreshRate.Numerator / d.RefreshRate.Denominator) + 1 == refreshRate));
-
-                            if (displayModes.Length > 0)
+                            displayModeList = Array.FindAll(displayModeList, d => d.Width == width && d.Height == height);
+                            if (displayModeList.Length > 0)
                             {
-                                return displayModes[0];
+                                if (refreshRate > 0)
+                                {
+                                    Array.Sort(displayModeList, (d1, d2) =>
+                                    {
+                                        float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
+                                        float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
+
+                                        f1 = Math.Abs(refreshRate - f1);
+                                        f2 = Math.Abs(refreshRate - f2);
+
+                                        return f1.CompareTo(f2);
+                                    });
+                                }
+                                else
+                                {
+                                    Array.Sort(displayModeList, (d1, d2) =>
+                                    {
+                                        float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
+                                        float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
+
+                                        return f2.CompareTo(f1);
+                                    });
+                                }
+
+                                return displayModeList[0];
                             }
                         }
                         catch

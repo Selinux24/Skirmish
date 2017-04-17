@@ -132,8 +132,8 @@ namespace Engine
         /// <param name="screenHeight">Window height</param>
         /// <param name="fullScreen">Full screen window</param>
         /// <param name="refreshRate">Refresh rate</param>
-        /// <param name="multiSampleCount">Multi-sample count</param>
-        public Game(string name, bool fullScreen = true, int screenWidth = 0, int screenHeight = 0, bool vsyncEnabled = true, int refreshRate = 0, int multiSampleCount = 0)
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        public Game(string name, bool fullScreen = true, int screenWidth = 0, int screenHeight = 0, bool vsyncEnabled = true, int refreshRate = 0, bool multiSampling = false)
         {
             this.Name = name;
 
@@ -167,7 +167,7 @@ namespace Engine
 
             this.Input = new Input(this.Form);
 
-            this.Graphics = new Graphics(this.Form, vsyncEnabled, refreshRate, multiSampleCount);
+            this.Graphics = new Graphics(this.Form, vsyncEnabled, refreshRate, multiSampling);
 
             DrawerPool.Initialize(this.Graphics.Device);
         }

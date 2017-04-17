@@ -419,13 +419,13 @@
     <Compile Include="Animation\SkinningData.cs" />
     <Compile Include="Common\VertexPosition.cs" />
     <Compile Include="Triangle.cs" />
-    <Compile Include="Helpers\BackBufferFormats.cs" />
+    <Compile Include="Helpers\DepthBufferFormats.cs" />
     <Compile Include="Manipulator3D.cs" />
     <Compile Include="Common\VertexBillboard.cs" />
     <Compile Include="Common\VertexInstancingData.cs" />
     <Compile Include="IVertexData.cs" />
     <Compile Include="Effects\BufferMaterials.cs" />
-    <Compile Include="Helpers\Texture2DFormats.cs" />
+    <Compile Include="Helpers\BackBufferFormats.cs" />
     <Compile Include="Common\VertexPositionNormalTexture.cs" />
     <Compile Include="Effects\BufferLights.cs" />
     <Compile Include="Common\VertexPositionNormalColor.cs" />
