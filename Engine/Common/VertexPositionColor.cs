@@ -24,6 +24,42 @@ namespace Engine.Common
                 new InputElement("COLOR", 0, SharpDX.DXGI.Format.R32G32B32A32_Float, 12, slot, InputClassification.PerVertexData, 0),
             };
         }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="color">Color for all vertices</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static VertexPositionColor[] Generate(Vector3[] vertices, Color4 color)
+        {
+            VertexPositionColor[] res = new VertexPositionColor[vertices.Length];
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                res[i] = new VertexPositionColor() { Position = vertices[i], Color = color };
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="colors">Colors</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static VertexPositionColor[] Generate(Vector3[] vertices, Color4[] colors)
+        {
+            if (vertices.Length != colors.Length) throw new ArgumentException("Vertices and colors must have the same length");
+
+            VertexPositionColor[] res = new VertexPositionColor[vertices.Length];
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                res[i] = new VertexPositionColor() { Position = vertices[i], Color = colors[i] };
+            }
+
+            return res;
+        }
 
         /// <summary>
         /// Position

@@ -163,7 +163,7 @@ namespace Engine
                 this.drawingQuadTree = new QuadTree<VertexData>(vertices, LODLevels);
 
                 //Populate nodes dictionary
-                var nodes = this.drawingQuadTree.GetTailNodes();
+                var nodes = this.drawingQuadTree.GetLeafNodes();
                 foreach (var node in nodes)
                 {
                     var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null, Matrix.Identity);

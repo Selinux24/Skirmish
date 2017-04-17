@@ -92,11 +92,14 @@
     <StartupObject>Resources.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="Blender\Buildings\Dungeon\Base.blend" />
+    <None Include="Blender\Buildings\Dungeon\Room1.blend" />
     <None Include="Blender\Buildings\Obelisk\diffus.dds" />
     <None Include="Blender\Buildings\Obelisk\normal.dds" />
     <None Include="Blender\Buildings\Obelisk\specular.dds" />
     <None Include="Blender\Buildings\Garage\concrete.jpg" />
     <None Include="Blender\Furniture\Lamps\concrete.jpg" />
+    <None Include="Blender\Buildings\Dungeon\BaseMap.png" />
     <Content Include="Blender\Buildings\Helipod\helipod.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -136,6 +139,9 @@
     <None Include="Blender\Vehicles\Jagdpanther\trbotCL.jpg" />
     <None Include="Blender\Vehicles\Jagdpanther\turbakBM.jpg" />
     <None Include="Blender\Vehicles\Jagdpanther\turbakCL.jpg" />
+    <Content Include="Collada\Buildings\Dungeon\BaseMap.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Collada\Buildings\Helipod\concrete.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -329,6 +335,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Furniture\StreetLamp\StreetLamp.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Collada\Buildings\Dungeon\Room1.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>

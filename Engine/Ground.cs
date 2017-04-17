@@ -288,7 +288,7 @@ namespace Engine
         {
             List<Triangle> tris = new List<Triangle>();
 
-            var nodes = this.groundPickingQuadtree.GetTailNodes();
+            var nodes = this.groundPickingQuadtree.GetLeafNodes();
             foreach (var node in nodes)
             {
                 if (node.Items != null)

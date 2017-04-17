@@ -216,7 +216,7 @@ namespace Engine
             {
                 List<MeshMaterial> matList = new List<MeshMaterial>();
 
-                var nodes = this.groundPickingQuadtree.GetTailNodes();
+                var nodes = this.groundPickingQuadtree.GetLeafNodes();
 
                 foreach (var node in nodes)
                 {
@@ -264,7 +264,7 @@ namespace Engine
 
             this.groundPickingQuadtree = new PickingQuadTree<Triangle>(content.GetTriangles(), description.Quadtree.MaximumDepth);
 
-            var nodes = this.groundPickingQuadtree.GetTailNodes();
+            var nodes = this.groundPickingQuadtree.GetLeafNodes();
 
             foreach (var node in nodes)
             {
@@ -317,7 +317,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            var nodes = this.Cull ? this.visibleNodes : this.groundPickingQuadtree.GetTailNodes();
+            var nodes = this.Cull ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
 
             if (nodes != null && nodes.Length > 0)
             {

@@ -142,12 +142,12 @@ namespace Engine.Collections
             return this.Root.GetNodesInVolume(ref frustum);
         }
         /// <summary>
-        /// Gets all tail nodes
+        /// Gets all leaf nodes
         /// </summary>
-        /// <returns>Returns all tais nodel</returns>
-        public PickingQuadTreeNode<T>[] GetTailNodes()
+        /// <returns>Returns all leaf nodel</returns>
+        public PickingQuadTreeNode<T>[] GetLeafNodes()
         {
-            return this.Root.GetTailNodes();
+            return this.Root.GetLeafNodes();
         }
         /// <summary>
         /// Gets the closest node to the specified position
@@ -161,7 +161,7 @@ namespace Engine.Collections
             if (node == null)
             {
                 //Look for the closest node
-                var tailNodes = this.GetTailNodes();
+                var tailNodes = this.GetLeafNodes();
 
                 float dist = float.MaxValue;
                 for (int i = 0; i < tailNodes.Length; i++)

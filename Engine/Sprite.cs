@@ -156,6 +156,10 @@ namespace Engine
         /// </summary>
         public Color4 Color { get; set; }
         /// <summary>
+        /// Use textures flag
+        /// </summary>
+        public bool Textured { get; private set; }
+        /// <summary>
         /// Manipulator
         /// </summary>
         public Manipulator2D Manipulator { get; private set; }
@@ -179,9 +183,14 @@ namespace Engine
         public Sprite(Game game, BufferManager bufferManager, SpriteDescription description)
             : base(game, bufferManager, description)
         {
-            this.InitializeBuffers();
+            this.Textured = description.Textures != null && description.Textures.Length > 0;
 
-            this.InitializeTexture(description.ContentPath, description.Textures);
+            this.InitializeBuffers(this.Textured);
+
+            if (this.Textured)
+            {
+                this.InitializeTexture(description.ContentPath, description.Textures);
+            }
 
             this.renderWidth = game.Form.RenderWidth.NextPair();
             this.renderHeight = game.Form.RenderHeight.NextPair();
@@ -193,7 +202,7 @@ namespace Engine
             this.Height = this.sourceHeight;
             this.FitScreen = description.FitScreen;
             this.TextureIndex = 0;
-            this.Color = Color4.White;
+            this.Color = description.Color;
 
             this.Manipulator = new Manipulator2D();
         }
@@ -229,7 +238,7 @@ namespace Engine
                 }
 
                 var effect = DrawerPool.EffectDefaultSprite;
-                var technique = effect.GetTechnique(VertexTypes.PositionTexture, false, DrawingStages.Drawing, context.DrawerMode);
+                var technique = effect.GetTechnique(this.Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor, false, DrawingStages.Drawing, context.DrawerMode);
 
                 this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
@@ -258,16 +267,23 @@ namespace Engine
         /// <summary>
         /// Initialize buffers
         /// </summary>
-        private void InitializeBuffers()
+        private void InitializeBuffers(bool textured)
         {
             Vector3[] vData;
             Vector2[] uvs;
             uint[] iData;
             GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, out vData, out uvs, out iData);
+            if (textured)
+            {
+                var vertices = VertexPositionTexture.Generate(vData, uvs);
+                this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, false, 0);
+            }
+            else
+            {
+                var vertices = VertexPositionColor.Generate(vData, Color4.White);
+                this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, false, 0);
+            }
 
-            var vertices = VertexPositionTexture.Generate(vData, uvs);
-
-            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, false, 0);
             this.indexBuffer = this.BufferManager.Add(this.Name, iData, false);
         }
         /// <summary>

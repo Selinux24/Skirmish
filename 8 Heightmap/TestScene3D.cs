@@ -40,6 +40,7 @@ namespace HeightmapTest
         private TextDrawer stats = null;
         private TextDrawer help = null;
         private TextDrawer help2 = null;
+        private Sprite backPannel = null;
 
         private Cursor cursor;
         private LensFlare lensFlare = null;
@@ -120,6 +121,16 @@ namespace HeightmapTest
             this.stats.Position = new Vector2(5, this.load.Top + this.load.Height + 3);
             this.help.Position = new Vector2(5, this.stats.Top + this.stats.Height + 3);
             this.help2.Position = new Vector2(5, this.help.Top + this.help.Height + 3);
+
+            var spDesc = new SpriteDescription()
+            {
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.help2.Top + this.help2.Height + 3,
+                Color = new Color4(0, 0, 0, 0.55f),
+            };
+
+            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
 
             #endregion
 
@@ -310,7 +321,7 @@ namespace HeightmapTest
                     Name = "Terrain",
                     Quadtree = new GroundDescription.QuadtreeDescription()
                     {
-                        MaximumDepth = 5,
+                        MaximumDepth = 8,
                     },
                     //PathFinder = new GroundDescription.PathFinderDescription()
                     //{
@@ -1061,7 +1072,7 @@ namespace HeightmapTest
                 this.TimeOfDay,
                 this.Lights.KeyLight.Brightness);
 
-            this.help2.Text = this.Game.RuntimeText;
+            this.help2.Text = string.Format("Picks: {0:000}; Average time: {1:00.0000000}", Counters.PicksPerFrame, Counters.PickingAverageTime);
         }
 
         public override void Draw(GameTime gameTime)

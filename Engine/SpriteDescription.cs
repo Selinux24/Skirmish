@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine
 {
     using Engine.Common;
@@ -8,6 +9,10 @@ namespace Engine
     /// </summary>
     public class SpriteDescription : DrawableDescription
     {
+        /// <summary>
+        /// Sprite color
+        /// </summary>
+        public Color4 Color;
         /// <summary>
         /// Sprite textures
         /// </summary>

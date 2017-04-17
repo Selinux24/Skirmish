@@ -808,10 +808,10 @@ namespace Engine.Collections
             return nodes.ToArray();
         }
         /// <summary>
-        /// Gets all tail nodes
+        /// Gets all leaf nodes
         /// </summary>
-        /// <returns>Returns all tail nodes</returns>
-        public PickingQuadTreeNode<T>[] GetTailNodes()
+        /// <returns>Returns all leaf nodes</returns>
+        public PickingQuadTreeNode<T>[] GetLeafNodes()
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
@@ -823,7 +823,7 @@ namespace Engine.Collections
             {
                 for (int i = 0; i < this.Children.Length; i++)
                 {
-                    var childNodes = this.Children[i].GetTailNodes();
+                    var childNodes = this.Children[i].GetLeafNodes();
                     if (childNodes.Length > 0)
                     {
                         nodes.AddRange(childNodes);
