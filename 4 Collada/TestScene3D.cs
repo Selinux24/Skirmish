@@ -8,7 +8,9 @@ namespace Collada
         private TextDrawer title = null;
         private TextDrawer fps = null;
         private TextDrawer picks = null;
-        private ModelInstanced dungeon = null;
+        private ModelInstanced room1 = null;
+        private ModelInstanced room2 = null;
+        private ModelInstanced corridor1 = null;
 
         public TestScene3D(Game game)
             : base(game)
@@ -32,12 +34,30 @@ namespace Collada
             this.picks.Text = null;
             this.picks.Position = new Vector2(0, 48);
 
-            this.dungeon = this.AddInstancingModel("Resources",
-                "dungeon.xml",
+            this.room1 = this.AddInstancingModel("Resources",
+                "Room1.xml",
                 new ModelInstancedDescription()
                 {
-                    Name = "Torchs",
-                    Instances = 9,
+                    Name = "room1",
+                    Instances = 2,
+                    CastShadow = true,
+                });
+
+            this.room2 = this.AddInstancingModel("Resources",
+                "Room2.xml",
+                new ModelInstancedDescription()
+                {
+                    Name = "room2",
+                    Instances = 6,
+                    CastShadow = true,
+                });
+
+            this.corridor1 = this.AddInstancingModel("Resources",
+                "Corridor1.xml",
+                new ModelInstancedDescription()
+                {
+                    Name = "corridor1",
+                    Instances = 8,
                     CastShadow = true,
                 });
 
@@ -57,28 +77,43 @@ namespace Collada
         {
             GameEnvironment.Background = Color.DarkGray;
 
-            BoundingSphere sph = this.dungeon.Instances[0].GetBoundingSphere();
+            BoundingSphere sph = this.room1.Instances[0].GetBoundingSphere();
             sph.Radius *= 5;
             this.SceneVolume = sph;
         }
         private void InitializeDungeon()
         {
-            BoundingBox bbox = this.dungeon.Instances[0].GetBoundingBox();
+            BoundingBox bbox = this.room1.Instances[0].GetBoundingBox();
 
             float x = bbox.GetX();
             float z = bbox.GetZ();
 
-            int index = 0;
+            this.room1.Instances[0].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
+            this.room1.Instances[1].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
 
-            this.dungeon.Instances[index++].Manipulator.SetPosition(new Vector3(0, 0, 0));
-            this.dungeon.Instances[index++].Manipulator.SetPosition(new Vector3(-x, 0, 0));
-            this.dungeon.Instances[index++].Manipulator.SetPosition(new Vector3(-2 * x, 0, 0));
-            this.dungeon.Instances[index++].Manipulator.SetPosition(new Vector3(x, 0, 0));
-            this.dungeon.Instances[index++].Manipulator.SetPosition(new Vector3(2 * x, 0, 0));
-            this.dungeon.Instances[index++].Manipulator.SetPosition(new Vector3(0, 0, -z));
-            this.dungeon.Instances[index++].Manipulator.SetPosition(new Vector3(0, 0, -2 * z));
-            this.dungeon.Instances[index++].Manipulator.SetPosition(new Vector3(0, 0, z));
-            this.dungeon.Instances[index++].Manipulator.SetPosition(new Vector3(0, 0, 2 * z));
+            this.room2.Instances[0].Manipulator.SetPosition(new Vector3(-4 * x, 0, +0 * z));
+            this.room2.Instances[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+            this.room2.Instances[1].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
+            this.room2.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.room2.Instances[2].Manipulator.SetPosition(new Vector3(+0 * x, 0, -2 * z));
+            this.room2.Instances[2].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.room2.Instances[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +2 * z));
+            this.room2.Instances[4].Manipulator.SetPosition(new Vector3(-2 * x, 0, -2 * z));
+            this.room2.Instances[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.room2.Instances[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +2 * z));
+
+            this.corridor1.Instances[0].Manipulator.SetPosition(new Vector3(-1 * x, 0, 0));
+            this.corridor1.Instances[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1.Instances[1].Manipulator.SetPosition(new Vector3(-3 * x, 0, 0));
+            this.corridor1.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1.Instances[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, 0));
+            this.corridor1.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1.Instances[3].Manipulator.SetPosition(new Vector3(+2 * x, 0, 0));
+            this.corridor1.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1.Instances[4].Manipulator.SetPosition(new Vector3(+0 * x, 0, -1 * z));
+            this.corridor1.Instances[5].Manipulator.SetPosition(new Vector3(+0 * x, 0, +1 * z));
+            this.corridor1.Instances[6].Manipulator.SetPosition(new Vector3(-2 * x, 0, -1 * z));
+            this.corridor1.Instances[7].Manipulator.SetPosition(new Vector3(-2 * x, 0, +1 * z));
         }
 
         public override void Update(GameTime gameTime)
