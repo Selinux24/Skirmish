@@ -370,19 +370,19 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Movement delta
+        /// Movement delta (20.5f)
         /// </summary>
         public float MovementDelta = 20.5f;
         /// <summary>
-        /// Slow movement delta
+        /// Slow movement delta (1.0f)
         /// </summary>
         public float SlowMovementDelta = 1.0f;
         /// <summary>
-        /// Rotation delta
+        /// Rotation delta (0.25f)
         /// </summary>
         public float RotationDelta = 0.25f;
         /// <summary>
-        /// Slow rotation delta
+        /// Slow rotation delta (0.10f)
         /// </summary>
         public float SlowRotationDelta = 0.10f;
         /// <summary>

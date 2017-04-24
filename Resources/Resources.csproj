@@ -94,6 +94,7 @@
   <ItemGroup>
     <None Include="Blender\Buildings\Dungeon\Base.blend" />
     <None Include="Blender\Buildings\Dungeon\Corridor1.blend" />
+    <None Include="Blender\Buildings\Dungeon\Dungeon.blend" />
     <None Include="Blender\Buildings\Dungeon\Room1.blend" />
     <None Include="Blender\Buildings\Dungeon\Room2.blend" />
     <None Include="Blender\Buildings\Obelisk\diffus.dds" />
@@ -348,6 +349,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Buildings\Dungeon\Room2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Buildings\Dungeon\Dungeon.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Tests\AniCube\aniCube.dae" />

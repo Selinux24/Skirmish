@@ -20,7 +20,7 @@ namespace Collada
                 cl.LockMouse = true;
 #endif
 
-                cl.AddScene(new TestScene3D(cl) { Active = true, });
+                cl.AddScene(new SceneryDungeon(cl) { Active = true, });
 
                 cl.Run();
             }
