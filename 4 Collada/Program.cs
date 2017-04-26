@@ -7,9 +7,9 @@ namespace Collada
         static void Main()
         {
 #if DEBUG
-            using (Game cl = new Game("4 Collada", false, 800, 450, true))
+            using (Game cl = new Game("4 Collada", false, 800, 450, true, 0, 4))
 #else
-            using (Game cl = new Game("4 Collada"))
+            using (Game cl = new Game("4 Collada", true, 0, 0, true, 0, 4))
 #endif
             {
 #if DEBUG

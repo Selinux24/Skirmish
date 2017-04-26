@@ -30,6 +30,14 @@ namespace Engine
         private SpriteTextureChannelsEnum channels = SpriteTextureChannelsEnum.None;
 
         /// <summary>
+        /// Sprite initial width
+        /// </summary>
+        public float Width { get; private set; }
+        /// <summary>
+        /// Sprite initial height
+        /// </summary>
+        public float Height { get; private set; }
+        /// <summary>
         /// Manipulator
         /// </summary>
         public Manipulator2D Manipulator = new Manipulator2D();
@@ -104,6 +112,9 @@ namespace Engine
                 out proj);
 
             this.viewProjection = view * proj;
+
+            this.Width = description.Width;
+            this.Height = description.Height;
         }
         /// <summary>
         /// Dispose objects

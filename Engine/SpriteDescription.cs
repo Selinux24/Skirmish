@@ -12,7 +12,7 @@ namespace Engine
         /// <summary>
         /// Sprite color
         /// </summary>
-        public Color4 Color;
+        public Color4 Color = Color4.White;
         /// <summary>
         /// Sprite textures
         /// </summary>

@@ -93,6 +93,7 @@ namespace Engine
             float y = this.minimapArea.Maximum.Y - this.minimapArea.Minimum.Y;
             float z = this.minimapArea.Maximum.Z - this.minimapArea.Minimum.Z;
 
+            float aspect = this.minimapBox.Height / this.minimapBox.Width;
             float near = 0.1f;
 
             Vector3 eyePos = new Vector3(0, y + near, 0);
@@ -105,7 +106,7 @@ namespace Engine
                 Vector3.UnitZ);
 
             Matrix proj = Matrix.OrthoLH(
-                x,
+                x / aspect,
                 z,
                 near,
                 y + near);
@@ -144,7 +145,7 @@ namespace Engine
                 this.drawContext.GameTime = context.GameTime;
 
                 this.Game.Graphics.SetViewport(this.viewport);
-                this.Game.Graphics.SetRenderTarget(this.renderTarget, true, Color.Silver, null, false);
+                this.Game.Graphics.SetRenderTarget(this.renderTarget, true, Color.Black, null, false);
 
                 for (int i = 0; i < this.Drawables.Length; i++)
                 {

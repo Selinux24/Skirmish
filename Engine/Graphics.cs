@@ -274,7 +274,7 @@ namespace Engine
         /// <param name="form">Game form</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multisampling</param>
-        public Graphics(EngineForm form, bool vsyncEnabled = false, int refreshRate = 0, bool multiSampling = false)
+        public Graphics(EngineForm form, bool vsyncEnabled = false, int refreshRate = 0, int multiSampling = 0)
         {
             Adapter1 adapter = null;
             ModeDescription displayMode = this.FindModeDescription(
@@ -289,11 +289,11 @@ namespace Engine
             {
                 this.vsyncEnabled = vsyncEnabled && displayMode.RefreshRate != new Rational(0, 1);
 
-                if (multiSampling)
+                if (multiSampling != 0)
                 {
                     using (Device tmpDevice = new Device(adapter))
                     {
-                        this.CheckMultisample(tmpDevice, out this.msCount, out this.msQuality);
+                        this.CheckMultisample(tmpDevice, multiSampling, out this.msCount, out this.msQuality);
                     }
                 }
 
@@ -417,7 +417,7 @@ namespace Engine
                 new DepthStencilViewDescription()
                 {
                     Format = this.DepthFormat,
-                    Dimension = DepthStencilViewDimension.Texture2D,
+                    Dimension = this.msCount == 1 ? DepthStencilViewDimension.Texture2D : DepthStencilViewDimension.Texture2DMultisampled,
                     Texture2D = new DepthStencilViewDescription.Texture2DResource()
                     {
                         MipSlice = 0
@@ -1327,6 +1327,24 @@ namespace Engine
         }
 
         /// <summary>
+        /// Checks the multi-sample specified count
+        /// </summary>
+        /// <param name="tmpDevice">Temporary device</param>
+        /// <param name="multiSampling">Multi-sample count</param>
+        /// <param name="sampleCount">Sample count</param>
+        /// <param name="maxQualityLevel">Maximum quality level</param>
+        private void CheckMultisample(Device tmpDevice, int multiSampling, out int sampleCount, out int maxQualityLevel)
+        {
+            sampleCount = 1;
+            maxQualityLevel = 0;
+            int maxQuality = tmpDevice.CheckMultisampleQualityLevels(this.BufferFormat, multiSampling);
+            if (maxQuality > 0)
+            {
+                sampleCount = multiSampling;
+                maxQualityLevel = maxQuality - 1;
+            }
+        }
+        /// <summary>
         /// Checks the multi-sample maximum quality
         /// </summary>
         /// <param name="tmpDevice">Temporary device</param>
@@ -1341,13 +1359,8 @@ namespace Engine
                 int maxQuality = tmpDevice.CheckMultisampleQualityLevels(this.BufferFormat, count);
                 if (maxQuality > 0)
                 {
-                    maxQuality--;
-                }
-
-                if (maxQuality > 0)
-                {
                     sampleCount = count;
-                    maxQualityLevel = maxQuality;
+                    maxQualityLevel = maxQuality - 1;
                 }
             }
         }

@@ -166,6 +166,7 @@ namespace GameLogic
             {
                 ContentPath = "Resources",
                 Textures = new[] { "HUD.png" },
+                Color = new Color4(1f, 1f, 1f, 0.75f),
             };
             this.sprHUD = this.AddBackgroud(bkDesc);
 

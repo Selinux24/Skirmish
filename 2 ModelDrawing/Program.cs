@@ -7,9 +7,9 @@ namespace ModelDrawing
         static void Main()
         {
 #if DEBUG
-            using (Game cl = new Game("2 ModelDrawing", false, 800, 450))
+            using (Game cl = new Game("2 ModelDrawing", false, 800, 450, true, 0, 4))
 #else
-            using (Game cl = new Game("2 ModelDrawing"))
+            using (Game cl = new Game("2 ModelDrawing", true, 0, 0, true, 0, 4))
 #endif
             {
 #if DEBUG

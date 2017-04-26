@@ -10,9 +10,9 @@ namespace GameLogic
         static void Main()
         {
 #if DEBUG
-            using (game = new Game("Game Logic", false, 800, 600))
+            using (game = new Game("Game Logic", false, 800, 600, true, 0, 4))
 #else
-            using (game = new Game("Game Logic"))
+            using (game = new Game("Game Logic", true, 0, 0, true, 0, 4))
 #endif
             {
                 game.VisibleMouse = true;

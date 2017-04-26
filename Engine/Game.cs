@@ -133,7 +133,7 @@ namespace Engine
         /// <param name="fullScreen">Full screen window</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, bool fullScreen = true, int screenWidth = 0, int screenHeight = 0, bool vsyncEnabled = true, int refreshRate = 0, bool multiSampling = false)
+        public Game(string name, bool fullScreen = true, int screenWidth = 0, int screenHeight = 0, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0)
         {
             this.Name = name;
 
