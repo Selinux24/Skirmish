@@ -72,11 +72,51 @@ namespace Engine
         /// <summary>
         /// Picking test per frame
         /// </summary>
-        public static int PicksPerFrame = 0;
+        public static int PicksPerFrame { get; private set; }
+        /// <summary>
+        /// Total picking time cost per frame
+        /// </summary>
+        public static float PickingTotalTimePerFrame { get; private set; }
         /// <summary>
         /// Average picking time cost
         /// </summary>
-        public static float PickingAverageTime = 0f;
+        public static float PickingAverageTime { get; private set; }
+        /// <summary>
+        /// Box volume tests per frame
+        /// </summary>
+        public static float VolumeBoxTestPerFrame { get; private set; }
+        /// <summary>
+        /// Total box volume tests time cost
+        /// </summary>
+        public static float VolumeBoxTestTotalTimePerFrame { get; private set; }
+        /// <summary>
+        /// Average box volume tests time cost
+        /// </summary>
+        public static float VolumeBoxTestAverageTime { get; private set; }
+        /// <summary>
+        /// Sphere volume tests per frame
+        /// </summary>
+        public static float VolumeSphereTestPerFrame { get; private set; }
+        /// <summary>
+        /// Total sphere volume tests time cost
+        /// </summary>
+        public static float VolumeSphereTestTotalTimePerFrame { get; private set; }
+        /// <summary>
+        /// Average sphere volume tests time cost
+        /// </summary>
+        public static float VolumeSphereTestAverageTime { get; private set; }
+        /// <summary>
+        /// Frustum volume tests per frame
+        /// </summary>
+        public static float VolumeFrustumTestPerFrame { get; private set; }
+        /// <summary>
+        /// Total frustum volume tests time cost
+        /// </summary>
+        public static float VolumeFrustumTestTotalTimePerFrame { get; private set; }
+        /// <summary>
+        /// Average frustum volume tests time cost
+        /// </summary>
+        public static float VolumeFrustumTestAverageTime { get; private set; }
         /// <summary>
         /// Rasterizer state changes count per frame
         /// </summary>
@@ -226,7 +266,17 @@ namespace Engine
             TextureUpdates = 0;
 
             PicksPerFrame = 0;
+            PickingTotalTimePerFrame = 0f;
             PickingAverageTime = 0f;
+            VolumeBoxTestPerFrame = 0;
+            VolumeBoxTestTotalTimePerFrame = 0f;
+            VolumeBoxTestAverageTime = 0f;
+            VolumeSphereTestPerFrame = 0;
+            VolumeSphereTestTotalTimePerFrame = 0f;
+            VolumeSphereTestAverageTime = 0f;
+            VolumeFrustumTestPerFrame = 0;
+            VolumeFrustumTestTotalTimePerFrame = 0f;
+            VolumeFrustumTestAverageTime = 0f;
 
             RasterizerStateChanges = 0;
             BlendStateChanges = 0;
@@ -265,7 +315,17 @@ namespace Engine
             TextureUpdates = 0;
 
             PicksPerFrame = 0;
+            PickingTotalTimePerFrame = 0f;
             PickingAverageTime = 0f;
+            VolumeBoxTestPerFrame = 0;
+            VolumeBoxTestTotalTimePerFrame = 0f;
+            VolumeBoxTestAverageTime = 0f;
+            VolumeSphereTestPerFrame = 0;
+            VolumeSphereTestTotalTimePerFrame = 0f;
+            VolumeSphereTestAverageTime = 0f;
+            VolumeFrustumTestPerFrame = 0;
+            VolumeFrustumTestTotalTimePerFrame = 0f;
+            VolumeFrustumTestAverageTime = 0f;
 
             RasterizerStateChanges = 0;
             BlendStateChanges = 0;
@@ -372,6 +432,34 @@ namespace Engine
             }
 
             c.Add(name, usage, binding, sizeInBytes, length);
+        }
+
+        public static void AddPick(float delta)
+        {
+            PicksPerFrame++;
+            PickingTotalTimePerFrame += delta;
+            PickingAverageTime = PickingTotalTimePerFrame / PicksPerFrame;
+        }
+
+        public static void AddVolumeFrustumTest(float delta)
+        {
+            VolumeFrustumTestPerFrame++;
+            VolumeFrustumTestTotalTimePerFrame += delta;
+            VolumeFrustumTestAverageTime = VolumeFrustumTestTotalTimePerFrame / VolumeFrustumTestPerFrame;
+        }
+
+        public static void AddVolumeBoxTest(float delta)
+        {
+            VolumeBoxTestPerFrame++;
+            VolumeBoxTestTotalTimePerFrame += delta;
+            VolumeBoxTestAverageTime = VolumeBoxTestTotalTimePerFrame / VolumeBoxTestPerFrame;
+        }
+
+        public static void AddVolumeSphereTest(float delta)
+        {
+            VolumeSphereTestPerFrame++;
+            VolumeSphereTestTotalTimePerFrame += delta;
+            VolumeSphereTestAverageTime = VolumeSphereTestTotalTimePerFrame / VolumeSphereTestPerFrame;
         }
     }
 }

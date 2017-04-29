@@ -983,10 +983,10 @@ namespace Engine
         /// <returns>Returns a node list</returns>
         public override PickingQuadTreeNode<Triangle>[] GetFoliageNodes(BoundingFrustum frustum, BoundingSphere sph)
         {
-            var visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref frustum);
+            var visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref sph);
             if (visibleNodes != null && visibleNodes.Length > 0)
             {
-                return Array.FindAll(visibleNodes, n => sph.Contains(ref n.BoundingBox) != ContainmentType.Disjoint);
+                return Array.FindAll(visibleNodes, n => frustum.Contains(ref n.BoundingBox) != ContainmentType.Disjoint);
             }
 
             return null;

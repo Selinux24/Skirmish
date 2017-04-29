@@ -127,7 +127,7 @@ namespace HeightmapTest
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.help2.Top + this.help2.Height + 3,
-                Color = new Color4(0, 0, 0, 0.55f),
+                Color = new Color4(0, 0, 0, 0.75f),
             };
 
             this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
@@ -768,8 +768,8 @@ namespace HeightmapTest
 
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
-            this.Camera.Position = new Vector3(12, 8, 7);
-            this.Camera.Interest = new Vector3(0, 7, 0);
+            this.Camera.Position = new Vector3(24, 12, 14);
+            this.Camera.Interest = new Vector3(0, 10, 0);
             //this.Camera.MovementDelta *= 10f;
 
             this.skydom.RayleighScattering *= 0.8f;
@@ -1072,7 +1072,9 @@ namespace HeightmapTest
                 this.TimeOfDay,
                 this.Lights.KeyLight.Brightness);
 
-            this.help2.Text = string.Format("Picks: {0:000}; Average time: {1:00.0000000}", Counters.PicksPerFrame, Counters.PickingAverageTime);
+            this.help2.Text = string.Format("Picks: {0:000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}", 
+                Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
+                Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime);
         }
 
         public override void Draw(GameTime gameTime)

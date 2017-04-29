@@ -65,10 +65,7 @@ namespace Engine.Collections
             {
                 w.Stop();
 
-                float time = ((Counters.PicksPerFrame * Counters.PickingAverageTime) + (float)w.Elapsed.TotalSeconds);
-
-                Counters.PicksPerFrame++;
-                Counters.PickingAverageTime = time / Counters.PicksPerFrame;
+                Counters.AddPick((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>
@@ -91,10 +88,7 @@ namespace Engine.Collections
             {
                 w.Stop();
 
-                float time = ((Counters.PicksPerFrame * Counters.PickingAverageTime) + (float)w.Elapsed.TotalSeconds);
-
-                Counters.PicksPerFrame++;
-                Counters.PickingAverageTime = time / Counters.PicksPerFrame;
+                Counters.AddPick((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>
@@ -117,10 +111,7 @@ namespace Engine.Collections
             {
                 w.Stop();
 
-                float time = ((Counters.PicksPerFrame * Counters.PickingAverageTime) + (float)w.Elapsed.TotalSeconds);
-
-                Counters.PicksPerFrame++;
-                Counters.PickingAverageTime = time / Counters.PicksPerFrame;
+                Counters.AddPick((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>
@@ -139,7 +130,55 @@ namespace Engine.Collections
         /// <returns>Returns the nodes contained into the frustum</returns>
         public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingFrustum frustum)
         {
-            return this.Root.GetNodesInVolume(ref frustum);
+            Stopwatch w = Stopwatch.StartNew();
+            try
+            {
+                return this.Root.GetNodesInVolume(ref frustum);
+            }
+            finally
+            {
+                w.Stop();
+
+                Counters.AddVolumeFrustumTest((float)w.Elapsed.TotalSeconds);
+            }
+        }
+        /// <summary>
+        /// Gets the nodes contained into the specified bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the nodes contained into the bounding box</returns>
+        public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingBox bbox)
+        {
+            Stopwatch w = Stopwatch.StartNew();
+            try
+            {
+                return this.Root.GetNodesInVolume(ref bbox);
+            }
+            finally
+            {
+                w.Stop();
+
+                Counters.AddVolumeBoxTest((float)w.Elapsed.TotalSeconds);
+            }
+        }
+        /// <summary>
+        /// Gets the nodes contained into the specified bounding sphere
+        /// </summary>
+        /// <param name="sphere">Bounding sphere</param>
+        /// <returns>Returns the nodes contained into the bounding sphere</returns>
+        public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingSphere sphere)
+        {
+            Stopwatch w = Stopwatch.StartNew();
+            try
+            {
+                return this.Root.GetNodesInVolume(ref sphere);
+            }
+            finally
+            {
+                w.Stop();
+
+                Counters.AddVolumeSphereTest((float)w.Elapsed.TotalSeconds);
+            }
         }
         /// <summary>
         /// Gets all leaf nodes
@@ -161,16 +200,16 @@ namespace Engine.Collections
             if (node == null)
             {
                 //Look for the closest node
-                var tailNodes = this.GetLeafNodes();
+                var leafNodes = this.GetLeafNodes();
 
                 float dist = float.MaxValue;
-                for (int i = 0; i < tailNodes.Length; i++)
+                for (int i = 0; i < leafNodes.Length; i++)
                 {
-                    float d = Vector3.DistanceSquared(position, tailNodes[i].Center);
+                    float d = Vector3.DistanceSquared(position, leafNodes[i].Center);
                     if (d < dist)
                     {
                         dist = d;
-                        node = tailNodes[i];
+                        node = leafNodes[i];
                     }
                 }
             }
