@@ -8,7 +8,7 @@ using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine
 {
-    using Engine.Collections;
+    using Engine.Collections.Generic;
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
@@ -973,23 +973,6 @@ namespace Engine
             }
 
             return nodes;
-        }
-
-        /// <summary>
-        /// Gets the node list suitable for foliage planting
-        /// </summary>
-        /// <param name="frustum">Camera frustum</param>
-        /// <param name="sph">Foliagle bounding sphere</param>
-        /// <returns>Returns a node list</returns>
-        public override PickingQuadTreeNode<Triangle>[] GetFoliageNodes(BoundingFrustum frustum, BoundingSphere sph)
-        {
-            var visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref sph);
-            if (visibleNodes != null && visibleNodes.Length > 0)
-            {
-                return Array.FindAll(visibleNodes, n => frustum.Contains(ref n.BoundingBox) != ContainmentType.Disjoint);
-            }
-
-            return null;
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System.Diagnostics;
 
-namespace Engine.Collections
+namespace Engine.Collections.Generic
 {
     using Engine.Common;
 

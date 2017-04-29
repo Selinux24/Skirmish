@@ -31,11 +31,6 @@ namespace Engine
             public const int MAX = 1024 * 8;
 
             /// <summary>
-            /// Foliage populating flag
-            /// </summary>
-            protected bool Planting = false;
-
-            /// <summary>
             /// Foliage populated flag
             /// </summary>
             public bool Planted = false;
@@ -46,11 +41,15 @@ namespace Engine
             /// <summary>
             /// Gets the node to wich this patch is currently assigned
             /// </summary>
-            public PickingQuadTreeNode<Triangle> CurrentNode { get; protected set; }
+            public QuadTreeNode CurrentNode { get; protected set; }
             /// <summary>
             /// Foliage map channel
             /// </summary>
             public int Channel { get; protected set; }
+            /// <summary>
+            /// Foliage populating flag
+            /// </summary>
+            public bool Planting { get; private set; }
 
             /// <summary>
             /// Constructor
@@ -71,10 +70,11 @@ namespace Engine
             /// <summary>
             /// Launchs foliage population asynchronous task
             /// </summary>
-            /// <param name="node">Node</param>
+            /// <param name="ground">Ground</param>
+            /// <param name="node">Foliage Node</param>
             /// <param name="map">Foliage map</param>
             /// <param name="description">Terrain vegetation description</param>
-            public void Plant(PickingQuadTreeNode<Triangle> node, FoliageMap map, FoliageMapChannel description)
+            public void Plant(Ground ground, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
             {
                 if (!this.Planting)
                 {
@@ -83,27 +83,32 @@ namespace Engine
                     this.Channel = description.Index;
                     this.Planting = true;
 
-                    var t = Task.Factory.StartNew<VertexBillboard[]>(() => PlantTask(node, map, description), TaskCreationOptions.PreferFairness);
+                    var t = Task.Factory.StartNew<VertexBillboard[]>(() => PlantTask(ground, node, map, description), TaskCreationOptions.PreferFairness);
 
-                    t.ContinueWith(task => PlantThreadCompleted(task.Result));
+                    t.ContinueWith(task =>
+                    {
+                        PlantThreadCompleted(task.Result);
+                    });
                 }
             }
             /// <summary>
             /// Asynchronous planting task
             /// </summary>
+            /// <param name="ground">Ground</param>
             /// <param name="node">Node to process</param>
             /// <param name="map">Foliage map</param>
             /// <param name="description">Vegetation task</param>
             /// <returns>Returns generated vertex data</returns>
-            private static VertexBillboard[] PlantTask(PickingQuadTreeNode<Triangle> node, FoliageMap map, FoliageMapChannel description)
+            private static VertexBillboard[] PlantTask(Ground ground, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
             {
                 List<VertexBillboard> vertexData = new List<VertexBillboard>(MAX);
 
                 if (node != null)
                 {
-                    var root = node.QuadTree;
-                    Vector2 min = new Vector2(root.BoundingBox.Minimum.X, root.BoundingBox.Minimum.Z);
-                    Vector2 max = new Vector2(root.BoundingBox.Maximum.X, root.BoundingBox.Maximum.Z);
+                    BoundingBox gbbox = ground.GetBoundingBox();
+
+                    Vector2 min = new Vector2(gbbox.Minimum.X, gbbox.Minimum.Z);
+                    Vector2 max = new Vector2(gbbox.Maximum.X, gbbox.Maximum.Z);
 
                     Random rnd = new Random(description.Seed);
                     BoundingBox bbox = node.BoundingBox;
@@ -112,48 +117,54 @@ namespace Engine
                     //Number of points
                     while (count > 0)
                     {
-                        Vector3 pos = new Vector3(
-                            rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
-                            bbox.Maximum.Y + 1f,
-                            rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
-
-                        bool plant = false;
-                        if (map != null)
+                        try
                         {
-                            Color4 c = map.GetRelative(pos, min, max);
+                            Vector3 pos = new Vector3(
+                                rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
+                                bbox.Maximum.Y + 1f,
+                                rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
 
-                            if (c[description.Index] > 0)
+                            bool plant = false;
+                            if (map != null)
                             {
-                                plant = rnd.NextFloat(0, 1) < (c[description.Index]);
-                            }
-                        }
-                        else
-                        {
-                            plant = true;
-                        }
+                                Color4 c = map.GetRelative(pos, min, max);
 
-                        if (plant)
-                        {
-                            Ray ray = new Ray(pos, Vector3.Down);
-
-                            Vector3 intersectionPoint;
-                            Triangle t;
-                            if (node.PickFirst(ref ray, out intersectionPoint, out t))
-                            {
-                                if (t.Normal.Y > 0.5f)
+                                if (c[description.Index] > 0)
                                 {
-                                    vertexData.Add(new VertexBillboard()
+                                    plant = rnd.NextFloat(0, 1) < (c[description.Index]);
+                                }
+                            }
+                            else
+                            {
+                                plant = true;
+                            }
+
+                            if (plant)
+                            {
+                                Ray ray = new Ray(pos, Vector3.Down);
+
+                                Vector3 intersectionPoint;
+                                Triangle t;
+                                float d;
+                                if (ground.PickFirstGround(ref ray, true, out intersectionPoint, out t, out d))
+                                {
+                                    if (t.Normal.Y > 0.5f)
                                     {
-                                        Position = intersectionPoint,
-                                        Size = new Vector2(
-                                            rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                                            rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
-                                    });
+                                        vertexData.Add(new VertexBillboard()
+                                        {
+                                            Position = intersectionPoint,
+                                            Size = new Vector2(
+                                                rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
+                                                rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
+                                        });
+                                    }
                                 }
                             }
                         }
-
-                        count--;
+                        finally
+                        {
+                            count--;
+                        }
                     }
                 }
 
@@ -366,7 +377,7 @@ namespace Engine
         /// <summary>
         /// Foliage patches list
         /// </summary>
-        private Dictionary<PickingQuadTreeNode<Triangle>, List<FoliagePatch>> foliagePatches = new Dictionary<PickingQuadTreeNode<Triangle>, List<FoliagePatch>>();
+        private Dictionary<QuadTreeNode, List<FoliagePatch>> foliagePatches = new Dictionary<QuadTreeNode, List<FoliagePatch>>();
         /// <summary>
         /// Foliage buffer list
         /// </summary>
@@ -407,7 +418,19 @@ namespace Engine
         /// Foliage visible sphere
         /// </summary>
         private BoundingSphere foliageSphere;
-
+        /// <summary>
+        /// Foliage node size
+        /// </summary>
+        private float foliageNodeSize;
+        /// <summary>
+        /// Foliage quadtree
+        /// </summary>
+        private QuadTree foliageQuadtree;
+        /// <summary>
+        /// Last visible node collection
+        /// </summary>
+        private QuadTreeNode[] visibleNodes;
+        
         /// <summary>
         /// Parent ground
         /// </summary>
@@ -422,6 +445,10 @@ namespace Engine
                 return new[] { this.material };
             }
         }
+        /// <summary>
+        /// Current active planting tasks
+        /// </summary>
+        public int PlantingTasks { get; private set; }
 
         /// <summary>
         /// Wind direction
@@ -449,8 +476,8 @@ namespace Engine
 
             if (description != null)
             {
-                //TODO: parametrize this
-                this.foliageSphere = new BoundingSphere(Vector3.Zero, 250);
+                this.foliageSphere = new BoundingSphere(Vector3.Zero, description.VisibleRadius);
+                this.foliageNodeSize = description.NodeSize;
 
                 //Material
                 this.material = new MeshMaterial()
@@ -529,12 +556,36 @@ namespace Engine
 
             if (this.ParentGround != null)
             {
+                if (this.foliageQuadtree == null)
+                {
+                    BoundingBox bbox = this.ParentGround.GetBoundingBox();
+
+                    float x = bbox.GetX();
+                    float z = bbox.GetZ();
+
+                    float max = x < z ? z : x;
+
+                    int levels = Math.Max(1, (int)(max / this.foliageNodeSize));
+                    levels = Math.Min(6, levels);
+
+                    this.foliageQuadtree = new QuadTree(bbox, levels);
+                }
+
                 this.foliageSphere.Center = context.EyePosition;
 
-                var visibleNodes = this.ParentGround.GetFoliageNodes(context.Frustum, this.foliageSphere);
+                this.visibleNodes = this.GetFoliageNodes(context.Frustum, this.foliageSphere);
 
-                if (visibleNodes != null && visibleNodes.Length > 0)
+                if (this.visibleNodes != null && this.visibleNodes.Length > 0)
                 {
+                    //Sort fartest first
+                    Array.Sort(this.visibleNodes, (f1, f2) =>
+                    {
+                        float d1 = Vector3.DistanceSquared(f1.Center, context.EyePosition);
+                        float d2 = Vector3.DistanceSquared(f2.Center, context.EyePosition);
+
+                        return -d1.CompareTo(d2);
+                    });
+
                     #region Assign foliage patches
 
                     /*
@@ -549,7 +600,7 @@ namespace Engine
 
                     int count = this.foliageMapChannels.Length;
 
-                    foreach (var node in visibleNodes)
+                    foreach (var node in this.visibleNodes)
                     {
                         if (!this.foliagePatches.ContainsKey(node))
                         {
@@ -569,7 +620,7 @@ namespace Engine
 
                             if (!fPatch.Planted)
                             {
-                                fPatch.Plant(node, this.foliageMap, this.foliageMapChannels[i]);
+                                fPatch.Plant(this.ParentGround, node, this.foliageMap, this.foliageMapChannels[i]);
                             }
                             else
                             {
@@ -601,7 +652,7 @@ namespace Engine
 
                         var freeBuffers = this.foliageBuffers.FindAll(b =>
                             (b.CurrentPatch == null) ||
-                            (b.CurrentPatch != null && !Array.Exists(visibleNodes, n => n == b.CurrentPatch.CurrentNode)));
+                            (b.CurrentPatch != null && !Array.Exists(this.visibleNodes, n => n == b.CurrentPatch.CurrentNode)));
 
                         if (freeBuffers.Count > 0)
                         {
@@ -628,7 +679,7 @@ namespace Engine
                     if (this.foliagePatches.Keys.Count > MaxFoliagePatches)
                     {
                         var nodes = this.foliagePatches.Keys.ToArray();
-                        var notVisible = Array.FindAll(nodes, n => !Array.Exists(visibleNodes, v => v == n));
+                        var notVisible = Array.FindAll(nodes, n => !Array.Exists(this.visibleNodes, v => v == n));
                         if (notVisible.Length > 0)
                         {
                             Array.Sort(notVisible, (n1, n2) =>
@@ -650,6 +701,13 @@ namespace Engine
                     #endregion
                 }
             }
+
+            this.PlantingTasks = 0;
+
+            foreach (var q in this.foliagePatches)
+            {
+                this.PlantingTasks += q.Value.FindAll(f => f.Planting == true).Count;
+            }
         }
         /// <summary>
         /// Draws the gardener
@@ -659,20 +717,9 @@ namespace Engine
         {
             if (this.ParentGround != null)
             {
-                var visibleNodes = this.ParentGround.GetFoliageNodes(context.Frustum, this.foliageSphere);
-
-                if (visibleNodes != null && visibleNodes.Length > 0)
+                if (this.visibleNodes != null && this.visibleNodes.Length > 0)
                 {
-                    //Sort fartest first
-                    Array.Sort(visibleNodes, (f1, f2) =>
-                    {
-                        float d1 = Vector3.DistanceSquared(f1.Center, context.EyePosition);
-                        float d2 = Vector3.DistanceSquared(f2.Center, context.EyePosition);
-
-                        return -d1.CompareTo(d2);
-                    });
-
-                    foreach (var item in visibleNodes)
+                    foreach (var item in this.visibleNodes)
                     {
                         var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch != null && b.CurrentPatch.CurrentNode == item);
                         if (buffers.Count > 0)
@@ -794,6 +841,23 @@ namespace Engine
         {
             this.WindDirection = direction;
             this.WindStrength = strength;
+        }
+
+        /// <summary>
+        /// Gets the node list suitable for foliage planting
+        /// </summary>
+        /// <param name="frustum">Camera frustum</param>
+        /// <param name="sph">Foliagle bounding sphere</param>
+        /// <returns>Returns a node list</returns>
+        private QuadTreeNode[] GetFoliageNodes(BoundingFrustum frustum, BoundingSphere sph)
+        {
+            var visibleNodes = this.foliageQuadtree.GetNodesInVolume(ref sph);
+            if (visibleNodes != null && visibleNodes.Length > 0)
+            {
+                return Array.FindAll(visibleNodes, n => frustum.Contains(ref n.BoundingBox) != ContainmentType.Disjoint);
+            }
+
+            return null;
         }
     }
 }

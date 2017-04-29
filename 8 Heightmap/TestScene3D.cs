@@ -321,7 +321,7 @@ namespace HeightmapTest
                     Name = "Terrain",
                     Quadtree = new GroundDescription.QuadtreeDescription()
                     {
-                        MaximumDepth = 4,
+                        MaximumDepth = 5,
                     },
                     //PathFinder = new GroundDescription.PathFinderDescription()
                     //{
@@ -761,11 +761,6 @@ namespace HeightmapTest
 
             this.SceneVolume = this.terrain.GetBoundingSphere();
 
-            GameEnvironment.LODDistanceHigh = 25f;
-            GameEnvironment.LODDistanceMedium = 100f;
-            GameEnvironment.LODDistanceLow = 250f;
-            GameEnvironment.LODDistanceMinimum = 500f;
-
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
             this.Camera.Position = new Vector3(24, 12, 14);
@@ -1072,9 +1067,10 @@ namespace HeightmapTest
                 this.TimeOfDay,
                 this.Lights.KeyLight.Brightness);
 
-            this.help2.Text = string.Format("Picks: {0:000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}", 
+            this.help2.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}", 
                 Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
-                Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime);
+                Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime,
+                this.gardener.PlantingTasks + this.gardener2.PlantingTasks);
         }
 
         public override void Draw(GameTime gameTime)

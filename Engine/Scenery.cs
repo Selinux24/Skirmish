@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Collections;
+    using Engine.Collections.Generic;
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
@@ -415,17 +415,6 @@ namespace Engine
             }
 
             return nodes;
-        }
-
-        /// <summary>
-        /// Gets the node list suitable for foliage planting
-        /// </summary>
-        /// <param name="frustum">Camera frustum</param>
-        /// <param name="sph">Foliagle bounding sphere</param>
-        /// <returns>Returns a node list</returns>
-        public override PickingQuadTreeNode<Triangle>[] GetFoliageNodes(BoundingFrustum frustum, BoundingSphere sph)
-        {
-            return this.visibleNodes;
         }
     }
 }

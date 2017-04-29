@@ -147,6 +147,10 @@
     <Compile Include="AnimationClipDescription.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
+    <Compile Include="Collections\Generic\PickingQuadTree.cs" />
+    <Compile Include="Collections\Generic\PickingQuadTreeNode.cs" />
+    <Compile Include="Collections\Generic\QuadTree.cs" />
+    <Compile Include="Collections\Generic\QuadTreeNode.cs" />
     <Compile Include="Common\Batcher.cs" />
     <Compile Include="Common\BufferDescriptor.cs" />
     <Compile Include="Common\BufferManager.cs" />
@@ -198,8 +202,6 @@
     <Compile Include="Camera.cs" />
     <Compile Include="CameraModes.cs" />
     <Compile Include="CameraTranslations.cs" />
-    <Compile Include="Collections\PickingQuadTree.cs" />
-    <Compile Include="Collections\PickingQuadTreeNode.cs" />
     <Compile Include="Collections\PriorityDictionary.cs" />
     <Compile Include="Collections\QuadTree.cs">
       <SubType>Code</SubType>

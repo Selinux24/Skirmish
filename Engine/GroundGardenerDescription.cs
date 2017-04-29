@@ -63,6 +63,14 @@ namespace Engine
         /// </summary>
         public string VegetationMap = null;
         /// <summary>
+        /// Visible radius
+        /// </summary>
+        public float VisibleRadius = 200f;
+        /// <summary>
+        /// Node size
+        /// </summary>
+        public float NodeSize = 640f;
+        /// <summary>
         /// Material
         /// </summary>
         public MaterialDescription Material = new MaterialDescription();

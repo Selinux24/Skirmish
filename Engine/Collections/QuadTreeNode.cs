@@ -4,12 +4,10 @@ using System.Collections.Generic;
 
 namespace Engine.Collections
 {
-    using Engine.Common;
-
     /// <summary>
     /// Quadtree node
     /// </summary>
-    public class QuadTreeNode<T> where T : IVertexList
+    public class QuadTreeNode
     {
         /// <summary>
         /// Static node count
@@ -26,9 +24,9 @@ namespace Engine.Collections
         /// <param name="maxDepth">Maximum depth</param>
         /// <param name="treeDepth">Current depth</param>
         /// <returns>Returns new node</returns>
-        public static QuadTreeNode<T> CreatePartitions(
-            QuadTree<T> quadTree, QuadTreeNode<T> parent,
-            BoundingBox bbox, T[] items,
+        public static QuadTreeNode CreatePartitions(
+            QuadTree quadTree, QuadTreeNode parent,
+            BoundingBox bbox,
             int maxDepth,
             int treeDepth)
         {
@@ -36,67 +34,56 @@ namespace Engine.Collections
 
             if (treeDepth <= maxDepth)
             {
-                var nodeItems = Array.FindAll(items, i =>
+                var node = new QuadTreeNode(quadTree, parent)
                 {
-                    var tbox = BoundingBox.FromPoints(i.GetVertices());
+                    Id = -1,
+                    Level = treeDepth,
+                    BoundingBox = bbox,
+                };
 
-                    return Intersection.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
-                });
-
-                if (nodeItems.Length > 0)
+                bool haltByDepth = treeDepth == maxDepth;
+                if (haltByDepth)
                 {
-                    var node = new QuadTreeNode<T>(quadTree, parent)
-                    {
-                        Id = -1,
-                        Level = treeDepth,
-                        BoundingBox = bbox,
-                    };
-
-                    bool haltByDepth = treeDepth == maxDepth;
-                    if (haltByDepth)
-                    {
-                        node.Id = NodeCount++;
-                        node.Items = nodeItems;
-                    }
-                    else
-                    {
-                        Vector3 M = bbox.Maximum;
-                        Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
-                        Vector3 m = bbox.Minimum;
-
-                        //-1-1-1   +0+1+0   -->   mmm    cMc
-                        BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-                        //-1-1+0   +0+1+1   -->   mmc    cMM
-                        BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
-                        //+0-1-1   +1+1+0   -->   cmm    MMc
-                        BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
-                        //+0-1+0   +1+1+1   -->   cmc    MMM
-                        BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
-
-                        var topLeftChild = CreatePartitions(quadTree, node, topLeftBox, nodeItems, maxDepth, treeDepth + 1);
-                        var topRightChild = CreatePartitions(quadTree, node, topRightBox, nodeItems, maxDepth, treeDepth + 1);
-                        var bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, nodeItems, maxDepth, treeDepth + 1);
-                        var bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, nodeItems, maxDepth, treeDepth + 1);
-
-                        List<QuadTreeNode<T>> childList = new List<QuadTreeNode<T>>();
-
-                        if (topLeftChild != null) childList.Add(topLeftChild);
-                        if (topRightChild != null) childList.Add(topRightChild);
-                        if (bottomLeftChild != null) childList.Add(bottomLeftChild);
-                        if (bottomRightChild != null) childList.Add(bottomRightChild);
-
-                        if (childList.Count > 0)
-                        {
-                            node.Children = childList.ToArray();
-                            node.TopLeftChild = topLeftChild;
-                            node.TopRightChild = topRightChild;
-                            node.BottomLeftChild = bottomLeftChild;
-                            node.BottomRightChild = bottomRightChild;
-                        }
-                    }
-
-                    return node;
+                    node.Id = NodeCount++;
                 }
+                else
+                {
+                    Vector3 M = bbox.Maximum;
+                    Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
+                    Vector3 m = bbox.Minimum;
+
+                    //-1-1-1   +0+1+0   -->   mmm    cMc
+                    BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+                    //-1-1+0   +0+1+1   -->   mmc    cMM
+                    BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+                    //+0-1-1   +1+1+0   -->   cmm    MMc
+                    BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+                    //+0-1+0   +1+1+1   -->   cmc    MMM
+                    BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+
+                    var topLeftChild = CreatePartitions(quadTree, node, topLeftBox, maxDepth, treeDepth + 1);
+                    var topRightChild = CreatePartitions(quadTree, node, topRightBox, maxDepth, treeDepth + 1);
+                    var bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, maxDepth, treeDepth + 1);
+                    var bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, maxDepth, treeDepth + 1);
+
+                    List<QuadTreeNode> childList = new List<QuadTreeNode>();
+
+                    if (topLeftChild != null) childList.Add(topLeftChild);
+                    if (topRightChild != null) childList.Add(topRightChild);
+                    if (bottomLeftChild != null) childList.Add(bottomLeftChild);
+                    if (bottomRightChild != null) childList.Add(bottomRightChild);
+
+                    if (childList.Count > 0)
+                    {
+                        node.Children = childList.ToArray();
+                        node.TopLeftChild = topLeftChild;
+                        node.TopRightChild = topRightChild;
+                        node.BottomLeftChild = bottomLeftChild;
+                        node.BottomRightChild = bottomRightChild;
+                    }
+                }
+
+                return node;
             }
 
             return null;
@@ -105,60 +92,60 @@ namespace Engine.Collections
         /// <summary>
         /// Parent
         /// </summary>
-        public QuadTree<T> QuadTree { get; private set; }
+        public QuadTree QuadTree { get; private set; }
         /// <summary>
         /// Parent node
         /// </summary>
-        public QuadTreeNode<T> Parent { get; private set; }
+        public QuadTreeNode Parent { get; private set; }
         /// <summary>
         /// Gets the child node al top lef position (from above)
         /// </summary>
-        public QuadTreeNode<T> TopLeftChild { get; private set; }
+        public QuadTreeNode TopLeftChild { get; private set; }
         /// <summary>
         /// Gets the child node al top right position (from above)
         /// </summary>
-        public QuadTreeNode<T> TopRightChild { get; private set; }
+        public QuadTreeNode TopRightChild { get; private set; }
         /// <summary>
         /// Gets the child node al bottom lef position (from above)
         /// </summary>
-        public QuadTreeNode<T> BottomLeftChild { get; private set; }
+        public QuadTreeNode BottomLeftChild { get; private set; }
         /// <summary>
         /// Gets the child node al bottom right position (from above)
         /// </summary>
-        public QuadTreeNode<T> BottomRightChild { get; private set; }
+        public QuadTreeNode BottomRightChild { get; private set; }
 
         /// <summary>
         /// Gets the neighbor at top position (from above)
         /// </summary>
-        public QuadTreeNode<T> TopNeighbor { get; private set; }
+        public QuadTreeNode TopNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at bottom position (from above)
         /// </summary>
-        public QuadTreeNode<T> BottomNeighbor { get; private set; }
+        public QuadTreeNode BottomNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at left position (from above)
         /// </summary>
-        public QuadTreeNode<T> LeftNeighbor { get; private set; }
+        public QuadTreeNode LeftNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at right position (from above)
         /// </summary>
-        public QuadTreeNode<T> RightNeighbor { get; private set; }
+        public QuadTreeNode RightNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at top left position (from above)
         /// </summary>
-        public QuadTreeNode<T> TopLeftNeighbor { get; private set; }
+        public QuadTreeNode TopLeftNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at top right position (from above)
         /// </summary>
-        public QuadTreeNode<T> TopRightNeighbor { get; private set; }
+        public QuadTreeNode TopRightNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at bottom left position (from above)
         /// </summary>
-        public QuadTreeNode<T> BottomLeftNeighbor { get; private set; }
+        public QuadTreeNode BottomLeftNeighbor { get; private set; }
         /// <summary>
         /// Gets the neighbor at bottom right position (from above)
         /// </summary>
-        public QuadTreeNode<T> BottomRightNeighbor { get; private set; }
+        public QuadTreeNode BottomRightNeighbor { get; private set; }
 
         /// <summary>
         /// Node Id
@@ -185,18 +172,14 @@ namespace Engine.Collections
         /// <summary>
         /// Children list
         /// </summary>
-        public QuadTreeNode<T>[] Children;
-        /// <summary>
-        /// Node triangles
-        /// </summary>
-        internal T[] Items;
+        public QuadTreeNode[] Children;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="quadTree">Quadtree</param>
         /// <param name="parent">Parent node</param>
-        public QuadTreeNode(QuadTree<T> quadTree, QuadTreeNode<T> parent)
+        public QuadTreeNode(QuadTree quadTree, QuadTreeNode parent)
         {
             this.QuadTree = quadTree;
             this.Parent = parent;
@@ -228,7 +211,7 @@ namespace Engine.Collections
         /// Searchs for the neighbor node at top position (from above)
         /// </summary>
         /// <returns>Returns the neighbor node at top position if exists.</returns>
-        private QuadTreeNode<T> FindNeighborNodeAtTop()
+        private QuadTreeNode FindNeighborNodeAtTop()
         {
             if (this.Parent != null)
             {
@@ -264,7 +247,7 @@ namespace Engine.Collections
         /// Searchs for the neighbor node at bottom position (from above)
         /// </summary>
         /// <returns>Returns the neighbor node at bottom position if exists.</returns>
-        private QuadTreeNode<T> FindNeighborNodeAtBottom()
+        private QuadTreeNode FindNeighborNodeAtBottom()
         {
             if (this.Parent != null)
             {
@@ -300,7 +283,7 @@ namespace Engine.Collections
         /// Searchs for the neighbor node at right position(from above)
         /// </summary>
         /// <returns>Returns the neighbor node at top position if exists.</returns>
-        private QuadTreeNode<T> FindNeighborNodeAtRight()
+        private QuadTreeNode FindNeighborNodeAtRight()
         {
             if (this.Parent != null)
             {
@@ -336,7 +319,7 @@ namespace Engine.Collections
         /// Searchs for the neighbor node at left position (from above)
         /// </summary>
         /// <returns>Returns the neighbor node at left position if exists.</returns>
-        private QuadTreeNode<T> FindNeighborNodeAtLeft()
+        private QuadTreeNode FindNeighborNodeAtLeft()
         {
             if (this.Parent != null)
             {
@@ -433,9 +416,9 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
         /// <returns>Returns the leaf nodes contained into the frustum</returns>
-        public QuadTreeNode<T>[] GetNodesInVolume(ref BoundingFrustum frustum)
+        public QuadTreeNode[] GetNodesInVolume(ref BoundingFrustum frustum)
         {
-            List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
+            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
 
             if (this.Children == null)
             {
@@ -463,9 +446,9 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns the leaf nodes contained into the bounding box</returns>
-        public QuadTreeNode<T>[] GetNodesInVolume(ref BoundingBox bbox)
+        public QuadTreeNode[] GetNodesInVolume(ref BoundingBox bbox)
         {
-            List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
+            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
 
             if (this.Children == null)
             {
@@ -493,9 +476,9 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
         /// <returns>Returns the leaf nodes contained into the bounding sphere</returns>
-        public QuadTreeNode<T>[] GetNodesInVolume(ref BoundingSphere sphere)
+        public QuadTreeNode[] GetNodesInVolume(ref BoundingSphere sphere)
         {
-            List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
+            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
 
             if (this.Children == null)
             {
@@ -522,9 +505,9 @@ namespace Engine.Collections
         /// Gets all leaf nodes
         /// </summary>
         /// <returns>Returns all leaf nodes</returns>
-        public QuadTreeNode<T>[] GetLeafNodes()
+        public QuadTreeNode[] GetLeafNodes()
         {
-            List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
+            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
 
             if (this.Children == null)
             {
@@ -549,7 +532,7 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="position">Position</param>
         /// <returns>Returns the leaf node wich contains the specified position</returns>
-        public QuadTreeNode<T> GetNode(Vector3 position)
+        public QuadTreeNode GetNode(Vector3 position)
         {
             if (this.Children == null)
             {
@@ -582,7 +565,7 @@ namespace Engine.Collections
             if (this.Children == null)
             {
                 //Leaf node
-                return string.Format("QuadTreeNode {0}; Depth {1}; Items {2}", this.Id, this.Level, this.Items.Length);
+                return string.Format("QuadTreeNode {0}; Depth {1}", this.Id, this.Level);
             }
             else
             {

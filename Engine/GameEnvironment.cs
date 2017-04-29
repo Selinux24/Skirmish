@@ -19,18 +19,18 @@ namespace Engine
         /// <summary>
         /// Maximum distance for high level of detail models
         /// </summary>
-        public static float LODDistanceHigh = 10f;
+        public static float LODDistanceHigh = 100f;
         /// <summary>
         /// Maximum distance for medium level of detail models
         /// </summary>
-        public static float LODDistanceMedium = 50f;
+        public static float LODDistanceMedium = 150f;
         /// <summary>
         /// Maximum distance for low level of detail models
         /// </summary>
-        public static float LODDistanceLow = 250f;
+        public static float LODDistanceLow = 300f;
         /// <summary>
         /// Maximum distance for minimum level of detail models
         /// </summary>
-        public static float LODDistanceMinimum = 1250f;
+        public static float LODDistanceMinimum = 1000f;
     }
 }

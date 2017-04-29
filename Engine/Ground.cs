@@ -5,7 +5,7 @@ using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
-    using Engine.Collections;
+    using Engine.Collections.Generic;
     using Engine.Common;
     using Engine.PathFinding;
 
@@ -516,12 +516,11 @@ namespace Engine
             triangle = new Triangle();
             distance = float.MaxValue;
 
-            if (this.objectsPickingQuadtree != null)
             {
                 Vector3 oP;
                 Triangle oT;
                 float oD;
-                if (this.objectsPickingQuadtree.PickNearest(ref ray, facingOnly, out oP, out oT, out oD))
+                if (this.PickNearestOfObjects(ref ray, facingOnly, out oP, out oT, out oD))
                 {
                     position = oP;
                     triangle = oT;
@@ -531,12 +530,11 @@ namespace Engine
                 }
             }
 
-            if (this.groundPickingQuadtree != null)
             {
                 Vector3 gP;
                 Triangle gT;
                 float gD;
-                if (this.groundPickingQuadtree.PickNearest(ref ray, facingOnly, out gP, out gT, out gD))
+                if (this.PickNearestGround(ref ray, facingOnly, out gP, out gT, out gD))
                 {
                     if (distance > gD)
                     {
@@ -568,12 +566,11 @@ namespace Engine
             triangle = new Triangle();
             distance = float.MaxValue;
 
-            if (this.objectsPickingQuadtree != null)
             {
                 Vector3 oP;
                 Triangle oT;
                 float oD;
-                if (this.objectsPickingQuadtree.PickFirst(ref ray, facingOnly, out oP, out oT, out oD))
+                if (this.PickFirstOfObjects(ref ray, facingOnly, out oP, out oT, out oD))
                 {
                     position = oP;
                     triangle = oT;
@@ -583,12 +580,11 @@ namespace Engine
                 }
             }
 
-            if (this.groundPickingQuadtree != null)
             {
                 Vector3 gP;
                 Triangle gT;
                 float gD;
-                if (this.groundPickingQuadtree.PickFirst(ref ray, facingOnly, out gP, out gT, out gD))
+                if (this.PickFirstGround(ref ray, facingOnly, out gP, out gT, out gD))
                 {
                     if (distance > gD)
                     {
@@ -620,12 +616,11 @@ namespace Engine
             List<Triangle> lTriangles = new List<Triangle>();
             List<float> lDistances = new List<float>();
 
-            if (this.objectsPickingQuadtree != null)
             {
                 Vector3[] oP;
                 Triangle[] oT;
                 float[] oD;
-                if (this.objectsPickingQuadtree.PickAll(ref ray, facingOnly, out oP, out oT, out oD))
+                if (this.PickAllOfObjects(ref ray, facingOnly, out oP, out oT, out oD))
                 {
                     lPositions.AddRange(oP);
                     lTriangles.AddRange(oT);
@@ -635,12 +630,11 @@ namespace Engine
                 }
             }
 
-            if (this.groundPickingQuadtree != null)
             {
                 Vector3[] gP;
                 Triangle[] gT;
                 float[] gD;
-                if (this.groundPickingQuadtree.PickAll(ref ray, facingOnly, out gP, out gT, out gD))
+                if (this.PickAllGround(ref ray, facingOnly, out gP, out gT, out gD))
                 {
                     lPositions.AddRange(gP);
                     lTriangles.AddRange(gT);
@@ -657,7 +651,7 @@ namespace Engine
             return res;
         }
         /// <summary>
-        /// Pick internal ground objects nearest position
+        /// Pick internal objects nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
@@ -665,78 +659,36 @@ namespace Engine
         /// <param name="triangle">Picked triangle if exists</param>
         /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        protected virtual bool PickNearestGroundObjects(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public virtual bool PickNearestOfObjects(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
+            bool res = false;
+
             position = Vector3.Zero;
             triangle = new Triangle();
             distance = float.MaxValue;
 
-            var forPickingObks = this.GroundObjects.FindAll(o => o.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) || o.Use.HasFlag(AttachedModelUsesEnum.FullPicking));
-            if (forPickingObks.Count > 0)
+            if (this.objectsPickingQuadtree != null)
             {
-                bool picked = false;
-                Vector3 bestP = Vector3.Zero;
-                Triangle bestT = new Triangle();
-                float bestD = float.MaxValue;
-
-                foreach (var gObj in forPickingObks)
+                Vector3 gP;
+                Triangle gT;
+                float gD;
+                if (this.objectsPickingQuadtree.PickNearest(ref ray, facingOnly, out gP, out gT, out gD))
                 {
-                    var model = gObj.Model as Model;
-                    if (model != null)
+                    if (distance > gD)
                     {
-                        Vector3 p;
-                        Triangle t;
-                        float d;
-                        if (model.PickNearest(ref ray, facingOnly, out p, out t, out d))
-                        {
-                            picked = true;
-
-                            if (d < bestD)
-                            {
-                                bestP = p;
-                                bestT = t;
-                                bestD = d;
-                            }
-                        }
+                        position = gP;
+                        triangle = gT;
+                        distance = gD;
                     }
 
-                    var modelI = gObj.Model as ModelInstanced;
-                    if (modelI != null)
-                    {
-                        for (int i = 0; i < modelI.Count; i++)
-                        {
-                            Vector3 p;
-                            Triangle t;
-                            float d;
-                            if (modelI.Instances[i].PickNearest(ref ray, facingOnly, out p, out t, out d))
-                            {
-                                picked = true;
-
-                                if (d < bestD)
-                                {
-                                    bestP = p;
-                                    bestT = t;
-                                    bestD = d;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (picked)
-                {
-                    position = bestP;
-                    triangle = bestT;
-                    distance = bestD;
-
-                    return true;
+                    res = true;
                 }
             }
 
-            return false;
+            return res;
         }
         /// <summary>
-        /// Pick internal ground objects first position
+        /// Pick internal objects first position
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
@@ -744,58 +696,36 @@ namespace Engine
         /// <param name="triangle">Picked triangle if exists</param>
         /// <param name="distance">Distance to position</param>
         /// <returns>Returns true if picked position found</returns>
-        protected virtual bool PickFirstGroundObjects(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public virtual bool PickFirstOfObjects(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
         {
+            bool res = false;
+
             position = Vector3.Zero;
             triangle = new Triangle();
             distance = float.MaxValue;
 
-            var forPickingObks = this.GroundObjects.FindAll(o => o.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) || o.Use.HasFlag(AttachedModelUsesEnum.FullPicking));
-            if (forPickingObks.Count > 0)
+            if (this.objectsPickingQuadtree != null)
             {
-                foreach (var gObj in forPickingObks)
+                Vector3 gP;
+                Triangle gT;
+                float gD;
+                if (this.objectsPickingQuadtree.PickFirst(ref ray, facingOnly, out gP, out gT, out gD))
                 {
-                    var model = gObj.Model as Model;
-                    if (model != null)
+                    if (distance > gD)
                     {
-                        Vector3 p;
-                        Triangle t;
-                        float d;
-                        if (model.PickFirst(ref ray, facingOnly, out p, out t, out d))
-                        {
-                            position = p;
-                            triangle = t;
-                            distance = d;
-
-                            return true;
-                        }
+                        position = gP;
+                        triangle = gT;
+                        distance = gD;
                     }
 
-                    var modelI = gObj.Model as ModelInstanced;
-                    if (modelI != null)
-                    {
-                        for (int i = 0; i < modelI.Count; i++)
-                        {
-                            Vector3 p;
-                            Triangle t;
-                            float d;
-                            if (modelI.Instances[i].PickFirst(ref ray, facingOnly, out p, out t, out d))
-                            {
-                                position = p;
-                                triangle = t;
-                                distance = d;
-
-                                return true;
-                            }
-                        }
-                    }
+                    res = true;
                 }
             }
 
-            return false;
+            return res;
         }
         /// <summary>
-        /// Pick internal ground objects positions
+        /// Pick internal objects positions
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
@@ -803,70 +733,138 @@ namespace Engine
         /// <param name="triangles">Picked triangles if exists</param>
         /// <param name="distances">Distances to positions</param>
         /// <returns>Returns true if picked position found</returns>
-        protected virtual bool PickAllGroundObjects(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        public virtual bool PickAllOfObjects(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
         {
+            bool res = false;
+
             positions = null;
             triangles = null;
             distances = null;
 
-            var forPickingObks = this.GroundObjects.FindAll(o => o.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) || o.Use.HasFlag(AttachedModelUsesEnum.FullPicking));
-            if (forPickingObks.Count > 0)
+            if (this.objectsPickingQuadtree != null)
             {
-                bool picked = false;
-
-                List<Vector3> pList = new List<Vector3>();
-                List<Triangle> tList = new List<Triangle>();
-                List<float> dList = new List<float>();
-
-                foreach (var gObj in forPickingObks)
+                Vector3[] gP;
+                Triangle[] gT;
+                float[] gD;
+                if (this.objectsPickingQuadtree.PickAll(ref ray, facingOnly, out gP, out gT, out gD))
                 {
-                    var model = gObj.Model as Model;
-                    if (model != null)
-                    {
-                        Vector3[] p;
-                        Triangle[] t;
-                        float[] d;
-                        if (model.PickAll(ref ray, facingOnly, out p, out t, out d))
-                        {
-                            picked = true;
+                    positions = gP;
+                    triangles = gT;
+                    distances = gD;
 
-                            pList.AddRange(p);
-                            tList.AddRange(t);
-                            dList.AddRange(d);
-                        }
-                    }
-
-                    var modelI = gObj.Model as ModelInstanced;
-                    if (modelI != null)
-                    {
-                        for (int i = 0; i < modelI.Count; i++)
-                        {
-                            Vector3[] p;
-                            Triangle[] t;
-                            float[] d;
-                            if (modelI.Instances[i].PickAll(ref ray, facingOnly, out p, out t, out d))
-                            {
-                                picked = true;
-
-                                pList.AddRange(p);
-                                tList.AddRange(t);
-                                dList.AddRange(d);
-                            }
-                        }
-                    }
-                }
-
-                if (picked)
-                {
-                    positions = pList.ToArray();
-                    triangles = tList.ToArray();
-                    distances = dList.ToArray();
-
-                    return true;
+                    res = true;
                 }
             }
 
-            return false;
+            return res;
+        }
+        /// <summary>
+        /// Pick ground nearest position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
+        /// <param name="position">Picked position if exists</param>
+        /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if picked position found</returns>
+        public virtual bool PickNearestGround(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        {
+            bool res = false;
+
+            position = Vector3.Zero;
+            triangle = new Triangle();
+            distance = float.MaxValue;
+
+            if (this.groundPickingQuadtree != null)
+            {
+                Vector3 gP;
+                Triangle gT;
+                float gD;
+                if (this.groundPickingQuadtree.PickNearest(ref ray, facingOnly, out gP, out gT, out gD))
+                {
+                    if (distance > gD)
+                    {
+                        position = gP;
+                        triangle = gT;
+                        distance = gD;
+                    }
+
+                    res = true;
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Pick ground first position
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
+        /// <param name="position">Picked position if exists</param>
+        /// <param name="triangle">Picked triangle if exists</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if picked position found</returns>
+        public virtual bool PickFirstGround(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        {
+            bool res = false;
+
+            position = Vector3.Zero;
+            triangle = new Triangle();
+            distance = float.MaxValue;
+
+            if (this.groundPickingQuadtree != null)
+            {
+                Vector3 gP;
+                Triangle gT;
+                float gD;
+                if (this.groundPickingQuadtree.PickFirst(ref ray, facingOnly, out gP, out gT, out gD))
+                {
+                    if (distance > gD)
+                    {
+                        position = gP;
+                        triangle = gT;
+                        distance = gD;
+                    }
+
+                    res = true;
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Pick ground positions
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only triangles facing to ray origin</param>
+        /// <param name="positions">Picked positions if exists</param>
+        /// <param name="triangles">Picked triangles if exists</param>
+        /// <param name="distances">Distances to positions</param>
+        /// <returns>Returns true if picked position found</returns>
+        public virtual bool PickAllGround(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        {
+            bool res = false;
+
+            positions = null;
+            triangles = null;
+            distances = null;
+
+            if (this.groundPickingQuadtree != null)
+            {
+                Vector3[] gP;
+                Triangle[] gT;
+                float[] gD;
+                if (this.groundPickingQuadtree.PickAll(ref ray, facingOnly, out gP, out gT, out gD))
+                {
+                    positions = gP;
+                    triangles = gT;
+                    distances = gD;
+
+                    res = true;
+                }
+            }
+
+            return res;
         }
 
         /// <summary>
@@ -985,13 +983,5 @@ namespace Engine
 
             return false;
         }
-
-        /// <summary>
-        /// Gets the node list suitable for foliage planting
-        /// </summary>
-        /// <param name="frustum">Camera frustum</param>
-        /// <param name="sph">Foliagle bounding sphere</param>
-        /// <returns>Returns a node list</returns>
-        public abstract PickingQuadTreeNode<Triangle>[] GetFoliageNodes(BoundingFrustum frustum, BoundingSphere sph);
     }
 }
