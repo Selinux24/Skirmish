@@ -257,7 +257,8 @@ namespace DeferredTest
                 Width = width,
                 Height = height,
                 Channel = SpriteTextureChannelsEnum.NoAlpha,
-            });
+            },
+            layerHUD);
 
             this.bufferDrawer.Visible = false;
 
@@ -396,9 +397,9 @@ namespace DeferredTest
 
             this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 1000);
 
-            this.Lights.KeyLight.Enabled = false;
+            this.Lights.KeyLight.Enabled = true;
             this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = true;
+            this.Lights.FillLight.Enabled = false;
 
             this.pointOffset = this.Lights.PointLights.Length;
             this.spotOffset = this.Lights.SpotLights.Length;

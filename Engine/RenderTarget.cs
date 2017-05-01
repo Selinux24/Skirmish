@@ -3,6 +3,7 @@ using SharpDX.DXGI;
 using System;
 using RenderTargetView = SharpDX.Direct3D11.RenderTargetView;
 using RenderTargetViewDescription = SharpDX.Direct3D11.RenderTargetViewDescription;
+using RenderTargetViewDimension = SharpDX.Direct3D11.RenderTargetViewDimension;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 using ShaderResourceViewDescription = SharpDX.Direct3D11.ShaderResourceViewDescription;
 
@@ -85,7 +86,7 @@ namespace Engine
                 var rtvDesc = new RenderTargetViewDescription()
                 {
                     Format = this.RenderTargetFormat,
-                    Dimension = SharpDX.Direct3D11.RenderTargetViewDimension.Texture2D,
+                    Dimension = RenderTargetViewDimension.Texture2D,
                     Texture2D = new RenderTargetViewDescription.Texture2DResource()
                     {
                         MipSlice = 0,

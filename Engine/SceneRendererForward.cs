@@ -254,9 +254,9 @@ namespace Engine
 #if DEBUG
                             Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                            var cntType = this.DrawContext.Frustum.Contains(new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance));
+                            var sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
 
-                            shadowObjs.ForEach(o => o.SetCulling(cntType == ContainmentType.Disjoint));
+                            shadowObjs.ForEach(o => o.Culling(sph));
 #if DEBUG
                             swCull.Stop();
 
@@ -276,7 +276,7 @@ namespace Engine
                                 var fromLightVP = this.shadowMapperLow.GetFromLightViewProjection(
                                     lightPosition,
                                     this.DrawContext.EyePosition,
-                                    scene.Lights.ShadowHDDistance);
+                                    scene.Lights.ShadowLDDistance);
 
                                 this.DrawShadowsContext.ViewProjection = fromLightVP;
 
@@ -297,9 +297,9 @@ namespace Engine
 #if DEBUG
                             swCull = Stopwatch.StartNew();
 #endif
-                            cntType = this.DrawContext.Frustum.Contains(new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance));
+                            sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
 
-                            shadowObjs.ForEach(o => o.SetCulling(cntType == ContainmentType.Disjoint));
+                            shadowObjs.ForEach(o => o.Culling(sph));
 #if DEBUG
                             swCull.Stop();
 
@@ -318,7 +318,7 @@ namespace Engine
                                 Matrix fromLightVP = this.shadowMapperHigh.GetFromLightViewProjection(
                                     lightPosition,
                                     this.DrawContext.EyePosition,
-                                    scene.Lights.ShadowLDDistance);
+                                    scene.Lights.ShadowHDDistance);
 
                                 this.DrawShadowsContext.ViewProjection = fromLightVP;
 

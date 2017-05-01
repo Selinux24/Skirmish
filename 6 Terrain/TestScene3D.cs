@@ -727,6 +727,9 @@ namespace TerrainTest
 
             this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
             this.Camera.LookTo(this.helicopter.Manipulator.Position);
+
+            this.Lights.ShadowLDDistance = 100f;
+            this.Lights.ShadowHDDistance = 25f;
         }
         public override void Dispose()
         {

@@ -429,9 +429,9 @@ namespace Engine
 #if DEBUG
                             Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                            var cntType = this.DrawContext.Frustum.Contains(new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance));
+                            var sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
 
-                            shadowObjs.ForEach(o => o.SetCulling(cntType == ContainmentType.Disjoint));
+                            shadowObjs.ForEach(o => o.Culling(sph));
 #if DEBUG
                             swCull.Stop();
 
@@ -472,9 +472,9 @@ namespace Engine
 #if DEBUG
                             swCull = Stopwatch.StartNew();
 #endif
-                            cntType = this.DrawContext.Frustum.Contains(new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance));
+                            sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
 
-                            shadowObjs.ForEach(o => o.SetCulling(cntType == ContainmentType.Disjoint));
+                            shadowObjs.ForEach(o => o.Culling(sph));
 #if DEBUG
                             swCull.Stop();
 

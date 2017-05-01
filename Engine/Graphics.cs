@@ -249,6 +249,16 @@ namespace Engine
                 return this.depthStencilView;
             }
         }
+        /// <summary>
+        /// Gets if the device was created with multi-sampling active
+        /// </summary>
+        public bool MultiSampled
+        {
+            get
+            {
+                return this.msCount > 1;
+            }
+        }
 
         /// <summary>
         /// Gets desktop mode description
@@ -417,7 +427,7 @@ namespace Engine
                 new DepthStencilViewDescription()
                 {
                     Format = this.DepthFormat,
-                    Dimension = this.msCount == 1 ? DepthStencilViewDimension.Texture2D : DepthStencilViewDimension.Texture2DMultisampled,
+                    Dimension = this.MultiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
                     Texture2D = new DepthStencilViewDescription.Texture2DResource()
                     {
                         MipSlice = 0
