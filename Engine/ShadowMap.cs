@@ -17,8 +17,6 @@ using Texture2DDescription = SharpDX.Direct3D11.Texture2DDescription;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Shadow map
     /// </summary>
@@ -28,42 +26,27 @@ namespace Engine
         /// Game class
         /// </summary>
         protected Game Game { get; private set; }
+
         /// <summary>
         /// Map width
         /// </summary>
-        public readonly int Width;
+        public int Width { get; private set; }
         /// <summary>
         /// Map height
         /// </summary>
-        public readonly int Height;
+        public int Height { get; private set; }
         /// <summary>
         /// Viewport
         /// </summary>
-        public readonly Viewport Viewport;
+        public Viewport Viewport { get; private set; }
         /// <summary>
-        /// Static depth map
+        /// Depth map
         /// </summary>
-        public DepthStencilView DepthMapStatic { get; protected set; }
+        public DepthStencilView DepthMap { get; protected set; }
         /// <summary>
-        /// Dynamic depth map
+        /// Deph map texture
         /// </summary>
-        public DepthStencilView DepthMapDynamic { get; protected set; }
-        /// <summary>
-        /// Shadow map flags
-        /// </summary>
-        public ShadowMapFlags Flags { get; set; }
-        /// <summary>
-        /// Static deph map texture
-        /// </summary>
-        public ShaderResourceView TextureStatic { get; protected set; }
-        /// <summary>
-        /// Dynamic deph map texture
-        /// </summary>
-        public ShaderResourceView TextureDynamic { get; protected set; }
-        /// <summary>
-        /// View * Projection matrix
-        /// </summary>
-        public Matrix ViewProjection { get; protected set; }
+        public ShaderResourceView Texture { get; protected set; }
 
         /// <summary>
         /// Generate internal resources
@@ -119,6 +102,16 @@ namespace Engine
                 srv = new ShaderResourceView(game.Graphics.Device, depthMap, rvDescription);
             }
         }
+        /// <summary>
+        /// Sets shadow light
+        /// </summary>
+        /// <param name="light">Light</param>
+        public static void SetLight(SceneLightDirectional light, float lightDistance, out Vector3 lightPosition, out Vector3 lightDirection)
+        {
+            // Calc light position outside the scene volume
+            lightPosition = light.GetPosition(lightDistance);
+            lightDirection = light.Direction;
+        }
 
         /// <summary>
         /// Constructor
@@ -135,103 +128,45 @@ namespace Engine
 
             this.Viewport = new Viewport(0, 0, width, height, 0, 1.0f);
 
-            DepthStencilView dsvStatic;
-            ShaderResourceView srvStatic;
-            GenerateResources(game, width, height, out dsvStatic, out srvStatic);
-            this.DepthMapStatic = dsvStatic;
-            this.TextureStatic = srvStatic;
-
-            DepthStencilView dsvDynamic;
-            ShaderResourceView srvDynamic;
-            GenerateResources(game, width, height, out dsvDynamic, out srvDynamic);
-            this.DepthMapDynamic = dsvDynamic;
-            this.TextureDynamic = srvDynamic;
+            DepthStencilView dsv;
+            ShaderResourceView srv;
+            GenerateResources(game, width, height, out dsv, out srv);
+            this.DepthMap = dsv;
+            this.Texture = srv;
         }
         /// <summary>
-        /// Updates drawing context with shadow map generation parameters
+        /// Gets from light view * projection matrix
         /// </summary>
-        /// <param name="light">Light</param>
-        /// <param name="center">Scene center</param>
-        /// <param name="radius">Scene radius</param>
-        /// <param name="context">Drawing context to update</param>
-        public void Update(SceneLightDirectional light, Vector3 center, float radius, ref DrawContext context)
+        /// <param name="eyePosition">Eye position</param>
+        /// <param name="shadowDistance">Shadows visible distance</param>
+        public Matrix GetFromLightViewProjection(Vector3 lightPosition, Vector3 eyePosition, float shadowDistance)
         {
-            // Calc light position outside the scene volume
-            var lightPosition = light.GetPosition(radius);
-            var lightDirection = light.Direction;
-
             // View from light to scene center position
-            var view = Matrix.LookAtLH(lightPosition, center, Vector3.Up);
+            var view = Matrix.LookAtLH(lightPosition, eyePosition, Vector3.Up);
 
             // Transform bounding sphere to light space.
-            Vector3 sphereCenterLS = Vector3.TransformCoordinate(center, view);
+            Vector3 sphereCenterLS = Vector3.TransformCoordinate(eyePosition, view);
 
             // Ortho frustum in light space encloses scene.
-            float xleft = sphereCenterLS.X - radius;
-            float xright = sphereCenterLS.X + radius;
-            float ybottom = sphereCenterLS.Y - radius;
-            float ytop = sphereCenterLS.Y + radius;
-            float znear = sphereCenterLS.Z - radius;
-            float zfar = sphereCenterLS.Z + radius;
+            float xleft = sphereCenterLS.X - shadowDistance;
+            float xright = sphereCenterLS.X + shadowDistance;
+            float ybottom = sphereCenterLS.Y - shadowDistance;
+            float ytop = sphereCenterLS.Y + shadowDistance;
+            float znear = sphereCenterLS.Z - shadowDistance;
+            float zfar = sphereCenterLS.Z + shadowDistance;
 
             // Orthogonal projection from center
             var projection = Matrix.OrthoOffCenterLH(xleft, xright, ybottom, ytop, znear, zfar);
 
-            this.ViewProjection = view * projection;
-
-            context.View = view;
-            context.Projection = projection;
-            context.ViewProjection = this.ViewProjection;
-            context.Frustum = new BoundingFrustum(this.ViewProjection);
-            context.EyePosition = lightPosition;
-            context.EyeTarget = lightDirection;
+            return view * projection;
         }
         /// <summary>
         /// Release of resources
         /// </summary>
         public void Dispose()
         {
-            if (this.DepthMapStatic != null)
-            {
-                this.DepthMapStatic.Dispose();
-                this.DepthMapStatic = null;
-            }
-            if (this.DepthMapDynamic != null)
-            {
-                this.DepthMapDynamic.Dispose();
-                this.DepthMapDynamic = null;
-            }
-
-            if (this.TextureStatic != null)
-            {
-                this.TextureStatic.Dispose();
-                this.TextureStatic = null;
-            }
-            if (this.TextureDynamic != null)
-            {
-                this.TextureDynamic.Dispose();
-                this.TextureDynamic = null;
-            }
+            Helper.Dispose(this.DepthMap);
+            Helper.Dispose(this.Texture);
         }
-    }
-
-    /// <summary>
-    /// Flags
-    /// </summary>
-    [Flags]
-    public enum ShadowMapFlags : int
-    {
-        /// <summary>
-        /// None
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Static shadow map
-        /// </summary>
-        Static = 1,
-        /// <summary>
-        /// Dynamix shadow map
-        /// </summary>
-        Dynamic = 2,
     }
 }

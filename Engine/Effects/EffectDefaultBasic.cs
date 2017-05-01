@@ -188,9 +188,13 @@ namespace Engine.Effects
         /// </summary>
         private EffectMatrixVariable worldViewProjection = null;
         /// <summary>
-        /// From light View * Projection transform
+        /// Low definition map from light View * Projection transform
         /// </summary>
-        private EffectMatrixVariable fromLightViewProjection = null;
+        private EffectMatrixVariable fromLightViewProjectionLD = null;
+        /// <summary>
+        /// High definition map from light View * Projection transform
+        /// </summary>
+        private EffectMatrixVariable fromLightViewProjectionHD = null;
         /// <summary>
         /// Animation data effect variable
         /// </summary>
@@ -224,13 +228,13 @@ namespace Engine.Effects
         /// </summary>
         private EffectShaderResourceVariable specularMap = null;
         /// <summary>
-        /// Static shadow map effect variable
+        /// Low definition shadow map effect variable
         /// </summary>
-        private EffectShaderResourceVariable shadowMapStatic = null;
+        private EffectShaderResourceVariable shadowMapLD = null;
         /// <summary>
-        /// Dynamic shadow map effect variable
+        /// High definition shadow map effect variable
         /// </summary>
-        private EffectShaderResourceVariable shadowMapDynamic = null;
+        private EffectShaderResourceVariable shadowMapHD = null;
         /// <summary>
         /// Animation palette width effect variable
         /// </summary>
@@ -265,13 +269,13 @@ namespace Engine.Effects
         /// </summary>
         private ShaderResourceView currentSpecularMap = null;
         /// <summary>
-        /// Current static shadow map
+        /// Current low definition shadow map
         /// </summary>
-        private ShaderResourceView currentShadowMapStatic = null;
+        private ShaderResourceView currentShadowMapLD = null;
         /// <summary>
-        /// Current dynamic shadow map
+        /// Current high definition shadow map
         /// </summary>
-        private ShaderResourceView currentShadowMapDynamic = null;
+        private ShaderResourceView currentShadowMapHD = null;
         /// <summary>
         /// Current animation palette
         /// </summary>
@@ -488,17 +492,31 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// From light View * Projection transform
+        /// Low definition map from light View * Projection transform
         /// </summary>
-        protected Matrix FromLightViewProjection
+        protected Matrix FromLightViewProjectionLD
         {
             get
             {
-                return this.fromLightViewProjection.GetMatrix();
+                return this.fromLightViewProjectionLD.GetMatrix();
             }
             set
             {
-                this.fromLightViewProjection.SetMatrix(value);
+                this.fromLightViewProjectionLD.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// High definition map from light View * Projection transform
+        /// </summary>
+        protected Matrix FromLightViewProjectionHD
+        {
+            get
+            {
+                return this.fromLightViewProjectionHD.GetMatrix();
+            }
+            set
+            {
+                this.fromLightViewProjectionHD.SetMatrix(value);
             }
         }
         /// <summary>
@@ -635,42 +653,42 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Static shadow map
+        /// Low definition shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMapStatic
+        protected ShaderResourceView ShadowMapLD
         {
             get
             {
-                return this.shadowMapStatic.GetResource();
+                return this.shadowMapLD.GetResource();
             }
             set
             {
-                if (this.currentShadowMapStatic != value)
+                if (this.currentShadowMapLD != value)
                 {
-                    this.shadowMapStatic.SetResource(value);
+                    this.shadowMapLD.SetResource(value);
 
-                    this.currentShadowMapStatic = value;
+                    this.currentShadowMapLD = value;
 
                     Counters.TextureUpdates++;
                 }
             }
         }
         /// <summary>
-        /// Dynamic shadow map
+        /// High definition shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMapDynamic
+        protected ShaderResourceView ShadowMapHD
         {
             get
             {
-                return this.shadowMapDynamic.GetResource();
+                return this.shadowMapHD.GetResource();
             }
             set
             {
-                if (this.currentShadowMapDynamic != value)
+                if (this.currentShadowMapHD != value)
                 {
-                    this.shadowMapDynamic.SetResource(value);
+                    this.shadowMapHD.SetResource(value);
 
-                    this.currentShadowMapDynamic = value;
+                    this.currentShadowMapHD = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -815,7 +833,8 @@ namespace Engine.Effects
             //Per frame
             this.world = this.Effect.GetVariableByName("gVSWorld").AsMatrix();
             this.worldViewProjection = this.Effect.GetVariableByName("gVSWorldViewProjection").AsMatrix();
-            this.fromLightViewProjection = this.Effect.GetVariableByName("gPSLightViewProjection").AsMatrix();
+            this.fromLightViewProjectionLD = this.Effect.GetVariableByName("gPSLightViewProjectionLD").AsMatrix();
+            this.fromLightViewProjectionHD = this.Effect.GetVariableByName("gPSLightViewProjectionHD").AsMatrix();
             this.eyePositionWorld = this.Effect.GetVariableByName("gPSEyePositionWorld").AsVector();
             this.globalAmbient = this.Effect.GetVariableByName("gPSGlobalAmbient").AsScalar();
             this.dirLights = this.Effect.GetVariableByName("gPSDirLights");
@@ -826,8 +845,8 @@ namespace Engine.Effects
             this.fogRange = this.Effect.GetVariableByName("gPSFogRange").AsScalar();
             this.fogColor = this.Effect.GetVariableByName("gPSFogColor").AsVector();
             this.shadowMaps = this.Effect.GetVariableByName("gPSShadows").AsScalar();
-            this.shadowMapStatic = this.Effect.GetVariableByName("gPSShadowMapStatic").AsShaderResource();
-            this.shadowMapDynamic = this.Effect.GetVariableByName("gPSShadowMapDynamic").AsShaderResource();
+            this.shadowMapLD = this.Effect.GetVariableByName("gPSShadowMapLD").AsShaderResource();
+            this.shadowMapHD = this.Effect.GetVariableByName("gPSShadowMapHD").AsShaderResource();
 
             //Per object
             this.useColorDiffuse = this.Effect.GetVariableByName("gPSUseColorDiffuse").AsScalar();
@@ -928,7 +947,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection)
         {
-            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, null, 0, null, null, Matrix.Identity);
+            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, null, 0, null, null, Matrix.Identity, Matrix.Identity);
         }
         /// <summary>
         /// Update per frame data
@@ -938,18 +957,20 @@ namespace Engine.Effects
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMaps">Shadow map flags</param>
-        /// <param name="shadowMapStatic">Static shadow map texture</param>
-        /// <param name="shadowMapDynamic">Dynamic shadow map texture</param>
-        /// <param name="fromLightViewProjection">From light View * Projection transform</param>
+        /// <param name="shadowMapLD">Low definition shadow map texture</param>
+        /// <param name="shadowMapHD">High definition shadow map texture</param>
+        /// <param name="fromLightViewProjectionLD">Low definition map from light View * Projection transform</param>
+        /// <param name="fromLightViewProjectionHD">High definition map from light View * Projection transform</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             SceneLights lights,
             int shadowMaps,
-            ShaderResourceView shadowMapStatic,
-            ShaderResourceView shadowMapDynamic,
-            Matrix fromLightViewProjection)
+            ShaderResourceView shadowMapLD,
+            ShaderResourceView shadowMapHD,
+            Matrix fromLightViewProjectionLD,
+            Matrix fromLightViewProjectionHD)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
@@ -992,9 +1013,10 @@ namespace Engine.Effects
                 this.FogRange = lights.FogRange;
                 this.FogColor = lights.FogColor;
 
-                this.FromLightViewProjection = fromLightViewProjection;
-                this.ShadowMapStatic = shadowMapStatic;
-                this.ShadowMapDynamic = shadowMapDynamic;
+                this.FromLightViewProjectionLD = fromLightViewProjectionLD;
+                this.FromLightViewProjectionHD = fromLightViewProjectionHD;
+                this.ShadowMapLD = shadowMapLD;
+                this.ShadowMapHD = shadowMapHD;
                 this.ShadowMaps = shadowMaps;
             }
             else
@@ -1005,9 +1027,10 @@ namespace Engine.Effects
                 this.FogRange = 0;
                 this.FogColor = Color.Transparent;
 
-                this.FromLightViewProjection = Matrix.Identity;
-                this.ShadowMapStatic = null;
-                this.ShadowMapDynamic = null;
+                this.FromLightViewProjectionLD = Matrix.Identity;
+                this.FromLightViewProjectionHD = Matrix.Identity;
+                this.ShadowMapLD = null;
+                this.ShadowMapHD = null;
                 this.ShadowMaps = 0;
             }
 

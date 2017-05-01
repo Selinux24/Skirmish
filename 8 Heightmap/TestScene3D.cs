@@ -193,6 +193,7 @@ namespace HeightmapTest
             {
                 Name = "Soldier",
                 TextureIndex = 0,
+                CastShadow = true,
             };
             this.soldier = this.AddModel(@"Resources/Soldier", @"soldier_anim2.xml", sDesc, true, layerObjects);
             sw.Stop();
@@ -209,6 +210,7 @@ namespace HeightmapTest
             {
                 Name = "Troops",
                 Instances = 4,
+                CastShadow = true,
             };
             this.troops = this.AddInstancingModel(@"Resources/Soldier", @"soldier_anim2.xml", tDesc, true, layerObjects);
             sw.Stop();
@@ -221,7 +223,8 @@ namespace HeightmapTest
             sw.Restart();
             var mDesc = new ModelDescription()
             {
-                Name = "M24"
+                Name = "M24",
+                CastShadow = true,
             };
             this.helicopter = this.AddModel(@"Resources/m24", @"m24.xml", mDesc, true, layerObjects);
             sw.Stop();
@@ -758,8 +761,6 @@ namespace HeightmapTest
             }
 
             #endregion
-
-            this.SceneVolume = this.terrain.GetBoundingSphere();
 
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;

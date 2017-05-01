@@ -366,11 +366,18 @@ struct PSVertexSkyScattering
 /*
 SHADOW MAPPING
 */
-struct ShadowMapOutput
+struct PSShadowMapPosition
 {
 	float4 positionHomogeneous : SV_POSITION;
 };
-struct PSShadowMapOutput
+struct PSShadowMapPositionTexture
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float4 depth : TEXCOORD0;
+	float2 tex : TEXCOORD1;
+	float textureIndex : textureIndex;
+};
+struct PSShadowMapBillboard
 {
 	float4 positionHomogeneous : SV_POSITION;
 	float4 depth : TEXCOORD0;

@@ -8,12 +8,15 @@ namespace SceneTest
 {
     public class SceneMaterials : Scene
     {
+        private const int layerHUD = 99;
+
         private float spaceSize = 40;
         private float radius = 1;
         private uint stacks = 40;
 
         private TextDrawer title = null;
         private TextDrawer runtime = null;
+        private Sprite backPannel = null;
 
         private LensFlare lensFlare = null;
 
@@ -43,20 +46,28 @@ namespace SceneTest
             this.InitializeFloor();
             this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10));
             this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10));
-
-            this.SceneVolume = new BoundingSphere(Vector3.Zero, 100f);
         }
 
         private void InitializeTextBoxes()
         {
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange));
-            this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange));
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), layerHUD);
+            this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), layerHUD);
 
             this.title.Text = "Scene Test - Materials";
             this.runtime.Text = "";
 
             this.title.Position = Vector2.Zero;
             this.runtime.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
+
+            var spDesc = new SpriteDescription()
+            {
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.runtime.Top + this.runtime.Height + 3,
+                Color = new Color4(0, 0, 0, 0.75f),
+            };
+
+            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
         }
         private void InitializeSkyEffects()
         {

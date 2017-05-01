@@ -20,7 +20,8 @@ cbuffer cbVSPerFrame : register (b1)
 
 cbuffer cbPSPerFrame : register (b3)
 {
-	float4x4 gPSLightViewProjection;
+	float4x4 gPSLightViewProjectionLD;
+	float4x4 gPSLightViewProjectionHD;
 	float3 gPSEyePositionWorld;
 	float gPSGlobalAmbient;
 	uint3 gPSLightCount;
@@ -33,8 +34,8 @@ cbuffer cbPSPerFrame : register (b3)
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
 };
-Texture2D gPSShadowMapStatic;
-Texture2D gPSShadowMapDynamic;
+Texture2D gPSShadowMapLD;
+Texture2D gPSShadowMapHD;
 
 cbuffer cbPSPerObject : register (b4)
 {
@@ -71,7 +72,8 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 
 	Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex, gMaterialPaletteWidth);
 
-	float4 lightPosition = mul(float4(input.positionWorld, 1), gPSLightViewProjection);
+	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
+	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
 
 	ComputeLightsInput lInput;
 
@@ -91,10 +93,11 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 	lInput.pColorDiffuse = color;
 	lInput.pColorSpecular = 1;
 	lInput.ePosition = gPSEyePositionWorld;
-	lInput.sLightPosition = lightPosition;
+	lInput.sLightPositionLD = lightPositionLD;
+	lInput.sLightPositionHD = lightPositionHD;
 	lInput.shadows = gPSShadows;
-	lInput.shadowMapStatic = gPSShadowMapStatic;
-	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+	lInput.shadowMapLD = gPSShadowMapLD;
+	lInput.shadowMapHD = gPSShadowMapHD;
 	lInput.lod = gLOD;
 
 	return ComputeLights(lInput);
@@ -108,7 +111,8 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 
 	Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex, gMaterialPaletteWidth);
 
-	float4 lightPosition = mul(float4(input.positionWorld, 1), gPSLightViewProjection);
+	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
+	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
 
 	ComputeLightsInput lInput;
 
@@ -128,10 +132,11 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 	lInput.pColorDiffuse = color;
 	lInput.pColorSpecular = 1;
 	lInput.ePosition = gPSEyePositionWorld;
-	lInput.sLightPosition = lightPosition;
+	lInput.sLightPositionLD = lightPositionLD;
+	lInput.sLightPositionHD = lightPositionHD;
 	lInput.shadows = gPSShadows;
-	lInput.shadowMapStatic = gPSShadowMapStatic;
-	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+	lInput.shadowMapLD = gPSShadowMapLD;
+	lInput.shadowMapHD = gPSShadowMapHD;
 	lInput.lod = gLOD;
 
 	return ComputeLights(lInput);
@@ -145,7 +150,8 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 
 	Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex, gMaterialPaletteWidth);
 
-	float4 lightPosition = mul(float4(input.positionWorld, 1), gPSLightViewProjection);
+	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
+	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
 
 	ComputeLightsInput lInput;
 
@@ -165,10 +171,11 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 	lInput.pColorDiffuse = color;
 	lInput.pColorSpecular = 1;
 	lInput.ePosition = gPSEyePositionWorld;
-	lInput.sLightPosition = lightPosition;
+	lInput.sLightPositionLD = lightPositionLD;
+	lInput.sLightPositionHD = lightPositionHD;
 	lInput.shadows = gPSShadows;
-	lInput.shadowMapStatic = gPSShadowMapStatic;
-	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+	lInput.shadowMapLD = gPSShadowMapLD;
+	lInput.shadowMapHD = gPSShadowMapHD;
 	lInput.lod = gLOD;
 
 	return ComputeLights(lInput);

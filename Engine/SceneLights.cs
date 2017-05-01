@@ -156,11 +156,11 @@ namespace Engine
         /// <summary>
         /// Fog start value
         /// </summary>
-        public float FogStart = 0f;
+        public float FogStart { get; set; }
         /// <summary>
         /// Fog range value
         /// </summary>
-        public float FogRange = 0f;
+        public float FogRange { get; set; }
         /// <summary>
         /// Base fog color
         /// </summary>
@@ -209,13 +209,29 @@ namespace Engine
                 return this.directionalLights.FindAll(l => l.CastShadow).ToArray();
             }
         }
+        /// <summary>
+        /// High definition shadows distance
+        /// </summary>
+        public float ShadowHDDistance { get; set; }
+        /// <summary>
+        /// Low definition shadows distance
+        /// </summary>
+        public float ShadowLDDistance { get; set; }
+        /// <summary>
+        /// Far light distance definition for shadow maps
+        /// </summary>
+        public float FarLightsDistance { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         public SceneLights()
         {
-
+            this.FogStart = 0f;
+            this.FogRange = 0;
+            this.ShadowHDDistance = 50f;
+            this.ShadowLDDistance = 150f;
+            this.FarLightsDistance = 1000000f;
         }
         /// <summary>
         /// Adds the specified new light to colection

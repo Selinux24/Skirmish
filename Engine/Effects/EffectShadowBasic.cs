@@ -117,11 +117,19 @@ namespace Engine.Effects
         /// Animation palette
         /// </summary>
         private EffectShaderResourceVariable animationPalette = null;
+        /// <summary>
+        /// Diffuse map effect variable
+        /// </summary>
+        private EffectShaderResourceVariable diffuseMap = null;
 
         /// <summary>
         /// Current animation palette
         /// </summary>
         private ShaderResourceView currentAnimationPalette = null;
+        /// <summary>
+        /// Current diffuse map
+        /// </summary>
+        private ShaderResourceView currentDiffuseMap = null;
 
         /// <summary>
         /// World view projection matrix
@@ -200,6 +208,27 @@ namespace Engine.Effects
                 }
             }
         }
+        /// <summary>
+        /// Diffuse map
+        /// </summary>
+        protected ShaderResourceView DiffuseMap
+        {
+            get
+            {
+                return this.diffuseMap.GetResource();
+            }
+            set
+            {
+                if (this.currentDiffuseMap != value)
+                {
+                    this.diffuseMap.SetResource(value);
+
+                    this.currentDiffuseMap = value;
+
+                    Counters.TextureUpdates++;
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -231,11 +260,12 @@ namespace Engine.Effects
             this.InstancingShadowMapPositionNormalTextureTangent = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentI");
             this.InstancingShadowMapPositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentSkinnedI");
 
-            this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.animationOffset = this.Effect.GetVariableByName("gAnimationOffset").AsScalar();
-            this.textureIndex = this.Effect.GetVariableByName("gTextureIndex").AsScalar();
             this.animationPaletteWidth = this.Effect.GetVariableByName("gAnimationPaletteWidth").AsScalar();
             this.animationPalette = this.Effect.GetVariableByName("gAnimationPalette").AsShaderResource();
+            this.worldViewProjection = this.Effect.GetVariableByName("gVSWorldViewProjection").AsMatrix();
+            this.animationOffset = this.Effect.GetVariableByName("gVSAnimationOffset").AsScalar();
+            this.diffuseMap = this.Effect.GetVariableByName("gPSDiffuseMapArray").AsShaderResource();
+            this.textureIndex = this.Effect.GetVariableByName("gPSTextureIndex").AsScalar();
         }
         /// <summary>
         /// Get technique by vertex type
@@ -317,9 +347,11 @@ namespace Engine.Effects
         /// <param name="textureIndex">Texture index</param>
         /// <param name="animationOffset">Animation index</param>
         public void UpdatePerObject(
+            ShaderResourceView diffuseMap,
             uint textureIndex,
             uint animationOffset)
         {
+            this.DiffuseMap = diffuseMap;
             this.TextureIndex = textureIndex;
 
             this.AnimationOffset = animationOffset;

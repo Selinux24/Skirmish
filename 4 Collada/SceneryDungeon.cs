@@ -6,9 +6,13 @@ namespace Collada
 {
     public class SceneryDungeon : Scene
     {
+        private const int layerHUD = 99;
+
         private TextDrawer title = null;
         private TextDrawer fps = null;
         private TextDrawer picks = null;
+        private Sprite backPannel = null;
+
         private Scenery dungeon = null;
         private Player agent = null;
 
@@ -22,17 +26,27 @@ namespace Collada
         {
             base.Initialize();
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
             this.title.Text = "Collada Dungeon Scene";
             this.title.Position = Vector2.Zero;
 
-            this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
             this.fps.Text = null;
             this.fps.Position = new Vector2(0, 24);
 
-            this.picks = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.picks = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
             this.picks.Text = null;
             this.picks.Position = new Vector2(0, 48);
+
+            var spDesc = new SpriteDescription()
+            {
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.picks.Top + this.picks.Height + 3,
+                Color = new Color4(0, 0, 0, 0.75f),
+            };
+
+            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
 
             this.agent = new Player()
             {
@@ -79,9 +93,6 @@ namespace Collada
         private void InitializeEnvironment()
         {
             GameEnvironment.Background = Color.DarkGray;
-
-            BoundingSphere sph = this.dungeon.GetBoundingSphere();
-            this.SceneVolume = sph;
         }
 
         public override void Update(GameTime gameTime)

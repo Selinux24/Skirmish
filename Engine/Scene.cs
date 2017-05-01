@@ -116,17 +116,13 @@ namespace Engine
         /// </summary>
         public bool Active { get; set; }
         /// <summary>
-        /// Processing order
+        /// Scene processing order
         /// </summary>
         public int Order { get; set; }
         /// <summary>
         /// Scene lights
         /// </summary>
         public SceneLights Lights { get; protected set; }
-        /// <summary>
-        /// Scene volume
-        /// </summary>
-        public BoundingSphere SceneVolume { get; protected set; }
         /// <summary>
         /// Gets the component list of the scene
         /// </summary>
@@ -184,8 +180,6 @@ namespace Engine
                 this.Game.Form.RenderHeight);
 
             this.Lights = SceneLights.Default;
-
-            this.SceneVolume = new BoundingSphere(Vector3.Zero, 1000);
 
             this.PerformFrustumCulling = true;
 

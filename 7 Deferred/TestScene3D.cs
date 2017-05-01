@@ -15,12 +15,14 @@ namespace DeferredTest
         private const float far = 1000f;
         private const float fogStart = 0.01f;
         private const float fogRange = 0.10f;
+        private const int layerHUD = 99;
 
         private Cursor cursor = null;
         private TextDrawer title = null;
         private TextDrawer load = null;
         private TextDrawer help = null;
         private TextDrawer statistics = null;
+        private Sprite backPannel = null;
 
         private Model tank = null;
         private NavigationMeshAgent tankAgent = new NavigationMeshAgent();
@@ -177,8 +179,6 @@ namespace DeferredTest
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.SceneVolume = this.terrain.GetBoundingSphere();
-
             #endregion
 
             #region Gardener
@@ -265,10 +265,10 @@ namespace DeferredTest
 
             #region Texts
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
-            this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
-            this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
-            this.statistics = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red));
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
+            this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+            this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+            this.statistics = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red), layerHUD);
 
             this.title.Text = "Deferred Ligthning test";
             this.load.Text = loadingText;
@@ -279,6 +279,16 @@ namespace DeferredTest
             this.load.Position = new Vector2(0, this.title.Top + this.title.Height + 2);
             this.help.Position = new Vector2(0, this.load.Top + this.load.Height + 2);
             this.statistics.Position = new Vector2(0, this.help.Top + this.help.Height + 2);
+
+            var spDesc = new SpriteDescription()
+            {
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.statistics.Top + this.statistics.Height + 3,
+                Color = new Color4(0, 0, 0, 0.75f),
+            };
+
+            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
 
             #endregion
 

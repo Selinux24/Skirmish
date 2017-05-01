@@ -9,10 +9,13 @@ namespace ModelDrawing
 {
     public class TestScene : Scene
     {
+        private const int layerHUD = 99;
+
         private TextDrawer text = null;
         private TextDrawer statistics = null;
         private TextDrawer text1 = null;
         private TextDrawer text2 = null;
+        private Sprite backPannel = null;
 
         private Model floor = null;
 
@@ -50,19 +53,29 @@ namespace ModelDrawing
         }
         private void InitializeTexts()
         {
-            this.text = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed });
-            this.statistics = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue });
-            this.text1 = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue });
-            this.text2 = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue });
-         
+            this.text = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed }, layerHUD);
+            this.statistics = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, layerHUD);
+            this.text1 = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, layerHUD);
+            this.text2 = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, layerHUD);
+
             this.text.Position = Vector2.One;
             this.statistics.Position = Vector2.One;
             this.text1.Position = Vector2.One;
             this.text2.Position = Vector2.One;
-            
+
             this.statistics.Top = this.text.Top + this.text.Height + 5;
             this.text1.Top = this.statistics.Top + this.statistics.Height + 5;
             this.text2.Top = this.text1.Top + this.text1.Height + 5;
+
+            var spDesc = new SpriteDescription()
+            {
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.text2.Top + this.text2.Height + 3,
+                Color = new Color4(0, 0, 0, 0.75f),
+            };
+
+            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
         }
         private void InitializeFloor()
         {

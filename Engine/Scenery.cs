@@ -142,6 +142,7 @@ namespace Engine
                         else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                         {
                             ((EffectShadowBasic)sceneryEffect).UpdatePerObject(
+                                mat.DiffuseTexture,
                                 0,
                                 0);
                         }
@@ -335,9 +336,10 @@ namespace Engine
                         context.EyePosition,
                         context.Lights,
                         context.ShadowMaps,
-                        context.ShadowMapStatic,
-                        context.ShadowMapDynamic,
-                        context.FromLightViewProjection);
+                        context.ShadowMapLow,
+                        context.ShadowMapHigh,
+                        context.FromLightViewProjectionLow,
+                        context.FromLightViewProjectionHigh);
 
                     #endregion
                 }

@@ -825,9 +825,10 @@ namespace Engine
                 context.EyePosition,
                 context.Lights,
                 context.ShadowMaps,
-                context.ShadowMapStatic,
-                context.ShadowMapDynamic,
-                context.FromLightViewProjection);
+                context.ShadowMapLow,
+                context.ShadowMapHigh,
+                context.FromLightViewProjectionLow,
+                context.FromLightViewProjectionHigh);
 
             #endregion
 

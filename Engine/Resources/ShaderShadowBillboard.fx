@@ -58,7 +58,7 @@ GSVertexBillboard VSBillboard(VSVertexBillboard input)
 }
 
 [maxvertexcount(4)]
-void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSShadowMapOutput> outputStream)
+void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSShadowMapBillboard> outputStream)
 {
 	float3 look = gEyePositionWorld - input[0].centerWorld;
 	if(gEndRadius == 0 || length(look) < gEndRadius)
@@ -85,7 +85,7 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 		}
 
 		//Transform quad vertices to world space and output them as a triangle strip.
-		PSShadowMapOutput gout;
+		PSShadowMapBillboard gout;
 		[unroll]
 		for(int i = 0; i < 4; ++i)
 		{
@@ -108,12 +108,12 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 	}
 }
 
-float4 PSBillboard(PSShadowMapOutput input) : SV_Target
+float4 PSBillboard(PSShadowMapBillboard input) : SV_Target
 {
 	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
 
-	if(textureColor.a > 0.05f)
+	if(textureColor.a > 0.8f)
 	{
 		float depthValue = input.depth.z / input.depth.w;
 

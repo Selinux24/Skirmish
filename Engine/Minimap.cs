@@ -115,8 +115,6 @@ namespace Engine
             {
                 DrawerMode = DrawerModesEnum.Forward,
                 World = Matrix.Identity,
-                View = view,
-                Projection = proj,
                 ViewProjection = view * proj,
                 EyePosition = eyePos,
                 EyeTarget = target,

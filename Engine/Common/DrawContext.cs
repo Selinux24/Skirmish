@@ -11,62 +11,67 @@ namespace Engine.Common
         /// <summary>
         /// Context name
         /// </summary>
-        public string Name = "";
+        public string Name { get; set; }
         /// <summary>
         /// Game time
         /// </summary>
-        public GameTime GameTime;
+        public GameTime GameTime { get; set; }
         /// <summary>
         /// Drawer mode
         /// </summary>
-        public DrawerModesEnum DrawerMode = DrawerModesEnum.Forward;
+        public DrawerModesEnum DrawerMode { get; set; }
         /// <summary>
         /// World matrix
         /// </summary>
-        public Matrix World;
-        /// <summary>
-        /// View matrix
-        /// </summary>
-        public Matrix View;
-        /// <summary>
-        /// Projection matrix
-        /// </summary>
-        public Matrix Projection;
+        public Matrix World { get; set; }
         /// <summary>
         /// View * projection matrix
         /// </summary>
-        public Matrix ViewProjection;
+        public Matrix ViewProjection { get; set; }
         /// <summary>
         /// Bounding frustum
         /// </summary>
-        public BoundingFrustum Frustum;
+        public BoundingFrustum Frustum { get; set; }
         /// <summary>
         /// Eye position
         /// </summary>
-        public Vector3 EyePosition;
+        public Vector3 EyePosition { get; set; }
         /// <summary>
         /// Eye target
         /// </summary>
-        public Vector3 EyeTarget;
+        public Vector3 EyeTarget { get; set; }
         /// <summary>
         /// Lights
         /// </summary>
-        public SceneLights Lights;
-        /// <summary>
-        /// View * projection from light matrix
-        /// </summary>
-        public Matrix FromLightViewProjection;
+        public SceneLights Lights { get; set; }
         /// <summary>
         /// Shadow maps
         /// </summary>
-        public int ShadowMaps;
+        public int ShadowMaps { get; set; }
         /// <summary>
-        /// Static shadow map
+        /// View * projection from light matrix for static shadows
         /// </summary>
-        public ShaderResourceView ShadowMapStatic;
+        public Matrix FromLightViewProjectionLow { get; set; }
         /// <summary>
-        /// Dynamic shadow map
+        /// View * projection from light matrix for dynamic shadows
         /// </summary>
-        public ShaderResourceView ShadowMapDynamic;
+        public Matrix FromLightViewProjectionHigh { get; set; }
+        /// <summary>
+        /// Low definition shadow map
+        /// </summary>
+        public ShaderResourceView ShadowMapLow { get; set; }
+        /// <summary>
+        /// High definition shadow map
+        /// </summary>
+        public ShaderResourceView ShadowMapHigh { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public DrawContext()
+        {
+            this.Name = string.Empty;
+            this.DrawerMode = DrawerModesEnum.Forward;
+        }
     }
 }

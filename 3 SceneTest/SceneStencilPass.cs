@@ -43,8 +43,6 @@ namespace SceneTest
             this.InitializeLights();
 
             this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 5000);
-
-            this.SceneVolume = new BoundingSphere(Vector3.Zero, 50f);
         }
 
         private void InitializeFloorAsphalt()

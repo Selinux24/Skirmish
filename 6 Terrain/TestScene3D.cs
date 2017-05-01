@@ -27,7 +27,7 @@ namespace TerrainTest
         };
 
         private bool useDebugTex = false;
-        private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapStatic;
+        private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapDynamic;
         private SpriteTexture shadowMapDrawer = null;
         private ShaderResourceView debugTex = null;
         private int graphIndex = -1;
@@ -42,6 +42,7 @@ namespace TerrainTest
         private TextDrawer stats = null;
         private TextDrawer counters1 = null;
         private TextDrawer counters2 = null;
+        private Sprite backPannel = null;
 
         private Model cursor3D = null;
         private Cursor cursor2D = null;
@@ -154,6 +155,16 @@ namespace TerrainTest
             this.stats.Position = new Vector2(0, 46);
             this.counters1.Position = new Vector2(0, 68);
             this.counters2.Position = new Vector2(0, 90);
+
+            var spDesc = new SpriteDescription()
+            {
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.counters2.Top + this.counters2.Height + 3,
+                Color = new Color4(0, 0, 0, 0.75f),
+            };
+
+            this.backPannel = this.AddSprite(spDesc, layerHud - 1);
 
             #endregion
 
@@ -641,7 +652,7 @@ namespace TerrainTest
                 Channel = SpriteTextureChannelsEnum.Red,
             };
             this.shadowMapDrawer = this.AddSpriteTexture(stDescription, this.layerHud);
-            this.shadowMapDrawer.Visible = false;
+            this.shadowMapDrawer.Visible = true;
             this.shadowMapDrawer.DeferredEnabled = false;
 
             this.debugTex = this.Game.ResourceManager.CreateResource(@"Resources\uvtest.png");
@@ -716,8 +727,6 @@ namespace TerrainTest
 
             this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
             this.Camera.LookTo(this.helicopter.Manipulator.Position);
-
-            this.SceneVolume = this.terrain.GetBoundingSphere();
         }
         public override void Dispose()
         {

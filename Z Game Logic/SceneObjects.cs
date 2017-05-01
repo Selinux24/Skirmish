@@ -13,6 +13,8 @@ namespace GameLogic
 
     public class SceneObjects : Scene
     {
+        private const int layerHUD = 99;
+
         private TextDrawer txtTitle = null;
         private TextDrawer txtGame = null;
         private TextDrawer txtTeam = null;
@@ -131,8 +133,11 @@ namespace GameLogic
                 "cursor.xml",
                 new ModelDescription()
                 {
-                    CastShadow = true
-                });
+                    CastShadow = false,
+                    DepthEnabled = false,
+                },
+                true,
+                layerHUD);
 
             this.terrain = this.AddScenery(
                 "Resources3D",
@@ -166,17 +171,27 @@ namespace GameLogic
             {
                 ContentPath = "Resources",
                 Textures = new[] { "HUD.png" },
-                Color = new Color4(1f, 1f, 1f, 0.75f),
+                Color = new Color4(1f, 1f, 1f, 1f),
             };
-            this.sprHUD = this.AddBackgroud(bkDesc);
+            this.sprHUD = this.AddBackgroud(bkDesc, layerHUD - 1);
 
-            int minimapWidth = this.Game.Form.RenderWidth / 4;
-            int minimapHeight = this.Game.Form.RenderHeight / 4;
+            int minimapHeight = (this.Game.Form.RenderHeight / 4) - 8;
+            int minimapWidth = minimapHeight;
+
+            var topLeft = new Vector2(593, 443);
+            var bottomRight = new Vector2(789, 590);
+            var tRes = new Vector2(800, 600);
+            var wRes = new Vector2(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+
+            var pTopLeft = wRes / tRes * topLeft;
+            var pBottomRight = wRes / tRes * bottomRight;
+
+            var q = pTopLeft + ((pBottomRight - pTopLeft - new Vector2(minimapWidth, minimapHeight)) * 0.5f);
 
             MinimapDescription minimapDesc = new MinimapDescription()
             {
-                Left = this.Game.Form.RenderWidth - minimapWidth - (this.Game.Form.RenderWidth / 100),
-                Top = this.Game.Form.RenderHeight - minimapHeight - (this.Game.Form.RenderHeight / 100),
+                Top = (int)q.Y,
+                Left = (int)q.X,
                 Width = minimapWidth,
                 Height = minimapHeight,
                 Drawables = new Drawable[]
@@ -186,14 +201,14 @@ namespace GameLogic
                 },
                 MinimapArea = this.terrain.GetBoundingBox(),
             };
-            this.minimap = this.AddMinimap(minimapDesc);
+            this.minimap = this.AddMinimap(minimapDesc, layerHUD);
 
-            this.txtTitle = this.AddText(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray));
-            this.txtGame = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue));
-            this.txtTeam = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow));
-            this.txtSoldier = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow));
-            this.txtActionList = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow));
-            this.txtAction = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow));
+            this.txtTitle = this.AddText(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), layerHUD);
+            this.txtGame = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), layerHUD);
+            this.txtTeam = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), layerHUD);
+            this.txtSoldier = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), layerHUD);
+            this.txtActionList = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), layerHUD);
+            this.txtAction = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), layerHUD);
 
             this.butClose = this.AddSpriteButton(new SpriteButtonDescription()
             {
@@ -209,7 +224,7 @@ namespace GameLogic
                     ShadowColor = Color.Orange,
                 },
                 Text = "EXIT",
-            });
+            }, layerHUD);
 
             this.butNext = this.AddSpriteButton(new SpriteButtonDescription()
             {
@@ -224,7 +239,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next",
-            });
+            }, layerHUD);
 
             this.butPrevSoldier = this.AddSpriteButton(new SpriteButtonDescription()
             {
@@ -239,7 +254,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Soldier",
-            });
+            }, layerHUD);
 
             this.butNextSoldier = this.AddSpriteButton(new SpriteButtonDescription()
             {
@@ -254,7 +269,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Soldier",
-            });
+            }, layerHUD);
 
             this.butPrevAction = this.AddSpriteButton(new SpriteButtonDescription()
             {
@@ -269,7 +284,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Action",
-            });
+            }, layerHUD);
 
             this.butNextAction = this.AddSpriteButton(new SpriteButtonDescription()
             {
@@ -284,7 +299,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Action",
-            });
+            }, layerHUD);
 
             this.butClose.Click += (sender, eventArgs) => { this.Game.Exit(); };
             this.butNext.Click += (sender, eventArgs) => { this.NextPhase(); };
@@ -296,8 +311,6 @@ namespace GameLogic
             this.txtTitle.Text = "Game Logic";
 
             #endregion
-
-            this.SceneVolume = this.terrain.GetBoundingSphere();
 
             this.UpdateLayout();
 
@@ -602,6 +615,7 @@ namespace GameLogic
                     p.AddLoop("stand");
                     instance.AnimationController.AddPath(p);
                     instance.AnimationController.Start(soldierIndex);
+                    instance.AnimationController.TimeDelta = 0.1f;
 
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
                     float z = (teamIndex * teamSeparation) - (gameWidth * 0.5f);

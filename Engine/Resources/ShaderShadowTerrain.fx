@@ -8,9 +8,9 @@ cbuffer cbPerFrame : register (b0)
 	float4x4 gWorldViewProjection;
 };
 
-ShadowMapOutput VSTerrain(VSVertexTerrain input)
+PSShadowMapPosition VSTerrain(VSVertexTerrain input)
 {
-	ShadowMapOutput output = (ShadowMapOutput)0;
+	PSShadowMapPosition output = (PSShadowMapPosition)0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection);
 

@@ -31,7 +31,8 @@ cbuffer cbPerFrame : register (b2)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
-	float4x4 gLightViewProjection;
+	float4x4 gLightViewProjectionLD;
+	float4x4 gLightViewProjectionHD;
 	float3 gEyePositionWorld;
 	float gGlobalAmbient;
 	uint3 gLightCount;
@@ -52,8 +53,8 @@ cbuffer cbPerFrame : register (b2)
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
 };
 Texture2DArray gTextureArray;
-Texture2D gShadowMapStatic;
-Texture2D gShadowMapDynamic;
+Texture2D gShadowMapLD;
+Texture2D gShadowMapHD;
 
 float3 CalcWindTranslation(uint primID, float3 pos, float3 windDirection, float windStrength)
 {
@@ -135,7 +136,8 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 
 	Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gMaterialPaletteWidth);
 
-	float4 lightPosition = mul(float4(input.positionWorld, 1), gLightViewProjection);
+	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gLightViewProjectionLD);
+	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gLightViewProjectionHD);
 
 	ComputeLightsInput lInput;
 
@@ -155,10 +157,11 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
 	lInput.pColorDiffuse = textureColor;
 	lInput.pColorSpecular = 1;
 	lInput.ePosition = gEyePositionWorld;
-	lInput.sLightPosition = lightPosition;
+	lInput.sLightPositionLD = lightPositionLD;
+	lInput.sLightPositionHD = lightPositionHD;
 	lInput.shadows = gShadows;
-	lInput.shadowMapStatic = gShadowMapStatic;
-	lInput.shadowMapDynamic = gShadowMapDynamic;
+	lInput.shadowMapLD = gShadowMapLD;
+	lInput.shadowMapHD = gShadowMapHD;
 	lInput.lod = gLOD;
 
 	float4 litColor = ComputeLights(lInput);

@@ -48,9 +48,13 @@ namespace Engine
         /// </summary>
         private Viewport viewport;
         /// <summary>
-        /// Shadow mapper
+        /// High definition shadow mapper
         /// </summary>
-        private ShadowMap shadowMapper = null;
+        private ShadowMap shadowMapperHigh = null;
+        /// <summary>
+        /// Low definition shadow mapper
+        /// </summary>
+        private ShadowMap shadowMapperLow = null;
         /// <summary>
         /// Geometry buffer
         /// </summary>
@@ -129,39 +133,35 @@ namespace Engine
         /// </summary>
         protected DrawContext DrawShadowsContext = null;
         /// <summary>
-        /// Static shadow map
+        /// Low definition shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMapStatic
+        protected ShaderResourceView ShadowMapLow
         {
             get
             {
-                if (this.shadowMapper != null)
+                if (this.shadowMapperLow != null)
                 {
-                    return this.shadowMapper.TextureStatic;
+                    return this.shadowMapperLow.Texture;
                 }
 
                 return null;
             }
         }
         /// <summary>
-        /// Dynamic shadow map
+        /// High definition shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMapDynamic
+        protected ShaderResourceView ShadowMapHigh
         {
             get
             {
-                if (this.shadowMapper != null)
+                if (this.shadowMapperHigh != null)
                 {
-                    return this.shadowMapper.TextureDynamic;
+                    return this.shadowMapperHigh.Texture;
                 }
 
                 return null;
             }
         }
-        /// <summary>
-        /// Gets or sets whether the static shadow map must be updated in the next frame
-        /// </summary>
-        protected bool UpdateShadowMapStatic { get; set; }
         /// <summary>
         /// Gets or sets whether the renderer was updated
         /// </summary>
@@ -207,12 +207,14 @@ namespace Engine
 
             this.UpdateRectangleAndView();
 
-            this.shadowMapper = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
+            this.shadowMapperLow = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
+            this.shadowMapperHigh = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
+
             this.geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 3);
             this.lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 1);
 
             this.dirLightInputLayout = new InputLayout(
-                game.Graphics.Device, 
+                game.Graphics.Device,
                 DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.GetPassByIndex(0).Description.Signature,
                 VertexPosition.Input(BufferSlot));
 
@@ -247,15 +249,14 @@ namespace Engine
                 Name = "Secondary",
                 DrawerMode = DrawerModesEnum.ShadowMap,
             };
-
-            this.UpdateShadowMapStatic = true;
         }
         /// <summary>
         /// Dispose objects
         /// </summary>
         public virtual void Dispose()
         {
-            Helper.Dispose(this.shadowMapper);
+            Helper.Dispose(this.shadowMapperLow);
+            Helper.Dispose(this.shadowMapperHigh);
             Helper.Dispose(this.geometryBuffer);
             Helper.Dispose(this.lightBuffer);
             Helper.Dispose(this.lightGeometryVertexBuffer);
@@ -306,8 +307,6 @@ namespace Engine
             this.UpdateContext.EyePosition = scene.Camera.Position;
             this.UpdateContext.EyeDirection = scene.Camera.Direction;
             this.UpdateContext.Lights = scene.Lights;
-
-            this.UpdateShadowMapStatic = scene.TimeOfDay.Updated;
 
             //Cull lights
             scene.Lights.Cull(this.UpdateContext.Frustum, this.UpdateContext.EyePosition);
@@ -372,8 +371,6 @@ namespace Engine
                     //Initialize context data from update context
                     this.DrawContext.GameTime = gameTime;
                     this.DrawContext.World = this.UpdateContext.World;
-                    this.DrawContext.View = this.UpdateContext.View;
-                    this.DrawContext.Projection = this.UpdateContext.Projection;
                     this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
                     this.DrawContext.Frustum = this.UpdateContext.Frustum;
                     this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
@@ -381,9 +378,10 @@ namespace Engine
                     //Initialize context data from scene
                     this.DrawContext.Lights = scene.Lights;
                     this.DrawContext.ShadowMaps = 0;
-                    this.DrawContext.ShadowMapStatic = null;
-                    this.DrawContext.ShadowMapDynamic = null;
-                    this.DrawContext.FromLightViewProjection = Matrix.Identity;
+                    this.DrawContext.ShadowMapLow = null;
+                    this.DrawContext.ShadowMapHigh = null;
+                    this.DrawContext.FromLightViewProjectionLow = Matrix.Identity;
+                    this.DrawContext.FromLightViewProjectionHigh = Matrix.Identity;
 #if DEBUG
                     swStartup.Stop();
 
@@ -400,9 +398,16 @@ namespace Engine
 #if DEBUG
                         Stopwatch swShadowsPreparation = Stopwatch.StartNew();
 #endif
+                        Vector3 lightPosition;
+                        Vector3 lightDirection;
+                        ShadowMap.SetLight(shadowCastingLights[0], scene.Lights.FarLightsDistance, out lightPosition, out lightDirection);
+
+                        ShadowMapFlags flags = ShadowMapFlags.None;
 
                         this.DrawShadowsContext.GameTime = gameTime;
                         this.DrawShadowsContext.World = this.UpdateContext.World;
+                        this.DrawShadowsContext.EyePosition = lightPosition;
+                        this.DrawShadowsContext.EyeTarget = lightDirection;
 #if DEBUG
                         swShadowsPreparation.Stop();
 
@@ -413,34 +418,48 @@ namespace Engine
 #endif
                         #endregion
 
-                        if (this.UpdateShadowMapStatic)
-                        {
-                            #region Static shadow map
+                        #region Shadow map
 
-                            //Draw static components if cast shadow
-                            List<Drawable> staticObjs = visibleComponents.FindAll(c => c.CastShadow == true && c.Static == true);
-                            if (staticObjs.Count > 0)
+                        //Draw components if drop shadow (opaque)
+                        var shadowObjs = scene.Components.FindAll(c => c.CastShadow == true);
+                        if (shadowObjs.Count > 0)
+                        {
+                            #region Cull
+
+#if DEBUG
+                            Stopwatch swCull = Stopwatch.StartNew();
+#endif
+                            var cntType = this.DrawContext.Frustum.Contains(new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance));
+
+                            shadowObjs.ForEach(o => o.SetCulling(cntType == ContainmentType.Disjoint));
+#if DEBUG
+                            swCull.Stop();
+
+                            shadowMap_cull += swCull.ElapsedTicks;
+#endif
+                            #endregion
+
+                            if (shadowObjs.Exists(o => o.Cull == false))
                             {
-                                if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Static))
-                                {
-                                    this.shadowMapper.Flags |= ShadowMapFlags.Static;
-                                }
+                                flags |= ShadowMapFlags.LowDefinition;
 
                                 #region Draw
+
 #if DEBUG
                                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                                var cntType = this.DrawContext.Frustum.Contains(scene.SceneVolume);
+                                var fromLightVP = this.shadowMapperLow.GetFromLightViewProjection(
+                                    lightPosition,
+                                    this.DrawContext.EyePosition,
+                                    scene.Lights.ShadowLDDistance);
 
-                                staticObjs.ForEach(o => o.SetCulling(cntType == ContainmentType.Disjoint));
+                                this.DrawShadowsContext.ViewProjection = fromLightVP;
 
-                                this.shadowMapper.Update(
-                                    shadowCastingLights[0],
-                                    scene.SceneVolume.Center,
-                                    scene.SceneVolume.Radius,
-                                    ref this.DrawShadowsContext);
-                                this.BindShadowMap(this.shadowMapper.DepthMapStatic);
-                                this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, staticObjs);
+                                this.BindShadowMap(this.shadowMapperLow.Viewport, this.shadowMapperLow.DepthMap);
+                                this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, shadowObjs);
+
+                                this.DrawContext.ShadowMapLow = this.shadowMapperLow.Texture;
+                                this.DrawContext.FromLightViewProjectionLow = fromLightVP;
 #if DEBUG
                                 swDraw.Stop();
 
@@ -449,31 +468,13 @@ namespace Engine
                                 #endregion
                             }
 
-                            #endregion
-
-                            this.UpdateShadowMapStatic = false;
-                        }
-
-                        #region Dynamic shadow map
-
-                        //Draw dynamic components if drop shadow (opaque)
-                        List<Drawable> dynamicObjs = visibleComponents.FindAll(c => c.CastShadow == true && c.Static == false);
-                        if (dynamicObjs.Count > 0)
-                        {
                             #region Cull
 #if DEBUG
-                            Stopwatch swCull = Stopwatch.StartNew();
+                            swCull = Stopwatch.StartNew();
 #endif
-                            bool draw = false;
-                            if (scene.PerformFrustumCulling)
-                            {
-                                //Frustum culling
-                                draw = scene.CullTest(this.DrawContext.Frustum, dynamicObjs);
-                            }
-                            else
-                            {
-                                draw = true;
-                            }
+                            cntType = this.DrawContext.Frustum.Contains(new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance));
+
+                            shadowObjs.ForEach(o => o.SetCulling(cntType == ContainmentType.Disjoint));
 #if DEBUG
                             swCull.Stop();
 
@@ -481,42 +482,40 @@ namespace Engine
 #endif
                             #endregion
 
-                            #region Draw
-
-                            if (draw)
+                            if (shadowObjs.Exists(o => o.Cull == false))
                             {
-                                if (!this.shadowMapper.Flags.HasFlag(ShadowMapFlags.Dynamic))
-                                {
-                                    this.shadowMapper.Flags |= ShadowMapFlags.Dynamic;
-                                }
+                                flags |= ShadowMapFlags.HighDefinition;
 
+                                #region Draw
 #if DEBUG
                                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                                this.shadowMapper.Update(
-                                    shadowCastingLights[0],
-                                    scene.SceneVolume.Center,
-                                    scene.SceneVolume.Radius,
-                                    ref this.DrawShadowsContext);
-                                this.BindShadowMap(this.shadowMapper.DepthMapDynamic);
-                                this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, dynamicObjs);
+                                Matrix fromLightVP = this.shadowMapperHigh.GetFromLightViewProjection(
+                                    lightPosition,
+                                    this.DrawContext.EyePosition,
+                                    scene.Lights.ShadowHDDistance);
+
+                                this.DrawShadowsContext.ViewProjection = fromLightVP;
+
+                                this.BindShadowMap(this.shadowMapperHigh.Viewport, this.shadowMapperHigh.DepthMap);
+                                this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, shadowObjs);
+
+                                this.DrawContext.ShadowMapHigh = this.shadowMapperHigh.Texture;
+                                this.DrawContext.FromLightViewProjectionHigh = fromLightVP;
 #if DEBUG
                                 swDraw.Stop();
 
                                 shadowMap_draw += swDraw.ElapsedTicks;
 #endif
-                            }
 
-                            #endregion
+                                #endregion
+                            }
                         }
 
                         #endregion
 
-                        //Set shadow map and transform to drawing context
-                        this.DrawContext.ShadowMaps = (int)this.shadowMapper.Flags;
-                        this.DrawContext.ShadowMapStatic = this.shadowMapper.TextureStatic;
-                        this.DrawContext.ShadowMapDynamic = this.shadowMapper.TextureDynamic;
-                        this.DrawContext.FromLightViewProjection = this.shadowMapper.ViewProjection;
+                        //Set shadow map flags to drawing context
+                        this.DrawContext.ShadowMaps = (int)flags;
                     }
 
                     #endregion
@@ -792,8 +791,8 @@ namespace Engine
         /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
         public virtual ShaderResourceView GetResource(SceneRendererResultEnum result)
         {
-            if (result == SceneRendererResultEnum.ShadowMapStatic) return this.ShadowMapStatic;
-            if (result == SceneRendererResultEnum.ShadowMapDynamic) return this.ShadowMapDynamic;
+            if (result == SceneRendererResultEnum.ShadowMapStatic) return this.ShadowMapLow;
+            if (result == SceneRendererResultEnum.ShadowMapDynamic) return this.ShadowMapHigh;
             if (result == SceneRendererResultEnum.LightMap) return this.LightMap[0];
 
             if (this.GeometryMap != null && this.GeometryMap.Length > 0)
@@ -915,10 +914,12 @@ namespace Engine
         /// <summary>
         /// Binds graphics for shadow mapping pass
         /// </summary>
-        private void BindShadowMap(DepthStencilView dsv)
+        /// <param name="viewport">Viewport</param>
+        /// <param name="dsv">Deph stencil buffer</param>
+        private void BindShadowMap(Viewport viewport, DepthStencilView dsv)
         {
             //Set shadow mapper viewport
-            this.Game.Graphics.SetViewport(this.shadowMapper.Viewport);
+            this.Game.Graphics.SetViewport(viewport);
 
             //Set shadow map depth map without render target
             this.Game.Graphics.SetRenderTarget(
@@ -1022,18 +1023,19 @@ namespace Engine
                 {
                     effect.UpdatePerLight(
                         directionalLights[i],
-                        context.FromLightViewProjection,
+                        context.FromLightViewProjectionLow,
+                        context.FromLightViewProjectionHigh,
                         context.ShadowMaps,
-                        context.ShadowMapStatic,
-                        context.ShadowMapDynamic);
+                        context.ShadowMapLow,
+                        context.ShadowMapHigh);
 
                     for (int p = 0; p < effectTechnique.Description.PassCount; p++)
                     {
                         effectTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
 
                         this.Game.Graphics.DeviceContext.DrawIndexed(
-                            this.screenGeometry.IndexCount, 
-                            this.screenGeometry.Offset, 
+                            this.screenGeometry.IndexCount,
+                            this.screenGeometry.Offset,
                             0);
 
                         Counters.DrawCallsPerFrame++;

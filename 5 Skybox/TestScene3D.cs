@@ -11,6 +11,8 @@ namespace Skybox
 {
     public class TestScene3D : Scene
     {
+        private const int layerHUD = 99;
+
         private Vector2[] firePositions = new[]
         {
             new Vector2(+5, +5),
@@ -36,6 +38,7 @@ namespace Skybox
         private TextDrawer title = null;
         private TextDrawer help = null;
         private TextDrawer fps = null;
+        private Sprite backPannel = null;
 
         private Skydom skydom = null;
         private Scenery ruins = null;
@@ -82,9 +85,9 @@ namespace Skybox
 
             #region Text
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
-            this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
-            this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow));
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
+            this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+            this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
 
             this.title.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -97,6 +100,16 @@ namespace Skybox
             this.title.Position = Vector2.Zero;
             this.help.Position = new Vector2(0, 24);
             this.fps.Position = new Vector2(0, 40);
+
+            var spDesc = new SpriteDescription()
+            {
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.fps.Top + this.fps.Height + 3,
+                Color = new Color4(0, 0, 0, 0.75f),
+            };
+
+            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
 
             #endregion
 
@@ -270,8 +283,6 @@ namespace Skybox
             this.ruins.AttachFullPickingFullPathFinding(this.torchs);
 
             #endregion
-
-            this.SceneVolume = this.ruins.GetBoundingSphere();
 
             this.InitializeCamera();
         }

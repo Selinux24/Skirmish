@@ -32,7 +32,8 @@ cbuffer cbVSPerInstance : register (b2)
 
 cbuffer cbPSPerFrame : register (b3)
 {
-	float4x4 gPSLightViewProjection;
+	float4x4 gPSLightViewProjectionLD;
+	float4x4 gPSLightViewProjectionHD;
 	float3 gPSEyePositionWorld;
 	float gPSGlobalAmbient;
 	uint3 gPSLightCount;
@@ -46,8 +47,8 @@ cbuffer cbPSPerFrame : register (b3)
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
 };
-Texture2D gPSShadowMapStatic;
-Texture2D gPSShadowMapDynamic;
+Texture2D gPSShadowMapLD;
+Texture2D gPSShadowMapHD;
 
 cbuffer cbPSPerObject : register (b4)
 {
@@ -240,7 +241,8 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 {
 	Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex, gMaterialPaletteWidth);
 
-	float4 lightPosition = mul(float4(input.positionWorld, 1), gPSLightViewProjection);
+	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
+	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
 
 	ComputeLightsInput lInput;
 
@@ -261,10 +263,11 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.pColorDiffuse = input.color;
 	lInput.pColorSpecular = 1;
 	lInput.ePosition = gPSEyePositionWorld;
-	lInput.sLightPosition = lightPosition;
+	lInput.sLightPositionLD = lightPositionLD;
+	lInput.sLightPositionHD = lightPositionHD;
 	lInput.shadows = gPSShadows;
-	lInput.shadowMapStatic = gPSShadowMapStatic;
-	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+	lInput.shadowMapLD = gPSShadowMapLD;
+	lInput.shadowMapHD = gPSShadowMapHD;
 
 	return ComputeLights(lInput);
 }
@@ -494,7 +497,8 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		specularMap = gPSSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	}
 
-	float4 lightPosition = mul(float4(input.positionWorld, 1), gPSLightViewProjection);
+	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
+	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
 
 	ComputeLightsInput lInput;
 
@@ -515,10 +519,11 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	lInput.pColorDiffuse = diffuseMap;
 	lInput.pColorSpecular = specularMap;
 	lInput.ePosition = gPSEyePositionWorld;
-	lInput.sLightPosition = lightPosition;
+	lInput.sLightPositionLD = lightPositionLD;
+	lInput.sLightPositionHD = lightPositionHD;
 	lInput.shadows = gPSShadows;
-	lInput.shadowMapStatic = gPSShadowMapStatic;
-	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+	lInput.shadowMapLD = gPSShadowMapLD;
+	lInput.shadowMapHD = gPSShadowMapHD;
 
 	return ComputeLights(lInput);
 }
@@ -640,13 +645,14 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	float3 normalWorld = input.normalWorld;
 
 	float distToEye = length(gPSEyePositionWorld - input.positionWorld);
-	if (distToEye <= gLOD.x) 
+	if (distToEye <= gLOD.x)
 	{
 		float3 normalMap = gPSNormalMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
 		normalWorld = NormalSampleToWorldSpace(normalMap, input.normalWorld, input.tangentWorld);
 	}
 
-	float4 lightPosition = mul(float4(input.positionWorld, 1), gPSLightViewProjection);
+	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
+	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
 
 	ComputeLightsInput lInput;
 
@@ -667,10 +673,11 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	lInput.pColorDiffuse = diffuseMap;
 	lInput.pColorSpecular = specularMap;
 	lInput.ePosition = gPSEyePositionWorld;
-	lInput.sLightPosition = lightPosition;
+	lInput.sLightPositionLD = lightPositionLD;
+	lInput.sLightPositionHD = lightPositionHD;
 	lInput.shadows = gPSShadows;
-	lInput.shadowMapStatic = gPSShadowMapStatic;
-	lInput.shadowMapDynamic = gPSShadowMapDynamic;
+	lInput.shadowMapLD = gPSShadowMapLD;
+	lInput.shadowMapHD = gPSShadowMapHD;
 
 	return ComputeLights(lInput);
 }

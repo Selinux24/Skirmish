@@ -25,8 +25,9 @@ SamplerState SamplerAnisotropic
 SamplerComparisonState SamplerComparisonLessEqual
 {
 	Filter = COMPARISON_MIN_MAG_MIP_LINEAR;
-	AddressU = MIRROR;
-	AddressV = MIRROR;
+	AddressU = BORDER;
+	AddressV = BORDER;
+	BorderColor = float4(1,1,1,1);
 
 	ComparisonFunc = LESS_EQUAL;
 };
@@ -220,28 +221,34 @@ inline float3 NormalSampleToWorldSpace(float3 normalMapSample, float3 normalW, f
 
 	return normalize((normalT.x * tangentW) + (normalT.y * binormalW) + (normalT.z * normalW));
 }
-inline float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shadowMapStatic, Texture2D shadowMapDynamic)
+inline float CalcShadowFactor(uint shadows, float4 lightPositionLD, float4 lightPositionHD, Texture2D shadowMapLD, Texture2D shadowMapHD)
 {
 	uint samples = 16;
 	float factor = 0.8f;
 	float bias = 0.0001f;
 	float poissonFactor = 3500.0f;
 
-	float2 tex = 0.0f;
-	tex.x = (+lightPosition.x / lightPosition.w * 0.5f) + 0.5f;
-	tex.y = (-lightPosition.y / lightPosition.w * 0.5f) + 0.5f;
-	float z = (lightPosition.z / lightPosition.w) - bias;
+	float2 texL = 0.0f;
+	texL.x = (+lightPositionLD.x / lightPositionLD.w * 0.5f) + 0.5f;
+	texL.y = (-lightPositionLD.y / lightPositionLD.w * 0.5f) + 0.5f;
+	float zL = (lightPositionLD.z / lightPositionLD.w) - bias;
+
+	float2 texH = 0.0f;
+	texH.x = (+lightPositionHD.x / lightPositionHD.w * 0.5f) + 0.5f;
+	texH.y = (-lightPositionHD.y / lightPositionHD.w * 0.5f) + 0.5f;
+	float zH = (lightPositionHD.z / lightPositionHD.w) - bias;
 
 	float shadow = 0.0f;
 
 	for (uint i = 0; i < samples; i++)
 	{
-		float2 stc = tex + poissonDisk[i] / poissonFactor;
+		float2 stcL = texL + poissonDisk[i] / poissonFactor;
+		float2 stcH = texH + poissonDisk[i] / poissonFactor;
 
 		[flatten]
 		if (shadows == 1)
 		{
-			if (!shadowMapStatic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
+			if (!shadowMapLD.SampleCmpLevelZero(SamplerComparisonLessEqual, stcL, zL))
 			{
 				shadow += factor;
 			}
@@ -249,7 +256,7 @@ inline float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shad
 		[flatten]
 		if (shadows == 2)
 		{
-			if (!shadowMapDynamic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
+			if (!shadowMapHD.SampleCmpLevelZero(SamplerComparisonLessEqual, stcH, zH))
 			{
 				shadow += factor;
 			}
@@ -257,8 +264,8 @@ inline float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shad
 		[flatten]
 		if (shadows == 3)
 		{
-			if (!shadowMapStatic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z) ||
-				!shadowMapDynamic.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z))
+			if (!shadowMapHD.SampleCmpLevelZero(SamplerComparisonLessEqual, stcH, zH) ||
+				!shadowMapLD.SampleCmpLevelZero(SamplerComparisonLessEqual, stcL, zL))
 			{
 				shadow += factor;
 			}
@@ -267,6 +274,7 @@ inline float CalcShadowFactor(float4 lightPosition, uint shadows, Texture2D shad
 
 	return 1.0f - (shadow / samples);
 }
+
 inline float CalcFogFactor(float distToEye, float fogStart, float fogRange)
 {
 	return saturate((distToEye - fogStart) / fogRange);
@@ -339,10 +347,11 @@ struct ComputeDirectionalLightsInput
 	float3 pPosition;
 	float3 pNormal;
 	float3 ePosition;
-	float4 sLightPosition;
+	float4 sLightPositionLD;
+	float4 sLightPositionHD;
 	uint shadows;
-	Texture2D shadowMapStatic;
-	Texture2D shadowMapDynamic;
+	Texture2D shadowMapLD;
+	Texture2D shadowMapHD;
 };
 
 inline ComputeLightsOutput ComputeDirectionalLightLOD1(ComputeDirectionalLightsInput input)
@@ -355,7 +364,7 @@ inline ComputeLightsOutput ComputeDirectionalLightLOD1(ComputeDirectionalLightsI
 	[flatten]
 	if (input.dirLight.CastShadow == 1)
 	{
-		cShadowFactor = CalcShadowFactor(input.sLightPosition, input.shadows, input.shadowMapStatic, input.shadowMapDynamic);
+		cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 	}
 
 	ComputeLightsOutput output;
@@ -373,7 +382,7 @@ inline ComputeLightsOutput ComputeDirectionalLightLOD2(ComputeDirectionalLightsI
 	[flatten]
 	if (input.dirLight.CastShadow == 1)
 	{
-		cShadowFactor = CalcShadowFactor(input.sLightPosition, input.shadows, input.shadowMapStatic, input.shadowMapDynamic);
+		cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 	}
 
 	ComputeLightsOutput output;
@@ -391,7 +400,7 @@ inline ComputeLightsOutput ComputeDirectionalLightLOD3(ComputeDirectionalLightsI
 	[flatten]
 	if (input.dirLight.CastShadow == 1)
 	{
-		cShadowFactor = CalcShadowFactor(input.sLightPosition, input.shadows, input.shadowMapStatic, input.shadowMapDynamic);
+		cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 	}
 
 	ComputeLightsOutput output;
@@ -571,10 +580,11 @@ struct ComputeLightsInput
 	float4 pColorDiffuse;
 	float4 pColorSpecular;
 	float3 ePosition;
-	float4 sLightPosition;
+	float4 sLightPositionLD;
+	float4 sLightPositionHD;
 	uint shadows;
-	Texture2D shadowMapStatic;
-	Texture2D shadowMapDynamic;
+	Texture2D shadowMapLD;
+	Texture2D shadowMapHD;
 };
 
 inline float4 ComputeLightsLOD1(ComputeLightsInput input)
@@ -593,7 +603,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
 		float cShadowFactor = 1;
 		if (input.dirLights[i].CastShadow == 1)
 		{
-			cShadowFactor = CalcShadowFactor(input.sLightPosition, input.shadows, input.shadowMapStatic, input.shadowMapDynamic);
+			cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 		}
 
 		float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal) * cShadowFactor;
@@ -659,7 +669,7 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 		float cShadowFactor = 1;
 		if (input.dirLights[i].CastShadow == 1)
 		{
-			cShadowFactor = CalcShadowFactor(input.sLightPosition, input.shadows, input.shadowMapStatic, input.shadowMapDynamic);
+			cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 		}
 
 		float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal) * cShadowFactor;
@@ -714,7 +724,7 @@ inline float4 ComputeLightsLOD3(ComputeLightsInput input)
 		float cShadowFactor = 1;
 		if (input.dirLights[i].CastShadow == 1)
 		{
-			cShadowFactor = CalcShadowFactor(input.sLightPosition, input.shadows, input.shadowMapStatic, input.shadowMapDynamic);
+			cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 		}
 
 		float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal) * cShadowFactor;

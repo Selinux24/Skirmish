@@ -11,9 +11,12 @@ namespace AnimationTest
 {
     public class TestScene3D : Scene
     {
+        private const int layerHUD = 99;
+
         private TextDrawer title = null;
         private TextDrawer runtime = null;
         private TextDrawer animText = null;
+        private Sprite backPannel = null;
 
         private Model floor = null;
 
@@ -40,15 +43,13 @@ namespace AnimationTest
 
             GameEnvironment.Background = Color.CornflowerBlue;
 
-            this.SceneVolume = new BoundingSphere(Vector3.Zero, 10f);
-
-            this.Lights.KeyLight.CastShadow = false;
+            this.Lights.KeyLight.CastShadow = true;
 
             #region Texts
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White));
-            this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow));
-            this.animText = this.AddText(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange));
+            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
+            this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), layerHUD);
+            this.animText = this.AddText(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), layerHUD);
 
             this.title.Text = "Animation test";
             this.runtime.Text = "";
@@ -57,6 +58,16 @@ namespace AnimationTest
             this.title.Position = Vector2.Zero;
             this.runtime.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
             this.animText.Position = new Vector2(5, this.runtime.Top + this.runtime.Height + 3);
+
+            var spDesc = new SpriteDescription()
+            {
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.animText.Top + this.animText.Height + 3,
+                Color = new Color4(0, 0, 0, 0.75f),
+            };
+
+            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
 
             #endregion
 

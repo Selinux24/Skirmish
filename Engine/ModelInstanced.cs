@@ -194,9 +194,10 @@ namespace Engine
                             context.EyePosition,
                             context.Lights,
                             context.ShadowMaps,
-                            context.ShadowMapStatic,
-                            context.ShadowMapDynamic,
-                            context.FromLightViewProjection);
+                            context.ShadowMapLow,
+                            context.ShadowMapHigh,
+                            context.FromLightViewProjectionLow,
+                            context.FromLightViewProjectionHigh);
                     }
                     else if (context.DrawerMode == DrawerModesEnum.Deferred)
                     {
@@ -263,6 +264,7 @@ namespace Engine
                                         else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
                                         {
                                             ((EffectShadowBasic)effect).UpdatePerObject(
+                                                mat.DiffuseTexture,
                                                 0,
                                                 0);
                                         }
