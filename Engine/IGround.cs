@@ -81,8 +81,10 @@ namespace Engine
         /// <param name="agent">Agent</param>
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
+        /// <param name="useGround">Use ground info</param>
+        /// <param name="delta">Delta amount for path refinement</param>
         /// <returns>Return path if exists</returns>
-        PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to);
+        PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to, bool useGround = true, float delta = 0f);
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>

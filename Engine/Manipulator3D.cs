@@ -40,11 +40,6 @@ namespace Engine
         protected Vector3 position = Vector3.Zero;
 
         /// <summary>
-        /// Ground
-        /// </summary>
-        protected IGround Ground = null;
-
-        /// <summary>
         /// Following path
         /// </summary>
         protected ICurve Curve = null;
@@ -244,24 +239,11 @@ namespace Engine
                 else
                 {
                     Vector3 newPosition = this.position + (Vector3.Normalize(p - this.position) * velocity);
-                    Vector3 newNormal = this.Up;
-
-                    if (this.Ground != null)
-                    {
-                        Vector3 pos;
-                        Triangle tri;
-                        float d;
-                        if (this.Ground.FindNearestGroundPosition(newPosition, out pos, out tri, out d))
-                        {
-                            newPosition = pos;
-                            newNormal = tri.Normal;
-                        }
-                    }
 
                     Vector3 view = Vector3.Normalize(this.position - newPosition);
 
                     this.position = newPosition;
-                    this.LookAt(newPosition + view, newNormal, false, 0.1f);
+                    this.LookAt(newPosition + view, Vector3.Up, false, 0.1f);
                 }
             }
             else
@@ -646,7 +628,6 @@ namespace Engine
             this.Path = path;
             this.PathTarget = 0;
             this.PathVelocity = velocity;
-            this.Ground = ground;
         }
 
         /// <summary>

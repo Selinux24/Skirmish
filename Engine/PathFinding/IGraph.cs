@@ -15,7 +15,7 @@ namespace Engine.PathFinding
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to);
+        Vector3[] FindPath(Agent agent, Vector3 from, Vector3 to);
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>

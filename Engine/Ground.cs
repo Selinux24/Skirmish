@@ -884,25 +884,81 @@ namespace Engine
         /// <param name="agent">Agent</param>
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
+        /// <param name="useGround">Use ground info</param>
+        /// <param name="delta">Delta amount for path refinement</param>
         /// <returns>Return path if exists</returns>
-        public virtual PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to)
+        public virtual PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to, bool useGround = true, float delta = 0f)
         {
+            List<Vector3> positions = new List<Vector3>();
+            List<Vector3> normals = new List<Vector3>();
+
             var path = this.navigationGraph.FindPath(agent, from, to);
-            if (path != null)
+            if (path != null && path.Length > 1)
             {
-                for (int i = 0; i < path.ReturnPath.Count; i++)
+                if (delta == 0)
                 {
-                    Vector3 position;
-                    Triangle triangle;
-                    float distance;
-                    if (FindNearestGroundPosition(path.ReturnPath[i], out position, out triangle, out distance))
+                    positions.AddRange(path);
+                    normals.AddRange(Helper.CreateArray(path.Length, new Vector3(0, 1, 0)));
+                }
+                else
+                {
+                    positions.Add(path[0]);
+                    normals.Add(Vector3.Up);
+
+                    var p0 = path[0];
+                    var p1 = path[1];
+
+                    int index = 0;
+                    while (index < path.Length - 1)
                     {
-                        path.ReturnPath[i] = position;
+                        var s = p1 - p0;
+                        var v = Vector3.Normalize(s) * delta;
+                        var l = delta - s.Length();
+
+                        if (l <= 0f)
+                        {
+                            //Into de segment
+                            p0 += v;
+                        }
+                        else if (index < path.Length - 2)
+                        {
+                            //Next segment
+                            var p2 = path[index + 2];
+                            p0 = p1 + ((p2 - p1) * l);
+                            p1 = p2;
+
+                            index++;
+                        }
+                        else
+                        {
+                            //End
+                            p0 = path[index + 1];
+
+                            index++;
+                        }
+
+                        positions.Add(p0);
+                        normals.Add(Vector3.Up);
                     }
                 }
             }
 
-            return path;
+            if (useGround)
+            {
+                for (int i = 0; i < positions.Count; i++)
+                {
+                    Vector3 position;
+                    Triangle triangle;
+                    float distance;
+                    if (FindNearestGroundPosition(positions[i], out position, out triangle, out distance))
+                    {
+                        positions[i] = position;
+                        normals[i] = triangle.Normal;
+                    }
+                }
+            }
+
+            return new PathFindingPath(positions.ToArray(), normals.ToArray());
         }
         /// <summary>
         /// Gets wether the specified position is walkable

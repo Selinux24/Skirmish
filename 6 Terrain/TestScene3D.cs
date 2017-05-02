@@ -897,7 +897,21 @@ namespace TerrainTest
             {
                 if (picked)
                 {
-                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, pickedPosition);
+                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, pickedPosition, false, 0f);
+                    if (p != null)
+                    {
+                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 10f, this.terrain);
+
+                        this.DEBUGDrawTankPath(this.tank.Manipulator.Position, p);
+                    }
+                }
+            }
+
+            if (this.Game.Input.LeftMouseButtonJustReleased)
+            {
+                if (picked)
+                {
+                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, pickedPosition, true, 0.25f);
                     if (p != null)
                     {
                         this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 10f, this.terrain);

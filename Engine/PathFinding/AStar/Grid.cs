@@ -324,7 +324,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to)
+        public Vector3[] FindPath(Agent agent, Vector3 from, Vector3 to)
         {
             return AStarQuery.FindPath(this, from, to);
         }

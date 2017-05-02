@@ -130,12 +130,12 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="from">From position</param>
         /// <param name="to">To position</param>
         /// <returns>Returns path between the specified points if exists</returns>
-        public PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to)
+        public Vector3[] FindPath(Agent agent, Vector3 from, Vector3 to)
         {
             Vector3[] path;
             if (this.Query[agent].FindPath(from, to, out path))
             {
-                return new PathFindingPath(path);
+                return path;
             }
 
             return null;
