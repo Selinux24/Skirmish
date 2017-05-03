@@ -1,7 +1,7 @@
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
-cbuffer cbPerFrame : register (b0)
+cbuffer cbPerFrame : register(b0)
 {
 	float4x4 gWorldViewProjection;
 };
@@ -20,15 +20,15 @@ PSVertexPosition VSCubic(VSVertexPosition input)
 
 float4 PSForwardCubic(PSVertexPosition input) : SV_Target
 {
-    return gCubemap.Sample(SamplerLinear, input.positionLocal);
+	return gCubemap.Sample(SamplerLinear, input.positionLocal);
 }
 
 technique11 ForwardCubemap
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSCubic()));
-        SetGeometryShader(NULL);
-        SetPixelShader(CompileShader(ps_5_0, PSForwardCubic()));
-    }
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSCubic()));
+		SetGeometryShader(NULL);
+		SetPixelShader(CompileShader(ps_5_0, PSForwardCubic()));
+	}
 }

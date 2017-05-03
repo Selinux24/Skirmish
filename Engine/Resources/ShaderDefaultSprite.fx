@@ -4,16 +4,16 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbPerFrame : register (b0)
+cbuffer cbPerFrame : register(b0)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
 };
-cbuffer cbPerObject : register (b1)
+cbuffer cbPerObject : register(b1)
 {
 	float4 gColor;
 };
-cbuffer cbPerInstance : register (b2)
+cbuffer cbPerInstance : register(b2)
 {
 	float gTextureIndex;
 };
@@ -25,13 +25,13 @@ POSITION COLOR
 **********************************************************************************************************/
 PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
 {
-    PSVertexPositionColor output = (PSVertexPositionColor)0;
+	PSVertexPositionColor output = (PSVertexPositionColor) 0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-    output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
+	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
+	output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.color = input.color;
     
-    return output;
+	return output;
 }
 
 float4 PSPositionColor(PSVertexPositionColor input) : SV_TARGET
@@ -44,14 +44,14 @@ POSITION TEXTURE
 **********************************************************************************************************/
 PSVertexPositionTexture VSPositionTexture(VSVertexPositionTexture input)
 {
-    PSVertexPositionTexture output = (PSVertexPositionTexture)0;
+	PSVertexPositionTexture output = (PSVertexPositionTexture) 0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-    output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
+	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
+	output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;
     
-    return output;
+	return output;
 }
 
 float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
@@ -60,14 +60,14 @@ float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 }
 float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
 	//Grayscale of red channel
 	return float4(color.rrr, 1);
 }
 float4 PSPositionTextureGREEN(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
 	//Grayscale of green channel
 	return float4(color.ggg, 1);
@@ -81,14 +81,14 @@ float4 PSPositionTextureBLUE(PSVertexPositionTexture input) : SV_TARGET
 }
 float4 PSPositionTextureALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	
    	//Grayscale of alpha channel
 	return float4(color.aaa, 1);
 }
 float4 PSPositionTextureNOALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+	float4 color = gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 
    	//Color channel
 	return float4(color.rgb, 1);

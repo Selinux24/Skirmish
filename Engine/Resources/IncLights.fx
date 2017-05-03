@@ -27,7 +27,7 @@ SamplerComparisonState SamplerComparisonLessEqual
 	Filter = COMPARISON_MIN_MAG_MIP_LINEAR;
 	AddressU = BORDER;
 	AddressV = BORDER;
-	BorderColor = float4(1,1,1,1);
+	BorderColor = float4(1, 1, 1, 1);
 
 	ComparisonFunc = LESS_EQUAL;
 };
@@ -45,22 +45,24 @@ float2 EncodeColor(float3 rgb24)
 
 	// pack it up (capital G's are MSB, the rest are LSB)
 	float2 packed;
-	packed.x = rgb16.r * 8 + floor(greenSplit);		// rrrrrGGG
-	packed.y = frac(greenSplit) * 256 + rgb16.b;		// gggbbbbb
+	packed.x = rgb16.r * 8 + floor(greenSplit); // rrrrrGGG
+	packed.y = frac(greenSplit) * 256 + rgb16.b; // gggbbbbb
 
-														// scale down and return
+	// scale down and return
 	packed /= 255.0f;
+
 	return packed;
 }
-float3 DecodeColor(float2 packed) {
+float3 DecodeColor(float2 packed)
+{
 	// scale up to 8-bit
 	packed *= 255.0f;
 
 	// round and split the packed bits
-	float2 split = round(packed) / 8;	// first component at bit 3
-	split.y /= 4;				// second component at bit 5
+	float2 split = round(packed) / 8; // first component at bit 3
+	split.y /= 4; // second component at bit 5
 
-								// unpack (obfuscated yet optimized crap follows)
+	// unpack (obfuscated yet optimized crap follows)
 	float3 rgb16 = 0.0f.rrr;
 	rgb16.gb = frac(split) * 256;
 	rgb16.rg += floor(split) * 4;
@@ -68,6 +70,7 @@ float3 DecodeColor(float2 packed) {
 
 	// scale down and return
 	rgb16 /= 255.0f;
+
 	return rgb16;
 }
 
@@ -96,9 +99,8 @@ inline float4 RandomVector4(float seed, Texture1D rndTex)
 inline float RandomScalar(float min, float max, float seed, Texture1D rndTex)
 {
 	float r = rndTex.SampleLevel(SamplerLinear, seed, 0).x;
-	r = roll(r, min, max);
 
-	return r;
+	return roll(r, min, max);
 }
 inline float2 RandomVector2(float min, float max, float seed, Texture1D rndTex)
 {
@@ -323,7 +325,8 @@ inline float CalcSpotCone(float3 lightDirection, float spotAngle, float3 L)
 	return smoothstep(minCos, maxCos, cosAngle);
 }
 
-inline float4 HDR(float4 color, float exposure) {
+inline float4 HDR(float4 color, float exposure)
+{
 	float4 hdrColor = float4(color.rgb * exposure, color.a);
 
 	hdrColor.r = hdrColor.r < 1.413f ? pow(abs(hdrColor.r) * 0.38317f, 1.0f / 2.2f) : 1.0f - exp(-hdrColor.r);
@@ -425,16 +428,20 @@ inline ComputeLightsOutput ComputeDirectionalLight(ComputeDirectionalLightsInput
 {
 	float distToEye = length(input.ePosition - input.pPosition);
 
-	if (distToEye < input.lod.x) {
+	if (distToEye < input.lod.x)
+	{
 		return ComputeDirectionalLightLOD1(input);
 	}
-	else if (distToEye < input.lod.y) {
+	else if (distToEye < input.lod.y)
+	{
 		return ComputeDirectionalLightLOD2(input);
 	}
-	else if (distToEye < input.lod.z) {
+	else if (distToEye < input.lod.z)
+	{
 		return ComputeDirectionalLightLOD3(input);
 	}
-	else {
+	else
+	{
 		return ComputeDirectionalLightLOD4(input);
 	}
 }
@@ -485,13 +492,16 @@ inline ComputeLightsOutput ComputePointLight(ComputePointLightsInput input)
 {
 	float distToEye = length(input.ePosition - input.pPosition);
 
-	if (distToEye < input.lod.x) {
+	if (distToEye < input.lod.x)
+	{
 		return ComputePointLightLOD1(input);
 	}
-	else if (distToEye < input.lod.z) {
+	else if (distToEye < input.lod.z)
+	{
 		return ComputePointLightLOD2(input);
 	}
-	else {
+	else
+	{
 		ComputeLightsOutput output;
 		output.diffuse = 0;
 		output.specular = 0;
@@ -547,13 +557,16 @@ inline ComputeLightsOutput ComputeSpotLight(ComputeSpotLightsInput input)
 {
 	float distToEye = length(input.ePosition - input.pPosition);
 
-	if (distToEye < input.lod.x) {
+	if (distToEye < input.lod.x)
+	{
 		return ComputeSpotLightLOD1(input);
 	}
-	else if (distToEye < input.lod.z) {
+	else if (distToEye < input.lod.z)
+	{
 		return ComputeSpotLightLOD2(input);
 	}
-	else {
+	else
+	{
 		ComputeLightsOutput output;
 		output.diffuse = 0;
 		output.specular = 0;
@@ -775,21 +788,27 @@ inline float4 ComputeLights(ComputeLightsInput input)
 		fog = CalcFogFactor(distToEye, input.fogStart, input.fogRange);
 	}
 
-	if (fog >= 1) {
+	if (fog >= 1)
+	{
 		return input.fogColor;
 	}
-	else {
+	else
+	{
 		float4 color = 0;
-		if (distToEye < input.lod.x) {
+		if (distToEye < input.lod.x)
+		{
 			color = ComputeLightsLOD1(input);
 		}
-		else if (distToEye < input.lod.y) {
+		else if (distToEye < input.lod.y)
+		{
 			color = ComputeLightsLOD2(input);
 		}
-		else if (distToEye < input.lod.z) {
+		else if (distToEye < input.lod.z)
+		{
 			color = ComputeLightsLOD3(input);
 		}
-		else {
+		else
+		{
 			color = ComputeLightsLOD4(input);
 		}
 

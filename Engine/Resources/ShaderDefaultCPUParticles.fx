@@ -1,7 +1,7 @@
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
-cbuffer cbPerFrame : register (b0)
+cbuffer cbPerFrame : register(b0)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
@@ -19,9 +19,9 @@ cbuffer cbPerFrame : register (b0)
 	float4 gMaxColor;
 	float2 gRotateSpeed;
 };
-cbuffer cbFixed : register (b1)
+cbuffer cbFixed : register(b1)
 {
-	float2 gQuadTexC[4] = 
+	float2 gQuadTexC[4] =
 	{
 		float2(0.0f, 1.0f),
 		float2(0.0f, 0.0f),
@@ -34,46 +34,46 @@ Texture2DArray gTextureArray;
 
 float3 ComputeParticlePosition(float3 position, float3 velocity, float age, float normalizedAge)
 {
-    float startVelocity = length(velocity);
-    float endVelocity = startVelocity * gEndVelocity;
-    float velocityIntegral = startVelocity * normalizedAge + (endVelocity - startVelocity) * normalizedAge * normalizedAge * 0.5f;
+	float startVelocity = length(velocity);
+	float endVelocity = startVelocity * gEndVelocity;
+	float velocityIntegral = startVelocity * normalizedAge + (endVelocity - startVelocity) * normalizedAge * normalizedAge * 0.5f;
      
-    float3 p = (normalize(velocity) * velocityIntegral) + (gGravity * age * normalizedAge);
+	float3 p = (normalize(velocity) * velocityIntegral) + (gGravity * age * normalizedAge);
     
-    return position + p;
+	return position + p;
 }
 float2 ComputeParticleSize(float randomValue, float normalizedAge)
 {
-    float startSize = lerp(gStartSize.x, gStartSize.y, randomValue);
-    float endSize = lerp(gEndSize.x, gEndSize.y, randomValue);
+	float startSize = lerp(gStartSize.x, gStartSize.y, randomValue);
+	float endSize = lerp(gEndSize.x, gEndSize.y, randomValue);
     
-    float size = lerp(startSize, endSize, normalizedAge);
+	float size = lerp(startSize, endSize, normalizedAge);
     
-    return float2(size, size);
+	return float2(size, size);
 }
 float4 ComputeParticleColor(float randomValue, float normalizedAge)
 {
-    float4 color = lerp(gMinColor, gMaxColor, randomValue);
+	float4 color = lerp(gMinColor, gMaxColor, randomValue);
     
-    color.a *= normalizedAge * (1-normalizedAge) * (1-normalizedAge) * 6.7f;
+	color.a *= normalizedAge * (1 - normalizedAge) * (1 - normalizedAge) * 6.7f;
 
 	return color;
 }
 float4 ComputeParticleRotation(float randomValue, float age)
-{    
-    float rotateSpeed = lerp(gRotateSpeed.x, gRotateSpeed.y, randomValue);
+{
+	float rotateSpeed = lerp(gRotateSpeed.x, gRotateSpeed.y, randomValue);
     
-    float rotation = rotateSpeed * age;
+	float rotation = rotateSpeed * age;
 
-    float c = cos(rotation);
-    float s = sin(rotation);
+	float c = cos(rotation);
+	float s = sin(rotation);
     
-    float4 rotationMatrix = float4(c, -s, s, c);
+	float4 rotationMatrix = float4(c, -s, s, c);
     
-    rotationMatrix *= 0.5f;
-    rotationMatrix += 0.5f;
+	rotationMatrix *= 0.5f;
+	rotationMatrix += 0.5f;
     
-    return rotationMatrix;
+	return rotationMatrix;
 }
 
 GSCPUParticle VSParticle(VSVertexCPUParticle input)
@@ -112,7 +112,7 @@ void GSParticle(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inou
 	//Compute triangle strip vertices (quad) in world space.
 	float halfWidth = 0.5f * sizeWorld.x;
 	float halfHeight = 0.5f * sizeWorld.y;
-	float4 v[4] = {float4(0,0,0,0),float4(0,0,0,0),float4(0,0,0,0),float4(0,0,0,0)};
+	float4 v[4] = { float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0) };
 	v[0] = float4(centerWorld + halfWidth * right - halfHeight * up, 1.0f);
 	v[1] = float4(centerWorld + halfWidth * right + halfHeight * up, 1.0f);
 	v[2] = float4(centerWorld - halfWidth * right - halfHeight * up, 1.0f);
@@ -121,7 +121,7 @@ void GSParticle(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inou
 	//Transform quad vertices to world space and output them as a triangle strip.
 	PSCPUParticle gout;
 	[unroll]
-	for(int i = 0; i < 4; ++i)
+	for (int i = 0; i < 4; ++i)
 	{
 		gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
 		gout.positionWorld = mul(v[i], gWorld).xyz;

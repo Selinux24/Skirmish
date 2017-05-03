@@ -5,7 +5,7 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbPerFrame : register (b0)
+cbuffer cbPerFrame : register(b0)
 {
 	float4x4 gWorldViewProjection;
 	float4 gSphereRadii;
@@ -27,10 +27,10 @@ PSVertexSkyScattering VSScattering(VSVertexPosition input)
 		gSphereRadii, gScatteringCoeffs, gInvWaveLength, gMisc,
 		colorM, colorR, rayPos);
 
-    PSVertexSkyScattering output = (PSVertexSkyScattering)0;
+	PSVertexSkyScattering output = (PSVertexSkyScattering) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-    output.positionWorld = input.positionLocal;
+	output.positionWorld = input.positionLocal;
 	output.colorM = colorM;
 	output.colorR = colorR;
 	output.direction = rayPos;

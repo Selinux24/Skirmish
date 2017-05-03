@@ -3,14 +3,14 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbPerFrame : register (b0)
+cbuffer cbPerFrame : register(b0)
 {
 	float4x4 gWorldViewProjection;
 };
 
 PSShadowMapPosition VSTerrain(VSVertexTerrain input)
 {
-	PSShadowMapPosition output = (PSShadowMapPosition)0;
+	PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection);
 

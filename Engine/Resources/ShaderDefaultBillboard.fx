@@ -1,7 +1,7 @@
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
-cbuffer cbGlobal : register (b0)
+cbuffer cbGlobal : register(b0)
 {
 	uint gMaterialPaletteWidth;
 	float3 gLOD;
@@ -9,7 +9,7 @@ cbuffer cbGlobal : register (b0)
 Texture2D gMaterialPalette;
 Texture1D gTextureRandom;
 
-cbuffer cbFixed : register (b1)
+cbuffer cbFixed : register(b1)
 {
 	float2 gQuadTexCL[4] =
 	{
@@ -27,7 +27,7 @@ cbuffer cbFixed : register (b1)
 	};
 };
 
-cbuffer cbPerFrame : register (b2)
+cbuffer cbPerFrame : register(b2)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
@@ -80,7 +80,7 @@ GSVertexBillboard VSBillboard(VSVertexBillboard input)
 void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSVertexBillboard> outputStream)
 {
 	float3 look = gEyePositionWorld - input[0].centerWorld;
-	if(gEndRadius == 0 || length(look) < gEndRadius)
+	if (gEndRadius == 0 || length(look) < gEndRadius)
 	{
 		//Compute the local coordinate system of the sprite relative to the world space such that the billboard is aligned with the y-axis and faces the eye.
 		look.y = 0.0f; // y-axis aligned, so project to xz-plane
@@ -91,13 +91,13 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 		//Compute triangle strip vertices (quad) in world space.
 		float halfWidth = 0.5f * input[0].sizeWorld.x;
 		float halfHeight = 0.5f * input[0].sizeWorld.y;
-		float4 v[4] = {float4(0,0,0,0),float4(0,0,0,0),float4(0,0,0,0),float4(0,0,0,0)};
+		float4 v[4] = { float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0) };
 		v[0] = float4(input[0].centerWorld + halfWidth * right - halfHeight * up, 1.0f);
 		v[1] = float4(input[0].centerWorld + halfWidth * right + halfHeight * up, 1.0f);
 		v[2] = float4(input[0].centerWorld - halfWidth * right - halfHeight * up, 1.0f);
 		v[3] = float4(input[0].centerWorld - halfWidth * right + halfHeight * up, 1.0f);
 
-		if(gWindStrength > 0)
+		if (gWindStrength > 0)
 		{
 			v[1].xyz = CalcWindTranslation(primID, v[1].xyz, gWindDirection, gWindStrength);
 			v[3].xyz = CalcWindTranslation(primID, v[3].xyz, gWindDirection, gWindStrength);
@@ -106,7 +106,7 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 		//Transform quad vertices to world space and output them as a triangle strip.
 		PSVertexBillboard gout;
 		[unroll]
-		for(int i = 0; i < 4; ++i)
+		for (int i = 0; i < 4; ++i)
 		{
 			gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
 			gout.positionWorld = mul(v[i], gWorld).xyz;

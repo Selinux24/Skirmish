@@ -1,18 +1,18 @@
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
-cbuffer cbGlobals : register (b0)
+cbuffer cbGlobals : register(b0)
 {
-    uint gAnimationPaletteWidth;
+	uint gAnimationPaletteWidth;
 };
 Texture2D gAnimationPalette;
 
-cbuffer cbVSPerFrame : register (b1)
+cbuffer cbVSPerFrame : register(b1)
 {
 	float4x4 gVSWorldViewProjection;
 };
 
-cbuffer cbVSPerInstance : register (b2)
+cbuffer cbVSPerInstance : register(b2)
 {
 	uint gVSAnimationOffset;
 	uint PAD21;
@@ -22,7 +22,7 @@ cbuffer cbVSPerInstance : register (b2)
 
 Texture2DArray gPSDiffuseMapArray;
 
-cbuffer cbPSPerInstance : register (b5)
+cbuffer cbPSPerInstance : register(b5)
 {
 	uint gPSTextureIndex;
 	bool PAD51;
@@ -32,7 +32,7 @@ cbuffer cbPSPerInstance : register (b5)
 
 PSShadowMapPosition VSSMPositionColor(VSVertexPositionColor input)
 {
-	PSShadowMapPosition output = (PSShadowMapPosition)0;
+	PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gVSWorldViewProjection);
 
@@ -40,17 +40,17 @@ PSShadowMapPosition VSSMPositionColor(VSVertexPositionColor input)
 }
 PSShadowMapPosition VSSMPositionColorI(VSVertexPositionColorI input)
 {
-	PSShadowMapPosition output = (PSShadowMapPosition)0;
+	PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
-    float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
+	float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
-    output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
+	output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
     
-    return output;
+	return output;
 }
 PSShadowMapPosition VSSMPositionColorSkinned(VSVertexPositionColorSkinned input)
 {
-	PSShadowMapPosition output = (PSShadowMapPosition)0;
+	PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -69,7 +69,7 @@ PSShadowMapPosition VSSMPositionColorSkinned(VSVertexPositionColorSkinned input)
 }
 PSShadowMapPosition VSSMPositionColorSkinnedI(VSVertexPositionColorSkinnedI input)
 {
-	PSShadowMapPosition output = (PSShadowMapPosition)0;
+	PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -82,16 +82,16 @@ PSShadowMapPosition VSSMPositionColorSkinnedI(VSVertexPositionColorSkinnedI inpu
 		input.positionLocal,
 		positionL);
 
-    float4 instancePosition = mul(positionL, input.localTransform);
+	float4 instancePosition = mul(positionL, input.localTransform);
 	
 	output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
     
-    return output;
+	return output;
 }
 
 PSShadowMapPosition VSSMPositionNormalColor(VSVertexPositionNormalColor input)
 {
-	PSShadowMapPosition output = (PSShadowMapPosition)0;
+	PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gVSWorldViewProjection);
 
@@ -99,17 +99,17 @@ PSShadowMapPosition VSSMPositionNormalColor(VSVertexPositionNormalColor input)
 }
 PSShadowMapPosition VSSMPositionNormalColorI(VSVertexPositionNormalColorI input)
 {
-	PSShadowMapPosition output = (PSShadowMapPosition)0;
+	PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
-    float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
+	float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
-    output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
+	output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
 
-    return output;
+	return output;
 }
 PSShadowMapPosition VSSMPositionNormalColorSkinned(VSVertexPositionNormalColorSkinned input)
 {
-	PSShadowMapPosition output = (PSShadowMapPosition)0;
+	PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -128,7 +128,7 @@ PSShadowMapPosition VSSMPositionNormalColorSkinned(VSVertexPositionNormalColorSk
 }
 PSShadowMapPosition VSSMPositionNormalColorSkinnedI(VSVertexPositionNormalColorSkinnedI input)
 {
-	PSShadowMapPosition output = (PSShadowMapPosition)0;
+	PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -141,16 +141,16 @@ PSShadowMapPosition VSSMPositionNormalColorSkinnedI(VSVertexPositionNormalColorS
 		input.positionLocal,
 		positionL);
 
-    float4 instancePosition = mul(positionL, input.localTransform);
+	float4 instancePosition = mul(positionL, input.localTransform);
 	
 	output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
 
-    return output;
+	return output;
 }
 
 PSShadowMapPositionTexture VSSMPositionTexture(VSVertexPositionTexture input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gVSWorldViewProjection);
 	output.depth = output.positionHomogeneous;
@@ -161,20 +161,20 @@ PSShadowMapPositionTexture VSSMPositionTexture(VSVertexPositionTexture input)
 }
 PSShadowMapPositionTexture VSSMPositionTextureI(VSVertexPositionTextureI input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
-    float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
+	float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
-    output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
+	output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
 	output.depth = output.positionHomogeneous;
 	output.tex = input.tex;
 	output.textureIndex = input.textureIndex;
 
-    return output;
+	return output;
 }
 PSShadowMapPositionTexture VSSMPositionTextureSkinned(VSVertexPositionTextureSkinned input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -196,7 +196,7 @@ PSShadowMapPositionTexture VSSMPositionTextureSkinned(VSVertexPositionTextureSki
 }
 PSShadowMapPositionTexture VSSMPositionTextureSkinnedI(VSVertexPositionTextureSkinnedI input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -209,19 +209,19 @@ PSShadowMapPositionTexture VSSMPositionTextureSkinnedI(VSVertexPositionTextureSk
 		input.positionLocal,
 		positionL);
 
-    float4 instancePosition = mul(positionL, input.localTransform);
+	float4 instancePosition = mul(positionL, input.localTransform);
 	
 	output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
 	output.depth = output.positionHomogeneous;
 	output.tex = input.tex;
 	output.textureIndex = input.textureIndex;
 
-    return output;
+	return output;
 }
 
 PSShadowMapPositionTexture VSSMPositionNormalTexture(VSVertexPositionNormalTexture input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gVSWorldViewProjection);
 	output.depth = output.positionHomogeneous;
@@ -232,20 +232,20 @@ PSShadowMapPositionTexture VSSMPositionNormalTexture(VSVertexPositionNormalTextu
 }
 PSShadowMapPositionTexture VSSMPositionNormalTextureI(VSVertexPositionNormalTextureI input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
-    float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
+	float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
-    output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
+	output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
 	output.depth = output.positionHomogeneous;
 	output.tex = input.tex;
 	output.textureIndex = input.textureIndex;
 
-    return output;
+	return output;
 }
 PSShadowMapPositionTexture VSSMPositionNormalTextureSkinned(VSVertexPositionNormalTextureSkinned input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 	
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -267,7 +267,7 @@ PSShadowMapPositionTexture VSSMPositionNormalTextureSkinned(VSVertexPositionNorm
 }
 PSShadowMapPositionTexture VSSMPositionNormalTextureSkinnedI(VSVertexPositionNormalTextureSkinnedI input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -280,7 +280,7 @@ PSShadowMapPositionTexture VSSMPositionNormalTextureSkinnedI(VSVertexPositionNor
 		input.positionLocal,
 		positionL);
 
-    float4 instancePosition = mul(positionL, input.localTransform);
+	float4 instancePosition = mul(positionL, input.localTransform);
 	
 	output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
 	output.depth = output.positionHomogeneous;
@@ -292,7 +292,7 @@ PSShadowMapPositionTexture VSSMPositionNormalTextureSkinnedI(VSVertexPositionNor
 
 PSShadowMapPositionTexture VSSMPositionNormalTextureTangent(VSVertexPositionNormalTextureTangent input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gVSWorldViewProjection);
 	output.depth = output.positionHomogeneous;
@@ -303,20 +303,20 @@ PSShadowMapPositionTexture VSSMPositionNormalTextureTangent(VSVertexPositionNorm
 }
 PSShadowMapPositionTexture VSSMPositionNormalTextureTangentI(VSVertexPositionNormalTextureTangentI input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
-    float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
+	float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
-    output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
+	output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
 	output.depth = output.positionHomogeneous;
 	output.tex = input.tex;
 	output.textureIndex = input.textureIndex;
 
-    return output;
+	return output;
 }
 PSShadowMapPositionTexture VSSMPositionNormalTextureTangentSkinned(VSVertexPositionNormalTextureTangentSkinned input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -338,7 +338,7 @@ PSShadowMapPositionTexture VSSMPositionNormalTextureTangentSkinned(VSVertexPosit
 }
 PSShadowMapPositionTexture VSSMPositionNormalTextureTangentSkinnedI(VSVertexPositionNormalTextureTangentSkinnedI input)
 {
-	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
+	PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	
@@ -351,7 +351,7 @@ PSShadowMapPositionTexture VSSMPositionNormalTextureTangentSkinnedI(VSVertexPosi
 		input.positionLocal,
 		positionL);
 
-    float4 instancePosition = mul(positionL, input.localTransform);
+	float4 instancePosition = mul(positionL, input.localTransform);
 	
 	output.positionHomogeneous = mul(instancePosition, gVSWorldViewProjection);
 	output.depth = output.positionHomogeneous;
@@ -381,110 +381,110 @@ float4 PSDefault(PSShadowMapPositionTexture input) : SV_Target
 
 technique11 ShadowMapPositionColor
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionColor()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionColor()));
 		SetGeometryShader(NULL);
-        SetPixelShader(NULL);
-    }
+		SetPixelShader(NULL);
+	}
 }
 technique11 ShadowMapPositionColorI
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorI()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorI()));
 		SetGeometryShader(NULL);
-        SetPixelShader(NULL);
-    }
+		SetPixelShader(NULL);
+	}
 }
 technique11 ShadowMapPositionColorSkinned
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorSkinned()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorSkinned()));
 		SetGeometryShader(NULL);
-        SetPixelShader(NULL);
-    }
+		SetPixelShader(NULL);
+	}
 }
 technique11 ShadowMapPositionColorSkinnedI
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorSkinnedI()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorSkinnedI()));
 		SetGeometryShader(NULL);
-        SetPixelShader(NULL);
-    }
+		SetPixelShader(NULL);
+	}
 }
 
 technique11 ShadowMapPositionNormalColor
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColor()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColor()));
 		SetGeometryShader(NULL);
-        SetPixelShader(NULL);
-    }
+		SetPixelShader(NULL);
+	}
 }
 technique11 ShadowMapPositionNormalColorI
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorI()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorI()));
 		SetGeometryShader(NULL);
-        SetPixelShader(NULL);
-    }
+		SetPixelShader(NULL);
+	}
 }
 technique11 ShadowMapPositionNormalColorSkinned
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorSkinned()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorSkinned()));
 		SetGeometryShader(NULL);
-        SetPixelShader(NULL);
-    }
+		SetPixelShader(NULL);
+	}
 }
 technique11 ShadowMapPositionNormalColorSkinnedI
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorSkinnedI()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorSkinnedI()));
 		SetGeometryShader(NULL);
-        SetPixelShader(NULL);
-    }
+		SetPixelShader(NULL);
+	}
 }
 
 technique11 ShadowMapPositionTexture
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTexture()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
 }
 technique11 ShadowMapPositionTextureI
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureI()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
 }
 technique11 ShadowMapPositionTextureSkinned
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinned()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinned()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
 }
 technique11 ShadowMapPositionTextureSkinnedI
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinnedI()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
@@ -492,36 +492,36 @@ technique11 ShadowMapPositionTextureSkinnedI
 
 technique11 ShadowMapPositionNormalTexture
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTexture()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTexture()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
 }
 technique11 ShadowMapPositionNormalTextureI
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureI()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
 }
 technique11 ShadowMapPositionNormalTextureSkinned
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinned()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinned()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
 }
 technique11 ShadowMapPositionNormalTextureSkinnedI
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinnedI()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
@@ -529,36 +529,36 @@ technique11 ShadowMapPositionNormalTextureSkinnedI
 
 technique11 ShadowMapPositionNormalTextureTangent
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangent()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangent()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
 }
 technique11 ShadowMapPositionNormalTextureTangentI
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentI()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
 }
 technique11 ShadowMapPositionNormalTextureTangentSkinned
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinned()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinned()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}
 }
 technique11 ShadowMapPositionNormalTextureTangentSkinnedI
 {
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinnedI()));
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinnedI()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
 	}

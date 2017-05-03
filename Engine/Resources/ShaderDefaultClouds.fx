@@ -7,19 +7,19 @@ BUFFERS & VARIABLES
 Texture2D gCloudTexture1 : register(t0);
 Texture2D gCloudTexture2 : register(t1);
 
-cbuffer cbPerFrame : register (b0)
+cbuffer cbPerFrame : register(b0)
 {
 	float4x4 gWorldViewProjection;
 	float gBrightness;
 	float gFadingDistance;
 	float2 PAD1;
 };
-cbuffer cbPerFrameStatic : register (b1)
+cbuffer cbPerFrameStatic : register(b1)
 {
 	float2 gFirstTranslation;
 	float2 gSecondTranslation;
 };
-cbuffer cbPerFramePerturbed : register (b2)
+cbuffer cbPerFramePerturbed : register(b2)
 {
 	float gTranslation;
 	float gScale;
@@ -28,7 +28,7 @@ cbuffer cbPerFramePerturbed : register (b2)
 
 PSVertexPositionTexture VSClouds(VSVertexPositionTexture input)
 {
-	PSVertexPositionTexture output = (PSVertexPositionTexture)0;
+	PSVertexPositionTexture output = (PSVertexPositionTexture) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
 	output.positionWorld = input.positionLocal;

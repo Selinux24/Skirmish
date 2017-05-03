@@ -3,7 +3,7 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbVSPerFrame : register (b1)
+cbuffer cbVSPerFrame : register(b1)
 {
 	float4x4 gVSWorld;
 	float4x4 gVSWorldViewProjection;
@@ -11,7 +11,7 @@ cbuffer cbVSPerFrame : register (b1)
 	float3 PAD_B1;
 };
 
-cbuffer cbPSPerObject : register (b4)
+cbuffer cbPSPerObject : register(b4)
 {
 	float4 gPSParams;
 	uint gPSMaterialIndex;
@@ -20,22 +20,22 @@ cbuffer cbPSPerObject : register (b4)
 
 PSVertexTerrain VSTerrain(VSVertexTerrain input)
 {
-    PSVertexTerrain output = (PSVertexTerrain)0;
+	PSVertexTerrain output = (PSVertexTerrain) 0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gVSWorldViewProjection);
-    output.positionWorld = mul(float4(input.positionLocal, 1), gVSWorld).xyz;
-	output.normalWorld = normalize(mul(input.normalLocal, (float3x3)gVSWorld));
-	output.tangentWorld = normalize(mul(input.tangentLocal, (float3x3)gVSWorld));
+	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gVSWorldViewProjection);
+	output.positionWorld = mul(float4(input.positionLocal, 1), gVSWorld).xyz;
+	output.normalWorld = normalize(mul(input.normalLocal, (float3x3) gVSWorld));
+	output.tangentWorld = normalize(mul(input.tangentLocal, (float3x3) gVSWorld));
 	output.tex0 = input.tex * gVSTextureResolution;
 	output.tex1 = input.tex;
 	output.color = input.color;
     
-    return output;
+	return output;
 }
 
 GBufferPSOutput PSTerrainAlphaMap(PSVertexTerrain input)
 {
-	GBufferPSOutput output = (GBufferPSOutput)0;
+	GBufferPSOutput output = (GBufferPSOutput) 0;
 
 	float4 specular;
 	float3 normal;
@@ -49,7 +49,7 @@ GBufferPSOutput PSTerrainAlphaMap(PSVertexTerrain input)
 }
 GBufferPSOutput PSTerrainSlopes(PSVertexTerrain input)
 {
-	GBufferPSOutput output = (GBufferPSOutput)0;
+	GBufferPSOutput output = (GBufferPSOutput) 0;
 
 	float4 specular;
 	float3 normal;
@@ -63,7 +63,7 @@ GBufferPSOutput PSTerrainSlopes(PSVertexTerrain input)
 }
 GBufferPSOutput PSTerrainFull(PSVertexTerrain input)
 {
-    GBufferPSOutput output = (GBufferPSOutput)0;
+	GBufferPSOutput output = (GBufferPSOutput) 0;
 
 	float4 specular;
 	float3 normal;
@@ -73,7 +73,7 @@ GBufferPSOutput PSTerrainFull(PSVertexTerrain input)
 	output.normal = float4(normal, 0);
 	output.depth = float4(input.positionWorld, gPSMaterialIndex);
 
-    return output;
+	return output;
 }
 
 /**********************************************************************************************************

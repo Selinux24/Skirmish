@@ -1,7 +1,7 @@
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
-cbuffer cbPerFrame : register (b0)
+cbuffer cbPerFrame : register(b0)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
@@ -12,20 +12,20 @@ Texture2D gTexture;
 
 PSVertexPositionTexture VSFont(VSVertexPositionTexture input)
 {
-    PSVertexPositionTexture output = (PSVertexPositionTexture)0;
+	PSVertexPositionTexture output = (PSVertexPositionTexture) 0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-    output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
+	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
+	output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.tex = input.tex;
     
-    return output;
+	return output;
 }
 
 float4 PSFont(PSVertexPositionTexture input) : SV_TARGET
 {
-    float4 litColor = gTexture.Sample(SamplerPoint, input.tex);
+	float4 litColor = gTexture.Sample(SamplerPoint, input.tex);
 
-	if(litColor.a != 0.0f)
+	if (litColor.a != 0.0f)
 	{
 		litColor *= gColor;
 	}

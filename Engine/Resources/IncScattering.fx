@@ -9,7 +9,7 @@ float vernierScale(float fCos)
 	float xnew = (3.83 + x * x5p6);
 	float xfinal = (0.459 + x * xnew);
 	float xfinal2 = -0.00287 + x * xfinal;
-	float outx = exp( xfinal2 ); 
+	float outx = exp(xfinal2);
 	return 0.25 * outx;
 }
 float mieScale(float3 lightDirection, float3 viewDirection)
@@ -20,11 +20,11 @@ float mieScale(float3 lightDirection, float3 viewDirection)
 	float g = -0.991f;
 	float g2 = -0.991f * -0.991f;
 
-	return (1.5 * ((1.0 - g2) / (2.0 + g2)) * (1.0 + fCos2) / pow(abs(1.0 + g2 - 2.0*g*fCos), 1.5));
+	return (1.5 * ((1.0 - g2) / (2.0 + g2)) * (1.0 + fCos2) / pow(abs(1.0 + g2 - 2.0 * g * fCos), 1.5));
 }
 
 void vertexPhase(
-	float3 positionLocal, float3 lightDirection, float4 backColor, 
+	float3 positionLocal, float3 lightDirection, float4 backColor,
 	float4 sphereRadii, float4 scatteringCoeffs, float4 invWaveLength, float4 misc,
 	out float4 colorM, out float4 colorR, out float3 rayPos)
 {
@@ -53,7 +53,7 @@ void vertexPhase(
 	colorM = backColor;
 	colorR = backColor;
 
-	if(positionLocal.y >= -0.1f)
+	if (positionLocal.y >= -0.1f)
 	{
 		// Calculate ray's scattering offset.
 		float scatteringOffset = (exp(scaleOverScaleDepth * (innerRadius - 1))) * vernierScale(dot(rayDir, rayStart));
@@ -67,7 +67,7 @@ void vertexPhase(
 		color = 0;
 
 		// Now loop through the sample rays
-		for(uint i = 0; i < gSamples; i++)
+		for (uint i = 0; i < gSamples; i++)
 		{
 			float sampleHeight = length(samplePoint);
 			float sampleDepth = exp(scaleOverScaleDepth * (innerRadius - sampleHeight));
@@ -94,8 +94,7 @@ void vertexPhase(
 	}
 }
 
-float4 pixelPhase(
-	float3 lightDirection, float3 viewDirection, float4 colorR, float4 colorM)
+float4 pixelPhase(float3 lightDirection, float3 viewDirection, float4 colorR, float4 colorM)
 {
 	float fMiePhase = mieScale(lightDirection, viewDirection);
    

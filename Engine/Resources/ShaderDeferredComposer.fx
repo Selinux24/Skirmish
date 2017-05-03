@@ -1,19 +1,19 @@
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
-cbuffer cbGlobals : register (b0)
+cbuffer cbGlobals : register(b0)
 {
 	uint gMaterialPaletteWidth;
 	float3 gLOD;
 };
-cbuffer cbPerFrame : register (b1)
+cbuffer cbPerFrame : register(b1)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
 	float3 gEyePositionWorld;
 	float PAD11;
 };
-cbuffer cbPerDirLight : register (b2)
+cbuffer cbPerDirLight : register(b2)
 {
 	DirectionalLight gDirLight;
 	float4x4 gLightViewProjectionLD;
@@ -23,15 +23,15 @@ cbuffer cbPerDirLight : register (b2)
 	uint PAD22;
 	uint PAD23;
 }
-cbuffer cbPerPointLight : register (b3)
+cbuffer cbPerPointLight : register(b3)
 {
 	PointLight gPointLight;
 }
-cbuffer cbPerSpotLight : register (b4)
+cbuffer cbPerSpotLight : register(b4)
 {
 	SpotLight gSpotLight;
 }
-cbuffer cbCombineLights : register (b5)
+cbuffer cbCombineLights : register(b5)
 {
 	float gGlobalAmbient;
 	float gFogStart;
@@ -61,7 +61,7 @@ struct PSStencilInput
 
 PSLightInput VSLight(VSVertexPosition input)
 {
-	PSLightInput output = (PSLightInput)0;
+	PSLightInput output = (PSLightInput) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
 	output.positionScreen = output.positionHomogeneous;
@@ -70,7 +70,7 @@ PSLightInput VSLight(VSVertexPosition input)
 }
 PSStencilInput VSStencil(VSVertexPosition input)
 {
-	PSStencilInput output = (PSStencilInput)0;
+	PSStencilInput output = (PSStencilInput) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
 
@@ -180,11 +180,11 @@ float4 PSSpotLight(PSLightInput input) : SV_TARGET
 
 		ComputeSpotLightsInput linput;
 
-		linput. spotLight= gSpotLight;
-		linput.shininess= k.Shininess;
-		linput.pPosition= position;
-		linput.pNormal= normal;
-		linput.ePosition= gEyePositionWorld;
+		linput.spotLight = gSpotLight;
+		linput.shininess = k.Shininess;
+		linput.pPosition = position;
+		linput.pNormal = normal;
+		linput.ePosition = gEyePositionWorld;
 		linput.lod = gLOD;
 
 		ComputeLightsOutput loutput = ComputeSpotLight(linput);
