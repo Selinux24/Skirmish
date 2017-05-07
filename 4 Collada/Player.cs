@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Collada
 {
-    class Player : NavigationMeshAgent
+    class Player : NavigationMeshAgentType
     {
         public float Velocity;
         public float VelocitySlow;

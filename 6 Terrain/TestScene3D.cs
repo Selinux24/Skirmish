@@ -11,18 +11,27 @@ using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace TerrainTest
 {
+    using TerrainTest.AI;
+
     public class TestScene3D : Scene
     {
         private const int MaxPickingTest = 1000;
         private const int MaxGridDrawer = 10000;
 
+        private int layerHud = 99;
+        private int layerObjects = 0;
+        private int layerTerrain = 1;
+        private int layerEffects = 2;
+
+        private Random rnd = new Random();
+
         private bool walkMode = false;
         private float walkerVelocity = 8f;
         private bool follow = false;
-        private NavigationMeshAgent walkerAgent = new NavigationMeshAgent()
+        private NavigationMeshAgentType walkerAgentType = new NavigationMeshAgentType()
         {
             Height = 1f,
-            Radius = 0.5f,
+            Radius = 0.2f,
             MaxClimb = 0.9f,
         };
 
@@ -31,11 +40,6 @@ namespace TerrainTest
         private SpriteTexture shadowMapDrawer = null;
         private ShaderResourceView debugTex = null;
         private int graphIndex = -1;
-
-        private int layerHud = 99;
-        private int layerObjects = 0;
-        private int layerTerrain = 1;
-        private int layerEffects = 2;
 
         private TextDrawer title = null;
         private TextDrawer load = null;
@@ -47,8 +51,9 @@ namespace TerrainTest
         private Model cursor3D = null;
         private Cursor cursor2D = null;
 
-        private Model tank = null;
-        private NavigationMeshAgent tankAgent = new NavigationMeshAgent();
+        private Model tankP1 = null;
+        private Model tankP2 = null;
+        private NavigationMeshAgentType tankAgentType = new NavigationMeshAgentType();
 
         private LensFlare lensFlare = null;
         private Skydom skydom = null;
@@ -59,9 +64,6 @@ namespace TerrainTest
         private float windStrength = 1f;
         private List<Line3D> oks = new List<Line3D>();
         private List<Line3D> errs = new List<Line3D>();
-        private LineListDrawer terrainLineDrawer = null;
-        private LineListDrawer terrainPointDrawer = null;
-        private TriangleListDrawer terrainGraphDrawer = null;
 
         private Model helipod = null;
         private Model garage = null;
@@ -70,11 +72,10 @@ namespace TerrainTest
         private ModelInstanced tree1 = null;
         private ModelInstanced tree2 = null;
         private Color4 objColor = Color.Magenta;
-        private LineListDrawer objLineDrawer = null;
+        private bool objNotSet = true;
 
         private Model helicopter = null;
         private AnimationPath helicopterRollPath = null;
-        private LineListDrawer helicopterLineDrawer = null;
         private Vector3 helicopterHeightOffset = (Vector3.Up * 15f);
         private Color4 gridColor = new Color4(Color.LightSeaGreen.ToColor3(), 0.5f);
         private Color4 curvesColor = Color.Red;
@@ -83,11 +84,28 @@ namespace TerrainTest
         private Color4 hAxisColor = Color.YellowGreen;
         private Color4 wAxisColor = Color.White;
         private Color4 velocityColor = Color.Green;
-        private LineListDrawer curveLineDrawer = null;
 
+        private LineListDrawer staticObjLineDrawer = null;
+        private LineListDrawer movingObjLineDrawer = null;
         private LineListDrawer lightsVolumeDrawer = null;
+        private LineListDrawer curveLineDrawer = null;
+        private LineListDrawer terrainLineDrawer = null;
+        private LineListDrawer terrainPointDrawer = null;
+        private TriangleListDrawer terrainGraphDrawer = null;
+
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
+
+        private AgentManager agentManager = null;
+        private Agent tankP1Agent = null;
+        private Agent tankP2Agent = null;
+        private ParticleSystemDescription pPlume = null;
+        private ParticleSystemDescription pFire = null;
+        private ParticleSystemDescription pDust = null;
+        private ParticleSystemDescription pProjectile = null;
+        private ParticleSystemDescription pExplosion = null;
+        private ParticleSystemDescription pSmokeExplosion = null;
+        private ParticleManager pManager = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -274,18 +292,21 @@ namespace TerrainTest
                 CastShadow = true,
                 Static = false,
             };
-            this.tank = this.AddModel("resources/Leopard", "Leopard.xml", tDesc, true, this.layerObjects);
+            this.tankP1 = this.AddModel("resources/Leopard", "Leopard.xml", tDesc, true, this.layerObjects);
+            this.tankP2 = this.AddModel("resources/Leopard", "Leopard.xml", tDesc, true, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.Lights.AddRange(this.tank.Lights);
+            this.Lights.AddRange(this.tankP1.Lights);
+            this.Lights.AddRange(this.tankP2.Lights);
 
-            this.tank.Manipulator.SetScale(0.2f, true);
+            this.tankP1.Manipulator.SetScale(0.2f, true);
+            this.tankP2.Manipulator.SetScale(0.2f, true);
 
-            var tankbbox = this.tank.GetBoundingBox();
-            tankAgent.Height = tankbbox.GetY();
-            tankAgent.Radius = tankbbox.GetX() * 0.5f;
-            tankAgent.MaxClimb = tankbbox.GetY() * 0.45f;
+            var tankbbox = this.tankP1.GetBoundingBox();
+            tankAgentType.Height = tankbbox.GetY();
+            tankAgentType.Radius = tankbbox.GetX() * 0.5f;
+            tankAgentType.MaxClimb = tankbbox.GetY() * 0.4f;
 
             #endregion
 
@@ -423,8 +444,8 @@ namespace TerrainTest
             var navSettings = NavigationMeshGenerationSettings.Default;
             navSettings.Agents = new[]
             {
-                walkerAgent,
-                tankAgent,
+                walkerAgentType,
+                tankAgentType,
             };
             var terrainDescription = new GroundDescription()
             {
@@ -491,6 +512,19 @@ namespace TerrainTest
 
             #endregion
 
+            #region Particles
+
+            this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources/particles", "smoke.png");
+            this.pFire = ParticleSystemDescription.InitializeFire("resources/particles", "fire.png");
+            this.pDust = ParticleSystemDescription.InitializeDust("resources/particles", "smoke.png");
+            this.pProjectile = ParticleSystemDescription.InitializeProjectileTrail("resources/particles", "smoke.png");
+            this.pExplosion = ParticleSystemDescription.InitializeExplosion("resources/particles", "fire.png");
+            this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources/particles", "smoke.png");
+
+            this.pManager = this.AddParticleManager(new ParticleManagerDescription(), layerEffects);
+
+            #endregion
+
             this.load.Text = loadingText;
 
             #endregion
@@ -498,10 +532,6 @@ namespace TerrainTest
             #region Model positioning over scenery
 
             Random posRnd = new Random(1);
-
-            List<Line3D> lines = new List<Line3D>();
-
-            this.gardener.SetWind(this.windDirection, this.windStrength);
 
             //Helipod
             Vector3 hPos;
@@ -511,7 +541,6 @@ namespace TerrainTest
             {
                 this.helipod.Manipulator.SetPosition(hPos);
             }
-            lines.AddRange(Line3D.CreateWiredBox(this.helipod.GetBoundingBox()));
 
             //Garage
             Vector3 gPos;
@@ -522,10 +551,9 @@ namespace TerrainTest
                 this.garage.Manipulator.SetPosition(gPos);
                 this.garage.Manipulator.SetRotation(MathUtil.PiOverFour + MathUtil.Pi, 0, 0);
             }
-            lines.AddRange(Line3D.CreateWiredBox(this.garage.GetBoundingBox()));
 
             //Obelisk
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < this.obelisk.Count; i++)
             {
                 int ox = i == 0 || i == 2 ? 1 : -1;
                 int oy = i == 0 || i == 1 ? 1 : -1;
@@ -538,7 +566,6 @@ namespace TerrainTest
                     this.obelisk[i].Manipulator.SetPosition(obeliskPosition);
                     this.obelisk[i].Manipulator.SetScale(1.5f);
                 }
-                lines.AddRange(Line3D.CreateWiredBox(this.obelisk[i].GetBoundingBox()));
             }
 
             //Rocks
@@ -569,7 +596,6 @@ namespace TerrainTest
                     this.rocks[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
                     this.rocks[i].Manipulator.SetScale(scale);
                 }
-                lines.AddRange(Line3D.CreateWiredBox(this.rocks[i].GetBoundingBox()));
             }
 
             //Trees
@@ -586,7 +612,6 @@ namespace TerrainTest
                     this.tree1[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
                     this.tree1[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
                 }
-                lines.AddRange(Line3D.CreateWiredTriangle(this.tree1[i].GetVolume()));
             }
 
             for (int i = 0; i < this.tree2.Count; i++)
@@ -602,14 +627,10 @@ namespace TerrainTest
                     this.tree2[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
                     this.tree2[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
                 }
-                lines.AddRange(Line3D.CreateWiredTriangle(this.tree2[i].GetVolume()));
             }
 
-            this.objLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), lines.ToArray(), this.objColor);
-            this.objLineDrawer.Visible = false;
-
             this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helipod, this.garage, this.obelisk }, false);
-            this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.tree1, this.tree2, this.rocks }, false);
+            this.terrain.AttachCoarsePickingCoarsePathFinding(new ModelBase[] { this.tree1, this.tree2, this.rocks }, false);
             this.terrain.UpdateInternals();
 
             this.lensFlare.ParentGround = this.terrain;
@@ -626,14 +647,29 @@ namespace TerrainTest
             this.helicopterRollPath = new AnimationPath();
             this.helicopterRollPath.AddLoop("roll");
 
-            Vector3 tankPosition;
-            Triangle tankTriangle;
-            float tankDist;
-            if (this.terrain.FindTopGroundPosition(-60, -60, out tankPosition, out tankTriangle, out tankDist))
             {
-                this.tank.Manipulator.SetPosition(tankPosition);
-                this.tank.Manipulator.SetNormal(tankTriangle.Normal);
+                Vector3 tankPosition;
+                Triangle tankTriangle;
+                float tankDist;
+                if (this.terrain.FindTopGroundPosition(-60, -60, out tankPosition, out tankTriangle, out tankDist))
+                {
+                    this.tankP1.Manipulator.SetPosition(tankPosition);
+                    this.tankP1.Manipulator.SetNormal(tankTriangle.Normal);
+                }
             }
+
+            {
+                Vector3 tankPosition;
+                Triangle tankTriangle;
+                float tankDist;
+                if (this.terrain.FindTopGroundPosition(60, 60, out tankPosition, out tankTriangle, out tankDist))
+                {
+                    this.tankP2.Manipulator.SetPosition(tankPosition);
+                    this.tankP2.Manipulator.SetNormal(tankTriangle.Normal);
+                }
+            }
+
+            this.gardener.SetWind(this.windDirection, this.windStrength);
 
             #endregion
 
@@ -652,7 +688,7 @@ namespace TerrainTest
                 Channel = SpriteTextureChannelsEnum.Red,
             };
             this.shadowMapDrawer = this.AddSpriteTexture(stDescription, this.layerHud);
-            this.shadowMapDrawer.Visible = true;
+            this.shadowMapDrawer.Visible = false;
             this.shadowMapDrawer.DeferredEnabled = false;
 
             this.debugTex = this.Game.ResourceManager.CreateResource(@"Resources\uvtest.png");
@@ -712,16 +748,23 @@ namespace TerrainTest
 
             #region DEBUG Helicopter manipulator
 
-            this.helicopterLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 1000, this.layerEffects);
-            this.helicopterLineDrawer.Visible = false;
+            this.movingObjLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 1000, this.layerEffects);
+            this.movingObjLineDrawer.Visible = false;
 
             #endregion
 
             #region DEBUG Trajectory
 
             this.curveLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 20000, this.layerEffects);
-            this.curveLineDrawer.Visible = false;
+            this.curveLineDrawer.Visible = true;
             this.curveLineDrawer.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
+
+            #endregion
+
+            #region DEBUG static volumes
+
+            this.staticObjLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 5000, layerEffects);
+            this.staticObjLineDrawer.Visible = false;
 
             #endregion
 
@@ -730,14 +773,43 @@ namespace TerrainTest
 
             this.Lights.ShadowLDDistance = 100f;
             this.Lights.ShadowHDDistance = 25f;
+
+            this.tankP1Agent = new Agent(this.tankAgentType, this.tankP1);
+            this.tankP2Agent = new Agent(this.tankAgentType, this.tankP2);
+
+            var p1CheckPoints = new Vector3[]
+            {
+                new Vector3(+60, 0, -60),
+                new Vector3(-60, 0, -60),
+                new Vector3(+60, 0, +60),
+                new Vector3(-70, 0, +70),
+            };
+
+            var p2CheckPoints = new Vector3[]
+            {
+                new Vector3(+60, 0, -60),
+                new Vector3(+60, 0, +60),
+                new Vector3(-70, 0, +70),
+                new Vector3(-60, 0, -60),
+                new Vector3(+00, 0, +00),
+            };
+
+            this.tankP1Agent.DoPatrol(p1CheckPoints, 5f, 15f, this.terrain);
+            this.tankP2Agent.DoPatrol(p2CheckPoints, 7f, 5f, this.terrain);
+
+            this.tankP1Agent.Attacking += Agent_Attacking;
+            this.tankP2Agent.Attacking += Agent_Attacking;
+            this.tankP1Agent.Damaged += Agent_Damaged;
+            this.tankP2Agent.Damaged += Agent_Damaged;
+            this.tankP1Agent.Destroyed += Agent_Destroyed;
+            this.tankP2Agent.Destroyed += Agent_Destroyed;
+
+            this.agentManager = new AgentManager(new[] { this.tankP1Agent }, new[] { this.tankP2Agent }, this.terrain);
         }
+
         public override void Dispose()
         {
-            if (this.debugTex != null)
-            {
-                this.debugTex.Dispose();
-                this.debugTex = null;
-            }
+            Helper.Dispose(this.debugTex);
 
             base.Dispose();
         }
@@ -831,7 +903,7 @@ namespace TerrainTest
                 }
 
                 Vector3 walkerPos;
-                if (this.terrain.Walk(this.walkerAgent, prevPos, this.Camera.Position, out walkerPos))
+                if (this.terrain.Walk(this.walkerAgentType, prevPos, this.Camera.Position, out walkerPos))
                 {
                     this.Camera.Goto(walkerPos);
                 }
@@ -897,12 +969,10 @@ namespace TerrainTest
             {
                 if (picked)
                 {
-                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, pickedPosition, false, 0f);
+                    var p = this.terrain.FindPath(this.tankAgentType, this.tankP1.Manipulator.Position, pickedPosition, false, 0f);
                     if (p != null)
                     {
-                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 10f, this.terrain);
-
-                        this.DEBUGDrawTankPath(this.tank.Manipulator.Position, p);
+                        this.DEBUGDrawTankPath(this.tankP1.Manipulator.Position, p);
                     }
                 }
             }
@@ -911,12 +981,13 @@ namespace TerrainTest
             {
                 if (picked)
                 {
-                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, pickedPosition, true, 0.25f);
+                    var p = this.terrain.FindPath(this.tankAgentType, this.tankP1.Manipulator.Position, pickedPosition, true, 0.25f);
                     if (p != null)
                     {
-                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 10f, this.terrain);
+                        this.tankP1Agent.Clear();
+                        this.tankP1.Manipulator.Follow(p.ReturnPath.ToArray(), 10f);
 
-                        this.DEBUGDrawTankPath(this.tank.Manipulator.Position, p);
+                        this.DEBUGDrawTankPath(this.tankP1.Manipulator.Position, p);
                     }
                 }
             }
@@ -935,18 +1006,6 @@ namespace TerrainTest
 
             this.Lights.PointLights[0].Position = (this.helicopter.Manipulator.Position + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Left);
             this.Lights.PointLights[1].Position = (this.helicopter.Manipulator.Position + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Right);
-
-            if (this.curveLineDrawer.Visible)
-            {
-                Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
-                this.curveLineDrawer.SetLines(this.hAxisColor, Line3D.CreateAxis(rot, 5f));
-            }
-
-            if (this.helicopterLineDrawer.Visible)
-            {
-                BoundingSphere sph = this.helicopter.GetBoundingSphere();
-                this.helicopterLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(sph, 50, 20));
-            }
 
             #endregion
 
@@ -974,7 +1033,7 @@ namespace TerrainTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                this.helicopterLineDrawer.Visible = !this.helicopterLineDrawer.Visible;
+                this.movingObjLineDrawer.Visible = !this.movingObjLineDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
@@ -995,7 +1054,7 @@ namespace TerrainTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F9))
             {
-                this.objLineDrawer.Visible = !this.objLineDrawer.Visible;
+                this.staticObjLineDrawer.Visible = !this.staticObjLineDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F11))
@@ -1016,9 +1075,6 @@ namespace TerrainTest
                     this.drawCullVolumes = false;
                 }
             }
-
-            if (this.drawDrawVolumes) this.DEBUGDrawLightMarks();
-            if (this.drawCullVolumes) this.DEBUGDrawLightVolumes();
 
             if (this.Game.Input.KeyJustReleased(Keys.Add))
             {
@@ -1060,7 +1116,7 @@ namespace TerrainTest
 
             if (this.Game.Input.KeyJustReleased(Keys.C))
             {
-                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
+                this.Lights.KeyLight.CastShadow = !this.Lights.KeyLight.CastShadow;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.D1))
@@ -1083,8 +1139,33 @@ namespace TerrainTest
                 }
             }
 
+            if (this.drawDrawVolumes) this.DEBUGDrawLightMarks();
+            if (this.drawCullVolumes) this.DEBUGDrawLightVolumes();
+
+
+            if (this.curveLineDrawer.Visible)
+            {
+                Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
+                this.curveLineDrawer.SetLines(this.hAxisColor, Line3D.CreateAxis(rot, 5f));
+            }
+
+            if (this.staticObjLineDrawer.Visible && objNotSet)
+            {
+                DEBUGDrawStaticVolumes();
+
+                objNotSet = false;
+            }
+
+            if (this.movingObjLineDrawer.Visible)
+            {
+                this.DEBUGDrawMovingVolumes();
+            }
+
             #endregion
+
+            this.agentManager.Update(gameTime);
         }
+
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
@@ -1095,9 +1176,26 @@ namespace TerrainTest
 
             this.stats.Text = this.Game.RuntimeText;
 
-            string txt1 = string.Format("Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Primitives: {6}", Counters.Buffers, Counters.BufferBytes / 1024, Counters.BufferReads, Counters.BufferWrites, this.RenderMode, this.shadowResult, Counters.PrimitivesPerFrame);
-            string txt2 = string.Format("IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}", Counters.IAInputLayoutSets, Counters.IAPrimitiveTopologySets, Counters.IAVertexBuffersSets, Counters.IAIndexBufferSets, this.terrain.VisiblePatchesCount);
+            string txt1 = string.Format(
+                "Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Primitives: {6}",
+                Counters.Buffers,
+                Counters.BufferBytes / 1024,
+                Counters.BufferReads,
+                Counters.BufferWrites,
+                this.RenderMode,
+                this.shadowResult,
+                Counters.PrimitivesPerFrame);
             this.counters1.Text = txt1;
+
+            string txt2 = string.Format(
+                "IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}; {5}.{6}/{7}.{8}",
+                Counters.IAInputLayoutSets,
+                Counters.IAPrimitiveTopologySets,
+                Counters.IAVertexBuffersSets,
+                Counters.IAIndexBufferSets,
+                this.terrain.VisiblePatchesCount,
+                this.tankP1Agent.CurrentBehavior, this.tankP1Agent.Life,
+                this.tankP2Agent.CurrentBehavior, this.tankP2Agent.Life);
             this.counters2.Text = txt2;
 
             #endregion
@@ -1169,6 +1267,108 @@ namespace TerrainTest
             return curve;
         }
 
+        private void Agent_Attacking(Agent sender, AttackEventArgs e)
+        {
+            var p1 = sender.Model.GetBoundingBox().GetCenter();
+            var p2 = e.Target.Model.GetBoundingBox().GetCenter();
+            var dir = Vector3.Normalize(p2 - p1) * 100f;
+
+            Ray r = new Ray(p1, dir);
+
+            Vector3 p;
+            Triangle t;
+            float d;
+            if (e.Target.Model.PickFirst(ref r, true, out p, out t, out d))
+            {
+                this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-0.5f), new Vector3(0.5f)));
+                this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-0.5f), new Vector3(0.5f)));
+            }
+        }
+        private void Agent_Damaged(Agent sender, EventArgs e)
+        {
+            sender.Model.TextureIndex = 1;
+
+            Array.ForEach(sender.Model.Lights, l =>
+            {
+                if (this.rnd.NextFloat(0, 1) > 0.8f)
+                {
+                    l.Enabled = false;
+                }
+            });
+        }
+        private void Agent_Destroyed(Agent sender, EventArgs e)
+        {
+            sender.Model.TextureIndex = 2;
+            Array.ForEach(sender.Model.Lights, l => l.Enabled = false);
+
+            var p = sender.Model.GetBoundingBox().GetCenter();
+
+            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
+            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
+            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
+            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
+            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
+            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
+            this.AddSmokePlumeSystem(p);
+        }
+        private void AddExplosionSystem(Vector3 position)
+        {
+            Vector3 velocity = Vector3.Up;
+            float duration = 0.5f;
+            float rate = 0.1f;
+
+            var emitter1 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate,
+                InfiniteDuration = false,
+                MaximumDistance = 100f,
+            };
+            var emitter2 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate * 2f,
+                InfiniteDuration = false,
+                MaximumDistance = 100f,
+            };
+
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
+        }
+        private void AddSmokePlumeSystem(Vector3 position)
+        {
+            Vector3 velocity = Vector3.Up;
+            float duration = this.rnd.NextFloat(60, 360);
+            float rate = this.rnd.NextFloat(0.1f, 1f);
+
+            var emitter1 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate * 0.5f,
+                InfiniteDuration = false,
+                MaximumDistance = 100f,
+            };
+
+            var emitter2 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = velocity,
+                Duration = duration + (duration * 0.1f),
+                EmissionRate = rate,
+                InfiniteDuration = false,
+                MaximumDistance = 500f,
+            };
+
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
+        }
+
         private void DEBUGPickingPosition(Vector3 position)
         {
             Vector3[] positions;
@@ -1226,7 +1426,7 @@ namespace TerrainTest
         }
         private void DEBUGUpdateGraphDrawer()
         {
-            var agent = this.walkMode ? this.walkerAgent : this.tankAgent;
+            var agent = this.walkMode ? this.walkerAgentType : this.tankAgentType;
 
             var nodes = this.terrain.GetNodes(agent);
             if (nodes != null && nodes.Length > 0)
@@ -1318,6 +1518,40 @@ namespace TerrainTest
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+        }
+        private void DEBUGDrawStaticVolumes()
+        {
+            List<Line3D> lines = new List<Line3D>();
+            lines.AddRange(Line3D.CreateWiredBox(this.helipod.GetBoundingBox()));
+            lines.AddRange(Line3D.CreateWiredBox(this.garage.GetBoundingBox()));
+            for (int i = 0; i < this.obelisk.Count; i++)
+            {
+                lines.AddRange(Line3D.CreateWiredBox(this.obelisk[i].GetBoundingBox()));
+            }
+            for (int i = 0; i < this.rocks.Count; i++)
+            {
+                lines.AddRange(Line3D.CreateWiredBox(this.rocks[i].GetBoundingBox()));
+            }
+            for (int i = 0; i < this.tree1.Count; i++)
+            {
+                lines.AddRange(Line3D.CreateWiredTriangle(this.tree1[i].GetVolume()));
+            }
+
+            for (int i = 0; i < this.tree2.Count; i++)
+            {
+                lines.AddRange(Line3D.CreateWiredTriangle(this.tree2[i].GetVolume()));
+            }
+
+            this.staticObjLineDrawer.SetLines(objColor, lines.ToArray());
+        }
+        private void DEBUGDrawMovingVolumes()
+        {
+            var hsph = this.helicopter.GetBoundingSphere();
+            this.movingObjLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, }, 50, 20));
+
+            var t1sph = this.tankP1.GetBoundingBox();
+            var t2sph = this.tankP2.GetBoundingBox();
+            this.movingObjLineDrawer.SetLines(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateWiredBox(new[] { t1sph, t2sph, }));
         }
     }
 }

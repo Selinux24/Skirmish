@@ -25,7 +25,7 @@ namespace Skybox
         private int bsphSlices = 20;
         private int bsphStacks = 10;
 
-        private NavigationMeshAgent walker = new NavigationMeshAgent()
+        private NavigationMeshAgentType walker = new NavigationMeshAgentType()
         {
             Name = "agent",
             Height = 1f,

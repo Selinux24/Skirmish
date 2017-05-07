@@ -77,6 +77,8 @@ namespace Collada
                     },
                 });
 
+            this.Lights.AddRange(this.dungeon.Lights);
+
             this.InitializeCamera();
             this.InitializeEnvironment();
         }
@@ -93,6 +95,10 @@ namespace Collada
         private void InitializeEnvironment()
         {
             GameEnvironment.Background = Color.DarkGray;
+
+            this.Lights.KeyLight.Enabled = false;
+            this.Lights.BackLight.Enabled = false;
+            this.Lights.FillLight.Enabled = true;
         }
 
         public override void Update(GameTime gameTime)

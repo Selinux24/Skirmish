@@ -1,7 +1,10 @@
 ﻿
 namespace Engine.PathFinding.NavMesh
 {
-    public class NavigationMeshAgent : Agent
+    /// <summary>
+    /// Navigation mesh agent type
+    /// </summary>
+    public class NavigationMeshAgentType : AgentType
     {
         /// <summary>
         /// Gets or sets the maximum climb height.

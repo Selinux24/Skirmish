@@ -2,9 +2,9 @@
 namespace Engine.PathFinding
 {
     /// <summary>
-    /// Agent
+    /// Agent type
     /// </summary>
-    public abstract class Agent
+    public abstract class AgentType
     {
         /// <summary>
         /// Agent name

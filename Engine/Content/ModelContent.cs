@@ -451,7 +451,8 @@ namespace Engine.Content
         /// </summary>
         public ModelContent()
         {
-
+            //Adding default material for non material geometry, like volumes
+            this.Materials.Add(NoMaterial, MaterialContent.Default);
         }
 
         /// <summary>

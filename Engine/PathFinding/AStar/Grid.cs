@@ -311,31 +311,31 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Gets the node collection of the grid
         /// </summary>
-        /// <param name="agent">Agent</param>
+        /// <param name="agent">Agent type</param>
         /// <returns>Returns the node collection of the grid</returns>
-        public IGraphNode[] GetNodes(Agent agent)
+        public IGraphNode[] GetNodes(AgentType agent)
         {
             return Array.ConvertAll(this.Nodes, (n) => { return (IGraphNode)n; });
         }
         /// <summary>
         /// Find path from point to point
         /// </summary>
-        /// <param name="agent">Agent</param>
+        /// <param name="agent">Agent type</param>
         /// <param name="from">Start point</param>
         /// <param name="to">End point</param>
         /// <returns>Return path if exists</returns>
-        public Vector3[] FindPath(Agent agent, Vector3 from, Vector3 to)
+        public Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
             return AStarQuery.FindPath(this, from, to);
         }
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>
-        /// <param name="agent">Agent</param>
+        /// <param name="agent">Agent type</param>
         /// <param name="position">Position</param>
         /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(Agent agent, Vector3 position, out Vector3? nearest)
+        public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
         {
             nearest = null;
 

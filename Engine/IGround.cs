@@ -84,7 +84,7 @@ namespace Engine
         /// <param name="useGround">Use ground info</param>
         /// <param name="delta">Delta amount for path refinement</param>
         /// <returns>Return path if exists</returns>
-        PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to, bool useGround = true, float delta = 0f);
+        PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = true, float delta = 0f);
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>
@@ -92,7 +92,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        bool IsWalkable(Agent agent, Vector3 position, out Vector3? nearest);
+        bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest);
         /// <summary>
         /// Gets final position for agents walking over the ground if exists
         /// </summary>
@@ -101,7 +101,7 @@ namespace Engine
         /// <param name="newPosition">New position</param>
         /// <param name="finalPosition">Returns the final position if exists</param>
         /// <returns>Returns true if final position found</returns>
-        bool Walk(Agent agent, Vector3 prevPosition, Vector3 newPosition, out Vector3 finalPosition);
+        bool Walk(AgentType agent, Vector3 prevPosition, Vector3 newPosition, out Vector3 finalPosition);
 
         /// <summary>
         /// Gets bounding sphere

@@ -36,7 +36,7 @@ namespace GameLogic
         private SceneLightSpot spotLight = null;
 
         private ModelInstanced soldier = null;
-        private GridAgent soldierAgent = null;
+        private GridAgentType soldierAgent = null;
         private Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
         private ModelInstance current
         {
@@ -805,7 +805,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set move animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f);
 
                     this.GoToSoldier(active);
                 }
@@ -822,7 +822,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set crawl animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f);
 
                     this.GoToSoldier(active);
                 }
@@ -839,7 +839,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f);
 
                     this.GoToSoldier(active);
                 }
@@ -862,7 +862,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set assault animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f);
 
                     this.GoToSoldier(active);
                 }
@@ -947,7 +947,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f);
 
                     this.GoToSoldier(active);
                 }
@@ -964,7 +964,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f);
 
                     this.GoToSoldier(active);
                 }
@@ -1050,7 +1050,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f, this.terrain);
+                    this.soldierModels[active].Manipulator.Follow(path.ReturnPath.ToArray(), 0.2f);
 
                     this.GoToSoldier(active);
                 }

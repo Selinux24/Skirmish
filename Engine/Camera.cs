@@ -319,7 +319,7 @@ namespace Engine
                 }
                 else if (this.mode == CameraModes.Free)
                 {
-                    this.SetFree(Vector3.Zero, this.ZoomMin * 2f);
+                    this.SetFree(this.position, this.interest);
                 }
                 else if (this.mode == CameraModes.Ortho)
                 {
@@ -705,16 +705,14 @@ namespace Engine
         /// <summary>
         /// Sets camera to free mode
         /// </summary>
-        /// <param name="newInterest">Interest point</param>
-        /// <param name="distance">Distance to interest point from viewer point</param>
-        private void SetFree(Vector3 newInterest, float distance)
+        /// <param name="newPosition">New position</param>
+        /// <param name="newInterest">New interest point</param>
+        private void SetFree(Vector3 newPosition, Vector3 newInterest)
         {
             this.StopTranslations();
 
-            Vector3 diff = newInterest - this.Interest;
-            this.Interest += diff;
-            this.Position += diff;
-            this.Position = Vector3.Normalize(this.Position) * distance;
+            this.Position = newPosition;
+            this.Interest = newInterest;
 
             this.mode = CameraModes.Free;
         }

@@ -198,7 +198,7 @@ namespace Engine
         /// Computes current position and orientation in the curve
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public virtual void UpdateFollowCurve(GameTime gameTime)
+        protected virtual void UpdateFollowCurve(GameTime gameTime)
         {
             if (this.CurveTime <= this.Curve.Length)
             {
@@ -224,7 +224,7 @@ namespace Engine
         /// Computes current position and orientation in the path
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        public virtual void UpdateFollowPath(GameTime gameTime)
+        protected virtual void UpdateFollowPath(GameTime gameTime)
         {
             if (this.PathTarget < this.Path.Length)
             {
@@ -622,12 +622,23 @@ namespace Engine
         /// </summary>
         /// <param name="path">Path to follow</param>
         /// <param name="velocity">Velocity</param>
-        /// <param name="ground">Terrain</param>
-        public void Follow(Vector3[] path, float velocity, IGround ground)
+        public void Follow(Vector3[] path, float velocity)
         {
             this.Path = path;
             this.PathTarget = 0;
             this.PathVelocity = velocity;
+        }
+        /// <summary>
+        /// Stops to follow any curve or path
+        /// </summary>
+        public void Stop()
+        {
+            this.Curve = null;
+            this.CurveTime = 0f;
+
+            this.Path = null;
+            this.PathTarget = 0;
+            this.PathVelocity = -1;
         }
 
         /// <summary>

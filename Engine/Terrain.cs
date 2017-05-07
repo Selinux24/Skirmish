@@ -964,7 +964,7 @@ namespace Engine
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <returns>Returns the path finder grid nodes</returns>
-        public IGraphNode[] GetNodes(Agent agent)
+        public IGraphNode[] GetNodes(AgentType agent)
         {
             IGraphNode[] nodes = null;
 

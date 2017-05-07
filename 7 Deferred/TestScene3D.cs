@@ -25,7 +25,7 @@ namespace DeferredTest
         private Sprite backPannel = null;
 
         private Model tank = null;
-        private NavigationMeshAgent tankAgent = new NavigationMeshAgent();
+        private NavigationMeshAgentType tankAgent = new NavigationMeshAgentType();
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
         private Skydom skydom = null;
@@ -606,7 +606,7 @@ namespace DeferredTest
                     var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, position);
                     if (p != null)
                     {
-                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 10f, this.terrain);
+                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 10f);
                     }
                 }
             }

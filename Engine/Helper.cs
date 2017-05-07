@@ -984,7 +984,7 @@ namespace Engine
         /// <returns>Returns the center of the current bounding box</returns>
         public static Vector3 GetCenter(this BoundingBox bbox)
         {
-            return bbox.Minimum + bbox.Maximum * 0.5f;
+            return (bbox.Minimum + bbox.Maximum) * 0.5f;
         }
         /// <summary>
         /// Gets the x maganitude of the current bounding box

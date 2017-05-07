@@ -251,8 +251,8 @@
     <Compile Include="ModelDescription.cs" />
     <Compile Include="ModelInstance.cs" />
     <Compile Include="ModelInstancedDescription.cs" />
-    <Compile Include="PathFinding\Agent.cs" />
-    <Compile Include="PathFinding\AStar\GridAgent.cs" />
+    <Compile Include="PathFinding\AgentType.cs" />
+    <Compile Include="PathFinding\AStar\GridAgentType.cs" />
     <Compile Include="PathFinding\AStar\GridGenerationSettings.cs" />
     <Compile Include="PathFinding\NavMesh\BoundarySide.cs" />
     <Compile Include="Collections\BoundingVolumeTreeNode.cs" />
@@ -260,7 +260,7 @@
     <Compile Include="GeometricOrientation.cs" />
     <Compile Include="PathFinding\NavMesh\Link.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMesh.cs" />
-    <Compile Include="PathFinding\NavMesh\NavigationMeshAgent.cs" />
+    <Compile Include="PathFinding\NavMesh\NavigationMeshAgentType.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMeshBuilder.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMeshGenerationSettings.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMeshInfo.cs" />

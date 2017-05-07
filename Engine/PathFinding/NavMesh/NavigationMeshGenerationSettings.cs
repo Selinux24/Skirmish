@@ -63,9 +63,9 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public bool BuildBoundingVolumeTree { get; set; }
         /// <summary>
-        /// Agents list
+        /// Agent types list
         /// </summary>
-        public NavigationMeshAgent[] Agents = null;
+        public NavigationMeshAgentType[] Agents = null;
 
         /// <summary>
         /// Prevents a default instance of the <see cref="NavigationMeshGenerationSettings"/> class from being created.
@@ -87,7 +87,7 @@ namespace Engine.PathFinding.NavMesh
 
             this.Agents = new[]
             {
-                new NavigationMeshAgent()
+                new NavigationMeshAgentType()
                 {
                     MaxClimb = 1f,
                     Height = 2.0f,
@@ -99,7 +99,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the height of the agents traversing the <see cref="NavMesh"/> in voxel (cell) units.
         /// </summary>
-        public int GetVoxelAgentHeight(NavigationMeshAgent agent)
+        public int GetVoxelAgentHeight(NavigationMeshAgentType agent)
         {
             var vah = (int)(agent.Height / CellHeight);
 
@@ -108,7 +108,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the radius of the agents traversing the <see cref="NavMesh"/> in voxel (cell) units.
         /// </summary>
-        public int GetVoxelAgentRadius(NavigationMeshAgent agent)
+        public int GetVoxelAgentRadius(NavigationMeshAgentType agent)
         {
             var var = (int)(agent.Radius / CellHeight);
 
@@ -117,7 +117,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the maximum clim height in voxel (cell) units.
         /// </summary>
-        public int GetVoxelMaxClimb(NavigationMeshAgent agent)
+        public int GetVoxelMaxClimb(NavigationMeshAgentType agent)
         {
             var vmc = (int)(agent.MaxClimb / CellHeight);
 

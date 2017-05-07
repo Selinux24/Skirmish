@@ -891,7 +891,7 @@ namespace Engine
         /// <param name="useGround">Use ground info</param>
         /// <param name="delta">Delta amount for path refinement</param>
         /// <returns>Return path if exists</returns>
-        public virtual PathFindingPath FindPath(Agent agent, Vector3 from, Vector3 to, bool useGround = true, float delta = 0f)
+        public virtual PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = true, float delta = 0f)
         {
             List<Vector3> positions = new List<Vector3>();
             List<Vector3> normals = new List<Vector3>();
@@ -971,7 +971,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public virtual bool IsWalkable(Agent agent, Vector3 position, out Vector3? nearest)
+        public virtual bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
         {
             if (this.navigationGraph != null)
             {
@@ -990,7 +990,7 @@ namespace Engine
         /// <param name="newPosition">New position</param>
         /// <param name="finalPosition">Returns the final position if exists</param>
         /// <returns>Returns true if final position found</returns>
-        public virtual bool Walk(Agent agent, Vector3 prevPosition, Vector3 newPosition, out Vector3 finalPosition)
+        public virtual bool Walk(AgentType agent, Vector3 prevPosition, Vector3 newPosition, out Vector3 finalPosition)
         {
             finalPosition = Vector3.Zero;
 

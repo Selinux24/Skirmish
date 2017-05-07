@@ -12,13 +12,13 @@ namespace Engine.PathFinding.NavMesh
     public class NavigationMesh : IGraph
     {
         /// <summary>
-        /// 
+        /// Navigation mesh queries by agent type
         /// </summary>
-        protected readonly Dictionary<Agent, NavigationMeshQuery> Query = new Dictionary<Agent, NavigationMeshQuery>();
+        protected readonly Dictionary<AgentType, NavigationMeshQuery> Query = new Dictionary<AgentType, NavigationMeshQuery>();
         /// <summary>
-        /// 
+        /// Navigation mesh nodes by agent type
         /// </summary>
-        protected readonly Dictionary<Agent, NavigationMeshNode[]> Nodes = new Dictionary<Agent, NavigationMeshNode[]>();
+        protected readonly Dictionary<AgentType, NavigationMeshNode[]> Nodes = new Dictionary<AgentType, NavigationMeshNode[]>();
 
         /// <summary>
         /// Navigation Mesh Build
@@ -117,20 +117,20 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the node list
         /// </summary>
-        /// <param name="agent">Agent</param>
+        /// <param name="agent">Agent type</param>
         /// <returns>Returns the node collections for the specified list</returns>
-        public IGraphNode[] GetNodes(Agent agent)
+        public IGraphNode[] GetNodes(AgentType agent)
         {
             return Array.ConvertAll(this.Nodes[agent], (n) => { return (IGraphNode)n; });
         }
         /// <summary>
         /// Finds a path over the navigation mesh
         /// </summary>
-        /// <param name="agent">Agent</param>
+        /// <param name="agent">Agent type</param>
         /// <param name="from">From position</param>
         /// <param name="to">To position</param>
         /// <returns>Returns path between the specified points if exists</returns>
-        public Vector3[] FindPath(Agent agent, Vector3 from, Vector3 to)
+        public Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
             Vector3[] path;
             if (this.Query[agent].FindPath(from, to, out path))
@@ -143,11 +143,11 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>
-        /// <param name="agent">Agent</param>
+        /// <param name="agent">Agent type</param>
         /// <param name="position">Position</param>
         /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(Agent agent, Vector3 position, out Vector3? nearest)
+        public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
         {
             return this.Query[agent].IsWalkable(position, out nearest);
         }

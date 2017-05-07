@@ -30,7 +30,7 @@ namespace TerrainTest
             base.Update(gameTime);
         }
 
-        public override void UpdateFollowCurve(GameTime gameTime)
+        protected override void UpdateFollowCurve(GameTime gameTime)
         {
             var nDelta = gameTime.ElapsedSeconds * this.CurveTimeDelta;
 

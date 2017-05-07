@@ -251,6 +251,10 @@ namespace Engine
                 return 1;
             }
         }
+        /// <summary>
+        /// Gets the current model lights collection
+        /// </summary>
+        public SceneLight[] Lights { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -273,6 +277,28 @@ namespace Engine
 
                 this.patchDictionary.Add(node.Id, patch);
             }
+
+            #endregion
+
+            #region Lights
+
+            List<SceneLight> lights = new List<SceneLight>();
+
+            foreach (var key in content.Lights.Keys)
+            {
+                var l = content.Lights[key];
+
+                if (l.LightType == LightContentTypeEnum.Point)
+                {
+                    lights.Add(l.CreatePointLight());
+                }
+                else if (l.LightType == LightContentTypeEnum.Spot)
+                {
+                    lights.Add(l.CreateSpotLight());
+                }
+            }
+
+            this.Lights = lights.ToArray();
 
             #endregion
 
@@ -407,7 +433,7 @@ namespace Engine
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <returns>Returns the path finder grid nodes</returns>
-        public IGraphNode[] GetNodes(Agent agent)
+        public IGraphNode[] GetNodes(AgentType agent)
         {
             IGraphNode[] nodes = null;
 
