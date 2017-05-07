@@ -87,18 +87,18 @@ namespace Collada
                     CastShadow = true,
                 });
 
-            BoundingBox bbox = this.wall.Instances[0].GetBoundingBox();
+            BoundingBox bbox = this.wall[0].GetBoundingBox();
 
             float x = bbox.GetX() * (10f / 11f);
             float z = bbox.GetZ();
 
-            this.wall.Instances[0].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
-            this.wall.Instances[1].Manipulator.SetPosition(new Vector3(+2 * x, 0, +0 * z));
-            this.wall.Instances[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, +0 * z));
-            this.wall.Instances[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
-            this.wall.Instances[4].Manipulator.SetPosition(new Vector3(-1 * x, 0, +0 * z));
-            this.wall.Instances[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
-            this.wall.Instances[6].Manipulator.SetPosition(new Vector3(-3 * x, 0, +0 * z));
+            this.wall[0].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
+            this.wall[1].Manipulator.SetPosition(new Vector3(+2 * x, 0, +0 * z));
+            this.wall[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, +0 * z));
+            this.wall[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
+            this.wall[4].Manipulator.SetPosition(new Vector3(-1 * x, 0, +0 * z));
+            this.wall[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
+            this.wall[6].Manipulator.SetPosition(new Vector3(-3 * x, 0, +0 * z));
         }
         private void InitializeEmitter()
         {

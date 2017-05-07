@@ -17,7 +17,22 @@ namespace Engine
     /// </summary>
     public class SceneRendererForward : ISceneRenderer
     {
+        /// <summary>
+        /// Shadow map size
+        /// </summary>
         private const int ShadowMapSize = 1024 * 4;
+        /// <summary>
+        /// Cull index for low definition shadows
+        /// </summary>
+        private const int CullIndexShadowLowIndex = 0;
+        /// <summary>
+        /// Cull index for high definition shadows
+        /// </summary>
+        private const int CullIndexShadowHighIndex = 1;
+        /// <summary>
+        /// Cull index for drawing
+        /// </summary>
+        private const int CullIndexDrawIndex = 2;
 
         /// <summary>
         /// High definition shadow mapper
@@ -27,6 +42,10 @@ namespace Engine
         /// Low definition shadow mapper
         /// </summary>
         private ShadowMap shadowMapperLow = null;
+        /// <summary>
+        /// Cull manager
+        /// </summary>
+        private SceneCullManager cullManager = null;
 
         /// <summary>
         /// Game
@@ -89,6 +108,7 @@ namespace Engine
 
             this.shadowMapperLow = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
             this.shadowMapperHigh = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
+            this.cullManager = new SceneCullManager();
 
             this.UpdateContext = new UpdateContext()
             {
@@ -256,7 +276,7 @@ namespace Engine
 #endif
                             var sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
 
-                            shadowObjs.ForEach(o => o.Culling(sph));
+                            var doLowShadows = this.cullManager.Cull(sph, CullIndexShadowLowIndex, shadowObjs);
 #if DEBUG
                             swCull.Stop();
 
@@ -264,7 +284,7 @@ namespace Engine
 #endif
                             #endregion
 
-                            if (shadowObjs.Exists(o => o.Cull == false))
+                            if (doLowShadows)
                             {
                                 flags |= ShadowMapFlags.LowDefinition;
 
@@ -281,7 +301,7 @@ namespace Engine
                                 this.DrawShadowsContext.ViewProjection = fromLightVP;
 
                                 this.BindShadowMap(this.shadowMapperLow.Viewport, this.shadowMapperLow.DepthMap);
-                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, shadowObjs);
+                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowLowIndex, shadowObjs);
 
                                 this.DrawContext.ShadowMapLow = this.shadowMapperLow.Texture;
                                 this.DrawContext.FromLightViewProjectionLow = fromLightVP;
@@ -299,7 +319,7 @@ namespace Engine
 #endif
                             sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
 
-                            shadowObjs.ForEach(o => o.Culling(sph));
+                            var doHighShadows = this.cullManager.Cull(sph, CullIndexShadowHighIndex, shadowObjs);
 #if DEBUG
                             swCull.Stop();
 
@@ -307,7 +327,7 @@ namespace Engine
 #endif
                             #endregion
 
-                            if (shadowObjs.Exists(o => o.Cull == false))
+                            if (doHighShadows)
                             {
                                 flags |= ShadowMapFlags.HighDefinition;
 
@@ -323,7 +343,7 @@ namespace Engine
                                 this.DrawShadowsContext.ViewProjection = fromLightVP;
 
                                 this.BindShadowMap(this.shadowMapperHigh.Viewport, this.shadowMapperHigh.DepthMap);
-                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, shadowObjs);
+                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowHighIndex, shadowObjs);
 
                                 this.DrawContext.ShadowMapHigh = this.shadowMapperHigh.Texture;
                                 this.DrawContext.FromLightViewProjectionHigh = fromLightVP;
@@ -373,7 +393,7 @@ namespace Engine
                         if (scene.PerformFrustumCulling)
                         {
                             //Frustum culling
-                            draw = scene.CullTest(this.DrawContext.Frustum, visibleComponents);
+                            draw = this.cullManager.Cull(this.DrawContext.Frustum, CullIndexDrawIndex, visibleComponents);
                         }
                         else
                         {
@@ -394,7 +414,7 @@ namespace Engine
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
                             //Draw solid
-                            this.DrawResultComponents(gameTime, this.DrawContext, visibleComponents);
+                            this.DrawResultComponents(gameTime, this.DrawContext, CullIndexDrawIndex, visibleComponents);
 #if DEBUG
                             swDraw.Stop();
 
@@ -498,12 +518,13 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
+        /// <param name="index">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawShadowComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
+        private void DrawShadowComponents(GameTime gameTime, DrawContext context, int index, List<Drawable> components)
         {
             components.ForEach((c) =>
             {
-                if (!c.Cull)
+                if (!this.cullManager.IsVisible(index, c))
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
 
@@ -522,14 +543,15 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
+        /// <param name="index">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
+        private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, List<Drawable> components)
         {
             components.ForEach((c) =>
             {
-                Counters.MaxInstancesPerFrame += c.MaxInstances;
+                Counters.MaxInstancesPerFrame += c.Count;
 
-                if (!c.Cull)
+                if (!this.cullManager.IsVisible(index, c))
                 {
                     this.Game.Graphics.SetRasterizerDefault();
 

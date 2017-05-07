@@ -170,6 +170,7 @@
     <Compile Include="FoliageMap.cs" />
     <Compile Include="GroundGardener.cs" />
     <Compile Include="GroundGardenerDescription.cs" />
+    <Compile Include="ICull.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />
     <Compile Include="ISceneLightPosition.cs" />
@@ -188,6 +189,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="SceneCullManager.cs" />
     <Compile Include="ShadowMapFlags.cs" />
     <Compile Include="SkyPlane.cs" />
     <Compile Include="SkyPlaneMode.cs" />

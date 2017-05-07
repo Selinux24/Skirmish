@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Drawable object
     /// </summary>
-    public abstract class Drawable : IDisposable
+    public abstract class Drawable : ICull, IDisposable
     {
         /// <summary>
         /// Game class
@@ -42,14 +42,9 @@ namespace Engine.Common
         /// </summary>
         public bool Active { get; set; }
         /// <summary>
-        /// Culling test flag
-        /// </summary>
-        /// <remarks>True if passes culling test</remarks>
-        public bool Cull { get; protected set; }
-        /// <summary>
         /// Maximum instance count
         /// </summary>
-        public abstract int MaxInstances { get; }
+        public abstract int Count { get; }
 
         /// <summary>
         /// Gets or sets whether the object is static
@@ -113,25 +108,25 @@ namespace Engine.Common
         /// Performs culling test
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        public virtual void Culling(BoundingFrustum frustum)
+        public virtual bool Cull(BoundingFrustum frustum)
         {
-            this.Cull = false;
+            return false;
+        }
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="box">Box</param>
+        public virtual bool Cull(BoundingBox box)
+        {
+            return false;
         }
         /// <summary>
         /// Performs culling test
         /// </summary>
         /// <param name="sphere">Sphere</param>
-        public virtual void Culling(BoundingSphere sphere)
+        public virtual bool Cull(BoundingSphere sphere)
         {
-            this.Cull = false;
-        }
-        /// <summary>
-        /// Sets cull value
-        /// </summary>
-        /// <param name="value">New value</param>
-        public virtual void SetCulling(bool value)
-        {
-            this.Cull = value;
+            return false;
         }
 
         /// <summary>

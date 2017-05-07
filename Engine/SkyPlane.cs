@@ -90,7 +90,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public override int MaxInstances
+        public override int Count
         {
             get
             {
@@ -107,8 +107,6 @@ namespace Engine
         public SkyPlane(Game game, BufferManager bufferManager, SkyPlaneDescription description)
             : base(game, bufferManager, description)
         {
-            this.Cull = false;
-
             var img1 = new ImageContent()
             {
                 Streams = ContentManager.FindContent(description.ContentPath, description.Texture1Name),

@@ -183,15 +183,15 @@ namespace SceneTest
 
             this.floorAsphaltI = this.AddInstancingModel(content, descI);
 
-            this.floorAsphaltI.Instances[0].Manipulator.SetPosition(-l * 2, 0, 0);
-            this.floorAsphaltI.Instances[1].Manipulator.SetPosition(l * 2, 0, 0);
-            this.floorAsphaltI.Instances[2].Manipulator.SetPosition(0, 0, -l * 2);
-            this.floorAsphaltI.Instances[3].Manipulator.SetPosition(0, 0, l * 2);
+            this.floorAsphaltI[0].Manipulator.SetPosition(-l * 2, 0, 0);
+            this.floorAsphaltI[1].Manipulator.SetPosition(l * 2, 0, 0);
+            this.floorAsphaltI[2].Manipulator.SetPosition(0, 0, -l * 2);
+            this.floorAsphaltI[3].Manipulator.SetPosition(0, 0, l * 2);
 
-            this.floorAsphaltI.Instances[4].Manipulator.SetPosition(-l * 2, 0, -l * 2);
-            this.floorAsphaltI.Instances[5].Manipulator.SetPosition(l * 2, 0, -l * 2);
-            this.floorAsphaltI.Instances[6].Manipulator.SetPosition(-l * 2, 0, l * 2);
-            this.floorAsphaltI.Instances[7].Manipulator.SetPosition(l * 2, 0, l * 2);
+            this.floorAsphaltI[4].Manipulator.SetPosition(-l * 2, 0, -l * 2);
+            this.floorAsphaltI[5].Manipulator.SetPosition(l * 2, 0, -l * 2);
+            this.floorAsphaltI[6].Manipulator.SetPosition(-l * 2, 0, l * 2);
+            this.floorAsphaltI[7].Manipulator.SetPosition(l * 2, 0, l * 2);
         }
         private void InitializeBuildingObelisk()
         {
@@ -222,20 +222,20 @@ namespace SceneTest
             this.buildingObelisk.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.buildingObelisk.Manipulator.SetScale(10);
 
-            this.buildingObeliskI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, 0, 0);
-            this.buildingObeliskI.Instances[1].Manipulator.SetPosition(spaceSize * 2, 0, 0);
-            this.buildingObeliskI.Instances[2].Manipulator.SetPosition(0, 0, -spaceSize * 2);
-            this.buildingObeliskI.Instances[3].Manipulator.SetPosition(0, 0, spaceSize * 2);
+            this.buildingObeliskI[0].Manipulator.SetPosition(-spaceSize * 2, 0, 0);
+            this.buildingObeliskI[1].Manipulator.SetPosition(spaceSize * 2, 0, 0);
+            this.buildingObeliskI[2].Manipulator.SetPosition(0, 0, -spaceSize * 2);
+            this.buildingObeliskI[3].Manipulator.SetPosition(0, 0, spaceSize * 2);
 
-            this.buildingObeliskI.Instances[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
-            this.buildingObeliskI.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            this.buildingObeliskI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
-            this.buildingObeliskI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+            this.buildingObeliskI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
+            this.buildingObeliskI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
+            this.buildingObeliskI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
+            this.buildingObeliskI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
-            this.buildingObeliskI.Instances[0].Manipulator.SetScale(10);
-            this.buildingObeliskI.Instances[1].Manipulator.SetScale(10);
-            this.buildingObeliskI.Instances[2].Manipulator.SetScale(10);
-            this.buildingObeliskI.Instances[3].Manipulator.SetScale(10);
+            this.buildingObeliskI[0].Manipulator.SetScale(10);
+            this.buildingObeliskI[1].Manipulator.SetScale(10);
+            this.buildingObeliskI[2].Manipulator.SetScale(10);
+            this.buildingObeliskI[3].Manipulator.SetScale(10);
         }
         private void InitializeCharacterSoldier()
         {
@@ -271,25 +271,25 @@ namespace SceneTest
             this.characterSoldier.AnimationController.AddPath(p1);
             this.characterSoldier.AnimationController.Start(0);
 
-            this.characterSoldierI.Instances[0].Manipulator.SetPosition(-spaceSize * 2 + s, 0, -s);
-            this.characterSoldierI.Instances[1].Manipulator.SetPosition(spaceSize * 2 + s, 0, -s);
-            this.characterSoldierI.Instances[2].Manipulator.SetPosition(s, 0, -spaceSize * 2 - s);
-            this.characterSoldierI.Instances[3].Manipulator.SetPosition(s, 0, spaceSize * 2 - s);
+            this.characterSoldierI[0].Manipulator.SetPosition(-spaceSize * 2 + s, 0, -s);
+            this.characterSoldierI[1].Manipulator.SetPosition(spaceSize * 2 + s, 0, -s);
+            this.characterSoldierI[2].Manipulator.SetPosition(s, 0, -spaceSize * 2 - s);
+            this.characterSoldierI[3].Manipulator.SetPosition(s, 0, spaceSize * 2 - s);
 
-            this.characterSoldierI.Instances[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
-            this.characterSoldierI.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            this.characterSoldierI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
-            this.characterSoldierI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+            this.characterSoldierI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
+            this.characterSoldierI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
+            this.characterSoldierI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
+            this.characterSoldierI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
-            this.characterSoldierI.Instances[0].AnimationController.AddPath(p1);
-            this.characterSoldierI.Instances[1].AnimationController.AddPath(p1);
-            this.characterSoldierI.Instances[2].AnimationController.AddPath(p1);
-            this.characterSoldierI.Instances[3].AnimationController.AddPath(p1);
+            this.characterSoldierI[0].AnimationController.AddPath(p1);
+            this.characterSoldierI[1].AnimationController.AddPath(p1);
+            this.characterSoldierI[2].AnimationController.AddPath(p1);
+            this.characterSoldierI[3].AnimationController.AddPath(p1);
 
-            this.characterSoldierI.Instances[0].AnimationController.Start(1);
-            this.characterSoldierI.Instances[1].AnimationController.Start(2);
-            this.characterSoldierI.Instances[2].AnimationController.Start(3);
-            this.characterSoldierI.Instances[3].AnimationController.Start(4);
+            this.characterSoldierI[0].AnimationController.Start(1);
+            this.characterSoldierI[1].AnimationController.Start(2);
+            this.characterSoldierI[2].AnimationController.Start(3);
+            this.characterSoldierI[3].AnimationController.Start(4);
         }
         private void InitializeVehiclesLeopard()
         {
@@ -321,21 +321,21 @@ namespace SceneTest
             this.vehicleLeopard.Manipulator.SetPosition(s, 0, 0);
             this.vehicleLeopard.Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
 
-            this.vehicleLeopardI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, 0, -spaceSize * 2);
-            this.vehicleLeopardI.Instances[1].Manipulator.SetPosition(spaceSize * 2, 0, -spaceSize * 2);
-            this.vehicleLeopardI.Instances[2].Manipulator.SetPosition(-spaceSize * 2, 0, spaceSize * 2);
-            this.vehicleLeopardI.Instances[3].Manipulator.SetPosition(spaceSize * 2, 0, spaceSize * 2);
+            this.vehicleLeopardI[0].Manipulator.SetPosition(-spaceSize * 2, 0, -spaceSize * 2);
+            this.vehicleLeopardI[1].Manipulator.SetPosition(spaceSize * 2, 0, -spaceSize * 2);
+            this.vehicleLeopardI[2].Manipulator.SetPosition(-spaceSize * 2, 0, spaceSize * 2);
+            this.vehicleLeopardI[3].Manipulator.SetPosition(spaceSize * 2, 0, spaceSize * 2);
 
-            this.vehicleLeopardI.Instances[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
-            this.vehicleLeopardI.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            this.vehicleLeopardI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
-            this.vehicleLeopardI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+            this.vehicleLeopardI[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
+            this.vehicleLeopardI[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
+            this.vehicleLeopardI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
+            this.vehicleLeopardI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
             this.Lights.AddRange(this.vehicleLeopard.Lights);
-            this.Lights.AddRange(this.vehicleLeopardI.Instances[0].Lights);
-            this.Lights.AddRange(this.vehicleLeopardI.Instances[1].Lights);
-            this.Lights.AddRange(this.vehicleLeopardI.Instances[2].Lights);
-            this.Lights.AddRange(this.vehicleLeopardI.Instances[3].Lights);
+            this.Lights.AddRange(this.vehicleLeopardI[0].Lights);
+            this.Lights.AddRange(this.vehicleLeopardI[1].Lights);
+            this.Lights.AddRange(this.vehicleLeopardI[2].Lights);
+            this.Lights.AddRange(this.vehicleLeopardI[3].Lights);
         }
         private void InitializeLamps()
         {
@@ -368,21 +368,21 @@ namespace SceneTest
             this.lamp.Manipulator.SetPosition(0, spaceSize, -spaceSize * dist);
             this.lamp.Manipulator.SetRotation(0, pitch, 0);
 
-            this.lampI.Instances[0].Manipulator.SetPosition(-spaceSize * 2, spaceSize, -spaceSize * dist);
-            this.lampI.Instances[1].Manipulator.SetPosition(spaceSize * 2, spaceSize, -spaceSize * dist);
-            this.lampI.Instances[2].Manipulator.SetPosition(-spaceSize * dist, spaceSize, -spaceSize * 2);
-            this.lampI.Instances[3].Manipulator.SetPosition(-spaceSize * dist, spaceSize, spaceSize * 2);
+            this.lampI[0].Manipulator.SetPosition(-spaceSize * 2, spaceSize, -spaceSize * dist);
+            this.lampI[1].Manipulator.SetPosition(spaceSize * 2, spaceSize, -spaceSize * dist);
+            this.lampI[2].Manipulator.SetPosition(-spaceSize * dist, spaceSize, -spaceSize * 2);
+            this.lampI[3].Manipulator.SetPosition(-spaceSize * dist, spaceSize, spaceSize * 2);
 
-            this.lampI.Instances[0].Manipulator.SetRotation(0, pitch, 0);
-            this.lampI.Instances[1].Manipulator.SetRotation(0, pitch, 0);
-            this.lampI.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
-            this.lampI.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
+            this.lampI[0].Manipulator.SetRotation(0, pitch, 0);
+            this.lampI[1].Manipulator.SetRotation(0, pitch, 0);
+            this.lampI[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
+            this.lampI[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
 
             this.Lights.AddRange(this.lamp.Lights);
-            this.Lights.AddRange(this.lampI.Instances[0].Lights);
-            this.Lights.AddRange(this.lampI.Instances[1].Lights);
-            this.Lights.AddRange(this.lampI.Instances[2].Lights);
-            this.Lights.AddRange(this.lampI.Instances[3].Lights);
+            this.Lights.AddRange(this.lampI[0].Lights);
+            this.Lights.AddRange(this.lampI[1].Lights);
+            this.Lights.AddRange(this.lampI[2].Lights);
+            this.Lights.AddRange(this.lampI[3].Lights);
         }
         private void InitializeStreetLamps()
         {
@@ -410,33 +410,33 @@ namespace SceneTest
                 });
 
             this.streetlamp.Manipulator.SetPosition(-spaceSize, 0, -spaceSize * -2f);
-            this.streetlampI.Instances[0].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * -1f);
-            this.streetlampI.Instances[1].Manipulator.SetPosition(-spaceSize, 0, 0);
-            this.streetlampI.Instances[2].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 1f);
-            this.streetlampI.Instances[3].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 2f);
+            this.streetlampI[0].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * -1f);
+            this.streetlampI[1].Manipulator.SetPosition(-spaceSize, 0, 0);
+            this.streetlampI[2].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 1f);
+            this.streetlampI[3].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 2f);
 
-            this.streetlampI.Instances[4].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -2f);
-            this.streetlampI.Instances[5].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -1f);
-            this.streetlampI.Instances[6].Manipulator.SetPosition(+spaceSize, 0, 0);
-            this.streetlampI.Instances[7].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 1f);
-            this.streetlampI.Instances[8].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 2f);
+            this.streetlampI[4].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -2f);
+            this.streetlampI[5].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -1f);
+            this.streetlampI[6].Manipulator.SetPosition(+spaceSize, 0, 0);
+            this.streetlampI[7].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 1f);
+            this.streetlampI[8].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 2f);
 
-            this.streetlampI.Instances[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            this.streetlampI.Instances[5].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            this.streetlampI.Instances[6].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            this.streetlampI.Instances[7].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            this.streetlampI.Instances[8].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.streetlampI[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.streetlampI[5].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.streetlampI[6].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.streetlampI[7].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.streetlampI[8].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
 
             this.Lights.AddRange(this.streetlamp.Lights);
-            this.Lights.AddRange(this.streetlampI.Instances[0].Lights);
-            this.Lights.AddRange(this.streetlampI.Instances[1].Lights);
-            this.Lights.AddRange(this.streetlampI.Instances[2].Lights);
-            this.Lights.AddRange(this.streetlampI.Instances[3].Lights);
-            this.Lights.AddRange(this.streetlampI.Instances[4].Lights);
-            this.Lights.AddRange(this.streetlampI.Instances[5].Lights);
-            this.Lights.AddRange(this.streetlampI.Instances[6].Lights);
-            this.Lights.AddRange(this.streetlampI.Instances[7].Lights);
-            this.Lights.AddRange(this.streetlampI.Instances[8].Lights);
+            this.Lights.AddRange(this.streetlampI[0].Lights);
+            this.Lights.AddRange(this.streetlampI[1].Lights);
+            this.Lights.AddRange(this.streetlampI[2].Lights);
+            this.Lights.AddRange(this.streetlampI[3].Lights);
+            this.Lights.AddRange(this.streetlampI[4].Lights);
+            this.Lights.AddRange(this.streetlampI[5].Lights);
+            this.Lights.AddRange(this.streetlampI[6].Lights);
+            this.Lights.AddRange(this.streetlampI[7].Lights);
+            this.Lights.AddRange(this.streetlampI[8].Lights);
         }
 
         public override void Update(GameTime gameTime)

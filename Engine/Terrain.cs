@@ -620,7 +620,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public override int MaxInstances
+        public override int Count
         {
             get
             {

@@ -535,14 +535,14 @@ namespace TerrainTest
                 float obeliskDist;
                 if (this.terrain.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition, out obeliskTri, out obeliskDist))
                 {
-                    this.obelisk.Instances[i].Manipulator.SetPosition(obeliskPosition);
-                    this.obelisk.Instances[i].Manipulator.SetScale(1.5f);
+                    this.obelisk[i].Manipulator.SetPosition(obeliskPosition);
+                    this.obelisk[i].Manipulator.SetScale(1.5f);
                 }
-                lines.AddRange(Line3D.CreateWiredBox(this.obelisk.Instances[i].GetBoundingBox()));
+                lines.AddRange(Line3D.CreateWiredBox(this.obelisk[i].GetBoundingBox()));
             }
 
             //Rocks
-            for (int i = 0; i < this.rocks.Instances.Length; i++)
+            for (int i = 0; i < this.rocks.Count; i++)
             {
                 var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
 
@@ -565,15 +565,15 @@ namespace TerrainTest
                         scale = posRnd.NextFloat(0.1f, 0.2f);
                     }
 
-                    this.rocks.Instances[i].Manipulator.SetPosition(rockPosition);
-                    this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
-                    this.rocks.Instances[i].Manipulator.SetScale(scale);
+                    this.rocks[i].Manipulator.SetPosition(rockPosition);
+                    this.rocks[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
+                    this.rocks[i].Manipulator.SetScale(scale);
                 }
-                lines.AddRange(Line3D.CreateWiredBox(this.rocks.Instances[i].GetBoundingBox()));
+                lines.AddRange(Line3D.CreateWiredBox(this.rocks[i].GetBoundingBox()));
             }
 
             //Trees
-            for (int i = 0; i < this.tree1.Instances.Length; i++)
+            for (int i = 0; i < this.tree1.Count; i++)
             {
                 var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
 
@@ -582,14 +582,14 @@ namespace TerrainTest
                 float treeDist;
                 if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
                 {
-                    this.tree1.Instances[i].Manipulator.SetPosition(treePosition);
-                    this.tree1.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
-                    this.tree1.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
+                    this.tree1[i].Manipulator.SetPosition(treePosition);
+                    this.tree1[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
+                    this.tree1[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
                 }
-                lines.AddRange(Line3D.CreateWiredTriangle(this.tree1.Instances[i].GetVolume()));
+                lines.AddRange(Line3D.CreateWiredTriangle(this.tree1[i].GetVolume()));
             }
 
-            for (int i = 0; i < this.tree2.Instances.Length; i++)
+            for (int i = 0; i < this.tree2.Count; i++)
             {
                 var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
 
@@ -598,11 +598,11 @@ namespace TerrainTest
                 float treeDist;
                 if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
                 {
-                    this.tree2.Instances[i].Manipulator.SetPosition(treePosition);
-                    this.tree2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
-                    this.tree2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
+                    this.tree2[i].Manipulator.SetPosition(treePosition);
+                    this.tree2[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
+                    this.tree2[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
                 }
-                lines.AddRange(Line3D.CreateWiredTriangle(this.tree2.Instances[i].GetVolume()));
+                lines.AddRange(Line3D.CreateWiredTriangle(this.tree2[i].GetVolume()));
             }
 
             this.objLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), lines.ToArray(), this.objColor);

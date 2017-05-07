@@ -93,37 +93,37 @@ namespace Collada
         }
         private void InitializeDungeon()
         {
-            BoundingBox bbox = this.room1.Instances[0].GetBoundingBox();
+            BoundingBox bbox = this.room1[0].GetBoundingBox();
 
             float x = bbox.GetX();
             float z = bbox.GetZ();
 
-            this.room1.Instances[0].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
-            this.room1.Instances[1].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
+            this.room1[0].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
+            this.room1[1].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
 
-            this.room2.Instances[0].Manipulator.SetPosition(new Vector3(-4 * x, 0, +0 * z));
-            this.room2.Instances[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
-            this.room2.Instances[1].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
-            this.room2.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            this.room2.Instances[2].Manipulator.SetPosition(new Vector3(+0 * x, 0, -2 * z));
-            this.room2.Instances[2].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            this.room2.Instances[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +2 * z));
-            this.room2.Instances[4].Manipulator.SetPosition(new Vector3(-2 * x, 0, -2 * z));
-            this.room2.Instances[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            this.room2.Instances[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +2 * z));
+            this.room2[0].Manipulator.SetPosition(new Vector3(-4 * x, 0, +0 * z));
+            this.room2[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+            this.room2[1].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
+            this.room2[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.room2[2].Manipulator.SetPosition(new Vector3(+0 * x, 0, -2 * z));
+            this.room2[2].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.room2[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +2 * z));
+            this.room2[4].Manipulator.SetPosition(new Vector3(-2 * x, 0, -2 * z));
+            this.room2[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.room2[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +2 * z));
 
-            this.corridor1.Instances[0].Manipulator.SetPosition(new Vector3(-1 * x, 0, 0));
-            this.corridor1.Instances[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            this.corridor1.Instances[1].Manipulator.SetPosition(new Vector3(-3 * x, 0, 0));
-            this.corridor1.Instances[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            this.corridor1.Instances[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, 0));
-            this.corridor1.Instances[2].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            this.corridor1.Instances[3].Manipulator.SetPosition(new Vector3(+2 * x, 0, 0));
-            this.corridor1.Instances[3].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            this.corridor1.Instances[4].Manipulator.SetPosition(new Vector3(+0 * x, 0, -1 * z));
-            this.corridor1.Instances[5].Manipulator.SetPosition(new Vector3(+0 * x, 0, +1 * z));
-            this.corridor1.Instances[6].Manipulator.SetPosition(new Vector3(-2 * x, 0, -1 * z));
-            this.corridor1.Instances[7].Manipulator.SetPosition(new Vector3(-2 * x, 0, +1 * z));
+            this.corridor1[0].Manipulator.SetPosition(new Vector3(-1 * x, 0, 0));
+            this.corridor1[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1[1].Manipulator.SetPosition(new Vector3(-3 * x, 0, 0));
+            this.corridor1[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, 0));
+            this.corridor1[2].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1[3].Manipulator.SetPosition(new Vector3(+2 * x, 0, 0));
+            this.corridor1[3].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1[4].Manipulator.SetPosition(new Vector3(+0 * x, 0, -1 * z));
+            this.corridor1[5].Manipulator.SetPosition(new Vector3(+0 * x, 0, +1 * z));
+            this.corridor1[6].Manipulator.SetPosition(new Vector3(-2 * x, 0, -1 * z));
+            this.corridor1[7].Manipulator.SetPosition(new Vector3(-2 * x, 0, +1 * z));
         }
 
         public override void Update(GameTime gameTime)

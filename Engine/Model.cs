@@ -105,7 +105,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public override int MaxInstances
+        public override int Count
         {
             get
             {
@@ -185,6 +185,8 @@ namespace Engine
                     }
                 }
             }
+
+            this.SetLOD(context.EyePosition);
         }
         /// <summary>
         /// Draw
@@ -307,57 +309,79 @@ namespace Engine
         /// Culling
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        public override void Culling(BoundingFrustum frustum)
+        public override bool Cull(BoundingFrustum frustum)
         {
+            bool cull = false;
+
             if (this.hasVolumes)
             {
                 if (this.SphericVolume)
                 {
-                    this.Cull = frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
+                    cull = frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
                 }
                 else
                 {
-                    this.Cull = frustum.Contains(this.GetBoundingBox()) == ContainmentType.Disjoint;
+                    cull = frustum.Contains(this.GetBoundingBox()) == ContainmentType.Disjoint;
                 }
             }
             else
             {
-                this.Cull = false;
+                cull = false;
             }
 
-            if (!this.Cull)
+            return cull;
+        }
+        /// <summary>
+        /// Culling
+        /// </summary>
+        /// <param name="box">Box</param>
+        public override bool Cull(BoundingBox box)
+        {
+            bool cull = false;
+
+            if (this.hasVolumes)
             {
-                var pars = frustum.GetCameraParams();
-
-                this.SetLOD(pars.Position);
+                if (this.SphericVolume)
+                {
+                    cull = this.GetBoundingBox().Contains(ref box) == ContainmentType.Disjoint;
+                }
+                else
+                {
+                    cull = this.GetBoundingBox().Contains(ref box) == ContainmentType.Disjoint;
+                }
             }
+            else
+            {
+                cull = false;
+            }
+
+            return cull;
         }
         /// <summary>
         /// Culling
         /// </summary>
         /// <param name="sphere">Sphere</param>
-        public override void Culling(BoundingSphere sphere)
+        public override bool Cull(BoundingSphere sphere)
         {
+            bool cull = false;
+
             if (this.hasVolumes)
             {
                 if (this.SphericVolume)
                 {
-                    this.Cull = this.GetBoundingSphere().Contains(ref sphere) == ContainmentType.Disjoint;
+                    cull = this.GetBoundingSphere().Contains(ref sphere) == ContainmentType.Disjoint;
                 }
                 else
                 {
-                    this.Cull = this.GetBoundingBox().Contains(ref sphere) == ContainmentType.Disjoint;
+                    cull = this.GetBoundingBox().Contains(ref sphere) == ContainmentType.Disjoint;
                 }
             }
             else
             {
-                this.Cull = false;
+                cull = false;
             }
 
-            if (!this.Cull)
-            {
-                this.SetLOD(sphere.Center);
-            }
+            return cull;
         }
         /// <summary>
         /// Set level of detail values

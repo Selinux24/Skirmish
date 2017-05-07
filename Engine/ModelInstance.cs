@@ -9,7 +9,7 @@ namespace Engine
     /// <summary>
     /// Model instance
     /// </summary>
-    public class ModelInstance : IRayPickable<Triangle>
+    public class ModelInstance : IRayPickable<Triangle>, ICull
     {
         /// <summary>
         /// Global id counter
@@ -90,10 +90,6 @@ namespace Engine
         /// </summary>
         public bool Visible = true;
         /// <summary>
-        /// Culling test flag
-        /// </summary>
-        public bool Cull { get; private set; }
-        /// <summary>
         /// Instance level of detail
         /// </summary>
         public LevelOfDetailEnum LevelOfDetail
@@ -126,7 +122,6 @@ namespace Engine
             this.model = model;
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
-            this.Cull = false;
 
             var drawData = model.GetDrawingData(LevelOfDetailEnum.High);
             if (drawData != null && drawData.Lights != null && drawData.Lights.Length > 0)
@@ -160,6 +155,8 @@ namespace Engine
                     }
                 }
             }
+
+            this.SetLOD(context.EyePosition);
         }
 
         /// <summary>
@@ -443,65 +440,79 @@ namespace Engine
         /// Performs culling test
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        public virtual void Culling(BoundingFrustum frustum)
+        public virtual bool Cull(BoundingFrustum frustum)
         {
+            var cull = true;
+
             if (this.hasVolumes)
             {
                 if (this.model.SphericVolume)
                 {
-                    this.Cull = frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
+                    cull = frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
                 }
                 else
                 {
-                    this.Cull = frustum.Contains(this.GetBoundingBox()) == ContainmentType.Disjoint;
+                    cull = frustum.Contains(this.GetBoundingBox()) == ContainmentType.Disjoint;
                 }
             }
             else
             {
-                this.Cull = false;
+                cull = false;
             }
 
-            if (!this.Cull)
+            return cull;
+        }
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="box">Box</param>
+        public virtual bool Cull(BoundingBox box)
+        {
+            bool cull = true;
+
+            if (this.hasVolumes)
             {
-                var pars = frustum.GetCameraParams();
-             
-                this.SetLOD(pars.Position);
+                if (this.model.SphericVolume)
+                {
+                    cull = this.GetBoundingBox().Contains(ref box) == ContainmentType.Disjoint;
+                }
+                else
+                {
+                    cull = this.GetBoundingBox().Contains(ref box) == ContainmentType.Disjoint;
+                }
             }
+            else
+            {
+                cull = false;
+            }
+
+            return cull;
         }
         /// <summary>
         /// Performs culling test
         /// </summary>
         /// <param name="sphere">Sphere</param>
-        public virtual void Culling(BoundingSphere sphere)
+        public virtual bool Cull(BoundingSphere sphere)
         {
+            bool cull = true;
+
             if (this.hasVolumes)
             {
                 if (this.model.SphericVolume)
                 {
-                    this.Cull = this.GetBoundingSphere().Contains(ref sphere) == ContainmentType.Disjoint;
+                    cull = this.GetBoundingSphere().Contains(ref sphere) == ContainmentType.Disjoint;
                 }
                 else
                 {
-                    this.Cull = this.GetBoundingBox().Contains(ref sphere) == ContainmentType.Disjoint;
+                    cull = this.GetBoundingBox().Contains(ref sphere) == ContainmentType.Disjoint;
                 }
             }
             else
             {
-                this.Cull = false;
+                cull = false;
             }
 
-            if (!this.Cull)
-            {
-                this.SetLOD(sphere.Center);
-            }
-        }
-        /// <summary>
-        /// Sets cull value
-        /// </summary>
-        /// <param name="value">New value</param>
-        public virtual void SetCulling(bool value)
-        {
-            this.Cull = value;
+            return cull;
         }
         /// <summary>
         /// Set level of detail values
@@ -539,12 +550,11 @@ namespace Engine
         public override string ToString()
         {
             return string.Format(
-                "Id: {0}; LOD: {1}; Active: {2}; Visible: {3}; Cull: {4}",
+                "Id: {0}; LOD: {1}; Active: {2}; Visible: {3}",
                 this.Id,
                 this.LevelOfDetail,
                 this.Active,
-                this.Visible,
-                this.Cull);
+                this.Visible);
         }
     }
 }

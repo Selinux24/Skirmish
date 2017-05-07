@@ -514,7 +514,7 @@ namespace HeightmapTest
             {
                 #region Rocks
 
-                for (int i = 0; i < this.rocks.Instances.Length; i++)
+                for (int i = 0; i < this.rocks.Count; i++)
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
 
@@ -537,9 +537,9 @@ namespace HeightmapTest
                             scale = posRnd.NextFloat(0.1f, 1f);
                         }
 
-                        this.rocks.Instances[i].Manipulator.SetPosition(rockPosition, true);
-                        this.rocks.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
-                        this.rocks.Instances[i].Manipulator.SetScale(scale, true);
+                        this.rocks[i].Manipulator.SetPosition(rockPosition, true);
+                        this.rocks[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
+                        this.rocks[i].Manipulator.SetScale(scale, true);
                     }
                 }
 
@@ -551,7 +551,7 @@ namespace HeightmapTest
 
                 bbox = new BoundingBox(new Vector3(-400, 0, -400), new Vector3(-1000, 1000, -1000));
 
-                for (int i = 0; i < this.trees.Instances.Length; i++)
+                for (int i = 0; i < this.trees.Count; i++)
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
 
@@ -562,15 +562,15 @@ namespace HeightmapTest
                     {
                         treePosition.Y -= posRnd.NextFloat(1f, 5f);
 
-                        this.trees.Instances[i].Manipulator.SetPosition(treePosition, true);
-                        this.trees.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0, true);
-                        this.trees.Instances[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                        this.trees[i].Manipulator.SetPosition(treePosition, true);
+                        this.trees[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0, true);
+                        this.trees[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
                     }
                 }
 
                 bbox = new BoundingBox(new Vector3(-300, 0, -300), new Vector3(-1000, 1000, -1000));
 
-                for (int i = 0; i < this.trees2.Instances.Length; i++)
+                for (int i = 0; i < this.trees2.Count; i++)
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
 
@@ -581,9 +581,9 @@ namespace HeightmapTest
                     {
                         treePosition.Y -= posRnd.NextFloat(0f, 2f);
 
-                        this.trees2.Instances[i].Manipulator.SetPosition(treePosition, true);
-                        this.trees2.Instances[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.15f, MathUtil.PiOverFour * 0.15f), 0, true);
-                        this.trees2.Instances[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                        this.trees2[i].Manipulator.SetPosition(treePosition, true);
+                        this.trees2[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.15f, MathUtil.PiOverFour * 0.15f), 0, true);
+                        this.trees2[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
                     }
                 }
 
@@ -598,9 +598,9 @@ namespace HeightmapTest
                 float distance;
                 if (this.terrain.FindTopGroundPosition(5, 5, out position, out triangle, out distance))
                 {
-                    this.torchs.Instances[0].Manipulator.SetScale(1f, 1f, 1f, true);
-                    this.torchs.Instances[0].Manipulator.SetPosition(position, true);
-                    BoundingBox tbbox = this.torchs.Instances[0].GetBoundingBox();
+                    this.torchs[0].Manipulator.SetScale(1f, 1f, 1f, true);
+                    this.torchs[0].Manipulator.SetPosition(position, true);
+                    BoundingBox tbbox = this.torchs[0].GetBoundingBox();
 
                     position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
 
@@ -650,9 +650,9 @@ namespace HeightmapTest
                     float d;
                     this.terrain.FindTopGroundPosition(pos.X, pos.Z, out pos, out t, out d);
 
-                    this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
-                    this.torchs.Instances[i].Manipulator.SetPosition(pos, true);
-                    BoundingBox tbbox = this.torchs.Instances[i].GetBoundingBox();
+                    this.torchs[i].Manipulator.SetScale(0.20f, true);
+                    this.torchs[i].Manipulator.SetPosition(pos, true);
+                    BoundingBox tbbox = this.torchs[i].GetBoundingBox();
 
                     pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
 
@@ -747,15 +747,15 @@ namespace HeightmapTest
                     float distance;
                     if (this.terrain.FindTopGroundPosition(iPos[i].X, iPos[i].Y, out position, out triangle, out distance))
                     {
-                        this.troops.Instances[i].Manipulator.SetPosition(position, true);
-                        this.troops.Instances[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
-                        this.troops.Instances[i].TextureIndex = 1;
+                        this.troops[i].Manipulator.SetPosition(position, true);
+                        this.troops[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
+                        this.troops[i].TextureIndex = 1;
 
                         AnimationPath p = new AnimationPath();
                         p.AddLoop("idle1");
-                        this.troops.Instances[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
-                        this.troops.Instances[i].AnimationController.AddPath(p);
-                        this.troops.Instances[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
+                        this.troops[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
+                        this.troops[i].AnimationController.AddPath(p);
+                        this.troops[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
                     }
                 }
             }
@@ -1042,10 +1042,10 @@ namespace HeightmapTest
                 BoundingBox[] bboxes = new BoundingBox[]
                 {
                     this.soldier.GetBoundingBox(true),
-                    this.troops.Instances[0].GetBoundingBox(true),
-                    this.troops.Instances[1].GetBoundingBox(true),
-                    this.troops.Instances[2].GetBoundingBox(true),
-                    this.troops.Instances[3].GetBoundingBox(true),
+                    this.troops[0].GetBoundingBox(true),
+                    this.troops[1].GetBoundingBox(true),
+                    this.troops[2].GetBoundingBox(true),
+                    this.troops[3].GetBoundingBox(true),
                 };
                 if (this.soldierLines == null)
                 {

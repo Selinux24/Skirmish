@@ -451,7 +451,7 @@ namespace Engine.Content
         /// </summary>
         public ModelContent()
         {
-            this.Materials.Add(NoMaterial, MaterialContent.Default);
+
         }
 
         /// <summary>

@@ -348,7 +348,9 @@ namespace Engine
                     if (usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePicking) ||
                         usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.CoarsePathFinding))
                     {
-                        Array.ForEach(model.Instances, (m) =>
+                        var instances = model.GetInstances();
+
+                        Array.ForEach(instances, (m) =>
                         {
                             m.Manipulator.UpdateInternals(true);
 
@@ -370,7 +372,9 @@ namespace Engine
                         usage == UsageEnum.Picking && curr.Use.HasFlag(AttachedModelUsesEnum.FullPicking) ||
                         usage == UsageEnum.PathFinding && curr.Use.HasFlag(AttachedModelUsesEnum.FullPathFinding))
                     {
-                        Array.ForEach(model.Instances, (m) =>
+                        var instances = model.GetInstances();
+
+                        Array.ForEach(instances, (m) =>
                         {
                             m.Manipulator.UpdateInternals(true);
 

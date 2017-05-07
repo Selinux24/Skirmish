@@ -24,9 +24,27 @@ namespace Engine
     /// </summary>
     public class SceneRendererDeferred : ISceneRenderer
     {
+        /// <summary>
+        /// Render helper geometry buffer slot
+        /// </summary>
         public static int BufferSlot = 15;
 
+        /// <summary>
+        /// Shadow map size
+        /// </summary>
         private const int ShadowMapSize = 1024 * 4;
+        /// <summary>
+        /// Cull index for low definition shadows
+        /// </summary>
+        private const int CullIndexShadowLowIndex = 0;
+        /// <summary>
+        /// Cull index for high definition shadows
+        /// </summary>
+        private const int CullIndexShadowHighIndex = 1;
+        /// <summary>
+        /// Cull index for drawing
+        /// </summary>
+        private const int CullIndexDrawIndex = 2;
 
         /// <summary>
         /// Light geometry
@@ -55,6 +73,10 @@ namespace Engine
         /// Low definition shadow mapper
         /// </summary>
         private ShadowMap shadowMapperLow = null;
+        /// <summary>
+        /// Cull manager
+        /// </summary>
+        private SceneCullManager cullManager = null;
         /// <summary>
         /// Geometry buffer
         /// </summary>
@@ -209,6 +231,7 @@ namespace Engine
 
             this.shadowMapperLow = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
             this.shadowMapperHigh = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
+            this.cullManager = new SceneCullManager();
 
             this.geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 3);
             this.lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 1);
@@ -431,7 +454,7 @@ namespace Engine
 #endif
                             var sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
 
-                            shadowObjs.ForEach(o => o.Culling(sph));
+                            var doLowShadows = this.cullManager.Cull(sph, CullIndexShadowLowIndex, shadowObjs);
 #if DEBUG
                             swCull.Stop();
 
@@ -439,7 +462,7 @@ namespace Engine
 #endif
                             #endregion
 
-                            if (shadowObjs.Exists(o => o.Cull == false))
+                            if (doLowShadows)
                             {
                                 flags |= ShadowMapFlags.LowDefinition;
 
@@ -456,7 +479,7 @@ namespace Engine
                                 this.DrawShadowsContext.ViewProjection = fromLightVP;
 
                                 this.BindShadowMap(this.shadowMapperLow.Viewport, this.shadowMapperLow.DepthMap);
-                                this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, shadowObjs);
+                                this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, CullIndexShadowLowIndex, shadowObjs);
 
                                 this.DrawContext.ShadowMapLow = this.shadowMapperLow.Texture;
                                 this.DrawContext.FromLightViewProjectionLow = fromLightVP;
@@ -474,7 +497,7 @@ namespace Engine
 #endif
                             sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
 
-                            shadowObjs.ForEach(o => o.Culling(sph));
+                            var doHighShadows = this.cullManager.Cull(sph, CullIndexShadowHighIndex, shadowObjs);
 #if DEBUG
                             swCull.Stop();
 
@@ -482,7 +505,7 @@ namespace Engine
 #endif
                             #endregion
 
-                            if (shadowObjs.Exists(o => o.Cull == false))
+                            if (doHighShadows)
                             {
                                 flags |= ShadowMapFlags.HighDefinition;
 
@@ -498,7 +521,7 @@ namespace Engine
                                 this.DrawShadowsContext.ViewProjection = fromLightVP;
 
                                 this.BindShadowMap(this.shadowMapperHigh.Viewport, this.shadowMapperHigh.DepthMap);
-                                this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, shadowObjs);
+                                this.DrawShadowsComponents(gameTime, this.DrawShadowsContext, CullIndexShadowHighIndex, shadowObjs);
 
                                 this.DrawContext.ShadowMapHigh = this.shadowMapperHigh.Texture;
                                 this.DrawContext.FromLightViewProjectionHigh = fromLightVP;
@@ -534,7 +557,7 @@ namespace Engine
                         if (scene.PerformFrustumCulling)
                         {
                             //Frustum culling
-                            draw = scene.CullTest(this.DrawContext.Frustum, deferredEnabledComponents);
+                            draw = this.cullManager.Cull(this.DrawContext.Frustum, CullIndexDrawIndex, deferredEnabledComponents);
                         }
                         else
                         {
@@ -564,7 +587,7 @@ namespace Engine
                             Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
                             //Draw scene on g-buffer render targets
-                            this.DrawResultComponents(gameTime, this.DrawContext, deferredEnabledComponents, true);
+                            this.DrawResultComponents(gameTime, this.DrawContext, CullIndexDrawIndex, deferredEnabledComponents, true);
 #if DEBUG
                             swGeometryBufferDraw.Stop();
 #endif
@@ -652,7 +675,7 @@ namespace Engine
                         this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
 
                         //Draw scene
-                        this.DrawResultComponents(gameTime, this.DrawContext, deferredDisabledComponents, false);
+                        this.DrawResultComponents(gameTime, this.DrawContext, CullIndexDrawIndex, deferredDisabledComponents, false);
 
                         //Set deferred mode
                         this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
@@ -1286,11 +1309,11 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawShadowsComponents(GameTime gameTime, DrawContext context, List<Drawable> components)
+        private void DrawShadowsComponents(GameTime gameTime, DrawContext context, int index, List<Drawable> components)
         {
             components.ForEach((c) =>
             {
-                if (!c.Cull)
+                if (!this.cullManager.IsVisible(index, c))
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
 
@@ -1311,13 +1334,13 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
         /// <param name="deferred">Deferred drawing</param>
-        private void DrawResultComponents(GameTime gameTime, DrawContext context, List<Drawable> components, bool deferred)
+        private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, List<Drawable> components, bool deferred)
         {
             components.ForEach((c) =>
             {
-                Counters.MaxInstancesPerFrame += c.MaxInstances;
+                Counters.MaxInstancesPerFrame += c.Count;
 
-                if (!c.Cull)
+                if (!this.cullManager.IsVisible(index, c))
                 {
                     this.Game.Graphics.SetRasterizerDefault();
 

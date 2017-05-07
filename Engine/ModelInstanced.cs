@@ -24,26 +24,20 @@ namespace Engine
         /// Temporal instance listo for rendering
         /// </summary>
         private ModelInstance[] instancesTmp = null;
+        /// <summary>
+        /// Instances
+        /// </summary>
+        private int instanceCount = 0;
 
         /// <summary>
         /// Gets manipulator per instance list
         /// </summary>
         /// <returns>Gets manipulator per instance list</returns>
-        public ModelInstance[] Instances
+        public ModelInstance this[int index]
         {
             get
             {
-                return this.instances;
-            }
-        }
-        /// <summary>
-        /// Gets instance count
-        /// </summary>
-        public int Count
-        {
-            get
-            {
-                return this.instances.Length;
+                return this.instances[index];
             }
         }
         /// <summary>
@@ -53,21 +47,17 @@ namespace Engine
         {
             get
             {
-                return Array.FindAll(this.instances, i => i.Visible == true && i.Cull == false).Length;
+                return Array.FindAll(this.instances, i => i.Visible == true).Length;
             }
         }
         /// <summary>
-        /// Instances
-        /// </summary>
-        public int InstanceCount { get; protected set; }
-        /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public override int MaxInstances
+        public override int Count
         {
             get
             {
-                return this.InstanceCount;
+                return this.instanceCount;
             }
         }
 
@@ -84,10 +74,10 @@ namespace Engine
         {
             if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 
-            this.InstanceCount = description.Instances;
+            this.instanceCount = description.Instances;
 
-            this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this));
-            this.instancingData = new VertexInstancingData[this.InstanceCount];
+            this.instances = Helper.CreateArray(this.instanceCount, () => new ModelInstance(this));
+            this.instancingData = new VertexInstancingData[this.instanceCount];
         }
         /// <summary>
         /// Constructor
@@ -102,10 +92,10 @@ namespace Engine
         {
             if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 
-            this.InstanceCount = description.Instances;
+            this.instanceCount = description.Instances;
 
-            this.instances = Helper.CreateArray(this.InstanceCount, () => new ModelInstance(this));
-            this.instancingData = new VertexInstancingData[this.InstanceCount];
+            this.instances = Helper.CreateArray(this.instanceCount, () => new ModelInstance(this));
+            this.instancingData = new VertexInstancingData[this.instanceCount];
         }
         /// <summary>
         /// Update
@@ -118,6 +108,28 @@ namespace Engine
                 Array.ForEach(this.instances, i =>
                 {
                     if (i.Active) i.Update(context);
+                });
+
+                this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && i.LevelOfDetail != LevelOfDetailEnum.None);
+
+                //Sort by LOD
+                Array.Sort(this.instancesTmp, (i1, i2) =>
+                {
+                    var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+
+                    if (i == 0)
+                    {
+                        var da = Vector3.DistanceSquared(i1.Manipulator.Position, context.EyePosition);
+                        var db = Vector3.DistanceSquared(i2.Manipulator.Position, context.EyePosition);
+                        i = da.CompareTo(db);
+                    }
+
+                    if (i == 0)
+                    {
+                        i = i1.Id.CompareTo(i2.Id);
+                    }
+
+                    return this.AlphaEnabled ? -i : i;
                 });
             }
         }
@@ -303,110 +315,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Culling test
-        /// </summary>
-        /// <param name="frustum">Frustum</param>
-        public override void Culling(BoundingFrustum frustum)
-        {
-            //Cull was made per instance
-            this.Cull = true;
-
-            Array.ForEach(this.Instances, i =>
-            {
-                if (i.Visible)
-                {
-                    i.Culling(frustum);
-
-                    if (!i.Cull)
-                    {
-                        this.Cull = false;
-                    }
-                }
-            });
-
-            var par = frustum.GetCameraParams();
-
-            this.UpdateInstacesTmp(par.Position);
-        }
-        /// <summary>
-        /// Culling test
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        public override void Culling(BoundingSphere sphere)
-        {
-            //Cull was made per instance
-            this.Cull = true;
-
-            Array.ForEach(this.Instances, i =>
-            {
-                if (i.Visible)
-                {
-                    i.Culling(sphere);
-
-                    if (!i.Cull)
-                    {
-                        this.Cull = false;
-                    }
-                }
-            });
-
-            this.UpdateInstacesTmp(sphere.Center);
-        }
-        /// <summary>
-        /// Sets cull value
-        /// </summary>
-        /// <param name="value">New value</param>
-        public override void SetCulling(bool value)
-        {
-            base.SetCulling(value);
-
-            if (this.instances != null && this.instances.Length > 0)
-            {
-                Array.ForEach(this.instances, i => i.SetCulling(value));
-            }
-
-            this.UpdateInstacesTmp(Vector3.Zero);
-        }
-        /// <summary>
-        /// Updates the instance tmp list
-        /// </summary>
-        private void UpdateInstacesTmp(Vector3 origin)
-        {
-            this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && !i.Cull && i.LevelOfDetail != LevelOfDetailEnum.None);
-
-            //Sort by LOD
-            Array.Sort(this.instancesTmp, (i1, i2) =>
-            {
-                ModelInstance a;
-                ModelInstance b;
-
-                if (this.AlphaEnabled)
-                {
-                    a = i2;
-                    b = i1;
-                }
-                else
-                {
-                    a = i1;
-                    b = i2;
-                }
-
-                var i = a.LevelOfDetail.CompareTo(b.LevelOfDetail);
-                if (i == 0)
-                {
-                    var da = Vector3.DistanceSquared(a.Manipulator.Position, origin);
-                    var db = Vector3.DistanceSquared(b.Manipulator.Position, origin);
-                    i = da.CompareTo(db);
-                }
-                if (i == 0)
-                {
-                    i = a.Id.CompareTo(b.Id);
-                }
-
-                return i;
-            });
-        }
-        /// <summary>
         /// Set instance positions
         /// </summary>
         /// <param name="positions">New positions</param>
@@ -414,24 +322,32 @@ namespace Engine
         {
             if (positions != null && positions.Length > 0)
             {
-                if (this.Instances != null && this.Instances.Length > 0)
+                if (this.instances != null && this.instances.Length > 0)
                 {
-                    for (int i = 0; i < this.Instances.Length; i++)
+                    for (int i = 0; i < this.instances.Length; i++)
                     {
                         if (i < positions.Length)
                         {
-                            this.Instances[i].Manipulator.SetPosition(positions[i], true);
-                            this.Instances[i].Active = true;
-                            this.Instances[i].Visible = true;
+                            this.instances[i].Manipulator.SetPosition(positions[i], true);
+                            this.instances[i].Active = true;
+                            this.instances[i].Visible = true;
                         }
                         else
                         {
-                            this.Instances[i].Active = false;
-                            this.Instances[i].Visible = false;
+                            this.instances[i].Active = false;
+                            this.instances[i].Visible = false;
                         }
                     }
                 }
             }
+        }
+        /// <summary>
+        /// Gets the instance list
+        /// </summary>
+        /// <returns>Returns an array with the instance list</returns>
+        public ModelInstance[] GetInstances()
+        {
+            return this.instances;
         }
     }
 }

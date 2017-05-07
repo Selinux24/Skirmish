@@ -33,7 +33,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public override int MaxInstances
+        public override int Count
         {
             get
             {
@@ -134,22 +134,6 @@ namespace Engine
                     Counters.DrawCallsPerFrame++;
                 }
             }
-        }
-        /// <summary>
-        /// No culling
-        /// </summary>
-        /// <param name="frustum">Frustum</param>
-        public override void Culling(BoundingFrustum frustum)
-        {
-            this.Cull = false;
-        }
-        /// <summary>
-        /// No culling
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        public override void Culling(BoundingSphere sphere)
-        {
-            this.Cull = false;
         }
 
         /// <summary>

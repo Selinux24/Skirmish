@@ -244,7 +244,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public override int MaxInstances
+        public override int Count
         {
             get
             {
@@ -318,7 +318,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            var nodes = this.Cull ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
+            var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
 
             if (nodes != null && nodes.Length > 0)
             {

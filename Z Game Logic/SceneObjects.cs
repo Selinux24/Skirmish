@@ -608,7 +608,7 @@ namespace GameLogic
                 int soldierIndex = 0;
                 foreach (Soldier soldier in team.Soldiers)
                 {
-                    ModelInstance instance = this.soldier.Instances[instanceIndex++];
+                    ModelInstance instance = this.soldier[instanceIndex++];
 
                     instance.TextureIndex = teamIndex;
                     AnimationPath p = new AnimationPath();

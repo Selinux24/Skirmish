@@ -257,10 +257,10 @@ namespace Skybox
                 float d;
                 this.ruins.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i], out t, out d);
 
-                this.torchs.Instances[i].Manipulator.SetScale(0.20f, true);
-                this.torchs.Instances[i].Manipulator.SetPosition(firePositions3D[i], true);
+                this.torchs[i].Manipulator.SetScale(0.20f, true);
+                this.torchs[i].Manipulator.SetPosition(firePositions3D[i], true);
 
-                BoundingBox bbox = this.torchs.Instances[i].GetBoundingBox();
+                BoundingBox bbox = this.torchs[i].GetBoundingBox();
 
                 firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
 
@@ -474,7 +474,7 @@ namespace Skybox
             List<Line3D> volumesTorchs = new List<Line3D>();
             for (int i = 0; i < this.torchs.Count; i++)
             {
-                volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs.Instances[i].GetBoundingBox()));
+                volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs[i].GetBoundingBox()));
             }
             this.volumesDrawer.SetLines(this.torchVolumeColor, volumesTorchs.ToArray());
 

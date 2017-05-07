@@ -342,14 +342,14 @@ namespace DeferredTest
                     if (this.terrain.FindTopGroundPosition((i * 10) - 20, 20, out p, out t, out d))
                     {
                         p.Y += 10f;
-                        this.helicopters.Instances[i].Manipulator.SetPosition(p, true);
+                        this.helicopters[i].Manipulator.SetPosition(p, true);
                         cameraPosition += p;
                         modelCount++;
                     }
                     AnimationPath ap = new AnimationPath();
                     ap.AddLoop("roll");
-                    this.helicopters.Instances[i].AnimationController.AddPath(ap);
-                    this.helicopters.Instances[i].AnimationController.Start();
+                    this.helicopters[i].AnimationController.AddPath(ap);
+                    this.helicopters[i].AnimationController.Start();
                 }
             }
             #endregion
@@ -378,8 +378,8 @@ namespace DeferredTest
                     float d;
                     if (this.terrain.FindTopGroundPosition((i * 10) - 35, 17, out p, out t, out d))
                     {
-                        this.trees.Instances[i].Manipulator.SetScale(0.5f, true);
-                        this.trees.Instances[i].Manipulator.SetPosition(p, true);
+                        this.trees[i].Manipulator.SetScale(0.5f, true);
+                        this.trees[i].Manipulator.SetPosition(p, true);
                         cameraPosition += p;
                         modelCount++;
                     }

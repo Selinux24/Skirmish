@@ -21,7 +21,7 @@ namespace Engine
         public Skydom(Game game, BufferManager bufferManager, SkydomDescription description)
             : base(game, bufferManager, description)
         {
-            this.Cull = false;
+            
         }
 
         /// <summary>

@@ -45,7 +45,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public override int MaxInstances
+        public override int Count
         {
             get
             {
@@ -127,10 +127,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            for (int i = 0; i < this.Drawables.Length; i++)
-            {
-                this.Drawables[i].SetCulling(false);
-            }
+            
         }
         /// <summary>
         /// Draw objects

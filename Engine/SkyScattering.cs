@@ -87,7 +87,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public override int MaxInstances
+        public override int Count
         {
             get
             {
@@ -213,8 +213,6 @@ namespace Engine
         public SkyScattering(Game game, BufferManager bufferManager, SkyScatteringDescription description)
             : base(game, bufferManager, description)
         {
-            this.Cull = false;
-
             this.PlanetRadius = description.PlanetRadius;
             this.PlanetAtmosphereRadius = description.PlanetAtmosphereRadius;
 
