@@ -127,9 +127,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AI\AgentManager.cs" />
-    <Compile Include="AI\AttackBehaviorEventHandler.cs" />
-    <Compile Include="AI\AttackEventArgs.cs" />
+    <Compile Include="AI\BehaviorChangingEventArgs.cs" />
+    <Compile Include="AI\BehaviorEventArgs.cs" />
     <Compile Include="AI\Behavior.cs" />
+    <Compile Include="AI\BehaviorChangingEventHandler.cs" />
     <Compile Include="AI\BehaviorEventHandler.cs" />
     <Compile Include="AI\Behaviors\AttackBehavior.cs" />
     <Compile Include="AI\Behaviors\PatrolBehavior.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AI\Agent.cs" />
     <Compile Include="TestScene3D.cs" />
+    <Compile Include="Weapon.cs" />
     <Content Include="Resources\Clouds\cloud001.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

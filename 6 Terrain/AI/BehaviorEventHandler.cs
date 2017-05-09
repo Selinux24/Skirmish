@@ -2,5 +2,5 @@
 
 namespace TerrainTest.AI
 {
-    delegate void BehaviorEventHandler(Agent sender, EventArgs e);
+    delegate void BehaviorEventHandler(BehaviorEventArgs e);
 }

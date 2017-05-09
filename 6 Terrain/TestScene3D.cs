@@ -99,6 +99,34 @@ namespace TerrainTest
         private AgentManager agentManager = null;
         private Agent tankP1Agent = null;
         private Agent tankP2Agent = null;
+        private Agent helicopterAgent = null;
+
+        Vector3[] p1CheckPoints = new Vector3[]
+        {
+                new Vector3(+60, 0, -60),
+                new Vector3(-60, 0, -60),
+                new Vector3(+60, 0, +60),
+                new Vector3(-70, 0, +70),
+        };
+
+        Vector3[] p2CheckPoints = new Vector3[]
+        {
+                new Vector3(+60, 0, -60),
+                new Vector3(+60, 0, +60),
+                new Vector3(-70, 0, +70),
+                new Vector3(-60, 0, -60),
+                new Vector3(+00, 0, +00),
+        };
+
+        Vector3[] hCheckPoints = new Vector3[]
+        {
+                new Vector3(+60, 20, +60),
+                new Vector3(+60, 20, -60),
+                new Vector3(-70, 20, +70),
+                new Vector3(-60, 20, -60),
+                new Vector3(+00, 25, +00),
+        };
+
         private ParticleSystemDescription pPlume = null;
         private ParticleSystemDescription pFire = null;
         private ParticleSystemDescription pDust = null;
@@ -662,7 +690,7 @@ namespace TerrainTest
                 Vector3 tankPosition;
                 Triangle tankTriangle;
                 float tankDist;
-                if (this.terrain.FindTopGroundPosition(60, 60, out tankPosition, out tankTriangle, out tankDist))
+                if (this.terrain.FindTopGroundPosition(-70, 70, out tankPosition, out tankTriangle, out tankDist))
                 {
                     this.tankP2.Manipulator.SetPosition(tankPosition);
                     this.tankP2.Manipulator.SetNormal(tankTriangle.Normal);
@@ -763,7 +791,7 @@ namespace TerrainTest
 
             #region DEBUG static volumes
 
-            this.staticObjLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 5000, layerEffects);
+            this.staticObjLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 20000, layerEffects);
             this.staticObjLineDrawer.Visible = false;
 
             #endregion
@@ -774,37 +802,33 @@ namespace TerrainTest
             this.Lights.ShadowLDDistance = 100f;
             this.Lights.ShadowHDDistance = 25f;
 
-            this.tankP1Agent = new Agent(this.tankAgentType, this.tankP1);
-            this.tankP2Agent = new Agent(this.tankAgentType, this.tankP2);
+            var t1W = new WeaponDescription() { Name = "Cannon", Damage = 35, Cadence = 15, Range = 50 };
+            var t2W = new WeaponDescription() { Name = "Machine Gun", Damage = 5, Cadence = 0.5f, Range = 30 };
+            var h1W = new WeaponDescription() { Name = "Missile", Damage = 150, Cadence = 10f, Range = 100 };
+            var h2W = new WeaponDescription() { Name = "Gatling", Damage = 10, Cadence = 0.1f, Range = 30 };
 
-            var p1CheckPoints = new Vector3[]
-            {
-                new Vector3(+60, 0, -60),
-                new Vector3(-60, 0, -60),
-                new Vector3(+60, 0, +60),
-                new Vector3(-70, 0, +70),
-            };
-
-            var p2CheckPoints = new Vector3[]
-            {
-                new Vector3(+60, 0, -60),
-                new Vector3(+60, 0, +60),
-                new Vector3(-70, 0, +70),
-                new Vector3(-60, 0, -60),
-                new Vector3(+00, 0, +00),
-            };
-
-            this.tankP1Agent.DoPatrol(p1CheckPoints, 5f, 15f, this.terrain);
-            this.tankP2Agent.DoPatrol(p2CheckPoints, 7f, 5f, this.terrain);
+            this.tankP1Agent = new Agent(this.tankAgentType, this.tankP1, 100, t1W, t2W);
+            this.tankP2Agent = new Agent(this.tankAgentType, this.tankP2, 100, t1W, t2W);
+            this.helicopterAgent = new Agent(null, this.helicopter, 70, h1W, h2W);
 
             this.tankP1Agent.Attacking += Agent_Attacking;
-            this.tankP2Agent.Attacking += Agent_Attacking;
             this.tankP1Agent.Damaged += Agent_Damaged;
-            this.tankP2Agent.Damaged += Agent_Damaged;
             this.tankP1Agent.Destroyed += Agent_Destroyed;
-            this.tankP2Agent.Destroyed += Agent_Destroyed;
+            this.tankP1Agent.BehaviorBeforeChange += TankAgent_BehaviorBeforeChange;
 
-            this.agentManager = new AgentManager(new[] { this.tankP1Agent }, new[] { this.tankP2Agent }, this.terrain);
+            this.tankP2Agent.Attacking += Agent_Attacking;
+            this.tankP2Agent.Damaged += Agent_Damaged;
+            this.tankP2Agent.Destroyed += Agent_Destroyed;
+            this.tankP2Agent.BehaviorBeforeChange += TankAgent_BehaviorBeforeChange;
+
+            this.helicopterAgent.Attacking += Agent_Attacking;
+            this.helicopterAgent.Damaged += Agent_Damaged;
+            this.helicopterAgent.Destroyed += Agent_Destroyed;
+            this.helicopterAgent.BehaviorBeforeChange += HelicopterAgent_BehaviorBeforeChange;
+
+            this.agentManager = new AgentManager(new[] { helicopterAgent, this.tankP2Agent, this.tankP1Agent });
+
+            this.helicopter.AnimationController.SetPath(this.helicopterRollPath);
         }
 
         public override void Dispose()
@@ -999,7 +1023,7 @@ namespace TerrainTest
             if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
                 Curve3D curve = this.GenerateHelicopterPath();
-                ((HeliManipulator)this.helicopter.Manipulator).Follow(curve, 10f, 0.001f);
+                //((HeliManipulator)this.helicopter.Manipulator).Follow(curve, 10f, 0.001f);
                 this.helicopter.AnimationController.SetPath(this.helicopterRollPath);
                 this.DEBUGDrawHelicopterPath(curve);
             }
@@ -1165,7 +1189,6 @@ namespace TerrainTest
 
             this.agentManager.Update(gameTime);
         }
-
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
@@ -1188,14 +1211,15 @@ namespace TerrainTest
             this.counters1.Text = txt1;
 
             string txt2 = string.Format(
-                "IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}; {5}.{6}/{7}.{8}",
+                "IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}; T1.{5}.{6}/T2.{7}.{8}/H.{9}/{10}",
                 Counters.IAInputLayoutSets,
                 Counters.IAPrimitiveTopologySets,
                 Counters.IAVertexBuffersSets,
                 Counters.IAIndexBufferSets,
                 this.terrain.VisiblePatchesCount,
                 this.tankP1Agent.CurrentBehavior, this.tankP1Agent.Life,
-                this.tankP2Agent.CurrentBehavior, this.tankP2Agent.Life);
+                this.tankP2Agent.CurrentBehavior, this.tankP2Agent.Life,
+                this.helicopterAgent.CurrentBehavior, this.helicopterAgent.Life);
             this.counters2.Text = txt2;
 
             #endregion
@@ -1267,10 +1291,14 @@ namespace TerrainTest
             return curve;
         }
 
-        private void Agent_Attacking(Agent sender, AttackEventArgs e)
+        private void Agent_Attacking(BehaviorEventArgs e)
         {
-            var p1 = sender.Model.GetBoundingBox().GetCenter();
-            var p2 = e.Target.Model.GetBoundingBox().GetCenter();
+            //TODO: Add weapon firing effects
+        }
+        private void Agent_Damaged(BehaviorEventArgs e)
+        {
+            var p1 = e.Active.Model.GetBoundingBox().GetCenter();
+            var p2 = e.Passive.Model.GetBoundingBox().GetCenter();
             var dir = Vector3.Normalize(p2 - p1) * 100f;
 
             Ray r = new Ray(p1, dir);
@@ -1278,30 +1306,15 @@ namespace TerrainTest
             Vector3 p;
             Triangle t;
             float d;
-            if (e.Target.Model.PickFirst(ref r, true, out p, out t, out d))
+            if (e.Passive.Model.PickFirst(ref r, true, out p, out t, out d))
             {
                 this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-0.5f), new Vector3(0.5f)));
                 this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-0.5f), new Vector3(0.5f)));
             }
         }
-        private void Agent_Damaged(Agent sender, EventArgs e)
+        private void Agent_Destroyed(BehaviorEventArgs e)
         {
-            sender.Model.TextureIndex = 1;
-
-            Array.ForEach(sender.Model.Lights, l =>
-            {
-                if (this.rnd.NextFloat(0, 1) > 0.8f)
-                {
-                    l.Enabled = false;
-                }
-            });
-        }
-        private void Agent_Destroyed(Agent sender, EventArgs e)
-        {
-            sender.Model.TextureIndex = 2;
-            Array.ForEach(sender.Model.Lights, l => l.Enabled = false);
-
-            var p = sender.Model.GetBoundingBox().GetCenter();
+            var p = e.Passive.Model.GetBoundingBox().GetCenter();
 
             this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
             this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
@@ -1311,6 +1324,67 @@ namespace TerrainTest
             this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
             this.AddSmokePlumeSystem(p);
         }
+
+        private void TankAgent_BehaviorBeforeChange(BehaviorChangingEventArgs e)
+        {
+            if (e.Active.Life > 0)
+            {
+                if (e.Previous is AI.Behaviors.AttackBehavior)
+                {
+                    e.Active.DoNothing();
+                }
+                else if (e.Previous is AI.Behaviors.PatrolBehavior)
+                {
+                    var t = ((AI.Behaviors.PatrolBehavior)e.Previous).CurrentTarget;
+                    if (t != null)
+                    {
+                        e.Active.DoAttack(t);
+                    }
+                    else
+                    {
+                        e.Active.DoNothing();
+                    }
+                }
+                else
+                {
+                    if (e.Active == this.tankP1Agent)
+                    {
+                        e.Active.DoPatrol(p1CheckPoints, 5f, 15f, this.terrain, new[] { helicopterAgent });
+                    }
+                    else
+                    {
+                        e.Active.DoPatrol(p2CheckPoints, 7f, 5f, this.terrain, new[] { helicopterAgent });
+                    }
+                }
+            }
+        }
+        private void HelicopterAgent_BehaviorBeforeChange(BehaviorChangingEventArgs e)
+        {
+            if (e.Active.Life > 0)
+            {
+                if (e.Previous is AI.Behaviors.AttackBehavior)
+                {
+                    e.Active.DoNothing();
+                }
+                else if (e.Previous is AI.Behaviors.PatrolBehavior)
+                {
+                    var t = ((AI.Behaviors.PatrolBehavior)e.Previous).CurrentTarget;
+                    if (t != null)
+                    {
+                        e.Active.DoAttack(t);
+                    }
+                    else
+                    {
+                        e.Active.DoNothing();
+                    }
+                }
+                else
+                {
+                    e.Active.DoPatrol(hCheckPoints, 10f, 4f, null, new[] { tankP1Agent, tankP2Agent });
+                }
+            }
+        }
+
         private void AddExplosionSystem(Vector3 position)
         {
             Vector3 velocity = Vector3.Up;

@@ -1,4 +1,5 @@
 ﻿using Engine;
+using SharpDX;
 
 namespace TerrainTest.AI.Behaviors
 {
@@ -15,14 +16,17 @@ namespace TerrainTest.AI.Behaviors
         {
             if (this.Target != null)
             {
-                if (this.Agent.CanAttack)
-                {
-                    this.Agent.Attack(this.Target);
-                }
-
                 if (this.Target.Life <= 0)
                 {
                     this.Active = false;
+                }
+                else if (Vector3.Distance(this.Agent.Model.Manipulator.Position, this.Target.Model.Manipulator.Position) >= this.Agent.CurrentWeapon.Range)
+                {
+                    this.Active = false;
+                }
+                else if (this.Agent.CanAttack)
+                {
+                    this.Agent.Attack(this.Target);
                 }
             }
         }
