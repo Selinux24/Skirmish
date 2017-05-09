@@ -134,12 +134,14 @@
     <Compile Include="AI\BehaviorEventHandler.cs" />
     <Compile Include="AI\Behaviors\AttackBehavior.cs" />
     <Compile Include="AI\Behaviors\PatrolBehavior.cs" />
+    <Compile Include="AI\WeaponDescription.cs" />
     <Compile Include="HeliManipulator.cs" />
+    <Compile Include="MovingEmitter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AI\Agent.cs" />
     <Compile Include="TestScene3D.cs" />
-    <Compile Include="Weapon.cs" />
+    <Compile Include="AI\Weapon.cs" />
     <Content Include="Resources\Clouds\cloud001.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -103,28 +103,28 @@ namespace TerrainTest
 
         Vector3[] p1CheckPoints = new Vector3[]
         {
-                new Vector3(+60, 0, -60),
-                new Vector3(-60, 0, -60),
-                new Vector3(+60, 0, +60),
-                new Vector3(-70, 0, +70),
+            new Vector3(+60, 0, -60),
+            new Vector3(-60, 0, -60),
+            new Vector3(+60, 0, +60),
+            new Vector3(-70, 0, +70),
         };
 
         Vector3[] p2CheckPoints = new Vector3[]
         {
-                new Vector3(+60, 0, -60),
-                new Vector3(+60, 0, +60),
-                new Vector3(-70, 0, +70),
-                new Vector3(-60, 0, -60),
-                new Vector3(+00, 0, +00),
+            new Vector3(+60, 0, -60),
+            new Vector3(+60, 0, +60),
+            new Vector3(-70, 0, +70),
+            new Vector3(-60, 0, -60),
+            new Vector3(+00, 0, +00),
         };
 
         Vector3[] hCheckPoints = new Vector3[]
         {
-                new Vector3(+60, 20, +60),
-                new Vector3(+60, 20, -60),
-                new Vector3(-70, 20, +70),
-                new Vector3(-60, 20, -60),
-                new Vector3(+00, 25, +00),
+            new Vector3(+60, 20, +60),
+            new Vector3(+60, 20, -60),
+            new Vector3(-70, 20, +70),
+            new Vector3(-60, 20, -60),
+            new Vector3(+00, 25, +00),
         };
 
         private ParticleSystemDescription pPlume = null;
@@ -293,7 +293,7 @@ namespace TerrainTest
                 Name = "Helicopter",
                 CastShadow = true,
                 Static = false,
-                TextureIndex = 2,
+                TextureIndex = 0,
             };
             this.helicopter = this.AddModel("resources/Helicopter", "Helicopter.xml", hDesc, true, this.layerObjects);
             sw.Stop();
@@ -784,7 +784,7 @@ namespace TerrainTest
             #region DEBUG Trajectory
 
             this.curveLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 20000, this.layerEffects);
-            this.curveLineDrawer.Visible = true;
+            this.curveLineDrawer.Visible = false;
             this.curveLineDrawer.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
 
             #endregion
@@ -1297,32 +1297,19 @@ namespace TerrainTest
         }
         private void Agent_Damaged(BehaviorEventArgs e)
         {
-            var p1 = e.Active.Model.GetBoundingBox().GetCenter();
-            var p2 = e.Passive.Model.GetBoundingBox().GetCenter();
-            var dir = Vector3.Normalize(p2 - p1) * 100f;
-
-            Ray r = new Ray(p1, dir);
-
-            Vector3 p;
-            Triangle t;
-            float d;
-            if (e.Passive.Model.PickFirst(ref r, true, out p, out t, out d))
-            {
-                this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-0.5f), new Vector3(0.5f)));
-                this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-0.5f), new Vector3(0.5f)));
-            }
+            this.AddExplosionSystem(e.Passive);
+            this.AddExplosionSystem(e.Passive);
+            this.AddSmokeSystem(e.Passive);
         }
         private void Agent_Destroyed(BehaviorEventArgs e)
         {
-            var p = e.Passive.Model.GetBoundingBox().GetCenter();
-
-            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
-            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
-            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
-            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
-            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
-            this.AddExplosionSystem(p + this.rnd.NextVector3(new Vector3(-1.5f), new Vector3(1.5f)));
-            this.AddSmokePlumeSystem(p);
+            this.AddExplosionSystem(e.Passive);
+            this.AddExplosionSystem(e.Passive);
+            this.AddExplosionSystem(e.Passive);
+            this.AddExplosionSystem(e.Passive);
+            this.AddExplosionSystem(e.Passive);
+            this.AddExplosionSystem(e.Passive);
+            this.AddSmokePlumeSystem(e.Passive);
         }
 
         private void TankAgent_BehaviorBeforeChange(BehaviorChangingEventArgs e)
@@ -1385,24 +1372,22 @@ namespace TerrainTest
             }
         }
 
-        private void AddExplosionSystem(Vector3 position)
+        private void AddExplosionSystem(Agent agent)
         {
             Vector3 velocity = Vector3.Up;
             float duration = 0.5f;
             float rate = 0.1f;
 
-            var emitter1 = new ParticleEmitter()
+            var emitter1 = new MovingEmitter(agent.Model.Manipulator, Vector3.Zero)
             {
-                Position = position,
                 Velocity = velocity,
                 Duration = duration,
                 EmissionRate = rate,
                 InfiniteDuration = false,
                 MaximumDistance = 100f,
             };
-            var emitter2 = new ParticleEmitter()
+            var emitter2 = new MovingEmitter(agent.Model.Manipulator, Vector3.Zero)
             {
-                Position = position,
                 Velocity = velocity,
                 Duration = duration,
                 EmissionRate = rate * 2f,
@@ -1413,15 +1398,14 @@ namespace TerrainTest
             this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
             this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
         }
-        private void AddSmokePlumeSystem(Vector3 position)
+        private void AddSmokePlumeSystem(Agent agent)
         {
             Vector3 velocity = Vector3.Up;
             float duration = this.rnd.NextFloat(60, 360);
             float rate = this.rnd.NextFloat(0.1f, 1f);
 
-            var emitter1 = new ParticleEmitter()
+            var emitter1 = new MovingEmitter(agent.Model.Manipulator, Vector3.Zero)
             {
-                Position = position,
                 Velocity = velocity,
                 Duration = duration,
                 EmissionRate = rate * 0.5f,
@@ -1429,9 +1413,8 @@ namespace TerrainTest
                 MaximumDistance = 100f,
             };
 
-            var emitter2 = new ParticleEmitter()
+            var emitter2 = new MovingEmitter(agent.Model.Manipulator, Vector3.Zero)
             {
-                Position = position,
                 Velocity = velocity,
                 Duration = duration + (duration * 0.1f),
                 EmissionRate = rate,
@@ -1441,6 +1424,23 @@ namespace TerrainTest
 
             this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
             this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
+        }
+        private void AddSmokeSystem(Agent agent)
+        {
+            Vector3 velocity = Vector3.Up;
+            float duration = this.rnd.NextFloat(10, 30);
+            float rate = this.rnd.NextFloat(0.1f, 1f);
+
+            var emitter = new MovingEmitter(agent.Model.Manipulator, Vector3.Zero)
+            {
+                Velocity = velocity,
+                Duration = duration + (duration * 0.1f),
+                EmissionRate = rate,
+                InfiniteDuration = false,
+                MaximumDistance = 500f,
+            };
+
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter);
         }
 
         private void DEBUGPickingPosition(Vector3 position)

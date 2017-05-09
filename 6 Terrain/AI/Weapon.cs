@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Engine;
 using SharpDX;
-using Engine;
 
 namespace TerrainTest.AI
 {
@@ -55,13 +50,5 @@ namespace TerrainTest.AI
         {
             this.lastAttackTime -= delay;
         }
-    }
-
-    struct WeaponDescription
-    {
-        public string Name;
-        public float Cadence;
-        public float Damage;
-        public float Range;
     }
 }
