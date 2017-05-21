@@ -3,7 +3,7 @@ using SharpDX;
 
 namespace TerrainTest.AI
 {
-    class Weapon
+    public class Weapon
     {
         private float lastAttackTime = 0;
 
@@ -37,13 +37,18 @@ namespace TerrainTest.AI
             this.lastAttackTime += gameTime.ElapsedSeconds;
         }
 
-        public float Shoot()
+        public float Shoot(Brain brain)
         {
-            this.lastAttackTime = 0;
-            var d = AgentManager.rnd.NextFloat(0, this.Damage);
-            if (AgentManager.rnd.NextFloat(0, 1) > 0.9f) { d *= 2f; } //Critic
+            if (this.CanShoot)
+            {
+                this.lastAttackTime = 0;
+                var d = brain.RandomGenerator.NextFloat(0, this.Damage);
+                if (brain.RandomGenerator.NextFloat(0, 1) > 0.9f) { d *= 2f; } //Critic
 
-            return d;
+                return d;
+            }
+
+            return 0;
         }
 
         public void Delay(float delay)

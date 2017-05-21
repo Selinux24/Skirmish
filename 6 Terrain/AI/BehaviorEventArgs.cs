@@ -2,12 +2,12 @@
 
 namespace TerrainTest.AI
 {
-    class BehaviorEventArgs : EventArgs
+    public class BehaviorEventArgs : EventArgs
     {
-        public Agent Active;
-        public Agent Passive;
+        public AIAgent Active;
+        public AIAgent Passive;
 
-        public BehaviorEventArgs(Agent active, Agent passive)
+        public BehaviorEventArgs(AIAgent active, AIAgent passive)
         {
             this.Active = active;
             this.Passive = passive;

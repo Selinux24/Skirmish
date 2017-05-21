@@ -1,7 +1,5 @@
 ﻿using Engine;
-using Engine.Common;
 using SharpDX;
-using System;
 
 namespace TerrainTest
 {
@@ -9,7 +7,6 @@ namespace TerrainTest
     {
         private Vector3 velocity;
         private Vector3 acceleration;
-        private float maxSpeed = 8f;
         private float maxForce = 0.2f;
 
         public HeliManipulator()
@@ -20,51 +17,55 @@ namespace TerrainTest
 
         protected override void UpdateFollowPath(GameTime gameTime)
         {
-            float msp = this.maxSpeed * gameTime.ElapsedSeconds;
-            float msf = this.maxForce * gameTime.ElapsedSeconds;
-
-            var target = this.Path[this.PathTarget];
-
-            // A vector pointing from the location to the target
-            var desired = target - this.position;
-
-            // Scale to maximum speed
-            desired = Vector3.Normalize(desired) * msp;
-
-            // Steering = Desired minus velocity
-            var steer = desired - this.velocity;
-            // Limit to maximum steering force
-            if (steer.Length() > msf)
+            if (this.PathTarget >= 0)
             {
-                steer = Vector3.Normalize(steer) * msf;
-            }
+                float msp = this.LinearVelocity * gameTime.ElapsedSeconds;
+                float msf = this.maxForce * gameTime.ElapsedSeconds;
 
-            this.acceleration += steer;
+                var target = this.Path[this.PathTarget];
 
-            this.velocity += this.acceleration;
+                // A vector pointing from the location to the target
+                var desired = target - this.position;
 
-            if (this.velocity.Length() > msp)
-            {
-                this.velocity = Vector3.Normalize(this.velocity) * msp;
-            }
+                // Scale to maximum speed
+                desired = Vector3.Normalize(desired) * msp;
 
-            this.position += this.velocity;
-
-            this.acceleration = Vector3.Zero;
-
-
-            if (Helper.WithinEpsilon(this.position, target, 0.5f))
-            {
-                this.PathTarget++;
-
-                if(this.PathTarget >= this.Path.Length)
+                // Steering = Desired minus velocity
+                var steer = desired - this.velocity;
+                // Limit to maximum steering force
+                if (steer.Length() > msf)
                 {
-                    this.PathTarget = 0;
+                    steer = Vector3.Normalize(steer) * msf;
                 }
-            }
 
-            this.SetPosition(this.position);
-            this.LookAt(this.position - this.velocity, true, 0.1f);
+                this.acceleration += steer;
+
+                this.velocity += this.acceleration;
+
+                if (this.velocity.Length() > msp)
+                {
+                    this.velocity = Vector3.Normalize(this.velocity) * msp;
+                }
+
+                this.position += this.velocity;
+
+                this.acceleration = Vector3.Zero;
+
+
+                if (Helper.WithinEpsilon(this.position, target, 0.5f))
+                {
+                    this.PathTarget++;
+
+                    if (this.PathTarget >= this.Path.Length)
+                    {
+                        this.Path = null;
+                        this.PathTarget = -1;
+                    }
+                }
+
+                this.SetPosition(this.position);
+                this.LookAt(this.position - this.velocity, true, 0.1f);
+            }
         }
     }
 }

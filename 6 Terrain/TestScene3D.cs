@@ -96,10 +96,10 @@ namespace TerrainTest
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
-        private AgentManager agentManager = null;
-        private Agent tankP1Agent = null;
-        private Agent tankP2Agent = null;
-        private Agent helicopterAgent = null;
+        private Brain agentManager = null;
+        private AIAgent tankP1Agent = null;
+        private AIAgent tankP2Agent = null;
+        private FlyerAIAgent helicopterAgent = null;
 
         Vector3[] p1CheckPoints = new Vector3[]
         {
@@ -802,33 +802,46 @@ namespace TerrainTest
             this.Lights.ShadowLDDistance = 100f;
             this.Lights.ShadowHDDistance = 25f;
 
+            this.helicopter.AnimationController.SetPath(this.helicopterRollPath);
+
             var t1W = new WeaponDescription() { Name = "Cannon", Damage = 35, Cadence = 15, Range = 50 };
             var t2W = new WeaponDescription() { Name = "Machine Gun", Damage = 5, Cadence = 0.5f, Range = 30 };
-            var h1W = new WeaponDescription() { Name = "Missile", Damage = 150, Cadence = 10f, Range = 100 };
+            var h1W = new WeaponDescription() { Name = "Missile", Damage = 100, Cadence = 10f, Range = 100 };
             var h2W = new WeaponDescription() { Name = "Gatling", Damage = 10, Cadence = 0.1f, Range = 30 };
 
-            this.tankP1Agent = new Agent(this.tankAgentType, this.tankP1, 100, t1W, t2W);
-            this.tankP2Agent = new Agent(this.tankAgentType, this.tankP2, 100, t1W, t2W);
-            this.helicopterAgent = new Agent(null, this.helicopter, 70, h1W, h2W);
+            this.agentManager = new Brain(this.terrain);
+
+            this.tankP1Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP1, t1W, t2W, 300);
+            this.tankP2Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP2, t1W, t2W, 300);
+            this.helicopterAgent = new FlyerAIAgent(this.agentManager, null, this.helicopter, h1W, h2W, 50, 20);
 
             this.tankP1Agent.Attacking += Agent_Attacking;
             this.tankP1Agent.Damaged += Agent_Damaged;
             this.tankP1Agent.Destroyed += Agent_Destroyed;
-            this.tankP1Agent.BehaviorBeforeChange += TankAgent_BehaviorBeforeChange;
 
             this.tankP2Agent.Attacking += Agent_Attacking;
             this.tankP2Agent.Damaged += Agent_Damaged;
             this.tankP2Agent.Destroyed += Agent_Destroyed;
-            this.tankP2Agent.BehaviorBeforeChange += TankAgent_BehaviorBeforeChange;
 
             this.helicopterAgent.Attacking += Agent_Attacking;
             this.helicopterAgent.Damaged += Agent_Damaged;
             this.helicopterAgent.Destroyed += Agent_Destroyed;
-            this.helicopterAgent.BehaviorBeforeChange += HelicopterAgent_BehaviorBeforeChange;
 
-            this.agentManager = new AgentManager(new[] { helicopterAgent, this.tankP2Agent, this.tankP1Agent });
+            this.agentManager.AddAgent(0, this.helicopterAgent);
+            this.agentManager.AddAgent(1, this.tankP1Agent);
+            this.agentManager.AddAgent(1, this.tankP2Agent);
 
-            this.helicopter.AnimationController.SetPath(this.helicopterRollPath);
+            this.tankP1Agent.InitPatrollingBehavior(this.p1CheckPoints, 10, 5);
+            this.tankP1Agent.InitAttackingBehavior(7, 10);
+            this.tankP1Agent.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
+
+            this.tankP2Agent.InitPatrollingBehavior(this.p2CheckPoints, 10, 5);
+            this.tankP2Agent.InitAttackingBehavior(7, 10);
+            this.tankP2Agent.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
+
+            this.helicopterAgent.InitPatrollingBehavior(this.hCheckPoints, 5, 12);
+            this.helicopterAgent.InitAttackingBehavior(15, 10);
+            this.helicopterAgent.InitRetreatingBehavior(new Vector3(75, 0, 75), 25);
         }
 
         public override void Dispose()
@@ -1009,7 +1022,8 @@ namespace TerrainTest
                     if (p != null)
                     {
                         this.tankP1Agent.Clear();
-                        this.tankP1.Manipulator.Follow(p.ReturnPath.ToArray(), 10f);
+                        this.tankP1.Manipulator.Follow(p.ReturnPath.ToArray());
+                        this.tankP1.Manipulator.LinearVelocity = 10f;
 
                         this.DEBUGDrawTankPath(this.tankP1.Manipulator.Position, p);
                     }
@@ -1188,6 +1202,12 @@ namespace TerrainTest
             #endregion
 
             this.agentManager.Update(gameTime);
+
+            var tp = this.helicopterAgent.Target;
+            if (tp.HasValue)
+            {
+                this.DEBUGPickingPosition(tp.Value);
+            }
         }
         public override void Draw(GameTime gameTime)
         {
@@ -1217,9 +1237,9 @@ namespace TerrainTest
                 Counters.IAVertexBuffersSets,
                 Counters.IAIndexBufferSets,
                 this.terrain.VisiblePatchesCount,
-                this.tankP1Agent.CurrentBehavior, this.tankP1Agent.Life,
-                this.tankP2Agent.CurrentBehavior, this.tankP2Agent.Life,
-                this.helicopterAgent.CurrentBehavior, this.helicopterAgent.Life);
+                this.tankP1Agent.CurrentState, this.tankP1Agent.Life,
+                this.tankP2Agent.CurrentState, this.tankP2Agent.Life,
+                this.helicopterAgent.CurrentState, this.helicopterAgent.Life);
             this.counters2.Text = txt2;
 
             #endregion
@@ -1300,79 +1320,71 @@ namespace TerrainTest
             this.AddExplosionSystem(e.Passive);
             this.AddExplosionSystem(e.Passive);
             this.AddSmokeSystem(e.Passive);
+
+            if (e.Passive.Damage > 0.9f)
+            {
+                e.Passive.Model.TextureIndex = 2;
+            }
+            else if (e.Passive.Damage > 0.2f)
+            {
+                e.Passive.Model.TextureIndex = 1;
+            }
+            else
+            {
+                e.Passive.Model.TextureIndex = 0;
+            }
         }
         private void Agent_Destroyed(BehaviorEventArgs e)
         {
-            this.AddExplosionSystem(e.Passive);
-            this.AddExplosionSystem(e.Passive);
-            this.AddExplosionSystem(e.Passive);
-            this.AddExplosionSystem(e.Passive);
-            this.AddExplosionSystem(e.Passive);
-            this.AddExplosionSystem(e.Passive);
-            this.AddSmokePlumeSystem(e.Passive);
-        }
+            if (e.Passive == this.helicopterAgent)
+            {
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
 
-        private void TankAgent_BehaviorBeforeChange(BehaviorChangingEventArgs e)
-        {
-            if (e.Active.Life > 0)
-            {
-                if (e.Previous is AI.Behaviors.AttackBehavior)
-                {
-                    e.Active.DoNothing();
-                }
-                else if (e.Previous is AI.Behaviors.PatrolBehavior)
-                {
-                    var t = ((AI.Behaviors.PatrolBehavior)e.Previous).CurrentTarget;
-                    if (t != null)
-                    {
-                        e.Active.DoAttack(t);
-                    }
-                    else
-                    {
-                        e.Active.DoNothing();
-                    }
-                }
-                else
-                {
-                    if (e.Active == this.tankP1Agent)
-                    {
-                        e.Active.DoPatrol(p1CheckPoints, 5f, 15f, this.terrain, new[] { helicopterAgent });
-                    }
-                    else
-                    {
-                        e.Active.DoPatrol(p2CheckPoints, 7f, 5f, this.terrain, new[] { helicopterAgent });
-                    }
-                }
+                e.Passive.Model.Visible = false;
             }
-        }
-        private void HelicopterAgent_BehaviorBeforeChange(BehaviorChangingEventArgs e)
-        {
-            if (e.Active.Life > 0)
+            else
             {
-                if (e.Previous is AI.Behaviors.AttackBehavior)
-                {
-                    e.Active.DoNothing();
-                }
-                else if (e.Previous is AI.Behaviors.PatrolBehavior)
-                {
-                    var t = ((AI.Behaviors.PatrolBehavior)e.Previous).CurrentTarget;
-                    if (t != null)
-                    {
-                        e.Active.DoAttack(t);
-                    }
-                    else
-                    {
-                        e.Active.DoNothing();
-                    }
-                }
-                else
-                {
-                    e.Active.DoPatrol(hCheckPoints, 10f, 4f, null, new[] { tankP1Agent, tankP2Agent });
-                }
+                this.AddExplosionSystem(e.Passive);
+                this.AddExplosionSystem(e.Passive);
+                this.AddExplosionSystem(e.Passive);
+                this.AddExplosionSystem(e.Passive);
+                this.AddExplosionSystem(e.Passive);
+                this.AddExplosionSystem(e.Passive);
+                this.AddSmokePlumeSystem(e.Passive);
+
+                e.Passive.Model.TextureIndex = 2;
             }
         }
 
-        private void AddExplosionSystem(Agent agent)
+        private void AddExplosionSystem(AIAgent agent, Vector3 random)
+        {
+            Vector3 velocity = Vector3.Up;
+            float duration = 0.5f;
+            float rate = 0.1f;
+
+            var emitter1 = new MovingEmitter(agent.Model.Manipulator, random)
+            {
+                Velocity = velocity,
+                Duration = duration,
+                EmissionRate = rate,
+                InfiniteDuration = false,
+                MaximumDistance = 100f,
+            };
+
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
+        }
+        private void AddExplosionSystem(AIAgent agent)
         {
             Vector3 velocity = Vector3.Up;
             float duration = 0.5f;
@@ -1398,7 +1410,7 @@ namespace TerrainTest
             this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
             this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
         }
-        private void AddSmokePlumeSystem(Agent agent)
+        private void AddSmokePlumeSystem(AIAgent agent)
         {
             Vector3 velocity = Vector3.Up;
             float duration = this.rnd.NextFloat(60, 360);
@@ -1425,7 +1437,7 @@ namespace TerrainTest
             this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
             this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
         }
-        private void AddSmokeSystem(Agent agent)
+        private void AddSmokeSystem(AIAgent agent)
         {
             Vector3 velocity = Vector3.Up;
             float duration = this.rnd.NextFloat(10, 30);

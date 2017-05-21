@@ -60,10 +60,6 @@ namespace Engine
         /// Target position
         /// </summary>
         protected int PathTarget = -1;
-        /// <summary>
-        /// Path velocity
-        /// </summary>
-        protected float PathVelocity = 0f;
 
         /// <summary>
         /// Gets Position component
@@ -228,7 +224,7 @@ namespace Engine
         {
             if (this.PathTarget < this.Path.Length)
             {
-                var velocity = this.PathVelocity * gameTime.ElapsedSeconds;
+                var velocity = this.LinearVelocity * gameTime.ElapsedSeconds;
 
                 Vector3 p = this.Path[this.PathTarget];
 
@@ -249,7 +245,6 @@ namespace Engine
             else
             {
                 this.Path = null;
-                this.PathVelocity = 0f;
                 this.PathTarget = -1;
             }
         }
@@ -621,12 +616,10 @@ namespace Engine
         /// Follow specified path
         /// </summary>
         /// <param name="path">Path to follow</param>
-        /// <param name="velocity">Velocity</param>
-        public void Follow(Vector3[] path, float velocity)
+        public void Follow(Vector3[] path)
         {
             this.Path = path;
             this.PathTarget = 0;
-            this.PathVelocity = velocity;
         }
         /// <summary>
         /// Stops to follow any curve or path
@@ -638,7 +631,6 @@ namespace Engine
 
             this.Path = null;
             this.PathTarget = 0;
-            this.PathVelocity = -1;
         }
 
         /// <summary>
