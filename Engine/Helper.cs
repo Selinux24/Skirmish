@@ -28,6 +28,11 @@ namespace Engine
         public const uint PRIMEY = 0xd8163841;
 
         /// <summary>
+        /// Random number generator
+        /// </summary>
+        public static Random RandomGenerator = new Random();
+
+        /// <summary>
         /// Serializes the specified object to XML file
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>

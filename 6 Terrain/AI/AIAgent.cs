@@ -8,18 +8,14 @@ namespace TerrainTest.AI
     public class AIAgent
     {
         protected Brain Parent;
+        public AIStatus Status;
         public Model Model;
         public AgentType AgentType;
-        public Weapon PrimaryWeapon;
-        public Weapon SecondaryWeapon;
-        public Weapon CurrentWeapon;
-        public float Life;
 
         delegate void CurrentBehavior(GameTime gameTime);
 
         CurrentBehavior currentBehavior = null;
         public AIStates CurrentState = AIStates.Idle;
-        private float initialLife;
         public float desiredVelocity;
 
         private Vector3[] checkPoints = null;
@@ -64,30 +60,18 @@ namespace TerrainTest.AI
                 return null;
             }
         }
-        public float Damage
-        {
-            get
-            {
-                return 1f - (this.Life / this.initialLife);
-            }
-        }
 
         public event BehaviorEventHandler Attacking;
         public event BehaviorEventHandler Damaged;
         public event BehaviorEventHandler Destroyed;
 
-        public AIAgent(Brain parent, AgentType agentType, Model model, WeaponDescription primaryWeapon, WeaponDescription secondaryWeapon, float life)
+        public AIAgent(Brain parent, AgentType agentType, Model model, AIStatusDescription status)
         {
             this.Parent = parent;
-
             this.AgentType = agentType;
             this.Model = model;
-            this.PrimaryWeapon = new Weapon(primaryWeapon);
-            this.SecondaryWeapon = new Weapon(secondaryWeapon);
-            this.initialLife = life;
-            this.Life = life;
+            this.Status = new AIStatus(status);
 
-            this.CurrentWeapon = this.PrimaryWeapon;
             this.ChangeState(AIStates.Idle);
         }
 
@@ -99,9 +83,6 @@ namespace TerrainTest.AI
             }
 
             this.currentBehavior?.Invoke(gameTime);
-
-            this.PrimaryWeapon?.Update(gameTime);
-            this.SecondaryWeapon?.Update(gameTime);
 
             if (this.CurrentState == AIStates.Idle)
             {
@@ -176,12 +157,14 @@ namespace TerrainTest.AI
                 }
             }
 
-            var t = this.Target;
-            if (t.HasValue)
+            this.Status.Update(gameTime);
+
+            var target = this.Target;
+            if (target.HasValue)
             {
-                float d = Vector3.Distance(this.Model.Manipulator.Position, t.Value);
+                float d = Vector3.Distance(this.Model.Manipulator.Position, target.Value);
                 float cv = this.Model.Manipulator.LinearVelocity;
-                float dv = this.desiredVelocity * Math.Min(1f, d / 10f);
+                float dv = this.desiredVelocity * Math.Min(1f, d / 100f);
                 float a = dv > cv ? 0.1f : -0.1f;
                 float v = cv + a;
 
@@ -256,17 +239,14 @@ namespace TerrainTest.AI
 
             if (this.attackTarget != null)
             {
-                if (this.attackTarget.Life <= 0)
+                if (this.attackTarget.Status.Life <= 0)
                 {
                     this.attackTarget = null;
                     this.attackPosition = null;
                     return false;
                 }
 
-                var p1 = this.Model.Manipulator.Position;
-                var p2 = this.attackTarget.Model.Manipulator.Position;
-
-                if (Vector3.Distance(p1, p2) < this.CurrentWeapon.Range)
+                if (this.OnSight(this.attackTarget))
                 {
                     return !this.IsHardEnemy(this.attackTarget);
                 }
@@ -407,26 +387,21 @@ namespace TerrainTest.AI
         {
             var targets = this.Parent.GetTargetsForAgent(this);
 
-            var tList = Array.FindAll(targets, target =>
+            return Array.FindAll(targets, target =>
             {
-                if (target.Life > 0)
+                if (target.Status.Life > 0)
                 {
-                    var p1 = this.Model.Manipulator.Position;
-                    var p2 = target.Model.Manipulator.Position;
-
-                    return Vector3.Distance(p1, p2) < this.CurrentWeapon.Range;
+                    return this.OnSight(target);
                 }
 
                 return false;
             });
-
-            return tList;
         }
         protected virtual bool IsHardEnemy(AIAgent target)
         {
             if (target != null)
             {
-                if (target.CurrentWeapon != null && target.CurrentWeapon.Damage > this.Life && this.Damage > 0.9f)
+                if (target.Status.CurrentWeapon != null && target.Status.CurrentWeapon.Damage > this.Status.Life && this.Status.Damage > 0.9f)
                 {
                     return true;
                 }
@@ -447,12 +422,28 @@ namespace TerrainTest.AI
         }
 
 
+        public bool OnSight(AIAgent target)
+        {
+            var p1 = this.Model.Manipulator.Position;
+            var p2 = target.Model.Manipulator.Position;
+
+            var s = p2 - p1;
+            if (s.Length() < this.Status.SightDistance)
+            {
+                float a = Helper.Angle(s, this.Model.Manipulator.Forward);
+                if (a < this.Status.SightAngle)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
         public void Attack(AIAgent target)
         {
-            if (this.CurrentWeapon != null)
+            if (this.Status.CurrentWeapon != null)
             {
-                float d = this.CurrentWeapon.Shoot(this.Parent);
-
+                float d = this.Status.CurrentWeapon.Shoot(this.Parent, this, target);
                 if (d > 0f)
                 {
                     target.GetDamage(this, d);
@@ -463,16 +454,23 @@ namespace TerrainTest.AI
         }
         public void GetDamage(AIAgent attacker, float damage)
         {
-            this.Life -= this.Parent.RandomGenerator.NextFloat(0, damage);
+            if (this.attackTarget == null)
+            {
+                this.attackTarget = attacker;
+                this.attackPosition = attacker.Model.Manipulator.Position;
+                this.ChangeState(AIStates.Attacking);
+            }
 
-            if (this.PrimaryWeapon != null) this.PrimaryWeapon.Delay(damage * 0.1f);
-            if (this.SecondaryWeapon != null) this.SecondaryWeapon.Delay(damage * 0.1f);
+            this.Status.Life -= Helper.RandomGenerator.NextFloat(0, damage);
+
+            if (this.Status.PrimaryWeapon != null) this.Status.PrimaryWeapon.Delay(damage * 0.1f);
+            if (this.Status.SecondaryWeapon != null) this.Status.SecondaryWeapon.Delay(damage * 0.1f);
 
             this.FireDamaged(attacker, this);
 
-            if (this.Life <= 0)
+            if (this.Status.Life <= 0)
             {
-                this.Life = 0;
+                this.Status.Life = 0;
 
                 this.Clear();
 

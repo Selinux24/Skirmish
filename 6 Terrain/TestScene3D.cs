@@ -811,9 +811,28 @@ namespace TerrainTest
 
             this.agentManager = new Brain(this.terrain);
 
-            this.tankP1Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP1, t1W, t2W, 300);
-            this.tankP2Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP2, t1W, t2W, 300);
-            this.helicopterAgent = new FlyerAIAgent(this.agentManager, null, this.helicopter, h1W, h2W, 50, 20);
+            var tStatus = new AIStatusDescription()
+            {
+                PrimaryWeapon = t1W,
+                SecondaryWeapon = t2W,
+                Life = 300,
+                SightDistance = 80,
+                SightAngle = 45,
+            };
+
+            var hStatus = new FlyerAIStatusDescription()
+            {
+                PrimaryWeapon = h1W,
+                SecondaryWeapon = h2W,
+                Life = 50,
+                SightDistance = 120,
+                SightAngle = 90,
+                FlightHeight = 20,
+            };
+
+            this.tankP1Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP1, tStatus);
+            this.tankP2Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP2, tStatus);
+            this.helicopterAgent = new FlyerAIAgent(this.agentManager, null, this.helicopter, hStatus);
 
             this.tankP1Agent.Attacking += Agent_Attacking;
             this.tankP1Agent.Damaged += Agent_Damaged;
@@ -1237,9 +1256,9 @@ namespace TerrainTest
                 Counters.IAVertexBuffersSets,
                 Counters.IAIndexBufferSets,
                 this.terrain.VisiblePatchesCount,
-                this.tankP1Agent.CurrentState, this.tankP1Agent.Life,
-                this.tankP2Agent.CurrentState, this.tankP2Agent.Life,
-                this.helicopterAgent.CurrentState, this.helicopterAgent.Life);
+                this.tankP1Agent.CurrentState, this.tankP1Agent.Status.Life,
+                this.tankP2Agent.CurrentState, this.tankP2Agent.Status.Life,
+                this.helicopterAgent.CurrentState, this.helicopterAgent.Status.Life);
             this.counters2.Text = txt2;
 
             #endregion
@@ -1321,11 +1340,11 @@ namespace TerrainTest
             this.AddExplosionSystem(e.Passive);
             this.AddSmokeSystem(e.Passive);
 
-            if (e.Passive.Damage > 0.9f)
+            if (e.Passive.Status.Damage > 0.9f)
             {
                 e.Passive.Model.TextureIndex = 2;
             }
-            else if (e.Passive.Damage > 0.2f)
+            else if (e.Passive.Status.Damage > 0.2f)
             {
                 e.Passive.Model.TextureIndex = 1;
             }
@@ -1338,18 +1357,18 @@ namespace TerrainTest
         {
             if (e.Passive == this.helicopterAgent)
             {
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-                this.AddExplosionSystem(e.Passive, this.agentManager.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
+                this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
 
                 e.Passive.Model.Visible = false;
             }

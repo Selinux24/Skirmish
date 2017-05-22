@@ -37,15 +37,27 @@ namespace TerrainTest.AI
             this.lastAttackTime += gameTime.ElapsedSeconds;
         }
 
-        public float Shoot(Brain brain)
+        public float Shoot(Brain brain, AIAgent from, AIAgent to)
         {
             if (this.CanShoot)
             {
-                this.lastAttackTime = 0;
-                var d = brain.RandomGenerator.NextFloat(0, this.Damage);
-                if (brain.RandomGenerator.NextFloat(0, 1) > 0.9f) { d *= 2f; } //Critic
+                if (from.OnSight(to))
+                {
+                    var fromPosition = from.Model.Manipulator.Position;
+                    var toPosition = to.Model.Manipulator.Position;
 
-                return d;
+                    var distance = Vector3.Distance(toPosition, fromPosition);
+                    if (distance <= this.Range)
+                    {
+                        //TODO: Ray picking
+
+                        this.lastAttackTime = 0;
+                        var damage = Helper.RandomGenerator.NextFloat(0, this.Damage);
+                        if (Helper.RandomGenerator.NextFloat(0, 1) > 0.9f) { damage *= 2f; } //Critic
+
+                        return damage;
+                    }
+                }
             }
 
             return 0;

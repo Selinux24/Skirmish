@@ -1,21 +1,35 @@
 ﻿using Engine;
-using System;
 using System.Collections.Generic;
 
 namespace TerrainTest.AI
 {
+    /// <summary>
+    /// Brain controller
+    /// </summary>
     public class Brain
     {
+        /// <summary>
+        /// Ground instance
+        /// </summary>
         public Ground Ground;
-        public Random RandomGenerator;
+        /// <summary>
+        /// Groups dictionary
+        /// </summary>
         private Dictionary<int, List<AIAgent>> groups = new Dictionary<int, List<AIAgent>>();
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="ground">Ground</param>
         public Brain(Ground ground)
         {
             this.Ground = ground;
-            this.RandomGenerator = new Random();
         }
 
+        /// <summary>
+        /// Updates the brain state
+        /// </summary>
+        /// <param name="gameTime"></param>
         public void Update(GameTime gameTime)
         {
             foreach (var values in this.groups.Values)
@@ -27,6 +41,11 @@ namespace TerrainTest.AI
             }
         }
 
+        /// <summary>
+        /// Adds agents to the brain groups
+        /// </summary>
+        /// <param name="index">Group index</param>
+        /// <param name="agent">Agent</param>
         public void AddAgent(int index, AIAgent agent)
         {
             if (!this.groups.ContainsKey(index))
@@ -36,7 +55,11 @@ namespace TerrainTest.AI
 
             this.groups[index].Add(agent);
         }
-
+        /// <summary>
+        /// Gets available targets for agent
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <returns>Returns all available targets for agent, based on group indexes</returns>
         public AIAgent[] GetTargetsForAgent(AIAgent agent)
         {
             List<AIAgent> targets = new List<AIAgent>();

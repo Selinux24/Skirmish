@@ -1,6 +1,6 @@
 ﻿namespace TerrainTest.AI
 {
-    public struct WeaponDescription
+    public class WeaponDescription
     {
         public string Name;
         public float Cadence;

@@ -8,10 +8,10 @@ namespace TerrainTest.AI
     {
         public float FlightHeight;
 
-        public FlyerAIAgent(Brain parent, AgentType agentType, Model model, WeaponDescription primaryWeapon, WeaponDescription secondaryWeapon, float life, float flightHeight) :
-            base(parent, agentType, model, primaryWeapon, secondaryWeapon, life)
+        public FlyerAIAgent(Brain parent, AgentType agentType, Model model, FlyerAIStatusDescription status) :
+            base(parent, agentType, model, status)
         {
-            this.FlightHeight = flightHeight;
+            this.FlightHeight = status.FlightHeight;
         }
 
         protected override void SetRouteToPoint(Vector3 point, float velocity)
