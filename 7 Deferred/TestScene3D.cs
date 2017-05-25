@@ -25,6 +25,7 @@ namespace DeferredTest
         private Sprite backPannel = null;
 
         private Model tank = null;
+        private Manipulator3DController tankController = null;
         private NavigationMeshAgentType tankAgent = new NavigationMeshAgentType();
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
@@ -139,6 +140,7 @@ namespace DeferredTest
                     CastShadow = true,
                 });
             this.Lights.AddRange(this.tank.Lights);
+            this.tankController = new Manipulator3DController();
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -606,10 +608,13 @@ namespace DeferredTest
                     var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, position);
                     if (p != null)
                     {
-                        this.tank.Manipulator.Follow(p.ReturnPath.ToArray(), 10f);
+                        this.tankController.Follow(new SegmentPath(p.ReturnPath.ToArray()));
+                        this.tank.Manipulator.LinearVelocity = 5;
                     }
                 }
             }
+
+            this.tankController?.UpdateManipulator(gameTime, this.tank.Manipulator);
 
             #endregion
 

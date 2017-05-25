@@ -9,7 +9,7 @@ namespace Engine
     /// <summary>
     /// Path of bezier curves
     /// </summary>
-    public class BezierPath : ICurve
+    public class BezierPath : IControllerPath
     {
         private List<Vector3> originalControlPoints = new List<Vector3>();
         private float? originalMinSqrDistance = null;
@@ -305,6 +305,19 @@ namespace Engine
             this.FindCurve(time, out segment, out segmentTime);
 
             return CalculateBezierPoint(segment, segmentTime);
+        }
+        /// <summary>
+        /// Gets the next control point in the specified time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <returns>Returns the next control point in time</returns>
+        public Vector3 GetNextControlPoint(float time)
+        {
+            int segment;
+            float segmentTime;
+            this.FindCurve(time, out segment, out segmentTime);
+
+            return this.controlPoints[segment];
         }
         /// <summary>
         /// Calculates a point on the path.

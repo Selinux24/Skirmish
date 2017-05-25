@@ -11,12 +11,12 @@ namespace TerrainTest.AI
         public AIStatus Status;
         public Model Model;
         public AgentType AgentType;
+        public Manipulator3DController Controller;
 
         delegate void CurrentBehavior(GameTime gameTime);
 
         CurrentBehavior currentBehavior = null;
         public AIStates CurrentState = AIStates.Idle;
-        public float desiredVelocity;
 
         private Vector3[] checkPoints = null;
         private int currentCheckPoint = -1;
@@ -71,6 +71,7 @@ namespace TerrainTest.AI
             this.AgentType = agentType;
             this.Model = model;
             this.Status = new AIStatus(status);
+            this.Controller = new Manipulator3DController();
 
             this.ChangeState(AIStates.Idle);
         }
@@ -159,22 +160,11 @@ namespace TerrainTest.AI
 
             this.Status.Update(gameTime);
 
-            var target = this.Target;
-            if (target.HasValue)
-            {
-                float d = Vector3.Distance(this.Model.Manipulator.Position, target.Value);
-                float cv = this.Model.Manipulator.LinearVelocity;
-                float dv = this.desiredVelocity * Math.Min(1f, d / 100f);
-                float a = dv > cv ? 0.1f : -0.1f;
-                float v = cv + a;
-
-                this.Model.Manipulator.LinearVelocity = v;
-            }
+            this.Controller.UpdateManipulator(gameTime, this.Model.Manipulator);
         }
 
         public void Clear()
         {
-            this.Model.Manipulator.Stop();
             this.ChangeState(AIStates.None);
         }
         private void ChangeState(AIStates state)
@@ -308,7 +298,7 @@ namespace TerrainTest.AI
                 navigate = true;
             }
 
-            if (!this.Model.Manipulator.IsFollowingPath)
+            if (!this.Controller.HasPath)
             {
                 navigate = true;
             }
@@ -415,9 +405,9 @@ namespace TerrainTest.AI
             {
                 var p = this.Parent.Ground.FindPath(this.AgentType, this.Model.Manipulator.Position, point);
 
-                this.Model.Manipulator.Follow(p.ReturnPath.ToArray());
+                this.Controller.Follow(new SegmentPath(p.ReturnPath.ToArray()));
 
-                this.desiredVelocity = velocity;
+                this.Model.Manipulator.LinearVelocity = velocity;
             }
         }
 

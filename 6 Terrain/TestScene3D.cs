@@ -75,6 +75,7 @@ namespace TerrainTest
         private bool objNotSet = true;
 
         private Model helicopter = null;
+        private HeliManipulatorController helicopterController = null;
         private AnimationPath helicopterRollPath = null;
         private Vector3 helicopterHeightOffset = (Vector3.Up * 15f);
         private Color4 gridColor = new Color4(Color.LightSeaGreen.ToColor3(), 0.5f);
@@ -301,7 +302,6 @@ namespace TerrainTest
 
             this.Lights.AddRange(this.helicopter.Lights);
 
-            this.helicopter.SetManipulator(new HeliManipulator());
             this.helicopter.Manipulator.SetScale(0.75f);
 
             AnimationPath p = new AnimationPath();
@@ -825,7 +825,7 @@ namespace TerrainTest
                 PrimaryWeapon = h1W,
                 SecondaryWeapon = h2W,
                 Life = 50,
-                SightDistance = 120,
+                SightDistance = 100,
                 SightAngle = 90,
                 FlightHeight = 20,
             };
@@ -858,9 +858,9 @@ namespace TerrainTest
             this.tankP2Agent.InitAttackingBehavior(7, 10);
             this.tankP2Agent.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
 
-            this.helicopterAgent.InitPatrollingBehavior(this.hCheckPoints, 5, 12);
+            this.helicopterAgent.InitPatrollingBehavior(this.hCheckPoints, 5, 8);
             this.helicopterAgent.InitAttackingBehavior(15, 10);
-            this.helicopterAgent.InitRetreatingBehavior(new Vector3(75, 0, 75), 25);
+            this.helicopterAgent.InitRetreatingBehavior(new Vector3(75, 0, 75), 12);
         }
 
         public override void Dispose()
@@ -1041,7 +1041,7 @@ namespace TerrainTest
                     if (p != null)
                     {
                         this.tankP1Agent.Clear();
-                        this.tankP1.Manipulator.Follow(p.ReturnPath.ToArray());
+                        //this.tankP1.Manipulator.Follow(p.ReturnPath.ToArray());
                         this.tankP1.Manipulator.LinearVelocity = 10f;
 
                         this.DEBUGDrawTankPath(this.tankP1.Manipulator.Position, p);
@@ -1250,7 +1250,7 @@ namespace TerrainTest
             this.counters1.Text = txt1;
 
             string txt2 = string.Format(
-                "IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}; T1.{5}.{6}/T2.{7}.{8}/H.{9}/{10}",
+                "IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}; T1.{5}.{6:000}  /  T2.{7}.{8:000}  /  H.{9}.{10:000}",
                 Counters.IAInputLayoutSets,
                 Counters.IAPrimitiveTopologySets,
                 Counters.IAVertexBuffersSets,
@@ -1284,6 +1284,7 @@ namespace TerrainTest
         private Curve3D GenerateHelicopterPath()
         {
             Curve3D curve = new Curve3D();
+            
             curve.PreLoop = CurveLoopType.Constant;
             curve.PostLoop = CurveLoopType.Constant;
 
@@ -1291,7 +1292,7 @@ namespace TerrainTest
 
             Random rnd = new Random();
 
-            if (this.helicopter.Manipulator.IsFollowingPath)
+            if (this.helicopterController != null && this.helicopterController.HasPath)
             {
                 for (int i = 0; i < cPoints.Length - 2; i++)
                 {
@@ -1327,6 +1328,7 @@ namespace TerrainTest
             }
 
             curve.SetTangents();
+            
             return curve;
         }
 

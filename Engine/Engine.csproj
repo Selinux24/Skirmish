@@ -175,6 +175,7 @@
     <Compile Include="IRayIntersectable.cs" />
     <Compile Include="ISceneLightPosition.cs" />
     <Compile Include="IVertexList.cs" />
+    <Compile Include="Manipulator3DController.cs" />
     <Compile Include="MaterialDescription.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />
@@ -190,6 +191,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="SceneCullManager.cs" />
+    <Compile Include="SegmentPath.cs" />
     <Compile Include="ShadowMapFlags.cs" />
     <Compile Include="SkyPlane.cs" />
     <Compile Include="SkyPlaneMode.cs" />
@@ -308,7 +310,7 @@
     <Compile Include="HeightMap.cs" />
     <Compile Include="IBufferData.cs" />
     <Compile Include="IControl.cs" />
-    <Compile Include="ICurve.cs" />
+    <Compile Include="IControllerPath.cs" />
     <Compile Include="ISceneRenderer.cs" />
     <Compile Include="IScreenFitted.cs" />
     <Compile Include="Collections\PriorityQueue.cs" />

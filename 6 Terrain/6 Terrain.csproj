@@ -136,7 +136,7 @@
     <Compile Include="AI\Brain.cs" />
     <Compile Include="AI\FlyerAIAgent.cs" />
     <Compile Include="AI\WeaponDescription.cs" />
-    <Compile Include="HeliManipulator.cs" />
+    <Compile Include="HeliManipulatorController.cs" />
     <Compile Include="MovingEmitter.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

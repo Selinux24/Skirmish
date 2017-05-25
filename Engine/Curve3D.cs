@@ -1,14 +1,12 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
-    /// 
+    /// Curve 3D controller path
     /// </summary>
-    public class Curve3D : ICurve
+    public class Curve3D : IControllerPath
     {
         private Curve cX = new Curve();
         private Curve cY = new Curve();
@@ -53,6 +51,9 @@ namespace Engine
                 this.cZ.PreLoop = value;
             }
         }
+        /// <summary>
+        /// Gets the key count
+        /// </summary>
         public int KeyCount
         {
             get
@@ -60,6 +61,9 @@ namespace Engine
                 return this.cX.Keys.Count;
             }
         }
+        /// <summary>
+        /// Gets the starting key
+        /// </summary>
         public Curve3DKey Start
         {
             get
@@ -67,6 +71,9 @@ namespace Engine
                 return this.GetKey(0);
             }
         }
+        /// <summary>
+        /// Gets the key collection
+        /// </summary>
         public Curve3DKey[] Keys
         {
             get
@@ -81,6 +88,9 @@ namespace Engine
                 return keys;
             }
         }
+        /// <summary>
+        /// Gets the ending key
+        /// </summary>
         public Curve3DKey End
         {
             get
@@ -88,6 +98,9 @@ namespace Engine
                 return this.GetKey(this.KeyCount - 1);
             }
         }
+        /// <summary>
+        /// Gets the curve total length
+        /// </summary>
         public float Length
         {
             get
@@ -95,6 +108,9 @@ namespace Engine
                 return this.End.Position;
             }
         }
+        /// <summary>
+        /// Gets all the curve control points
+        /// </summary>
         public Vector3[] Points
         {
             get
@@ -110,6 +126,9 @@ namespace Engine
             }
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public Curve3D()
         {
             this.cX.PreLoop = CurveLoopType.Oscillate;
@@ -121,13 +140,22 @@ namespace Engine
             this.cZ.PostLoop = CurveLoopType.Oscillate;
         }
 
+        /// <summary>
+        /// Adds a new position to the curve
+        /// </summary>
+        /// <param name="position">Time position</param>
+        /// <param name="vector">Position</param>
         public void AddPosition(float position, Vector3 vector)
         {
             this.cX.Keys.Add(new CurveKey(position, vector.X));
             this.cY.Keys.Add(new CurveKey(position, vector.Y));
             this.cZ.Keys.Add(new CurveKey(position, vector.Z));
         }
-
+        /// <summary>
+        /// Gets the curve key at specified index
+        /// </summary>
+        /// <param name="index">Curve index</param>
+        /// <returns>Returns the key at specified index</returns>
         public Curve3DKey GetKey(int index)
         {
             var keyX = this.cX.Keys[index];
@@ -141,7 +169,11 @@ namespace Engine
                 new Vector3(keyX.TangentOut, keyY.TangentOut, keyZ.TangentOut),
                 keyX.Continuity);
         }
-
+        /// <summary>
+        /// Gets the curve position at specified time
+        /// </summary>
+        /// <param name="time">Curve time</param>
+        /// <returns>Returns the curve position at specified time</returns>
         public Vector3 GetPosition(float time)
         {
             return new Vector3(
@@ -149,7 +181,21 @@ namespace Engine
                 this.cY.Evaluate(time),
                 this.cZ.Evaluate(time));
         }
-
+        /// <summary>
+        /// Gets the next control point at specified time
+        /// </summary>
+        /// <param name="time">Curve time</param>
+        /// <returns>Returns the next control point at specified time</returns>
+        public Vector3 GetNextControlPoint(float time)
+        {
+            return new Vector3(
+                this.cX.Evaluate(time),
+                this.cY.Evaluate(time),
+                this.cZ.Evaluate(time));
+        }
+        /// <summary>
+        /// Sets the curve tangents
+        /// </summary>
         public void SetTangents()
         {
             CurveKey prev;
@@ -185,7 +231,12 @@ namespace Engine
             }
 
         }
-
+        /// <summary>
+        /// Sets the curve tangents for the current key, by previous and next keys
+        /// </summary>
+        /// <param name="prev">Previous key</param>
+        /// <param name="curr">Current key</param>
+        /// <param name="next">Next key</param>
         private void SetCurveKeyTangent(ref CurveKey prev, ref CurveKey curr, ref CurveKey next)
         {
             float dt = next.Position - prev.Position;

@@ -3,9 +3,9 @@
 namespace Engine
 {
     /// <summary>
-    /// Path
+    /// Controller path
     /// </summary>
-    public interface ICurve
+    public interface IControllerPath
     {
         /// <summary>
         /// Total length of path
@@ -17,5 +17,11 @@ namespace Engine
         /// <param name="time">Time</param>
         /// <returns>Returns path position</returns>
         Vector3 GetPosition(float time);
+        /// <summary>
+        /// Gets the next control point in specified time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <returns>Returns next path control point</returns>
+        Vector3 GetNextControlPoint(float time);
     }
 }

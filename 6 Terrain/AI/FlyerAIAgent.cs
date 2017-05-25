@@ -12,6 +12,7 @@ namespace TerrainTest.AI
             base(parent, agentType, model, status)
         {
             this.FlightHeight = status.FlightHeight;
+            this.Controller = new HeliManipulatorController();
         }
 
         protected override void SetRouteToPoint(Vector3 point, float velocity)
@@ -19,9 +20,9 @@ namespace TerrainTest.AI
             var p = point;
             p.Y = this.FlightHeight;
 
-            this.Model.Manipulator.Follow(new[] { this.Model.Manipulator.Position, p });
+            this.Controller.Follow(new SegmentPath(new[] { this.Model.Manipulator.Position, p }));
 
-            this.desiredVelocity = velocity;
+            this.Model.Manipulator.LinearVelocity = velocity;
         }
     }
 }

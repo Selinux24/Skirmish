@@ -674,7 +674,19 @@ namespace Engine
                 v.Y.GetRelative(size.Y, min.Y, max.Y),
                 v.Z.GetRelative(size.Z, min.Z, max.Z));
         }
-
+        /// <summary>
+        /// Maps n into start and stop pairs
+        /// </summary>
+        /// <param name="n">Value to map</param>
+        /// <param name="start1">Start reference 1</param>
+        /// <param name="stop1">Stop reference 1</param>
+        /// <param name="start2">Start reference 2</param>
+        /// <param name="stop2">Stop reference 2</param>
+        /// <returns>Returns mapped value of n</returns>
+        public static float Map(this float n, float start1, float stop1, float start2, float stop2)
+        {
+            return ((n - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+        }
         /// <summary>
         /// Gets angle between two vectors
         /// </summary>

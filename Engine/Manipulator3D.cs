@@ -40,28 +40,6 @@ namespace Engine
         protected Vector3 position = Vector3.Zero;
 
         /// <summary>
-        /// Following path
-        /// </summary>
-        protected ICurve Curve = null;
-        /// <summary>
-        /// Path time
-        /// </summary>
-        protected float CurveTime = 0f;
-        /// <summary>
-        /// Following time delta
-        /// </summary>
-        protected float CurveTimeDelta = 1f;
-
-        /// <summary>
-        /// Target
-        /// </summary>
-        protected Vector3[] Path = null;
-        /// <summary>
-        /// Target position
-        /// </summary>
-        protected int PathTarget = -1;
-
-        /// <summary>
         /// Gets Position component
         /// </summary>
         public Vector3 Position
@@ -133,16 +111,6 @@ namespace Engine
         /// Angular velocity modifier
         /// </summary>
         public float AngularVelocity = 1f;
-        /// <summary>
-        /// Gets whether the model is following a path or not
-        /// </summary>
-        public bool IsFollowingPath
-        {
-            get
-            {
-                return this.Curve != null || this.Path != null;
-            }
-        }
 
         /// <summary>
         /// Contructor
@@ -161,23 +129,6 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Update(GameTime gameTime)
         {
-            if (this.Curve != null)
-            {
-                #region Following a curve
-
-                this.UpdateFollowCurve(gameTime);
-
-                #endregion
-            }
-            else if (this.Path != null)
-            {
-                #region Following a path
-
-                this.UpdateFollowPath(gameTime);
-
-                #endregion
-            }
-
             this.UpdateLocalTransform();
         }
         /// <summary>
@@ -189,64 +140,6 @@ namespace Engine
             if (force) this.transformUpdateNeeded = true;
 
             this.UpdateLocalTransform();
-        }
-        /// <summary>
-        /// Computes current position and orientation in the curve
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        protected virtual void UpdateFollowCurve(GameTime gameTime)
-        {
-            if (this.CurveTime <= this.Curve.Length)
-            {
-                Vector3 newPosition = this.Curve.GetPosition(this.CurveTime);
-
-                if (this.CurveTime != 0f)
-                {
-                    Vector3 view = Vector3.Normalize(this.position - newPosition);
-
-                    this.position = newPosition;
-                    this.LookAt(newPosition + view);
-                }
-
-                this.CurveTime += gameTime.ElapsedMilliseconds * 0.01f * this.CurveTimeDelta;
-            }
-            else
-            {
-                this.Curve = null;
-                this.CurveTime = 0f;
-            }
-        }
-        /// <summary>
-        /// Computes current position and orientation in the path
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        protected virtual void UpdateFollowPath(GameTime gameTime)
-        {
-            if (this.PathTarget < this.Path.Length)
-            {
-                var velocity = this.LinearVelocity * gameTime.ElapsedSeconds;
-
-                Vector3 p = this.Path[this.PathTarget];
-
-                if (Helper.WithinEpsilon(this.position, p, velocity))
-                {
-                    this.PathTarget++;
-                }
-                else
-                {
-                    Vector3 newPosition = this.position + (Vector3.Normalize(p - this.position) * velocity);
-
-                    Vector3 view = Vector3.Normalize(this.position - newPosition);
-
-                    this.position = newPosition;
-                    this.LookAt(newPosition + view, Vector3.Up, false, 0.1f);
-                }
-            }
-            else
-            {
-                this.Path = null;
-                this.PathTarget = -1;
-            }
         }
         /// <summary>
         /// Update internal state
@@ -278,14 +171,6 @@ namespace Engine
                 Counters.UpdatesPerFrame++;
             }
         }
-        /// <summary>
-        /// Sets if transform update needed
-        /// </summary>
-        /// <param name="needed">Needed</param>
-        protected virtual void SetUpdateNeeded(bool needed)
-        {
-            this.transformUpdateNeeded = needed;
-        }
 
         /// <summary>
         /// Increments position component d length along d vector
@@ -297,7 +182,7 @@ namespace Engine
             {
                 this.position += d;
 
-                this.SetUpdateNeeded(true);
+                this.transformUpdateNeeded = true;
             }
         }
         /// <summary>
@@ -312,7 +197,7 @@ namespace Engine
             {
                 this.rotation *= Quaternion.RotationYawPitchRoll(yaw, pitch, roll);
 
-                this.SetUpdateNeeded(true);
+                this.transformUpdateNeeded = true;
             }
         }
 
@@ -481,7 +366,7 @@ namespace Engine
             {
                 this.position = position;
 
-                this.SetUpdateNeeded(true);
+                this.transformUpdateNeeded = true;
 
                 if (updateState) this.UpdateLocalTransform();
             }
@@ -508,7 +393,7 @@ namespace Engine
             {
                 this.rotation = rotation;
 
-                this.SetUpdateNeeded(true);
+                this.transformUpdateNeeded = true;
 
                 if (updateState) this.UpdateLocalTransform();
             }
@@ -544,7 +429,7 @@ namespace Engine
             {
                 this.scaling = scale;
 
-                this.SetUpdateNeeded(true);
+                this.transformUpdateNeeded = true;
 
                 if (updateState) this.UpdateLocalTransform();
             }
@@ -579,7 +464,7 @@ namespace Engine
                     this.rotation = Quaternion.Slerp(this.rotation, Helper.LookAt(this.position, target, up, yAxisOnly), interpolationAmount);
                 }
 
-                this.SetUpdateNeeded(true);
+                this.transformUpdateNeeded = true;
             }
         }
         /// <summary>
@@ -599,38 +484,6 @@ namespace Engine
             {
                 this.SetRotation(Quaternion.RotationAxis(Vector3.Left, 0f));
             }
-        }
-
-        /// <summary>
-        /// Follow specified curve
-        /// </summary>
-        /// <param name="curve">Path</param>
-        /// <param name="delta">Delta to apply to time increment</param>
-        public void Follow(ICurve curve, float delta = 1f)
-        {
-            this.Curve = curve;
-            this.CurveTime = 0f;
-            this.CurveTimeDelta = delta;
-        }
-        /// <summary>
-        /// Follow specified path
-        /// </summary>
-        /// <param name="path">Path to follow</param>
-        public void Follow(Vector3[] path)
-        {
-            this.Path = path;
-            this.PathTarget = 0;
-        }
-        /// <summary>
-        /// Stops to follow any curve or path
-        /// </summary>
-        public void Stop()
-        {
-            this.Curve = null;
-            this.CurveTime = 0f;
-
-            this.Path = null;
-            this.PathTarget = 0;
         }
 
         /// <summary>
