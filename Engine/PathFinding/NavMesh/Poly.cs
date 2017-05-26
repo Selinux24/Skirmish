@@ -5,7 +5,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// Uses the PolyMesh polygon data for pathfinding
     /// </summary>
-    public class Poly
+    class Poly
     {
         /// <summary>
         /// Gets or sets the indices of polygon's vertices

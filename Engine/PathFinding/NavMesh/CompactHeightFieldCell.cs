@@ -6,7 +6,7 @@ namespace Engine.PathFinding.NavMesh
     /// Represents a cell in a <see cref="CompactHeightField"/>.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct CompactHeightFieldCell
+    struct CompactHeightFieldCell
     {
         /// <summary>
         /// The starting index of spans in a <see cref="CompactHeightField"/> for this cell.
@@ -26,6 +26,15 @@ namespace Engine.PathFinding.NavMesh
         {
             StartIndex = start;
             Count = count;
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns a string represening the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("StartIndex: {0}; Count: {1}", this.StartIndex, this.Count);
         }
     }
 }

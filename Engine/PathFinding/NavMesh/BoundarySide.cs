@@ -47,7 +47,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// Extension methods for the <see cref="BoundarySide"/> enumeration.
     /// </summary>
-    public static class BoundarySideExtensions
+    static class BoundarySideExtensions
     {
         /// <summary>
         /// Gets the side in the exact opposite direction as a specified side.

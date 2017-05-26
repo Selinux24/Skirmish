@@ -5,7 +5,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// Contains information about a navigation mesh
     /// </summary>
-    public class NavigationMeshInfo
+    class NavigationMeshInfo
     {
         public int X;
         public int Y;

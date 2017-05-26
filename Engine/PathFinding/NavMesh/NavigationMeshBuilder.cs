@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh
     /// The NavMeshBuilder class converst PolyMesh and PolyMeshDetail into a different data structure suited for pathfinding.
     /// This class will create tiled data.
     /// </summary>
-    public class NavigationMeshBuilder
+    class NavigationMeshBuilder
     {
         /// <summary>
         /// Gets the file header
@@ -27,7 +27,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the PolyMeshDetail mesh data (the indices of the vertices and triagles)
         /// </summary>
-        public PolyMeshDetail.MeshData[] NavDMeshes { get; private set; }
+        public PolyMeshData[] NavDMeshes { get; private set; }
         /// <summary>
         /// Gets the PolyMeshDetail vertices
         /// </summary>
@@ -35,7 +35,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the PolyMeshDetail triangles
         /// </summary>
-        public PolyMeshDetail.TriangleData[] NavDTris { get; private set; }
+        public PolyMeshTriangleData[] NavDTris { get; private set; }
         /// <summary>
         /// Gets the bounding volume tree
         /// </summary>
@@ -238,9 +238,9 @@ namespace Engine.PathFinding.NavMesh
             //allocate data
             this.NavVerts = new Vector3[totVertCount];
             this.NavPolys = new Poly[totPolyCount];
-            this.NavDMeshes = new PolyMeshDetail.MeshData[polyMesh.PolyCount];
+            this.NavDMeshes = new PolyMeshData[polyMesh.PolyCount];
             this.NavDVerts = new Vector3[uniqueDetailVertCount];
-            this.NavDTris = new PolyMeshDetail.TriangleData[detailTriCount];
+            this.NavDTris = new PolyMeshTriangleData[detailTriCount];
             this.OffMeshCons = new OffMeshConnection[storedOffMeshConCount];
 
             int offMeshVertsBase = polyMesh.VertexCount;

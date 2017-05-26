@@ -4,7 +4,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A link is formed between two polygons in a TiledNavMesh
     /// </summary>
-    public class Link
+    class Link
     {
         /// <summary>
         /// Entity links to external entity.

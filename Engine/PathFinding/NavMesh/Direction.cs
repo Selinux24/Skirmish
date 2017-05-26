@@ -5,7 +5,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A set of cardinal directions.
     /// </summary>
-    public enum Direction
+    enum Direction
     {
         /// <summary>
         /// The west direction.
@@ -28,7 +28,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A set of extension methods to make using the Direction enum a lot simpler.
     /// </summary>
-    public static class DirectionExtensions
+    static class DirectionExtensions
     {
         private static readonly int[] OffsetsX = { -1, +0, +1, +0 };
         private static readonly int[] OffsetsY = { +0, +1, +0, -1 };

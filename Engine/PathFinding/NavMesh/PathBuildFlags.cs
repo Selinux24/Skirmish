@@ -6,7 +6,7 @@ namespace Engine.PathFinding.NavMesh
     /// Flags for choosing how the path is built.
     /// </summary>
     [Flags]
-    public enum PathBuildFlags
+    enum PathBuildFlags
     {
         /// <summary>
         /// Build normally.

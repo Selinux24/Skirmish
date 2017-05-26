@@ -5,7 +5,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A Region contains a group of adjacent spans.
     /// </summary>
-    public class Region
+    class Region
     {
         /// <summary>
         /// Gets or sets the number of spans

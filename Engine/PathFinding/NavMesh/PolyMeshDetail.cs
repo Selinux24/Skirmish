@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.PathFinding.NavMesh
 {
@@ -9,7 +9,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// The PolyMeshDetail class is a combination of a PolyMesh and a CompactHeightfield merged together
     /// </summary>
-    public class PolyMeshDetail
+    class PolyMeshDetail
     {
         /// <summary>
         /// 9 x 2
@@ -41,33 +41,6 @@ namespace Engine.PathFinding.NavMesh
 			-1, +1
 		};
 
-        /// <summary>
-        /// Determine whether an edge of the triangle is part of the polygon (1 if true, 0 if false)
-        /// </summary>
-        /// <param name="va">Triangle vertex A</param>
-        /// <param name="vb">Triangle vertex B</param>
-        /// <param name="vpoly">Polygon vertex data</param>
-        /// <returns>1 if the vertices are close, 0 if otherwise</returns>
-        private static int GetEdgeFlags(Vector3 va, Vector3 vb, Vector3[] vpoly, int npoly)
-        {
-            //true if edge is part of polygon
-            float thrSqr = 0.001f * 0.001f;
-
-            for (int i = 0, j = npoly - 1; i < npoly; j = i++)
-            {
-                Vector3 pt1 = va;
-                Vector3 pt2 = vb;
-
-                //the vertices pt1 (va) and pt2 (vb) are extremely close to the polygon edge
-                if (Intersection.PointToSegment2DSquared(ref pt1, ref vpoly[j], ref vpoly[i]) < thrSqr &&
-                    Intersection.PointToSegment2DSquared(ref pt2, ref vpoly[j], ref vpoly[i]) < thrSqr)
-                {
-                    return 1;
-                }
-            }
-
-            return 0;
-        }
         /// <summary>
         /// 
         /// </summary>
@@ -124,7 +97,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the mesh data		
         /// </summary>
-        public MeshData[] Meshes { get; private set; }
+        public PolyMeshData[] Meshes { get; private set; }
         /// <summary>
         /// Gets the vertex data
         /// </summary>
@@ -132,7 +105,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the triangle data
         /// </summary>
-        public TriangleData[] Tris { get; private set; }
+        public PolyMeshTriangleData[] Tris { get; private set; }
         /// <summary>
         /// Gets the number of meshes (MeshData)
         /// </summary>
@@ -206,7 +179,7 @@ namespace Engine.PathFinding.NavMesh
             Vector3[] poly = new Vector3[mesh.VerticesPerPoly];
 
             var storedVertices = new List<Vector3>();
-            var storedTriangles = new List<TriangleData>();
+            var storedTriangles = new List<PolyMeshTriangleData>();
 
             //find max size for polygon area
             for (int i = 0; i < mesh.PolyCount; i++)
@@ -252,7 +225,7 @@ namespace Engine.PathFinding.NavMesh
 
             HeightFieldPatch hp = new HeightFieldPatch(0, 0, maxhw, maxhh);
 
-            this.Meshes = new MeshData[mesh.PolyCount];
+            this.Meshes = new PolyMeshData[mesh.PolyCount];
 
             for (int i = 0; i < mesh.PolyCount; i++)
             {
@@ -281,10 +254,10 @@ namespace Engine.PathFinding.NavMesh
                 hp.Resize(bounds[i]);
                 this.GetHeightData(compactField, p, npoly, mesh.Vertices, mesh.BorderSize, hp);
 
-                List<Vector3> tempVerts = new List<Vector3>();
-                List<TriangleData> tempTris = new List<TriangleData>(128);
-                List<EdgeInfo> edges = new List<EdgeInfo>(16);
-                List<SamplingData> samples = new List<SamplingData>(128);
+                var tempVerts = new List<Vector3>();
+                var tempTris = new List<PolyMeshTriangleData>(128);
+                var edges = new List<EdgeInfo>(16);
+                var samples = new List<SamplingData>(128);
                 this.BuildPolyDetail(poly, npoly, sampleDist, sampleMaxError, compactField, hp, tempVerts, tempTris, edges, samples);
 
                 //more detail verts
@@ -323,7 +296,7 @@ namespace Engine.PathFinding.NavMesh
                 //store triangles
                 for (int j = 0; j < tempTris.Count; j++)
                 {
-                    storedTriangles.Add(new TriangleData(tempTris[j], tempVerts, poly, npoly));
+                    storedTriangles.Add(new PolyMeshTriangleData(tempTris[j], tempVerts, poly, npoly));
                 }
             }
 
@@ -340,7 +313,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="verts"></param>
         /// <param name="borderSize"></param>
         /// <param name="hp"></param>
-        private void GetHeightData(CompactHeightField compactField, PolyMesh.Polygon poly, int polyCount, Vertexi[] verts, int borderSize, HeightFieldPatch hp)
+        private void GetHeightData(CompactHeightField compactField, PolyMeshPolygon poly, int polyCount, Vertexi[] verts, int borderSize, HeightFieldPatch hp)
         {
             var stack = new List<CompactHeightFieldSpanReference>();
             bool empty = true;
@@ -466,7 +439,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="borderSize">Heightfield border size</param>
         /// <param name="hp">HeightPatch which extracts heightfield data</param>
         /// <param name="stack">Temporary stack of CompactSpanReferences</param>
-        private void GetHeightDataSeedsFromVertices(CompactHeightField compactField, PolyMesh.Polygon poly, int polyCount, Vertexi[] verts, int borderSize, HeightFieldPatch hp, List<CompactHeightFieldSpanReference> stack)
+        private void GetHeightDataSeedsFromVertices(CompactHeightField compactField, PolyMeshPolygon poly, int polyCount, Vertexi[] verts, int borderSize, HeightFieldPatch hp, List<CompactHeightFieldSpanReference> stack)
         {
             hp.SetAll(0);
 
@@ -618,7 +591,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="tris">Detail triangles</param>
         /// <param name="edges">The edge array</param>
         /// <param name="samples">The samples array</param>
-        private void BuildPolyDetail(Vector3[] polyMeshVerts, int numMeshVerts, float sampleDist, float sampleMaxError, CompactHeightField compactField, HeightFieldPatch hp, List<Vector3> verts, List<TriangleData> tris, List<EdgeInfo> edges, List<SamplingData> samples)
+        private void BuildPolyDetail(Vector3[] polyMeshVerts, int numMeshVerts, float sampleDist, float sampleMaxError, CompactHeightField compactField, HeightFieldPatch hp, List<Vector3> verts, List<PolyMeshTriangleData> tris, List<EdgeInfo> edges, List<SamplingData> samples)
         {
             const int MAX_VERTS = 127;
             const int MAX_VERTS_PER_EDGE = 32;
@@ -928,7 +901,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="pts"></param>
         /// <param name="hull"></param>
         /// <param name="tris"></param>
-        private void TriangulateHull(List<Vector3> pts, List<int> hull, List<TriangleData> tris)
+        private void TriangulateHull(List<Vector3> pts, List<int> hull, List<PolyMeshTriangleData> tris)
         {
             int start = 0;
             int left = 1;
@@ -960,7 +933,7 @@ namespace Engine.PathFinding.NavMesh
                 }
             }
 
-            tris.Add(new TriangleData(hull[start], hull[left], hull[right], 0));
+            tris.Add(new PolyMeshTriangleData(hull[start], hull[left], hull[right], 0));
 
             while (Next(left, hull.Count) != right)
             {
@@ -985,12 +958,12 @@ namespace Engine.PathFinding.NavMesh
 
                 if (dleft < dright)
                 {
-                    tris.Add(new TriangleData(hull[left], hull[nleft], hull[right], 0));
+                    tris.Add(new PolyMeshTriangleData(hull[left], hull[nleft], hull[right], 0));
                     left = nleft;
                 }
                 else
                 {
-                    tris.Add(new TriangleData(hull[left], hull[nright], hull[right], 0));
+                    tris.Add(new PolyMeshTriangleData(hull[left], hull[nright], hull[right], 0));
                     right = nright;
                 }
             }
@@ -1002,7 +975,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="hull">The hull (purpose?)</param>
         /// <param name="tris">The triangles formed.</param>
         /// <param name="edges">The edge connections formed.</param>
-        private void DelaunayHull(List<Vector3> pts, List<int> hull, List<TriangleData> tris, List<EdgeInfo> edges)
+        private void DelaunayHull(List<Vector3> pts, List<int> hull, List<PolyMeshTriangleData> tris, List<EdgeInfo> edges)
         {
             edges.Clear();
 
@@ -1040,7 +1013,7 @@ namespace Engine.PathFinding.NavMesh
             tris.Clear();
             for (int i = 0; i < nfaces; i++)
             {
-                tris.Add(new TriangleData(-1, -1, -1, -1));
+                tris.Add(new PolyMeshTriangleData(-1, -1, -1, -1));
             }
 
             for (int i = 0; i < edges.Count; i++)
@@ -1345,7 +1318,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="verts">Vertex array</param>
         /// <param name="tris">Triange list</param>
         /// <returns>The distance</returns>
-        private float DistanceToTriMesh(Vector3 p, List<Vector3> verts, List<TriangleData> tris)
+        private float DistanceToTriMesh(Vector3 p, List<Vector3> verts, List<PolyMeshTriangleData> tris)
         {
             float dmin = float.MaxValue;
 
@@ -1384,112 +1357,6 @@ namespace Engine.PathFinding.NavMesh
             /// Edge is hull
             /// </summary>
             Hull = -2
-        }
-        /// <summary>
-        /// The MeshData struct contains information about vertex and triangle base and offset values for array indices
-        /// </summary>
-        public struct MeshData
-        {
-            public int VertexIndex;
-            public int VertexCount;
-            public int TriangleIndex;
-            public int TriangleCount;
-        }
-        /// <summary>
-        /// The triangle info contains three vertex hashes and a flag
-        /// </summary>
-        public struct TriangleData
-        {
-            public int VertexHash0;
-            public int VertexHash1;
-            public int VertexHash2;
-            public int Flags; //indicates which 3 vertices are part of the polygon
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="TriangleData" /> struct.
-            /// </summary>
-            /// <param name="hash0">Vertex A</param>
-            /// <param name="hash1">Vertex B</param>
-            /// <param name="hash2">Vertex C</param>
-            public TriangleData(int hash0, int hash1, int hash2)
-            {
-                VertexHash0 = hash0;
-                VertexHash1 = hash1;
-                VertexHash2 = hash2;
-                Flags = 0;
-            }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="TriangleData" /> struct.
-            /// </summary>
-            /// <param name="hash0">Vertex A</param>
-            /// <param name="hash1">Vertex B</param>
-            /// <param name="hash2">Vertex C</param>
-            /// <param name="flags">The triangle flags</param>
-            public TriangleData(int hash0, int hash1, int hash2, int flags)
-            {
-                VertexHash0 = hash0;
-                VertexHash1 = hash1;
-                VertexHash2 = hash2;
-                Flags = flags;
-            }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="TriangleData" /> struct.
-            /// </summary>
-            /// <param name="data">The triangle itself</param>
-            /// <param name="verts">The list of all the vertices</param>
-            /// <param name="vpoly">The list of the polygon's vertices</param>
-            public TriangleData(TriangleData data, List<Vector3> verts, Vector3[] vpoly, int npoly)
-            {
-                VertexHash0 = data.VertexHash0;
-                VertexHash1 = data.VertexHash1;
-                VertexHash2 = data.VertexHash2;
-                Flags = GetTriFlags(ref data, verts, vpoly, npoly);
-            }
-
-            /// <summary>
-            /// Gets a triangle's particular vertex
-            /// </summary>
-            /// <param name="index">Vertex index</param>
-            /// <returns>Triangle vertex hash</returns>
-            public int this[int index]
-            {
-                get
-                {
-                    switch (index)
-                    {
-                        case 0:
-                            return VertexHash0;
-                        case 1:
-                            return VertexHash1;
-                        case 2:
-                        default:
-                            return VertexHash2;
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Determine which edges of the triangle are part of the polygon
-            /// </summary>
-            /// <param name="t">A triangle.</param>
-            /// <param name="verts">The vertex buffer that the triangle is referencing.</param>
-            /// <param name="vpoly">Polygon vertex data.</param>
-            /// <returns>The triangle's flags.</returns>
-            public static int GetTriFlags(ref TriangleData t, List<Vector3> verts, Vector3[] vpoly, int npoly)
-            {
-                int flags = 0;
-
-                //the triangle flags store five bits ?0?0? (like 10001, 10101, etc..)
-                //each bit stores whether two vertices are close enough to a polygon edge 
-                //since triangle has three vertices, there are three distinct pairs of vertices (va,vb), (vb,vc) and (vc,va)
-                flags |= GetEdgeFlags(verts[t.VertexHash0], verts[t.VertexHash1], vpoly, npoly) << 0;
-                flags |= GetEdgeFlags(verts[t.VertexHash1], verts[t.VertexHash2], vpoly, npoly) << 2;
-                flags |= GetEdgeFlags(verts[t.VertexHash2], verts[t.VertexHash0], vpoly, npoly) << 4;
-
-                return flags;
-            }
         }
         /// <summary>
         /// The EdgeInfo struct contains two enpoints and the faces/polygons to the left and right of that edge.

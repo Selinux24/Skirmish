@@ -185,6 +185,9 @@
     <Compile Include="ParticleTypes.cs" />
     <Compile Include="Effects\EffectDefaultCPUParticles.cs" />
     <Compile Include="ParticleEmitter.cs" />
+    <Compile Include="PathFinding\NavMesh\PolyMeshData.cs" />
+    <Compile Include="PathFinding\NavMesh\PolyMeshPolygon.cs" />
+    <Compile Include="PathFinding\NavMesh\PolyMeshTriangleData.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

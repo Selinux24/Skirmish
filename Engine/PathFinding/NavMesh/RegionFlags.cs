@@ -6,7 +6,7 @@ namespace Engine.PathFinding.NavMesh
     /// Flags that can be applied to a region.
     /// </summary>
     [Flags]
-    public enum RegionFlags
+    enum RegionFlags
     {
         /// <summary>
         /// The border flag

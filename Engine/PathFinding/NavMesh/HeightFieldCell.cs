@@ -9,14 +9,10 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A cell is a column of voxels represented in <see cref="HeightFieldSpan"/>s.
     /// </summary>
-    public class HeightFieldCell
+    class HeightFieldCell
     {
         private List<HeightFieldSpan> spans = new List<HeightFieldSpan>();
 
-        /// <summary>
-        /// Gets the height of the cell in number of voxels.
-        /// </summary>
-        public int Height { get; private set; }
         /// <summary>
         /// Gets the number of spans in the cell.
         /// </summary>
@@ -89,18 +85,18 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Initializes a new instance of the <see cref="HeightFieldCell"/> class.
         /// </summary>
-        /// <param name="height">The number of voxels in the column.</param>
-        public HeightFieldCell(int height)
+        public HeightFieldCell()
         {
-            this.Height = height;
+            
         }
 
         /// <summary>
         /// Adds a <see cref="HeightFieldSpan"/> to the cell.
         /// </summary>
         /// <param name="span">A span.</param>
+        /// <param name="height">The number of voxels in the column.</param>
         /// <exception cref="ArgumentException">Thrown if an invalid span is provided.</exception>
-        public void AddSpan(HeightFieldSpan span)
+        public void AddSpan(HeightFieldSpan span, int height)
         {
             if (span.Minimum > span.Maximum)
             {
@@ -110,8 +106,8 @@ namespace Engine.PathFinding.NavMesh
             }
 
             //Clamp the span to the cell's range of [0, maxHeight]
-            span.Minimum = MathUtil.Clamp(span.Minimum, 0, this.Height);
-            span.Maximum = MathUtil.Clamp(span.Maximum, 0, this.Height);
+            span.Minimum = MathUtil.Clamp(span.Minimum, 0, height);
+            span.Maximum = MathUtil.Clamp(span.Maximum, 0, height);
 
             lock (this.spans)
             {
@@ -160,6 +156,15 @@ namespace Engine.PathFinding.NavMesh
                 //If the span is not inserted, it is the highest span and will be added to the end.
                 this.spans.Add(span);
             }
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns a string represening the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("Spans: {0}; Walkables: {1}", this.SpanCount, this.WalkableSpanCount);
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Engine.PathFinding.NavMesh
     /// Represents a voxel span in a <see cref="CompactHeightField"/>.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct CompactHeightFieldSpan
+    struct CompactHeightFieldSpan
     {
         /// <summary>
         /// A constant that means there is no connection for the values <see cref="ConnectionWest"/>,
@@ -165,7 +165,7 @@ namespace Engine.PathFinding.NavMesh
         {
             get
             {
-                return Minimum + Height;
+                return this.Minimum + Height;
             }
         }
         /// <summary>
@@ -264,6 +264,15 @@ namespace Engine.PathFinding.NavMesh
                 default:
                     throw new ArgumentException("dir isn't a valid Direction.");
             }
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns a string represening the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("Minimum: {0}; Maximum: {1}; Height: {3}; Region: {2}; Connections: {4}", this.Minimum, this.Maximum, this.Region, this.Height, this.ConnectionCount);
         }
     }
 }

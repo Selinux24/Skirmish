@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.PathFinding.NavMesh
@@ -8,7 +7,7 @@ namespace Engine.PathFinding.NavMesh
     /// A point in a navigation mesh.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct PathPoint
+    struct PathPoint
     {
         /// <summary>
         /// A null point that isn't associated with any polygon.

@@ -14,11 +14,11 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Navigation mesh queries by agent type
         /// </summary>
-        protected readonly Dictionary<AgentType, NavigationMeshQuery> Query = new Dictionary<AgentType, NavigationMeshQuery>();
+        private readonly Dictionary<AgentType, NavigationMeshQuery> Query = new Dictionary<AgentType, NavigationMeshQuery>();
         /// <summary>
         /// Navigation mesh nodes by agent type
         /// </summary>
-        protected readonly Dictionary<AgentType, NavigationMeshNode[]> Nodes = new Dictionary<AgentType, NavigationMeshNode[]>();
+        private readonly Dictionary<AgentType, NavigationMeshNode[]> Nodes = new Dictionary<AgentType, NavigationMeshNode[]>();
 
         /// <summary>
         /// Navigation Mesh Build
@@ -104,14 +104,6 @@ namespace Engine.PathFinding.NavMesh
             }
 
             return nm;
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        protected NavigationMesh()
-        {
-
         }
 
         /// <summary>

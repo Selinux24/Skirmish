@@ -6,7 +6,7 @@ namespace Engine.PathFinding.NavMesh
     /// References a <see cref="HeightFieldSpan"/> within a <see cref="HeightField"/>.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct HeightFieldSpanReference
+    struct HeightFieldSpanReference
     {
         private int x;
         private int y;

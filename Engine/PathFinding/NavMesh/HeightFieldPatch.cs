@@ -6,7 +6,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// Stores height data in a grid.
     /// </summary>
-    public class HeightFieldPatch
+    class HeightFieldPatch
     {
         /// <summary>
         /// The value used when a height value has not yet been set.

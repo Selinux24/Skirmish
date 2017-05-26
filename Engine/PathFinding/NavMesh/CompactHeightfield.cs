@@ -7,8 +7,39 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A more memory-compact heightfield that stores open spans of voxels instead of closed ones.
     /// </summary>
-    public class CompactHeightField
+    class CompactHeightField
     {
+        /// <summary>
+        /// Gets the world-space bounding box.
+        /// </summary>
+        private BoundingBox bounds;
+        /// <summary>
+        /// Gets the maximum distance to a border based on the distance field. This value is undefined prior to
+        /// calling <see cref="BuildDistanceField"/>.
+        /// </summary>
+        private int maxDistance;
+        /// <summary>
+        /// Gets an array of distances from a span to the nearest border. This value is undefined prior to calling
+        /// <see cref="BuildDistanceField"/>.
+        /// </summary>
+        private int[] distances;
+        /// <summary>
+        /// Gets the size of the border.
+        /// </summary>
+        private int borderSize;
+        /// <summary>
+        /// Gets the maximum number of allowed regions.
+        /// </summary>
+        private int maxRegions;
+        /// <summary>
+        /// Maximum walk contour iterations
+        /// </summary>
+        private int maxWalkContourIterations = 40000;
+        /// <summary>
+        /// Gets the area flags.
+        /// </summary>
+        private Area[] areas;
+
         /// <summary>
         /// Gets the width of the <see cref="CompactHeightField"/> in voxel units.
         /// </summary>
@@ -22,10 +53,6 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public int Length { get; private set; }
         /// <summary>
-        /// Gets the world-space bounding box.
-        /// </summary>
-        public BoundingBox Bounds { get; private set; }
-        /// <summary>
         /// Gets the world-space size of a cell in the XZ plane.
         /// </summary>
         public float CellSize { get; private set; }
@@ -34,28 +61,6 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         public float CellHeight { get; private set; }
         /// <summary>
-        /// Gets the maximum distance to a border based on the distance field. This value is undefined prior to
-        /// calling <see cref="BuildDistanceField"/>.
-        /// </summary>
-        public int MaxDistance { get; private set; }
-        /// <summary>
-        /// Gets an array of distances from a span to the nearest border. This value is undefined prior to calling
-        /// <see cref="BuildDistanceField"/>.
-        /// </summary>
-        public int[] Distances { get; private set; }
-        /// <summary>
-        /// Gets the size of the border.
-        /// </summary>
-        public int BorderSize { get; private set; }
-        /// <summary>
-        /// Gets the maximum number of allowed regions.
-        /// </summary>
-        public int MaxRegions { get; private set; }
-        /// <summary>
-        /// Maximum walk contour iterations
-        /// </summary>
-        public int MaxWalkContourIterations { get; private set; }
-        /// <summary>
         /// Gets the cells.
         /// </summary>
         public CompactHeightFieldCell[] Cells { get; private set; }
@@ -63,10 +68,6 @@ namespace Engine.PathFinding.NavMesh
         /// Gets the spans.
         /// </summary>
         public CompactHeightFieldSpan[] Spans { get; private set; }
-        /// <summary>
-        /// Gets the area flags.
-        /// </summary>
-        public Area[] Areas { get; private set; }
 
         /// <summary>
         /// Gets an <see cref="IEnumerable{T}"/> of <see cref="CompactHeightFieldSpan"/> of the spans at a specified coordiante.
@@ -129,8 +130,8 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="voxelMaxClimb">Voxel maximum climb</param>
         /// <returns>Returns the new generated compact height field</returns>
         public static CompactHeightField Build(
-            HeightField heightField, 
-            int minRegionSize, int mergedRegionSize, 
+            HeightField heightField,
+            int minRegionSize, int mergedRegionSize,
             int voxelAgentHeight, int voxelAgentRadius, int voxelMaxClimb)
         {
             var ch = new CompactHeightField(heightField, voxelAgentHeight, voxelMaxClimb);
@@ -146,7 +147,10 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="source">The original stack</param>
         /// <param name="destination">The new stack</param>
         /// <param name="regions">Region ids</param>
-        private static void AppendStacks(List<CompactHeightFieldSpanReference> source, List<CompactHeightFieldSpanReference> destination, RegionId[] regions)
+        private static void AppendStacks(
+            List<CompactHeightFieldSpanReference> source, 
+            List<CompactHeightFieldSpanReference> destination, 
+            RegionId[] regions)
         {
             for (int j = 0; j < source.Count; j++)
             {
@@ -168,7 +172,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="walkableClimb">The maximum difference in slope to filter.</param>
         public CompactHeightField(HeightField field, int walkableHeight, int walkableClimb)
         {
-            this.Bounds = field.Bounds;
+            this.bounds = field.Bounds;
             this.Width = field.Width;
             this.Height = field.Height;
             this.Length = field.Length;
@@ -178,9 +182,7 @@ namespace Engine.PathFinding.NavMesh
             int spanCount = field.SpanCount;
             this.Cells = new CompactHeightFieldCell[this.Width * this.Length];
             this.Spans = new CompactHeightFieldSpan[spanCount];
-            this.Areas = new Area[spanCount];
-
-            this.MaxWalkContourIterations = 40000; 
+            this.areas = new Area[spanCount];
 
             //iterate over the Heightfield's cells
             int spanIndex = 0;
@@ -205,7 +207,7 @@ namespace Engine.PathFinding.NavMesh
                         CompactHeightFieldSpan res;
                         CompactHeightFieldSpan.FromMinMax(s.Maximum, fs[j + 1].Minimum, out res);
                         this.Spans[spanIndex] = res;
-                        this.Areas[spanIndex] = s.Area;
+                        this.areas[spanIndex] = s.Area;
                         spanIndex++;
                         c.Count++;
                     }
@@ -216,7 +218,7 @@ namespace Engine.PathFinding.NavMesh
                 if (lastS.Area.IsWalkable)
                 {
                     this.Spans[spanIndex] = new CompactHeightFieldSpan(fs[lastInd].Maximum, int.MaxValue);
-                    this.Areas[spanIndex] = lastS.Area;
+                    this.areas[spanIndex] = lastS.Area;
                     spanIndex++;
                     c.Count++;
                 }
@@ -268,150 +270,6 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
-        /// Builds a distance field, or the distance to the nearest unwalkable area.
-        /// </summary>
-        public void BuildDistanceField()
-        {
-            if (this.Distances == null)
-            {
-                this.Distances = new int[this.Spans.Length];
-            }
-
-            //fill up all the values in src
-            this.CalculateDistanceField(this.Distances);
-
-            //blur the distances
-            this.BoxBlur(this.Distances, 1);
-
-            //find the maximum distance
-            this.MaxDistance = 0;
-            for (int i = 0; i < this.Distances.Length; i++)
-            {
-                this.MaxDistance = Math.Max(this.Distances[i], this.MaxDistance);
-            }
-        }
-        /// <summary>
-        /// Erodes the walkable areas in the map.
-        /// </summary>
-        /// <remarks>
-        /// If you have already called <see cref="BuildDistanceField"/>, it will automatically be called again after
-        /// erosion because it needs to be recalculated.
-        /// </remarks>
-        /// <param name="radius">The radius to erode from unwalkable areas.</param>
-        public void Erode(int radius)
-        {
-            radius *= 2;
-
-            //get a distance field
-            int[] dists = new int[this.Spans.Length];
-            this.CalculateDistanceField(dists);
-
-            //erode close-to-null areas to null areas.
-            for (int i = 0; i < this.Spans.Length; i++)
-            {
-                if (dists[i] < radius)
-                {
-                    this.Areas[i] = Area.Null;
-                }
-            }
-
-            //marking areas as null changes the distance field, so recalculate it.
-            if (this.Distances != null)
-            {
-                this.BuildDistanceField();
-            }
-        }
-        /// <summary>
-        /// The central method for building regions, which consists of connected, non-overlapping walkable spans.
-        /// </summary>
-        /// <param name="borderSize">The border size</param>
-        /// <param name="minRegionArea">If smaller than this value, region will be null</param>
-        /// <param name="mergeRegionArea">Reduce unneccesarily small regions</param>
-        public void BuildRegions(int borderSize, int minRegionArea, int mergeRegionArea)
-        {
-            if (this.Distances == null)
-            {
-                this.BuildDistanceField();
-            }
-
-            const int LogStackCount = 3;
-            const int StackCount = 1 << LogStackCount;
-            List<CompactHeightFieldSpanReference>[] stacks = new List<CompactHeightFieldSpanReference>[StackCount];
-            for (int i = 0; i < stacks.Length; i++)
-            {
-                stacks[i] = new List<CompactHeightFieldSpanReference>(1024);
-            }
-
-            RegionId[] regions = new RegionId[this.Spans.Length];
-            int[] floodDistances = new int[this.Spans.Length];
-
-            RegionId[] regionBuffer = new RegionId[this.Spans.Length];
-            int[] distanceBuffer = new int[this.Spans.Length];
-
-            int regionIndex = 1;
-            int level = ((this.MaxDistance + 1) / 2) * 2;
-
-            const int ExpandIters = 8;
-            if (borderSize > 0)
-            {
-                //make sure border doesn't overflow
-                int borderWidth = Math.Min(this.Width, borderSize);
-                int borderHeight = Math.Min(this.Length, borderSize);
-
-                //fill regions
-                this.FillRectangleRegion(regions, new RegionId(regionIndex++, RegionFlags.Border), 0, borderWidth, 0, this.Length);
-                this.FillRectangleRegion(regions, new RegionId(regionIndex++, RegionFlags.Border), this.Width - borderWidth, this.Width, 0, this.Length);
-                this.FillRectangleRegion(regions, new RegionId(regionIndex++, RegionFlags.Border), 0, this.Width, 0, borderHeight);
-                this.FillRectangleRegion(regions, new RegionId(regionIndex++, RegionFlags.Border), 0, this.Width, this.Length - borderHeight, this.Length);
-
-                this.BorderSize = borderSize;
-            }
-
-            int stackId = -1;
-            while (level > 0)
-            {
-                level = level >= 2 ? level - 2 : 0;
-                stackId = (stackId + 1) & (StackCount - 1);
-
-                if (stackId == 0)
-                {
-                    SortCellsByLevel(regions, stacks, level, StackCount, 1);
-                }
-                else
-                {
-                    AppendStacks(stacks[stackId - 1], stacks[stackId], regions);
-                }
-
-                //expand current regions until no new empty connected cells found
-                this.ExpandRegions(regions, floodDistances, ExpandIters, level, stacks[stackId], regionBuffer, distanceBuffer);
-
-                //mark new regions with ids
-                for (int j = 0; j < stacks[stackId].Count; j++)
-                {
-                    var spanRef = stacks[stackId][j];
-                    if (spanRef.Index >= 0 && regions[spanRef.Index] == 0)
-                    {
-                        if (this.FloodRegion(regions, floodDistances, regionIndex, level, ref spanRef))
-                        {
-                            regionIndex++;
-                        }
-                    }
-                }
-            }
-
-            //expand current regions until no new empty connected cells found
-            this.ExpandRegions(regions, floodDistances, ExpandIters * 8, 0, null, regionBuffer, distanceBuffer);
-
-            //filter out small regions
-            this.MaxRegions = this.FilterSmallRegions(regions, minRegionArea, mergeRegionArea, regionIndex);
-
-            //write the result out
-            for (int i = 0; i < this.Spans.Length; i++)
-            {
-                this.Spans[i].Region = regions[i];
-            }
-        }
-        /// <summary>
         /// Builds a set of <see cref="Contour"/>s around the generated regions. Must be called after regions are generated.
         /// </summary>
         /// <param name="maxError">The maximum allowed deviation in a simplified contour from a raw one.</param>
@@ -420,26 +278,27 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>A <see cref="ContourSet"/> containing one contour per region.</returns>
         public ContourSet BuildContourSet(float maxError, int maxEdgeLength, ContourBuildFlags buildFlags)
         {
-            BoundingBox contourSetBounds = this.Bounds;
-            if (this.BorderSize > 0)
+            BoundingBox contourSetBounds = this.bounds;
+            if (this.borderSize > 0)
             {
                 //remove offset
-                float pad = this.BorderSize * this.CellSize;
+                float pad = this.borderSize * this.CellSize;
                 contourSetBounds.Minimum.X += pad;
                 contourSetBounds.Minimum.Z += pad;
                 contourSetBounds.Maximum.X -= pad;
                 contourSetBounds.Maximum.Z -= pad;
             }
 
-            int contourSetWidth = this.Width - this.BorderSize * 2;
-            int contourSetLength = this.Length - this.BorderSize * 2;
+            int contourSetWidth = this.Width - this.borderSize * 2;
+            int contourSetLength = this.Length - this.borderSize * 2;
 
-            int maxContours = Math.Max(this.MaxRegions, 8);
+            int maxContours = Math.Max(this.maxRegions, 8);
             var contours = new List<Contour>(maxContours);
 
             EdgeFlags[] flags = new EdgeFlags[this.Spans.Length];
 
             //Modify flags array by using the CompactHeightfield data
+
             //mark boundaries
             for (int z = 0; z < this.Length; z++)
             {
@@ -520,7 +379,7 @@ namespace Engine.PathFinding.NavMesh
                         WalkContour(spanRef, flags, verts);
                         Contour.Simplify(verts, simplified, maxError, maxEdgeLength, buildFlags);
                         Contour.RemoveDegenerateSegments(simplified);
-                        Contour contour = new Contour(simplified, reg, this.Areas[i], this.BorderSize);
+                        Contour contour = new Contour(simplified, reg, this.areas[i], this.borderSize);
 
                         if (!contour.IsNull)
                         {
@@ -567,6 +426,150 @@ namespace Engine.PathFinding.NavMesh
             }
 
             return new ContourSet(contours, contourSetBounds, contourSetWidth, contourSetLength);
+        }
+        /// <summary>
+        /// Builds a distance field, or the distance to the nearest unwalkable area.
+        /// </summary>
+        private void BuildDistanceField()
+        {
+            if (this.distances == null)
+            {
+                this.distances = new int[this.Spans.Length];
+            }
+
+            //fill up all the values in src
+            this.CalculateDistanceField(this.distances);
+
+            //blur the distances
+            this.BoxBlur(this.distances, 1);
+
+            //find the maximum distance
+            this.maxDistance = 0;
+            for (int i = 0; i < this.distances.Length; i++)
+            {
+                this.maxDistance = Math.Max(this.distances[i], this.maxDistance);
+            }
+        }
+        /// <summary>
+        /// Erodes the walkable areas in the map.
+        /// </summary>
+        /// <remarks>
+        /// If you have already called <see cref="BuildDistanceField"/>, it will automatically be called again after
+        /// erosion because it needs to be recalculated.
+        /// </remarks>
+        /// <param name="radius">The radius to erode from unwalkable areas.</param>
+        private void Erode(int radius)
+        {
+            radius *= 2;
+
+            //get a distance field
+            int[] dists = new int[this.Spans.Length];
+            this.CalculateDistanceField(dists);
+
+            //erode close-to-null areas to null areas.
+            for (int i = 0; i < this.Spans.Length; i++)
+            {
+                if (dists[i] < radius)
+                {
+                    this.areas[i] = Area.Null;
+                }
+            }
+
+            //marking areas as null changes the distance field, so recalculate it.
+            if (this.distances != null)
+            {
+                this.BuildDistanceField();
+            }
+        }
+        /// <summary>
+        /// The central method for building regions, which consists of connected, non-overlapping walkable spans.
+        /// </summary>
+        /// <param name="borderSize">The border size</param>
+        /// <param name="minRegionArea">If smaller than this value, region will be null</param>
+        /// <param name="mergeRegionArea">Reduce unneccesarily small regions</param>
+        private void BuildRegions(int borderSize, int minRegionArea, int mergeRegionArea)
+        {
+            if (this.distances == null)
+            {
+                this.BuildDistanceField();
+            }
+
+            const int LogStackCount = 3;
+            const int StackCount = 1 << LogStackCount;
+            List<CompactHeightFieldSpanReference>[] stacks = new List<CompactHeightFieldSpanReference>[StackCount];
+            for (int i = 0; i < stacks.Length; i++)
+            {
+                stacks[i] = new List<CompactHeightFieldSpanReference>(1024);
+            }
+
+            RegionId[] regions = new RegionId[this.Spans.Length];
+            int[] floodDistances = new int[this.Spans.Length];
+
+            RegionId[] regionBuffer = new RegionId[this.Spans.Length];
+            int[] distanceBuffer = new int[this.Spans.Length];
+
+            int regionIndex = 1;
+            int level = ((this.maxDistance + 1) / 2) * 2;
+
+            const int ExpandIters = 8;
+            if (borderSize > 0)
+            {
+                //make sure border doesn't overflow
+                int borderWidth = Math.Min(this.Width, borderSize);
+                int borderHeight = Math.Min(this.Length, borderSize);
+
+                //fill regions
+                this.FillRectangleRegion(regions, new RegionId(regionIndex++, RegionFlags.Border), 0, borderWidth, 0, this.Length);
+                this.FillRectangleRegion(regions, new RegionId(regionIndex++, RegionFlags.Border), this.Width - borderWidth, this.Width, 0, this.Length);
+                this.FillRectangleRegion(regions, new RegionId(regionIndex++, RegionFlags.Border), 0, this.Width, 0, borderHeight);
+                this.FillRectangleRegion(regions, new RegionId(regionIndex++, RegionFlags.Border), 0, this.Width, this.Length - borderHeight, this.Length);
+
+                this.borderSize = borderSize;
+            }
+
+            int stackId = -1;
+            while (level > 0)
+            {
+                level = level >= 2 ? level - 2 : 0;
+                stackId = (stackId + 1) & (StackCount - 1);
+
+                if (stackId == 0)
+                {
+                    SortCellsByLevel(regions, stacks, level, StackCount, 1);
+                }
+                else
+                {
+                    AppendStacks(stacks[stackId - 1], stacks[stackId], regions);
+                }
+
+                //expand current regions until no new empty connected cells found
+                this.ExpandRegions(regions, floodDistances, ExpandIters, level, stacks[stackId], regionBuffer, distanceBuffer);
+
+                //mark new regions with ids
+                for (int j = 0; j < stacks[stackId].Count; j++)
+                {
+                    var spanRef = stacks[stackId][j];
+                    if (spanRef.Index >= 0 && regions[spanRef.Index] == 0)
+                    {
+                        if (this.FloodRegion(regions, floodDistances, regionIndex, level, ref spanRef))
+                        {
+                            regionIndex++;
+                        }
+                    }
+                }
+            }
+
+            //expand current regions until no new empty connected cells found
+            this.ExpandRegions(regions, floodDistances, ExpandIters * 8, 0, null, regionBuffer, distanceBuffer);
+
+            //filter out small regions
+            this.maxRegions = this.FilterSmallRegions(regions, minRegionArea, mergeRegionArea, regionIndex);
+
+            //write the result out
+            for (int i = 0; i < this.Spans.Length; i++)
+            {
+                this.Spans[i].Region = regions[i];
+            }
         }
         /// <summary>
         /// Discards regions that are too small. 
@@ -625,7 +628,7 @@ namespace Engine.PathFinding.NavMesh
                             continue;
                         }
 
-                        reg.AreaType = this.Areas[i];
+                        reg.AreaType = this.areas[i];
 
                         //check if this cell is next to a border
                         for (var dir = Direction.West; dir <= Direction.South; dir++)
@@ -852,7 +855,7 @@ namespace Engine.PathFinding.NavMesh
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
                         CompactHeightFieldSpan s = this.Spans[i];
-                        Area area = this.Areas[i];
+                        Area area = this.areas[i];
 
                         bool isBoundary = false;
                         if (s.ConnectionCount != 4)
@@ -866,7 +869,7 @@ namespace Engine.PathFinding.NavMesh
                                 int dx = x + dir.GetHorizontalOffset();
                                 int dy = y + dir.GetVerticalOffset();
                                 int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
-                                if (area != this.Areas[di])
+                                if (area != this.areas[di])
                                 {
                                     isBoundary = true;
                                     break;
@@ -1121,7 +1124,7 @@ namespace Engine.PathFinding.NavMesh
                         {
                             //a cell is being expanded to if it's distance is greater than the current level,
                             //but no region has been asigned yet. It must also not be in a null area.
-                            if (this.Distances[i] >= level && regions[i] == 0 && this.Areas[i].IsWalkable)
+                            if (this.distances[i] >= level && regions[i] == 0 && this.areas[i].IsWalkable)
                             {
                                 stack.Add(new CompactHeightFieldSpanReference(x, y, i));
                             }
@@ -1165,7 +1168,7 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     RegionId r = regions[i];
-                    Area area = this.Areas[i];
+                    Area area = this.areas[i];
                     CompactHeightFieldSpan s = this.Spans[i];
 
                     //search direct neighbors for the one with the smallest distance value
@@ -1181,7 +1184,7 @@ namespace Engine.PathFinding.NavMesh
                         int dy = y + dir.GetVerticalOffset();
                         int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
 
-                        if (this.Areas[di] != area)
+                        if (this.areas[di] != area)
                         {
                             continue;
                         }
@@ -1253,7 +1256,7 @@ namespace Engine.PathFinding.NavMesh
             Stack<CompactHeightFieldSpanReference> stack = new Stack<CompactHeightFieldSpanReference>();
             stack.Push(start);
 
-            Area area = this.Areas[start.Index];
+            Area area = this.areas[start.Index];
             regions[start.Index] = new RegionId(regionIndex);
             floodDistances[start.Index] = 0;
 
@@ -1276,7 +1279,7 @@ namespace Engine.PathFinding.NavMesh
                         int dy = cell.Y + dir.GetVerticalOffset();
                         int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref cs, dir);
 
-                        if (this.Areas[di] != area)
+                        if (this.areas[di] != area)
                         {
                             continue;
                         }
@@ -1303,7 +1306,7 @@ namespace Engine.PathFinding.NavMesh
                             int dy2 = dy + dir2.GetVerticalOffset();
                             int di2 = this.Cells[dx2 + dy2 * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref ds, dir2);
 
-                            if (this.Areas[di2] != area)
+                            if (this.areas[di2] != area)
                             {
                                 continue;
                             }
@@ -1335,12 +1338,12 @@ namespace Engine.PathFinding.NavMesh
                         int dy = cell.Y + dir.GetVerticalOffset();
                         int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref cs, dir);
 
-                        if (this.Areas[di] != area)
+                        if (this.areas[di] != area)
                         {
                             continue;
                         }
 
-                        if (this.Distances[di] >= lev && regions[di] == 0)
+                        if (this.distances[di] >= lev && regions[di] == 0)
                         {
                             regions[di] = new RegionId(regionIndex);
                             floodDistances[di] = 0;
@@ -1496,7 +1499,7 @@ namespace Engine.PathFinding.NavMesh
                     CompactHeightFieldCell c = this.Cells[x + y * this.Width];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
-                        if (this.Areas[i].IsWalkable)
+                        if (this.areas[i].IsWalkable)
                         {
                             regions[i] = newRegionId;
                         }
@@ -1527,12 +1530,12 @@ namespace Engine.PathFinding.NavMesh
                     CompactHeightFieldCell c = this.Cells[y * this.Width + x];
                     for (int i = c.StartIndex, end = c.StartIndex + c.Count; i < end; i++)
                     {
-                        if (!this.Areas[i].IsWalkable || !regions[i].IsNull)
+                        if (!this.areas[i].IsWalkable || !regions[i].IsNull)
                         {
                             continue;
                         }
 
-                        int level = this.Distances[i] >> logLevelsPerStack;
+                        int level = this.distances[i] >> logLevelsPerStack;
                         int sId = startlevel - level;
                         if (sId >= numStacks)
                         {
@@ -1568,10 +1571,10 @@ namespace Engine.PathFinding.NavMesh
             Direction startDir = dir;
             int startIndex = spanReference.Index;
 
-            Area area = this.Areas[startIndex];
+            Area area = this.areas[startIndex];
 
             int iter = 0;
-            while (++iter < this.MaxWalkContourIterations)
+            while (++iter < this.maxWalkContourIterations)
             {
                 // this direction is connected
                 if (EdgeFlagsHelper.IsConnected(ref flags[spanReference.Index], dir))
@@ -1606,7 +1609,7 @@ namespace Engine.PathFinding.NavMesh
                         int dy = spanReference.Y + dir.GetVerticalOffset();
                         int di = this.Cells[dx + dy * this.Width].StartIndex + CompactHeightFieldSpan.GetConnection(ref s, dir);
                         r = this.Spans[di].Region;
-                        if (area != this.Areas[di])
+                        if (area != this.areas[di])
                         {
                             isAreaBorder = true;
                         }
@@ -1679,7 +1682,7 @@ namespace Engine.PathFinding.NavMesh
 
             //combine region and area codes in order to prevent border vertices, which are in between two areas, to be removed 
             cornerRegs[0] = s.Region;
-            cornerAreas[0] = this.Areas[sr.Index];
+            cornerAreas[0] = this.areas[sr.Index];
 
             if (s.IsConnected(dir))
             {
@@ -1691,7 +1694,7 @@ namespace Engine.PathFinding.NavMesh
 
                 cornerHeight = Math.Max(cornerHeight, ds.Minimum);
                 cornerRegs[1] = this.Spans[di].Region;
-                cornerAreas[1] = this.Areas[di];
+                cornerAreas[1] = this.areas[di];
 
                 //get neighbor of neighbor's span
                 if (ds.IsConnected(dirp))
@@ -1703,7 +1706,7 @@ namespace Engine.PathFinding.NavMesh
 
                     cornerHeight = Math.Max(cornerHeight, ds2.Minimum);
                     cornerRegs[2] = ds2.Region;
-                    cornerAreas[2] = this.Areas[di2];
+                    cornerAreas[2] = this.areas[di2];
                 }
             }
 
@@ -1717,7 +1720,7 @@ namespace Engine.PathFinding.NavMesh
 
                 cornerHeight = Math.Max(cornerHeight, ds.Minimum);
                 cornerRegs[3] = ds.Region;
-                cornerAreas[3] = this.Areas[di];
+                cornerAreas[3] = this.areas[di];
 
                 //get neighbor of neighbor's span
                 if (ds.IsConnected(dir))
@@ -1729,7 +1732,7 @@ namespace Engine.PathFinding.NavMesh
 
                     cornerHeight = Math.Max(cornerHeight, ds2.Minimum);
                     cornerRegs[2] = ds2.Region;
-                    cornerAreas[2] = this.Areas[di2];
+                    cornerAreas[2] = this.areas[di2];
                 }
             }
 

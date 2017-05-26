@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.PathFinding.NavMesh
 {
@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// The MeshTile contains the map data for pathfinding
     /// </summary>
-    public class MeshTile : IEquatable<MeshTile>
+    class MeshTile : IEquatable<MeshTile>
     {
         private PolyIdManager idManager;
         private int baseRef;
@@ -42,7 +42,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets or sets the PolyMeshDetail data
         /// </summary>
-        public PolyMeshDetail.MeshData[] DetailMeshes { get; set; }
+        public PolyMeshData[] DetailMeshes { get; set; }
         /// <summary>
         /// Gets or sets the PolyMeshDetail vertices
         /// </summary>
@@ -50,7 +50,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets or sets the PolyMeshDetail triangles
         /// </summary>
-        public PolyMeshDetail.TriangleData[] DetailTris { get; set; }
+        public PolyMeshTriangleData[] DetailTris { get; set; }
         /// <summary>
         /// Gets or sets the OffmeshConnections
         /// </summary>
@@ -785,14 +785,14 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>True, if a height is found. False, if otherwise.</returns>
         public bool ClosestHeight(int indexPoly, Vector3 pos, out float h)
         {
-            Poly poly = this.Polys[indexPoly];
-            PolyMeshDetail.MeshData pd = this.DetailMeshes[indexPoly];
+            var poly = this.Polys[indexPoly];
+            var pd = this.DetailMeshes[indexPoly];
 
             //find height at the location
             for (int j = 0; j < this.DetailMeshes[indexPoly].TriangleCount; j++)
             {
-                PolyMeshDetail.TriangleData t = DetailTris[pd.TriangleIndex + j];
-                Vector3[] v = new Vector3[3];
+                var t = DetailTris[pd.TriangleIndex + j];
+                var v = new Vector3[3];
 
                 for (int k = 0; k < 3; k++)
                 {

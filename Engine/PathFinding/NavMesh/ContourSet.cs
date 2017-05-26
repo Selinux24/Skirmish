@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh
     /// A set of contours around the regions of a <see cref="CompactHeightField"/>, used as the edges of a
     /// <see cref="PolyMesh"/>.
     /// </summary>
-    public class ContourSet : ICollection<Contour>
+    class ContourSet : ICollection<Contour>
     {
         /// <summary>
         /// Internal list

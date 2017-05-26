@@ -7,7 +7,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// A contour is formed from a region.
     /// </summary>
-    public class Contour
+    class Contour
     {
         /// <summary>
         /// Finds the closest indices between two contours. Useful for merging contours.
@@ -380,30 +380,34 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Merges another contour into this instance.
         /// </summary>
-        /// <param name="contour">The contour to merge.</param>
-        public void MergeWith(Contour contour)
+        /// <param name="other">The contour to merge.</param>
+        public void MergeWith(Contour other)
         {
-            int lengthA = Vertices.Length;
-            int lengthB = contour.Vertices.Length;
+            int lengthA = this.Vertices.Length;
+            int lengthB = other.Vertices.Length;
 
             int ia, ib;
-            GetClosestIndices(this, contour, out ia, out ib);
+            GetClosestIndices(this, other, out ia, out ib);
 
             //create a list with the capacity set to the max number of possible verts to avoid expanding the list.
-            var newVerts = new List<ContourVertexi>(Vertices.Length + contour.Vertices.Length + 2);
+            var newVerts = new List<ContourVertexi>(this.Vertices.Length + other.Vertices.Length + 2);
 
             //copy contour A
             for (int i = 0; i <= lengthA; i++)
-                newVerts.Add(Vertices[(ia + i) % lengthA]);
+            {
+                newVerts.Add(this.Vertices[(ia + i) % lengthA]);
+            }
 
             //add contour B (other contour) to contour A (this contour)
             for (int i = 0; i <= lengthB; i++)
-                newVerts.Add(contour.Vertices[(ib + i) % lengthB]);
+            {
+                newVerts.Add(other.Vertices[(ib + i) % lengthB]);
+            }
 
-            Vertices = newVerts.ToArray();
+            this.Vertices = newVerts.ToArray();
 
             //delete the other contour
-            contour.Vertices = null;
+            other.Vertices = null;
         }
     }
 }

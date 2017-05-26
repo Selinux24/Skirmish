@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.PathFinding.NavMesh
 {
@@ -9,7 +9,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// The class of Poly mesh.
     /// </summary>
-    public class PolyMesh
+    class PolyMesh
     {
         public const int NullId = -1;
 
@@ -24,7 +24,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="nvp">The maximum number of vertices per polygon.</param>
         /// <param name="cellSize">The size of a cell.</param>
         /// <param name="cellHeight">The height of a cell.</param>
-        public static BoundingVolumeTree BuildBVT(Vertexi[] verts, PolyMesh.Polygon[] polys, int nvp, float cellSize, float cellHeight)
+        public static BoundingVolumeTree BuildBVT(Vertexi[] verts, PolyMeshPolygon[] polys, int nvp, float cellSize, float cellHeight)
         {
             var items = new List<BoundingVolumeTreeNode>();
 
@@ -377,7 +377,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="edgeA">Shared edge's endpoint A</param>
         /// <param name="edgeB">Shared edge's endpoint B</param>
         /// <returns>The distance between two vertices</returns>
-        private static int GetPolyMergeValue(List<Polygon> polys, int polyA, int polyB, List<Vertexi> verts, out int edgeA, out int edgeB)
+        private static int GetPolyMergeValue(List<PolyMeshPolygon> polys, int polyA, int polyB, List<Vertexi> verts, out int edgeA, out int edgeB)
         {
             int numVertsA = polys[polyA].VertexCount;
             int numVertsB = polys[polyB].VertexCount;
@@ -462,7 +462,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="polys">The polygon list</param>
         /// <param name="remove">The vertex index</param>
         /// <returns>True, if vertex can be removed. False, if otherwise.</returns>
-        private static bool CanRemoveVertex(List<Polygon> polys, int remove)
+        private static bool CanRemoveVertex(List<PolyMeshPolygon> polys, int remove)
         {
             //count number of polygons to remove
             int numRemovedVerts = 0;
@@ -471,7 +471,7 @@ namespace Engine.PathFinding.NavMesh
 
             for (int i = 0; i < polys.Count; i++)
             {
-                Polygon p = polys[i];
+                var p = polys[i];
                 int nv = p.VertexCount;
                 int numRemoved = 0;
                 int numVerts = 0;
@@ -496,7 +496,9 @@ namespace Engine.PathFinding.NavMesh
 
             //don't remove a vertex from a triangle since you need at least three vertices to make a polygon
             if (numRemainingEdges <= 2)
+            {
                 return false;
+            }
 
             //find edges which share removed vertex
             int maxEdges = numTouchedVerts * 2;
@@ -505,7 +507,7 @@ namespace Engine.PathFinding.NavMesh
 
             for (int i = 0; i < polys.Count; i++)
             {
-                Polygon p = polys[i];
+                var p = polys[i];
                 int nv = p.VertexCount;
 
                 //collect edges which touch removed vertex
@@ -568,7 +570,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="vertices">The vertex list</param>
         /// <param name="polys">The polygon list</param>
         /// <param name="numVertsPerPoly">Number of vertices per polygon</param>
-        private static void BuildMeshAdjacency(List<Vertexi> vertices, List<Polygon> polys, int numVertsPerPoly)
+        private static void BuildMeshAdjacency(List<Vertexi> vertices, List<PolyMeshPolygon> polys, int numVertsPerPoly)
         {
             int maxEdgeCount = polys.Count * numVertsPerPoly;
             int[] firstEdge = new int[vertices.Count + maxEdgeCount];
@@ -576,18 +578,22 @@ namespace Engine.PathFinding.NavMesh
             List<AdjacencyEdge> edges = new List<AdjacencyEdge>(maxEdgeCount);
 
             for (int i = 0; i < vertices.Count; i++)
+            {
                 firstEdge[i] = NullId;
+            }
 
             //Iterate through all the polygons
             for (int i = 0; i < polys.Count; i++)
             {
-                Polygon p = polys[i];
+                var p = polys[i];
 
                 //Iterate through all the vertices
                 for (int j = 0; j < numVertsPerPoly; j++)
                 {
                     if (p.Vertices[j] == NullId)
+                    {
                         break;
+                    }
 
                     //get closest two verts
                     int v0 = p.Vertices[j];
@@ -620,11 +626,13 @@ namespace Engine.PathFinding.NavMesh
             //Iterate through all the polygons again
             for (int i = 0; i < polys.Count; i++)
             {
-                Polygon p = polys[i];
+                var p = polys[i];
                 for (int j = 0; j < numVertsPerPoly; j++)
                 {
                     if (p.Vertices[j] == NullId)
+                    {
                         break;
+                    }
 
                     //get adjacent vertices
                     int v0 = p.Vertices[j];
@@ -741,7 +749,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the polygon data
         /// </summary>
-        public Polygon[] Polys { get; private set; }
+        public PolyMeshPolygon[] Polys { get; private set; }
         /// <summary>
         /// Gets the bounds.
         /// </summary>
@@ -778,20 +786,20 @@ namespace Engine.PathFinding.NavMesh
             this.VerticesPerPoly = numVertsPerPoly;
 
             //get maximum limits
-            int maxVertices; 
-            int maxTris; 
+            int maxVertices;
+            int maxTris;
             int maxVertsPerCont;
             contSet.GetVertexLimits(out maxVertices, out maxTris, out maxVertsPerCont);
 
             //initialize the mesh members
             var verts = new List<Vertexi>(maxVertices);
-            var polys = new List<Polygon>(maxTris);
+            var polys = new List<PolyMeshPolygon>(maxTris);
             var vertRemoveQueue = new Queue<int>(maxVertices);
             var mergeTemp = new int[numVertsPerPoly];
             var vertDict = new Dictionary<Vertexi, int>(new Vertexi.RoughYEqualityComparer(2));
             var indices = new int[maxVertsPerCont]; //keep track of vertex hash codes
             var tris = new Triangle[maxVertsPerCont];
-            var contPolys = new List<Polygon>(maxVertsPerCont + 1);
+            var contPolys = new List<PolyMeshPolygon>(maxVertsPerCont + 1);
 
             //extract contour data
             foreach (var cont in contSet)
@@ -851,7 +859,7 @@ namespace Engine.PathFinding.NavMesh
                     //each polygon has numVertsPerPoly
                     //index 0, 1, 2 store triangle vertices
                     //other polygon indexes (3 to numVertsPerPoly - 1) should be used for storing extra vertices when two polygons merge together
-                    Polygon p = new Polygon(numVertsPerPoly, Area.Null, RegionId.Null);
+                    PolyMeshPolygon p = new PolyMeshPolygon(numVertsPerPoly, Area.Null, RegionId.Null);
                     p.Vertices[0] = RemoveDiagonalFlag(indices[ti.Index0]);
                     p.Vertices[1] = RemoveDiagonalFlag(indices[ti.Index1]);
                     p.Vertices[2] = RemoveDiagonalFlag(indices[ti.Index2]);
@@ -911,7 +919,7 @@ namespace Engine.PathFinding.NavMesh
                 for (int i = 0; i < contPolys.Count; i++)
                 {
                     var p1 = contPolys[i];
-                    var p2 = new Polygon(numVertsPerPoly, cont.Area, cont.RegionId);
+                    var p2 = new PolyMeshPolygon(numVertsPerPoly, cont.Area, cont.RegionId);
 
                     Buffer.BlockCopy(p1.Vertices, 0, p2.Vertices, 0, numVertsPerPoly * sizeof(int));
 
@@ -996,7 +1004,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="verts">A list of vertices</param>
         /// <param name="polys">A list of polygons</param>
         /// <param name="vertex">The vertex to remove</param>
-        private void RemoveVertex(List<Vertexi> verts, List<Polygon> polys, int vertex)
+        private void RemoveVertex(List<Vertexi> verts, List<PolyMeshPolygon> polys, int vertex)
         {
             int[] mergeTemp = new int[VerticesPerPoly];
 
@@ -1004,7 +1012,7 @@ namespace Engine.PathFinding.NavMesh
             int numRemovedVerts = 0;
             for (int i = 0; i < polys.Count; i++)
             {
-                Polygon p = polys[i];
+                var p = polys[i];
 
                 for (int j = 0; j < p.VertexCount; j++)
                 {
@@ -1023,7 +1031,7 @@ namespace Engine.PathFinding.NavMesh
             //Iterate through all the polygons
             for (int i = 0; i < polys.Count; i++)
             {
-                Polygon p = polys[i];
+                var p = polys[i];
 
                 if (p.ContainsVertex(vertex))
                 {
@@ -1050,7 +1058,7 @@ namespace Engine.PathFinding.NavMesh
             //adjust indices
             for (int i = 0; i < polys.Count; i++)
             {
-                Polygon p = polys[i];
+                var p = polys[i];
 
                 for (int j = 0; j < p.VertexCount; j++)
                 {
@@ -1149,14 +1157,14 @@ namespace Engine.PathFinding.NavMesh
             }
 
             //merge hole triangles back to polygons
-            List<Polygon> mergePolys = new List<Polygon>(ntris + 1);
+            var mergePolys = new List<PolyMeshPolygon>(ntris + 1);
 
             for (int j = 0; j < ntris; j++)
             {
                 Triangle t = tris[j];
                 if (t.Index0 != t.Index1 && t.Index0 != t.Index2 && t.Index1 != t.Index2)
                 {
-                    Polygon p = new Polygon(VerticesPerPoly, areas[t.Index0], regions[t.Index0]);
+                    var p = new PolyMeshPolygon(VerticesPerPoly, areas[t.Index0], regions[t.Index0]);
                     p.Vertices[0] = hole[t.Index0];
                     p.Vertices[1] = hole[t.Index1];
                     p.Vertices[2] = hole[t.Index2];
@@ -1202,8 +1210,8 @@ namespace Engine.PathFinding.NavMesh
                         break;
                     }
 
-                    Polygon pa = mergePolys[bestPolyA];
-                    Polygon pb = mergePolys[bestPolyB];
+                    PolyMeshPolygon pa = mergePolys[bestPolyA];
+                    PolyMeshPolygon pb = mergePolys[bestPolyB];
                     pa.MergeWith(pb, bestEa, bestEb, mergeTemp);
                     mergePolys[bestPolyB] = mergePolys[mergePolys.Count - 1];
                     mergePolys.RemoveAt(mergePolys.Count - 1);
@@ -1228,7 +1236,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Two adjacent vertices form an edge.
         /// </summary>
-        private struct AdjacencyEdge
+        struct AdjacencyEdge
         {
             public int Vert0;
             public int Vert1;
@@ -1242,7 +1250,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Another edge structure, but this one contains the RegionId and AreaId.
         /// </summary>
-        private struct Edge
+        struct Edge
         {
             public int Vert0;
             public int Vert1;
@@ -1262,134 +1270,6 @@ namespace Engine.PathFinding.NavMesh
                 this.Vert1 = vert1;
                 this.Region = region;
                 this.Area = area;
-            }
-        }
-        /// <summary>
-        /// Each polygon is a collection of vertices. It is the basic unit of the PolyMesh
-        /// </summary>
-        public class Polygon
-        {
-            /// <summary>
-            /// Gets the indices for the vertices.
-            /// </summary>
-            /// <value>The vertices.</value>
-            public int[] Vertices { get; private set; }
-            /// <summary>
-            /// Gets the neighbor edges.
-            /// </summary>
-            /// <value>The neighbor edges.</value>
-            public int[] NeighborEdges { get; private set; }
-            /// <summary>
-            /// Gets or sets the area id
-            /// </summary>
-            public Area Area { get; set; }
-            /// <summary>
-            /// Gets the the number of vertex.
-            /// </summary>
-            /// <value>The vertex count.</value>
-            public int VertexCount
-            {
-                get
-                {
-                    for (int i = 0; i < Vertices.Length; i++)
-                    {
-                        if (Vertices[i] == NullId)
-                        {
-                            return i;
-                        }
-                    }
-
-                    return Vertices.Length;
-                }
-            }
-            /// <summary>
-            /// Gets or sets the region identifier.
-            /// </summary>
-            /// <value>The region identifier.</value>
-            public RegionId RegionId { get; set; }
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Polygon" /> class.
-            /// </summary>
-            /// <param name="numVertsPerPoly">The number of vertices per polygon.</param>
-            /// <param name="area">The AreaId</param>
-            /// <param name="regionId">The RegionId</param>
-            public Polygon(int numVertsPerPoly, Area area, RegionId regionId)
-            {
-                this.Vertices = new int[numVertsPerPoly];
-                this.NeighborEdges = new int[numVertsPerPoly];
-                this.Area = area;
-                this.RegionId = regionId;
-
-                for (int i = 0; i < numVertsPerPoly; i++)
-                {
-                    this.Vertices[i] = NullId;
-                    this.NeighborEdges[i] = NullId;
-                }
-            }
-
-            /// <summary>
-            /// Determine if the vertex is in polygon.
-            /// </summary>
-            /// <returns><c>true</c>, if vertex was containsed, <c>false</c> otherwise.</returns>
-            /// <param name="vertex">The Vertex.</param>
-            public bool ContainsVertex(int vertex)
-            {
-                //iterate through all the vertices
-                for (int i = 0; i < this.Vertices.Length; i++)
-                {
-                    //find the vertex, return false if at end of defined polygon.
-                    int v = this.Vertices[i];
-                    if (v == vertex)
-                    {
-                        return true;
-                    }
-                    else if (v == NullId)
-                    {
-                        return false;
-                    }
-                }
-
-                return false;
-            }
-            /// <summary>
-            /// Merges another polygon with this one.
-            /// </summary>
-            /// <param name="other">The other polygon to merge into this one.</param>
-            /// <param name="startEdge">This starting edge for this polygon.</param>
-            /// <param name="otherStartEdge">The starting edge for the other polygon.</param>
-            /// <param name="temp">A temporary vertex buffer. Must be at least <c>numVertsPerPoly</c> long.</param>
-            public void MergeWith(Polygon other, int startEdge, int otherStartEdge, int[] temp)
-            {
-                if (temp.Length < this.Vertices.Length)
-                {
-                    throw new ArgumentException(string.Format("Buffer not large enough. Must be at least numVertsPerPoly ({0})", this.Vertices.Length), "temp");
-                }
-
-                int thisCount = this.VertexCount;
-                int otherCount = other.VertexCount;
-
-                int n = 0;
-
-                for (int t = 0; t < temp.Length; t++)
-                {
-                    temp[t] = NullId;
-                }
-
-                //add self, starting at best edge
-                for (int i = 0; i < thisCount - 1; i++)
-                {
-                    temp[n++] = this.Vertices[(startEdge + 1 + i) % thisCount];
-                }
-
-                //add other polygon
-                for (int i = 0; i < otherCount - 1; i++)
-                {
-                    temp[n++] = other.Vertices[(otherStartEdge + 1 + i) % otherCount];
-                }
-
-                //save merged data back
-                Array.Copy(temp, this.Vertices, this.Vertices.Length);
             }
         }
 

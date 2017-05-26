@@ -8,7 +8,7 @@ namespace Engine.PathFinding.NavMesh
     /// </summary>
     [Serializable]
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    public struct Area : IEquatable<Area>, IEquatable<byte>
+    struct Area : IEquatable<Area>, IEquatable<byte>
     {
         /// <summary>
         /// The null area is one that is considered unwalkable.

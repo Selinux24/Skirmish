@@ -6,7 +6,7 @@ namespace Engine.PathFinding.NavMesh
     /// A <see cref="RegionId"/> is an identifier with flags marking borders.
     /// </summary>
     [Serializable]
-    public struct RegionId : IEquatable<RegionId>, IEquatable<int>
+    struct RegionId : IEquatable<RegionId>, IEquatable<int>
     {
         /// <summary>
         /// A bitmask 

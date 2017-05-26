@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh
     /// <see cref="PolyIdManager"/> as the bits for each section may be
     /// diffrent, causing incorrect decoded values.
     /// </remarks>
-    public class PolyIdManager
+    class PolyIdManager
     {
         private int polyMask;
         private int tileMask;

@@ -7,7 +7,7 @@ namespace Engine.PathFinding.NavMesh
     /// A reference to a <see cref="CompactHeightFieldSpan"/> in a <see cref="CompactHeightField"/>.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct CompactHeightFieldSpanReference : IEquatable<CompactHeightFieldSpanReference>
+    struct CompactHeightFieldSpanReference : IEquatable<CompactHeightFieldSpanReference>
     {
         /// <summary>
         /// A "null" reference is one with a negative index.
@@ -112,6 +112,15 @@ namespace Engine.PathFinding.NavMesh
             hash = (13 * hash) + this.Index.GetHashCode();
 
             return hash;
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns a string represening the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("X: {0}; Y: {1}; Index: {2}", this.X, this.Y, this.Index);
         }
     }
 }

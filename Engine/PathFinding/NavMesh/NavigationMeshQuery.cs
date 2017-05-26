@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// Do pathfinding calculations on the TiledNavMesh
     /// </summary>
-    public class NavigationMeshQuery
+    class NavigationMeshQuery
     {
         /// <summary>
         /// Maximum number of vertices
@@ -995,7 +995,7 @@ namespace Engine.PathFinding.NavMesh
         /// Determine which list the node is in.
         /// </summary>
         [Flags]
-        private enum NodeFlags
+        enum NodeFlags
         {
             /// <summary>
             /// None
@@ -1013,7 +1013,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Every polygon becomes a Node, which contains a position and cost.
         /// </summary>
-        private class Node : IValueWithCost
+        class Node : IValueWithCost
         {
             public Vector3 Position;
             public float cost;
@@ -1061,7 +1061,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Link all nodes together. Store indices in hash map.
         /// </summary>
-        private class NodePool
+        class NodePool
         {
             private List<Node> nodes;
             private Dictionary<int, Node> nodeDict;
@@ -1174,7 +1174,7 @@ namespace Engine.PathFinding.NavMesh
         /// 
         /// </summary>
         [Flags]
-        private enum StraightPathFlags
+        enum StraightPathFlags
         {
             /// <summary>
             /// None
@@ -1196,7 +1196,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Straight path vertex
         /// </summary>
-        private struct StraightPathVertex
+        struct StraightPathVertex
         {
             /// <summary>
             /// Path point
@@ -1229,7 +1229,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Straight path
         /// </summary>
-        private class StraightPath
+        class StraightPath
         {
             /// <summary>
             /// Vertex list

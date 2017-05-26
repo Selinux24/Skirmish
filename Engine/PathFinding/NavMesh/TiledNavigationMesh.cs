@@ -6,12 +6,10 @@ using System.Linq;
 
 namespace Engine.PathFinding.NavMesh
 {
-    using Engine.Common;
-
     /// <summary>
     /// A TiledNavMesh is a continuous region, which is used for pathfinding. 
     /// </summary>
-    public class TiledNavigationMesh
+    class TiledNavigationMesh
     {
         private Dictionary<Point, List<MeshTile>> tileSet;
         private Dictionary<MeshTile, int> tileRefs;
@@ -244,89 +242,6 @@ namespace Engine.PathFinding.NavMesh
             return this.IdManager.Encode(1, tileList.Count, 0);
         }
         /// <summary>
-        /// Retrieve the endpoints of the offmesh connection at the specified polygon
-        /// </summary>
-        /// <param name="prevRef">The previous polygon reference</param>
-        /// <param name="polyRef">The current polygon reference</param>
-        /// <param name="startPos">The starting position</param>
-        /// <param name="endPos">The ending position</param>
-        /// <returns>True if endpoints found, false if not</returns>
-        public bool GetOffMeshConnectionPolyEndPoints(int prevRef, int polyRef, ref Vector3 startPos, ref Vector3 endPos)
-        {
-            int salt = 0, indexTile = 0, indexPoly = 0;
-
-            if (polyRef == 0)
-            {
-                return false;
-            }
-
-            //get current polygon
-            this.IdManager.Decode(ref polyRef, out indexPoly, out indexTile, out salt);
-            if (indexTile >= this.MaxTiles)
-            {
-                return false;
-            }
-
-            if (tileList[indexTile].Salt != salt)
-            {
-                return false;
-            }
-
-            MeshTile tile = tileList[indexTile];
-            if (indexPoly >= tile.PolyCount)
-            {
-                return false;
-            }
-
-            Poly poly = tile.Polys[indexPoly];
-            if (poly.PolyType != PolyType.OffMeshConnection)
-            {
-                return false;
-            }
-
-            int idx0 = 0, idx1 = 1;
-
-            //find the link that points to the first vertex
-            foreach (Link link in poly.Links)
-            {
-                if (link.Edge == 0)
-                {
-                    if (link.Reference != prevRef)
-                    {
-                        idx0 = 1;
-                        idx1 = 0;
-                    }
-
-                    break;
-                }
-            }
-
-            startPos = tile.Verts[poly.Vertices[idx0]];
-            endPos = tile.Verts[poly.Vertices[idx1]];
-
-            return true;
-        }
-        /// <summary>
-        /// Get the tile reference
-        /// </summary>
-        /// <param name="tile">Tile to look for</param>
-        /// <returns>Tile reference</returns>
-        public int GetTileRef(MeshTile tile)
-        {
-            if (tile == null)
-            {
-                return 0;
-            }
-
-            int id;
-            if (!tileRefs.TryGetValue(tile, out id))
-            {
-                id = 0;
-            }
-
-            return id;
-        }
-        /// <summary>
         /// Find the tile at a specific location.
         /// </summary>
         /// <param name="x">The X coordinate of the tile.</param>
@@ -335,19 +250,9 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>The MeshTile at the specified location.</returns>
         public MeshTile GetTileAt(int x, int y, int layer)
         {
-            return GetTileAt(new Point(x, y), layer);
-        }
-        /// <summary>
-        /// Find the tile at a specific location.
-        /// </summary>
-        /// <param name="location">The (X, Y) coordinate of the tile.</param>
-        /// <param name="layer">The layer of the tile.</param>
-        /// <returns>The MeshTile at the specified location.</returns>
-        public MeshTile GetTileAt(Point location, int layer)
-        {
             //Find tile based off hash
             List<MeshTile> list;
-            if (!tileSet.TryGetValue(location, out list))
+            if (!tileSet.TryGetValue(new Point(x, y), out list))
             {
                 return null;
             }
@@ -371,33 +276,14 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>A read-only collection of tiles at the specified coordinate</returns>
         public IEnumerable<MeshTile> GetTilesAt(int x, int y)
         {
-            return GetTilesAt(new Point(x, y));
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="location"></param>
-        /// <returns></returns>
-        public IEnumerable<MeshTile> GetTilesAt(Point location)
-        {
             //Find tile based off hash
             List<MeshTile> list;
-            if (!tileSet.TryGetValue(location, out list))
+            if (!tileSet.TryGetValue(new Point(x, y), out list))
             {
                 return Enumerable.Empty<MeshTile>();
             }
 
             return new ReadOnlyCollection<MeshTile>(list);
-        }
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="location"></param>
-        /// <param name="side"></param>
-        /// <returns></returns>
-        public IEnumerable<MeshTile> GetNeighborTilesAt(Point location, BoundarySide side)
-        {
-            return GetNeighborTilesAt(location.X, location.Y, side);
         }
         /// <summary>
         /// Gets the neighboring tile at that position

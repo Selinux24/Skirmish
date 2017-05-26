@@ -7,7 +7,7 @@ namespace Engine.PathFinding.NavMesh
     /// A <see cref="ContourVertexi"/> is a vertex that stores 3 integer coordinates and a region ID, and is used to build <see cref="Contour"/>s.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct ContourVertexi
+    struct ContourVertexi
     {
         /// <summary>
         /// Gets the leftness of a triangle formed from 3 contour vertices.
