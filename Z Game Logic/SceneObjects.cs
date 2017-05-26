@@ -38,7 +38,7 @@ namespace GameLogic
         private ModelInstanced soldier = null;
         private GridAgentType soldierAgent = null;
         private Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
-        private Dictionary<Soldier, Manipulator3DController> soldierControllers = new Dictionary<Soldier, Manipulator3DController>();
+        private Dictionary<Soldier, ManipulatorController> soldierControllers = new Dictionary<Soldier, ManipulatorController>();
         private ModelInstance current
         {
             get
@@ -617,11 +617,15 @@ namespace GameLogic
                     ModelInstance instance = this.soldier[instanceIndex++];
 
                     instance.TextureIndex = teamIndex;
-                    AnimationPath p = new AnimationPath();
-                    p.AddLoop("stand");
-                    instance.AnimationController.AddPath(p);
+
+                    AnimationPath p0 = new AnimationPath();
+                    //p0.AddRepeat("stand", 4);
+                    //p0.Add("walk");
+                    p0.AddLoop("stand");
+
+                    instance.AnimationController.AddPath(p0);
                     instance.AnimationController.Start(soldierIndex);
-                    instance.AnimationController.TimeDelta = 0.1f;
+                    instance.AnimationController.TimeDelta = 0.20f;
 
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
                     float z = (teamIndex * teamSeparation) - (gameWidth * 0.5f);
@@ -644,7 +648,9 @@ namespace GameLogic
                     }
 
                     this.soldierModels.Add(soldier, instance);
-                    this.soldierControllers.Add(soldier, new Manipulator3DController());
+                    var controller = new BasicManipulatorController();
+                    controller.PathEnd += Controller_PathEnd;
+                    this.soldierControllers.Add(soldier, controller);
 
                     soldierIndex++;
                 }
@@ -652,6 +658,22 @@ namespace GameLogic
                 teamIndex++;
             }
         }
+
+        private void Controller_PathEnd(object sender, EventArgs e)
+        {
+            var instance = sender as ManipulatorController;
+
+            foreach (var item in this.soldierControllers)
+            {
+                if(item.Value == instance)
+                {
+                    AnimationPath p0 = new AnimationPath();
+                    p0.AddLoop("stand");
+                    this.soldierModels[item.Key].AnimationController.ContinuePath(p0);
+                }
+            }
+        }
+
         private void SetFrustum()
         {
             this.lineDrawer.SetLines(this.frstColor, Line3D.CreateWiredFrustum(this.Camera.Frustum));
@@ -807,12 +829,23 @@ namespace GameLogic
         {
             if (ActionsManager.Move(this.skirmishGame, active, active.CurrentMovingCapacity))
             {
+                var model = this.soldierModels[active];
+                var controller = this.soldierControllers[active];
+
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.FindPath(this.soldierAgent, model.Manipulator.Position, destination);
                 if (path != null)
                 {
-                    //TODO: Set move animation clip
-                    this.soldierControllers[active].Follow(new SegmentPath(path.ReturnPath.ToArray()));
+                    //Set move animation clip
+                    AnimationPath p = new AnimationPath();
+                    p.AddLoop("walk");
+
+                    model.AnimationController.SetPath(p);
+                    model.AnimationController.Start(0);
+
+                    //Folow
+                    controller.Follow(path);
+                    model.Manipulator.LinearVelocity = 3;
 
                     this.GoToSoldier(active);
                 }
@@ -825,11 +858,11 @@ namespace GameLogic
             if (ActionsManager.Crawl(this.skirmishGame, active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set crawl animation clip
-                    this.soldierControllers[active].Follow(new SegmentPath(path.ReturnPath.ToArray()));
+                    this.soldierControllers[active].Follow(path);
 
                     this.GoToSoldier(active);
                 }
@@ -842,11 +875,11 @@ namespace GameLogic
             if (ActionsManager.Run(this.skirmishGame, active, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierControllers[active].Follow(new SegmentPath(path.ReturnPath.ToArray()));
+                    this.soldierControllers[active].Follow(path);
 
                     this.GoToSoldier(active);
                 }
@@ -865,11 +898,11 @@ namespace GameLogic
                 Vector3 dir = Vector3.Normalize(activeMan.Position - passiveMan.Position);
                 Vector3 destination = passiveMan.Position + (dir * 3f);
 
-                var path = this.terrain.FindPath(this.soldierAgent, activeMan.Position, destination);
+                var path = this.FindPath(this.soldierAgent, activeMan.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set assault animation clip
-                    this.soldierControllers[active].Follow(new SegmentPath(path.ReturnPath.ToArray()));
+                    this.soldierControllers[active].Follow(path);
 
                     this.GoToSoldier(active);
                 }
@@ -950,11 +983,11 @@ namespace GameLogic
             if (ActionsManager.FindCover(this.skirmishGame, active))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierControllers[active].Follow(new SegmentPath(path.ReturnPath.ToArray()));
+                    this.soldierControllers[active].Follow(path);
 
                     this.GoToSoldier(active);
                 }
@@ -967,11 +1000,11 @@ namespace GameLogic
             if (ActionsManager.RunAway(this.skirmishGame, active))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierControllers[active].Follow(new SegmentPath(path.ReturnPath.ToArray()));
+                    this.soldierControllers[active].Follow(path);
 
                     this.GoToSoldier(active);
                 }
@@ -1053,11 +1086,11 @@ namespace GameLogic
             if (ActionsManager.Leave(this.skirmishGame, active))
             {
                 //Run 3d actions
-                var path = this.terrain.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
                 if (path != null)
                 {
                     //TODO: Set run animation clip
-                    this.soldierControllers[active].Follow(new SegmentPath(path.ReturnPath.ToArray()));
+                    this.soldierControllers[active].Follow(path);
 
                     this.GoToSoldier(active);
                 }
@@ -1099,6 +1132,16 @@ namespace GameLogic
             }
         }
 
+        private IControllerPath FindPath(GridAgentType agentType, Vector3 origin, Vector3 destination)
+        {
+            var path = this.terrain.FindPath(agentType, origin, destination);
+            if (path != null)
+            {
+                return new SegmentPath(origin, path.ReturnPath.ToArray());
+            }
+
+            return null;
+        }
         private Soldier PickSoldier(ref Ray cursorRay, bool enemyOnly)
         {
             Vector3 position = cursorRay.Position;

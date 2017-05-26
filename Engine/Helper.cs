@@ -468,6 +468,16 @@ namespace Engine
                 MathUtil.WithinEpsilon(a.Y, b.Y, epsilon) &&
                 MathUtil.WithinEpsilon(a.Z, b.Z, epsilon);
         }
+
+        public static Vector3 Limit(this Vector3 vector, float magnitude)
+        {
+            if (vector.Length() > magnitude)
+            {
+                return Vector3.Normalize(vector) * magnitude;
+            }
+
+            return vector;
+        }
         /// <summary>
         /// Returns xyz components from Vector4
         /// </summary>
@@ -946,7 +956,7 @@ namespace Engine
                 up = Vector3.Left;
             }
 
-            Quaternion q = Quaternion.Invert(Quaternion.LookAtLH(eyePosition, target, up));
+            Quaternion q = Quaternion.Invert(Quaternion.LookAtLH(target, eyePosition, up));
 
             if (yAxisOnly)
             {

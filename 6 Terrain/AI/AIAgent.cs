@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.PathFinding;
+using Engine.Common;
 using SharpDX;
 using System;
 
@@ -11,7 +12,7 @@ namespace TerrainTest.AI
         public AIStatus Status;
         public Model Model;
         public AgentType AgentType;
-        public Manipulator3DController Controller;
+        public ManipulatorController Controller;
 
         delegate void CurrentBehavior(GameTime gameTime);
 
@@ -71,7 +72,7 @@ namespace TerrainTest.AI
             this.AgentType = agentType;
             this.Model = model;
             this.Status = new AIStatus(status);
-            this.Controller = new Manipulator3DController();
+            this.Controller = new SteerManipulatorController();
 
             this.ChangeState(AIStates.Idle);
         }

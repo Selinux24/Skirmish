@@ -157,6 +157,7 @@
     <Compile Include="Common\DrawerModesEnum.cs" />
     <Compile Include="Common\IndexBufferShapeEnum.cs" />
     <Compile Include="Common\Intersection.cs" />
+    <Compile Include="Common\ManipulatorController.cs" />
     <Compile Include="Common\UpdateContext.cs" />
     <Compile Include="Common\UseMaterials.cs" />
     <Compile Include="Common\UseSkinningData.cs" />
@@ -175,7 +176,7 @@
     <Compile Include="IRayIntersectable.cs" />
     <Compile Include="ISceneLightPosition.cs" />
     <Compile Include="IVertexList.cs" />
-    <Compile Include="Manipulator3DController.cs" />
+    <Compile Include="BasicManipulatorController.cs" />
     <Compile Include="MaterialDescription.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />
@@ -201,6 +202,7 @@
     <Compile Include="SkyScattering.cs" />
     <Compile Include="SkyPlaneDescription.cs" />
     <Compile Include="SkyScatteringDescription.cs" />
+    <Compile Include="SteerManipulatorController.cs" />
     <Compile Include="TimeOfDay.cs" />
     <Compile Include="TransitionDescription.cs" />
     <Compile Include="AttachedModelUsesEnum.cs" />

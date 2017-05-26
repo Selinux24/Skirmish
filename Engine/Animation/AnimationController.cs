@@ -114,34 +114,33 @@ namespace Engine.Animation
         /// <summary>
         /// Adds clips to the controller clips list
         /// </summary>
-        /// <param name="indices">Clip indices in the skinning data clip list</param>
+        /// <param name="paths">Animation path list</param>
         public void AddPath(params AnimationPath[] paths)
         {
-            var clonedPaths = new AnimationPath[paths.Length];
-
-            for (int i = 0; i < paths.Length; i++)
-            {
-                clonedPaths[i] = paths[i].Clone();
-            }
-
-            if (this.animationPaths.Count > 0)
-            {
-                //Adds transitions
-                this.animationPaths[this.animationPaths.Count - 1].ConnectTo(clonedPaths[0]);
-            }
-
-            this.animationPaths.AddRange(clonedPaths);
-
-            if (this.currentIndex < 0)
-            {
-                this.currentIndex = 0;
-            }
+            this.AppendPaths(AppendFlags.None, paths);
         }
         /// <summary>
         /// Sets the specified past as current path list
         /// </summary>
-        /// <param name="paths">Path list</param>
+        /// <param name="paths">Animation path list</param>
         public void SetPath(params AnimationPath[] paths)
+        {
+            this.AppendPaths(AppendFlags.ClearCurrent, paths);
+        }
+        /// <summary>
+        /// Adds clips to the controller clips list and ends the current animation
+        /// </summary>
+        /// <param name="paths">Animation path list</param>
+        public void ContinuePath(params AnimationPath[] paths)
+        {
+            this.AppendPaths(AppendFlags.EndsCurrent, paths);
+        }
+        /// <summary>
+        /// Append animation paths to the controller
+        /// </summary>
+        /// <param name="flags">Append path flags</param>
+        /// <param name="paths">Paths to append</param>
+        private void AppendPaths(AppendFlags flags, params AnimationPath[] paths)
         {
             var clonedPaths = new AnimationPath[paths.Length];
 
@@ -152,11 +151,23 @@ namespace Engine.Animation
 
             if (this.animationPaths.Count > 0)
             {
+                var currentLast = this.animationPaths[this.animationPaths.Count - 1];
+                var newFirst = clonedPaths[0];
+
                 //Adds transitions
-                this.animationPaths[this.animationPaths.Count - 1].ConnectTo(clonedPaths[0]);
+                currentLast.ConnectTo(newFirst);
+
+                if (flags == AppendFlags.EndsCurrent)
+                {
+                    currentLast.End();
+                }
             }
 
-            this.animationPaths.Clear();
+            if (flags == AppendFlags.ClearCurrent)
+            {
+                this.animationPaths.Clear();
+            }
+
             this.animationPaths.AddRange(clonedPaths);
 
             if (this.currentIndex < 0)
@@ -164,6 +175,7 @@ namespace Engine.Animation
                 this.currentIndex = 0;
             }
         }
+
         /// <summary>
         /// Updates internal state
         /// </summary>
@@ -174,9 +186,6 @@ namespace Engine.Animation
             if (this.active && this.currentIndex >= 0)
             {
                 var path = this.animationPaths[this.currentIndex];
-
-                //Update current path
-                path.Update(time * this.TimeDelta, skData);
 
                 if (!path.Playing)
                 {
@@ -192,6 +201,9 @@ namespace Engine.Animation
                         }
                     }
                 }
+
+                //Update current path
+                path.Update(time * this.TimeDelta, skData);
             }
         }
         /// <summary>
@@ -290,6 +302,25 @@ namespace Engine.Animation
         public void Pause()
         {
             this.active = false;
+        }
+
+        /// <summary>
+        /// Animation paths append flags
+        /// </summary>
+        enum AppendFlags
+        {
+            /// <summary>
+            /// None
+            /// </summary>
+            None,
+            /// <summary>
+            /// Ends current clip
+            /// </summary>
+            EndsCurrent,
+            /// <summary>
+            /// Clear all clips
+            /// </summary>
+            ClearCurrent,
         }
     }
 }

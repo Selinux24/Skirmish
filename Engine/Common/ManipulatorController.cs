@@ -1,11 +1,8 @@
-﻿using SharpDX;
+﻿using System;
 
-namespace Engine
+namespace Engine.Common
 {
-    /// <summary>
-    /// Manipulator controller interface
-    /// </summary>
-    public class Manipulator3DController
+    public abstract class ManipulatorController
     {
         /// <summary>
         /// Following path
@@ -27,35 +24,21 @@ namespace Engine
         }
 
         /// <summary>
-        /// Constructor
+        /// On path ending event
         /// </summary>
-        public Manipulator3DController()
-        {
-
-        }
+        public event EventHandler PathStart;
+        /// <summary>
+        /// On path ending event
+        /// </summary>
+        public event EventHandler PathEnd;
 
         /// <summary>
         /// Computes current position and orientation in the curve
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="manipulator">Manipulator to update</param>
-        public virtual void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
-        {
-            if (this.HasPath && this.pathTime <= this.path.Length)
-            {
-                var newPosition = this.path.GetPosition(this.pathTime);
+        public abstract void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator);
 
-                if (this.pathTime != 0f)
-                {
-                    var view = Vector3.Normalize(manipulator.Position - newPosition);
-
-                    manipulator.SetPosition(newPosition);
-                    manipulator.LookAt(newPosition + view);
-                }
-
-                this.pathTime += gameTime.ElapsedSeconds * manipulator.LinearVelocity;
-            }
-        }
         /// <summary>
         /// Sets the path to follow
         /// </summary>
@@ -65,6 +48,18 @@ namespace Engine
         {
             this.path = path;
             this.pathTime = time;
+
+            this.PathStart?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
+        /// Clears current path
+        /// </summary>
+        public virtual void Clear()
+        {
+            this.path = null;
+            this.pathTime = 0f;
+
+            this.PathEnd?.Invoke(this, new EventArgs());
         }
     }
 }

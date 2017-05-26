@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -19,20 +20,72 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="origin">Origin</param>
+        /// <param name="destination">Destination</param>
+        public SegmentPath(Vector3 origin, Vector3 destination)
+        {
+            this.InitializePath(origin, null, destination);
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="origin">Origin</param>
+        /// <param name="path">Inner path</param>
+        /// <param name="destination">Destination</param>
+        public SegmentPath(Vector3 origin, Vector3[] path, Vector3 destination)
+        {
+            this.InitializePath(origin, path, destination);
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="origin">Origin</param>
+        /// <param name="path">Path</param>
+        public SegmentPath(Vector3 origin, Vector3[] path)
+        {
+            this.InitializePath(origin, path, null);
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="destination">Destination</param>
+        public SegmentPath(Vector3[] path, Vector3 destination)
+        {
+            this.InitializePath(null, path, destination);
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="path">Path</param>
         public SegmentPath(Vector3[] path)
         {
-            this.path = path;
-
-            float length = 0;
-            for (int i = 1; i < path.Length; i++)
-            {
-                length += Vector3.Distance(path[i], path[i - 1]);
-            }
-
-            this.Length = length;
+            this.InitializePath(null, path, null);
         }
 
+        /// <summary>
+        /// Initializes a path
+        /// </summary>
+        /// <param name="origin">Origin</param>
+        /// <param name="path">Inner path</param>
+        /// <param name="destination">Destination</param>
+        private void InitializePath(Vector3? origin, Vector3[] path, Vector3? destination)
+        {
+            List<Vector3> lPath = new List<Vector3>();
+
+            if (origin.HasValue) lPath.Add(origin.Value);
+            if (path != null) lPath.AddRange(path);
+            if (destination.HasValue) lPath.Add(destination.Value);
+
+            float length = 0;
+            for (int i = 1; i < lPath.Count; i++)
+            {
+                length += Vector3.Distance(lPath[i], lPath[i - 1]);
+            }
+
+            this.path = lPath.ToArray();
+            this.Length = length;
+        }
         /// <summary>
         /// Gets the path position at specified distance
         /// </summary>
@@ -41,8 +94,9 @@ namespace Engine
         public Vector3 GetPosition(float distance)
         {
             if (distance == 0) return path[0];
-            if (distance == this.Length) return path[path.Length - 1];
+            if (distance >= this.Length) return path[path.Length - 1];
 
+            Vector3 res = Vector3.Zero;
             float l = distance;
             for (int i = 1; i < path.Length; i++)
             {
@@ -51,13 +105,15 @@ namespace Engine
 
                 if (l - segmentLength <= 0)
                 {
-                    return path[i - 1] + (Vector3.Normalize(segment) * l);
+                    res = path[i - 1] + (Vector3.Normalize(segment) * l);
+
+                    break;
                 }
 
                 l -= segmentLength;
             }
 
-            return Vector3.Zero;
+            return res;
         }
         /// <summary>
         /// Gets the next control point at specified distance
@@ -67,8 +123,9 @@ namespace Engine
         public Vector3 GetNextControlPoint(float distance)
         {
             if (distance == 0) return path[0];
-            if (distance == this.Length) return path[path.Length - 1];
+            if (distance >= this.Length) return path[path.Length - 1];
 
+            Vector3 res = Vector3.Zero;
             float l = distance;
             for (int i = 1; i < path.Length; i++)
             {
@@ -77,13 +134,15 @@ namespace Engine
 
                 if (l - segmentLength <= 0)
                 {
-                    return path[i];
+                    res = path[i];
+
+                    break;
                 }
 
                 l -= segmentLength;
             }
 
-            return Vector3.Zero;
+            return res;
         }
     }
 }

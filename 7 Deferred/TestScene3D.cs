@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.Common;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
@@ -25,7 +26,7 @@ namespace DeferredTest
         private Sprite backPannel = null;
 
         private Model tank = null;
-        private Manipulator3DController tankController = null;
+        private ManipulatorController tankController = null;
         private NavigationMeshAgentType tankAgent = new NavigationMeshAgentType();
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
@@ -140,7 +141,11 @@ namespace DeferredTest
                     CastShadow = true,
                 });
             this.Lights.AddRange(this.tank.Lights);
-            this.tankController = new Manipulator3DController();
+            this.tankController = new SteerManipulatorController()
+            {
+                ArrivingRadius = 5f,
+                MaximumForce = 0.01f,
+            };
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -609,7 +614,7 @@ namespace DeferredTest
                     if (p != null)
                     {
                         this.tankController.Follow(new SegmentPath(p.ReturnPath.ToArray()));
-                        this.tank.Manipulator.LinearVelocity = 5;
+                        this.tank.Manipulator.LinearVelocity = 8;
                     }
                 }
             }

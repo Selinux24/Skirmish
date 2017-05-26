@@ -36,6 +36,7 @@ namespace Engine.Animation
         {
             this.Time = 0f;
             this.ItemTime = 0f;
+            this.Playing = true;
         }
 
         /// <summary>
@@ -122,6 +123,19 @@ namespace Engine.Animation
                 };
 
                 animationPath.items.Insert(0, newItem);
+            }
+        }
+
+        /// <summary>
+        /// Sets the items to terminate and end
+        /// </summary>
+        public void End()
+        {
+            var current = this.GetCurrentItem();
+            if (current != null)
+            {
+                current.Loop = false;
+                current.Repeats = 1;
             }
         }
 
