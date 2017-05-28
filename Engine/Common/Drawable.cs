@@ -16,7 +16,7 @@ namespace Engine.Common
         /// <summary>
         /// Graphics device
         /// </summary>
-        public virtual Device Device { get { return this.Game.Graphics.Device; } }
+        public virtual Graphics Graphics { get { return this.Game.Graphics; } }
         /// <summary>
         /// Graphics context
         /// </summary>

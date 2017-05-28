@@ -182,7 +182,7 @@ namespace Engine
 
             this.particles = new VertexCPUParticle[this.MaxConcurrentParticles];
 
-            this.vertexBuffer = game.Graphics.Device.CreateVertexBufferWrite(description.Name, this.particles);
+            this.vertexBuffer = game.Graphics.CreateVertexBufferWrite(description.Name, this.particles);
             this.vertexBufferBinding = new[]
             {
                 new VertexBufferBinding(this.vertexBuffer, default(VertexCPUParticle).GetStride(), 0),

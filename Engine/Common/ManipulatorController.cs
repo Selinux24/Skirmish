@@ -49,7 +49,10 @@ namespace Engine.Common
             this.path = path;
             this.pathTime = time;
 
-            this.PathStart?.Invoke(this, new EventArgs());
+            if (this.PathStart != null)
+            {
+                this.PathStart.Invoke(this, new EventArgs());
+            }
         }
         /// <summary>
         /// Clears current path
@@ -59,7 +62,10 @@ namespace Engine.Common
             this.path = null;
             this.pathTime = 0f;
 
-            this.PathEnd?.Invoke(this, new EventArgs());
+            if (this.PathEnd != null)
+            {
+                this.PathEnd.Invoke(this, new EventArgs());
+            }
         }
     }
 }

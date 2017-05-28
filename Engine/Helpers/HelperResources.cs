@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
@@ -9,7 +8,6 @@ using BindFlags = SharpDX.Direct3D11.BindFlags;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using BufferDescription = SharpDX.Direct3D11.BufferDescription;
 using CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags;
-using Device = SharpDX.Direct3D11.Device;
 using DeviceContext = SharpDX.Direct3D11.DeviceContext;
 using FilterFlags = SharpDX.Direct3D11.FilterFlags;
 using ImageLoadInformation = SharpDX.Direct3D11.ImageLoadInformation;
@@ -19,7 +17,6 @@ using Resource = SharpDX.Direct3D11.Resource;
 using ResourceOptionFlags = SharpDX.Direct3D11.ResourceOptionFlags;
 using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using ShaderResourceViewDescription = SharpDX.Direct3D11.ShaderResourceViewDescription;
 using Texture1D = SharpDX.Direct3D11.Texture1D;
 using Texture1DDescription = SharpDX.Direct3D11.Texture1DDescription;
 using Texture2D = SharpDX.Direct3D11.Texture2D;
@@ -38,42 +35,42 @@ namespace Engine.Helpers
         /// Creates an inmutable index buffer
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <param name="data">Data to write in the buffer</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public static Buffer CreateIndexBufferImmutable<T>(this Device device, string name, T[] data)
+        public static Buffer CreateIndexBufferImmutable<T>(this Graphics graphics, string name, T[] data)
             where T : struct
         {
-            return CreateIndexBuffer<T>(device, name, data, false);
+            return CreateIndexBuffer<T>(graphics, name, data, false);
         }
         /// <summary>
         /// Creates a writable index buffer
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <param name="data">Data to write in the buffer</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public static Buffer CreateIndexBufferWrite<T>(this Device device, string name, T[] data)
+        public static Buffer CreateIndexBufferWrite<T>(this Graphics graphics, string name, T[] data)
             where T : struct
         {
-            return CreateIndexBuffer<T>(device, name, data, true);
+            return CreateIndexBuffer<T>(graphics, name, data, true);
         }
         /// <summary>
         /// Creates an index buffer
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <param name="data">Data to write in the buffer</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        public static Buffer CreateIndexBuffer<T>(this Device device, string name, T[] data, bool dynamic)
+        public static Buffer CreateIndexBuffer<T>(this Graphics graphics, string name, T[] data, bool dynamic)
             where T : struct
         {
             return CreateBuffer<T>(
-                device,
+                graphics,
                 name,
                 data,
                 dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
@@ -85,37 +82,37 @@ namespace Engine.Helpers
         /// Creates an inmutable vertex buffer
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <param name="data">Data to write in the buffer</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public static Buffer CreateVertexBufferImmutable<T>(this Device device, string name, T[] data)
+        public static Buffer CreateVertexBufferImmutable<T>(this Graphics graphics, string name, T[] data)
             where T : struct
         {
-            return CreateVertexBuffer<T>(device, name, data, false);
+            return CreateVertexBuffer<T>(graphics, name, data, false);
         }
         /// <summary>
         /// Creates a writable vertex buffer
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <param name="data">Data to write in the buffer</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public static Buffer CreateVertexBufferWrite<T>(this Device device, string name, T[] data)
+        public static Buffer CreateVertexBufferWrite<T>(this Graphics graphics, string name, T[] data)
             where T : struct
         {
-            return CreateVertexBuffer<T>(device, name, data, true);
+            return CreateVertexBuffer<T>(graphics, name, data, true);
         }
         /// <summary>
         /// Creates a vertex buffer from IVertexData
         /// </summary>
-        /// <param name="device">Device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
         /// <returns>Returns new buffer</returns>
-        public static Buffer CreateVertexBuffer(this Device device, string name, IVertexData[] vertices, bool dynamic)
+        public static Buffer CreateVertexBuffer(this Graphics graphics, string name, IVertexData[] vertices, bool dynamic)
         {
             Buffer buffer = null;
 
@@ -123,67 +120,67 @@ namespace Engine.Helpers
             {
                 if (vertices[0].VertexType == VertexTypes.Billboard)
                 {
-                    buffer = CreateVertexBuffer<VertexBillboard>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexBillboard>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.Particle)
                 {
-                    buffer = CreateVertexBuffer<VertexCPUParticle>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexCPUParticle>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.GPUParticle)
                 {
-                    buffer = CreateVertexBuffer<VertexGPUParticle>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexGPUParticle>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.Position)
                 {
-                    buffer = CreateVertexBuffer<VertexPosition>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexPosition>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionColor)
                 {
-                    buffer = CreateVertexBuffer<VertexPositionColor>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexPositionColor>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
                 {
-                    buffer = CreateVertexBuffer<VertexPositionNormalColor>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexPositionNormalColor>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionTexture)
                 {
-                    buffer = CreateVertexBuffer<VertexPositionTexture>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexPositionTexture>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
                 {
-                    buffer = CreateVertexBuffer<VertexPositionNormalTexture>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexPositionNormalTexture>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
                 {
-                    buffer = CreateVertexBuffer<VertexPositionNormalTextureTangent>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexPositionNormalTextureTangent>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.Terrain)
                 {
-                    buffer = CreateVertexBuffer<VertexTerrain>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexTerrain>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
                 {
-                    buffer = CreateVertexBuffer<VertexSkinnedPosition>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexSkinnedPosition>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
                 {
-                    buffer = CreateVertexBuffer<VertexSkinnedPositionColor>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionColor>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
                 {
-                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalColor>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalColor>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
                 {
-                    buffer = CreateVertexBuffer<VertexSkinnedPositionTexture>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionTexture>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
                 {
-                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalTexture>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalTexture>(graphics, name, vertices, dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
                 {
-                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalTextureTangent>(device, name, vertices, dynamic);
+                    buffer = CreateVertexBuffer<VertexSkinnedPositionNormalTextureTangent>(graphics, name, vertices, dynamic);
                 }
                 else
                 {
@@ -197,37 +194,37 @@ namespace Engine.Helpers
         /// Creates a vertex buffer from IVertexData
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns new buffer</returns>
-        public static Buffer CreateVertexBuffer<T>(this Device device, string name, IVertexData[] vertices, bool dynamic) where T : struct, IVertexData
+        public static Buffer CreateVertexBuffer<T>(this Graphics graphics, string name, IVertexData[] vertices, bool dynamic) where T : struct, IVertexData
         {
             T[] data = Array.ConvertAll((IVertexData[])vertices, v => (T)v);
 
             if (dynamic)
             {
-                return device.CreateVertexBufferWrite(name, data);
+                return graphics.CreateVertexBufferWrite(name, data);
             }
             else
             {
-                return device.CreateVertexBufferImmutable(name, data);
+                return graphics.CreateVertexBufferImmutable(name, data);
             }
         }
         /// <summary>
         /// Creates a vertex buffer
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <param name="data">Data to write in the buffer</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public static Buffer CreateVertexBuffer<T>(this Device device, string name, T[] data, bool dynamic)
+        public static Buffer CreateVertexBuffer<T>(this Graphics graphics, string name, T[] data, bool dynamic)
             where T : struct
         {
             return CreateBuffer<T>(
-                device,
+                graphics,
                 name,
                 data,
                 dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
@@ -246,14 +243,14 @@ namespace Engine.Helpers
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        public static Buffer CreateBuffer<T>(this Device device, string name, int length, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        public static Buffer CreateBuffer<T>(this Graphics graphics, string name, int length, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
             where T : struct
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
 
             Counters.RegBuffer(typeof(T), name, usage, binding, sizeInBytes, length);
 
-            BufferDescription description = new BufferDescription()
+            var description = new BufferDescription()
             {
                 Usage = usage,
                 SizeInBytes = sizeInBytes,
@@ -263,7 +260,7 @@ namespace Engine.Helpers
                 StructureByteStride = 0,
             };
 
-            return new Buffer(device, description);
+            return new Buffer(graphics.Device, description);
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -276,14 +273,14 @@ namespace Engine.Helpers
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public static Buffer CreateBuffer<T>(this Device device, string name, T[] data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        public static Buffer CreateBuffer<T>(this Graphics graphics, string name, T[] data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
             where T : struct
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Length;
 
             Counters.RegBuffer(typeof(T), name, usage, binding, sizeInBytes, data.Length);
 
-            using (DataStream dstr = new DataStream(sizeInBytes, true, true))
+            using (var dstr = new DataStream(sizeInBytes, true, true))
             {
                 dstr.WriteRange(data);
                 dstr.Position = 0;
@@ -298,7 +295,7 @@ namespace Engine.Helpers
                     StructureByteStride = 0,
                 };
 
-                return new Buffer(device, dstr, description);
+                return new Buffer(graphics.Device, dstr, description);
             }
         }
 
@@ -565,46 +562,46 @@ namespace Engine.Helpers
         /// <summary>
         /// Loads a texture from memory in the graphics device
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="buffer">Data buffer</param>
         /// <returns>Returns the resource view</returns>
-        public static ShaderResourceView LoadTexture(this Device device, byte[] buffer)
+        public static ShaderResourceView LoadTexture(this Graphics graphics, byte[] buffer)
         {
             Counters.Textures++;
 
-            return ShaderResourceView.FromMemory(device, buffer, ImageLoadInformation.Default);
+            return ShaderResourceView.FromMemory(graphics.Device, buffer, ImageLoadInformation.Default);
         }
         /// <summary>
         /// Loads a texture from file in the graphics device
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="filename">Path to file</param>
         /// <returns>Returns the resource view</returns>
-        public static ShaderResourceView LoadTexture(this Device device, string filename)
+        public static ShaderResourceView LoadTexture(this Graphics graphics, string filename)
         {
             Counters.Textures++;
 
-            return ShaderResourceView.FromFile(device, filename, ImageLoadInformation.Default);
+            return ShaderResourceView.FromFile(graphics.Device, filename, ImageLoadInformation.Default);
         }
         /// <summary>
         /// Loads a texture from file in the graphics device
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="file">Stream</param>
         /// <returns>Returns the resource view</returns>
-        public static ShaderResourceView LoadTexture(this Device device, MemoryStream file)
+        public static ShaderResourceView LoadTexture(this Graphics graphics, MemoryStream file)
         {
             Counters.Textures++;
 
-            return ShaderResourceView.FromStream(device, file, (int)file.Length, ImageLoadInformation.Default);
+            return ShaderResourceView.FromStream(graphics.Device, file, (int)file.Length, ImageLoadInformation.Default);
         }
         /// <summary>
         /// Loads a texture array from a file collection in the graphics device
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="filenames">Path file collection</param>
         /// <returns>Returns the resource view</returns>
-        public static ShaderResourceView LoadTextureArray(this Device device, string[] filenames)
+        public static ShaderResourceView LoadTextureArray(this Graphics graphics, string[] filenames)
         {
             Counters.Textures++;
 
@@ -613,7 +610,7 @@ namespace Engine.Helpers
             for (int i = 0; i < filenames.Length; i++)
             {
                 textureList.Add(Texture2D.FromFile<Texture2D>(
-                    device,
+                    graphics.Device,
                     filenames[i],
                     new ImageLoadInformation()
                     {
@@ -628,10 +625,10 @@ namespace Engine.Helpers
                     }));
             }
 
-            Texture2DDescription textureDescription = textureList[0].Description;
+            var textureDescription = textureList[0].Description;
 
-            using (Texture2D textureArray = new Texture2D(
-                device,
+            using (var textureArray = new Texture2D(
+                graphics.Device,
                 new Texture2DDescription()
                 {
                     Width = textureDescription.Width,
@@ -639,11 +636,7 @@ namespace Engine.Helpers
                     MipLevels = textureDescription.MipLevels,
                     ArraySize = filenames.Length,
                     Format = textureDescription.Format,
-                    SampleDescription = new SampleDescription()
-                    {
-                        Count = 1,
-                        Quality = 0,
-                    },
+                    SampleDescription = new SampleDescription(1, 0),
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.ShaderResource,
                     CpuAccessFlags = CpuAccessFlags.None,
@@ -655,7 +648,7 @@ namespace Engine.Helpers
                 {
                     for (int mipLevel = 0; mipLevel < textureDescription.MipLevels; mipLevel++)
                     {
-                        DataBox mappedTex2D = device.ImmediateContext.MapSubresource(
+                        var mappedTex2D = graphics.Device.ImmediateContext.MapSubresource(
                             textureList[i],
                             mipLevel,
                             MapMode.Read,
@@ -666,7 +659,7 @@ namespace Engine.Helpers
                             i,
                             textureDescription.MipLevels);
 
-                        device.ImmediateContext.UpdateSubresource(
+                        graphics.Device.ImmediateContext.UpdateSubresource(
                             textureArray,
                             subIndex,
                             null,
@@ -674,7 +667,7 @@ namespace Engine.Helpers
                             mappedTex2D.RowPitch,
                             mappedTex2D.SlicePitch);
 
-                        device.ImmediateContext.UnmapSubresource(
+                        graphics.Device.ImmediateContext.UnmapSubresource(
                             textureList[i],
                             mipLevel);
                     }
@@ -682,39 +675,23 @@ namespace Engine.Helpers
                     textureList[i].Dispose();
                 }
 
-                ShaderResourceView result = new ShaderResourceView(
-                    device,
-                    textureArray,
-                    new ShaderResourceViewDescription()
-                    {
-                        Format = textureDescription.Format,
-                        Dimension = ShaderResourceViewDimension.Texture2DArray,
-                        Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
-                        {
-                            MostDetailedMip = 0,
-                            MipLevels = textureDescription.MipLevels,
-                            FirstArraySlice = 0,
-                            ArraySize = filenames.Length,
-                        },
-                    });
-
-                return result;
+                return new ShaderResourceView(graphics.Device, textureArray);
             }
         }
         /// <summary>
         /// Loads a texture array from a file collection in the graphics device
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="files">Stream collection</param>
         /// <returns>Returns the resource view</returns>
-        public static ShaderResourceView LoadTextureArray(this Device device, MemoryStream[] files)
+        public static ShaderResourceView LoadTextureArray(this Graphics graphics, MemoryStream[] files)
         {
             List<Texture2D> textureList = new List<Texture2D>();
 
             for (int i = 0; i < files.Length; i++)
             {
                 textureList.Add(Texture2D.FromStream<Texture2D>(
-                    device,
+                    graphics.Device,
                     files[i],
                     (int)files[i].Length,
                     new ImageLoadInformation()
@@ -730,10 +707,10 @@ namespace Engine.Helpers
                     }));
             }
 
-            Texture2DDescription textureDescription = textureList[0].Description;
+            var textureDescription = textureList[0].Description;
 
-            using (Texture2D textureArray = new Texture2D(
-                device,
+            using (var textureArray = new Texture2D(
+                graphics.Device,
                 new Texture2DDescription()
                 {
                     Width = textureDescription.Width,
@@ -741,11 +718,7 @@ namespace Engine.Helpers
                     MipLevels = textureDescription.MipLevels,
                     ArraySize = files.Length,
                     Format = textureDescription.Format,
-                    SampleDescription = new SampleDescription()
-                    {
-                        Count = 1,
-                        Quality = 0,
-                    },
+                    SampleDescription = new SampleDescription(1, 0),
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.ShaderResource,
                     CpuAccessFlags = CpuAccessFlags.None,
@@ -756,7 +729,7 @@ namespace Engine.Helpers
                 {
                     for (int mipLevel = 0; mipLevel < textureDescription.MipLevels; mipLevel++)
                     {
-                        DataBox mappedTex2D = device.ImmediateContext.MapSubresource(
+                        var mappedTex2D = graphics.Device.ImmediateContext.MapSubresource(
                             textureList[i],
                             mipLevel,
                             MapMode.Read,
@@ -767,7 +740,7 @@ namespace Engine.Helpers
                             i,
                             textureDescription.MipLevels);
 
-                        device.ImmediateContext.UpdateSubresource(
+                        graphics.Device.ImmediateContext.UpdateSubresource(
                             textureArray,
                             subIndex,
                             null,
@@ -775,7 +748,7 @@ namespace Engine.Helpers
                             mappedTex2D.RowPitch,
                             mappedTex2D.SlicePitch);
 
-                        device.ImmediateContext.UnmapSubresource(
+                        graphics.Device.ImmediateContext.UnmapSubresource(
                             textureList[i],
                             mipLevel);
                     }
@@ -783,50 +756,30 @@ namespace Engine.Helpers
                     textureList[i].Dispose();
                 }
 
-                ShaderResourceView result = new ShaderResourceView(
-                    device,
-                    textureArray,
-                    new ShaderResourceViewDescription()
-                    {
-                        Format = textureDescription.Format,
-                        Dimension = ShaderResourceViewDimension.Texture2DArray,
-                        Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
-                        {
-                            MostDetailedMip = 0,
-                            MipLevels = textureDescription.MipLevels,
-                            FirstArraySlice = 0,
-                            ArraySize = files.Length,
-                        },
-                    });
-
-                return result;
+                return new ShaderResourceView(graphics.Device, textureArray);
             }
         }
         /// <summary>
         /// Loads a cube texture from file in the graphics device
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="filename">Path to file</param>
         /// <param name="format">Format</param>
         /// <param name="faceSize">Face size</param>
         /// <returns>Returns the resource view</returns>
-        public static ShaderResourceView LoadTextureCube(this Device device, string filename, Format format, int faceSize)
+        public static ShaderResourceView LoadTextureCube(this Graphics graphics, string filename, Format format, int faceSize)
         {
             Counters.Textures++;
 
-            using (Texture2D cubeTex = new Texture2D(
-                device,
+            using (var cubeTex = new Texture2D(
+                graphics.Device,
                 new Texture2DDescription()
                 {
                     Width = faceSize,
                     Height = faceSize,
                     MipLevels = 0,
                     ArraySize = 6,
-                    SampleDescription = new SampleDescription()
-                    {
-                        Count = 1,
-                        Quality = 0,
-                    },
+                    SampleDescription = new SampleDescription(1, 0),
                     Format = format,
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
@@ -834,46 +787,30 @@ namespace Engine.Helpers
                     OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
                 }))
             {
-                return new ShaderResourceView(
-                    device,
-                    cubeTex,
-                    new ShaderResourceViewDescription()
-                    {
-                        Format = format,
-                        Dimension = ShaderResourceViewDimension.TextureCube,
-                        TextureCube = new ShaderResourceViewDescription.TextureCubeResource()
-                        {
-                            MostDetailedMip = 0,
-                            MipLevels = -1,
-                        },
-                    });
+                return new ShaderResourceView(graphics.Device, cubeTex);
             }
         }
         /// <summary>
         /// Loads a cube texture from file in the graphics device
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="file">Stream</param>
         /// <param name="format">Format</param>
         /// <param name="faceSize">Face size</param>
         /// <returns>Returns the resource view</returns>
-        public static ShaderResourceView LoadTextureCube(this Device device, MemoryStream file, Format format, int faceSize)
+        public static ShaderResourceView LoadTextureCube(this Graphics graphics, MemoryStream file, Format format, int faceSize)
         {
             Counters.Textures++;
 
-            using (Texture2D cubeTex = new Texture2D(
-                device,
+            using (var cubeTex = new Texture2D(
+                graphics.Device,
                 new Texture2DDescription()
                 {
                     Width = faceSize,
                     Height = faceSize,
                     MipLevels = 0,
                     ArraySize = 6,
-                    SampleDescription = new SampleDescription()
-                    {
-                        Count = 1,
-                        Quality = 0,
-                    },
+                    SampleDescription = new SampleDescription(1, 0),
                     Format = format,
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
@@ -881,36 +818,24 @@ namespace Engine.Helpers
                     OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
                 }))
             {
-                return new ShaderResourceView(
-                    device,
-                    cubeTex,
-                    new ShaderResourceViewDescription()
-                    {
-                        Format = format,
-                        Dimension = ShaderResourceViewDimension.TextureCube,
-                        TextureCube = new ShaderResourceViewDescription.TextureCubeResource()
-                        {
-                            MostDetailedMip = 0,
-                            MipLevels = -1,
-                        },
-                    });
+                return new ShaderResourceView(graphics.Device, cubeTex);
             }
         }
         /// <summary>
         /// Creates a texture filled with specified values
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="size">Texture size</param>
         /// <param name="values">Color values</param>
         /// <returns>Returns created texture</returns>
-        public static ShaderResourceView CreateTexture1D(this Device device, int size, Vector4[] values)
+        public static ShaderResourceView CreateTexture1D(this Graphics graphics, int size, Vector4[] values)
         {
             Counters.Textures++;
 
-            using (DataStream str = DataStream.Create(values, false, false))
+            using (var str = DataStream.Create(values, false, false))
             {
-                using (Resource randTex = new Texture1D(
-                    device,
+                using (var randTex = new Texture1D(
+                    graphics.Device,
                     new Texture1DDescription()
                     {
                         Format = Format.R32G32B32A32_Float,
@@ -924,36 +849,30 @@ namespace Engine.Helpers
                     },
                     str))
                 {
-                    ShaderResourceViewDescription srvDesc = new ShaderResourceViewDescription();
-                    srvDesc.Format = Format.R32G32B32A32_Float;
-                    srvDesc.Dimension = ShaderResourceViewDimension.Texture1D;
-                    srvDesc.Texture1D.MipLevels = 1;
-                    srvDesc.Texture1D.MostDetailedMip = 0;
-
-                    return new ShaderResourceView(device, randTex, srvDesc);
+                    return new ShaderResourceView(graphics.Device, randTex);
                 }
             }
         }
         /// <summary>
         /// Creates a texture filled with specified values
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="size">Texture size</param>
         /// <param name="values">Color values</param>
         /// <returns>Returns created texture</returns>
-        public static ShaderResourceView CreateTexture2D(this Device device, int size, Vector4[] values)
+        public static ShaderResourceView CreateTexture2D(this Graphics graphics, int size, Vector4[] values)
         {
             Counters.Textures++;
 
-            Vector4[] tmp = new Vector4[size * size];
+            var tmp = new Vector4[size * size];
             Array.Copy(values, tmp, values.Length);
 
-            using (DataStream str = DataStream.Create(tmp, false, false))
+            using (var str = DataStream.Create(tmp, false, false))
             {
-                DataBox dBox = new DataBox(str.DataPointer, size * (int)FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
+                var dBox = new DataBox(str.DataPointer, size * (int)FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
 
-                using (Texture2D texture = new Texture2D(
-                    device,
+                using (var texture = new Texture2D(
+                    graphics.Device,
                     new Texture2DDescription()
                     {
                         Format = Format.R32G32B32A32_Float,
@@ -961,11 +880,7 @@ namespace Engine.Helpers
                         Height = size,
                         ArraySize = 1,
                         MipLevels = 1,
-                        SampleDescription = new SampleDescription()
-                        {
-                            Count = 1,
-                            Quality = 0,
-                        },
+                        SampleDescription = new SampleDescription(1, 0),
                         Usage = ResourceUsage.Immutable,
                         BindFlags = BindFlags.ShaderResource,
                         CpuAccessFlags = CpuAccessFlags.None,
@@ -973,26 +888,20 @@ namespace Engine.Helpers
                     },
                     new[] { dBox }))
                 {
-                    ShaderResourceViewDescription srvDesc = new ShaderResourceViewDescription();
-                    srvDesc.Format = Format.R32G32B32A32_Float;
-                    srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
-                    srvDesc.Texture1D.MipLevels = 1;
-                    srvDesc.Texture1D.MostDetailedMip = 0;
-
-                    return new ShaderResourceView(device, texture, srvDesc);
+                    return new ShaderResourceView(graphics.Device, texture);
                 }
             }
         }
         /// <summary>
         /// Creates a random 1D texture
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="size">Texture size</param>
         /// <param name="min">Minimum value</param>
         /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns created texture</returns>
-        public static ShaderResourceView CreateRandomTexture(this Device device, int size, float min, float max, int seed = 0)
+        public static ShaderResourceView CreateRandomTexture(this Graphics graphics, int size, float min, float max, int seed = 0)
         {
             Counters.Textures++;
 
@@ -1004,21 +913,21 @@ namespace Engine.Helpers
                 randomValues.Add(rnd.NextVector4(new Vector4(min), new Vector4(max)));
             }
 
-            return CreateTexture1D(device, size, randomValues.ToArray());
+            return CreateTexture1D(graphics, size, randomValues.ToArray());
         }
         /// <summary>
         /// Creates a texture for render target use
         /// </summary>
-        /// <param name="device">Device</param>
+        /// <param name="graphics">Device</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <returns>Returns new texture</returns>
-        public static Texture2D CreateRenderTargetTexture(this Device device, Format format, int width, int height)
+        public static Texture2D CreateRenderTargetTexture(this Graphics graphics, Format format, int width, int height)
         {
             Counters.Textures++;
 
             return new Texture2D(
-                device,
+                graphics.Device,
                 new Texture2DDescription()
                 {
                     Width = width,
@@ -1026,7 +935,7 @@ namespace Engine.Helpers
                     MipLevels = 1,
                     ArraySize = 1,
                     Format = format,
-                    SampleDescription = new SampleDescription(1, 0),
+                    SampleDescription = graphics.CurrentSampleDescription,
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
                     CpuAccessFlags = CpuAccessFlags.None,

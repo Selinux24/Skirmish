@@ -216,9 +216,9 @@ namespace Engine
             int size = (int)(this.MaxConcurrentParticles * (this.Emitter.Duration == 0 ? 60 : this.Emitter.Duration));
             size = Math.Min(size, 5000);
 
-            this.emittersBuffer = game.Graphics.Device.CreateBuffer<VertexGPUParticle>(description.Name, data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
-            this.drawingBuffer = game.Graphics.Device.CreateBuffer<VertexGPUParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            this.streamOutBuffer = game.Graphics.Device.CreateBuffer<VertexGPUParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
+            this.emittersBuffer = game.Graphics.CreateBuffer<VertexGPUParticle>(description.Name, data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
+            this.drawingBuffer = game.Graphics.CreateBuffer<VertexGPUParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
+            this.streamOutBuffer = game.Graphics.CreateBuffer<VertexGPUParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
             this.inputStride = default(VertexGPUParticle).GetStride();
 
             this.emitterBinding = new[] { new VertexBufferBinding(this.emittersBuffer, this.inputStride, 0) };

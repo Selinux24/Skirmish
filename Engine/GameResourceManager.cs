@@ -120,7 +120,7 @@ namespace Engine
             string md5 = values.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.Device.LoadTexture(values);
+                var view = this.game.Graphics.LoadTexture(values);
                 this.resources.Add(md5, view);
             }
 
@@ -138,7 +138,7 @@ namespace Engine
             string md5 = identifier.ToByteArray().GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.Device.CreateTexture2D(size, values);
+                var view = this.game.Graphics.CreateTexture2D(size, values);
                 this.resources.Add(md5, view);
             }
 
@@ -158,7 +158,7 @@ namespace Engine
             string md5 = identifier.ToByteArray().GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.Device.CreateRandomTexture(size, min, max, seed);
+                var view = this.game.Graphics.CreateRandomTexture(size, min, max, seed);
                 this.resources.Add(md5, view);
             }
 
@@ -173,7 +173,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public ShaderResourceView CreateGlobalResourceTexture2D(string name, Vector4[] values, int size)
         {
-            var view = this.game.Graphics.Device.CreateTexture2D(size, values);
+            var view = this.game.Graphics.CreateTexture2D(size, values);
             this.SetGlobalResource(name, view);
             return view;
         }
@@ -185,7 +185,7 @@ namespace Engine
         /// <returns></returns>
         public ShaderResourceView CreateGlobalResourceTexture2D(string name, byte[] bytes)
         {
-            var view = this.game.Graphics.Device.LoadTexture(bytes);
+            var view = this.game.Graphics.LoadTexture(bytes);
             this.SetGlobalResource(name, view);
             return view;
         }
@@ -200,7 +200,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public ShaderResourceView CreateGlobalResourceRandomTexture(string name, int size, float min, float max, int seed = 0)
         {
-            var view = this.game.Graphics.Device.CreateRandomTexture(size, min, max, seed);
+            var view = this.game.Graphics.CreateRandomTexture(size, min, max, seed);
             this.SetGlobalResource(name, view);
             return view;
         }
@@ -233,7 +233,7 @@ namespace Engine
             string md5 = buffer.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.Device.LoadTexture(buffer);
+                var view = this.game.Graphics.LoadTexture(buffer);
                 this.resources.Add(md5, view);
             }
 
@@ -248,7 +248,7 @@ namespace Engine
         {
             if (!this.resources.ContainsKey(path))
             {
-                var view = this.game.Graphics.Device.LoadTexture(path);
+                var view = this.game.Graphics.LoadTexture(path);
                 this.resources.Add(path, view);
             }
 
@@ -265,7 +265,7 @@ namespace Engine
             if (!this.resources.ContainsKey(md5))
             {
                 stream.Position = 0;
-                var view = this.game.Graphics.Device.LoadTexture(stream);
+                var view = this.game.Graphics.LoadTexture(stream);
                 this.resources.Add(md5, view);
             }
 
@@ -281,7 +281,7 @@ namespace Engine
             string md5 = paths.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.Device.LoadTextureArray(paths);
+                var view = this.game.Graphics.LoadTextureArray(paths);
                 this.resources.Add(md5, view);
             }
 
@@ -297,7 +297,7 @@ namespace Engine
             string md5 = streams.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.Device.LoadTextureArray(streams);
+                var view = this.game.Graphics.LoadTextureArray(streams);
                 this.resources.Add(md5, view);
             }
 
@@ -313,7 +313,7 @@ namespace Engine
         {
             if (!this.resources.ContainsKey(path))
             {
-                var view = this.game.Graphics.Device.LoadTextureCube(path, Format.R8G8B8A8_UNorm, size);
+                var view = this.game.Graphics.LoadTextureCube(path, Format.R8G8B8A8_UNorm, size);
                 this.resources.Add(path, view);
             }
 
@@ -331,7 +331,7 @@ namespace Engine
             if (!this.resources.ContainsKey(md5))
             {
                 stream.Position = 0;
-                var view = this.game.Graphics.Device.LoadTextureCube(stream, Format.R8G8B8A8_UNorm, size);
+                var view = this.game.Graphics.LoadTextureCube(stream, Format.R8G8B8A8_UNorm, size);
                 this.resources.Add(md5, view);
             }
 

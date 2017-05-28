@@ -62,6 +62,14 @@ namespace Engine
         /// Multisample quality
         /// </summary>
         private int msQuality = 0;
+
+        public SampleDescription CurrentSampleDescription
+        {
+            get
+            {
+                return new SampleDescription(this.msCount, this.msQuality);
+            }
+        }
         /// <summary>
         /// Swap chain
         /// </summary>
@@ -335,7 +343,7 @@ namespace Engine
                     ModeDescription = displayMode,
                     Usage = Usage.RenderTargetOutput,
                     OutputHandle = form.Handle,
-                    SampleDescription = new SampleDescription(this.msCount, this.msQuality),
+                    SampleDescription = this.CurrentSampleDescription,
                     IsWindowed = !form.IsFullscreen,
                     SwapEffect = SwapEffect.Discard,
                     Flags = SwapChainFlags.None,
@@ -414,7 +422,7 @@ namespace Engine
                     MipLevels = 1,
                     ArraySize = 1,
                     Format = this.DepthFormat,
-                    SampleDescription = new SampleDescription(this.msCount, this.msQuality),
+                    SampleDescription = this.CurrentSampleDescription,
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.DepthStencil,
                     CpuAccessFlags = CpuAccessFlags.None,

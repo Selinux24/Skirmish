@@ -628,7 +628,7 @@ namespace DeferredTest
                 }
             }
 
-            this.tankController?.UpdateManipulator(gameTime, this.tank.Manipulator);
+            this.tankController.UpdateManipulator(gameTime, this.tank.Manipulator);
 
             #endregion
 

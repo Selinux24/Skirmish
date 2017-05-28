@@ -67,7 +67,7 @@ namespace Engine
                     MipLevels = 1,
                     ArraySize = 1,
                     Format = Format.R24G8_Typeless,
-                    SampleDescription = new SampleDescription(1, 0),
+                    SampleDescription = game.Graphics.CurrentSampleDescription,
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
                     CpuAccessFlags = CpuAccessFlags.None,
@@ -76,25 +76,41 @@ namespace Engine
 
             using (depthMap)
             {
+                var dsDimension = game.Graphics.MultiSampled ?
+                    DepthStencilViewDimension.Texture2DMultisampled :
+                    DepthStencilViewDimension.Texture2D;
+
                 var dsDescription = new DepthStencilViewDescription
                 {
                     Flags = DepthStencilViewFlags.None,
                     Format = Format.D24_UNorm_S8_UInt,
-                    Dimension = DepthStencilViewDimension.Texture2D,
+                    Dimension = dsDimension,
                     Texture2D = new DepthStencilViewDescription.Texture2DResource()
                     {
                         MipSlice = 0,
                     },
+                    Texture2DMS = new DepthStencilViewDescription.Texture2DMultisampledResource()
+                    {
+
+                    },
                 };
+
+                var rvDimension = game.Graphics.MultiSampled ?
+                    ShaderResourceViewDimension.Texture2DMultisampled :
+                    ShaderResourceViewDimension.Texture2D;
 
                 var rvDescription = new ShaderResourceViewDescription
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
-                    Dimension = ShaderResourceViewDimension.Texture2D,
+                    Dimension = rvDimension,
                     Texture2D = new ShaderResourceViewDescription.Texture2DResource()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0
+                    },
+                    Texture2DMS = new ShaderResourceViewDescription.Texture2DMultisampledResource()
+                    {
+
                     },
                 };
 

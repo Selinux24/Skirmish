@@ -98,7 +98,7 @@ namespace Engine.Common
                 var data = vKeys[i].Data.ToArray();
                 int slot = vertexBuffers.Count;
 
-                vertexBuffers.Add(graphics.Device.CreateVertexBuffer(vKeys[i].Name, data, vKeys[i].Dynamic));
+                vertexBuffers.Add(graphics.CreateVertexBuffer(vKeys[i].Name, data, vKeys[i].Dynamic));
                 vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[slot], data[0].GetStride(), 0));
 
                 vKeys[i].Input.AddRange(data[0].GetInput(slot));
@@ -117,7 +117,7 @@ namespace Engine.Common
             int instancingBufferOffset = vertexBuffers.Count;
 
             var instancingData = new VertexInstancingData[instances];
-            vertexBuffers.Add(graphics.Device.CreateVertexBufferWrite(null, instancingData));
+            vertexBuffers.Add(graphics.CreateVertexBufferWrite(null, instancingData));
             vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[instancingBufferOffset], instancingData[0].GetStride(), 0));
 
             foreach (var item in vKeys)
@@ -138,7 +138,7 @@ namespace Engine.Common
         {
             for (int i = 0; i < iKeys.Count; i++)
             {
-                indexBuffers.Add(graphics.Device.CreateIndexBuffer(iKeys[i].Name, iKeys[i].Data.ToArray(), iKeys[i].Dynamic));
+                indexBuffers.Add(graphics.CreateIndexBuffer(iKeys[i].Name, iKeys[i].Data.ToArray(), iKeys[i].Dynamic));
             }
         }
 

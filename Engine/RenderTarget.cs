@@ -1,11 +1,7 @@
-﻿using SharpDX.Direct3D;
-using SharpDX.DXGI;
+﻿using SharpDX.DXGI;
 using System;
 using RenderTargetView = SharpDX.Direct3D11.RenderTargetView;
-using RenderTargetViewDescription = SharpDX.Direct3D11.RenderTargetViewDescription;
-using RenderTargetViewDimension = SharpDX.Direct3D11.RenderTargetViewDimension;
 using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using ShaderResourceViewDescription = SharpDX.Direct3D11.ShaderResourceViewDescription;
 
 namespace Engine
 {
@@ -81,34 +77,12 @@ namespace Engine
 
             for (int i = 0; i < this.BufferCount; i++)
             {
-                var tex = this.Game.Graphics.Device.CreateRenderTargetTexture(this.RenderTargetFormat, width, height);
-
-                var rtvDesc = new RenderTargetViewDescription()
-                {
-                    Format = this.RenderTargetFormat,
-                    Dimension = RenderTargetViewDimension.Texture2D,
-                    Texture2D = new RenderTargetViewDescription.Texture2DResource()
-                    {
-                        MipSlice = 0,
-                    },
-                };
-
-                var srvDesc = new ShaderResourceViewDescription()
-                {
-                    Format = this.RenderTargetFormat,
-                    Dimension = ShaderResourceViewDimension.Texture2D,
-                    Texture2D = new ShaderResourceViewDescription.Texture2DResource()
-                    {
-                        MostDetailedMip = 0,
-                        MipLevels = 1,
-                    },
-                };
-
+                var tex = this.Game.Graphics.CreateRenderTargetTexture(this.RenderTargetFormat, width, height);
                 using (tex)
                 {
-                    this.Targets[i] = new RenderTargetView(this.Game.Graphics.Device, tex, rtvDesc);
+                    this.Targets[i] = new RenderTargetView(this.Game.Graphics.Device, tex);
 
-                    this.Textures[i] = new ShaderResourceView(this.Game.Graphics.Device, tex, srvDesc);
+                    this.Textures[i] = new ShaderResourceView(this.Game.Graphics.Device, tex);
                 }
             }
         }
