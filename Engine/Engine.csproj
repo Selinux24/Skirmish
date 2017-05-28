@@ -145,6 +145,7 @@
     <Compile Include="Animation\AnimationPath.cs" />
     <Compile Include="Animation\AnimationPathItem.cs" />
     <Compile Include="AnimationClipDescription.cs" />
+    <Compile Include="Animation\AnimationPlan.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Collections\Generic\PickingQuadTree.cs" />

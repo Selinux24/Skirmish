@@ -12,7 +12,7 @@ namespace Engine.Animation
         /// <summary>
         /// Controller clips
         /// </summary>
-        private List<AnimationPath> animationPaths = new List<AnimationPath>();
+        private AnimationPlan animationPaths = new AnimationPlan();
         /// <summary>
         /// Current clip index in the animation controller clips list
         /// </summary>
@@ -91,10 +91,24 @@ namespace Engine.Animation
                 {
                     var path = this.animationPaths[this.currentIndex];
 
-                    return path.GetCurrentItem().ClipName;
+                    var pathItem = path.GetCurrentItem();
+                    if (pathItem != null)
+                    {
+                        return pathItem.ClipName;
+                    }
                 }
 
                 return "None";
+            }
+        }
+        /// <summary>
+        /// Gets the path count in the controller
+        /// </summary>
+        public int PathCount
+        {
+            get
+            {
+                return this.animationPaths.Count;
             }
         }
 
@@ -115,7 +129,7 @@ namespace Engine.Animation
         /// Adds clips to the controller clips list
         /// </summary>
         /// <param name="paths">Animation path list</param>
-        public void AddPath(params AnimationPath[] paths)
+        public void AddPath(AnimationPlan paths)
         {
             this.AppendPaths(AppendFlags.None, paths);
         }
@@ -123,7 +137,7 @@ namespace Engine.Animation
         /// Sets the specified past as current path list
         /// </summary>
         /// <param name="paths">Animation path list</param>
-        public void SetPath(params AnimationPath[] paths)
+        public void SetPath(AnimationPlan paths)
         {
             this.AppendPaths(AppendFlags.ClearCurrent, paths);
         }
@@ -131,7 +145,7 @@ namespace Engine.Animation
         /// Adds clips to the controller clips list and ends the current animation
         /// </summary>
         /// <param name="paths">Animation path list</param>
-        public void ContinuePath(params AnimationPath[] paths)
+        public void ContinuePath(AnimationPlan paths)
         {
             this.AppendPaths(AppendFlags.EndsCurrent, paths);
         }
@@ -140,32 +154,52 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="flags">Append path flags</param>
         /// <param name="paths">Paths to append</param>
-        private void AppendPaths(AppendFlags flags, params AnimationPath[] paths)
+        private void AppendPaths(AppendFlags flags, AnimationPlan paths)
         {
-            var clonedPaths = new AnimationPath[paths.Length];
+            var clonedPaths = new AnimationPath[paths.Count];
 
-            for (int i = 0; i < paths.Length; i++)
+            for (int i = 0; i < paths.Count; i++)
             {
                 clonedPaths[i] = paths[i].Clone();
             }
 
             if (this.animationPaths.Count > 0)
             {
-                var currentLast = this.animationPaths[this.animationPaths.Count - 1];
-                var newFirst = clonedPaths[0];
+                AnimationPath last = null;
+                AnimationPath next = null;
 
-                //Adds transitions
-                currentLast.ConnectTo(newFirst);
-
-                if (flags == AppendFlags.EndsCurrent)
+                if (flags == AppendFlags.ClearCurrent)
                 {
-                    currentLast.End();
-                }
-            }
+                    last = this.animationPaths[this.animationPaths.Count - 1];
+                    next = clonedPaths[0];
 
-            if (flags == AppendFlags.ClearCurrent)
-            {
-                this.animationPaths.Clear();
+                    //Clear all paths
+                    this.animationPaths.Clear();
+                }
+                else if (flags == AppendFlags.EndsCurrent)
+                {
+                    last = this.animationPaths[this.currentIndex];
+                    next = clonedPaths[0];
+
+                    //Remove all paths from current to end
+                    if (this.animationPaths.Count > this.currentIndex + 1)
+                    {
+                        this.animationPaths.RemoveRange(
+                            this.currentIndex + 1,
+                            this.animationPaths.Count - (this.currentIndex + 1));
+                    }
+
+                    //Mark current path for ending
+                    last.End();
+                }
+                else
+                {
+                    last = this.animationPaths[this.animationPaths.Count - 1];
+                    next = clonedPaths[0];
+                }
+
+                //Adds transitions from current path item to the first added item
+                last.ConnectTo(next);
             }
 
             this.animationPaths.AddRange(clonedPaths);
@@ -269,8 +303,7 @@ namespace Engine.Animation
             {
                 var path = this.animationPaths[this.currentIndex];
 
-                path.Time = time;
-                path.ItemTime = time;
+                path.SetTime(time);
             }
         }
         /// <summary>
@@ -285,8 +318,7 @@ namespace Engine.Animation
             {
                 var path = this.animationPaths[this.currentIndex];
 
-                path.Time = time;
-                path.ItemTime = time;
+                path.SetTime(time);
             }
         }
         /// <summary>
@@ -302,6 +334,26 @@ namespace Engine.Animation
         public void Pause()
         {
             this.active = false;
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            string res = "Inactive";
+
+            if (this.currentIndex >= 0)
+            {
+                res = string.Format("{0}", this.animationPaths[this.currentIndex].GetItemList().Join(", "));
+                if (this.currentIndex + 1 < this.animationPaths.Count)
+                {
+                    res += string.Format(" {0}", this.animationPaths[this.currentIndex + 1].GetItemList().Join(", "));
+                }
+            }
+
+            return res;
         }
 
         /// <summary>

@@ -76,7 +76,6 @@ namespace TerrainTest
 
         private Model helicopter = null;
         private HeliManipulatorController helicopterController = null;
-        private AnimationPath helicopterRollPath = null;
         private Vector3 helicopterHeightOffset = (Vector3.Up * 15f);
         private Color4 gridColor = new Color4(Color.LightSeaGreen.ToColor3(), 0.5f);
         private Color4 curvesColor = Color.Red;
@@ -135,6 +134,8 @@ namespace TerrainTest
         private ParticleSystemDescription pExplosion = null;
         private ParticleSystemDescription pSmokeExplosion = null;
         private ParticleManager pManager = null;
+
+        private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -306,7 +307,9 @@ namespace TerrainTest
 
             AnimationPath p = new AnimationPath();
             p.AddLoop("default");
-            this.helicopter.AnimationController.AddPath(p);
+            this.animations.Add("default", new AnimationPlan(p));
+
+            this.helicopter.AnimationController.AddPath(this.animations["default"]);
             this.helicopter.AnimationController.Start();
 
             #endregion
@@ -672,8 +675,9 @@ namespace TerrainTest
                 this.helicopter.Manipulator.SetNormal(heliTri.Normal);
             }
 
-            this.helicopterRollPath = new AnimationPath();
-            this.helicopterRollPath.AddLoop("roll");
+            var hp = new AnimationPath();
+            hp.AddLoop("roll");
+            this.animations.Add("heli_default", new AnimationPlan(hp));
 
             {
                 Vector3 tankPosition;
@@ -802,7 +806,7 @@ namespace TerrainTest
             this.Lights.ShadowLDDistance = 100f;
             this.Lights.ShadowHDDistance = 25f;
 
-            this.helicopter.AnimationController.SetPath(this.helicopterRollPath);
+            this.helicopter.AnimationController.SetPath(this.animations["heli_default"]);
 
             var t1W = new WeaponDescription() { Name = "Cannon", Damage = 35, Cadence = 15, Range = 50 };
             var t2W = new WeaponDescription() { Name = "Machine Gun", Damage = 5, Cadence = 0.5f, Range = 30 };
@@ -1057,7 +1061,7 @@ namespace TerrainTest
             {
                 Curve3D curve = this.GenerateHelicopterPath();
                 //((HeliManipulator)this.helicopter.Manipulator).Follow(curve, 10f, 0.001f);
-                this.helicopter.AnimationController.SetPath(this.helicopterRollPath);
+                this.helicopter.AnimationController.SetPath(this.animations["heli_default"]);
                 this.DEBUGDrawHelicopterPath(curve);
             }
 
@@ -1284,7 +1288,7 @@ namespace TerrainTest
         private Curve3D GenerateHelicopterPath()
         {
             Curve3D curve = new Curve3D();
-            
+
             curve.PreLoop = CurveLoopType.Constant;
             curve.PostLoop = CurveLoopType.Constant;
 
@@ -1328,7 +1332,7 @@ namespace TerrainTest
             }
 
             curve.SetTangents();
-            
+
             return curve;
         }
 

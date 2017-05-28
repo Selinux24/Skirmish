@@ -5,6 +5,7 @@ using Engine.Content;
 using SharpDX;
 using SharpDX.Direct3D;
 using System;
+using System.Collections.Generic;
 
 namespace SceneTest
 {
@@ -40,6 +41,8 @@ namespace SceneTest
 
         private SkyScattering sky = null;
         private SkyPlane skyPlane = null;
+
+        private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         private LineListDrawer lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
@@ -265,10 +268,11 @@ namespace SceneTest
 
             AnimationPath p1 = new AnimationPath();
             p1.AddLoop("idle1");
+            this.animations.Add("default", new AnimationPlan(p1));
 
             this.characterSoldier.Manipulator.SetPosition(s - 10, 0, -s);
             this.characterSoldier.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            this.characterSoldier.AnimationController.AddPath(p1);
+            this.characterSoldier.AnimationController.AddPath(this.animations["default"]);
             this.characterSoldier.AnimationController.Start(0);
 
             this.characterSoldierI[0].Manipulator.SetPosition(-spaceSize * 2 + s, 0, -s);
@@ -281,10 +285,10 @@ namespace SceneTest
             this.characterSoldierI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             this.characterSoldierI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
-            this.characterSoldierI[0].AnimationController.AddPath(p1);
-            this.characterSoldierI[1].AnimationController.AddPath(p1);
-            this.characterSoldierI[2].AnimationController.AddPath(p1);
-            this.characterSoldierI[3].AnimationController.AddPath(p1);
+            this.characterSoldierI[0].AnimationController.AddPath(this.animations["default"]);
+            this.characterSoldierI[1].AnimationController.AddPath(this.animations["default"]);
+            this.characterSoldierI[2].AnimationController.AddPath(this.animations["default"]);
+            this.characterSoldierI[3].AnimationController.AddPath(this.animations["default"]);
 
             this.characterSoldierI[0].AnimationController.Start(1);
             this.characterSoldierI[1].AnimationController.Start(2);

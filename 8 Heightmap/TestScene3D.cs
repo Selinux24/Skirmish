@@ -4,6 +4,7 @@ using Engine.Common;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace HeightmapTest
@@ -76,6 +77,8 @@ namespace HeightmapTest
 
         private Model helicopter = null;
         private Model helicopter2 = null;
+
+        private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -505,6 +508,22 @@ namespace HeightmapTest
 
             #endregion
 
+            #region Animations
+
+            var hp = new AnimationPath();
+            hp.AddLoop("roll");
+            this.animations.Add("heli_default", new AnimationPlan(hp));
+
+            var sp = new AnimationPath();
+            sp.AddLoop("stand");
+            this.animations.Add("soldier_stand", new AnimationPlan(sp));
+
+            var sp1 = new AnimationPath();
+            sp1.AddLoop("idle1");
+            this.animations.Add("soldier_idle", new AnimationPlan(sp1));
+
+            #endregion
+
             #region Positioning
 
             Random posRnd = new Random(1024);
@@ -699,10 +718,8 @@ namespace HeightmapTest
                     this.helicopter2.Manipulator.SetScale(5, true);
                 }
 
-                AnimationPath p = new AnimationPath();
-                p.AddLoop("roll");
                 this.helicopter2.AnimationController.TimeDelta = 2f;
-                this.helicopter2.AnimationController.AddPath(p);
+                this.helicopter2.AnimationController.AddPath(this.animations["heli_default"]);
                 this.helicopter2.AnimationController.Start();
             }
 
@@ -724,9 +741,7 @@ namespace HeightmapTest
                     this.soldier.Manipulator.SetPosition(position, true);
                 }
 
-                AnimationPath p = new AnimationPath();
-                p.AddLoop("stand");
-                this.soldier.AnimationController.AddPath(p);
+                this.soldier.AnimationController.AddPath(this.animations["soldier_stand"]);
                 this.soldier.AnimationController.Start();
             }
 
@@ -751,10 +766,8 @@ namespace HeightmapTest
                         this.troops[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
                         this.troops[i].TextureIndex = 1;
 
-                        AnimationPath p = new AnimationPath();
-                        p.AddLoop("idle1");
                         this.troops[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
-                        this.troops[i].AnimationController.AddPath(p);
+                        this.troops[i].AnimationController.AddPath(this.animations["soldier_idle"]);
                         this.troops[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
                     }
                 }

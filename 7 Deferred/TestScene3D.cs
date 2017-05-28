@@ -4,6 +4,7 @@ using Engine.Common;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace DeferredTest
@@ -48,6 +49,8 @@ namespace DeferredTest
         private int pointOffset = 0;
         private int spotOffset = 0;
         private bool onlyModels = true;
+
+        private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -126,6 +129,14 @@ namespace DeferredTest
                 });
             sw.Stop();
             loadingText += string.Format("helicopters: {0} ", sw.Elapsed.TotalSeconds);
+
+            #endregion
+
+            #region Helicopters animation plans
+
+            var ap = new AnimationPath();
+            ap.AddLoop("roll");
+            this.animations.Add("default", new AnimationPlan(ap));
 
             #endregion
 
@@ -332,9 +343,8 @@ namespace DeferredTest
                     cameraPosition += p;
                     modelCount++;
                 }
-                AnimationPath ap = new AnimationPath();
-                ap.AddLoop("roll");
-                this.helicopter.AnimationController.AddPath(ap);
+
+                this.helicopter.AnimationController.AddPath(this.animations["default"]);
                 this.helicopter.AnimationController.Start();
             }
             #endregion
@@ -353,9 +363,8 @@ namespace DeferredTest
                         cameraPosition += p;
                         modelCount++;
                     }
-                    AnimationPath ap = new AnimationPath();
-                    ap.AddLoop("roll");
-                    this.helicopters[i].AnimationController.AddPath(ap);
+
+                    this.helicopters[i].AnimationController.AddPath(this.animations["default"]);
                     this.helicopters[i].AnimationController.Start();
                 }
             }

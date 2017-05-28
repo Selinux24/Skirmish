@@ -39,6 +39,7 @@ namespace GameLogic
         private GridAgentType soldierAgent = null;
         private Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
         private Dictionary<Soldier, ManipulatorController> soldierControllers = new Dictionary<Soldier, ManipulatorController>();
+        private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
         private ModelInstance current
         {
             get
@@ -315,7 +316,9 @@ namespace GameLogic
 
             this.UpdateLayout();
 
-            this.IntializePositions();
+            this.InitializeAnimations();
+
+            this.InitializePositions();
 
             #region DEBUG
 
@@ -596,7 +599,33 @@ namespace GameLogic
             this.txtAction.Top = this.txtActionList.Top + this.txtActionList.Height + 1;
             this.txtAction.Left = this.txtSoldier.Left;
         }
-        private void IntializePositions()
+
+        private void InitializeAnimations()
+        {
+            {
+                AnimationPath p = new AnimationPath();
+                p.AddLoop("idle");
+
+                this.animations.Add("idle", new AnimationPlan(p));
+            }
+            {
+                AnimationPath p = new AnimationPath();
+                p.AddLoop("stand");
+
+                this.animations.Add("stand", new AnimationPlan(p));
+            }
+            {
+                AnimationPath p = new AnimationPath();
+                p.AddLoop("walk");
+                this.animations.Add("walk", new AnimationPlan(p));
+            }
+            {
+                AnimationPath p = new AnimationPath();
+                p.AddLoop("run");
+                this.animations.Add("run", new AnimationPlan(p));
+            }
+        }
+        private void InitializePositions()
         {
             BoundingBox bbox = this.terrain.GetBoundingBox();
 
@@ -617,13 +646,7 @@ namespace GameLogic
                     ModelInstance instance = this.soldier[instanceIndex++];
 
                     instance.TextureIndex = teamIndex;
-
-                    AnimationPath p0 = new AnimationPath();
-                    //p0.AddRepeat("stand", 4);
-                    //p0.Add("walk");
-                    p0.AddLoop("stand");
-
-                    instance.AnimationController.AddPath(p0);
+                    instance.AnimationController.AddPath(this.animations["stand"]);
                     instance.AnimationController.Start(soldierIndex);
                     instance.AnimationController.TimeDelta = 0.20f;
 
@@ -665,11 +688,9 @@ namespace GameLogic
 
             foreach (var item in this.soldierControllers)
             {
-                if(item.Value == instance)
+                if (item.Value == instance)
                 {
-                    AnimationPath p0 = new AnimationPath();
-                    p0.AddLoop("stand");
-                    this.soldierModels[item.Key].AnimationController.ContinuePath(p0);
+                    this.soldierModels[item.Key].AnimationController.ContinuePath(this.animations["stand"]);
                 }
             }
         }
@@ -837,11 +858,7 @@ namespace GameLogic
                 if (path != null)
                 {
                     //Set move animation clip
-                    AnimationPath p = new AnimationPath();
-                    p.AddLoop("walk");
-
-                    model.AnimationController.SetPath(p);
-                    model.AnimationController.Start(0);
+                    model.AnimationController.SetPath(this.animations["walk"]);
 
                     //Folow
                     controller.Follow(path);
@@ -874,12 +891,19 @@ namespace GameLogic
         {
             if (ActionsManager.Run(this.skirmishGame, active, active.CurrentMovingCapacity))
             {
+                var model = this.soldierModels[active];
+                var controller = this.soldierControllers[active];
+
                 //Run 3d actions
-                var path = this.FindPath(this.soldierAgent, this.soldierModels[active].Manipulator.Position, destination);
+                var path = this.FindPath(this.soldierAgent, model.Manipulator.Position, destination);
                 if (path != null)
                 {
-                    //TODO: Set run animation clip
-                    this.soldierControllers[active].Follow(path);
+                    //Set move animation clip
+                    model.AnimationController.SetPath(this.animations["run"]);
+
+                    //Folow
+                    controller.Follow(path);
+                    model.Manipulator.LinearVelocity = 8;
 
                     this.GoToSoldier(active);
                 }

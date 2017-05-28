@@ -21,7 +21,7 @@ namespace AnimationTest
         private Model floor = null;
 
         private Model soldier = null;
-        private List<AnimationPath> soldierPaths = new List<AnimationPath>();
+        private Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
         private TriangleListDrawer soldierTris = null;
         private LineListDrawer soldierLines = null;
         private bool showSoldierDEBUG = false;
@@ -148,11 +148,15 @@ namespace AnimationTest
                 AnimationPath p2 = new AnimationPath();
                 p2.Add("idle2");
 
-                this.soldierPaths.Add(p0);
-                this.soldierPaths.Add(p1);
-                this.soldierPaths.Add(p2);
+                AnimationPath p3 = new AnimationPath();
+                p3.AddLoop("stand");
 
-                this.soldier.AnimationController.AddPath(p0);
+                this.soldierPaths.Add("complex", new AnimationPlan(p0));
+                this.soldierPaths.Add("idle1", new AnimationPlan(p1));
+                this.soldierPaths.Add("idle2", new AnimationPlan(p2));
+                this.soldierPaths.Add("stand", new AnimationPlan(p3));
+
+                this.soldier.AnimationController.AddPath(this.soldierPaths["complex"]);
 
                 float playerHeight = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
 
@@ -255,7 +259,8 @@ namespace AnimationTest
 
             this.runtime.Text = this.Game.RuntimeText;
             this.animText.Text = string.Format(
-                "Delta: {0:0.0}; Index: {1}; Clip: {2}; Time: {3:0.00}; Item Time: {4:0.00}",
+                "Paths: {0:00}; Delta: {1:0.0}; Index: {2}; Clip: {3}; Time: {4:0.00}; Item Time: {5:0.00}",
+                this.soldier.AnimationController.PathCount,
                 this.soldier.AnimationController.TimeDelta,
                 this.soldier.AnimationController.CurrentIndex,
                 this.soldier.AnimationController.CurrentPathItemClip,
@@ -324,13 +329,22 @@ namespace AnimationTest
             {
                 this.soldier.AnimationController.Pause();
             }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                this.soldier.AnimationController.ContinuePath(this.soldierPaths["stand"]);
+            }
         }
 
         private void AnimationController_PathEnding(object sender, EventArgs e)
         {
-            int index = Math.Min(this.rnd.Next(1, 3), this.soldierPaths.Count - 1);
+            var keys = this.soldierPaths.Keys.ToArray();
 
-            ((AnimationController)sender).SetPath(this.soldierPaths[index]);
+            int index = Math.Min(this.rnd.Next(1, 3), keys.Length - 1);
+
+            var key = keys[index];
+
+            ((AnimationController)sender).SetPath(this.soldierPaths[key]);
             ((AnimationController)sender).Start(0);
         }
     }
