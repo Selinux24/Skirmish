@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.PathFinding.NavMesh
 {
@@ -68,8 +68,8 @@ namespace Engine.PathFinding.NavMesh
         {
             resultPath = null;
 
-            var startPt = this.FindNearestPoly(from, Vector3.Zero);
-            var endPt = this.FindNearestPoly(to, Vector3.Zero);
+            var startPt = this.FindNearestPoly(from, new Vector3(0, from.Y, 0));
+            var endPt = this.FindNearestPoly(to, new Vector3(0, to.Y, 0));
             int[] path;
             if (this.FindPath(ref startPt, ref endPt, out path))
             {

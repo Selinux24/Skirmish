@@ -18,6 +18,12 @@ namespace Engine
         /// <returns>Returns path position</returns>
         Vector3 GetPosition(float time);
         /// <summary>
+        /// Gets path normal in specified time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <returns>Returns path normal</returns>
+        Vector3 GetNormal(float time);
+        /// <summary>
         /// Gets the next control point in specified time
         /// </summary>
         /// <param name="time">Time</param>

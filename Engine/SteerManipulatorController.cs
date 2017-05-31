@@ -78,7 +78,7 @@ namespace Engine
                         position += this.velocity;
 
                         manipulator.SetPosition(position);
-                        manipulator.LookAt(position + this.velocity);
+                        manipulator.LookAt(position + this.velocity, false);
                     }
                 }
                 else

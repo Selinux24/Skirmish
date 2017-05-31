@@ -35,7 +35,7 @@
                     var velocity = next - position;
 
                     manipulator.SetPosition(next);
-                    manipulator.LookAt(next + velocity);
+                    manipulator.LookAt(next + velocity, false);
                 }
                 else
                 {

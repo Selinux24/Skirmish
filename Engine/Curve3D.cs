@@ -182,6 +182,15 @@ namespace Engine
                 this.cZ.Evaluate(time));
         }
         /// <summary>
+        /// Gets path normal in specified time
+        /// </summary>
+        /// <param name="time">Time</param>
+        /// <returns>Returns path normal</returns>
+        public Vector3 GetNormal(float time)
+        {
+            return Vector3.Up;
+        }
+        /// <summary>
         /// Gets the next control point at specified time
         /// </summary>
         /// <param name="time">Curve time</param>

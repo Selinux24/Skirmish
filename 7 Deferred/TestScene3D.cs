@@ -11,12 +11,17 @@ namespace DeferredTest
 {
     public class TestScene3D : Scene
     {
+        private const int MaxGridDrawer = 10000;
+
         private string titleMask = "{0}: {1} directionals, {2} points and {3} spots. Shadows {4}";
 
         private const float near = 0.1f;
         private const float far = 1000f;
         private const float fogStart = 0.01f;
         private const float fogRange = 0.10f;
+        private const int layerObjects = 0;
+        private const int layerTerrain = 1;
+        private const int layerEffects = 2;
         private const int layerHUD = 99;
 
         private Cursor cursor = null;
@@ -44,6 +49,7 @@ namespace DeferredTest
         private SceneLightSpot spotLight = null;
 
         private LineListDrawer lineDrawer = null;
+        private TriangleListDrawer terrainGraphDrawer = null;
 
         private Random rnd = new Random(0);
         private int pointOffset = 0;
@@ -166,7 +172,7 @@ namespace DeferredTest
 
             sw.Restart();
 
-            this.tank.Manipulator.SetScale(0.2f);
+            this.tank.Manipulator.SetScale(0.2f, true);
 
             var tankbbox = this.tank.GetBoundingBox();
             tankAgent.Height = tankbbox.GetY();
@@ -258,27 +264,6 @@ namespace DeferredTest
             loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
 
             #endregion
-
-            #endregion
-
-            #region Debug Buffer Drawer
-
-            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
-            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
-            int smLeft = this.Game.Form.RenderWidth - width;
-            int smTop = this.Game.Form.RenderHeight - height;
-
-            this.bufferDrawer = this.AddSpriteTexture(new SpriteTextureDescription()
-            {
-                Left = smLeft,
-                Top = smTop,
-                Width = width,
-                Height = height,
-                Channel = SpriteTextureChannelsEnum.NoAlpha,
-            },
-            layerHUD);
-
-            this.bufferDrawer.Visible = false;
 
             #endregion
 
@@ -411,14 +396,72 @@ namespace DeferredTest
 
             #region Lights
 
-            this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 1000);
-
             this.Lights.KeyLight.Enabled = true;
             this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = false;
 
             this.pointOffset = this.Lights.PointLights.Length;
             this.spotOffset = this.Lights.SpotLights.Length;
+
+            #endregion
+
+            #region Debug
+
+            #region Buffer Drawer
+
+            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
+            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
+            int smLeft = this.Game.Form.RenderWidth - width;
+            int smTop = this.Game.Form.RenderHeight - height;
+
+            this.bufferDrawer = this.AddSpriteTexture(new SpriteTextureDescription()
+            {
+                Left = smLeft,
+                Top = smTop,
+                Width = width,
+                Height = height,
+                Channel = SpriteTextureChannelsEnum.NoAlpha,
+            },
+            layerEffects);
+
+            this.bufferDrawer.Visible = false;
+
+            #endregion
+
+            #region Light line drawer
+
+            this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 1000, layerEffects);
+            this.lineDrawer.Visible = false;
+
+            #endregion
+
+            #region Terrain grapth drawer
+
+            this.terrainGraphDrawer = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), MaxGridDrawer, layerEffects);
+            this.terrainGraphDrawer.Visible = false;
+
+            var nodes = this.terrain.GetNodes(tankAgent);
+            if (nodes != null && nodes.Length > 0)
+            {
+                Random clrRnd = new Random(1);
+                Color[] regions = new Color[nodes.Length];
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.55f);
+                }
+
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    var node = (NavigationMeshNode)nodes[i];
+                    var color = regions[node.PolyId];
+                    var poly = node.Poly;
+                    var tris = poly.Triangulate();
+
+                    this.terrainGraphDrawer.AddTriangles(color, tris);
+                }
+            }
+
+            #endregion
 
             #endregion
         }
@@ -528,6 +571,11 @@ namespace DeferredTest
                 }
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.F4))
+            {
+                this.terrainGraphDrawer.Visible = !this.terrainGraphDrawer.Visible;
+            }
+
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
                 var shadowMap = this.Renderer.GetResource(SceneRendererResultEnum.ShadowMapStatic);
@@ -619,7 +667,7 @@ namespace DeferredTest
             {
                 if (picked)
                 {
-                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, position);
+                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, position, true, this.tank.Manipulator.LinearVelocity * gameTime.ElapsedSeconds);
                     if (p != null)
                     {
                         this.tankController.Follow(new SegmentPath(p.ReturnPath.ToArray()));

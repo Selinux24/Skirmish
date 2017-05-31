@@ -1,5 +1,5 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.PathFinding.NavMesh
@@ -11,6 +11,11 @@ namespace Engine.PathFinding.NavMesh
     /// </summary>
     public class NavigationMesh : IGraph
     {
+        /// <summary>
+        /// Padding for bounding box compute
+        /// </summary>
+        private const float BOUND_PADDING = float.Epsilon * 2f;
+
         /// <summary>
         /// Navigation mesh queries by agent type
         /// </summary>
@@ -52,8 +57,7 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Returns a navigation mesh</returns>
         public static NavigationMesh Build(Triangle[] triangles, NavigationMeshGenerationSettings settings)
         {
-            BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetVertices());
-            Array.ForEach(triangles, tri => bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(tri.GetVertices())));
+            var bbox = ComputeBoundingBox(triangles);
 
             var nm = new NavigationMesh();
 
@@ -84,26 +88,56 @@ namespace Engine.PathFinding.NavMesh
 
                 var tnm = new TiledNavigationMesh(builder);
                 var query = new NavigationMeshQuery(tnm, 2048);
-                var nodes = new NavigationMeshNode[pmd.MeshCount];
 
-                for (int i = 0; i < pmd.MeshCount; i++)
+                var nodes = new List<NavigationMeshNode>();
+                for (int m = 0; m < pmd.MeshCount; m++)
                 {
-                    var mesh = pmd.Meshes[i];
-                    var poly = pm.Polys[i];
+                    var mesh = pmd.Meshes[m];
+                    var poly = pm.Polys[m];
+                
+                    int vertIndex = mesh.VertexIndex;
+                    int triIndex = mesh.TriangleIndex;
 
-                    nodes[i] = new NavigationMeshNode(nm, new Polygon(mesh.VertexCount), i, poly.RegionId.Id);
-
-                    for (int v = 0; v < mesh.VertexCount; v++)
+                    for (int j = 0; j < mesh.TriangleCount; j++)
                     {
-                        nodes[i].Poly.Points[v] = pmd.Verts[mesh.VertexIndex + v];
+                        var t = pmd.Tris[triIndex + j];
+
+                        var v0 = pmd.Verts[vertIndex + t.VertexHash0];
+                        var v1 = pmd.Verts[vertIndex + t.VertexHash1];
+                        var v2 = pmd.Verts[vertIndex + t.VertexHash2];
+
+                        nodes.Add(new NavigationMeshNode(nm, new Polygon(v0, v1, v2), m, poly.RegionId.Id));
                     }
                 }
 
                 nm.Query.Add(agent, query);
-                nm.Nodes.Add(agent, nodes);
+                nm.Nodes.Add(agent, nodes.ToArray());
             }
 
             return nm;
+        }
+        /// <summary>
+        /// Computes a bounding box
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Retusn a bounding box</returns>
+        private static BoundingBox ComputeBoundingBox(Triangle[] triangles)
+        {
+            var bbox = BoundingBox.FromPoints(triangles[0].GetVertices());
+
+            Array.ForEach(triangles, tri =>
+            {
+                bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(tri.GetVertices()));
+
+                bbox.Minimum.X -= BOUND_PADDING;
+                bbox.Minimum.Y -= BOUND_PADDING;
+                bbox.Minimum.Z -= BOUND_PADDING;
+                bbox.Maximum.X += BOUND_PADDING;
+                bbox.Maximum.Y += BOUND_PADDING;
+                bbox.Maximum.Z += BOUND_PADDING;
+            });
+
+            return bbox;
         }
 
         /// <summary>
