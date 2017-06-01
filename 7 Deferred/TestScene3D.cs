@@ -1,6 +1,5 @@
 ﻿using Engine;
 using Engine.Animation;
-using Engine.Common;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
@@ -31,9 +30,7 @@ namespace DeferredTest
         private TextDrawer statistics = null;
         private Sprite backPannel = null;
 
-        private Model tank = null;
-        private ManipulatorController tankController = null;
-        private NavigationMeshAgentType tankAgent = new NavigationMeshAgentType();
+        private GameAgent tankAgent = null;
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
         private Skydom skydom = null;
@@ -68,9 +65,6 @@ namespace DeferredTest
         {
             base.Initialize();
 
-            this.Camera.NearPlaneDistance = near;
-            this.Camera.FarPlaneDistance = far;
-
             #region Cursor
 
             SpriteDescription cursorDesc = new SpriteDescription()
@@ -90,210 +84,219 @@ namespace DeferredTest
             string loadingText = null;
 
             #region Skydom
-
-            sw.Restart();
-            this.skydom = this.AddSkydom(new SkydomDescription()
             {
-                Name = "Sky",
-                ContentPath = "Resources",
-                Radius = far,
-                Texture = "sunset.dds",
-            });
-            sw.Stop();
-            loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
-
+                sw.Restart();
+                this.skydom = this.AddSkydom(new SkydomDescription()
+                {
+                    Name = "Sky",
+                    ContentPath = "Resources",
+                    Radius = far,
+                    Texture = "sunset.dds",
+                });
+                sw.Stop();
+                loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
+            }
             #endregion
 
             #region Helicopter
-
-            sw.Restart();
-            this.helicopter = this.AddModel(
-                "Resources",
-                "helicopter.xml",
-                new ModelDescription()
-                {
-                    Name = "Helicopter",
-                    CastShadow = true,
-                    TextureIndex = 2,
-                });
-            sw.Stop();
-            loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
-
+            {
+                sw.Restart();
+                this.helicopter = this.AddModel(
+                    "Resources",
+                    "helicopter.xml",
+                    new ModelDescription()
+                    {
+                        Name = "Helicopter",
+                        CastShadow = true,
+                        TextureIndex = 2,
+                    });
+                sw.Stop();
+                loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
+            }
             #endregion
 
             #region Helicopters
-
-            sw.Restart();
-            this.helicopters = this.AddInstancingModel(
-                "Resources",
-                "helicopter.xml",
-                new ModelInstancedDescription()
-                {
-                    Name = "Bunch of Helicopters",
-                    CastShadow = true,
-                    Instances = 2,
-                });
-            sw.Stop();
-            loadingText += string.Format("helicopters: {0} ", sw.Elapsed.TotalSeconds);
-
+            {
+                sw.Restart();
+                this.helicopters = this.AddInstancingModel(
+                    "Resources",
+                    "helicopter.xml",
+                    new ModelInstancedDescription()
+                    {
+                        Name = "Bunch of Helicopters",
+                        CastShadow = true,
+                        Instances = 2,
+                    });
+                sw.Stop();
+                loadingText += string.Format("helicopters: {0} ", sw.Elapsed.TotalSeconds);
+            }
             #endregion
 
             #region Helicopters animation plans
-
-            var ap = new AnimationPath();
-            ap.AddLoop("roll");
-            this.animations.Add("default", new AnimationPlan(ap));
-
+            {
+                var ap = new AnimationPath();
+                ap.AddLoop("roll");
+                this.animations.Add("default", new AnimationPlan(ap));
+            }
             #endregion
 
             #region Tank
-
-            sw.Restart();
-            this.tank = this.AddModel(
-                "Resources",
-                "leopard.xml",
-                new ModelDescription()
-                {
-                    Name = "Tank",
-                    CastShadow = true,
-                });
-            this.Lights.AddRange(this.tank.Lights);
-            this.tankController = new SteerManipulatorController()
             {
-                ArrivingRadius = 5f,
-                MaximumForce = 0.01f,
-            };
-            sw.Stop();
-            loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
+                sw.Restart();
+                var tank = this.AddModel(
+                    "Resources",
+                    "leopard.xml",
+                    new ModelDescription()
+                    {
+                        Name = "Tank",
+                        CastShadow = true,
+                    });
+                tank.Manipulator.SetScale(0.2f, true);
 
+                var tankController = new SteerManipulatorController()
+                {
+                    ArrivingRadius = 5f,
+                    MaximumForce = 0.01f,
+                };
+
+                var tankbbox = tank.GetBoundingBox();
+                var tankAgentType = new NavigationMeshAgentType()
+                {
+                    Height = tankbbox.GetY(),
+                    Radius = tankbbox.GetX() * 0.5f,
+                    MaxClimb = tankbbox.GetY() * 0.55f,
+                };
+
+                this.tankAgent = new GameAgent()
+                {
+                    Model = tank,
+                    Controller = tankController,
+                    AgentType = tankAgentType,
+                    Active = true,
+                };
+                this.AddComponent(this.tankAgent);
+
+                this.Lights.AddRange(tank.Lights);
+
+                sw.Stop();
+                loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
+            }
             #endregion
 
             #region Terrain
-
-            sw.Restart();
-
-            this.tank.Manipulator.SetScale(0.2f, true);
-
-            var tankbbox = this.tank.GetBoundingBox();
-            tankAgent.Height = tankbbox.GetY();
-            tankAgent.Radius = tankbbox.GetX() * 0.5f;
-            tankAgent.MaxClimb = tankbbox.GetY() * 0.55f;
-
-            var navSettings = NavigationMeshGenerationSettings.Default;
-            navSettings.Agents = new[]
             {
-                tankAgent,
-            };
+                sw.Restart();
 
-            this.terrain = this.AddScenery(
-                "Resources",
-                "terrain.xml",
-                new GroundDescription()
-                {
-                    Name = "Terrain",
-                    Quadtree = new GroundDescription.QuadtreeDescription()
-                    {
-                        MaximumDepth = 2,
-                    },
-                    PathFinder = new GroundDescription.PathFinderDescription()
-                    {
-                        Settings = navSettings,
-                    },
-                });
-            sw.Stop();
-            loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
+                var navSettings = NavigationMeshGenerationSettings.Default;
+                navSettings.Agents = new[] { this.tankAgent.AgentType, };
 
+                this.terrain = this.AddScenery(
+                    "Resources",
+                    "terrain.xml",
+                    new GroundDescription()
+                    {
+                        Name = "Terrain",
+                        Quadtree = new GroundDescription.QuadtreeDescription()
+                        {
+                            MaximumDepth = 2,
+                        },
+                        PathFinder = new GroundDescription.PathFinderDescription()
+                        {
+                            Settings = navSettings,
+                        },
+                    });
+                sw.Stop();
+                loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
+            }
             #endregion
 
             #region Gardener
+            {
+                sw.Restart();
 
-            sw.Restart();
-
-            this.gardener = this.AddGardener(
-                new GroundGardenerDescription()
-                {
-                    ContentPath = "Resources/Vegetation",
-                    ChannelRed = new GroundGardenerDescription.Channel()
+                this.gardener = this.AddGardener(
+                    new GroundGardenerDescription()
                     {
-                        VegetarionTextures = new[] { "grass.png" },
-                        Saturation = 20f,
-                        StartRadius = 0f,
-                        EndRadius = 50f,
-                        MinSize = Vector2.One * 0.20f,
-                        MaxSize = Vector2.One * 0.25f,
-                    }
-                });
-            sw.Stop();
-            loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
-
-            this.gardener.ParentGround = this.terrain;
-
+                        ContentPath = "Resources/Vegetation",
+                        ChannelRed = new GroundGardenerDescription.Channel()
+                        {
+                            VegetarionTextures = new[] { "grass.png" },
+                            Saturation = 20f,
+                            StartRadius = 0f,
+                            EndRadius = 50f,
+                            MinSize = Vector2.One * 0.20f,
+                            MaxSize = Vector2.One * 0.25f,
+                        }
+                    });
+                sw.Stop();
+                loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
+            }
             #endregion
 
             #region Trees
+            {
+                sw.Restart();
+                this.tree = this.AddModel(
+                    "resources/trees",
+                    "birch_a.xml",
+                    new ModelDescription()
+                    {
+                        Name = "Lonely tree",
+                        Static = true,
+                        CastShadow = true,
+                        AlphaEnabled = true,
+                        DepthEnabled = true,
+                    });
+                sw.Stop();
+                loadingText += string.Format("tree: {0} ", sw.Elapsed.TotalSeconds);
 
-            sw.Restart();
-            this.tree = this.AddModel(
-                "resources/trees",
-                "birch_a.xml",
-                new ModelDescription()
-                {
-                    Name = "Lonely tree",
-                    Static = true,
-                    CastShadow = true,
-                    AlphaEnabled = true,
-                    DepthEnabled = true,
-                });
-            sw.Stop();
-            loadingText += string.Format("tree: {0} ", sw.Elapsed.TotalSeconds);
-
-            sw.Restart();
-            this.trees = this.AddInstancingModel(
-                "resources/trees",
-                "birch_b.xml",
-                new ModelInstancedDescription()
-                {
-                    Name = "Bunch of trees",
-                    Static = true,
-                    CastShadow = true,
-                    AlphaEnabled = true,
-                    DepthEnabled = true,
-                    Instances = 10,
-                });
-            sw.Stop();
-            loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
-
+                sw.Restart();
+                this.trees = this.AddInstancingModel(
+                    "resources/trees",
+                    "birch_b.xml",
+                    new ModelInstancedDescription()
+                    {
+                        Name = "Bunch of trees",
+                        Static = true,
+                        CastShadow = true,
+                        AlphaEnabled = true,
+                        DepthEnabled = true,
+                        Instances = 10,
+                    });
+                sw.Stop();
+                loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
+            }
             #endregion
 
             #endregion
 
             #region Texts
-
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
-            this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
-            this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
-            this.statistics = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red), layerHUD);
-
-            this.title.Text = "Deferred Ligthning test";
-            this.load.Text = loadingText;
-            this.help.Text = "";
-            this.statistics.Text = "";
-
-            this.title.Position = Vector2.Zero;
-            this.load.Position = new Vector2(0, this.title.Top + this.title.Height + 2);
-            this.help.Position = new Vector2(0, this.load.Top + this.load.Height + 2);
-            this.statistics.Position = new Vector2(0, this.help.Top + this.help.Height + 2);
-
-            var spDesc = new SpriteDescription()
             {
-                AlphaEnabled = true,
-                Width = this.Game.Form.RenderWidth,
-                Height = this.statistics.Top + this.statistics.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
-            };
+                this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
+                this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+                this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+                this.statistics = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red), layerHUD);
 
-            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+                this.title.Text = "Deferred Ligthning test";
+                this.load.Text = loadingText;
+                this.help.Text = "";
+                this.statistics.Text = "";
 
+                this.title.Position = Vector2.Zero;
+                this.load.Position = new Vector2(0, this.title.Top + this.title.Height + 2);
+                this.help.Position = new Vector2(0, this.load.Top + this.load.Height + 2);
+                this.statistics.Position = new Vector2(0, this.help.Top + this.help.Height + 2);
+
+                var spDesc = new SpriteDescription()
+                {
+                    AlphaEnabled = true,
+                    Width = this.Game.Form.RenderWidth,
+                    Height = this.statistics.Top + this.statistics.Height + 3,
+                    Color = new Color4(0, 0, 0, 0.75f),
+                };
+
+                this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+            }
             #endregion
 
             #region Object locations
@@ -308,8 +311,8 @@ namespace DeferredTest
                 float d;
                 if (this.terrain.FindTopGroundPosition(20, 40, out p, out t, out d))
                 {
-                    this.tank.Manipulator.SetPosition(p);
-                    this.tank.Manipulator.SetNormal(t.Normal);
+                    this.tankAgent.Model.Manipulator.SetPosition(p);
+                    this.tankAgent.Model.Manipulator.SetNormal(t.Normal);
                     cameraPosition += p;
                     modelCount++;
                 }
@@ -388,9 +391,17 @@ namespace DeferredTest
             }
             #endregion
 
+            #region Gardener
+
+            this.gardener.ParentGround = this.terrain;
+
+            #endregion
+
             cameraPosition /= (float)modelCount;
             this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
             this.Camera.LookTo(cameraPosition + Vector3.Up);
+            this.Camera.NearPlaneDistance = near;
+            this.Camera.FarPlaneDistance = far;
 
             #endregion
 
@@ -440,7 +451,7 @@ namespace DeferredTest
             this.terrainGraphDrawer = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), MaxGridDrawer, layerEffects);
             this.terrainGraphDrawer.Visible = false;
 
-            var nodes = this.terrain.GetNodes(tankAgent);
+            var nodes = this.terrain.GetNodes(tankAgent.AgentType);
             if (nodes != null && nodes.Length > 0)
             {
                 Random clrRnd = new Random(1);
@@ -625,7 +636,7 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F9))
             {
-                this.tank.Active = this.tank.Visible = !this.tank.Visible;
+                this.tankAgent.Model.Active = this.tankAgent.Model.Visible = !this.tankAgent.Model.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F10))
@@ -667,16 +678,16 @@ namespace DeferredTest
             {
                 if (picked)
                 {
-                    var p = this.terrain.FindPath(this.tankAgent, this.tank.Manipulator.Position, position, true, this.tank.Manipulator.LinearVelocity * gameTime.ElapsedSeconds);
+                    var p = this.terrain.FindPath(
+                        this.tankAgent.AgentType,
+                        this.tankAgent.Model.Manipulator.Position, position, true, this.tankAgent.Model.Manipulator.LinearVelocity * gameTime.ElapsedSeconds);
                     if (p != null)
                     {
-                        this.tankController.Follow(new SegmentPath(p.ReturnPath.ToArray()));
-                        this.tank.Manipulator.LinearVelocity = 8;
+                        this.tankAgent.Controller.Follow(new SegmentPath(p.ReturnPath.ToArray()));
+                        this.tankAgent.Model.Manipulator.LinearVelocity = 8;
                     }
                 }
             }
-
-            this.tankController.UpdateManipulator(gameTime, this.tank.Manipulator);
 
             #endregion
 
@@ -873,7 +884,7 @@ namespace DeferredTest
             this.Lights.ClearSpotLights();
             this.spotLight = null;
 
-            this.Lights.AddRange(this.tank.Lights);
+            this.Lights.AddRange(this.tankAgent.Model.Lights);
 
             if (!modelsOnly)
             {

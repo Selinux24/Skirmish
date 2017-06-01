@@ -173,9 +173,11 @@
     <Compile Include="GroundGardener.cs" />
     <Compile Include="GroundGardenerDescription.cs" />
     <Compile Include="ICull.cs" />
+    <Compile Include="IDrawable.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />
     <Compile Include="ISceneLightPosition.cs" />
+    <Compile Include="IUpdatable.cs" />
     <Compile Include="IVertexList.cs" />
     <Compile Include="BasicManipulatorController.cs" />
     <Compile Include="MaterialDescription.cs" />

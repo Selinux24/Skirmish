@@ -170,7 +170,7 @@ namespace Engine
             scene.Lights.Cull(this.UpdateContext.Frustum, this.UpdateContext.EyePosition);
 
             //Update active components
-            scene.Components.FindAll(c => c.Active).ForEach(c => c.Update(this.UpdateContext));
+            scene.UpdatableComponents.FindAll(c => c.Active).ForEach(c => c.Update(this.UpdateContext));
 
             this.Updated = true;
 #if DEBUG
@@ -205,7 +205,7 @@ namespace Engine
                 Stopwatch swTotal = Stopwatch.StartNew();
 #endif
                 //Draw visible components
-                var visibleComponents = scene.Components.FindAll(c => c.Visible);
+                var visibleComponents = scene.DrawableComponents.FindAll(c => c.Visible);
                 if (visibleComponents.Count > 0)
                 {
                     #region Preparation
@@ -266,7 +266,7 @@ namespace Engine
                         #region Shadow map
 
                         //Draw components if drop shadow (opaque)
-                        var shadowObjs = scene.Components.FindAll(c => c.CastShadow == true);
+                        var shadowObjs = scene.DrawableComponents.FindAll(c => c.CastShadow == true);
                         if (shadowObjs.Count > 0)
                         {
                             #region Cull
@@ -274,9 +274,11 @@ namespace Engine
 #if DEBUG
                             Stopwatch swCull = Stopwatch.StartNew();
 #endif
+                            var toCullShadowObjs = shadowObjs.FindAll(s => s is ICull).ConvertAll<ICull>(s => (ICull)s);
+
                             var sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
 
-                            var doLowShadows = this.cullManager.Cull(sph, CullIndexShadowLowIndex, shadowObjs);
+                            var doLowShadows = this.cullManager.Cull(sph, CullIndexShadowLowIndex, toCullShadowObjs);
 #if DEBUG
                             swCull.Stop();
 
@@ -317,9 +319,11 @@ namespace Engine
 #if DEBUG
                             swCull = Stopwatch.StartNew();
 #endif
+                            toCullShadowObjs = shadowObjs.FindAll(s => s is ICull).ConvertAll<ICull>(s => (ICull)s);
+
                             sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
 
-                            var doHighShadows = this.cullManager.Cull(sph, CullIndexShadowHighIndex, shadowObjs);
+                            var doHighShadows = this.cullManager.Cull(sph, CullIndexShadowHighIndex, toCullShadowObjs);
 #if DEBUG
                             swCull.Stop();
 
@@ -392,8 +396,10 @@ namespace Engine
                         bool draw = false;
                         if (scene.PerformFrustumCulling)
                         {
+                            var toCullVisible = visibleComponents.FindAll(s => s is ICull).ConvertAll<ICull>(s => (ICull)s);
+
                             //Frustum culling
-                            draw = this.cullManager.Cull(this.DrawContext.Frustum, CullIndexDrawIndex, visibleComponents);
+                            draw = this.cullManager.Cull(this.DrawContext.Frustum, CullIndexDrawIndex, toCullVisible);
                         }
                         else
                         {
@@ -520,11 +526,12 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="index">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawShadowComponents(GameTime gameTime, DrawContext context, int index, List<Drawable> components)
+        private void DrawShadowComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<IDrawable> components)
         {
             components.ForEach((c) =>
             {
-                if (!this.cullManager.IsVisible(index, c))
+                var visible = (c is ICull) ? !this.cullManager.IsVisible(index, (ICull)c) : true;
+                if (visible)
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
 
@@ -545,13 +552,14 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="index">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, List<Drawable> components)
+        private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<IDrawable> components)
         {
             components.ForEach((c) =>
             {
                 Counters.MaxInstancesPerFrame += c.Count;
 
-                if (!this.cullManager.IsVisible(index, c))
+                var visible = (c is ICull) ? !this.cullManager.IsVisible(index, (ICull)c) : true;
+                if (visible)
                 {
                     this.Game.Graphics.SetRasterizerDefault();
 

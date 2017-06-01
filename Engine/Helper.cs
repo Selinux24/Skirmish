@@ -156,7 +156,7 @@ namespace Engine
         /// <summary>
         /// Performs the specified action on each element of the System.Collections.Generic.IEnumerable<T>.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="T">Type</typeparam>
         /// <param name="enumeration">The enumeration instance</param>
         /// <param name="action">The System.Action`1 delegate to perform on each element of the System.Collections.Generic.IEnumerable<T>.</param>
         public static void ForEach<T>(this IEnumerable<T> enumeration, Action<T> action)
@@ -165,6 +165,27 @@ namespace Engine
             {
                 action(item);
             }
+        }
+        /// <summary>
+        /// Retrieves all the elements that match the conditions defined by the specified predicate
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="enumeration"></param>
+        /// <param name="match">The System.Predicate delegate that defines the conditions of the elements to search for</param>
+        /// <returns>A list containing all the elements that match the conditions defined by the specified predicate, if found; otherwise, an empty list</returns>
+        public static List<T> FindAll<T>(this IEnumerable<T> enumeration, Predicate<T> match)
+        {
+            List<T> res = new List<T>();
+
+            foreach (T item in enumeration)
+            {
+                if (match.Invoke(item))
+                {
+                    res.Add(item);
+                }
+            }
+
+            return res;
         }
         /// <summary>
         /// Gets the internal items of the KeyCollection into a list
@@ -251,6 +272,14 @@ namespace Engine
             return res;
         }
         /// <summary>
+        /// Dispose object
+        /// </summary>
+        /// <param name="obj">Object</param>
+        public static void Dispose(Object obj)
+        {
+            Dispose((IDisposable)obj);
+        }
+        /// <summary>
         /// Dispose disposable object
         /// </summary>
         /// <param name="obj">Disposable object</param>
@@ -259,6 +288,23 @@ namespace Engine
             if (obj != null)
             {
                 obj.Dispose();
+            }
+        }
+        /// <summary>
+        /// Dispose objects array
+        /// </summary>
+        /// <param name="array">Objects array</param>
+        public static void Dispose(IEnumerable<Object> array)
+        {
+            if (array != null && array.Count() > 0)
+            {
+                foreach (var item in array)
+                {
+                    if (item is IDisposable)
+                    {
+                        Helper.Dispose((IDisposable)item);
+                    }
+                }
             }
         }
         /// <summary>

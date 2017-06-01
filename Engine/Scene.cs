@@ -2,6 +2,7 @@
 using SharpDX.Direct3D11;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 
 namespace Engine
@@ -25,9 +26,13 @@ namespace Engine
         /// </summary>
         private Matrix world = Matrix.Identity;
         /// <summary>
-        /// Scene component list
+        /// Drawable component list
         /// </summary>
-        private List<Drawable> components = new List<Drawable>();
+        private List<IDrawable> drawableComponents = new List<IDrawable>();
+        /// <summary>
+        /// Updatable component list
+        /// </summary>
+        private List<IUpdatable> updatableComponents = new List<IUpdatable>();
         /// <summary>
         /// Control captured with mouse
         /// </summary>
@@ -124,13 +129,23 @@ namespace Engine
         /// </summary>
         public SceneLights Lights { get; protected set; }
         /// <summary>
-        /// Gets the component list of the scene
+        /// Gets the drawable component list of the scene
         /// </summary>
-        public List<Drawable> Components
+        public ReadOnlyCollection<IDrawable> DrawableComponents
         {
             get
             {
-                return this.components;
+                return new ReadOnlyCollection<IDrawable>(this.drawableComponents);
+            }
+        }
+        /// <summary>
+        /// Gets the updatable component list of the scene
+        /// </summary>
+        public ReadOnlyCollection<IUpdatable> UpdatableComponents
+        {
+            get
+            {
+                return new ReadOnlyCollection<IUpdatable>(this.updatableComponents);
             }
         }
         /// <summary>
@@ -193,7 +208,7 @@ namespace Engine
         /// </summary>
         public virtual void Initialize()
         {
-            
+
         }
         /// <summary>
         /// Generates scene resources
@@ -226,7 +241,7 @@ namespace Engine
             this.CapturedControl = this.capturedControl != null;
 
             //Process 2D controls
-            List<Drawable> ctrls = this.components.FindAll(c => c.Active && c is IControl);
+            var ctrls = this.updatableComponents.FindAll(c => c.Active && c is IControl);
             for (int i = 0; i < ctrls.Count; i++)
             {
                 IControl ctrl = (IControl)ctrls[i];
@@ -271,7 +286,8 @@ namespace Engine
         {
             Helper.Dispose(this.Renderer);
             Helper.Dispose(this.camera);
-            Helper.Dispose(this.components);
+            Helper.Dispose(this.drawableComponents);
+            Helper.Dispose(this.updatableComponents);
         }
         /// <summary>
         /// Change renderer mode
@@ -304,9 +320,9 @@ namespace Engine
                 this.Renderer.Resize();
             }
 
-            for (int i = 0; i < this.components.Count; i++)
+            for (int i = 0; i < this.drawableComponents.Count; i++)
             {
-                var fitted = this.components[i] as IScreenFitted;
+                var fitted = this.drawableComponents[i] as IScreenFitted;
                 if (fitted != null)
                 {
                     fitted.Resize();
@@ -802,15 +818,22 @@ namespace Engine
         /// <param name="order">Processing order</param>
         private void AddComponent(Drawable component, int order)
         {
-            if (!this.components.Contains(component))
+            this.AddComponent((IDrawable)component, order);
+
+            this.AddComponent((IUpdatable)component);
+        }
+
+        public void AddComponent(IDrawable component, int order)
+        {
+            if (!this.drawableComponents.Contains(component))
             {
                 if (order != 0)
                 {
                     component.Order = order;
                 }
 
-                this.components.Add(component);
-                this.components.Sort((p1, p2) =>
+                this.drawableComponents.Add(component);
+                this.drawableComponents.Sort((p1, p2) =>
                 {
                     //First by order index
                     int i = p1.Order.CompareTo(p2.Order);
@@ -829,18 +852,45 @@ namespace Engine
                 this.UpdateGlobalResources = true;
             }
         }
+
+        public void AddComponent(IUpdatable component)
+        {
+            if (!this.updatableComponents.Contains(component))
+            {
+                this.updatableComponents.Add(component);
+
+                this.UpdateGlobalResources = true;
+            }
+        }
         /// <summary>
         /// Remove and dispose component
         /// </summary>
         /// <param name="component">Component</param>
         public void RemoveComponent(Drawable component)
         {
-            if (this.components.Contains(component))
-            {
-                this.components.Remove(component);
+            this.RemoveComponent((IDrawable)component);
 
-                component.Dispose();
-                component = null;
+            this.RemoveComponent((IUpdatable)component);
+
+            component.Dispose();
+            component = null;
+        }
+
+        public void RemoveComponent(IDrawable component)
+        {
+            if (this.drawableComponents.Contains(component))
+            {
+                this.drawableComponents.Remove(component);
+
+                this.UpdateGlobalResources = true;
+            }
+        }
+
+        public void RemoveComponent(IUpdatable component)
+        {
+            if (this.updatableComponents.Contains(component))
+            {
+                this.updatableComponents.Remove(component);
 
                 this.UpdateGlobalResources = true;
             }
@@ -894,7 +944,7 @@ namespace Engine
 
             mats.Add(MeshMaterial.Default);
 
-            var matComponents = this.components.FindAll(c => c is UseMaterials);
+            var matComponents = this.drawableComponents.FindAll(c => c is UseMaterials);
 
             foreach (UseMaterials component in matComponents)
             {
@@ -948,7 +998,7 @@ namespace Engine
         {
             List<SkinningData> skData = new List<SkinningData>();
 
-            var skComponents = this.components.FindAll(c => c is UseSkinningData);
+            var skComponents = this.drawableComponents.FindAll(c => c is UseSkinningData);
 
             foreach (UseSkinningData component in skComponents)
             {
