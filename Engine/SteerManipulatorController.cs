@@ -12,7 +12,7 @@ namespace Engine
         /// <summary>
         /// Current velocity
         /// </summary>
-        private Vector3 velocity;
+        protected Vector3 Velocity;
         /// <summary>
         /// Maximum force
         /// </summary>
@@ -64,21 +64,21 @@ namespace Engine
                         }
 
                         // Steering = Desired minus Velocity
-                        var steer = desired - this.velocity;
+                        var steer = desired - this.Velocity;
 
                         // Limit to maximum steering force
                         steer = steer.Limit(maxForce);
 
                         // Update velocity
-                        this.velocity += steer;
+                        this.Velocity += steer;
 
                         // Limit speed
-                        this.velocity = this.velocity.Limit(maxSpeed);
+                        this.Velocity = this.Velocity.Limit(maxSpeed);
 
-                        position += this.velocity;
+                        position += this.Velocity;
 
                         manipulator.SetPosition(position);
-                        manipulator.LookAt(position + this.velocity, false);
+                        manipulator.LookAt(position + this.Velocity, false);
                     }
                 }
                 else

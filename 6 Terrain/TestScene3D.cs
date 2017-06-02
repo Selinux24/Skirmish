@@ -54,6 +54,8 @@ namespace TerrainTest
         private Model tankP1 = null;
         private Model tankP2 = null;
         private NavigationMeshAgentType tankAgentType = new NavigationMeshAgentType();
+        private Vector3 tankLeftCat = Vector3.Zero;
+        private Vector3 tankRightCat = Vector3.Zero;
 
         private LensFlare lensFlare = null;
         private Skydom skydom = null;
@@ -338,6 +340,9 @@ namespace TerrainTest
             tankAgentType.Height = tankbbox.GetY();
             tankAgentType.Radius = tankbbox.GetX() * 0.5f;
             tankAgentType.MaxClimb = tankbbox.GetY() * 0.4f;
+
+            this.tankLeftCat = new Vector3(tankbbox.Maximum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
+            this.tankRightCat = new Vector3(tankbbox.Minimum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
 
             #endregion
 
@@ -821,14 +826,14 @@ namespace TerrainTest
                 SecondaryWeapon = t2W,
                 Life = 300,
                 SightDistance = 80,
-                SightAngle = 45,
+                SightAngle = 145,
             };
 
             var hStatus = new FlyerAIStatusDescription()
             {
                 PrimaryWeapon = h1W,
                 SecondaryWeapon = h2W,
-                Life = 50,
+                Life = 1,
                 SightDistance = 100,
                 SightAngle = 90,
                 FlightHeight = 20,
@@ -838,10 +843,16 @@ namespace TerrainTest
             this.tankP2Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP2, tStatus);
             this.helicopterAgent = new FlyerAIAgent(this.agentManager, null, this.helicopter, hStatus);
 
+            this.AddComponent(this.tankP1Agent);
+            this.AddComponent(this.tankP2Agent);
+            this.AddComponent(this.helicopterAgent);
+
+            this.tankP1Agent.Moving += Agent_Moving;
             this.tankP1Agent.Attacking += Agent_Attacking;
             this.tankP1Agent.Damaged += Agent_Damaged;
             this.tankP1Agent.Destroyed += Agent_Destroyed;
 
+            this.tankP2Agent.Moving += Agent_Moving;
             this.tankP2Agent.Attacking += Agent_Attacking;
             this.tankP2Agent.Damaged += Agent_Damaged;
             this.tankP2Agent.Destroyed += Agent_Destroyed;
@@ -1224,8 +1235,6 @@ namespace TerrainTest
 
             #endregion
 
-            this.agentManager.Update(gameTime);
-
             var tp = this.helicopterAgent.Target;
             if (tp.HasValue)
             {
@@ -1254,15 +1263,15 @@ namespace TerrainTest
             this.counters1.Text = txt1;
 
             string txt2 = string.Format(
-                "IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}; T1.{5}.{6:000}  /  T2.{7}.{8:000}  /  H.{9}.{10:000}",
+                "IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}; T1.{5}  /  T2.{6}  /  H.{7}",
                 Counters.IAInputLayoutSets,
                 Counters.IAPrimitiveTopologySets,
                 Counters.IAVertexBuffersSets,
                 Counters.IAIndexBufferSets,
                 this.terrain.VisiblePatchesCount,
-                this.tankP1Agent.CurrentState, this.tankP1Agent.Status.Life,
-                this.tankP2Agent.CurrentState, this.tankP2Agent.Status.Life,
-                this.helicopterAgent.CurrentState, this.helicopterAgent.Status.Life);
+                this.tankP1Agent,
+                this.tankP2Agent,
+                this.helicopterAgent);
             this.counters2.Text = txt2;
 
             #endregion
@@ -1336,6 +1345,14 @@ namespace TerrainTest
             return curve;
         }
 
+        private void Agent_Moving(BehaviorEventArgs e)
+        {
+            if (Helper.RandomGenerator.NextFloat(0, 1) > 0.8f)
+            {
+                this.AddDustSystem(e.Active, this.tankLeftCat);
+                this.AddDustSystem(e.Active, this.tankRightCat);
+            }
+        }
         private void Agent_Attacking(BehaviorEventArgs e)
         {
             //TODO: Add weapon firing effects
@@ -1345,19 +1362,6 @@ namespace TerrainTest
             this.AddExplosionSystem(e.Passive);
             this.AddExplosionSystem(e.Passive);
             this.AddSmokeSystem(e.Passive);
-
-            if (e.Passive.Status.Damage > 0.9f)
-            {
-                e.Passive.Model.TextureIndex = 2;
-            }
-            else if (e.Passive.Status.Damage > 0.2f)
-            {
-                e.Passive.Model.TextureIndex = 1;
-            }
-            else
-            {
-                e.Passive.Model.TextureIndex = 0;
-            }
         }
         private void Agent_Destroyed(BehaviorEventArgs e)
         {
@@ -1375,8 +1379,6 @@ namespace TerrainTest
                 this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
                 this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
                 this.AddExplosionSystem(e.Passive, Helper.RandomGenerator.NextVector3(Vector3.One * -1f, Vector3.One));
-
-                e.Passive.Model.Visible = false;
             }
             else
             {
@@ -1387,8 +1389,6 @@ namespace TerrainTest
                 this.AddExplosionSystem(e.Passive);
                 this.AddExplosionSystem(e.Passive);
                 this.AddSmokePlumeSystem(e.Passive);
-
-                e.Passive.Model.TextureIndex = 2;
             }
         }
 
@@ -1398,7 +1398,7 @@ namespace TerrainTest
             float duration = 0.5f;
             float rate = 0.1f;
 
-            var emitter1 = new MovingEmitter(agent.Model.Manipulator, random)
+            var emitter1 = new MovingEmitter(agent.Manipulator, random)
             {
                 Velocity = velocity,
                 Duration = duration,
@@ -1415,7 +1415,7 @@ namespace TerrainTest
             float duration = 0.5f;
             float rate = 0.1f;
 
-            var emitter1 = new MovingEmitter(agent.Model.Manipulator, Vector3.Zero)
+            var emitter1 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
             {
                 Velocity = velocity,
                 Duration = duration,
@@ -1423,7 +1423,7 @@ namespace TerrainTest
                 InfiniteDuration = false,
                 MaximumDistance = 100f,
             };
-            var emitter2 = new MovingEmitter(agent.Model.Manipulator, Vector3.Zero)
+            var emitter2 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
             {
                 Velocity = velocity,
                 Duration = duration,
@@ -1441,7 +1441,7 @@ namespace TerrainTest
             float duration = this.rnd.NextFloat(60, 360);
             float rate = this.rnd.NextFloat(0.1f, 1f);
 
-            var emitter1 = new MovingEmitter(agent.Model.Manipulator, Vector3.Zero)
+            var emitter1 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
             {
                 Velocity = velocity,
                 Duration = duration,
@@ -1450,7 +1450,7 @@ namespace TerrainTest
                 MaximumDistance = 100f,
             };
 
-            var emitter2 = new MovingEmitter(agent.Model.Manipulator, Vector3.Zero)
+            var emitter2 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
             {
                 Velocity = velocity,
                 Duration = duration + (duration * 0.1f),
@@ -1468,7 +1468,7 @@ namespace TerrainTest
             float duration = this.rnd.NextFloat(10, 30);
             float rate = this.rnd.NextFloat(0.1f, 1f);
 
-            var emitter = new MovingEmitter(agent.Model.Manipulator, Vector3.Zero)
+            var emitter = new MovingEmitter(agent.Manipulator, Vector3.Zero)
             {
                 Velocity = velocity,
                 Duration = duration + (duration * 0.1f),
@@ -1478,6 +1478,17 @@ namespace TerrainTest
             };
 
             this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter);
+        }
+        private void AddDustSystem(AIAgent agent, Vector3 delta)
+        {
+            var emitter = new MovingEmitter(agent.Manipulator, delta)
+            {
+                Duration = 5f,
+                EmissionRate = 1f,
+                MaximumDistance = 250f,
+            };
+
+            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
         }
 
         private void DEBUGPickingPosition(Vector3 position)

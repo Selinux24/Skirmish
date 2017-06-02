@@ -43,8 +43,8 @@ namespace TerrainTest.AI
             {
                 if (from.OnSight(to))
                 {
-                    var fromPosition = from.Model.Manipulator.Position;
-                    var toPosition = to.Model.Manipulator.Position;
+                    var fromPosition = from.Manipulator.Position;
+                    var toPosition = to.Manipulator.Position;
 
                     var distance = Vector3.Distance(toPosition, fromPosition);
                     if (distance <= this.Range)

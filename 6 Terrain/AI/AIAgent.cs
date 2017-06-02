@@ -6,18 +6,14 @@ using System;
 
 namespace TerrainTest.AI
 {
-    public class AIAgent
+    public class AIAgent : IUpdatable, ITransformable3D
     {
-        protected Brain Parent;
-        public AIStatus Status;
-        public Model Model;
-        public AgentType AgentType;
-        public ManipulatorController Controller;
-
         delegate void CurrentBehavior(GameTime gameTime);
 
-        CurrentBehavior currentBehavior = null;
-        public AIStates CurrentState = AIStates.Idle;
+        private CurrentBehavior currentBehavior = null;
+
+        private Vector3? lastPosition = null;
+        private float lastDistance = 0f;
 
         private Vector3[] checkPoints = null;
         private int currentCheckPoint = -1;
@@ -33,6 +29,13 @@ namespace TerrainTest.AI
         private Vector3 rallyPoint;
         private Vector3? retreatingPosition = null;
         private float retreatVelocity;
+
+        protected Brain Parent;
+        protected AIStatus Status;
+        protected Model Model;
+        protected AgentType AgentType;
+        protected ManipulatorController Controller;
+        protected AIStates CurrentState = AIStates.Idle;
 
         public Vector3? Target
         {
@@ -61,13 +64,25 @@ namespace TerrainTest.AI
                 return null;
             }
         }
+        public bool Active { get; set; }
 
+        public event BehaviorEventHandler Moving;
         public event BehaviorEventHandler Attacking;
         public event BehaviorEventHandler Damaged;
         public event BehaviorEventHandler Destroyed;
 
+        public Manipulator3D Manipulator
+        {
+            get
+            {
+                return this.Model.Manipulator;
+            }
+        }
+
         public AIAgent(Brain parent, AgentType agentType, Model model, AIStatusDescription status)
         {
+            this.Active = true;
+
             this.Parent = parent;
             this.AgentType = agentType;
             this.Model = model;
@@ -77,91 +92,102 @@ namespace TerrainTest.AI
             this.ChangeState(AIStates.Idle);
         }
 
-        public void Update(GameTime gameTime)
+        public void Update(UpdateContext context)
         {
-            if (this.CurrentState == AIStates.None)
+            if (this.CurrentState != AIStates.None)
             {
-                return;
-            }
+                this.currentBehavior?.Invoke(context.GameTime);
 
-            this.currentBehavior?.Invoke(gameTime);
-
-            if (this.CurrentState == AIStates.Idle)
-            {
-                if (this.AttackingTest(gameTime))
+                if (this.CurrentState == AIStates.Idle)
                 {
-                    this.ChangeState(AIStates.Attacking);
+                    if (this.AttackingTest(context.GameTime))
+                    {
+                        this.ChangeState(AIStates.Attacking);
+                    }
+                    else if (this.RetreatingTest(context.GameTime))
+                    {
+                        this.ChangeState(AIStates.Retreating);
+                    }
+                    else if (this.PatrollingTest(context.GameTime))
+                    {
+                        this.ChangeState(AIStates.Patrolling);
+                    }
+                    else
+                    {
+                        //Continue doing nothing
+                    }
                 }
-                else if (this.RetreatingTest(gameTime))
+                else if (this.CurrentState == AIStates.Patrolling)
                 {
-                    this.ChangeState(AIStates.Retreating);
+                    if (this.AttackingTest(context.GameTime))
+                    {
+                        this.ChangeState(AIStates.Attacking);
+                    }
+                    else if (this.RetreatingTest(context.GameTime))
+                    {
+                        this.ChangeState(AIStates.Retreating);
+                    }
+                    else if (this.PatrollingTest(context.GameTime))
+                    {
+                        //Continue patrolling
+                    }
+                    else
+                    {
+                        this.ChangeState(AIStates.Idle);
+                    }
                 }
-                else if (this.PatrollingTest(gameTime))
+                else if (this.CurrentState == AIStates.Attacking)
                 {
-                    this.ChangeState(AIStates.Patrolling);
+                    if (this.AttackingTest(context.GameTime))
+                    {
+                        //Continue attacking
+                    }
+                    else if (this.RetreatingTest(context.GameTime))
+                    {
+                        this.ChangeState(AIStates.Retreating);
+                    }
+                    else if (this.PatrollingTest(context.GameTime))
+                    {
+                        this.ChangeState(AIStates.Patrolling);
+                    }
+                    else
+                    {
+                        this.ChangeState(AIStates.Idle);
+                    }
                 }
-                else
+                else if (this.CurrentState == AIStates.Retreating)
                 {
-                    //Continue doing nothing
-                }
-            }
-            else if (this.CurrentState == AIStates.Patrolling)
-            {
-                if (this.AttackingTest(gameTime))
-                {
-                    this.ChangeState(AIStates.Attacking);
-                }
-                else if (this.RetreatingTest(gameTime))
-                {
-                    this.ChangeState(AIStates.Retreating);
-                }
-                else if (this.PatrollingTest(gameTime))
-                {
-                    //Continue patrolling
-                }
-                else
-                {
-                    this.ChangeState(AIStates.Idle);
-                }
-            }
-            else if (this.CurrentState == AIStates.Attacking)
-            {
-                if (this.AttackingTest(gameTime))
-                {
-                    //Continue attacking
-                }
-                else if (this.RetreatingTest(gameTime))
-                {
-                    this.ChangeState(AIStates.Retreating);
-                }
-                else if (this.PatrollingTest(gameTime))
-                {
-                    this.ChangeState(AIStates.Patrolling);
-                }
-                else
-                {
-                    this.ChangeState(AIStates.Idle);
-                }
-            }
-            else if (this.CurrentState == AIStates.Retreating)
-            {
-                if (this.RetreatingTest(gameTime))
-                {
-                    //Continue the retreat
-                }
-                else if (this.PatrollingTest(gameTime))
-                {
-                    this.ChangeState(AIStates.Patrolling);
-                }
-                else
-                {
-                    this.ChangeState(AIStates.Idle);
+                    if (this.RetreatingTest(context.GameTime))
+                    {
+                        //Continue the retreat
+                    }
+                    else if (this.PatrollingTest(context.GameTime))
+                    {
+                        this.ChangeState(AIStates.Patrolling);
+                    }
+                    else
+                    {
+                        this.ChangeState(AIStates.Idle);
+                    }
                 }
             }
 
-            this.Status.Update(gameTime);
+            this.Status.Update(context.GameTime);
 
-            this.Controller.UpdateManipulator(gameTime, this.Model.Manipulator);
+            this.lastPosition = this.Model.Manipulator.Position;
+
+            this.Controller.UpdateManipulator(context.GameTime, this.Model.Manipulator);
+
+            if (this.lastPosition.HasValue)
+            {
+                lastDistance += Vector3.Distance(this.lastPosition.Value, this.Model.Manipulator.Position);
+                if (lastDistance > 0.2f)
+                {
+                    this.FireMoving(this, null);
+
+                    lastDistance -= 0.2f;
+                }
+            }
         }
 
         public void Clear()
@@ -470,17 +496,42 @@ namespace TerrainTest.AI
         }
 
 
-        private void FireAttacking(AIAgent active, AIAgent passive)
+        protected virtual void FireMoving(AIAgent active, AIAgent passive)
+        {
+            this.Moving?.Invoke(new BehaviorEventArgs(active, passive));
+        }
+        protected virtual void FireAttacking(AIAgent active, AIAgent passive)
         {
             this.Attacking?.Invoke(new BehaviorEventArgs(active, passive));
         }
-        private void FireDamaged(AIAgent active, AIAgent passive)
+        protected virtual void FireDamaged(AIAgent active, AIAgent passive)
         {
+            if (this.Status.Damage > 0.9f)
+            {
+                this.Model.TextureIndex = 2;
+            }
+            else if (this.Status.Damage > 0.2f)
+            {
+                this.Model.TextureIndex = 1;
+            }
+            else
+            {
+                this.Model.TextureIndex = 0;
+            }
+
             this.Damaged?.Invoke(new BehaviorEventArgs(active, passive));
         }
-        private void FireDestroyed(AIAgent active, AIAgent passive)
+        protected virtual void FireDestroyed(AIAgent active, AIAgent passive)
         {
+            this.Model.TextureIndex = 2;
+
             this.Destroyed?.Invoke(new BehaviorEventArgs(active, passive));
+        }
+
+
+        public override string ToString()
+        {
+            return string.Format("{0} -> {1:000:00}", this.CurrentState, this.Status.Life);
         }
     }
 }

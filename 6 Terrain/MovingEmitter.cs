@@ -35,7 +35,9 @@ namespace TerrainTest
         /// <param name="context">Updating context</param>
         public override void Update(UpdateContext context)
         {
-            this.Position = this.manipulator.Position + this.delta;
+            Vector3 rDelta = Vector3.Transform(this.delta, this.manipulator.Rotation);
+
+            this.Position = this.manipulator.Position + rDelta;
 
             base.Update(context);
         }

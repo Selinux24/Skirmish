@@ -27,21 +27,6 @@ namespace TerrainTest.AI
         }
 
         /// <summary>
-        /// Updates the brain state
-        /// </summary>
-        /// <param name="gameTime"></param>
-        public void Update(GameTime gameTime)
-        {
-            foreach (var values in this.groups.Values)
-            {
-                for (int i = 0; i < values.Count; i++)
-                {
-                    values[i].Update(gameTime);
-                }
-            }
-        }
-
-        /// <summary>
         /// Adds agents to the brain groups
         /// </summary>
         /// <param name="index">Group index</param>

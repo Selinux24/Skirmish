@@ -177,6 +177,7 @@
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />
     <Compile Include="ISceneLightPosition.cs" />
+    <Compile Include="ITransformable3D.cs" />
     <Compile Include="IUpdatable.cs" />
     <Compile Include="IVertexList.cs" />
     <Compile Include="BasicManipulatorController.cs" />
