@@ -64,7 +64,39 @@ namespace TerrainTest.AI
                 return null;
             }
         }
-        public bool Active { get; set; }
+        public bool Active
+        {
+            get
+            {
+                return this.Model.Active;
+            }
+            set
+            {
+                this.Model.Active = value;
+            }
+        }
+        public bool Visible
+        {
+            get
+            {
+                return this.Model.Visible;
+            }
+            set
+            {
+                this.Model.Visible = value;
+            }
+        }
+        public float Speed
+        {
+            get
+            {
+                return this.Controller.MaximumSpeed;
+            }
+            set
+            {
+                this.Controller.MaximumSpeed = value;
+            }
+        }
 
         public event BehaviorEventHandler Moving;
         public event BehaviorEventHandler Attacking;
@@ -81,8 +113,6 @@ namespace TerrainTest.AI
 
         public AIAgent(Brain parent, AgentType agentType, Model model, AIStatusDescription status)
         {
-            this.Active = true;
-
             this.Parent = parent;
             this.AgentType = agentType;
             this.Model = model;
@@ -426,15 +456,15 @@ namespace TerrainTest.AI
 
             return false;
         }
-        protected virtual void SetRouteToPoint(Vector3 point, float velocity)
+        protected virtual void SetRouteToPoint(Vector3 point, float speed)
         {
             if (this.AgentType != null & this.Parent.Ground != null)
             {
                 var p = this.Parent.Ground.FindPath(this.AgentType, this.Model.Manipulator.Position, point);
-
-                this.Controller.Follow(new SegmentPath(p.ReturnPath.ToArray()));
-
-                this.Model.Manipulator.LinearVelocity = velocity;
+                if (p != null)
+                {
+                    this.Follow(p, speed);
+                }
             }
         }
 
@@ -529,9 +559,15 @@ namespace TerrainTest.AI
         }
 
 
+        public void Follow(PathFindingPath path, float speed)
+        {
+            this.Controller.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
+            this.Controller.MaximumSpeed = speed;
+        }
+
         public override string ToString()
         {
-            return string.Format("{0} -> {1:000:00}", this.CurrentState, this.Status.Life);
+            return string.Format("{0} -> {1:000.00}", this.CurrentState, this.Status.Life);
         }
     }
 }

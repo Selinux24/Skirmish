@@ -1,7 +1,11 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Manipulator controller base class
+    /// </summary>
     public abstract class ManipulatorController
     {
         /// <summary>
@@ -12,6 +16,18 @@ namespace Engine.Common
         /// Path time
         /// </summary>
         protected float pathTime = 0f;
+        /// <summary>
+        /// Current velocity
+        /// </summary>
+        protected Vector3 Velocity = Vector3.Zero;
+        /// <summary>
+        /// Maximum speed
+        /// </summary>
+        public float MaximumSpeed = 1f;
+        /// <summary>
+        /// Maximum force
+        /// </summary>
+        public float MaximumForce = 1f;
         /// <summary>
         /// Gets if the current controller has a initialized path
         /// </summary>

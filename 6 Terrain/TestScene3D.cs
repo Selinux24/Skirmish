@@ -818,6 +818,29 @@ namespace TerrainTest
             var h1W = new WeaponDescription() { Name = "Missile", Damage = 100, Cadence = 10f, Range = 100 };
             var h2W = new WeaponDescription() { Name = "Gatling", Damage = 10, Cadence = 0.1f, Range = 30 };
 
+            //Adjust check-points
+            for (int i = 0; i < this.p1CheckPoints.Length; i++)
+            {
+                Vector3 p1;
+                Triangle t1;
+                float d1;
+                if (this.terrain.FindNearestGroundPosition(this.p1CheckPoints[i], out p1, out t1, out d1))
+                {
+                    this.p1CheckPoints[i] = p1;
+                }
+            }
+
+            for (int i = 0; i < this.p2CheckPoints.Length; i++)
+            {
+                Vector3 p2;
+                Triangle t2;
+                float d2;
+                if (this.terrain.FindNearestGroundPosition(this.p2CheckPoints[i], out p2, out t2, out d2))
+                {
+                    this.p2CheckPoints[i] = p2;
+                }
+            }
+
             this.agentManager = new Brain(this.terrain);
 
             var tStatus = new AIStatusDescription()
@@ -833,7 +856,7 @@ namespace TerrainTest
             {
                 PrimaryWeapon = h1W,
                 SecondaryWeapon = h2W,
-                Life = 1,
+                Life = 50,
                 SightDistance = 100,
                 SightAngle = 90,
                 FlightHeight = 20,
@@ -1056,8 +1079,7 @@ namespace TerrainTest
                     if (p != null)
                     {
                         this.tankP1Agent.Clear();
-                        //this.tankP1.Manipulator.Follow(p.ReturnPath.ToArray());
-                        this.tankP1.Manipulator.LinearVelocity = 10f;
+                        this.tankP1Agent.Follow(p, 10);
 
                         this.DEBUGDrawTankPath(this.tankP1.Manipulator.Position, p);
                     }

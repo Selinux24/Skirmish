@@ -30,7 +30,7 @@ namespace DeferredTest
         private TextDrawer statistics = null;
         private Sprite backPannel = null;
 
-        private GameAgent tankAgent = null;
+        private GameAgent<SteerManipulatorController> tankAgent = null;
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
         private Skydom skydom = null;
@@ -155,8 +155,9 @@ namespace DeferredTest
 
                 var tankController = new SteerManipulatorController()
                 {
-                    ArrivingRadius = 5f,
-                    MaximumForce = 0.01f,
+                    MaximumForce = 0.5f,
+                    MaximumSpeed = 7.5f,
+                    ArrivingRadius = 7.5f,
                 };
 
                 var tankbbox = tank.GetBoundingBox();
@@ -167,16 +168,10 @@ namespace DeferredTest
                     MaxClimb = tankbbox.GetY() * 0.55f,
                 };
 
-                this.tankAgent = new GameAgent()
-                {
-                    Model = tank,
-                    Controller = tankController,
-                    AgentType = tankAgentType,
-                    Active = true,
-                };
+                this.tankAgent = new GameAgent<SteerManipulatorController>(tankAgentType, tank, tankController);
                 this.AddComponent(this.tankAgent);
 
-                this.Lights.AddRange(tank.Lights);
+                this.Lights.AddRange(this.tankAgent.Lights);
 
                 sw.Stop();
                 loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
@@ -311,8 +306,8 @@ namespace DeferredTest
                 float d;
                 if (this.terrain.FindTopGroundPosition(20, 40, out p, out t, out d))
                 {
-                    this.tankAgent.Model.Manipulator.SetPosition(p);
-                    this.tankAgent.Model.Manipulator.SetNormal(t.Normal);
+                    this.tankAgent.Manipulator.SetPosition(p);
+                    this.tankAgent.Manipulator.SetNormal(t.Normal);
                     cameraPosition += p;
                     modelCount++;
                 }
@@ -636,7 +631,7 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F9))
             {
-                this.tankAgent.Model.Active = this.tankAgent.Model.Visible = !this.tankAgent.Model.Visible;
+                this.tankAgent.Active = this.tankAgent.Visible = !this.tankAgent.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F10))
@@ -680,11 +675,10 @@ namespace DeferredTest
                 {
                     var p = this.terrain.FindPath(
                         this.tankAgent.AgentType,
-                        this.tankAgent.Model.Manipulator.Position, position, true, this.tankAgent.Model.Manipulator.LinearVelocity * gameTime.ElapsedSeconds);
+                        this.tankAgent.Manipulator.Position, position, true, this.tankAgent.MaximumSpeed * gameTime.ElapsedSeconds);
                     if (p != null)
                     {
-                        this.tankAgent.Controller.Follow(new SegmentPath(p.ReturnPath.ToArray()));
-                        this.tankAgent.Model.Manipulator.LinearVelocity = 8;
+                        this.tankAgent.FollowPath(p);
                     }
                 }
             }
@@ -884,7 +878,7 @@ namespace DeferredTest
             this.Lights.ClearSpotLights();
             this.spotLight = null;
 
-            this.Lights.AddRange(this.tankAgent.Model.Lights);
+            this.Lights.AddRange(this.tankAgent.Lights);
 
             if (!modelsOnly)
             {

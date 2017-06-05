@@ -862,7 +862,7 @@ namespace GameLogic
 
                     //Folow
                     controller.Follow(path);
-                    model.Manipulator.LinearVelocity = 3;
+                    controller.MaximumSpeed = 3;
 
                     this.GoToSoldier(active);
                 }
@@ -903,7 +903,7 @@ namespace GameLogic
 
                     //Folow
                     controller.Follow(path);
-                    model.Manipulator.LinearVelocity = 8;
+                    controller.MaximumSpeed = 8;
 
                     this.GoToSoldier(active);
                 }

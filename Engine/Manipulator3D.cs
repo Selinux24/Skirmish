@@ -103,14 +103,6 @@ namespace Engine
         /// Gets Down vector
         /// </summary>
         public Vector3 Down { get; private set; }
-        /// <summary>
-        /// Linear velocity modifier
-        /// </summary>
-        public float LinearVelocity = 1f;
-        /// <summary>
-        /// Angular velocity modifier
-        /// </summary>
-        public float AngularVelocity = 1f;
 
         /// <summary>
         /// Contructor
@@ -207,7 +199,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveForward(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Forward * d * this.LinearVelocity * gameTime.ElapsedSeconds);
+            this.Move(this.Forward * d * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along backward vector
@@ -215,7 +207,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveBackward(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Backward * d * this.LinearVelocity * gameTime.ElapsedSeconds);
+            this.Move(this.Backward * d * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along left vector
@@ -223,7 +215,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveLeft(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Left * -d * this.LinearVelocity * gameTime.ElapsedSeconds);
+            this.Move(this.Left * -d * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along right vector
@@ -231,7 +223,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveRight(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Right * -d * this.LinearVelocity * gameTime.ElapsedSeconds);
+            this.Move(this.Right * -d * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along up vector
@@ -239,7 +231,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveUp(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Up * d * this.LinearVelocity * gameTime.ElapsedSeconds);
+            this.Move(this.Up * d * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments position component d distance along down vector
@@ -247,7 +239,7 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveDown(GameTime gameTime, float d = 1f)
         {
-            this.Move(this.Down * d * this.LinearVelocity * gameTime.ElapsedSeconds);
+            this.Move(this.Down * d * gameTime.ElapsedSeconds);
         }
 
         /// <summary>
@@ -256,7 +248,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void YawLeft(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(-a * this.AngularVelocity * gameTime.ElapsedSeconds, 0, 0);
+            this.Rotate(-a * gameTime.ElapsedSeconds, 0, 0);
         }
         /// <summary>
         /// Increments rotation yaw (Y) to the right
@@ -264,7 +256,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void YawRight(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(a * this.AngularVelocity * gameTime.ElapsedSeconds, 0, 0);
+            this.Rotate(a * gameTime.ElapsedSeconds, 0, 0);
         }
         /// <summary>
         /// Increments rotation pitch (X) up
@@ -272,7 +264,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void PitchUp(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, a * this.AngularVelocity * gameTime.ElapsedSeconds, 0);
+            this.Rotate(0, a * gameTime.ElapsedSeconds, 0);
         }
         /// <summary>
         /// Increments rotation pitch (X) down
@@ -280,7 +272,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void PitchDown(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, -a * this.AngularVelocity * gameTime.ElapsedSeconds, 0);
+            this.Rotate(0, -a * gameTime.ElapsedSeconds, 0);
         }
         /// <summary>
         /// Increments rotation roll (Z) left
@@ -288,7 +280,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void RollLeft(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, 0, -a * this.AngularVelocity * gameTime.ElapsedSeconds);
+            this.Rotate(0, 0, -a * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Increments rotation roll (Z) right
@@ -296,7 +288,7 @@ namespace Engine
         /// <param name="a">Amount (radians)</param>
         public void RollRight(GameTime gameTime, float a = RADIAN)
         {
-            this.Rotate(0, 0, a * this.AngularVelocity * gameTime.ElapsedSeconds);
+            this.Rotate(0, 0, a * gameTime.ElapsedSeconds);
         }
 
         /// <summary>
@@ -440,9 +432,10 @@ namespace Engine
         /// <param name="target">Target</param>
         /// <param name="yAxisOnly">Rotate Y axis only</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        public void LookAt(Vector3 target, bool yAxisOnly = true, float interpolationAmount = 0)
+        /// <param name="updateState">Update internal state</param>
+        public void LookAt(Vector3 target, bool yAxisOnly = true, float interpolationAmount = 0, bool updateState = false)
         {
-            LookAt(target, Vector3.Up, yAxisOnly, interpolationAmount);
+            LookAt(target, Vector3.Up, yAxisOnly, interpolationAmount, updateState);
         }
         /// <summary>
         /// Look at target
@@ -451,20 +444,19 @@ namespace Engine
         /// <param name="up">Up vector</param>
         /// <param name="yAxisOnly">Rotate Y axis only</param>
         /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
-        public void LookAt(Vector3 target, Vector3 up, bool yAxisOnly = true, float interpolationAmount = 0)
+        /// <param name="updateState">Update internal state</param>
+        public void LookAt(Vector3 target, Vector3 up, bool yAxisOnly = true, float interpolationAmount = 0, bool updateState = false)
         {
             if (!Vector3.NearEqual(this.position, target, new Vector3(MathUtil.ZeroTolerance)))
             {
-                if (interpolationAmount == 0)
+                var newRotation = Helper.LookAt(this.position, target, up, yAxisOnly);
+
+                if (interpolationAmount > 0)
                 {
-                    this.rotation = Helper.LookAt(this.position, target, up, yAxisOnly);
-                }
-                else
-                {
-                    this.rotation = Quaternion.Slerp(this.rotation, Helper.LookAt(this.position, target, up, yAxisOnly), interpolationAmount);
+                    newRotation = Quaternion.Lerp(this.rotation, newRotation, interpolationAmount);
                 }
 
-                this.transformUpdateNeeded = true;
+                this.SetRotation(newRotation, updateState);
             }
         }
         /// <summary>

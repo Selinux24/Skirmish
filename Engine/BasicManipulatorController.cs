@@ -27,15 +27,15 @@
 
                 if (dToTarget > this.ArrivingThreshold)
                 {
-                    float maxSpeed = manipulator.LinearVelocity * gameTime.ElapsedSeconds;
+                    float maxSpeed = this.MaximumSpeed * gameTime.ElapsedSeconds;
 
                     this.pathTime += maxSpeed;
 
                     var next = this.path.GetPosition(this.pathTime);
-                    var velocity = next - position;
+                    this.Velocity = next - position;
 
                     manipulator.SetPosition(next);
-                    manipulator.LookAt(next + velocity, false);
+                    manipulator.LookAt(next + this.Velocity, false);
                 }
                 else
                 {

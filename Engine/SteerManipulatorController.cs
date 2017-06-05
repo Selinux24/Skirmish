@@ -10,14 +10,6 @@ namespace Engine
     public class SteerManipulatorController : ManipulatorController
     {
         /// <summary>
-        /// Current velocity
-        /// </summary>
-        protected Vector3 Velocity;
-        /// <summary>
-        /// Maximum force
-        /// </summary>
-        public float MaximumForce = 0.1f;
-        /// <summary>
         /// Arriving radius
         /// </summary>
         public float ArrivingRadius = 10f;
@@ -41,15 +33,13 @@ namespace Engine
 
                 if (dToTarget > this.ArrivingThreshold)
                 {
-                    float maxSpeed = manipulator.LinearVelocity * gameTime.ElapsedSeconds;
-                    float maxForce = this.MaximumForce;
+                    float maxSpeed = this.MaximumSpeed * gameTime.ElapsedSeconds;
+                    float maxForce = this.MaximumForce * gameTime.ElapsedSeconds;
 
-                    this.pathTime += maxSpeed;
-
-                    var next = this.path.GetNextControlPoint(this.pathTime);
+                    var next = this.path.GetNextControlPoint(this.pathTime + maxSpeed);
 
                     // A vector pointing from the location to the target
-                    var desired = next - position;
+                    var desired = (next - position);
                     float dToNext = desired.Length();
                     if (dToNext != 0)
                     {
@@ -75,10 +65,12 @@ namespace Engine
                         // Limit speed
                         this.Velocity = this.Velocity.Limit(maxSpeed);
 
-                        position += this.Velocity;
+                        this.pathTime += this.Velocity.Length();
+                        var newPosition = this.path.GetPosition(this.pathTime);
+                        var newNormal = this.path.GetNormal(this.pathTime);
 
-                        manipulator.SetPosition(position);
-                        manipulator.LookAt(position + this.Velocity, false);
+                        manipulator.SetPosition(newPosition);
+                        manipulator.LookAt(newPosition + (newPosition - position), newNormal, false, 0.1f);
                     }
                 }
                 else

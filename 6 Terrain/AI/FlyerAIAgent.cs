@@ -15,7 +15,7 @@ namespace TerrainTest.AI
             this.Controller = new HeliManipulatorController();
         }
 
-        protected override void SetRouteToPoint(Vector3 point, float velocity)
+        protected override void SetRouteToPoint(Vector3 point, float speed)
         {
             var p = point;
 
@@ -25,8 +25,7 @@ namespace TerrainTest.AI
             }
 
             this.Controller.Follow(new SegmentPath(new[] { this.Model.Manipulator.Position, p }));
-
-            this.Model.Manipulator.LinearVelocity = velocity;
+            this.Controller.MaximumSpeed = speed;
         }
 
         protected override void FireDestroyed(AIAgent active, AIAgent passive)

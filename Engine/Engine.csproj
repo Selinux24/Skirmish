@@ -182,6 +182,7 @@
     <Compile Include="IVertexList.cs" />
     <Compile Include="BasicManipulatorController.cs" />
     <Compile Include="MaterialDescription.cs" />
+    <Compile Include="NormalPath.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />
     <Compile Include="ParticleSystemCPU.cs" />
