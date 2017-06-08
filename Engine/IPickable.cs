@@ -37,5 +37,16 @@ namespace Engine
         /// <param name="distances">Distances to positions</param>
         /// <returns>Returns true if ground position found</returns>
         bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out T[] item, out float[] distances);
+
+        /// <summary>
+        /// Gets bounding sphere
+        /// </summary>
+        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
+        BoundingSphere GetBoundingSphere();
+        /// <summary>
+        /// Gets bounding box
+        /// </summary>
+        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
+        BoundingBox GetBoundingBox();
     }
 }

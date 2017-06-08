@@ -51,7 +51,7 @@ namespace Engine
                     LoadNormalMaps = true,
                     TextureCount = 0,
                     DynamicBuffers = false,
-                    Constraint = node.BoundingBox,
+                    Constraint = node.GetBoundingBox(),
                 };
 
                 var drawingData = DrawingData.Build(game, bufferManager, content, desc);
@@ -409,7 +409,7 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public override BoundingSphere GetBoundingSphere()
         {
-            return this.groundPickingQuadtree.BoundingSphere;
+            return this.groundPickingQuadtree.GetBoundingSphere();
         }
         /// <summary>
         /// Gets bounding box
@@ -417,7 +417,7 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public override BoundingBox GetBoundingBox()
         {
-            return this.groundPickingQuadtree.BoundingBox;
+            return this.groundPickingQuadtree.GetBoundingBox();
         }
         /// <summary>
         /// Gets terrain bounding boxes at specified level

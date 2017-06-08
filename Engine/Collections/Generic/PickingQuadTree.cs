@@ -17,11 +17,11 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Global bounding box
         /// </summary>
-        public BoundingBox BoundingBox { get; private set; }
+        private BoundingBox boundingBox;
         /// <summary>
         /// Global bounding sphere
         /// </summary>
-        public BoundingSphere BoundingSphere { get; private set; }
+        private BoundingSphere boundingSphere;
 
         /// <summary>
         /// Constructor
@@ -33,8 +33,8 @@ namespace Engine.Collections.Generic
             var bbox = GeometryUtil.CreateBoundingBox(items);
             var bsph = GeometryUtil.CreateBoundingSphere(items);
 
-            this.BoundingBox = bbox;
-            this.BoundingSphere = bsph;
+            this.boundingBox = bbox;
+            this.boundingSphere = bsph;
 
             this.Root = PickingQuadTreeNode<T>.CreatePartitions(
                 this, null,
@@ -215,6 +215,22 @@ namespace Engine.Collections.Generic
             }
 
             return node;
+        }
+        /// <summary>
+        /// Gets bounding sphere
+        /// </summary>
+        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
+        public BoundingSphere GetBoundingSphere()
+        {
+            return this.boundingSphere;
+        }
+        /// <summary>
+        /// Gets bounding box
+        /// </summary>
+        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
+        public BoundingBox GetBoundingBox()
+        {
+            return this.boundingBox;
         }
 
         /// <summary>

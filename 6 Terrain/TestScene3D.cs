@@ -951,7 +951,7 @@ namespace TerrainTest
             {
                 Ray cursorRay = this.GetPickingRay();
 
-                picked = this.terrain.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance);
+                picked = this.terrain.PickNearestGround(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance);
                 if (picked)
                 {
                     this.cursor3D.Manipulator.SetPosition(pickedPosition);

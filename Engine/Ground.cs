@@ -165,7 +165,7 @@ namespace Engine
         /// <param name="models">Model list</param>
         /// <param name="use">Use</param>
         /// <param name="updateInternals">Update internal objects</param>
-        protected void Attach(ModelBase[] models, AttachedModelUsesEnum use, bool updateInternals = true)
+        protected void Attach(IEnumerable<ModelBase> models, AttachedModelUsesEnum use, bool updateInternals = true)
         {
             foreach (var model in models)
             {
@@ -186,7 +186,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachFullPickingFullPathFinding(ModelBase[] models, bool updateInternals = true)
+        public void AttachFullPickingFullPathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.FullPicking | AttachedModelUsesEnum.FullPathFinding, updateInternals);
         }
@@ -195,7 +195,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachCoarsePickingCoarsePathFinding(ModelBase[] models, bool updateInternals = true)
+        public void AttachCoarsePickingCoarsePathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.CoarsePicking | AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
         }
@@ -204,7 +204,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachCoarsePickingFullPathFinding(ModelBase[] models, bool updateInternals = true)
+        public void AttachCoarsePickingFullPathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.CoarsePicking | AttachedModelUsesEnum.FullPathFinding, updateInternals);
         }
@@ -213,7 +213,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachFullPickingCoarsePathFinding(ModelBase[] models, bool updateInternals = true)
+        public void AttachFullPickingCoarsePathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.FullPicking | AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
         }
@@ -222,7 +222,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachFullPicking(ModelBase[] models, bool updateInternals = true)
+        public void AttachFullPicking(IEnumerable<ModelBase> models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.FullPicking, updateInternals);
         }
@@ -231,7 +231,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachCoarsePicking(ModelBase[] models, bool updateInternals = true)
+        public void AttachCoarsePicking(IEnumerable<ModelBase> models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.CoarsePicking, updateInternals);
         }
@@ -240,7 +240,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachFullPathFinding(ModelBase[] models, bool updateInternals = true)
+        public void AttachFullPathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.FullPathFinding, updateInternals);
         }
@@ -249,7 +249,7 @@ namespace Engine
         /// </summary>
         /// <param name="models">Model list</param>
         /// <param name="updateInternals">Update internal objects</param>
-        public void AttachCoarsePathFinding(ModelBase[] models, bool updateInternals = true)
+        public void AttachCoarsePathFinding(IEnumerable<ModelBase> models, bool updateInternals = true)
         {
             Attach(models, AttachedModelUsesEnum.CoarsePathFinding, updateInternals);
         }
@@ -1037,6 +1037,74 @@ namespace Engine
 
                             return true;
                         }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the first pickable object in the ray path
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="maxDistance">Maximum distance for test</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="model">Gets the resulting model</param>
+        /// <returns>Returns true if a pickable object in the ray path was found</returns>
+        public virtual bool Pick(ref Ray ray, float maxDistance, bool facingOnly, out IRayPickable<Triangle> model)
+        {
+            model = null;
+
+            List<Tuple<IRayPickable<Triangle>, float>> coarse = new List<Tuple<IRayPickable<Triangle>, float>>();
+
+            foreach (var gObj in this.GroundObjects)
+            {
+                var objs = gObj.GetObjects();
+                foreach (var obj in objs)
+                {
+                    var bsph = obj.GetBoundingSphere();
+                    float distance;
+                    if (Collision.RayIntersectsSphere(ref ray, ref bsph, out distance))
+                    {
+                        if (distance <= maxDistance)
+                        {
+                            coarse.Add(new Tuple<IRayPickable<Triangle>, float>(obj, distance));
+                        }
+                    }
+                }
+            }
+
+            //Sort by distance
+            coarse.Sort((i1, i2) =>
+            {
+                return i1.Item2.CompareTo(i2.Item2);
+            });
+
+            foreach (var obj in coarse)
+            {
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (obj.Item1.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                {
+                    Vector3 gp;
+                    Triangle gt;
+                    float gd;
+                    if (this.PickNearestGround(ref ray, facingOnly, out gp, out gt, out gd))
+                    {
+                        if(gd > d)
+                        {
+                            model = obj.Item1;
+
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        model = obj.Item1;
+
+                        return true;
                     }
                 }
             }

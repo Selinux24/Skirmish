@@ -939,7 +939,7 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public override BoundingSphere GetBoundingSphere()
         {
-            return this.groundPickingQuadtree != null ? this.groundPickingQuadtree.BoundingSphere : new BoundingSphere();
+            return this.groundPickingQuadtree != null ? this.groundPickingQuadtree.GetBoundingSphere() : new BoundingSphere();
         }
         /// <summary>
         /// Gets bounding box
@@ -947,7 +947,7 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public override BoundingBox GetBoundingBox()
         {
-            return this.groundPickingQuadtree != null ? this.groundPickingQuadtree.BoundingBox : new BoundingBox();
+            return this.groundPickingQuadtree != null ? this.groundPickingQuadtree.GetBoundingBox() : new BoundingBox();
         }
 
         /// <summary>

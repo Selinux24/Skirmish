@@ -514,9 +514,17 @@ namespace Engine
         /// <summary>
         /// Gets bounding sphere
         /// </summary>
+        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
+        public BoundingSphere GetBoundingSphere()
+        {
+            return this.GetBoundingSphere(false);
+        }
+        /// <summary>
+        /// Gets bounding sphere
+        /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere(bool refresh = false)
+        public BoundingSphere GetBoundingSphere(bool refresh)
         {
             if (refresh || this.boundingSphere == new BoundingSphere())
             {
@@ -532,9 +540,17 @@ namespace Engine
         /// <summary>
         /// Gets bounding box
         /// </summary>
+        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
+        public BoundingBox GetBoundingBox()
+        {
+            return this.GetBoundingBox(false);
+        }
+        /// <summary>
+        /// Gets bounding box
+        /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox(bool refresh = false)
+        public BoundingBox GetBoundingBox(bool refresh)
         {
             if (refresh || this.boundingBox == new BoundingBox())
             {
@@ -550,9 +566,17 @@ namespace Engine
         /// <summary>
         /// Gets oriented bounding box
         /// </summary>
+        /// <returns>Returns oriented bounding box with identity transformation. Empty if the vertex type hasn't position channel</returns>
+        public OrientedBoundingBox GetOrientedBoundingBox()
+        {
+            return this.GetOrientedBoundingBox(false);
+        }
+        /// <summary>
+        /// Gets oriented bounding box
+        /// </summary>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns oriented bounding box with identity transformation. Empty if the vertex type hasn't position channel</returns>
-        public OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false)
+        public OrientedBoundingBox GetOrientedBoundingBox(bool refresh)
         {
             if (refresh || this.orientedBoundingBox == new OrientedBoundingBox())
             {
