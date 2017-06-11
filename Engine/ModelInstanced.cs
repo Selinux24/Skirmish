@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -10,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Instaced model
     /// </summary>
-    public class ModelInstanced : ModelBase
+    public class ModelInstanced : ModelBase, IComposed<Triangle>
     {
         /// <summary>
         /// Instancing data per instance
@@ -348,6 +349,21 @@ namespace Engine
         public ModelInstance[] GetInstances()
         {
             return this.instances;
+        }
+        /// <summary>
+        /// Gets all ray pickable components
+        /// </summary>
+        /// <returns>Returns a collection of ray pickable components</returns>
+        public IEnumerable<IRayPickable<Triangle>> GetComponents()
+        {
+            IRayPickable<Triangle>[] res = new IRayPickable<Triangle>[this.instanceCount];
+
+            for (int i = 0; i < this.instanceCount; i++)
+            {
+                res[i] = this.instances[i];
+            }
+
+            return res;
         }
     }
 }

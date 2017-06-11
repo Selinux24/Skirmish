@@ -18,6 +18,70 @@ namespace Engine
     public class Scene : IDisposable
     {
         /// <summary>
+        /// Performs coarse ray picking over the specified collection
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="maxDistance">Maximum distance to test</param>
+        /// <param name="list">Collection of objects to test</param>
+        /// <returns>Returns a list of ray pickable objects order by distance to ray origin</returns>
+        private static List<Tuple<IRayPickable<Triangle>, float>> PickCoarse(ref Ray ray, float maxDistance, IEnumerable<object> list)
+        {
+            List<Tuple<IRayPickable<Triangle>, float>> coarse = new List<Tuple<IRayPickable<Triangle>, float>>();
+
+            foreach (var gObj in list)
+            {
+                if (gObj is IComposed<Triangle>)
+                {
+                    var components = ((IComposed<Triangle>)gObj).GetComponents();
+
+                    coarse.AddRange(PickCoarse(ref ray, maxDistance, components));
+                }
+                else if (gObj is IRayPickable<Triangle>)
+                {
+                    float d;
+                    if (TestCoarse(ref ray, (IRayPickable<Triangle>)gObj, maxDistance, out d))
+                    {
+                        coarse.Add(new Tuple<IRayPickable<Triangle>, float>((IRayPickable<Triangle>)gObj, d));
+                    }
+                }
+            }
+
+            //Sort by distance
+            coarse.Sort((i1, i2) =>
+            {
+                return i1.Item2.CompareTo(i2.Item2);
+            });
+
+            return coarse;
+        }
+        /// <summary>
+        /// Perfors coarse picking between the specified ray and the bounding volume of the object
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="obj">Object</param>
+        /// <param name="maxDistance">Maximum distance to test</param>
+        /// <param name="distance">Gets the picking distance if intersection exists</param>
+        /// <returns>Returns true if exists intersection between the ray and the bounding volume of the object, into the maximum distance</returns>
+        private static bool TestCoarse(ref Ray ray, IRayPickable<Triangle> obj, float maxDistance, out float distance)
+        {
+            distance = float.MaxValue;
+
+            var bsph = obj.GetBoundingSphere();
+            float d;
+            if (Collision.RayIntersectsSphere(ref ray, ref bsph, out d))
+            {
+                if (d <= maxDistance)
+                {
+                    distance = d;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Camera
         /// </summary>
         private Camera camera = null;
@@ -822,7 +886,11 @@ namespace Engine
 
             this.AddComponent((IUpdatable)component);
         }
-
+        /// <summary>
+        /// Adds a drawable component
+        /// </summary>
+        /// <param name="component">Component</param>
+        /// <param name="order">Processing order</param>
         public void AddComponent(IDrawable component, int order)
         {
             if (!this.drawableComponents.Contains(component))
@@ -852,7 +920,10 @@ namespace Engine
                 this.UpdateGlobalResources = true;
             }
         }
-
+        /// <summary>
+        /// Adds a updatable component
+        /// </summary>
+        /// <param name="component">Component</param>
         public void AddComponent(IUpdatable component)
         {
             if (!this.updatableComponents.Contains(component))
@@ -875,7 +946,10 @@ namespace Engine
             component.Dispose();
             component = null;
         }
-
+        /// <summary>
+        /// Removes a drawable component
+        /// </summary>
+        /// <param name="component">Component</param>
         public void RemoveComponent(IDrawable component)
         {
             if (this.drawableComponents.Contains(component))
@@ -885,7 +959,10 @@ namespace Engine
                 this.UpdateGlobalResources = true;
             }
         }
-
+        /// <summary>
+        /// Removes a updatable component
+        /// </summary>
+        /// <param name="component">Component</param>
         public void RemoveComponent(IUpdatable component)
         {
             if (this.updatableComponents.Contains(component))
@@ -916,6 +993,35 @@ namespace Engine
             Vector3 fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
 
             return new Ray(nPoint, Vector3.Normalize(fPoint - nPoint));
+        }
+        /// <summary>
+        /// Gets the nearest pickable object in the ray path
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="maxDistance">Maximum distance for test</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="model">Gets the resulting ray pickable object</param>
+        /// <returns>Returns true if a pickable object in the ray path was found</returns>
+        public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, out IRayPickable<Triangle> model)
+        {
+            model = null;
+
+            var coarse = PickCoarse(ref ray, maxDistance, this.updatableComponents);
+
+            foreach (var obj in coarse)
+            {
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (obj.Item1.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                {
+                    model = obj.Item1;
+
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

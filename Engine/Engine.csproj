@@ -172,6 +172,7 @@
     <Compile Include="FoliageMap.cs" />
     <Compile Include="GroundGardener.cs" />
     <Compile Include="GroundGardenerDescription.cs" />
+    <Compile Include="IComposed.cs" />
     <Compile Include="ICull.cs" />
     <Compile Include="IDrawable.cs" />
     <Compile Include="IParticleSystem.cs" />
