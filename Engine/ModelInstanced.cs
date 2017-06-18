@@ -113,26 +113,26 @@ namespace Engine
 
                 this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && i.LevelOfDetail != LevelOfDetailEnum.None);
 
-                //Sort by LOD
-                Array.Sort(this.instancesTmp, (i1, i2) =>
-                {
-                    var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+                //TODO: Sort by LOD
+                //Array.Sort(this.instancesTmp, (i1, i2) =>
+                //{
+                //    var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
 
-                    if (i == 0)
-                    {
-                        var da = Vector3.DistanceSquared(i1.Manipulator.Position, context.EyePosition);
-                        var db = Vector3.DistanceSquared(i2.Manipulator.Position, context.EyePosition);
-                        i = da.CompareTo(db);
-                    }
+                //    if (i == 0)
+                //    {
+                //        var da = Vector3.DistanceSquared(i1.Manipulator.Position, context.EyePosition);
+                //        var db = Vector3.DistanceSquared(i2.Manipulator.Position, context.EyePosition);
+                //        i = da.CompareTo(db);
+                //    }
 
-                    if (i == 0)
-                    {
-                        i = i1.Id.CompareTo(i2.Id);
-                    }
+                //    if (i == 0)
+                //    {
+                //        i = i1.Id.CompareTo(i2.Id);
+                //    }
 
-                    //return this.AlphaEnabled ? -i : i;
-                    return i;
-                });
+                //    //return this.AlphaEnabled ? -i : i;
+                //    return i;
+                //});
             }
         }
         /// <summary>

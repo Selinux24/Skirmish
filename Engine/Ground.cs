@@ -38,14 +38,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Updates internal objects
-        /// </summary>
-        public virtual void UpdateInternals()
-        {
-
-        }
-
-        /// <summary>
         /// Pick ground nearest position
         /// </summary>
         /// <param name="ray">Ray</param>

@@ -3,9 +3,9 @@
 namespace Engine
 {
     /// <summary>
-    /// Culling methods
+    /// Cullable interface
     /// </summary>
-    public interface ICull
+    public interface ICullable
     {
         /// <summary>
         /// Performs culling test

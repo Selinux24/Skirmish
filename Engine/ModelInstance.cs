@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Model instance
     /// </summary>
-    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, ICull, IVolume
+    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, ICullable, IVolume
     {
         /// <summary>
         /// Global id counter

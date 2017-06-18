@@ -145,7 +145,6 @@ namespace Skybox
             {
                 Name = "Terrain",
                 CastShadow = true,
-                DelayGeneration = true,
             };
             this.ruins = this.AddScenery(
                 "Resources",

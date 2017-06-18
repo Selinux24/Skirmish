@@ -47,7 +47,7 @@ namespace SpriteDrawing
             };
             this.background = this.AddBackgroud(bkDescription, 1);
 
-            this.spriteMov.Transform2D.SetPosition(256, 0);
+            this.spriteMov.ScreenTransform.SetPosition(256, 0);
         }
         public override void Update(GameTime gameTime)
         {
@@ -60,27 +60,27 @@ namespace SpriteDrawing
 
             if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
-                this.spriteMov.Transform2D.SetPosition(0, 0);
+                this.spriteMov.ScreenTransform.SetPosition(0, 0);
             }
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
-                this.spriteMov.Transform2D.MoveLeft(gameTime, delta);
+                this.spriteMov.ScreenTransform.MoveLeft(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.D))
             {
-                this.spriteMov.Transform2D.MoveRight(gameTime, delta);
+                this.spriteMov.ScreenTransform.MoveRight(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.W))
             {
-                this.spriteMov.Transform2D.MoveUp(gameTime, delta);
+                this.spriteMov.ScreenTransform.MoveUp(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.S))
             {
-                this.spriteMov.Transform2D.MoveDown(gameTime, delta);
+                this.spriteMov.ScreenTransform.MoveDown(gameTime, delta);
             }
         }
     }

@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
@@ -112,6 +111,14 @@ namespace Engine
         /// Scene mode
         /// </summary>
         private SceneModesEnum sceneMode = SceneModesEnum.Unknown;
+        /// <summary>
+        /// Scene bounding box
+        /// </summary>
+        private BoundingBox boundingBox;
+        /// <summary>
+        /// Scene bounding sphere
+        /// </summary>
+        private BoundingSphere boundingSphere;
         /// <summary>
         /// Graph used for pathfinding
         /// </summary>
@@ -827,10 +834,11 @@ namespace Engine
         }
 
         /// <summary>
-        /// Add component to collection
+        /// Adds component to collection
         /// </summary>
         /// <param name="component">Component</param>
         /// <param name="order">Processing order</param>
+        /// <returns>Returns the added component</returns>
         public SceneObject<T> AddComponent<T>(SceneObject<T> component, int order)
         {
             if (!this.components.Contains(component))
@@ -862,7 +870,14 @@ namespace Engine
 
             return component;
         }
-
+        /// <summary>
+        /// Adds component to collection
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <param name="component">Component</param>
+        /// <param name="description">Description</param>
+        /// <param name="order">Processing order</param>
+        /// <returns>Returns the added component</returns>
         public SceneObject<T> AddComponent<T>(T component, SceneObjectDescription description, int order = 0)
         {
             var sceneObject = new SceneObject<T>(component, description);
@@ -887,12 +902,19 @@ namespace Engine
             component.Dispose();
             component = null;
         }
-
+        /// <summary>
+        /// Gets full component collection
+        /// </summary>
+        /// <returns>Returns the full component collection</returns>
         public ReadOnlyCollection<SceneObject> GetComponents()
         {
             return new ReadOnlyCollection<SceneObject>(this.components);
         }
-
+        /// <summary>
+        /// Gets the component collection
+        /// </summary>
+        /// <param name="func">Filter</param>
+        /// <returns>Returns the filtered component collection</returns>
         public ReadOnlyCollection<SceneObject> GetComponents(Func<SceneObject, bool> func)
         {
             if (func != null)
@@ -904,7 +926,11 @@ namespace Engine
                 return new ReadOnlyCollection<SceneObject>(this.components);
             }
         }
-
+        /// <summary>
+        /// Gets full component collection
+        /// </summary>
+        /// <typeparam name="T">Return type</typeparam>
+        /// <returns>Returns the full component collection</returns>
         public ReadOnlyCollection<T> GetComponents<T>()
         {
             List<T> res = new List<T>();
@@ -919,7 +945,12 @@ namespace Engine
 
             return new ReadOnlyCollection<T>(res);
         }
-
+        /// <summary>
+        /// Gets the component collection
+        /// </summary>
+        /// <typeparam name="T">Return type</typeparam>
+        /// <param name="func">Filter</param>
+        /// <returns>Returns the filtered component collection</returns>
         public ReadOnlyCollection<T> GetComponents<T>(Func<SceneObject, bool> func)
         {
             List<T> res = new List<T>();
@@ -1065,9 +1096,6 @@ namespace Engine
             animationPaletteWidth = (uint)texWidth;
         }
 
-
-
-
         /// <summary>
         /// Gets picking ray from current mouse position
         /// </summary>
@@ -1124,22 +1152,45 @@ namespace Engine
 
             return false;
         }
-
+        /// <summary>
+        /// Gets nearest picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="item">Ray intersectable object found</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if ground position found</returns>
         public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle item, out float distance)
         {
             return PickNearest(ref ray, facingOnly, SceneObjectUsageEnum.None, out position, out item, out distance);
         }
-
+        /// <summary>
+        /// Gets first picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="item">Ray intersectable object found</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if ground position found</returns>
         public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle item, out float distance)
         {
             return PickFirst(ref ray, facingOnly, SceneObjectUsageEnum.None, out position, out item, out distance);
         }
-
+        /// <summary>
+        /// Gets all picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="positions">Ground positions if exists</param>
+        /// <param name="item">Ray intersectable objects found</param>
+        /// <param name="distances">Distances to positions</param>
+        /// <returns>Returns true if ground position found</returns>
         public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] item, out float[] distances)
         {
             return PickAll(ref ray, facingOnly, SceneObjectUsageEnum.None, out positions, out item, out distances);
         }
-
         /// <summary>
         /// Gets ground position giving x, z coordinates
         /// </summary>
@@ -1182,7 +1233,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            var usage = SceneObjectUsageEnum.CoarsePathFinding & SceneObjectUsageEnum.FullPathFinding;
+            var usage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
 
             return this.PickFirst(ref ray, true, usage, out position, out triangle, out distance);
         }
@@ -1205,7 +1256,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            var usage = SceneObjectUsageEnum.CoarsePathFinding & SceneObjectUsageEnum.FullPathFinding;
+            var usage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
 
             return this.PickAll(ref ray, true, usage, out positions, out triangles, out distances);
         }
@@ -1227,7 +1278,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            var usage = SceneObjectUsageEnum.CoarsePathFinding & SceneObjectUsageEnum.FullPathFinding;
+            var usage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
 
             Vector3[] pArray;
             Triangle[] tArray;
@@ -1262,7 +1313,16 @@ namespace Engine
                 return false;
             }
         }
-
+        /// <summary>
+        /// Gets nearest picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="item">Ray intersectable object found</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if ground position found</returns>
         private bool PickNearest(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out Vector3 position, out Triangle item, out float distance)
         {
             position = Vector3.Zero;
@@ -1305,7 +1365,16 @@ namespace Engine
 
             return picked;
         }
-
+        /// <summary>
+        /// Gets first picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="item">Ray intersectable object found</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if ground position found</returns>
         private bool PickFirst(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out Vector3 position, out Triangle item, out float distance)
         {
             position = Vector3.Zero;
@@ -1314,7 +1383,7 @@ namespace Engine
 
             var cmpList = usage == SceneObjectUsageEnum.None ?
                 this.components :
-                this.components.FindAll(c => c.Usage.HasFlag(usage));
+                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsageEnum.None);
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
 
@@ -1335,7 +1404,16 @@ namespace Engine
 
             return false;
         }
-
+        /// <summary>
+        /// Gets all picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="positions">Ground positions if exists</param>
+        /// <param name="item">Ray intersectable objects found</param>
+        /// <param name="distances">Distances to positions</param>
+        /// <returns>Returns true if ground position found</returns>
         private bool PickAll(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out Vector3[] positions, out Triangle[] item, out float[] distances)
         {
             positions = null;
@@ -1344,7 +1422,7 @@ namespace Engine
 
             var cmpList = usage == SceneObjectUsageEnum.None ?
                 this.components :
-                this.components.FindAll(c => c.Usage.HasFlag(usage));
+                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsageEnum.None);
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
 
@@ -1371,15 +1449,43 @@ namespace Engine
 
             return lPositions.Count > 0;
         }
-
-
-
-
-        public void SetGround<T>(SceneObject<T> obj, bool fullGeometryPathFinding)
+        /// <summary>
+        /// Gets bounding sphere
+        /// </summary>
+        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
+        public BoundingSphere GetBoundingSphere()
         {
-            obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
+            return this.boundingSphere;
+        }
+        /// <summary>
+        /// Gets bounding box
+        /// </summary>
+        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
+        public BoundingBox GetBoundingBox()
+        {
+            return this.boundingBox;
         }
 
+        /// <summary>
+        /// Set ground geometry
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
+        public void SetGround<T>(SceneObject<T> obj, bool fullGeometryPathFinding)
+        {
+            obj.Usage |= SceneObjectUsageEnum.Ground;
+            obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
+        }
+        /// <summary>
+        /// Attach geomtry to ground
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <param name="x">X position</param>
+        /// <param name="z">Z position</param>
+        /// <param name="transform">Transform</param>
+        /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
         public void AttachToGround<T>(SceneObject<T> obj, float x, float z, Matrix transform, bool fullGeometryPathFinding)
         {
             Vector3 pos;
@@ -1394,9 +1500,9 @@ namespace Engine
             obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
         }
 
-
-
-
+        /// <summary>
+        /// Updates navigation graph
+        /// </summary>
         public void UpdateNavigationGraph()
         {
             if (this.PathFinderDescription != null)
@@ -1409,7 +1515,6 @@ namespace Engine
                 this.navigationGraph = PathFinder.Build(this.PathFinderDescription.Settings, gTriangles);
             }
         }
-
         /// <summary>
         /// Gets the objects triangle list for navigation graph construction
         /// </summary>
@@ -1468,7 +1573,6 @@ namespace Engine
 
             return tris.ToArray();
         }
-
         /// <summary>
         /// Gets the path finder grid nodes
         /// </summary>
@@ -1485,7 +1589,6 @@ namespace Engine
 
             return nodes;
         }
-
         /// <summary>
         /// Find path from point to point
         /// </summary>
@@ -1646,22 +1749,6 @@ namespace Engine
             }
 
             return false;
-        }
-
-
-
-
-        private BoundingBox boundingBox;
-        private BoundingSphere boundingSphere;
-
-        public BoundingSphere GetBoundingSphere()
-        {
-            return this.boundingSphere;
-        }
-
-        public BoundingBox GetBoundingBox()
-        {
-            return this.boundingBox;
         }
     }
 }

@@ -275,7 +275,7 @@ namespace Engine
 #if DEBUG
                             Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                            var toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICull>()).ConvertAll<ICull>(s => s.Get<ICull>());
+                            var toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
 
                             var sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
 
@@ -320,7 +320,7 @@ namespace Engine
 #if DEBUG
                             swCull = Stopwatch.StartNew();
 #endif
-                            toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICull>()).ConvertAll<ICull>(s => s.Get<ICull>());
+                            toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
 
                             sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
 
@@ -397,7 +397,7 @@ namespace Engine
                         bool draw = false;
                         if (scene.PerformFrustumCulling)
                         {
-                            var toCullVisible = visibleComponents.FindAll(s => s.Is<ICull>()).ConvertAll<ICull>(s => s.Get<ICull>());
+                            var toCullVisible = visibleComponents.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
 
                             //Frustum culling
                             draw = this.cullManager.Cull(this.DrawContext.Frustum, CullIndexDrawIndex, toCullVisible);
@@ -531,7 +531,7 @@ namespace Engine
         {
             components.FindAll(c => c.Is<IDrawable>()).ForEach((c) =>
             {
-                var cull = c.Get<ICull>();
+                var cull = c.Get<ICullable>();
 
                 var visible = cull != null ? !this.cullManager.IsVisible(index, cull) : true;
                 if (visible)
@@ -561,7 +561,7 @@ namespace Engine
             {
                 Counters.MaxInstancesPerFrame += c.Count;
 
-                var visible = (c is ICull) ? !this.cullManager.IsVisible(index, (ICull)c) : true;
+                var visible = (c is ICullable) ? !this.cullManager.IsVisible(index, (ICullable)c) : true;
                 if (visible)
                 {
                     this.Game.Graphics.SetRasterizerDefault();

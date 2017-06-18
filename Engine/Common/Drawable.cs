@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Drawable object
     /// </summary>
-    public abstract class Drawable : IUpdatable, IDrawable, ICull, IDisposable
+    public abstract class Drawable : IUpdatable, IDrawable, ICullable, IDisposable
     {
         /// <summary>
         /// Game class

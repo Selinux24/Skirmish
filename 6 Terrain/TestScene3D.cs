@@ -486,7 +486,6 @@ namespace TerrainTest
                 },
                 CastShadow = true,
                 Static = true,
-                DelayGeneration = true,
             };
             this.terrain = this.AddScenery("resources/Terrain", "two_levels.xml", terrainDescription, true, this.layerTerrain);
             sw.Stop();

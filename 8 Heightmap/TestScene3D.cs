@@ -289,54 +289,44 @@ namespace HeightmapTest
             #region Terrain
 
             sw.Restart();
-            var pfSettings = NavigationMeshGenerationSettings.Default;
-            pfSettings.CellHeight = 5f;
-            pfSettings.CellSize = 5f;
-            var hDesc =
-                new HeightmapDescription()
+            var hDesc = new HeightmapDescription()
+            {
+                ContentPath = "Resources/Scenery/Heightmap",
+                HeightmapFileName = "desert0hm.bmp",
+                ColormapFileName = "desert0cm.bmp",
+                CellSize = 15,
+                MaximumHeight = 150,
+                TextureResolution = 75f,
+                Textures = new HeightmapDescription.TexturesDescription()
                 {
-                    ContentPath = "Resources/Scenery/Heightmap",
-                    HeightmapFileName = "desert0hm.bmp",
-                    ColormapFileName = "desert0cm.bmp",
-                    CellSize = 15,
-                    MaximumHeight = 150,
-                    TextureResolution = 75f,
-                    Textures = new HeightmapDescription.TexturesDescription()
-                    {
-                        ContentPath = "Textures",
-                        NormalMaps = new[] { "normal001.dds", "normal002.dds" },
+                    ContentPath = "Textures",
+                    NormalMaps = new[] { "normal001.dds", "normal002.dds" },
 
-                        UseAlphaMapping = true,
-                        AlphaMap = "alpha001.dds",
-                        ColorTextures = new[] { "dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds" },
+                    UseAlphaMapping = true,
+                    AlphaMap = "alpha001.dds",
+                    ColorTextures = new[] { "dirt001.dds", "dirt002.dds", "dirt004.dds", "stone001.dds" },
 
-                        UseSlopes = false,
-                        SlopeRanges = new Vector2(0.005f, 0.25f),
-                        TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
-                        TexturesHR = new[] { "dirt0hr.dds" },
+                    UseSlopes = false,
+                    SlopeRanges = new Vector2(0.005f, 0.25f),
+                    TexturesLR = new[] { "dirt0lr.dds", "dirt1lr.dds", "dirt2lr.dds" },
+                    TexturesHR = new[] { "dirt0hr.dds" },
 
-                        Proportion = 0.25f,
-                    },
-                    Material = new MaterialDescription
-                    {
-                        Shininess = 10f,
-                        SpecularColor = new Color4(0.1f, 0.1f, 0.1f, 1f),
-                    },
-                };
-            var gDesc =
-                new GroundDescription()
+                    Proportion = 0.25f,
+                },
+                Material = new MaterialDescription
                 {
-                    Name = "Terrain",
-                    Quadtree = new GroundDescription.QuadtreeDescription()
-                    {
-                        MaximumDepth = 5,
-                    },
-                    //PathFinder = new GroundDescription.PathFinderDescription()
-                    //{
-                    //    Settings = pfSettings,
-                    //},
-                    DelayGeneration = true,
-                };
+                    Shininess = 10f,
+                    SpecularColor = new Color4(0.1f, 0.1f, 0.1f, 1f),
+                },
+            };
+            var gDesc = new GroundDescription()
+            {
+                Name = "Terrain",
+                Quadtree = new GroundDescription.QuadtreeDescription()
+                {
+                    MaximumDepth = 5,
+                },
+            };
             this.terrain = this.AddTerrain(hDesc, gDesc, true, layerTerrain);
             sw.Stop();
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
@@ -767,7 +757,7 @@ namespace HeightmapTest
                         this.troops.Instance[i].Manipulator.SetPosition(position, true);
                         this.troops.Instance[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
                         this.troops.Instance[i].TextureIndex = 1;
-                                   
+
                         this.troops.Instance[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
                         this.troops.Instance[i].AnimationController.AddPath(this.animations["soldier_idle"]);
                         this.troops.Instance[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
@@ -776,6 +766,14 @@ namespace HeightmapTest
             }
 
             #endregion
+
+            var pfSettings = NavigationMeshGenerationSettings.Default;
+            pfSettings.CellHeight = 5f;
+            pfSettings.CellSize = 5f;
+            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
+            {
+                Settings = pfSettings,
+            };
 
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
@@ -1083,7 +1081,7 @@ namespace HeightmapTest
                 this.TimeOfDay,
                 this.Lights.KeyLight.Brightness);
 
-            this.help2.Instance.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}", 
+            this.help2.Instance.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}",
                 Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
                 Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime,
                 this.gardener.Instance.PlantingTasks + this.gardener2.Instance.PlantingTasks);

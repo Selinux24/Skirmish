@@ -737,11 +737,6 @@ namespace Engine
 
                 this.Map = new MapGrid(this.Game, vertices, trianglesPerNode, this.BufferManager);
             }
-
-            if (!groundDescription.DelayGeneration)
-            {
-                this.UpdateInternals();
-            }
         }
         /// <summary>
         /// Release of resources

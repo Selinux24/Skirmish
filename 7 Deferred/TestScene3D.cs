@@ -495,19 +495,19 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F12))
             {
-                if (this.bufferDrawer.Transform2D.Position == Vector2.Zero)
+                if (this.bufferDrawer.ScreenTransform.Position == Vector2.Zero)
                 {
                     int width = (int)(this.Game.Form.RenderWidth * 0.33f);
                     int height = (int)(this.Game.Form.RenderHeight * 0.33f);
                     int smLeft = this.Game.Form.RenderWidth - width;
                     int smTop = this.Game.Form.RenderHeight - height;
 
-                    this.bufferDrawer.Transform2D.SetPosition(smLeft, smTop);
+                    this.bufferDrawer.ScreenTransform.SetPosition(smLeft, smTop);
                     this.bufferDrawer.Instance.ResizeSprite(width, height);
                 }
                 else
                 {
-                    this.bufferDrawer.Transform2D.SetPosition(Vector2.Zero);
+                    this.bufferDrawer.ScreenTransform.SetPosition(Vector2.Zero);
                     this.bufferDrawer.Instance.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
                 }
             }

@@ -173,7 +173,7 @@
     <Compile Include="GroundGardener.cs" />
     <Compile Include="GroundGardenerDescription.cs" />
     <Compile Include="IComposed.cs" />
-    <Compile Include="ICull.cs" />
+    <Compile Include="ICullable.cs" />
     <Compile Include="IDrawable.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />
@@ -249,7 +249,7 @@
     <Compile Include="HeightmapDescription.cs" />
     <Compile Include="IFollower.cs" />
     <Compile Include="IGround.cs" />
-    <Compile Include="IPickable.cs" />
+    <Compile Include="IRayPickable.cs" />
     <Compile Include="IValueWithCost.cs" />
     <Compile Include="Curve3DKey.cs" />
     <Compile Include="Curve3D.cs" />

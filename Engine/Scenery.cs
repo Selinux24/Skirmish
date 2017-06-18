@@ -291,11 +291,6 @@ namespace Engine
             this.Lights = lights.ToArray();
 
             #endregion
-
-            if (!this.Description.DelayGeneration)
-            {
-                this.UpdateInternals();
-            }
         }
         /// <summary>
         /// Dispose of created resources

@@ -449,7 +449,7 @@ namespace Engine
 #if DEBUG
                             Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                            var toCullShadowObjs = shadowObjs.FindAll(s => s is ICull).ConvertAll<ICull>(s => (ICull)s);
+                            var toCullShadowObjs = shadowObjs.FindAll(s => s is ICullable).ConvertAll<ICullable>(s => (ICullable)s);
 
                             var sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
 
@@ -494,7 +494,7 @@ namespace Engine
 #if DEBUG
                             swCull = Stopwatch.StartNew();
 #endif
-                            toCullShadowObjs = shadowObjs.FindAll(s => s is ICull).ConvertAll<ICull>(s => (ICull)s);
+                            toCullShadowObjs = shadowObjs.FindAll(s => s is ICullable).ConvertAll<ICullable>(s => (ICullable)s);
 
                             sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
 
@@ -557,7 +557,7 @@ namespace Engine
                         bool draw = false;
                         if (scene.PerformFrustumCulling)
                         {
-                            var toCullDeferred = deferredEnabledComponents.FindAll(s => s is ICull).ConvertAll<ICull>(s => (ICull)s);
+                            var toCullDeferred = deferredEnabledComponents.FindAll(s => s is ICullable).ConvertAll<ICullable>(s => (ICullable)s);
 
                             //Frustum culling
                             draw = this.cullManager.Cull(this.DrawContext.Frustum, CullIndexDrawIndex, toCullDeferred);
@@ -1316,7 +1316,7 @@ namespace Engine
         {
             components.FindAll(c => c.Is<IDrawable>()).ForEach((c) =>
             {
-                var cull = c.Get<ICull>();
+                var cull = c.Get<ICullable>();
 
                 var visible = cull != null ? !this.cullManager.IsVisible(index, cull) : true;
                 if (visible)
@@ -1349,7 +1349,7 @@ namespace Engine
             {
                 Counters.MaxInstancesPerFrame += c.Count;
 
-                var cull = c.Get<ICull>();
+                var cull = c.Get<ICullable>();
 
                 var visible = cull != null ? !this.cullManager.IsVisible(index, cull) : true;
                 if (visible)

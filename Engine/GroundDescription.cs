@@ -1,7 +1,5 @@
 ﻿namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Ground description
     /// </summary>
@@ -30,11 +28,6 @@
         /// Quadtree
         /// </summary>
         public QuadtreeDescription Quadtree = new QuadtreeDescription();
-
-        /// <summary>
-        /// Delay internal generation
-        /// </summary>
-        public bool DelayGeneration = false;
 
         /// <summary>
         /// Constructor

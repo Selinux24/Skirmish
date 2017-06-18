@@ -131,7 +131,7 @@ namespace Engine
                 return this.Get<ITransformable3D>()?.Manipulator;
             }
         }
-        public Manipulator2D Transform2D
+        public Manipulator2D ScreenTransform
         {
             get
             {
@@ -179,9 +179,13 @@ namespace Engine
         /// </summary>
         CoarsePathFinding = 0x2,
         /// <summary>
+        /// Scene ground
+        /// </summary>
+        Ground = 0x4,
+        /// <summary>
         /// Scene agent
         /// </summary>
-        Agent = 0x4,
+        Agent = 0x8,
     }
 
     /// <summary>

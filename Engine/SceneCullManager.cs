@@ -11,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Culled objects dictionary
         /// </summary>
-        protected Dictionary<ICull, List<bool>> Objects = new Dictionary<ICull, List<bool>>();
+        protected Dictionary<ICullable, List<bool>> Objects = new Dictionary<ICullable, List<bool>>();
 
         /// <summary>
         /// Performs cull test in the object list against the bounding volume
@@ -20,7 +20,7 @@ namespace Engine
         /// <param name="index">Results index</param>
         /// <param name="objects">Objects list</param>
         /// <returns>Returns true if any object results visible</returns>
-        public bool Cull(BoundingFrustum frustum, int index, IEnumerable<ICull> objects)
+        public bool Cull(BoundingFrustum frustum, int index, IEnumerable<ICullable> objects)
         {
             bool res = false;
 
@@ -42,7 +42,7 @@ namespace Engine
         /// <param name="index">Results index</param>
         /// <param name="objects">Objects list</param>
         /// <returns>Returns true if any object results visible</returns>
-        public bool Cull(BoundingBox bbox, int index, IEnumerable<ICull> objects)
+        public bool Cull(BoundingBox bbox, int index, IEnumerable<ICullable> objects)
         {
             bool res = false;
 
@@ -64,7 +64,7 @@ namespace Engine
         /// <param name="index">Results index</param>
         /// <param name="objects">Objects list</param>
         /// <returns>Returns true if any object results visible</returns>
-        public bool Cull(BoundingSphere bsph, int index, IEnumerable<ICull> objects)
+        public bool Cull(BoundingSphere bsph, int index, IEnumerable<ICullable> objects)
         {
             bool res = false;
 
@@ -85,7 +85,7 @@ namespace Engine
         /// <param name="value">Value</param>
         /// <param name="index">Results index</param>
         /// <param name="objects">Object list</param>
-        public void SetCullValue(bool value, int index, IEnumerable<ICull> objects)
+        public void SetCullValue(bool value, int index, IEnumerable<ICullable> objects)
         {
             foreach (var item in objects)
             {
@@ -98,7 +98,7 @@ namespace Engine
         /// <param name="value">Value</param>
         /// <param name="index">Results index</param>
         /// <param name="item">Object</param>
-        public void SetCullValue(bool value, int index, ICull item)
+        public void SetCullValue(bool value, int index, ICullable item)
         {
             if (!this.Objects.ContainsKey(item))
             {
@@ -122,7 +122,7 @@ namespace Engine
         /// <param name="index">Results index</param>
         /// <param name="item">Object</param>
         /// <returns>Returns true if the especified object is visible at index</returns>
-        public bool IsVisible(int index, ICull item)
+        public bool IsVisible(int index, ICullable item)
         {
             if (this.Objects.ContainsKey(item))
             {
