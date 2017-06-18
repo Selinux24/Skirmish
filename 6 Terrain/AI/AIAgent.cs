@@ -32,7 +32,14 @@ namespace TerrainTest.AI
 
         protected Brain Parent;
         protected AIStatus Status;
-        protected Model Model;
+        protected SceneObject SceneObject;
+        protected Model Model
+        {
+            get
+            {
+                return this.SceneObject.Get<Model>();
+            }
+        }
         protected AgentType AgentType;
         protected ManipulatorController Controller;
         protected AIStates CurrentState = AIStates.Idle;
@@ -68,22 +75,22 @@ namespace TerrainTest.AI
         {
             get
             {
-                return this.Model.Active;
+                return this.SceneObject.Active;
             }
             set
             {
-                this.Model.Active = value;
+                this.SceneObject.Active = value;
             }
         }
         public bool Visible
         {
             get
             {
-                return this.Model.Visible;
+                return this.SceneObject.Visible;
             }
             set
             {
-                this.Model.Visible = value;
+                this.SceneObject.Visible = value;
             }
         }
         public float Speed
@@ -111,11 +118,11 @@ namespace TerrainTest.AI
             }
         }
 
-        public AIAgent(Brain parent, AgentType agentType, Model model, AIStatusDescription status)
+        public AIAgent(Brain parent, AgentType agentType, SceneObject model, AIStatusDescription status)
         {
             this.Parent = parent;
             this.AgentType = agentType;
-            this.Model = model;
+            this.SceneObject = model;
             this.Status = new AIStatus(status);
             this.Controller = new SteerManipulatorController();
 
@@ -204,13 +211,13 @@ namespace TerrainTest.AI
 
             this.Status.Update(context.GameTime);
 
-            this.lastPosition = this.Model.Manipulator.Position;
+            this.lastPosition = this.Manipulator.Position;
 
-            this.Controller.UpdateManipulator(context.GameTime, this.Model.Manipulator);
+            this.Controller.UpdateManipulator(context.GameTime, this.Manipulator);
 
             if (this.lastPosition.HasValue)
             {
-                lastDistance += Vector3.Distance(this.lastPosition.Value, this.Model.Manipulator.Position);
+                lastDistance += Vector3.Distance(this.lastPosition.Value, this.Manipulator.Position);
                 if (lastDistance > 0.2f)
                 {
                     this.FireMoving(this, null);
@@ -318,7 +325,7 @@ namespace TerrainTest.AI
         }
         protected virtual bool RetreatingTest(GameTime gameTime)
         {
-            if (this.Model.Manipulator.Position == this.rallyPoint)
+            if (this.Manipulator.Position == this.rallyPoint)
             {
                 return false;
             }
@@ -346,7 +353,7 @@ namespace TerrainTest.AI
         {
             bool navigate = false;
 
-            var currentPosition = this.Model.Manipulator.Position;
+            var currentPosition = this.Manipulator.Position;
 
             if (this.currentCheckPoint < 0)
             {
@@ -392,22 +399,29 @@ namespace TerrainTest.AI
 
                 if (!this.attackPosition.HasValue)
                 {
-                    this.attackPosition = this.attackTarget.Model.Manipulator.Position;
+                    this.attackPosition = this.attackTarget.Manipulator.Position;
                     chase = true;
                 }
                 else
                 {
-                    float d = Vector3.Distance(this.attackTarget.Model.Manipulator.Position, this.attackPosition.Value);
+                    float d = Vector3.Distance(this.attackTarget.Manipulator.Position, this.attackPosition.Value);
                     if (d > attakingDeltaDistance)
                     {
-                        this.attackPosition = this.attackTarget.Model.Manipulator.Position;
+                        this.attackPosition = this.attackTarget.Manipulator.Position;
                         chase = true;
                     }
                 }
 
                 if (chase)
                 {
-                    this.SetRouteToPoint(this.attackPosition.Value, this.attackVelocity);
+                    float v = this.attackVelocity;
+
+                    float d = Vector3.Distance(this.attackTarget.Manipulator.Position, this.Manipulator.Position);
+                    if (d < 10)
+                    {
+                        v = this.attackTarget.Controller.Speed;
+                    }
+                    this.SetRouteToPoint(this.attackPosition.Value, v);
                 }
 
                 this.Attack(this.attackTarget);
@@ -458,9 +472,9 @@ namespace TerrainTest.AI
         }
         protected virtual void SetRouteToPoint(Vector3 point, float speed)
         {
-            if (this.AgentType != null & this.Parent.Ground != null)
+            if (this.AgentType != null & this.Parent.Scene != null)
             {
-                var p = this.Parent.Ground.FindPath(this.AgentType, this.Model.Manipulator.Position, point);
+                var p = this.Parent.Scene.FindPath(this.AgentType, this.Manipulator.Position, point);
                 if (p != null)
                 {
                     this.Follow(p, speed);
@@ -471,13 +485,13 @@ namespace TerrainTest.AI
 
         public bool OnSight(AIAgent target)
         {
-            var p1 = this.Model.Manipulator.Position;
-            var p2 = target.Model.Manipulator.Position;
+            var p1 = this.Manipulator.Position;
+            var p2 = target.Manipulator.Position;
 
             var s = p2 - p1;
             if (s.Length() < this.Status.SightDistance)
             {
-                float a = Helper.Angle(s, this.Model.Manipulator.Forward);
+                float a = Helper.Angle(s, this.Manipulator.Forward);
                 if (a < this.Status.SightAngle)
                 {
                     return true;
@@ -504,7 +518,7 @@ namespace TerrainTest.AI
             if (this.attackTarget == null)
             {
                 this.attackTarget = attacker;
-                this.attackPosition = attacker.Model.Manipulator.Position;
+                this.attackPosition = attacker.Manipulator.Position;
                 this.ChangeState(AIStates.Attacking);
             }
 

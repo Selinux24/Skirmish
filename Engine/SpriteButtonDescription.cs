@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Sprite button description
     /// </summary>
-    public class SpriteButtonDescription : DrawableDescription
+    public class SpriteButtonDescription : SceneObjectDescription
     {
         /// <summary>
         /// Texture to show when released state

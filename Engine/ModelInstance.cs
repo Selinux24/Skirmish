@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
@@ -9,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Model instance
     /// </summary>
-    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, ICull
+    public class ModelInstance : ITransformable3D, IRayPickable<Triangle>, ICull, IVolume
     {
         /// <summary>
         /// Global id counter
@@ -340,12 +341,29 @@ namespace Engine
         /// <summary>
         /// Gets internal volume
         /// </summary>
-        /// <returns>Returns interna volume</returns>
-        public Triangle[] GetVolume()
+        /// <param name="full"></param>
+        /// <returns>Returns internal volume</returns>
+        public Triangle[] GetVolume(bool full)
         {
             var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
+            if (full)
+            {
+                return this.GetTriangles(true);
+            }
+            else
+            {
+                if (drawingData.VolumeMesh != null)
+                {
+                    return Triangle.Transform(drawingData.VolumeMesh, this.Manipulator.LocalTransform);
+                }
+                else
+                {
+                    //Generate cylinder
+                    var cylinder = BoundingCylinder.FromPoints(this.GetPoints());
+                    return Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8);
+                }
 
-            return Triangle.Transform(drawingData.VolumeMesh, this.Manipulator.LocalTransform);
+            }
         }
 
         /// <summary>

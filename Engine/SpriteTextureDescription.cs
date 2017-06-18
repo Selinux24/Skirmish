@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Minimap description
     /// </summary>
-    public class SpriteTextureDescription : DrawableDescription
+    public class SpriteTextureDescription : SceneObjectDescription
     {
         /// <summary>
         /// Top position

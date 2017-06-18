@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Model description
     /// </summary>
-    public class ModelDescription : DrawableDescription
+    public class ModelDescription : SceneObjectDescription
     {
         /// <summary>
         /// Texture index

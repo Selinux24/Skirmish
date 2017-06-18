@@ -11,14 +11,14 @@ namespace SceneTest
     {
         private float spaceSize = 40;
 
-        private Model floorAsphalt = null;
+        private SceneObject<Model> floorAsphalt = null;
 
-        private Model buildingObelisk = null;
+        private SceneObject<Model> buildingObelisk = null;
 
-        private Model lightEmitter1 = null;
-        private Model lightEmitter2 = null;
+        private SceneObject<Model> lightEmitter1 = null;
+        private SceneObject<Model> lightEmitter2 = null;
 
-        private LineListDrawer lightsVolumeDrawer = null;
+        private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
@@ -95,7 +95,7 @@ namespace SceneTest
                     Static = true,
                 });
 
-            this.buildingObelisk.Manipulator.SetPosition(0, 0, 0);
+            this.buildingObelisk.Transform.SetPosition(0, 0, 0);
         }
         private void InitializeEmitter()
         {
@@ -249,51 +249,51 @@ namespace SceneTest
             position.Z = 3.0f * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
 
             this.Lights.PointLights[0].Position = position;
-            this.lightEmitter1.Manipulator.SetPosition(position);
+            this.lightEmitter1.Transform.SetPosition(position);
 
             position.X *= -1;
             position.Z *= -1;
 
             this.Lights.SpotLights[0].Position = position;
             this.Lights.SpotLights[0].Direction = -Vector3.Normalize(new Vector3(position.X, 0, position.Z));
-            this.lightEmitter2.Manipulator.SetPosition(position);
+            this.lightEmitter2.Transform.SetPosition(position);
         }
         private void UpdateLightDrawingVolumes()
         {
-            this.lightsVolumeDrawer.Clear();
+            this.lightsVolumeDrawer.Instance.Clear();
 
             foreach (var spot in this.Lights.SpotLights)
             {
                 var lines = spot.GetVolume(10);
 
-                this.lightsVolumeDrawer.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                this.lightsVolumeDrawer.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
         private void UpdateLightCullingVolumes()
         {
-            this.lightsVolumeDrawer.Clear();
+            this.lightsVolumeDrawer.Instance.Clear();
 
             foreach (var spot in this.Lights.SpotLights)
             {
                 var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 12, 5);
 
-                this.lightsVolumeDrawer.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 12, 5);
 
-                this.lightsVolumeDrawer.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;

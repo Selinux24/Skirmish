@@ -8,11 +8,6 @@
     public interface IUpdatable
     {
         /// <summary>
-        /// Active
-        /// </summary>
-        bool Active { get; set; }
-
-        /// <summary>
         /// Update state
         /// </summary>
         /// <param name="context">Context</param>

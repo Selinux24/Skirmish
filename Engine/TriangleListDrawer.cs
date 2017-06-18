@@ -31,17 +31,6 @@ namespace Engine
         private bool dictionaryChanged = false;
 
         /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return this.dictionary.Count;
-            }
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
@@ -49,11 +38,11 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="count">Maximum triangle count</param>
         public TriangleListDrawer(Game game, BufferManager bufferManager, TriangleListDrawerDescription description, int count)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.dictionaryChanged = false;
 
-            this.InitializeBuffers(count * 3);
+            this.InitializeBuffers(description.Name, count * 3);
         }
         /// <summary>
         /// Constructor
@@ -64,12 +53,12 @@ namespace Engine
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
         public TriangleListDrawer(Game game, BufferManager bufferManager, TriangleListDrawerDescription description, IEnumerable<Triangle> triangles, Color4 color)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.dictionary.Add(color, new List<Triangle>(triangles));
             this.dictionaryChanged = true;
 
-            this.InitializeBuffers(triangles.Count() * 3);
+            this.InitializeBuffers(description.Name, triangles.Count() * 3);
         }
         /// <summary>
         /// Internal resources disposition
@@ -122,9 +111,6 @@ namespace Engine
 
                 this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
-                if (this.AlphaEnabled) this.Game.Graphics.SetBlendDefaultAlpha();
-                else this.Game.Graphics.SetBlendDefault();
-
                 for (int p = 0; p < technique.Description.PassCount; p++)
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
@@ -139,10 +125,11 @@ namespace Engine
         /// <summary>
         /// Initialize buffers
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="vertexCount">Vertex count</param>
-        private void InitializeBuffers(int vertexCount)
+        private void InitializeBuffers(string name, int vertexCount)
         {
-            this.vertexBuffer = this.BufferManager.Add(this.Name, new VertexPositionColor[vertexCount], true, 0);
+            this.vertexBuffer = this.BufferManager.Add(name, new VertexPositionColor[vertexCount], true, 0);
         }
         /// <summary>
         /// Set triangle list

@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Lens flare description
     /// </summary>
-    public class LensFlareDescription : DrawableDescription
+    public class LensFlareDescription : SceneObjectDescription
     {
         /// <summary>
         /// Flare description

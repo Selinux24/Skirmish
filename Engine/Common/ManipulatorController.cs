@@ -21,6 +21,16 @@ namespace Engine.Common
         /// </summary>
         protected Vector3 Velocity = Vector3.Zero;
         /// <summary>
+        /// Current speed
+        /// </summary>
+        public float Speed
+        {
+            get
+            {
+                return this.Velocity.Length();
+            }
+        }
+        /// <summary>
         /// Maximum speed
         /// </summary>
         public float MaximumSpeed = 1f;

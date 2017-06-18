@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
@@ -11,6 +12,7 @@ namespace Engine
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
+    using Engine.PathFinding;
 
     /// <summary>
     /// Render scene
@@ -24,24 +26,32 @@ namespace Engine
         /// <param name="maxDistance">Maximum distance to test</param>
         /// <param name="list">Collection of objects to test</param>
         /// <returns>Returns a list of ray pickable objects order by distance to ray origin</returns>
-        private static List<Tuple<IRayPickable<Triangle>, float>> PickCoarse(ref Ray ray, float maxDistance, IEnumerable<object> list)
+        private static List<Tuple<IRayPickable<Triangle>, float>> PickCoarse(ref Ray ray, float maxDistance, IEnumerable<SceneObject> list)
         {
             List<Tuple<IRayPickable<Triangle>, float>> coarse = new List<Tuple<IRayPickable<Triangle>, float>>();
 
             foreach (var gObj in list)
             {
-                if (gObj is IComposed<Triangle>)
+                if (gObj.Is<IComposed>())
                 {
-                    var components = ((IComposed<Triangle>)gObj).GetComponents();
-
-                    coarse.AddRange(PickCoarse(ref ray, maxDistance, components));
-                }
-                else if (gObj is IRayPickable<Triangle>)
-                {
-                    float d;
-                    if (TestCoarse(ref ray, (IRayPickable<Triangle>)gObj, maxDistance, out d))
+                    var components = gObj.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    foreach (var pickable in components)
                     {
-                        coarse.Add(new Tuple<IRayPickable<Triangle>, float>((IRayPickable<Triangle>)gObj, d));
+                        float d;
+                        if (TestCoarse(ref ray, pickable, maxDistance, out d))
+                        {
+                            coarse.Add(new Tuple<IRayPickable<Triangle>, float>(pickable, d));
+                        }
+                    }
+                }
+                else if (gObj.Is<IRayPickable<Triangle>>())
+                {
+                    var pickable = gObj.Get<IRayPickable<Triangle>>();
+
+                    float d;
+                    if (TestCoarse(ref ray, pickable, maxDistance, out d))
+                    {
+                        coarse.Add(new Tuple<IRayPickable<Triangle>, float>(pickable, d));
                     }
                 }
             }
@@ -90,13 +100,9 @@ namespace Engine
         /// </summary>
         private Matrix world = Matrix.Identity;
         /// <summary>
-        /// Drawable component list
+        /// Scene component list
         /// </summary>
-        private List<IDrawable> drawableComponents = new List<IDrawable>();
-        /// <summary>
-        /// Updatable component list
-        /// </summary>
-        private List<IUpdatable> updatableComponents = new List<IUpdatable>();
+        private List<SceneObject> components = new List<SceneObject>();
         /// <summary>
         /// Control captured with mouse
         /// </summary>
@@ -106,6 +112,10 @@ namespace Engine
         /// Scene mode
         /// </summary>
         private SceneModesEnum sceneMode = SceneModesEnum.Unknown;
+        /// <summary>
+        /// Graph used for pathfinding
+        /// </summary>
+        protected IGraph navigationGraph = null;
 
         /// <summary>
         /// Game class
@@ -193,26 +203,6 @@ namespace Engine
         /// </summary>
         public SceneLights Lights { get; protected set; }
         /// <summary>
-        /// Gets the drawable component list of the scene
-        /// </summary>
-        public ReadOnlyCollection<IDrawable> DrawableComponents
-        {
-            get
-            {
-                return new ReadOnlyCollection<IDrawable>(this.drawableComponents);
-            }
-        }
-        /// <summary>
-        /// Gets the updatable component list of the scene
-        /// </summary>
-        public ReadOnlyCollection<IUpdatable> UpdatableComponents
-        {
-            get
-            {
-                return new ReadOnlyCollection<IUpdatable>(this.updatableComponents);
-            }
-        }
-        /// <summary>
         /// Gets or sets if scene has to perform frustum culling with objects
         /// </summary>
         public bool PerformFrustumCulling { get; set; }
@@ -235,6 +225,10 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Path finder
+        /// </summary>
+        public PathFinderDescription PathFinderDescription = new PathFinderDescription();
 
         /// <summary>
         /// Constructor
@@ -275,6 +269,13 @@ namespace Engine
 
         }
         /// <summary>
+        /// Scene objects initialized
+        /// </summary>
+        public virtual void Initialized()
+        {
+            this.UpdateNavigationGraph();
+        }
+        /// <summary>
         /// Generates scene resources
         /// </summary>
         public virtual void SetResources()
@@ -305,10 +306,10 @@ namespace Engine
             this.CapturedControl = this.capturedControl != null;
 
             //Process 2D controls
-            var ctrls = this.updatableComponents.FindAll(c => c.Active && c is IControl);
+            var ctrls = this.components.FindAll(c => c.Active && c.Is<IControl>());
             for (int i = 0; i < ctrls.Count; i++)
             {
-                IControl ctrl = (IControl)ctrls[i];
+                var ctrl = ctrls[i].Get<IControl>();
 
                 ctrl.MouseOver = ctrl.Rectangle.Contains(this.Game.Input.MouseX, this.Game.Input.MouseY);
 
@@ -333,6 +334,7 @@ namespace Engine
 
             if (!this.Game.Input.LeftMouseButtonPressed) this.capturedControl = null;
         }
+
         /// <summary>
         /// Draw scene objects
         /// </summary>
@@ -350,8 +352,7 @@ namespace Engine
         {
             Helper.Dispose(this.Renderer);
             Helper.Dispose(this.camera);
-            Helper.Dispose(this.drawableComponents);
-            Helper.Dispose(this.updatableComponents);
+            Helper.Dispose(this.components);
         }
         /// <summary>
         /// Change renderer mode
@@ -384,9 +385,9 @@ namespace Engine
                 this.Renderer.Resize();
             }
 
-            for (int i = 0; i < this.drawableComponents.Count; i++)
+            for (int i = 0; i < this.components.Count; i++)
             {
-                var fitted = this.drawableComponents[i] as IScreenFitted;
+                var fitted = this.components[i].Get<IScreenFitted>();
                 if (fitted != null)
                 {
                     fitted.Resize();
@@ -402,7 +403,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Model AddModel(string contentFolder, string modelContentFile, ModelDescription description, bool optimize = true, int order = 0)
+        public SceneObject<Model> AddModel(string contentFolder, string modelContentFile, ModelDescription description, bool optimize = true, int order = 0)
         {
             var content = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(contentFolder, modelContentFile));
 
@@ -417,7 +418,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Model AddModel(string contentFolder, ModelContentDescription content, ModelDescription description, bool optimize = true, int order = 0)
+        public SceneObject<Model> AddModel(string contentFolder, ModelContentDescription content, ModelDescription description, bool optimize = true, int order = 0)
         {
             Model newModel = null;
 
@@ -435,9 +436,7 @@ namespace Engine
                 newModel = new Model(this.Game, this.BufferManager, lod, description);
             }
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new model
@@ -446,13 +445,11 @@ namespace Engine
         /// <param name="description">Model description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Model AddModel(ModelContent content, ModelDescription description, int order = 0)
+        public SceneObject<Model> AddModel(ModelContent content, ModelDescription description, int order = 0)
         {
-            Model newModel = new Model(this.Game, this.BufferManager, content, description);
+            var newModel = new Model(this.Game, this.BufferManager, content, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new instanced model
@@ -463,7 +460,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(string contentFolder, string modelContentFile, ModelInstancedDescription description, bool optimize = true, int order = 0)
+        public SceneObject<ModelInstanced> AddInstancingModel(string contentFolder, string modelContentFile, ModelInstancedDescription description, bool optimize = true, int order = 0)
         {
             var content = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(contentFolder, modelContentFile));
 
@@ -478,7 +475,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(string contentFolder, ModelContentDescription content, ModelInstancedDescription description, bool optimize = true, int order = 0)
+        public SceneObject<ModelInstanced> AddInstancingModel(string contentFolder, ModelContentDescription content, ModelInstancedDescription description, bool optimize = true, int order = 0)
         {
             ModelInstanced newModel = null;
 
@@ -496,9 +493,7 @@ namespace Engine
                 newModel = new ModelInstanced(this.Game, this.BufferManager, lod, description);
             }
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new instanced model
@@ -507,13 +502,11 @@ namespace Engine
         /// <param name="description">Model description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public ModelInstanced AddInstancingModel(ModelContent content, ModelInstancedDescription description, int order = 0)
+        public SceneObject<ModelInstanced> AddInstancingModel(ModelContent content, ModelInstancedDescription description, int order = 0)
         {
-            ModelInstanced newModel = new ModelInstanced(this.Game, this.BufferManager, content, description);
+            var newModel = new ModelInstanced(this.Game, this.BufferManager, content, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new terrain model
@@ -524,7 +517,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Scenery AddScenery(string contentFolder, string modelContentFile, GroundDescription description, bool optimize = true, int order = 0)
+        public SceneObject<Scenery> AddScenery(string contentFolder, string modelContentFile, GroundDescription description, bool optimize = true, int order = 0)
         {
             var content = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(contentFolder, modelContentFile));
 
@@ -539,7 +532,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Scenery AddScenery(string contentFolder, ModelContentDescription content, GroundDescription description, bool optimize = true, int order = 0)
+        public SceneObject<Scenery> AddScenery(string contentFolder, ModelContentDescription content, GroundDescription description, bool optimize = true, int order = 0)
         {
             var t = LoaderCOLLADA.Load(contentFolder, content);
             ModelContent geo = t[0];
@@ -555,7 +548,7 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Scenery AddScenery(HeightmapDescription content, GroundDescription description, bool optimize = true, int order = 0)
+        public SceneObject<Scenery> AddScenery(HeightmapDescription content, GroundDescription description, bool optimize = true, int order = 0)
         {
             ModelContent geo = ModelContent.FromHeightmap(
                 content.ContentPath,
@@ -575,13 +568,11 @@ namespace Engine
         /// <param name="description">Terrain description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Scenery AddScenery(ModelContent content, GroundDescription description, int order = 0)
+        public SceneObject<Scenery> AddScenery(ModelContent content, GroundDescription description, int order = 0)
         {
-            Scenery newModel = new Scenery(this.Game, this.BufferManager, content, description);
+            var newModel = new Scenery(this.Game, this.BufferManager, content, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new terrain model
@@ -591,13 +582,11 @@ namespace Engine
         /// <param name="optimize">Optimize model</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Terrain AddTerrain(HeightmapDescription content, GroundDescription description, bool optimize = true, int order = 0)
+        public SceneObject<Terrain> AddTerrain(HeightmapDescription content, GroundDescription description, bool optimize = true, int order = 0)
         {
-            Terrain newModel = new Terrain(this.Game, this.BufferManager, content, description);
+            var newModel = new Terrain(this.Game, this.BufferManager, content, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new gardener
@@ -605,13 +594,11 @@ namespace Engine
         /// <param name="description">Gardener description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public GroundGardener AddGardener(GroundGardenerDescription description, int order = 0)
+        public SceneObject<GroundGardener> AddGardener(GroundGardenerDescription description, int order = 0)
         {
-            GroundGardener newModel = new GroundGardener(this.Game, this.BufferManager, description);
+            var newModel = new GroundGardener(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new mini-map
@@ -619,13 +606,11 @@ namespace Engine
         /// <param name="description">Mini-map description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new mini-map</returns>
-        public Minimap AddMinimap(MinimapDescription description, int order = 0)
+        public SceneObject<Minimap> AddMinimap(MinimapDescription description, int order = 0)
         {
-            Minimap newModel = new Minimap(this.Game, this.BufferManager, description);
+            var newModel = new Minimap(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new cubemap
@@ -633,13 +618,11 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Cubemap AddCubemap(CubemapDescription description, int order = 0)
+        public SceneObject<Cubemap> AddCubemap(CubemapDescription description, int order = 0)
         {
-            Cubemap newModel = new Cubemap(this.Game, this.BufferManager, description);
+            var newModel = new Cubemap(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new skydom
@@ -647,39 +630,33 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Skydom AddSkydom(SkydomDescription description)
+        public SceneObject<Skydom> AddSkydom(SkydomDescription description)
         {
-            Skydom newModel = new Skydom(this.Game, this.BufferManager, description);
+            var newModel = new Skydom(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, -1);
-
-            return newModel;
+            return this.AddComponent(newModel, description, -1);
         }
         /// <summary>
         /// Adds new sky scattering component
         /// </summary>
         /// <param name="description">Description</param>
         /// <returns>Returns new model</returns>
-        public SkyScattering AddSkyScattering(SkyScatteringDescription description)
+        public SceneObject<SkyScattering> AddSkyScattering(SkyScatteringDescription description)
         {
-            SkyScattering newModel = new SkyScattering(this.Game, this.BufferManager, description);
+            var newModel = new SkyScattering(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, -1);
-
-            return newModel;
+            return this.AddComponent(newModel, description, -1);
         }
         /// <summary>
         /// Adds new sky plane component
         /// </summary>
         /// <param name="description">Description</param>
         /// <returns>Returns new model</returns>
-        public SkyPlane AddSkyPlane(SkyPlaneDescription description)
+        public SceneObject<SkyPlane> AddSkyPlane(SkyPlaneDescription description)
         {
-            SkyPlane newModel = new SkyPlane(this.Game, this.BufferManager, description);
+            var newModel = new SkyPlane(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, -1);
-
-            return newModel;
+            return this.AddComponent(newModel, description, -1);
         }
         /// <summary>
         /// Adds new background sprite
@@ -687,13 +664,11 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="order">Order</param>
         /// <returns>Return new model</returns>
-        public Sprite AddBackgroud(SpriteBackgroundDescription description, int order = 0)
+        public SceneObject<Sprite> AddBackgroud(SpriteBackgroundDescription description, int order = 0)
         {
-            Sprite newModel = new Sprite(this.Game, this.BufferManager, description);
+            var newModel = new Sprite(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new sprite
@@ -701,13 +676,11 @@ namespace Engine
         /// <param name="description">Sprite description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Sprite AddSprite(SpriteDescription description, int order = 0)
+        public SceneObject<Sprite> AddSprite(SpriteDescription description, int order = 0)
         {
-            Sprite newModel = new Sprite(this.Game, this.BufferManager, description);
+            var newModel = new Sprite(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new sprite texture
@@ -715,13 +688,11 @@ namespace Engine
         /// <param name="description">Sprite texture description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public SpriteTexture AddSpriteTexture(SpriteTextureDescription description, int order = 0)
+        public SceneObject<SpriteTexture> AddSpriteTexture(SpriteTextureDescription description, int order = 0)
         {
-            SpriteTexture newModel = new SpriteTexture(this.Game, this.BufferManager, description);
+            var newModel = new SpriteTexture(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new sprite button
@@ -732,13 +703,11 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public SpriteButton AddSpriteButton(SpriteButtonDescription description, int order = 0)
+        public SceneObject<SpriteButton> AddSpriteButton(SpriteButtonDescription description, int order = 0)
         {
-            SpriteButton newModel = new SpriteButton(this.Game, this.BufferManager, description);
+            var newModel = new SpriteButton(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds new game cursor
@@ -746,13 +715,11 @@ namespace Engine
         /// <param name="description">Sprite description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new model</returns>
-        public Cursor AddCursor(SpriteDescription description, int order = 0)
+        public SceneObject<Cursor> AddCursor(SpriteDescription description, int order = 0)
         {
-            Cursor newModel = new Cursor(this.Game, this.BufferManager, description);
+            var newModel = new Cursor(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds text
@@ -760,13 +727,11 @@ namespace Engine
         /// <param name="description">Text description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new text</returns>
-        public TextDrawer AddText(TextDrawerDescription description, int order = 0)
+        public SceneObject<TextDrawer> AddText(TextDrawerDescription description, int order = 0)
         {
-            TextDrawer newModel = new TextDrawer(this.Game, this.BufferManager, description);
+            var newModel = new TextDrawer(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds a new particle manager
@@ -774,13 +739,11 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new particle manager</returns>
-        public ParticleManager AddParticleManager(ParticleManagerDescription description, int order = 0)
+        public SceneObject<ParticleManager> AddParticleManager(ParticleManagerDescription description, int order = 0)
         {
-            ParticleManager newModel = new ParticleManager(this.Game, this.BufferManager, description);
+            var newModel = new ParticleManager(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds a line list drawer
@@ -789,13 +752,11 @@ namespace Engine
         /// <param name="count">Line count</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(LineListDrawerDescription description, int count, int order = 0)
+        public SceneObject<LineListDrawer> AddLineListDrawer(LineListDrawerDescription description, int count, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, this.BufferManager, description, count);
+            var newModel = new LineListDrawer(this.Game, this.BufferManager, description, count);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds a line list drawer
@@ -805,13 +766,11 @@ namespace Engine
         /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(LineListDrawerDescription description, Line3D[] lines, Color4 color, int order = 0)
+        public SceneObject<LineListDrawer> AddLineListDrawer(LineListDrawerDescription description, Line3D[] lines, Color4 color, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, this.BufferManager, description, lines, color);
+            var newModel = new LineListDrawer(this.Game, this.BufferManager, description, lines, color);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds a line list drawer
@@ -821,13 +780,11 @@ namespace Engine
         /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new line list drawer</returns>
-        public LineListDrawer AddLineListDrawer(LineListDrawerDescription description, Triangle[] triangles, Color4 color, int order = 0)
+        public SceneObject<LineListDrawer> AddLineListDrawer(LineListDrawerDescription description, Triangle[] triangles, Color4 color, int order = 0)
         {
-            LineListDrawer newModel = new LineListDrawer(this.Game, this.BufferManager, description, triangles, color);
+            var newModel = new LineListDrawer(this.Game, this.BufferManager, description, triangles, color);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds a triangle list drawer
@@ -836,13 +793,11 @@ namespace Engine
         /// <param name="count">Triangle count</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new triangle list drawer</returns>
-        public TriangleListDrawer AddTriangleListDrawer(TriangleListDrawerDescription description, int count, int order = 0)
+        public SceneObject<TriangleListDrawer> AddTriangleListDrawer(TriangleListDrawerDescription description, int count, int order = 0)
         {
-            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, this.BufferManager, description, count);
+            var newModel = new TriangleListDrawer(this.Game, this.BufferManager, description, count);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds a triangle list drawer
@@ -852,13 +807,11 @@ namespace Engine
         /// <param name="color">Color</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new triangle list drawer</returns>
-        public TriangleListDrawer AddTriangleListDrawer(TriangleListDrawerDescription description, Triangle[] triangles, Color4 color, int order = 0)
+        public SceneObject<TriangleListDrawer> AddTriangleListDrawer(TriangleListDrawerDescription description, Triangle[] triangles, Color4 color, int order = 0)
         {
-            TriangleListDrawer newModel = new TriangleListDrawer(this.Game, this.BufferManager, description, triangles, color);
+            var newModel = new TriangleListDrawer(this.Game, this.BufferManager, description, triangles, color);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
         /// <summary>
         /// Adds a lens flare drawer
@@ -866,13 +819,11 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns new lens flare drawer</returns>
-        public LensFlare AddLensFlare(LensFlareDescription description, int order = 0)
+        public SceneObject<LensFlare> AddLensFlare(LensFlareDescription description, int order = 0)
         {
-            LensFlare newModel = new LensFlare(this.Game, this.BufferManager, description);
+            var newModel = new LensFlare(this.Game, this.BufferManager, description);
 
-            this.AddComponent(newModel, order);
-
-            return newModel;
+            return this.AddComponent(newModel, description, order);
         }
 
         /// <summary>
@@ -880,28 +831,17 @@ namespace Engine
         /// </summary>
         /// <param name="component">Component</param>
         /// <param name="order">Processing order</param>
-        private void AddComponent(Drawable component, int order)
+        public SceneObject<T> AddComponent<T>(SceneObject<T> component, int order)
         {
-            this.AddComponent((IDrawable)component, order);
-
-            this.AddComponent((IUpdatable)component);
-        }
-        /// <summary>
-        /// Adds a drawable component
-        /// </summary>
-        /// <param name="component">Component</param>
-        /// <param name="order">Processing order</param>
-        public void AddComponent(IDrawable component, int order)
-        {
-            if (!this.drawableComponents.Contains(component))
+            if (!this.components.Contains(component))
             {
                 if (order != 0)
                 {
                     component.Order = order;
                 }
 
-                this.drawableComponents.Add(component);
-                this.drawableComponents.Sort((p1, p2) =>
+                this.components.Add(component);
+                this.components.Sort((p1, p2) =>
                 {
                     //First by order index
                     int i = p1.Order.CompareTo(p2.Order);
@@ -919,109 +859,83 @@ namespace Engine
 
                 this.UpdateGlobalResources = true;
             }
-        }
-        /// <summary>
-        /// Adds a updatable component
-        /// </summary>
-        /// <param name="component">Component</param>
-        public void AddComponent(IUpdatable component)
-        {
-            if (!this.updatableComponents.Contains(component))
-            {
-                this.updatableComponents.Add(component);
 
-                this.UpdateGlobalResources = true;
-            }
+            return component;
+        }
+
+        public SceneObject<T> AddComponent<T>(T component, SceneObjectDescription description, int order = 0)
+        {
+            var sceneObject = new SceneObject<T>(component, description);
+
+            this.AddComponent(sceneObject, 0);
+
+            return sceneObject;
         }
         /// <summary>
         /// Remove and dispose component
         /// </summary>
         /// <param name="component">Component</param>
-        public void RemoveComponent(Drawable component)
+        public void RemoveComponent(SceneObject component)
         {
-            this.RemoveComponent((IDrawable)component);
+            if (this.components.Contains(component))
+            {
+                this.components.Remove(component);
 
-            this.RemoveComponent((IUpdatable)component);
+                this.UpdateGlobalResources = true;
+            }
 
             component.Dispose();
             component = null;
         }
-        /// <summary>
-        /// Removes a drawable component
-        /// </summary>
-        /// <param name="component">Component</param>
-        public void RemoveComponent(IDrawable component)
-        {
-            if (this.drawableComponents.Contains(component))
-            {
-                this.drawableComponents.Remove(component);
 
-                this.UpdateGlobalResources = true;
-            }
+        public ReadOnlyCollection<SceneObject> GetComponents()
+        {
+            return new ReadOnlyCollection<SceneObject>(this.components);
         }
-        /// <summary>
-        /// Removes a updatable component
-        /// </summary>
-        /// <param name="component">Component</param>
-        public void RemoveComponent(IUpdatable component)
-        {
-            if (this.updatableComponents.Contains(component))
-            {
-                this.updatableComponents.Remove(component);
 
-                this.UpdateGlobalResources = true;
+        public ReadOnlyCollection<SceneObject> GetComponents(Func<SceneObject, bool> func)
+        {
+            if (func != null)
+            {
+                return new ReadOnlyCollection<SceneObject>(this.components.FindAll(c => func(c)));
+            }
+            else
+            {
+                return new ReadOnlyCollection<SceneObject>(this.components);
             }
         }
 
-        /// <summary>
-        /// Gets picking ray from current mouse position
-        /// </summary>
-        /// <returns>Returns picking ray from current mouse position</returns>
-        public Ray GetPickingRay()
+        public ReadOnlyCollection<T> GetComponents<T>()
         {
-            int mouseX = this.Game.Input.MouseX;
-            int mouseY = this.Game.Input.MouseY;
-            Matrix worldViewProjection = this.world * this.camera.View * this.camera.Projection;
-            float nDistance = this.camera.NearPlaneDistance;
-            float fDistance = this.camera.FarPlaneDistance;
-            ViewportF viewport = this.Game.Graphics.Viewport;
+            List<T> res = new List<T>();
 
-            Vector3 nVector = new Vector3(mouseX, mouseY, nDistance);
-            Vector3 fVector = new Vector3(mouseX, mouseY, fDistance);
-
-            Vector3 nPoint = Vector3.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
-            Vector3 fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
-
-            return new Ray(nPoint, Vector3.Normalize(fPoint - nPoint));
-        }
-        /// <summary>
-        /// Gets the nearest pickable object in the ray path
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="maxDistance">Maximum distance for test</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="model">Gets the resulting ray pickable object</param>
-        /// <returns>Returns true if a pickable object in the ray path was found</returns>
-        public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, out IRayPickable<Triangle> model)
-        {
-            model = null;
-
-            var coarse = PickCoarse(ref ray, maxDistance, this.updatableComponents);
-
-            foreach (var obj in coarse)
+            for (int i = 0; i < this.components.Count; i++)
             {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (obj.Item1.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                if (this.components[i] is T)
                 {
-                    model = obj.Item1;
-
-                    return true;
+                    res.Add((T)(object)this.components[i]);
                 }
             }
 
-            return false;
+            return new ReadOnlyCollection<T>(res);
+        }
+
+        public ReadOnlyCollection<T> GetComponents<T>(Func<SceneObject, bool> func)
+        {
+            List<T> res = new List<T>();
+
+            for (int i = 0; i < this.components.Count; i++)
+            {
+                if (func == null || func(this.components[i]))
+                {
+                    if (this.components[i].Is<T>())
+                    {
+                        res.Add(this.components[i].Get<T>());
+                    }
+                }
+            }
+
+            return new ReadOnlyCollection<T>(res);
         }
 
         /// <summary>
@@ -1050,11 +964,11 @@ namespace Engine
 
             mats.Add(MeshMaterial.Default);
 
-            var matComponents = this.drawableComponents.FindAll(c => c is UseMaterials);
+            var matComponents = this.components.FindAll(c => c.Is<UseMaterials>());
 
-            foreach (UseMaterials component in matComponents)
+            foreach (var component in matComponents)
             {
-                var matList = component.Materials;
+                var matList = component.Get<UseMaterials>().Materials;
                 if (matList != null && matList.Length > 0)
                 {
                     mats.AddRange(matList);
@@ -1104,11 +1018,11 @@ namespace Engine
         {
             List<SkinningData> skData = new List<SkinningData>();
 
-            var skComponents = this.drawableComponents.FindAll(c => c is UseSkinningData);
+            var skComponents = this.components.FindAll(c => c.Is<UseSkinningData>());
 
-            foreach (UseSkinningData component in skComponents)
+            foreach (var component in skComponents)
             {
-                var skList = component.SkinningData;
+                var skList = component.Get<UseSkinningData>().SkinningData;
                 if (skList != null && skList.Length > 0)
                 {
                     skData.AddRange(skList);
@@ -1149,6 +1063,605 @@ namespace Engine
 
             animationPalette = this.Game.ResourceManager.CreateGlobalResourceTexture2D("AnimationPalette", values.ToArray(), texWidth);
             animationPaletteWidth = (uint)texWidth;
+        }
+
+
+
+
+        /// <summary>
+        /// Gets picking ray from current mouse position
+        /// </summary>
+        /// <returns>Returns picking ray from current mouse position</returns>
+        public Ray GetPickingRay()
+        {
+            int mouseX = this.Game.Input.MouseX;
+            int mouseY = this.Game.Input.MouseY;
+            Matrix worldViewProjection = this.world * this.camera.View * this.camera.Projection;
+            float nDistance = this.camera.NearPlaneDistance;
+            float fDistance = this.camera.FarPlaneDistance;
+            ViewportF viewport = this.Game.Graphics.Viewport;
+
+            Vector3 nVector = new Vector3(mouseX, mouseY, nDistance);
+            Vector3 fVector = new Vector3(mouseX, mouseY, fDistance);
+
+            Vector3 nPoint = Vector3.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+            Vector3 fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+
+            return new Ray(nPoint, Vector3.Normalize(fPoint - nPoint));
+        }
+        /// <summary>
+        /// Gets the nearest pickable object in the ray path
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="maxDistance">Maximum distance for test</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="model">Gets the resulting ray pickable object</param>
+        /// <returns>Returns true if a pickable object in the ray path was found</returns>
+        public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, out IRayPickable<Triangle> model)
+        {
+            model = null;
+
+            var usage = SceneObjectUsageEnum.Agent &
+                SceneObjectUsageEnum.CoarsePathFinding &
+                SceneObjectUsageEnum.FullPathFinding;
+
+            var cmpList = this.components.FindAll(c => c.Usage.HasFlag(usage));
+
+            var coarse = PickCoarse(ref ray, maxDistance, cmpList);
+
+            foreach (var obj in coarse)
+            {
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (obj.Item1.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                {
+                    model = obj.Item1;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle item, out float distance)
+        {
+            return PickNearest(ref ray, facingOnly, SceneObjectUsageEnum.None, out position, out item, out distance);
+        }
+
+        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle item, out float distance)
+        {
+            return PickFirst(ref ray, facingOnly, SceneObjectUsageEnum.None, out position, out item, out distance);
+        }
+
+        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] item, out float[] distances)
+        {
+            return PickAll(ref ray, facingOnly, SceneObjectUsageEnum.None, out positions, out item, out distances);
+        }
+
+        /// <summary>
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindTopGroundPosition(float x, float z, out Vector3 position, out Triangle triangle, out float distance)
+        {
+            BoundingBox bbox = this.GetBoundingBox();
+
+            Ray ray = new Ray()
+            {
+                Position = new Vector3(x, bbox.Maximum.Y + 0.1f, z),
+                Direction = Vector3.Down,
+            };
+
+            var usage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
+
+            return this.PickNearest(ref ray, true, usage, out position, out triangle, out distance);
+        }
+        /// <summary>
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindFirstGroundPosition(float x, float z, out Vector3 position, out Triangle triangle, out float distance)
+        {
+            BoundingBox bbox = this.GetBoundingBox();
+
+            Ray ray = new Ray()
+            {
+                Position = new Vector3(x, bbox.Maximum.Y + 0.1f, z),
+                Direction = Vector3.Down,
+            };
+
+            var usage = SceneObjectUsageEnum.CoarsePathFinding & SceneObjectUsageEnum.FullPathFinding;
+
+            return this.PickFirst(ref ray, true, usage, out position, out triangle, out distance);
+        }
+        /// <summary>
+        /// Gets all ground positions giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="positions">Ground positions if exists</param>
+        /// <param name="triangles">Triangles found</param>
+        /// <param name="distances">Distances to positions</param>
+        /// <returns>Returns true if ground positions found</returns>
+        public bool FindAllGroundPosition(float x, float z, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        {
+            BoundingBox bbox = this.GetBoundingBox();
+
+            Ray ray = new Ray()
+            {
+                Position = new Vector3(x, bbox.Maximum.Y + 0.01f, z),
+                Direction = Vector3.Down,
+            };
+
+            var usage = SceneObjectUsageEnum.CoarsePathFinding & SceneObjectUsageEnum.FullPathFinding;
+
+            return this.PickAll(ref ray, true, usage, out positions, out triangles, out distances);
+        }
+        /// <summary>
+        /// Gets nearest ground position to "from" position
+        /// </summary>
+        /// <param name="from">Position from</param>
+        /// <param name="position">Ground position if exists</param>
+        /// <param name="triangle">Triangle found</param>
+        /// <param name="distance">Distance to position</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindNearestGroundPosition(Vector3 from, out Vector3 position, out Triangle triangle, out float distance)
+        {
+            BoundingBox bbox = this.GetBoundingBox();
+
+            Ray ray = new Ray()
+            {
+                Position = new Vector3(from.X, bbox.Maximum.Y + 0.01f, from.Z),
+                Direction = Vector3.Down,
+            };
+
+            var usage = SceneObjectUsageEnum.CoarsePathFinding & SceneObjectUsageEnum.FullPathFinding;
+
+            Vector3[] pArray;
+            Triangle[] tArray;
+            float[] dArray;
+            if (this.PickAll(ref ray, true, usage, out pArray, out tArray, out dArray))
+            {
+                int index = -1;
+                float dist = float.MaxValue;
+                for (int i = 0; i < pArray.Length; i++)
+                {
+                    float d = Vector3.DistanceSquared(from, pArray[i]);
+                    if (d <= dist)
+                    {
+                        dist = d;
+
+                        index = i;
+                    }
+                }
+
+                position = pArray[index];
+                triangle = tArray[index];
+                distance = dArray[index];
+
+                return true;
+            }
+            else
+            {
+                position = Vector3.Zero;
+                triangle = new Triangle();
+                distance = float.MaxValue;
+
+                return false;
+            }
+        }
+
+        private bool PickNearest(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out Vector3 position, out Triangle item, out float distance)
+        {
+            position = Vector3.Zero;
+            item = new Triangle();
+            distance = float.MaxValue;
+
+            var cmpList = usage == SceneObjectUsageEnum.None ?
+                this.components :
+                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsageEnum.None);
+
+            var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
+
+            bool picked = false;
+            float bestDistance = float.MaxValue;
+
+            foreach (var obj in coarse)
+            {
+                if (obj.Item2 > bestDistance)
+                {
+                    break;
+                }
+
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (obj.Item1.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                {
+                    if (d < bestDistance)
+                    {
+                        bestDistance = d;
+
+                        position = p;
+                        item = t;
+                        distance = d;
+                    }
+
+                    picked = true;
+                }
+            }
+
+            return picked;
+        }
+
+        private bool PickFirst(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out Vector3 position, out Triangle item, out float distance)
+        {
+            position = Vector3.Zero;
+            item = new Triangle();
+            distance = float.MaxValue;
+
+            var cmpList = usage == SceneObjectUsageEnum.None ?
+                this.components :
+                this.components.FindAll(c => c.Usage.HasFlag(usage));
+
+            var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
+
+            foreach (var obj in coarse)
+            {
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (obj.Item1.PickFirst(ref ray, facingOnly, out p, out t, out d))
+                {
+                    position = p;
+                    item = t;
+                    distance = d;
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool PickAll(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out Vector3[] positions, out Triangle[] item, out float[] distances)
+        {
+            positions = null;
+            item = null;
+            distances = null;
+
+            var cmpList = usage == SceneObjectUsageEnum.None ?
+                this.components :
+                this.components.FindAll(c => c.Usage.HasFlag(usage));
+
+            var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
+
+            List<Vector3> lPositions = new List<Vector3>();
+            List<Triangle> lTriangles = new List<Triangle>();
+            List<float> lDistances = new List<float>();
+
+            foreach (var obj in coarse)
+            {
+                Vector3[] p;
+                Triangle[] t;
+                float[] d;
+                if (obj.Item1.PickAll(ref ray, facingOnly, out p, out t, out d))
+                {
+                    lPositions.AddRange(p);
+                    lTriangles.AddRange(t);
+                    lDistances.AddRange(d);
+                }
+            }
+
+            positions = lPositions.ToArray();
+            item = lTriangles.ToArray();
+            distances = lDistances.ToArray();
+
+            return lPositions.Count > 0;
+        }
+
+
+
+
+        public void SetGround<T>(SceneObject<T> obj, bool fullGeometryPathFinding)
+        {
+            obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
+        }
+
+        public void AttachToGround<T>(SceneObject<T> obj, float x, float z, Matrix transform, bool fullGeometryPathFinding)
+        {
+            Vector3 pos;
+            Triangle tri;
+            float dist;
+            if (this.FindTopGroundPosition(x, z, out pos, out tri, out dist))
+            {
+                obj.Transform.LocalTransform = transform;
+                obj.Transform.SetPosition(pos);
+            }
+
+            obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
+        }
+
+
+
+
+        public void UpdateNavigationGraph()
+        {
+            if (this.PathFinderDescription != null)
+            {
+                var gTriangles = this.GetTrianglesForNavigationGraph();
+
+                this.boundingBox = GeometryUtil.CreateBoundingBox(gTriangles);
+                this.boundingSphere = GeometryUtil.CreateBoundingSphere(gTriangles);
+
+                this.navigationGraph = PathFinder.Build(this.PathFinderDescription.Settings, gTriangles);
+            }
+        }
+
+        /// <summary>
+        /// Gets the objects triangle list for navigation graph construction
+        /// </summary>
+        /// <returns>Returns a triangle list</returns>
+        protected Triangle[] GetTrianglesForNavigationGraph()
+        {
+            List<Triangle> tris = new List<Triangle>();
+
+            var pfComponents = this.components.FindAll(c => c.Usage.HasFlag(SceneObjectUsageEnum.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsageEnum.CoarsePathFinding));
+
+            for (int i = 0; i < pfComponents.Count; i++)
+            {
+                var curr = pfComponents[i];
+
+                List<IVolume> volumes = new List<IVolume>();
+
+                bool isComposed = curr.Is<IComposed>();
+                if (!isComposed)
+                {
+                    var trn = curr.Get<ITransformable3D>();
+                    if (trn != null)
+                    {
+                        trn.Manipulator.UpdateInternals(true);
+                    }
+
+                    var pickable = curr.Get<IVolume>();
+                    if (pickable != null)
+                    {
+                        volumes.Add(pickable);
+                    }
+                }
+                else
+                {
+                    var trnChilds = curr.Get<IComposed>().GetComponents<ITransformable3D>();
+                    foreach (var child in trnChilds)
+                    {
+                        child.Manipulator.UpdateInternals(true);
+                    }
+
+                    var pickableChilds = curr.Get<IComposed>().GetComponents<IVolume>();
+                    volumes.AddRange(pickableChilds);
+                }
+
+                for (int p = 0; p < volumes.Count; p++)
+                {
+                    var full = curr.Usage.HasFlag(SceneObjectUsageEnum.FullPathFinding);
+
+                    var vTris = volumes[p].GetVolume(full);
+                    if (vTris != null && vTris.Length > 0)
+                    {
+                        //Use volume mesh
+                        tris.AddRange(vTris);
+                    }
+                }
+            }
+
+            return tris.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the path finder grid nodes
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <returns>Returns the path finder grid nodes</returns>
+        public IGraphNode[] GetNodes(AgentType agent)
+        {
+            IGraphNode[] nodes = null;
+
+            if (this.navigationGraph != null)
+            {
+                nodes = this.navigationGraph.GetNodes(agent);
+            }
+
+            return nodes;
+        }
+
+        /// <summary>
+        /// Find path from point to point
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="from">Start point</param>
+        /// <param name="to">End point</param>
+        /// <param name="useGround">Use ground info</param>
+        /// <param name="delta">Delta amount for path refinement</param>
+        /// <returns>Return path if exists</returns>
+        public virtual PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = true, float delta = 0f)
+        {
+            List<Vector3> positions = new List<Vector3>();
+            List<Vector3> normals = new List<Vector3>();
+
+            var path = this.navigationGraph.FindPath(agent, from, to);
+            if (path != null && path.Length > 1)
+            {
+                if (delta == 0)
+                {
+                    positions.AddRange(path);
+                    normals.AddRange(Helper.CreateArray(path.Length, new Vector3(0, 1, 0)));
+                }
+                else
+                {
+                    positions.Add(path[0]);
+                    normals.Add(Vector3.Up);
+
+                    var p0 = path[0];
+                    var p1 = path[1];
+
+                    int index = 0;
+                    while (index < path.Length - 1)
+                    {
+                        var s = p1 - p0;
+                        var v = Vector3.Normalize(s) * delta;
+                        var l = delta - s.Length();
+
+                        if (l <= 0f)
+                        {
+                            //Into de segment
+                            p0 += v;
+                        }
+                        else if (index < path.Length - 2)
+                        {
+                            //Next segment
+                            var p2 = path[index + 2];
+                            p0 = p1 + ((p2 - p1) * l);
+                            p1 = p2;
+
+                            index++;
+                        }
+                        else
+                        {
+                            //End
+                            p0 = path[index + 1];
+
+                            index++;
+                        }
+
+                        positions.Add(p0);
+                        normals.Add(Vector3.Up);
+                    }
+                }
+            }
+
+            if (useGround)
+            {
+                for (int i = 0; i < positions.Count; i++)
+                {
+                    Vector3 position;
+                    Triangle triangle;
+                    float distance;
+                    if (FindNearestGroundPosition(positions[i], out position, out triangle, out distance))
+                    {
+                        positions[i] = position;
+                        normals[i] = triangle.Normal;
+                    }
+                }
+            }
+
+            return new PathFindingPath(positions.ToArray(), normals.ToArray());
+        }
+        /// <summary>
+        /// Gets wether the specified position is walkable
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="position">Position</param>
+        /// <param name="nearest">Gets the nearest walkable position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        public virtual bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
+        {
+            if (this.navigationGraph != null)
+            {
+                return this.navigationGraph.IsWalkable(agent, position, out nearest);
+            }
+
+            nearest = position;
+
+            return true;
+        }
+        /// <summary>
+        /// Gets final position for agents walking over the ground if exists
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="prevPosition">Previous position</param>
+        /// <param name="newPosition">New position</param>
+        /// <param name="finalPosition">Returns the final position if exists</param>
+        /// <returns>Returns true if final position found</returns>
+        public virtual bool Walk(AgentType agent, Vector3 prevPosition, Vector3 newPosition, out Vector3 finalPosition)
+        {
+            finalPosition = Vector3.Zero;
+
+            Vector3 walkerPos;
+            Triangle t;
+            float d;
+            if (this.FindNearestGroundPosition(newPosition, out walkerPos, out t, out d))
+            {
+                Vector3? nearest;
+                if (this.IsWalkable(agent, walkerPos, out nearest))
+                {
+                    finalPosition = walkerPos;
+                    finalPosition.Y += agent.Height;
+
+                    var moveP = newPosition - prevPosition;
+                    var moveV = finalPosition - prevPosition;
+                    if (moveV.LengthSquared() > moveP.LengthSquared())
+                    {
+                        finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+                    }
+
+                    return true;
+                }
+                else
+                {
+                    //Not walkable but nearest position found
+                    if (nearest.HasValue)
+                    {
+                        //Adjust height
+                        var p = nearest.Value;
+                        p.Y = prevPosition.Y;
+
+                        if (this.FindNearestGroundPosition(p, out walkerPos, out t, out d))
+                        {
+                            finalPosition = walkerPos;
+                            finalPosition.Y += agent.Height;
+
+                            var moveP = newPosition - prevPosition;
+                            var moveV = finalPosition - prevPosition;
+                            if (moveV.LengthSquared() > moveP.LengthSquared())
+                            {
+                                finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+                            }
+
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+
+
+
+        private BoundingBox boundingBox;
+        private BoundingSphere boundingSphere;
+
+        public BoundingSphere GetBoundingSphere()
+        {
+            return this.boundingSphere;
+        }
+
+        public BoundingBox GetBoundingBox()
+        {
+            return this.boundingBox;
         }
     }
 }

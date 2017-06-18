@@ -36,16 +36,6 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; set; }
-        /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -55,11 +45,11 @@ namespace Engine
         /// <param name="content">Content</param>
         /// <param name="description">Description</param>
         public Cubemap(Game game, BufferManager bufferManager, CubemapDescription description)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.Manipulator = new Manipulator3D();
 
-            this.InitializeBuffers(description.Geometry, description.ReverseFaces);
+            this.InitializeBuffers(description.Name, description.Geometry, description.ReverseFaces);
             this.InitializeTexture(description.ContentPath, description.Texture);
         }
         /// <summary>
@@ -136,9 +126,10 @@ namespace Engine
         /// <summary>
         /// Initialize buffers
         /// </summary>
+        /// <param name="name">Buffer name</param>
         /// <param name="geometry">Geometry to use</param>
         /// <param name="reverse">Reverse faces</param>
-        protected virtual void InitializeBuffers(CubemapDescription.CubeMapGeometryEnum geometry, bool reverse)
+        protected virtual void InitializeBuffers(string name, CubemapDescription.CubeMapGeometryEnum geometry, bool reverse)
         {
             Vector3[] vData;
             uint[] iData;
@@ -154,8 +145,8 @@ namespace Engine
 
             if (reverse) iData = GeometryUtil.ChangeCoordinate(iData);
 
-            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices.ToArray(), false, 0);
-            this.indexBuffer = this.BufferManager.Add(this.Name, iData, false);
+            this.vertexBuffer = this.BufferManager.Add(name, vertices.ToArray(), false, 0);
+            this.indexBuffer = this.BufferManager.Add(name, iData, false);
         }
         /// <summary>
         /// Initialize textures

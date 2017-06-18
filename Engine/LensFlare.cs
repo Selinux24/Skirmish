@@ -34,17 +34,7 @@ namespace Engine
         /// <summary>
         /// Parent ground
         /// </summary>
-        public Ground ParentGround { get; set; }
-        /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1 + (this.flares != null ? this.flares.Length : 0);
-            }
-        }
+        public Scene ParentGround { get; set; }
 
         /// <summary>
         /// Constructor
@@ -53,7 +43,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
         public LensFlare(Game game, BufferManager bufferManager, LensFlareDescription description)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.glowSprite = new Sprite(game, bufferManager, new SpriteDescription()
             {

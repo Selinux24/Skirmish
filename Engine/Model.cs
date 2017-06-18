@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
@@ -11,7 +12,7 @@ namespace Engine
     /// <summary>
     /// Basic Model
     /// </summary>
-    public class Model : ModelBase, ITransformable3D, IRayPickable<Triangle>
+    public class Model : ModelBase, ITransformable3D, IRayPickable<Triangle>, IVolume
     {
         /// <summary>
         /// Update point cache flag
@@ -102,16 +103,6 @@ namespace Engine
         /// Gets the current model lights collection
         /// </summary>
         public SceneLight[] Lights { get; protected set; }
-        /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -122,7 +113,7 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
         public Model(Game game, BufferManager bufferManager, ModelContent content, ModelDescription description, bool dynamic = false)
-            : base(game, bufferManager, content, description, false, 0, true, true, dynamic)
+            : base(game, bufferManager, content, false, 0, true, true, dynamic)
         {
             this.TextureIndex = description.TextureIndex;
 
@@ -144,7 +135,7 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
         public Model(Game game, BufferManager bufferManager, LODModelContent content, ModelDescription description, bool dynamic = false)
-            : base(game, bufferManager, content, description, false, 0, true, true, dynamic)
+            : base(game, bufferManager, content, false, 0, true, true, dynamic)
         {
             this.TextureIndex = description.TextureIndex;
 
@@ -590,14 +581,6 @@ namespace Engine
 
             return this.orientedBoundingBox;
         }
-        /// <summary>
-        /// Gets internal volume
-        /// </summary>
-        /// <returns>Returns interna volume</returns>
-        public Triangle[] GetVolume()
-        {
-            return this.DrawingData.VolumeMesh;
-        }
 
         /// <summary>
         /// Gets nearest picking position of giving ray
@@ -703,6 +686,32 @@ namespace Engine
             }
 
             return false;
+        }
+       
+        /// <summary>
+        /// Gets internal volume
+        /// </summary>
+        /// <param name="full"></param>
+        /// <returns>Returns internal volume</returns>
+        public Triangle[] GetVolume(bool full)
+        {
+            if (full)
+            {
+                return this.GetTriangles(true);
+            }
+            else
+            {
+                if( this.DrawingData.VolumeMesh != null)
+                {
+                    return this.DrawingData.VolumeMesh;
+                }
+                else
+                {
+                    //Generate cylinder
+                    var cylinder = BoundingCylinder.FromPoints(this.GetPoints());
+                    return Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8);
+                }
+            }
         }
     }
 }

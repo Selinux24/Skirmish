@@ -89,8 +89,8 @@ namespace Engine.Common
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelBase(Game game, BufferManager bufferManager, ModelContent content, DrawableDescription description, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
-            : base(game, bufferManager, description)
+        public ModelBase(Game game, BufferManager bufferManager, ModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
+            : base(game, bufferManager)
         {
             var desc = new DrawingDataDescription()
             {
@@ -120,8 +120,8 @@ namespace Engine.Common
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelBase(Game game, BufferManager bufferManager, LODModelContent content, DrawableDescription description, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
-            : base(game, bufferManager, description)
+        public ModelBase(Game game, BufferManager bufferManager, LODModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
+            : base(game, bufferManager)
         {
             var desc = new DrawingDataDescription()
             {

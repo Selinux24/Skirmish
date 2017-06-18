@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Text drawer description
     /// </summary>
-    public class TextDrawerDescription : DrawableDescription
+    public class TextDrawerDescription : SceneObjectDescription
     {
         /// <summary>
         /// Generates a new description

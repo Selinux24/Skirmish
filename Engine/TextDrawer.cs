@@ -117,16 +117,6 @@ namespace Engine
         /// Gets or sets relative position of shadow
         /// </summary>
         public Vector2 ShadowRelative { get; set; }
-        /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 0;
-            }
-        }
 
         /// <summary>
         /// Gets or sest text position in 2D screen
@@ -192,7 +182,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Text description</param>
         public TextDrawer(Game game, BufferManager bufferManager, TextDrawerDescription description)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
 
@@ -205,8 +195,8 @@ namespace Engine
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
             uint[] indices = new uint[FontMap.MAXTEXTLENGTH * 6];
 
-            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, true, 0);
-            this.indexBuffer = this.BufferManager.Add(this.Name, indices, true);
+            this.vertexBuffer = this.BufferManager.Add(description.Name, vertices, true, 0);
+            this.indexBuffer = this.BufferManager.Add(description.Name, indices, true);
 
             this.TextColor = description.TextColor;
             this.ShadowColor = description.ShadowColor;

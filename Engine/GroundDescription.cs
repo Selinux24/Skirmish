@@ -1,12 +1,11 @@
 ﻿namespace Engine
 {
     using Engine.Common;
-    using Engine.PathFinding;
 
     /// <summary>
     /// Ground description
     /// </summary>
-    public class GroundDescription : DrawableDescription
+    public class GroundDescription : SceneObjectDescription
     {
         /// <summary>
         /// Quadtree description
@@ -26,25 +25,11 @@
                 this.MaximumDepth = 3;
             }
         }
-        /// <summary>
-        /// Path finder grid description
-        /// </summary>
-        public class PathFinderDescription
-        {
-            /// <summary>
-            /// Graph type
-            /// </summary>
-            public PathFinderSettings Settings = null;
-        }
 
         /// <summary>
         /// Quadtree
         /// </summary>
         public QuadtreeDescription Quadtree = new QuadtreeDescription();
-        /// <summary>
-        /// Path finder
-        /// </summary>
-        public PathFinderDescription PathFinder = null;
 
         /// <summary>
         /// Delay internal generation

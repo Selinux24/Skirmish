@@ -6,9 +6,9 @@ namespace SpriteDrawing
     {
         private const float delta = 25f;
 
-        private Sprite background = null;
-        private Sprite spriteFixed = null;
-        private Sprite spriteMov = null;
+        private SceneObject<Sprite> background = null;
+        private SceneObject<Sprite> spriteFixed = null;
+        private SceneObject<Sprite> spriteMov = null;
 
         public TestScene(Game game)
             : base(game)
@@ -47,7 +47,7 @@ namespace SpriteDrawing
             };
             this.background = this.AddBackgroud(bkDescription, 1);
 
-            this.spriteMov.Manipulator.SetPosition(256, 0);
+            this.spriteMov.Transform2D.SetPosition(256, 0);
         }
         public override void Update(GameTime gameTime)
         {
@@ -60,27 +60,27 @@ namespace SpriteDrawing
 
             if (this.Game.Input.KeyJustReleased(Keys.Home))
             {
-                this.spriteMov.Manipulator.SetPosition(0, 0);
+                this.spriteMov.Transform2D.SetPosition(0, 0);
             }
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
-                this.spriteMov.Manipulator.MoveLeft(gameTime, delta);
+                this.spriteMov.Transform2D.MoveLeft(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.D))
             {
-                this.spriteMov.Manipulator.MoveRight(gameTime, delta);
+                this.spriteMov.Transform2D.MoveRight(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.W))
             {
-                this.spriteMov.Manipulator.MoveUp(gameTime, delta);
+                this.spriteMov.Transform2D.MoveUp(gameTime, delta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.S))
             {
-                this.spriteMov.Manipulator.MoveDown(gameTime, delta);
+                this.spriteMov.Transform2D.MoveDown(gameTime, delta);
             }
         }
     }

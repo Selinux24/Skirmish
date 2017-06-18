@@ -723,8 +723,8 @@ namespace HeightmapTest
                 this.helicopter2.AnimationController.Start();
             }
 
-            this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helicopter, this.helicopter2 }, false);
-            this.terrain.AttachCoarsePickingCoarsePathFinding(new ModelBase[] { this.torchs, this.rocks, this.trees, this.trees2 }, false);
+            this.terrain.AttachFullPathFinding(new ModelBase[] { this.helicopter, this.helicopter2 }, false);
+            this.terrain.AttachCoarsePathFinding(new ModelBase[] { this.torchs, this.rocks, this.trees, this.trees2 }, false);
             this.terrain.UpdateInternals();
 
             this.gardener.ParentGround = this.terrain;

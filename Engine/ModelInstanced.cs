@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Instaced model
     /// </summary>
-    public class ModelInstanced : ModelBase, IComposed<Triangle>
+    public class ModelInstanced : ModelBase, IComposed
     {
         /// <summary>
         /// Instancing data per instance
@@ -54,7 +54,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public override int Count
+        public int Count
         {
             get
             {
@@ -71,7 +71,7 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
         public ModelInstanced(Game game, BufferManager bufferManager, ModelContent content, ModelInstancedDescription description, bool dynamic = false)
-            : base(game, bufferManager, content, description, true, description.Instances, true, true, dynamic)
+            : base(game, bufferManager, content, true, description.Instances, true, true, dynamic)
         {
             if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 
@@ -89,7 +89,7 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
         public ModelInstanced(Game game, BufferManager bufferManager, LODModelContent content, ModelInstancedDescription description, bool dynamic = false)
-            : base(game, bufferManager, content, description, true, description.Instances, true, true, dynamic)
+            : base(game, bufferManager, content, true, description.Instances, true, true, dynamic)
         {
             if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 
@@ -130,7 +130,8 @@ namespace Engine
                         i = i1.Id.CompareTo(i2.Id);
                     }
 
-                    return this.AlphaEnabled ? -i : i;
+                    //return this.AlphaEnabled ? -i : i;
+                    return i;
                 });
             }
         }
@@ -351,16 +352,19 @@ namespace Engine
             return this.instances;
         }
         /// <summary>
-        /// Gets all ray pickable components
+        /// Gets all components
         /// </summary>
-        /// <returns>Returns a collection of ray pickable components</returns>
-        public IEnumerable<IRayPickable<Triangle>> GetComponents()
+        /// <returns>Returns a collection of components</returns>
+        public IEnumerable<T> GetComponents<T>()
         {
-            IRayPickable<Triangle>[] res = new IRayPickable<Triangle>[this.instanceCount];
+            List<T> res = new List<T>();
 
             for (int i = 0; i < this.instanceCount; i++)
             {
-                res[i] = this.instances[i];
+                if (this.instances[i] is T)
+                {
+                    res.Add((T)(object)this.instances[i]);
+                }
             }
 
             return res;

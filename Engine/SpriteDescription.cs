@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Sprite description
     /// </summary>
-    public class SpriteDescription : DrawableDescription
+    public class SpriteDescription : SceneObjectDescription
     {
         /// <summary>
         /// Sprite color

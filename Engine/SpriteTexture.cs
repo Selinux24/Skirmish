@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Minimap
     /// </summary>
-    public class SpriteTexture : Drawable, IScreenFitted
+    public class SpriteTexture : Drawable, IScreenFitted, ITransformable2D
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -62,16 +62,6 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1;
-            }
-        }
 
         /// <summary>
         /// Contructor
@@ -80,7 +70,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Sprite texture description</param>
         public SpriteTexture(Game game, BufferManager bufferManager, SpriteTextureDescription description)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             Vector3[] cv;
             Vector2[] cuv;
@@ -95,8 +85,8 @@ namespace Engine
 
             var vertices = VertexPositionTexture.Generate(cv, cuv);
 
-            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, false, 0);
-            this.indexBuffer = this.BufferManager.Add(this.Name, ci, false);
+            this.vertexBuffer = this.BufferManager.Add(description.Name, vertices, false, 0);
+            this.indexBuffer = this.BufferManager.Add(description.Name, ci, false);
 
             this.Channels = description.Channel;
 

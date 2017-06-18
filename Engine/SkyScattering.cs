@@ -85,16 +85,6 @@ namespace Engine
         public float ScatteringScale { get; private set; }
 
         /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1;
-            }
-        }
-        /// <summary>
         /// Planet radius
         /// </summary>
         public float PlanetRadius { get; set; }
@@ -211,7 +201,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Sky scattering description class</param>
         public SkyScattering(Game game, BufferManager bufferManager, SkyScatteringDescription description)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.PlanetRadius = description.PlanetRadius;
             this.PlanetAtmosphereRadius = description.PlanetAtmosphereRadius;
@@ -230,7 +220,7 @@ namespace Engine
             this.sphereOuterRadius = this.sphereInnerRadius * 1.025f;
             this.CalcScale();
 
-            this.InitializeBuffers();
+            this.InitializeBuffers(description.Name);
         }
         /// <summary>
         /// Resource releasing
@@ -307,7 +297,8 @@ namespace Engine
         /// <summary>
         /// Initialize buffers
         /// </summary>
-        private void InitializeBuffers()
+        /// <param name="name">Buffer name</param>
+        private void InitializeBuffers(string name)
         {
             Vector3[] vData;
             uint[] iData;
@@ -322,8 +313,8 @@ namespace Engine
 
             var indices = GeometryUtil.ChangeCoordinate(iData);
 
-            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices.ToArray(), false, 0);
-            this.indexBuffer = this.BufferManager.Add(this.Name, indices, false);
+            this.vertexBuffer = this.BufferManager.Add(name, vertices.ToArray(), false, 0);
+            this.indexBuffer = this.BufferManager.Add(name, indices, false);
         }
         /// <summary>
         /// Calc current scattering scale from sphere radius values

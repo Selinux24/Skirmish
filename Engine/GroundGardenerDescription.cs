@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Ground gardener description
     /// </summary>
-    public class GroundGardenerDescription : DrawableDescription
+    public class GroundGardenerDescription : SceneObjectDescription
     {
         /// <summary>
         /// Vegetation channel

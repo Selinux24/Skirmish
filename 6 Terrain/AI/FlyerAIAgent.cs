@@ -8,7 +8,7 @@ namespace TerrainTest.AI
     {
         public float FlightHeight;
 
-        public FlyerAIAgent(Brain parent, AgentType agentType, Model model, FlyerAIStatusDescription status) :
+        public FlyerAIAgent(Brain parent, AgentType agentType, SceneObject model, FlyerAIStatusDescription status) :
             base(parent, agentType, model, status)
         {
             this.FlightHeight = status.FlightHeight;
@@ -24,7 +24,7 @@ namespace TerrainTest.AI
                 p.Y = this.FlightHeight;
             }
 
-            this.Controller.Follow(new SegmentPath(new[] { this.Model.Manipulator.Position, p }));
+            this.Controller.Follow(new SegmentPath(new[] { this.Manipulator.Position, p }));
             this.Controller.MaximumSpeed = speed;
         }
 
@@ -34,14 +34,14 @@ namespace TerrainTest.AI
             Vector3 p;
             Triangle t;
             float d;
-            if (this.Parent.Ground.FindNearestGroundPosition(this.Manipulator.Position, out p, out t, out d))
+            if (this.Parent.Scene.FindNearestGroundPosition(this.Manipulator.Position, out p, out t, out d))
             {
                 this.SetRouteToPoint(p, 15f);
                 this.Model.AnimationController.Stop();
             }
             else
             {
-                this.Model.Visible = false;
+                this.SceneObject.Visible = false;
             }
 
             base.FireDestroyed(active, passive);

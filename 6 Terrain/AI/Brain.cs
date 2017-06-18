@@ -11,7 +11,7 @@ namespace TerrainTest.AI
         /// <summary>
         /// Ground instance
         /// </summary>
-        public Ground Ground;
+        public Scene Scene;
         /// <summary>
         /// Groups dictionary
         /// </summary>
@@ -20,10 +20,10 @@ namespace TerrainTest.AI
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="ground">Ground</param>
-        public Brain(Ground ground)
+        /// <param name="scene">Scene</param>
+        public Brain(Scene scene)
         {
-            this.Ground = ground;
+            this.Scene = scene;
         }
 
         /// <summary>

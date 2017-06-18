@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Cube-map description
     /// </summary>
-    public class CubemapDescription : DrawableDescription
+    public class CubemapDescription : SceneObjectDescription
     {
         /// <summary>
         /// Cube map geometry enumeration

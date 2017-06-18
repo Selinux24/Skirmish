@@ -114,16 +114,6 @@ namespace Engine
         {
             get { return this.button.Rectangle; }
         }
-        /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -132,7 +122,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Button description</param>
         public SpriteButton(Game game, BufferManager bufferManager, SpriteButtonDescription description)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.button = new Sprite(
                 game,

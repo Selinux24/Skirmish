@@ -25,7 +25,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public override int Count
+        public int Count
         {
             get
             {
@@ -40,7 +40,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Particle manager description</param>
         public ParticleManager(Game game, BufferManager bufferManager, ParticleManagerDescription description)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
 
         }

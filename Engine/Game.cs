@@ -193,6 +193,8 @@ namespace Engine
 
             scene.Initialize();
 
+            scene.Initialized();
+
             scene.SetResources();
         }
         /// <summary>

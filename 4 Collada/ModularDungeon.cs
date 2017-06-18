@@ -7,14 +7,14 @@ namespace Collada
     {
         private const int layerHUD = 99;
 
-        private TextDrawer title = null;
-        private TextDrawer fps = null;
-        private TextDrawer picks = null;
-        private Sprite backPannel = null;
-
-        private ModelInstanced room1 = null;
-        private ModelInstanced room2 = null;
-        private ModelInstanced corridor1 = null;
+        private SceneObject<TextDrawer> title = null;
+        private SceneObject<TextDrawer> fps = null;
+        private SceneObject<TextDrawer> picks = null;
+        private SceneObject<Sprite> backPannel = null;
+                
+        private SceneObject<ModelInstanced> room1 = null;
+        private SceneObject<ModelInstanced> room2 = null;
+        private SceneObject<ModelInstanced> corridor1 = null;
 
         public ModularDungeon(Game game)
             : base(game)
@@ -27,22 +27,22 @@ namespace Collada
             base.Initialize();
 
             this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
-            this.title.Text = "Collada Dungeon Scene";
-            this.title.Position = Vector2.Zero;
+            this.title.Instance.Text = "Collada Dungeon Scene";
+            this.title.Instance.Position = Vector2.Zero;
 
             this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
-            this.fps.Text = null;
-            this.fps.Position = new Vector2(0, 24);
+            this.fps.Instance.Text = null;
+            this.fps.Instance.Position = new Vector2(0, 24);
 
             this.picks = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
-            this.picks.Text = null;
-            this.picks.Position = new Vector2(0, 48);
+            this.picks.Instance.Text = null;
+            this.picks.Instance.Position = new Vector2(0, 48);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.picks.Top + this.picks.Height + 3,
+                Height = this.picks.Instance.Top + this.picks.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -93,37 +93,37 @@ namespace Collada
         }
         private void InitializeDungeon()
         {
-            BoundingBox bbox = this.room1[0].GetBoundingBox();
+            BoundingBox bbox = this.room1.Instance[0].GetBoundingBox();
 
             float x = bbox.GetX();
             float z = bbox.GetZ();
 
-            this.room1[0].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
-            this.room1[1].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
+            this.room1.Instance[0].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
+            this.room1.Instance[1].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
 
-            this.room2[0].Manipulator.SetPosition(new Vector3(-4 * x, 0, +0 * z));
-            this.room2[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
-            this.room2[1].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
-            this.room2[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            this.room2[2].Manipulator.SetPosition(new Vector3(+0 * x, 0, -2 * z));
-            this.room2[2].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            this.room2[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +2 * z));
-            this.room2[4].Manipulator.SetPosition(new Vector3(-2 * x, 0, -2 * z));
-            this.room2[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
-            this.room2[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +2 * z));
+            this.room2.Instance[0].Manipulator.SetPosition(new Vector3(-4 * x, 0, +0 * z));
+            this.room2.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+            this.room2.Instance[1].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
+            this.room2.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.room2.Instance[2].Manipulator.SetPosition(new Vector3(+0 * x, 0, -2 * z));
+            this.room2.Instance[2].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.room2.Instance[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +2 * z));
+            this.room2.Instance[4].Manipulator.SetPosition(new Vector3(-2 * x, 0, -2 * z));
+            this.room2.Instance[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            this.room2.Instance[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +2 * z));
 
-            this.corridor1[0].Manipulator.SetPosition(new Vector3(-1 * x, 0, 0));
-            this.corridor1[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            this.corridor1[1].Manipulator.SetPosition(new Vector3(-3 * x, 0, 0));
-            this.corridor1[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            this.corridor1[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, 0));
-            this.corridor1[2].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            this.corridor1[3].Manipulator.SetPosition(new Vector3(+2 * x, 0, 0));
-            this.corridor1[3].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
-            this.corridor1[4].Manipulator.SetPosition(new Vector3(+0 * x, 0, -1 * z));
-            this.corridor1[5].Manipulator.SetPosition(new Vector3(+0 * x, 0, +1 * z));
-            this.corridor1[6].Manipulator.SetPosition(new Vector3(-2 * x, 0, -1 * z));
-            this.corridor1[7].Manipulator.SetPosition(new Vector3(-2 * x, 0, +1 * z));
+            this.corridor1.Instance[0].Manipulator.SetPosition(new Vector3(-1 * x, 0, 0));
+            this.corridor1.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1.Instance[1].Manipulator.SetPosition(new Vector3(-3 * x, 0, 0));
+            this.corridor1.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1.Instance[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, 0));
+            this.corridor1.Instance[2].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1.Instance[3].Manipulator.SetPosition(new Vector3(+2 * x, 0, 0));
+            this.corridor1.Instance[3].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            this.corridor1.Instance[4].Manipulator.SetPosition(new Vector3(+0 * x, 0, -1 * z));
+            this.corridor1.Instance[5].Manipulator.SetPosition(new Vector3(+0 * x, 0, +1 * z));
+            this.corridor1.Instance[6].Manipulator.SetPosition(new Vector3(-2 * x, 0, -1 * z));
+            this.corridor1.Instance[7].Manipulator.SetPosition(new Vector3(-2 * x, 0, +1 * z));
         }
 
         public override void Update(GameTime gameTime)
@@ -137,7 +137,7 @@ namespace Collada
 
             this.UpdateCamera(gameTime);
 
-            this.fps.Text = this.Game.RuntimeText;
+            this.fps.Instance.Text = this.Game.RuntimeText;
         }
         private void UpdateCamera(GameTime gameTime)
         {

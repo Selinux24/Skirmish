@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Sprite drawer
     /// </summary>
-    public class Sprite : Drawable, IScreenFitted
+    public class Sprite : Drawable, IScreenFitted, ITransformable2D
     {
         /// <summary>
         /// Creates view and orthoprojection from specified size
@@ -163,16 +163,6 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator2D Manipulator { get; private set; }
-        /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -181,11 +171,11 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
         public Sprite(Game game, BufferManager bufferManager, SpriteDescription description)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.Textured = description.Textures != null && description.Textures.Length > 0;
 
-            this.InitializeBuffers(this.Textured);
+            this.InitializeBuffers(description.Name, this.Textured);
 
             if (this.Textured)
             {
@@ -267,7 +257,9 @@ namespace Engine
         /// <summary>
         /// Initialize buffers
         /// </summary>
-        private void InitializeBuffers(bool textured)
+        /// <param name="name">Buffer name</param>
+        /// <param name="textured">Use a textured buffer</param>
+        private void InitializeBuffers(string name, bool textured)
         {
             Vector3[] vData;
             Vector2[] uvs;
@@ -276,15 +268,15 @@ namespace Engine
             if (textured)
             {
                 var vertices = VertexPositionTexture.Generate(vData, uvs);
-                this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, false, 0);
+                this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
             }
             else
             {
                 var vertices = VertexPositionColor.Generate(vData, Color4.White);
-                this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, false, 0);
+                this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
             }
 
-            this.indexBuffer = this.BufferManager.Add(this.Name, iData, false);
+            this.indexBuffer = this.BufferManager.Add(name, iData, false);
         }
         /// <summary>
         /// Initialize textures

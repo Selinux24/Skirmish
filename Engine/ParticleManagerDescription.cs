@@ -3,7 +3,7 @@ namespace Engine
 {
     using Engine.Common;
 
-    public class ParticleManagerDescription : DrawableDescription
+    public class ParticleManagerDescription : SceneObjectDescription
     {
         public ParticleManagerDescription()
             : base()

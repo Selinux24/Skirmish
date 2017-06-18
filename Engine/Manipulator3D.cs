@@ -78,6 +78,10 @@ namespace Engine
             {
                 return this.localTransform;
             }
+            set
+            {
+                this.SetLocalTransform(value);
+            }
         }
         /// <summary>
         /// Gets Forward vector
@@ -161,6 +165,16 @@ namespace Engine
                 }
 
                 Counters.UpdatesPerFrame++;
+            }
+        }
+
+        protected virtual void SetLocalTransform(Matrix newLocalTransform)
+        {
+            if (newLocalTransform.Decompose(out scaling, out rotation, out position))
+            {
+                this.transformUpdateNeeded = true;
+
+                this.UpdateLocalTransform();
             }
         }
 

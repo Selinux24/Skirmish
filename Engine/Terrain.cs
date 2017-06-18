@@ -617,16 +617,6 @@ namespace Engine
                 return new[] { this.terrainMaterial };
             }
         }
-        /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -958,22 +948,6 @@ namespace Engine
         public BoundingBox[] GetBoundingBoxes(int level = 0)
         {
             return this.groundPickingQuadtree.GetBoundingBoxes(level);
-        }
-        /// <summary>
-        /// Gets the path finder grid nodes
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <returns>Returns the path finder grid nodes</returns>
-        public IGraphNode[] GetNodes(AgentType agent)
-        {
-            IGraphNode[] nodes = null;
-
-            if (this.navigationGraph != null)
-            {
-                nodes = this.navigationGraph.GetNodes(agent);
-            }
-
-            return nodes;
         }
     }
 }

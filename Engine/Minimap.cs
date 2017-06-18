@@ -42,16 +42,6 @@ namespace Engine
         /// Reference to the objects that we render in the minimap
         /// </summary>
         public Drawable[] Drawables;
-        /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1;
-            }
-        }
 
         /// <summary>
         /// Contructor
@@ -60,7 +50,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Minimap description</param>
         public Minimap(Game game, BufferManager bufferManager, MinimapDescription description)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.Drawables = description.Drawables;
 

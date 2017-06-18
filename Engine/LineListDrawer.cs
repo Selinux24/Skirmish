@@ -30,17 +30,6 @@ namespace Engine
         private bool dictionaryChanged = false;
 
         /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return this.dictionary.Count;
-            }
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
@@ -48,11 +37,11 @@ namespace Engine
         /// <param name="description">Component description</param>
         /// <param name="count">Maximum line count</param>
         public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description, int count)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.dictionaryChanged = false;
 
-            this.InitializeBuffers(count * 2);
+            this.InitializeBuffers(description.Name, count * 2);
         }
         /// <summary>
         /// Constructor
@@ -63,12 +52,12 @@ namespace Engine
         /// <param name="lines">Line list</param>
         /// <param name="color">Color</param>
         public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description, Line3D[] lines, Color4 color)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             this.dictionary.Add(color, new List<Line3D>(lines));
             this.dictionaryChanged = true;
 
-            this.InitializeBuffers(lines.Length * 2);
+            this.InitializeBuffers(description.Name, lines.Length * 2);
         }
         /// <summary>
         /// Constructor
@@ -79,14 +68,14 @@ namespace Engine
         /// <param name="triangles">Triangle list</param>
         /// <param name="color">Color</param>
         public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description, Triangle[] triangles, Color4 color)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             var lines = Line3D.CreateWiredTriangle(triangles);
 
             this.dictionary.Add(color, new List<Line3D>(lines));
             this.dictionaryChanged = true;
 
-            this.InitializeBuffers(lines.Length * 2);
+            this.InitializeBuffers(description.Name, lines.Length * 2);
         }
         /// <summary>
         /// Internal resources disposition
@@ -139,9 +128,6 @@ namespace Engine
 
                 this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.LineList);
 
-                if (this.AlphaEnabled) this.Game.Graphics.SetBlendDefaultAlpha();
-                else this.Game.Graphics.SetBlendDefault();
-
                 for (int p = 0; p < technique.Description.PassCount; p++)
                 {
                     technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
@@ -156,10 +142,11 @@ namespace Engine
         /// <summary>
         /// Initialize buffers
         /// </summary>
+        /// <param name="name">Buffer name</param>
         /// <param name="vertexCount">Vertex count</param>
-        private void InitializeBuffers(int vertexCount)
+        private void InitializeBuffers(string name, int vertexCount)
         {
-            this.vertexBuffer = this.BufferManager.Add(this.Name, new VertexPositionColor[vertexCount], true, 0);
+            this.vertexBuffer = this.BufferManager.Add(name, new VertexPositionColor[vertexCount], true, 0);
         }
         /// <summary>
         /// Set line

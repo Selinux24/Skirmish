@@ -70,11 +70,11 @@ namespace Engine
             /// <summary>
             /// Launchs foliage population asynchronous task
             /// </summary>
-            /// <param name="ground">Ground</param>
+            /// <param name="scene">Scene</param>
             /// <param name="node">Foliage Node</param>
             /// <param name="map">Foliage map</param>
             /// <param name="description">Terrain vegetation description</param>
-            public void Plant(Ground ground, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
+            public void Plant(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
             {
                 if (!this.Planting)
                 {
@@ -83,7 +83,7 @@ namespace Engine
                     this.Channel = description.Index;
                     this.Planting = true;
 
-                    var t = Task.Factory.StartNew<VertexBillboard[]>(() => PlantTask(ground, node, map, description), TaskCreationOptions.PreferFairness);
+                    var t = Task.Factory.StartNew<VertexBillboard[]>(() => PlantTask(scene, node, map, description), TaskCreationOptions.PreferFairness);
 
                     t.ContinueWith(task =>
                     {
@@ -94,18 +94,18 @@ namespace Engine
             /// <summary>
             /// Asynchronous planting task
             /// </summary>
-            /// <param name="ground">Ground</param>
+            /// <param name="scene">Scene</param>
             /// <param name="node">Node to process</param>
             /// <param name="map">Foliage map</param>
             /// <param name="description">Vegetation task</param>
             /// <returns>Returns generated vertex data</returns>
-            private static VertexBillboard[] PlantTask(Ground ground, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
+            private static VertexBillboard[] PlantTask(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
             {
                 List<VertexBillboard> vertexData = new List<VertexBillboard>(MAX);
 
                 if (node != null)
                 {
-                    BoundingBox gbbox = ground.GetBoundingBox();
+                    BoundingBox gbbox = scene.GetBoundingBox();
 
                     Vector2 min = new Vector2(gbbox.Minimum.X, gbbox.Minimum.Z);
                     Vector2 max = new Vector2(gbbox.Maximum.X, gbbox.Maximum.Z);
@@ -146,7 +146,7 @@ namespace Engine
                                 Vector3 intersectionPoint;
                                 Triangle t;
                                 float d;
-                                if (ground.PickFirstGround(ref ray, true, out intersectionPoint, out t, out d))
+                                if (scene.PickFirst(ref ray, true, out intersectionPoint, out t, out d))
                                 {
                                     if (t.Normal.Y > 0.5f)
                                     {
@@ -387,16 +387,6 @@ namespace Engine
         /// Wind total time
         /// </summary>
         private float windTime = 0;
-        /// <summary>
-        /// Number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1;
-            }
-        }
 
         /// <summary>
         /// Random texture
@@ -434,7 +424,7 @@ namespace Engine
         /// <summary>
         /// Parent ground
         /// </summary>
-        public Ground ParentGround { get; set; }
+        public Scene ParentScene { get; set; }
         /// <summary>
         /// Material
         /// </summary>
@@ -466,7 +456,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
         public GroundGardener(Game game, BufferManager bufferManager, GroundGardenerDescription description) :
-            base(game, bufferManager, description)
+            base(game, bufferManager)
         {
             this.game = game;
 
@@ -529,7 +519,7 @@ namespace Engine
 
                 for (int i = 0; i < MaxFoliageBuffers; i++)
                 {
-                    this.foliageBuffers.Add(new FoliageBuffer(game, this.BufferManager, this.Name));
+                    this.foliageBuffers.Add(new FoliageBuffer(game, this.BufferManager, description.Name));
                 }
             }
         }
@@ -554,11 +544,11 @@ namespace Engine
         {
             this.windTime += context.GameTime.ElapsedSeconds * this.WindStrength;
 
-            if (this.ParentGround != null)
+            if (this.ParentScene != null)
             {
                 if (this.foliageQuadtree == null)
                 {
-                    BoundingBox bbox = this.ParentGround.GetBoundingBox();
+                    BoundingBox bbox = this.ParentScene.GetBoundingBox();
 
                     float x = bbox.GetX();
                     float z = bbox.GetZ();
@@ -620,7 +610,7 @@ namespace Engine
 
                             if (!fPatch.Planted)
                             {
-                                fPatch.Plant(this.ParentGround, node, this.foliageMap, this.foliageMapChannels[i]);
+                                fPatch.Plant(this.ParentScene, node, this.foliageMap, this.foliageMapChannels[i]);
                             }
                             else
                             {
@@ -715,7 +705,7 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.ParentGround != null)
+            if (this.ParentScene != null)
             {
                 if (this.visibleNodes != null && this.visibleNodes.Length > 0)
                 {

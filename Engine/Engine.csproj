@@ -178,10 +178,12 @@
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />
     <Compile Include="ISceneLightPosition.cs" />
+    <Compile Include="ITransformable2D.cs" />
     <Compile Include="ITransformable3D.cs" />
     <Compile Include="IUpdatable.cs" />
     <Compile Include="IVertexList.cs" />
     <Compile Include="BasicManipulatorController.cs" />
+    <Compile Include="IVolume.cs" />
     <Compile Include="MaterialDescription.cs" />
     <Compile Include="NormalPath.cs" />
     <Compile Include="ParticleManager.cs" />
@@ -195,12 +197,14 @@
     <Compile Include="PathFinding\NavMesh\PolyMeshData.cs" />
     <Compile Include="PathFinding\NavMesh\PolyMeshPolygon.cs" />
     <Compile Include="PathFinding\NavMesh\PolyMeshTriangleData.cs" />
+    <Compile Include="PathFinding\PathFinderDescription.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="SceneCullManager.cs" />
+    <Compile Include="SceneObject.cs" />
     <Compile Include="SegmentPath.cs" />
     <Compile Include="ShadowMapFlags.cs" />
     <Compile Include="SkyPlane.cs" />

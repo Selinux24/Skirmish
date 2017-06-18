@@ -87,16 +87,6 @@ namespace Engine
         /// Perturbation scale
         /// </summary>
         public float PerturbationScale { get; set; }
-        /// <summary>
-        /// Maximum number of instances
-        /// </summary>
-        public override int Count
-        {
-            get
-            {
-                return 1;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -105,7 +95,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Sky plane description class</param>
         public SkyPlane(Game game, BufferManager bufferManager, SkyPlaneDescription description)
-            : base(game, bufferManager, description)
+            : base(game, bufferManager)
         {
             var img1 = new ImageContent()
             {
@@ -149,8 +139,8 @@ namespace Engine
 
             VertexPositionTexture[] vertices = VertexPositionTexture.Generate(vData, uvs);
 
-            this.vertexBuffer = this.BufferManager.Add(this.Name, vertices, false, 0);
-            this.indexBuffer = this.BufferManager.Add(this.Name, iData, false);
+            this.vertexBuffer = this.BufferManager.Add(description.Name, vertices, false, 0);
+            this.indexBuffer = this.BufferManager.Add(description.Name, iData, false);
         }
         /// <summary>
         /// Resource releasing

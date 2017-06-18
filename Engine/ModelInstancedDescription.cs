@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Instanced model description
     /// </summary>
-    public class ModelInstancedDescription : DrawableDescription
+    public class ModelInstancedDescription : SceneObjectDescription
     {
         /// <summary>
         /// Instances

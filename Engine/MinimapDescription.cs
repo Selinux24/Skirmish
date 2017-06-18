@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Minimap description
     /// </summary>
-    public class MinimapDescription : DrawableDescription
+    public class MinimapDescription : SceneObjectDescription
     {
         /// <summary>
         /// Top position

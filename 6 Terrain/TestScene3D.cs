@@ -37,46 +37,46 @@ namespace TerrainTest
 
         private bool useDebugTex = false;
         private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapDynamic;
-        private SpriteTexture shadowMapDrawer = null;
+        private SceneObject<SpriteTexture> shadowMapDrawer = null;
         private ShaderResourceView debugTex = null;
         private int graphIndex = -1;
 
-        private TextDrawer title = null;
-        private TextDrawer load = null;
-        private TextDrawer stats = null;
-        private TextDrawer counters1 = null;
-        private TextDrawer counters2 = null;
-        private Sprite backPannel = null;
+        private SceneObject<TextDrawer> title = null;
+        private SceneObject<TextDrawer> load = null;
+        private SceneObject<TextDrawer> stats = null;
+        private SceneObject<TextDrawer> counters1 = null;
+        private SceneObject<TextDrawer> counters2 = null;
+        private SceneObject<Sprite> backPannel = null;
 
-        private Model cursor3D = null;
-        private Cursor cursor2D = null;
+        private SceneObject<Model> cursor3D = null;
+        private SceneObject<Cursor> cursor2D = null;
 
-        private Model tankP1 = null;
-        private Model tankP2 = null;
+        private SceneObject<Model> tankP1 = null;
+        private SceneObject<Model> tankP2 = null;
         private NavigationMeshAgentType tankAgentType = new NavigationMeshAgentType();
         private Vector3 tankLeftCat = Vector3.Zero;
         private Vector3 tankRightCat = Vector3.Zero;
 
-        private LensFlare lensFlare = null;
-        private Skydom skydom = null;
-        private SkyPlane clouds = null;
-        private Scenery terrain = null;
-        private GroundGardener gardener = null;
+        private SceneObject<LensFlare> lensFlare = null;
+        private SceneObject<Skydom> skydom = null;
+        private SceneObject<SkyPlane> clouds = null;
+        private SceneObject<Scenery> terrain = null;
+        private SceneObject<GroundGardener> gardener = null;
         private Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
         private List<Line3D> oks = new List<Line3D>();
         private List<Line3D> errs = new List<Line3D>();
 
-        private Model helipod = null;
-        private Model garage = null;
-        private ModelInstanced obelisk = null;
-        private ModelInstanced rocks = null;
-        private ModelInstanced tree1 = null;
-        private ModelInstanced tree2 = null;
+        private SceneObject<Model> helipod = null;
+        private SceneObject<Model> garage = null;
+        private SceneObject<ModelInstanced> obelisk = null;
+        private SceneObject<ModelInstanced> rocks = null;
+        private SceneObject<ModelInstanced> tree1 = null;
+        private SceneObject<ModelInstanced> tree2 = null;
         private Color4 objColor = Color.Magenta;
         private bool objNotSet = true;
 
-        private Model helicopter = null;
+        private SceneObject<Model> helicopter = null;
         private HeliManipulatorController helicopterController = null;
         private Vector3 helicopterHeightOffset = (Vector3.Up * 15f);
         private Color4 gridColor = new Color4(Color.LightSeaGreen.ToColor3(), 0.5f);
@@ -87,13 +87,13 @@ namespace TerrainTest
         private Color4 wAxisColor = Color.White;
         private Color4 velocityColor = Color.Green;
 
-        private LineListDrawer staticObjLineDrawer = null;
-        private LineListDrawer movingObjLineDrawer = null;
-        private LineListDrawer lightsVolumeDrawer = null;
-        private LineListDrawer curveLineDrawer = null;
-        private LineListDrawer terrainLineDrawer = null;
-        private LineListDrawer terrainPointDrawer = null;
-        private TriangleListDrawer terrainGraphDrawer = null;
+        private SceneObject<LineListDrawer> staticObjLineDrawer = null;
+        private SceneObject<LineListDrawer> movingObjLineDrawer = null;
+        private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
+        private SceneObject<LineListDrawer> curveLineDrawer = null;
+        private SceneObject<LineListDrawer> terrainLineDrawer = null;
+        private SceneObject<LineListDrawer> terrainPointDrawer = null;
+        private SceneObject<TriangleListDrawer> terrainGraphDrawer = null;
 
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
@@ -135,7 +135,7 @@ namespace TerrainTest
         private ParticleSystemDescription pProjectile = null;
         private ParticleSystemDescription pExplosion = null;
         private ParticleSystemDescription pSmokeExplosion = null;
-        private ParticleManager pManager = null;
+        private SceneObject<ParticleManager> pManager = null;
 
         private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
@@ -194,23 +194,23 @@ namespace TerrainTest
             this.counters1 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), this.layerHud);
             this.counters2 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), this.layerHud);
 
-            this.title.Text = "Terrain collision and trajectories test";
-            this.load.Text = "";
-            this.stats.Text = "";
-            this.counters1.Text = "";
-            this.counters2.Text = "";
+            this.title.Instance.Text = "Terrain collision and trajectories test";
+            this.load.Instance.Text = "";
+            this.stats.Instance.Text = "";
+            this.counters1.Instance.Text = "";
+            this.counters2.Instance.Text = "";
 
-            this.title.Position = Vector2.Zero;
-            this.load.Position = new Vector2(0, 24);
-            this.stats.Position = new Vector2(0, 46);
-            this.counters1.Position = new Vector2(0, 68);
-            this.counters2.Position = new Vector2(0, 90);
+            this.title.Instance.Position = Vector2.Zero;
+            this.load.Instance.Position = new Vector2(0, 24);
+            this.stats.Instance.Position = new Vector2(0, 46);
+            this.counters1.Instance.Position = new Vector2(0, 68);
+            this.counters2.Instance.Position = new Vector2(0, 90);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.counters2.Top + this.counters2.Height + 3,
+                Height = this.counters2.Instance.Top + this.counters2.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -252,7 +252,7 @@ namespace TerrainTest
                 Height = 16,
             };
             this.cursor2D = this.AddCursor(c2DDesc, this.layerHud);
-            this.cursor2D.Color = Color.Red;
+            this.cursor2D.Instance.Color = Color.Red;
             this.cursor2D.Visible = false;
             sw.Stop();
             loadingText += string.Format("cursor2D: {0} ", sw.Elapsed.TotalSeconds);
@@ -303,16 +303,16 @@ namespace TerrainTest
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.Lights.AddRange(this.helicopter.Lights);
+            this.Lights.AddRange(this.helicopter.Instance.Lights);
 
-            this.helicopter.Manipulator.SetScale(0.75f);
+            this.helicopter.Transform.SetScale(0.75f);
 
             AnimationPath p = new AnimationPath();
             p.AddLoop("default");
             this.animations.Add("default", new AnimationPlan(p));
 
-            this.helicopter.AnimationController.AddPath(this.animations["default"]);
-            this.helicopter.AnimationController.Start();
+            this.helicopter.Instance.AnimationController.AddPath(this.animations["default"]);
+            this.helicopter.Instance.AnimationController.Start();
 
             #endregion
 
@@ -330,13 +330,13 @@ namespace TerrainTest
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.Lights.AddRange(this.tankP1.Lights);
-            this.Lights.AddRange(this.tankP2.Lights);
+            this.Lights.AddRange(this.tankP1.Instance.Lights);
+            this.Lights.AddRange(this.tankP2.Instance.Lights);
 
-            this.tankP1.Manipulator.SetScale(0.2f, true);
-            this.tankP2.Manipulator.SetScale(0.2f, true);
+            this.tankP1.Transform.SetScale(0.2f, true);
+            this.tankP2.Transform.SetScale(0.2f, true);
 
-            var tankbbox = this.tankP1.GetBoundingBox();
+            var tankbbox = this.tankP1.Geometry.GetBoundingBox();
             tankAgentType.Height = tankbbox.GetY();
             tankAgentType.Radius = tankbbox.GetX() * 0.5f;
             tankAgentType.MaxClimb = tankbbox.GetY() * 0.4f;
@@ -359,7 +359,7 @@ namespace TerrainTest
             sw.Stop();
             loadingText += string.Format("helipod: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.Lights.AddRange(this.helipod.Lights);
+            this.Lights.AddRange(this.helipod.Instance.Lights);
 
             #endregion
 
@@ -376,7 +376,7 @@ namespace TerrainTest
             sw.Stop();
             loadingText += string.Format("garage: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.Lights.AddRange(this.garage.Lights);
+            this.Lights.AddRange(this.garage.Instance.Lights);
 
             #endregion
 
@@ -477,22 +477,12 @@ namespace TerrainTest
             #region Terrain
 
             sw.Restart();
-            var navSettings = NavigationMeshGenerationSettings.Default;
-            navSettings.Agents = new[]
-            {
-                walkerAgentType,
-                tankAgentType,
-            };
             var terrainDescription = new GroundDescription()
             {
                 Name = "Terrain",
                 Quadtree = new GroundDescription.QuadtreeDescription()
                 {
                     MaximumDepth = 1,
-                },
-                PathFinder = new GroundDescription.PathFinderDescription()
-                {
-                    Settings = navSettings,
                 },
                 CastShadow = true,
                 Static = true,
@@ -544,7 +534,7 @@ namespace TerrainTest
 
             loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.gardener.ParentGround = this.terrain;
+            this.gardener.Instance.ParentScene = this;
 
             #endregion
 
@@ -561,32 +551,22 @@ namespace TerrainTest
 
             #endregion
 
-            this.load.Text = loadingText;
+            this.load.Instance.Text = loadingText;
 
             #endregion
 
-            #region Model positioning over scenery
+            #region Ground composition
 
             Random posRnd = new Random(1);
 
-            //Helipod
-            Vector3 hPos;
-            Triangle hTri;
-            float hDist;
-            if (this.terrain.FindTopGroundPosition(75, 75, out hPos, out hTri, out hDist))
-            {
-                this.helipod.Manipulator.SetPosition(hPos);
-            }
+            //Terrain
+            this.SetGround(this.terrain, true);
 
+            //Helipod
+            this.AttachToGround(this.helipod, 75, 75, Matrix.Identity, true);
+            
             //Garage
-            Vector3 gPos;
-            Triangle gTri;
-            float gDist;
-            if (this.terrain.FindTopGroundPosition(-10, -40, out gPos, out gTri, out gDist))
-            {
-                this.garage.Manipulator.SetPosition(gPos);
-                this.garage.Manipulator.SetRotation(MathUtil.PiOverFour + MathUtil.Pi, 0, 0);
-            }
+            this.AttachToGround(this.garage, -10, -40, Matrix.RotationYawPitchRoll(MathUtil.PiOverFour + MathUtil.Pi, 0, 0), true);
 
             //Obelisk
             for (int i = 0; i < this.obelisk.Count; i++)
@@ -597,10 +577,12 @@ namespace TerrainTest
                 Vector3 obeliskPosition;
                 Triangle obeliskTri;
                 float obeliskDist;
-                if (this.terrain.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition, out obeliskTri, out obeliskDist))
+                if (this.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition, out obeliskTri, out obeliskDist))
                 {
-                    this.obelisk[i].Manipulator.SetPosition(obeliskPosition);
-                    this.obelisk[i].Manipulator.SetScale(1.5f);
+                    var obeliskInstance = this.obelisk.GetComponent<ITransformable3D>(i);
+
+                    obeliskInstance.Manipulator.SetPosition(obeliskPosition);
+                    obeliskInstance.Manipulator.SetScale(1.5f);
                 }
             }
 
@@ -612,7 +594,7 @@ namespace TerrainTest
                 Vector3 rockPosition;
                 Triangle rockTri;
                 float rockDist;
-                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
+                if (this.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
                 {
                     var scale = 1f;
                     if (i < 5)
@@ -628,9 +610,11 @@ namespace TerrainTest
                         scale = posRnd.NextFloat(0.1f, 0.2f);
                     }
 
-                    this.rocks[i].Manipulator.SetPosition(rockPosition);
-                    this.rocks[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
-                    this.rocks[i].Manipulator.SetScale(scale);
+                    var rockInstance = this.rocks.GetComponent<ITransformable3D>(i);
+
+                    rockInstance.Manipulator.SetPosition(rockPosition);
+                    rockInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
+                    rockInstance.Manipulator.SetScale(scale);
                 }
             }
 
@@ -642,11 +626,13 @@ namespace TerrainTest
                 Vector3 treePosition;
                 Triangle treeTri;
                 float treeDist;
-                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                if (this.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
                 {
-                    this.tree1[i].Manipulator.SetPosition(treePosition);
-                    this.tree1[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
-                    this.tree1[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
+                    var treeInstance = this.tree1.GetComponent<ITransformable3D>(i);
+
+                    treeInstance.Manipulator.SetPosition(treePosition);
+                    treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
+                    treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
                 }
             }
 
@@ -657,27 +643,50 @@ namespace TerrainTest
                 Vector3 treePosition;
                 Triangle treeTri;
                 float treeDist;
-                if (this.terrain.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                if (this.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
                 {
-                    this.tree2[i].Manipulator.SetPosition(treePosition);
-                    this.tree2[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
-                    this.tree2[i].Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
+                    var treeInstance = this.tree2.GetComponent<ITransformable3D>(i);
+
+                    treeInstance.Manipulator.SetPosition(treePosition);
+                    treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
+                    treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
                 }
             }
 
-            this.terrain.AttachFullPickingFullPathFinding(new ModelBase[] { this.helipod, this.garage, this.obelisk }, false);
-            this.terrain.AttachCoarsePickingCoarsePathFinding(new ModelBase[] { this.tree1, this.tree2, this.rocks }, false);
-            this.terrain.UpdateInternals();
+            #endregion
 
-            this.lensFlare.ParentGround = this.terrain;
+            this.lensFlare.Instance.ParentGround = this;
+
+            this.gardener.Instance.SetWind(this.windDirection, this.windStrength);
+
+            this.Lights.ShadowLDDistance = 100f;
+            this.Lights.ShadowHDDistance = 25f;
+
+            var navSettings = NavigationMeshGenerationSettings.Default;
+            navSettings.Agents = new[]
+            {
+                walkerAgentType,
+                tankAgentType,
+            };
+            this.PathFinderDescription = new PathFinderDescription()
+            {
+                Settings = navSettings,
+            };
+        }
+
+        public override void Initialized()
+        {
+            base.Initialized();
+
+            #region Agent positioning over scenery
 
             Vector3 heliPos;
             Triangle heliTri;
             float heliDist;
-            if (this.terrain.FindTopGroundPosition(this.helipod.Manipulator.Position.X, this.helipod.Manipulator.Position.Z, out heliPos, out heliTri, out heliDist))
+            if (this.FindTopGroundPosition(this.helipod.Transform.Position.X, this.helipod.Transform.Position.Z, out heliPos, out heliTri, out heliDist))
             {
-                this.helicopter.Manipulator.SetPosition(heliPos);
-                this.helicopter.Manipulator.SetNormal(heliTri.Normal);
+                this.helicopter.Transform.SetPosition(heliPos);
+                this.helicopter.Transform.SetNormal(heliTri.Normal);
             }
 
             var hp = new AnimationPath();
@@ -688,10 +697,10 @@ namespace TerrainTest
                 Vector3 tankPosition;
                 Triangle tankTriangle;
                 float tankDist;
-                if (this.terrain.FindTopGroundPosition(-60, -60, out tankPosition, out tankTriangle, out tankDist))
+                if (this.FindTopGroundPosition(-60, -60, out tankPosition, out tankTriangle, out tankDist))
                 {
-                    this.tankP1.Manipulator.SetPosition(tankPosition);
-                    this.tankP1.Manipulator.SetNormal(tankTriangle.Normal);
+                    this.tankP1.Transform.SetPosition(tankPosition);
+                    this.tankP1.Transform.SetNormal(tankTriangle.Normal);
                 }
             }
 
@@ -699,14 +708,12 @@ namespace TerrainTest
                 Vector3 tankPosition;
                 Triangle tankTriangle;
                 float tankDist;
-                if (this.terrain.FindTopGroundPosition(-70, 70, out tankPosition, out tankTriangle, out tankDist))
+                if (this.FindTopGroundPosition(-70, 70, out tankPosition, out tankTriangle, out tankDist))
                 {
-                    this.tankP2.Manipulator.SetPosition(tankPosition);
-                    this.tankP2.Manipulator.SetNormal(tankTriangle.Normal);
+                    this.tankP2.Transform.SetPosition(tankPosition);
+                    this.tankP2.Transform.SetNormal(tankTriangle.Normal);
                 }
             }
-
-            this.gardener.SetWind(this.windDirection, this.windStrength);
 
             #endregion
 
@@ -741,7 +748,7 @@ namespace TerrainTest
 
             #region DEBUG Ground position test
 
-            BoundingBox bbox = this.terrain.GetBoundingBox();
+            BoundingBox bbox = this.terrain.Geometry.GetBoundingBox();
 
             float sep = 2.1f;
             for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
@@ -751,7 +758,7 @@ namespace TerrainTest
                     Vector3 pos;
                     Triangle tri;
                     float dist;
-                    if (this.terrain.FindTopGroundPosition(x, z, out pos, out tri, out dist))
+                    if (this.FindTopGroundPosition(x, z, out pos, out tri, out dist))
                     {
                         this.oks.Add(new Line3D(pos, pos + Vector3.Up));
                     }
@@ -767,11 +774,11 @@ namespace TerrainTest
 
             if (this.oks.Count > 0)
             {
-                this.terrainLineDrawer.AddLines(Color.Green, this.oks.ToArray());
+                this.terrainLineDrawer.Instance.AddLines(Color.Green, this.oks.ToArray());
             }
             if (this.errs.Count > 0)
             {
-                this.terrainLineDrawer.AddLines(Color.Red, this.errs.ToArray());
+                this.terrainLineDrawer.Instance.AddLines(Color.Red, this.errs.ToArray());
             }
 
             #endregion
@@ -794,7 +801,7 @@ namespace TerrainTest
 
             this.curveLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 20000, this.layerEffects);
             this.curveLineDrawer.Visible = false;
-            this.curveLineDrawer.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
+            this.curveLineDrawer.Instance.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
 
             #endregion
 
@@ -805,13 +812,10 @@ namespace TerrainTest
 
             #endregion
 
-            this.Camera.Goto(this.helicopter.Manipulator.Position + Vector3.One * 25f);
-            this.Camera.LookTo(this.helicopter.Manipulator.Position);
+            this.Camera.Goto(this.helicopter.Transform.Position + Vector3.One * 25f);
+            this.Camera.LookTo(this.helicopter.Transform.Position);
 
-            this.Lights.ShadowLDDistance = 100f;
-            this.Lights.ShadowHDDistance = 25f;
-
-            this.helicopter.AnimationController.SetPath(this.animations["heli_default"]);
+            this.helicopter.Instance.AnimationController.SetPath(this.animations["heli_default"]);
 
             var t1W = new WeaponDescription() { Name = "Cannon", Damage = 35, Cadence = 15, Range = 50 };
             var t2W = new WeaponDescription() { Name = "Machine Gun", Damage = 5, Cadence = 0.5f, Range = 30 };
@@ -824,7 +828,7 @@ namespace TerrainTest
                 Vector3 p1;
                 Triangle t1;
                 float d1;
-                if (this.terrain.FindNearestGroundPosition(this.p1CheckPoints[i], out p1, out t1, out d1))
+                if (this.FindNearestGroundPosition(this.p1CheckPoints[i], out p1, out t1, out d1))
                 {
                     this.p1CheckPoints[i] = p1;
                 }
@@ -835,13 +839,13 @@ namespace TerrainTest
                 Vector3 p2;
                 Triangle t2;
                 float d2;
-                if (this.terrain.FindNearestGroundPosition(this.p2CheckPoints[i], out p2, out t2, out d2))
+                if (this.FindNearestGroundPosition(this.p2CheckPoints[i], out p2, out t2, out d2))
                 {
                     this.p2CheckPoints[i] = p2;
                 }
             }
 
-            this.agentManager = new Brain(this.terrain);
+            this.agentManager = new Brain(this);
 
             var tStatus = new AIStatusDescription()
             {
@@ -866,9 +870,9 @@ namespace TerrainTest
             this.tankP2Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP2, tStatus);
             this.helicopterAgent = new FlyerAIAgent(this.agentManager, null, this.helicopter, hStatus);
 
-            this.AddComponent(this.tankP1Agent);
-            this.AddComponent(this.tankP2Agent);
-            this.AddComponent(this.helicopterAgent);
+            this.AddComponent(this.tankP1Agent, new SceneObjectDescription() { });
+            this.AddComponent(this.tankP2Agent, new SceneObjectDescription() { });
+            this.AddComponent(this.helicopterAgent, new SceneObjectDescription() { });
 
             this.tankP1Agent.Moving += Agent_Moving;
             this.tankP1Agent.Attacking += Agent_Attacking;
@@ -942,19 +946,16 @@ namespace TerrainTest
 
             #region Cursor picking and positioning
 
-            bool picked = false;
-            Vector3 pickedPosition = Vector3.Zero;
-            Triangle pickedTriangle = new Triangle();
-            float pickedDistance = float.MaxValue;
+            Ray cursorRay = this.GetPickingRay();
 
             if (!this.walkMode)
             {
-                Ray cursorRay = this.GetPickingRay();
-
-                picked = this.terrain.PickNearestGround(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance);
-                if (picked)
+                Vector3 pickedPosition;
+                Triangle pickedTriangle;
+                float pickedDistance;
+                if (this.terrain.Geometry.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance))
                 {
-                    this.cursor3D.Manipulator.SetPosition(pickedPosition);
+                    this.cursor3D.Transform.SetPosition(pickedPosition);
                 }
             }
 
@@ -997,7 +998,7 @@ namespace TerrainTest
                 }
 
                 Vector3 walkerPos;
-                if (this.terrain.Walk(this.walkerAgentType, prevPos, this.Camera.Position, out walkerPos))
+                if (this.Walk(this.walkerAgentType, prevPos, this.Camera.Position, out walkerPos))
                 {
                     this.Camera.Goto(walkerPos);
                 }
@@ -1049,9 +1050,9 @@ namespace TerrainTest
 
                 if (this.follow)
                 {
-                    var sph = this.helicopter.GetBoundingSphere();
+                    var sph = this.helicopter.Geometry.GetBoundingSphere();
                     this.Camera.LookTo(sph.Center);
-                    this.Camera.Goto(sph.Center + (this.helicopter.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
+                    this.Camera.Goto(sph.Center + (this.helicopter.Transform.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
                 }
 
                 #endregion
@@ -1061,27 +1062,33 @@ namespace TerrainTest
 
             if (this.Game.Input.LeftMouseButtonPressed)
             {
-                if (picked)
+                Vector3 pickedPosition;
+                Triangle pickedTriangle;
+                float pickedDistance;
+                if (this.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance))
                 {
-                    var p = this.terrain.FindPath(this.tankAgentType, this.tankP1.Manipulator.Position, pickedPosition, false, 0f);
+                    var p = this.FindPath(this.tankAgentType, this.tankP1.Transform.Position, pickedPosition, false, 0f);
                     if (p != null)
                     {
-                        this.DEBUGDrawTankPath(this.tankP1.Manipulator.Position, p);
+                        this.DEBUGDrawTankPath(this.tankP1.Transform.Position, p);
                     }
                 }
             }
 
             if (this.Game.Input.LeftMouseButtonJustReleased)
             {
-                if (picked)
+                Vector3 pickedPosition;
+                Triangle pickedTriangle;
+                float pickedDistance;
+                if (this.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance))
                 {
-                    var p = this.terrain.FindPath(this.tankAgentType, this.tankP1.Manipulator.Position, pickedPosition, true, 0.25f);
+                    var p = this.FindPath(this.tankAgentType, this.tankP1.Transform.Position, pickedPosition, true, 0.25f);
                     if (p != null)
                     {
                         this.tankP1Agent.Clear();
                         this.tankP1Agent.Follow(p, 10);
 
-                        this.DEBUGDrawTankPath(this.tankP1.Manipulator.Position, p);
+                        this.DEBUGDrawTankPath(this.tankP1.Transform.Position, p);
                     }
                 }
             }
@@ -1094,12 +1101,12 @@ namespace TerrainTest
             {
                 Curve3D curve = this.GenerateHelicopterPath();
                 //((HeliManipulator)this.helicopter.Manipulator).Follow(curve, 10f, 0.001f);
-                this.helicopter.AnimationController.SetPath(this.animations["heli_default"]);
+                this.helicopter.Instance.AnimationController.SetPath(this.animations["heli_default"]);
                 this.DEBUGDrawHelicopterPath(curve);
             }
 
-            this.Lights.PointLights[0].Position = (this.helicopter.Manipulator.Position + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Left);
-            this.Lights.PointLights[1].Position = (this.helicopter.Manipulator.Position + this.helicopter.Manipulator.Up + this.helicopter.Manipulator.Right);
+            this.Lights.PointLights[0].Position = (this.helicopter.Transform.Position + this.helicopter.Transform.Up + this.helicopter.Transform.Left);
+            this.Lights.PointLights[1].Position = (this.helicopter.Transform.Position + this.helicopter.Transform.Up + this.helicopter.Transform.Right);
 
             #endregion
 
@@ -1183,13 +1190,13 @@ namespace TerrainTest
 
             if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
-                this.helicopter.TextureIndex++;
-                if (this.helicopter.TextureIndex > 2) this.helicopter.TextureIndex = 2;
+                this.helicopter.Instance.TextureIndex++;
+                if (this.helicopter.Instance.TextureIndex > 2) this.helicopter.Instance.TextureIndex = 2;
             }
             if (this.Game.Input.KeyJustReleased(Keys.Left))
             {
-                this.helicopter.TextureIndex--;
-                if (this.helicopter.TextureIndex < 0) this.helicopter.TextureIndex = 0;
+                this.helicopter.Instance.TextureIndex--;
+                if (this.helicopter.Instance.TextureIndex < 0) this.helicopter.Instance.TextureIndex = 0;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Up))
@@ -1224,9 +1231,12 @@ namespace TerrainTest
             {
                 if (this.terrainGraphDrawer.Visible)
                 {
-                    this.terrainPointDrawer.Clear();
+                    this.terrainPointDrawer.Instance.Clear();
 
-                    if (picked)
+                    Vector3 pickedPosition;
+                    Triangle pickedTriangle;
+                    float pickedDistance;
+                    if (this.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance))
                     {
                         this.DEBUGPickingPosition(pickedPosition);
                     }
@@ -1239,8 +1249,8 @@ namespace TerrainTest
 
             if (this.curveLineDrawer.Visible)
             {
-                Matrix rot = Matrix.RotationQuaternion(this.helicopter.Manipulator.Rotation) * Matrix.Translation(this.helicopter.Manipulator.Position);
-                this.curveLineDrawer.SetLines(this.hAxisColor, Line3D.CreateAxis(rot, 5f));
+                Matrix rot = Matrix.RotationQuaternion(this.helicopter.Transform.Rotation) * Matrix.Translation(this.helicopter.Transform.Position);
+                this.curveLineDrawer.Instance.SetLines(this.hAxisColor, Line3D.CreateAxis(rot, 5f));
             }
 
             if (this.staticObjLineDrawer.Visible && objNotSet)
@@ -1267,11 +1277,11 @@ namespace TerrainTest
         {
             base.Draw(gameTime);
 
-            this.shadowMapDrawer.Texture = this.useDebugTex ? this.debugTex : this.Renderer.GetResource(this.shadowResult);
+            this.shadowMapDrawer.Instance.Texture = this.useDebugTex ? this.debugTex : this.Renderer.GetResource(this.shadowResult);
 
             #region Texts
 
-            this.stats.Text = this.Game.RuntimeText;
+            this.stats.Instance.Text = this.Game.RuntimeText;
 
             string txt1 = string.Format(
                 "Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Primitives: {6}",
@@ -1282,7 +1292,7 @@ namespace TerrainTest
                 this.RenderMode,
                 this.shadowResult,
                 Counters.PrimitivesPerFrame);
-            this.counters1.Text = txt1;
+            this.counters1.Instance.Text = txt1;
 
             string txt2 = string.Format(
                 "IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}; T1.{5}  /  T2.{6}  /  H.{7}",
@@ -1290,18 +1300,18 @@ namespace TerrainTest
                 Counters.IAPrimitiveTopologySets,
                 Counters.IAVertexBuffersSets,
                 Counters.IAIndexBufferSets,
-                this.terrain.VisiblePatchesCount,
+                this.terrain.Instance.VisiblePatchesCount,
                 this.tankP1Agent,
                 this.tankP2Agent,
                 this.helicopterAgent);
-            this.counters2.Text = txt2;
+            this.counters2.Instance.Text = txt2;
 
             #endregion
         }
 
         private Vector3 GetRandomPoint(Random rnd, Vector3 offset)
         {
-            BoundingBox bbox = this.terrain.GetBoundingBox();
+            BoundingBox bbox = this.terrain.Instance.GetBoundingBox();
 
             while (true)
             {
@@ -1310,7 +1320,7 @@ namespace TerrainTest
                 Vector3 p;
                 Triangle t;
                 float d;
-                if (terrain.FindTopGroundPosition(v.X, v.Z, out p, out t, out d))
+                if (this.FindTopGroundPosition(v.X, v.Z, out p, out t, out d))
                 {
                     return p + offset;
                 }
@@ -1336,8 +1346,8 @@ namespace TerrainTest
             }
             else
             {
-                cPoints[0] = this.helicopter.Manipulator.Position;
-                cPoints[1] = this.helicopter.Manipulator.Position + (Vector3.Up * 5f) + (this.helicopter.Manipulator.Forward * 10f);
+                cPoints[0] = this.helicopter.Transform.Position;
+                cPoints[1] = this.helicopter.Transform.Position + (Vector3.Up * 5f) + (this.helicopter.Transform.Forward * 10f);
 
                 for (int i = 2; i < cPoints.Length - 2; i++)
                 {
@@ -1345,10 +1355,10 @@ namespace TerrainTest
                 }
             }
 
-            var p = this.helipod.Manipulator.Position;
+            var p = this.helipod.Transform.Position;
             Triangle t;
             float d;
-            if (this.terrain.FindTopGroundPosition(p.X, p.Z, out p, out t, out d))
+            if (this.FindTopGroundPosition(p.X, p.Z, out p, out t, out d))
             {
                 cPoints[cPoints.Length - 2] = p + this.helicopterHeightOffset;
                 cPoints[cPoints.Length - 1] = p;
@@ -1429,7 +1439,7 @@ namespace TerrainTest
                 MaximumDistance = 100f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
+            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
         }
         private void AddExplosionSystem(AIAgent agent)
         {
@@ -1454,8 +1464,8 @@ namespace TerrainTest
                 MaximumDistance = 100f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
+            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
+            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
         }
         private void AddSmokePlumeSystem(AIAgent agent)
         {
@@ -1481,8 +1491,8 @@ namespace TerrainTest
                 MaximumDistance = 500f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
+            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
+            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
         }
         private void AddSmokeSystem(AIAgent agent)
         {
@@ -1499,7 +1509,7 @@ namespace TerrainTest
                 MaximumDistance = 500f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter);
+            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter);
         }
         private void AddDustSystem(AIAgent agent, Vector3 delta)
         {
@@ -1510,7 +1520,7 @@ namespace TerrainTest
                 MaximumDistance = 250f,
             };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
+            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
         }
 
         private void DEBUGPickingPosition(Vector3 position)
@@ -1518,13 +1528,13 @@ namespace TerrainTest
             Vector3[] positions;
             Triangle[] triangles;
             float[] distances;
-            if (this.terrain.FindAllGroundPosition(position.X, position.Z, out positions, out triangles, out distances))
+            if (this.FindAllGroundPosition(position.X, position.Z, out positions, out triangles, out distances))
             {
-                this.terrainPointDrawer.SetLines(Color.Magenta, Line3D.CreateCrossList(positions, 1f));
-                this.terrainPointDrawer.SetLines(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
+                this.terrainPointDrawer.Instance.SetLines(Color.Magenta, Line3D.CreateCrossList(positions, 1f));
+                this.terrainPointDrawer.Instance.SetLines(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
                 if (positions.Length > 1)
                 {
-                    this.terrainPointDrawer.SetLines(Color.Cyan, new Line3D(positions[0], positions[positions.Length - 1]));
+                    this.terrainPointDrawer.Instance.SetLines(Color.Cyan, new Line3D(positions[0], positions[positions.Length - 1]));
                 }
             }
         }
@@ -1541,9 +1551,9 @@ namespace TerrainTest
                 path.Add(pos);
             }
 
-            this.curveLineDrawer.SetLines(this.curvesColor, Line3D.CreatePath(path.ToArray()));
-            this.curveLineDrawer.SetLines(this.pointsColor, Line3D.CreateCrossList(curve.Points, 0.5f));
-            this.curveLineDrawer.SetLines(this.segmentsColor, Line3D.CreatePath(curve.Points));
+            this.curveLineDrawer.Instance.SetLines(this.curvesColor, Line3D.CreatePath(path.ToArray()));
+            this.curveLineDrawer.Instance.SetLines(this.pointsColor, Line3D.CreateCrossList(curve.Points, 0.5f));
+            this.curveLineDrawer.Instance.SetLines(this.segmentsColor, Line3D.CreatePath(curve.Points));
         }
         private void DEBUGDrawTankPath(Vector3 from, PathFindingPath path)
         {
@@ -1566,13 +1576,13 @@ namespace TerrainTest
                 lines[i] = line;
             }
 
-            this.terrainPointDrawer.SetLines(Color.Red, lines);
+            this.terrainPointDrawer.Instance.SetLines(Color.Red, lines);
         }
         private void DEBUGUpdateGraphDrawer()
         {
             var agent = this.walkMode ? this.walkerAgentType : this.tankAgentType;
 
-            var nodes = this.terrain.GetNodes(agent);
+            var nodes = this.GetNodes(agent);
             if (nodes != null && nodes.Length > 0)
             {
                 Random clrRnd = new Random(1);
@@ -1586,7 +1596,7 @@ namespace TerrainTest
                 {
                     this.graphIndex = -1;
 
-                    this.terrainGraphDrawer.Clear();
+                    this.terrainGraphDrawer.Instance.Clear();
 
                     for (int i = 0; i < nodes.Length; i++)
                     {
@@ -1595,7 +1605,7 @@ namespace TerrainTest
                         var poly = node.Poly;
                         var tris = poly.Triangulate();
 
-                        this.terrainGraphDrawer.AddTriangles(color, tris);
+                        this.terrainGraphDrawer.Instance.AddTriangles(color, tris);
                     }
                 }
                 else
@@ -1607,14 +1617,14 @@ namespace TerrainTest
 
                     if (this.graphIndex < nodes.Length)
                     {
-                        this.terrainGraphDrawer.Clear();
+                        this.terrainGraphDrawer.Instance.Clear();
 
                         var node = (NavigationMeshNode)nodes[this.graphIndex];
                         var color = regions[node.RegionId];
                         var poly = node.Poly;
                         var tris = poly.Triangulate();
 
-                        this.terrainGraphDrawer.SetTriangles(color, tris);
+                        this.terrainGraphDrawer.Instance.SetTriangles(color, tris);
                     }
                 }
             }
@@ -1625,40 +1635,40 @@ namespace TerrainTest
         }
         private void DEBUGDrawLightVolumes()
         {
-            this.lightsVolumeDrawer.Clear();
+            this.lightsVolumeDrawer.Instance.Clear();
 
             foreach (var spot in this.Lights.SpotLights)
             {
                 var lines = spot.GetVolume(10);
 
-                this.lightsVolumeDrawer.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                this.lightsVolumeDrawer.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
         private void DEBUGDrawLightMarks()
         {
-            this.lightsVolumeDrawer.Clear();
+            this.lightsVolumeDrawer.Instance.Clear();
 
             foreach (var spot in this.Lights.SpotLights)
             {
                 var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 10, 10);
 
-                this.lightsVolumeDrawer.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 10, 10);
 
-                this.lightsVolumeDrawer.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
@@ -1666,36 +1676,44 @@ namespace TerrainTest
         private void DEBUGDrawStaticVolumes()
         {
             List<Line3D> lines = new List<Line3D>();
-            lines.AddRange(Line3D.CreateWiredBox(this.helipod.GetBoundingBox()));
-            lines.AddRange(Line3D.CreateWiredBox(this.garage.GetBoundingBox()));
+            lines.AddRange(Line3D.CreateWiredBox(this.helipod.Geometry.GetBoundingBox()));
+            lines.AddRange(Line3D.CreateWiredBox(this.garage.Geometry.GetBoundingBox()));
             for (int i = 0; i < this.obelisk.Count; i++)
             {
-                lines.AddRange(Line3D.CreateWiredBox(this.obelisk[i].GetBoundingBox()));
+                var instance = this.obelisk.GetComponent<IRayPickable<Triangle>>(i);
+
+                lines.AddRange(Line3D.CreateWiredBox(instance.GetBoundingBox()));
             }
             for (int i = 0; i < this.rocks.Count; i++)
             {
-                lines.AddRange(Line3D.CreateWiredBox(this.rocks[i].GetBoundingBox()));
+                var instance = this.rocks.GetComponent<IRayPickable<Triangle>>(i);
+
+                lines.AddRange(Line3D.CreateWiredBox(instance.GetBoundingBox()));
             }
             for (int i = 0; i < this.tree1.Count; i++)
             {
-                lines.AddRange(Line3D.CreateWiredTriangle(this.tree1[i].GetVolume()));
+                var instance = this.tree1.GetComponent<IVolume>(i);
+
+                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(false)));
             }
 
             for (int i = 0; i < this.tree2.Count; i++)
             {
-                lines.AddRange(Line3D.CreateWiredTriangle(this.tree2[i].GetVolume()));
+                var instance = this.tree2.GetComponent<IVolume>(i);
+
+                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(false)));
             }
 
-            this.staticObjLineDrawer.SetLines(objColor, lines.ToArray());
+            this.staticObjLineDrawer.Instance.SetLines(objColor, lines.ToArray());
         }
         private void DEBUGDrawMovingVolumes()
         {
-            var hsph = this.helicopter.GetBoundingSphere();
-            this.movingObjLineDrawer.SetLines(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, }, 50, 20));
+            var hsph = this.helicopter.Geometry.GetBoundingSphere();
+            this.movingObjLineDrawer.Instance.SetLines(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, }, 50, 20));
 
-            var t1sph = this.tankP1.GetBoundingBox();
-            var t2sph = this.tankP2.GetBoundingBox();
-            this.movingObjLineDrawer.SetLines(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateWiredBox(new[] { t1sph, t2sph, }));
+            var t1sph = this.tankP1.Geometry.GetBoundingBox();
+            var t2sph = this.tankP2.Geometry.GetBoundingBox();
+            this.movingObjLineDrawer.Instance.SetLines(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateWiredBox(new[] { t1sph, t2sph, }));
         }
     }
 }

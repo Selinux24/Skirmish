@@ -335,7 +335,8 @@ namespace Engine
             scene.Lights.Cull(this.UpdateContext.Frustum, this.UpdateContext.EyePosition);
 
             //Update active components
-            scene.UpdatableComponents.FindAll(c => c.Active).ForEach(c => c.Update(this.UpdateContext));
+            scene.GetComponents<IUpdatable>(c => c.Active)
+                .ForEach(c => c.Update(this.UpdateContext));
 
             this.Updated = true;
 #if DEBUG
@@ -380,7 +381,7 @@ namespace Engine
                 Stopwatch swTotal = Stopwatch.StartNew();
 #endif
                 //Draw visible components
-                var visibleComponents = scene.DrawableComponents.FindAll(c => c.Visible);
+                var visibleComponents = scene.GetComponents(c => c.Visible);
                 if (visibleComponents.Count > 0)
                 {
                     #region Preparation
@@ -440,7 +441,7 @@ namespace Engine
                         #region Shadow map
 
                         //Draw components if drop shadow (opaque)
-                        var shadowObjs = scene.DrawableComponents.FindAll(c => c.CastShadow == true);
+                        var shadowObjs = scene.GetComponents(c => c.CastShadow == true);
                         if (shadowObjs.Count > 0)
                         {
                             #region Cull
@@ -1311,11 +1312,13 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        private void DrawShadowsComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<IDrawable> components)
+        private void DrawShadowsComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components)
         {
-            components.ForEach((c) =>
+            components.FindAll(c => c.Is<IDrawable>()).ForEach((c) =>
             {
-                var visible = (c is ICull) ? !this.cullManager.IsVisible(index, (ICull)c) : true;
+                var cull = c.Get<ICull>();
+
+                var visible = cull != null ? !this.cullManager.IsVisible(index, cull) : true;
                 if (visible)
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
@@ -1326,7 +1329,10 @@ namespace Engine
                     if (c.AlphaEnabled) this.Game.Graphics.SetBlendTransparent();
                     else this.Game.Graphics.SetBlendDefault();
 
-                    c.Draw(context);
+                    //if (c.AlphaEnabled) this.Game.Graphics.SetBlendDefaultAlpha();
+                    //else this.Game.Graphics.SetBlendDefault();
+
+                    c.Get<IDrawable>().Draw(context);
                 }
             });
         }
@@ -1337,13 +1343,15 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
         /// <param name="deferred">Deferred drawing</param>
-        private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<IDrawable> components, bool deferred)
+        private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components, bool deferred)
         {
             components.ForEach((c) =>
             {
                 Counters.MaxInstancesPerFrame += c.Count;
 
-                var visible = (c is ICull) ? !this.cullManager.IsVisible(index, (ICull)c) : true;
+                var cull = c.Get<ICull>();
+
+                var visible = cull != null ? !this.cullManager.IsVisible(index, cull) : true;
                 if (visible)
                 {
                     this.Game.Graphics.SetRasterizerDefault();
@@ -1362,7 +1370,7 @@ namespace Engine
                         else this.Game.Graphics.SetBlendDefault();
                     }
 
-                    c.Draw(context);
+                    c.Get<IDrawable>().Draw(context);
                 }
             });
         }

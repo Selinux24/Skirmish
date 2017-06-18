@@ -261,52 +261,6 @@ namespace Engine.PathFinding.AStar
                 Nodes = result.ToArray(),
             };
         }
-        /// <summary>
-        /// Performs validation test for specified point
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="terrain">Terrain class</param>
-        /// <param name="angle">Maximum angle of node</param>
-        /// <param name="points">Result point list</param>
-        /// <param name="tris">Result triangle list</param>
-        /// <returns>Returns true if point is valid.</returns>
-        private static bool TestPoint(float x, float z, Scenery terrain, float angle, out Vector3[] points, out Triangle[] tris)
-        {
-            points = null;
-            tris = null;
-
-            List<Vector3> pointList = new List<Vector3>();
-            List<Triangle> triangleList = new List<Triangle>();
-
-            Vector3[] pickedPositions;
-            Triangle[] pickedTriangles;
-            float[] pickedDistances;
-            if (terrain.FindAllGroundPosition(x, z, out pickedPositions, out pickedTriangles, out pickedDistances))
-            {
-                for (int i = 0; i < pickedPositions.Length; i++)
-                {
-                    float a = Helper.Angle(Vector3.Up, pickedTriangles[i].Normal);
-                    if (a <= angle)
-                    {
-                        pointList.Add(pickedPositions[i]);
-                        triangleList.Add(pickedTriangles[i]);
-                    }
-                }
-            }
-
-            if (pointList.Count > 0)
-            {
-                points = pointList.ToArray();
-                tris = triangleList.ToArray();
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
      
         /// <summary>
         /// Gets the node collection of the grid

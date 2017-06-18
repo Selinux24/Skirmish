@@ -50,6 +50,7 @@ namespace Engine.Collections.Generic
                         Id = -1,
                         Level = treeDepth,
                         boundingBox = bbox,
+                        boundingSphere = BoundingSphere.FromBox(bbox),
                     };
 
                     bool haltByDepth = treeDepth == maxDepth;

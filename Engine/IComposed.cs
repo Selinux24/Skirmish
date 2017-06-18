@@ -3,15 +3,19 @@
 namespace Engine
 {
     /// <summary>
-    /// Ray pickable component composition interface
+    /// Component composition interface
     /// </summary>
-    /// <typeparam name="T">Type of pickable result</typeparam>
-    public interface IComposed<T> where T : IRayIntersectable
+    /// <typeparam name="T">Type of result component</typeparam>
+    public interface IComposed
     {
         /// <summary>
-        /// Gets all ray pickable components
+        /// Component count
         /// </summary>
-        /// <returns>Returns a collection of ray pickable components</returns>
-        IEnumerable<IRayPickable<T>> GetComponents();
+        int Count { get; }
+        /// <summary>
+        /// Gets components
+        /// </summary>
+        /// <returns>Returns a collection of components of the specified type</returns>
+        IEnumerable<T> GetComponents<T>();
     }
 }

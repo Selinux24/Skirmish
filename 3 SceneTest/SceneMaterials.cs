@@ -14,13 +14,13 @@ namespace SceneTest
         private float radius = 1;
         private uint stacks = 40;
 
-        private TextDrawer title = null;
-        private TextDrawer runtime = null;
-        private Sprite backPannel = null;
+        private SceneObject<TextDrawer> title = null;
+        private SceneObject<TextDrawer> runtime = null;
+        private SceneObject<Sprite> backPannel = null;
 
-        private LensFlare lensFlare = null;
+        private SceneObject<LensFlare> lensFlare = null;
 
-        private Model floor = null;
+        private SceneObject<Model> floor = null;
 
         public SceneMaterials(Game game)
             : base(game)
@@ -53,17 +53,17 @@ namespace SceneTest
             this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), layerHUD);
             this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), layerHUD);
 
-            this.title.Text = "Scene Test - Materials";
-            this.runtime.Text = "";
+            this.title.Instance.Text = "Scene Test - Materials";
+            this.runtime.Instance.Text = "";
 
-            this.title.Position = Vector2.Zero;
-            this.runtime.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
+            this.title.Instance.Position = Vector2.Zero;
+            this.runtime.Instance.Position = new Vector2(5, this.title.Instance.Top + this.title.Instance.Height + 3);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.runtime.Top + this.runtime.Height + 3,
+                Height = this.runtime.Instance.Top + this.runtime.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -137,7 +137,7 @@ namespace SceneTest
 
             this.floor = this.AddModel(content, desc);
         }
-        private Model InitializeSphere(MaterialContent material)
+        private SceneObject<Model> InitializeSphere(MaterialContent material)
         {
             Vector3[] v = null;
             Vector3[] n = null;
@@ -196,7 +196,7 @@ namespace SceneTest
 
                         var material = this.GenerateMaterial(diffuse, specular, shininess);
                         var model = this.InitializeSphere(material);
-                        model.Manipulator.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
+                        model.Transform.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
                     }
                 }
             }
@@ -220,7 +220,7 @@ namespace SceneTest
 
             base.Update(gameTime);
 
-            this.runtime.Text = this.Game.RuntimeText;
+            this.runtime.Instance.Text = this.Game.RuntimeText;
         }
 
         private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)

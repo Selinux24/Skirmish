@@ -33,27 +33,27 @@ namespace Skybox
             MaxClimb = 0.9f,
         };
 
-        private Cursor cursor;
+        private SceneObject<Cursor> cursor;
 
-        private TextDrawer title = null;
-        private TextDrawer help = null;
-        private TextDrawer fps = null;
-        private Sprite backPannel = null;
+        private SceneObject<TextDrawer> title = null;
+        private SceneObject<TextDrawer> help = null;
+        private SceneObject<TextDrawer> fps = null;
+        private SceneObject<Sprite> backPannel = null;
 
-        private Skydom skydom = null;
-        private Scenery ruins = null;
-        private LineListDrawer volumesDrawer = null;
-        private TriangleListDrawer graphDrawer = null;
+        private SceneObject<Skydom> skydom = null;
+        private SceneObject<Scenery> ruins = null;
+        private SceneObject<LineListDrawer> volumesDrawer = null;
+        private SceneObject<TriangleListDrawer> graphDrawer = null;
 
-        private ParticleManager pManager = null;
+        private SceneObject<ParticleManager> pManager = null;
         private ParticleSystemDescription pPlume = null;
         private ParticleSystemDescription pFire = null;
         private ParticleSystemDescription pBigFire = null;
 
-        private ModelInstanced torchs = null;
+        private SceneObject<ModelInstanced> torchs = null;
         private SceneLightPoint[] torchLights = null;
 
-        private Model movingFire = null;
+        private SceneObject<Model> movingFire = null;
         private ParticleEmitter movingFireEmitter = null;
         private SceneLightPoint movingFireLight = null;
 
@@ -89,23 +89,23 @@ namespace Skybox
             this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
             this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
 
-            this.title.Text = "Collada Scene with Skybox";
+            this.title.Instance.Text = "Collada Scene with Skybox";
 #if DEBUG
-            this.help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
+            this.help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
 #else
             this.help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
 #endif
-            this.fps.Text = null;
+            this.fps.Instance.Text = null;
 
-            this.title.Position = Vector2.Zero;
-            this.help.Position = new Vector2(0, 24);
-            this.fps.Position = new Vector2(0, 40);
+            this.title.Instance.Position = Vector2.Zero;
+            this.help.Instance.Position = new Vector2(0, 24);
+            this.fps.Instance.Position = new Vector2(0, 40);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.fps.Top + this.fps.Height + 3,
+                Height = this.fps.Instance.Top + this.fps.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -280,7 +280,7 @@ namespace Skybox
                 this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
-            this.ruins.AttachFullPickingFullPathFinding(this.torchs);
+            this.ruins.AttachFullPathFinding(this.torchs);
 
             #endregion
 
@@ -441,21 +441,21 @@ namespace Skybox
                 Vector3 p;
                 Triangle t;
                 float d;
-                if (this.ruins.PickNearest(ref pRay, true, out p, out t, out d))
+                if (this.ruins.Instance.PickNearest(ref pRay, true, out p, out t, out d))
                 {
-                    this.volumesDrawer.SetTriangles(Color.White, new[] { t });
+                    this.volumesDrawer.Instance.SetTriangles(Color.White, new[] { t });
                 }
             }
 
 #if DEBUG
-            this.fps.Text = string.Format(
+            this.fps.Instance.Text = string.Format(
                 "Mouse (X:{0}; Y:{1}, Wheel: {2}) Absolute (X:{3}; Y:{4}) Cursor ({5})",
                 this.Game.Input.MouseXDelta,
                 this.Game.Input.MouseYDelta,
                 this.Game.Input.MouseWheelDelta,
                 this.Game.Input.MouseX,
                 this.Game.Input.MouseY,
-                this.cursor.CursorPosition);
+                this.cursor.Instance.CursorPosition);
 #else
             this.fps.Text = this.Game.RuntimeText;
 #endif
@@ -469,20 +469,20 @@ namespace Skybox
 
         private void DEBUGUpdateVolumesDrawer()
         {
-            this.volumesDrawer.SetLines(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.GetBoundingBox()));
+            this.volumesDrawer.Instance.SetLines(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.Instance.GetBoundingBox()));
 
             List<Line3D> volumesTorchs = new List<Line3D>();
             for (int i = 0; i < this.torchs.Count; i++)
             {
-                volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs[i].GetBoundingBox()));
+                volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs.Instance[i].GetBoundingBox()));
             }
-            this.volumesDrawer.SetLines(this.torchVolumeColor, volumesTorchs.ToArray());
+            this.volumesDrawer.Instance.SetLines(this.torchVolumeColor, volumesTorchs.ToArray());
 
             for (int i = 1; i < this.Lights.PointLights.Length; i++)
             {
                 var light = this.Lights.PointLights[i];
 
-                this.volumesDrawer.SetLines(
+                this.volumesDrawer.Instance.SetLines(
                     light.DiffuseColor,
                     Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
             }
@@ -491,13 +491,13 @@ namespace Skybox
         {
             var light = this.Lights.PointLights[0];
 
-            this.volumesDrawer.SetLines(
+            this.volumesDrawer.Instance.SetLines(
                 light.DiffuseColor,
                 Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
         }
         private void DEBUGUpdateGraphDrawer()
         {
-            var nodes = this.ruins.GetNodes(this.walker);
+            var nodes = this.ruins.Instance.GetNodes(this.walker);
             if (nodes != null && nodes.Length > 0)
             {
                 Random clrRnd = new Random(1);
@@ -507,7 +507,7 @@ namespace Skybox
                     regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.55f);
                 }
 
-                this.graphDrawer.Clear();
+                this.graphDrawer.Instance.Clear();
 
                 for (int i = 0; i < nodes.Length; i++)
                 {
@@ -516,7 +516,7 @@ namespace Skybox
                     var poly = node.Poly;
                     var tris = poly.Triangulate();
 
-                    this.graphDrawer.AddTriangles(color, tris);
+                    this.graphDrawer.Instance.AddTriangles(color, tris);
                 }
             }
         }

@@ -10,13 +10,13 @@ namespace Collada
     {
         private const int layerHUD = 99;
 
-        private TextDrawer title = null;
-        private TextDrawer fps = null;
-        private TextDrawer picks = null;
-        private Sprite backPannel = null;
+        private SceneObject<TextDrawer> title = null;
+        private SceneObject<TextDrawer> fps = null;
+        private SceneObject<TextDrawer> picks = null;
+        private SceneObject<Sprite> backPannel = null;
 
-        private ModelInstanced wall = null;
-        private Model lightEmitter = null;
+        private SceneObject<ModelInstanced> wall = null;
+        private SceneObject<Model> lightEmitter = null;
 
         private SceneLightPoint pointLight = null;
 
@@ -55,22 +55,22 @@ namespace Collada
         private void InitializeText()
         {
             this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
-            this.title.Text = "Tiled Wall Test Scene";
-            this.title.Position = Vector2.Zero;
+            this.title.Instance.Text = "Tiled Wall Test Scene";
+            this.title.Instance.Position = Vector2.Zero;
 
             this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
-            this.fps.Text = null;
-            this.fps.Position = new Vector2(0, 24);
+            this.fps.Instance.Text = null;
+            this.fps.Instance.Position = new Vector2(0, 24);
 
             this.picks = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
-            this.picks.Text = null;
-            this.picks.Position = new Vector2(0, 48);
+            this.picks.Instance.Text = null;
+            this.picks.Instance.Position = new Vector2(0, 48);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.picks.Top + this.picks.Height + 3,
+                Height = this.picks.Instance.Top + this.picks.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -87,18 +87,18 @@ namespace Collada
                     CastShadow = true,
                 });
 
-            BoundingBox bbox = this.wall[0].GetBoundingBox();
+            BoundingBox bbox = this.wall.Instance[0].GetBoundingBox();
 
             float x = bbox.GetX() * (10f / 11f);
             float z = bbox.GetZ();
 
-            this.wall[0].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
-            this.wall[1].Manipulator.SetPosition(new Vector3(+2 * x, 0, +0 * z));
-            this.wall[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, +0 * z));
-            this.wall[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
-            this.wall[4].Manipulator.SetPosition(new Vector3(-1 * x, 0, +0 * z));
-            this.wall[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
-            this.wall[6].Manipulator.SetPosition(new Vector3(-3 * x, 0, +0 * z));
+            this.wall.Instance[0].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
+            this.wall.Instance[1].Manipulator.SetPosition(new Vector3(+2 * x, 0, +0 * z));
+            this.wall.Instance[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, +0 * z));
+            this.wall.Instance[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
+            this.wall.Instance[4].Manipulator.SetPosition(new Vector3(-1 * x, 0, +0 * z));
+            this.wall.Instance[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
+            this.wall.Instance[6].Manipulator.SetPosition(new Vector3(-3 * x, 0, +0 * z));
         }
         private void InitializeEmitter()
         {
@@ -150,7 +150,7 @@ namespace Collada
 
             this.UpdateLight(gameTime);
 
-            this.fps.Text = this.Game.RuntimeText;
+            this.fps.Instance.Text = this.Game.RuntimeText;
         }
         private void UpdateCamera(GameTime gameTime)
         {
@@ -210,7 +210,7 @@ namespace Collada
                 pos.Z -= gameTime.ElapsedSeconds * 5f;
             }
 
-            this.lightEmitter.Manipulator.SetPosition(pos);
+            this.lightEmitter.Transform.SetPosition(pos);
             this.pointLight.Position = pos;
         }
     }
