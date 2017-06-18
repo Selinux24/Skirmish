@@ -23,30 +23,30 @@ namespace DeferredTest
         private const int layerEffects = 2;
         private const int layerHUD = 99;
 
-        private Cursor cursor = null;
-        private TextDrawer title = null;
-        private TextDrawer load = null;
-        private TextDrawer help = null;
-        private TextDrawer statistics = null;
-        private Sprite backPannel = null;
+        private SceneObject<Cursor> cursor = null;
+        private SceneObject<TextDrawer> title = null;
+        private SceneObject<TextDrawer> load = null;
+        private SceneObject<TextDrawer> help = null;
+        private SceneObject<TextDrawer> statistics = null;
+        private SceneObject<Sprite> backPannel = null;
 
         private GameAgent<SteerManipulatorController> tankAgent = null;
-        private Model helicopter = null;
-        private ModelInstanced helicopters = null;
-        private Skydom skydom = null;
-        private Scenery terrain = null;
-        private GroundGardener gardener = null;
+        private SceneObject<Model> helicopter = null;
+        private SceneObject<ModelInstanced> helicopters = null;
+        private SceneObject<Skydom> skydom = null;
+        private SceneObject<Scenery> terrain = null;
+        private SceneObject<GroundGardener> gardener = null;
 
-        Model tree = null;
-        ModelInstanced trees = null;
+        private SceneObject<Model> tree = null;
+        private SceneObject<ModelInstanced> trees = null;
 
-        private SpriteTexture bufferDrawer = null;
+        private SceneObject<SpriteTexture> bufferDrawer = null;
         private int textIntex = 0;
         private bool animateLights = false;
         private SceneLightSpot spotLight = null;
 
-        private LineListDrawer lineDrawer = null;
-        private TriangleListDrawer terrainGraphDrawer = null;
+        private SceneObject<LineListDrawer> lineDrawer = null;
+        private SceneObject<TriangleListDrawer> terrainGraphDrawer = null;
 
         private Random rnd = new Random(0);
         private int pointOffset = 0;
@@ -151,7 +151,7 @@ namespace DeferredTest
                         Name = "Tank",
                         CastShadow = true,
                     });
-                tank.Manipulator.SetScale(0.2f, true);
+                tank.Transform.SetScale(0.2f, true);
 
                 var tankController = new SteerManipulatorController()
                 {
@@ -160,7 +160,7 @@ namespace DeferredTest
                     ArrivingRadius = 7.5f,
                 };
 
-                var tankbbox = tank.GetBoundingBox();
+                var tankbbox = tank.Instance.GetBoundingBox();
                 var tankAgentType = new NavigationMeshAgentType()
                 {
                     Height = tankbbox.GetY(),
@@ -169,7 +169,7 @@ namespace DeferredTest
                 };
 
                 this.tankAgent = new GameAgent<SteerManipulatorController>(tankAgentType, tank, tankController);
-                this.AddComponent(this.tankAgent);
+                this.AddComponent(this.tankAgent, new SceneObjectDescription() { });
 
                 this.Lights.AddRange(this.tankAgent.Lights);
 
@@ -182,9 +182,6 @@ namespace DeferredTest
             {
                 sw.Restart();
 
-                var navSettings = NavigationMeshGenerationSettings.Default;
-                navSettings.Agents = new[] { this.tankAgent.AgentType, };
-
                 this.terrain = this.AddScenery(
                     "Resources",
                     "terrain.xml",
@@ -194,10 +191,6 @@ namespace DeferredTest
                         Quadtree = new GroundDescription.QuadtreeDescription()
                         {
                             MaximumDepth = 2,
-                        },
-                        PathFinder = new GroundDescription.PathFinderDescription()
-                        {
-                            Settings = navSettings,
                         },
                     });
                 sw.Stop();
@@ -272,132 +265,26 @@ namespace DeferredTest
                 this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
                 this.statistics = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red), layerHUD);
 
-                this.title.Text = "Deferred Ligthning test";
-                this.load.Text = loadingText;
-                this.help.Text = "";
-                this.statistics.Text = "";
+                this.title.Instance.Text = "Deferred Ligthning test";
+                this.load.Instance.Text = loadingText;
+                this.help.Instance.Text = "";
+                this.statistics.Instance.Text = "";
 
-                this.title.Position = Vector2.Zero;
-                this.load.Position = new Vector2(0, this.title.Top + this.title.Height + 2);
-                this.help.Position = new Vector2(0, this.load.Top + this.load.Height + 2);
-                this.statistics.Position = new Vector2(0, this.help.Top + this.help.Height + 2);
+                this.title.Instance.Position = Vector2.Zero;
+                this.load.Instance.Position = new Vector2(0, this.title.Instance.Top + this.title.Instance.Height + 2);
+                this.help.Instance.Position = new Vector2(0, this.load.Instance.Top + this.load.Instance.Height + 2);
+                this.statistics.Instance.Position = new Vector2(0, this.help.Instance.Top + this.help.Instance.Height + 2);
 
                 var spDesc = new SpriteDescription()
                 {
                     AlphaEnabled = true,
                     Width = this.Game.Form.RenderWidth,
-                    Height = this.statistics.Top + this.statistics.Height + 3,
+                    Height = this.statistics.Instance.Top + this.statistics.Instance.Height + 3,
                     Color = new Color4(0, 0, 0, 0.75f),
                 };
 
                 this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
             }
-            #endregion
-
-            #region Object locations
-
-            Vector3 cameraPosition = Vector3.Zero;
-            int modelCount = 0;
-
-            #region Tank
-            {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.terrain.FindTopGroundPosition(20, 40, out p, out t, out d))
-                {
-                    this.tankAgent.Manipulator.SetPosition(p);
-                    this.tankAgent.Manipulator.SetNormal(t.Normal);
-                    cameraPosition += p;
-                    modelCount++;
-                }
-            }
-            #endregion
-
-            #region Helicopter
-            {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.terrain.FindTopGroundPosition(20, -20, out p, out t, out d))
-                {
-                    p.Y += 10f;
-                    this.helicopter.Manipulator.SetPosition(p, true);
-                    cameraPosition += p;
-                    modelCount++;
-                }
-
-                this.helicopter.AnimationController.AddPath(this.animations["default"]);
-                this.helicopter.AnimationController.Start();
-            }
-            #endregion
-
-            #region Helicopters
-            {
-                for (int i = 0; i < this.helicopters.Count; i++)
-                {
-                    Vector3 p;
-                    Triangle t;
-                    float d;
-                    if (this.terrain.FindTopGroundPosition((i * 10) - 20, 20, out p, out t, out d))
-                    {
-                        p.Y += 10f;
-                        this.helicopters[i].Manipulator.SetPosition(p, true);
-                        cameraPosition += p;
-                        modelCount++;
-                    }
-
-                    this.helicopters[i].AnimationController.AddPath(this.animations["default"]);
-                    this.helicopters[i].AnimationController.Start();
-                }
-            }
-            #endregion
-
-            #region Tree
-            {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.terrain.FindTopGroundPosition(20, -20, out p, out t, out d))
-                {
-                    this.tree.Manipulator.SetScale(0.5f, true);
-                    this.tree.Manipulator.SetPosition(p, true);
-                    cameraPosition += p;
-                    modelCount++;
-                }
-            }
-            #endregion
-
-            #region Trees
-            {
-                for (int i = 0; i < this.trees.Count; i++)
-                {
-                    Vector3 p;
-                    Triangle t;
-                    float d;
-                    if (this.terrain.FindTopGroundPosition((i * 10) - 35, 17, out p, out t, out d))
-                    {
-                        this.trees[i].Manipulator.SetScale(0.5f, true);
-                        this.trees[i].Manipulator.SetPosition(p, true);
-                        cameraPosition += p;
-                        modelCount++;
-                    }
-                }
-            }
-            #endregion
-
-            #region Gardener
-
-            this.gardener.ParentGround = this.terrain;
-
-            #endregion
-
-            cameraPosition /= (float)modelCount;
-            this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
-            this.Camera.LookTo(cameraPosition + Vector3.Up);
-            this.Camera.NearPlaneDistance = near;
-            this.Camera.FarPlaneDistance = far;
-
             #endregion
 
             #region Lights
@@ -446,7 +333,7 @@ namespace DeferredTest
             this.terrainGraphDrawer = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), MaxGridDrawer, layerEffects);
             this.terrainGraphDrawer.Visible = false;
 
-            var nodes = this.terrain.GetNodes(tankAgent.AgentType);
+            var nodes = this.GetNodes(tankAgent.AgentType);
             if (nodes != null && nodes.Length > 0)
             {
                 Random clrRnd = new Random(1);
@@ -463,13 +350,119 @@ namespace DeferredTest
                     var poly = node.Poly;
                     var tris = poly.Triangulate();
 
-                    this.terrainGraphDrawer.AddTriangles(color, tris);
+                    this.terrainGraphDrawer.Instance.AddTriangles(color, tris);
                 }
             }
 
             #endregion
 
             #endregion
+
+            var navSettings = NavigationMeshGenerationSettings.Default;
+            navSettings.Agents = new[] { this.tankAgent.AgentType, };
+
+            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
+            {
+                Settings = navSettings,
+            };
+
+            this.SetGround(this.terrain, true);
+
+            #region Tree
+            {
+                this.AttachToGround(this.tree, 20, -20, Matrix.Scaling(0.5f), false);
+            }
+            #endregion
+
+            #region Trees
+            {
+                for (int i = 0; i < this.trees.Count; i++)
+                {
+                    Vector3 p;
+                    Triangle t;
+                    float d;
+                    if (this.FindTopGroundPosition((i * 10) - 35, 17, out p, out t, out d))
+                    {
+                        this.trees.Instance[i].Manipulator.SetScale(0.5f, true);
+                        this.trees.Instance[i].Manipulator.SetPosition(p, true);
+                    }
+                }
+            }
+            #endregion
+
+            #region Gardener
+
+            this.gardener.Instance.ParentScene = this;
+
+            #endregion
+        }
+
+        public override void Initialized()
+        {
+            base.Initialized();
+
+            Vector3 cameraPosition = Vector3.Zero;
+            int modelCount = 0;
+
+            #region Tank
+            {
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (this.FindTopGroundPosition(20, 40, out p, out t, out d))
+                {
+                    this.tankAgent.Manipulator.SetPosition(p);
+                    this.tankAgent.Manipulator.SetNormal(t.Normal);
+                    cameraPosition += p;
+                    modelCount++;
+                }
+            }
+            #endregion
+
+            #region Helicopter
+            {
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (this.FindTopGroundPosition(20, -20, out p, out t, out d))
+                {
+                    p.Y += 10f;
+                    this.helicopter.Transform.SetPosition(p, true);
+                    cameraPosition += p;
+                    modelCount++;
+                }
+
+                this.helicopter.Instance.AnimationController.AddPath(this.animations["default"]);
+                this.helicopter.Instance.AnimationController.Start();
+            }
+            #endregion
+
+            #region Helicopters
+            {
+                for (int i = 0; i < this.helicopters.Count; i++)
+                {
+                    Vector3 p;
+                    Triangle t;
+                    float d;
+                    if (this.FindTopGroundPosition((i * 10) - 20, 20, out p, out t, out d))
+                    {
+                        p.Y += 10f;
+                        this.helicopters.Instance[i].Manipulator.SetPosition(p, true);
+                        cameraPosition += p;
+                        modelCount++;
+                    }
+
+                    this.helicopters.Instance[i].AnimationController.AddPath(this.animations["default"]);
+                    this.helicopters.Instance[i].AnimationController.Start();
+                }
+            }
+            #endregion
+
+            cameraPosition /= (float)modelCount;
+            this.Camera.Goto(cameraPosition + new Vector3(-30, 30, -30));
+            this.Camera.LookTo(cameraPosition + Vector3.Up);
+            this.Camera.NearPlaneDistance = near;
+            this.Camera.FarPlaneDistance = far;
         }
         public override void Update(GameTime gameTime)
         {
@@ -494,7 +487,7 @@ namespace DeferredTest
             Vector3 position;
             Triangle triangle;
             float distance;
-            bool picked = this.terrain.PickNearest(ref cursorRay, true, out position, out triangle, out distance);
+            bool picked = this.PickNearest(ref cursorRay, true, out position, out triangle, out distance);
 
             #endregion
 
@@ -502,20 +495,20 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F12))
             {
-                if (this.bufferDrawer.Manipulator.Position == Vector2.Zero)
+                if (this.bufferDrawer.Transform2D.Position == Vector2.Zero)
                 {
                     int width = (int)(this.Game.Form.RenderWidth * 0.33f);
                     int height = (int)(this.Game.Form.RenderHeight * 0.33f);
                     int smLeft = this.Game.Form.RenderWidth - width;
                     int smTop = this.Game.Form.RenderHeight - height;
 
-                    this.bufferDrawer.Manipulator.SetPosition(smLeft, smTop);
-                    this.bufferDrawer.ResizeSprite(width, height);
+                    this.bufferDrawer.Transform2D.SetPosition(smLeft, smTop);
+                    this.bufferDrawer.Instance.ResizeSprite(width, height);
                 }
                 else
                 {
-                    this.bufferDrawer.Manipulator.SetPosition(Vector2.Zero);
-                    this.bufferDrawer.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+                    this.bufferDrawer.Transform2D.SetPosition(Vector2.Zero);
+                    this.bufferDrawer.Instance.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
                 }
             }
 
@@ -525,9 +518,9 @@ namespace DeferredTest
                     var colorMap = this.Renderer.GetResource(SceneRendererResultEnum.ColorMap);
 
                     //Colors
-                    this.bufferDrawer.Texture = colorMap;
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
-                    this.help.Text = "Colors";
+                    this.bufferDrawer.Instance.Texture = colorMap;
+                    this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                    this.help.Instance.Text = "Colors";
 
                     this.bufferDrawer.Visible = true;
                 }
@@ -536,20 +529,20 @@ namespace DeferredTest
                 {
                     var normalMap = this.Renderer.GetResource(SceneRendererResultEnum.NormalMap);
 
-                    if (this.bufferDrawer.Texture == normalMap &&
-                        this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
+                    if (this.bufferDrawer.Instance.Texture == normalMap &&
+                        this.bufferDrawer.Instance.Channels == SpriteTextureChannelsEnum.NoAlpha)
                     {
                         //Specular Power
-                        this.bufferDrawer.Texture = normalMap;
-                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
-                        this.help.Text = "Specular Power";
+                        this.bufferDrawer.Instance.Texture = normalMap;
+                        this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.Alpha;
+                        this.help.Instance.Text = "Specular Power";
                     }
                     else
                     {
                         //Normals
-                        this.bufferDrawer.Texture = normalMap;
-                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
-                        this.help.Text = "Normals";
+                        this.bufferDrawer.Instance.Texture = normalMap;
+                        this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                        this.help.Instance.Text = "Normals";
                     }
                     this.bufferDrawer.Visible = true;
                 }
@@ -558,20 +551,20 @@ namespace DeferredTest
                 {
                     var depthMap = this.Renderer.GetResource(SceneRendererResultEnum.DepthMap);
 
-                    if (this.bufferDrawer.Texture == depthMap &&
-                        this.bufferDrawer.Channels == SpriteTextureChannelsEnum.NoAlpha)
+                    if (this.bufferDrawer.Instance.Texture == depthMap &&
+                        this.bufferDrawer.Instance.Channels == SpriteTextureChannelsEnum.NoAlpha)
                     {
                         //Specular Factor
-                        this.bufferDrawer.Texture = depthMap;
-                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Alpha;
-                        this.help.Text = "Specular Intensity";
+                        this.bufferDrawer.Instance.Texture = depthMap;
+                        this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.Alpha;
+                        this.help.Instance.Text = "Specular Intensity";
                     }
                     else
                     {
                         //Position
-                        this.bufferDrawer.Texture = depthMap;
-                        this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
-                        this.help.Text = "Position";
+                        this.bufferDrawer.Instance.Texture = depthMap;
+                        this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                        this.help.Instance.Text = "Position";
                     }
                     this.bufferDrawer.Visible = true;
                 }
@@ -589,14 +582,14 @@ namespace DeferredTest
                 if (shadowMap != null)
                 {
                     //Shadow map
-                    this.bufferDrawer.Texture = shadowMap;
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.Red;
+                    this.bufferDrawer.Instance.Texture = shadowMap;
+                    this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.Red;
                     this.bufferDrawer.Visible = true;
-                    this.help.Text = "Shadow map";
+                    this.help.Instance.Text = "Shadow map";
                 }
                 else
                 {
-                    this.help.Text = "The Shadow map is empty";
+                    this.help.Instance.Text = "The Shadow map is empty";
                 }
             }
 
@@ -607,14 +600,14 @@ namespace DeferredTest
                 if (lightMap != null)
                 {
                     //Light map
-                    this.bufferDrawer.Texture = lightMap;
-                    this.bufferDrawer.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                    this.bufferDrawer.Instance.Texture = lightMap;
+                    this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.NoAlpha;
                     this.bufferDrawer.Visible = true;
-                    this.help.Text = "Light map";
+                    this.help.Instance.Text = "Light map";
                 }
                 else
                 {
-                    this.help.Text = "The Light map is empty";
+                    this.help.Instance.Text = "The Light map is empty";
                 }
             }
 
@@ -656,12 +649,12 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.T))
             {
-                this.helicopter.TextureIndex++;
+                this.helicopter.Instance.TextureIndex++;
 
-                if (this.helicopter.TextureIndex >= this.helicopter.TextureCount)
+                if (this.helicopter.Instance.TextureIndex >= this.helicopter.Instance.TextureCount)
                 {
                     //Loop
-                    this.helicopter.TextureIndex = 0;
+                    this.helicopter.Instance.TextureIndex = 0;
                 }
             }
 
@@ -673,7 +666,7 @@ namespace DeferredTest
             {
                 if (picked)
                 {
-                    var p = this.terrain.FindPath(
+                    var p = this.FindPath(
                         this.tankAgent.AgentType,
                         this.tankAgent.Manipulator.Position, position, true, this.tankAgent.MaximumSpeed * gameTime.ElapsedSeconds);
                     if (p != null)
@@ -719,7 +712,7 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyPressed(Keys.Space))
             {
-                this.lineDrawer.SetLines(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
+                this.lineDrawer.Instance.SetLines(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
                 this.lineDrawer.Visible = true;
             }
 
@@ -795,7 +788,7 @@ namespace DeferredTest
                     this.spotLight.Intensity = Math.Max(0f, this.spotLight.Intensity);
                 }
 
-                this.lineDrawer.SetLines(Color.White, this.spotLight.GetVolume(10));
+                this.lineDrawer.Instance.SetLines(Color.White, this.spotLight.GetVolume(10));
             }
             else
             {
@@ -838,10 +831,10 @@ namespace DeferredTest
 
             if (this.Game.Form.IsFullscreen)
             {
-                this.load.Text = this.Game.RuntimeText;
+                this.load.Instance.Text = this.Game.RuntimeText;
             }
 
-            this.title.Text = string.Format(
+            this.title.Instance.Text = string.Format(
                 this.titleMask,
                 this.RenderMode,
                 this.Lights.DirectionalLights.Length,
@@ -851,21 +844,21 @@ namespace DeferredTest
 
             if (Counters.Statistics.Length == 0)
             {
-                this.statistics.Text = "No statistics";
+                this.statistics.Instance.Text = "No statistics";
             }
             else if (this.textIntex < 0)
             {
-                this.statistics.Text = "Press . for more statistics";
+                this.statistics.Instance.Text = "Press . for more statistics";
                 this.textIntex = -1;
             }
             else if (this.textIntex >= Counters.Statistics.Length)
             {
-                this.statistics.Text = "Press , for more statistics";
+                this.statistics.Instance.Text = "Press , for more statistics";
                 this.textIntex = Counters.Statistics.Length;
             }
             else
             {
-                this.statistics.Text = string.Format(
+                this.statistics.Instance.Text = string.Format(
                     "{0} - {1}",
                     Counters.Statistics[this.textIntex],
                     Counters.GetStatistics(this.textIntex));
@@ -886,7 +879,7 @@ namespace DeferredTest
                     Vector3 lightPosition;
                     Triangle lightTriangle;
                     float lightDistance;
-                    if (this.terrain.FindTopGroundPosition(0, 1, out lightPosition, out lightTriangle, out lightDistance))
+                    if (this.FindTopGroundPosition(0, 1, out lightPosition, out lightTriangle, out lightDistance))
                     {
                         lightPosition.Y += 10f;
 
@@ -923,7 +916,7 @@ namespace DeferredTest
                         Vector3 lightPosition;
                         Triangle lightTriangle;
                         float lightDistance;
-                        if (!this.terrain.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out lightPosition, out lightTriangle, out lightDistance))
+                        if (!this.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out lightPosition, out lightTriangle, out lightDistance))
                         {
                             lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
                         }

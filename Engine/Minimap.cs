@@ -41,7 +41,7 @@ namespace Engine
         /// <summary>
         /// Reference to the objects that we render in the minimap
         /// </summary>
-        public Drawable[] Drawables;
+        public SceneObject[] Drawables;
 
         /// <summary>
         /// Contructor
@@ -134,7 +134,7 @@ namespace Engine
 
                 for (int i = 0; i < this.Drawables.Length; i++)
                 {
-                    this.Drawables[i].Draw(this.drawContext);
+                    this.Drawables[i].Get<IDrawable>()?.Draw(this.drawContext);
                 }
 
                 this.Game.Graphics.SetDefaultViewport();

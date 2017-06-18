@@ -28,7 +28,7 @@ namespace Engine
         /// <summary>
         /// Terrain to draw
         /// </summary>
-        public Drawable[] Drawables;
+        public SceneObject[] Drawables;
         /// <summary>
         /// Minimap render area
         /// </summary>

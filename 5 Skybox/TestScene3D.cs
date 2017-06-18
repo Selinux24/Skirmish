@@ -141,16 +141,9 @@ namespace Skybox
 
             #region Terrain
 
-            var nvSettings = NavigationMeshGenerationSettings.Default;
-            nvSettings.Agents[0] = this.walker;
-
             GroundDescription desc = new GroundDescription()
             {
                 Name = "Terrain",
-                PathFinder = new GroundDescription.PathFinderDescription()
-                {
-                    Settings = nvSettings,
-                },
                 CastShadow = true,
                 DelayGeneration = true,
             };
@@ -210,7 +203,7 @@ namespace Skybox
 
             this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
-            this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pBigFire, this.movingFireEmitter);
+            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pBigFire, this.movingFireEmitter);
 
             #endregion
 
@@ -255,12 +248,12 @@ namespace Skybox
                 firePositions3D[i] = Vector3.Zero;
                 Triangle t;
                 float d;
-                this.ruins.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i], out t, out d);
+                this.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i], out t, out d);
 
-                this.torchs[i].Manipulator.SetScale(0.20f, true);
-                this.torchs[i].Manipulator.SetPosition(firePositions3D[i], true);
+                this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
+                this.torchs.Instance[i].Manipulator.SetPosition(firePositions3D[i], true);
 
-                BoundingBox bbox = this.torchs[i].GetBoundingBox();
+                BoundingBox bbox = this.torchs.Instance[i].GetBoundingBox();
 
                 firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
 
@@ -276,13 +269,19 @@ namespace Skybox
 
                 this.Lights.Add(this.torchLights[i]);
 
-                this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
-                this.pManager.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
+                this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
+                this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
-            this.ruins.AttachFullPathFinding(this.torchs);
-
             #endregion
+
+            var nvSettings = NavigationMeshGenerationSettings.Default;
+            nvSettings.Agents[0] = this.walker;
+
+            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
+            {
+                Settings = nvSettings,
+            };
 
             this.InitializeCamera();
         }
@@ -308,7 +307,7 @@ namespace Skybox
 
             {
                 Vector3 walkerPosition;
-                if (this.ruins.Walk(this.walker, previousPosition, this.Camera.Position, out walkerPosition))
+                if (this.Walk(this.walker, previousPosition, this.Camera.Position, out walkerPosition))
                 {
                     this.Camera.Goto(walkerPosition);
                 }
@@ -332,7 +331,7 @@ namespace Skybox
             position.Y = h + (0.25f * (1f + (float)Math.Sin(this.Game.GameTime.TotalSeconds)));
             position.Z = r * d * (float)Math.Sin(v * this.Game.GameTime.TotalSeconds);
 
-            this.movingFire.Manipulator.SetPosition(position);
+            this.movingFire.Transform.SetPosition(position);
             this.movingFireEmitter.Position = position;
             this.movingFireLight.Position = position;
 
@@ -497,7 +496,7 @@ namespace Skybox
         }
         private void DEBUGUpdateGraphDrawer()
         {
-            var nodes = this.ruins.Instance.GetNodes(this.walker);
+            var nodes = this.GetNodes(this.walker);
             if (nodes != null && nodes.Length > 0)
             {
                 Random clrRnd = new Random(1);

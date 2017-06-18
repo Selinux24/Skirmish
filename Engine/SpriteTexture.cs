@@ -40,11 +40,11 @@ namespace Engine
         /// <summary>
         /// Manipulator
         /// </summary>
-        public Manipulator2D Manipulator = new Manipulator2D();
+        public Manipulator2D Manipulator { get; private set; }
         /// <summary>
         /// Texture
         /// </summary>
-        public ShaderResourceView Texture;
+        public ShaderResourceView Texture { get; set; }
         /// <summary>
         /// Drawing channels
         /// </summary>
@@ -90,6 +90,7 @@ namespace Engine
 
             this.Channels = description.Channel;
 
+            this.Manipulator = new Manipulator2D();
             this.Manipulator.SetPosition(description.Left, description.Top);
             this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, description.Width, description.Height);
 

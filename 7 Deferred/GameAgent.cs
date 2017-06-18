@@ -17,7 +17,7 @@ namespace DeferredTest
         /// <summary>
         /// Model
         /// </summary>
-        private Model model;
+        private SceneObject model;
         /// <summary>
         /// Controller
         /// </summary>
@@ -58,7 +58,7 @@ namespace DeferredTest
         {
             get
             {
-                return this.model.Manipulator;
+                return this.model.Get<ITransformable3D>()?.Manipulator;
             }
         }
 
@@ -80,14 +80,14 @@ namespace DeferredTest
         {
             get
             {
-                return this.model.Lights;
+                return this.model.Get<Model>()?.Lights;
             }
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public GameAgent(NavigationMeshAgentType agentType, Model model, T controller)
+        public GameAgent(NavigationMeshAgentType agentType, SceneObject model, T controller)
         {
             this.model = model;
             this.controller = controller;
@@ -107,7 +107,7 @@ namespace DeferredTest
         /// <param name="context">Upating context</param>
         public void Update(UpdateContext context)
         {
-            this.controller?.UpdateManipulator(context.GameTime, this.model?.Manipulator);
+            this.controller?.UpdateManipulator(context.GameTime, this.Manipulator);
         }
         /// <summary>
         /// Sets a path to follow

@@ -13,17 +13,17 @@ namespace AnimationTest
     {
         private const int layerHUD = 99;
 
-        private TextDrawer title = null;
-        private TextDrawer runtime = null;
-        private TextDrawer animText = null;
-        private Sprite backPannel = null;
-
-        private Model floor = null;
-
-        private Model soldier = null;
+        private SceneObject<TextDrawer> title = null;
+        private SceneObject<TextDrawer> runtime = null;
+        private SceneObject<TextDrawer> animText = null;
+        private SceneObject<Sprite> backPannel = null;
+                
+        private SceneObject<Model> floor = null;
+                
+        private SceneObject<Model> soldier = null;
         private Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
-        private TriangleListDrawer soldierTris = null;
-        private LineListDrawer soldierLines = null;
+        private SceneObject<TriangleListDrawer> soldierTris = null;
+        private SceneObject<LineListDrawer> soldierLines = null;
         private bool showSoldierDEBUG = false;
 
         private Random rnd = new Random();
@@ -51,19 +51,19 @@ namespace AnimationTest
             this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), layerHUD);
             this.animText = this.AddText(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), layerHUD);
 
-            this.title.Text = "Animation test";
-            this.runtime.Text = "";
-            this.animText.Text = "";
+            this.title.Instance.Text = "Animation test";
+            this.runtime.Instance.Text = "";
+            this.animText.Instance.Text = "";
 
-            this.title.Position = Vector2.Zero;
-            this.runtime.Position = new Vector2(5, this.title.Top + this.title.Height + 3);
-            this.animText.Position = new Vector2(5, this.runtime.Top + this.runtime.Height + 3);
+            this.title.Instance.Position = Vector2.Zero;
+            this.runtime.Instance.Position = new Vector2(5, this.title.Instance.Top + this.title.Instance.Height + 3);
+            this.animText.Instance.Position = new Vector2(5, this.runtime.Instance.Top + this.runtime.Instance.Height + 3);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.animText.Top + this.animText.Height + 3,
+                Height = this.animText.Instance.Top + this.animText.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -128,9 +128,9 @@ namespace AnimationTest
             #endregion
 
             {
-                this.soldier.Manipulator.SetPosition(0, 0, 0, true);
+                this.soldier.Transform.SetPosition(0, 0, 0, true);
 
-                this.soldier.AnimationController.PathEnding += AnimationController_PathEnding;
+                this.soldier.Instance.AnimationController.PathEnding += AnimationController_PathEnding;
 
                 AnimationPath p0 = new AnimationPath();
                 p0.Add("idle1");
@@ -156,9 +156,11 @@ namespace AnimationTest
                 this.soldierPaths.Add("idle2", new AnimationPlan(p2));
                 this.soldierPaths.Add("stand", new AnimationPlan(p3));
 
-                this.soldier.AnimationController.AddPath(this.soldierPaths["complex"]);
+                this.soldier.Instance.AnimationController.AddPath(this.soldierPaths["complex"]);
 
-                float playerHeight = this.soldier.GetBoundingBox().Maximum.Y - this.soldier.GetBoundingBox().Minimum.Y;
+                var bbox = this.soldier.Instance.GetBoundingBox();
+
+                float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
 
                 this.Camera.Goto(0, playerHeight, -12f);
                 this.Camera.LookTo(0, playerHeight * 0.6f, 0);
@@ -216,8 +218,8 @@ namespace AnimationTest
             if (this.showSoldierDEBUG)
             {
                 Color color = new Color(Color.Red.ToColor3(), 0.6f);
-                Triangle[] tris = this.soldier.GetTriangles(true);
-                BoundingBox bbox = this.soldier.GetBoundingBox(true);
+                Triangle[] tris = this.soldier.Instance.GetTriangles(true);
+                BoundingBox bbox = this.soldier.Instance.GetBoundingBox(true);
 
                 if (this.soldierTris == null)
                 {
@@ -225,7 +227,7 @@ namespace AnimationTest
                 }
                 else
                 {
-                    this.soldierTris.SetTriangles(color, tris);
+                    this.soldierTris.Instance.SetTriangles(color, tris);
                 }
 
                 if (this.soldierLines == null)
@@ -234,7 +236,7 @@ namespace AnimationTest
                 }
                 else
                 {
-                    this.soldierLines.SetLines(color, Line3D.CreateWiredBox(bbox));
+                    this.soldierLines.Instance.SetLines(color, Line3D.CreateWiredBox(bbox));
                 }
 
                 this.soldierTris.Active = this.soldierTris.Visible = true;
@@ -257,15 +259,15 @@ namespace AnimationTest
 
             base.Update(gameTime);
 
-            this.runtime.Text = this.Game.RuntimeText;
-            this.animText.Text = string.Format(
+            this.runtime.Instance.Text = this.Game.RuntimeText;
+            this.animText.Instance.Text = string.Format(
                 "Paths: {0:00}; Delta: {1:0.0}; Index: {2}; Clip: {3}; Time: {4:0.00}; Item Time: {5:0.00}",
-                this.soldier.AnimationController.PathCount,
-                this.soldier.AnimationController.TimeDelta,
-                this.soldier.AnimationController.CurrentIndex,
-                this.soldier.AnimationController.CurrentPathItemClip,
-                this.soldier.AnimationController.CurrentPathTime,
-                this.soldier.AnimationController.CurrentPathItemTime);
+                this.soldier.Instance.AnimationController.PathCount,
+                this.soldier.Instance.AnimationController.TimeDelta,
+                this.soldier.Instance.AnimationController.CurrentIndex,
+                this.soldier.Instance.AnimationController.CurrentPathItemClip,
+                this.soldier.Instance.AnimationController.CurrentPathTime,
+                this.soldier.Instance.AnimationController.CurrentPathItemTime);
         }
         private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
         {
@@ -303,36 +305,36 @@ namespace AnimationTest
         {
             if (this.Game.Input.KeyJustReleased(Keys.Left))
             {
-                this.soldier.AnimationController.TimeDelta -= 0.1f;
-                this.soldier.AnimationController.TimeDelta = Math.Max(0, this.soldier.AnimationController.TimeDelta);
+                this.soldier.Instance.AnimationController.TimeDelta -= 0.1f;
+                this.soldier.Instance.AnimationController.TimeDelta = Math.Max(0, this.soldier.Instance.AnimationController.TimeDelta);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
-                this.soldier.AnimationController.TimeDelta += 0.1f;
-                this.soldier.AnimationController.TimeDelta = Math.Min(5, this.soldier.AnimationController.TimeDelta);
+                this.soldier.Instance.AnimationController.TimeDelta += 0.1f;
+                this.soldier.Instance.AnimationController.TimeDelta = Math.Min(5, this.soldier.Instance.AnimationController.TimeDelta);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Up))
             {
                 if (this.Game.Input.KeyPressed(Keys.ShiftKey))
                 {
-                    this.soldier.AnimationController.Start(0);
+                    this.soldier.Instance.AnimationController.Start(0);
                 }
                 else
                 {
-                    this.soldier.AnimationController.Resume();
+                    this.soldier.Instance.AnimationController.Resume();
                 }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Down))
             {
-                this.soldier.AnimationController.Pause();
+                this.soldier.Instance.AnimationController.Pause();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                this.soldier.AnimationController.ContinuePath(this.soldierPaths["stand"]);
+                this.soldier.Instance.AnimationController.ContinuePath(this.soldierPaths["stand"]);
             }
         }
 
