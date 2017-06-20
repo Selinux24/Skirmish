@@ -1210,7 +1210,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            var usage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
+            var usage = SceneObjectUsageEnum.Ground;
 
             return this.PickNearest(ref ray, true, usage, out position, out triangle, out distance);
         }
@@ -1233,7 +1233,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            var usage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
+            var usage = SceneObjectUsageEnum.Ground;
 
             return this.PickFirst(ref ray, true, usage, out position, out triangle, out distance);
         }
@@ -1256,7 +1256,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            var usage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
+            var usage = SceneObjectUsageEnum.Ground;
 
             return this.PickAll(ref ray, true, usage, out positions, out triangles, out distances);
         }
@@ -1278,7 +1278,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
 
-            var usage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
+            var usage = SceneObjectUsageEnum.Ground;
 
             Vector3[] pArray;
             Triangle[] tArray;
@@ -1474,6 +1474,9 @@ namespace Engine
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
         public void SetGround<T>(SceneObject<T> obj, bool fullGeometryPathFinding)
         {
+            this.boundingBox = obj.Get<IRayPickable<Triangle>>().GetBoundingBox();
+            this.boundingSphere = obj.Get<IRayPickable<Triangle>>().GetBoundingSphere();
+
             obj.Usage |= SceneObjectUsageEnum.Ground;
             obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
         }
@@ -1486,17 +1489,8 @@ namespace Engine
         /// <param name="z">Z position</param>
         /// <param name="transform">Transform</param>
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
-        public void AttachToGround<T>(SceneObject<T> obj, float x, float z, Matrix transform, bool fullGeometryPathFinding)
+        public void AttachToGround<T>(SceneObject<T> obj, bool fullGeometryPathFinding)
         {
-            Vector3 pos;
-            Triangle tri;
-            float dist;
-            if (this.FindTopGroundPosition(x, z, out pos, out tri, out dist))
-            {
-                obj.Transform.LocalTransform = transform;
-                obj.Transform.SetPosition(pos);
-            }
-
             obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
         }
 

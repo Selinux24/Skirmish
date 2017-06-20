@@ -721,7 +721,7 @@ namespace HeightmapTest
 
             this.gardener.Instance.ParentScene = this;
             this.gardener2.Instance.ParentScene = this;
-            this.lensFlare.Instance.ParentGround = this;
+            this.lensFlare.Instance.ParentScene = this;
 
             //Player soldier
             {

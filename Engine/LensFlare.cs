@@ -32,9 +32,9 @@ namespace Engine
         private Vector2 lightProjectedDirection;
      
         /// <summary>
-        /// Parent ground
+        /// Parent scene
         /// </summary>
-        public Scene ParentGround { get; set; }
+        public Scene ParentScene { get; set; }
 
         /// <summary>
         /// Constructor
@@ -99,7 +99,7 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null)
             {
-                if (this.ParentGround != null)
+                if (this.ParentScene != null)
                 {
                     Vector3 lightPosition = keyLight.GetPosition(1000);
                     Vector3 direction = Vector3.Normalize(context.EyePosition - lightPosition);
@@ -109,7 +109,7 @@ namespace Engine
                     Vector3 position;
                     Triangle tri;
                     float distance;
-                    if (this.ParentGround.PickNearest(ref ray, false, out position, out tri, out distance))
+                    if (this.ParentScene.PickNearest(ref ray, false, out position, out tri, out distance))
                     {
                         if (Vector3.Distance(lightPosition, context.EyePosition) > distance) return;
                     }

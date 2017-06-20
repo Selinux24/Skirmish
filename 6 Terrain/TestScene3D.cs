@@ -307,9 +307,9 @@ namespace TerrainTest
 
             this.helicopter.Transform.SetScale(0.75f);
 
-            AnimationPath p = new AnimationPath();
-            p.AddLoop("default");
-            this.animations.Add("default", new AnimationPlan(p));
+            AnimationPath ap = new AnimationPath();
+            ap.AddLoop("default");
+            this.animations.Add("default", new AnimationPlan(ap));
 
             this.helicopter.Instance.AnimationController.AddPath(this.animations["default"]);
             this.helicopter.Instance.AnimationController.Start();
@@ -533,8 +533,6 @@ namespace TerrainTest
 
             loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.gardener.Instance.ParentScene = this;
-
             #endregion
 
             #region Particles
@@ -560,106 +558,12 @@ namespace TerrainTest
 
             //Terrain
             this.SetGround(this.terrain, true);
-
-            //Helipod
-            this.AttachToGround(this.helipod, 75, 75, Matrix.Identity, true);
-            
-            //Garage
-            this.AttachToGround(this.garage, -10, -40, Matrix.RotationYawPitchRoll(MathUtil.PiOverFour + MathUtil.Pi, 0, 0), true);
-
-            //Obelisk
-            for (int i = 0; i < this.obelisk.Count; i++)
-            {
-                int ox = i == 0 || i == 2 ? 1 : -1;
-                int oy = i == 0 || i == 1 ? 1 : -1;
-
-                Vector3 obeliskPosition;
-                Triangle obeliskTri;
-                float obeliskDist;
-                if (this.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition, out obeliskTri, out obeliskDist))
-                {
-                    var obeliskInstance = this.obelisk.GetComponent<ITransformable3D>(i);
-
-                    obeliskInstance.Manipulator.SetPosition(obeliskPosition);
-                    obeliskInstance.Manipulator.SetScale(1.5f);
-                }
-            }
-
-            //Rocks
-            for (int i = 0; i < this.rocks.Count; i++)
-            {
-                var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
-
-                Vector3 rockPosition;
-                Triangle rockTri;
-                float rockDist;
-                if (this.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
-                {
-                    var scale = 1f;
-                    if (i < 5)
-                    {
-                        scale = posRnd.NextFloat(2f, 5f);
-                    }
-                    else if (i < 30)
-                    {
-                        scale = posRnd.NextFloat(0.5f, 2f);
-                    }
-                    else
-                    {
-                        scale = posRnd.NextFloat(0.1f, 0.2f);
-                    }
-
-                    var rockInstance = this.rocks.GetComponent<ITransformable3D>(i);
-
-                    rockInstance.Manipulator.SetPosition(rockPosition);
-                    rockInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
-                    rockInstance.Manipulator.SetScale(scale);
-                }
-            }
-
-            //Trees
-            for (int i = 0; i < this.tree1.Count; i++)
-            {
-                var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
-
-                Vector3 treePosition;
-                Triangle treeTri;
-                float treeDist;
-                if (this.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
-                {
-                    var treeInstance = this.tree1.GetComponent<ITransformable3D>(i);
-
-                    treeInstance.Manipulator.SetPosition(treePosition);
-                    treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
-                    treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
-                }
-            }
-
-            for (int i = 0; i < this.tree2.Count; i++)
-            {
-                var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
-
-                Vector3 treePosition;
-                Triangle treeTri;
-                float treeDist;
-                if (this.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
-                {
-                    var treeInstance = this.tree2.GetComponent<ITransformable3D>(i);
-
-                    treeInstance.Manipulator.SetPosition(treePosition);
-                    treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
-                    treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
-                }
-            }
-
-            #endregion
-
-            this.lensFlare.Instance.ParentGround = this;
-
-            this.gardener.Instance.SetWind(this.windDirection, this.windStrength);
-
-            this.Lights.ShadowLDDistance = 100f;
-            this.Lights.ShadowHDDistance = 25f;
+            this.AttachToGround(this.helipod, true);
+            this.AttachToGround(this.garage, true);
+            this.AttachToGround(this.obelisk, true);
+            this.AttachToGround(this.rocks, false);
+            this.AttachToGround(this.tree1, false);
+            this.AttachToGround(this.tree2, false);
 
             var navSettings = NavigationMeshGenerationSettings.Default;
             navSettings.Agents = new[]
@@ -671,6 +575,130 @@ namespace TerrainTest
             {
                 Settings = navSettings,
             };
+
+            //Helipod
+            {
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (this.FindTopGroundPosition(75, 75, out p, out t, out d))
+                {
+                    this.helipod.Transform.SetPosition(p);
+                }
+            }
+
+            //Garage
+            {
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (this.FindTopGroundPosition(-10, -40, out p, out t, out d))
+                {
+                    this.garage.Transform.SetPosition(p);
+                    this.garage.Transform.SetRotation(MathUtil.PiOverFour + MathUtil.Pi, 0, 0);
+                }
+            }
+
+            //Obelisk
+            {
+                for (int i = 0; i < this.obelisk.Count; i++)
+                {
+                    int ox = i == 0 || i == 2 ? 1 : -1;
+                    int oy = i == 0 || i == 1 ? 1 : -1;
+
+                    Vector3 obeliskPosition;
+                    Triangle obeliskTri;
+                    float obeliskDist;
+                    if (this.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition, out obeliskTri, out obeliskDist))
+                    {
+                        var obeliskInstance = this.obelisk.GetComponent<ITransformable3D>(i);
+
+                        obeliskInstance.Manipulator.SetPosition(obeliskPosition);
+                        obeliskInstance.Manipulator.SetScale(1.5f);
+                    }
+                }
+            }
+
+            //Rocks
+            {
+                for (int i = 0; i < this.rocks.Count; i++)
+                {
+                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+
+                    Vector3 rockPosition;
+                    Triangle rockTri;
+                    float rockDist;
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
+                    {
+                        var scale = 1f;
+                        if (i < 5)
+                        {
+                            scale = posRnd.NextFloat(2f, 5f);
+                        }
+                        else if (i < 30)
+                        {
+                            scale = posRnd.NextFloat(0.5f, 2f);
+                        }
+                        else
+                        {
+                            scale = posRnd.NextFloat(0.1f, 0.2f);
+                        }
+
+                        var rockInstance = this.rocks.GetComponent<ITransformable3D>(i);
+
+                        rockInstance.Manipulator.SetPosition(rockPosition);
+                        rockInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
+                        rockInstance.Manipulator.SetScale(scale);
+                    }
+                }
+            }
+
+            //Trees
+            {
+                for (int i = 0; i < this.tree1.Count; i++)
+                {
+                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+
+                    Vector3 treePosition;
+                    Triangle treeTri;
+                    float treeDist;
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                    {
+                        var treeInstance = this.tree1.GetComponent<ITransformable3D>(i);
+
+                        treeInstance.Manipulator.SetPosition(treePosition);
+                        treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
+                        treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
+                    }
+                }
+
+                for (int i = 0; i < this.tree2.Count; i++)
+                {
+                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+
+                    Vector3 treePosition;
+                    Triangle treeTri;
+                    float treeDist;
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                    {
+                        var treeInstance = this.tree2.GetComponent<ITransformable3D>(i);
+
+                        treeInstance.Manipulator.SetPosition(treePosition);
+                        treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
+                        treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
+                    }
+                }
+            }
+
+            #endregion
+
+            this.lensFlare.Instance.ParentScene = this;
+
+            this.gardener.Instance.ParentScene = this;
+            this.gardener.Instance.SetWind(this.windDirection, this.windStrength);
+
+            this.Lights.ShadowLDDistance = 100f;
+            this.Lights.ShadowHDDistance = 25f;
         }
 
         public override void Initialized()

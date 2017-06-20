@@ -141,12 +141,10 @@ namespace Engine
 
                             if (plant)
                             {
-                                Ray ray = new Ray(pos, Vector3.Down);
-
                                 Vector3 intersectionPoint;
                                 Triangle t;
                                 float d;
-                                if (scene.PickFirst(ref ray, true, out intersectionPoint, out t, out d))
+                                if (scene.FindTopGroundPosition(pos.X, pos.Z, out intersectionPoint, out t, out d))
                                 {
                                     if (t.Normal.Y > 0.5f)
                                     {

@@ -93,7 +93,7 @@ namespace Skybox
 #if DEBUG
             this.help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
 #else
-            this.help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
+            this.help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
 #endif
             this.fps.Instance.Text = null;
 
@@ -455,7 +455,7 @@ namespace Skybox
                 this.Game.Input.MouseY,
                 this.cursor.Instance.CursorPosition);
 #else
-            this.fps.Text = this.Game.RuntimeText;
+            this.fps.Instance.Text = this.Game.RuntimeText;
 #endif
         }
         private void UpdateInputEnabledLights()

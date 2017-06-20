@@ -703,7 +703,7 @@ namespace Engine
             {
                 if( this.DrawingData.VolumeMesh != null)
                 {
-                    return this.DrawingData.VolumeMesh;
+                    return Triangle.Transform(this.DrawingData.VolumeMesh, this.Manipulator.LocalTransform);
                 }
                 else
                 {

@@ -367,10 +367,19 @@ namespace DeferredTest
             };
 
             this.SetGround(this.terrain, true);
+            this.AttachToGround(this.tree, false);
+            this.AttachToGround(this.trees, false);
 
             #region Tree
             {
-                this.AttachToGround(this.tree, 20, -20, Matrix.Scaling(0.5f), false);
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (this.FindTopGroundPosition(20, -20, out p, out t, out d))
+                {
+                    this.tree.Transform.SetPosition(p);
+                    this.tree.Transform.SetScale(0.5f);
+                }
             }
             #endregion
 
