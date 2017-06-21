@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Model description
     /// </summary>
-    public class ModelDescription : SceneObjectDescription
+    public class ModelDescription : ModelBaseDescription
     {
         /// <summary>
         /// Texture index

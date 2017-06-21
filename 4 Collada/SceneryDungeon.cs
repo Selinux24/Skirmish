@@ -26,15 +26,15 @@ namespace Collada
         {
             base.Initialize();
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
             this.title.Instance.Text = "Collada Dungeon Scene";
             this.title.Instance.Position = Vector2.Zero;
 
-            this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
             this.fps.Instance.Text = null;
             this.fps.Instance.Position = new Vector2(0, 24);
 
-            this.picks = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+            this.picks = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
             this.picks.Instance.Text = null;
             this.picks.Instance.Position = new Vector2(0, 48);
 
@@ -46,7 +46,7 @@ namespace Collada
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
 
             this.agent = new Player()
             {
@@ -58,9 +58,7 @@ namespace Collada
                 VelocitySlow = 1f,
             };
 
-            this.dungeon = this.AddScenery(
-                "Resources",
-                "Dungeon.xml",
+            this.dungeon = this.AddComponent<Scenery>(
                 new GroundDescription()
                 {
                     Name = "room1",
@@ -68,7 +66,14 @@ namespace Collada
                     {
                         MaximumDepth = 2,
                     },
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources",
+                        ModelContentFilename = "Dungeon.xml",
+                    },
                 });
+
+            this.SetGround(this.dungeon, true);
 
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
             {

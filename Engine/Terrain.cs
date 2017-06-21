@@ -623,29 +623,28 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="description">Heightmap content</param>
-        /// <param name="groundDescription">Terrain description</param>
-        public Terrain(Game game, BufferManager bufferManager, HeightmapDescription description, GroundDescription groundDescription)
-            : base(game, bufferManager, groundDescription)
+        /// <param name="description">Terrain description</param>
+        public Terrain(Game game, BufferManager bufferManager, GroundDescription description)
+            : base(game, bufferManager, description)
         {
             #region Read heightmap
 
             {
-                string contentPath = description.ContentPath;
+                string contentPath = description.Content.HeightmapDescription.ContentPath;
 
                 ImageContent heightMapImage = new ImageContent()
                 {
-                    Streams = ContentManager.FindContent(contentPath, description.HeightmapFileName),
+                    Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.HeightmapFileName),
                 };
                 ImageContent colorMapImage = new ImageContent()
                 {
-                    Streams = ContentManager.FindContent(contentPath, description.ColormapFileName),
+                    Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.ColormapFileName),
                 };
 
                 this.heightMap = HeightMap.FromStream(heightMapImage.Stream, colorMapImage.Stream);
-                this.heightMapCellSize = description.CellSize;
-                this.heightMapHeight = description.MaximumHeight;
-                this.textureResolution = description.TextureResolution;
+                this.heightMapCellSize = description.Content.HeightmapDescription.CellSize;
+                this.heightMapHeight = description.Content.HeightmapDescription.MaximumHeight;
+                this.textureResolution = description.Content.HeightmapDescription.TextureResolution;
             }
 
             #endregion
@@ -653,59 +652,59 @@ namespace Engine
             #region Read terrain data
 
             {
-                string contentPath = Path.Combine(description.ContentPath, description.Textures.ContentPath);
+                string contentPath = Path.Combine(description.Content.HeightmapDescription.ContentPath, description.Content.HeightmapDescription.Textures.ContentPath);
 
                 this.terrainMaterial = new MeshMaterial()
                 {
-                    Material = description.Material != null ? description.Material.GetMaterial() : Material.Default
+                    Material = description.Content.HeightmapDescription.Material != null ? description.Content.HeightmapDescription.Material.GetMaterial() : Material.Default
                 };
 
                 ImageContent normalMapTextures = new ImageContent()
                 {
-                    Streams = ContentManager.FindContent(contentPath, description.Textures.NormalMaps),
+                    Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.Textures.NormalMaps),
                 };
                 this.terrainNormalMaps = game.ResourceManager.CreateResource(normalMapTextures);
 
                 ImageContent specularMapTextures = new ImageContent()
                 {
-                    Streams = ContentManager.FindContent(contentPath, description.Textures.SpecularMaps),
+                    Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.Textures.SpecularMaps),
                 };
                 this.terrainSpecularMaps = game.ResourceManager.CreateResource(specularMapTextures);
 
-                if (description.Textures.UseSlopes)
+                if (description.Content.HeightmapDescription.Textures.UseSlopes)
                 {
                     ImageContent terrainTexturesLR = new ImageContent()
                     {
-                        Streams = ContentManager.FindContent(contentPath, description.Textures.TexturesLR),
+                        Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.Textures.TexturesLR),
                     };
                     ImageContent terrainTexturesHR = new ImageContent()
                     {
-                        Streams = ContentManager.FindContent(contentPath, description.Textures.TexturesHR),
+                        Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.Textures.TexturesHR),
                     };
 
                     this.terrainTexturesLR = game.ResourceManager.CreateResource(terrainTexturesLR);
                     this.terrainTexturesHR = game.ResourceManager.CreateResource(terrainTexturesHR);
-                    this.slopeRanges = description.Textures.SlopeRanges;
+                    this.slopeRanges = description.Content.HeightmapDescription.Textures.SlopeRanges;
                 }
 
-                if (description.Textures.UseAlphaMapping)
+                if (description.Content.HeightmapDescription.Textures.UseAlphaMapping)
                 {
                     ImageContent colors = new ImageContent()
                     {
-                        Streams = ContentManager.FindContent(contentPath, description.Textures.ColorTextures),
+                        Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.Textures.ColorTextures),
                     };
                     ImageContent alphaMap = new ImageContent()
                     {
-                        Streams = ContentManager.FindContent(contentPath, description.Textures.AlphaMap),
+                        Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.Textures.AlphaMap),
                     };
 
                     this.colorTextures = game.ResourceManager.CreateResource(colors);
                     this.alphaMap = game.ResourceManager.CreateResource(alphaMap);
                 }
 
-                this.useAlphaMap = description.Textures.UseAlphaMapping;
-                this.useSlopes = description.Textures.UseSlopes;
-                this.proportion = description.Textures.Proportion;
+                this.useAlphaMap = description.Content.HeightmapDescription.Textures.UseAlphaMapping;
+                this.useSlopes = description.Content.HeightmapDescription.Textures.UseSlopes;
+                this.proportion = description.Content.HeightmapDescription.Textures.Proportion;
             }
 
             #endregion

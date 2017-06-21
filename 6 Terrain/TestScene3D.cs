@@ -175,8 +175,14 @@ namespace TerrainTest
                 2f,
                 5f));
 
-            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 5000, this.layerEffects);
-
+            {
+                var desc = new LineListDrawerDescription()
+                {
+                    DepthEnabled = true,
+                    Count = 5000,
+                };
+                this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+            }
             #endregion
 
             #region Camera
@@ -188,11 +194,11 @@ namespace TerrainTest
 
             #region Texts
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), this.layerHud);
-            this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), this.layerHud);
-            this.stats = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), this.layerHud);
-            this.counters1 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), this.layerHud);
-            this.counters2 = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), this.layerHud);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, this.layerHud);
+            this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, this.layerHud);
+            this.stats = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, this.layerHud);
+            this.counters1 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsageEnum.UI, this.layerHud);
+            this.counters2 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsageEnum.UI, this.layerHud);
 
             this.title.Instance.Text = "Terrain collision and trajectories test";
             this.load.Instance.Text = "";
@@ -214,7 +220,7 @@ namespace TerrainTest
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddSprite(spDesc, layerHud - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHud - 1);
 
             #endregion
 
@@ -233,8 +239,13 @@ namespace TerrainTest
                 DeferredEnabled = false,
                 CastShadow = false,
                 DepthEnabled = false,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/cursor",
+                    ModelContentFilename = "cursor.xml",
+                }
             };
-            this.cursor3D = this.AddModel("resources/cursor", "cursor.xml", c3DDesc, true, this.layerHud);
+            this.cursor3D = this.AddComponent<Model>(c3DDesc, SceneObjectUsageEnum.UI, this.layerHud);
             sw.Stop();
             loadingText += string.Format("cursor3D: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -251,7 +262,7 @@ namespace TerrainTest
                 Width = 16,
                 Height = 16,
             };
-            this.cursor2D = this.AddCursor(c2DDesc, this.layerHud);
+            this.cursor2D = this.AddComponent<Cursor>(c2DDesc, SceneObjectUsageEnum.UI, this.layerHud);
             this.cursor2D.Instance.Color = Color.Red;
             this.cursor2D.Visible = false;
             sw.Stop();
@@ -283,7 +294,7 @@ namespace TerrainTest
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            this.lensFlare = this.AddLensFlare(lfDesc, this.layerEffects);
+            this.lensFlare = this.AddComponent<LensFlare>(lfDesc, SceneObjectUsageEnum.None, this.layerEffects);
             sw.Stop();
             loadingText += string.Format("lensFlare: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -298,8 +309,13 @@ namespace TerrainTest
                 CastShadow = true,
                 Static = false,
                 TextureIndex = 0,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/Helicopter",
+                    ModelContentFilename = "Helicopter.xml",
+                }
             };
-            this.helicopter = this.AddModel("resources/Helicopter", "Helicopter.xml", hDesc, true, this.layerObjects);
+            this.helicopter = this.AddComponent<Model>(hDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -324,9 +340,14 @@ namespace TerrainTest
                 Name = "Tank",
                 CastShadow = true,
                 Static = false,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/Leopard",
+                    ModelContentFilename = "Leopard.xml",
+                }
             };
-            this.tankP1 = this.AddModel("resources/Leopard", "Leopard.xml", tDesc, true, this.layerObjects);
-            this.tankP2 = this.AddModel("resources/Leopard", "Leopard.xml", tDesc, true, this.layerObjects);
+            this.tankP1 = this.AddComponent<Model>(tDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
+            this.tankP2 = this.AddComponent<Model>(tDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -354,8 +375,13 @@ namespace TerrainTest
                 Name = "Helipod",
                 CastShadow = true,
                 Static = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/Helipod",
+                    ModelContentFilename = "Helipod.xml",
+                }
             };
-            this.helipod = this.AddModel("resources/Helipod", "Helipod.xml", hpDesc, true, this.layerObjects);
+            this.helipod = this.AddComponent<Model>(hpDesc, SceneObjectUsageEnum.None, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("helipod: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -371,8 +397,13 @@ namespace TerrainTest
                 Name = "Garage",
                 CastShadow = true,
                 Static = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/Garage",
+                    ModelContentFilename = "Garage.xml",
+                }
             };
-            this.garage = this.AddModel("resources/Garage", "Garage.xml", gDesc, true, this.layerObjects);
+            this.garage = this.AddComponent<Model>(gDesc, SceneObjectUsageEnum.None, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("garage: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -389,8 +420,13 @@ namespace TerrainTest
                 CastShadow = true,
                 Static = true,
                 Instances = 4,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/Obelisk",
+                    ModelContentFilename = "Obelisk.xml",
+                }
             };
-            this.obelisk = this.AddInstancingModel("resources/Obelisk", "Obelisk.xml", oDesc, true, this.layerObjects);
+            this.obelisk = this.AddComponent<ModelInstanced>(oDesc, SceneObjectUsageEnum.None, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("obelisk: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -405,8 +441,13 @@ namespace TerrainTest
                 CastShadow = true,
                 Static = true,
                 Instances = 250,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/Rocks",
+                    ModelContentFilename = "boulder.xml",
+                }
             };
-            this.rocks = this.AddInstancingModel("resources/Rocks", "boulder.xml", rDesc, true, this.layerObjects);
+            this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsageEnum.None, this.layerObjects);
             sw.Stop();
             loadingText += string.Format("rocks: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -422,6 +463,11 @@ namespace TerrainTest
                 Static = true,
                 AlphaEnabled = true,
                 Instances = 100,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/Trees",
+                    ModelContentFilename = "birch_a.xml",
+                }
             };
             var t2Desc = new ModelInstancedDescription()
             {
@@ -430,9 +476,14 @@ namespace TerrainTest
                 Static = true,
                 AlphaEnabled = true,
                 Instances = 100,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/Trees",
+                    ModelContentFilename = "birch_b.xml",
+                }
             };
-            this.tree1 = this.AddInstancingModel("resources/Trees", "birch_a.xml", t1Desc, true, this.layerTerrain);
-            this.tree2 = this.AddInstancingModel("resources/Trees", "birch_b.xml", t2Desc, true, this.layerTerrain);
+            this.tree1 = this.AddComponent<ModelInstanced>(t1Desc, SceneObjectUsageEnum.None, this.layerTerrain);
+            this.tree2 = this.AddComponent<ModelInstanced>(t2Desc, SceneObjectUsageEnum.None, this.layerTerrain);
             sw.Stop();
             loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
 
@@ -441,7 +492,7 @@ namespace TerrainTest
             #region Skydom
 
             sw.Restart();
-            this.skydom = this.AddSkydom(new SkydomDescription()
+            this.skydom = this.AddComponent<Skydom>(new SkydomDescription()
             {
                 Name = "Skydom",
                 ContentPath = "resources/Skydom",
@@ -456,7 +507,7 @@ namespace TerrainTest
             #region Clouds
 
             sw.Restart();
-            this.clouds = this.AddSkyPlane(new SkyPlaneDescription()
+            this.clouds = this.AddComponent<SkyPlane>(new SkyPlaneDescription()
             {
                 Name = "Clouds",
                 ContentPath = "Resources/clouds",
@@ -486,8 +537,13 @@ namespace TerrainTest
                 },
                 CastShadow = true,
                 Static = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "resources/Terrain",
+                    ModelContentFilename = "two_levels.xml",
+                }
             };
-            this.terrain = this.AddScenery("resources/Terrain", "two_levels.xml", terrainDescription, true, this.layerTerrain);
+            this.terrain = this.AddComponent<Scenery>(terrainDescription, SceneObjectUsageEnum.Ground, this.layerTerrain);
             sw.Stop();
 
             loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
@@ -528,7 +584,7 @@ namespace TerrainTest
                     MaxSize = new Vector2(0.5f, 0.75f),
                 }
             };
-            this.gardener = this.AddGardener(grDesc, this.layerTerrain);
+            this.gardener = this.AddComponent<GroundGardener>(grDesc, SceneObjectUsageEnum.None, this.layerTerrain);
             sw.Stop();
 
             loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
@@ -544,7 +600,7 @@ namespace TerrainTest
             this.pExplosion = ParticleSystemDescription.InitializeExplosion("resources/particles", "fire.png");
             this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources/particles", "smoke.png");
 
-            this.pManager = this.AddParticleManager(new ParticleManagerDescription(), layerEffects);
+            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription(), SceneObjectUsageEnum.None, layerEffects);
 
             #endregion
 
@@ -745,98 +801,119 @@ namespace TerrainTest
             #endregion
 
             #region DEBUG Shadow Map
-
-            int width = 300;
-            int height = 300;
-            int smLeft = this.Game.Form.RenderWidth - width;
-            int smTop = this.Game.Form.RenderHeight - height;
-            var stDescription = new SpriteTextureDescription()
             {
-                Left = smLeft,
-                Top = smTop,
-                Width = width,
-                Height = height,
-                Channel = SpriteTextureChannelsEnum.Red,
-            };
-            this.shadowMapDrawer = this.AddSpriteTexture(stDescription, this.layerHud);
-            this.shadowMapDrawer.Visible = false;
-            this.shadowMapDrawer.DeferredEnabled = false;
+                int width = 300;
+                int height = 300;
+                int smLeft = this.Game.Form.RenderWidth - width;
+                int smTop = this.Game.Form.RenderHeight - height;
+                var stDescription = new SpriteTextureDescription()
+                {
+                    Left = smLeft,
+                    Top = smTop,
+                    Width = width,
+                    Height = height,
+                    Channel = SpriteTextureChannelsEnum.Red,
+                };
+                this.shadowMapDrawer = this.AddComponent<SpriteTexture>(stDescription, SceneObjectUsageEnum.UI, this.layerHud);
+                this.shadowMapDrawer.Visible = false;
+                this.shadowMapDrawer.DeferredEnabled = false;
 
-            this.debugTex = this.Game.ResourceManager.CreateResource(@"Resources\uvtest.png");
-
+                this.debugTex = this.Game.ResourceManager.CreateResource(@"Resources\uvtest.png");
+            }
             #endregion
 
             #region DEBUG Path finding Graph
-
-            this.terrainGraphDrawer = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), MaxGridDrawer, this.layerEffects);
-            this.terrainGraphDrawer.Visible = false;
-
+            {
+                var desc = new TriangleListDrawerDescription() { Count = MaxGridDrawer };
+                this.terrainGraphDrawer = this.AddComponent<TriangleListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.terrainGraphDrawer.Visible = false;
+            }
             #endregion
 
             #region DEBUG Ground position test
-
-            BoundingBox bbox = this.terrain.Geometry.GetBoundingBox();
-
-            float sep = 2.1f;
-            for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
             {
-                for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
+                BoundingBox bbox = this.terrain.Geometry.GetBoundingBox();
+
+                float sep = 2.1f;
+                for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
                 {
-                    Vector3 pos;
-                    Triangle tri;
-                    float dist;
-                    if (this.FindTopGroundPosition(x, z, out pos, out tri, out dist))
+                    for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
                     {
-                        this.oks.Add(new Line3D(pos, pos + Vector3.Up));
-                    }
-                    else
-                    {
-                        this.errs.Add(new Line3D(x, 10, z, x, -10, z));
+                        Vector3 pos;
+                        Triangle tri;
+                        float dist;
+                        if (this.FindTopGroundPosition(x, z, out pos, out tri, out dist))
+                        {
+                            this.oks.Add(new Line3D(pos, pos + Vector3.Up));
+                        }
+                        else
+                        {
+                            this.errs.Add(new Line3D(x, 10, z, x, -10, z));
+                        }
                     }
                 }
-            }
 
-            this.terrainLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), oks.Count + errs.Count, this.layerEffects);
-            this.terrainLineDrawer.Visible = false;
+                var desc = new LineListDrawerDescription()
+                {
+                    Count = oks.Count + errs.Count
+                };
+                this.terrainLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.terrainLineDrawer.Visible = false;
 
-            if (this.oks.Count > 0)
-            {
-                this.terrainLineDrawer.Instance.AddLines(Color.Green, this.oks.ToArray());
+                if (this.oks.Count > 0)
+                {
+                    this.terrainLineDrawer.Instance.AddLines(Color.Green, this.oks.ToArray());
+                }
+                if (this.errs.Count > 0)
+                {
+                    this.terrainLineDrawer.Instance.AddLines(Color.Red, this.errs.ToArray());
+                }
             }
-            if (this.errs.Count > 0)
-            {
-                this.terrainLineDrawer.Instance.AddLines(Color.Red, this.errs.ToArray());
-            }
-
             #endregion
 
             #region DEBUG Picking test
-
-            this.terrainPointDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), MaxPickingTest, this.layerEffects);
-            this.terrainPointDrawer.Visible = false;
-
+            {
+                var desc = new LineListDrawerDescription()
+                {
+                    Count = MaxPickingTest
+                };
+                this.terrainPointDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.terrainPointDrawer.Visible = false;
+            }
             #endregion
 
             #region DEBUG Helicopter manipulator
-
-            this.movingObjLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 1000, this.layerEffects);
-            this.movingObjLineDrawer.Visible = false;
-
+            {
+                var desc = new LineListDrawerDescription()
+                {
+                    Count = 1000
+                };
+                this.movingObjLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.movingObjLineDrawer.Visible = false;
+            }
             #endregion
 
             #region DEBUG Trajectory
-
-            this.curveLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 20000, this.layerEffects);
-            this.curveLineDrawer.Visible = false;
-            this.curveLineDrawer.Instance.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
-
+            {
+                var desc = new LineListDrawerDescription()
+                {
+                    Count = 20000
+                };
+                this.curveLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.curveLineDrawer.Visible = false;
+                this.curveLineDrawer.Instance.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
+            }
             #endregion
 
             #region DEBUG static volumes
-
-            this.staticObjLineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 20000, layerEffects);
-            this.staticObjLineDrawer.Visible = false;
-
+            {
+                var desc = new LineListDrawerDescription()
+                {
+                    Count = 20000
+                };
+                this.staticObjLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);
+                this.staticObjLineDrawer.Visible = false;
+            }
             #endregion
 
             this.Camera.Goto(this.helicopter.Transform.Position + Vector3.One * 25f);
@@ -897,9 +974,9 @@ namespace TerrainTest
             this.tankP2Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP2, tStatus);
             this.helicopterAgent = new FlyerAIAgent(this.agentManager, null, this.helicopter, hStatus);
 
-            this.AddComponent(this.tankP1Agent, new SceneObjectDescription() { });
-            this.AddComponent(this.tankP2Agent, new SceneObjectDescription() { });
-            this.AddComponent(this.helicopterAgent, new SceneObjectDescription() { });
+            this.AddComponent(this.tankP1Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.Agent);
+            this.AddComponent(this.tankP2Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.Agent);
+            this.AddComponent(this.helicopterAgent, new SceneObjectDescription() { }, SceneObjectUsageEnum.Agent);
 
             this.tankP1Agent.Moving += Agent_Moving;
             this.tankP1Agent.Attacking += Agent_Attacking;

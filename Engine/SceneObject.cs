@@ -186,6 +186,10 @@ namespace Engine
         /// Scene agent
         /// </summary>
         Agent = 0x8,
+        /// <summary>
+        /// User interface
+        /// </summary>
+        UI = 0x16,
     }
 
     /// <summary>

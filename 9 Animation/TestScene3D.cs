@@ -17,9 +17,9 @@ namespace AnimationTest
         private SceneObject<TextDrawer> runtime = null;
         private SceneObject<TextDrawer> animText = null;
         private SceneObject<Sprite> backPannel = null;
-                
+
         private SceneObject<Model> floor = null;
-                
+
         private SceneObject<Model> soldier = null;
         private Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
         private SceneObject<TriangleListDrawer> soldierTris = null;
@@ -47,9 +47,9 @@ namespace AnimationTest
 
             #region Texts
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
-            this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), layerHUD);
-            this.animText = this.AddText(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
+            this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.animText = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsageEnum.UI, layerHUD);
 
             this.title.Instance.Text = "Animation test";
             this.runtime.Instance.Text = "";
@@ -67,7 +67,7 @@ namespace AnimationTest
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
 
             #endregion
 
@@ -75,13 +75,16 @@ namespace AnimationTest
 
             #region Soldier
 
-            this.soldier = this.AddModel(
-                @"Resources/Soldier",
-                @"soldier_anim2.xml",
+            this.soldier = this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     TextureIndex = 1,
                     CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Soldier",
+                        ModelContentFilename = "soldier_anim2.xml",
+                    }
                 });
 
             #endregion
@@ -120,9 +123,13 @@ namespace AnimationTest
                     DeferredEnabled = true,
                     DepthEnabled = true,
                     AlphaEnabled = false,
+                    Content = new ContentDescription()
+                    {
+                        ModelContent = content,
+                    }
                 };
 
-                this.floor = this.AddModel(content, desc);
+                this.floor = this.AddComponent<Model>(desc);
             }
 
             #endregion
@@ -223,7 +230,7 @@ namespace AnimationTest
 
                 if (this.soldierTris == null)
                 {
-                    this.soldierTris = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), tris, color);
+                    this.soldierTris = this.AddComponent<TriangleListDrawer>(new TriangleListDrawerDescription() { Triangles = tris, Color = color });
                 }
                 else
                 {
@@ -232,7 +239,7 @@ namespace AnimationTest
 
                 if (this.soldierLines == null)
                 {
-                    this.soldierLines = this.AddLineListDrawer(new LineListDrawerDescription(), Line3D.CreateWiredBox(bbox), color);
+                    this.soldierLines = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { Lines = Line3D.CreateWiredBox(bbox), Color = color });
                 }
                 else
                 {

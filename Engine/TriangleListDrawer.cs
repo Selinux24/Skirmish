@@ -36,29 +36,25 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
-        /// <param name="count">Maximum triangle count</param>
-        public TriangleListDrawer(Game game, BufferManager bufferManager, TriangleListDrawerDescription description, int count)
-            : base(game, bufferManager)
+        public TriangleListDrawer(Game game, BufferManager bufferManager, TriangleListDrawerDescription description)
+            : base(game, bufferManager, description)
         {
-            this.dictionaryChanged = false;
+            int count = 0;
+            if (description.Triangles != null && description.Triangles.Length > 0)
+            {
+                count = description.Triangles.Length * 3;
 
-            this.InitializeBuffers(description.Name, count * 3);
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="description">Description</param>
-        /// <param name="triangles">Triangle list</param>
-        /// <param name="color">Color</param>
-        public TriangleListDrawer(Game game, BufferManager bufferManager, TriangleListDrawerDescription description, IEnumerable<Triangle> triangles, Color4 color)
-            : base(game, bufferManager)
-        {
-            this.dictionary.Add(color, new List<Triangle>(triangles));
-            this.dictionaryChanged = true;
+                this.dictionary.Add(description.Color, new List<Triangle>(description.Triangles));
+                this.dictionaryChanged = true;
+            }
+            else
+            {
+                count = description.Count * 3;
 
-            this.InitializeBuffers(description.Name, triangles.Count() * 3);
+                this.dictionaryChanged = false;
+            }
+
+            this.InitializeBuffers(description.Name, count);
         }
         /// <summary>
         /// Internal resources disposition

@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Engine
 {
@@ -250,11 +251,38 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        /// <param name="content">Geometry content</param>
         /// <param name="description">Terrain description</param>
-        public Scenery(Game game, BufferManager bufferManager, ModelContent content, GroundDescription description)
+        public Scenery(Game game, BufferManager bufferManager, GroundDescription description)
             : base(game, bufferManager, description)
         {
+            ModelContent content = null;
+
+            if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
+            {
+                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
+
+                var t = LoaderCOLLADA.Load(description.Content.ContentFolder, contentDesc);
+                content = t[0];
+            }
+            else if(description.Content.ModelContentDescription != null)
+            {
+                var t = LoaderCOLLADA.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
+                content = t[0];
+            }
+            else if (description.Content.HeightmapDescription != null)
+            {
+                content = ModelContent.FromHeightmap(
+                    description.Content.HeightmapDescription.ContentPath,
+                    description.Content.HeightmapDescription.HeightmapFileName,
+                    description.Content.HeightmapDescription.Textures.TexturesLR,
+                    description.Content.HeightmapDescription.CellSize,
+                    description.Content.HeightmapDescription.MaximumHeight);
+            }
+            else if (description.Content.ModelContent != null)
+            {
+                content = description.Content.ModelContent;
+            }
+
             #region Patches
 
             this.groundPickingQuadtree = new PickingQuadTree<Triangle>(content.GetTriangles(), description.Quadtree.MaximumDepth);

@@ -1,5 +1,8 @@
-﻿namespace Engine
+﻿
+namespace Engine
 {
+    using Engine.Content;
+
     /// <summary>
     /// Ground description
     /// </summary>
@@ -24,6 +27,12 @@
             }
         }
 
+        
+
+        /// <summary>
+        /// Content
+        /// </summary>
+        public ContentDescription Content = new ContentDescription();
         /// <summary>
         /// Quadtree
         /// </summary>
@@ -41,5 +50,18 @@
             this.DepthEnabled = true;
             this.AlphaEnabled = false;
         }
+    }
+
+    public class ContentDescription
+    {
+        public string ContentFolder;
+
+        public string ModelContentFilename;
+
+        public ModelContent ModelContent;
+
+        public ModelContentDescription ModelContentDescription;
+
+        public HeightmapDescription HeightmapDescription;
     }
 }

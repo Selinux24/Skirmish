@@ -95,7 +95,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Sky plane description class</param>
         public SkyPlane(Game game, BufferManager bufferManager, SkyPlaneDescription description)
-            : base(game, bufferManager)
+            : base(game, bufferManager, description)
         {
             var img1 = new ImageContent()
             {

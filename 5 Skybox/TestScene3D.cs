@@ -79,15 +79,15 @@ namespace Skybox
                 Height = 16,
             };
 
-            this.cursor = this.AddCursor(cursorDesc);
+            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI);
 
             #endregion
 
             #region Text
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
-            this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
-            this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
+            this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
 
             this.title.Instance.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -109,13 +109,13 @@ namespace Skybox
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
 
             #endregion
 
             #region Skydom
 
-            this.skydom = this.AddSkydom(new SkydomDescription()
+            this.skydom = this.AddComponent<Skydom>(new SkydomDescription()
             {
                 Name = "Skydom",
                 ContentPath = "Resources",
@@ -127,14 +127,17 @@ namespace Skybox
 
             #region Torchs
 
-            this.torchs = this.AddInstancingModel(
-                "Resources",
-                "torch.xml",
+            this.torchs = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Torchs",
                     Instances = this.firePositions.Length,
                     CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources",
+                        ModelContentFilename = "torch.xml",
+                    }
                 });
 
             #endregion
@@ -145,18 +148,22 @@ namespace Skybox
             {
                 Name = "Terrain",
                 CastShadow = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "Resources",
+                    ModelContentFilename = "ruins.xml",
+                }
             };
-            this.ruins = this.AddScenery(
-                "Resources",
-                "ruins.xml",
-                desc,
-                false);
+            this.ruins = this.AddComponent<Scenery>(desc);
 
             #endregion
 
+            this.SetGround(this.ruins, true);
+            this.AttachToGround(this.torchs, true);
+
             #region Particle Systems
 
-            this.pManager = this.AddParticleManager(new ParticleManagerDescription() { Name = "Particle Systems" });
+            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" });
 
             this.pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
             this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
@@ -196,9 +203,13 @@ namespace Skybox
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 AlphaEnabled = false,
+                Content = new ContentDescription()
+                {
+                    ModelContent = content,
+                }
             };
 
-            this.movingFire = this.AddModel(content, mFireDesc);
+            this.movingFire = this.AddComponent<Model>(mFireDesc);
 
             this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
@@ -208,10 +219,10 @@ namespace Skybox
 
             #region DEBUG drawers
 
-            this.volumesDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 10000);
+            this.volumesDrawer = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { Count = 10000 });
             this.volumesDrawer.Visible = false;
 
-            this.graphDrawer = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), 10000);
+            this.graphDrawer = this.AddComponent<TriangleListDrawer>(new TriangleListDrawerDescription() { Count = 10000 });
             this.graphDrawer.Visible = false;
 
             #endregion

@@ -32,7 +32,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Ground description</param>
         public Ground(Game game, BufferManager bufferManager, GroundDescription description)
-            : base(game, bufferManager)
+            : base(game, bufferManager, description)
         {
             this.Description = description;
         }

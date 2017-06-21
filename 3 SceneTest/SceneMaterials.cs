@@ -50,8 +50,8 @@ namespace SceneTest
 
         private void InitializeTextBoxes()
         {
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), layerHUD);
-            this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsageEnum.UI, layerHUD);
+            this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsageEnum.UI, layerHUD);
 
             this.title.Instance.Text = "Scene Test - Materials";
             this.runtime.Instance.Text = "";
@@ -67,11 +67,11 @@ namespace SceneTest
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
         }
         private void InitializeSkyEffects()
         {
-            this.lensFlare = this.AddLensFlare(new LensFlareDescription()
+            this.lensFlare = this.AddComponent<LensFlare>(new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
@@ -133,9 +133,13 @@ namespace SceneTest
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 AlphaEnabled = false,
+                Content = new ContentDescription()
+                {
+                    ModelContent = content,
+                }
             };
 
-            this.floor = this.AddModel(content, desc);
+            this.floor = this.AddComponent<Model>(desc);
         }
         private SceneObject<Model> InitializeSphere(MaterialContent material)
         {
@@ -162,9 +166,13 @@ namespace SceneTest
             {
                 Static = true,
                 CastShadow = true,
+                Content = new ContentDescription()
+                {
+                    ModelContent = content,
+                }
             };
 
-            return this.AddModel(content, desc);
+            return this.AddComponent<Model>(desc);
         }
         private MaterialContent GenerateMaterial(Color4 diffuse, Color4 specular, float shininess)
         {
@@ -192,7 +200,7 @@ namespace SceneTest
                         float f = 1f / (float)n * 4f;
 
                         var diffuse = new Color4(r / 256f, g / 256f, b / 256f, 1);
-                        var specular = new Color4(r / 256f * specularFactor, g / 256f* specularFactor, b / 256f* specularFactor, 1);
+                        var specular = new Color4(r / 256f * specularFactor, g / 256f * specularFactor, b / 256f * specularFactor, 1);
 
                         var material = this.GenerateMaterial(diffuse, specular, shininess);
                         var model = this.InitializeSphere(material);

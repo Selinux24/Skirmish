@@ -33,6 +33,10 @@ namespace Engine
         /// Fit screen
         /// </summary>
         public bool FitScreen;
+        /// <summary>
+        /// Centered
+        /// </summary>
+        public bool Centered = true;
 
         /// <summary>
         /// Constructor

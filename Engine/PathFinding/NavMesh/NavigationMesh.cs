@@ -123,6 +123,11 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Retusn a bounding box</returns>
         private static BoundingBox ComputeBoundingBox(Triangle[] triangles)
         {
+            if(triangles == null || triangles.Length == 0)
+            {
+                return new BoundingBox();
+            }
+
             var bbox = BoundingBox.FromPoints(triangles[0].GetVertices());
 
             Array.ForEach(triangles, tri =>

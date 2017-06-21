@@ -182,7 +182,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Text description</param>
         public TextDrawer(Game game, BufferManager bufferManager, TextDrawerDescription description)
-            : base(game, bufferManager)
+            : base(game, bufferManager, description)
         {
             this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
 

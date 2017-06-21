@@ -5,7 +5,6 @@ using System.Collections.Generic;
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Content;
     using Engine.Effects;
 
     /// <summary>
@@ -67,29 +66,9 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game class</param>
         /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="content">Content</param>
         /// <param name="description">Description</param>
-        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelInstanced(Game game, BufferManager bufferManager, ModelContent content, ModelInstancedDescription description, bool dynamic = false)
-            : base(game, bufferManager, content, true, description.Instances, true, true, dynamic)
-        {
-            if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
-
-            this.instanceCount = description.Instances;
-
-            this.instances = Helper.CreateArray(this.instanceCount, () => new ModelInstance(this));
-            this.instancingData = new VertexInstancingData[this.instanceCount];
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game class</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="content">Content</param>
-        /// <param name="description">Description</param>
-        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelInstanced(Game game, BufferManager bufferManager, LODModelContent content, ModelInstancedDescription description, bool dynamic = false)
-            : base(game, bufferManager, content, true, description.Instances, true, true, dynamic)
+        public ModelInstanced(Game game, BufferManager bufferManager, ModelInstancedDescription description)
+            : base(game, bufferManager, description)
         {
             if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 

@@ -31,7 +31,8 @@ namespace Engine.Common
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="bufferManager">Buffer manager</param>
-        public Drawable(Game game, BufferManager bufferManager)
+        /// <param name="description">Description</param>
+        public Drawable(Game game, BufferManager bufferManager, SceneObjectDescription description)
         {
             this.Game = game;
             this.BufferManager = bufferManager;

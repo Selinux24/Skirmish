@@ -159,6 +159,7 @@
     <Compile Include="Common\IndexBufferShapeEnum.cs" />
     <Compile Include="Common\Intersection.cs" />
     <Compile Include="Common\ManipulatorController.cs" />
+    <Compile Include="Common\ModelBaseDescription.cs" />
     <Compile Include="Common\UpdateContext.cs" />
     <Compile Include="Common\UseMaterials.cs" />
     <Compile Include="Common\UseSkinningData.cs" />

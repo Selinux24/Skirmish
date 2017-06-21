@@ -109,33 +109,9 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game class</param>
         /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="content">Content</param>
         /// <param name="description">Description</param>
-        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public Model(Game game, BufferManager bufferManager, ModelContent content, ModelDescription description, bool dynamic = false)
-            : base(game, bufferManager, content, false, 0, true, true, dynamic)
-        {
-            this.TextureIndex = description.TextureIndex;
-
-            this.Manipulator = new Manipulator3D();
-            this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
-
-            var drawData = this.GetDrawingData(LevelOfDetailEnum.High);
-            if (drawData != null)
-            {
-                this.Lights = drawData.Lights;
-            }
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game class</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="content">Content</param>
-        /// <param name="description">Description</param>
-        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public Model(Game game, BufferManager bufferManager, LODModelContent content, ModelDescription description, bool dynamic = false)
-            : base(game, bufferManager, content, false, 0, true, true, dynamic)
+        public Model(Game game, BufferManager bufferManager, ModelDescription description)
+            : base(game, bufferManager, description)
         {
             this.TextureIndex = description.TextureIndex;
 

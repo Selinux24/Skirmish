@@ -54,15 +54,15 @@ namespace Collada
         }
         private void InitializeText()
         {
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
             this.title.Instance.Text = "Tiled Wall Test Scene";
             this.title.Instance.Position = Vector2.Zero;
 
-            this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
             this.fps.Instance.Text = null;
             this.fps.Instance.Position = new Vector2(0, 24);
 
-            this.picks = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+            this.picks = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
             this.picks.Instance.Text = null;
             this.picks.Instance.Position = new Vector2(0, 48);
 
@@ -74,17 +74,21 @@ namespace Collada
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
         }
         private void InitializeDungeon()
         {
-            this.wall = this.AddInstancingModel("Resources",
-                "wall.xml",
+            this.wall = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "wall",
                     Instances = 7,
                     CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources",
+                        ModelContentFilename = "wall.xml",
+                    }
                 });
 
             BoundingBox bbox = this.wall.Instance[0].GetBoundingBox();
@@ -132,9 +136,13 @@ namespace Collada
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 AlphaEnabled = false,
+                Content = new ContentDescription()
+                {
+                    ModelContent = content,
+                }
             };
 
-            this.lightEmitter = this.AddModel(content, desc);
+            this.lightEmitter = this.AddComponent<Model>(desc);
         }
 
         public override void Update(GameTime gameTime)

@@ -42,7 +42,12 @@ namespace SceneTest
             this.InitializeEmitter();
             this.InitializeLights();
 
-            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 5000);
+            var desc = new LineListDrawerDescription()
+            {
+                DepthEnabled = true,
+                Count = 5000
+            };
+            this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
         }
 
         private void InitializeFloorAsphalt()
@@ -79,20 +84,27 @@ namespace SceneTest
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 AlphaEnabled = false,
+                Content = new ContentDescription()
+                {
+                    ModelContent = content
+                }
             };
 
-            this.floorAsphalt = this.AddModel(content, desc);
+            this.floorAsphalt = this.AddComponent<Model>(desc);
         }
         private void InitializeBuildingObelisk()
         {
-            this.buildingObelisk = this.AddModel(
-                "SceneStencilPass/buildings/obelisk",
-                "Obelisk.xml",
+            this.buildingObelisk = this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     Name = "Obelisk",
                     CastShadow = true,
                     Static = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneStencilPass/buildings/obelisk",
+                        ModelContentFilename = "Obelisk.xml",
+                    }
                 });
 
             this.buildingObelisk.Transform.SetPosition(0, 0, 0);
@@ -129,10 +141,14 @@ namespace SceneTest
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 AlphaEnabled = false,
+                Content = new ContentDescription()
+                {
+                    ModelContent = content,
+                }
             };
 
-            this.lightEmitter1 = this.AddModel(content, desc);
-            this.lightEmitter2 = this.AddModel(content, desc);
+            this.lightEmitter1 = this.AddComponent<Model>(desc);
+            this.lightEmitter2 = this.AddComponent<Model>(desc);
         }
         private void InitializeLights()
         {

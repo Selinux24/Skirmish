@@ -45,7 +45,7 @@ namespace Engine
         /// <param name="content">Content</param>
         /// <param name="description">Description</param>
         public Cubemap(Game game, BufferManager bufferManager, CubemapDescription description)
-            : base(game, bufferManager)
+            : base(game, bufferManager, description)
         {
             this.Manipulator = new Manipulator3D();
 

@@ -11,7 +11,7 @@ namespace Collada
         private SceneObject<TextDrawer> fps = null;
         private SceneObject<TextDrawer> picks = null;
         private SceneObject<Sprite> backPannel = null;
-                
+
         private SceneObject<ModelInstanced> room1 = null;
         private SceneObject<ModelInstanced> room2 = null;
         private SceneObject<ModelInstanced> corridor1 = null;
@@ -26,15 +26,15 @@ namespace Collada
         {
             base.Initialize();
 
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
             this.title.Instance.Text = "Collada Dungeon Scene";
             this.title.Instance.Position = Vector2.Zero;
 
-            this.fps = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
             this.fps.Instance.Text = null;
             this.fps.Instance.Position = new Vector2(0, 24);
 
-            this.picks = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
+            this.picks = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
             this.picks.Instance.Text = null;
             this.picks.Instance.Position = new Vector2(0, 48);
 
@@ -46,33 +46,45 @@ namespace Collada
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
 
-            this.room1 = this.AddInstancingModel("Resources",
-                "Room1.xml",
+            this.room1 = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "room1",
                     Instances = 2,
                     CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources",
+                        ModelContentFilename = "Room1.xml",
+                    }
                 });
 
-            this.room2 = this.AddInstancingModel("Resources",
-                "Room2.xml",
+            this.room2 = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "room2",
                     Instances = 6,
                     CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources",
+                        ModelContentFilename = "Room2.xml",
+                    }
                 });
 
-            this.corridor1 = this.AddInstancingModel("Resources",
-                "Corridor1.xml",
+            this.corridor1 = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "corridor1",
                     Instances = 8,
                     CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources",
+                        ModelContentFilename = "Corridor1.xml",
+                    }
                 });
 
             this.InitializeDungeon();

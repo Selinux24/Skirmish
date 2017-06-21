@@ -43,7 +43,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
         public LensFlare(Game game, BufferManager bufferManager, LensFlareDescription description)
-            : base(game, bufferManager)
+            : base(game, bufferManager, description)
         {
             this.glowSprite = new Sprite(game, bufferManager, new SpriteDescription()
             {

@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine
 {
     /// <summary>
@@ -6,6 +7,19 @@ namespace Engine
     /// </summary>
     public class TriangleListDrawerDescription : ModelDescription
     {
+        /// <summary>
+        /// Maximum triangle count
+        /// </summary>
+        public int Count;
+        /// <summary>
+        /// Initial triangles
+        /// </summary>
+        public Triangle[] Triangles;
+        /// <summary>
+        /// Initial color
+        /// </summary>
+        public Color4 Color;
+
         /// <summary>
         /// Constructor
         /// </summary>

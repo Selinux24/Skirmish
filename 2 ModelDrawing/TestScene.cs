@@ -53,10 +53,10 @@ namespace ModelDrawing
         }
         private void InitializeTexts()
         {
-            this.text = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed }, layerHUD);
-            this.statistics = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, layerHUD);
-            this.text1 = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, layerHUD);
-            this.text2 = this.AddText(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, layerHUD);
+            this.text = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed }, SceneObjectUsageEnum.UI, layerHUD);
+            this.statistics = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsageEnum.UI, layerHUD);
+            this.text1 = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsageEnum.UI, layerHUD);
+            this.text2 = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsageEnum.UI, layerHUD);
 
             this.text.Instance.Position = Vector2.One;
             this.statistics.Instance.Position = Vector2.One;
@@ -75,7 +75,7 @@ namespace ModelDrawing
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
         }
         private void InitializeFloor()
         {
@@ -101,7 +101,15 @@ namespace ModelDrawing
 
             var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, material);
 
-            this.floor = this.AddModel(content, new ModelDescription() { });
+            var desc = new ModelDescription()
+            {
+                Content = new ContentDescription()
+                {
+                    ModelContent = content,
+                }
+            };
+
+            this.floor = this.AddComponent<Model>(desc, SceneObjectUsageEnum.Ground);
         }
         private void InitializeModels()
         {
@@ -112,7 +120,7 @@ namespace ModelDrawing
             this.pExplosion = ParticleSystemDescription.InitializeExplosion("resources", "fire.png");
             this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources", "smoke.png");
 
-            this.pManager = this.AddParticleManager(new ParticleManagerDescription());
+            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription());
         }
 
         public override void Update(GameTime gameTime)

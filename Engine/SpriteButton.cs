@@ -122,7 +122,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Button description</param>
         public SpriteButton(Game game, BufferManager bufferManager, SpriteButtonDescription description)
-            : base(game, bufferManager)
+            : base(game, bufferManager, description)
         {
             this.button = new Sprite(
                 game,

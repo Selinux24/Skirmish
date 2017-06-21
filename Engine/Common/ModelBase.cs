@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Engine.Common
 {
@@ -89,63 +91,64 @@ namespace Engine.Common
         /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
         /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
         /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelBase(Game game, BufferManager bufferManager, ModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
-            : base(game, bufferManager)
+        public ModelBase(Game game, BufferManager bufferManager, ModelBaseDescription description)
+            : base(game, bufferManager, description)
         {
             var desc = new DrawingDataDescription()
             {
-                Instanced = instanced,
-                Instances = instances,
-                LoadAnimation = loadAnimation,
-                LoadNormalMaps = loadNormalMaps,
+                Instanced = description.Instanced,
+                Instances = description.Instances,
+                LoadAnimation = description.LoadAnimation,
+                LoadNormalMaps = description.LoadNormalMaps,
                 TextureCount = this.TextureCount,
-                DynamicBuffers = dynamic,
+                DynamicBuffers = description.Dynamic,
             };
 
-            var drawable = DrawingData.Build(game, this.BufferManager, content, desc);
+            ModelContent[] geo = null;
 
-            this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
-
-            this.LevelOfDetail = LevelOfDetailEnum.None;
-        }
-        /// <summary>
-        /// Base model
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="content">Model content</param>
-        /// <param name="description">Description</param>
-        /// <param name="instanced">Is instanced</param>
-        /// <param name="instances">Instance count</param>
-        /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
-        /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
-        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelBase(Game game, BufferManager bufferManager, LODModelContent content, bool instanced = false, int instances = 0, bool loadAnimation = true, bool loadNormalMaps = true, bool dynamic = false)
-            : base(game, bufferManager)
-        {
-            var desc = new DrawingDataDescription()
+            if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
-                Instanced = instanced,
-                Instances = instances,
-                LoadAnimation = loadAnimation,
-                LoadNormalMaps = loadNormalMaps,
-                TextureCount = this.TextureCount,
-                DynamicBuffers = dynamic,
-            };
+                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
 
-            foreach (var lod in content.Keys)
+                geo = LoaderCOLLADA.Load(description.Content.ContentFolder, contentDesc);
+            }
+            else if (description.Content.ModelContentDescription != null)
             {
-                if (this.defaultLevelOfDetail == LevelOfDetailEnum.None)
-                {
-                    this.defaultLevelOfDetail = lod;
-                }
-
-                var drawable = DrawingData.Build(game, this.BufferManager, content[lod], desc);
-
-                this.meshesByLOD.Add(lod, drawable);
+                geo = LoaderCOLLADA.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
+            }
+            else if (description.Content.ModelContent != null)
+            {
+                geo = new[] { description.Content.ModelContent };
             }
 
-            this.LevelOfDetail = this.defaultLevelOfDetail;
+            if (geo.Length == 1)
+            {
+                if (description.Optimize) geo[0].Optimize();
+
+                var drawable = DrawingData.Build(game, this.BufferManager, geo[0], desc);
+
+                this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
+
+                this.LevelOfDetail = LevelOfDetailEnum.None;
+            }
+            else
+            {
+                var content = new LODModelContent(geo, description.Optimize);
+
+                foreach (var lod in content.Keys)
+                {
+                    if (this.defaultLevelOfDetail == LevelOfDetailEnum.None)
+                    {
+                        this.defaultLevelOfDetail = lod;
+                    }
+
+                    var drawable = DrawingData.Build(game, this.BufferManager, content[lod], desc);
+
+                    this.meshesByLOD.Add(lod, drawable);
+                }
+
+                this.LevelOfDetail = this.defaultLevelOfDetail;
+            }
         }
         /// <summary>
         /// Dispose model buffers

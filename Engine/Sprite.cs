@@ -171,7 +171,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
         public Sprite(Game game, BufferManager bufferManager, SpriteDescription description)
-            : base(game, bufferManager)
+            : base(game, bufferManager, description)
         {
             this.Textured = description.Textures != null && description.Textures.Length > 0;
 

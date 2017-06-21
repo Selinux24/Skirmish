@@ -50,7 +50,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Minimap description</param>
         public Minimap(Game game, BufferManager bufferManager, MinimapDescription description)
-            : base(game, bufferManager)
+            : base(game, bufferManager, description)
         {
             this.Drawables = description.Drawables;
 

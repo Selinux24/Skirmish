@@ -35,47 +35,35 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Component description</param>
-        /// <param name="count">Maximum line count</param>
-        public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description, int count)
-            : base(game, bufferManager)
+        public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description)
+            : base(game, bufferManager, description)
         {
-            this.dictionaryChanged = false;
+            int count = 0;
 
-            this.InitializeBuffers(description.Name, count * 2);
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="description">Component description</param>
-        /// <param name="lines">Line list</param>
-        /// <param name="color">Color</param>
-        public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description, Line3D[] lines, Color4 color)
-            : base(game, bufferManager)
-        {
-            this.dictionary.Add(color, new List<Line3D>(lines));
-            this.dictionaryChanged = true;
+            if (description.Triangles != null && description.Triangles.Length > 0)
+            {
+                var lines = Line3D.CreateWiredTriangle(description.Triangles);
 
-            this.InitializeBuffers(description.Name, lines.Length * 2);
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="description">Component description</param>
-        /// <param name="triangles">Triangle list</param>
-        /// <param name="color">Color</param>
-        public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description, Triangle[] triangles, Color4 color)
-            : base(game, bufferManager)
-        {
-            var lines = Line3D.CreateWiredTriangle(triangles);
+                count = description.Lines.Length * 2;
 
-            this.dictionary.Add(color, new List<Line3D>(lines));
-            this.dictionaryChanged = true;
+                this.dictionary.Add(description.Color, new List<Line3D>(lines));
+                this.dictionaryChanged = true;
+            }
+            else if (description.Lines != null && description.Lines.Length > 0)
+            {
+                count = description.Lines.Length * 2;
 
-            this.InitializeBuffers(description.Name, lines.Length * 2);
+                this.dictionary.Add(description.Color, new List<Line3D>(description.Lines));
+                this.dictionaryChanged = true;
+            }
+            else
+            {
+                count = description.Count * 2;
+
+                this.dictionaryChanged = false;
+            }
+
+            this.InitializeBuffers(description.Name, count);
         }
         /// <summary>
         /// Internal resources disposition

@@ -28,7 +28,7 @@ namespace SpriteDrawing
                 Height = 128,
                 FitScreen = true,
             };
-            this.spriteMov = this.AddSprite(spriteMovDesc, 3);
+            this.spriteMov = this.AddComponent<Sprite>(spriteMovDesc, SceneObjectUsageEnum.None, 3);
 
             SpriteDescription spriteFixedDesc = new SpriteDescription()
             {
@@ -38,14 +38,14 @@ namespace SpriteDrawing
                 Height = 256,
                 FitScreen = true,
             };
-            this.spriteFixed = this.AddSprite(spriteFixedDesc, 2);
+            this.spriteFixed = this.AddComponent<Sprite>(spriteFixedDesc, SceneObjectUsageEnum.None, 2);
 
             SpriteBackgroundDescription bkDescription = new SpriteBackgroundDescription()
             {
                 ContentPath = "Resources",
                 Textures = new[] { "background.jpg" },
             };
-            this.background = this.AddBackgroud(bkDescription, 1);
+            this.background = this.AddComponent<Sprite>(bkDescription, SceneObjectUsageEnum.None, 1);
 
             this.spriteMov.ScreenTransform.SetPosition(256, 0);
         }

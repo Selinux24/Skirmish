@@ -72,15 +72,16 @@ namespace SceneTest
             this.InitializeLamps();
             this.InitializeStreetLamps();
 
-            this.lightsVolumeDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 10000);
+            var desc = new LineListDrawerDescription() { DepthEnabled = true, Count = 10000 };
+            this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(6, 30, 00), 0.0001f);
         }
 
         private void InitializeTextBoxes()
         {
-            this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), layerHUD);
-            this.runtime = this.AddText(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsageEnum.UI, layerHUD);
+            this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsageEnum.UI, layerHUD);
 
             this.title.Instance.Text = "Scene Test - Textures";
             this.runtime.Instance.Text = "";
@@ -96,11 +97,11 @@ namespace SceneTest
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
         }
         private void InitializeSkyEffects()
         {
-            this.lensFlare = this.AddLensFlare(new LensFlareDescription()
+            this.lensFlare = this.AddComponent<LensFlare>(new LensFlareDescription()
             {
                 Name = "Flares",
                 ContentPath = @"Common/lensFlare",
@@ -122,9 +123,9 @@ namespace SceneTest
                 }
             });
 
-            this.sky = this.AddSkyScattering(new SkyScatteringDescription() { Name = "Sky" });
+            this.sky = this.AddComponent<SkyScattering>(new SkyScatteringDescription() { Name = "Sky" });
 
-            this.skyPlane = this.AddSkyPlane(new SkyPlaneDescription()
+            this.skyPlane = this.AddComponent<SkyPlane>(new SkyPlaneDescription()
             {
                 Name = "Clouds",
                 ContentPath = "SceneTextures/sky",
@@ -168,6 +169,10 @@ namespace SceneTest
                 DepthEnabled = true,
                 AlphaEnabled = false,
                 SphericVolume = false,
+                Content = new ContentDescription()
+                {
+                    ModelContent = content,
+                }
             };
 
             var descI = new ModelInstancedDescription()
@@ -180,17 +185,21 @@ namespace SceneTest
                 AlphaEnabled = false,
                 SphericVolume = false,
                 Instances = 8,
+                Content = new ContentDescription()
+                {
+                    ModelContent = content,
+                }
             };
 
-            this.floorAsphalt = this.AddModel(content, desc);
+            this.floorAsphalt = this.AddComponent<Model>(desc);
 
-            this.floorAsphaltI = this.AddInstancingModel(content, descI);
+            this.floorAsphaltI = this.AddComponent<ModelInstanced>(descI);
 
             this.floorAsphaltI.Instance[0].Manipulator.SetPosition(-l * 2, 0, 0);
             this.floorAsphaltI.Instance[1].Manipulator.SetPosition(l * 2, 0, 0);
             this.floorAsphaltI.Instance[2].Manipulator.SetPosition(0, 0, -l * 2);
             this.floorAsphaltI.Instance[3].Manipulator.SetPosition(0, 0, l * 2);
-                              
+
             this.floorAsphaltI.Instance[4].Manipulator.SetPosition(-l * 2, 0, -l * 2);
             this.floorAsphaltI.Instance[5].Manipulator.SetPosition(l * 2, 0, -l * 2);
             this.floorAsphaltI.Instance[6].Manipulator.SetPosition(-l * 2, 0, l * 2);
@@ -198,20 +207,21 @@ namespace SceneTest
         }
         private void InitializeBuildingObelisk()
         {
-            this.buildingObelisk = this.AddModel(
-                "SceneTextures/buildings/obelisk",
-                "Obelisk.xml",
+            this.buildingObelisk = this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     Name = "Obelisk",
                     CastShadow = true,
                     Static = true,
                     SphericVolume = false,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/buildings/obelisk",
+                        ModelContentFilename = "Obelisk.xml",
+                    }
                 });
 
-            this.buildingObeliskI = this.AddInstancingModel(
-                "SceneTextures/buildings/obelisk",
-                "Obelisk.xml",
+            this.buildingObeliskI = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "ObeliskI",
@@ -219,6 +229,11 @@ namespace SceneTest
                     Static = true,
                     SphericVolume = false,
                     Instances = 4,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/buildings/obelisk",
+                        ModelContentFilename = "Obelisk.xml",
+                    }
                 });
 
             this.buildingObelisk.Transform.SetPosition(0, 0, 0);
@@ -242,26 +257,32 @@ namespace SceneTest
         }
         private void InitializeCharacterSoldier()
         {
-            this.characterSoldier = this.AddModel(
-                @"SceneTextures/character/soldier",
-                @"soldier_anim2.xml",
+            this.characterSoldier = this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     Name = "Soldier",
                     TextureIndex = 1,
                     CastShadow = true,
                     Static = false,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/character/soldier",
+                        ModelContentFilename = "soldier_anim2.xml",
+                    }
                 });
 
-            this.characterSoldierI = this.AddInstancingModel(
-                @"SceneTextures/character/soldier",
-                @"soldier_anim2.xml",
+            this.characterSoldierI = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "SoldierI",
                     CastShadow = true,
                     Static = false,
                     Instances = 4,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/character/soldier",
+                        ModelContentFilename = "soldier_anim2.xml",
+                    }
                 });
 
             float s = spaceSize / 2f;
@@ -284,7 +305,7 @@ namespace SceneTest
             this.characterSoldierI.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.characterSoldierI.Instance[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             this.characterSoldierI.Instance[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
-                                  
+
             this.characterSoldierI.Instance[0].AnimationController.AddPath(this.animations["default"]);
             this.characterSoldierI.Instance[1].AnimationController.AddPath(this.animations["default"]);
             this.characterSoldierI.Instance[2].AnimationController.AddPath(this.animations["default"]);
@@ -297,20 +318,21 @@ namespace SceneTest
         }
         private void InitializeVehiclesLeopard()
         {
-            this.vehicleLeopard = this.AddModel(
-                "SceneTextures/vehicles/leopard",
-                "Leopard.xml",
+            this.vehicleLeopard = this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     Name = "Leopard",
                     CastShadow = true,
                     Static = false,
                     SphericVolume = false,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/vehicles/leopard",
+                        ModelContentFilename = "Leopard.xml",
+                    }
                 });
 
-            this.vehicleLeopardI = this.AddInstancingModel(
-                "SceneTextures/vehicles/leopard",
-                "Leopard.xml",
+            this.vehicleLeopardI = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "LeopardI",
@@ -318,6 +340,11 @@ namespace SceneTest
                     Static = false,
                     SphericVolume = false,
                     Instances = 4,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/vehicles/leopard",
+                        ModelContentFilename = "Leopard.xml",
+                    }
                 });
 
             float s = -spaceSize / 2f;
@@ -329,7 +356,7 @@ namespace SceneTest
             this.vehicleLeopardI.Instance[1].Manipulator.SetPosition(spaceSize * 2, 0, -spaceSize * 2);
             this.vehicleLeopardI.Instance[2].Manipulator.SetPosition(-spaceSize * 2, 0, spaceSize * 2);
             this.vehicleLeopardI.Instance[3].Manipulator.SetPosition(spaceSize * 2, 0, spaceSize * 2);
-                                
+
             this.vehicleLeopardI.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
             this.vehicleLeopardI.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.vehicleLeopardI.Instance[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
@@ -343,20 +370,21 @@ namespace SceneTest
         }
         private void InitializeLamps()
         {
-            this.lamp = this.AddModel(
-                "SceneTextures/lamps",
-                "lamp.xml",
+            this.lamp = this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     Name = "Lamp",
                     CastShadow = true,
                     Static = true,
                     SphericVolume = false,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/lamps",
+                        ModelContentFilename = "lamp.xml",
+                    }
                 });
 
-            this.lampI = this.AddInstancingModel(
-                "SceneTextures/lamps",
-                "lamp.xml",
+            this.lampI = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "LampI",
@@ -364,6 +392,11 @@ namespace SceneTest
                     Static = true,
                     SphericVolume = false,
                     Instances = 4,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/lamps",
+                        ModelContentFilename = "lamp.xml",
+                    }
                 });
 
             float dist = 0.23f;
@@ -376,7 +409,7 @@ namespace SceneTest
             this.lampI.Instance[1].Manipulator.SetPosition(spaceSize * 2, spaceSize, -spaceSize * dist);
             this.lampI.Instance[2].Manipulator.SetPosition(-spaceSize * dist, spaceSize, -spaceSize * 2);
             this.lampI.Instance[3].Manipulator.SetPosition(-spaceSize * dist, spaceSize, spaceSize * 2);
-                      
+
             this.lampI.Instance[0].Manipulator.SetRotation(0, pitch, 0);
             this.lampI.Instance[1].Manipulator.SetRotation(0, pitch, 0);
             this.lampI.Instance[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
@@ -390,20 +423,21 @@ namespace SceneTest
         }
         private void InitializeStreetLamps()
         {
-            this.streetlamp = this.AddModel(
-                "SceneTextures/lamps",
-                "streetlamp.xml",
+            this.streetlamp = this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     Name = "Street Lamp",
                     CastShadow = true,
                     Static = true,
                     SphericVolume = false,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/lamps",
+                        ModelContentFilename = "streetlamp.xml",
+                    }
                 });
 
-            this.streetlampI = this.AddInstancingModel(
-                "SceneTextures/lamps",
-                "streetlamp.xml",
+            this.streetlampI = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "Street LampI",
@@ -411,6 +445,11 @@ namespace SceneTest
                     Static = true,
                     SphericVolume = false,
                     Instances = 9,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/lamps",
+                        ModelContentFilename = "streetlamp.xml",
+                    }
                 });
 
             this.streetlamp.Transform.SetPosition(-spaceSize, 0, -spaceSize * -2f);
@@ -419,13 +458,13 @@ namespace SceneTest
             this.streetlampI.Instance[1].Manipulator.SetPosition(-spaceSize, 0, 0);
             this.streetlampI.Instance[2].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 1f);
             this.streetlampI.Instance[3].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 2f);
-                            
+
             this.streetlampI.Instance[4].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -2f);
             this.streetlampI.Instance[5].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -1f);
             this.streetlampI.Instance[6].Manipulator.SetPosition(+spaceSize, 0, 0);
             this.streetlampI.Instance[7].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 1f);
             this.streetlampI.Instance[8].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 2f);
-                            
+
             this.streetlampI.Instance[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             this.streetlampI.Instance[5].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             this.streetlampI.Instance[6].Manipulator.SetRotation(MathUtil.Pi, 0, 0);

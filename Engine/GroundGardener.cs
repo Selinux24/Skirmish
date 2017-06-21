@@ -454,7 +454,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Description</param>
         public GroundGardener(Game game, BufferManager bufferManager, GroundGardenerDescription description) :
-            base(game, bufferManager)
+            base(game, bufferManager, description)
         {
             this.game = game;
 

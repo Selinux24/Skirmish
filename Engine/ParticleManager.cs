@@ -40,7 +40,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Particle manager description</param>
         public ParticleManager(Game game, BufferManager bufferManager, ParticleManagerDescription description)
-            : base(game, bufferManager)
+            : base(game, bufferManager, description)
         {
 
         }

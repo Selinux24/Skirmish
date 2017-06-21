@@ -30,7 +30,7 @@ namespace DeferredTest
         private SceneObject<TextDrawer> statistics = null;
         private SceneObject<Sprite> backPannel = null;
 
-        private GameAgent<SteerManipulatorController> tankAgent = null;
+        private SceneObject<GameAgent<SteerManipulatorController>> tankAgent = null;
         private SceneObject<Model> helicopter = null;
         private SceneObject<ModelInstanced> helicopters = null;
         private SceneObject<Skydom> skydom = null;
@@ -66,15 +66,15 @@ namespace DeferredTest
             base.Initialize();
 
             #region Cursor
-
-            SpriteDescription cursorDesc = new SpriteDescription()
             {
-                Textures = new[] { "target.png" },
-                Width = 16,
-                Height = 16,
-            };
-            this.cursor = this.AddCursor(cursorDesc);
-
+                SpriteDescription cursorDesc = new SpriteDescription()
+                {
+                    Textures = new[] { "target.png" },
+                    Width = 16,
+                    Height = 16,
+                };
+                this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI);
+            }
             #endregion
 
             #region Models
@@ -86,13 +86,16 @@ namespace DeferredTest
             #region Skydom
             {
                 sw.Restart();
-                this.skydom = this.AddSkydom(new SkydomDescription()
+
+                var desc = new SkydomDescription()
                 {
                     Name = "Sky",
                     ContentPath = "Resources",
                     Radius = far,
                     Texture = "sunset.dds",
-                });
+                };
+                this.skydom = this.AddComponent<Skydom>(desc);
+
                 sw.Stop();
                 loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
             }
@@ -101,15 +104,20 @@ namespace DeferredTest
             #region Helicopter
             {
                 sw.Restart();
-                this.helicopter = this.AddModel(
-                    "Resources",
-                    "helicopter.xml",
-                    new ModelDescription()
+
+                var desc = new ModelDescription()
+                {
+                    Name = "Helicopter",
+                    CastShadow = true,
+                    TextureIndex = 2,
+                    Content = new ContentDescription()
                     {
-                        Name = "Helicopter",
-                        CastShadow = true,
-                        TextureIndex = 2,
-                    });
+                        ContentFolder = "Resources",
+                        ModelContentFilename = "helicopter.xml",
+                    }
+                };
+                this.helicopter = this.AddComponent<Model>(desc);
+
                 sw.Stop();
                 loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
             }
@@ -118,15 +126,20 @@ namespace DeferredTest
             #region Helicopters
             {
                 sw.Restart();
-                this.helicopters = this.AddInstancingModel(
-                    "Resources",
-                    "helicopter.xml",
-                    new ModelInstancedDescription()
+
+                var desc = new ModelInstancedDescription()
+                {
+                    Name = "Bunch of Helicopters",
+                    CastShadow = true,
+                    Instances = 2,
+                    Content = new ContentDescription()
                     {
-                        Name = "Bunch of Helicopters",
-                        CastShadow = true,
-                        Instances = 2,
-                    });
+                        ContentFolder = "Resources",
+                        ModelContentFilename = "helicopter.xml",
+                    }
+                };
+                this.helicopters = this.AddComponent<ModelInstanced>(desc);
+
                 sw.Stop();
                 loadingText += string.Format("helicopters: {0} ", sw.Elapsed.TotalSeconds);
             }
@@ -143,14 +156,18 @@ namespace DeferredTest
             #region Tank
             {
                 sw.Restart();
-                var tank = this.AddModel(
-                    "Resources",
-                    "leopard.xml",
-                    new ModelDescription()
+
+                var desc = new ModelDescription()
+                {
+                    Name = "Tank",
+                    CastShadow = true,
+                    Content = new ContentDescription()
                     {
-                        Name = "Tank",
-                        CastShadow = true,
-                    });
+                        ContentFolder = "Resources",
+                        ModelContentFilename = "leopard.xml",
+                    }
+                };
+                var tank = this.AddComponent<Model>(desc);
                 tank.Transform.SetScale(0.2f, true);
 
                 var tankController = new SteerManipulatorController()
@@ -168,10 +185,10 @@ namespace DeferredTest
                     MaxClimb = tankbbox.GetY() * 0.55f,
                 };
 
-                this.tankAgent = new GameAgent<SteerManipulatorController>(tankAgentType, tank, tankController);
-                this.AddComponent(this.tankAgent, new SceneObjectDescription() { });
+                var agent = new GameAgent<SteerManipulatorController>(tankAgentType, tank, tankController);
+                this.tankAgent = this.AddComponent(agent, new SceneObjectDescription() { });
 
-                this.Lights.AddRange(this.tankAgent.Lights);
+                this.Lights.AddRange(this.tankAgent.Instance.Lights);
 
                 sw.Stop();
                 loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
@@ -182,17 +199,21 @@ namespace DeferredTest
             {
                 sw.Restart();
 
-                this.terrain = this.AddScenery(
-                    "Resources",
-                    "terrain.xml",
-                    new GroundDescription()
+                var desc = new GroundDescription()
+                {
+                    Name = "Terrain",
+                    Quadtree = new GroundDescription.QuadtreeDescription()
                     {
-                        Name = "Terrain",
-                        Quadtree = new GroundDescription.QuadtreeDescription()
-                        {
-                            MaximumDepth = 2,
-                        },
-                    });
+                        MaximumDepth = 2,
+                    },
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources",
+                        ModelContentFilename = "terrain.xml",
+                    }
+                };
+                this.terrain = this.AddComponent<Scenery>(desc);
+
                 sw.Stop();
                 loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
             }
@@ -202,20 +223,21 @@ namespace DeferredTest
             {
                 sw.Restart();
 
-                this.gardener = this.AddGardener(
-                    new GroundGardenerDescription()
+                var desc = new GroundGardenerDescription()
+                {
+                    ContentPath = "Resources/Vegetation",
+                    ChannelRed = new GroundGardenerDescription.Channel()
                     {
-                        ContentPath = "Resources/Vegetation",
-                        ChannelRed = new GroundGardenerDescription.Channel()
-                        {
-                            VegetarionTextures = new[] { "grass.png" },
-                            Saturation = 20f,
-                            StartRadius = 0f,
-                            EndRadius = 50f,
-                            MinSize = Vector2.One * 0.20f,
-                            MaxSize = Vector2.One * 0.25f,
-                        }
-                    });
+                        VegetarionTextures = new[] { "grass.png" },
+                        Saturation = 20f,
+                        StartRadius = 0f,
+                        EndRadius = 50f,
+                        MinSize = Vector2.One * 0.20f,
+                        MaxSize = Vector2.One * 0.25f,
+                    }
+                };
+                this.gardener = this.AddComponent<GroundGardener>(desc);
+
                 sw.Stop();
                 loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
             }
@@ -224,33 +246,45 @@ namespace DeferredTest
             #region Trees
             {
                 sw.Restart();
-                this.tree = this.AddModel(
-                    "resources/trees",
-                    "birch_a.xml",
-                    new ModelDescription()
+
+                var desc = new ModelDescription()
+                {
+                    Name = "Lonely tree",
+                    Static = true,
+                    CastShadow = true,
+                    AlphaEnabled = true,
+                    DepthEnabled = true,
+                    Content = new ContentDescription()
                     {
-                        Name = "Lonely tree",
-                        Static = true,
-                        CastShadow = true,
-                        AlphaEnabled = true,
-                        DepthEnabled = true,
-                    });
+                        ContentFolder = "resources/trees",
+                        ModelContentFilename = "birch_a.xml",
+                    }
+                };
+                this.tree = this.AddComponent<Model>(desc);
+
                 sw.Stop();
                 loadingText += string.Format("tree: {0} ", sw.Elapsed.TotalSeconds);
+            }
 
+            {
                 sw.Restart();
-                this.trees = this.AddInstancingModel(
-                    "resources/trees",
-                    "birch_b.xml",
-                    new ModelInstancedDescription()
+
+                var desc = new ModelInstancedDescription()
+                {
+                    Name = "Bunch of trees",
+                    Static = true,
+                    CastShadow = true,
+                    AlphaEnabled = true,
+                    DepthEnabled = true,
+                    Instances = 10,
+                    Content = new ContentDescription()
                     {
-                        Name = "Bunch of trees",
-                        Static = true,
-                        CastShadow = true,
-                        AlphaEnabled = true,
-                        DepthEnabled = true,
-                        Instances = 10,
-                    });
+                        ContentFolder = "resources/trees",
+                        ModelContentFilename = "birch_b.xml",
+                    }
+                };
+                this.trees = this.AddComponent<ModelInstanced>(desc);
+
                 sw.Stop();
                 loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
             }
@@ -260,10 +294,15 @@ namespace DeferredTest
 
             #region Texts
             {
-                this.title = this.AddText(TextDrawerDescription.Generate("Tahoma", 18, Color.White), layerHUD);
-                this.load = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
-                this.help = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), layerHUD);
-                this.statistics = this.AddText(TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red), layerHUD);
+                var dTitle = TextDrawerDescription.Generate("Tahoma", 18, Color.White);
+                var dLoad = TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow);
+                var dHelp = TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow);
+                var dStats = TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red);
+
+                this.title = this.AddComponent<TextDrawer>(dTitle, SceneObjectUsageEnum.UI, layerHUD);
+                this.load = this.AddComponent<TextDrawer>(dLoad, SceneObjectUsageEnum.UI, layerHUD);
+                this.help = this.AddComponent<TextDrawer>(dHelp, SceneObjectUsageEnum.UI, layerHUD);
+                this.statistics = this.AddComponent<TextDrawer>(dStats, SceneObjectUsageEnum.UI, layerHUD);
 
                 this.title.Instance.Text = "Deferred Ligthning test";
                 this.load.Instance.Text = loadingText;
@@ -282,8 +321,7 @@ namespace DeferredTest
                     Height = this.statistics.Instance.Top + this.statistics.Instance.Height + 3,
                     Color = new Color4(0, 0, 0, 0.75f),
                 };
-
-                this.backPannel = this.AddSprite(spDesc, layerHUD - 1);
+                this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
             }
             #endregion
 
@@ -301,39 +339,49 @@ namespace DeferredTest
             #region Debug
 
             #region Buffer Drawer
-
-            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
-            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
-            int smLeft = this.Game.Form.RenderWidth - width;
-            int smTop = this.Game.Form.RenderHeight - height;
-
-            this.bufferDrawer = this.AddSpriteTexture(new SpriteTextureDescription()
             {
-                Left = smLeft,
-                Top = smTop,
-                Width = width,
-                Height = height,
-                Channel = SpriteTextureChannelsEnum.NoAlpha,
-            },
-            layerEffects);
+                int width = (int)(this.Game.Form.RenderWidth * 0.33f);
+                int height = (int)(this.Game.Form.RenderHeight * 0.33f);
+                int smLeft = this.Game.Form.RenderWidth - width;
+                int smTop = this.Game.Form.RenderHeight - height;
 
-            this.bufferDrawer.Visible = false;
+                var desc = new SpriteTextureDescription()
+                {
+                    Left = smLeft,
+                    Top = smTop,
+                    Width = width,
+                    Height = height,
+                    Channel = SpriteTextureChannelsEnum.NoAlpha,
+                };
+                this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsageEnum.UI, layerEffects);
 
+                this.bufferDrawer.Visible = false;
+            }
             #endregion
 
             #region Light line drawer
-
-            this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription() { DepthEnabled = true }, 1000, layerEffects);
-            this.lineDrawer.Visible = false;
-
+            {
+                var desc = new LineListDrawerDescription()
+                {
+                    DepthEnabled = true,
+                    Count = 1000,
+                };
+                this.lineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);
+                this.lineDrawer.Visible = false;
+            }
             #endregion
 
             #region Terrain grapth drawer
+            {
+                var desc = new TriangleListDrawerDescription()
+                {
+                    Count = MaxGridDrawer,
+                };
+                this.terrainGraphDrawer = this.AddComponent<TriangleListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);
+                this.terrainGraphDrawer.Visible = false;
+            }
 
-            this.terrainGraphDrawer = this.AddTriangleListDrawer(new TriangleListDrawerDescription(), MaxGridDrawer, layerEffects);
-            this.terrainGraphDrawer.Visible = false;
-
-            var nodes = this.GetNodes(tankAgent.AgentType);
+            var nodes = this.GetNodes(tankAgent.Instance.AgentType);
             if (nodes != null && nodes.Length > 0)
             {
                 Random clrRnd = new Random(1);
@@ -359,7 +407,7 @@ namespace DeferredTest
             #endregion
 
             var navSettings = NavigationMeshGenerationSettings.Default;
-            navSettings.Agents = new[] { this.tankAgent.AgentType, };
+            navSettings.Agents = new[] { this.tankAgent.Instance.AgentType, };
 
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
             {
@@ -420,8 +468,8 @@ namespace DeferredTest
                 float d;
                 if (this.FindTopGroundPosition(20, 40, out p, out t, out d))
                 {
-                    this.tankAgent.Manipulator.SetPosition(p);
-                    this.tankAgent.Manipulator.SetNormal(t.Normal);
+                    this.tankAgent.Transform.SetPosition(p);
+                    this.tankAgent.Transform.SetNormal(t.Normal);
                     cameraPosition += p;
                     modelCount++;
                 }
@@ -496,7 +544,172 @@ namespace DeferredTest
             Vector3 position;
             Triangle triangle;
             float distance;
-            bool picked = this.PickNearest(ref cursorRay, true, out position, out triangle, out distance);
+            bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsageEnum.Ground, out position, out triangle, out distance);
+
+            #endregion
+
+            #region Tank
+
+            if (this.Game.Input.LeftMouseButtonPressed)
+            {
+                if (picked)
+                {
+                    var p = this.FindPath(
+                        this.tankAgent.Instance.AgentType,
+                        this.tankAgent.Transform.Position, position, true, this.tankAgent.Instance.MaximumSpeed * gameTime.ElapsedSeconds);
+                    if (p != null)
+                    {
+                        this.tankAgent.Instance.FollowPath(p);
+                    }
+                }
+            }
+
+            #endregion
+
+            #region Camera
+
+#if DEBUG
+            if (this.Game.Input.RightMouseButtonPressed)
+#endif
+            {
+                this.Camera.RotateMouse(
+                    this.Game.GameTime,
+                    this.Game.Input.MouseXDelta,
+                    this.Game.Input.MouseYDelta);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.W))
+            {
+                this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.S))
+            {
+                this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Space))
+            {
+                this.lineDrawer.Instance.SetLines(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
+                this.lineDrawer.Visible = true;
+            }
+
+            #endregion
+
+            #region Lights
+
+            if (this.Game.Input.KeyJustReleased(Keys.F))
+            {
+                this.Lights.BaseFogColor = new Color((byte)54, (byte)56, (byte)68);
+                this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
+                this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.G))
+            {
+                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.L))
+            {
+                this.onlyModels = !this.onlyModels;
+
+                this.CreateLights(this.onlyModels);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.P))
+            {
+                this.animateLights = !this.animateLights;
+            }
+
+            if (this.spotLight != null)
+            {
+                if (this.Game.Input.KeyPressed(Keys.Left))
+                {
+                    this.spotLight.Position += (Vector3.Left) * gameTime.ElapsedSeconds * 10f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Right))
+                {
+                    this.spotLight.Position += (Vector3.Right) * gameTime.ElapsedSeconds * 10f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Up))
+                {
+                    this.spotLight.Position += (Vector3.ForwardLH) * gameTime.ElapsedSeconds * 10f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Down))
+                {
+                    this.spotLight.Position += (Vector3.BackwardLH) * gameTime.ElapsedSeconds * 10f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.PageUp))
+                {
+                    this.spotLight.Position += (Vector3.Up) * gameTime.ElapsedSeconds * 10f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.PageDown))
+                {
+                    this.spotLight.Position += (Vector3.Down) * gameTime.ElapsedSeconds * 10f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Add))
+                {
+                    this.spotLight.Intensity += gameTime.ElapsedSeconds * 10f;
+                }
+
+                if (this.Game.Input.KeyPressed(Keys.Subtract))
+                {
+                    this.spotLight.Intensity -= gameTime.ElapsedSeconds * 10f;
+
+                    this.spotLight.Intensity = Math.Max(0f, this.spotLight.Intensity);
+                }
+
+                this.lineDrawer.Instance.SetLines(Color.White, this.spotLight.GetVolume(10));
+            }
+            else
+            {
+                this.lineDrawer.Visible = false;
+            }
+
+            if (animateLights)
+            {
+                if (this.Lights.PointLights.Length > 0)
+                {
+                    for (int i = 1; i < this.Lights.PointLights.Length; i++)
+                    {
+                        var l = this.Lights.PointLights[i];
+
+                        if ((int)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds * 50f);
+                        if ((int)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds * 50f);
+
+                        if (l.Radius <= 0)
+                        {
+                            l.Radius = 0;
+                            l.State = 1;
+                        }
+
+                        if (l.Radius >= 50)
+                        {
+                            l.Radius = 50;
+                            l.State = -1;
+                        }
+
+                        l.Intensity = l.Radius * 0.1f;
+                    }
+                }
+            }
 
             #endregion
 
@@ -668,171 +881,6 @@ namespace DeferredTest
             }
 
             #endregion
-
-            #region Tank
-
-            if (this.Game.Input.LeftMouseButtonPressed)
-            {
-                if (picked)
-                {
-                    var p = this.FindPath(
-                        this.tankAgent.AgentType,
-                        this.tankAgent.Manipulator.Position, position, true, this.tankAgent.MaximumSpeed * gameTime.ElapsedSeconds);
-                    if (p != null)
-                    {
-                        this.tankAgent.FollowPath(p);
-                    }
-                }
-            }
-
-            #endregion
-
-            #region Camera
-
-#if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
-#endif
-            {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.A))
-            {
-                this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.D))
-            {
-                this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.W))
-            {
-                this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.S))
-            {
-                this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Space))
-            {
-                this.lineDrawer.Instance.SetLines(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
-                this.lineDrawer.Visible = true;
-            }
-
-            #endregion
-
-            #region Lights
-
-            if (this.Game.Input.KeyJustReleased(Keys.F))
-            {
-                this.Lights.BaseFogColor = new Color((byte)54, (byte)56, (byte)68);
-                this.Lights.FogStart = this.Lights.FogStart == 0f ? far * fogStart : 0f;
-                this.Lights.FogRange = this.Lights.FogRange == 0f ? far * fogRange : 0f;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.G))
-            {
-                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.L))
-            {
-                this.onlyModels = !this.onlyModels;
-
-                this.CreateLights(this.onlyModels);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.P))
-            {
-                this.animateLights = !this.animateLights;
-            }
-
-            if (this.spotLight != null)
-            {
-                if (this.Game.Input.KeyPressed(Keys.Left))
-                {
-                    this.spotLight.Position += (Vector3.Left) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Right))
-                {
-                    this.spotLight.Position += (Vector3.Right) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Up))
-                {
-                    this.spotLight.Position += (Vector3.ForwardLH) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Down))
-                {
-                    this.spotLight.Position += (Vector3.BackwardLH) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.PageUp))
-                {
-                    this.spotLight.Position += (Vector3.Up) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.PageDown))
-                {
-                    this.spotLight.Position += (Vector3.Down) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Add))
-                {
-                    this.spotLight.Intensity += gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Subtract))
-                {
-                    this.spotLight.Intensity -= gameTime.ElapsedSeconds * 10f;
-
-                    this.spotLight.Intensity = Math.Max(0f, this.spotLight.Intensity);
-                }
-
-                this.lineDrawer.Instance.SetLines(Color.White, this.spotLight.GetVolume(10));
-            }
-            else
-            {
-                this.lineDrawer.Visible = false;
-            }
-
-            if (animateLights)
-            {
-                if (this.Lights.PointLights.Length > 0)
-                {
-                    for (int i = 1; i < this.Lights.PointLights.Length; i++)
-                    {
-                        var l = this.Lights.PointLights[i];
-
-                        if ((int)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds * 50f);
-                        if ((int)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds * 50f);
-
-                        if (l.Radius <= 0)
-                        {
-                            l.Radius = 0;
-                            l.State = 1;
-                        }
-
-                        if (l.Radius >= 50)
-                        {
-                            l.Radius = 50;
-                            l.State = -1;
-                        }
-
-                        l.Intensity = l.Radius * 0.1f;
-                    }
-                }
-            }
-
-            #endregion
         }
         public override void Draw(GameTime gameTime)
         {
@@ -880,7 +928,7 @@ namespace DeferredTest
             this.Lights.ClearSpotLights();
             this.spotLight = null;
 
-            this.Lights.AddRange(this.tankAgent.Lights);
+            this.Lights.AddRange(this.tankAgent.Instance.Lights);
 
             if (!modelsOnly)
             {

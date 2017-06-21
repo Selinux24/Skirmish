@@ -130,35 +130,48 @@ namespace GameLogic
 
             #region 3D models
 
-            this.cursor3D = this.AddModel(
-                "Resources3D",
-                "cursor.xml",
+            this.cursor3D = this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     CastShadow = false,
                     DepthEnabled = false,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources3D",
+                        ModelContentFilename = "cursor.xml",
+                    }
                 },
-                true,
+                SceneObjectUsageEnum.UI,
                 layerHUD);
 
-            this.terrain = this.AddScenery(
-                "Resources3D",
-                "terrain.xml",
+            this.terrain = this.AddComponent<Scenery>(
                 new GroundDescription()
                 {
                     CastShadow = true,
-                });
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources3D",
+                        ModelContentFilename = "terrain.xml",
+                    }
+                },
+                SceneObjectUsageEnum.Ground);
 
-            this.soldier = this.AddInstancingModel(
-                "Resources3D",
-                "soldier_anim2.xml",
+            this.soldier = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Instances = this.skirmishGame.AllSoldiers.Length,
                     CastShadow = true,
-                });
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources3D",
+                        ModelContentFilename = "soldier_anim2.xml",
+                    }
+                },
+                SceneObjectUsageEnum.Agent);
 
             #endregion
+
+            this.SetGround(this.terrain, true);
 
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
             {
@@ -176,7 +189,7 @@ namespace GameLogic
                 Textures = new[] { "HUD.png" },
                 Color = new Color4(1f, 1f, 1f, 1f),
             };
-            this.sprHUD = this.AddBackgroud(bkDesc, layerHUD - 1);
+            this.sprHUD = this.AddComponent<Sprite>(bkDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
 
             int minimapHeight = (this.Game.Form.RenderHeight / 4) - 8;
             int minimapWidth = minimapHeight;
@@ -204,16 +217,16 @@ namespace GameLogic
                 },
                 MinimapArea = this.terrain.Instance.GetBoundingBox(),
             };
-            this.minimap = this.AddMinimap(minimapDesc, layerHUD);
+            this.minimap = this.AddComponent<Minimap>(minimapDesc, SceneObjectUsageEnum.UI, layerHUD);
 
-            this.txtTitle = this.AddText(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), layerHUD);
-            this.txtGame = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), layerHUD);
-            this.txtTeam = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), layerHUD);
-            this.txtSoldier = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), layerHUD);
-            this.txtActionList = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), layerHUD);
-            this.txtAction = this.AddText(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), layerHUD);
+            this.txtTitle = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsageEnum.UI, layerHUD);
+            this.txtGame = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsageEnum.UI, layerHUD);
+            this.txtTeam = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.txtSoldier = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.txtActionList = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.txtAction = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
 
-            this.butClose = this.AddSpriteButton(new SpriteButtonDescription()
+            this.butClose = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
@@ -227,9 +240,9 @@ namespace GameLogic
                     ShadowColor = Color.Orange,
                 },
                 Text = "EXIT",
-            }, layerHUD);
+            }, SceneObjectUsageEnum.UI, layerHUD);
 
-            this.butNext = this.AddSpriteButton(new SpriteButtonDescription()
+            this.butNext = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
@@ -242,9 +255,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next",
-            }, layerHUD);
+            }, SceneObjectUsageEnum.UI, layerHUD);
 
-            this.butPrevSoldier = this.AddSpriteButton(new SpriteButtonDescription()
+            this.butPrevSoldier = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
@@ -257,9 +270,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Soldier",
-            }, layerHUD);
+            }, SceneObjectUsageEnum.UI, layerHUD);
 
-            this.butNextSoldier = this.AddSpriteButton(new SpriteButtonDescription()
+            this.butNextSoldier = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
@@ -272,9 +285,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Soldier",
-            }, layerHUD);
+            }, SceneObjectUsageEnum.UI, layerHUD);
 
-            this.butPrevAction = this.AddSpriteButton(new SpriteButtonDescription()
+            this.butPrevAction = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
@@ -287,9 +300,9 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Action",
-            }, layerHUD);
+            }, SceneObjectUsageEnum.UI, layerHUD);
 
-            this.butNextAction = this.AddSpriteButton(new SpriteButtonDescription()
+            this.butNextAction = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
@@ -302,7 +315,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Action",
-            }, layerHUD);
+            }, SceneObjectUsageEnum.UI, layerHUD);
 
             this.butClose.Instance.Click += (sender, eventArgs) => { this.Game.Exit(); };
             this.butNext.Instance.Click += (sender, eventArgs) => { this.NextPhase(); };
@@ -323,7 +336,7 @@ namespace GameLogic
 
             #region DEBUG
 
-            this.lineDrawer = this.AddLineListDrawer(new LineListDrawerDescription(), 5000);
+            this.lineDrawer = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { Count = 5000 });
             this.lineDrawer.Visible = false;
 
             #endregion
@@ -352,7 +365,7 @@ namespace GameLogic
                 Vector3 position;
                 Triangle triangle;
                 float distance;
-                bool picked = this.PickNearest(ref cursorRay, true, out position, out triangle, out distance);
+                bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsageEnum.Ground, out position, out triangle, out distance);
 
                 #region DEBUG
 

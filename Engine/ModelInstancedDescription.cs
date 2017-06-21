@@ -6,20 +6,15 @@ namespace Engine
     /// <summary>
     /// Instanced model description
     /// </summary>
-    public class ModelInstancedDescription : SceneObjectDescription
+    public class ModelInstancedDescription : ModelBaseDescription
     {
-        /// <summary>
-        /// Instances
-        /// </summary>
-        public int Instances = 1;
-
         /// <summary>
         /// Constructor
         /// </summary>
         public ModelInstancedDescription()
             : base()
         {
-
+            this.Instanced = true;
         }
     }
 }

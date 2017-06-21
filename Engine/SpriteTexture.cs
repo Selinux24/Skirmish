@@ -70,7 +70,7 @@ namespace Engine
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Sprite texture description</param>
         public SpriteTexture(Game game, BufferManager bufferManager, SpriteTextureDescription description)
-            : base(game, bufferManager)
+            : base(game, bufferManager, description)
         {
             Vector3[] cv;
             Vector2[] cuv;
