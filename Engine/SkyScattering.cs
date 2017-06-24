@@ -197,11 +197,10 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Sky scattering description class</param>
-        public SkyScattering(Game game, BufferManager bufferManager, SkyScatteringDescription description)
-            : base(game, bufferManager, description)
+        public SkyScattering(Scene scene, SkyScatteringDescription description)
+            : base(scene, description)
         {
             this.PlanetRadius = description.PlanetRadius;
             this.PlanetAtmosphereRadius = description.PlanetAtmosphereRadius;

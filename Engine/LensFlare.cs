@@ -30,22 +30,16 @@ namespace Engine
         /// Light projected direction
         /// </summary>
         private Vector2 lightProjectedDirection;
-     
-        /// <summary>
-        /// Parent scene
-        /// </summary>
-        public Scene ParentScene { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game instance</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public LensFlare(Game game, BufferManager bufferManager, LensFlareDescription description)
-            : base(game, bufferManager, description)
+        public LensFlare(Scene scene, LensFlareDescription description)
+            : base(scene, description)
         {
-            this.glowSprite = new Sprite(game, bufferManager, new SpriteDescription()
+            this.glowSprite = new Sprite(scene, new SpriteDescription()
             {
                 ContentPath = description.ContentPath,
                 Height = 100,
@@ -71,7 +65,7 @@ namespace Engine
 
                     this.flares[i] = new Flare()
                     {
-                        FlareSprite = new Sprite(game, bufferManager, sprDesc),
+                        FlareSprite = new Sprite(scene, sprDesc),
                         Position = flareDesc.Position,
                         Scale = flareDesc.Scale,
                         Color = flareDesc.Color,
@@ -99,7 +93,7 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null)
             {
-                if (this.ParentScene != null)
+                if (this.Scene != null)
                 {
                     Vector3 lightPosition = keyLight.GetPosition(1000);
                     Vector3 direction = Vector3.Normalize(context.EyePosition - lightPosition);
@@ -109,7 +103,7 @@ namespace Engine
                     Vector3 position;
                     Triangle tri;
                     float distance;
-                    if (this.ParentScene.PickNearest(ref ray, false, out position, out tri, out distance))
+                    if (this.Scene.PickNearest(ref ray, false, out position, out tri, out distance))
                     {
                         if (Vector3.Distance(lightPosition, context.EyePosition) > distance) return;
                     }

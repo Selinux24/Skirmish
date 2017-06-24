@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace Engine.Common
@@ -82,17 +81,10 @@ namespace Engine.Common
         /// <summary>
         /// Base model
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="content">Model content</param>
-        /// <param name="description">Description</param>
-        /// <param name="instanced">Is instanced</param>
-        /// <param name="instances">Instance count</param>
-        /// <param name="loadAnimation">Sets whether the load phase attemps to read skinning data</param>
-        /// <param name="loadNormalMaps">Sets whether the load phase attemps to read normal mappings</param>
-        /// <param name="dynamic">Sets whether the buffers must be created inmutables or not</param>
-        public ModelBase(Game game, BufferManager bufferManager, ModelBaseDescription description)
-            : base(game, bufferManager, description)
+        /// <param name="scene">Scene</param>
+        /// <param name="description">Object description</param>
+        public ModelBase(Scene scene, ModelBaseDescription description)
+            : base(scene, description)
         {
             var desc = new DrawingDataDescription()
             {
@@ -125,7 +117,7 @@ namespace Engine.Common
             {
                 if (description.Optimize) geo[0].Optimize();
 
-                var drawable = DrawingData.Build(game, this.BufferManager, geo[0], desc);
+                var drawable = DrawingData.Build(this.Game, this.BufferManager, geo[0], desc);
 
                 this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
 
@@ -142,7 +134,7 @@ namespace Engine.Common
                         this.defaultLevelOfDetail = lod;
                     }
 
-                    var drawable = DrawingData.Build(game, this.BufferManager, content[lod], desc);
+                    var drawable = DrawingData.Build(this.Game, this.BufferManager, content[lod], desc);
 
                     this.meshesByLOD.Add(lod, drawable);
                 }

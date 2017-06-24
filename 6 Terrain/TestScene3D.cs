@@ -748,9 +748,6 @@ namespace TerrainTest
 
             #endregion
 
-            this.lensFlare.Instance.ParentScene = this;
-
-            this.gardener.Instance.ParentScene = this;
             this.gardener.Instance.SetWind(this.windDirection, this.windStrength);
 
             this.Lights.ShadowLDDistance = 100f;

@@ -14,12 +14,10 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="content">Content</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Skydom description</param>
-        public Skydom(Game game, BufferManager bufferManager, SkydomDescription description)
-            : base(game, bufferManager, description)
+        public Skydom(Scene scene, SkydomDescription description)
+            : base(scene, description)
         {
             
         }

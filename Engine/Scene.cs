@@ -125,27 +125,11 @@ namespace Engine
         /// <summary>
         /// Game class
         /// </summary>
-        protected Game Game { get; private set; }
+        public Game Game { get; private set; }
         /// <summary>
-        /// Graphics Device
+        /// Buffer manager
         /// </summary>
-        protected Device Device
-        {
-            get
-            {
-                return this.Game.Graphics.Device;
-            }
-        }
-        /// <summary>
-        /// Graphics Context
-        /// </summary>
-        protected DeviceContext DeviceContext
-        {
-            get
-            {
-                return this.Game.Graphics.DeviceContext;
-            }
-        }
+        internal BufferManager BufferManager = null;
         /// <summary>
         /// Scene renderer
         /// </summary>
@@ -158,10 +142,6 @@ namespace Engine
         /// Flag to update the scene global resources
         /// </summary>
         protected bool UpdateGlobalResources { get; set; }
-        /// <summary>
-        /// Buffer manager
-        /// </summary>
-        protected BufferManager BufferManager = null;
 
         /// <summary>
         /// Gets the scen world matrix
@@ -408,7 +388,7 @@ namespace Engine
         /// <returns>Returns the new generated resource</returns>
         private T CreateResource<T>(SceneObjectDescription description) where T : Drawable
         {
-            return (T)Activator.CreateInstance(typeof(T), this.Game, this.BufferManager, description);
+            return (T)Activator.CreateInstance(typeof(T), this, description);
         }
 
         public SceneObject<T> AddComponent<T>(SceneObjectDescription description, SceneObjectUsageEnum usage = SceneObjectUsageEnum.None, int order = 0) where T : Drawable

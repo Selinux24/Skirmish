@@ -2,8 +2,10 @@
 using SharpDX.Direct3D11;
 using System;
 
-namespace Engine.Common
+namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Drawable object
     /// </summary>
@@ -12,30 +14,33 @@ namespace Engine.Common
         /// <summary>
         /// Game class
         /// </summary>
-        public virtual Game Game { get; private set; }
+        public virtual Scene Scene { get; private set; }
+        /// <summary>
+        /// Object description
+        /// </summary>
+        public virtual SceneObjectDescription Description { get; private set; }
+        /// <summary>
+        /// Game class
+        /// </summary>
+        public virtual Game Game { get { return this.Scene.Game; } }
         /// <summary>
         /// Graphics device
         /// </summary>
-        public virtual Graphics Graphics { get { return this.Game.Graphics; } }
-        /// <summary>
-        /// Graphics context
-        /// </summary>
-        public virtual DeviceContext DeviceContext { get { return this.Game.Graphics.DeviceContext; } }
+        public virtual Graphics Graphics { get { return this.Scene.Game.Graphics; } }
         /// <summary>
         /// Buffer manager
         /// </summary>
-        public virtual BufferManager BufferManager { get; protected set; }
+        public virtual BufferManager BufferManager { get { return this.Scene.BufferManager; } }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Drawable(Game game, BufferManager bufferManager, SceneObjectDescription description)
+        public Drawable(Scene scene, SceneObjectDescription description)
         {
-            this.Game = game;
-            this.BufferManager = bufferManager;
+            this.Scene = scene;
+            this.Description = description;
         }
 
         /// <summary>

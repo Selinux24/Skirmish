@@ -66,11 +66,10 @@ namespace Engine
         /// <summary>
         /// Contructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Sprite texture description</param>
-        public SpriteTexture(Game game, BufferManager bufferManager, SpriteTextureDescription description)
-            : base(game, bufferManager, description)
+        public SpriteTexture(Scene scene, SpriteTextureDescription description)
+            : base(scene, description)
         {
             Vector3[] cv;
             Vector2[] cuv;
@@ -145,9 +144,9 @@ namespace Engine
 
             for (int p = 0; p < technique.Description.PassCount; p++)
             {
-                technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+                technique.GetPassByIndex(p).Apply(this.Graphics.DeviceContext, 0);
 
-                this.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
+                this.Graphics.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
 
                 Counters.DrawCallsPerFrame++;
             }

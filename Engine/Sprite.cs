@@ -167,11 +167,10 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Sprite(Game game, BufferManager bufferManager, SpriteDescription description)
-            : base(game, bufferManager, description)
+        public Sprite(Scene scene, SpriteDescription description)
+            : base(scene, description)
         {
             this.Textured = description.Textures != null && description.Textures.Length > 0;
 
@@ -182,8 +181,8 @@ namespace Engine
                 this.InitializeTexture(description.ContentPath, description.Textures);
             }
 
-            this.renderWidth = game.Form.RenderWidth.NextPair();
-            this.renderHeight = game.Form.RenderHeight.NextPair();
+            this.renderWidth = this.Game.Form.RenderWidth.NextPair();
+            this.renderHeight = this.Game.Form.RenderHeight.NextPair();
             this.sourceWidth = description.Width <= 0 ? this.renderWidth : description.Width.NextPair();
             this.sourceHeight = description.Height <= 0 ? this.renderHeight : description.Height.NextPair();
             this.viewProjection = Sprite.CreateViewOrthoProjection(this.renderWidth, this.renderHeight);

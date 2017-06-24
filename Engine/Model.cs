@@ -6,7 +6,6 @@ namespace Engine
 {
     using Engine.Animation;
     using Engine.Common;
-    using Engine.Content;
     using Engine.Effects;
 
     /// <summary>
@@ -107,11 +106,10 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game class</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Model(Game game, BufferManager bufferManager, ModelDescription description)
-            : base(game, bufferManager, description)
+        public Model(Scene scene, ModelDescription description)
+            : base(scene, description)
         {
             this.TextureIndex = description.TextureIndex;
 
@@ -255,7 +253,7 @@ namespace Engine
 
                             for (int p = 0; p < technique.Description.PassCount; p++)
                             {
-                                technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+                                technique.GetPassByIndex(p).Apply(this.Graphics.DeviceContext, 0);
 
                                 mesh.Draw(this.Game.Graphics);
 

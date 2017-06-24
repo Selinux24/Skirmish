@@ -178,19 +178,18 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game class</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Text description</param>
-        public TextDrawer(Game game, BufferManager bufferManager, TextDrawerDescription description)
-            : base(game, bufferManager, description)
+        public TextDrawer(Scene scene, TextDrawerDescription description)
+            : base(scene, description)
         {
             this.Font = string.Format("{0} {1}", description.Font, description.FontSize);
 
             this.viewProjection = Sprite.CreateViewOrthoProjection(
-                game.Form.RenderWidth.NextPair(),
-                game.Form.RenderHeight.NextPair());
+                this.Game.Form.RenderWidth.NextPair(),
+                this.Game.Form.RenderHeight.NextPair());
 
-            this.fontMap = FontMap.Map(game, description.Font, description.FontSize);
+            this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize);
 
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
             uint[] indices = new uint[FontMap.MAXTEXTLENGTH * 6];

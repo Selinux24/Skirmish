@@ -64,11 +64,10 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game class</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public ModelInstanced(Game game, BufferManager bufferManager, ModelInstancedDescription description)
-            : base(game, bufferManager, description)
+        public ModelInstanced(Scene scene, ModelInstancedDescription description)
+            : base(scene, description)
         {
             if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 
@@ -275,7 +274,7 @@ namespace Engine
 
                                         for (int p = 0; p < technique.Description.PassCount; p++)
                                         {
-                                            technique.GetPassByIndex(p).Apply(this.DeviceContext, 0);
+                                            technique.GetPassByIndex(p).Apply(this.Graphics.DeviceContext, 0);
 
                                             mesh.Draw(this.Game.Graphics, index, length);
 

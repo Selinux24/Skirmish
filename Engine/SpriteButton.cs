@@ -121,12 +121,11 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="description">Button description</param>
-        public SpriteButton(Game game, BufferManager bufferManager, SpriteButtonDescription description)
-            : base(game, bufferManager, description)
+        public SpriteButton(Scene scene, SpriteButtonDescription description)
+            : base(scene, description)
         {
             this.button = new Sprite(
-                game,
-                bufferManager,
+                scene,
                 new SpriteDescription()
                 {
                     Textures = new[] { description.TextureReleased, description.TexturePressed },
@@ -138,8 +137,7 @@ namespace Engine
             if (description.TextDescription != null)
             {
                 this.text = new TextDrawer(
-                    game,
-                    bufferManager,
+                    scene,
                     description.TextDescription);
             }
 

@@ -33,11 +33,10 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public TriangleListDrawer(Game game, BufferManager bufferManager, TriangleListDrawerDescription description)
-            : base(game, bufferManager, description)
+        public TriangleListDrawer(Scene scene, TriangleListDrawerDescription description)
+            : base(scene, description)
         {
             int count = 0;
             if (description.Triangles != null && description.Triangles.Length > 0)

@@ -32,11 +32,10 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Component description</param>
-        public LineListDrawer(Game game, BufferManager bufferManager, LineListDrawerDescription description)
-            : base(game, bufferManager, description)
+        public LineListDrawer(Scene scene, LineListDrawerDescription description)
+            : base(scene, description)
         {
             int count = 0;
 

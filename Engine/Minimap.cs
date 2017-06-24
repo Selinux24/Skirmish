@@ -46,17 +46,16 @@ namespace Engine
         /// <summary>
         /// Contructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Minimap description</param>
-        public Minimap(Game game, BufferManager bufferManager, MinimapDescription description)
-            : base(game, bufferManager, description)
+        public Minimap(Scene scene, MinimapDescription description)
+            : base(scene, description)
         {
             this.Drawables = description.Drawables;
 
             this.minimapArea = description.MinimapArea;
 
-            this.minimapBox = new SpriteTexture(game, bufferManager, new SpriteTextureDescription()
+            this.minimapBox = new SpriteTexture(scene, new SpriteTextureDescription()
             {
                 Top = description.Top,
                 Left = description.Left,

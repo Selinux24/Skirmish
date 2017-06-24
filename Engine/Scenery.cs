@@ -9,7 +9,6 @@ namespace Engine
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
-    using Engine.PathFinding;
 
     /// <summary>
     /// Terrain model
@@ -250,10 +249,10 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game class</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Terrain description</param>
-        public Scenery(Game game, BufferManager bufferManager, GroundDescription description)
-            : base(game, bufferManager, description)
+        public Scenery(Scene scene, GroundDescription description)
+            : base(scene, description)
         {
             ModelContent content = null;
 
@@ -291,7 +290,7 @@ namespace Engine
 
             foreach (var node in nodes)
             {
-                var patch = SceneryPatch.CreatePatch(game, this.BufferManager, content, node);
+                var patch = SceneryPatch.CreatePatch(this.Game, this.BufferManager, content, node);
 
                 this.patchDictionary.Add(node.Id, patch);
             }

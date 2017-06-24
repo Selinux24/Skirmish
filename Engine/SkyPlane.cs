@@ -91,23 +91,22 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Sky plane description class</param>
-        public SkyPlane(Game game, BufferManager bufferManager, SkyPlaneDescription description)
-            : base(game, bufferManager, description)
+        public SkyPlane(Scene scene, SkyPlaneDescription description)
+            : base(scene, description)
         {
             var img1 = new ImageContent()
             {
                 Streams = ContentManager.FindContent(description.ContentPath, description.Texture1Name),
             };
-            this.skyTexture1 = game.ResourceManager.CreateResource(img1);
+            this.skyTexture1 = this.Game.ResourceManager.CreateResource(img1);
 
             var img2 = new ImageContent()
             {
                 Streams = ContentManager.FindContent(description.ContentPath, description.Texture2Name),
             };
-            this.skyTexture2 = game.ResourceManager.CreateResource(img2);
+            this.skyTexture2 = this.Game.ResourceManager.CreateResource(img2);
 
             this.mode = description.Mode;
             this.MaxBrightness = description.MaxBrightness;

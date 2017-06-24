@@ -1,13 +1,9 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
-using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
     using Engine.Collections.Generic;
-    using Engine.Common;
-    using Engine.PathFinding;
 
     /// <summary>
     /// Ground class
@@ -19,22 +15,26 @@ namespace Engine
         /// Quadtree for base ground picking
         /// </summary>
         protected PickingQuadTree<Triangle> groundPickingQuadtree = null;
-
         /// <summary>
         /// Instance description used for creation
         /// </summary>
-        public GroundDescription Description { get; private set; }
+        protected new GroundDescription Description
+        {
+            get
+            {
+                return this.Description as GroundDescription;
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="scene">Scene</param>
         /// <param name="description">Ground description</param>
-        public Ground(Game game, BufferManager bufferManager, GroundDescription description)
-            : base(game, bufferManager, description)
+        public Ground(Scene scene, GroundDescription description)
+            : base(scene, description)
         {
-            this.Description = description;
+
         }
 
         /// <summary>
