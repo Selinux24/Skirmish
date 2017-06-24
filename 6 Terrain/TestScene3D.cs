@@ -1,6 +1,5 @@
 ﻿using Engine;
 using Engine.Animation;
-using Engine.Common;
 using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
@@ -27,6 +26,7 @@ namespace TerrainTest
 
         private bool walkMode = false;
         private float walkerVelocity = 8f;
+        private SceneObject followTarget;
         private bool follow = false;
         private NavigationMeshAgentType walkerAgentType = new NavigationMeshAgentType()
         {
@@ -753,31 +753,36 @@ namespace TerrainTest
             this.Lights.ShadowLDDistance = 100f;
             this.Lights.ShadowHDDistance = 25f;
         }
-
         public override void Initialized()
         {
             base.Initialized();
 
             #region Agent positioning over scenery
 
-            Vector3 heliPos;
-            Triangle heliTri;
-            float heliDist;
-            if (this.FindTopGroundPosition(this.helipod.Transform.Position.X, this.helipod.Transform.Position.Z, out heliPos, out heliTri, out heliDist))
+            var sceneryUsage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
+
             {
-                this.helicopter.Transform.SetPosition(heliPos);
-                this.helicopter.Transform.SetNormal(heliTri.Normal);
+                var ray = this.GetTopDownRay(this.helipod.Transform.Position);
+                Vector3 heliPos;
+                Triangle heliTri;
+                float heliDist;
+                if (this.PickNearest(ref ray, true, sceneryUsage, out heliPos, out heliTri, out heliDist))
+                {
+                    this.helicopter.Transform.SetPosition(heliPos);
+                    this.helicopter.Transform.SetNormal(heliTri.Normal);
+                }
+
+                var hp = new AnimationPath();
+                hp.AddLoop("roll");
+                this.animations.Add("heli_default", new AnimationPlan(hp));
             }
 
-            var hp = new AnimationPath();
-            hp.AddLoop("roll");
-            this.animations.Add("heli_default", new AnimationPlan(hp));
-
             {
+                var ray = this.GetTopDownRay(-60, -60);
                 Vector3 tankPosition;
                 Triangle tankTriangle;
                 float tankDist;
-                if (this.FindTopGroundPosition(-60, -60, out tankPosition, out tankTriangle, out tankDist))
+                if (this.PickNearest(ref ray, true, sceneryUsage, out tankPosition, out tankTriangle, out tankDist))
                 {
                     this.tankP1.Transform.SetPosition(tankPosition);
                     this.tankP1.Transform.SetNormal(tankTriangle.Normal);
@@ -785,10 +790,11 @@ namespace TerrainTest
             }
 
             {
+                var ray = this.GetTopDownRay(-70, 70);
                 Vector3 tankPosition;
                 Triangle tankTriangle;
                 float tankDist;
-                if (this.FindTopGroundPosition(-70, 70, out tankPosition, out tankTriangle, out tankDist))
+                if (this.PickNearest(ref ray, true, sceneryUsage, out tankPosition, out tankTriangle, out tankDist))
                 {
                     this.tankP2.Transform.SetPosition(tankPosition);
                     this.tankP2.Transform.SetNormal(tankTriangle.Normal);
@@ -971,9 +977,9 @@ namespace TerrainTest
             this.tankP2Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP2, tStatus);
             this.helicopterAgent = new FlyerAIAgent(this.agentManager, null, this.helicopter, hStatus);
 
-            this.AddComponent(this.tankP1Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.Agent);
-            this.AddComponent(this.tankP2Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.Agent);
-            this.AddComponent(this.helicopterAgent, new SceneObjectDescription() { }, SceneObjectUsageEnum.Agent);
+            this.AddComponent(this.tankP1Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.None);
+            this.AddComponent(this.tankP2Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.None);
+            this.AddComponent(this.helicopterAgent, new SceneObjectDescription() { }, SceneObjectUsageEnum.None);
 
             this.tankP1Agent.Moving += Agent_Moving;
             this.tankP1Agent.Attacking += Agent_Attacking;
@@ -1005,7 +1011,6 @@ namespace TerrainTest
             this.helicopterAgent.InitAttackingBehavior(15, 10);
             this.helicopterAgent.InitRetreatingBehavior(new Vector3(75, 0, 75), 12);
         }
-
         public override void Dispose()
         {
             Helper.Dispose(this.debugTex);
@@ -1126,7 +1131,18 @@ namespace TerrainTest
 
                 if (this.Game.Input.KeyJustReleased(Keys.Space))
                 {
-                    this.follow = !this.follow;
+                    if (this.follow)
+                    {
+                        this.followTarget = null;
+                        this.follow = false;
+                    }
+
+                    SceneObject agent;
+                    if (this.PickNearest(ref cursorRay, 0, true, SceneObjectUsageEnum.Agent, out agent))
+                    {
+                        this.followTarget = agent;
+                        this.follow = true;
+                    }
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.A))
@@ -1151,9 +1167,12 @@ namespace TerrainTest
 
                 if (this.follow)
                 {
-                    var sph = this.helicopter.Geometry.GetBoundingSphere();
+                    var pickable = this.followTarget.Get<IRayPickable<Triangle>>();
+                    var transform = this.followTarget.Get<ITransformable3D>();
+
+                    var sph = pickable.GetBoundingSphere();
                     this.Camera.LookTo(sph.Center);
-                    this.Camera.Goto(sph.Center + (this.helicopter.Transform.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
+                    this.Camera.Goto(sph.Center + (transform.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
                 }
 
                 #endregion

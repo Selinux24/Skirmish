@@ -15,7 +15,7 @@ namespace TerrainTest.AI
             this.Controller = new HeliManipulatorController();
         }
 
-        protected override void SetRouteToPoint(Vector3 point, float speed)
+        protected override void SetRouteToPoint(Vector3 point, float speed, bool fine)
         {
             var p = point;
 
@@ -36,7 +36,7 @@ namespace TerrainTest.AI
             float d;
             if (this.Parent.Scene.FindNearestGroundPosition(this.Manipulator.Position, out p, out t, out d))
             {
-                this.SetRouteToPoint(p, 15f);
+                this.SetRouteToPoint(p, 15f, false);
                 this.Model.AnimationController.Stop();
             }
             else

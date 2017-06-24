@@ -148,6 +148,7 @@
     <Compile Include="Animation\AnimationPlan.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
+    <Compile Include="Common\BaseSceneObject.cs" />
     <Compile Include="Collections\Generic\PickingQuadTree.cs" />
     <Compile Include="Collections\Generic\PickingQuadTreeNode.cs" />
     <Compile Include="Collections\Generic\QuadTree.cs" />
@@ -315,6 +316,7 @@
     <Compile Include="SpriteTextureDescription.cs" />
     <Compile Include="TextDrawerDescription.cs" />
     <Compile Include="TriangleListDrawerDescription.cs" />
+    <Compile Include="Updatable.cs" />
     <Compile Include="Vertexi.cs" />
     <Compile Include="PathFinding\NavMesh\Region.cs" />
     <Compile Include="PathFinding\NavMesh\RegionFlags.cs" />

@@ -771,10 +771,6 @@ namespace HeightmapTest
             //this.terrain.Instance.AttachCoarsePathFinding(new ModelBase[] { this.torchs, this.rocks, this.trees, this.trees2 }, false);
             //this.terrain.Instance.UpdateInternals();
 
-            this.gardener.Instance.ParentScene = this;
-            this.gardener2.Instance.ParentScene = this;
-            this.lensFlare.Instance.ParentScene = this;
-
             //Player soldier
             {
                 Vector3 position;

@@ -446,12 +446,6 @@ namespace DeferredTest
                 }
             }
             #endregion
-
-            #region Gardener
-
-            this.gardener.Instance.ParentScene = this;
-
-            #endregion
         }
 
         public override void Initialized()

@@ -23,9 +23,9 @@ namespace Engine
         /// <param name="maxDistance">Maximum distance to test</param>
         /// <param name="list">Collection of objects to test</param>
         /// <returns>Returns a list of ray pickable objects order by distance to ray origin</returns>
-        private static List<Tuple<IRayPickable<Triangle>, float>> PickCoarse(ref Ray ray, float maxDistance, IEnumerable<SceneObject> list)
+        private static List<Tuple<SceneObject, float>> PickCoarse(ref Ray ray, float maxDistance, IEnumerable<SceneObject> list)
         {
-            List<Tuple<IRayPickable<Triangle>, float>> coarse = new List<Tuple<IRayPickable<Triangle>, float>>();
+            List<Tuple<SceneObject, float>> coarse = new List<Tuple<SceneObject, float>>();
 
             foreach (var gObj in list)
             {
@@ -37,7 +37,7 @@ namespace Engine
                         float d;
                         if (TestCoarse(ref ray, pickable, maxDistance, out d))
                         {
-                            coarse.Add(new Tuple<IRayPickable<Triangle>, float>(pickable, d));
+                            coarse.Add(new Tuple<SceneObject, float>(gObj, d));
                         }
                     }
                 }
@@ -48,7 +48,7 @@ namespace Engine
                     float d;
                     if (TestCoarse(ref ray, pickable, maxDistance, out d))
                     {
-                        coarse.Add(new Tuple<IRayPickable<Triangle>, float>(pickable, d));
+                        coarse.Add(new Tuple<SceneObject, float>(gObj, d));
                     }
                 }
             }
@@ -77,7 +77,7 @@ namespace Engine
             float d;
             if (Collision.RayIntersectsSphere(ref ray, ref bsph, out d))
             {
-                if (d <= maxDistance)
+                if (maxDistance == 0 || d <= maxDistance)
                 {
                     distance = d;
 
@@ -386,12 +386,19 @@ namespace Engine
         /// <typeparam name="T">Type of resource</typeparam>
         /// <param name="description">Resource description</param>
         /// <returns>Returns the new generated resource</returns>
-        private T CreateResource<T>(SceneObjectDescription description) where T : Drawable
+        private T CreateResource<T>(SceneObjectDescription description) where T : BaseSceneObject
         {
             return (T)Activator.CreateInstance(typeof(T), this, description);
         }
-
-        public SceneObject<T> AddComponent<T>(SceneObjectDescription description, SceneObjectUsageEnum usage = SceneObjectUsageEnum.None, int order = 0) where T : Drawable
+        /// <summary>
+        /// Adds component to collection
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Usage</param>
+        /// <param name="order">Processing order</param>
+        /// <returns></returns>
+        public SceneObject<T> AddComponent<T>(SceneObjectDescription description, SceneObjectUsageEnum usage = SceneObjectUsageEnum.None, int order = 0) where T : BaseSceneObject
         {
             T component = this.CreateResource<T>(description);
 
@@ -403,6 +410,7 @@ namespace Engine
         /// <typeparam name="T">Component type</typeparam>
         /// <param name="component">Component</param>
         /// <param name="description">Description</param>
+        /// <param name="usage">Usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the added component</returns>
         public SceneObject<T> AddComponent<T>(T component, SceneObjectDescription description, SceneObjectUsageEnum usage = SceneObjectUsageEnum.None, int order = 0)
@@ -416,7 +424,9 @@ namespace Engine
         /// <summary>
         /// Adds component to collection
         /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
         /// <param name="component">Component</param>
+        /// <param name="usage">Usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the added component</returns>
         private SceneObject<T> AddComponent<T>(SceneObject<T> component, SceneObjectUsageEnum usage, int order)
@@ -686,6 +696,33 @@ namespace Engine
         /// <summary>
         /// Gets vertical ray from scene's top and down vector with x and z coordinates
         /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public Ray GetTopDownRay(Point position)
+        {
+            return this.GetTopDownRay(position.X, position.Y);
+        }
+        /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public Ray GetTopDownRay(Vector2 position)
+        {
+            return this.GetTopDownRay(position.X, position.Y);
+        }
+        /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public Ray GetTopDownRay(Vector3 position)
+        {
+            return this.GetTopDownRay(position.X, position.Z);
+        }
+        /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="z">Z coordinate</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
@@ -699,6 +736,7 @@ namespace Engine
                 Direction = Vector3.Down,
             };
         }
+
         /// <summary>
         /// Gets the nearest pickable object in the ray path
         /// </summary>
@@ -707,13 +745,26 @@ namespace Engine
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="model">Gets the resulting ray pickable object</param>
         /// <returns>Returns true if a pickable object in the ray path was found</returns>
-        public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, out IRayPickable<Triangle> model)
+        public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, out SceneObject model)
         {
-            model = null;
-
             var usage = SceneObjectUsageEnum.Agent &
                 SceneObjectUsageEnum.CoarsePathFinding &
                 SceneObjectUsageEnum.FullPathFinding;
+
+            return this.PickNearest(ref ray, maxDistance, facingOnly, usage, out model);
+        }
+        /// <summary>
+        /// Gets the nearest pickable object in the ray path
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="maxDistance">Maximum distance for test</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="usage">Object usage mask</param>
+        /// <param name="model">Gets the resulting ray pickable object</param>
+        /// <returns>Returns true if a pickable object in the ray path was found</returns>
+        public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, SceneObjectUsageEnum usage, out SceneObject model)
+        {
+            model = null;
 
             var cmpList = this.components.FindAll(c => c.Usage.HasFlag(usage));
 
@@ -721,19 +772,24 @@ namespace Engine
 
             foreach (var obj in coarse)
             {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (obj.Item1.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
+                if (pickable != null)
                 {
-                    model = obj.Item1;
+                    Vector3 p;
+                    Triangle t;
+                    float d;
+                    if (pickable.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                    {
+                        model = obj.Item1;
 
-                    return true;
+                        return true;
+                    }
                 }
             }
 
             return false;
         }
+
         /// <summary>
         /// Gets nearest picking position of giving ray
         /// </summary>
@@ -895,21 +951,25 @@ namespace Engine
                     break;
                 }
 
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (obj.Item1.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
+                if (pickable != null)
                 {
-                    if (d < bestDistance)
+                    Vector3 p;
+                    Triangle t;
+                    float d;
+                    if (pickable.PickNearest(ref ray, facingOnly, out p, out t, out d))
                     {
-                        bestDistance = d;
+                        if (d < bestDistance)
+                        {
+                            bestDistance = d;
 
-                        position = p;
-                        item = t;
-                        distance = d;
+                            position = p;
+                            item = t;
+                            distance = d;
+                        }
+
+                        picked = true;
                     }
-
-                    picked = true;
                 }
             }
 
@@ -939,16 +999,20 @@ namespace Engine
 
             foreach (var obj in coarse)
             {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (obj.Item1.PickFirst(ref ray, facingOnly, out p, out t, out d))
+                var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
+                if (pickable != null)
                 {
-                    position = p;
-                    item = t;
-                    distance = d;
+                    Vector3 p;
+                    Triangle t;
+                    float d;
+                    if (pickable.PickFirst(ref ray, facingOnly, out p, out t, out d))
+                    {
+                        position = p;
+                        item = t;
+                        distance = d;
 
-                    return true;
+                        return true;
+                    }
                 }
             }
 
@@ -982,14 +1046,18 @@ namespace Engine
 
             foreach (var obj in coarse)
             {
-                Vector3[] p;
-                Triangle[] t;
-                float[] d;
-                if (obj.Item1.PickAll(ref ray, facingOnly, out p, out t, out d))
+                var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
+                if (pickable != null)
                 {
-                    lPositions.AddRange(p);
-                    lTriangles.AddRange(t);
-                    lDistances.AddRange(d);
+                    Vector3[] p;
+                    Triangle[] t;
+                    float[] d;
+                    if (pickable.PickAll(ref ray, facingOnly, out p, out t, out d))
+                    {
+                        lPositions.AddRange(p);
+                        lTriangles.AddRange(t);
+                        lDistances.AddRange(d);
+                    }
                 }
             }
 
@@ -1022,7 +1090,7 @@ namespace Engine
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="obj">Object</param>
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
-        public void SetGround<T>(SceneObject<T> obj, bool fullGeometryPathFinding)
+        public void SetGround(SceneObject obj, bool fullGeometryPathFinding)
         {
             this.boundingBox = obj.Get<IRayPickable<Triangle>>().GetBoundingBox();
             this.boundingSphere = obj.Get<IRayPickable<Triangle>>().GetBoundingSphere();
@@ -1039,7 +1107,7 @@ namespace Engine
         /// <param name="z">Z position</param>
         /// <param name="transform">Transform</param>
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
-        public void AttachToGround<T>(SceneObject<T> obj, bool fullGeometryPathFinding)
+        public void AttachToGround(SceneObject obj, bool fullGeometryPathFinding)
         {
             obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
         }
@@ -1052,7 +1120,7 @@ namespace Engine
             if (this.PathFinderDescription != null && this.PathFinderDescription.Settings != null)
             {
                 var gTriangles = this.GetTrianglesForNavigationGraph();
-                if(gTriangles == null || gTriangles.Length == 0)
+                if (gTriangles == null || gTriangles.Length == 0)
                 {
                     throw new ArgumentException("Scene must have one ground object for navigation graph processing");
                 }

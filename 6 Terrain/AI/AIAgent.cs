@@ -118,11 +118,11 @@ namespace TerrainTest.AI
             }
         }
 
-        public AIAgent(Brain parent, AgentType agentType, SceneObject model, AIStatusDescription status)
+        public AIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, AIStatusDescription status)
         {
             this.Parent = parent;
             this.AgentType = agentType;
-            this.SceneObject = model;
+            this.SceneObject = sceneObject;
             this.Status = new AIStatus(status);
             this.Controller = new SteerManipulatorController();
 
@@ -388,7 +388,7 @@ namespace TerrainTest.AI
 
             if (navigate)
             {
-                this.SetRouteToPoint(this.checkPoints[this.currentCheckPoint], this.patrollVelocity);
+                this.SetRouteToPoint(this.checkPoints[this.currentCheckPoint], this.patrollVelocity, true);
             }
         }
         protected virtual void AttackingTasks(GameTime gameTime)
@@ -421,7 +421,7 @@ namespace TerrainTest.AI
                     {
                         v = this.attackTarget.Controller.Speed;
                     }
-                    this.SetRouteToPoint(this.attackPosition.Value, v);
+                    this.SetRouteToPoint(this.attackPosition.Value, v, false);
                 }
 
                 this.Attack(this.attackTarget);
@@ -439,7 +439,7 @@ namespace TerrainTest.AI
 
             if (retreat)
             {
-                this.SetRouteToPoint(this.retreatingPosition.Value, this.retreatVelocity);
+                this.SetRouteToPoint(this.retreatingPosition.Value, this.retreatVelocity, true);
             }
         }
 
@@ -470,11 +470,15 @@ namespace TerrainTest.AI
 
             return false;
         }
-        protected virtual void SetRouteToPoint(Vector3 point, float speed)
+        protected virtual void SetRouteToPoint(Vector3 point, float speed, bool refine)
         {
             if (this.AgentType != null & this.Parent.Scene != null)
             {
-                var p = this.Parent.Scene.FindPath(this.AgentType, this.Manipulator.Position, point);
+                var refineDelta = refine ?
+                    speed * 0.1f :
+                    0f;
+
+                var p = this.Parent.Scene.FindPath(this.AgentType, this.Manipulator.Position, point, true, refineDelta);
                 if (p != null)
                 {
                     this.Follow(p, speed);

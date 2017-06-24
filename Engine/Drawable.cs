@@ -1,6 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D11;
-using System;
 
 namespace Engine
 {
@@ -9,16 +7,8 @@ namespace Engine
     /// <summary>
     /// Drawable object
     /// </summary>
-    public abstract class Drawable : IUpdatable, IDrawable, ICullable, IDisposable
+    public abstract class Drawable : Updatable, IDrawable, ICullable
     {
-        /// <summary>
-        /// Game class
-        /// </summary>
-        public virtual Scene Scene { get; private set; }
-        /// <summary>
-        /// Object description
-        /// </summary>
-        public virtual SceneObjectDescription Description { get; private set; }
         /// <summary>
         /// Game class
         /// </summary>
@@ -37,26 +27,16 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Drawable(Scene scene, SceneObjectDescription description)
+        public Drawable(Scene scene, SceneObjectDescription description) : base(scene, description)
         {
-            this.Scene = scene;
-            this.Description = description;
+
         }
 
-        /// <summary>
-        /// Update state
-        /// </summary>
-        /// <param name="context">Context</param>
-        public abstract void Update(UpdateContext context);
         /// <summary>
         /// Draw
         /// </summary>
         /// <param name="context">Context</param>
         public abstract void Draw(DrawContext context);
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        public abstract void Dispose();
 
         /// <summary>
         /// Performs culling test
