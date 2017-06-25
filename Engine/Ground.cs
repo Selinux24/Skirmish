@@ -15,16 +15,6 @@ namespace Engine
         /// Quadtree for base ground picking
         /// </summary>
         protected PickingQuadTree<Triangle> groundPickingQuadtree = null;
-        /// <summary>
-        /// Instance description used for creation
-        /// </summary>
-        protected new GroundDescription Description
-        {
-            get
-            {
-                return this.Description as GroundDescription;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -150,13 +140,28 @@ namespace Engine
         /// Gets bounding sphere
         /// </summary>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public abstract BoundingSphere GetBoundingSphere();
+        public BoundingSphere GetBoundingSphere()
+        {
+            return this.groundPickingQuadtree != null ?
+                BoundingSphere.FromBox(this.groundPickingQuadtree.BoundingBox) :
+                new BoundingSphere();
+        }
         /// <summary>
         /// Gets bounding box
         /// </summary>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public abstract BoundingBox GetBoundingBox();
+        public BoundingBox GetBoundingBox()
+        {
+            return this.groundPickingQuadtree != null ?
+                this.groundPickingQuadtree.BoundingBox :
+                new BoundingBox();
+        }
 
+        /// <summary>
+        /// Gets the ground volume
+        /// </summary>
+        /// <param name="full"></param>
+        /// <returns>Returns all the triangles of the ground</returns>
         public Triangle[] GetVolume(bool full)
         {
             List<Triangle> res = new List<Triangle>();

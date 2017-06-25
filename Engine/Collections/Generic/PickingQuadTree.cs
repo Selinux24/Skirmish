@@ -8,7 +8,7 @@ namespace Engine.Collections.Generic
     /// <summary>
     /// Picking quad tree
     /// </summary>
-    public class PickingQuadTree<T> : IRayPickable<T> where T : IVertexList, IRayIntersectable
+    public class PickingQuadTree<T> where T : IVertexList, IRayIntersectable
     {
         /// <summary>
         /// Root node
@@ -17,11 +17,7 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Global bounding box
         /// </summary>
-        private BoundingBox boundingBox;
-        /// <summary>
-        /// Global bounding sphere
-        /// </summary>
-        private BoundingSphere boundingSphere;
+        public BoundingBox BoundingBox { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -31,10 +27,8 @@ namespace Engine.Collections.Generic
         public PickingQuadTree(T[] items, int maxDepth)
         {
             var bbox = GeometryUtil.CreateBoundingBox(items);
-            var bsph = GeometryUtil.CreateBoundingSphere(items);
 
-            this.boundingBox = bbox;
-            this.boundingSphere = bsph;
+            this.BoundingBox = bbox;
 
             this.Root = PickingQuadTreeNode<T>.CreatePartitions(
                 this, null,
@@ -215,22 +209,6 @@ namespace Engine.Collections.Generic
             }
 
             return node;
-        }
-        /// <summary>
-        /// Gets bounding sphere
-        /// </summary>
-        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere()
-        {
-            return this.boundingSphere;
-        }
-        /// <summary>
-        /// Gets bounding box
-        /// </summary>
-        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox()
-        {
-            return this.boundingBox;
         }
 
         /// <summary>

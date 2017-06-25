@@ -9,7 +9,7 @@ namespace Engine.Collections.Generic
     /// <summary>
     /// Picking quad tree node
     /// </summary>
-    public class PickingQuadTreeNode<T> : IRayPickable<T> where T : IVertexList, IRayIntersectable
+    public class PickingQuadTreeNode<T> where T : IVertexList, IRayIntersectable
     {
         /// <summary>
         /// Static node count
@@ -49,8 +49,7 @@ namespace Engine.Collections.Generic
                     {
                         Id = -1,
                         Level = treeDepth,
-                        boundingBox = bbox,
-                        boundingSphere = BoundingSphere.FromBox(bbox),
+                        BoundingBox = bbox,
                     };
 
                     bool haltByDepth = treeDepth == maxDepth;
@@ -106,11 +105,7 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Bounding box
         /// </summary>
-        private BoundingBox boundingBox;
-        /// <summary>
-        /// Bounding sphere
-        /// </summary>
-        private BoundingSphere boundingSphere;
+        public BoundingBox BoundingBox;
 
         /// <summary>
         /// Parent
@@ -185,7 +180,7 @@ namespace Engine.Collections.Generic
         {
             get
             {
-                return (this.boundingBox.Maximum + this.boundingBox.Minimum) * 0.5f;
+                return (this.BoundingBox.Maximum + this.BoundingBox.Minimum) * 0.5f;
             }
         }
         /// <summary>
@@ -422,7 +417,7 @@ namespace Engine.Collections.Generic
                     #region Per bound test
 
                     float d;
-                    if (Intersection.RayIntersectsBox(ref ray, ref this.boundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
                     {
                         #region Per item test
 
@@ -452,7 +447,7 @@ namespace Engine.Collections.Generic
                 foreach (var node in this.Children)
                 {
                     float d;
-                    if (Intersection.RayIntersectsBox(ref ray, ref node.boundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
                     {
                         while (boxHitsByDistance.ContainsKey(d))
                         {
@@ -557,7 +552,7 @@ namespace Engine.Collections.Generic
                     #region Per bound test
 
                     float d;
-                    if (Intersection.RayIntersectsBox(ref ray, ref this.boundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
                     {
                         #region Per item test
 
@@ -585,7 +580,7 @@ namespace Engine.Collections.Generic
                 foreach (var node in this.Children)
                 {
                     float d;
-                    if (Intersection.RayIntersectsBox(ref ray, ref node.boundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
                     {
                         Vector3 thisHit;
                         T thisTri;
@@ -653,7 +648,7 @@ namespace Engine.Collections.Generic
                     #region Per bound test
 
                     float d;
-                    if (Intersection.RayIntersectsBox(ref ray, ref this.boundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out d))
                     {
                         #region Per item test
 
@@ -688,7 +683,7 @@ namespace Engine.Collections.Generic
                 foreach (var node in this.Children)
                 {
                     float d;
-                    if (Intersection.RayIntersectsBox(ref ray, ref node.boundingBox, out d))
+                    if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out d))
                     {
                         Vector3[] thisHits;
                         T[] thisTris;
@@ -740,7 +735,7 @@ namespace Engine.Collections.Generic
                 {
                     Array.ForEach(this.Children, (c) =>
                     {
-                        bboxes.Add(c.boundingBox);
+                        bboxes.Add(c.BoundingBox);
                     });
                 }
                 else
@@ -753,7 +748,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                bboxes.Add(this.boundingBox);
+                bboxes.Add(this.BoundingBox);
             }
 
             return bboxes.ToArray();
@@ -794,7 +789,7 @@ namespace Engine.Collections.Generic
 
             if (this.Children == null)
             {
-                if (frustum.Contains(this.boundingBox) != ContainmentType.Disjoint)
+                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
                 {
                     nodes.Add(this);
                 }
@@ -824,7 +819,7 @@ namespace Engine.Collections.Generic
 
             if (this.Children == null)
             {
-                if (bbox.Contains(this.boundingBox) != ContainmentType.Disjoint)
+                if (bbox.Contains(this.BoundingBox) != ContainmentType.Disjoint)
                 {
                     nodes.Add(this);
                 }
@@ -854,7 +849,7 @@ namespace Engine.Collections.Generic
 
             if (this.Children == null)
             {
-                if (sphere.Contains(ref this.boundingBox) != ContainmentType.Disjoint)
+                if (sphere.Contains(ref this.BoundingBox) != ContainmentType.Disjoint)
                 {
                     nodes.Add(this);
                 }
@@ -908,7 +903,7 @@ namespace Engine.Collections.Generic
         {
             if (this.Children == null)
             {
-                if (this.boundingBox.Contains(position) != ContainmentType.Disjoint)
+                if (this.BoundingBox.Contains(position) != ContainmentType.Disjoint)
                 {
                     return this;
                 }
@@ -926,22 +921,6 @@ namespace Engine.Collections.Generic
             }
 
             return null;
-        }
-        /// <summary>
-        /// Gets bounding sphere
-        /// </summary>
-        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere()
-        {
-            return this.boundingSphere;
-        }
-        /// <summary>
-        /// Gets bounding box
-        /// </summary>
-        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox()
-        {
-            return this.boundingBox;
         }
 
         /// <summary>

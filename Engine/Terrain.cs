@@ -717,15 +717,15 @@ namespace Engine
             for (int i = 0; i < indices.Length; i += 3)
             {
                 tris.Add(new Triangle(
-                    vertices[indices[i]].Position.Value, 
-                    vertices[indices[i+2]].Position.Value, 
-                    vertices[indices[i+1]].Position.Value));
+                    vertices[indices[i]].Position.Value,
+                    vertices[indices[i + 2]].Position.Value,
+                    vertices[indices[i + 1]].Position.Value));
             }
 
             //Initialize quadtree for ray picking
             this.groundPickingQuadtree = new PickingQuadTree<Triangle>(
                 tris.ToArray(),
-                this.Description.Quadtree.MaximumDepth);
+                description.Quadtree.MaximumDepth);
 
             if (this.Map == null)
             {
@@ -762,7 +762,6 @@ namespace Engine
         {
             this.Map.Update(context.EyePosition);
         }
-
         /// <summary>
         /// Draws the terrain components
         /// </summary>
@@ -913,23 +912,6 @@ namespace Engine
                 this.heightMapCellSize,
                 this.heightMapHeight,
                 out vertices, out indices);
-        }
-
-        /// <summary>
-        /// Gets bounding sphere
-        /// </summary>
-        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public override BoundingSphere GetBoundingSphere()
-        {
-            return this.groundPickingQuadtree != null ? this.groundPickingQuadtree.GetBoundingSphere() : new BoundingSphere();
-        }
-        /// <summary>
-        /// Gets bounding box
-        /// </summary>
-        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public override BoundingBox GetBoundingBox()
-        {
-            return this.groundPickingQuadtree != null ? this.groundPickingQuadtree.GetBoundingBox() : new BoundingBox();
         }
 
         /// <summary>

@@ -383,8 +383,6 @@ namespace Engine
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
             this.InvalidateCache();
-
-            this.VolumeManager.Invalidate();
         }
 
         /// <summary>
@@ -394,6 +392,7 @@ namespace Engine
         {
             this.updatePoints = true;
             this.updateTriangles = true;
+            this.VolumeManager.Invalidate();
         }
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -627,7 +626,7 @@ namespace Engine
                 else
                 {
                     //Generate cylinder
-                    var cylinder = BoundingCylinder.FromPoints(this.GetPoints());
+                    var cylinder = this.VolumeManager.GetBoundingCylinder();
                     return Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8);
                 }
             }

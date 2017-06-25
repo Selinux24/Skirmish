@@ -38,18 +38,6 @@ namespace Engine
         /// </summary>
         private Triangle[] triangleCache = null;
         /// <summary>
-        /// Bounding sphere cache
-        /// </summary>
-        private BoundingSphere boundingSphere = new BoundingSphere();
-        /// <summary>
-        /// Bounding box cache
-        /// </summary>
-        private BoundingBox boundingBox = new BoundingBox();
-        /// <summary>
-        /// Oriented bounding box cache
-        /// </summary>
-        private OrientedBoundingBox orientedBoundingBox = new OrientedBoundingBox();
-        /// <summary>
         /// Gets if model has volumes
         /// </summary>
         private bool hasVolumes
@@ -74,10 +62,6 @@ namespace Engine
         /// Manipulator
         /// </summary>
         public Manipulator3D Manipulator { get; private set; }
-        /// <summary>
-        /// Manipulator has changed last frame
-        /// </summary>
-        public bool ManipulatorChanged { get; private set; }
         /// <summary>
         /// Texture index
         /// </summary>
@@ -112,6 +96,10 @@ namespace Engine
         /// Gets the current instance lights collection
         /// </summary>
         public SceneLight[] Lights { get; protected set; }
+        /// <summary>
+        /// Volume manager
+        /// </summary>
+        public VolumeManager VolumeManager { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -123,6 +111,9 @@ namespace Engine
             this.model = model;
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+
+            this.VolumeManager = new VolumeManager();
+            this.VolumeManager.Feeder = this.GetPoints;
 
             var drawData = model.GetDrawingData(LevelOfDetailEnum.High);
             if (drawData != null && drawData.Lights != null && drawData.Lights.Length > 0)
@@ -142,18 +133,13 @@ namespace Engine
         /// <param name="context">Context</param>
         public virtual void Update(UpdateContext context)
         {
-            this.ManipulatorChanged = false;
-
             this.Manipulator.Update(context.GameTime);
 
-            if (this.ManipulatorChanged)
+            if (this.Lights != null && this.Lights.Length > 0)
             {
-                if (this.Lights != null && this.Lights.Length > 0)
+                for (int i = 0; i < this.Lights.Length; i++)
                 {
-                    for (int i = 0; i < this.Lights.Length; i++)
-                    {
-                        this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
-                    }
+                    this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
                 }
             }
 
@@ -180,19 +166,6 @@ namespace Engine
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
             this.InvalidateCache();
-
-            this.boundingSphere = new BoundingSphere();
-            this.boundingBox = new BoundingBox();
-
-            if (this.Lights != null && this.Lights.Length > 0)
-            {
-                for (int i = 0; i < this.Lights.Length; i++)
-                {
-                    this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
-                }
-            }
-
-            this.ManipulatorChanged = true;
         }
 
         /// <summary>
@@ -202,8 +175,7 @@ namespace Engine
         {
             this.updatePoints = true;
             this.updateTriangles = true;
-
-            this.orientedBoundingBox = new OrientedBoundingBox();
+            this.VolumeManager.Invalidate();
         }
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -274,16 +246,7 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere(bool refresh)
         {
-            if (refresh || this.boundingSphere == new BoundingSphere())
-            {
-                Vector3[] positions = this.GetPoints(refresh);
-                if (positions != null && positions.Length > 0)
-                {
-                    this.boundingSphere = BoundingSphere.FromPoints(positions);
-                }
-            }
-
-            return this.boundingSphere;
+            return this.VolumeManager.GetBoundingSphere(refresh);
         }
         /// <summary>
         /// Gets bounding box
@@ -300,16 +263,7 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox(bool refresh)
         {
-            if (refresh || this.boundingBox == new BoundingBox())
-            {
-                Vector3[] positions = this.GetPoints(refresh);
-                if (positions != null && positions.Length > 0)
-                {
-                    this.boundingBox = BoundingBox.FromPoints(positions);
-                }
-            }
-
-            return this.boundingBox;
+            return this.VolumeManager.GetBoundingBox(refresh);
         }
         /// <summary>
         /// Gets oriented bounding box
@@ -326,44 +280,7 @@ namespace Engine
         /// <returns>Returns oriented bounding box with identity transformation. Empty if the vertex type hasn't position channel</returns>
         public OrientedBoundingBox GetOrientedBoundingBox(bool refresh)
         {
-            if (refresh || this.orientedBoundingBox == new OrientedBoundingBox())
-            {
-                Vector3[] positions = this.GetPoints(refresh);
-                if (positions != null && positions.Length > 0)
-                {
-                    this.orientedBoundingBox = new OrientedBoundingBox(positions);
-                    this.orientedBoundingBox.Transform(Matrix.Identity);
-                }
-            }
-
-            return this.orientedBoundingBox;
-        }
-        /// <summary>
-        /// Gets internal volume
-        /// </summary>
-        /// <param name="full"></param>
-        /// <returns>Returns internal volume</returns>
-        public Triangle[] GetVolume(bool full)
-        {
-            var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
-            if (full)
-            {
-                return this.GetTriangles(true);
-            }
-            else
-            {
-                if (drawingData.VolumeMesh != null)
-                {
-                    return Triangle.Transform(drawingData.VolumeMesh, this.Manipulator.LocalTransform);
-                }
-                else
-                {
-                    //Generate cylinder
-                    var cylinder = BoundingCylinder.FromPoints(this.GetPoints());
-                    return Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8);
-                }
-
-            }
+            return this.VolumeManager.GetOrientedBoundingBox(refresh);
         }
 
         /// <summary>
@@ -582,6 +499,34 @@ namespace Engine
             else
             {
                 this.LevelOfDetail = LevelOfDetailEnum.None;
+            }
+        }
+
+        /// <summary>
+        /// Gets internal volume
+        /// </summary>
+        /// <param name="full"></param>
+        /// <returns>Returns internal volume</returns>
+        public Triangle[] GetVolume(bool full)
+        {
+            var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
+            if (full)
+            {
+                return this.GetTriangles(true);
+            }
+            else
+            {
+                if (drawingData.VolumeMesh != null)
+                {
+                    return Triangle.Transform(drawingData.VolumeMesh, this.Manipulator.LocalTransform);
+                }
+                else
+                {
+                    //Generate cylinder
+                    var cylinder = this.VolumeManager.GetBoundingCylinder();
+                    return Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8);
+                }
+
             }
         }
 
