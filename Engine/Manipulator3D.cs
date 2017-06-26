@@ -1,12 +1,13 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
     /// <summary>
     /// 3D manipulator
     /// </summary>
-    public class Manipulator3D
+    public class Manipulator3D : IManipulator
     {
         /// <summary>
         /// State updated event
@@ -490,6 +491,16 @@ namespace Engine
             {
                 this.SetRotation(Quaternion.RotationAxis(Vector3.Left, 0f));
             }
+        }
+
+        /// <summary>
+        /// Gets the transform by name
+        /// </summary>
+        /// <param name="name">Transform name</param>
+        /// <returns>Returns the transform by name</returns>
+        public Matrix Transform(string name)
+        {
+            return this.localTransform;
         }
 
         /// <summary>

@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// 2D manipulator
     /// </summary>
-    public class Manipulator2D
+    public class Manipulator2D : IManipulator
     {
         /// <summary>
         /// Final transform for the controller
@@ -164,6 +164,16 @@ namespace Engine
         public void SetScale(Vector2 scale)
         {
             this.scale = scale;
+        }
+
+        /// <summary>
+        /// Gets the transform by name
+        /// </summary>
+        /// <param name="name">Transform name</param>
+        /// <returns>Returns the transform by name</returns>
+        public Matrix Transform(string name)
+        {
+            return this.localTransform;
         }
 
         /// <summary>

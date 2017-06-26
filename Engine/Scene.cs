@@ -114,10 +114,6 @@ namespace Engine
         /// </summary>
         private BoundingBox boundingBox;
         /// <summary>
-        /// Scene bounding sphere
-        /// </summary>
-        private BoundingSphere boundingSphere;
-        /// <summary>
         /// Graph used for pathfinding
         /// </summary>
         protected IGraph navigationGraph = null;
@@ -1068,14 +1064,6 @@ namespace Engine
             return lPositions.Count > 0;
         }
         /// <summary>
-        /// Gets bounding sphere
-        /// </summary>
-        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere()
-        {
-            return this.boundingSphere;
-        }
-        /// <summary>
         /// Gets bounding box
         /// </summary>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
@@ -1093,7 +1081,6 @@ namespace Engine
         public void SetGround(SceneObject obj, bool fullGeometryPathFinding)
         {
             this.boundingBox = obj.Get<IRayPickable<Triangle>>().GetBoundingBox();
-            this.boundingSphere = obj.Get<IRayPickable<Triangle>>().GetBoundingSphere();
 
             obj.Usage |= SceneObjectUsageEnum.Ground;
             obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
@@ -1126,7 +1113,6 @@ namespace Engine
                 }
 
                 this.boundingBox = GeometryUtil.CreateBoundingBox(gTriangles);
-                this.boundingSphere = GeometryUtil.CreateBoundingSphere(gTriangles);
 
                 this.navigationGraph = PathFinder.Build(this.PathFinderDescription.Settings, gTriangles);
             }
@@ -1145,7 +1131,7 @@ namespace Engine
             {
                 var curr = pfComponents[i];
 
-                List<IVolume> volumes = new List<IVolume>();
+                List<IRayPickable<Triangle>> volumes = new List<IRayPickable<Triangle>>();
 
                 bool isComposed = curr.Is<IComposed>();
                 if (!isComposed)
@@ -1156,7 +1142,7 @@ namespace Engine
                         trn.Manipulator.UpdateInternals(true);
                     }
 
-                    var pickable = curr.Get<IVolume>();
+                    var pickable = curr.Get<IRayPickable<Triangle>>();
                     if (pickable != null)
                     {
                         volumes.Add(pickable);
@@ -1170,7 +1156,7 @@ namespace Engine
                         child.Manipulator.UpdateInternals(true);
                     }
 
-                    var pickableChilds = curr.Get<IComposed>().GetComponents<IVolume>();
+                    var pickableChilds = curr.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
                     volumes.AddRange(pickableChilds);
                 }
 

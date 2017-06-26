@@ -165,7 +165,6 @@
     <Compile Include="Common\UseMaterials.cs" />
     <Compile Include="Common\UseSkinningData.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
-    <Compile Include="Common\VolumeManager.cs" />
     <Compile Include="Effects\EffectDefaultClouds.cs" />
     <Compile Include="Effects\EffectPostBlur.cs" />
     <Compile Include="Effects\EffectShadowBillboard.cs" />
@@ -178,6 +177,7 @@
     <Compile Include="IComposed.cs" />
     <Compile Include="ICullable.cs" />
     <Compile Include="IDrawable.cs" />
+    <Compile Include="IManipulator.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />
     <Compile Include="ISceneLightPosition.cs" />
@@ -186,7 +186,7 @@
     <Compile Include="IUpdatable.cs" />
     <Compile Include="IVertexList.cs" />
     <Compile Include="BasicManipulatorController.cs" />
-    <Compile Include="IVolume.cs" />
+    <Compile Include="Manipulator3DArray.cs" />
     <Compile Include="MaterialDescription.cs" />
     <Compile Include="NormalPath.cs" />
     <Compile Include="ParticleManager.cs" />

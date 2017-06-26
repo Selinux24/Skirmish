@@ -340,6 +340,7 @@ namespace TerrainTest
                 Name = "Tank",
                 CastShadow = true,
                 Static = false,
+                Optimize = false,
                 Content = new ContentDescription()
                 {
                     ContentFolder = "resources/Leopard",
@@ -1812,14 +1813,14 @@ namespace TerrainTest
             }
             for (int i = 0; i < this.tree1.Count; i++)
             {
-                var instance = this.tree1.GetComponent<IVolume>(i);
+                var instance = this.tree1.GetComponent<IRayPickable<Triangle>>(i);
 
                 lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(false)));
             }
 
             for (int i = 0; i < this.tree2.Count; i++)
             {
-                var instance = this.tree2.GetComponent<IVolume>(i);
+                var instance = this.tree2.GetComponent<IRayPickable<Triangle>>(i);
 
                 lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(false)));
             }

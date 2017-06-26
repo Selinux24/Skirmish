@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Basic Model
     /// </summary>
-    public class Model : ModelBase, ITransformable3D, IRayPickable<Triangle>, ICullable, IVolume
+    public class Model : ModelBase, ITransformable3D, IRayPickable<Triangle>, ICullable
     {
         /// <summary>
         /// Update point cache flag
@@ -29,6 +29,14 @@ namespace Engine
         /// Triangle list cache
         /// </summary>
         private Triangle[] triangleCache = null;
+        /// <summary>
+        /// Bounding sphere
+        /// </summary>
+        private BoundingSphere boundingSphere;
+        /// <summary>
+        /// Bounding box
+        /// </summary>
+        private BoundingBox boundingBox;
         /// <summary>
         /// Gets if model has volumes
         /// </summary>
@@ -86,10 +94,6 @@ namespace Engine
         /// Gets the current model lights collection
         /// </summary>
         public SceneLight[] Lights { get; protected set; }
-        /// <summary>
-        /// Volume manager
-        /// </summary>
-        public VolumeManager VolumeManager { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -103,9 +107,6 @@ namespace Engine
 
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
-
-            this.VolumeManager = new VolumeManager();
-            this.VolumeManager.Feeder = this.GetPoints;
 
             var drawData = this.GetDrawingData(LevelOfDetailEnum.High);
             if (drawData != null)
@@ -392,7 +393,9 @@ namespace Engine
         {
             this.updatePoints = true;
             this.updateTriangles = true;
-            this.VolumeManager.Invalidate();
+
+            this.boundingSphere = new BoundingSphere();
+            this.boundingBox = new BoundingBox();
         }
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -463,7 +466,16 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere(bool refresh)
         {
-            return this.VolumeManager.GetBoundingSphere(refresh);
+            if (refresh || this.boundingSphere == new BoundingSphere())
+            {
+                var points = this.GetPoints(refresh);
+                if (points != null && points.Length > 0)
+                {
+                    this.boundingSphere = BoundingSphere.FromPoints(points);
+                }
+            }
+
+            return this.boundingSphere;
         }
         /// <summary>
         /// Gets bounding box
@@ -480,24 +492,16 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox(bool refresh)
         {
-            return this.VolumeManager.GetBoundingBox(refresh);
-        }
-        /// <summary>
-        /// Gets oriented bounding box
-        /// </summary>
-        /// <returns>Returns oriented bounding box with identity transformation. Empty if the vertex type hasn't position channel</returns>
-        public OrientedBoundingBox GetOrientedBoundingBox()
-        {
-            return this.GetOrientedBoundingBox(false);
-        }
-        /// <summary>
-        /// Gets oriented bounding box
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns oriented bounding box with identity transformation. Empty if the vertex type hasn't position channel</returns>
-        public OrientedBoundingBox GetOrientedBoundingBox(bool refresh)
-        {
-            return this.VolumeManager.GetOrientedBoundingBox(refresh);
+            if (refresh || this.boundingBox == new BoundingBox())
+            {
+                var points = this.GetPoints(refresh);
+                if (points != null && points.Length > 0)
+                {
+                    this.boundingBox = BoundingBox.FromPoints(points);
+                }
+            }
+
+            return this.boundingBox;
         }
 
         /// <summary>
@@ -626,7 +630,7 @@ namespace Engine
                 else
                 {
                     //Generate cylinder
-                    var cylinder = this.VolumeManager.GetBoundingCylinder();
+                    var cylinder = BoundingCylinder.FromPoints(this.GetPoints());
                     return Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8);
                 }
             }
