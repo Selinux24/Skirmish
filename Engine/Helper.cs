@@ -26,6 +26,10 @@ namespace Engine
 
         public const uint PRIMEX = 0x8da6b343;
         public const uint PRIMEY = 0xd8163841;
+        /// <summary>
+        /// One radian
+        /// </summary>
+        public const float RADIAN = 0.0174532924f;
 
         /// <summary>
         /// Random number generator
@@ -748,7 +752,7 @@ namespace Engine
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
-        /// <returns>Returns angle value</returns>
+        /// <returns>Returns angle value in radians</returns>
         public static float Angle(Vector2 one, Vector2 two)
         {
             //Get the dot product
@@ -759,6 +763,37 @@ namespace Engine
 
             //Get the arc cosin of the angle, you now have your angle in radians 
             return (float)Math.Acos(dot);
+        }
+        /// <summary>
+        /// Gets angle between two quaternions
+        /// </summary>
+        /// <param name="one">First quaternions</param>
+        /// <param name="two">Second quaternions</param>
+        /// <returns>Returns angle value in radians</returns>
+        public static float Angle(Quaternion one, Quaternion two)
+        {
+            float dot = Quaternion.Dot(one, two);
+
+            return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f)) * 2f;
+        }
+        /// <summary>
+        /// Finds the quaternion between from and to quaternions traveling maxDelta radians
+        /// </summary>
+        /// <param name="from">From</param>
+        /// <param name="to">To</param>
+        /// <param name="maxDelta">Maximum radians</param>
+        /// <returns>Gets the quaternion between from and to quaternions traveling maxDelta radians</returns>
+        public static Quaternion RotateTowards(Quaternion from, Quaternion to, float maxDelta)
+        {
+            float angle = Helper.Angle(from, to);
+            if (angle == 0f)
+            {
+                return to;
+            }
+
+            float delta = Math.Min(1f, maxDelta / angle);
+
+            return Quaternion.Slerp(from, to, delta);
         }
         /// <summary>
         /// Gets angle between two vectors with sign

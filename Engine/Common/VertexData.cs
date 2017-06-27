@@ -387,7 +387,7 @@ namespace Engine.Common
             {
                 for (int i = 0; i < vertices.Length; i++)
                 {
-                    vertices[i].Transform(transform);
+                    vertices[i] = vertices[i].Transform(transform);
                 }
             }
 
@@ -524,47 +524,51 @@ namespace Engine.Common
         /// Transforms helper by given matrix
         /// </summary>
         /// <param name="transform">Transformation matrix</param>
-        public void Transform(Matrix transform)
+        public VertexData Transform(Matrix transform)
         {
+            VertexData result = this;
+
             if (!transform.IsIdentity)
             {
-                if (this.Position.HasValue)
+                if (result.Position.HasValue)
                 {
-                    Vector3 position = this.Position.Value;
+                    Vector3 position = result.Position.Value;
 
                     Vector3 p;
                     Vector3.TransformCoordinate(ref position, ref transform, out p);
 
-                    this.Position = p;
+                    result.Position = p;
                 }
 
-                if (this.Normal.HasValue)
+                if (result.Normal.HasValue)
                 {
                     Vector3 normal = this.Normal.Value;
 
                     Vector3.TransformNormal(ref normal, ref transform, out normal);
 
-                    this.Normal = normal;
+                    result.Normal = normal;
                 }
 
-                if (this.Tangent.HasValue)
+                if (result.Tangent.HasValue)
                 {
-                    Vector3 tangent = this.Tangent.Value;
+                    Vector3 tangent = result.Tangent.Value;
 
                     Vector3.TransformNormal(ref tangent, ref transform, out tangent);
 
-                    this.Tangent = tangent;
+                    result.Tangent = tangent;
                 }
 
-                if (this.BiNormal.HasValue)
+                if (result.BiNormal.HasValue)
                 {
-                    Vector3 biNormal = this.BiNormal.Value;
+                    Vector3 biNormal = result.BiNormal.Value;
 
                     Vector3.TransformNormal(ref biNormal, ref transform, out biNormal);
 
-                    this.BiNormal = biNormal;
+                    result.BiNormal = biNormal;
                 }
             }
+
+            return result;
         }
         /// <summary>
         /// Gets the vertex list

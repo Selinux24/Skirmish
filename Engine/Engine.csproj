@@ -177,7 +177,6 @@
     <Compile Include="IComposed.cs" />
     <Compile Include="ICullable.cs" />
     <Compile Include="IDrawable.cs" />
-    <Compile Include="IManipulator.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />
     <Compile Include="ISceneLightPosition.cs" />
@@ -186,8 +185,8 @@
     <Compile Include="IUpdatable.cs" />
     <Compile Include="IVertexList.cs" />
     <Compile Include="BasicManipulatorController.cs" />
-    <Compile Include="Manipulator3DArray.cs" />
     <Compile Include="MaterialDescription.cs" />
+    <Compile Include="ModelPart.cs" />
     <Compile Include="NormalPath.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />

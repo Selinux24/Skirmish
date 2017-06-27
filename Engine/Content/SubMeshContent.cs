@@ -265,6 +265,17 @@ namespace Engine.Content
                 throw new InvalidOperationException(string.Format("Bad source topology for triangle list: {0}", this.Topology));
             }
         }
+        /// <summary>
+        /// Transforms the vertex data
+        /// </summary>
+        /// <param name="transform">Transform to apply</param>
+        public void Transform(Matrix transform)
+        {
+            for (int i = 0; i < this.vertices.Count; i++)
+            {
+                this.vertices[i] = this.vertices[i].Transform(transform);
+            }
+        }
 
         /// <summary>
         /// Gets text representation of instance

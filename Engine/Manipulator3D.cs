@@ -1,23 +1,17 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
     /// <summary>
     /// 3D manipulator
     /// </summary>
-    public class Manipulator3D : IManipulator
+    public class Manipulator3D
     {
         /// <summary>
         /// State updated event
         /// </summary>
         public event EventHandler Updated;
-
-        /// <summary>
-        /// One radian
-        /// </summary>
-        private const float RADIAN = 0.0174532924f;
 
         /// <summary>
         /// Transform update needed flag
@@ -71,7 +65,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Gets final transform of controller
+        /// Gets local transform of controller
         /// </summary>
         public Matrix LocalTransform
         {
@@ -82,6 +76,23 @@ namespace Engine
             set
             {
                 this.SetLocalTransform(value);
+            }
+        }
+        /// <summary>
+        /// Gets final transform of controller
+        /// </summary>
+        public Matrix FinalTransform
+        {
+            get
+            {
+                if (this.Parent == null)
+                {
+                    return this.localTransform;
+                }
+                else
+                {
+                    return this.localTransform * this.Parent.FinalTransform;
+                }
             }
         }
         /// <summary>
@@ -108,6 +119,10 @@ namespace Engine
         /// Gets Down vector
         /// </summary>
         public Vector3 Down { get; private set; }
+        /// <summary>
+        /// Parent manipulator
+        /// </summary>
+        public Manipulator3D Parent { get; set; }
 
         /// <summary>
         /// Contructor
@@ -168,7 +183,10 @@ namespace Engine
                 Counters.UpdatesPerFrame++;
             }
         }
-
+        /// <summary>
+        /// Sets the local transform decomposing position, scale and rotation
+        /// </summary>
+        /// <param name="newLocalTransform">New local transform</param>
         protected virtual void SetLocalTransform(Matrix newLocalTransform)
         {
             if (newLocalTransform.Decompose(out scaling, out rotation, out position))
@@ -261,7 +279,7 @@ namespace Engine
         /// Increments rotation yaw (Y) to the left
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void YawLeft(GameTime gameTime, float a = RADIAN)
+        public void YawLeft(GameTime gameTime, float a = Helper.RADIAN)
         {
             this.Rotate(-a * gameTime.ElapsedSeconds, 0, 0);
         }
@@ -269,7 +287,7 @@ namespace Engine
         /// Increments rotation yaw (Y) to the right
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void YawRight(GameTime gameTime, float a = RADIAN)
+        public void YawRight(GameTime gameTime, float a = Helper.RADIAN)
         {
             this.Rotate(a * gameTime.ElapsedSeconds, 0, 0);
         }
@@ -277,7 +295,7 @@ namespace Engine
         /// Increments rotation pitch (X) up
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void PitchUp(GameTime gameTime, float a = RADIAN)
+        public void PitchUp(GameTime gameTime, float a = Helper.RADIAN)
         {
             this.Rotate(0, a * gameTime.ElapsedSeconds, 0);
         }
@@ -285,7 +303,7 @@ namespace Engine
         /// Increments rotation pitch (X) down
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void PitchDown(GameTime gameTime, float a = RADIAN)
+        public void PitchDown(GameTime gameTime, float a = Helper.RADIAN)
         {
             this.Rotate(0, -a * gameTime.ElapsedSeconds, 0);
         }
@@ -293,7 +311,7 @@ namespace Engine
         /// Increments rotation roll (Z) left
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void RollLeft(GameTime gameTime, float a = RADIAN)
+        public void RollLeft(GameTime gameTime, float a = Helper.RADIAN)
         {
             this.Rotate(0, 0, -a * gameTime.ElapsedSeconds);
         }
@@ -301,7 +319,7 @@ namespace Engine
         /// Increments rotation roll (Z) right
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void RollRight(GameTime gameTime, float a = RADIAN)
+        public void RollRight(GameTime gameTime, float a = Helper.RADIAN)
         {
             this.Rotate(0, 0, a * gameTime.ElapsedSeconds);
         }
@@ -462,6 +480,14 @@ namespace Engine
         /// <param name="updateState">Update internal state</param>
         public void LookAt(Vector3 target, Vector3 up, bool yAxisOnly = true, float interpolationAmount = 0, bool updateState = false)
         {
+            if (this.Parent != null)
+            {
+                //Set parameters to local space
+                var parentTransform = Matrix.Invert(this.Parent.FinalTransform);
+
+                target = Vector3.TransformCoordinate(target, parentTransform);
+            }
+
             if (!Vector3.NearEqual(this.position, target, new Vector3(MathUtil.ZeroTolerance)))
             {
                 var newRotation = Helper.LookAt(this.position, target, up, yAxisOnly);
@@ -470,6 +496,44 @@ namespace Engine
                 {
                     newRotation = Quaternion.Lerp(this.rotation, newRotation, interpolationAmount);
                 }
+
+                this.SetRotation(newRotation, updateState);
+            }
+        }
+        /// <summary>
+        /// Rotate to target
+        /// </summary>
+        /// <param name="target">Target</param>
+        /// <param name="yAxisOnly">Rotate Y axis only</param>
+        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
+        /// <param name="updateState">Update internal state</param>
+        public void RotateTo(Vector3 target, bool yAxisOnly = true, float interpolationAmount = 0, bool updateState = false)
+        {
+            RotateTo(target, Vector3.Up, yAxisOnly, interpolationAmount, updateState);
+        }
+        /// <summary>
+        /// Rotate to target
+        /// </summary>
+        /// <param name="target">Target</param>
+        /// <param name="up">Up vector</param>
+        /// <param name="yAxisOnly">Rotate Y axis only</param>
+        /// <param name="interpolationAmount">Interpolation amount for linear interpolation</param>
+        /// <param name="updateState">Update internal state</param>
+        public void RotateTo(Vector3 target, Vector3 up, bool yAxisOnly = true, float interpolationAmount = 0, bool updateState = false)
+        {
+            if (this.Parent != null)
+            {
+                //Set parameters to local space
+                var parentTransform = Matrix.Invert(this.Parent.FinalTransform);
+
+                target = Vector3.TransformCoordinate(target, parentTransform);
+            }
+
+            if (!Vector3.NearEqual(this.position, target, new Vector3(MathUtil.ZeroTolerance)))
+            {
+                var newRotation = Helper.LookAt(this.position, target, up, yAxisOnly);
+
+                newRotation = Helper.RotateTowards(this.rotation, newRotation, interpolationAmount);
 
                 this.SetRotation(newRotation, updateState);
             }
@@ -491,16 +555,6 @@ namespace Engine
             {
                 this.SetRotation(Quaternion.RotationAxis(Vector3.Left, 0f));
             }
-        }
-
-        /// <summary>
-        /// Gets the transform by name
-        /// </summary>
-        /// <param name="name">Transform name</param>
-        /// <returns>Returns the transform by name</returns>
-        public Matrix Transform(string name)
-        {
-            return this.localTransform;
         }
 
         /// <summary>

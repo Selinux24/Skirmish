@@ -6,7 +6,7 @@ using System;
 
 namespace TerrainTest.AI
 {
-    public class AIAgent : IUpdatable, ITransformable3D
+    public abstract class AIAgent : IUpdatable, ITransformable3D
     {
         delegate void CurrentBehavior(GameTime gameTime);
 
@@ -21,7 +21,7 @@ namespace TerrainTest.AI
         private float lastCheckPointTime;
         private float patrollVelocity;
 
-        private AIAgent attackTarget;
+        protected AIAgent attackTarget;
         private Vector3? attackPosition = null;
         private float attackVelocity;
         private float attakingDeltaDistance = 10;

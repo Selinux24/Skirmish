@@ -12,6 +12,14 @@ namespace Engine
         /// Texture index
         /// </summary>
         public uint TextureIndex = 0;
+        /// <summary>
+        /// Transform names
+        /// </summary>
+        public string[] TransformNames;
+        /// <summary>
+        /// Transform dependeces
+        /// </summary>
+        public int[] TransformDependeces;
 
         /// <summary>
         /// Constructor

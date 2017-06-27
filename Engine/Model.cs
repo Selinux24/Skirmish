@@ -7,6 +7,7 @@ namespace Engine
     using Engine.Animation;
     using Engine.Common;
     using Engine.Effects;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Basic Model
@@ -62,6 +63,10 @@ namespace Engine
         /// Animation index
         /// </summary>
         protected uint AnimationIndex = 0;
+        /// <summary>
+        /// Model parts collection
+        /// </summary>
+        protected List<ModelPart> ModelParts = new List<ModelPart>();
 
         /// <summary>
         /// Model manipulator
@@ -94,6 +99,28 @@ namespace Engine
         /// Gets the current model lights collection
         /// </summary>
         public SceneLight[] Lights { get; protected set; }
+        /// <summary>
+        /// Gets the model part by name
+        /// </summary>
+        /// <param name="name">Part name</param>
+        /// <returns>Returns the model part name</returns>
+        public ModelPart this[string name]
+        {
+            get
+            {
+                return this.ModelParts.Find(p => p.Name == name);
+            }
+        }
+        /// <summary>
+        /// Gets the model part count
+        /// </summary>
+        public int ModelPartCount
+        {
+            get
+            {
+                return this.ModelParts.Count;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -105,8 +132,37 @@ namespace Engine
         {
             this.TextureIndex = description.TextureIndex;
 
-            this.Manipulator = new Manipulator3D();
-            this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+            if (description.TransformDependeces != null && description.TransformDependeces.Length > 0)
+            {
+                for (int i = 0; i < description.TransformNames.Length; i++)
+                {
+                    this.ModelParts.Add(new ModelPart(description.TransformNames[i]));
+                }
+
+                for (int i = 0; i < description.TransformNames.Length; i++)
+                {
+                    var thisName = description.TransformNames[i];
+                    var thisMan = this[thisName].Manipulator;
+                    thisMan.Updated += new EventHandler(ManipulatorUpdated);
+
+                    var parentIndex = description.TransformDependeces[i];
+                    if (parentIndex >= 0)
+                    {
+                        var parentName = description.TransformNames[parentIndex];
+
+                        thisMan.Parent = this[parentName].Manipulator;
+                    }
+                    else
+                    {
+                        this.Manipulator = thisMan;
+                    }
+                }
+            }
+            else
+            {
+                this.Manipulator = new Manipulator3D();
+                this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
+            }
 
             var drawData = this.GetDrawingData(LevelOfDetailEnum.High);
             if (drawData != null)
@@ -128,7 +184,14 @@ namespace Engine
                 this.InvalidateCache();
             }
 
-            this.Manipulator.Update(context.GameTime);
+            if (this.ModelParts.Count > 0)
+            {
+                this.ModelParts.ForEach(p => p.Manipulator.Update(context.GameTime));
+            }
+            else
+            {
+                this.Manipulator.Update(context.GameTime);
+            }
 
             if (this.Lights != null && this.Lights.Length > 0)
             {
@@ -160,39 +223,41 @@ namespace Engine
 
                 if (effect != null)
                 {
-                    #region Per frame update
-
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
-                    {
-                        ((EffectDefaultBasic)effect).UpdatePerFrame(
-                            this.Manipulator.LocalTransform * context.World,
-                            context.ViewProjection,
-                            context.EyePosition,
-                            context.Lights,
-                            context.ShadowMaps,
-                            context.ShadowMapLow,
-                            context.ShadowMapHigh,
-                            context.FromLightViewProjectionLow,
-                            context.FromLightViewProjectionHigh);
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                    {
-                        ((EffectDeferredBasic)effect).UpdatePerFrame(
-                            this.Manipulator.LocalTransform * context.World,
-                            context.ViewProjection);
-                    }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                    {
-                        ((EffectShadowBasic)effect).UpdatePerFrame(
-                            this.Manipulator.LocalTransform * context.World,
-                            context.ViewProjection);
-                    }
-
-                    #endregion
-
                     foreach (string meshName in this.DrawingData.Meshes.Keys)
                     {
                         var dictionary = this.DrawingData.Meshes[meshName];
+
+                        var localTransform = this.GetTransformByName(meshName) * context.World;
+
+                        #region Per frame update
+
+                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                        {
+                            ((EffectDefaultBasic)effect).UpdatePerFrame(
+                                localTransform,
+                                context.ViewProjection,
+                                context.EyePosition,
+                                context.Lights,
+                                context.ShadowMaps,
+                                context.ShadowMapLow,
+                                context.ShadowMapHigh,
+                                context.FromLightViewProjectionLow,
+                                context.FromLightViewProjectionHigh);
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                        {
+                            ((EffectDeferredBasic)effect).UpdatePerFrame(
+                                localTransform,
+                                context.ViewProjection);
+                        }
+                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                        {
+                            ((EffectShadowBasic)effect).UpdatePerFrame(
+                                localTransform,
+                                context.ViewProjection);
+                        }
+
+                        #endregion
 
                         foreach (string material in dictionary.Keys)
                         {
@@ -384,6 +449,28 @@ namespace Engine
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
             this.InvalidateCache();
+        }
+
+        /// <summary>
+        /// Gets the transform by transform name
+        /// </summary>
+        /// <param name="name">Transform name</param>
+        /// <returns>Retusn the transform of the specified transform name</returns>
+        public Matrix GetTransformByName(string name)
+        {
+            Manipulator3D man = null;
+
+            var part = this.ModelParts.Find(p => p.Name == name);
+            if (part != null)
+            {
+                man = part.Manipulator;
+            }
+            else
+            {
+                man = this.Manipulator;
+            }
+
+            return man.FinalTransform;
         }
 
         /// <summary>

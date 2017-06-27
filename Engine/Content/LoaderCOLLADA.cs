@@ -136,10 +136,7 @@ namespace Engine.Content
 
                                                     foreach (var submesh in modelContent.Geometry[meshName].Values)
                                                     {
-                                                        foreach (var v in submesh.Vertices)
-                                                        {
-                                                            v.Transform(trn);
-                                                        }
+                                                        submesh.Transform(trn);
                                                     }
                                                 }
                                             }
@@ -189,10 +186,7 @@ namespace Engine.Content
                                                         {
                                                             if (!childTrn.IsIdentity)
                                                             {
-                                                                foreach (var v in submesh.Vertices)
-                                                                {
-                                                                    v.Transform(childTrn);
-                                                                }
+                                                                submesh.Transform(childTrn);
                                                             }
                                                         }
                                                     }

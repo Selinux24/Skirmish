@@ -99,8 +99,8 @@ namespace TerrainTest
         private bool drawCullVolumes = false;
 
         private Brain agentManager = null;
-        private AIAgent tankP1Agent = null;
-        private AIAgent tankP2Agent = null;
+        private TankAIAgent tankP1Agent = null;
+        private TankAIAgent tankP2Agent = null;
         private FlyerAIAgent helicopterAgent = null;
 
         Vector3[] p1CheckPoints = new Vector3[]
@@ -345,7 +345,9 @@ namespace TerrainTest
                 {
                     ContentFolder = "resources/Leopard",
                     ModelContentFilename = "Leopard.xml",
-                }
+                },
+                TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
+                TransformDependeces = new[] { 1, 2, -1 },
             };
             this.tankP1 = this.AddComponent<Model>(tDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
             this.tankP2 = this.AddComponent<Model>(tDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
@@ -361,7 +363,7 @@ namespace TerrainTest
             var tankbbox = this.tankP1.Geometry.GetBoundingBox();
             tankAgentType.Height = tankbbox.GetY();
             tankAgentType.Radius = tankbbox.GetX() * 0.5f;
-            tankAgentType.MaxClimb = tankbbox.GetY() * 0.4f;
+            tankAgentType.MaxClimb = tankbbox.GetY() * 0.1f;
 
             this.tankLeftCat = new Vector3(tankbbox.Maximum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
             this.tankRightCat = new Vector3(tankbbox.Minimum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
@@ -974,8 +976,8 @@ namespace TerrainTest
                 FlightHeight = 20,
             };
 
-            this.tankP1Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP1, tStatus);
-            this.tankP2Agent = new AIAgent(this.agentManager, this.tankAgentType, this.tankP2, tStatus);
+            this.tankP1Agent = new TankAIAgent(this.agentManager, this.tankAgentType, this.tankP1, tStatus);
+            this.tankP2Agent = new TankAIAgent(this.agentManager, this.tankAgentType, this.tankP2, tStatus);
             this.helicopterAgent = new FlyerAIAgent(this.agentManager, null, this.helicopter, hStatus);
 
             this.AddComponent(this.tankP1Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.None);
