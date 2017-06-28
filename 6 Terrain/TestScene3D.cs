@@ -927,9 +927,9 @@ namespace TerrainTest
 
             this.helicopter.Instance.AnimationController.SetPath(this.animations["heli_default"]);
 
-            var t1W = new WeaponDescription() { Name = "Cannon", Damage = 35, Cadence = 15, Range = 50 };
-            var t2W = new WeaponDescription() { Name = "Machine Gun", Damage = 5, Cadence = 0.5f, Range = 30 };
-            var h1W = new WeaponDescription() { Name = "Missile", Damage = 100, Cadence = 10f, Range = 100 };
+            var t1W = new WeaponDescription() { Name = "Cannon", Damage = 3.5f, Cadence = 1.5f, Range = 50 };
+            var t2W = new WeaponDescription() { Name = "Machine Gun", Damage = 0.5f, Cadence = 0.05f, Range = 30 };
+            var h1W = new WeaponDescription() { Name = "Missile", Damage = 10, Cadence = 2f, Range = 100 };
             var h2W = new WeaponDescription() { Name = "Gatling", Damage = 10, Cadence = 0.1f, Range = 30 };
 
             //Adjust check-points
@@ -980,6 +980,9 @@ namespace TerrainTest
             this.tankP2Agent = new TankAIAgent(this.agentManager, this.tankAgentType, this.tankP2, tStatus);
             this.helicopterAgent = new FlyerAIAgent(this.agentManager, null, this.helicopter, hStatus);
 
+            this.tankP1Agent.SceneObject.Name = "Tank1";
+            this.tankP2Agent.SceneObject.Name = "Tank2";
+
             this.AddComponent(this.tankP1Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.None);
             this.AddComponent(this.tankP2Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.None);
             this.AddComponent(this.helicopterAgent, new SceneObjectDescription() { }, SceneObjectUsageEnum.None);
@@ -1002,17 +1005,17 @@ namespace TerrainTest
             this.agentManager.AddAgent(1, this.tankP1Agent);
             this.agentManager.AddAgent(1, this.tankP2Agent);
 
-            this.tankP1Agent.InitPatrollingBehavior(this.p1CheckPoints, 10, 5);
-            this.tankP1Agent.InitAttackingBehavior(7, 10);
-            this.tankP1Agent.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
+            this.tankP1Agent.PatrolBehavior.InitPatrollingBehavior(this.p1CheckPoints, 10, 5);
+            this.tankP1Agent.AttackBehavior.InitAttackingBehavior(7, 10);
+            this.tankP1Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
 
-            this.tankP2Agent.InitPatrollingBehavior(this.p2CheckPoints, 10, 5);
-            this.tankP2Agent.InitAttackingBehavior(7, 10);
-            this.tankP2Agent.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
+            this.tankP2Agent.PatrolBehavior.InitPatrollingBehavior(this.p2CheckPoints, 10, 5);
+            this.tankP2Agent.AttackBehavior.InitAttackingBehavior(7, 10);
+            this.tankP2Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
 
-            this.helicopterAgent.InitPatrollingBehavior(this.hCheckPoints, 5, 8);
-            this.helicopterAgent.InitAttackingBehavior(15, 10);
-            this.helicopterAgent.InitRetreatingBehavior(new Vector3(75, 0, 75), 12);
+            this.helicopterAgent.PatrolBehavior.InitPatrollingBehavior(this.hCheckPoints, 5, 8);
+            this.helicopterAgent.AttackBehavior.InitAttackingBehavior(15, 10);
+            this.helicopterAgent.RetreatBehavior.InitRetreatingBehavior(new Vector3(75, 0, 75), 12);
         }
         public override void Dispose()
         {
@@ -1209,7 +1212,7 @@ namespace TerrainTest
                     if (p != null)
                     {
                         this.tankP1Agent.Clear();
-                        this.tankP1Agent.Follow(p, 10);
+                        this.tankP1Agent.FollowPath(p, 10);
 
                         this.DEBUGDrawTankPath(this.tankP1.Transform.Position, p);
                     }
@@ -1510,7 +1513,7 @@ namespace TerrainTest
         }
         private void Agent_Attacking(BehaviorEventArgs e)
         {
-            //TODO: Add weapon firing effects
+            this.AddProjectileTrailSystem(e.Active, e.Passive, 100f);
         }
         private void Agent_Damaged(BehaviorEventArgs e)
         {
@@ -1593,7 +1596,7 @@ namespace TerrainTest
         private void AddSmokePlumeSystem(AIAgent agent)
         {
             Vector3 velocity = Vector3.Up;
-            float duration = this.rnd.NextFloat(60, 360);
+            float duration = this.rnd.NextFloat(6, 36);
             float rate = this.rnd.NextFloat(0.1f, 1f);
 
             var emitter1 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
@@ -1620,7 +1623,7 @@ namespace TerrainTest
         private void AddSmokeSystem(AIAgent agent)
         {
             Vector3 velocity = Vector3.Up;
-            float duration = this.rnd.NextFloat(10, 30);
+            float duration = this.rnd.NextFloat(5, 15);
             float rate = this.rnd.NextFloat(0.1f, 1f);
 
             var emitter = new MovingEmitter(agent.Manipulator, Vector3.Zero)
@@ -1644,6 +1647,16 @@ namespace TerrainTest
             };
 
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
+        }
+        private void AddProjectileTrailSystem(AIAgent agent, AIAgent target, float speed)
+        {
+            var emitter = new LinealEmitter(agent.Manipulator.Position, target.Manipulator.Position, speed)
+            {
+                EmissionRate = 0.00001f,
+                MaximumDistance = 100f,
+            };
+
+            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pProjectile, emitter);
         }
 
         private void DEBUGPickingPosition(Vector3 position)

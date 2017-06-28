@@ -41,7 +41,7 @@ namespace TerrainTest.AI
         {
             if (this.CanShoot)
             {
-                if (from.OnSight(to))
+                if (from.EnemyOnSight(to))
                 {
                     var fromPosition = from.Manipulator.Position;
                     var toPosition = to.Manipulator.Position;

@@ -8,14 +8,14 @@ namespace TerrainTest.AI
     {
         public float FlightHeight;
 
-        public FlyerAIAgent(Brain parent, AgentType agentType, SceneObject model, FlyerAIStatusDescription status) :
-            base(parent, agentType, model, status)
+        public FlyerAIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, FlyerAIStatusDescription status) :
+            base(parent, agentType, sceneObject, status)
         {
             this.FlightHeight = status.FlightHeight;
-            this.Controller = new HeliManipulatorController();
+            this.Controller = new HeliManipulatorController(sceneObject.Get<ITransformable3D>().Manipulator);
         }
 
-        protected override void SetRouteToPoint(Vector3 point, float speed, bool fine)
+        public override void SetRouteToPoint(Vector3 point, float speed, bool fine)
         {
             var p = point;
 
@@ -28,8 +28,31 @@ namespace TerrainTest.AI
             this.Controller.MaximumSpeed = speed;
         }
 
+        protected override void FireDamaged(AIAgent active, AIAgent passive)
+        {
+            base.FireDamaged(active, passive);
+
+            var model = this.SceneObject.Get<Model>();
+            if (model != null)
+            {
+                if (this.Status.Damage > 0.9f)
+                {
+                    model.TextureIndex = 2;
+                }
+                else if (this.Status.Damage > 0.2f)
+                {
+                    model.TextureIndex = 1;
+                }
+                else
+                {
+                    model.TextureIndex = 0;
+                }
+            }
+        }
         protected override void FireDestroyed(AIAgent active, AIAgent passive)
         {
+            var model = this.SceneObject.Get<Model>();
+
             //Find nearest ground position
             Vector3 p;
             Triangle t;
@@ -37,11 +60,19 @@ namespace TerrainTest.AI
             if (this.Parent.Scene.FindNearestGroundPosition(this.Manipulator.Position, out p, out t, out d))
             {
                 this.SetRouteToPoint(p, 15f, false);
-                this.Model.AnimationController.Stop();
+                if (model != null)
+                {
+                    model.AnimationController.Stop();
+                }
             }
             else
             {
                 this.SceneObject.Visible = false;
+            }
+
+            if (model != null)
+            {
+                model.TextureIndex = 2;
             }
 
             base.FireDestroyed(active, passive);

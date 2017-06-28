@@ -42,4 +42,32 @@ namespace TerrainTest
             base.Update(context);
         }
     }
+
+    public class LinealEmitter : ParticleEmitter
+    {
+        private Vector3 from;
+        private Vector3 to;
+        private float speed;
+        private Vector3 direction;
+
+        public LinealEmitter(Vector3 from, Vector3 to, float speed) : base()
+        {
+            this.Position = from;
+            this.from = from;
+            this.to = to;
+            this.speed = speed;
+            this.direction = (to - from);
+            float distance = direction.Length();
+            this.direction.Normalize();
+
+            this.Duration = distance / speed;
+        }
+
+        public override void Update(UpdateContext context)
+        {
+            this.Position += (direction * speed * context.GameTime.ElapsedSeconds);
+
+            base.Update(context);
+        }
+    }
 }

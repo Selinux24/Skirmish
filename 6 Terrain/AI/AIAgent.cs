@@ -1,71 +1,49 @@
 ﻿using Engine;
-using Engine.PathFinding;
 using Engine.Common;
+using Engine.PathFinding;
 using SharpDX;
 using System;
 
 namespace TerrainTest.AI
 {
-    public abstract class AIAgent : IUpdatable, ITransformable3D
+    public abstract class AIAgent : IUpdatable
     {
-        delegate void CurrentBehavior(GameTime gameTime);
+        private Behavior currentBehavior = null;
 
-        private CurrentBehavior currentBehavior = null;
-
-        private Vector3? lastPosition = null;
         private float lastDistance = 0f;
 
-        private Vector3[] checkPoints = null;
-        private int currentCheckPoint = -1;
-        private float checkPointTime;
-        private float lastCheckPointTime;
-        private float patrollVelocity;
-
-        protected AIAgent attackTarget;
-        private Vector3? attackPosition = null;
-        private float attackVelocity;
-        private float attakingDeltaDistance = 10;
-
-        private Vector3 rallyPoint;
-        private Vector3? retreatingPosition = null;
-        private float retreatVelocity;
-
-        protected Brain Parent;
-        protected AIStatus Status;
-        protected SceneObject SceneObject;
-        protected Model Model
+        public Brain Parent { get; protected set; }
+        public AIStatus Status { get; protected set; }
+        public SceneObject SceneObject { get; protected set; }
+        public AgentType AgentType { get; protected set; }
+        public ManipulatorController Controller { get; protected set; }
+        public AIStates CurrentState { get; protected set; }
+        public Manipulator3D Manipulator
         {
             get
             {
-                return this.SceneObject.Get<Model>();
+                return this.SceneObject.Get<ITransformable3D>().Manipulator;
             }
         }
-        protected AgentType AgentType;
-        protected ManipulatorController Controller;
-        protected AIStates CurrentState = AIStates.Idle;
-
         public Vector3? Target
         {
             get
             {
                 if (this.CurrentState == AIStates.Idle)
                 {
-                    return null;
+                    return this.IdleBehavior.Target;
                 }
                 else if (this.CurrentState == AIStates.Patrolling)
                 {
-                    if (currentCheckPoint >= 0)
-                    {
-                        return this.checkPoints[currentCheckPoint];
-                    }
+                    return this.PatrolBehavior.Target;
                 }
                 else if (this.CurrentState == AIStates.Attacking)
                 {
-                    return this.attackPosition;
+                    return this.AttackBehavior.Target;
                 }
                 else if (this.CurrentState == AIStates.Retreating)
                 {
-                    return this.retreatingPosition;
+                    return this.RetreatBehavior.Target;
                 }
 
                 return null;
@@ -105,18 +83,15 @@ namespace TerrainTest.AI
             }
         }
 
+        public IdleBehavior IdleBehavior { get; protected set; }
+        public PatrolBehavior PatrolBehavior { get; protected set; }
+        public AttackBehavior AttackBehavior { get; protected set; }
+        public RetreatBehavior RetreatBehavior { get; protected set; }
+
         public event BehaviorEventHandler Moving;
         public event BehaviorEventHandler Attacking;
         public event BehaviorEventHandler Damaged;
         public event BehaviorEventHandler Destroyed;
-
-        public Manipulator3D Manipulator
-        {
-            get
-            {
-                return this.Model.Manipulator;
-            }
-        }
 
         public AIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, AIStatusDescription status)
         {
@@ -126,6 +101,12 @@ namespace TerrainTest.AI
             this.Status = new AIStatus(status);
             this.Controller = new SteerManipulatorController();
 
+            this.IdleBehavior = new IdleBehavior(this);
+            this.PatrolBehavior = new PatrolBehavior(this);
+            this.AttackBehavior = new AttackBehavior(this);
+            this.RetreatBehavior = new RetreatBehavior(this);
+
+            this.CurrentState = AIStates.None;
             this.ChangeState(AIStates.Idle);
         }
 
@@ -133,19 +114,19 @@ namespace TerrainTest.AI
         {
             if (this.CurrentState != AIStates.None)
             {
-                this.currentBehavior?.Invoke(context.GameTime);
+                this.currentBehavior?.Task(context.GameTime);
 
                 if (this.CurrentState == AIStates.Idle)
                 {
-                    if (this.AttackingTest(context.GameTime))
+                    if (this.AttackBehavior.Test(context.GameTime))
                     {
                         this.ChangeState(AIStates.Attacking);
                     }
-                    else if (this.RetreatingTest(context.GameTime))
+                    else if (this.RetreatBehavior.Test(context.GameTime))
                     {
                         this.ChangeState(AIStates.Retreating);
                     }
-                    else if (this.PatrollingTest(context.GameTime))
+                    else if (this.PatrolBehavior.Test(context.GameTime))
                     {
                         this.ChangeState(AIStates.Patrolling);
                     }
@@ -156,15 +137,15 @@ namespace TerrainTest.AI
                 }
                 else if (this.CurrentState == AIStates.Patrolling)
                 {
-                    if (this.AttackingTest(context.GameTime))
+                    if (this.AttackBehavior.Test(context.GameTime))
                     {
                         this.ChangeState(AIStates.Attacking);
                     }
-                    else if (this.RetreatingTest(context.GameTime))
+                    else if (this.RetreatBehavior.Test(context.GameTime))
                     {
                         this.ChangeState(AIStates.Retreating);
                     }
-                    else if (this.PatrollingTest(context.GameTime))
+                    else if (this.PatrolBehavior.Test(context.GameTime))
                     {
                         //Continue patrolling
                     }
@@ -175,15 +156,15 @@ namespace TerrainTest.AI
                 }
                 else if (this.CurrentState == AIStates.Attacking)
                 {
-                    if (this.AttackingTest(context.GameTime))
+                    if (this.AttackBehavior.Test(context.GameTime))
                     {
                         //Continue attacking
                     }
-                    else if (this.RetreatingTest(context.GameTime))
+                    else if (this.RetreatBehavior.Test(context.GameTime))
                     {
                         this.ChangeState(AIStates.Retreating);
                     }
-                    else if (this.PatrollingTest(context.GameTime))
+                    else if (this.PatrolBehavior.Test(context.GameTime))
                     {
                         this.ChangeState(AIStates.Patrolling);
                     }
@@ -194,11 +175,11 @@ namespace TerrainTest.AI
                 }
                 else if (this.CurrentState == AIStates.Retreating)
                 {
-                    if (this.RetreatingTest(context.GameTime))
+                    if (this.RetreatBehavior.Test(context.GameTime))
                     {
                         //Continue the retreat
                     }
-                    else if (this.PatrollingTest(context.GameTime))
+                    else if (this.PatrolBehavior.Test(context.GameTime))
                     {
                         this.ChangeState(AIStates.Patrolling);
                     }
@@ -211,25 +192,17 @@ namespace TerrainTest.AI
 
             this.Status.Update(context.GameTime);
 
-            this.lastPosition = this.Manipulator.Position;
+            var lastPosition = this.Manipulator.Position;
 
             this.Controller.UpdateManipulator(context.GameTime, this.Manipulator);
 
-            if (this.lastPosition.HasValue)
+            this.lastDistance += Vector3.Distance(lastPosition, this.Manipulator.Position);
+            if (this.lastDistance > 0.2f)
             {
-                lastDistance += Vector3.Distance(this.lastPosition.Value, this.Manipulator.Position);
-                if (lastDistance > 0.2f)
-                {
-                    this.FireMoving(this, null);
+                this.FireMoving(this, null);
 
-                    lastDistance -= 0.2f;
-                }
+                this.lastDistance -= 0.2f;
             }
-        }
-
-        public void Clear()
-        {
-            this.ChangeState(AIStates.None);
         }
         private void ChangeState(AIStates state)
         {
@@ -239,22 +212,241 @@ namespace TerrainTest.AI
 
             if (state == AIStates.Idle)
             {
-                this.currentBehavior = this.IdleTasks;
+                this.currentBehavior = this.IdleBehavior;
             }
             else if (state == AIStates.Patrolling)
             {
-                this.currentBehavior = this.PatrollingTasks;
+                this.currentBehavior = this.PatrolBehavior;
             }
             else if (state == AIStates.Attacking)
             {
-                this.currentBehavior = this.AttackingTasks;
+                this.currentBehavior = this.AttackBehavior;
             }
             else if (state == AIStates.Retreating)
             {
-                this.currentBehavior = this.RetreatingTasks;
+                this.currentBehavior = this.RetreatBehavior;
+            }
+        }
+        public void Clear()
+        {
+            this.ChangeState(AIStates.None);
+        }
+
+
+        public virtual AIAgent[] GetEnemiesOnSight()
+        {
+            var targets = this.Parent.GetTargetsForAgent(this);
+
+            return Array.FindAll(targets, target =>
+            {
+                if (target.Status.Life > 0)
+                {
+                    return this.EnemyOnSight(target);
+                }
+
+                return false;
+            });
+        }
+        public virtual bool EnemyOnSight(AIAgent target)
+        {
+            var p1 = this.Manipulator.Position;
+            var p2 = target.Manipulator.Position;
+
+            var s = p2 - p1;
+            if (s.Length() < this.Status.SightDistance)
+            {
+                float a = Helper.Angle(s, this.Manipulator.Forward);
+                if (a < this.Status.SightAngle)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        public virtual bool EnemyOnAttackRange(AIAgent target)
+        {
+            if (this.Status.CurrentWeapon != null)
+            {
+                var p1 = this.Manipulator.Position;
+                var p2 = target.Manipulator.Position;
+
+                var s = p2 - p1;
+                if (s.Length() < this.Status.CurrentWeapon.Range)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        public virtual bool IsHardEnemy(AIAgent target)
+        {
+            if (target != null)
+            {
+                if (target.Status.CurrentWeapon != null && target.Status.CurrentWeapon.Damage > this.Status.Life && this.Status.Damage > 0.9f)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        public virtual void Attack(AIAgent target)
+        {
+            if (this.Status.CurrentWeapon != null)
+            {
+                float d = this.Status.CurrentWeapon.Shoot(this.Parent, this, target);
+                if (d > 0f)
+                {
+                    target.GetDamage(this, d);
+
+                    this.FireAttacking(this, target);
+                }
+            }
+        }
+        public virtual void GetDamage(AIAgent attacker, float damage)
+        {
+            if (this.AttackBehavior.Target == null)
+            {
+                this.AttackBehavior.SetTarget(attacker);
+                this.ChangeState(AIStates.Attacking);
+            }
+
+            this.Status.Life -= Helper.RandomGenerator.NextFloat(0, damage);
+
+            if (this.Status.PrimaryWeapon != null) this.Status.PrimaryWeapon.Delay(damage * 0.1f);
+            if (this.Status.SecondaryWeapon != null) this.Status.SecondaryWeapon.Delay(damage * 0.1f);
+
+            this.FireDamaged(attacker, this);
+
+            if (this.Status.Life <= 0)
+            {
+                this.Status.Life = 0;
+
+                this.Clear();
+
+                this.FireDestroyed(attacker, this);
             }
         }
 
+
+        public virtual void SetRouteToPoint(Vector3 point, float speed, bool refine)
+        {
+            if (this.AgentType != null & this.Parent.Scene != null)
+            {
+                var refineDelta = refine ?
+                    speed * 0.1f :
+                    0f;
+
+                var p = this.Parent.Scene.FindPath(this.AgentType, this.Manipulator.Position, point, true, refineDelta);
+                if (p != null)
+                {
+                    this.FollowPath(p, speed);
+                }
+            }
+        }
+        public virtual void FollowPath(PathFindingPath path, float speed)
+        {
+            this.Controller.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
+            this.Controller.MaximumSpeed = speed;
+        }
+        public virtual void Stop()
+        {
+            this.Controller.Clear();
+            this.Controller.MaximumSpeed = 0f;
+        }
+
+        protected virtual void FireMoving(AIAgent active, AIAgent passive)
+        {
+            this.Moving?.Invoke(new BehaviorEventArgs(active, passive));
+        }
+        protected virtual void FireAttacking(AIAgent active, AIAgent passive)
+        {
+            this.Attacking?.Invoke(new BehaviorEventArgs(active, passive));
+        }
+        protected virtual void FireDamaged(AIAgent active, AIAgent passive)
+        {
+            this.Damaged?.Invoke(new BehaviorEventArgs(active, passive));
+        }
+        protected virtual void FireDestroyed(AIAgent active, AIAgent passive)
+        {
+            this.Destroyed?.Invoke(new BehaviorEventArgs(active, passive));
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0} -> {1:000.00}", this.CurrentState, this.Status.Life);
+        }
+    }
+
+    public abstract class Behavior
+    {
+        public AIAgent Agent { get; private set; }
+
+        public abstract Vector3? Target { get; }
+
+        public Behavior(AIAgent agent)
+        {
+            this.Agent = agent;
+        }
+
+        public abstract bool Test(GameTime gameTime);
+
+        public abstract void Task(GameTime gameTime);
+    }
+
+    public class IdleBehavior : Behavior
+    {
+        public override Vector3? Target
+        {
+            get
+            {
+                return null;
+            }
+        }
+
+        public IdleBehavior(AIAgent agent) : base(agent)
+        {
+
+        }
+
+        public override bool Test(GameTime gameTime)
+        {
+            return true;
+        }
+
+        public override void Task(GameTime gameTime)
+        {
+            //Do nothing
+        }
+    }
+
+    public class PatrolBehavior : Behavior
+    {
+        private Vector3[] checkPoints = null;
+        private int currentCheckPoint = -1;
+        private float checkPointTime;
+        private float lastCheckPointTime = 0;
+        private float patrollVelocity;
+
+        public override Vector3? Target
+        {
+            get
+            {
+                if (this.currentCheckPoint >= 0)
+                {
+                    return this.checkPoints[this.currentCheckPoint];
+                }
+
+                return null;
+            }
+        }
+
+        public PatrolBehavior(AIAgent agent) : base(agent)
+        {
+
+        }
 
         public void InitPatrollingBehavior(Vector3[] checkPoints, float checkPointTime, float patrolVelocity)
         {
@@ -264,21 +456,8 @@ namespace TerrainTest.AI
             this.lastCheckPointTime = 0;
             this.patrollVelocity = patrolVelocity;
         }
-        public void InitAttackingBehavior(float attackVelocity, float attakingDeltaDistance)
-        {
-            this.attackTarget = null;
-            this.attackPosition = null;
-            this.attackVelocity = attackVelocity;
-            this.attakingDeltaDistance = attakingDeltaDistance;
-        }
-        public void InitRetreatingBehavior(Vector3 rallyPoint, float retreatVelocity)
-        {
-            this.rallyPoint = rallyPoint;
-            this.retreatingPosition = null;
-            this.retreatVelocity = retreatVelocity;
-        }
 
-        protected virtual bool PatrollingTest(GameTime gameTime)
+        public override bool Test(GameTime gameTime)
         {
             if (this.checkPoints != null && this.checkPoints.Length > 0)
             {
@@ -287,73 +466,12 @@ namespace TerrainTest.AI
 
             return false;
         }
-        protected virtual bool AttackingTest(GameTime gameTime)
-        {
-            bool res = false;
 
-            if (this.attackTarget != null)
-            {
-                if (this.attackTarget.Status.Life <= 0)
-                {
-                    this.attackTarget = null;
-                    this.attackPosition = null;
-                    return false;
-                }
-
-                if (this.OnSight(this.attackTarget))
-                {
-                    return !this.IsHardEnemy(this.attackTarget);
-                }
-            }
-
-            var targets = this.GetEnemiesOnSight();
-
-            if (targets != null && targets.Length > 0)
-            {
-                this.attackTarget = targets[0];
-                this.attackPosition = null;
-                res = !this.IsHardEnemy(this.attackTarget);
-            }
-            else
-            {
-                this.attackTarget = null;
-                this.attackPosition = null;
-                return false;
-            }
-
-            return res;
-        }
-        protected virtual bool RetreatingTest(GameTime gameTime)
-        {
-            if (this.Manipulator.Position == this.rallyPoint)
-            {
-                return false;
-            }
-            else
-            {
-                var targets = this.GetEnemiesOnSight();
-                for (int i = 0; i < targets.Length; i++)
-                {
-                    if (this.IsHardEnemy(targets[i]))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
-
-
-        protected virtual void IdleTasks(GameTime gameTime)
-        {
-            //Do nothing
-        }
-        protected virtual void PatrollingTasks(GameTime gameTime)
+        public override void Task(GameTime gameTime)
         {
             bool navigate = false;
 
-            var currentPosition = this.Manipulator.Position;
+            var currentPosition = this.Agent.Manipulator.Position;
 
             if (this.currentCheckPoint < 0)
             {
@@ -362,7 +480,7 @@ namespace TerrainTest.AI
                 navigate = true;
             }
 
-            if (!this.Controller.HasPath)
+            if (!this.Agent.Controller.HasPath)
             {
                 navigate = true;
             }
@@ -388,46 +506,171 @@ namespace TerrainTest.AI
 
             if (navigate)
             {
-                this.SetRouteToPoint(this.checkPoints[this.currentCheckPoint], this.patrollVelocity, true);
+                this.Agent.SetRouteToPoint(this.checkPoints[this.currentCheckPoint], this.patrollVelocity, true);
             }
         }
-        protected virtual void AttackingTasks(GameTime gameTime)
+    }
+
+    public class AttackBehavior : Behavior
+    {
+        private AIAgent attackTarget;
+        private Vector3? attackPosition = null;
+        private float attackVelocity;
+        private float attakingDeltaDistance = 10;
+
+        public override Vector3? Target
+        {
+            get
+            {
+                return this.attackPosition;
+            }
+        }
+
+        public AttackBehavior(AIAgent agent) : base(agent)
+        {
+
+        }
+
+        public void InitAttackingBehavior(float attackVelocity, float attakingDeltaDistance)
+        {
+            this.attackTarget = null;
+            this.attackPosition = null;
+            this.attackVelocity = attackVelocity;
+            this.attakingDeltaDistance = attakingDeltaDistance;
+        }
+
+        public override bool Test(GameTime gameTime)
+        {
+            bool res = false;
+
+            if (this.attackTarget != null)
+            {
+                if (this.attackTarget.Status.Life <= 0)
+                {
+                    this.attackTarget = null;
+                    this.attackPosition = null;
+                    return false;
+                }
+
+                if (this.Agent.EnemyOnSight(this.attackTarget))
+                {
+                    return !this.Agent.IsHardEnemy(this.attackTarget);
+                }
+            }
+
+            var targets = this.Agent.GetEnemiesOnSight();
+
+            if (targets != null && targets.Length > 0)
+            {
+                this.attackTarget = targets[0];
+                this.attackPosition = null;
+                res = !this.Agent.IsHardEnemy(this.attackTarget);
+            }
+            else
+            {
+                this.attackTarget = null;
+                this.attackPosition = null;
+                return false;
+            }
+
+            return res;
+        }
+
+        public override void Task(GameTime gameTime)
         {
             if (this.attackTarget != null)
             {
-                bool chase = false;
-
                 if (!this.attackPosition.HasValue)
                 {
                     this.attackPosition = this.attackTarget.Manipulator.Position;
-                    chase = true;
                 }
                 else
                 {
                     float d = Vector3.Distance(this.attackTarget.Manipulator.Position, this.attackPosition.Value);
-                    if (d > attakingDeltaDistance)
+                    if (d > this.attakingDeltaDistance)
                     {
                         this.attackPosition = this.attackTarget.Manipulator.Position;
-                        chase = true;
                     }
                 }
 
-                if (chase)
+                bool onSight = this.Agent.EnemyOnSight(this.attackTarget);
+                bool onRange = !onSight ? false : this.Agent.EnemyOnAttackRange(this.attackTarget);
+
+                if (!onRange)
                 {
                     float v = this.attackVelocity;
 
-                    float d = Vector3.Distance(this.attackTarget.Manipulator.Position, this.Manipulator.Position);
+                    float d = Vector3.Distance(this.attackTarget.Manipulator.Position, this.Agent.Manipulator.Position);
                     if (d < 10)
                     {
                         v = this.attackTarget.Controller.Speed;
                     }
-                    this.SetRouteToPoint(this.attackPosition.Value, v, false);
+                    this.Agent.SetRouteToPoint(this.attackPosition.Value, v, false);
                 }
+                else
+                {
+                    this.Agent.Attack(this.attackTarget);
 
-                this.Attack(this.attackTarget);
+                    this.Agent.Stop();
+                }
             }
         }
-        protected virtual void RetreatingTasks(GameTime gameTime)
+
+        public void SetTarget(AIAgent target)
+        {
+            this.attackTarget = target;
+            this.attackPosition = target.Manipulator.Position;
+        }
+    }
+
+    public class RetreatBehavior : Behavior
+    {
+        private Vector3 rallyPoint;
+        private Vector3? retreatingPosition = null;
+        private float retreatVelocity;
+
+        public override Vector3? Target
+        {
+            get
+            {
+                return this.retreatingPosition;
+            }
+        }
+
+        public RetreatBehavior(AIAgent agent) : base(agent)
+        {
+
+        }
+
+        public void InitRetreatingBehavior(Vector3 rallyPoint, float retreatVelocity)
+        {
+            this.rallyPoint = rallyPoint;
+            this.retreatingPosition = null;
+            this.retreatVelocity = retreatVelocity;
+        }
+
+        public override bool Test(GameTime gameTime)
+        {
+            if (this.Agent.Manipulator.Position == this.Agent.RetreatBehavior.rallyPoint)
+            {
+                return false;
+            }
+            else
+            {
+                var targets = this.Agent.GetEnemiesOnSight();
+                for (int i = 0; i < targets.Length; i++)
+                {
+                    if (this.Agent.IsHardEnemy(targets[i]))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public override void Task(GameTime gameTime)
         {
             bool retreat = false;
 
@@ -439,153 +682,8 @@ namespace TerrainTest.AI
 
             if (retreat)
             {
-                this.SetRouteToPoint(this.retreatingPosition.Value, this.retreatVelocity, true);
+                this.Agent.SetRouteToPoint(this.retreatingPosition.Value, this.retreatVelocity, true);
             }
-        }
-
-
-        protected virtual AIAgent[] GetEnemiesOnSight()
-        {
-            var targets = this.Parent.GetTargetsForAgent(this);
-
-            return Array.FindAll(targets, target =>
-            {
-                if (target.Status.Life > 0)
-                {
-                    return this.OnSight(target);
-                }
-
-                return false;
-            });
-        }
-        protected virtual bool IsHardEnemy(AIAgent target)
-        {
-            if (target != null)
-            {
-                if (target.Status.CurrentWeapon != null && target.Status.CurrentWeapon.Damage > this.Status.Life && this.Status.Damage > 0.9f)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        protected virtual void SetRouteToPoint(Vector3 point, float speed, bool refine)
-        {
-            if (this.AgentType != null & this.Parent.Scene != null)
-            {
-                var refineDelta = refine ?
-                    speed * 0.1f :
-                    0f;
-
-                var p = this.Parent.Scene.FindPath(this.AgentType, this.Manipulator.Position, point, true, refineDelta);
-                if (p != null)
-                {
-                    this.Follow(p, speed);
-                }
-            }
-        }
-
-
-        public bool OnSight(AIAgent target)
-        {
-            var p1 = this.Manipulator.Position;
-            var p2 = target.Manipulator.Position;
-
-            var s = p2 - p1;
-            if (s.Length() < this.Status.SightDistance)
-            {
-                float a = Helper.Angle(s, this.Manipulator.Forward);
-                if (a < this.Status.SightAngle)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        public void Attack(AIAgent target)
-        {
-            if (this.Status.CurrentWeapon != null)
-            {
-                float d = this.Status.CurrentWeapon.Shoot(this.Parent, this, target);
-                if (d > 0f)
-                {
-                    target.GetDamage(this, d);
-
-                    this.FireAttacking(this, target);
-                }
-            }
-        }
-        public void GetDamage(AIAgent attacker, float damage)
-        {
-            if (this.attackTarget == null)
-            {
-                this.attackTarget = attacker;
-                this.attackPosition = attacker.Manipulator.Position;
-                this.ChangeState(AIStates.Attacking);
-            }
-
-            this.Status.Life -= Helper.RandomGenerator.NextFloat(0, damage);
-
-            if (this.Status.PrimaryWeapon != null) this.Status.PrimaryWeapon.Delay(damage * 0.1f);
-            if (this.Status.SecondaryWeapon != null) this.Status.SecondaryWeapon.Delay(damage * 0.1f);
-
-            this.FireDamaged(attacker, this);
-
-            if (this.Status.Life <= 0)
-            {
-                this.Status.Life = 0;
-
-                this.Clear();
-
-                this.FireDestroyed(attacker, this);
-            }
-        }
-
-
-        protected virtual void FireMoving(AIAgent active, AIAgent passive)
-        {
-            this.Moving?.Invoke(new BehaviorEventArgs(active, passive));
-        }
-        protected virtual void FireAttacking(AIAgent active, AIAgent passive)
-        {
-            this.Attacking?.Invoke(new BehaviorEventArgs(active, passive));
-        }
-        protected virtual void FireDamaged(AIAgent active, AIAgent passive)
-        {
-            if (this.Status.Damage > 0.9f)
-            {
-                this.Model.TextureIndex = 2;
-            }
-            else if (this.Status.Damage > 0.2f)
-            {
-                this.Model.TextureIndex = 1;
-            }
-            else
-            {
-                this.Model.TextureIndex = 0;
-            }
-
-            this.Damaged?.Invoke(new BehaviorEventArgs(active, passive));
-        }
-        protected virtual void FireDestroyed(AIAgent active, AIAgent passive)
-        {
-            this.Model.TextureIndex = 2;
-
-            this.Destroyed?.Invoke(new BehaviorEventArgs(active, passive));
-        }
-
-
-        public void Follow(PathFindingPath path, float speed)
-        {
-            this.Controller.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
-            this.Controller.MaximumSpeed = speed;
-        }
-
-        public override string ToString()
-        {
-            return string.Format("{0} -> {1:000.00}", this.CurrentState, this.Status.Life);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Engine;
+using SharpDX;
 
 namespace TerrainTest
 {
@@ -7,6 +8,21 @@ namespace TerrainTest
     /// </summary>
     public class HeliManipulatorController : SteerManipulatorController
     {
+        /// <summary>
+        /// Internal manipulator
+        /// </summary>
+        private Manipulator3D internalManipulator = null;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="manipulator">Parent manipulator</param>
+        public HeliManipulatorController(Manipulator3D manipulator) : base()
+        {
+            this.internalManipulator = new Manipulator3D();
+            this.internalManipulator.Parent = manipulator;
+        }
+
         /// <summary>
         /// Updates the manipulator's view and position
         /// </summary>
@@ -18,12 +34,7 @@ namespace TerrainTest
 
             if (this.HasPath)
             {
-                //var nfw = Vector3.Normalize(position - this.velocity);
-                //var pitch = MathUtil.Pi / 6f;
-                //pitch *= (Vector3.Cross(nfw, this.velocity).Length() / maxspeed);
-
-                //var prot = Quaternion.Slerp(manipulator.Rotation, Quaternion.RotationYawPitchRoll(0, -pitch, 0), 0.2f);
-                //manipulator.SetRotation(prot, true);
+                this.internalManipulator.SetRotation(0, 0, MathUtil.PiOverFour, true);
             }
         }
     }

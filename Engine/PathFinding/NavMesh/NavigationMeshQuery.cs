@@ -68,8 +68,18 @@ namespace Engine.PathFinding.NavMesh
         {
             resultPath = null;
 
-            var startPt = this.FindNearestPoly(from, new Vector3(0, from.Y, 0));
-            var endPt = this.FindNearestPoly(to, new Vector3(0, to.Y, 0));
+            var startPt = this.FindNearestPoly(from, Vector3.Zero);
+            var endPt = this.FindNearestPoly(to, Vector3.Zero);
+
+            if (startPt.Polygon == PathPoint.Null.Polygon)
+            {
+                startPt = this.FindNearestPoly(from, new Vector3(0, from.Y, 0));
+            }
+            if (endPt.Polygon == PathPoint.Null.Polygon)
+            {
+                endPt = this.FindNearestPoly(to, new Vector3(0, to.Y, 0));
+            }
+
             int[] path;
             if (this.FindPath(ref startPt, ref endPt, out path))
             {
