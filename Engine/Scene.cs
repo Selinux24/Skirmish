@@ -377,6 +377,21 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets the screen coordinates
+        /// </summary>
+        /// <param name="position">3D position</param>
+        /// <param name="inside">Returns true if the resulting point is inside the screen</param>
+        /// <returns>Returns the screen coordinates</returns>
+        public Vector2 GetScreenCoordinates(Vector3 position, out bool inside)
+        {
+            return Helper.UnprojectToScreen(
+                position,
+                this.Game.Graphics.Viewport,
+                this.camera.View * this.camera.Projection,
+                out inside);
+        }
+
+        /// <summary>
         /// Creates a new resource
         /// </summary>
         /// <typeparam name="T">Type of resource</typeparam>

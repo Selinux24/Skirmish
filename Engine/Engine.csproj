@@ -214,6 +214,8 @@
     <Compile Include="SkyScattering.cs" />
     <Compile Include="SkyPlaneDescription.cs" />
     <Compile Include="SkyScatteringDescription.cs" />
+    <Compile Include="SpriteProgressBar.cs" />
+    <Compile Include="SpriteProgressBarDescription.cs" />
     <Compile Include="SteerManipulatorController.cs" />
     <Compile Include="TimeOfDay.cs" />
     <Compile Include="TransitionDescription.cs" />

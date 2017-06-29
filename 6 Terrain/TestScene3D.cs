@@ -48,6 +48,10 @@ namespace TerrainTest
         private SceneObject<TextDrawer> counters2 = null;
         private SceneObject<Sprite> backPannel = null;
 
+        private SceneObject<SpriteProgressBar> hProgressBar = null;
+        private SceneObject<SpriteProgressBar> t1ProgressBar = null;
+        private SceneObject<SpriteProgressBar> t2ProgressBar = null;
+
         private SceneObject<Model> cursor3D = null;
         private SceneObject<Cursor> cursor2D = null;
 
@@ -102,32 +106,6 @@ namespace TerrainTest
         private TankAIAgent tankP1Agent = null;
         private TankAIAgent tankP2Agent = null;
         private FlyerAIAgent helicopterAgent = null;
-
-        Vector3[] p1CheckPoints = new Vector3[]
-        {
-            new Vector3(+60, 0, -60),
-            new Vector3(-60, 0, -60),
-            new Vector3(+60, 0, +60),
-            new Vector3(-70, 0, +70),
-        };
-
-        Vector3[] p2CheckPoints = new Vector3[]
-        {
-            new Vector3(+60, 0, -60),
-            new Vector3(+60, 0, +60),
-            new Vector3(-70, 0, +70),
-            new Vector3(-60, 0, -60),
-            new Vector3(+00, 0, +00),
-        };
-
-        Vector3[] hCheckPoints = new Vector3[]
-        {
-            new Vector3(+60, 20, +60),
-            new Vector3(+60, 20, -60),
-            new Vector3(-70, 20, +70),
-            new Vector3(-60, 20, -60),
-            new Vector3(+00, 25, +00),
-        };
 
         private ParticleSystemDescription pPlume = null;
         private ParticleSystemDescription pFire = null;
@@ -221,6 +199,26 @@ namespace TerrainTest
             };
 
             this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHud - 1);
+
+            var spbDesc = new SpriteProgressBarDescription()
+            {
+                Width = 50,
+                Height = 5,
+                BaseColor = Color.Red,
+                ProgressColor = Color.Green,
+            };
+
+            this.hProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerHud);
+            this.t1ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerHud);
+            this.t2ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerHud);
+
+            this.hProgressBar.Instance.Top = 120;
+            this.t1ProgressBar.Instance.Top = 120;
+            this.t2ProgressBar.Instance.Top = 120;
+
+            this.hProgressBar.Instance.Left = 5;
+            this.t1ProgressBar.Instance.Left = 135;
+            this.t2ProgressBar.Instance.Left = 270;
 
             #endregion
 
@@ -927,31 +925,57 @@ namespace TerrainTest
 
             this.helicopter.Instance.AnimationController.SetPath(this.animations["heli_default"]);
 
-            var t1W = new WeaponDescription() { Name = "Cannon", Damage = 3.5f, Cadence = 1.5f, Range = 50 };
-            var t2W = new WeaponDescription() { Name = "Machine Gun", Damage = 0.5f, Cadence = 0.05f, Range = 30 };
-            var h1W = new WeaponDescription() { Name = "Missile", Damage = 10, Cadence = 2f, Range = 100 };
+            var t1W = new WeaponDescription() { Name = "Machine Gun", Damage = 0.05f, Cadence = 0.05f, Range = 30 };
+            var t2W = new WeaponDescription() { Name = "Cannon", Damage = 50, Cadence = 5f, Range = 50 };
+            var h1W = new WeaponDescription() { Name = "Missile", Damage = 100, Cadence = 5f, Range = 100 };
             var h2W = new WeaponDescription() { Name = "Gatling", Damage = 10, Cadence = 0.1f, Range = 30 };
 
+            Vector3[] p1CheckPoints = new Vector3[]
+            {
+                new Vector3(+60, 0, -60),
+                new Vector3(-60, 0, -60),
+                new Vector3(+60, 0, +60),
+                new Vector3(-70, 0, +70),
+            };
+
+            Vector3[] p2CheckPoints = new Vector3[]
+            {
+                new Vector3(+60, 0, -60),
+                new Vector3(+60, 0, +60),
+                new Vector3(-70, 0, +70),
+                new Vector3(-60, 0, -60),
+                new Vector3(+00, 0, +00),
+            };
+
+            Vector3[] hCheckPoints = new Vector3[]
+            {
+                new Vector3(+60, 20, +60),
+                new Vector3(+60, 20, -60),
+                new Vector3(-70, 20, +70),
+                new Vector3(-60, 20, -60),
+                new Vector3(+00, 25, +00),
+            };
+
             //Adjust check-points
-            for (int i = 0; i < this.p1CheckPoints.Length; i++)
+            for (int i = 0; i < p1CheckPoints.Length; i++)
             {
                 Vector3 p1;
                 Triangle t1;
                 float d1;
-                if (this.FindNearestGroundPosition(this.p1CheckPoints[i], out p1, out t1, out d1))
+                if (this.FindNearestGroundPosition(p1CheckPoints[i], out p1, out t1, out d1))
                 {
-                    this.p1CheckPoints[i] = p1;
+                    p1CheckPoints[i] = p1;
                 }
             }
 
-            for (int i = 0; i < this.p2CheckPoints.Length; i++)
+            for (int i = 0; i < p2CheckPoints.Length; i++)
             {
                 Vector3 p2;
                 Triangle t2;
                 float d2;
-                if (this.FindNearestGroundPosition(this.p2CheckPoints[i], out p2, out t2, out d2))
+                if (this.FindNearestGroundPosition(p2CheckPoints[i], out p2, out t2, out d2))
                 {
-                    this.p2CheckPoints[i] = p2;
+                    p2CheckPoints[i] = p2;
                 }
             }
 
@@ -1005,15 +1029,15 @@ namespace TerrainTest
             this.agentManager.AddAgent(1, this.tankP1Agent);
             this.agentManager.AddAgent(1, this.tankP2Agent);
 
-            this.tankP1Agent.PatrolBehavior.InitPatrollingBehavior(this.p1CheckPoints, 10, 5);
+            this.tankP1Agent.PatrolBehavior.InitPatrollingBehavior(p1CheckPoints, 10, 5);
             this.tankP1Agent.AttackBehavior.InitAttackingBehavior(7, 10);
             this.tankP1Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
 
-            this.tankP2Agent.PatrolBehavior.InitPatrollingBehavior(this.p2CheckPoints, 10, 5);
+            this.tankP2Agent.PatrolBehavior.InitPatrollingBehavior(p2CheckPoints, 10, 5);
             this.tankP2Agent.AttackBehavior.InitAttackingBehavior(7, 10);
             this.tankP2Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
 
-            this.helicopterAgent.PatrolBehavior.InitPatrollingBehavior(this.hCheckPoints, 5, 8);
+            this.helicopterAgent.PatrolBehavior.InitPatrollingBehavior(hCheckPoints, 5, 8);
             this.helicopterAgent.AttackBehavior.InitAttackingBehavior(15, 10);
             this.helicopterAgent.RetreatBehavior.InitRetreatingBehavior(new Vector3(75, 0, 75), 12);
         }
@@ -1398,7 +1422,12 @@ namespace TerrainTest
             {
                 this.DEBUGPickingPosition(tp.Value);
             }
+
+            this.SetScreenPosition(this.helicopterAgent, 4, this.hProgressBar);
+            this.SetScreenPosition(this.tankP1Agent, 4, this.t1ProgressBar);
+            this.SetScreenPosition(this.tankP2Agent, 4, this.t2ProgressBar);
         }
+
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
@@ -1432,8 +1461,35 @@ namespace TerrainTest
                 this.helicopterAgent);
             this.counters2.Instance.Text = txt2;
 
+            this.hProgressBar.Instance.ProgressValue = (1f - this.helicopterAgent.Status.Damage);
+            this.t1ProgressBar.Instance.ProgressValue = (1f - this.tankP1Agent.Status.Damage);
+            this.t2ProgressBar.Instance.ProgressValue = (1f - this.tankP2Agent.Status.Damage);
+
             #endregion
         }
+
+        private void SetScreenPosition(AIAgent agent, float height, SceneObject<SpriteProgressBar> pb)
+        {
+            bool inside;
+            var screenPosition = this.GetScreenCoordinates(agent.Manipulator.Position, out inside);
+            var top = this.GetScreenCoordinates(agent.Manipulator.Position + new Vector3(0, height, 0), out inside);
+
+            if (inside)
+            {
+                pb.Visible = true;
+
+                screenPosition.X = top.X - (pb.Instance.Width * 0.5f);
+                screenPosition.Y = top.Y;
+
+                pb.Instance.Top = (int)screenPosition.Y;
+                pb.Instance.Left = (int)screenPosition.X;
+            }
+            else
+            {
+                pb.Visible = false;
+            }
+        }
+
 
         private Vector3 GetRandomPoint(Random rnd, Vector3 offset)
         {
@@ -1652,7 +1708,7 @@ namespace TerrainTest
         {
             var emitter = new LinealEmitter(agent.Manipulator.Position, target.Manipulator.Position, speed)
             {
-                EmissionRate = 0.00001f,
+                EmissionRate = 0.001f,
                 MaximumDistance = 100f,
             };
 

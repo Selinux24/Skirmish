@@ -518,7 +518,77 @@ namespace Engine
                 MathUtil.WithinEpsilon(a.Y, b.Y, epsilon) &&
                 MathUtil.WithinEpsilon(a.Z, b.Z, epsilon);
         }
+        /// <summary>
+        /// Gets the screen coordinates from the specified 3D point
+        /// </summary>
+        /// <param name="point">3D point</param>
+        /// <param name="viewPort">View port</param>
+        /// <param name="wvp">World * View * Projection</param>
+        /// <param name="isInsideScreen">Returns true if the resulting point is inside the screen</param>
+        /// <returns>Returns the resulting screen coordinates</returns>
+        public static Vector2 UnprojectToScreen(Vector3 point, ViewportF viewPort, Matrix wvp, out bool isInsideScreen)
+        {
+            isInsideScreen = true;
 
+            // Go to projection space
+            Vector4 projected;
+            Vector3.Transform(ref point, ref wvp, out projected);
+
+            // Clip
+            // 
+            //  -Wp < Xp <= Wp 
+            //  -Wp < Yp <= Wp 
+            //  0 < Zp <= Wp 
+            // 
+            if (projected.X < -projected.W)
+            {
+                projected.X = -projected.W;
+                isInsideScreen = false;
+            }
+            if (projected.X > projected.W)
+            {
+                projected.X = projected.W;
+                isInsideScreen = false;
+            }
+            if (projected.Y < -projected.W)
+            {
+                projected.Y = -projected.W;
+                isInsideScreen = false;
+            }
+            if (projected.Y > projected.W)
+            {
+                projected.Y = projected.W;
+                isInsideScreen = false;
+            }
+            if (projected.Z < 0)
+            {
+                projected.Z = 0;
+                isInsideScreen = false;
+            }
+            if (projected.Z > projected.W)
+            {
+                projected.Z = projected.W;
+                isInsideScreen = false;
+            }
+
+            // Divide by w, to move from homogeneous coordinates to 3D coordinates again 
+            projected.X = projected.X / projected.W;
+            projected.Y = projected.Y / projected.W;
+            projected.Z = projected.Z / projected.W;
+
+            // Perform the viewport scaling, to get the appropiate coordinates inside the viewport 
+            projected.X = ((float)(((projected.X + 1.0) * 0.5) * viewPort.Width)) + viewPort.X;
+            projected.Y = ((float)(((1.0 - projected.Y) * 0.5) * viewPort.Height)) + viewPort.Y;
+            projected.Z = (projected.Z * (viewPort.MaxDepth - viewPort.MinDepth)) + viewPort.MinDepth;
+
+            return projected.XY();
+        }
+        /// <summary>
+        /// Limits the vector length to specified magnitude
+        /// </summary>
+        /// <param name="vector">Vector to limit</param>
+        /// <param name="magnitude">Magnitude</param>
+        /// <returns></returns>
         public static Vector3 Limit(this Vector3 vector, float magnitude)
         {
             if (vector.Length() > magnitude)
@@ -536,6 +606,15 @@ namespace Engine
         public static Vector3 XYZ(this Vector4 vector)
         {
             return new Vector3(vector.X, vector.Y, vector.Z);
+        }
+        /// <summary>
+        /// Returns xy components from Vector4
+        /// </summary>
+        /// <param name="vector">Vector4</param>
+        /// <returns>Returns xy components from Vector4</returns>
+        public static Vector2 XY(this Vector4 vector)
+        {
+            return new Vector2(vector.X, vector.Y);
         }
         /// <summary>
         /// Returns rgb components from Color4
