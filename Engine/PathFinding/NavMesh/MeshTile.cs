@@ -13,7 +13,7 @@ namespace Engine.PathFinding.NavMesh
     class MeshTile : IEquatable<MeshTile>
     {
         private PolyIdManager idManager;
-        private int baseRef;
+        private PolyId baseRef;
 
         /// <summary>
         /// 
@@ -224,7 +224,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="layer"></param>
         /// <param name="manager"></param>
         /// <param name="baseRef"></param>
-        public MeshTile(Point location, int layer, PolyIdManager manager, int baseRef)
+        public MeshTile(Point location, int layer, PolyIdManager manager, PolyId baseRef)
         {
             this.Location = location;
             this.Layer = layer;
@@ -239,7 +239,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="layer"></param>
         /// <param name="manager"></param>
         /// <param name="baseRef"></param>
-        public MeshTile(int x, int y, int layer, PolyIdManager manager, int baseRef)
+        public MeshTile(int x, int y, int layer, PolyIdManager manager, PolyId baseRef)
             : this(new Point(x, y), layer, manager, baseRef) { }
 
         /// <summary>
@@ -267,7 +267,7 @@ namespace Engine.PathFinding.NavMesh
                         continue;
                     }
 
-                    int id;
+                    PolyId id;
                     this.idManager.SetPolyIndex(ref baseRef, p.NeighborEdges[j] - 1, out id);
 
                     //Initialize a new link
@@ -296,8 +296,8 @@ namespace Engine.PathFinding.NavMesh
                 //Find polygon to connect to
                 Vector3 p = omc.Pos0;
                 Vector3 nearestPt = new Vector3();
-                int reference = FindNearestPoly(p, extents, ref nearestPt);
-                if (reference == 0)
+                PolyId reference = FindNearestPoly(p, extents, ref nearestPt);
+                if (reference == PolyId.Null)
                 {
                     continue;
                 }
@@ -322,7 +322,7 @@ namespace Engine.PathFinding.NavMesh
 
                 //Start end-point always conects back to off-mesh connection
                 int landPolyIdx = this.idManager.DecodePolyIndex(ref reference);
-                int id;
+                PolyId id;
                 this.idManager.SetPolyIndex(ref baseRef, OffMeshConnections[con].Poly, out id);
 
                 Link link2 = new Link();
@@ -362,7 +362,7 @@ namespace Engine.PathFinding.NavMesh
                     Vector3 va = this.Verts[this.Polys[i].Vertices[j]];
                     Vector3 vb = this.Verts[this.Polys[i].Vertices[(j + 1) % numPolyVerts]];
                     BoundarySide opSide = dir.GetOpposite();
-                    int[] neighbors;
+                    PolyId[] neighbors;
                     float[] neighborAreas;
                     target.FindConnectingPolys(va, vb, opSide, out neighbors, out neighborAreas);
 
@@ -440,8 +440,8 @@ namespace Engine.PathFinding.NavMesh
                 //Find polygon to connect to
                 Vector3 p = targetCon.Pos1;
                 Vector3 nearestPt = new Vector3();
-                int reference = this.FindNearestPoly(p, extents, ref nearestPt);
-                if (reference == 0)
+                PolyId reference = this.FindNearestPoly(p, extents, ref nearestPt);
+                if (reference == PolyId.Null)
                 {
                     continue;
                 }
@@ -467,7 +467,7 @@ namespace Engine.PathFinding.NavMesh
                 if ((targetCon.Flags & OffMeshConnectionFlags.Bidirectional) != 0)
                 {
                     int landPolyIdx = this.idManager.DecodePolyIndex(ref reference);
-                    int id = target.baseRef;
+                    PolyId id = target.baseRef;
                     this.idManager.SetPolyIndex(ref id, targetCon.Poly, out id);
 
                     Link bidiLink = new Link();
@@ -486,12 +486,12 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="side">Polygon edge</param>
         /// <param name="connections">Resulting Connection polygon</param>
         /// <param name="connectionAreas">Resulting Connection area</param>
-        public void FindConnectingPolys(Vector3 va, Vector3 vb, BoundarySide side, out int[] connections, out float[] connectionAreas)
+        public void FindConnectingPolys(Vector3 va, Vector3 vb, BoundarySide side, out PolyId[] connections, out float[] connectionAreas)
         {
             connections = null;
             connectionAreas = null;
 
-            List<int> con = new List<int>();
+            List<PolyId> con = new List<PolyId>();
             List<float> conarea = new List<float>();
 
             Vector2 amin = Vector2.Zero;
@@ -541,7 +541,7 @@ namespace Engine.PathFinding.NavMesh
                     conarea.Add(Math.Max(amin.X, bmin.X));
                     conarea.Add(Math.Min(amax.X, bmax.X));
 
-                    int id;
+                    PolyId id;
                     this.idManager.SetPolyIndex(ref baseRef, i, out id);
                     con.Add(id);
 
@@ -560,24 +560,24 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="extents">Range of search</param>
         /// <param name="nearestPt">Resulting nearest point</param>
         /// <returns>Polygon Reference which contains nearest point</returns>
-        public int FindNearestPoly(Vector3 center, Vector3 extents, ref Vector3 nearestPt)
+        public PolyId FindNearestPoly(Vector3 center, Vector3 extents, ref Vector3 nearestPt)
         {
             BoundingBox bounds;
             bounds.Minimum = center - extents;
             bounds.Maximum = center + extents;
 
             //Get nearby polygons from proximity grid
-            List<int> polys = new List<int>(128);
+            List<PolyId> polys = new List<PolyId>(128);
             int polyCount = this.QueryPolygons(bounds, polys);
 
             //Find nearest polygon amongst the nearby polygons
-            int nearest = 0;
+            PolyId nearest = PolyId.Null;
             float nearestDistanceSqr = float.MaxValue;
 
             //Iterate throuh all the polygons
             for (int i = 0; i < polyCount; i++)
             {
-                int reference = polys[i];
+                PolyId reference = polys[i];
                 Vector3 closestPtPoly = new Vector3();
                 this.ClosestPointOnPoly(this.idManager.DecodePolyIndex(ref reference), center, ref closestPtPoly);
                 float d = (center - closestPtPoly).LengthSquared();
@@ -598,7 +598,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="qbounds">The bounds</param>
         /// <param name="polys">List of polygons</param>
         /// <returns>Number of polygons found</returns>
-        public int QueryPolygons(BoundingBox qbounds, List<int> polys)
+        public int QueryPolygons(BoundingBox qbounds, List<PolyId> polys)
         {
             if (BVTree.Count != 0)
             {
@@ -635,7 +635,7 @@ namespace Engine.PathFinding.NavMesh
 
                     if (isLeafNode && overlap)
                     {
-                        int polyRef;
+                        PolyId polyRef;
                         this.idManager.SetPolyIndex(ref baseRef, bvNode.Index, out polyRef);
                         polys.Add(polyRef);
                     }
@@ -678,7 +678,7 @@ namespace Engine.PathFinding.NavMesh
 
                     if (qbounds.Contains(ref b) != ContainmentType.Disjoint)
                     {
-                        int polyRef;
+                        PolyId polyRef;
                         this.idManager.SetPolyIndex(ref baseRef, i, out polyRef);
                         polys.Add(polyRef);
                     }
@@ -745,6 +745,7 @@ namespace Engine.PathFinding.NavMesh
             float[] edgeDistance = new float[NavigationMeshQuery.VertsPerPolygon];
             float[] edgeT = new float[NavigationMeshQuery.VertsPerPolygon];
             int numPolyVerts = poly.VertexCount;
+
             for (int i = 0; i < numPolyVerts; i++)
             {
                 verts[i] = this.Verts[poly.Vertices[i]];

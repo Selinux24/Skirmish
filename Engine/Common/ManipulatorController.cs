@@ -6,7 +6,7 @@ namespace Engine.Common
     /// <summary>
     /// Manipulator controller base class
     /// </summary>
-    public abstract class ManipulatorController
+    public abstract class ManipulatorController : IControllable
     {
         /// <summary>
         /// Following path

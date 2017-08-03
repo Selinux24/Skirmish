@@ -9,6 +9,6 @@ namespace Engine
         /// <summary>
         /// Gets the cost of this instance.
         /// </summary>
-        float Cost { get; }
+        float TotalCost { get; }
     }
 }

@@ -13,6 +13,7 @@ namespace SceneTest
     {
         private const int layerHUD = 99;
 
+        private float baseHeight = 0.1f;
         private float spaceSize = 40;
 
         private SceneObject<TextDrawer> title = null;
@@ -20,6 +21,8 @@ namespace SceneTest
         private SceneObject<Sprite> backPannel = null;
 
         private SceneObject<LensFlare> lensFlare = null;
+
+        private SceneObject<Scenery> clif = null;
 
         private SceneObject<Model> floorAsphalt = null;
         private SceneObject<ModelInstanced> floorAsphaltI = null;
@@ -63,8 +66,14 @@ namespace SceneTest
             this.Camera.Goto(-20, 10, -40f);
             this.Camera.LookTo(0, 0, 0);
 
+            GameEnvironment.LODDistanceLow *= 2;
+            GameEnvironment.LODDistanceMedium *= 2;
+            GameEnvironment.LODDistanceHigh *= 2;
+            GameEnvironment.LODDistanceMinimum *= 2;
+
             this.InitializeTextBoxes();
             this.InitializeSkyEffects();
+            this.InitializeScenery();
             this.InitializeFloorAsphalt();
             this.InitializeBuildingObelisk();
             this.InitializeCharacterSoldier();
@@ -134,10 +143,24 @@ namespace SceneTest
                 Mode = SkyPlaneMode.Perturbed,
             });
         }
+        private void InitializeScenery()
+        {
+            this.clif = this.AddComponent<Scenery>(
+                new GroundDescription()
+                {
+                    Name = "Clif",
+                    CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/scenery",
+                        ModelContentFilename = "Clif.xml",
+                    }
+                });
+        }
         private void InitializeFloorAsphalt()
         {
             float l = spaceSize;
-            float h = 0f;
+            float h = baseHeight;
 
             VertexData[] vertices = new VertexData[]
             {
@@ -236,14 +259,14 @@ namespace SceneTest
                     }
                 });
 
-            this.buildingObelisk.Transform.SetPosition(0, 0, 0);
+            this.buildingObelisk.Transform.SetPosition(0, baseHeight, 0);
             this.buildingObelisk.Transform.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.buildingObelisk.Transform.SetScale(10);
 
-            this.buildingObeliskI.Instance[0].Manipulator.SetPosition(-spaceSize * 2, 0, 0);
-            this.buildingObeliskI.Instance[1].Manipulator.SetPosition(spaceSize * 2, 0, 0);
-            this.buildingObeliskI.Instance[2].Manipulator.SetPosition(0, 0, -spaceSize * 2);
-            this.buildingObeliskI.Instance[3].Manipulator.SetPosition(0, 0, spaceSize * 2);
+            this.buildingObeliskI.Instance[0].Manipulator.SetPosition(-spaceSize * 2, baseHeight, 0);
+            this.buildingObeliskI.Instance[1].Manipulator.SetPosition(spaceSize * 2, baseHeight, 0);
+            this.buildingObeliskI.Instance[2].Manipulator.SetPosition(0, baseHeight, -spaceSize * 2);
+            this.buildingObeliskI.Instance[3].Manipulator.SetPosition(0, baseHeight, spaceSize * 2);
 
             this.buildingObeliskI.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
             this.buildingObeliskI.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -291,15 +314,15 @@ namespace SceneTest
             p1.AddLoop("idle1");
             this.animations.Add("default", new AnimationPlan(p1));
 
-            this.characterSoldier.Transform.SetPosition(s - 10, 0, -s);
+            this.characterSoldier.Transform.SetPosition(s - 10, baseHeight, -s);
             this.characterSoldier.Transform.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
             this.characterSoldier.Instance.AnimationController.AddPath(this.animations["default"]);
             this.characterSoldier.Instance.AnimationController.Start(0);
 
-            this.characterSoldierI.Instance[0].Manipulator.SetPosition(-spaceSize * 2 + s, 0, -s);
-            this.characterSoldierI.Instance[1].Manipulator.SetPosition(spaceSize * 2 + s, 0, -s);
-            this.characterSoldierI.Instance[2].Manipulator.SetPosition(s, 0, -spaceSize * 2 - s);
-            this.characterSoldierI.Instance[3].Manipulator.SetPosition(s, 0, spaceSize * 2 - s);
+            this.characterSoldierI.Instance[0].Manipulator.SetPosition(-spaceSize * 2 + s, baseHeight, -s);
+            this.characterSoldierI.Instance[1].Manipulator.SetPosition(spaceSize * 2 + s, baseHeight, -s);
+            this.characterSoldierI.Instance[2].Manipulator.SetPosition(s, baseHeight, -spaceSize * 2 - s);
+            this.characterSoldierI.Instance[3].Manipulator.SetPosition(s, baseHeight, spaceSize * 2 - s);
 
             this.characterSoldierI.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
             this.characterSoldierI.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -349,13 +372,13 @@ namespace SceneTest
 
             float s = -spaceSize / 2f;
 
-            this.vehicleLeopard.Transform.SetPosition(s, 0, 0);
+            this.vehicleLeopard.Transform.SetPosition(s, baseHeight, 0);
             this.vehicleLeopard.Transform.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
 
-            this.vehicleLeopardI.Instance[0].Manipulator.SetPosition(-spaceSize * 2, 0, -spaceSize * 2);
-            this.vehicleLeopardI.Instance[1].Manipulator.SetPosition(spaceSize * 2, 0, -spaceSize * 2);
-            this.vehicleLeopardI.Instance[2].Manipulator.SetPosition(-spaceSize * 2, 0, spaceSize * 2);
-            this.vehicleLeopardI.Instance[3].Manipulator.SetPosition(spaceSize * 2, 0, spaceSize * 2);
+            this.vehicleLeopardI.Instance[0].Manipulator.SetPosition(-spaceSize * 2, baseHeight, -spaceSize * 2);
+            this.vehicleLeopardI.Instance[1].Manipulator.SetPosition(spaceSize * 2, baseHeight, -spaceSize * 2);
+            this.vehicleLeopardI.Instance[2].Manipulator.SetPosition(-spaceSize * 2, baseHeight, spaceSize * 2);
+            this.vehicleLeopardI.Instance[3].Manipulator.SetPosition(spaceSize * 2, baseHeight, spaceSize * 2);
 
             this.vehicleLeopardI.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
             this.vehicleLeopardI.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -452,18 +475,18 @@ namespace SceneTest
                     }
                 });
 
-            this.streetlamp.Transform.SetPosition(-spaceSize, 0, -spaceSize * -2f);
+            this.streetlamp.Transform.SetPosition(-spaceSize, baseHeight, -spaceSize * -2f);
 
-            this.streetlampI.Instance[0].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * -1f);
-            this.streetlampI.Instance[1].Manipulator.SetPosition(-spaceSize, 0, 0);
-            this.streetlampI.Instance[2].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 1f);
-            this.streetlampI.Instance[3].Manipulator.SetPosition(-spaceSize, 0, -spaceSize * 2f);
+            this.streetlampI.Instance[0].Manipulator.SetPosition(-spaceSize, baseHeight, -spaceSize * -1f);
+            this.streetlampI.Instance[1].Manipulator.SetPosition(-spaceSize, baseHeight, 0);
+            this.streetlampI.Instance[2].Manipulator.SetPosition(-spaceSize, baseHeight, -spaceSize * 1f);
+            this.streetlampI.Instance[3].Manipulator.SetPosition(-spaceSize, baseHeight, -spaceSize * 2f);
 
-            this.streetlampI.Instance[4].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -2f);
-            this.streetlampI.Instance[5].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * -1f);
-            this.streetlampI.Instance[6].Manipulator.SetPosition(+spaceSize, 0, 0);
-            this.streetlampI.Instance[7].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 1f);
-            this.streetlampI.Instance[8].Manipulator.SetPosition(+spaceSize, 0, -spaceSize * 2f);
+            this.streetlampI.Instance[4].Manipulator.SetPosition(+spaceSize, baseHeight, -spaceSize * -2f);
+            this.streetlampI.Instance[5].Manipulator.SetPosition(+spaceSize, baseHeight, -spaceSize * -1f);
+            this.streetlampI.Instance[6].Manipulator.SetPosition(+spaceSize, baseHeight, 0);
+            this.streetlampI.Instance[7].Manipulator.SetPosition(+spaceSize, baseHeight, -spaceSize * 1f);
+            this.streetlampI.Instance[8].Manipulator.SetPosition(+spaceSize, baseHeight, -spaceSize * 2f);
 
             this.streetlampI.Instance[4].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             this.streetlampI.Instance[5].Manipulator.SetRotation(MathUtil.Pi, 0, 0);

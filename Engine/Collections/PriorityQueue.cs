@@ -179,7 +179,7 @@ namespace Engine.Collections
         {
             int parent = (i - 1) / 2;
 
-            while ((i > 0) && (heap[parent].Cost > node.Cost))
+            while ((i > 0) && (heap[parent].TotalCost > node.TotalCost))
             {
                 heap[i] = heap[parent];
                 i = parent;
@@ -200,7 +200,7 @@ namespace Engine.Collections
             while (child < size)
             {
                 //determine which child element has a smaller cost 
-                if (((child + 1) < size) && (heap[child].Cost > heap[child + 1].Cost))
+                if (((child + 1) < size) && (heap[child].TotalCost > heap[child + 1].TotalCost))
                     child++;
 
                 heap[i] = heap[child];

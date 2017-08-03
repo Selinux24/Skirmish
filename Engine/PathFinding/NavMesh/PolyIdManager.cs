@@ -49,9 +49,9 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="tileIndex"></param>
         /// <param name="polyIndex"></param>
         /// <returns></returns>
-        public int Encode(int salt, int tileIndex, int polyIndex)
+        public PolyId Encode(int salt, int tileIndex, int polyIndex)
         {
-            int id;
+            PolyId id;
             Encode(salt, tileIndex, polyIndex, out id);
             return id;
         }
@@ -64,13 +64,13 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="tileIndex">Tile index</param>
         /// <param name="polyIndex">Poly index</param>
         /// <returns>Polygon reference</returns>
-        public void Encode(int salt, int tileIndex, int polyIndex, out int result)
+        public void Encode(int salt, int tileIndex, int polyIndex, out PolyId result)
         {
             polyIndex &= polyMask;
             tileIndex &= tileMask;
             salt &= saltMask;
 
-            result = ((salt << saltOffset) | (tileIndex << tileOffset) | polyIndex);
+            result = new PolyId((salt << saltOffset) | (tileIndex << tileOffset) | polyIndex);
         }
         /// <summary>
         /// 
@@ -78,12 +78,12 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="polyBase"></param>
         /// <param name="newPoly"></param>
         /// <param name="result"></param>
-        public void SetPolyIndex(ref int polyBase, int newPoly, out int result)
+        public void SetPolyIndex(ref PolyId polyBase, int newPoly, out PolyId result)
         {
             newPoly &= polyMask;
 
             //first clear poly then OR with new poly
-            result = ((polyBase & ~polyMask) | newPoly);
+            result = new PolyId((polyBase.Id & ~polyMask) | newPoly);
         }
         /// <summary>
         /// Decode a standard polygon reference.
@@ -94,9 +94,9 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="polyIndex">Resulting poly index.</param>
         /// <param name="tileIndex">Resulting tile index.</param>
         /// <param name="salt">Resulting salt value.</param>
-        public void Decode(ref int id, out int polyIndex, out int tileIndex, out int salt)
+        public void Decode(ref PolyId id, out int polyIndex, out int tileIndex, out int salt)
         {
-            int bits = id;
+            int bits = id.Id;
 
             salt = (bits >> saltOffset) & saltMask;
             tileIndex = (bits >> tileOffset) & tileMask;
@@ -107,9 +107,9 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="polyBits">The number of bits to use for the polygon value.</param>
         /// <returns>The value's poly index.</returns>
-        public int DecodePolyIndex(ref int id)
+        public int DecodePolyIndex(ref PolyId id)
         {
-            return id & polyMask;
+            return id.Id & polyMask;
         }
         /// <summary>
         /// Extract a tile's index from the specified polygon reference.
@@ -117,9 +117,9 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="polyBits">The number of bits to use for the polygon value.</param>
         /// <param name="tileBits">The number of bits to use for the tile value.</param>
         /// <returns>The value's tile index.</returns>
-        public int DecodeTileIndex(ref int id)
+        public int DecodeTileIndex(ref PolyId id)
         {
-            return (id >> tileOffset) & tileMask;
+            return (id.Id >> tileOffset) & tileMask;
         }
         /// <summary>
         /// Extract a tile's salt value from the specified polygon reference.
@@ -128,9 +128,9 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="tileBits">The number of bits to use for the tile value.</param>
         /// <param name="saltBits">The number of bits to use for the salt.</param>
         /// <returns>The value's salt.</returns>
-        public int DecodeSalt(ref int id)
+        public int DecodeSalt(ref PolyId id)
         {
-            return (id >> saltOffset) & saltMask;
+            return (id.Id >> saltOffset) & saltMask;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.Common;
+using Engine.Content;
 using Engine.PathFinding.AStar;
 using SharpDX;
 using System;

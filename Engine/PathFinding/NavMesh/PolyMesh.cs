@@ -24,7 +24,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="nvp">The maximum number of vertices per polygon.</param>
         /// <param name="cellSize">The size of a cell.</param>
         /// <param name="cellHeight">The height of a cell.</param>
-        public static BoundingVolumeTree BuildBVT(Vertexi[] verts, PolyMeshPolygon[] polys, int nvp, float cellSize, float cellHeight)
+        public static BoundingVolumeTree BuildBVT(Vertex3i[] verts, PolyMeshPolygon[] polys, int nvp, float cellSize, float cellHeight)
         {
             var items = new List<BoundingVolumeTreeNode>();
 
@@ -45,8 +45,8 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     var v = verts[vi];
-                    Vertexi.ComponentMin(ref temp.Bounds.Min, ref v, out temp.Bounds.Min);
-                    Vertexi.ComponentMax(ref temp.Bounds.Max, ref v, out temp.Bounds.Max);
+                    Vertex3i.ComponentMin(ref temp.Bounds.Min, ref v, out temp.Bounds.Min);
+                    Vertex3i.ComponentMax(ref temp.Bounds.Max, ref v, out temp.Bounds.Max);
                 }
 
                 temp.Bounds.Min.Y = (int)Math.Floor((float)temp.Bounds.Min.Y * cellHeight / cellSize);
@@ -92,7 +92,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="verts">Contour vertices</param>
         /// <param name="indices">PolyMesh indices</param>
         /// <returns>True, if internal diagonal. False, if otherwise.</returns>
-        public static bool Diagonal(int i, int j, Vertexi[] verts, int[] indices)
+        public static bool Diagonal(int i, int j, Vertex3i[] verts, int[] indices)
         {
             return InCone(i, j, verts, indices) && Diagonalie(i, j, verts, indices);
         }
@@ -105,7 +105,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="verts">Contour vertices</param>
         /// <param name="indices">PolyMesh indices</param>
         /// <returns>True, if internal. False, if otherwise.</returns>
-        public static bool InCone(int i, int j, Vertexi[] verts, int[] indices)
+        public static bool InCone(int i, int j, Vertex3i[] verts, int[] indices)
         {
             int pi = RemoveDiagonalFlag(indices[i]);
             int pj = RemoveDiagonalFlag(indices[j]);
@@ -113,13 +113,13 @@ namespace Engine.PathFinding.NavMesh
             int pin1 = RemoveDiagonalFlag(indices[Prev(i, verts.Length)]);
 
             //if P[i] is convex vertex (i + 1 left or on (i - 1, i))
-            if (Vertexi.IsLeftOn(ref verts[pin1], ref verts[pi], ref verts[pi1]))
+            if (Vertex3i.IsLeftOn(ref verts[pin1], ref verts[pi], ref verts[pi1]))
             {
-                return Vertexi.IsLeft(ref verts[pi], ref verts[pj], ref verts[pin1]) && Vertexi.IsLeft(ref verts[pj], ref verts[pi], ref verts[pi1]);
+                return Vertex3i.IsLeft(ref verts[pi], ref verts[pj], ref verts[pin1]) && Vertex3i.IsLeft(ref verts[pj], ref verts[pi], ref verts[pi1]);
             }
 
             //assume (i - 1, i, i + 1) not collinear
-            return !(Vertexi.IsLeftOn(ref verts[pi], ref verts[pj], ref verts[pi1]) && Vertexi.IsLeftOn(ref verts[pj], ref verts[pi], ref verts[pin1]));
+            return !(Vertex3i.IsLeftOn(ref verts[pi], ref verts[pj], ref verts[pi1]) && Vertex3i.IsLeftOn(ref verts[pj], ref verts[pi], ref verts[pin1]));
         }
         /// <summary>
         /// True if and only if (v[i], v[j]) is internal or external diagonal
@@ -130,7 +130,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="verts">Contour vertices</param>
         /// <param name="indices">PolyMesh indices</param>
         /// <returns>True, if internal or external diagonal. False, if otherwise.</returns>
-        public static bool Diagonalie(int i, int j, Vertexi[] verts, int[] indices)
+        public static bool Diagonalie(int i, int j, Vertex3i[] verts, int[] indices)
         {
             int d0 = RemoveDiagonalFlag(indices[i]);
             int d1 = RemoveDiagonalFlag(indices[j]);
@@ -146,15 +146,15 @@ namespace Engine.PathFinding.NavMesh
                     int p0 = RemoveDiagonalFlag(indices[k]);
                     int p1 = RemoveDiagonalFlag(indices[k1]);
 
-                    if (Vertexi.Equal2D(ref verts[d0], ref verts[p0]) ||
-                        Vertexi.Equal2D(ref verts[d1], ref verts[p0]) ||
-                        Vertexi.Equal2D(ref verts[d0], ref verts[p1]) ||
-                        Vertexi.Equal2D(ref verts[d1], ref verts[p1]))
+                    if (Vertex3i.Equal2D(ref verts[d0], ref verts[p0]) ||
+                        Vertex3i.Equal2D(ref verts[d1], ref verts[p0]) ||
+                        Vertex3i.Equal2D(ref verts[d0], ref verts[p1]) ||
+                        Vertex3i.Equal2D(ref verts[d1], ref verts[p1]))
                     {
                         continue;
                     }
 
-                    if (Vertexi.Intersect(ref verts[d0], ref verts[d1], ref verts[p0], ref verts[p1]))
+                    if (Vertex3i.Intersect(ref verts[d0], ref verts[d1], ref verts[p0], ref verts[p1]))
                     {
                         return false;
                     }
@@ -190,7 +190,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="b">Vertex B</param>
         /// <param name="c">Vertex C</param>
         /// <returns>True if conditions met, false if not</returns>
-        private static bool ULeft(Vertexi a, Vertexi b, Vertexi c)
+        private static bool ULeft(Vertex3i a, Vertex3i b, Vertex3i c)
         {
             return (b.X - a.X) * (c.Z - a.Z) -
                 (c.X - a.X) * (b.Z - a.Z) < 0;
@@ -228,7 +228,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="indices">Indices array</param>
         /// <param name="tris">Triangles array</param>
         /// <returns>The number of triangles.</returns>
-        private static int Triangulate(int n, Vertexi[] verts, int[] indices, Triangle[] tris)
+        private static int Triangulate(int n, Vertex3i[] verts, int[] indices, Triangle[] tris)
         {
             int ntris = 0;
 
@@ -354,7 +354,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="v">A vertex.</param>
         /// <param name="verts">The list of vertices</param>
         /// <returns>The vertex index</returns>
-        private static int AddVertex(Dictionary<Vertexi, int> vertDict, Vertexi v, List<Vertexi> verts)
+        private static int AddVertex(Dictionary<Vertex3i, int> vertDict, Vertex3i v, List<Vertex3i> verts)
         {
             int index;
             if (vertDict.TryGetValue(v, out index))
@@ -377,7 +377,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="edgeA">Shared edge's endpoint A</param>
         /// <param name="edgeB">Shared edge's endpoint B</param>
         /// <returns>The distance between two vertices</returns>
-        private static int GetPolyMergeValue(List<PolyMeshPolygon> polys, int polyA, int polyB, List<Vertexi> verts, out int edgeA, out int edgeB)
+        private static int GetPolyMergeValue(List<PolyMeshPolygon> polys, int polyA, int polyB, List<Vertex3i> verts, out int edgeA, out int edgeB)
         {
             int numVertsA = polys[polyA].VertexCount;
             int numVertsB = polys[polyB].VertexCount;
@@ -570,7 +570,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="vertices">The vertex list</param>
         /// <param name="polys">The polygon list</param>
         /// <param name="numVertsPerPoly">Number of vertices per polygon</param>
-        private static void BuildMeshAdjacency(List<Vertexi> vertices, List<PolyMeshPolygon> polys, int numVertsPerPoly)
+        private static void BuildMeshAdjacency(List<Vertex3i> vertices, List<PolyMeshPolygon> polys, int numVertsPerPoly)
         {
             int maxEdgeCount = polys.Count * numVertsPerPoly;
             int[] firstEdge = new int[vertices.Count + maxEdgeCount];
@@ -671,27 +671,27 @@ namespace Engine.PathFinding.NavMesh
             }
         }
 
-        private static bool DiagonalLoose(int i, int j, Vertexi[] verts, int[] indices)
+        private static bool DiagonalLoose(int i, int j, Vertex3i[] verts, int[] indices)
         {
             return InConeLoose(i, j, verts, indices) && DiagonalieLoose(i, j, verts, indices);
         }
 
-        private static bool InConeLoose(int i, int j, Vertexi[] verts, int[] indices)
+        private static bool InConeLoose(int i, int j, Vertex3i[] verts, int[] indices)
         {
             int pi = RemoveDiagonalFlag(indices[i]);
             int pj = RemoveDiagonalFlag(indices[j]);
             int pi1 = RemoveDiagonalFlag(indices[Next(i, verts.Length)]);
             int pin1 = RemoveDiagonalFlag(indices[Prev(i, verts.Length)]);
 
-            if (Vertexi.IsLeftOn(ref verts[pin1], ref verts[pi], ref verts[pi1]))
-                return Vertexi.IsLeftOn(ref verts[pi], ref verts[pj], ref verts[pin1])
-                    && Vertexi.IsLeftOn(ref verts[pj], ref verts[pi], ref verts[pi1]);
+            if (Vertex3i.IsLeftOn(ref verts[pin1], ref verts[pi], ref verts[pi1]))
+                return Vertex3i.IsLeftOn(ref verts[pi], ref verts[pj], ref verts[pin1])
+                    && Vertex3i.IsLeftOn(ref verts[pj], ref verts[pi], ref verts[pi1]);
 
-            return !(Vertexi.IsLeftOn(ref verts[pi], ref verts[pj], ref verts[pi1])
-                && Vertexi.IsLeftOn(ref verts[pj], ref verts[pi], ref verts[pin1]));
+            return !(Vertex3i.IsLeftOn(ref verts[pi], ref verts[pj], ref verts[pi1])
+                && Vertex3i.IsLeftOn(ref verts[pj], ref verts[pi], ref verts[pin1]));
         }
 
-        private static bool DiagonalieLoose(int i, int j, Vertexi[] verts, int[] indices)
+        private static bool DiagonalieLoose(int i, int j, Vertex3i[] verts, int[] indices)
         {
             int d0 = RemoveDiagonalFlag(indices[i]);
             int d1 = RemoveDiagonalFlag(indices[j]);
@@ -704,13 +704,13 @@ namespace Engine.PathFinding.NavMesh
                     int p0 = RemoveDiagonalFlag(indices[k]);
                     int p1 = RemoveDiagonalFlag(indices[k1]);
 
-                    if (Vertexi.Equal2D(ref verts[d0], ref verts[p0]) ||
-                        Vertexi.Equal2D(ref verts[d1], ref verts[p0]) ||
-                        Vertexi.Equal2D(ref verts[d0], ref verts[p1]) ||
-                        Vertexi.Equal2D(ref verts[d1], ref verts[p1]))
+                    if (Vertex3i.Equal2D(ref verts[d0], ref verts[p0]) ||
+                        Vertex3i.Equal2D(ref verts[d1], ref verts[p0]) ||
+                        Vertex3i.Equal2D(ref verts[d0], ref verts[p1]) ||
+                        Vertex3i.Equal2D(ref verts[d1], ref verts[p1]))
                         continue;
 
-                    if (Vertexi.IntersectProp(ref verts[d0], ref verts[d1], ref verts[p0], ref verts[p1]))
+                    if (Vertex3i.IntersectProp(ref verts[d0], ref verts[d1], ref verts[p0], ref verts[p1]))
                         return false;
                 }
             }
@@ -745,7 +745,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets the vertex data
         /// </summary>
-        public Vertexi[] Vertices { get; private set; }
+        public Vertex3i[] Vertices { get; private set; }
         /// <summary>
         /// Gets the polygon data
         /// </summary>
@@ -792,11 +792,11 @@ namespace Engine.PathFinding.NavMesh
             contSet.GetVertexLimits(out maxVertices, out maxTris, out maxVertsPerCont);
 
             //initialize the mesh members
-            var verts = new List<Vertexi>(maxVertices);
+            var verts = new List<Vertex3i>(maxVertices);
             var polys = new List<PolyMeshPolygon>(maxTris);
             var vertRemoveQueue = new Queue<int>(maxVertices);
             var mergeTemp = new int[numVertsPerPoly];
-            var vertDict = new Dictionary<Vertexi, int>(new Vertexi.RoughYEqualityComparer(2));
+            var vertDict = new Dictionary<Vertex3i, int>(new Vertex3i.RoughYEqualityComparer(2));
             var indices = new int[maxVertsPerCont]; //keep track of vertex hash codes
             var tris = new Triangle[maxVertsPerCont];
             var contPolys = new List<PolyMeshPolygon>(maxVertsPerCont + 1);
@@ -810,13 +810,13 @@ namespace Engine.PathFinding.NavMesh
                     continue;
                 }
 
-                var vertices = new Vertexi[cont.Vertices.Length];
+                var vertices = new Vertex3i[cont.Vertices.Length];
 
                 //triangulate contours
                 for (int i = 0; i < cont.Vertices.Length; i++)
                 {
                     var cv = cont.Vertices[i];
-                    vertices[i] = new Vertexi(cv.X, cv.Y, cv.Z);
+                    vertices[i] = new Vertex3i(cv.X, cv.Y, cv.Z);
                     indices[i] = i;
                 }
 
@@ -1004,7 +1004,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="verts">A list of vertices</param>
         /// <param name="polys">A list of polygons</param>
         /// <param name="vertex">The vertex to remove</param>
-        private void RemoveVertex(List<Vertexi> verts, List<PolyMeshPolygon> polys, int vertex)
+        private void RemoveVertex(List<Vertex3i> verts, List<PolyMeshPolygon> polys, int vertex)
         {
             int[] mergeTemp = new int[VerticesPerPoly];
 
@@ -1138,7 +1138,7 @@ namespace Engine.PathFinding.NavMesh
             }
 
             var tris = new Triangle[hole.Count];
-            var tverts = new Vertexi[hole.Count];
+            var tverts = new Vertex3i[hole.Count];
             var thole = new int[hole.Count];
 
             //generate temp vertex array for triangulation

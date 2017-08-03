@@ -28,7 +28,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Node passing cost
         /// </summary>
-        public float Cost { get; set; }
+        public float TotalCost { get; set; }
         /// <summary>
         /// Center position
         /// </summary>

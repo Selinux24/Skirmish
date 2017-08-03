@@ -12,11 +12,11 @@ namespace Engine
         /// <summary>
         /// The lower bound of the bounding box.
         /// </summary>
-        public Vertexi Min;
+        public Vertex3i Min;
         /// <summary>
         /// The upper bound of the bounding box.
         /// </summary>
-        public Vertexi Max;
+        public Vertex3i Max;
 
         /// <summary>
         /// Checks whether two boudning boxes are intersecting.
@@ -56,7 +56,7 @@ namespace Engine
         /// </summary>
         /// <param name="min">The lower bound of the bounding box.</param>
         /// <param name="max">The upper bound of the bounding box.</param>
-        public BoundingBoxi(Vertexi min, Vertexi max)
+        public BoundingBoxi(Vertex3i min, Vertex3i max)
         {
             Min = min;
             Max = max;

@@ -48,7 +48,7 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Node passing cost
         /// </summary>
-        public float Cost { get; set; }
+        public float TotalCost { get; set; }
         /// <summary>
         /// Center position
         /// </summary>
@@ -175,7 +175,7 @@ namespace Engine.PathFinding.AStar
             else if (p2.X == maxX && p2.Z == minZ) this.SouthEast = p2;
             else if (p3.X == maxX && p3.Z == minZ) this.SouthEast = p3;
 
-            this.Cost = cost;
+            this.TotalCost = cost;
             this.State = GridNodeStates.Clear;
             this.Center = (p0 + p1 + p2 + p3) / 4f;
         }
@@ -303,7 +303,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns text representation</returns>
         public override string ToString()
         {
-            return string.Format("State {0}; Cost {1:0.00}; Connections {2}; Center: {3}", this.State, this.Cost, this.ConnectedNodes.Count, this.Center);
+            return string.Format("State {0}; Cost {1:0.00}; Connections {2}; Center: {3}", this.State, this.TotalCost, this.ConnectedNodes.Count, this.Center);
         }
     }
 }

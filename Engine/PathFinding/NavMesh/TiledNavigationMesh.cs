@@ -12,7 +12,7 @@ namespace Engine.PathFinding.NavMesh
     class TiledNavigationMesh
     {
         private Dictionary<Point, List<MeshTile>> tileSet;
-        private Dictionary<MeshTile, int> tileRefs;
+        private Dictionary<MeshTile, PolyId> tileRefs;
         private List<MeshTile> tileList;
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public MeshTile this[int id]
+        public MeshTile this[PolyId id]
         {
             get
             {
@@ -102,7 +102,7 @@ namespace Engine.PathFinding.NavMesh
 
             //init tiles
             this.tileSet = new Dictionary<Point, List<MeshTile>>();
-            this.tileRefs = new Dictionary<MeshTile, int>();
+            this.tileRefs = new Dictionary<MeshTile, PolyId>();
             this.tileList = new List<MeshTile>();
 
             //init ID generator values
@@ -126,7 +126,7 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="tile"></param>
         /// <param name="id"></param>
-        public void AddTileAt(MeshTile tile, int id)
+        public void AddTileAt(MeshTile tile, PolyId id)
         {
             Point loc = tile.Location;
             List<MeshTile> locList;
@@ -158,7 +158,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="data">Navigation Mesh data</param>
         /// <param name="lastRef">Last polygon reference</param>
         /// <param name="result">Last tile reference</param>
-        public int AddTile(NavigationMeshBuilder data)
+        public PolyId AddTile(NavigationMeshBuilder data)
         {
             //make sure data is in right format
             var header = data.Header;
@@ -166,10 +166,10 @@ namespace Engine.PathFinding.NavMesh
             //make sure location is free
             if (GetTileAt(header.X, header.Y, header.Layer) != null)
             {
-                return 0;
+                return PolyId.Null;
             }
 
-            int newTileId = GetNextTileRef();
+            PolyId newTileId = GetNextTileRef();
             MeshTile tile = new MeshTile(new Point(header.X, header.Y), header.Layer, this.IdManager, newTileId);
             tile.Salt = this.IdManager.DecodeSalt(ref newTileId);
 
@@ -235,11 +235,29 @@ namespace Engine.PathFinding.NavMesh
         /// 
         /// </summary>
         /// <returns></returns>
-        public int GetNextTileRef()
+        public PolyId GetNextTileRef()
         {
             //Salt is 1 for first version. As tiles get edited, change salt.
             //Salt can't be 0, otherwise the first poly of tile 0 is incorrectly seen as PolyId.Null.
             return this.IdManager.Encode(1, tileList.Count, 0);
+        }
+        /// <summary>
+        /// Get the tile reference
+        /// </summary>
+        /// <param name="tile">Tile to look for</param>
+        /// <returns>Tile reference</returns>
+        public PolyId GetTileRef(MeshTile tile)
+        {
+            if (tile != null)
+            {
+                PolyId id;
+                if (tileRefs.TryGetValue(tile, out id))
+                {
+                    return id;
+                }
+            }
+
+            return PolyId.Null;
         }
         /// <summary>
         /// Find the tile at a specific location.
@@ -344,12 +362,12 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="tile">Resulting tile</param>
         /// <param name="poly">Resulting poly</param>
         /// <returns>True if tile and poly successfully retrieved</returns>
-        public bool TryGetTileAndPolyByRef(int reference, out MeshTile tile, out Poly poly)
+        public bool TryGetTileAndPolyByRef(PolyId reference, out MeshTile tile, out Poly poly)
         {
             tile = null;
             poly = null;
 
-            if (reference == 0)
+            if (reference == PolyId.Null)
             {
                 return false;
             }
@@ -386,7 +404,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="reference">Polygon reference</param>
         /// <param name="tile">Resulting tile</param>
         /// <param name="poly">Resulting poly</param>
-        public void TryGetTileAndPolyByRefUnsafe(int reference, out MeshTile tile, out Poly poly)
+        public void TryGetTileAndPolyByRefUnsafe(PolyId reference, out MeshTile tile, out Poly poly)
         {
             int salt, polyIndex, tileIndex;
             this.IdManager.Decode(ref reference, out polyIndex, out tileIndex, out salt);
@@ -398,9 +416,9 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         /// <param name="reference">Polygon reference</param>
         /// <returns>True if valid</returns>
-        public bool IsValidPolyRef(int reference)
+        public bool IsValidPolyRef(PolyId reference)
         {
-            if (reference == 0)
+            if (reference == PolyId.Null)
             {
                 return false;
             }
@@ -435,6 +453,67 @@ namespace Engine.PathFinding.NavMesh
         {
             tx = (int)Math.Floor((pos.X - this.Origin.X) / this.TileWidth);
             ty = (int)Math.Floor((pos.Z - this.Origin.Z) / this.TileHeight);
+        }
+        /// <summary>
+        /// Retrieve the endpoints of the offmesh connection at the specified polygon
+        /// </summary>
+        /// <param name="prevRef">The previous polygon reference</param>
+        /// <param name="polyRef">The current polygon reference</param>
+        /// <param name="startPos">The starting position</param>
+        /// <param name="endPos">The ending position</param>
+        /// <returns>True if endpoints found, false if not</returns>
+        public bool GetOffMeshConnectionPolyEndPoints(PolyId prevRef, PolyId polyRef, ref Vector3 startPos, ref Vector3 endPos)
+        {
+            int salt = 0, indexTile = 0, indexPoly = 0;
+
+            if (polyRef == PolyId.Null)
+                return false;
+
+            //get current polygon
+            this.IdManager.Decode(ref polyRef, out indexPoly, out indexTile, out salt);
+            if (indexTile >= this.MaxTiles)
+            {
+                return false;
+            }
+            if (tileList[indexTile].Salt != salt)
+            {
+                return false;
+            }
+
+            MeshTile tile = tileList[indexTile];
+            if (indexPoly >= tile.PolyCount)
+            {
+                return false;
+            }
+
+            Poly poly = tile.Polys[indexPoly];
+            if (poly.PolyType != PolyType.OffMeshConnection)
+            {
+                return false;
+            }
+
+            int idx0 = 0;
+            int idx1 = 1;
+
+            //find the link that points to the first vertex
+            foreach (Link link in poly.Links)
+            {
+                if (link.Edge == 0)
+                {
+                    if (link.Reference != prevRef)
+                    {
+                        idx0 = 1;
+                        idx1 = 0;
+                    }
+
+                    break;
+                }
+            }
+
+            startPos = tile.Verts[poly.Vertices[idx0]];
+            endPos = tile.Verts[poly.Vertices[idx1]];
+
+            return true;
         }
     }
 }

@@ -107,9 +107,11 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Blender\Furniture\StreetLamp\StreetLamp.blend" />
+    <None Include="Blender\Scenery\Clif\clif.blend" />
     <None Include="Blender\Scenery\Ground\ground_nmap.png" />
     <None Include="Blender\Furniture\StreetLamp\Lamp.png" />
     <None Include="Blender\Furniture\StreetLamp\metallic.jpg" />
+    <Content Include="Blender\Scenery\Clif\dirt_2048x2048.jpg" />
     <Content Include="Blender\Scenery\Ground\buildings.png" />
     <None Include="Blender\Vehicles\CapitalShip\Booster.bmp" />
     <None Include="Blender\Vehicles\CapitalShip\Hull.bmp" />
@@ -189,6 +191,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Furniture\StreetLamp\metallic.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\Clif\Diffuse.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\Ground\buildings.png">
@@ -352,6 +357,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Buildings\Dungeon\Dungeon.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\Clif\clif.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Tests\AniCube\aniCube.dae" />

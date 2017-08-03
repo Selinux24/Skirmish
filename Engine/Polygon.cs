@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Polygon class
     /// </summary>
@@ -98,7 +96,7 @@ namespace Engine
                 int i12 = i11 == 0 ? points.Length - 1 : i11 - 1;
                 int i13 = i11 == (points.Length - 1) ? 0 : i11 + 1;
 
-                if (Intersection.IsReflex(points[i12], points[i11], points[i13]))
+                if (Polygon.IsReflex(points[i12], points[i11], points[i13]))
                 {
                     numreflex = 1;
                     break;
@@ -244,6 +242,68 @@ namespace Engine
             outPoly = new Polygon(outVertices, 0, m);
 
             return outPoly.Count;
+        }
+        /// <summary>
+        /// Returns whether the three specified points were reflexive
+        /// </summary>
+        /// <param name="p1">Point 1</param>
+        /// <param name="p2">Point 2</param>
+        /// <param name="p3">Point 3</param>
+        /// <returns>Returns true if the three specified points were reflexive</returns>
+        public static bool IsReflex(Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            var op = ((p3.Z - p1.Z) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Z - p1.Z));
+
+            return op < 0;
+        }
+        /// <summary>
+        /// Generate an accurate sample of random points in the convex polygon and pick a point.
+        /// </summary>
+        /// <param name="pts">The polygon's points data</param>
+        /// <param name="s">A random float</param>
+        /// <param name="t">Another random float</param>
+        /// <param name="pt">The resulting point</param>
+        public static void RandomPointInConvexPoly(Vector3[] pts, float s, float t, out Vector3 pt)
+        {
+            //Calculate triangle areas
+            float[] areas = new float[pts.Length];
+            float areaSum = 0.0f;
+            float area;
+            for (int i = 2; i < pts.Length; i++)
+            {
+                Helper.Area2D(ref pts[0], ref pts[i - 1], ref pts[i], out area);
+                areaSum += Math.Max(0.001f, area);
+                areas[i] = area;
+            }
+
+            //Find sub triangle weighted by area
+            float threshold = s * areaSum;
+            float accumulatedArea = 0.0f;
+            float u = 0.0f;
+            int triangleVertex = 0;
+            for (int i = 2; i < pts.Length; i++)
+            {
+                float currentArea = areas[i];
+                if (threshold >= accumulatedArea && threshold < (accumulatedArea + currentArea))
+                {
+                    u = (threshold - accumulatedArea) / currentArea;
+                    triangleVertex = i;
+                    break;
+                }
+
+                accumulatedArea += currentArea;
+            }
+
+            float v = (float)Math.Sqrt(t);
+
+            float a = 1 - v;
+            float b = (1 - u) * v;
+            float c = u * v;
+            Vector3 pointA = pts[0];
+            Vector3 pointB = pts[triangleVertex - 1];
+            Vector3 pointC = pts[triangleVertex];
+
+            pt = a * pointA + b * pointB + c * pointC;
         }
 
         /// <summary>

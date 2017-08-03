@@ -112,7 +112,7 @@ namespace Engine.PathFinding.NavMesh
                 {
                     for (int i = 0; i < polyMesh.VertexCount; i++)
                     {
-                        Vertexi iv = polyMesh.Vertices[i];
+                        Vertex3i iv = polyMesh.Vertices[i];
                         float h = polyMesh.Bounds.Minimum.Y + iv.Y * cellHeight;
                         hmin = Math.Min(hmin, h);
                         hmax = Math.Max(hmax, h);

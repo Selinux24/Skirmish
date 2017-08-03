@@ -1,5 +1,8 @@
-﻿namespace Engine.Common
+﻿
+namespace Engine.Common
 {
+    using Engine.Content;
+
     /// <summary>
     /// Model base description
     /// </summary>

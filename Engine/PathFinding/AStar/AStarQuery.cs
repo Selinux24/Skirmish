@@ -139,11 +139,11 @@ namespace Engine.PathFinding.AStar
                                     continue;
                                 }
 
-                                float newGone = currentNode.Cost + ((int)nextNodeData.State);
+                                float newGone = currentNode.TotalCost + ((int)nextNodeData.State);
 
                                 if (nextNodeData.State == GridNodeStates.Clear)
                                 {
-                                    if (nextNode.Cost < newGone)
+                                    if (nextNode.TotalCost < newGone)
                                     {
                                         continue;
                                     }

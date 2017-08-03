@@ -11,6 +11,11 @@ namespace Engine.PathFinding.NavMesh
     struct Area : IEquatable<Area>, IEquatable<byte>
     {
         /// <summary>
+		/// The maximum number of areas that can be defined.
+		/// </summary>
+		public const int MaxValues = 256;
+
+        /// <summary>
         /// The null area is one that is considered unwalkable.
         /// </summary>
         public static readonly Area Null = new Area(0x00);

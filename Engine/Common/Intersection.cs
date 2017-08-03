@@ -108,6 +108,43 @@ namespace Engine.Common
             return true;
         }
         /// <summary>
+		/// Determine whether a ray is intersecting a segment AB.
+		/// </summary>
+        /// <param name="ray">Ray</param>
+		/// <param name="a">The endpoint A of segment AB.</param>
+		/// <param name="b">The endpoint B of segment AB.</param>
+		/// <param name="t">The parameter t</param>
+		/// <returns>A value indicating whether the ray is intersecting with the segment.</returns>
+		public static bool RayIntersectsSegment(ref Ray ray, ref Vector3 a, ref Vector3 b, out float t)
+        {
+            //default if not intersectng
+            t = 0;
+
+            Vector3 v = b - a;
+            Vector3 w = ray.Position - a;
+
+            float d = Helper.PerpendicularDotXZ(ref ray.Direction, ref v) * -1;
+            if (Math.Abs(d) < 1e-6f)
+            {
+                return false;
+            }
+
+            d = 1.0f / d;
+            t = Helper.PerpendicularDotXZ(ref v, ref w) * -d;
+            if (t < 0 || t > 1)
+            {
+                return false;
+            }
+
+            float s = Helper.PerpendicularDotXZ(ref ray.Direction, ref w) * -d;
+            if (s < 0 || s > 1)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
         /// Find the 3D distance between a point (x, y, z) and a segment PQ
         /// </summary>
         /// <param name="pt">The coordinate of the point.</param>
@@ -392,7 +429,9 @@ namespace Engine.Common
                 float a4 = a3 + a2 - a1;
 
                 if (a3 * a4 < 0.0f)
+                {
                     return true;
+                }
             }
 
             return false;
@@ -413,45 +452,131 @@ namespace Engine.Common
             Vector3 v = d - c;
             Vector3 w = a - c;
 
-            float magnitude;
-            PerpendicularDotXZ(ref u, ref v, out magnitude);
+            float magnitude = Helper.PerpendicularDotXZ(ref u, ref v);
 
             if (Math.Abs(magnitude) < 1e-6f)
             {
                 s = float.NaN;
                 t = float.NaN;
+
                 return false;
             }
 
-            PerpendicularDotXZ(ref v, ref w, out s);
-            PerpendicularDotXZ(ref u, ref w, out t);
-            s /= magnitude;
-            t /= magnitude;
+            s = Helper.PerpendicularDotXZ(ref v, ref w) / magnitude;
+            t = Helper.PerpendicularDotXZ(ref u, ref w) / magnitude;
 
             return true;
         }
         /// <summary>
-        /// Calculates the perpendicular dot product of two vectors projected onto the XZ plane.
+        /// Determines whether the segment interesects with the polygon.
         /// </summary>
-        /// <param name="a">A vector.</param>
-        /// <param name="b">Another vector.</param>
-        /// <param name="result">The perpendicular dot product on the XZ plane.</param>
-        private static void PerpendicularDotXZ(ref Vector3 a, ref Vector3 b, out float result)
+        /// <param name="p0">Segment's first endpoint</param>
+        /// <param name="p1">Segment's second endpoint</param>
+        /// <param name="verts">Polygon's vertices</param>
+        /// <param name="nverts">The number of vertices in the polygon</param>
+        /// <param name="tmin">Parameter t minimum</param>
+        /// <param name="tmax">Parameter t maximum</param>
+        /// <param name="segMin">Minimum vertex index</param>
+        /// <param name="segMax">Maximum vertex index</param>
+        /// <returns>True if intersect, false if not</returns>
+        public static bool SegmentPolygon2D(Vector3 p0, Vector3 p1, Vector3[] verts, int nverts, out float tmin, out float tmax, out int segMin, out int segMax)
         {
-            result = a.X * b.Z - a.Z * b.X;
-        }
+            const float Epsilon = 0.00000001f;
 
-        public static bool IsReflex(Vector3 p1, Vector3 p2, Vector3 p3)
-        {
-            return OP(p1, p2, p3) < 0;
+            tmin = 0;
+            tmax = 1;
+            segMin = -1;
+            segMax = -1;
+
+            Vector3 dir = p1 - p0;
+
+            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
+            {
+                Vector3 edge = verts[i] - verts[j];
+                Vector3 diff = p0 - verts[j];
+                float n = edge.Z * diff.X - edge.X * diff.Z;
+                float d = dir.Z * edge.X - dir.X * edge.Z;
+                if (Math.Abs(d) < Epsilon)
+                {
+                    //S is nearly parallel to this edge
+                    if (n < 0)
+                        return false;
+                    else
+                        continue;
+                }
+
+                float t = n / d;
+                if (d < 0)
+                {
+                    //segment S is entering across this edge
+                    if (t > tmin)
+                    {
+                        tmin = t;
+                        segMin = j;
+
+                        //S enters after leaving the polygon
+                        if (tmin > tmax)
+                            return false;
+                    }
+                }
+                else
+                {
+                    //segment S is leaving across this edge
+                    if (t < tmax)
+                    {
+                        tmax = t;
+                        segMax = j;
+
+                        //S leaves before entering the polygon
+                        if (tmax < tmin)
+                            return false;
+                    }
+                }
+            }
+
+            return true;
         }
-        public static bool IsConvex(Vector3 p1, Vector3 p2, Vector3 p3)
+        /// <summary>
+        /// Determines whether two polygons A and B are intersecting
+        /// </summary>
+        /// <param name="polya">Polygon A's vertices</param>
+        /// <param name="npolya">Number of vertices for polygon A</param>
+        /// <param name="polyb">Polygon B's vertices</param>
+        /// <param name="npolyb">Number of vertices for polygon B</param>
+        /// <returns>True if intersecting, false if not</returns>
+        public static bool PolygonIntersectsPolygon2D(Vector3[] polya, int npolya, Vector3[] polyb, int npolyb)
         {
-            return OP(p1, p2, p3) > 0;
-        }
-        private static float OP(Vector3 p1, Vector3 p2, Vector3 p3)
-        {
-            return ((p3.Z - p1.Z) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Z - p1.Z));
+            for (int i = 0, j = npolya - 1; i < npolya; j = i++)
+            {
+                Vector3 va = polya[j];
+                Vector3 vb = polya[i];
+                Vector3 n = new Vector3(va.X - vb.X, 0.0f, va.Z - vb.Z);
+                float amin, amax, bmin, bmax;
+                Helper.ProjectPolygon(n, polya, npolya, out amin, out amax);
+                Helper.ProjectPolygon(n, polyb, npolyb, out bmin, out bmax);
+                if (!Helper.OverlapRange(amin, amax, bmin, bmax, float.Epsilon))
+                {
+                    //found separating axis
+                    return false;
+                }
+            }
+
+            for (int i = 0, j = npolyb - 1; i < npolyb; j = i++)
+            {
+                Vector3 va = polyb[j];
+                Vector3 vb = polyb[i];
+                Vector3 n = new Vector3(va.X - vb.X, 0.0f, va.Z - vb.Z);
+                float amin, amax, bmin, bmax;
+                Helper.ProjectPolygon(n, polya, npolya, out amin, out amax);
+                Helper.ProjectPolygon(n, polyb, npolyb, out bmin, out bmax);
+                if (!Helper.OverlapRange(amin, amax, bmin, bmax, float.Epsilon))
+                {
+                    //found separating axis
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

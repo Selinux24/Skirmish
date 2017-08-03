@@ -148,6 +148,7 @@
     <Compile Include="Animation\AnimationPlan.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
+    <Compile Include="BoundingRectanglei.cs" />
     <Compile Include="Common\BaseSceneObject.cs" />
     <Compile Include="Collections\Generic\PickingQuadTree.cs" />
     <Compile Include="Collections\Generic\PickingQuadTreeNode.cs" />
@@ -165,6 +166,7 @@
     <Compile Include="Common\UseMaterials.cs" />
     <Compile Include="Common\UseSkinningData.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
+    <Compile Include="Content\ContentDescription.cs" />
     <Compile Include="Effects\EffectDefaultClouds.cs" />
     <Compile Include="Effects\EffectPostBlur.cs" />
     <Compile Include="Effects\EffectShadowBillboard.cs" />
@@ -175,6 +177,7 @@
     <Compile Include="GroundGardener.cs" />
     <Compile Include="GroundGardenerDescription.cs" />
     <Compile Include="IComposed.cs" />
+    <Compile Include="IControllable.cs" />
     <Compile Include="ICullable.cs" />
     <Compile Include="IDrawable.cs" />
     <Compile Include="IParticleSystem.cs" />
@@ -196,10 +199,36 @@
     <Compile Include="ParticleTypes.cs" />
     <Compile Include="Effects\EffectDefaultCPUParticles.cs" />
     <Compile Include="ParticleEmitter.cs" />
+    <Compile Include="PathFinding\AgentCrowd.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\Agent.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\AgentAnimation.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\AgentParams.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\AgentState.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\Crowd.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\CrowdNeighbor.cs" />
+    <Compile Include="PathFinding\NavMesh\FindPathOptions.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\LocalBoundary.cs" />
+    <Compile Include="PathFinding\NavMesh\NavigationMeshQueryFilter.cs" />
+    <Compile Include="PathFinding\NavMesh\Path.cs" />
+    <Compile Include="PathFinding\NavMesh\PolyId.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\ObstacleAvoidanceParams.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\ObstacleAvoidanceQuery.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\PathCorridor.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\PathQueue.cs" />
+    <Compile Include="PathFinding\NavMesh\RaycastHit.cs" />
+    <Compile Include="PathFinding\NavMesh\RaycastOptions.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\Status.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\TargetState.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\UpdateFlags.cs" />
     <Compile Include="PathFinding\NavMesh\PolyMeshData.cs" />
     <Compile Include="PathFinding\NavMesh\PolyMeshPolygon.cs" />
     <Compile Include="PathFinding\NavMesh\PolyMeshTriangleData.cs" />
+    <Compile Include="PathFinding\NavMesh\Segment.cs" />
+    <Compile Include="PathFinding\NavMesh\StraightPath.cs" />
+    <Compile Include="PathFinding\NavMesh\StraightPathFlags.cs" />
+    <Compile Include="PathFinding\NavMesh\StraightPathVertex.cs" />
     <Compile Include="PathFinding\PathFinderDescription.cs" />
+    <Compile Include="PathFinding\ProximityGrid.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -319,7 +348,8 @@
     <Compile Include="TextDrawerDescription.cs" />
     <Compile Include="TriangleListDrawerDescription.cs" />
     <Compile Include="Updatable.cs" />
-    <Compile Include="Vertexi.cs" />
+    <Compile Include="Vector2i.cs" />
+    <Compile Include="Vertex3i.cs" />
     <Compile Include="PathFinding\NavMesh\Region.cs" />
     <Compile Include="PathFinding\NavMesh\RegionFlags.cs" />
     <Compile Include="PathFinding\NavMesh\RegionId.cs" />

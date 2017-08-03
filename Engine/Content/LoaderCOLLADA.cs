@@ -25,7 +25,14 @@ namespace Engine.Content
         /// <returns>Returns the loaded contents</returns>
         public static ModelContent[] Load(string contentFolder, ModelContentDescription content)
         {
-            return Load(contentFolder, content.ModelFileName, content.VolumeMeshes, content.Animation);
+            Matrix transform = Matrix.Identity;
+
+            if(content.Scale != 1f)
+            {
+                transform = Matrix.Scaling(content.Scale);
+            }
+
+            return Load(contentFolder, content.ModelFileName, content.VolumeMeshes, content.Animation, transform);
         }
         /// <summary>
         /// Load a collada model
@@ -34,8 +41,9 @@ namespace Engine.Content
         /// <param name="fileName">Collada model</param>
         /// <param name="volumes">Volume mesh names</param>
         /// <param name="animation">Animation description</param>
+        /// <param name="transform">Transform</param>
         /// <returns>Returns the loaded contents</returns>
-        public static ModelContent[] Load(string contentFolder, string fileName, string[] volumes, AnimationDescription animation)
+        public static ModelContent[] Load(string contentFolder, string fileName, string[] volumes, AnimationDescription animation, Matrix transform)
         {
             MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList != null && modelList.Length > 0)
@@ -80,7 +88,7 @@ namespace Engine.Content
                                     {
                                         #region Lights
 
-                                        Matrix trn = node.ReadMatrix();
+                                        Matrix trn = transform * node.ReadMatrix();
 
                                         if (!trn.IsIdentity)
                                         {
@@ -109,7 +117,7 @@ namespace Engine.Content
                                             throw new Exception("Only one armature definition per file!");
                                         }
 
-                                        Matrix trn = node.ReadMatrix();
+                                        Matrix trn = transform * node.ReadMatrix();
 
                                         if (node.Nodes != null && node.Nodes.Length > 0)
                                         {
@@ -124,7 +132,7 @@ namespace Engine.Content
                                     {
                                         #region Geometry nodes
 
-                                        Matrix trn = node.ReadMatrix();
+                                        Matrix trn = transform * node.ReadMatrix();
 
                                         if (!trn.IsIdentity)
                                         {
@@ -149,7 +157,7 @@ namespace Engine.Content
                                         #region Controllers
 
                                         //TODO: Where to apply this transform?
-                                        Matrix trn = node.ReadMatrix();
+                                        Matrix trn = transform * node.ReadMatrix();
 
                                         if (node.InstanceController != null && node.InstanceController.Length > 0)
                                         {
@@ -168,7 +176,7 @@ namespace Engine.Content
                                         #region Default node
 
                                         //TODO: Where to apply this transform?
-                                        Matrix trn = node.ReadMatrix();
+                                        Matrix trn = transform * node.ReadMatrix();
 
                                         if (node.Nodes != null)
                                         {

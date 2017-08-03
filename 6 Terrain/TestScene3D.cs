@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
 using SharpDX;

@@ -584,6 +584,26 @@ namespace Engine
             return projected.XY();
         }
         /// <summary>
+        /// Project polygon using axis
+        /// </summary>
+        /// <param name="axis">Plane axis</param>
+        /// <param name="poly">Poligon vertices</param>
+        /// <param name="npoly">Vertex count</param>
+        /// <param name="rmin">Minimum range</param>
+        /// <param name="rmax">Maximum range</param>
+        public static void ProjectPolygon(Vector3 axis, Vector3[] poly, int npoly, out float rmin, out float rmax)
+        {
+            Helper.Dot2D(ref axis, ref poly[0], out rmin);
+            Helper.Dot2D(ref axis, ref poly[0], out rmax);
+            for (int i = 1; i < npoly; i++)
+            {
+                float d;
+                Helper.Dot2D(ref axis, ref poly[i], out d);
+                rmin = Math.Min(rmin, d);
+                rmax = Math.Max(rmax, d);
+            }
+        }
+        /// <summary>
         /// Limits the vector length to specified magnitude
         /// </summary>
         /// <param name="vector">Vector to limit</param>
@@ -827,6 +847,30 @@ namespace Engine
             return ((n - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
         }
         /// <summary>
+		/// Normalizes a value in a specified range to be between 0 and 1.
+		/// </summary>
+		/// <param name="t">The value</param>
+		/// <param name="t0">The lower bound of the range.</param>
+		/// <param name="t1">The upper bound of the range.</param>
+		/// <returns>A normalized value.</returns>
+		public static float Normalize(float t, float t0, float t1)
+        {
+            return MathUtil.Clamp((t - t0) / (t1 - t0), 0.0f, 1.0f);
+        }
+        /// <summary>
+        /// Gets if specified ranges overlaps within epsilon
+        /// </summary>
+        /// <param name="amin">Maximum A range</param>
+        /// <param name="amax">Minimum A range</param>
+        /// <param name="bmin">Maximum B range</param>
+        /// <param name="bmax">Minimum B range</param>
+        /// <param name="eps">Epsilon</param>
+        /// <returns>Returns true if specified ranges overlaps within epsilon</returns>
+        public static bool OverlapRange(float amin, float amax, float bmin, float bmax, float eps)
+        {
+            return ((amin + eps) > bmax || (amax - eps) < bmin) ? false : true;
+        }
+        /// <summary>
         /// Gets angle between two vectors
         /// </summary>
         /// <param name="one">First vector</param>
@@ -994,6 +1038,19 @@ namespace Engine
             area = acx * abz - abx * acz;
         }
         /// <summary>
+        /// Gets the area of the triangle projected onto the XZ-plane.
+        /// </summary>
+        /// <param name="a">The first point.</param>
+        /// <param name="b">The second point.</param>
+        /// <param name="c">The third point.</param>
+        /// <returns>The calculated area.</returns>
+        public static float Area2D(Vector3 a, Vector3 b, Vector3 c)
+        {
+            float area;
+            Area2D(ref a, ref b, ref c, out area);
+            return area;
+        }
+        /// <summary>
         /// Gets total distance between point list
         /// </summary>
         /// <param name="points">Point list</param>
@@ -1058,6 +1115,16 @@ namespace Engine
         public static float Dot2D(ref Vector3 left, ref Vector3 right)
         {
             return left.X * right.X + left.Z * right.Z;
+        }
+        /// <summary>
+		/// Calculates the perpendicular dot product of two vectors projected onto the XZ plane.
+		/// </summary>
+		/// <param name="left">A vector.</param>
+		/// <param name="right">Another vector.</param>
+		/// <returns>The perpendicular dot product on the XZ plane.</returns>
+		public static float PerpendicularDotXZ(ref Vector3 left, ref Vector3 right)
+        {
+            return left.X * right.Z - left.Z * right.X;
         }
         /// <summary>
         /// Calculates the cross product of two vectors (formed from three points)

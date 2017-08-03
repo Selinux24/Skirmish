@@ -16,14 +16,17 @@ namespace Engine.PathFinding.NavMesh
         /// </summary>
         private const float BOUND_PADDING = float.Epsilon * 2f;
 
+        class AgentTypeData
+        {
+            public TiledNavigationMesh NavigationMesh;
+            public NavigationMeshQuery Query;
+            public NavigationMeshNode[] Nodes;
+        }
+
         /// <summary>
-        /// Navigation mesh queries by agent type
+        /// Tiled navigation meshes
         /// </summary>
-        private readonly Dictionary<AgentType, NavigationMeshQuery> Query = new Dictionary<AgentType, NavigationMeshQuery>();
-        /// <summary>
-        /// Navigation mesh nodes by agent type
-        /// </summary>
-        private readonly Dictionary<AgentType, NavigationMeshNode[]> Nodes = new Dictionary<AgentType, NavigationMeshNode[]>();
+        private readonly Dictionary<AgentType, AgentTypeData> agentTypeData = new Dictionary<AgentType, AgentTypeData>();
 
         /// <summary>
         /// Navigation Mesh Build
@@ -63,58 +66,67 @@ namespace Engine.PathFinding.NavMesh
 
             foreach (var agent in settings.Agents)
             {
-                var voxelAgentHeight = settings.GetVoxelAgentHeight(agent);
-                var voxelAgentRadius = settings.GetVoxelAgentRadius(agent);
-                var voxelMaxClimb = settings.GetVoxelMaxClimb(agent);
-
-                var hf = HeightField.Build(bbox, triangles, settings.CellSize, settings.CellHeight, voxelAgentHeight, voxelMaxClimb);
-                var chf = CompactHeightField.Build(hf, settings.MinRegionSize, settings.MergedRegionSize, voxelAgentHeight, voxelAgentRadius, voxelMaxClimb);
-
-                var cs = chf.BuildContourSet(settings.MaxEdgeError, settings.MaxEdgeLength, settings.ContourFlags);
-                var pm = new PolyMesh(cs, settings.CellSize, settings.CellHeight, 0, settings.VertsPerPoly);
-                var pmd = new PolyMeshDetail(pm, chf, settings.SampleDistance, settings.MaxSampleError);
-
-                var builder = new NavigationMeshBuilder(
-                    pm,
-                    pmd,
-                    new OffMeshConnection[0],
-                    settings.CellSize,
-                    settings.CellHeight,
-                    settings.VertsPerPoly,
-                    agent.MaxClimb,
-                    settings.BuildBoundingVolumeTree,
-                    agent.Height,
-                    agent.Radius);
-
-                var tnm = new TiledNavigationMesh(builder);
-                var query = new NavigationMeshQuery(tnm, 2048);
-
-                var nodes = new List<NavigationMeshNode>();
-                for (int m = 0; m < pmd.MeshCount; m++)
-                {
-                    var mesh = pmd.Meshes[m];
-                    var poly = pm.Polys[m];
-                
-                    int vertIndex = mesh.VertexIndex;
-                    int triIndex = mesh.TriangleIndex;
-
-                    for (int j = 0; j < mesh.TriangleCount; j++)
-                    {
-                        var t = pmd.Tris[triIndex + j];
-
-                        var v0 = pmd.Verts[vertIndex + t.VertexHash0];
-                        var v1 = pmd.Verts[vertIndex + t.VertexHash1];
-                        var v2 = pmd.Verts[vertIndex + t.VertexHash2];
-
-                        nodes.Add(new NavigationMeshNode(nm, new Polygon(v0, v1, v2), m, poly.RegionId.Id));
-                    }
-                }
-
-                nm.Query.Add(agent, query);
-                nm.Nodes.Add(agent, nodes.ToArray());
+                BuildQuery(agent, nm, bbox, triangles, settings);
             }
 
             return nm;
+        }
+
+        private static void BuildQuery(NavigationMeshAgentType agent, NavigationMesh nm, BoundingBox bbox, Triangle[] triangles, NavigationMeshGenerationSettings settings)
+        {
+            var voxelAgentHeight = settings.GetVoxelAgentHeight(agent);
+            var voxelAgentRadius = settings.GetVoxelAgentRadius(agent);
+            var voxelMaxClimb = settings.GetVoxelMaxClimb(agent);
+
+            var hf = HeightField.Build(bbox, triangles, settings.CellSize, settings.CellHeight, voxelAgentHeight, voxelMaxClimb);
+            var chf = CompactHeightField.Build(hf, settings.MinRegionSize, settings.MergedRegionSize, voxelAgentHeight, voxelAgentRadius, voxelMaxClimb);
+
+            var cs = chf.BuildContourSet(settings.MaxEdgeError, settings.MaxEdgeLength, settings.ContourFlags);
+            var pm = new PolyMesh(cs, settings.CellSize, settings.CellHeight, 0, settings.VertsPerPoly);
+            var pmd = new PolyMeshDetail(pm, chf, settings.SampleDistance, settings.MaxSampleError);
+
+            var builder = new NavigationMeshBuilder(
+                pm,
+                pmd,
+                new OffMeshConnection[0],
+                settings.CellSize,
+                settings.CellHeight,
+                settings.VertsPerPoly,
+                agent.MaxClimb,
+                settings.BuildBoundingVolumeTree,
+                agent.Height,
+                agent.Radius);
+
+            var tnm = new TiledNavigationMesh(builder);
+            var query = new NavigationMeshQuery(tnm, 2048);
+
+            var nodes = new List<NavigationMeshNode>();
+            for (int m = 0; m < pmd.MeshCount; m++)
+            {
+                var mesh = pmd.Meshes[m];
+                var poly = pm.Polys[m];
+
+                int vertIndex = mesh.VertexIndex;
+                int triIndex = mesh.TriangleIndex;
+
+                for (int j = 0; j < mesh.TriangleCount; j++)
+                {
+                    var t = pmd.Tris[triIndex + j];
+
+                    var v0 = pmd.Verts[vertIndex + t.VertexHash0];
+                    var v1 = pmd.Verts[vertIndex + t.VertexHash1];
+                    var v2 = pmd.Verts[vertIndex + t.VertexHash2];
+
+                    nodes.Add(new NavigationMeshNode(nm, new Polygon(v0, v1, v2), m, poly.RegionId.Id));
+                }
+            }
+
+            nm.agentTypeData.Add(agent, new AgentTypeData()
+            {
+                NavigationMesh = tnm,
+                Query = query,
+                Nodes = nodes.ToArray(),
+            });
         }
         /// <summary>
         /// Computes a bounding box
@@ -123,7 +135,7 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Retusn a bounding box</returns>
         private static BoundingBox ComputeBoundingBox(Triangle[] triangles)
         {
-            if(triangles == null || triangles.Length == 0)
+            if (triangles == null || triangles.Length == 0)
             {
                 return new BoundingBox();
             }
@@ -152,7 +164,7 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Returns the node collections for the specified list</returns>
         public IGraphNode[] GetNodes(AgentType agent)
         {
-            return Array.ConvertAll(this.Nodes[agent], (n) => { return (IGraphNode)n; });
+            return Array.ConvertAll(this.agentTypeData[agent].Nodes, (n) => { return (IGraphNode)n; });
         }
         /// <summary>
         /// Finds a path over the navigation mesh
@@ -164,7 +176,7 @@ namespace Engine.PathFinding.NavMesh
         public Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
             Vector3[] path;
-            if (this.Query[agent].FindPath(from, to, out path))
+            if (this.agentTypeData[agent].Query.FindPath(from, to, out path))
             {
                 return path;
             }
@@ -180,7 +192,19 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Returns true if the specified position is walkable</returns>
         public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
         {
-            return this.Query[agent].IsWalkable(position, out nearest);
+            return this.agentTypeData[agent].Query.IsWalkable(position, out nearest);
+        }
+
+        internal Crowds.Crowd AddCrowd(AgentType agent)
+        {
+            if (!this.agentTypeData.ContainsKey(agent))
+            {
+                throw new Exception("Bad agent type. Include the agent in navigation mesh settings before generation.");
+            }
+
+            var navMesh = this.agentTypeData[agent].NavigationMesh;
+
+            return new Crowds.Crowd(1, ref navMesh);
         }
         /// <summary>
         /// Gets text representation of instance

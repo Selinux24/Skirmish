@@ -1,5 +1,7 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.Content;
+using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
@@ -30,7 +32,9 @@ namespace DeferredTest
         private SceneObject<TextDrawer> statistics = null;
         private SceneObject<Sprite> backPannel = null;
 
-        private SceneObject<GameAgent<SteerManipulatorController>> tankAgent = null;
+        private NavigationMeshAgentType tankAgentType = null;
+        private SceneObject<GameAgent<SteerManipulatorController>> tankAgent1 = null;
+        private SceneObject<GameAgent<SteerManipulatorController>> tankAgent2 = null;
         private SceneObject<Model> helicopter = null;
         private SceneObject<ModelInstanced> helicopters = null;
         private SceneObject<Skydom> skydom = null;
@@ -54,6 +58,8 @@ namespace DeferredTest
         private bool onlyModels = true;
 
         private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+
+        private AgentCrowd crowd = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -167,8 +173,10 @@ namespace DeferredTest
                         ModelContentFilename = "leopard.xml",
                     }
                 };
-                var tank = this.AddComponent<Model>(desc);
-                tank.Transform.SetScale(0.2f, true);
+                var tank1 = this.AddComponent<Model>(desc);
+                tank1.Transform.SetScale(0.2f, true);
+                var tank2 = this.AddComponent<Model>(desc);
+                tank2.Transform.SetScale(0.2f, true);
 
                 var tankController = new SteerManipulatorController()
                 {
@@ -177,18 +185,21 @@ namespace DeferredTest
                     ArrivingRadius = 7.5f,
                 };
 
-                var tankbbox = tank.Instance.GetBoundingBox();
-                var tankAgentType = new NavigationMeshAgentType()
+                var tankbbox = tank1.Instance.GetBoundingBox();
+                this.tankAgentType = new NavigationMeshAgentType()
                 {
                     Height = tankbbox.GetY(),
                     Radius = tankbbox.GetX() * 0.5f,
                     MaxClimb = tankbbox.GetY() * 0.55f,
                 };
 
-                var agent = new GameAgent<SteerManipulatorController>(tankAgentType, tank, tankController);
-                this.tankAgent = this.AddComponent(agent, new SceneObjectDescription() { });
+                var agent1 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank1, tankController);
+                var agent2 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank2, tankController);
+                this.tankAgent1 = this.AddComponent(agent1, new SceneObjectDescription() { });
+                this.tankAgent2 = this.AddComponent(agent2, new SceneObjectDescription() { });
 
-                this.Lights.AddRange(this.tankAgent.Instance.Lights);
+                this.Lights.AddRange(this.tankAgent1.Instance.Lights);
+                this.Lights.AddRange(this.tankAgent2.Instance.Lights);
 
                 sw.Stop();
                 loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
@@ -381,7 +392,7 @@ namespace DeferredTest
                 this.terrainGraphDrawer.Visible = false;
             }
 
-            var nodes = this.GetNodes(tankAgent.Instance.AgentType);
+            var nodes = this.GetNodes(this.tankAgentType);
             if (nodes != null && nodes.Length > 0)
             {
                 Random clrRnd = new Random(1);
@@ -407,7 +418,7 @@ namespace DeferredTest
             #endregion
 
             var navSettings = NavigationMeshGenerationSettings.Default;
-            navSettings.Agents = new[] { this.tankAgent.Instance.AgentType, };
+            navSettings.Agents = new[] { this.tankAgentType };
 
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
             {
@@ -447,7 +458,6 @@ namespace DeferredTest
             }
             #endregion
         }
-
         public override void Initialized()
         {
             base.Initialized();
@@ -455,15 +465,28 @@ namespace DeferredTest
             Vector3 cameraPosition = Vector3.Zero;
             int modelCount = 0;
 
-            #region Tank
+            #region Tanks
             {
                 Vector3 p;
                 Triangle t;
                 float d;
                 if (this.FindTopGroundPosition(20, 40, out p, out t, out d))
                 {
-                    this.tankAgent.Transform.SetPosition(p);
-                    this.tankAgent.Transform.SetNormal(t.Normal);
+                    this.tankAgent1.Transform.SetPosition(p);
+                    this.tankAgent1.Transform.SetNormal(t.Normal);
+                    cameraPosition += p;
+                    modelCount++;
+                }
+            }
+
+            {
+                Vector3 p;
+                Triangle t;
+                float d;
+                if (this.FindTopGroundPosition(15, 35, out p, out t, out d))
+                {
+                    this.tankAgent2.Transform.SetPosition(p);
+                    this.tankAgent2.Transform.SetNormal(t.Normal);
                     cameraPosition += p;
                     modelCount++;
                 }
@@ -514,6 +537,10 @@ namespace DeferredTest
             this.Camera.LookTo(cameraPosition + Vector3.Up);
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
+
+            this.crowd = new AgentCrowd(this, this.navigationGraph as NavigationMesh, this.tankAgentType);
+            crowd.AddAgent(this.tankAgent1, this.tankAgent1.Instance.AgentType);
+            crowd.AddAgent(this.tankAgent2, this.tankAgent2.Instance.AgentType);
         }
         public override void Update(GameTime gameTime)
         {
@@ -542,19 +569,21 @@ namespace DeferredTest
 
             #endregion
 
-            #region Tank
+            #region Tanks
 
             if (this.Game.Input.LeftMouseButtonPressed)
             {
                 if (picked)
                 {
-                    var p = this.FindPath(
-                        this.tankAgent.Instance.AgentType,
-                        this.tankAgent.Transform.Position, position, true, this.tankAgent.Instance.MaximumSpeed * gameTime.ElapsedSeconds);
-                    if (p != null)
-                    {
-                        this.tankAgent.Instance.FollowPath(p);
-                    }
+                    //var p = this.FindPath(
+                    //    this.tankAgent.Instance.AgentType,
+                    //    this.tankAgent.Transform.Position, position, true, this.tankAgent.Instance.MaximumSpeed * gameTime.ElapsedSeconds);
+                    //if (p != null)
+                    //{
+                    //    this.tankAgent.Instance.FollowPath(p);
+                    //}
+
+                    this.crowd.MoveTo(position, 0.25f);
                 }
             }
 
@@ -840,7 +869,8 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F9))
             {
-                this.tankAgent.Active = this.tankAgent.Visible = !this.tankAgent.Visible;
+                this.tankAgent1.Active = this.tankAgent1.Visible = !this.tankAgent1.Visible;
+                this.tankAgent2.Active = this.tankAgent2.Visible = this.tankAgent1.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F10))
@@ -875,6 +905,8 @@ namespace DeferredTest
             }
 
             #endregion
+
+            this.crowd.Update(gameTime);
         }
         public override void Draw(GameTime gameTime)
         {
@@ -922,7 +954,8 @@ namespace DeferredTest
             this.Lights.ClearSpotLights();
             this.spotLight = null;
 
-            this.Lights.AddRange(this.tankAgent.Instance.Lights);
+            this.Lights.AddRange(this.tankAgent1.Instance.Lights);
+            this.Lights.AddRange(this.tankAgent2.Instance.Lights);
 
             if (!modelsOnly)
             {

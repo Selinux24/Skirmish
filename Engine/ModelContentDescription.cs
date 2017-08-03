@@ -25,5 +25,10 @@ namespace Engine
         /// </summary>
         [XmlElement("animation_description")]
         public AnimationDescription Animation = null;
+        /// <summary>
+        /// Model scale
+        /// </summary>
+        [XmlElement("scale")]
+        public float Scale = 1f;
     }
 }

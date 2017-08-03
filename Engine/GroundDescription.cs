@@ -27,8 +27,6 @@ namespace Engine
             }
         }
 
-        
-
         /// <summary>
         /// Content
         /// </summary>
@@ -50,18 +48,5 @@ namespace Engine
             this.DepthEnabled = true;
             this.AlphaEnabled = false;
         }
-    }
-
-    public class ContentDescription
-    {
-        public string ContentFolder;
-
-        public string ModelContentFilename;
-
-        public ModelContent ModelContent;
-
-        public ModelContentDescription ModelContentDescription;
-
-        public HeightmapDescription HeightmapDescription;
     }
 }
