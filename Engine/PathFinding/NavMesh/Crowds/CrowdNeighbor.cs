@@ -5,7 +5,13 @@
 	/// </summary>
 	public struct CrowdNeighbor
     {
-        public int Index;
+        /// <summary>
+        /// Neighbor agent reference
+        /// </summary>
+        public Agent Neighbor;
+        /// <summary>
+        /// Distance to neighbor
+        /// </summary>
         public float Distance;
     }
 }

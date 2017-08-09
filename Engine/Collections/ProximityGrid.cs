@@ -9,10 +9,8 @@ namespace Engine.Collections
 	/// <typeparam name="T">An equatable type.</typeparam>
     public class ProximityGrid<T>
     {
-        private const int Invalid = -1;
-
         private float cellSize;
-        private float invCellSize;
+        private float inverseCellSize;
         private ProximityGridItem<T>[] pool;
         private int poolHead;
         private int[] buckets;
@@ -38,7 +36,7 @@ namespace Engine.Collections
         public ProximityGrid(int poolSize, float cellSize)
         {
             this.cellSize = cellSize;
-            this.invCellSize = 1.0f / cellSize;
+            this.inverseCellSize = 1.0f / cellSize;
 
             //allocate hash buckets
             this.buckets = new int[Helper.NextPowerOfTwo(poolSize)];
@@ -60,7 +58,7 @@ namespace Engine.Collections
         {
             for (int i = 0; i < this.buckets.Length; i++)
             {
-                this.buckets[i] = Invalid;
+                this.buckets[i] = -1;
             }
 
             this.poolHead = 0;
@@ -77,10 +75,10 @@ namespace Engine.Collections
         /// <param name="maxY">Maximum y-coordinate</param>
         public void AddItem(T value, float minX, float minY, float maxX, float maxY)
         {
-            int invMinX = (int)Math.Floor(minX * invCellSize);
-            int invMinY = (int)Math.Floor(minY * invCellSize);
-            int invMaxX = (int)Math.Floor(maxX * invCellSize);
-            int invMaxY = (int)Math.Floor(maxY * invCellSize);
+            int invMinX = (int)Math.Floor(minX * inverseCellSize);
+            int invMinY = (int)Math.Floor(minY * inverseCellSize);
+            int invMaxX = (int)Math.Floor(maxX * inverseCellSize);
+            int invMaxY = (int)Math.Floor(maxY * inverseCellSize);
 
             this.bounds.Min.X = Math.Min(this.bounds.Min.X, invMinX);
             this.bounds.Min.Y = Math.Min(this.bounds.Min.Y, invMinY);
@@ -137,10 +135,10 @@ namespace Engine.Collections
         /// <returns>The number of unique values</returns>
         public int QueryItems(float minX, float minY, float maxX, float maxY, T[] values, int maxVals)
         {
-            int invMinX = (int)Math.Floor(minX * invCellSize);
-            int invMinY = (int)Math.Floor(minY * invCellSize);
-            int invMaxX = (int)Math.Floor(maxX * invCellSize);
-            int invMaxY = (int)Math.Floor(maxY * invCellSize);
+            int invMinX = (int)Math.Floor(minX * inverseCellSize);
+            int invMinY = (int)Math.Floor(minY * inverseCellSize);
+            int invMaxX = (int)Math.Floor(maxX * inverseCellSize);
+            int invMaxY = (int)Math.Floor(maxY * inverseCellSize);
 
             int n = 0;
 
@@ -151,7 +149,7 @@ namespace Engine.Collections
                     int h = HashPos2(x, y, this.buckets.Length);
                     int idx = this.buckets[h];
 
-                    while (idx != Invalid)
+                    while (idx >= 0)
                     {
                         if (this.pool[idx].X == x && this.pool[idx].Y == y)
                         {
@@ -217,7 +215,7 @@ namespace Engine.Collections
             int h = HashPos2(x, y, this.buckets.Length);
             int idx = buckets[h];
 
-            while (idx != Invalid)
+            while (idx >= 0)
             {
                 var item = this.pool[idx];
                 if (item.X == x && item.Y == y)

@@ -18,7 +18,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <summary>
         /// The maximum number of neighbors that a crowd agent can take into account for steering decisions
         /// </summary>
-        private const int AgentMaxNeighbors = Agent.AgentMaxNeighbors;
+        private const int AgentMaxNeighbors = 6;
         /// <summary>
         /// The maximum number of corners a crowd agent will look ahead in the path
         /// </summary>
@@ -33,7 +33,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
         private const int OptMaxAgents = 1;
         private const float OptTimeTHR = 0.5f; //seconds
 
-        private const float CollisionResolveFactor = 0.7f;
         private const int CheckLookAhead = 10;
         private const float TargetReplanDelay = 1.0f; //seconds
 
@@ -106,7 +105,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
             {
                 slot = numAgents;
             }
-            else if (agent.topologyOptTime <= agents[numAgents - 1].topologyOptTime)
+            else if (agent.TopologyOptTime <= agents[numAgents - 1].TopologyOptTime)
             {
                 if (numAgents >= maxAgents)
                 {
@@ -119,7 +118,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 int i;
                 for (i = 0; i < numAgents; i++)
                 {
-                    if (agent.topologyOptTime >= agents[i].topologyOptTime)
+                    if (agent.TopologyOptTime >= agents[i].TopologyOptTime)
                     {
                         break;
                     }
@@ -144,33 +143,11 @@ namespace Engine.PathFinding.NavMesh.Crowds
             return Math.Min(numAgents + 1, maxAgents);
         }
         /// <summary>
-        /// Find the crowd agent's distance to its goal
-        /// </summary>
-        /// <param name="agent">Thw crowd agent</param>
-        /// <param name="range">The maximum range</param>
-        /// <returns>Distance to goal</returns>
-        private static float GetDistanceToGoal(Agent agent, float range)
-        {
-            if (agent.Corners.Count == 0)
-            {
-                return range;
-            }
-
-            bool endOfPath = ((agent.Corners[agent.Corners.Count - 1].Flags & StraightPathFlags.End) != 0) ? true : false;
-            if (endOfPath)
-            {
-                return Math.Min(Helper.Distance2D(agent.Position, agent.Corners[agent.Corners.Count - 1].Point.Position), range);
-            }
-
-            return range;
-        }
-        /// <summary>
         /// Gets if the specified agent is over an Offmesh connection
         /// </summary>
         /// <param name="agent">Agent</param>
-        /// <param name="radius">Trigger radius</param>
         /// <returns>Returns true if the agent is over an Offmesh connection</returns>
-        private static bool OverOffmeshConnection(Agent agent, float radius)
+        private static bool OverOffmeshConnection(Agent agent)
         {
             if (agent.Corners.Count == 0)
             {
@@ -181,6 +158,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
             if (offmeshConnection)
             {
                 float dist = Helper.Distance2D(agent.Position, agent.Corners[agent.Corners.Count - 1].Point.Position);
+                float radius = agent.Parameters.TriggerRadius;
                 if (dist * dist < radius * radius)
                 {
                     return true;
@@ -189,189 +167,11 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
             return false;
         }
-        /// <summary>
-        /// Calculate a vector based off of the map
-        /// </summary>
-        /// <param name="agent">The agent</param>
-        /// <param name="dir">The resulting steer direction</param>
-        private static void CalcSmoothSteerDirection(Agent agent, ref Vector3 dir)
-        {
-            if (agent.Corners.Count == 0)
-            {
-                dir = Vector3.Zero;
-                return;
-            }
-
-            int ip0 = 0;
-            int ip1 = Math.Min(1, agent.Corners.Count - 1);
-            Vector3 p0 = agent.Corners[ip0].Point.Position;
-            Vector3 p1 = agent.Corners[ip1].Point.Position;
-
-            Vector3 dir0 = p0 - agent.Position;
-            Vector3 dir1 = p1 - agent.Position;
-            dir0.Y = 0;
-            dir1.Y = 0;
-
-            float len0 = dir0.Length();
-            float len1 = dir1.Length();
-            if (len1 > 0.001f)
-            {
-                dir1 = dir1 * 1.0f / len1;
-            }
-
-            dir.X = dir0.X - dir1.X * len0 * 0.5f;
-            dir.Y = 0;
-            dir.Z = dir0.Z - dir1.Z * len0 * 0.5f;
-
-            dir.Normalize();
-        }
-        /// <summary>
-        /// Calculate a straight vector to the destination
-        /// </summary>
-        /// <param name="agent">The agent</param>
-        /// <param name="dir">The resulting steer direction</param>
-        private static void CalcStraightSteerDirection(Agent agent, ref Vector3 dir)
-        {
-            if (agent.Corners.Count == 0)
-            {
-                dir = Vector3.Zero;
-                return;
-            }
-
-            dir = agent.Corners[0].Point.Position - agent.Position;
-            dir.Y = 0;
-            dir.Normalize();
-        }
-        /// <summary>
-        /// Get the crowd agent's neighbors.
-        /// </summary>
-        /// <param name="pos">Current position</param>
-        /// <param name="height">The height</param>
-        /// <param name="range">The range to search within</param>
-        /// <param name="skip">The current crowd agent</param>
-        /// <param name="result">The neihbors array</param>
-        /// <param name="maxResult">The maximum number of neighbors that can be stored</param>
-        /// <param name="agents">Array of all crowd agents</param>
-        /// <param name="grid">The ProximityGrid</param>
-        /// <returns>The number of neighbors</returns>
-        private static int GetNeighbors(Vector3 pos, float height, float range, Agent skip, CrowdNeighbor[] result, int maxResult, List<Agent> agents, ProximityGrid<Agent> grid)
-        {
-            int n = 0;
-
-            Agent[] ids = new Agent[MaxNeighbors];
-            int neighborsIds = grid.QueryItems(pos, range, ids, MaxNeighbors);
-
-            for (int i = 0; i < neighborsIds; i++)
-            {
-                var ag = ids[i];
-                if (ag == skip)
-                {
-                    continue;
-                }
-
-                //check for overlap
-                Vector3 diff = pos - ag.Position;
-                if (Math.Abs(diff.Y) >= (height + ag.Parameters.Height) / 2.0f)
-                {
-                    continue;
-                }
-                diff.Y = 0;
-                float distSqr = diff.LengthSquared();
-                if (distSqr > range * range)
-                {
-                    continue;
-                }
-
-                n = AddNeighbor(ids[i], distSqr, result, n, maxResult, agents);
-            }
-
-            return n;
-        }
-        /// <summary>
-        /// Add a CrowdNeighbor to the array
-        /// </summary>
-        /// <param name="agent">The neighbor</param>
-        /// <param name="dist">Distance from current agent</param>
-        /// <param name="neighbors">The neighbors array</param>
-        /// <param name="neighborCount">The number of neighbors</param>
-        /// <param name="maxNeighbors">The maximum number of neighbors allowed</param>
-        /// <param name="agents">Agents</param>
-        /// <returns>An updated neighbor count</returns>
-        private static int AddNeighbor(Agent agent, float dist, CrowdNeighbor[] neighbors, int neighborCount, int maxNeighbors, List<Agent> agents)
-        {
-            int nPos = 0;
-
-            //Insert neighbor based on distance
-            if (neighborCount == 0)
-            {
-                nPos = neighborCount;
-            }
-            else if (dist >= neighbors[neighborCount - 1].Distance)
-            {
-                if (neighborCount >= maxNeighbors)
-                {
-                    return neighborCount;
-                }
-                else
-                {
-                    nPos = neighborCount;
-                }
-            }
-            else
-            {
-                int i;
-                for (i = 0; i < neighborCount; i++)
-                {
-                    if (dist <= neighbors[i].Distance)
-                    {
-                        break;
-                    }
-                }
-
-                int tgt = i + 1;
-                int n = Math.Min(neighborCount - i, maxNeighbors - tgt);
-
-                if (n > 0)
-                {
-                    for (int j = 0; j < n; j++)
-                    {
-                        neighbors[tgt + j] = neighbors[i + j];
-                    }
-                }
-
-                nPos = i;
-            }
-
-            //TODO rework Crowd so that Agents are passed around instead of indices
-            int index;
-            for (index = 0; index < agents.Count; index++)
-            {
-                if (agent.Equals(agents[index]))
-                {
-                    break;
-                }
-            }
-
-            if (index == agents.Count)
-            {
-                throw new IndexOutOfRangeException("Agent not in crowd.");
-            }
-
-            var neighbor = new CrowdNeighbor();
-            neighbor.Index = index;
-            neighbor.Distance = dist;
-            neighbors[nPos] = neighbor;
-
-            return Math.Min(neighborCount + 1, maxNeighbors);
-        }
 
         private List<Agent> agents = new List<Agent>();
-        private List<AgentAnimation> agentAnims = new List<AgentAnimation>();
         private PathQueue pathQueue;
-        private List<ObstacleAvoidanceParams> obstacleQueryParams = new List<ObstacleAvoidanceParams>();
         private ProximityGrid<Agent> grid;
         private Vector3 extents;
-        private int velocitySampleCount;
         private NavigationMeshQuery navQuery;
         private NavigationMeshQueryFilter navQueryFilter;
         private ObstacleAvoidanceQuery obstacleQuery;
@@ -391,26 +191,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
             //allocate obstacle avoidance query
             this.obstacleQuery = new ObstacleAvoidanceQuery(6, 8);
 
-            //initialize obstancle query params
-            for (int i = 0; i < this.obstacleQueryParams.Count; i++)
-            {
-                var obsQP = new ObstacleAvoidanceParams()
-                {
-                    VelBias = 0.4f,
-                    WeightDesVel = 2.0f,
-                    WeightCurVel = 0.75f,
-                    WeightSide = 0.75f,
-                    WeightToi = 2.5f,
-                    HorizTime = 2.5f,
-                    GridSize = 33,
-                    AdaptiveDivs = 7,
-                    AdaptiveRings = 2,
-                    AdaptiveDepth = 5,
-                };
-
-                this.obstacleQueryParams.Add(obsQP);
-            }
-
             this.pathQueue = new PathQueue(4096, ref navMesh);
 
             //allocate nav mesh query
@@ -426,8 +206,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <param name="timeDelta">Delta time</param>
         public void Update(float timeDelta)
         {
-            this.velocitySampleCount = 0;
-
             //check that all agents have valid paths
             this.CheckPathValidity(timeDelta);
 
@@ -443,90 +221,74 @@ namespace Engine.PathFinding.NavMesh.Crowds
             //get nearby navmesh segments and agents to collide with
             for (int i = 0; i < this.agents.Count; i++)
             {
-                var a = this.agents[i];
+                var agent = this.agents[i];
 
-                if (a.State != AgentState.Walking)
+                if (agent.State != AgentState.Walking)
                 {
                     continue;
                 }
 
                 //update the collision boundary after certain distance has passed or if it has become invalid
-                float updateThr = a.Parameters.CollisionQueryRange * 0.25f;
-                if (Helper.Distance2D(a.Position, a.Boundary.Center) > updateThr * updateThr || !a.Boundary.IsValid(navQuery))
-                {
-                    a.Boundary.Update(a.Corridor.GetFirstPoly(), a.Position, a.Parameters.CollisionQueryRange, navQuery);
-                }
+                agent.UpdateCollision(navQuery);
 
                 //query neighbor agents
-                a.NeighborCount = GetNeighbors(a.Position, a.Parameters.Height, a.Parameters.CollisionQueryRange, a, a.Neighbors, AgentMaxNeighbors, agents, grid);
+                Agent[] ids = new Agent[MaxNeighbors];
+                int neighborsIds = grid.QueryItems(agent.Position, agent.Parameters.CollisionQueryRange, ids, MaxNeighbors);
 
-                for (int j = 0; j < a.NeighborCount; j++)
-                {
-                    var neighbor = agents[a.Neighbors[j].Index];
-
-                    a.Neighbors[j].Index = this.agents.IndexOf(neighbor);
-                }
+                //set the neigbors for the agent
+                agent.SetNeighbors(ids, neighborsIds);
             }
 
             //find the next corner to steer to
             for (int i = 0; i < this.agents.Count; i++)
             {
-                var a = this.agents[i];
+                var agent = this.agents[i];
 
-                if (a.State != AgentState.Walking)
+                if (agent.State != AgentState.Walking)
                 {
                     continue;
                 }
 
-                if (a.TargetState == TargetState.None ||
-                    a.TargetState == TargetState.Velocity)
+                if (agent.TargetState == TargetState.None ||
+                    agent.TargetState == TargetState.Velocity)
                 {
                     continue;
                 }
 
                 //find corners for steering
-                a.Corners = a.Corridor.FindCorners(navQuery);
-
-                //check to see if the corner after the next corner is directly visible 
-                if ((a.Parameters.UpdateFlags & UpdateFlags.OptimizeVis) != 0 && a.Corners.Count > 0)
-                {
-                    Vector3 target = a.Corners[Math.Min(1, a.Corners.Count - 1)].Point.Position;
-                    a.Corridor.OptimizePathVisibility(target, a.Parameters.PathOptimizationRange, navQuery);
-                }
+                agent.Steer1(navQuery);
             }
 
             //trigger off-mesh connections (depends on corners)
             for (int i = 0; i < this.agents.Count; i++)
             {
-                var a = this.agents[i];
+                var agent = this.agents[i];
 
-                if (a.State != AgentState.Walking)
+                if (agent.State != AgentState.Walking)
                 {
                     continue;
                 }
 
-                if (a.TargetState == TargetState.None || a.TargetState == TargetState.Velocity)
+                if (agent.TargetState == TargetState.None || agent.TargetState == TargetState.Velocity)
                 {
                     continue;
                 }
 
                 //check
-                if (OverOffmeshConnection(a, a.Parameters.TriggerRadius))
+                if (OverOffmeshConnection(agent))
                 {
                     //adjust the path over the off-mesh connection
                     PolyId[] refs = new PolyId[2];
-                    var agentAnim = this.agentAnims[i];
-                    if (a.Corridor.MoveOverOffmeshConnection(a.Corners[a.Corners.Count - 1].Point.Polygon, refs, ref agentAnim.StartPos, ref agentAnim.EndPos, navQuery))
+                    var agentAnim = agent.Animation;
+                    if (agent.Corridor.MoveOverOffmeshConnection(agent.Corners[agent.Corners.Count - 1].Point.Polygon, refs, ref agentAnim.StartPos, ref agentAnim.EndPos, navQuery))
                     {
-                        agentAnim.InitPos = a.Position;
+                        agentAnim.InitPos = agent.Position;
                         agentAnim.PolyRef = refs[1];
                         agentAnim.Active = true;
                         agentAnim.T = 0.0f;
-                        agentAnim.TMax = (Helper.Distance2D(agentAnims[i].StartPos, agentAnims[i].EndPos) / a.Parameters.MaxSpeed) * 0.5f;
+                        agentAnim.TMax = (Helper.Distance2D(agentAnim.StartPos, agentAnim.EndPos) / agent.Parameters.MaxSpeed) * 0.5f;
 
-                        a.State = AgentState.Offmesh;
-                        a.Corners.Clear();
-                        a.NeighborCount = 0;
+                        agent.TriggerOffmeshConnection();
                         continue;
                     }
                 }
@@ -535,166 +297,45 @@ namespace Engine.PathFinding.NavMesh.Crowds
             //calculate steering
             for (int i = 0; i < this.agents.Count; i++)
             {
-                var a = this.agents[i];
+                var agent = this.agents[i];
 
-                if (a.State != AgentState.Walking)
+                if (agent.State != AgentState.Walking)
                 {
                     continue;
                 }
 
-                if (a.TargetState == TargetState.None)
+                if (agent.TargetState == TargetState.None)
                 {
                     continue;
                 }
 
-                Vector3 dvel = Vector3.Zero;
-
-                if (a.TargetState == TargetState.Velocity)
-                {
-                    dvel = a.TargetPosition;
-                    a.DesiredSpeed = a.TargetPosition.Length();
-                }
-                else
-                {
-                    //calculate steering direction
-                    if ((a.Parameters.UpdateFlags & UpdateFlags.AnticipateTurns) != 0)
-                    {
-                        CalcSmoothSteerDirection(a, ref dvel);
-                    }
-                    else
-                    {
-                        CalcStraightSteerDirection(a, ref dvel);
-                    }
-
-                    //calculate speed scale, which tells the agent to slowdown at the end of the path
-                    float slowDownRadius = a.Parameters.Radius * 2;
-                    float speedScale = GetDistanceToGoal(a, slowDownRadius) / slowDownRadius;
-
-                    a.DesiredSpeed = a.Parameters.MaxSpeed;
-                    dvel = dvel * (a.DesiredSpeed * speedScale);
-                }
-
-                //separation
-                if ((a.Parameters.UpdateFlags & UpdateFlags.Separation) != 0)
-                {
-                    float separationDist = a.Parameters.CollisionQueryRange;
-                    float invSeparationDist = 1.0f / separationDist;
-                    float separationWeight = a.Parameters.SeparationWeight;
-
-                    float w = 0;
-                    Vector3 disp = Vector3.Zero;
-
-                    for (int j = 0; j < a.NeighborCount; j++)
-                    {
-                        var n = agents[a.Neighbors[j].Index];
-
-                        Vector3 diff = a.Position - n.Position;
-                        diff.Y = 0;
-
-                        float distSqr = diff.LengthSquared();
-                        if (distSqr < 0.00001f)
-                        {
-                            continue;
-                        }
-
-                        if (distSqr > separationDist * separationDist)
-                        {
-                            continue;
-                        }
-
-                        float dist = (float)Math.Sqrt(distSqr);
-                        float weight = separationWeight * (1.0f - (dist * invSeparationDist) * (dist * invSeparationDist));
-
-                        disp = disp + diff * (weight / dist);
-                        w += 1.0f;
-                    }
-
-                    if (w > 0.0001f)
-                    {
-                        //adjust desired veloctiy
-                        dvel = dvel + disp * (1.0f / w);
-
-                        //clamp desired velocity to desired speed
-                        float speedSqr = dvel.LengthSquared();
-                        float desiredSqr = a.DesiredSpeed * a.DesiredSpeed;
-                        if (speedSqr > desiredSqr)
-                        {
-                            dvel = dvel * (desiredSqr / speedSqr);
-                        }
-                    }
-                }
-
-                //set the desired velocity
-                a.DesiredVel = dvel;
+                agent.Steer2(this.agents);
             }
 
             //velocity planning
             for (int i = 0; i < this.agents.Count; i++)
             {
-                var a = this.agents[i];
+                var agent = this.agents[i];
 
-                if (a.State != AgentState.Walking)
+                if (agent.State != AgentState.Walking)
                 {
                     continue;
                 }
 
-                if ((a.Parameters.UpdateFlags & UpdateFlags.ObstacleAvoidance) != 0)
-                {
-                    this.obstacleQuery.Reset();
-
-                    //add neighhbors as obstacles
-                    for (int j = 0; j < a.NeighborCount; j++)
-                    {
-                        var n = agents[a.Neighbors[j].Index];
-                        obstacleQuery.AddCircle(n.Position, n.Parameters.Radius, n.Vel, n.DesiredVel);
-                    }
-
-                    //append neighbor segments as obstacles
-                    for (int j = 0; j < a.Boundary.SegCount; j++)
-                    {
-                        Segment s = a.Boundary.Segs[j];
-                        if (Helper.Area2D(a.Position, s.Start, s.End) < 0.0f)
-                        {
-                            continue;
-                        }
-                        obstacleQuery.AddSegment(s.Start, s.End);
-                    }
-
-                    //sample new safe velocity
-                    bool adaptive = true;
-                    int ns = 0;
-                    var parameters = obstacleQueryParams[a.Parameters.ObstacleAvoidanceType];
-                    Vector3 nVel;
-                    if (adaptive)
-                    {
-                        ns = obstacleQuery.SampleVelocityAdaptive(a.Position, a.Parameters.Radius, a.DesiredSpeed, a.Vel, a.DesiredVel, parameters, out nVel);
-                    }
-                    else
-                    {
-                        ns = obstacleQuery.SampleVelocityGrid(a.Position, a.Parameters.Radius, a.DesiredSpeed, a.Vel, a.DesiredVel, parameters, out nVel);
-                    }
-                    a.NVel = nVel;
-
-                    this.velocitySampleCount += ns;
-                }
-                else
-                {
-                    //if not using velocity planning, new velocity is directly the desired velocity
-                    a.NVel = a.DesiredVel;
-                }
+                agent.VelocityPlanning(this.obstacleQuery);
             }
 
             //integrate
             for (int i = 0; i < this.agents.Count; i++)
             {
-                var a = agents[i];
+                var agent = agents[i];
 
-                if (a.State != AgentState.Walking)
+                if (agent.State != AgentState.Walking)
                 {
                     continue;
                 }
 
-                a.Integrate(timeDelta);
+                agent.Integrate(timeDelta);
             }
 
             //handle collisions
@@ -702,128 +343,68 @@ namespace Engine.PathFinding.NavMesh.Crowds
             {
                 for (int i = 0; i < this.agents.Count; i++)
                 {
-                    var a = agents[i];
+                    var agent = agents[i];
 
-                    if (a.State != AgentState.Walking)
+                    if (agent.State != AgentState.Walking)
                     {
                         continue;
                     }
 
-                    int idx0 = this.agents.IndexOf(a);
-
-                    a.Disp = Vector3.Zero;
-
-                    float w = 0;
-
-                    for (int j = 0; j < a.NeighborCount; j++)
-                    {
-                        Agent neighbor = agents[a.Neighbors[j].Index];
-                        int idx1 = this.agents.IndexOf(neighbor);
-
-                        Vector3 diff = a.Position - neighbor.Position;
-                        diff.Y = 0;
-
-                        float dist = diff.LengthSquared();
-                        if (dist > (a.Parameters.Radius + neighbor.Parameters.Radius) * (a.Parameters.Radius + neighbor.Parameters.Radius))
-                        {
-                            continue;
-                        }
-
-                        dist = (float)Math.Sqrt(dist);
-                        float pen = (a.Parameters.Radius + neighbor.Parameters.Radius) - dist;
-                        if (dist < 0.0001f)
-                        {
-                            //agents on top of each other, try to choose diverging separation directions
-                            if (idx0 > idx1)
-                            {
-                                diff = new Vector3(-a.DesiredVel.Z, 0, a.DesiredVel.X);
-                            }
-                            else
-                            {
-                                diff = new Vector3(a.DesiredVel.Z, 0, -a.DesiredVel.X);
-                            }
-                            pen = 0.01f;
-                        }
-                        else
-                        {
-                            pen = (1.0f / dist) * (pen * 0.5f) * CollisionResolveFactor;
-                        }
-
-                        a.Disp = a.Disp + diff * pen;
-
-                        w += 1.0f;
-                    }
-
-                    if (w > 0.0001f)
-                    {
-                        float iw = 1.0f / w;
-                        a.Disp = a.Disp * iw;
-                    }
+                    agent.HandleCollisions(this.agents);
                 }
 
                 for (int i = 0; i < this.agents.Count; i++)
                 {
-                    var a = agents[i];
+                    var agent = agents[i];
 
-                    if (a.State != AgentState.Walking)
+                    if (agent.State != AgentState.Walking)
                     {
                         continue;
                     }
 
                     //move along navmesh
-                    a.Corridor.MovePosition(a.Position, navQuery);
-
-                    //get valid constrained position back
-                    a.Position = a.Corridor.Pos;
-
-                    //if not using path, truncate the corridor to just one poly
-                    if (a.TargetState == TargetState.None ||
-                        a.TargetState == TargetState.Velocity)
-                    {
-                        a.Corridor.Reset(a.Corridor.GetFirstPoly(), a.Position);
-                        a.IsPartial = false;
-                    }
+                    agent.MovePosition(navQuery);
                 }
 
                 //update agents using offmesh connections
                 for (int i = 0; i < this.agents.Count; i++)
                 {
-                    var a = this.agents[i];
-                    var anim = this.agentAnims[i];
+                    var agent = this.agents[i];
+                    var anim = agent.Animation;
 
-                    if (!agentAnims[i].Active)
+                    if (!anim.Active)
                     {
                         continue;
                     }
 
                     anim.T += timeDelta;
-                    if (agentAnims[i].T > agentAnims[i].TMax)
+                    if (anim.T > anim.TMax)
                     {
                         //reset animation
                         anim.Active = false;
 
                         //prepare agent for walking
-                        a.State = AgentState.Walking;
+                        agent.State = AgentState.Walking;
 
                         continue;
                     }
 
                     //update position
-                    float ta = agentAnims[i].TMax * 0.15f;
-                    float tb = agentAnims[i].TMax;
-                    if (agentAnims[i].T < ta)
+                    float ta = anim.TMax * 0.15f;
+                    float tb = anim.TMax;
+                    if (anim.T < ta)
                     {
-                        float u = Helper.Normalize(agentAnims[i].T, 0.0f, ta);
-                        a.Position = Vector3.Lerp(agentAnims[i].InitPos, agentAnims[i].StartPos, u);
+                        float u = Helper.Normalize(anim.T, 0.0f, ta);
+                        agent.Position = Vector3.Lerp(anim.InitPos, anim.StartPos, u);
                     }
                     else
                     {
-                        float u = Helper.Normalize(agentAnims[i].T, ta, tb);
-                        a.Position = Vector3.Lerp(agentAnims[i].StartPos, agentAnims[i].EndPos, u);
+                        float u = Helper.Normalize(anim.T, ta, tb);
+                        agent.Position = Vector3.Lerp(anim.StartPos, anim.EndPos, u);
                     }
 
-                    a.Vel = Vector3.Zero;
-                    a.DesiredVel = Vector3.Zero;
+                    agent.Velocity = Vector3.Zero;
+                    agent.DesiredVelocity = Vector3.Zero;
                 }
             }
         }
@@ -835,10 +416,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <returns>The id of the agent (-1 if there is no empty slot)</returns>
         public Agent AddAgent(Vector3 pos, AgentParams parameters)
         {
-            var agent = new Agent()
-            {
-                Parameters = parameters
-            };
+            var agent = new Agent(parameters);
 
             //Find nearest position on the navmesh and place the agent there
             PathPoint nearest;
@@ -849,7 +427,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
 
             this.agents.Add(agent);
-            this.agentAnims.Add(new AgentAnimation());
 
             return agent;
         }
@@ -938,12 +515,12 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 if (agent.TargetState != TargetState.None &&
                     agent.TargetState != TargetState.Failed)
                 {
-                    if (!this.navQuery.IsValidPolyRef(agent.TargetRef))
+                    if (!this.navQuery.IsValidPolyRef(agent.TargetReference))
                     {
                         //current target is not valid, try to reposition
                         Vector3 nearest = agent.TargetPosition;
                         Vector3 tpos = agent.TargetPosition;
-                        agent.TargetRef = PolyId.Null;
+                        agent.TargetReference = PolyId.Null;
                         PathPoint nearestPt;
                         if (this.navQuery.FindNearestPoly(ref tpos, ref this.extents, out nearestPt))
                         {
@@ -953,7 +530,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                         }
                     }
 
-                    if (agent.TargetRef == PolyId.Null)
+                    if (agent.TargetReference == PolyId.Null)
                     {
                         //failed to reposition target
                         agent.ResetTarget(agentRef, agentPos);
@@ -971,7 +548,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 {
                     if (agent.TargetReplanTime > TargetReplanDelay &&
                         agent.Corridor.NavPath.Count < CheckLookAhead &&
-                        agent.Corridor.GetLastPoly() != agent.TargetRef)
+                        agent.Corridor.GetLastPoly() != agent.TargetReference)
                     {
                         replan = true;
                     }
@@ -1022,7 +599,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
                     //quick search towards the goal
                     PathPoint startPoint = new PathPoint(path[0], a.Position);
-                    PathPoint endPoint = new PathPoint(a.TargetRef, a.TargetPosition);
+                    PathPoint endPoint = new PathPoint(a.TargetReference, a.TargetPosition);
                     this.navQuery.InitSlicedFindPath(ref startPoint, ref endPoint, this.navQueryFilter, FindPathOptions.None);
                     int tempInt = 0;
                     this.navQuery.UpdateSlicedFindPath(MaxIter, ref tempInt);
@@ -1041,7 +618,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     if (status != Status.Failure && reqPath.Count > 0)
                     {
                         //in progress or succeed
-                        if (reqPath[reqPath.Count - 1] != a.TargetRef)
+                        if (reqPath[reqPath.Count - 1] != a.TargetReference)
                         {
                             //partial path, constrain target position in last polygon
                             bool tempBool;
@@ -1072,7 +649,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     a.Boundary.Reset();
                     a.IsPartial = false;
 
-                    if (reqPath[reqPath.Count - 1] == a.TargetRef)
+                    if (reqPath[reqPath.Count - 1] == a.TargetReference)
                     {
                         a.TargetState = TargetState.Valid;
                         a.TargetReplanTime = 0.0f;
@@ -1092,7 +669,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
             for (int i = 0; i < numQueue; i++)
             {
-                queue[i].TargetPathQueryIndex = this.pathQueue.Request(new PathPoint(queue[i].Corridor.GetLastPoly(), queue[i].Corridor.Target), new PathPoint(queue[i].TargetRef, queue[i].TargetPosition));
+                queue[i].TargetPathQueryIndex = this.pathQueue.Request(new PathPoint(queue[i].Corridor.GetLastPoly(), queue[i].Corridor.Target), new PathPoint(queue[i].TargetReference, queue[i].TargetPosition));
                 if (queue[i].TargetPathQueryIndex != PathQueue.Invalid)
                 {
                     queue[i].TargetState = TargetState.WaitingForPath;
@@ -1125,7 +702,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     {
                         //path find failed, retry if the target location is still valid
                         a.TargetPathQueryIndex = PathQueue.Invalid;
-                        if (a.TargetRef != PolyId.Null)
+                        if (a.TargetReference != PolyId.Null)
                         {
                             a.TargetState = TargetState.Requesting;
                         }
@@ -1182,7 +759,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                             }
 
                             //check for partial path
-                            if (res[res.Count - 1] != a.TargetRef)
+                            if (res[res.Count - 1] != a.TargetReference)
                             {
                                 //partial path, constrain target position inside the last polygon
                                 Vector3 nearest;
@@ -1255,8 +832,8 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     continue;
                 }
 
-                a.topologyOptTime += dt;
-                if (a.topologyOptTime >= OptTimeTHR)
+                a.TopologyOptTime += dt;
+                if (a.TopologyOptTime >= OptTimeTHR)
                 {
                     nqueue = AddToOptQueue(a, queue, nqueue, OptMaxAgents);
                 }
@@ -1265,7 +842,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
             for (int i = 0; i < nqueue; i++)
             {
                 queue[i].Corridor.OptimizePathTopology(this.navQuery, this.navQueryFilter);
-                queue[i].topologyOptTime = 0.0f;
+                queue[i].TopologyOptTime = 0.0f;
             }
         }
 

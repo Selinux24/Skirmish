@@ -4,6 +4,7 @@ using System;
 namespace Engine.PathFinding.NavMesh.Crowds
 {
     using Engine.Common;
+    using System.Collections.Generic;
 
     public class ObstacleAvoidanceQuery
     {
@@ -86,6 +87,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
         private int maxSegments;
         private ObstacleSegment[] segments;
         private int numSegments;
+        private List<ObstacleAvoidanceParams> obstacleQueryParams = new List<ObstacleAvoidanceParams>();
 
         public ObstacleAvoidanceQuery(int maxCircles, int maxSegments)
         {
@@ -96,6 +98,26 @@ namespace Engine.PathFinding.NavMesh.Crowds
             this.maxSegments = maxSegments;
             this.numSegments = 0;
             this.segments = new ObstacleSegment[this.maxSegments];
+
+            //initialize obstancle query params
+            for (int i = 0; i < this.obstacleQueryParams.Count; i++)
+            {
+                var obsQP = new ObstacleAvoidanceParams()
+                {
+                    VelBias = 0.4f,
+                    WeightDesVel = 2.0f,
+                    WeightCurVel = 0.75f,
+                    WeightSide = 0.75f,
+                    WeightToi = 2.5f,
+                    HorizTime = 2.5f,
+                    GridSize = 33,
+                    AdaptiveDivs = 7,
+                    AdaptiveRings = 2,
+                    AdaptiveDepth = 5,
+                };
+
+                this.obstacleQueryParams.Add(obsQP);
+            }
         }
 
         /// <summary>
@@ -412,6 +434,10 @@ namespace Engine.PathFinding.NavMesh.Crowds
             nvel = res;
 
             return ns;
+        }
+        public ObstacleAvoidanceParams GetParams(byte obstacleAvoidanceType)
+        {
+            return this.obstacleQueryParams[obstacleAvoidanceType];
         }
     }
 }

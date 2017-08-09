@@ -6,6 +6,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
 {
     class PathCorridor
     {
+        private const int MaxIter = 32;
+        private const int MaxRes = 32;
+
         private Vector3 pos;
         private Vector3 target;
         private Path path;
@@ -130,9 +133,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
         {
             if (path.Count < 3)
                 return false;
-
-            const int MaxIter = 32;
-            const int MaxRes = 32;
 
             Path res = new Path();
             int numRes = 0;
