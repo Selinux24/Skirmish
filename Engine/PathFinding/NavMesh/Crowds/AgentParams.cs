@@ -15,5 +15,12 @@
         public UpdateFlags UpdateFlags;
         public byte ObstacleAvoidanceType;
         public byte QueryFilterType;
+        public float TriggerRadius
+        {
+            get
+            {
+                return this.Radius * 2.25f;
+            }
+        }
     }
 }

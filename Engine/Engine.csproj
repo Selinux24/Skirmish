@@ -149,6 +149,7 @@
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="BoundingRectanglei.cs" />
+    <Compile Include="Collections\ProximityGridItem.cs" />
     <Compile Include="Common\BaseSceneObject.cs" />
     <Compile Include="Collections\Generic\PickingQuadTree.cs" />
     <Compile Include="Collections\Generic\PickingQuadTreeNode.cs" />
@@ -228,7 +229,7 @@
     <Compile Include="PathFinding\NavMesh\StraightPathFlags.cs" />
     <Compile Include="PathFinding\NavMesh\StraightPathVertex.cs" />
     <Compile Include="PathFinding\PathFinderDescription.cs" />
-    <Compile Include="PathFinding\ProximityGrid.cs" />
+    <Compile Include="Collections\ProximityGrid.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

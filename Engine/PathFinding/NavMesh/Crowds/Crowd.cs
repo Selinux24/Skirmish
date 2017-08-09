@@ -4,6 +4,11 @@ using System.Collections.Generic;
 
 namespace Engine.PathFinding.NavMesh.Crowds
 {
+    using Engine.Collections;
+
+    /// <summary>
+    /// Crowd controller class
+    /// </summary>
     class Crowd
     {
         /// <summary>
@@ -159,7 +164,12 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
             return range;
         }
-
+        /// <summary>
+        /// Gets if the specified agent is over an Offmesh connection
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="radius">Trigger radius</param>
+        /// <returns>Returns true if the agent is over an Offmesh connection</returns>
         private static bool OverOffmeshConnection(Agent agent, float radius)
         {
             if (agent.Corners.Count == 0)
@@ -249,9 +259,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
             int n = 0;
 
             Agent[] ids = new Agent[MaxNeighbors];
-            int nids = grid.QueryItems(pos, range, ids, MaxNeighbors);
+            int neighborsIds = grid.QueryItems(pos, range, ids, MaxNeighbors);
 
-            for (int i = 0; i < nids; i++)
+            for (int i = 0; i < neighborsIds; i++)
             {
                 var ag = ids[i];
                 if (ag == skip)
@@ -282,46 +292,50 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// </summary>
         /// <param name="agent">The neighbor</param>
         /// <param name="dist">Distance from current agent</param>
-        /// <param name="neis">The neighbors array</param>
-        /// <param name="nneis">The number of neighbors</param>
-        /// <param name="maxNeis">The maximum number of neighbors allowed</param>
+        /// <param name="neighbors">The neighbors array</param>
+        /// <param name="neighborCount">The number of neighbors</param>
+        /// <param name="maxNeighbors">The maximum number of neighbors allowed</param>
         /// <param name="agents">Agents</param>
         /// <returns>An updated neighbor count</returns>
-        private static int AddNeighbor(Agent agent, float dist, CrowdNeighbor[] neis, int nneis, int maxNeis, List<Agent> agents)
+        private static int AddNeighbor(Agent agent, float dist, CrowdNeighbor[] neighbors, int neighborCount, int maxNeighbors, List<Agent> agents)
         {
-            //insert neighbor based on distance
             int nPos = 0;
-            if (nneis == 0)
+
+            //Insert neighbor based on distance
+            if (neighborCount == 0)
             {
-                nPos = nneis;
+                nPos = neighborCount;
             }
-            else if (dist >= neis[nneis - 1].Distance)
+            else if (dist >= neighbors[neighborCount - 1].Distance)
             {
-                if (nneis >= maxNeis)
+                if (neighborCount >= maxNeighbors)
                 {
-                    return nneis;
+                    return neighborCount;
                 }
-                nPos = nneis;
+                else
+                {
+                    nPos = neighborCount;
+                }
             }
             else
             {
                 int i;
-                for (i = 0; i < nneis; i++)
+                for (i = 0; i < neighborCount; i++)
                 {
-                    if (dist <= neis[i].Distance)
+                    if (dist <= neighbors[i].Distance)
                     {
                         break;
                     }
                 }
 
                 int tgt = i + 1;
-                int n = Math.Min(nneis - i, maxNeis - tgt);
+                int n = Math.Min(neighborCount - i, maxNeighbors - tgt);
 
                 if (n > 0)
                 {
                     for (int j = 0; j < n; j++)
                     {
-                        neis[tgt + j] = neis[i + j];
+                        neighbors[tgt + j] = neighbors[i + j];
                     }
                 }
 
@@ -346,9 +360,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
             var neighbor = new CrowdNeighbor();
             neighbor.Index = index;
             neighbor.Distance = dist;
-            neis[nPos] = neighbor;
+            neighbors[nPos] = neighbor;
 
-            return Math.Min(nneis + 1, maxNeis);
+            return Math.Min(neighborCount + 1, maxNeighbors);
         }
 
         private List<Agent> agents = new List<Agent>();
@@ -362,6 +376,11 @@ namespace Engine.PathFinding.NavMesh.Crowds
         private NavigationMeshQueryFilter navQueryFilter;
         private ObstacleAvoidanceQuery obstacleQuery;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="maxAgentRadius">Maximum agent radius</param>
+        /// <param name="navMesh">Tiled navigation mesh</param>
         public Crowd(float maxAgentRadius, ref TiledNavigationMesh navMesh)
         {
             this.extents = new Vector3(maxAgentRadius * 2.0f, maxAgentRadius * 1.5f, maxAgentRadius * 2.0f);
@@ -402,31 +421,24 @@ namespace Engine.PathFinding.NavMesh.Crowds
         }
 
         /// <summary>
-        /// Update the crowd pathfinding periodically 
+        /// Updates the crowd pathfinding status
         /// </summary>
-        /// <param name="dt">Th time until the next update</param>
-        public void Update(float dt)
+        /// <param name="timeDelta">Delta time</param>
+        public void Update(float timeDelta)
         {
-            velocitySampleCount = 0;
+            this.velocitySampleCount = 0;
 
             //check that all agents have valid paths
-            this.CheckPathValidity(dt);
+            this.CheckPathValidity(timeDelta);
 
             //update async move requests and path finder
             this.UpdateMoveRequest();
 
             //optimize path topology
-            this.UpdateTopologyOptimization(dt);
+            this.UpdateTopologyOptimization(timeDelta);
 
             //register agents to proximity grid
-            this.grid.Clear();
-
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var a = agents[i];
-
-                this.grid.AddItem(a, a.Parameters.Radius, a.Position);
-            }
+            this.RegisterAgents();
 
             //get nearby navmesh segments and agents to collide with
             for (int i = 0; i < this.agents.Count; i++)
@@ -499,8 +511,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 }
 
                 //check
-                float triggerRadius = a.Parameters.Radius * 2.25f;
-                if (OverOffmeshConnection(a, triggerRadius))
+                if (OverOffmeshConnection(a, a.Parameters.TriggerRadius))
                 {
                     //adjust the path over the off-mesh connection
                     PolyId[] refs = new PolyId[2];
@@ -683,7 +694,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     continue;
                 }
 
-                a.Integrate(dt);
+                a.Integrate(timeDelta);
             }
 
             //handle collisions
@@ -785,7 +796,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                         continue;
                     }
 
-                    anim.T += dt;
+                    anim.T += timeDelta;
                     if (agentAnims[i].T > agentAnims[i].TMax)
                     {
                         //reset animation
@@ -854,61 +865,54 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 this.agents.Remove(agent);
             }
         }
-
-        public void MoveTo(Vector3 position, float radius)
+        /// <summary>
+        /// Registers all agents in the proximity grid
+        /// </summary>
+        private void RegisterAgents()
         {
-            //Get the polygon that the starting point is in
-            PathPoint startPt;
-            if (this.navQuery.FindNearestPoly(ref position, ref this.extents, out startPt))
+            this.grid.Clear();
+
+            for (int i = 0; i < this.agents.Count; i++)
             {
-                for (int i = 0; i < this.agents.Count; i++)
-                {
-                    //Pick a new random point that is within a certain radius of the current point
-                    PathPoint newPt;
-                    if (this.navQuery.FindRandomPointAroundCircle(ref startPt, radius, out newPt))
-                    {
-                        //Give this agent a target point
-                        this.agents[i].RequestMoveTarget(newPt.Polygon, newPt.Position);
-                    }
-                }
+                var a = agents[i];
+
+                this.grid.AddItem(a, a.Parameters.Radius, a.Position);
             }
         }
 
         /// <summary>
         /// Make sure that each agent is taking a valid path
         /// </summary>
-        /// <param name="agents">The agent array</param>
-        /// <param name="agentCount">The number of agents</param>
-        /// <param name="dt">Time until next update</param>
-        private void CheckPathValidity(float dt)
+        /// <param name="deltaTime">Time until next update</param>
+        private void CheckPathValidity(float deltaTime)
         {
             //Iterate through all the agents
             for (int i = 0; i < this.agents.Count; i++)
             {
-                Agent ag = agents[i];
+                Agent agent = agents[i];
 
-                if (ag.State != AgentState.Walking)
+                if (agent.State != AgentState.Walking)
                 {
                     continue;
                 }
 
-                if (ag.TargetState == TargetState.None || ag.TargetState == TargetState.Velocity)
+                if (agent.TargetState == TargetState.None || agent.TargetState == TargetState.Velocity)
                 {
                     continue;
                 }
 
-                ag.TargetReplanTime += dt;
+                agent.TargetReplanTime += deltaTime;
 
                 bool replan = false;
 
                 //first check that the current location is valid
-                PolyId agentRef = ag.Corridor.GetFirstPoly();
-                Vector3 agentPos = ag.Position;
+                var agentRef = agent.Corridor.GetFirstPoly();
+                var agentPos = agent.Position;
                 if (!this.navQuery.IsValidPolyRef(agentRef))
                 {
                     //current location is not valid, try to reposition
                     Vector3 nearest = agentPos;
-                    Vector3 pos = ag.Position;
+                    Vector3 pos = agent.Position;
                     agentRef = PolyId.Null;
                     PathPoint nearestPt;
                     if (this.navQuery.FindNearestPoly(ref pos, ref this.extents, out nearestPt))
@@ -920,75 +924,63 @@ namespace Engine.PathFinding.NavMesh.Crowds
                         if (agentRef == PolyId.Null)
                         {
                             //could not find location in navmesh, set state to invalid
-                            ag.Corridor.Reset(PolyId.Null, agentPos);
-                            ag.IsPartial = false;
-                            ag.Boundary.Reset();
-                            ag.State = AgentState.Invalid;
+                            agent.SetInvalidState(agentPos);
                             continue;
                         }
 
                         //make sure the first polygon is valid
-                        ag.Corridor.FixPathStart(agentRef, agentPos);
-                        ag.Boundary.Reset();
-                        ag.Position = agentPos;
-
+                        agent.Reposition(agentRef, agentPos);
                         replan = true;
                     }
                 }
 
                 //try to recover move request position
-                if (ag.TargetState != TargetState.None &&
-                    ag.TargetState != TargetState.Failed)
+                if (agent.TargetState != TargetState.None &&
+                    agent.TargetState != TargetState.Failed)
                 {
-                    if (!this.navQuery.IsValidPolyRef(ag.TargetRef))
+                    if (!this.navQuery.IsValidPolyRef(agent.TargetRef))
                     {
                         //current target is not valid, try to reposition
-                        Vector3 nearest = ag.TargetPosition;
-                        Vector3 tpos = ag.TargetPosition;
-                        ag.TargetRef = PolyId.Null;
+                        Vector3 nearest = agent.TargetPosition;
+                        Vector3 tpos = agent.TargetPosition;
+                        agent.TargetRef = PolyId.Null;
                         PathPoint nearestPt;
                         if (this.navQuery.FindNearestPoly(ref tpos, ref this.extents, out nearestPt))
                         {
-                            ag.TargetRef = nearestPt.Polygon;
                             nearest = nearestPt.Position;
-                            ag.TargetPosition = nearest;
+                            agent.SetTarget(nearestPt.Polygon, nearestPt.Position);
                             replan = true;
                         }
                     }
 
-                    if (ag.TargetRef == PolyId.Null)
+                    if (agent.TargetRef == PolyId.Null)
                     {
                         //failed to reposition target
-                        ag.Corridor.Reset(agentRef, agentPos);
-                        ag.IsPartial = false;
-                        ag.TargetState = TargetState.None;
+                        agent.ResetTarget(agentRef, agentPos);
                     }
                 }
 
                 //if nearby corridor is not valid, replan
-                if (!ag.Corridor.IsValid(CheckLookAhead, this.navQuery))
+                if (!agent.Corridor.IsValid(CheckLookAhead, this.navQuery))
                 {
                     replan = true;
                 }
 
                 //if the end of the path is near and it is not the request location, replan
-                if (ag.TargetState == TargetState.Valid)
+                if (agent.TargetState == TargetState.Valid)
                 {
-                    if (ag.TargetReplanTime > TargetReplanDelay &&
-                        ag.Corridor.NavPath.Count < CheckLookAhead &&
-                        ag.Corridor.GetLastPoly() != ag.TargetRef)
+                    if (agent.TargetReplanTime > TargetReplanDelay &&
+                        agent.Corridor.NavPath.Count < CheckLookAhead &&
+                        agent.Corridor.GetLastPoly() != agent.TargetRef)
                     {
                         replan = true;
                     }
                 }
 
                 //try to replan path to goal
-                if (replan)
+                if (replan && agent.TargetState != TargetState.None)
                 {
-                    if (ag.TargetState != TargetState.None)
-                    {
-                        ag.RequestMoveTargetReplan(ag.TargetRef, ag.TargetPosition);
-                    }
+                    agent.RequestMoveTargetReplan();
                 }
             }
         }
@@ -1274,6 +1266,30 @@ namespace Engine.PathFinding.NavMesh.Crowds
             {
                 queue[i].Corridor.OptimizePathTopology(this.navQuery, this.navQueryFilter);
                 queue[i].topologyOptTime = 0.0f;
+            }
+        }
+
+        /// <summary>
+        /// Move all agents in the crowd to position
+        /// </summary>
+        /// <param name="position">Target position</param>
+        /// <param name="radius">Radius around target position</param>
+        public void MoveTo(Vector3 position, float radius)
+        {
+            //Get the polygon that the starting point is in
+            PathPoint startPt;
+            if (this.navQuery.FindNearestPoly(ref position, ref this.extents, out startPt))
+            {
+                for (int i = 0; i < this.agents.Count; i++)
+                {
+                    //Pick a new random point that is within a certain radius of the current point
+                    PathPoint newPt;
+                    if (this.navQuery.FindRandomPointAroundCircle(ref startPt, radius, out newPt))
+                    {
+                        //Give this agent a target point
+                        this.agents[i].RequestMoveTarget(newPt.Polygon, newPt.Position);
+                    }
+                }
             }
         }
     }

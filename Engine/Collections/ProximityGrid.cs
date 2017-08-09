@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine.PathFinding
+namespace Engine.Collections
 {
     /// <summary>
 	/// A <see cref="ProximityGrid{T}"/> is a uniform 2d grid that can efficiently retrieve items near a specified grid cell.
@@ -11,23 +11,9 @@ namespace Engine.PathFinding
     {
         private const int Invalid = -1;
 
-        /// <summary>
-        /// An "item" is simply a coordinate on the proximity grid
-        /// </summary>
-        class Item
-        {
-            public T Value { get; set; }
-
-            public int X { get; set; }
-
-            public int Y { get; set; }
-
-            public int Next { get; set; }
-        }
-
         private float cellSize;
         private float invCellSize;
-        private Item[] pool;
+        private ProximityGridItem<T>[] pool;
         private int poolHead;
         private int[] buckets;
         private BoundingRectanglei bounds;
@@ -58,10 +44,10 @@ namespace Engine.PathFinding
             this.buckets = new int[Helper.NextPowerOfTwo(poolSize)];
 
             //allocate pool of items
-            this.pool = new Item[poolSize];
+            this.pool = new ProximityGridItem<T>[poolSize];
             for (int i = 0; i < this.pool.Length; i++)
             {
-                this.pool[i] = new Item();
+                this.pool[i] = new ProximityGridItem<T>();
             }
 
             this.Clear();
@@ -195,12 +181,26 @@ namespace Engine.PathFinding
 
             return n;
         }
-
+        /// <summary>
+        /// Take all the items within a certain range and add their ids to an array.
+        /// </summary>
+        /// <param name="pos">Position</param>
+        /// <param name="range">Range around x & y values</param>
+        /// <param name="values">The array of values</param>
+        /// <param name="maxVals">The maximum number of values that can be stored</param>
+        /// <returns>The number of unique values</returns>
         public int QueryItems(Vector2 pos, float range, T[] values, int maxVals)
         {
             return this.QueryItems(pos.X - range, pos.Y - range, pos.X + range, pos.Y + range, values, maxVals);
         }
-
+        /// <summary>
+        /// Take all the items within a certain range and add their ids to an array.
+        /// </summary>
+        /// <param name="pos">Position</param>
+        /// <param name="range">Range around x & z values</param>
+        /// <param name="values">The array of values</param>
+        /// <param name="maxVals">The maximum number of values that can be stored</param>
+        /// <returns>The number of unique values</returns>
         public int QueryItems(Vector3 pos, float range, T[] values, int maxVals)
         {
             return this.QueryItems(pos.X - range, pos.Z - range, pos.X + range, pos.Z + range, values, maxVals);

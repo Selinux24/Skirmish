@@ -110,13 +110,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <summary>
         /// Change the move target
         /// </summary>
-        /// <param name="reference">The polygon reference</param>
-        /// <param name="pos">The target's coordinates</param>
-        public void RequestMoveTargetReplan(PolyId reference, Vector3 pos)
+        public void RequestMoveTargetReplan()
         {
             //initialize request
-            this.TargetRef = reference;
-            this.TargetPosition = pos;
             this.TargetPathQueryIndex = PathQueue.Invalid;
             this.TargetReplan = true;
             if (this.TargetRef != PolyId.Null)
@@ -181,6 +177,41 @@ namespace Engine.PathFinding.NavMesh.Crowds
             this.TargetPathQueryIndex = PathQueue.Invalid;
             this.TargetReplan = false;
             this.TargetState = TargetState.None;
+        }
+        /// <summary>
+        /// Sets the agent to invalid state
+        /// </summary>
+        /// <param name="position">Position</param>
+        public void SetInvalidState(Vector3 position)
+        {
+            this.Corridor.Reset(PolyId.Null, position);
+            this.IsPartial = false;
+            this.Boundary.Reset();
+            this.State = AgentState.Invalid;
+        }
+
+        public void SetTarget(PolyId reference, Vector3 position)
+        {
+            this.TargetRef = reference;
+            this.TargetPosition = position;
+        }
+
+        public void ResetTarget(PolyId reference, Vector3 position)
+        {
+            this.Corridor.Reset(reference, position);
+            this.IsPartial = false;
+            this.TargetState = TargetState.None;
+        }
+        /// <summary>
+        /// Sets new safe position for agent
+        /// </summary>
+        /// <param name="reference"></param>
+        /// <param name="position"></param>
+        public void Reposition(PolyId reference, Vector3 position)
+        {
+            this.Corridor.FixPathStart(reference, position);
+            this.Boundary.Reset();
+            this.Position = position;
         }
     }
 }
