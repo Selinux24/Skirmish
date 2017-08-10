@@ -17,18 +17,6 @@ namespace Engine.Collections
         private BoundingRectanglei bounds;
 
         /// <summary>
-        /// Hash function
-        /// </summary>
-        /// <param name="x">The x-coordinate</param>
-        /// <param name="y">The y-coordinate</param>
-        /// <param name="n">Total size of hash table</param>
-        /// <returns>A hash value</returns>
-        public static int HashPos2(int x, int y, int n)
-        {
-            return ((x * 73856093) ^ (y * 19349663)) & (n - 1);
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ProximityGrid{T}"/> class.
         /// </summary>
         /// <param name="poolSize">The size of the item array</param>
@@ -91,7 +79,7 @@ namespace Engine.Collections
                 {
                     if (this.poolHead < this.pool.Length)
                     {
-                        int h = HashPos2(x, y, this.buckets.Length);
+                        int h = Helper.HashVector2(x, y, this.buckets.Length);
                         int idx = this.poolHead;
                         this.poolHead++;
                         this.pool[idx].X = x;
@@ -133,12 +121,14 @@ namespace Engine.Collections
         /// <param name="values">The array of values</param>
         /// <param name="maxVals">The maximum number of values that can be stored</param>
         /// <returns>The number of unique values</returns>
-        public int QueryItems(float minX, float minY, float maxX, float maxY, T[] values, int maxVals)
+        public int QueryItems(float minX, float minY, float maxX, float maxY, int maxVals, out T[] values)
         {
-            int invMinX = (int)Math.Floor(minX * inverseCellSize);
-            int invMinY = (int)Math.Floor(minY * inverseCellSize);
-            int invMaxX = (int)Math.Floor(maxX * inverseCellSize);
-            int invMaxY = (int)Math.Floor(maxY * inverseCellSize);
+            values = new T[maxVals];
+
+            int invMinX = (int)Math.Floor(minX * this.inverseCellSize);
+            int invMinY = (int)Math.Floor(minY * this.inverseCellSize);
+            int invMaxX = (int)Math.Floor(maxX * this.inverseCellSize);
+            int invMaxY = (int)Math.Floor(maxY * this.inverseCellSize);
 
             int n = 0;
 
@@ -146,8 +136,8 @@ namespace Engine.Collections
             {
                 for (int x = invMinX; x <= invMaxX; x++)
                 {
-                    int h = HashPos2(x, y, this.buckets.Length);
-                    int idx = this.buckets[h];
+                    int hash = Helper.HashVector2(x, y, this.buckets.Length);
+                    int idx = this.buckets[hash];
 
                     while (idx >= 0)
                     {
@@ -187,9 +177,9 @@ namespace Engine.Collections
         /// <param name="values">The array of values</param>
         /// <param name="maxVals">The maximum number of values that can be stored</param>
         /// <returns>The number of unique values</returns>
-        public int QueryItems(Vector2 pos, float range, T[] values, int maxVals)
+        public int QueryItems(Vector2 pos, float range, int maxVals, out T[] values)
         {
-            return this.QueryItems(pos.X - range, pos.Y - range, pos.X + range, pos.Y + range, values, maxVals);
+            return this.QueryItems(pos.X - range, pos.Y - range, pos.X + range, pos.Y + range, maxVals, out values);
         }
         /// <summary>
         /// Take all the items within a certain range and add their ids to an array.
@@ -199,9 +189,9 @@ namespace Engine.Collections
         /// <param name="values">The array of values</param>
         /// <param name="maxVals">The maximum number of values that can be stored</param>
         /// <returns>The number of unique values</returns>
-        public int QueryItems(Vector3 pos, float range, T[] values, int maxVals)
+        public int QueryItems(Vector3 pos, float range, int maxVals, out T[] values)
         {
-            return this.QueryItems(pos.X - range, pos.Z - range, pos.X + range, pos.Z + range, values, maxVals);
+            return this.QueryItems(pos.X - range, pos.Z - range, pos.X + range, pos.Z + range, maxVals, out values);
         }
         /// <summary>
         /// Gets the number of items at a specific location.
@@ -212,7 +202,7 @@ namespace Engine.Collections
         public int GetItemCountAtLocation(int x, int y)
         {
             int n = 0;
-            int h = HashPos2(x, y, this.buckets.Length);
+            int h = Helper.HashVector2(x, y, this.buckets.Length);
             int idx = buckets[h];
 
             while (idx >= 0)

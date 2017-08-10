@@ -442,6 +442,17 @@ namespace Engine
             return md5;
         }
         /// <summary>
+        /// Hash function for Vector2
+        /// </summary>
+        /// <param name="x">The x-coordinate</param>
+        /// <param name="y">The y-coordinate</param>
+        /// <param name="n">Total size of hash table</param>
+        /// <returns>A hash value</returns>
+        public static int HashVector2(int x, int y, int n)
+        {
+            return ((x * 73856093) ^ (y * 19349663)) & (n - 1);
+        }
+        /// <summary>
         /// Gets the maximum value of the collection 
         /// </summary>
         /// <typeparam name="T">Type</typeparam>

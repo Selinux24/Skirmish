@@ -54,18 +54,21 @@ namespace Engine.PathFinding
             {
                 var a = this.agents[i];
                 var crtl = a.Item1.Get<ManipulatorController>();
-                var path = a.Item2.Corners;
-
-                List<Vector3> verts = new List<Vector3>();
-                List<Vector3> norms = new List<Vector3>();
-                for (int p = 0; p < path.Count; p++)
+                if (crtl != null)
                 {
-                    verts.Add(path[p].Point.Position);
-                    verts.Add(Vector3.Up);
-                }
-                NormalPath np = new NormalPath(verts.ToArray(), norms.ToArray());
+                    var path = a.Item2.Corners;
 
-                crtl.Follow(np);
+                    List<Vector3> verts = new List<Vector3>();
+                    List<Vector3> norms = new List<Vector3>();
+                    for (int p = 0; p < path.Count; p++)
+                    {
+                        verts.Add(path[p].Point.Position);
+                        verts.Add(Vector3.Up);
+                    }
+                    NormalPath np = new NormalPath(verts.ToArray(), norms.ToArray());
+
+                    crtl.Follow(np);
+                }
             }
         }
         /// <summary>

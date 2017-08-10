@@ -11,30 +11,12 @@ namespace Engine.PathFinding.NavMesh.Crowds
     /// </summary>
     class Crowd
     {
-        /// <summary>
-		/// The maximum number of crowd avoidance configurations supported by the crowd manager
-		/// </summary>
-		private const int AgentMaxObstacleAvoidanceParams = 8;
-        /// <summary>
-        /// The maximum number of neighbors that a crowd agent can take into account for steering decisions
-        /// </summary>
-        private const int AgentMaxNeighbors = 6;
-        /// <summary>
-        /// The maximum number of corners a crowd agent will look ahead in the path
-        /// </summary>
-        private const int AgentMaxCorners = 4;
-
         private const int MaxIteratorsPerUpdate = 100;
         private const int MaxNeighbors = 32;
-
-        private const int MaxIter = 20;
 
         private const int PathMaxAgents = 8;
         private const int OptMaxAgents = 1;
         private const float OptTimeTHR = 0.5f; //seconds
-
-        private const int CheckLookAhead = 10;
-        private const float TargetReplanDelay = 1.0f; //seconds
 
         /// <summary>
         /// Add the CrowdAgent to the path queue
@@ -142,31 +124,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
             return Math.Min(numAgents + 1, maxAgents);
         }
-        /// <summary>
-        /// Gets if the specified agent is over an Offmesh connection
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <returns>Returns true if the agent is over an Offmesh connection</returns>
-        private static bool OverOffmeshConnection(Agent agent)
-        {
-            if (agent.Corners.Count == 0)
-            {
-                return false;
-            }
-
-            bool offmeshConnection = (agent.Corners[agent.Corners.Count - 1].Flags & StraightPathFlags.OffMeshConnection) != 0;
-            if (offmeshConnection)
-            {
-                float dist = Helper.Distance2D(agent.Position, agent.Corners[agent.Corners.Count - 1].Point.Position);
-                float radius = agent.Parameters.TriggerRadius;
-                if (dist * dist < radius * radius)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
 
         private List<Agent> agents = new List<Agent>();
         private PathQueue pathQueue;
@@ -207,7 +164,12 @@ namespace Engine.PathFinding.NavMesh.Crowds
         public void Update(float timeDelta)
         {
             //check that all agents have valid paths
-            this.CheckPathValidity(timeDelta);
+            this.agents
+                .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
+                .ForEach(agent =>
+                {
+                    agent.CheckPlan(navQuery, extents, timeDelta);
+                });
 
             //update async move requests and path finder
             this.UpdateMoveRequest();
@@ -216,211 +178,204 @@ namespace Engine.PathFinding.NavMesh.Crowds
             this.UpdateTopologyOptimization(timeDelta);
 
             //register agents to proximity grid
-            this.RegisterAgents();
+            this.grid.Clear();
+            this.agents
+                .ForEach(agent =>
+                {
+                    this.grid.AddItem(agent, agent.Parameters.Radius, agent.Position);
+                });
 
             //get nearby navmesh segments and agents to collide with
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var agent = this.agents[i];
-
-                if (agent.State != AgentState.Walking)
+            this.agents
+                .FindAll(agent => agent.State == AgentState.Walking)
+                .ForEach(agent =>
                 {
-                    continue;
-                }
+                    //update the collision boundary after certain distance has passed or if it has become invalid
+                    agent.UpdateCollision(navQuery);
 
-                //update the collision boundary after certain distance has passed or if it has become invalid
-                agent.UpdateCollision(navQuery);
+                    //query neighbor agents
+                    Agent[] ids;
+                    int neighborsIds = grid.QueryItems(agent.Position, agent.Parameters.CollisionQueryRange, MaxNeighbors, out ids);
 
-                //query neighbor agents
-                Agent[] ids = new Agent[MaxNeighbors];
-                int neighborsIds = grid.QueryItems(agent.Position, agent.Parameters.CollisionQueryRange, ids, MaxNeighbors);
-
-                //set the neigbors for the agent
-                agent.SetNeighbors(ids, neighborsIds);
-            }
+                    //set the neigbors for the agent
+                    agent.SetNeighbors(ids, neighborsIds);
+                });
 
             //find the next corner to steer to
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var agent = this.agents[i];
-
-                if (agent.State != AgentState.Walking)
+            this.agents
+                .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
+                .ForEach(agent =>
                 {
-                    continue;
-                }
-
-                if (agent.TargetState == TargetState.None ||
-                    agent.TargetState == TargetState.Velocity)
-                {
-                    continue;
-                }
-
-                //find corners for steering
-                agent.Steer1(navQuery);
-            }
+                    //find corners for steering
+                    agent.Steer1(navQuery);
+                });
 
             //trigger off-mesh connections (depends on corners)
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var agent = this.agents[i];
-
-                if (agent.State != AgentState.Walking)
+            this.agents
+                .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
+                .ForEach(agent =>
                 {
-                    continue;
-                }
-
-                if (agent.TargetState == TargetState.None || agent.TargetState == TargetState.Velocity)
-                {
-                    continue;
-                }
-
-                //check
-                if (OverOffmeshConnection(agent))
-                {
-                    //adjust the path over the off-mesh connection
-                    PolyId[] refs = new PolyId[2];
-                    var agentAnim = agent.Animation;
-                    if (agent.Corridor.MoveOverOffmeshConnection(agent.Corners[agent.Corners.Count - 1].Point.Polygon, refs, ref agentAnim.StartPos, ref agentAnim.EndPos, navQuery))
-                    {
-                        agentAnim.InitPos = agent.Position;
-                        agentAnim.PolyRef = refs[1];
-                        agentAnim.Active = true;
-                        agentAnim.T = 0.0f;
-                        agentAnim.TMax = (Helper.Distance2D(agentAnim.StartPos, agentAnim.EndPos) / agent.Parameters.MaxSpeed) * 0.5f;
-
-                        agent.TriggerOffmeshConnection();
-                        continue;
-                    }
-                }
-            }
+                    agent.TriggerOffmeshConnection(navQuery);
+                });
 
             //calculate steering
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var agent = this.agents[i];
-
-                if (agent.State != AgentState.Walking)
+            this.agents
+                .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None))
+                .ForEach(agent =>
                 {
-                    continue;
-                }
-
-                if (agent.TargetState == TargetState.None)
-                {
-                    continue;
-                }
-
-                agent.Steer2(this.agents);
-            }
+                    agent.Steer2(this.agents);
+                });
 
             //velocity planning
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var agent = this.agents[i];
-
-                if (agent.State != AgentState.Walking)
+            this.agents
+                .FindAll(agent => agent.State == AgentState.Walking)
+                .ForEach(agent =>
                 {
-                    continue;
-                }
-
-                agent.VelocityPlanning(this.obstacleQuery);
-            }
+                    agent.VelocityPlanning(this.obstacleQuery);
+                });
 
             //integrate
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var agent = agents[i];
-
-                if (agent.State != AgentState.Walking)
+            this.agents
+                .FindAll(agent => agent.State == AgentState.Walking)
+                .ForEach(agent =>
                 {
-                    continue;
-                }
-
-                agent.Integrate(timeDelta);
-            }
+                    agent.Integrate(timeDelta);
+                });
 
             //handle collisions
-            for (int iter = 0; iter < 4; iter++)
+            for (int i = 0; i < 4; i++)
             {
-                for (int i = 0; i < this.agents.Count; i++)
-                {
-                    var agent = agents[i];
-
-                    if (agent.State != AgentState.Walking)
+                this.agents
+                    .FindAll(agent => agent.State == AgentState.Walking)
+                    .ForEach(agent =>
                     {
-                        continue;
-                    }
+                        agent.HandleCollisions(this.agents);
+                    });
 
-                    agent.HandleCollisions(this.agents);
-                }
-
-                for (int i = 0; i < this.agents.Count; i++)
-                {
-                    var agent = agents[i];
-
-                    if (agent.State != AgentState.Walking)
+                this.agents
+                    .FindAll(agent => agent.State == AgentState.Walking)
+                    .ForEach(agent =>
                     {
-                        continue;
-                    }
-
-                    //move along navmesh
-                    agent.MovePosition(navQuery);
-                }
+                        //move along navmesh
+                        agent.MovePosition(navQuery);
+                    });
 
                 //update agents using offmesh connections
-                for (int i = 0; i < this.agents.Count; i++)
-                {
-                    var agent = this.agents[i];
-                    var anim = agent.Animation;
-
-                    if (!anim.Active)
+                this.agents
+                    .ForEach(agent =>
                     {
-                        continue;
-                    }
-
-                    anim.T += timeDelta;
-                    if (anim.T > anim.TMax)
-                    {
-                        //reset animation
-                        anim.Active = false;
-
-                        //prepare agent for walking
-                        agent.State = AgentState.Walking;
-
-                        continue;
-                    }
-
-                    //update position
-                    float ta = anim.TMax * 0.15f;
-                    float tb = anim.TMax;
-                    if (anim.T < ta)
-                    {
-                        float u = Helper.Normalize(anim.T, 0.0f, ta);
-                        agent.Position = Vector3.Lerp(anim.InitPos, anim.StartPos, u);
-                    }
-                    else
-                    {
-                        float u = Helper.Normalize(anim.T, ta, tb);
-                        agent.Position = Vector3.Lerp(anim.StartPos, anim.EndPos, u);
-                    }
-
-                    agent.Velocity = Vector3.Zero;
-                    agent.DesiredVelocity = Vector3.Zero;
-                }
+                        agent.UpdateOffmeshConnections(timeDelta);
+                    });
             }
         }
         /// <summary>
+        /// Change the move requests for all the agents
+        /// </summary>
+        private void UpdateMoveRequest()
+        {
+            int numQueue = 0;
+            Agent[] queue = new Agent[PathMaxAgents];
+
+            //fire off new requests
+            this.agents
+                .FindAll(agent => agent.IsActive && agent.State != AgentState.Invalid)
+                .ForEach(agent =>
+                {
+                    if (agent.TargetState == TargetState.Requesting)
+                    {
+                        agent.ResolveRequesting(navQuery, navQueryFilter);
+                    }
+
+                    if (agent.TargetState == TargetState.WaitingForQueue)
+                    {
+                        numQueue = AddToPathQueue(agent, queue, numQueue, PathMaxAgents);
+                    }
+                });
+
+            for (int i = 0; i < numQueue; i++)
+            {
+                var startPoint = new PathPoint(queue[i].Corridor.GetLastPoly(), queue[i].Corridor.Target);
+                var endPoint = new PathPoint(queue[i].TargetReference, queue[i].TargetPosition);
+
+                queue[i].TargetPathQueryIndex = this.pathQueue.Request(startPoint, endPoint);
+                if (queue[i].TargetPathQueryIndex != PathQueue.Invalid)
+                {
+                    queue[i].TargetState = TargetState.WaitingForPath;
+                }
+            }
+
+            //update requests
+            this.pathQueue.Update(MaxIteratorsPerUpdate);
+
+            //process path results
+            this.agents
+                .FindAll(agent => agent.IsActive && agent.TargetState == TargetState.WaitingForPath)
+                .ForEach(agent =>
+                {
+                    agent.ResolveWaitingForPath(navQuery, pathQueue);
+                });
+        }
+        /// <summary>
+        /// Reoptimize the path corridor for all agents
+        /// </summary>
+        /// <param name="agents">The agents array</param>
+        /// <param name="numAgents">The number of agents</param>
+        /// <param name="timeDelta">Time until next update</param>
+        private void UpdateTopologyOptimization(float timeDelta)
+        {
+            if (this.agents.Count > 0)
+            {
+                Agent[] queue = new Agent[OptMaxAgents];
+                int nqueue = 0;
+
+                for (int i = 0; i < this.agents.Count; i++)
+                {
+                    var agent = agents[i];
+
+                    if (agent.State != AgentState.Walking)
+                    {
+                        continue;
+                    }
+
+                    if (agent.TargetState == TargetState.None ||
+                        agent.TargetState == TargetState.Velocity)
+                    {
+                        continue;
+                    }
+
+                    if ((agent.Parameters.UpdateFlags & UpdateFlags.OptimizeTopo) == 0)
+                    {
+                        continue;
+                    }
+
+                    agent.TopologyOptTime += timeDelta;
+                    if (agent.TopologyOptTime >= OptTimeTHR)
+                    {
+                        nqueue = AddToOptQueue(agent, queue, nqueue, OptMaxAgents);
+                    }
+                }
+
+                for (int i = 0; i < nqueue; i++)
+                {
+                    queue[i].Corridor.OptimizePathTopology(this.navQuery, this.navQueryFilter);
+                    queue[i].TopologyOptTime = 0.0f;
+                }
+            }
+        }
+
+        /// <summary>
         /// Add an agent to the crowd.
         /// </summary>
-        /// <param name="pos">The agent's position</param>
+        /// <param name="position">The agent's position</param>
         /// <param name="parameters">The settings</param>
         /// <returns>The id of the agent (-1 if there is no empty slot)</returns>
-        public Agent AddAgent(Vector3 pos, AgentParams parameters)
+        public Agent AddAgent(Vector3 position, AgentParams parameters)
         {
             var agent = new Agent(parameters);
 
             //Find nearest position on the navmesh and place the agent there
             PathPoint nearest;
-            if (this.navQuery.FindNearestPoly(ref pos, ref this.extents, out nearest))
+            if (this.navQuery.FindNearestPoly(ref position, ref this.extents, out nearest))
             {
                 agent.Reset(nearest.Polygon, nearest.Position);
                 agent.IsActive = true;
@@ -440,409 +395,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
             if (this.agents.Contains(agent))
             {
                 this.agents.Remove(agent);
-            }
-        }
-        /// <summary>
-        /// Registers all agents in the proximity grid
-        /// </summary>
-        private void RegisterAgents()
-        {
-            this.grid.Clear();
-
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var a = agents[i];
-
-                this.grid.AddItem(a, a.Parameters.Radius, a.Position);
-            }
-        }
-
-        /// <summary>
-        /// Make sure that each agent is taking a valid path
-        /// </summary>
-        /// <param name="deltaTime">Time until next update</param>
-        private void CheckPathValidity(float deltaTime)
-        {
-            //Iterate through all the agents
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                Agent agent = agents[i];
-
-                if (agent.State != AgentState.Walking)
-                {
-                    continue;
-                }
-
-                if (agent.TargetState == TargetState.None || agent.TargetState == TargetState.Velocity)
-                {
-                    continue;
-                }
-
-                agent.TargetReplanTime += deltaTime;
-
-                bool replan = false;
-
-                //first check that the current location is valid
-                var agentRef = agent.Corridor.GetFirstPoly();
-                var agentPos = agent.Position;
-                if (!this.navQuery.IsValidPolyRef(agentRef))
-                {
-                    //current location is not valid, try to reposition
-                    Vector3 nearest = agentPos;
-                    Vector3 pos = agent.Position;
-                    agentRef = PolyId.Null;
-                    PathPoint nearestPt;
-                    if (this.navQuery.FindNearestPoly(ref pos, ref this.extents, out nearestPt))
-                    {
-                        nearest = nearestPt.Position;
-                        agentRef = nearestPt.Polygon;
-                        agentPos = nearestPt.Position;
-
-                        if (agentRef == PolyId.Null)
-                        {
-                            //could not find location in navmesh, set state to invalid
-                            agent.SetInvalidState(agentPos);
-                            continue;
-                        }
-
-                        //make sure the first polygon is valid
-                        agent.Reposition(agentRef, agentPos);
-                        replan = true;
-                    }
-                }
-
-                //try to recover move request position
-                if (agent.TargetState != TargetState.None &&
-                    agent.TargetState != TargetState.Failed)
-                {
-                    if (!this.navQuery.IsValidPolyRef(agent.TargetReference))
-                    {
-                        //current target is not valid, try to reposition
-                        Vector3 nearest = agent.TargetPosition;
-                        Vector3 tpos = agent.TargetPosition;
-                        agent.TargetReference = PolyId.Null;
-                        PathPoint nearestPt;
-                        if (this.navQuery.FindNearestPoly(ref tpos, ref this.extents, out nearestPt))
-                        {
-                            nearest = nearestPt.Position;
-                            agent.SetTarget(nearestPt.Polygon, nearestPt.Position);
-                            replan = true;
-                        }
-                    }
-
-                    if (agent.TargetReference == PolyId.Null)
-                    {
-                        //failed to reposition target
-                        agent.ResetTarget(agentRef, agentPos);
-                    }
-                }
-
-                //if nearby corridor is not valid, replan
-                if (!agent.Corridor.IsValid(CheckLookAhead, this.navQuery))
-                {
-                    replan = true;
-                }
-
-                //if the end of the path is near and it is not the request location, replan
-                if (agent.TargetState == TargetState.Valid)
-                {
-                    if (agent.TargetReplanTime > TargetReplanDelay &&
-                        agent.Corridor.NavPath.Count < CheckLookAhead &&
-                        agent.Corridor.GetLastPoly() != agent.TargetReference)
-                    {
-                        replan = true;
-                    }
-                }
-
-                //try to replan path to goal
-                if (replan && agent.TargetState != TargetState.None)
-                {
-                    agent.RequestMoveTargetReplan();
-                }
-            }
-        }
-        /// <summary>
-        /// Change the move requests for all the agents
-        /// </summary>
-        private void UpdateMoveRequest()
-        {
-            Agent[] queue = new Agent[PathMaxAgents];
-            int numQueue = 0;
-            Status status;
-
-            //fire off new requests
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var a = this.agents[i];
-
-                if (!a.IsActive)
-                {
-                    continue;
-                }
-
-                if (a.State == AgentState.Invalid)
-                {
-                    continue;
-                }
-
-                if (a.TargetState == TargetState.None || a.TargetState == TargetState.Velocity)
-                {
-                    continue;
-                }
-
-                if (a.TargetState == TargetState.Requesting)
-                {
-                    var path = a.Corridor.NavPath;
-
-                    Vector3 reqPos = new Vector3();
-                    Path reqPath = new Path();
-
-                    //quick search towards the goal
-                    PathPoint startPoint = new PathPoint(path[0], a.Position);
-                    PathPoint endPoint = new PathPoint(a.TargetReference, a.TargetPosition);
-                    this.navQuery.InitSlicedFindPath(ref startPoint, ref endPoint, this.navQueryFilter, FindPathOptions.None);
-                    int tempInt = 0;
-                    this.navQuery.UpdateSlicedFindPath(MaxIter, ref tempInt);
-                    status = Status.Failure;
-                    if (a.TargetReplan)
-                    {
-                        //try to use an existing steady path during replan if possible
-                        status = this.navQuery.FinalizedSlicedPathPartial(path, reqPath).ToStatus();
-                    }
-                    else
-                    {
-                        //try to move towards the target when the goal changes
-                        status = this.navQuery.FinalizeSlicedFindPath(reqPath).ToStatus();
-                    }
-
-                    if (status != Status.Failure && reqPath.Count > 0)
-                    {
-                        //in progress or succeed
-                        if (reqPath[reqPath.Count - 1] != a.TargetReference)
-                        {
-                            //partial path, constrain target position in last polygon
-                            bool tempBool;
-                            status = this.navQuery.ClosestPointOnPoly(reqPath[reqPath.Count - 1], a.TargetPosition, out reqPos, out tempBool).ToStatus();
-                            if (status == Status.Failure)
-                            {
-                                reqPath.Clear();
-                            }
-                        }
-                        else
-                        {
-                            reqPos = a.TargetPosition;
-                        }
-                    }
-                    else
-                    {
-                        reqPath.Clear();
-                    }
-
-                    if (reqPath.Count == 0)
-                    {
-                        //could not find path, start the request from the current location
-                        reqPos = a.Position;
-                        reqPath.Add(path[0]);
-                    }
-
-                    a.Corridor.SetCorridor(reqPos, reqPath);
-                    a.Boundary.Reset();
-                    a.IsPartial = false;
-
-                    if (reqPath[reqPath.Count - 1] == a.TargetReference)
-                    {
-                        a.TargetState = TargetState.Valid;
-                        a.TargetReplanTime = 0.0f;
-                    }
-                    else
-                    {
-                        //the path is longer or potentially unreachable, full plan
-                        a.TargetState = TargetState.WaitingForQueue;
-                    }
-                }
-
-                if (a.TargetState == TargetState.WaitingForQueue)
-                {
-                    numQueue = AddToPathQueue(a, queue, numQueue, PathMaxAgents);
-                }
-            }
-
-            for (int i = 0; i < numQueue; i++)
-            {
-                queue[i].TargetPathQueryIndex = this.pathQueue.Request(new PathPoint(queue[i].Corridor.GetLastPoly(), queue[i].Corridor.Target), new PathPoint(queue[i].TargetReference, queue[i].TargetPosition));
-                if (queue[i].TargetPathQueryIndex != PathQueue.Invalid)
-                {
-                    queue[i].TargetState = TargetState.WaitingForPath;
-                }
-            }
-
-            //update requests
-            this.pathQueue.Update(MaxIteratorsPerUpdate);
-
-            //process path results
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var a = this.agents[i];
-
-                if (!a.IsActive)
-                {
-                    continue;
-                }
-
-                if (a.TargetState == TargetState.None || a.TargetState == TargetState.Velocity)
-                {
-                    continue;
-                }
-
-                if (a.TargetState == TargetState.WaitingForPath)
-                {
-                    //poll path queue
-                    status = this.pathQueue.GetRequestStatus(a.TargetPathQueryIndex);
-                    if (status == Status.Failure)
-                    {
-                        //path find failed, retry if the target location is still valid
-                        a.TargetPathQueryIndex = PathQueue.Invalid;
-                        if (a.TargetReference != PolyId.Null)
-                        {
-                            a.TargetState = TargetState.Requesting;
-                        }
-                        else
-                        {
-                            a.TargetState = TargetState.Failed;
-                        }
-                        a.TargetReplanTime = 0.0f;
-                    }
-                    else if (status == Status.Success)
-                    {
-                        Path path = a.Corridor.NavPath;
-
-                        //apply results
-                        Vector3 targetPos = new Vector3();
-                        targetPos = a.TargetPosition;
-
-                        Path res;
-                        bool valid = true;
-                        status = this.pathQueue.GetPathResult(a.TargetPathQueryIndex, out res).ToStatus();
-                        if (status == Status.Failure || res.Count == 0)
-                        {
-                            valid = false;
-                        }
-
-                        //Merge result and existing path
-                        if (valid && path[path.Count - 1] != res[0])
-                        {
-                            valid = false;
-                        }
-
-                        if (valid)
-                        {
-                            //put the old path infront of the old path
-                            if (path.Count > 1)
-                            {
-                                //make space for the old path
-                                //if ((path.Count - 1) + nres > maxPathResult)
-                                //nres = maxPathResult - (npath - 1);
-
-                                for (int j = 0; j < res.Count; j++)
-                                {
-                                    res[path.Count - 1 + j] = res[j];
-                                }
-
-                                //copy old path in the beginning
-                                for (int j = 0; j < path.Count - 1; j++)
-                                {
-                                    res.Add(path[j]);
-                                }
-
-                                //remove trackbacks
-                                res.RemoveTrackbacks();
-                            }
-
-                            //check for partial path
-                            if (res[res.Count - 1] != a.TargetReference)
-                            {
-                                //partial path, constrain target position inside the last polygon
-                                Vector3 nearest;
-                                bool tempBool = false;
-                                status = this.navQuery.ClosestPointOnPoly(res[res.Count - 1], targetPos, out nearest, out tempBool).ToStatus();
-                                if (status == Status.Success)
-                                {
-                                    targetPos = nearest;
-                                }
-                                else
-                                {
-                                    valid = false;
-                                }
-                            }
-                        }
-
-                        if (valid)
-                        {
-                            //set current corridor
-                            a.Corridor.SetCorridor(targetPos, res);
-
-                            //forced to update boundary
-                            a.Boundary.Reset();
-                            a.TargetState = TargetState.Valid;
-                        }
-                        else
-                        {
-                            //something went wrong
-                            a.TargetState = TargetState.Failed;
-                        }
-
-                        a.TargetReplanTime = 0.0f;
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Reoptimize the path corridor for all agents
-        /// </summary>
-        /// <param name="agents">The agents array</param>
-        /// <param name="numAgents">The number of agents</param>
-        /// <param name="dt">Time until next update</param>
-        private void UpdateTopologyOptimization(float dt)
-        {
-            if (this.agents.Count == 0)
-            {
-                return;
-            }
-
-            Agent[] queue = new Agent[OptMaxAgents];
-            int nqueue = 0;
-
-            for (int i = 0; i < this.agents.Count; i++)
-            {
-                var a = agents[i];
-
-                if (a.State != AgentState.Walking)
-                {
-                    continue;
-                }
-
-                if (a.TargetState == TargetState.None ||
-                    a.TargetState == TargetState.Velocity)
-                {
-                    continue;
-                }
-
-                if ((a.Parameters.UpdateFlags & UpdateFlags.OptimizeTopo) == 0)
-                {
-                    continue;
-                }
-
-                a.TopologyOptTime += dt;
-                if (a.TopologyOptTime >= OptTimeTHR)
-                {
-                    nqueue = AddToOptQueue(a, queue, nqueue, OptMaxAgents);
-                }
-            }
-
-            for (int i = 0; i < nqueue; i++)
-            {
-                queue[i].Corridor.OptimizePathTopology(this.navQuery, this.navQueryFilter);
-                queue[i].TopologyOptTime = 0.0f;
             }
         }
 
