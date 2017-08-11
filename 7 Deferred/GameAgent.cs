@@ -1,4 +1,5 @@
-﻿using Engine;
+﻿using System;
+using Engine;
 using Engine.Common;
 using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
@@ -8,12 +9,12 @@ namespace DeferredTest
     /// <summary>
     /// Game agent class
     /// </summary>
-    public class GameAgent<T> : IUpdatable, ITransformable3D where T : ManipulatorController
+    public class GameAgent<T> : IUpdatable, IAgent where T : ManipulatorController
     {
         /// <summary>
         /// Agent type
         /// </summary>
-        public NavigationMeshAgentType AgentType;
+        public NavigationMeshAgentType AgentType { get; set; }
         /// <summary>
         /// Model
         /// </summary>
@@ -116,6 +117,21 @@ namespace DeferredTest
         public void FollowPath(PathFindingPath path)
         {
             this.controller.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
+        }
+
+        public void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
+        {
+            this.controller.UpdateManipulator(gameTime, manipulator);
+        }
+
+        public void Follow(IControllerPath path, float time = 0)
+        {
+            this.controller.Follow(path, time);
+        }
+
+        public void Clear()
+        {
+            this.controller.Clear();
         }
     }
 }

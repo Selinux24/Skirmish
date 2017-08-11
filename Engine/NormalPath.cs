@@ -74,27 +74,34 @@ namespace Engine
         /// <returns>Returns path normal</returns>
         public Vector3 GetNormal(float distance)
         {
-            if (distance == 0) return normals[0];
-            if (distance >= this.Length) return normals[normals.Length - 1];
-
-            Vector3 res = Vector3.Zero;
-            float l = distance;
-            for (int i = 1; i < checkPoints.Length; i++)
+            if (normals.Length > 1)
             {
-                Vector3 segment = checkPoints[i] - checkPoints[i - 1];
-                float segmentLength = segment.Length();
+                if (distance == 0) return normals[0];
+                if (distance >= this.Length) return normals[normals.Length - 1];
 
-                if (l - segmentLength <= 0)
+                Vector3 res = Vector3.Zero;
+                float l = distance;
+                for (int i = 1; i < checkPoints.Length; i++)
                 {
-                    res = Vector3.Lerp(normals[i], normals[i - 1], l / segmentLength);
+                    Vector3 segment = checkPoints[i] - checkPoints[i - 1];
+                    float segmentLength = segment.Length();
 
-                    break;
+                    if (l - segmentLength <= 0)
+                    {
+                        res = Vector3.Lerp(normals[i], normals[i - 1], l / segmentLength);
+
+                        break;
+                    }
+
+                    l -= segmentLength;
                 }
 
-                l -= segmentLength;
+                return res;
             }
-
-            return res;
+            else
+            {
+                return Vector3.Up;
+            }
         }
         /// <summary>
         /// Gets the next control point at specified distance

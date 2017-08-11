@@ -539,8 +539,8 @@ namespace DeferredTest
             this.Camera.FarPlaneDistance = far;
 
             this.crowd = new AgentCrowd(this, this.navigationGraph as NavigationMesh, this.tankAgentType);
-            crowd.AddAgent(this.tankAgent1, this.tankAgent1.Instance.AgentType);
-            crowd.AddAgent(this.tankAgent2, this.tankAgent2.Instance.AgentType);
+            crowd.AddAgent(this.tankAgent1.Instance);
+            crowd.AddAgent(this.tankAgent2.Instance);
         }
         public override void Update(GameTime gameTime)
         {

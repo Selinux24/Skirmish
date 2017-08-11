@@ -4,7 +4,6 @@ using System.Collections.Generic;
 
 namespace Engine.PathFinding
 {
-    using Common;
     using Engine.PathFinding.NavMesh;
     using Engine.PathFinding.NavMesh.Crowds;
 
@@ -20,7 +19,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Game agent and crowd agend relations
         /// </summary>
-        private List<Tuple<SceneObject, Agent>> agents = new List<Tuple<SceneObject, Agent>>();
+        private List<Tuple<IAgent, Agent>> agents = new List<Tuple<IAgent, Agent>>();
 
         /// <summary>
         /// Scene
@@ -53,22 +52,19 @@ namespace Engine.PathFinding
             for (int i = 0; i < this.agents.Count; i++)
             {
                 var a = this.agents[i];
-                var crtl = a.Item1.Get<ManipulatorController>();
-                if (crtl != null)
+                var crtl = a.Item1;
+                var path = a.Item2.Corners;
+
+                List<Vector3> verts = new List<Vector3>();
+                List<Vector3> norms = new List<Vector3>();
+                for (int p = 0; p < path.Count; p++)
                 {
-                    var path = a.Item2.Corners;
-
-                    List<Vector3> verts = new List<Vector3>();
-                    List<Vector3> norms = new List<Vector3>();
-                    for (int p = 0; p < path.Count; p++)
-                    {
-                        verts.Add(path[p].Point.Position);
-                        verts.Add(Vector3.Up);
-                    }
-                    NormalPath np = new NormalPath(verts.ToArray(), norms.ToArray());
-
-                    crtl.Follow(np);
+                    verts.Add(path[p].Point.Position);
+                    verts.Add(Vector3.Up);
                 }
+                NormalPath np = new NormalPath(verts.ToArray(), norms.ToArray());
+
+                crtl.Follow(np);
             }
         }
         /// <summary>
@@ -76,26 +72,27 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="obj">Agent</param>
         /// <param name="agentType">Agent type</param>
-        public void AddAgent(SceneObject obj, NavigationMeshAgentType agentType)
+        public void AddAgent(IAgent obj)
         {
             var par = new AgentParams()
             {
-                Height = agentType.Height,
-                Radius = agentType.Radius,
+                Height = obj.AgentType.Height,
+                Radius = obj.AgentType.Radius,
                 MaxSpeed = 13.5f,
                 MaxAcceleration = 80f,
-                CollisionQueryRange = agentType.Radius * 12f,
-                PathOptimizationRange = agentType.Radius * 30f,
+                CollisionQueryRange = obj.AgentType.Radius * 12f,
+                PathOptimizationRange = obj.AgentType.Radius * 30f,
             };
 
-            var transform = obj.Get<ITransformable3D>();
+            var agent = this.crowd.AddAgent(obj.Manipulator.Position, par);
 
-            var agent = this.crowd.AddAgent(transform.Manipulator.Position, par);
-
-            this.agents.Add(new Tuple<SceneObject, Agent>(obj, agent));
+            this.agents.Add(new Tuple<IAgent, Agent>(obj, agent));
         }
-
-        public void RemoveAgent(SceneObject obj)
+        /// <summary>
+        /// Remove agent
+        /// </summary>
+        /// <param name="obj">Scene object to remove from agent list</param>
+        public void RemoveAgent(IAgent obj)
         {
             var agent = this.agents.Find(a => a.Item1 == obj);
 

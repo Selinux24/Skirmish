@@ -201,6 +201,7 @@
     <Compile Include="Effects\EffectDefaultCPUParticles.cs" />
     <Compile Include="ParticleEmitter.cs" />
     <Compile Include="PathFinding\AgentCrowd.cs" />
+    <Compile Include="PathFinding\IAgent.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\Agent.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\AgentAnimation.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\AgentParams.cs" />
