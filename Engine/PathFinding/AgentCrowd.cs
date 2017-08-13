@@ -51,6 +51,11 @@ namespace Engine.PathFinding
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
+            this.agents.ForEach(agent =>
+            {
+                agent.Item2.Position = agent.Item1.Manipulator.Position;
+            });
+
             this.CrowdLatency += gameTime.ElapsedSeconds;
 
             if (this.CrowdLatency > CrowdLatencySecs || this.CrowdLatency < 0)
@@ -75,9 +80,11 @@ namespace Engine.PathFinding
                         verts.Add(item.Manipulator.Position);
                         norms.Add(item.Manipulator.Up);
 
-                        for (int p = 0; p < agent.Corners.Count; p++)
+                        var path = agent.GetStraightPath();
+
+                        for (int p = 0; p < path.Count; p++)
                         {
-                            var point = agent.Corners[p];
+                            var point = path[p];
 
                             verts.Add(point.Point.Position);
                             norms.Add(Vector3.Up);
@@ -91,7 +98,6 @@ namespace Engine.PathFinding
                     else
                     {
                         item.Clear();
-                        agent.ResetToPosition(PolyId.Null, Vector3.Zero);
 
                         Console.WriteLine("AgentCrowd[{0}].Clear", i);
                     }

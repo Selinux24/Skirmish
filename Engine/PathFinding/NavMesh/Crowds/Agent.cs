@@ -282,6 +282,8 @@ namespace Engine.PathFinding.NavMesh.Crowds
             return Math.Min(numAgents + 1, maxAgents);
         }
 
+        private Crowd crowd = null;
+
         private float TopologyOptTime { get; set; }
         private float DesiredSpeed { get; set; }
         private Vector3 Disp { get; set; }
@@ -302,16 +304,19 @@ namespace Engine.PathFinding.NavMesh.Crowds
         public bool IsActive { get; private set; }
         public bool IsPartial { get; private set; }
         public AgentState State { get; private set; }
-        public Vector3 Position { get; private set; }
+        public Vector3 Position { get; set; }
         public TargetState TargetState { get; private set; }
         public Vector3 TargetPosition { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="crowd">Crowd</param>
         /// <param name="parameters">Parameters</param>
-        public Agent(AgentParams parameters)
+        public Agent(Crowd crowd, AgentParams parameters)
         {
+            this.crowd = crowd;
+
             this.IsActive = false;
             this.Corridor = new PathCorridor();
             this.Boundary = new LocalBoundary();
@@ -409,26 +414,25 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <summary>
         /// Checks plan validity
         /// </summary>
-        /// <param name="navQuery">Navigation query</param>
-        /// <param name="extents">Search extents</param>
         /// <param name="timeDelta">Delta time</param>
-        public void CheckPlan(NavigationMeshQuery navQuery, Vector3 extents, float timeDelta)
+        public void CheckPlan(float timeDelta)
         {
             this.TargetReplanTime += timeDelta;
 
             bool replan = false;
 
             //first check that the current location is valid
-            var agentRef = this.Corridor.GetFirstPoly();
+            var agentRef = this.Corridor.FirstPoly;
             var agentPos = this.Position;
-            if (!navQuery.IsValidPolyRef(agentRef))
+            if (!this.crowd.NavQuery.IsValidPolyRef(agentRef))
             {
                 //current location is not valid, try to reposition
                 Vector3 nearest = agentPos;
                 Vector3 pos = this.Position;
+                Vector3 extents = this.crowd.Extents;
                 agentRef = PolyId.Null;
                 PathPoint nearestPt;
-                if (navQuery.FindNearestPoly(ref pos, ref extents, out nearestPt))
+                if (this.crowd.NavQuery.FindNearestPoly(ref pos, ref extents, out nearestPt))
                 {
                     nearest = nearestPt.Position;
                     agentRef = nearestPt.Polygon;
@@ -451,14 +455,15 @@ namespace Engine.PathFinding.NavMesh.Crowds
             if (this.TargetState != TargetState.None &&
                 this.TargetState != TargetState.Failed)
             {
-                if (!navQuery.IsValidPolyRef(this.TargetReference))
+                if (!this.crowd.NavQuery.IsValidPolyRef(this.TargetReference))
                 {
                     //current target is not valid, try to reposition
                     Vector3 nearest = this.TargetPosition;
                     Vector3 tpos = this.TargetPosition;
+                    Vector3 extents = this.crowd.Extents;
                     this.TargetReference = PolyId.Null;
                     PathPoint nearestPt;
-                    if (navQuery.FindNearestPoly(ref tpos, ref extents, out nearestPt))
+                    if (this.crowd.NavQuery.FindNearestPoly(ref tpos, ref extents, out nearestPt))
                     {
                         nearest = nearestPt.Position;
                         this.SetTarget(nearestPt.Polygon, nearestPt.Position);
@@ -474,7 +479,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
 
             //if nearby corridor is not valid, replan
-            if (!this.Corridor.IsValid(CheckLookAhead, navQuery))
+            if (!this.Corridor.IsValid(CheckLookAhead, this.crowd.NavQuery))
             {
                 replan = true;
             }
@@ -483,8 +488,8 @@ namespace Engine.PathFinding.NavMesh.Crowds
             if (this.TargetState == TargetState.Valid)
             {
                 if (this.TargetReplanTime > TargetReplanDelay &&
-                    this.Corridor.NavPath.Count < CheckLookAhead &&
-                    this.Corridor.GetLastPoly() != this.TargetReference)
+                    this.Corridor.NavigationPath.Count < CheckLookAhead &&
+                    this.Corridor.LastPoly != this.TargetReference)
                 {
                     replan = true;
                 }
@@ -562,31 +567,30 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <summary>
         /// Move agent to position
         /// </summary>
-        /// <param name="navQuery">Navigation query</param>
-        public void MovePosition(NavigationMeshQuery navQuery)
+        public void MovePosition()
         {
             //move along navmesh
-            this.Corridor.MovePosition(this.Position, navQuery);
+            this.Corridor.MovePosition(this.Position, this.crowd.NavQuery);
 
             //get valid constrained position back
-            this.Position = this.Corridor.Pos;
+            this.Position = this.Corridor.Position;
 
             //if not using path, truncate the corridor to just one poly
             if (this.TargetState == TargetState.None ||
                 this.TargetState == TargetState.Velocity)
             {
-                this.Corridor.Reset(this.Corridor.GetFirstPoly(), this.Position);
+                this.Corridor.Reset(this.Corridor.FirstPoly, this.Position);
                 this.IsPartial = false;
             }
         }
 
 
 
-        public void UpdateCollision(NavigationMeshQuery navQuery)
+        public void UpdateCollision()
         {
-            if (Helper.Distance2D(this.Position, this.Boundary.Center) > this.Parameters.UpdateThreshold || !this.Boundary.IsValid(navQuery))
+            if (Helper.Distance2D(this.Position, this.Boundary.Center) > this.Parameters.UpdateThreshold || !this.Boundary.IsValid(this.crowd.NavQuery))
             {
-                this.Boundary.Update(this.Corridor.GetFirstPoly(), this.Position, this.Parameters.CollisionQueryRange, navQuery);
+                this.Boundary.Update(this.Corridor.FirstPoly, this.Position, this.Parameters.CollisionQueryRange, this.crowd.NavQuery);
             }
         }
 
@@ -595,14 +599,14 @@ namespace Engine.PathFinding.NavMesh.Crowds
             this.Neighbors = GetNeighbors(this, neighborAgents, count);
         }
 
-        public bool TriggerOffmeshConnection(NavigationMeshQuery navQuery)
+        public bool TriggerOffmeshConnection()
         {
             if (OverOffmeshConnection(this))
             {
                 //adjust the path over the off-mesh connection
                 PolyId[] refs = new PolyId[2];
                 var agentAnim = this.Animation;
-                if (this.Corridor.MoveOverOffmeshConnection(this.Corners[this.Corners.Count - 1].Point.Polygon, refs, ref agentAnim.StartPos, ref agentAnim.EndPos, navQuery))
+                if (this.Corridor.MoveOverOffmeshConnection(this.Corners[this.Corners.Count - 1].Point.Polygon, refs, ref agentAnim.StartPos, ref agentAnim.EndPos, this.crowd.NavQuery))
                 {
                     agentAnim.InitPos = this.Position;
                     agentAnim.PolyRef = refs[1];
@@ -620,16 +624,16 @@ namespace Engine.PathFinding.NavMesh.Crowds
             return false;
         }
 
-        public void Steer1(NavigationMeshQuery navQuery)
+        public void Steer1()
         {
             //find corners for steering
-            this.Corners = this.Corridor.FindCorners(navQuery);
+            this.Corners = this.Corridor.FindCorners(this.crowd.NavQuery);
 
             //check to see if the corner after the next corner is directly visible 
             if ((this.Parameters.UpdateFlags & UpdateFlags.OptimizeVis) != 0 && this.Corners.Count > 0)
             {
                 Vector3 target = this.Corners[Math.Min(1, this.Corners.Count - 1)].Point.Position;
-                this.Corridor.OptimizePathVisibility(target, this.Parameters.PathOptimizationRange, navQuery);
+                this.Corridor.OptimizePathVisibility(target, this.Parameters.PathOptimizationRange, this.crowd.NavQuery);
             }
         }
 
@@ -716,17 +720,17 @@ namespace Engine.PathFinding.NavMesh.Crowds
             this.DesiredVelocity = dvel;
         }
 
-        public void VelocityPlanning(ObstacleAvoidanceQuery obstacleQuery)
+        public void VelocityPlanning()
         {
             if ((this.Parameters.UpdateFlags & UpdateFlags.ObstacleAvoidance) != 0)
             {
-                obstacleQuery.Reset();
+                this.crowd.ObstacleQuery.Reset();
 
                 //add neighhbors as obstacles
                 for (int j = 0; j < this.Neighbors.Length; j++)
                 {
                     var n = this.Neighbors[j].Neighbor;
-                    obstacleQuery.AddCircle(n.Position, n.Parameters.Radius, n.Velocity, n.DesiredVelocity);
+                    this.crowd.ObstacleQuery.AddCircle(n.Position, n.Parameters.Radius, n.Velocity, n.DesiredVelocity);
                 }
 
                 //append neighbor segments as obstacles
@@ -737,21 +741,21 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     {
                         continue;
                     }
-                    obstacleQuery.AddSegment(s.Start, s.End);
+                    this.crowd.ObstacleQuery.AddSegment(s.Start, s.End);
                 }
 
                 //sample new safe velocity
                 bool adaptive = true;
                 int ns = 0;
-                var parameters = obstacleQuery.GetParams(this.Parameters.ObstacleAvoidanceType);
+                var parameters = this.crowd.ObstacleQuery.GetParams(this.Parameters.ObstacleAvoidanceType);
                 Vector3 nVel;
                 if (adaptive)
                 {
-                    ns = obstacleQuery.SampleVelocityAdaptive(this.Position, this.Parameters.Radius, this.DesiredSpeed, this.Velocity, this.DesiredVelocity, parameters, out nVel);
+                    ns = this.crowd.ObstacleQuery.SampleVelocityAdaptive(this.Position, this.Parameters.Radius, this.DesiredSpeed, this.Velocity, this.DesiredVelocity, parameters, out nVel);
                 }
                 else
                 {
-                    ns = obstacleQuery.SampleVelocityGrid(this.Position, this.Parameters.Radius, this.DesiredSpeed, this.Velocity, this.DesiredVelocity, parameters, out nVel);
+                    ns = this.crowd.ObstacleQuery.SampleVelocityGrid(this.Position, this.Parameters.Radius, this.DesiredSpeed, this.Velocity, this.DesiredVelocity, parameters, out nVel);
                 }
                 this.NVelocity = nVel;
             }
@@ -853,11 +857,11 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
         }
 
-        public void ResolveRequesting(NavigationMeshQuery navQuery, NavigationMeshQueryFilter navQueryFilter, Agent[] queue, ref int numQueue)
+        public void ResolveRequesting(Agent[] queue, ref int numQueue)
         {
             if (this.TargetState == TargetState.Requesting)
             {
-                var path = this.Corridor.NavPath;
+                var path = this.Corridor.NavigationPath;
 
                 Vector3 reqPos = new Vector3();
                 Path reqPath = new Path();
@@ -865,19 +869,19 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 //quick search towards the goal
                 PathPoint startPoint = new PathPoint(path[0], this.Position);
                 PathPoint endPoint = new PathPoint(this.TargetReference, this.TargetPosition);
-                navQuery.InitSlicedFindPath(ref startPoint, ref endPoint, navQueryFilter, FindPathOptions.None);
+                this.crowd.NavQuery.InitSlicedFindPath(ref startPoint, ref endPoint, this.crowd.NavQueryFilter, FindPathOptions.None);
                 int tempInt = 0;
-                navQuery.UpdateSlicedFindPath(MaximumIterations, ref tempInt);
+                this.crowd.NavQuery.UpdateSlicedFindPath(MaximumIterations, ref tempInt);
                 var status = Status.Failure;
                 if (this.TargetReplan)
                 {
                     //try to use an existing steady path during replan if possible
-                    status = navQuery.FinalizedSlicedPathPartial(path, reqPath).ToStatus();
+                    status = this.crowd.NavQuery.FinalizedSlicedPathPartial(path, reqPath).ToStatus();
                 }
                 else
                 {
                     //try to move towards the target when the goal changes
-                    status = navQuery.FinalizeSlicedFindPath(reqPath).ToStatus();
+                    status = this.crowd.NavQuery.FinalizeSlicedFindPath(reqPath).ToStatus();
                 }
 
                 if (status != Status.Failure && reqPath.Count > 0)
@@ -887,7 +891,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     {
                         //partial path, constrain target position in last polygon
                         bool tempBool;
-                        status = navQuery.ClosestPointOnPoly(reqPath[reqPath.Count - 1], this.TargetPosition, out reqPos, out tempBool).ToStatus();
+                        status = this.crowd.NavQuery.ClosestPointOnPoly(reqPath[reqPath.Count - 1], this.TargetPosition, out reqPos, out tempBool).ToStatus();
                         if (status == Status.Failure)
                         {
                             reqPath.Clear();
@@ -932,7 +936,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
         }
 
-        public void ResolveWaitingForPath(NavigationMeshQuery navQuery, PathQueue pathQueue)
+        public void ResolveWaitingForPath(PathQueue pathQueue)
         {
             //poll path queue
             var status = pathQueue.GetRequestStatus(this.TargetPathQueryIndex);
@@ -952,7 +956,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
             else if (status == Status.Success)
             {
-                Path path = this.Corridor.NavPath;
+                Path path = this.Corridor.NavigationPath;
 
                 //apply results
                 Vector3 targetPos = new Vector3();
@@ -1002,7 +1006,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                         //partial path, constrain target position inside the last polygon
                         Vector3 nearest;
                         bool tempBool = false;
-                        status = navQuery.ClosestPointOnPoly(res[res.Count - 1], targetPos, out nearest, out tempBool).ToStatus();
+                        status = this.crowd.NavQuery.ClosestPointOnPoly(res[res.Count - 1], targetPos, out nearest, out tempBool).ToStatus();
                         if (status == Status.Success)
                         {
                             targetPos = nearest;
@@ -1035,7 +1039,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
         public void RequestPathUpdate(PathQueue pathQueue)
         {
-            var startPoint = new PathPoint(this.Corridor.GetLastPoly(), this.Corridor.Target);
+            var startPoint = new PathPoint(this.Corridor.LastPoly, this.Corridor.Target);
             var endPoint = new PathPoint(this.TargetReference, this.TargetPosition);
 
             this.TargetPathQueryIndex = pathQueue.Request(startPoint, endPoint);
@@ -1054,12 +1058,17 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
         }
 
-        public void OptimizePathTopology(NavigationMeshQuery navQuery, NavigationMeshQueryFilter navQueryFilter)
+        public void OptimizePathTopology()
         {
-            this.Corridor.OptimizePathTopology(navQuery, navQueryFilter);
+            this.Corridor.OptimizePathTopology(this.crowd.NavQuery, this.crowd.NavQueryFilter);
             this.TopologyOptTime = 0.0f;
         }
 
+
+        public StraightPath GetStraightPath()
+        {
+            return this.Corridor.FindCorners(this.crowd.NavQuery);
+        }
 
         public override string ToString()
         {

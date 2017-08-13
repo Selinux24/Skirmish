@@ -209,8 +209,8 @@ namespace Engine.PathFinding.NavMesh
             public float LastBestNodeCost;
             public PathPoint Start;
             public PathPoint End;
-            public FindPathOptions Options;
-            public float RaycastLimitSquared;
+            public FindPathOptions Options = new FindPathOptions();
+            public float RaycastLimitSquared = 0f;
             public NavigationMeshQueryFilter Filter;
 
             /// <summary>
@@ -1995,8 +1995,6 @@ namespace Engine.PathFinding.NavMesh
                 return false;
             }
 
-            int n = 0;
-
             if (query.Start.Polygon == query.End.Polygon)
             {
                 //special case: the search starts and ends at the same poly
@@ -2074,8 +2072,6 @@ namespace Engine.PathFinding.NavMesh
                 query = new QueryData();
                 return false;
             }
-
-            int n = 0;
 
             if (query.Start.Polygon == query.End.Polygon)
             {

@@ -17,11 +17,12 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
         private List<Agent> agents = new List<Agent>();
         private PathQueue pathQueue;
-        private ProximityGrid<Agent> grid;
-        private Vector3 extents;
-        private NavigationMeshQuery navQuery;
-        private NavigationMeshQueryFilter navQueryFilter;
-        private ObstacleAvoidanceQuery obstacleQuery;
+        private ProximityGrid<Agent> proximityGrid;
+
+        public readonly Vector3 Extents;
+        public readonly NavigationMeshQuery NavQuery;
+        public readonly NavigationMeshQueryFilter NavQueryFilter;
+        public readonly ObstacleAvoidanceQuery ObstacleQuery;
 
         /// <summary>
         /// Constructor
@@ -30,21 +31,21 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <param name="navMesh">Tiled navigation mesh</param>
         public Crowd(float maxAgentRadius, ref TiledNavigationMesh navMesh)
         {
-            this.extents = new Vector3(maxAgentRadius * 2.0f, maxAgentRadius * 1.5f, maxAgentRadius * 2.0f);
+            this.Extents = new Vector3(maxAgentRadius * 2.0f, maxAgentRadius * 1.5f, maxAgentRadius * 2.0f);
 
             //initialize proximity grid
-            this.grid = new ProximityGrid<Agent>(128 * 4, maxAgentRadius * 3);
+            this.proximityGrid = new ProximityGrid<Agent>(128 * 4, maxAgentRadius * 3);
 
             //allocate obstacle avoidance query
-            this.obstacleQuery = new ObstacleAvoidanceQuery(6, 8);
+            this.ObstacleQuery = new ObstacleAvoidanceQuery(6, 8);
 
             this.pathQueue = new PathQueue(4096, ref navMesh);
 
             //allocate nav mesh query
-            this.navQuery = new NavigationMeshQuery(navMesh, 512);
+            this.NavQuery = new NavigationMeshQuery(navMesh, 512);
 
             //initialize filter
-            this.navQueryFilter = null;
+            this.NavQueryFilter = null;
         }
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
                     .ForEach(agent =>
                     {
-                        agent.CheckPlan(navQuery, extents, timeDelta);
+                        agent.CheckPlan(timeDelta);
                     });
 
                 //update async move requests and path finder
@@ -73,7 +74,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                         .FindAll(agent => agent.IsActive && agent.State != AgentState.Invalid)
                         .ForEach(agent =>
                         {
-                            agent.ResolveRequesting(navQuery, navQueryFilter, queue, ref numQueue);
+                            agent.ResolveRequesting(queue, ref numQueue);
                         });
 
                     //update requests
@@ -84,7 +85,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                         .FindAll(agent => agent.IsActive && agent.TargetState == TargetState.WaitingForPath)
                         .ForEach(agent =>
                         {
-                            agent.ResolveWaitingForPath(navQuery, pathQueue);
+                            agent.ResolveWaitingForPath(pathQueue);
                         });
                 }
 
@@ -103,15 +104,15 @@ namespace Engine.PathFinding.NavMesh.Crowds
                             agent.OptimizeTopology(timeDelta, queue, ref numQueue);
                         });
 
-                    this.UpdateOptQueue(queue, numQueue);
+                    this.UpdateOptimizationQueue(queue, numQueue);
                 }
 
                 //register agents to proximity grid
-                this.grid.Clear();
+                this.proximityGrid.Clear();
                 this.agents
                     .ForEach(agent =>
                     {
-                        this.grid.AddItem(agent, agent.Parameters.Radius, agent.Position);
+                        this.proximityGrid.AddItem(agent, agent.Parameters.Radius, agent.Position);
                     });
 
                 //get nearby navmesh segments and agents to collide with
@@ -120,85 +121,89 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     .ForEach(agent =>
                     {
                         //update the collision boundary after certain distance has passed or if it has become invalid
-                        agent.UpdateCollision(navQuery);
+                        agent.UpdateCollision();
 
                         //query neighbor agents
                         Agent[] ids;
-                        int neighborsIds = grid.QueryItems(agent.Position, agent.Parameters.CollisionQueryRange, MaximumNeighbors, out ids);
+                        int neighborsIds = proximityGrid.QueryItems(agent.Position, agent.Parameters.CollisionQueryRange, MaximumNeighbors, out ids);
 
                         //set the neigbors for the agent
                         agent.SetNeighbors(ids, neighborsIds);
                     });
 
                 //find the next corner to steer to
-                this.agents
-                    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
-                    .ForEach(agent =>
-                    {
-                        //find corners for steering
-                        agent.Steer1(navQuery);
-                    });
+                //this.agents
+                //    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
+                //    .ForEach(agent =>
+                //    {
+                //        //find corners for steering
+                //        agent.Steer1();
+                //    });
 
                 //trigger off-mesh connections (depends on corners)
-                this.agents
-                    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
-                    .ForEach(agent =>
-                    {
-                        agent.TriggerOffmeshConnection(navQuery);
-                    });
+                //this.agents
+                //    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
+                //    .ForEach(agent =>
+                //    {
+                //        agent.TriggerOffmeshConnection();
+                //    });
 
                 //calculate steering
-                this.agents
-                    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None))
-                    .ForEach(agent =>
-                    {
-                        agent.Steer2(this.agents);
-                    });
+                //this.agents
+                //    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None))
+                //    .ForEach(agent =>
+                //    {
+                //        agent.Steer2(this.agents);
+                //    });
 
                 //velocity planning
-                this.agents
-                    .FindAll(agent => agent.State == AgentState.Walking)
-                    .ForEach(agent =>
-                    {
-                        agent.VelocityPlanning(this.obstacleQuery);
-                    });
+                //this.agents
+                //    .FindAll(agent => agent.State == AgentState.Walking)
+                //    .ForEach(agent =>
+                //    {
+                //        agent.VelocityPlanning();
+                //    });
 
                 //integrate
-                this.agents
-                    .FindAll(agent => agent.State == AgentState.Walking)
-                    .ForEach(agent =>
-                    {
-                        agent.Integrate(timeDelta);
-                    });
+                //this.agents
+                //    .FindAll(agent => agent.State == AgentState.Walking)
+                //    .ForEach(agent =>
+                //    {
+                //        agent.Integrate(timeDelta);
+                //    });
 
                 //handle collisions
                 for (int i = 0; i < 4; i++)
                 {
-                    this.agents
-                        .FindAll(agent => agent.State == AgentState.Walking)
-                        .ForEach(agent =>
-                        {
-                            agent.HandleCollisions(this.agents);
-                        });
+                    //this.agents
+                    //    .FindAll(agent => agent.State == AgentState.Walking)
+                    //    .ForEach(agent =>
+                    //    {
+                    //        agent.HandleCollisions(this.agents);
+                    //    });
 
-                    this.agents
-                        .FindAll(agent => agent.State == AgentState.Walking)
-                        .ForEach(agent =>
-                        {
-                            //move along navmesh
-                            agent.MovePosition(navQuery);
-                        });
+                    //this.agents
+                    //    .FindAll(agent => agent.State == AgentState.Walking)
+                    //    .ForEach(agent =>
+                    //    {
+                    //        //move along navmesh
+                    //        agent.MovePosition();
+                    //    });
 
                     //update agents using offmesh connections
-                    this.agents
-                        .ForEach(agent =>
-                        {
-                            agent.UpdateOffmeshConnections(timeDelta);
-                        });
+                    //this.agents
+                    //    .ForEach(agent =>
+                    //    {
+                    //        agent.UpdateOffmeshConnections(timeDelta);
+                    //    });
                 }
             }
         }
-
+        /// <summary>
+        /// Updates the path update requests queue
+        /// </summary>
+        /// <param name="queue">The queue to request for path update</param>
+        /// <param name="numQueue">Number of elements in the queue</param>
         private void UpdatePathQueue(Agent[] queue, int numQueue)
         {
             for (int i = 0; i < numQueue; i++)
@@ -208,12 +213,16 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
             this.pathQueue.Update(MaximumIteratorsPerUpdate);
         }
-
-        private void UpdateOptQueue(Agent[] queue, int numQueue)
+        /// <summary>
+        /// Updates the topology optimization queue
+        /// </summary>
+        /// <param name="queue">The queue</param>
+        /// <param name="numQueue">Number of elements in the queue</param>
+        private void UpdateOptimizationQueue(Agent[] queue, int numQueue)
         {
             for (int i = 0; i < numQueue; i++)
             {
-                queue[i].OptimizePathTopology(this.navQuery, this.navQueryFilter);
+                queue[i].OptimizePathTopology();
             }
         }
 
@@ -225,11 +234,12 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <returns>The id of the agent (-1 if there is no empty slot)</returns>
         public Agent AddAgent(Vector3 position, AgentParams parameters)
         {
-            var agent = new Agent(parameters);
+            var agent = new Agent(this, parameters);
 
             //Find nearest position on the navmesh and place the agent there
             PathPoint nearest;
-            if (this.navQuery.FindNearestPoly(ref position, ref this.extents, out nearest))
+            Vector3 extents = this.Extents;
+            if (this.NavQuery.FindNearestPoly(ref position, ref extents, out nearest))
             {
                 agent.ResetToPosition(nearest.Polygon, nearest.Position);
             }
@@ -260,13 +270,14 @@ namespace Engine.PathFinding.NavMesh.Crowds
         {
             //Get the polygon that the starting point is in
             PathPoint startPt;
-            if (this.navQuery.FindNearestPoly(ref position, ref this.extents, out startPt))
+            Vector3 extents = this.Extents;
+            if (this.NavQuery.FindNearestPoly(ref position, ref extents, out startPt))
             {
                 for (int i = 0; i < this.agents.Count; i++)
                 {
                     //Pick a new random point that is within a certain radius of the current point
                     PathPoint newPt;
-                    if (this.navQuery.FindRandomPointAroundCircle(ref startPt, radius, out newPt))
+                    if (this.NavQuery.FindRandomPointAroundCircle(ref startPt, radius, out newPt))
                     {
                         //Give this agent a target point
                         this.agents[i].RequestMoveTarget(newPt.Polygon, newPt.Position);

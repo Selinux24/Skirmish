@@ -9,8 +9,11 @@ namespace Engine.PathFinding.NavMesh
         public NavigationMeshQueryFilter()
         {
             areaCost = new float[Area.MaxValues];
+
             for (int i = 0; i < areaCost.Length; i++)
+            {
                 areaCost[i] = 1;
+            }
         }
 
         public virtual bool PassFilter(PolyId polyId, MeshTile tile, Poly poly)
