@@ -19,6 +19,26 @@ namespace Engine
         /// Gets the total length of the path
         /// </summary>
         public float Length { get; private set; }
+        /// <summary>
+        /// Gets the total checkpoint number of the path
+        /// </summary>
+        public int PositionCount
+        {
+            get
+            {
+                return this.checkPoints != null ? this.checkPoints.Length : 0;
+            }
+        }
+        /// <summary>
+        /// Number of normals in the path
+        /// </summary>
+        public int NormalCount
+        {
+            get
+            {
+                return this.normals != null ? this.normals.Length : 0;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -45,27 +65,34 @@ namespace Engine
         /// <returns>Returns the position at distance</returns>
         public Vector3 GetPosition(float distance)
         {
-            if (distance == 0) return checkPoints[0];
-            if (distance >= this.Length) return checkPoints[checkPoints.Length - 1];
-
-            Vector3 res = Vector3.Zero;
-            float l = distance;
-            for (int i = 1; i < checkPoints.Length; i++)
+            if (this.PositionCount > 0)
             {
-                Vector3 segment = checkPoints[i] - checkPoints[i - 1];
-                float segmentLength = segment.Length();
+                if (distance == 0) return checkPoints[0];
+                if (distance >= this.Length) return checkPoints[checkPoints.Length - 1];
 
-                if (l - segmentLength <= 0)
+                Vector3 res = Vector3.Zero;
+                float l = distance;
+                for (int i = 1; i < checkPoints.Length; i++)
                 {
-                    res = checkPoints[i - 1] + (Vector3.Normalize(segment) * l);
+                    Vector3 segment = checkPoints[i] - checkPoints[i - 1];
+                    float segmentLength = segment.Length();
 
-                    break;
+                    if (l - segmentLength <= 0)
+                    {
+                        res = checkPoints[i - 1] + (Vector3.Normalize(segment) * l);
+
+                        break;
+                    }
+
+                    l -= segmentLength;
                 }
 
-                l -= segmentLength;
+                return res;
             }
-
-            return res;
+            else
+            {
+                return Vector3.Zero;
+            }
         }
         /// <summary>
         /// Gets path normal in specified time
@@ -74,7 +101,7 @@ namespace Engine
         /// <returns>Returns path normal</returns>
         public Vector3 GetNormal(float distance)
         {
-            if (normals.Length > 1)
+            if (this.NormalCount > 0)
             {
                 if (distance == 0) return normals[0];
                 if (distance >= this.Length) return normals[normals.Length - 1];
@@ -110,27 +137,34 @@ namespace Engine
         /// <returns>Returns the next control path at specified distance</returns>
         public Vector3 GetNextControlPoint(float distance)
         {
-            if (distance == 0) return checkPoints[0];
-            if (distance >= this.Length) return checkPoints[checkPoints.Length - 1];
-
-            Vector3 res = Vector3.Zero;
-            float l = distance;
-            for (int i = 1; i < checkPoints.Length; i++)
+            if (this.PositionCount > 0)
             {
-                Vector3 segment = checkPoints[i] - checkPoints[i - 1];
-                float segmentLength = segment.Length();
+                if (distance == 0) return checkPoints[0];
+                if (distance >= this.Length) return checkPoints[checkPoints.Length - 1];
 
-                if (l - segmentLength <= 0)
+                Vector3 res = Vector3.Zero;
+                float l = distance;
+                for (int i = 1; i < checkPoints.Length; i++)
                 {
-                    res = checkPoints[i];
+                    Vector3 segment = checkPoints[i] - checkPoints[i - 1];
+                    float segmentLength = segment.Length();
 
-                    break;
+                    if (l - segmentLength <= 0)
+                    {
+                        res = checkPoints[i];
+
+                        break;
+                    }
+
+                    l -= segmentLength;
                 }
 
-                l -= segmentLength;
+                return res;
             }
-
-            return res;
+            else
+            {
+                return Vector3.Zero;
+            }
         }
     }
 }

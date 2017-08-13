@@ -21,5 +21,14 @@
         /// Next index
         /// </summary>
         public int Next { get; set; }
+
+        /// <summary>
+        /// Gets the text representation of the item
+        /// </summary>
+        /// <returns>Returns the text representation of the item</returns>
+        public override string ToString()
+        {
+            return string.Format("{0}", this.Value);
+        }
     }
 }

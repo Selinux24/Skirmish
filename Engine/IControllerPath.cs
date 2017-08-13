@@ -12,6 +12,14 @@ namespace Engine
         /// </summary>
         float Length { get; }
         /// <summary>
+        /// Gets the position count of the path
+        /// </summary>
+        int PositionCount { get; }
+        /// <summary>
+        /// Gets the normal count of the path
+        /// </summary>
+        int NormalCount { get; }
+        /// <summary>
         /// Gets path position in specified time
         /// </summary>
         /// <param name="time">Time</param>

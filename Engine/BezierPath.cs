@@ -34,11 +34,11 @@ namespace Engine
             {
                 List<Vector3> points = new List<Vector3>();
 
-                if (this.Count > 0)
+                if (this.PositionCount > 0)
                 {
                     points.Add(this.controlPoints[0]);
 
-                    for (int i = 0; i < this.Count; i++)
+                    for (int i = 0; i < this.PositionCount; i++)
                     {
                         int index = (i * 3) + 3;
 
@@ -52,7 +52,17 @@ namespace Engine
         /// <summary>
         /// Number of segments in the path
         /// </summary>
-        public int Count { get; private set; }
+        public int PositionCount { get; private set; }
+        /// <summary>
+        /// Number of normals in the path
+        /// </summary>
+        public int NormalCount
+        {
+            get
+            {
+                return 0;
+            }
+        }
         /// <summary>
         /// Total length of path
         /// </summary>
@@ -205,13 +215,13 @@ namespace Engine
         /// </summary>
         private void UpdateCurveInfo()
         {
-            this.Count = (this.controlPoints.Count - 1) / 3;
+            this.PositionCount = (this.controlPoints.Count - 1) / 3;
             this.curveTimes.Clear();
             this.Length = 0;
 
             List<Vector3> curvePoint = new List<Vector3>();
 
-            for (int i = 0; i < this.Count; i++)
+            for (int i = 0; i < this.PositionCount; i++)
             {
                 curvePoint.Clear();
 
@@ -248,7 +258,7 @@ namespace Engine
             if (this.originalMinSqrDistance.HasValue && this.originalMaxSqrDistance.HasValue)
             {
                 this.SetControlPoints(
-                    this.originalControlPoints.ToArray(), 
+                    this.originalControlPoints.ToArray(),
                     this.originalMinSqrDistance.Value,
                     this.originalMaxSqrDistance.Value,
                     this.originalScale);
@@ -279,7 +289,7 @@ namespace Engine
             {
                 float distance = 0;
 
-                for (int i = 0; i < this.Count; i++)
+                for (int i = 0; i < this.PositionCount; i++)
                 {
                     distance += this.curveTimes[i];
 

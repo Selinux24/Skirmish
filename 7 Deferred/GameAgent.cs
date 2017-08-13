@@ -52,6 +52,14 @@ namespace DeferredTest
                 this.model.Visible = value;
             }
         }
+
+        public bool HasPath
+        {
+            get
+            {
+                return this.controller.HasPath;
+            }
+        }
         /// <summary>
         /// Gets the agent manipulator
         /// </summary>

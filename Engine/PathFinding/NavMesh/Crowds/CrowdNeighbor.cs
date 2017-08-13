@@ -3,7 +3,7 @@
     /// <summary>
 	/// A neighboring crowd agent
 	/// </summary>
-	public struct CrowdNeighbor
+	struct CrowdNeighbor
     {
         /// <summary>
         /// Neighbor agent reference

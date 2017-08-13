@@ -6,6 +6,11 @@
     public interface IControllable
     {
         /// <summary>
+        /// Returns true if the controller is following a path
+        /// </summary>
+        bool HasPath { get; }
+
+        /// <summary>
         /// Computes current position and orientation in the curve
         /// </summary>
         /// <param name="gameTime">Game time</param>

@@ -16,6 +16,26 @@ namespace Engine
         /// Gets the total length of the path
         /// </summary>
         public float Length { get; private set; }
+        /// <summary>
+        /// Gets the total checkpoint number of the path
+        /// </summary>
+        public int PositionCount
+        {
+            get
+            {
+                return this.path != null ? this.path.Length : 0;
+            }
+        }
+        /// <summary>
+        /// Number of normals in the path
+        /// </summary>
+        public int NormalCount
+        {
+            get
+            {
+                return 0;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -93,27 +113,34 @@ namespace Engine
         /// <returns>Returns the position at distance</returns>
         public Vector3 GetPosition(float distance)
         {
-            if (distance == 0) return path[0];
-            if (distance >= this.Length) return path[path.Length - 1];
-
-            Vector3 res = Vector3.Zero;
-            float l = distance;
-            for (int i = 1; i < path.Length; i++)
+            if (this.PositionCount > 0)
             {
-                Vector3 segment = path[i] - path[i - 1];
-                float segmentLength = segment.Length();
+                if (distance == 0) return path[0];
+                if (distance >= this.Length) return path[path.Length - 1];
 
-                if (l - segmentLength <= 0)
+                Vector3 res = Vector3.Zero;
+                float l = distance;
+                for (int i = 1; i < path.Length; i++)
                 {
-                    res = path[i - 1] + (Vector3.Normalize(segment) * l);
+                    Vector3 segment = path[i] - path[i - 1];
+                    float segmentLength = segment.Length();
 
-                    break;
+                    if (l - segmentLength <= 0)
+                    {
+                        res = path[i - 1] + (Vector3.Normalize(segment) * l);
+
+                        break;
+                    }
+
+                    l -= segmentLength;
                 }
 
-                l -= segmentLength;
+                return res;
             }
-
-            return res;
+            else
+            {
+                return Vector3.Zero;
+            }
         }
         /// <summary>
         /// Gets path normal in specified time
@@ -131,27 +158,34 @@ namespace Engine
         /// <returns>Returns the next control path at specified distance</returns>
         public Vector3 GetNextControlPoint(float distance)
         {
-            if (distance == 0) return path[0];
-            if (distance >= this.Length) return path[path.Length - 1];
-
-            Vector3 res = Vector3.Zero;
-            float l = distance;
-            for (int i = 1; i < path.Length; i++)
+            if (this.PositionCount > 0)
             {
-                Vector3 segment = path[i] - path[i - 1];
-                float segmentLength = segment.Length();
+                if (distance == 0) return path[0];
+                if (distance >= this.Length) return path[path.Length - 1];
 
-                if (l - segmentLength <= 0)
+                Vector3 res = Vector3.Zero;
+                float l = distance;
+                for (int i = 1; i < path.Length; i++)
                 {
-                    res = path[i];
+                    Vector3 segment = path[i] - path[i - 1];
+                    float segmentLength = segment.Length();
 
-                    break;
+                    if (l - segmentLength <= 0)
+                    {
+                        res = path[i];
+
+                        break;
+                    }
+
+                    l -= segmentLength;
                 }
 
-                l -= segmentLength;
+                return res;
             }
-
-            return res;
+            else
+            {
+                return Vector3.Zero;
+            }
         }
     }
 }

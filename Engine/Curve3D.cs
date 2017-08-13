@@ -17,7 +17,7 @@ namespace Engine
         /// </summary>
         public bool IsConstant
         {
-            get { return this.KeyCount <= 1; }
+            get { return this.PositionCount <= 1; }
         }
         /// <summary>
         /// Defines how to handle weighting values that are greater than the last control point in the curve.
@@ -54,13 +54,24 @@ namespace Engine
         /// <summary>
         /// Gets the key count
         /// </summary>
-        public int KeyCount
+        public int PositionCount
         {
             get
             {
                 return this.cX.Keys.Count;
             }
         }
+        /// <summary>
+        /// Number of normals in the curve
+        /// </summary>
+        public int NormalCount
+        {
+            get
+            {
+                return 0;
+            }
+        }
+
         /// <summary>
         /// Gets the starting key
         /// </summary>
@@ -78,9 +89,9 @@ namespace Engine
         {
             get
             {
-                Curve3DKey[] keys = new Curve3DKey[this.KeyCount];
+                Curve3DKey[] keys = new Curve3DKey[this.PositionCount];
 
-                for (int i = 0; i < this.KeyCount; i++)
+                for (int i = 0; i < this.PositionCount; i++)
                 {
                     keys[i] = this.GetKey(i);
                 }
@@ -95,7 +106,7 @@ namespace Engine
         {
             get
             {
-                return this.GetKey(this.KeyCount - 1);
+                return this.GetKey(this.PositionCount - 1);
             }
         }
         /// <summary>
@@ -115,9 +126,9 @@ namespace Engine
         {
             get
             {
-                Vector3[] points = new Vector3[this.KeyCount];
+                Vector3[] points = new Vector3[this.PositionCount];
 
-                for (int i = 0; i < this.KeyCount; i++)
+                for (int i = 0; i < this.PositionCount; i++)
                 {
                     points[i] = this.GetKey(i).Value;
                 }

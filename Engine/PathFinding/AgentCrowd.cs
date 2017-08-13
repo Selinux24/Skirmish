@@ -12,6 +12,10 @@ namespace Engine.PathFinding
     /// </summary>
     public class AgentCrowd
     {
+        private static int CrowdUpdates = 0;
+        private const float CrowdLatencySecs = 10;
+        private float CrowdLatency = -1;
+
         /// <summary>
         /// Internal crowd
         /// </summary>
@@ -47,24 +51,51 @@ namespace Engine.PathFinding
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            this.crowd.Update(gameTime.ElapsedSeconds);
+            this.CrowdLatency += gameTime.ElapsedSeconds;
 
-            for (int i = 0; i < this.agents.Count; i++)
+            if (this.CrowdLatency > CrowdLatencySecs || this.CrowdLatency < 0)
             {
-                var a = this.agents[i];
-                var crtl = a.Item1;
-                var path = a.Item2.Corners;
+                Console.WriteLine("AgentCrowd.Update {0}", ++CrowdUpdates);
 
-                List<Vector3> verts = new List<Vector3>();
-                List<Vector3> norms = new List<Vector3>();
-                for (int p = 0; p < path.Count; p++)
+                this.CrowdLatency = 0;
+
+                this.crowd.Update(gameTime.ElapsedSeconds);
+
+                for (int i = 0; i < this.agents.Count; i++)
                 {
-                    verts.Add(path[p].Point.Position);
-                    verts.Add(Vector3.Up);
-                }
-                NormalPath np = new NormalPath(verts.ToArray(), norms.ToArray());
+                    var crowdAgent = this.agents[i];
+                    var item = crowdAgent.Item1;
+                    var agent = crowdAgent.Item2;
 
-                crtl.Follow(np);
+                    if (agent.State == AgentState.Walking && agent.TargetState == TargetState.Valid)
+                    {
+                        List<Vector3> verts = new List<Vector3>();
+                        List<Vector3> norms = new List<Vector3>();
+
+                        verts.Add(item.Manipulator.Position);
+                        norms.Add(item.Manipulator.Up);
+
+                        for (int p = 0; p < agent.Corners.Count; p++)
+                        {
+                            var point = agent.Corners[p];
+
+                            verts.Add(point.Point.Position);
+                            norms.Add(Vector3.Up);
+                        }
+
+                        var np = new NormalPath(verts.ToArray(), norms.ToArray());
+                        item.Follow(np);
+
+                        Console.WriteLine("AgentCrowd[{0}].Follow", i);
+                    }
+                    else
+                    {
+                        item.Clear();
+                        agent.ResetToPosition(PolyId.Null, Vector3.Zero);
+
+                        Console.WriteLine("AgentCrowd[{0}].Clear", i);
+                    }
+                }
             }
         }
         /// <summary>
@@ -107,6 +138,8 @@ namespace Engine.PathFinding
         /// <param name="radius">Separation radius between crowd agents</param>
         public void MoveTo(Vector3 position, float radius)
         {
+            this.CrowdLatency = -1;
+
             this.crowd.MoveTo(position, radius);
         }
     }
