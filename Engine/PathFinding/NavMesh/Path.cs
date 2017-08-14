@@ -12,11 +12,18 @@ namespace Engine.PathFinding.NavMesh
         {
             get
             {
-                return polys[i];
+                return i < polys.Count ? polys[i] : PolyId.Null;
             }
             set
             {
-                polys[i] = value;
+                if (i < polys.Count)
+                {
+                    polys[i] = value;
+                }
+                else
+                {
+                    polys.Insert(i, value);
+                }
             }
         }
         public int Count

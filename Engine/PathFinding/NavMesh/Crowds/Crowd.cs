@@ -132,70 +132,70 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     });
 
                 //find the next corner to steer to
-                //this.agents
-                //    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
-                //    .ForEach(agent =>
-                //    {
-                //        //find corners for steering
-                //        agent.Steer1();
-                //    });
+                this.agents
+                    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
+                    .ForEach(agent =>
+                    {
+                        //find corners for steering
+                        agent.Steer1();
+                    });
 
                 //trigger off-mesh connections (depends on corners)
-                //this.agents
-                //    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
-                //    .ForEach(agent =>
-                //    {
-                //        agent.TriggerOffmeshConnection();
-                //    });
+                this.agents
+                    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None && agent.TargetState != TargetState.Velocity))
+                    .ForEach(agent =>
+                    {
+                        agent.TriggerOffmeshConnection();
+                    });
 
                 //calculate steering
-                //this.agents
-                //    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None))
-                //    .ForEach(agent =>
-                //    {
-                //        agent.Steer2(this.agents);
-                //    });
+                this.agents
+                    .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None))
+                    .ForEach(agent =>
+                    {
+                        agent.Steer2(this.agents);
+                    });
 
                 //velocity planning
-                //this.agents
-                //    .FindAll(agent => agent.State == AgentState.Walking)
-                //    .ForEach(agent =>
-                //    {
-                //        agent.VelocityPlanning();
-                //    });
+                this.agents
+                    .FindAll(agent => agent.State == AgentState.Walking)
+                    .ForEach(agent =>
+                    {
+                        agent.VelocityPlanning();
+                    });
 
                 //integrate
-                //this.agents
-                //    .FindAll(agent => agent.State == AgentState.Walking)
-                //    .ForEach(agent =>
-                //    {
-                //        agent.Integrate(timeDelta);
-                //    });
+                this.agents
+                    .FindAll(agent => agent.State == AgentState.Walking)
+                    .ForEach(agent =>
+                    {
+                        agent.Integrate(timeDelta);
+                    });
 
                 //handle collisions
                 for (int i = 0; i < 4; i++)
                 {
-                    //this.agents
-                    //    .FindAll(agent => agent.State == AgentState.Walking)
-                    //    .ForEach(agent =>
-                    //    {
-                    //        agent.HandleCollisions(this.agents);
-                    //    });
+                    this.agents
+                        .FindAll(agent => agent.State == AgentState.Walking)
+                        .ForEach(agent =>
+                        {
+                            agent.HandleCollisions(this.agents);
+                        });
 
-                    //this.agents
-                    //    .FindAll(agent => agent.State == AgentState.Walking)
-                    //    .ForEach(agent =>
-                    //    {
-                    //        //move along navmesh
-                    //        agent.MovePosition();
-                    //    });
+                    this.agents
+                        .FindAll(agent => agent.State == AgentState.Walking)
+                        .ForEach(agent =>
+                        {
+                            //move along navmesh
+                            agent.MovePosition();
+                        });
 
                     //update agents using offmesh connections
-                    //this.agents
-                    //    .ForEach(agent =>
-                    //    {
-                    //        agent.UpdateOffmeshConnections(timeDelta);
-                    //    });
+                    this.agents
+                        .ForEach(agent =>
+                        {
+                            agent.UpdateOffmeshConnections(timeDelta);
+                        });
                 }
             }
         }
