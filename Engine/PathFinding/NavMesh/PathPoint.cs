@@ -26,12 +26,12 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Initializes a new instance of the <see cref="PathPoint"/> struct.
         /// </summary>
-        /// <param name="poly">The polygon that the point is on.</param>
-        /// <param name="pos">The 3d position of the point.</param>
-        public PathPoint(PolyId poly, Vector3 pos)
+        /// <param name="polygon">The polygon that the point is on.</param>
+        /// <param name="position">The 3d position of the point.</param>
+        public PathPoint(PolyId polygon, Vector3 position)
         {
-            this.Polygon = poly;
-            this.Position = pos;
+            this.Polygon = polygon;
+            this.Position = position;
         }
     }
 }

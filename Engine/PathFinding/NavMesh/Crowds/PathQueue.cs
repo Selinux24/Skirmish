@@ -2,9 +2,18 @@
 {
     class PathQueue
     {
+        /// <summary>
+        /// Invalid queue
+        /// </summary>
         public const int Invalid = 0;
+        /// <summary>
+        /// Maximum queue length
+        /// </summary>
         private const int MaxQueue = 8;
-        private const int MaxKeepAlive = 2; //in number of times Update() is called
+        /// <summary>
+        /// Number of times Update() is called
+        /// </summary>
+        private const int MaxKeepAlive = 2;
 
         struct PathQuery
         {
@@ -15,7 +24,7 @@
             public PathPoint End;
 
             //result
-            public Path Path;
+            public PolygonPath Path;
             public int PathCount;
 
             //state
@@ -38,7 +47,7 @@
             for (int i = 0; i < MaxQueue; i++)
             {
                 queue[i].Index = 0;
-                queue[i].Path = new Path();
+                queue[i].Path = new PolygonPath();
             }
 
             this.queueHead = 0;
@@ -78,7 +87,7 @@
                 //handle query start
                 if (q.Status == 0)
                 {
-                    q.Status = navquery.InitSlicedFindPath(ref q.Start, ref q.End, navqueryfilter, FindPathOptions.None).ToStatus();
+                    q.Status = navquery.InitSlicedFindPath(q.Start, q.End, navqueryfilter, FindPathOptions.None).ToStatus();
                 }
 
                 //handle query in progress
@@ -155,7 +164,7 @@
 
             return Status.Failure;
         }
-        public bool GetPathResult(int index, out Path path)
+        public bool GetPathResult(int index, out PolygonPath path)
         {
             path = null;
 
@@ -169,7 +178,7 @@
                     q.Index = 0;
                     q.Status = 0;
 
-                    path = new Path(q.Path);
+                    path = new PolygonPath(q.Path);
 
                     queue[i] = q;
 

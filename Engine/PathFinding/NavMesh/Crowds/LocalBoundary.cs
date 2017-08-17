@@ -13,12 +13,11 @@ namespace Engine.PathFinding.NavMesh.Crowds
         private const int MaxLocalSegs = 8;
         private const int MaxLocalPolys = 16;
 
-        private Vector3 center;
-        private Segment[] segs;
-        private int segCount;
-
-        private PolyId[] polys;
-        private int numPolys;
+        private Vector3 center = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+        private Segment[] segments = new Segment[MaxLocalSegs];
+        private int segmentCount = 0;
+        private PolyId[] polygons = new PolyId[MaxLocalPolys];
+        private int polygonCount = 0;
 
         /// <summary>
         /// Gets the center
@@ -33,21 +32,21 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <summary>
         /// Gets the segments
         /// </summary>
-        public Segment[] Segs
+        public Segment[] Segments
         {
             get
             {
-                return segs;
+                return segments;
             }
         }
         /// <summary>
         /// Gets the number of segments
         /// </summary>
-        public int SegCount
+        public int SegmentCount
         {
             get
             {
-                return segCount;
+                return segmentCount;
             }
         }
 
@@ -56,9 +55,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// </summary>
         public LocalBoundary()
         {
-            Reset();
-            segs = new Segment[MaxLocalSegs];
-            polys = new PolyId[MaxLocalPolys];
+
         }
 
         /// <summary>
@@ -67,115 +64,144 @@ namespace Engine.PathFinding.NavMesh.Crowds
         public void Reset()
         {
             center = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            segCount = 0;
-            numPolys = 0;
+            segmentCount = 0;
+            polygonCount = 0;
         }
         /// <summary>
         /// Add a line segment
         /// </summary>
-        /// <param name="dist">The distance</param>
-        /// <param name="s">The line segment</param>
-        public void AddSegment(float dist, Segment s)
+        /// <param name="distance">The distance</param>
+        /// <param name="segment">The line segment</param>
+        public void AddSegment(float distance, Segment segment)
         {
             //insert neighbor based on distance
-            int segPos = 0;
-            if (segCount == 0)
+            int segmentPosition = 0;
+            if (this.segmentCount == 0)
             {
-                segPos = 0;
+                segmentPosition = 0;
             }
-            else if (dist >= segs[segCount - 1].Dist)
+            else if (distance >= this.segments[this.segmentCount - 1].Dist)
             {
                 //further than the last segment, skip
-                if (segCount >= MaxLocalSegs)
+                if (this.segmentCount >= MaxLocalSegs)
+                {
                     return;
+                }
 
                 //last, trivial accept
-                segPos = segCount;
+                segmentPosition = this.segmentCount;
             }
             else
             {
                 //insert inbetween
                 int i;
-                for (i = 0; i < segCount; i++)
-                    if (dist <= segs[i].Dist)
+                for (i = 0; i < this.segmentCount; i++)
+                {
+                    if (distance <= this.segments[i].Dist)
+                    {
                         break;
+                    }
+                }
+
                 int tgt = i + 1;
-                int n = Math.Min(segCount - i, MaxLocalSegs - tgt);
+                int n = Math.Min(this.segmentCount - i, MaxLocalSegs - tgt);
                 if (n > 0)
                 {
                     for (int j = 0; j < n; j++)
-                        segs[tgt + j] = segs[i + j];
+                    {
+                        this.segments[tgt + j] = this.segments[i + j];
+                    }
                 }
 
-                segPos = i;
+                segmentPosition = i;
             }
 
-            segs[segPos].Dist = dist;
-            segs[segPos].Start = s.Start;
-            segs[segPos].End = s.End;
+            this.segments[segmentPosition].Dist = distance;
+            this.segments[segmentPosition].Start = segment.Start;
+            this.segments[segmentPosition].End = segment.End;
 
-            if (segCount < MaxLocalSegs)
-                segCount++;
+            if (this.segmentCount < MaxLocalSegs)
+            {
+                this.segmentCount++;
+            }
         }
         /// <summary>
         /// Examine polygons in the NavMeshQuery and add polygon edges
         /// </summary>
         /// <param name="reference">The starting polygon reference</param>
-        /// <param name="pos">Current position</param>
+        /// <param name="position">Current position</param>
         /// <param name="collisionQueryRange">Range to query</param>
-        /// <param name="navquery">The NavMeshQuery</param>
-        public void Update(PolyId reference, Vector3 pos, float collisionQueryRange, NavigationMeshQuery navquery)
+        /// <param name="navQuery">The NavMeshQuery</param>
+        public void Update(PolyId reference, Vector3 position, float collisionQueryRange, NavigationMeshQuery navQuery)
         {
-            const int MAX_SEGS_PER_POLY = NavigationMeshQuery.VertsPerPolygon;
-
             if (reference == PolyId.Null)
             {
                 this.center = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-                this.segCount = 0;
-                this.numPolys = 0;
-                return;
+                this.segmentCount = 0;
+                this.polygonCount = 0;
             }
-
-            this.center = pos;
-
-            //first query non-overlapping polygons
-            PolyId[] tempArray = new PolyId[polys.Length];
-            PathPoint centerPoint = new PathPoint(reference, pos);
-            navquery.FindLocalNeighborhood(ref centerPoint, collisionQueryRange, polys, tempArray, ref numPolys, MaxLocalPolys);
-
-            //secondly, store all polygon edges
-            this.segCount = 0;
-            Segment[] segs = new Segment[MAX_SEGS_PER_POLY];
-            int numSegs = 0;
-            for (int j = 0; j < numPolys; j++)
+            else
             {
-                tempArray = new PolyId[segs.Length];
-                navquery.GetPolyWallSegments(polys[j], segs, tempArray, ref numSegs, MAX_SEGS_PER_POLY);
-                for (int k = 0; k < numSegs; k++)
+                this.center = position;
+
+                //first query non-overlapping polygons
+                PathPoint centerPoint = new PathPoint(reference, position);
+                PolyId[] polys;
+                PolyId[] parentPolys;
+                int polyCount;
+                if (navQuery.FindLocalNeighborhood(centerPoint, collisionQueryRange, MaxLocalPolys, out polys, out parentPolys, out polyCount))
                 {
-                    //skip too distant segments
-                    float tseg;
-                    float distSqr = Intersection.PointToSegment2DSquared(ref pos, ref segs[k].Start, ref segs[k].End, out tseg);
-                    if (distSqr > collisionQueryRange * collisionQueryRange)
-                        continue;
-                    AddSegment(distSqr, segs[k]);
+                    this.polygons = polys;
+                    this.polygonCount = polyCount;
+                    this.segmentCount = 0;
+
+                    //secondly, store all polygon edges
+                    float collisionQueryRangeSqr = collisionQueryRange * collisionQueryRange;
+                    for (int i = 0; i < polygonCount; i++)
+                    {
+                        Segment[] segs;
+                        PolyId[] tempArray;
+                        int numSegs;
+                        if (navQuery.GetPolyWallSegments(
+                            polygons[i],
+                            NavigationMeshBuilder.VerticesPerPolygon,
+                            out segs, out tempArray, out numSegs))
+                        {
+                            for (int j = 0; j < numSegs; j++)
+                            {
+                                var segment = segs[j];
+
+                                //skip too distant segments
+                                float tseg;
+                                float distSqr = Intersection.PointToSegment2DSquared(position, segment.Start, segment.End, out tseg);
+                                if (distSqr <= collisionQueryRangeSqr)
+                                {
+                                    this.AddSegment(distSqr, segment);
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
         /// <summary>
         /// Determines whether the polygon reference is a part of the NavMeshQuery.
         /// </summary>
-        /// <param name="navquery">The NavMeshQuery</param>
+        /// <param name="navQuery">The NavMeshQuery</param>
         /// <returns>True if valid, false if not</returns>
-        public bool IsValid(NavigationMeshQuery navquery)
+        public bool IsValid(NavigationMeshQuery navQuery)
         {
-            if (numPolys == 0)
-                return false;
-
-            for (int i = 0; i < numPolys; i++)
+            if (polygonCount == 0)
             {
-                if (!navquery.IsValidPolyRef(polys[i]))
+                return false;
+            }
+
+            for (int i = 0; i < polygonCount; i++)
+            {
+                if (!navQuery.IsValidPolyRef(polygons[i]))
+                {
                     return false;
+                }
             }
 
             return true;

@@ -64,7 +64,7 @@ namespace Engine.PathFinding.NavMesh
                         continue;
                     }
 
-                    float d = Intersection.PointToSegment2DSquared(ref verts[j], ref p0, ref p1);
+                    float d = Intersection.PointToSegment2DSquared(verts[j], p0, p1);
                     maxEdgeDist = Math.Max(maxEdgeDist, d);
                 }
 
@@ -685,7 +685,7 @@ namespace Engine.PathFinding.NavMesh
                         int maxi = -1;
                         for (int m = a + 1; m < b; m++)
                         {
-                            float dev = Intersection.PointToSegmentSquared(ref edge[m], ref va, ref vb);
+                            float dev = Intersection.PointToSegmentSquared(edge[m], va, vb);
                             if (dev > maxd)
                             {
                                 maxd = dev;

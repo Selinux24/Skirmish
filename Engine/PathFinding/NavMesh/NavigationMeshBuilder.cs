@@ -13,37 +13,42 @@ namespace Engine.PathFinding.NavMesh
     class NavigationMeshBuilder
     {
         /// <summary>
+        /// Maximum number of vertices
+        /// </summary>
+        public const int VerticesPerPolygon = 6;
+
+        /// <summary>
         /// Gets the file header
         /// </summary>
         public NavigationMeshInfo Header { get; private set; }
         /// <summary>
         /// Gets the PolyMesh vertices
         /// </summary>
-        public Vector3[] NavVerts { get; private set; }
+        public Vector3[] Vertices { get; private set; }
         /// <summary>
         /// Gets the PolyMesh polygons
         /// </summary>
-        public Poly[] NavPolys { get; private set; }
+        public Poly[] Polygons { get; private set; }
         /// <summary>
         /// Gets the PolyMeshDetail mesh data (the indices of the vertices and triagles)
         /// </summary>
-        public PolyMeshData[] NavDMeshes { get; private set; }
+        public PolyMeshData[] DetailMeshes { get; private set; }
         /// <summary>
         /// Gets the PolyMeshDetail vertices
         /// </summary>
-        public Vector3[] NavDVerts { get; private set; }
+        public Vector3[] DetailVertices { get; private set; }
         /// <summary>
         /// Gets the PolyMeshDetail triangles
         /// </summary>
-        public PolyMeshTriangleData[] NavDTris { get; private set; }
+        public PolyMeshTriangleData[] DetailTriangles { get; private set; }
         /// <summary>
         /// Gets the bounding volume tree
         /// </summary>
-        public BoundingVolumeTree NavBvTree { get; private set; }
+        public BoundingVolumeTree BoundingVolumeTree { get; private set; }
         /// <summary>
         /// Gets the offmesh connection data
         /// </summary>
-        public OffMeshConnection[] OffMeshCons { get; private set; }
+        public OffMeshConnection[] OffMeshConnections { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NavigationMeshBuilder" /> class.
@@ -81,9 +86,9 @@ namespace Engine.PathFinding.NavMesh
                 throw new InvalidOperationException("The provided PolyMesh has not polys.");
             }
 
-            if (vertsPerPoly > NavigationMeshQuery.VertsPerPolygon)
+            if (vertsPerPoly > VerticesPerPolygon)
             {
-                throw new InvalidOperationException(string.Format("The number of vertices per polygon is above {0} limit", NavigationMeshQuery.VertsPerPolygon));
+                throw new InvalidOperationException(string.Format("The number of vertices per polygon is above {0} limit", VerticesPerPolygon));
             }
 
             //classify off-mesh connection points
@@ -236,12 +241,12 @@ namespace Engine.PathFinding.NavMesh
             };
 
             //allocate data
-            this.NavVerts = new Vector3[totVertCount];
-            this.NavPolys = new Poly[totPolyCount];
-            this.NavDMeshes = new PolyMeshData[polyMesh.PolyCount];
-            this.NavDVerts = new Vector3[uniqueDetailVertCount];
-            this.NavDTris = new PolyMeshTriangleData[detailTriCount];
-            this.OffMeshCons = new OffMeshConnection[storedOffMeshConCount];
+            this.Vertices = new Vector3[totVertCount];
+            this.Polygons = new Poly[totPolyCount];
+            this.DetailMeshes = new PolyMeshData[polyMesh.PolyCount];
+            this.DetailVertices = new Vector3[uniqueDetailVertCount];
+            this.DetailTriangles = new PolyMeshTriangleData[detailTriCount];
+            this.OffMeshConnections = new OffMeshConnection[storedOffMeshConCount];
 
             int offMeshVertsBase = polyMesh.VertexCount;
             int offMeshPolyBase = polyMesh.PolyCount;
@@ -250,9 +255,9 @@ namespace Engine.PathFinding.NavMesh
             for (int i = 0; i < polyMesh.VertexCount; i++)
             {
                 var iv = polyMesh.Vertices[i];
-                this.NavVerts[i].X = polyMesh.Bounds.Minimum.X + iv.X * cellSize;
-                this.NavVerts[i].Y = polyMesh.Bounds.Minimum.Y + iv.Y * cellHeight;
-                this.NavVerts[i].Z = polyMesh.Bounds.Minimum.Z + iv.Z * cellSize;
+                this.Vertices[i].X = polyMesh.Bounds.Minimum.X + iv.X * cellSize;
+                this.Vertices[i].Y = polyMesh.Bounds.Minimum.Y + iv.Y * cellHeight;
+                this.Vertices[i].Z = polyMesh.Bounds.Minimum.Z + iv.Z * cellSize;
             }
 
             //off-mesh link vertices
@@ -264,8 +269,8 @@ namespace Engine.PathFinding.NavMesh
                     //only store connections which start from this tile
                     if (offMeshSides[i * 2 + 0] == BoundarySide.Internal)
                     {
-                        this.NavVerts[offMeshVertsBase + (n * 2 + 0)] = offMeshCons[i].Pos0;
-                        this.NavVerts[offMeshVertsBase + (n * 2 + 1)] = offMeshCons[i].Pos1;
+                        this.Vertices[offMeshVertsBase + (n * 2 + 0)] = offMeshCons[i].Pos0;
+                        this.Vertices[offMeshVertsBase + (n * 2 + 1)] = offMeshCons[i].Pos1;
                         n++;
                     }
                 }
@@ -274,7 +279,7 @@ namespace Engine.PathFinding.NavMesh
             //store polygons
             for (int i = 0; i < polyMesh.PolyCount; i++)
             {
-                this.NavPolys[i] = new Poly()
+                this.Polygons[i] = new Poly()
                 {
                     VertexCount = 0,
                     Area = polyMesh.Polys[i].Area,
@@ -290,7 +295,7 @@ namespace Engine.PathFinding.NavMesh
                         break;
                     }
 
-                    this.NavPolys[i].Vertices[j] = polyMesh.Polys[i].Vertices[j];
+                    this.Polygons[i].Vertices[j] = polyMesh.Polys[i].Vertices[j];
 
                     if (PolyMesh.IsBoundaryEdge(polyMesh.Polys[i].NeighborEdges[j]))
                     {
@@ -298,32 +303,32 @@ namespace Engine.PathFinding.NavMesh
                         int dir = polyMesh.Polys[i].NeighborEdges[j] % 16;
                         if (dir == 0xf) //border
                         {
-                            this.NavPolys[i].NeighborEdges[j] = 0;
+                            this.Polygons[i].NeighborEdges[j] = 0;
                         }
                         else if (dir == 0) //portal x-
                         {
-                            this.NavPolys[i].NeighborEdges[j] = Link.External | 4;
+                            this.Polygons[i].NeighborEdges[j] = Link.External | 4;
                         }
                         else if (dir == 1) //portal z+
                         {
-                            this.NavPolys[i].NeighborEdges[j] = Link.External | 2;
+                            this.Polygons[i].NeighborEdges[j] = Link.External | 2;
                         }
                         else if (dir == 2) //portal x+
                         {
-                            this.NavPolys[i].NeighborEdges[j] = Link.External | 0;
+                            this.Polygons[i].NeighborEdges[j] = Link.External | 0;
                         }
                         else if (dir == 3) //portal z-
                         {
-                            this.NavPolys[i].NeighborEdges[j] = Link.External | 6;
+                            this.Polygons[i].NeighborEdges[j] = Link.External | 6;
                         }
                     }
                     else
                     {
                         //normal connection
-                        this.NavPolys[i].NeighborEdges[j] = polyMesh.Polys[i].NeighborEdges[j] + 1;
+                        this.Polygons[i].NeighborEdges[j] = polyMesh.Polys[i].NeighborEdges[j] + 1;
                     }
 
-                    this.NavPolys[i].VertexCount++;
+                    this.Polygons[i].VertexCount++;
                 }
             }
 
@@ -340,7 +345,7 @@ namespace Engine.PathFinding.NavMesh
                         verts[0] = offMeshVertsBase + (n * 2 + 0);
                         verts[1] = offMeshVertsBase + (n * 2 + 1);
 
-                        this.NavPolys[offMeshPolyBase + n] = new Poly()
+                        this.Polygons[offMeshPolyBase + n] = new Poly()
                         {
                             VertexCount = 2,
                             Vertices = verts,
@@ -362,16 +367,16 @@ namespace Engine.PathFinding.NavMesh
                 {
                     int vb = polyMeshDetail.Meshes[i].VertexIndex;
                     int numDetailVerts = polyMeshDetail.Meshes[i].VertexCount;
-                    int numPolyVerts = this.NavPolys[i].VertexCount;
-                    this.NavDMeshes[i].VertexIndex = vbase;
-                    this.NavDMeshes[i].VertexCount = numDetailVerts - numPolyVerts;
-                    this.NavDMeshes[i].TriangleIndex = polyMeshDetail.Meshes[i].TriangleIndex;
-                    this.NavDMeshes[i].TriangleCount = polyMeshDetail.Meshes[i].TriangleCount;
+                    int numPolyVerts = this.Polygons[i].VertexCount;
+                    this.DetailMeshes[i].VertexIndex = vbase;
+                    this.DetailMeshes[i].VertexCount = numDetailVerts - numPolyVerts;
+                    this.DetailMeshes[i].TriangleIndex = polyMeshDetail.Meshes[i].TriangleIndex;
+                    this.DetailMeshes[i].TriangleCount = polyMeshDetail.Meshes[i].TriangleCount;
 
                     //Copy detail vertices 
                     //first 'nv' verts are equal to nav poly verts
                     //the rest are detail verts
-                    for (int j = 0; j < this.NavDMeshes[i].VertexCount; j++)
+                    for (int j = 0; j < this.DetailMeshes[i].VertexCount; j++)
                     {
                         storedDetailVerts.Add(polyMeshDetail.Verts[vb + numPolyVerts + j]);
                     }
@@ -379,12 +384,12 @@ namespace Engine.PathFinding.NavMesh
                     vbase += numDetailVerts - numPolyVerts;
                 }
 
-                this.NavDVerts = storedDetailVerts.ToArray();
+                this.DetailVertices = storedDetailVerts.ToArray();
 
                 //store triangles
                 for (int j = 0; j < polyMeshDetail.TrisCount; j++)
                 {
-                    this.NavDTris[j] = polyMeshDetail.Tris[j];
+                    this.DetailTriangles[j] = polyMeshDetail.Tris[j];
                 }
             }
             else
@@ -393,28 +398,28 @@ namespace Engine.PathFinding.NavMesh
                 int tbase = 0;
                 for (int i = 0; i < polyMesh.PolyCount; i++)
                 {
-                    int numPolyVerts = this.NavPolys[i].VertexCount;
-                    this.NavDMeshes[i].VertexIndex = 0;
-                    this.NavDMeshes[i].VertexCount = 0;
-                    this.NavDMeshes[i].TriangleIndex = tbase;
-                    this.NavDMeshes[i].TriangleCount = numPolyVerts - 2;
+                    int numPolyVerts = this.Polygons[i].VertexCount;
+                    this.DetailMeshes[i].VertexIndex = 0;
+                    this.DetailMeshes[i].VertexCount = 0;
+                    this.DetailMeshes[i].TriangleIndex = tbase;
+                    this.DetailMeshes[i].TriangleCount = numPolyVerts - 2;
 
                     //triangulate polygon
                     for (int j = 2; j < numPolyVerts; j++)
                     {
-                        this.NavDTris[tbase].VertexHash0 = 0;
-                        this.NavDTris[tbase].VertexHash1 = j - 1;
-                        this.NavDTris[tbase].VertexHash2 = j;
+                        this.DetailTriangles[tbase].VertexHash0 = 0;
+                        this.DetailTriangles[tbase].VertexHash1 = j - 1;
+                        this.DetailTriangles[tbase].VertexHash2 = j;
 
                         //bit for each edge that belongs to the poly boundary
-                        this.NavDTris[tbase].Flags = 1 << 2;
+                        this.DetailTriangles[tbase].Flags = 1 << 2;
                         if (j == 2)
                         {
-                            this.NavDTris[tbase].Flags |= 1 << 0;
+                            this.DetailTriangles[tbase].Flags |= 1 << 0;
                         }
                         if (j == numPolyVerts - 1)
                         {
-                            this.NavDTris[tbase].Flags |= 1 << 4;
+                            this.DetailTriangles[tbase].Flags |= 1 << 4;
                         }
 
                         tbase++;
@@ -426,30 +431,30 @@ namespace Engine.PathFinding.NavMesh
             if (buildBoundingVolumeTree)
             {
                 //build tree
-                this.NavBvTree = PolyMesh.BuildBVT(polyMesh.Vertices, polyMesh.Polys, vertsPerPoly, cellSize, cellHeight);
+                this.BoundingVolumeTree = PolyMesh.BuildBVT(polyMesh.Vertices, polyMesh.Polys, vertsPerPoly, cellSize, cellHeight);
             }
 
             //store off-mesh connections
             if (offMeshCons != null && offMeshCons.Length > 0)
             {
                 int n = 0;
-                for (int i = 0; i < this.OffMeshCons.Length; i++)
+                for (int i = 0; i < this.OffMeshConnections.Length; i++)
                 {
                     //only store connections which start from this tile
                     if (offMeshSides[i * 2 + 0] == BoundarySide.Internal)
                     {
-                        this.OffMeshCons[n] = new OffMeshConnection();
+                        this.OffMeshConnections[n] = new OffMeshConnection();
 
-                        this.OffMeshCons[n].Poly = offMeshPolyBase + n;
+                        this.OffMeshConnections[n].Poly = offMeshPolyBase + n;
 
                         //copy connection end points
-                        this.OffMeshCons[n].Pos0 = offMeshCons[i].Pos0;
-                        this.OffMeshCons[n].Pos1 = offMeshCons[i].Pos1;
+                        this.OffMeshConnections[n].Pos0 = offMeshCons[i].Pos0;
+                        this.OffMeshConnections[n].Pos1 = offMeshCons[i].Pos1;
 
-                        this.OffMeshCons[n].Radius = offMeshCons[i].Radius;
-                        this.OffMeshCons[n].Flags = offMeshCons[i].Flags;
-                        this.OffMeshCons[n].Side = offMeshSides[i * 2 + 1];
-                        this.OffMeshCons[n].Tag = offMeshCons[i].Tag;
+                        this.OffMeshConnections[n].Radius = offMeshCons[i].Radius;
+                        this.OffMeshConnections[n].Flags = offMeshCons[i].Flags;
+                        this.OffMeshConnections[n].Side = offMeshSides[i * 2 + 1];
+                        this.OffMeshConnections[n].Tag = offMeshCons[i].Tag;
 
                         n++;
                     }

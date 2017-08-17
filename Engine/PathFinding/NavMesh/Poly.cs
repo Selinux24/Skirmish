@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.NavMesh
 {
@@ -38,6 +39,15 @@ namespace Engine.PathFinding.NavMesh
         public Poly()
         {
             this.Links = new List<Link>();
+        }
+
+
+        public int[] GetEdgeIndices(Link link)
+        {
+            int v0 = this.Vertices[link.Edge];
+            int v1 = this.Vertices[(link.Edge + 1) % this.VertexCount];
+
+            return new[] { v0, v1 };
         }
     }
 }

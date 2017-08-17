@@ -211,7 +211,7 @@
     <Compile Include="PathFinding\NavMesh\FindPathOptions.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\LocalBoundary.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMeshQueryFilter.cs" />
-    <Compile Include="PathFinding\NavMesh\Path.cs" />
+    <Compile Include="PathFinding\NavMesh\PolygonPath.cs" />
     <Compile Include="PathFinding\NavMesh\PolyId.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\ObstacleAvoidanceParams.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\ObstacleAvoidanceQuery.cs" />

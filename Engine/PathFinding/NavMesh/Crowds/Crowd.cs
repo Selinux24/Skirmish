@@ -238,8 +238,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
             //Find nearest position on the navmesh and place the agent there
             PathPoint nearest;
-            Vector3 extents = this.Extents;
-            if (this.NavQuery.FindNearestPoly(ref position, ref extents, out nearest))
+            if (this.NavQuery.FindNearestPoly(position, this.Extents, out nearest))
             {
                 agent.ResetToPosition(nearest.Polygon, nearest.Position);
             }
@@ -270,14 +269,13 @@ namespace Engine.PathFinding.NavMesh.Crowds
         {
             //Get the polygon that the starting point is in
             PathPoint startPt;
-            Vector3 extents = this.Extents;
-            if (this.NavQuery.FindNearestPoly(ref position, ref extents, out startPt))
+            if (this.NavQuery.FindNearestPoly(position, this.Extents, out startPt))
             {
                 for (int i = 0; i < this.agents.Count; i++)
                 {
                     //Pick a new random point that is within a certain radius of the current point
                     PathPoint newPt;
-                    if (this.NavQuery.FindRandomPointAroundCircle(ref startPt, radius, out newPt))
+                    if (this.NavQuery.FindRandomPointAroundCircle(startPt, radius, out newPt))
                     {
                         //Give this agent a target point
                         this.agents[i].RequestMoveTarget(newPt.Polygon, newPt.Position);

@@ -175,21 +175,21 @@ namespace Engine.PathFinding.NavMesh
 
             if (header.BvNodeCount == 0)
             {
-                tile.BVTree = null;
+                tile.BoundingVolumeTree = null;
             }
 
             //patch header
-            tile.Verts = data.NavVerts;
-            tile.Polys = data.NavPolys;
-            tile.PolyCount = header.PolyCount;
-            tile.DetailMeshes = data.NavDMeshes;
-            tile.DetailVerts = data.NavDVerts;
-            tile.DetailTris = data.NavDTris;
-            tile.BVTree = data.NavBvTree;
-            tile.OffMeshConnections = data.OffMeshCons;
+            tile.Vertices = data.Vertices;
+            tile.Polygons = data.Polygons;
+            tile.PolygonCount = header.PolyCount;
+            tile.DetailMeshes = data.DetailMeshes;
+            tile.DetailVertices = data.DetailVertices;
+            tile.DetailTriangles = data.DetailTriangles;
+            tile.BoundingVolumeTree = data.BoundingVolumeTree;
+            tile.OffMeshConnections = data.OffMeshConnections;
             tile.OffMeshConnectionCount = header.OffMeshConCount;
-            tile.BvQuantFactor = header.BvQuantFactor;
-            tile.BvNodeCount = header.BvNodeCount;
+            tile.BoundingVolumeTreeQuantFactor = header.BvQuantFactor;
+            tile.BoundingVolumeTreeNodeCount = header.BvNodeCount;
             tile.Bounds = header.Bounds;
             tile.WalkableClimb = header.WalkableClimb;
 
@@ -387,14 +387,14 @@ namespace Engine.PathFinding.NavMesh
                 return false;
             }
 
-            if (polyIndex >= tileList[tileIndex].PolyCount)
+            if (polyIndex >= tileList[tileIndex].PolygonCount)
             {
                 return false;
             }
 
             //Retrieve tile and poly
             tile = tileList[tileIndex];
-            poly = tileList[tileIndex].Polys[polyIndex];
+            poly = tileList[tileIndex].Polygons[polyIndex];
 
             return true;
         }
@@ -409,7 +409,7 @@ namespace Engine.PathFinding.NavMesh
             int salt, polyIndex, tileIndex;
             this.IdManager.Decode(ref reference, out polyIndex, out tileIndex, out salt);
             tile = tileList[tileIndex];
-            poly = tileList[tileIndex].Polys[polyIndex];
+            poly = tileList[tileIndex].Polygons[polyIndex];
         }
         /// <summary>
         /// Check if polygon reference is valid.
@@ -436,7 +436,7 @@ namespace Engine.PathFinding.NavMesh
                 return false;
             }
 
-            if (polyIndex >= tileList[tileIndex].PolyCount)
+            if (polyIndex >= tileList[tileIndex].PolygonCount)
             {
                 return false;
             }
@@ -462,12 +462,17 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="startPos">The starting position</param>
         /// <param name="endPos">The ending position</param>
         /// <returns>True if endpoints found, false if not</returns>
-        public bool GetOffMeshConnectionPolyEndPoints(PolyId prevRef, PolyId polyRef, ref Vector3 startPos, ref Vector3 endPos)
+        public bool GetOffMeshConnectionPolyEndPoints(PolyId prevRef, PolyId polyRef, out Vector3 startPos, out Vector3 endPos)
         {
+            startPos = Vector3.Zero;
+            endPos = Vector3.Zero;
+
             int salt = 0, indexTile = 0, indexPoly = 0;
 
             if (polyRef == PolyId.Null)
+            {
                 return false;
+            }
 
             //get current polygon
             this.IdManager.Decode(ref polyRef, out indexPoly, out indexTile, out salt);
@@ -481,12 +486,12 @@ namespace Engine.PathFinding.NavMesh
             }
 
             MeshTile tile = tileList[indexTile];
-            if (indexPoly >= tile.PolyCount)
+            if (indexPoly >= tile.PolygonCount)
             {
                 return false;
             }
 
-            Poly poly = tile.Polys[indexPoly];
+            Poly poly = tile.Polygons[indexPoly];
             if (poly.PolyType != PolyType.OffMeshConnection)
             {
                 return false;
@@ -510,8 +515,8 @@ namespace Engine.PathFinding.NavMesh
                 }
             }
 
-            startPos = tile.Verts[poly.Vertices[idx0]];
-            endPos = tile.Verts[poly.Vertices[idx1]];
+            startPos = tile.Vertices[poly.Vertices[idx0]];
+            endPos = tile.Vertices[poly.Vertices[idx1]];
 
             return true;
         }

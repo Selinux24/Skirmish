@@ -424,11 +424,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
             {
                 //current location is not valid, try to reposition
                 Vector3 nearest = agentPos;
-                Vector3 position = this.Position;
-                Vector3 extents = this.Crowd.Extents;
                 agentRef = PolyId.Null;
                 PathPoint nearestPt;
-                if (this.Crowd.NavQuery.FindNearestPoly(ref position, ref extents, out nearestPt))
+                if (this.Crowd.NavQuery.FindNearestPoly(this.Position, this.Crowd.Extents, out nearestPt))
                 {
                     nearest = nearestPt.Position;
                     agentRef = nearestPt.Polygon;
@@ -461,11 +459,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 {
                     //current target is not valid, try to reposition
                     Vector3 nearest = this.TargetPosition;
-                    Vector3 tposition = this.TargetPosition;
-                    Vector3 extents = this.Crowd.Extents;
                     this.targetReference = PolyId.Null;
                     PathPoint nearestPt;
-                    if (this.Crowd.NavQuery.FindNearestPoly(ref tposition, ref extents, out nearestPt))
+                    if (this.Crowd.NavQuery.FindNearestPoly(this.TargetPosition, this.Crowd.Extents, out nearestPt))
                     {
                         nearest = nearestPt.Position;
 
@@ -590,7 +586,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 //adjust the path over the off-mesh connection
                 PolyId[] refs = new PolyId[2];
                 var agentAnim = this.animation;
-                if (this.corridor.MoveOverOffmeshConnection(this.corners[this.corners.Count - 1].Point.Polygon, refs, ref agentAnim.StartPos, ref agentAnim.EndPos, this.Crowd.NavQuery))
+                if (this.corridor.MoveOverOffmeshConnection(this.corners[this.corners.Count - 1].Point.Polygon, refs, this.Crowd.NavQuery, out agentAnim.StartPos, out agentAnim.EndPos))
                 {
                     agentAnim.InitPos = this.Position;
                     agentAnim.PolyRef = refs[1];
@@ -718,9 +714,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 }
 
                 //append neighbor segments as obstacles
-                for (int j = 0; j < this.boundary.SegCount; j++)
+                for (int j = 0; j < this.boundary.SegmentCount; j++)
                 {
-                    Segment s = this.boundary.Segs[j];
+                    Segment s = this.boundary.Segments[j];
                     if (Helper.Area2D(this.Position, s.Start, s.End) < 0.0f)
                     {
                         continue;
@@ -848,12 +844,12 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 var path = this.corridor.NavigationPath;
 
                 Vector3 reqPos = new Vector3();
-                Path reqPath = new Path();
+                PolygonPath reqPath = new PolygonPath();
 
                 //quick search towards the goal
                 PathPoint startPoint = new PathPoint(path[0], this.Position);
                 PathPoint endPoint = new PathPoint(this.targetReference, this.TargetPosition);
-                this.Crowd.NavQuery.InitSlicedFindPath(ref startPoint, ref endPoint, this.Crowd.NavQueryFilter, FindPathOptions.None);
+                this.Crowd.NavQuery.InitSlicedFindPath(startPoint, endPoint, this.Crowd.NavQueryFilter, FindPathOptions.None);
                 int tempInt = 0;
                 this.Crowd.NavQuery.UpdateSlicedFindPath(MaximumIterations, ref tempInt);
                 var status = Status.Failure;
@@ -940,13 +936,13 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
             else if (status == Status.Success)
             {
-                Path path = this.corridor.NavigationPath;
+                PolygonPath path = this.corridor.NavigationPath;
 
                 //apply results
                 Vector3 targetPos = new Vector3();
                 targetPos = this.TargetPosition;
 
-                Path res;
+                PolygonPath res;
                 bool valid = true;
                 status = pathQueue.GetPathResult(this.targetPathQueryIndex, out res).ToStatus();
                 if (status == Status.Failure || res.Count == 0)

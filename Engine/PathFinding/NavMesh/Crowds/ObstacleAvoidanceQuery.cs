@@ -204,9 +204,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 //precalculate if the agent is close to the segment
                 float t;
                 this.segments[i].Touch = Intersection.PointToSegment2DSquared(
-                    ref position,
-                    ref this.segments[i].P,
-                    ref this.segments[i].Q,
+                    position,
+                    this.segments[i].P,
+                    this.segments[i].Q,
                     out t) < r2;
             }
         }

@@ -28,8 +28,8 @@ namespace Engine.PathFinding.NavMesh
                 Vector3 pt2 = vb;
 
                 //the vertices pt1 (va) and pt2 (vb) are extremely close to the polygon edge
-                if (Intersection.PointToSegment2DSquared(ref pt1, ref vpoly[j], ref vpoly[i]) < thrSqr &&
-                    Intersection.PointToSegment2DSquared(ref pt2, ref vpoly[j], ref vpoly[i]) < thrSqr)
+                if (Intersection.PointToSegment2DSquared(pt1, vpoly[j], vpoly[i]) < thrSqr &&
+                    Intersection.PointToSegment2DSquared(pt2, vpoly[j], vpoly[i]) < thrSqr)
                 {
                     return 1;
                 }

@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.PathFinding.NavMesh
 {
     /// <summary>
@@ -40,5 +41,54 @@ namespace Engine.PathFinding.NavMesh
         /// Gets or sets the maximum Vector3 of the bounding box
         /// </summary>
         public int BMax { get; set; }
+
+
+        public bool CheckBoundaries(Vector3 startPosition, Vector3 endPosition, Vector3 left, Vector3 right, float tmax)
+        {
+            if (this.Side == BoundarySide.PlusX || this.Side == BoundarySide.MinusX)
+            {
+                //calculate link size
+                float s = 1.0f / 255.0f;
+                float lmin = left.Z + (right.Z - left.Z) * (this.BMin * s);
+                float lmax = left.Z + (right.Z - left.Z) * (this.BMax * s);
+                if (lmin > lmax)
+                {
+                    //swap
+                    float temp = lmin;
+                    lmin = lmax;
+                    lmax = temp;
+                }
+
+                //find z intersection
+                float z = startPosition.Z + (endPosition.Z - startPosition.Z) * tmax;
+                if (z >= lmin && z <= lmax)
+                {
+                    return true;
+                }
+            }
+            else if (this.Side == BoundarySide.PlusZ || this.Side == BoundarySide.MinusZ)
+            {
+                //calculate link size
+                float s = 1.0f / 255.0f;
+                float lmin = left.X + (right.X - left.X) * (this.BMin * s);
+                float lmax = left.X + (right.X - left.X) * (this.BMax * s);
+                if (lmin > lmax)
+                {
+                    //swap
+                    float temp = lmin;
+                    lmin = lmax;
+                    lmax = temp;
+                }
+
+                //find x intersection
+                float x = startPosition.X + (endPosition.X - startPosition.X) * tmax;
+                if (x >= lmin && x <= lmax)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }

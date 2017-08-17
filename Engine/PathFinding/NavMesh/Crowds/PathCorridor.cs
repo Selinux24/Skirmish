@@ -24,7 +24,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <summary>
         /// Path
         /// </summary>
-        public Path NavigationPath { get; private set; }
+        public PolygonPath NavigationPath { get; private set; }
         /// <summary>
         /// Gets the first path polygon
         /// </summary>
@@ -51,7 +51,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// </summary>
         public PathCorridor()
         {
-            this.NavigationPath = new Path();
+            this.NavigationPath = new PolygonPath();
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// </summary>
         /// <param name="target">The target</param>
         /// <param name="path">The polygon path</param>
-        public void SetCorridor(Vector3 target, Path path)
+        public void SetCorridor(Vector3 target, PolygonPath path)
         {
             this.Target = target;
             this.NavigationPath = path;
@@ -90,15 +90,21 @@ namespace Engine.PathFinding.NavMesh.Crowds
             List<PolyId> visited = new List<PolyId>(MaxVisited);
 
             //move along navmesh and update new position
-            bool status = navQuery.MoveAlongSurface(ref startPoint, ref newPosition, out result, visited);
+            bool status = navQuery.MoveAlongSurface(startPoint, newPosition, out result, visited);
             if (status == true)
             {
                 this.MergeCorridorStartMoved(this.NavigationPath, visited);
 
                 //adjust the position to stay on top of the navmesh
-                float h = this.Position.Y;
-                navQuery.GetPolyHeight(this.NavigationPath[0], result, ref h);
-                result.Y = h;
+                float h;
+                if (navQuery.GetPolyHeight(this.NavigationPath[0], result, out h))
+                {
+                    result.Y = h;
+                }
+                else
+                {
+                    result.Y = this.Position.Y;
+                }
 
                 this.Position = result;
 
@@ -116,8 +122,11 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <param name="endPos">End position</param>
         /// <param name="navQuery">The query</param>
         /// <returns>True if position changed, false if not</returns>
-        public bool MoveOverOffmeshConnection(PolyId offMeshConRef, PolyId[] refs, ref Vector3 startPos, ref Vector3 endPos, NavigationMeshQuery navQuery)
+        public bool MoveOverOffmeshConnection(PolyId offMeshConRef, PolyId[] refs, NavigationMeshQuery navQuery, out Vector3 startPos, out Vector3 endPos)
         {
+            startPos = Vector3.Zero;
+            endPos = Vector3.Zero;
+
             //advance the path up to and over the off-mesh connection
             PolyId prevRef = PolyId.Null;
             PolyId polyRef = this.NavigationPath[0];
@@ -141,7 +150,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
             refs[0] = prevRef;
             refs[1] = polyRef;
 
-            if (navQuery.GetOffMeshConnectionPolyEndPoints(refs[0], refs[1], ref startPos, ref endPos) == true)
+            if (navQuery.GetOffMeshConnectionPolyEndPoints(refs[0], refs[1], out startPos, out endPos) == true)
             {
                 this.Position = endPos;
 
@@ -227,12 +236,12 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 return false;
             }
 
-            Path res = new Path();
+            PolygonPath res = new PolygonPath();
             int numRes = 0;
             int tempInt = 0;
             PathPoint startPoint = new PathPoint(this.NavigationPath[0], this.Position);
             PathPoint endPoint = new PathPoint(this.NavigationPath[this.NavigationPath.Count - 1], this.Target);
-            navQuery.InitSlicedFindPath(ref startPoint, ref endPoint, filter, FindPathOptions.None);
+            navQuery.InitSlicedFindPath(startPoint, endPoint, filter, FindPathOptions.None);
             navQuery.UpdateSlicedFindPath(MaxIterations, ref tempInt);
             bool status = navQuery.FinalizedSlicedPathPartial(this.NavigationPath, res);
 
@@ -270,10 +279,10 @@ namespace Engine.PathFinding.NavMesh.Crowds
             goal = this.Position + delta * (pathOptimizationRange / dist);
 
             PathPoint startPoint = new PathPoint(this.NavigationPath[0], this.Position);
-            Path raycastPath = new Path();
+            PolygonPath raycastPath;
             RaycastHit hit;
-            navQuery.Raycast(ref startPoint, ref goal, RaycastOptions.None, out hit, raycastPath);
-            if (raycastPath.Count > 1 && hit.T > 0.99f)
+            navQuery.Raycast(startPoint, goal, RaycastOptions.None, out hit, out raycastPath);
+            if (raycastPath.Count > 1 && hit.HasContact)
             {
                 MergeCorridorStartShortcut(raycastPath, raycastPath);
             }
@@ -284,7 +293,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <param name="path">The current path</param>
         /// <param name="visited">The visited polygons</param>
         /// <returns>New path length</returns>
-        private int MergeCorridorStartMoved(Path path, List<PolyId> visited)
+        private int MergeCorridorStartMoved(PolygonPath path, List<PolyId> visited)
         {
             int furthestPath = -1;
             int furthestVisited = -1;
@@ -348,7 +357,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <param name="path">The current path</param>
         /// <param name="visited">The visited polygons</param>
         /// <returns>New path length</returns>
-        private int MergeCorridorStartShortcut(Path path, Path visited)
+        private int MergeCorridorStartShortcut(PolygonPath path, PolygonPath visited)
         {
             int furthestPath = -1;
             int furthestVisited = -1;

@@ -151,7 +151,7 @@ namespace Engine.Common
         /// <param name="p">The coordinate of point P in the segment PQ.</param>
         /// <param name="q">The coordinate of point Q in the segment PQ.</param>
         /// <returns>The distance between the point and the segment.</returns>
-        public static float PointToSegmentSquared(ref Vector3 pt, ref Vector3 p, ref Vector3 q)
+        public static float PointToSegmentSquared(Vector3 pt, Vector3 p, Vector3 q)
         {
             //distance from P to Q
             Vector3 pq = q - p;
@@ -220,10 +220,10 @@ namespace Engine.Common
         /// <param name="p">The coordinate of point P in the segment PQ.</param>
         /// <param name="q">The coordinate of point Q in the segment PQ.</param>
         /// <returns>The distance between the point and the segment.</returns>
-        public static float PointToSegment2DSquared(ref Vector3 pt, ref Vector3 p, ref Vector3 q)
+        public static float PointToSegment2DSquared(Vector3 pt, Vector3 p, Vector3 q)
         {
             float t = 0;
-            return PointToSegment2DSquared(ref pt, ref p, ref q, out t);
+            return PointToSegment2DSquared(pt, p, q, out t);
         }
         /// <summary>
         /// Find the 2d distance between a point and a segment PQ
@@ -233,7 +233,7 @@ namespace Engine.Common
         /// <param name="q">The coordinate of point Q in the segment PQ.</param>
         /// <param name="t">Parameterization ratio t</param>
         /// <returns>The distance between the point and the segment.</returns>
-        public static float PointToSegment2DSquared(ref Vector3 pt, ref Vector3 p, ref Vector3 q, out float t)
+        public static float PointToSegment2DSquared(Vector3 pt, Vector3 p, Vector3 q, out float t)
         {
             //distance from P to Q in the xz plane
             float segmentDeltaX = q.X - p.X;
@@ -278,9 +278,11 @@ namespace Engine.Common
                 Vector3 vj = verts[j];
 
                 if (((vi.Z > point.Z) != (vj.Z > point.Z)) && (point.X < (vj.X - vi.X) * (point.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+                {
                     c = !c;
+                }
 
-                dmin = Math.Min(dmin, PointToSegment2DSquared(ref point, ref vj, ref vi));
+                dmin = Math.Min(dmin, PointToSegment2DSquared(point, vj, vi));
             }
 
             return c ? -dmin : dmin;
@@ -288,37 +290,43 @@ namespace Engine.Common
         /// <summary>
         /// Finds the squared distance between a point and the nearest edge of a polygon.
         /// </summary>
-        /// <param name="pt">A point.</param>
-        /// <param name="verts">A set of vertices that define a polygon.</param>
+        /// <param name="point">A point.</param>
+        /// <param name="vertices">A set of vertices that define a polygon.</param>
         /// <param name="nverts">The number of vertices to use from <c>verts</c>.</param>
         /// <returns>The squared distance between a point and the nearest edge of a polygon.</returns>
-        public static float PointToPolygonEdgeSquared(Vector3 pt, Vector3[] verts, int nverts)
+        public static float PointToPolygonEdgeSquared(Vector3 point, Vector3[] vertices)
         {
             float dmin = float.MaxValue;
-            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
+
+            int count = vertices.Length;
+            for (int i = 0, j = count - 1; i < count; j = i++)
             {
-                dmin = Math.Min(dmin, PointToSegment2DSquared(ref pt, ref verts[j], ref verts[i]));
+                dmin = Math.Min(dmin, PointToSegment2DSquared(point, vertices[j], vertices[i]));
             }
 
-            return PointInPoly(pt, verts, nverts) ? -dmin : dmin;
+            return PointInPoly(point, vertices) ? -dmin : dmin;
         }
         /// <summary>
         /// Finds the distance between a point and the nearest edge of a polygon.
         /// </summary>
-        /// <param name="pt">A point.</param>
-        /// <param name="verts">A set of vertices that define a polygon.</param>
-        /// <param name="nverts">The number of vertices to use from <c>verts</c>.</param>
+        /// <param name="point">A point.</param>
+        /// <param name="vertices">A set of vertices that define a polygon.</param>
         /// <param name="edgeDist">A buffer for edge distances to be stored in.</param>
         /// <param name="edgeT">A buffer for parametrization ratios to be stored in.</param>
         /// <returns>A value indicating whether the point is contained in the polygon.</returns>
-        public static bool PointToPolygonEdgeSquared(Vector3 pt, Vector3[] verts, int nverts, float[] edgeDist, float[] edgeT)
+        public static bool PointToPolygonEdgeSquared(Vector3 point, Vector3[] vertices, out float[] edgeDist, out float[] edgeT)
         {
+            int nverts = vertices.Length;
+
+            edgeDist = new float[nverts];
+            edgeT = new float[nverts];
+
             for (int i = 0, j = nverts - 1; i < nverts; j = i++)
             {
-                edgeDist[j] = PointToSegment2DSquared(ref pt, ref verts[j], ref verts[i], out edgeT[j]);
+                edgeDist[j] = PointToSegment2DSquared(point, vertices[j], vertices[i], out edgeT[j]);
             }
 
-            return PointInPoly(pt, verts, nverts);
+            return PointInPoly(point, vertices);
         }
         /// <summary>
         /// Finds the distance between a point and triangle ABC.
@@ -386,21 +394,22 @@ namespace Engine.Common
         /// <summary>
         /// Determines whether a point is inside a polygon.
         /// </summary>
-        /// <param name="pt">A point.</param>
-        /// <param name="verts">A set of vertices that define a polygon.</param>
-        /// <param name="nverts">The number of vertices to use from <c>verts</c>.</param>
+        /// <param name="point">A point.</param>
+        /// <param name="vertices">A set of vertices that define a polygon.</param>
         /// <returns>A value indicating whether the point is contained within the polygon.</returns>
-        public static bool PointInPoly(Vector3 pt, Vector3[] verts, int nverts)
+        public static bool PointInPoly(Vector3 point, Vector3[] vertices)
         {
             bool c = false;
 
+            int nverts = vertices.Length;
+
             for (int i = 0, j = nverts - 1; i < nverts; j = i++)
             {
-                Vector3 vi = verts[i];
-                Vector3 vj = verts[j];
+                Vector3 vi = vertices[i];
+                Vector3 vj = vertices[j];
 
-                if (((vi.Z > pt.Z) != (vj.Z > pt.Z)) &&
-                    (pt.X < (vj.X - vi.X) * (pt.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
+                if (((vi.Z > point.Z) != (vj.Z > point.Z)) &&
+                    (point.X < (vj.X - vi.X) * (point.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
                 {
                     c = !c;
                 }
@@ -473,13 +482,12 @@ namespace Engine.Common
         /// <param name="p0">Segment's first endpoint</param>
         /// <param name="p1">Segment's second endpoint</param>
         /// <param name="verts">Polygon's vertices</param>
-        /// <param name="nverts">The number of vertices in the polygon</param>
         /// <param name="tmin">Parameter t minimum</param>
         /// <param name="tmax">Parameter t maximum</param>
         /// <param name="segMin">Minimum vertex index</param>
         /// <param name="segMax">Maximum vertex index</param>
         /// <returns>True if intersect, false if not</returns>
-        public static bool SegmentPolygon2D(Vector3 p0, Vector3 p1, Vector3[] verts, int nverts, out float tmin, out float tmax, out int segMin, out int segMax)
+        public static bool SegmentPolygon2D(Vector3 p0, Vector3 p1, Vector3[] verts, out float tmin, out float tmax, out int segMin, out int segMax)
         {
             const float Epsilon = 0.00000001f;
 
@@ -489,6 +497,7 @@ namespace Engine.Common
             segMax = -1;
 
             Vector3 dir = p1 - p0;
+            int nverts = verts.Length;
 
             for (int i = 0, j = nverts - 1; i < nverts; j = i++)
             {
@@ -540,12 +549,13 @@ namespace Engine.Common
         /// Determines whether two polygons A and B are intersecting
         /// </summary>
         /// <param name="polya">Polygon A's vertices</param>
-        /// <param name="npolya">Number of vertices for polygon A</param>
         /// <param name="polyb">Polygon B's vertices</param>
-        /// <param name="npolyb">Number of vertices for polygon B</param>
         /// <returns>True if intersecting, false if not</returns>
-        public static bool PolygonIntersectsPolygon2D(Vector3[] polya, int npolya, Vector3[] polyb, int npolyb)
+        public static bool PolygonIntersectsPolygon2D(Vector3[] polya, Vector3[] polyb)
         {
+            int npolya = polya.Length;
+            int npolyb = polyb.Length;
+
             for (int i = 0, j = npolya - 1; i < npolya; j = i++)
             {
                 Vector3 va = polya[j];
