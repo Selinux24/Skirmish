@@ -706,37 +706,34 @@ namespace Engine.PathFinding.NavMesh.Crowds
             {
                 this.Crowd.ObstacleQuery.Reset();
 
-                //add neighhbors as obstacles
+                //add neighbors as obstacles
                 for (int j = 0; j < this.neighbors.Length; j++)
                 {
-                    var n = this.neighbors[j].Neighbor;
-                    this.Crowd.ObstacleQuery.AddCircle(n.Position, n.Parameters.Radius, n.velocity, n.desiredVelocity);
+                    var neighbor = this.neighbors[j].Neighbor;
+
+                    this.Crowd.ObstacleQuery.AddCircle(neighbor.Position, neighbor.Parameters.Radius, neighbor.velocity, neighbor.desiredVelocity);
                 }
 
-                //append neighbor segments as obstacles
+                //add neighbor segments as obstacles
                 for (int j = 0; j < this.boundary.SegmentCount; j++)
                 {
-                    Segment s = this.boundary.Segments[j];
-                    if (Helper.Area2D(this.Position, s.Start, s.End) < 0.0f)
+                    var segment = this.boundary.Segments[j];
+
+                    if (Helper.Area2D(this.Position, segment.Start, segment.End) >= 0.0f)
                     {
-                        continue;
+                        this.Crowd.ObstacleQuery.AddSegment(segment.Start, segment.End);
                     }
-                    this.Crowd.ObstacleQuery.AddSegment(s.Start, s.End);
                 }
 
                 //sample new safe velocity
-                bool adaptive = true;
-                int ns = 0;
-                var parameters = this.Crowd.ObstacleQuery.GetParams(this.Parameters.ObstacleAvoidanceType);
                 Vector3 nVel;
-                if (adaptive)
-                {
-                    ns = this.Crowd.ObstacleQuery.SampleVelocityAdaptive(this.Position, this.Parameters.Radius, this.desiredSpeed, this.velocity, this.desiredVelocity, parameters, out nVel);
-                }
-                else
-                {
-                    ns = this.Crowd.ObstacleQuery.SampleVelocityGrid(this.Position, this.Parameters.Radius, this.desiredSpeed, this.velocity, this.desiredVelocity, parameters, out nVel);
-                }
+                this.Crowd.ObstacleQuery.SampleVelocity(
+                    this.Position,
+                    this.Parameters.Radius,
+                    this.desiredSpeed,
+                    this.velocity,
+                    this.desiredVelocity,
+                    out nVel);
                 this.nVelocity = nVel;
             }
             else

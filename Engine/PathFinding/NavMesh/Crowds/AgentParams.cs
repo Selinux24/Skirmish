@@ -13,7 +13,6 @@
         public float PathOptimizationRange { get; set; }
         public float SeparationWeight { get; set; }
         public UpdateFlags UpdateFlags { get; set; }
-        public byte ObstacleAvoidanceType { get; set; }
         public byte QueryFilterType { get; set; }
         public float TriggerRadius
         {

@@ -4,14 +4,48 @@ using System;
 namespace Engine.PathFinding.NavMesh.Crowds
 {
     using Engine.Common;
-    using System.Collections.Generic;
 
+    //TODO: Convert this class into an interface.
+    //TODO: Implement the two avoidance modes in two separate classes
+    //TODO: Set the crowd property to the interface type, and initialize it using some new parametrization
+
+    /// <summary>
+    /// Obstacle avoidance query
+    /// </summary>
     public class ObstacleAvoidanceQuery
     {
         private const int MaxPatternDivs = 32;
         private const int MaxPatternRings = 4;
+        private const float EPS = 0.0001f;
 
-        struct ObstacleCircle
+        /// <summary>
+        /// Obstacle interface
+        /// </summary>
+        interface IObstable
+        {
+            /// <summary>
+            /// Updates the obstacle against a position at a specified desired velocity
+            /// </summary>
+            /// <param name="position">Position</param>
+            /// <param name="desiredVelocity">Desired velocity</param>
+            void Update(Vector3 position, Vector3 desiredVelocity);
+            /// <summary>
+            /// Process sample
+            /// </summary>
+            /// <param name="position">Position</param>
+            /// <param name="radius">Radius</param>
+            /// <param name="vcand">Candidate velocity</param>
+            /// <param name="vel">Velocity</param>
+            /// <param name="tmin">Distance to intersection with obstacle</param>
+            /// <param name="side">Intersected side</param>
+            /// <returns>Returns true if velocity change needed</returns>
+            bool ProcessSample(Vector3 position, float radius, Vector3 vcand, Vector3 vel, out float tmin, out float side);
+        }
+
+        /// <summary>
+        /// Circle obstacle
+        /// </summary>
+        struct ObstacleCircle : IObstable
         {
             /// <summary>
             /// The position of the obstacle
@@ -37,31 +71,185 @@ namespace Engine.PathFinding.NavMesh.Crowds
             /// Used for side selection during sampling
             /// </summary>
             public Vector3 Np;
+
+            /// <summary>
+            /// Updates the obstacle against a position at a specified desired velocity
+            /// </summary>
+            /// <param name="position">Position</param>
+            /// <param name="desiredVelocity">Desired velocity</param>
+            public void Update(Vector3 position, Vector3 desiredVelocity)
+            {
+                Vector3 pa = position;
+                Vector3 pb = this.Position;
+
+                Vector3 orig = new Vector3(0, 0, 0);
+                this.Dp = pb - pa;
+                this.Dp.Normalize();
+                Vector3 dv = this.DesiredVel - desiredVelocity;
+
+                float a;
+                Helper.Area2D(ref orig, ref this.Dp, ref dv, out a);
+                if (a < 0.01f)
+                {
+                    this.Np.X = -this.Dp.Z;
+                    this.Np.Z = this.Dp.X;
+                }
+                else
+                {
+                    this.Np.X = this.Dp.Z;
+                    this.Np.Z = -this.Dp.X;
+                }
+            }
+            /// <summary>
+            /// Process sample
+            /// </summary>
+            /// <param name="position">Position</param>
+            /// <param name="radius">Radius</param>
+            /// <param name="vcand">Candidate velocity</param>
+            /// <param name="vel">Velocity</param>
+            /// <param name="tmin">Distance to intersection with obstacle</param>
+            /// <param name="side">Intersected side</param>
+            /// <returns>Returns true if velocity change needed</returns>
+            public bool ProcessSample(Vector3 position, float radius, Vector3 vcand, Vector3 vel, out float tmin, out float side)
+            {
+                tmin = float.MaxValue;
+                side = 0;
+
+                //RVO
+                Vector3 vab = vcand * 2;
+                vab = vab - vel;
+                vab = vab - this.Vel;
+
+                //side
+                float numSide = 0;
+                side += MathUtil.Clamp(Math.Min(Helper.Dot2D(ref this.Dp, ref vab) * 0.5f + 0.5f, Helper.Dot2D(ref this.Np, ref vab) * 2.0f), 0.0f, 1.0f);
+                numSide++;
+
+                float htmin;
+                float htmax;
+                if (SweepCircleCircle(position, radius, vab, this.Position, this.Radius, out htmin, out htmax))
+                {
+                    //handle overlapping obstacles
+                    if (htmin < 0.0f && htmax > 0.0f)
+                    {
+                        //avoid more when overlapped
+                        htmin = -htmin * 0.5f;
+                    }
+
+                    if (htmin >= 0.0f)
+                    {
+                        tmin = htmin;
+
+                        //normalize side bias
+                        if (numSide != 0)
+                        {
+                            side /= numSide;
+                        }
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
-        struct ObstacleSegment
+        /// <summary>
+        /// Segment obstacle
+        /// </summary>
+        struct ObstacleSegment : IObstable
         {
             /// <summary>
-            /// Endpoints of the obstacle segment
+            /// First endpoint of the obstacle segment
             /// </summary>
             public Vector3 P;
             /// <summary>
-            /// Endpoints of the obstacle segment
+            /// Second endpoint of the obstacle segment
             /// </summary>
             public Vector3 Q;
+            /// <summary>
+            /// Gets if the obstacle is touched after updated against position
+            /// </summary>
+            public bool Touched;
 
-            public bool Touch;
+            /// <summary>
+            /// Updates the obstacle state against a position
+            /// </summary>
+            /// <param name="position">Position</param>
+            /// <param name="desiredVelocity">Desired velocity</param>
+            public void Update(Vector3 position, Vector3 desiredVelocity)
+            {
+                float t;
+                float distance = Intersection.PointToSegment2DSquared(
+                    position,
+                    this.P,
+                    this.Q,
+                    out t);
+
+                this.Touched = distance < EPS;
+            }
+            /// <summary>
+            /// Process sample
+            /// </summary>
+            /// <param name="position">Position</param>
+            /// <param name="radius">Radius</param>
+            /// <param name="vcand">Candidate velocity</param>
+            /// <param name="vel">Velocity</param>
+            /// <param name="tmin">Distance to intersection with obstacle</param>
+            /// <param name="side">Intersected side</param>
+            /// <returns>Returns true if velocity change needed</returns>
+            public bool ProcessSample(Vector3 position, float radius, Vector3 vcand, Vector3 vel, out float tmin, out float side)
+            {
+                tmin = float.MaxValue;
+                side = 0;
+
+                float htmin;
+                if (this.Touched)
+                {
+                    //special case when the agent is very close to the segment
+                    Vector3 sdir = this.Q - this.P;
+                    Vector3 snorm = new Vector3(-sdir.Z, 0, sdir.X);
+
+                    //if the velocity is pointing towards the segment, no collision
+                    if (Helper.Dot2D(ref snorm, ref vcand) < 0.0f)
+                    {
+                        return false;
+                    }
+
+                    //else immediate collision
+                    htmin = 0.0f;
+                }
+                else
+                {
+                    Ray ray = new Ray(position, vcand);
+                    if (!Intersection.RayIntersectsSegment(ref ray, ref this.P, ref this.Q, out htmin))
+                    {
+                        return false;
+                    }
+                }
+
+                //avoid less when facing walls
+                htmin *= 2.0f;
+
+                tmin = htmin;
+
+                return true;
+            }
         }
 
-        public static bool SweepCircleCircle(Vector3 center0, float radius0, Vector3 v, Vector3 center1, float radius1, ref float tmin, ref float tmax)
+        private static bool SweepCircleCircle(Vector3 center0, float radius0, Vector3 v, Vector3 center1, float radius1, out float tmin, out float tmax)
         {
-            const float EPS = 0.0001f;
+            tmin = float.MinValue;
+            tmax = float.MaxValue;
+
             Vector3 s = center1 - center0;
             float r = radius0 + radius1;
             float c = Helper.Dot2D(ref s, ref s) - r * r;
             float a = Helper.Dot2D(ref v, ref v);
             if (a < EPS)
+            {
                 return false; //not moving
+            }
 
             //overlap, calculate time to exit
             float b = Helper.Dot2D(ref v, ref s);
@@ -87,8 +275,14 @@ namespace Engine.PathFinding.NavMesh.Crowds
         private int maxSegments;
         private ObstacleSegment[] segments;
         private int numSegments;
-        private List<ObstacleAvoidanceParams> obstacleQueryParams = new List<ObstacleAvoidanceParams>();
 
+        public bool Adaptive = true;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="maxCircles">Maximum number of circles</param>
+        /// <param name="maxSegments">Maximum number of segments</param>
         public ObstacleAvoidanceQuery(int maxCircles, int maxSegments)
         {
             this.maxCircles = maxCircles;
@@ -99,35 +293,22 @@ namespace Engine.PathFinding.NavMesh.Crowds
             this.numSegments = 0;
             this.segments = new ObstacleSegment[this.maxSegments];
 
-            //initialize obstancle query params
-            for (int i = 0; i < this.obstacleQueryParams.Count; i++)
+            //initialize obstacle query params
+            this.parameters = new ObstacleAvoidanceParams()
             {
-                var obsQP = new ObstacleAvoidanceParams()
-                {
-                    VelBias = 0.4f,
-                    WeightDesVel = 2.0f,
-                    WeightCurVel = 0.75f,
-                    WeightSide = 0.75f,
-                    WeightToi = 2.5f,
-                    HorizTime = 2.5f,
-                    GridSize = 33,
-                    AdaptiveDivs = 7,
-                    AdaptiveRings = 2,
-                    AdaptiveDepth = 5,
-                };
-
-                this.obstacleQueryParams.Add(obsQP);
-            }
+                VelBias = 0.4f,
+                WeightDesVel = 2.0f,
+                WeightCurVel = 0.75f,
+                WeightSide = 0.75f,
+                WeightToi = 2.5f,
+                HorizTime = 2.5f,
+                GridSize = 33,
+                AdaptiveDivs = 7,
+                AdaptiveRings = 2,
+                AdaptiveDepth = 5,
+            };
         }
 
-        /// <summary>
-        /// Resets the ObstacleAvoidanceQuery's internal data
-        /// </summary>
-        public void Reset()
-        {
-            this.numCircles = 0;
-            this.numSegments = 0;
-        }
         /// <summary>
         /// Add a new circle to the array
         /// </summary>
@@ -137,16 +318,14 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <param name="dvel">The desired velocity</param>
         public void AddCircle(Vector3 pos, float rad, Vector3 vel, Vector3 dvel)
         {
-            if (this.numCircles >= this.maxCircles)
+            if (this.numCircles <= this.maxCircles)
             {
-                return;
+                this.circles[this.numCircles].Position = pos;
+                this.circles[this.numCircles].Radius = rad;
+                this.circles[this.numCircles].Vel = vel;
+                this.circles[this.numCircles].DesiredVel = dvel;
+                this.numCircles++;
             }
-
-            this.circles[this.numCircles].Position = pos;
-            this.circles[this.numCircles].Radius = rad;
-            this.circles[this.numCircles].Vel = vel;
-            this.circles[this.numCircles].DesiredVel = dvel;
-            this.numCircles++;
         }
         /// <summary>
         /// Add a segment to the array
@@ -155,173 +334,86 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <param name="q">The other endpoint</param>
         public void AddSegment(Vector3 p, Vector3 q)
         {
-            if (this.numSegments > this.maxSegments)
+            if (this.numSegments <= this.maxSegments)
             {
-                return;
+                this.segments[this.numSegments].P = p;
+                this.segments[this.numSegments].Q = q;
+                this.numSegments++;
             }
+        }
+        /// <summary>
+        /// Resets the ObstacleAvoidanceQuery's internal data
+        /// </summary>
+        public void Reset()
+        {
+            this.numCircles = 0;
+            this.numSegments = 0;
+        }
 
-            this.segments[this.numSegments].P = p;
-            this.segments[this.numSegments].Q = q;
-            this.numSegments++;
+        /// <summary>
+        /// Samples the new velocity
+        /// </summary>
+        /// <param name="position">Agent position</param>
+        /// <param name="radius">Agent radius</param>
+        /// <param name="maximumVelocity">Agent maximum velocity</param>
+        /// <param name="velocity">Agent current velocity</param>
+        /// <param name="desiredVelocity">Agent desired velocity</param>
+        /// <param name="newVelocity">Returns the new agent velocity to avoid the query obstacles</param>
+        /// <returns>Returns the number of samples used in the query</returns>
+        public int SampleVelocity(Vector3 position, float radius, float maximumVelocity, Vector3 velocity, Vector3 desiredVelocity, out Vector3 newVelocity)
+        {
+            this.Prepare(position, desiredVelocity);
+
+            if (this.Adaptive)
+            {
+                return this.SampleVelocityAdaptive(position, radius, maximumVelocity, velocity, desiredVelocity, out newVelocity);
+            }
+            else
+            {
+                return this.SampleVelocityGrid(position, radius, maximumVelocity, velocity, desiredVelocity, out newVelocity);
+            }
         }
         /// <summary>
         /// Prepare the obstacles for further calculations
         /// </summary>
-        /// <param name="position">Current position</param>
-        /// <param name="desiredVel">Desired velocity</param>
-        public void Prepare(Vector3 position, Vector3 desiredVel)
+        /// <param name="position">Current agent position</param>
+        /// <param name="desiredVelocity">Agent desired velocity</param>
+        private void Prepare(Vector3 position, Vector3 desiredVelocity)
         {
             //prepare obstacles
             for (int i = 0; i < this.numCircles; i++)
             {
                 //side
-                Vector3 pa = position;
-                Vector3 pb = this.circles[i].Position;
-
-                Vector3 orig = new Vector3(0, 0, 0);
-                this.circles[i].Dp = pb - pa;
-                this.circles[i].Dp.Normalize();
-                Vector3 dv = this.circles[i].DesiredVel - desiredVel;
-
-                float a;
-                Helper.Area2D(ref orig, ref this.circles[i].Dp, ref dv, out a);
-                if (a < 0.01f)
-                {
-                    this.circles[i].Np.X = -this.circles[i].Dp.Z;
-                    this.circles[i].Np.Z = this.circles[i].Dp.X;
-                }
-                else
-                {
-                    this.circles[i].Np.X = this.circles[i].Dp.Z;
-                    this.circles[i].Np.Z = -this.circles[i].Dp.X;
-                }
+                this.circles[i].Update(position, desiredVelocity);
             }
-
-            float r2 = 0.01f * 0.01f;
 
             for (int i = 0; i < this.numSegments; i++)
             {
                 //precalculate if the agent is close to the segment
-                float t;
-                this.segments[i].Touch = Intersection.PointToSegment2DSquared(
-                    position,
-                    this.segments[i].P,
-                    this.segments[i].Q,
-                    out t) < r2;
+                this.segments[i].Update(position, desiredVelocity);
             }
         }
-        public float ProcessSample(Vector3 vcand, float cs, Vector3 position, float radius, Vector3 vel, Vector3 desiredVel)
+        /// <summary>
+        /// Samples velocity using a grid
+        /// </summary>
+        /// <param name="position">Agent position</param>
+        /// <param name="radius">Agent radius</param>
+        /// <param name="maximumVelocity">Agent maximum velocity</param>
+        /// <param name="velocity">Agent current velocity</param>
+        /// <param name="desiredVelocity">Agent desired velocity</param>
+        /// <param name="newVelocity">Agent new velocity</param>
+        /// <returns>Returns the number of samples used in the query</returns>
+        private int SampleVelocityGrid(Vector3 position, float radius, float maximumVelocity, Vector3 velocity, Vector3 desiredVelocity, out Vector3 newVelocity)
         {
-            //find min time of impact and exit amongst all obstacles
-            float tmin = this.parameters.HorizTime;
-            float side = 0;
-            int numSide = 0;
-
-            for (int i = 0; i < this.numCircles; i++)
-            {
-                ObstacleCircle cir = this.circles[i];
-
-                //RVO
-                Vector3 vab = vcand * 2;
-                vab = vab - vel;
-                vab = vab - cir.Vel;
-
-                //side
-                side += MathUtil.Clamp(Math.Min(Helper.Dot2D(ref cir.Dp, ref vab) * 0.5f + 0.5f, Helper.Dot2D(ref cir.Np, ref vab) * 2.0f), 0.0f, 1.0f);
-                numSide++;
-
-                float htmin = 0, htmax = 0;
-                if (!SweepCircleCircle(position, radius, vab, cir.Position, cir.Radius, ref htmin, ref htmax))
-                {
-                    continue;
-                }
-
-                //handle overlapping obstacles
-                if (htmin < 0.0f && htmax > 0.0f)
-                {
-                    //avoid more when overlapped
-                    htmin = -htmin * 0.5f;
-                }
-
-                if (htmin >= 0.0f)
-                {
-                    //the closest obstacle is sometime ahead of us, keep track of nearest obstacle
-                    if (htmin < tmin)
-                    {
-                        tmin = htmin;
-                    }
-                }
-            }
-
-            for (int i = 0; i < numSegments; i++)
-            {
-                var seg = segments[i];
-
-                float htmin;
-                if (seg.Touch)
-                {
-                    //special case when the agent is very close to the segment
-                    Vector3 sdir = seg.Q - seg.P;
-                    Vector3 snorm = new Vector3(0, 0, 0);
-                    snorm.X = -sdir.Z;
-                    snorm.Z = sdir.X;
-
-                    //if the velocity is pointing towards the segment, no collision
-                    if (Helper.Dot2D(ref snorm, ref vcand) < 0.0f)
-                    {
-                        continue;
-                    }
-
-                    //else immediate collision
-                    htmin = 0.0f;
-                }
-                else
-                {
-                    Ray ray = new Ray(position, vcand);
-                    if (!Intersection.RayIntersectsSegment(ref ray, ref seg.P, ref seg.Q, out htmin))
-                    {
-                        continue;
-                    }
-                }
-
-                //avoid less when facing walls
-                htmin *= 2.0f;
-
-                //the closest obstacle is somewhere ahead of us, keep track of the nearest obstacle
-                if (htmin < tmin)
-                {
-                    tmin = htmin;
-                }
-            }
-
-            //normalize side bias
-            if (numSide != 0)
-            {
-                side /= numSide;
-            }
-
-            float vpen = this.parameters.WeightDesVel * (Helper.Distance2D(vcand, desiredVel) * invVmax);
-            float vcpen = this.parameters.WeightCurVel * (Helper.Distance2D(vcand, vel) * invVmax);
-            float spen = this.parameters.WeightSide * side;
-            float tpen = this.parameters.WeightToi * (1.0f / (0.1f + tmin * invHorizTime));
-
-            float penalty = vpen + vcpen + spen + tpen;
-
-            return penalty;
-        }
-        public int SampleVelocityGrid(Vector3 pos, float rad, float vmax, Vector3 vel, Vector3 desiredVel, ObstacleAvoidanceParams parameters, out Vector3 nvel)
-        {
-            this.Prepare(pos, desiredVel);
-            this.parameters = parameters;
             this.invHorizTime = 1.0f / this.parameters.HorizTime;
-            this.vmax = vmax;
-            this.invVmax = 1.0f / vmax;
+            this.vmax = maximumVelocity;
+            this.invVmax = 1.0f / maximumVelocity;
 
-            nvel = Vector3.Zero;
+            newVelocity = Vector3.Zero;
 
-            float cvx = desiredVel.X * this.parameters.VelBias;
-            float cvz = desiredVel.Z * this.parameters.VelBias;
-            float cs = vmax * 2 * (1 - this.parameters.VelBias) / (float)(this.parameters.GridSize - 1);
+            float cvx = desiredVelocity.X * this.parameters.VelBias;
+            float cvz = desiredVelocity.Z * this.parameters.VelBias;
+            float cs = maximumVelocity * 2 * (1 - this.parameters.VelBias) / (float)(this.parameters.GridSize - 1);
             float half = (this.parameters.GridSize - 1) * cs * 0.5f;
 
             float minPenalty = float.MaxValue;
@@ -336,33 +428,40 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     vcand.Y = 0;
                     vcand.Z = cvz + y * cs - half;
 
-                    if (vcand.X * vcand.X + vcand.Z * vcand.Z > (vmax + cs / 2) * (vmax + cs / 2))
+                    if (vcand.X * vcand.X + vcand.Z * vcand.Z > (maximumVelocity + cs / 2) * (maximumVelocity + cs / 2))
                     {
                         continue;
                     }
 
-                    float penalty = this.ProcessSample(vcand, cs, pos, rad, vel, desiredVel);
+                    float penalty = this.ProcessSample(vcand, cs, position, radius, velocity, desiredVelocity);
                     numSamples++;
                     if (penalty < minPenalty)
                     {
                         minPenalty = penalty;
-                        nvel = vcand;
+                        newVelocity = vcand;
                     }
                 }
             }
 
             return numSamples;
         }
-        public int SampleVelocityAdaptive(Vector3 position, float radius, float vmax, Vector3 vel, Vector3 desiredVel, ObstacleAvoidanceParams parameters, out Vector3 nvel)
+        /// <summary>
+        /// Samples velocity adaptative
+        /// </summary>
+        /// <param name="position">Agent position</param>
+        /// <param name="radius">Agent radius</param>
+        /// <param name="maximumVelocity">Agent maximum velocity</param>
+        /// <param name="velocity">Agent current velocity</param>
+        /// <param name="desiredVelocity">Agent desired velocity</param>
+        /// <param name="newVelocity">Agent new velocity</param>
+        /// <returns>Returns the number of samples used in the query</returns>
+        private int SampleVelocityAdaptive(Vector3 position, float radius, float maximumVelocity, Vector3 velocity, Vector3 desiredVelocity, out Vector3 newVelocity)
         {
-            this.Prepare(position, desiredVel);
-
-            this.parameters = parameters;
             this.invHorizTime = 1.0f / parameters.HorizTime;
-            this.vmax = vmax;
-            this.invVmax = 1.0f / vmax;
+            this.vmax = maximumVelocity;
+            this.invVmax = 1.0f / maximumVelocity;
 
-            nvel = new Vector3(0, 0, 0);
+            newVelocity = new Vector3(0, 0, 0);
 
             //build sampling pattern aligned to desired velocity
             float[] pattern = new float[(MaxPatternDivs * MaxPatternRings + 1) * 2];
@@ -375,7 +474,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
             int newNumDivs = MathUtil.Clamp(numDivs, 1, MaxPatternDivs);
             int newNumRings = MathUtil.Clamp(numRings, 1, MaxPatternRings);
             float da = (1.0f / newNumDivs) * (float)Math.PI * 2;
-            float dang = (float)Math.Atan2(desiredVel.Z, desiredVel.X);
+            float dang = (float)Math.Atan2(desiredVelocity.Z, desiredVelocity.X);
 
             //always add sample at zero
             pattern[numPatterns * 2 + 0] = 0;
@@ -396,8 +495,8 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
 
             //start sampling
-            float cr = vmax * (1.0f - parameters.VelBias);
-            Vector3 res = new Vector3(desiredVel.X * parameters.VelBias, 0, desiredVel.Z * parameters.VelBias);
+            float cr = maximumVelocity * (1.0f - parameters.VelBias);
+            Vector3 res = new Vector3(desiredVelocity.X * parameters.VelBias, 0, desiredVelocity.Z * parameters.VelBias);
             int ns = 0;
 
             for (int k = 0; k < depth; k++)
@@ -412,12 +511,12 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     vcand.Y = 0;
                     vcand.Z = res.Z + pattern[i * 2 + 1] * cr;
 
-                    if (vcand.X * vcand.X + vcand.Z * vcand.Z > (vmax + 0.001f) * (vmax + 0.001f))
+                    if (vcand.X * vcand.X + vcand.Z * vcand.Z > (maximumVelocity + 0.001f) * (maximumVelocity + 0.001f))
                     {
                         continue;
                     }
 
-                    float penalty = this.ProcessSample(vcand, cr / 10, position, radius, vel, desiredVel);
+                    float penalty = this.ProcessSample(vcand, cr / 10, position, radius, velocity, desiredVelocity);
                     ns++;
                     if (penalty < minPenalty)
                     {
@@ -431,13 +530,62 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 cr *= 0.5f;
             }
 
-            nvel = res;
+            newVelocity = res;
 
             return ns;
         }
-        public ObstacleAvoidanceParams GetParams(byte obstacleAvoidanceType)
+        /// <summary>
+        /// Process sample
+        /// </summary>
+        /// <param name="vcand"></param>
+        /// <param name="cs"></param>
+        /// <param name="position">Agent position</param>
+        /// <param name="radius">Agent radius</param>
+        /// <param name="velocity">Agent velocity</param>
+        /// <param name="desiredVelocity">Agent desired velocity</param>
+        /// <returns></returns>
+        private float ProcessSample(Vector3 vcand, float cs, Vector3 position, float radius, Vector3 velocity, Vector3 desiredVelocity)
         {
-            return this.obstacleQueryParams[obstacleAvoidanceType];
+            //find min time of impact and exit amongst all obstacles
+            float tmin = this.parameters.HorizTime;
+            float side = 0;
+
+            for (int i = 0; i < this.numCircles; i++)
+            {
+                var circle = this.circles[i];
+
+                float htmin;
+                if (circle.ProcessSample(position, radius, vcand, velocity, out htmin, out side))
+                {
+                    //the closest obstacle is sometime ahead of us, keep track of nearest obstacle
+                    if (htmin < tmin)
+                    {
+                        tmin = htmin;
+                    }
+                }
+            }
+
+            for (int i = 0; i < numSegments; i++)
+            {
+                var segment = segments[i];
+
+                float htmin;
+                if (segment.ProcessSample(position, radius, vcand, velocity, out htmin, out side))
+                {
+                    //the closest obstacle is sometime ahead of us, keep track of nearest obstacle
+                    if (htmin < tmin)
+                    {
+                        tmin = htmin;
+                    }
+                }
+            }
+
+            float vpen = this.parameters.WeightDesVel * (Helper.Distance2D(vcand, desiredVelocity) * invVmax);
+            float vcpen = this.parameters.WeightCurVel * (Helper.Distance2D(vcand, velocity) * invVmax);
+            float spen = this.parameters.WeightSide * side;
+            float tpen = this.parameters.WeightToi * (1.0f / (0.1f + tmin * invHorizTime));
+
+            return vpen + vcpen + spen + tpen;
         }
     }
 }
