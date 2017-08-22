@@ -195,7 +195,7 @@ namespace Engine.PathFinding.NavMesh
             return this.agentTypeData[agent].Query.IsWalkable(position, out nearest);
         }
 
-        internal Crowds.Crowd AddCrowd(AgentType agent)
+        internal Crowds.Crowd AddCrowd(bool adaptative, AgentType agent)
         {
             if (!this.agentTypeData.ContainsKey(agent))
             {
@@ -204,7 +204,7 @@ namespace Engine.PathFinding.NavMesh
 
             var navMesh = this.agentTypeData[agent].NavigationMesh;
 
-            return new Crowds.Crowd(1, ref navMesh);
+            return new Crowds.Crowd(10, adaptative, ref navMesh);
         }
         /// <summary>
         /// Gets text representation of instance

@@ -208,6 +208,12 @@
     <Compile Include="PathFinding\NavMesh\Crowds\AgentState.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\Crowd.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\CrowdNeighbor.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\IObstacle.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\IObstacleAvoidanceQuery.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\ObstacleAvoidanceQueryAdaptative.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\ObstacleAvoidanceQueryGrid.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\ObstacleCircle.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\ObstacleSegment.cs" />
     <Compile Include="PathFinding\NavMesh\FindPathOptions.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\LocalBoundary.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMeshQueryFilter.cs" />

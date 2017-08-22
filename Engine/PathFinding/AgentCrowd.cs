@@ -42,7 +42,7 @@ namespace Engine.PathFinding
             this.scene = scene;
             this.navigationMesh = navigationMesh;
 
-            this.crowd = navigationMesh.AddCrowd(agentType);
+            this.crowd = navigationMesh.AddCrowd(true, agentType);
         }
 
         /// <summary>

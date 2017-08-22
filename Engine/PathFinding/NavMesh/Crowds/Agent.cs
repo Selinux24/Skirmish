@@ -711,7 +711,15 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 {
                     var neighbor = this.neighbors[j].Neighbor;
 
-                    this.Crowd.ObstacleQuery.AddCircle(neighbor.Position, neighbor.Parameters.Radius, neighbor.velocity, neighbor.desiredVelocity);
+                    var circle = new ObstacleCircle()
+                    {
+                        Position = neighbor.Position,
+                        Radius = neighbor.Parameters.Radius,
+                        Vel = neighbor.velocity,
+                        DesiredVel = neighbor.desiredVelocity,
+                    };
+
+                    this.Crowd.ObstacleQuery.AddObstacle(circle);
                 }
 
                 //add neighbor segments as obstacles
@@ -721,7 +729,13 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
                     if (Helper.Area2D(this.Position, segment.Start, segment.End) >= 0.0f)
                     {
-                        this.Crowd.ObstacleQuery.AddSegment(segment.Start, segment.End);
+                        var seg = new ObstacleSegment()
+                        {
+                            P = segment.Start,
+                            Q = segment.End,
+                        };
+
+                        this.Crowd.ObstacleQuery.AddObstacle(seg);
                     }
                 }
 

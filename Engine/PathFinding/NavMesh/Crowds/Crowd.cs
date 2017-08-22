@@ -28,8 +28,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// Constructor
         /// </summary>
         /// <param name="maxAgentRadius">Maximum agent radius</param>
+        /// <param name="adaptative">Sets obstacle avoidance mode</param>
         /// <param name="navMesh">Tiled navigation mesh</param>
-        public Crowd(float maxAgentRadius, ref TiledNavigationMesh navMesh)
+        public Crowd(float maxAgentRadius, bool adaptative, ref TiledNavigationMesh navMesh)
         {
             this.Extents = new Vector3(maxAgentRadius * 2.0f, maxAgentRadius * 1.5f, maxAgentRadius * 2.0f);
 
@@ -37,7 +38,14 @@ namespace Engine.PathFinding.NavMesh.Crowds
             this.proximityGrid = new ProximityGrid<Agent>(128 * 4, maxAgentRadius * 3);
 
             //allocate obstacle avoidance query
-            this.ObstacleQuery = new ObstacleAvoidanceQuery(6, 8);
+            if (adaptative)
+            {
+                this.ObstacleQuery = new ObstacleAvoidanceQueryAdaptative(6, 8);
+            }
+            else
+            {
+                this.ObstacleQuery = new ObstacleAvoidanceQueryGrid(6, 8);
+            }
 
             this.pathQueue = new PathQueue(4096, ref navMesh);
 
