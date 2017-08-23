@@ -35,13 +35,18 @@
         private PathQuery[] queue;
         private int nextHandle = 1;
         private int queueHead;
-        private NavigationMeshQuery navquery;
-        private NavigationMeshQueryFilter navqueryfilter;
+        private NavigationMeshQuery navQuery;
+        private NavigationMeshQueryFilter navQueryFilter;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="maxSearchNodeCount">Maximum search node count</param>
+        /// <param name="nav">Tiled navigation mesh</param>
         public PathQueue(int maxSearchNodeCount, ref TiledNavigationMesh nav)
         {
-            this.navquery = new NavigationMeshQuery(nav, maxSearchNodeCount);
-            this.navqueryfilter = new NavigationMeshQueryFilter();
+            this.navQuery = new NavigationMeshQuery(nav, maxSearchNodeCount);
+            this.navQueryFilter = new NavigationMeshQueryFilter();
 
             this.queue = new PathQuery[MaxQueue];
             for (int i = 0; i < MaxQueue; i++)
@@ -53,6 +58,10 @@
             this.queueHead = 0;
         }
 
+        /// <summary>
+        /// Updates the queue
+        /// </summary>
+        /// <param name="maxIters">Maximum iterations</param>
         public void Update(int maxIters)
         {
             //update path request until there is nothing left to update
@@ -61,53 +70,52 @@
 
             for (int i = 0; i < MaxQueue; i++)
             {
-                PathQuery q = queue[queueHead % MaxQueue];
+                var q = this.queue[this.queueHead % MaxQueue];
 
                 //skip inactive requests
-                if (q.Index == 0)
+                if (q.Index != 0)
                 {
-                    queueHead++;
-                    continue;
-                }
-
-                //handle completed request
-                if (q.Status == Status.Success || q.Status == Status.Failure)
-                {
-                    q.KeepAlive++;
-                    if (q.KeepAlive > MaxKeepAlive)
+                    //handle completed request
+                    if (q.Status != Status.Success && q.Status != Status.Failure)
                     {
-                        q.Index = 0;
-                        q.Status = 0;
+                        //handle query start
+                        if (q.Status == 0)
+                        {
+                            q.Status = navQuery.InitSlicedFindPath(q.Start, q.End, navQueryFilter, FindPathOptions.None).ToStatus();
+                        }
+
+                        //handle query in progress
+                        if (q.Status == Status.InProgress)
+                        {
+                            int iters = 0;
+                            q.Status = navQuery.UpdateSlicedFindPath(iterCount, ref iters).ToStatus();
+
+                            iterCount -= iters;
+                        }
+
+                        if (q.Status == Status.Success)
+                        {
+                            q.Status = navQuery.FinalizeSlicedFindPath(q.Path).ToStatus();
+                        }
+
+                        if (iterCount <= 0)
+                        {
+                            break;
+                        }
                     }
+                    else
+                    {
+                        q.KeepAlive++;
 
-                    queueHead++;
-                    continue;
+                        if (q.KeepAlive > MaxKeepAlive)
+                        {
+                            q.Index = 0;
+                            q.Status = 0;
+                        }
+                    }
                 }
 
-                //handle query start
-                if (q.Status == 0)
-                {
-                    q.Status = navquery.InitSlicedFindPath(q.Start, q.End, navqueryfilter, FindPathOptions.None).ToStatus();
-                }
-
-                //handle query in progress
-                if (q.Status == Status.InProgress)
-                {
-                    int iters = 0;
-                    q.Status = navquery.UpdateSlicedFindPath(iterCount, ref iters).ToStatus();
-
-                    iterCount -= iters;
-                }
-
-                if (q.Status == Status.Success)
-                {
-                    q.Status = navquery.FinalizeSlicedFindPath(q.Path).ToStatus();
-                }
-
-                if (iterCount <= 0)
-                    break;
-
-                queueHead++;
+                this.queueHead++;
             }
         }
         /// <summary>
@@ -122,7 +130,7 @@
             int slot = -1;
             for (int i = 0; i < MaxQueue; i++)
             {
-                if (queue[i].Index == 0)
+                if (this.queue[i].Index == 0)
                 {
                     slot = i;
                     break;
@@ -131,12 +139,17 @@
 
             //could not find slot
             if (slot == -1)
+            {
                 return PathQueue.Invalid;
+            }
 
-            int index = nextHandle++;
-            if (nextHandle == 0) nextHandle++;
+            int index = this.nextHandle++;
+            if (this.nextHandle == 0)
+            {
+                this.nextHandle++;
+            }
 
-            PathQuery q = queue[slot];
+            PathQuery q = this.queue[slot];
             q.Index = index;
             q.Start = start;
             q.End = end;
@@ -145,7 +158,7 @@
             q.PathCount = 0;
             q.KeepAlive = 0;
 
-            queue[slot] = q;
+            this.queue[slot] = q;
 
             return index;
         }
@@ -158,21 +171,29 @@
         {
             for (int i = 0; i < MaxQueue; i++)
             {
-                if (queue[i].Index == index)
-                    return queue[i].Status;
+                if (this.queue[i].Index == index)
+                {
+                    return this.queue[i].Status;
+                }
             }
 
             return Status.Failure;
         }
+        /// <summary>
+        /// Gets the path result by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <param name="path">Polygon path result</param>
+        /// <returns>Returns the path result by index</returns>
         public bool GetPathResult(int index, out PolygonPath path)
         {
             path = null;
 
             for (int i = 0; i < MaxQueue; i++)
             {
-                if (queue[i].Index == index)
+                if (this.queue[i].Index == index)
                 {
-                    PathQuery q = queue[i];
+                    PathQuery q = this.queue[i];
 
                     //free request for reuse
                     q.Index = 0;
@@ -180,7 +201,7 @@
 
                     path = new PolygonPath(q.Path);
 
-                    queue[i] = q;
+                    this.queue[i] = q;
 
                     return true;
                 }

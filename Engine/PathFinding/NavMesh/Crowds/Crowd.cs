@@ -87,7 +87,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
                 //update async move requests and path finder
                 {
-                    this.optimizationQueue.Clear();
+                    this.pathResolveQueue.Clear();
 
                     //fire off new requests
                     this.agents
@@ -103,7 +103,12 @@ namespace Engine.PathFinding.NavMesh.Crowds
                         });
 
                     //update requests
-                    this.UpdatePathQueue();
+                    for (int i = 0; i < this.pathResolveQueue.Count; i++)
+                    {
+                        this.pathResolveQueue[i].RequestPathUpdate(this.pathQueue);
+                    }
+
+                    this.pathQueue.Update(MaximumIteratorsPerUpdate);
 
                     //process path results
                     this.agents
@@ -132,7 +137,10 @@ namespace Engine.PathFinding.NavMesh.Crowds
                             }
                         });
 
-                    this.UpdateOptimizationQueue(this.optimizationQueue);
+                    for (int i = 0; i < this.optimizationQueue.Count; i++)
+                    {
+                        this.optimizationQueue[i].OptimizePathTopology();
+                    }
                 }
 
                 //register agents to proximity grid
@@ -181,7 +189,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
                     .FindAll(agent => agent.State == AgentState.Walking && (agent.TargetState != TargetState.None))
                     .ForEach(agent =>
                     {
-                        agent.Steer2(this.agents);
+                        agent.Steer2();
                     });
 
                 //velocity planning
@@ -225,31 +233,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
                             agent.UpdateOffmeshConnections(timeDelta);
                         });
                 }
-            }
-        }
-        /// <summary>
-        /// Updates the path update requests queue
-        /// </summary>
-        /// <param name="queue">The queue to request for path update</param>
-        /// <param name="numQueue">Number of elements in the queue</param>
-        private void UpdatePathQueue()
-        {
-            for (int i = 0; i < this.pathResolveQueue.Count; i++)
-            {
-                this.pathResolveQueue[i].RequestPathUpdate(this.pathQueue);
-            }
-
-            this.pathQueue.Update(MaximumIteratorsPerUpdate);
-        }
-        /// <summary>
-        /// Updates the topology optimization queue
-        /// </summary>
-        /// <param name="queue">The queue</param>
-        private void UpdateOptimizationQueue(FixedArray<Agent> queue)
-        {
-            for (int i = 0; i < queue.Count; i++)
-            {
-                queue[i].OptimizePathTopology();
             }
         }
 

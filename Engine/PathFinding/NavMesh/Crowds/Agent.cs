@@ -187,18 +187,24 @@ namespace Engine.PathFinding.NavMesh.Crowds
         private bool targetReplan;
 
         private float desiredSpeed;
-        private Vector3 disp;
+        private Vector3 diverging;
         private Vector3 desiredVelocity;
         private Vector3 nVelocity;
         private Vector3 velocity;
-
-        public float TopologyOptTime { get; set; }
-        public float TargetReplanTime { get; set; }
 
         /// <summary>
         /// Base crowd
         /// </summary>
         protected Crowd Crowd = null;
+
+        /// <summary>
+        /// Topology optimization time
+        /// </summary>
+        public float TopologyOptTime { get; set; }
+        /// <summary>
+        /// Target replan time
+        /// </summary>
+        public float TargetReplanTime { get; set; }
 
         /// <summary>
         /// Gets the agent parameters
@@ -269,7 +275,11 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
         }
 
-
+        /// <summary>
+        /// Resets agent state to position
+        /// </summary>
+        /// <param name="reference">Polygon reference</param>
+        /// <param name="nearest">Nearest position</param>
         public void ResetToPosition(PolyId reference, Vector3 nearest)
         {
             this.corridor.Reset(reference, nearest);
@@ -297,7 +307,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
             this.TargetState = TargetState.None;
         }
-
         /// <summary>
         /// Checks plan validity
         /// </summary>
@@ -405,7 +414,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 }
             }
         }
-
         /// <summary>
         /// Request a new move target
         /// </summary>
@@ -427,7 +435,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
             return false;
         }
-
         /// <summary>
         /// Move agent to position
         /// </summary>
@@ -448,20 +455,78 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
         }
 
-
+        /// <summary>
+        /// Updates the collision state
+        /// </summary>
         public void UpdateCollision()
         {
-            if (Helper.Distance2D(this.Position, this.boundary.Center) > this.Parameters.UpdateThreshold || !this.boundary.IsValid(this.Crowd.NavQuery))
+            float dist = Helper.Distance2D(this.Position, this.boundary.Center);
+
+            if (dist > this.Parameters.UpdateThreshold || !this.boundary.IsValid(this.Crowd.NavQuery))
             {
                 this.boundary.Update(this.corridor.FirstPoly, this.Position, this.Parameters.CollisionQueryRange, this.Crowd.NavQuery);
             }
         }
-
-        public void SetNeighbors(Agent[] neighborAgents, int count)
+        /// <summary>
+        /// Handle collisions
+        /// </summary>
+        /// <param name="agents">Agent list</param>
+        public void HandleCollisions(List<Agent> agents)
         {
-            this.neighbors = GetNeighbors(this, neighborAgents, count);
+            int idx0 = agents.IndexOf(this);
+
+            this.diverging = Vector3.Zero;
+
+            float w = 0;
+
+            for (int i = 0; i < this.neighbors.Length; i++)
+            {
+                Agent neighbor = this.neighbors[i].Neighbor;
+                int idx1 = agents.IndexOf(neighbor);
+
+                Vector3 diff = this.Position - neighbor.Position;
+                diff.Y = 0;
+
+                float dist = diff.Length();
+                float radius = this.Parameters.Radius + neighbor.Parameters.Radius;
+                if (dist <= radius)
+                {
+                    float pen = radius - dist;
+                    if (dist < 0.0001f)
+                    {
+                        //agents on top of each other, try to choose diverging separation directions
+                        if (idx0 > idx1)
+                        {
+                            diff = new Vector3(-this.desiredVelocity.Z, 0, this.desiredVelocity.X);
+                        }
+                        else
+                        {
+                            diff = new Vector3(this.desiredVelocity.Z, 0, -this.desiredVelocity.X);
+                        }
+
+                        pen = 0.01f;
+                    }
+                    else
+                    {
+                        pen = (1.0f / dist) * (pen * 0.5f) * CollisionResolveFactor;
+                    }
+
+                    this.diverging = this.diverging + diff * pen;
+
+                    w += 1.0f;
+                }
+            }
+
+            if (w > 0.0001f)
+            {
+                this.diverging = this.diverging * (1.0f / w);
+            }
         }
 
+        /// <summary>
+        /// Triggers the offmesh connections
+        /// </summary>
+        /// <returns>Offmesh connections</returns>
         public bool TriggerOffmeshConnection()
         {
             if (OverOffmeshConnection(this))
@@ -486,7 +551,60 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
             return false;
         }
+        /// <summary>
+        /// Updates offmesh connections
+        /// </summary>
+        /// <param name="timeDelta">Time delta</param>
+        public void UpdateOffmeshConnections(float timeDelta)
+        {
+            var anim = this.animation;
 
+            if (anim.Active)
+            {
+                anim.T += timeDelta;
+                if (anim.T > anim.TMax)
+                {
+                    //reset animation
+                    anim.Active = false;
+
+                    //prepare agent for walking
+                    this.State = AgentState.Walking;
+                }
+                else
+                {
+                    //update position
+                    float ta = anim.TMax * 0.15f;
+                    float tb = anim.TMax;
+                    if (anim.T < ta)
+                    {
+                        float u = Helper.Normalize(anim.T, 0.0f, ta);
+                        this.Position = Vector3.Lerp(anim.InitPos, anim.StartPos, u);
+                    }
+                    else
+                    {
+                        float u = Helper.Normalize(anim.T, ta, tb);
+                        this.Position = Vector3.Lerp(anim.StartPos, anim.EndPos, u);
+                    }
+
+                    this.velocity = Vector3.Zero;
+                    this.desiredVelocity = Vector3.Zero;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets neighbors agents
+        /// </summary>
+        /// <param name="neighborAgents">Neighbors agents</param>
+        /// <param name="count">Neighbor count</param>
+        public void SetNeighbors(Agent[] neighborAgents, int count)
+        {
+            this.neighbors = GetNeighbors(this, neighborAgents, count);
+        }
+
+        /// <summary>
+        /// Steering first pass
+        /// </summary>
         public void Steer1()
         {
             //find corners for steering
@@ -499,8 +617,10 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 this.corridor.OptimizePathVisibility(target, this.Parameters.PathOptimizationRange, this.Crowd.NavQuery);
             }
         }
-
-        public void Steer2(List<Agent> agents)
+        /// <summary>
+        /// Steering second pass
+        /// </summary>
+        public void Steer2()
         {
             Vector3 dvel = Vector3.Zero;
 
@@ -582,7 +702,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
             //set the desired velocity
             this.desiredVelocity = dvel;
         }
-
+        /// <summary>
+        /// Velocity planning
+        /// </summary>
         public void VelocityPlanning()
         {
             if ((this.Parameters.UpdateFlags & UpdateFlags.ObstacleAvoidance) != 0)
@@ -640,97 +762,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
         }
 
-        public void HandleCollisions(List<Agent> agents)
-        {
-            int idx0 = agents.IndexOf(this);
-
-            this.disp = Vector3.Zero;
-
-            float w = 0;
-
-            for (int i = 0; i < this.neighbors.Length; i++)
-            {
-                Agent neighbor = this.neighbors[i].Neighbor;
-                int idx1 = agents.IndexOf(neighbor);
-
-                Vector3 diff = this.Position - neighbor.Position;
-                diff.Y = 0;
-
-                float dist = diff.LengthSquared();
-                if (dist > (this.Parameters.Radius + neighbor.Parameters.Radius) * (this.Parameters.Radius + neighbor.Parameters.Radius))
-                {
-                    continue;
-                }
-
-                dist = (float)Math.Sqrt(dist);
-                float pen = (this.Parameters.Radius + neighbor.Parameters.Radius) - dist;
-                if (dist < 0.0001f)
-                {
-                    //agents on top of each other, try to choose diverging separation directions
-                    if (idx0 > idx1)
-                    {
-                        diff = new Vector3(-this.desiredVelocity.Z, 0, this.desiredVelocity.X);
-                    }
-                    else
-                    {
-                        diff = new Vector3(this.desiredVelocity.Z, 0, -this.desiredVelocity.X);
-                    }
-                    pen = 0.01f;
-                }
-                else
-                {
-                    pen = (1.0f / dist) * (pen * 0.5f) * CollisionResolveFactor;
-                }
-
-                this.disp = this.disp + diff * pen;
-
-                w += 1.0f;
-            }
-
-            if (w > 0.0001f)
-            {
-                float iw = 1.0f / w;
-                this.disp = this.disp * iw;
-            }
-        }
-
-        public void UpdateOffmeshConnections(float timeDelta)
-        {
-            var anim = this.animation;
-
-            if (anim.Active)
-            {
-                anim.T += timeDelta;
-                if (anim.T > anim.TMax)
-                {
-                    //reset animation
-                    anim.Active = false;
-
-                    //prepare agent for walking
-                    this.State = AgentState.Walking;
-                }
-                else
-                {
-                    //update position
-                    float ta = anim.TMax * 0.15f;
-                    float tb = anim.TMax;
-                    if (anim.T < ta)
-                    {
-                        float u = Helper.Normalize(anim.T, 0.0f, ta);
-                        this.Position = Vector3.Lerp(anim.InitPos, anim.StartPos, u);
-                    }
-                    else
-                    {
-                        float u = Helper.Normalize(anim.T, ta, tb);
-                        this.Position = Vector3.Lerp(anim.StartPos, anim.EndPos, u);
-                    }
-
-                    this.velocity = Vector3.Zero;
-                    this.desiredVelocity = Vector3.Zero;
-                }
-            }
-        }
-
+        /// <summary>
+        /// Resolve path requesting state
+        /// </summary>
         public void ResolveRequesting()
         {
             if (this.TargetState == TargetState.Requesting)
@@ -804,7 +838,10 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 }
             }
         }
-
+        /// <summary>
+        /// Resolve waiting for path state
+        /// </summary>
+        /// <param name="pathQueue"></param>
         public void ResolveWaitingForPath(PathQueue pathQueue)
         {
             //poll path queue
@@ -906,6 +943,10 @@ namespace Engine.PathFinding.NavMesh.Crowds
             }
         }
 
+        /// <summary>
+        /// Request path update
+        /// </summary>
+        /// <param name="pathQueue">Path queue</param>
         public void RequestPathUpdate(PathQueue pathQueue)
         {
             var startPoint = new PathPoint(this.corridor.LastPoly, this.corridor.Target);
@@ -917,22 +958,30 @@ namespace Engine.PathFinding.NavMesh.Crowds
                 this.TargetState = TargetState.WaitingForPath;
             }
         }
-
+        /// <summary>
+        /// Optimizes the path topology
+        /// </summary>
         public void OptimizePathTopology()
         {
             this.corridor.OptimizePathTopology(this.Crowd.NavQuery, this.Crowd.NavQueryFilter);
             this.TopologyOptTime = 0.0f;
         }
-
-
+        /// <summary>
+        /// Gets the straight path
+        /// </summary>
+        /// <returns>Returns the straight path</returns>
         public StraightPath GetStraightPath()
         {
             return this.corridor.FindCorners(this.Crowd.NavQuery);
         }
 
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Agent. Position {0}", this.Position);
+            return string.Format("Agent. Position: {0}; Target: {1}", this.Position, this.TargetPosition);
         }
     }
 }

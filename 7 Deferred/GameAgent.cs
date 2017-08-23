@@ -52,7 +52,9 @@ namespace DeferredTest
                 this.model.Visible = value;
             }
         }
-
+        /// <summary>
+        /// Gets if the agent has a path to follow
+        /// </summary>
         public bool HasPath
         {
             get
@@ -70,7 +72,9 @@ namespace DeferredTest
                 return this.model.Get<ITransformable3D>()?.Manipulator;
             }
         }
-
+        /// <summary>
+        /// Maximum speed
+        /// </summary>
         public float MaximumSpeed
         {
             get
@@ -119,24 +123,26 @@ namespace DeferredTest
             this.controller?.UpdateManipulator(context.GameTime, this.Manipulator);
         }
         /// <summary>
-        /// Sets a path to follow
+        /// Updates the specified manipulator
         /// </summary>
-        /// <param name="path">Path</param>
-        public void FollowPath(PathFindingPath path)
-        {
-            this.controller.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
-        }
-
+        /// <param name="gameTime">Game time</param>
+        /// <param name="manipulator">Manipulator</param>
         public void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
         {
             this.controller.UpdateManipulator(gameTime, manipulator);
         }
-
+        /// <summary>
+        /// Follow the specified path
+        /// </summary>
+        /// <param name="path">Path to follow</param>
+        /// <param name="time">Path time</param>
         public void Follow(IControllerPath path, float time = 0)
         {
             this.controller.Follow(path, time);
         }
-
+        /// <summary>
+        /// Clears the path
+        /// </summary>
         public void Clear()
         {
             this.controller.Clear();

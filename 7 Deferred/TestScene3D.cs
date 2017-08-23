@@ -178,7 +178,13 @@ namespace DeferredTest
                 var tank2 = this.AddComponent<Model>(desc);
                 tank2.Transform.SetScale(0.2f, true);
 
-                var tankController = new SteerManipulatorController()
+                var tankController1 = new SteerManipulatorController()
+                {
+                    MaximumForce = 0.5f,
+                    MaximumSpeed = 7.5f,
+                    ArrivingRadius = 7.5f,
+                };
+                var tankController2 = new SteerManipulatorController()
                 {
                     MaximumForce = 0.5f,
                     MaximumSpeed = 7.5f,
@@ -193,8 +199,8 @@ namespace DeferredTest
                     MaxClimb = tankbbox.GetY() * 0.55f,
                 };
 
-                var agent1 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank1, tankController);
-                var agent2 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank2, tankController);
+                var agent1 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank1, tankController1);
+                var agent2 = new GameAgent<SteerManipulatorController>(this.tankAgentType, tank2, tankController2);
                 this.tankAgent1 = this.AddComponent(agent1, new SceneObjectDescription() { });
                 this.tankAgent2 = this.AddComponent(agent2, new SceneObjectDescription() { });
 

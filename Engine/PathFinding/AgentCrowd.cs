@@ -74,26 +74,29 @@ namespace Engine.PathFinding
 
                     if (agent.State == AgentState.Walking && agent.TargetState == TargetState.Valid)
                     {
-                        List<Vector3> verts = new List<Vector3>();
-                        List<Vector3> norms = new List<Vector3>();
-
-                        verts.Add(item.Manipulator.Position);
-                        norms.Add(item.Manipulator.Up);
-
-                        var path = agent.GetStraightPath();
-
-                        for (int p = 0; p < path.Count; p++)
+                        if (!item.HasPath)
                         {
-                            var point = path[p];
+                            List<Vector3> verts = new List<Vector3>();
+                            List<Vector3> norms = new List<Vector3>();
 
-                            verts.Add(point.Point.Position);
-                            norms.Add(Vector3.Up);
+                            verts.Add(item.Manipulator.Position);
+                            norms.Add(item.Manipulator.Up);
+
+                            var path = agent.GetStraightPath();
+
+                            for (int p = 0; p < path.Count; p++)
+                            {
+                                var point = path[p];
+
+                                verts.Add(point.Point.Position);
+                                norms.Add(Vector3.Up);
+                            }
+
+                            var np = new NormalPath(verts.ToArray(), norms.ToArray());
+                            item.Follow(np);
+
+                            Console.WriteLine("AgentCrowd[{0}].Follow", i);
                         }
-
-                        var np = new NormalPath(verts.ToArray(), norms.ToArray());
-                        item.Follow(np);
-
-                        Console.WriteLine("AgentCrowd[{0}].Follow", i);
                     }
                     else
                     {
@@ -145,6 +148,11 @@ namespace Engine.PathFinding
         public void MoveTo(Vector3 position, float radius)
         {
             this.CrowdLatency = -1;
+
+            for (int i = 0; i < this.agents.Count; i++)
+            {
+                this.agents[i].Item1.Clear();
+            }
 
             this.crowd.MoveTo(position, radius);
         }
