@@ -583,7 +583,7 @@ namespace DeferredTest
                     //    this.tankAgent.Instance.FollowPath(p);
                     //}
 
-                    this.crowd.MoveTo(position, 0.25f);
+                    this.crowd.MoveTo(position, 1f);
                 }
             }
 

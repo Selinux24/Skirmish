@@ -149,6 +149,7 @@
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="BoundingRectanglei.cs" />
+    <Compile Include="Collections\FixedArray.cs" />
     <Compile Include="Collections\ProximityGridItem.cs" />
     <Compile Include="Common\BaseSceneObject.cs" />
     <Compile Include="Collections\Generic\PickingQuadTree.cs" />
@@ -214,6 +215,8 @@
     <Compile Include="PathFinding\NavMesh\Crowds\ObstacleAvoidanceQueryGrid.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\ObstacleCircle.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\ObstacleSegment.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\PathOptimizationQueue.cs" />
+    <Compile Include="PathFinding\NavMesh\Crowds\PathResolveQueue.cs" />
     <Compile Include="PathFinding\NavMesh\FindPathOptions.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\LocalBoundary.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMeshQueryFilter.cs" />

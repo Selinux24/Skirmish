@@ -12,14 +12,18 @@ namespace Engine.PathFinding.NavMesh.Crowds
     {
         private const int MaximumIteratorsPerUpdate = 100;
         private const int MaximumNeighbors = 32;
-        private const int PathMaximumAgents = 8;
-        private const int TopologyOptimizationMaximumAgents = 1;
+        /// <summary>
+        /// Topology optimization threshold in seconds
+        /// </summary>
+        private const float OptimizationTimeThresshold = 0.5f;
 
-        private List<Agent> agents = new List<Agent>();
-        private PathQueue pathQueue;
+        private List<Agent> agents;
         private ProximityGrid<Agent> proximityGrid;
+        private PathQueue pathQueue;
+        private PathResolveQueue pathResolveQueue;
+        private PathOptimizationQueue optimizationQueue;
 
-        public readonly Vector3 Extents;
+        public readonly Vector3 HalfExtents;
         public readonly NavigationMeshQuery NavQuery;
         public readonly NavigationMeshQueryFilter NavQueryFilter;
         public readonly ObstacleAvoidanceQuery ObstacleQuery;
@@ -32,12 +36,29 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// <param name="navMesh">Tiled navigation mesh</param>
         public Crowd(float maxAgentRadius, bool adaptative, ref TiledNavigationMesh navMesh)
         {
-            this.Extents = new Vector3(maxAgentRadius * 2.0f, maxAgentRadius * 1.5f, maxAgentRadius * 2.0f);
+            //Initialize agent list
+            this.agents = new List<Agent>();
 
-            //initialize proximity grid
+            //Initialize proximity grid
             this.proximityGrid = new ProximityGrid<Agent>(128 * 4, maxAgentRadius * 3);
 
-            //allocate obstacle avoidance query
+            //Initialize path queue
+            this.pathQueue = new PathQueue(4096, ref navMesh);
+            //Initialize path resolve queue
+            this.pathResolveQueue = new PathResolveQueue();
+            //Initialize path optimization queue
+            this.optimizationQueue = new PathOptimizationQueue();
+
+            //Initialize half extents
+            this.HalfExtents = new Vector3(maxAgentRadius * 2.0f, maxAgentRadius * 1.5f, maxAgentRadius * 2.0f);
+
+            //Allocate nav mesh query
+            this.NavQuery = new NavigationMeshQuery(navMesh, 512);
+
+            //Initialize filter
+            this.NavQueryFilter = null;
+
+            //Allocate obstacle avoidance query
             if (adaptative)
             {
                 this.ObstacleQuery = new ObstacleAvoidanceQueryAdaptative(6, 8);
@@ -46,14 +67,6 @@ namespace Engine.PathFinding.NavMesh.Crowds
             {
                 this.ObstacleQuery = new ObstacleAvoidanceQueryGrid(6, 8);
             }
-
-            this.pathQueue = new PathQueue(4096, ref navMesh);
-
-            //allocate nav mesh query
-            this.NavQuery = new NavigationMeshQuery(navMesh, 512);
-
-            //initialize filter
-            this.NavQueryFilter = null;
         }
 
         /// <summary>
@@ -74,33 +87,36 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
                 //update async move requests and path finder
                 {
-                    int numQueue = 0;
-                    Agent[] queue = new Agent[PathMaximumAgents];
+                    this.optimizationQueue.Clear();
 
                     //fire off new requests
                     this.agents
                         .FindAll(agent => agent.IsActive && agent.State != AgentState.Invalid)
                         .ForEach(agent =>
                         {
-                            agent.ResolveRequesting(queue, ref numQueue);
+                            agent.ResolveRequesting();
+
+                            if (agent.TargetState == TargetState.WaitingForQueue)
+                            {
+                                this.pathResolveQueue.AddToPathQueue(agent);
+                            }
                         });
 
                     //update requests
-                    this.UpdatePathQueue(queue, numQueue);
+                    this.UpdatePathQueue();
 
                     //process path results
                     this.agents
                         .FindAll(agent => agent.IsActive && agent.TargetState == TargetState.WaitingForPath)
                         .ForEach(agent =>
                         {
-                            agent.ResolveWaitingForPath(pathQueue);
+                            agent.ResolveWaitingForPath(this.pathQueue);
                         });
                 }
 
                 //optimize path topology
                 {
-                    int numQueue = 0;
-                    Agent[] queue = new Agent[TopologyOptimizationMaximumAgents];
+                    this.optimizationQueue.Clear();
 
                     this.agents
                         .FindAll(agent =>
@@ -109,10 +125,14 @@ namespace Engine.PathFinding.NavMesh.Crowds
                             ((agent.Parameters.UpdateFlags & UpdateFlags.OptimizeTopo) != 0))
                         .ForEach(agent =>
                         {
-                            agent.OptimizeTopology(timeDelta, queue, ref numQueue);
+                            agent.TopologyOptTime += timeDelta;
+                            if (agent.TopologyOptTime >= OptimizationTimeThresshold)
+                            {
+                                this.optimizationQueue.AddToOptQueue(agent);
+                            }
                         });
 
-                    this.UpdateOptimizationQueue(queue, numQueue);
+                    this.UpdateOptimizationQueue(this.optimizationQueue);
                 }
 
                 //register agents to proximity grid
@@ -212,11 +232,11 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// </summary>
         /// <param name="queue">The queue to request for path update</param>
         /// <param name="numQueue">Number of elements in the queue</param>
-        private void UpdatePathQueue(Agent[] queue, int numQueue)
+        private void UpdatePathQueue()
         {
-            for (int i = 0; i < numQueue; i++)
+            for (int i = 0; i < this.pathResolveQueue.Count; i++)
             {
-                queue[i].RequestPathUpdate(this.pathQueue);
+                this.pathResolveQueue[i].RequestPathUpdate(this.pathQueue);
             }
 
             this.pathQueue.Update(MaximumIteratorsPerUpdate);
@@ -225,10 +245,9 @@ namespace Engine.PathFinding.NavMesh.Crowds
         /// Updates the topology optimization queue
         /// </summary>
         /// <param name="queue">The queue</param>
-        /// <param name="numQueue">Number of elements in the queue</param>
-        private void UpdateOptimizationQueue(Agent[] queue, int numQueue)
+        private void UpdateOptimizationQueue(FixedArray<Agent> queue)
         {
-            for (int i = 0; i < numQueue; i++)
+            for (int i = 0; i < queue.Count; i++)
             {
                 queue[i].OptimizePathTopology();
             }
@@ -246,7 +265,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
 
             //Find nearest position on the navmesh and place the agent there
             PathPoint nearest;
-            if (this.NavQuery.FindNearestPoly(position, this.Extents, out nearest))
+            if (this.NavQuery.FindNearestPoly(position, this.HalfExtents, out nearest))
             {
                 agent.ResetToPosition(nearest.Polygon, nearest.Position);
             }
@@ -277,7 +296,7 @@ namespace Engine.PathFinding.NavMesh.Crowds
         {
             //Get the polygon that the starting point is in
             PathPoint startPt;
-            if (this.NavQuery.FindNearestPoly(position, this.Extents, out startPt))
+            if (this.NavQuery.FindNearestPoly(position, this.HalfExtents, out startPt))
             {
                 for (int i = 0; i < this.agents.Count; i++)
                 {
