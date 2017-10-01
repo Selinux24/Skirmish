@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Serialization;
@@ -117,6 +118,22 @@ namespace Engine
             array2.CopyTo(newArray, array1.Length);
 
             return newArray;
+        }
+        /// <summary>
+        /// Converts the byte array to a structure
+        /// </summary>
+        /// <typeparam name="T">Structure type</typeparam>
+        /// <param name="bytes">Bytes</param>
+        /// <param name="start">Start intex</param>
+        /// <param name="count">Element count</param>
+        /// <returns>Gets the generated struct</returns>
+        public static T ToStructure<T>(this byte[] bytes, int start, int count) where T : struct
+        {
+            byte[] temp = bytes.Skip(start).Take(count).ToArray();
+            GCHandle handle = GCHandle.Alloc(temp, GCHandleType.Pinned);
+            T stuff = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
+            handle.Free();
+            return stuff;
         }
         /// <summary>
         /// Concatenates the members of a collection of type T, using the specified separator between each member.

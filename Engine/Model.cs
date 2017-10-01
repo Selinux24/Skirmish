@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
@@ -7,7 +8,6 @@ namespace Engine
     using Engine.Animation;
     using Engine.Common;
     using Engine.Effects;
-    using System.Collections.Generic;
 
     /// <summary>
     /// Basic Model

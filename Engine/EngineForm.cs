@@ -31,6 +31,20 @@ namespace Engine
         /// Absolute center
         /// </summary>
         public Point AbsoluteCenter { get; private set; }
+        /// <summary>
+        /// Gets or sets a value indicationg whether the current engine form is in fullscreen
+        /// </summary>
+        public new bool IsFullscreen
+        {
+            get
+            {
+                return base.IsFullscreen;
+            }
+            set
+            {
+                base.IsFullscreen = value;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -42,7 +56,7 @@ namespace Engine
         public EngineForm(string name, int screenWidth, int screenHeight, bool fullScreen)
             : base(name)
         {
-            this.IsFullscreen = fullScreen;
+            base.IsFullscreen = fullScreen;
             this.AllowUserResizing = !fullScreen;
 
             if (fullScreen)
@@ -66,7 +80,7 @@ namespace Engine
         private void InitializeComponent()
         {
             this.SuspendLayout();
-            
+
             this.Icon = Resources.engine;
             this.Name = "EngineForm";
             this.Text = "Engine Form";

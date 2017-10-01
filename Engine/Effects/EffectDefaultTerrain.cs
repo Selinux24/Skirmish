@@ -705,7 +705,7 @@ namespace Engine.Effects
             {
                 var v = this.lod.GetFloatVector();
 
-                return v.XYZ();
+                return new Vector3(v.X, v.Y, v.Z);
             }
             set
             {
