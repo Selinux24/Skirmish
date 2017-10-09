@@ -1,4 +1,6 @@
 ﻿using SharpDX.DXGI;
+using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Engine.Helpers.DDS
@@ -39,6 +41,61 @@ namespace Engine.Helpers.DDS
         const int DDS_CUBEMAP_ALLFACES = (DDS_CUBEMAP_POSITIVEX | DDS_CUBEMAP_NEGATIVEX | DDS_CUBEMAP_POSITIVEY | DDS_CUBEMAP_NEGATIVEY | DDS_CUBEMAP_POSITIVEZ | DDS_CUBEMAP_NEGATIVEZ);
 
         public readonly static int StructSize = Marshal.SizeOf(new DDSHeader());
+
+        public static bool GetInfo(byte[] data, out DDSHeader header, out int offset)
+        {
+            // Validate DDS file in memory
+            header = new DDSHeader();
+            offset = 0;
+
+            if (data.Length < (sizeof(uint) + DDSHeader.StructSize))
+            {
+                return false;
+            }
+
+            //first is magic number
+            int dwMagicNumber = BitConverter.ToInt32(data, 0);
+            if (dwMagicNumber != DDSHeader.DDS_MAGIC)
+            {
+                return false;
+            }
+
+            header = data.ToStructure<DDSHeader>(4, DDSHeader.StructSize);
+
+            // Verify header to validate DDS file
+            if (header.Size != DDSHeader.StructSize ||
+                header.PixelFormat.Size != DDSPixelFormat.StructSize)
+            {
+                return false;
+            }
+
+            // Check for DX10 extension
+            bool bDXT10Header = false;
+            if (header.IsDX10)
+            {
+                // Must be long enough for both headers and magic value
+                if (data.Length < (DDSHeader.StructSize + 4 + DDSHeaderDX10.StructSize))
+                {
+                    return false;
+                }
+
+                bDXT10Header = true;
+            }
+
+            offset = 4 + DDSHeader.StructSize + (bDXT10Header ? DDSHeaderDX10.StructSize : 0);
+
+            return true;
+        }
+        public static bool GetInfo(string filename, out DDSHeader header, out int offset, out byte[] buffer)
+        {
+            buffer = File.ReadAllBytes(filename);
+            return GetInfo(buffer, out header, out offset);
+        }
+        public static bool GetInfo(MemoryStream stream, out DDSHeader header, out int offset, out byte[] buffer)
+        {
+            buffer = stream.GetBuffer();
+            return GetInfo(buffer, out header, out offset);
+        }
 
         public int Size;
         public int Flags;

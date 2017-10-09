@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D11;
 
 namespace Engine.Common
 {
@@ -59,11 +58,11 @@ namespace Engine.Common
         /// <summary>
         /// Low definition shadow map
         /// </summary>
-        public ShaderResourceView ShadowMapLow { get; set; }
+        public EngineShaderResourceView ShadowMapLow { get; set; }
         /// <summary>
         /// High definition shadow map
         /// </summary>
-        public ShaderResourceView ShadowMapHigh { get; set; }
+        public EngineShaderResourceView ShadowMapHigh { get; set; }
 
         /// <summary>
         /// Constructor

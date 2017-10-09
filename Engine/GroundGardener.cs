@@ -3,8 +3,6 @@ using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine
 {
@@ -207,7 +205,7 @@ namespace Engine
             /// <summary>
             /// Foliage textures
             /// </summary>
-            public ShaderResourceView Textures;
+            public EngineShaderResourceView Textures;
             /// <summary>
             /// Foliage texture count
             /// </summary>
@@ -334,7 +332,7 @@ namespace Engine
             /// </summary>
             /// <param name="context">Drawing context</param>
             /// <param name="technique">Technique</param>
-            public void DrawFoliage(DrawContext context, EffectTechnique technique)
+            public void DrawFoliage(DrawContext context, EngineEffectTechnique technique)
             {
                 if (this.vertexDrawCount > 0)
                 {
@@ -344,9 +342,9 @@ namespace Engine
                         Counters.PrimitivesPerFrame += this.vertexDrawCount / 3;
                     }
 
-                    for (int p = 0; p < technique.Description.PassCount; p++)
+                    for (int p = 0; p < technique.PassCount; p++)
                     {
-                        technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                        technique.Apply(this.Game.Graphics, p, 0);
 
                         this.Game.Graphics.DeviceContext.Draw(this.vertexDrawCount, this.VertexBuffer.Offset);
 
@@ -384,7 +382,7 @@ namespace Engine
         /// <summary>
         /// Random texture
         /// </summary>
-        private ShaderResourceView textureRandom = null;
+        private EngineShaderResourceView textureRandom = null;
         /// <summary>
         /// Folliage map for vegetation planting task
         /// </summary>
@@ -720,7 +718,7 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         /// <param name="channel">Channel</param>
         /// <returns>Returns the selected technique</returns>
-        private EffectTechnique SetTechniqueVegetation(DrawContext context, int channel)
+        private EngineEffectTechnique SetTechniqueVegetation(DrawContext context, int channel)
         {
             if (context.DrawerMode == DrawerModesEnum.Forward) return this.SetTechniqueVegetationDefault(context, channel);
             if (context.DrawerMode == DrawerModesEnum.ShadowMap) return this.SetTechniqueVegetationShadowMap(context, channel);
@@ -732,7 +730,7 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         /// <param name="channel">Channel</param>
         /// <returns>Returns the selected technique</returns>
-        private EffectTechnique SetTechniqueVegetationDefault(DrawContext context, int channel)
+        private EngineEffectTechnique SetTechniqueVegetationDefault(DrawContext context, int channel)
         {
             var effect = DrawerPool.EffectDefaultBillboard;
 
@@ -771,7 +769,7 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         /// <param name="channel">Channel</param>
         /// <returns>Returns the selected technique</returns>
-        private EffectTechnique SetTechniqueVegetationShadowMap(DrawContext context, int channel)
+        private EngineEffectTechnique SetTechniqueVegetationShadowMap(DrawContext context, int channel)
         {
             var effect = DrawerPool.EffectShadowBillboard;
 

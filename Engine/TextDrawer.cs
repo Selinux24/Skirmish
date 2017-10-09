@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine
 {
@@ -270,7 +269,7 @@ namespace Engine
         /// <param name="technique">Technique</param>
         /// <param name="position">Position</param>
         /// <param name="color">Color</param>
-        private void DrawText(DrawContext context, EffectTechnique technique, Matrix local, Color4 color)
+        private void DrawText(DrawContext context, EngineEffectTechnique technique, Matrix local, Color4 color)
         {
             #region Per frame update
 
@@ -282,9 +281,9 @@ namespace Engine
 
             #endregion
 
-            for (int p = 0; p < technique.Description.PassCount; p++)
+            for (int p = 0; p < technique.PassCount; p++)
             {
-                technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                technique.Apply(this.Game.Graphics, p, 0);
 
                 this.Game.Graphics.DeviceContext.DrawIndexed(this.indexDrawCount, this.indexBuffer.Offset, this.vertexBuffer.Offset);
             }

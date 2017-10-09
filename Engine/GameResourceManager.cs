@@ -3,10 +3,10 @@ using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine
 {
+    using Engine.Common;
     using Engine.Content;
     using Engine.Helpers;
 
@@ -22,11 +22,11 @@ namespace Engine
         /// <summary>
         /// Resource dictionary
         /// </summary>
-        private Dictionary<string, ShaderResourceView> resources = new Dictionary<string, ShaderResourceView>();
+        private Dictionary<string, EngineShaderResourceView> resources = new Dictionary<string, EngineShaderResourceView>();
         /// <summary>
         /// Global resources dictionary
         /// </summary>
-        private Dictionary<string, ShaderResourceView> globalResources = new Dictionary<string, ShaderResourceView>();
+        private Dictionary<string, EngineShaderResourceView> globalResources = new Dictionary<string, EngineShaderResourceView>();
 
         /// <summary>
         /// Constructor
@@ -50,9 +50,9 @@ namespace Engine
         /// </summary>
         /// <param name="imageContent">Image content</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateResource(ImageContent imageContent)
+        public EngineShaderResourceView CreateResource(ImageContent imageContent)
         {
-            ShaderResourceView view = null;
+            EngineShaderResourceView view = null;
 
             if (imageContent.Stream != null)
             {
@@ -106,7 +106,7 @@ namespace Engine
         /// </summary>
         /// <param name="path">Path to file</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateResource(string path)
+        public EngineShaderResourceView CreateResource(string path)
         {
             return this.Get(path);
         }
@@ -115,7 +115,7 @@ namespace Engine
         /// </summary>
         /// <param name="values">Values</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateResource(byte[] values)
+        public EngineShaderResourceView CreateResource(byte[] values)
         {
             string md5 = values.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -133,7 +133,7 @@ namespace Engine
         /// <param name="values">Values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateResource(Guid identifier, Vector4[] values, int size)
+        public EngineShaderResourceView CreateResource(Guid identifier, Vector4[] values, int size)
         {
             string md5 = identifier.ToByteArray().GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -153,7 +153,7 @@ namespace Engine
         /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateResource(Guid identifier, int size, float min, float max, int seed = 0)
+        public EngineShaderResourceView CreateResource(Guid identifier, int size, float min, float max, int seed = 0)
         {
             string md5 = identifier.ToByteArray().GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -171,7 +171,7 @@ namespace Engine
         /// <param name="values">Values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateGlobalResourceTexture2D(string name, Vector4[] values, int size)
+        public EngineShaderResourceView CreateGlobalResourceTexture2D(string name, Vector4[] values, int size)
         {
             var view = this.game.Graphics.CreateTexture2D(size, values);
             this.SetGlobalResource(name, view);
@@ -183,7 +183,7 @@ namespace Engine
         /// <param name="name">Resource name</param>
         /// <param name="bytes">Resource bytes</param>
         /// <returns></returns>
-        public ShaderResourceView CreateGlobalResourceTexture2D(string name, byte[] bytes)
+        public EngineShaderResourceView CreateGlobalResourceTexture2D(string name, byte[] bytes)
         {
             var view = this.game.Graphics.LoadTexture(bytes);
             this.SetGlobalResource(name, view);
@@ -198,7 +198,7 @@ namespace Engine
         /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns the created resource view</returns>
-        public ShaderResourceView CreateGlobalResourceRandomTexture(string name, int size, float min, float max, int seed = 0)
+        public EngineShaderResourceView CreateGlobalResourceRandomTexture(string name, int size, float min, float max, int seed = 0)
         {
             var view = this.game.Graphics.CreateRandomTexture(size, min, max, seed);
             this.SetGlobalResource(name, view);
@@ -209,7 +209,7 @@ namespace Engine
         /// </summary>
         /// <param name="name">Resource name</param>
         /// <param name="resource">Resource content</param>
-        public void SetGlobalResource(string name, ShaderResourceView resource)
+        public void SetGlobalResource(string name, EngineShaderResourceView resource)
         {
             if (this.globalResources.ContainsKey(name))
             {
@@ -228,7 +228,7 @@ namespace Engine
         /// </summary>
         /// <param name="buffer">Buffer</param>
         /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView Get(byte[] buffer)
+        private EngineShaderResourceView Get(byte[] buffer)
         {
             string md5 = buffer.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -244,7 +244,7 @@ namespace Engine
         /// </summary>
         /// <param name="path">Path to file</param>
         /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView Get(string path)
+        private EngineShaderResourceView Get(string path)
         {
             if (!this.resources.ContainsKey(path))
             {
@@ -259,7 +259,7 @@ namespace Engine
         /// </summary>
         /// <param name="stream">Memory stream</param>
         /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView Get(MemoryStream stream)
+        private EngineShaderResourceView Get(MemoryStream stream)
         {
             string md5 = stream.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -276,7 +276,7 @@ namespace Engine
         /// </summary>
         /// <param name="paths">Path list</param>
         /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView Get(string[] paths)
+        private EngineShaderResourceView Get(string[] paths)
         {
             string md5 = paths.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -292,7 +292,7 @@ namespace Engine
         /// </summary>
         /// <param name="streams">Stream list</param>
         /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView Get(MemoryStream[] streams)
+        private EngineShaderResourceView Get(MemoryStream[] streams)
         {
             string md5 = streams.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -309,7 +309,7 @@ namespace Engine
         /// <param name="path">Path to file</param>
         /// <param name="size">Cube size</param>
         /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView Get(string path, int size)
+        private EngineShaderResourceView Get(string path, int size)
         {
             if (!this.resources.ContainsKey(path))
             {
@@ -325,7 +325,7 @@ namespace Engine
         /// <param name="stream">Memory stream</param>
         /// <param name="size">Cube size</param>
         /// <returns>Returns the created resource view</returns>
-        private ShaderResourceView Get(MemoryStream stream, int size)
+        private EngineShaderResourceView Get(MemoryStream stream, int size)
         {
             string md5 = stream.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))

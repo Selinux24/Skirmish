@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine
 {
@@ -81,7 +80,7 @@ namespace Engine
         /// <summary>
         /// Sprite texture
         /// </summary>
-        private ShaderResourceView spriteTexture = null;
+        private EngineShaderResourceView spriteTexture = null;
 
         /// <summary>
         /// Gets or sets text left position in 2D screen
@@ -243,9 +242,9 @@ namespace Engine
 
                 #endregion
 
-                for (int p = 0; p < technique.Description.PassCount; p++)
+                for (int p = 0; p < technique.PassCount; p++)
                 {
-                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                    technique.Apply(this.Game.Graphics, p, 0);
 
                     this.Game.Graphics.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
 

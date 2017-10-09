@@ -1,10 +1,5 @@
 ﻿using SharpDX;
 using System;
-using Device = SharpDX.Direct3D11.Device;
-using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
-using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
 {
@@ -18,21 +13,21 @@ namespace Engine.Effects
         /// <summary>
         /// Cubemap drawing technique
         /// </summary>
-        protected readonly EffectTechnique ForwardCubemap = null;
+        protected readonly EngineEffectTechnique ForwardCubemap = null;
 
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EffectMatrixVariable worldViewProjection = null;
+        private EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private EffectShaderResourceVariable cubeTexture = null;
+        private EngineEffectVariableTexture cubeTexture = null;
 
         /// <summary>
         /// Current cube texture
         /// </summary>
-        private ShaderResourceView currentCubeTexture = null;
+        private EngineShaderResourceView currentCubeTexture = null;
 
         /// <summary>
         /// World view projection matrix
@@ -51,7 +46,7 @@ namespace Engine.Effects
         /// <summary>
         /// Texture
         /// </summary>
-        protected ShaderResourceView CubeTexture
+        protected EngineShaderResourceView CubeTexture
         {
             get
             {
@@ -73,16 +68,16 @@ namespace Engine.Effects
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectDefaultCubemap(Device device, byte[] effect, bool compile)
-            : base(device, effect, compile)
+        public EffectDefaultCubemap(Graphics graphics, byte[] effect, bool compile)
+            : base(graphics, effect, compile)
         {
             this.ForwardCubemap = this.Effect.GetTechniqueByName("ForwardCubemap");
 
-            this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.cubeTexture = this.Effect.GetVariableByName("gCubemap").AsShaderResource();
+            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.cubeTexture = this.Effect.GetVariableTexture("gCubemap");
         }
         /// <summary>
         /// Get technique by vertex type
@@ -92,7 +87,7 @@ namespace Engine.Effects
         /// <param name="stage">Stage</param>
         /// <param name="mode">Mode</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
+        public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
             if (stage == DrawingStages.Drawing)
             {
@@ -134,7 +129,7 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="texture">Texture</param>
         public void UpdatePerObject(
-            ShaderResourceView cubeTexture)
+            EngineShaderResourceView cubeTexture)
         {
             this.CubeTexture = cubeTexture;
         }

@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
@@ -7,7 +8,6 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace TerrainTest
 {
@@ -39,7 +39,7 @@ namespace TerrainTest
         private bool useDebugTex = false;
         private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapDynamic;
         private SceneObject<SpriteTexture> shadowMapDrawer = null;
-        private ShaderResourceView debugTex = null;
+        private EngineShaderResourceView debugTex = null;
         private int graphIndex = -1;
 
         private SceneObject<TextDrawer> title = null;

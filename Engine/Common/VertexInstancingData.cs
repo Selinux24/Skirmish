@@ -1,11 +1,11 @@
-﻿using System.Runtime.InteropServices;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.DXGI;
-using InputClassification = SharpDX.Direct3D11.InputClassification;
-using InputElement = SharpDX.Direct3D11.InputElement;
+using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
+    using SharpDX.Direct3D11;
+
     /// <summary>
     /// Instancing data
     /// </summary>

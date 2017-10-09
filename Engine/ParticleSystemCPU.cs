@@ -1,10 +1,6 @@
 ﻿using SharpDX;
+using SharpDX.Direct3D;
 using System;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using InputLayout = SharpDX.Direct3D11.InputLayout;
-using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
 
 namespace Engine
 {
@@ -25,21 +21,9 @@ namespace Engine
         /// </summary>
         private VertexCPUParticle[] particles;
         /// <summary>
-        /// Particles buffer
+        /// Vertex buffer
         /// </summary>
-        private Buffer vertexBuffer;
-        /// <summary>
-        /// Vertex buffer binding
-        /// </summary>
-        private VertexBufferBinding[] vertexBufferBinding;
-        /// <summary>
-        /// Input layout for rotating particles
-        /// </summary>
-        private InputLayout rotatingInputLayout;
-        /// <summary>
-        /// Input layout for non rotating particles
-        /// </summary>
-        private InputLayout nonRotatingInputLayout;
+        private EngineBuffer<VertexCPUParticle> buffer;
         /// <summary>
         /// Current particle index to update data
         /// </summary>
@@ -61,7 +45,7 @@ namespace Engine
         /// <summary>
         /// Particle texture
         /// </summary>
-        public ShaderResourceView Texture { get; private set; }
+        public EngineShaderResourceView Texture { get; private set; }
         /// <summary>
         /// Texture count
         /// </summary>
@@ -182,33 +166,18 @@ namespace Engine
 
             this.particles = new VertexCPUParticle[this.MaxConcurrentParticles];
 
-            this.vertexBuffer = game.Graphics.CreateVertexBufferWrite(description.Name, this.particles);
-            this.vertexBufferBinding = new[]
-            {
-                new VertexBufferBinding(this.vertexBuffer, default(VertexCPUParticle).GetStride(), 0),
-            };
+            this.buffer = new EngineBuffer<VertexCPUParticle>(game.Graphics, description.Name, this.particles, true);
+            buffer.AddInputLayout(DrawerPool.EffectDefaultCPUParticles.RotationDraw.Create(game.Graphics, VertexCPUParticle.Input(BufferSlot)));
+            buffer.AddInputLayout(DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.Create(game.Graphics, VertexCPUParticle.Input(BufferSlot)));
 
             this.TimeToEnd = this.Emitter.Duration + this.MaximumAge;
-
-            this.rotatingInputLayout = new InputLayout(
-                game.Graphics.Device,
-                DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetPassByIndex(0).Description.Signature,
-                VertexCPUParticle.Input(BufferSlot));
-
-            this.nonRotatingInputLayout = new InputLayout(
-                game.Graphics.Device,
-                DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetPassByIndex(0).Description.Signature,
-                VertexCPUParticle.Input(BufferSlot));
         }
         /// <summary>
         /// Resource disposal
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(this.vertexBuffer);
-
-            Helper.Dispose(this.rotatingInputLayout);
-            Helper.Dispose(this.nonRotatingInputLayout);
+            Helper.Dispose(this.buffer);
         }
 
         /// <summary>
@@ -254,8 +223,8 @@ namespace Engine
                     context.DrawerMode,
                     rot);
 
-                this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.vertexBufferBinding);
-                this.Game.Graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
+                this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.buffer.VertexBufferBinding);
+                this.Game.Graphics.IAInputLayout = rot ? this.buffer.InputLayouts[0] : this.buffer.InputLayouts[1];
                 this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
                 this.Game.Graphics.SetDepthStencilRDZEnabled();
@@ -286,9 +255,9 @@ namespace Engine
                     this.TextureCount,
                     this.Texture);
 
-                for (int p = 0; p < technique.Description.PassCount; p++)
+                for (int p = 0; p < technique.PassCount; p++)
                 {
-                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                    technique.Apply(this.Game.Graphics, p, 0);
 
                     this.Game.Graphics.DeviceContext.Draw(this.ActiveParticles, 0);
 
@@ -334,7 +303,7 @@ namespace Engine
             this.particles[this.currentParticleIndex].RandomValues = randomValues;
             this.particles[this.currentParticleIndex].MaxAge = this.Emitter.TotalTime;
 
-            this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.vertexBuffer, this.particles);
+            this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.buffer.VertexBuffer, this.particles);
 
             this.currentParticleIndex = nextFreeParticle;
         }

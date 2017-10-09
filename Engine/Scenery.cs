@@ -157,9 +157,9 @@ namespace Engine
 
                         count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count : mesh.VertexBuffer.Count;
 
-                        for (int p = 0; p < technique.Description.PassCount; p++)
+                        for (int p = 0; p < technique.PassCount; p++)
                         {
-                            technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                            technique.Apply(this.Game.Graphics, p, 0);
 
                             mesh.Draw(this.Game.Graphics);
 
@@ -263,7 +263,7 @@ namespace Engine
                 var t = LoaderCOLLADA.Load(description.Content.ContentFolder, contentDesc);
                 content = t[0];
             }
-            else if(description.Content.ModelContentDescription != null)
+            else if (description.Content.ModelContentDescription != null)
             {
                 var t = LoaderCOLLADA.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
                 content = t[0];

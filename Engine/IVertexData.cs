@@ -1,8 +1,8 @@
-﻿using SharpDX.Direct3D11;
-
+﻿
 namespace Engine
 {
     using Engine.Common;
+    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Vertex data

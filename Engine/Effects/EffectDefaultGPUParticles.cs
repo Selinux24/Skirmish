@@ -1,12 +1,5 @@
 ﻿using SharpDX;
 using System;
-using Device = SharpDX.Direct3D11.Device;
-using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
-using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
-using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
 {
@@ -20,107 +13,107 @@ namespace Engine.Effects
         /// <summary>
         /// Fire stream out technique
         /// </summary>
-        public readonly EffectTechnique ParticleStreamOut = null;
+        public readonly EngineEffectTechnique ParticleStreamOut = null;
         /// <summary>
         /// Non rotation particles drawing technique
         /// </summary>
-        public readonly EffectTechnique NonRotationDraw = null;
+        public readonly EngineEffectTechnique NonRotationDraw = null;
         /// <summary>
         /// Rotation particles drawing technique
         /// </summary>
-        public readonly EffectTechnique RotationDraw = null;
+        public readonly EngineEffectTechnique RotationDraw = null;
 
         /// <summary>
         /// World effect variable
         /// </summary>
-        private EffectMatrixVariable world = null;
+        private EngineEffectVariableMatrix world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EffectMatrixVariable worldViewProjection = null;
+        private EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
-        private EffectVectorVariable eyePositionWorld = null;
+        private EngineEffectVariableVector eyePositionWorld = null;
         /// <summary>
         /// Game time effect variable
         /// </summary>
-        private EffectScalarVariable totalTime = null;
+        private EngineEffectVariableScalar totalTime = null;
         /// <summary>
         /// Elapsed time effect variable
         /// </summary>
-        private EffectScalarVariable elapsedTime = null;
+        private EngineEffectVariableScalar elapsedTime = null;
         /// <summary>
         /// Texture count effect variable
         /// </summary>
-        private EffectScalarVariable textureCount = null;
+        private EngineEffectVariableScalar textureCount = null;
         /// <summary>
         /// Textures effect variable
         /// </summary>
-        private EffectShaderResourceVariable textureArray = null;
+        private EngineEffectVariableTexture textureArray = null;
 
         /// <summary>
         /// Emission age effect variable
         /// </summary>
-        private EffectScalarVariable emissionRate = null;
+        private EngineEffectVariableScalar emissionRate = null;
         /// <summary>
         /// Velocity sensitivity effect variable
         /// </summary>
-        private EffectScalarVariable velocitySensitivity = null;
+        private EngineEffectVariableScalar velocitySensitivity = null;
         /// <summary>
         /// Horizontal velocity effect variable
         /// </summary>
-        private EffectVectorVariable horizontalVelocity = null;
+        private EngineEffectVariableVector horizontalVelocity = null;
         /// <summary>
         /// Vertical velocity effect variable
         /// </summary>
-        private EffectVectorVariable verticalVelocity = null;
+        private EngineEffectVariableVector verticalVelocity = null;
         /// <summary>
         /// Random values effect variable
         /// </summary>
-        private EffectVectorVariable randomValues = null;
+        private EngineEffectVariableVector randomValues = null;
 
         /// <summary>
         /// Maximum particle duration variable
         /// </summary>
-        private EffectScalarVariable maxDuration = null;
+        private EngineEffectVariableScalar maxDuration = null;
         /// <summary>
         /// Maximum particle duration randomness variable
         /// </summary>
-        private EffectScalarVariable maxDurationRandomness = null;
+        private EngineEffectVariableScalar maxDurationRandomness = null;
         /// <summary>
         /// End velocity variable
         /// </summary>
-        private EffectScalarVariable endVelocity = null;
+        private EngineEffectVariableScalar endVelocity = null;
         /// <summary>
         /// Gravity variable
         /// </summary>
-        private EffectVectorVariable gravity = null;
+        private EngineEffectVariableVector gravity = null;
         /// <summary>
         /// Starting size variable
         /// </summary>
-        private EffectVectorVariable startSize = null;
+        private EngineEffectVariableVector startSize = null;
         /// <summary>
         /// Ending size variable
         /// </summary>
-        private EffectVectorVariable endSize = null;
+        private EngineEffectVariableVector endSize = null;
         /// <summary>
         /// Minimum color variable
         /// </summary>
-        private EffectVectorVariable minColor = null;
+        private EngineEffectVariableVector minColor = null;
         /// <summary>
         /// Maximum color variable
         /// </summary>
-        private EffectVectorVariable maxColor = null;
+        private EngineEffectVariableVector maxColor = null;
         /// <summary>
         /// Rotation speed variable
         /// </summary>
-        private EffectVectorVariable rotateSpeed = null;
+        private EngineEffectVariableVector rotateSpeed = null;
 
         /// <summary>
         /// Current texture array
         /// </summary>
-        private ShaderResourceView currentTextureArray = null;
+        private EngineShaderResourceView currentTextureArray = null;
 
         /// <summary>
         /// World matrix
@@ -213,7 +206,7 @@ namespace Engine.Effects
         /// <summary>
         /// Textures
         /// </summary>
-        protected ShaderResourceView TextureArray
+        protected EngineShaderResourceView TextureArray
         {
             get
             {
@@ -457,39 +450,39 @@ namespace Engine.Effects
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectDefaultGPUParticles(Device device, byte[] effect, bool compile)
-            : base(device, effect, compile)
+        public EffectDefaultGPUParticles(Graphics graphics, byte[] effect, bool compile)
+            : base(graphics, effect, compile)
         {
             this.ParticleStreamOut = this.Effect.GetTechniqueByName("ParticleStreamOut");
             this.NonRotationDraw = this.Effect.GetTechniqueByName("NonRotationParticle");
             this.RotationDraw = this.Effect.GetTechniqueByName("RotationParticle");
 
-            this.world = this.Effect.GetVariableByName("gWorld").AsMatrix();
-            this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
-            this.totalTime = this.Effect.GetVariableByName("gTotalTime").AsScalar();
-            this.elapsedTime = this.Effect.GetVariableByName("gElapsedTime").AsScalar();
-            this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
-            this.textureArray = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
+            this.world = this.Effect.GetVariableMatrix("gWorld");
+            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.eyePositionWorld = this.Effect.GetVariableVector("gEyePositionWorld");
+            this.totalTime = this.Effect.GetVariableScalar("gTotalTime");
+            this.elapsedTime = this.Effect.GetVariableScalar("gElapsedTime");
+            this.textureCount = this.Effect.GetVariableScalar("gTextureCount");
+            this.textureArray = this.Effect.GetVariableTexture("gTextureArray");
 
-            this.emissionRate = this.Effect.GetVariableByName("gEmissionRate").AsScalar();
-            this.velocitySensitivity = this.Effect.GetVariableByName("gVelocitySensitivity").AsScalar();
-            this.horizontalVelocity = this.Effect.GetVariableByName("gHorizontalVelocity").AsVector();
-            this.verticalVelocity = this.Effect.GetVariableByName("gVerticalVelocity").AsVector();
-            this.randomValues = this.Effect.GetVariableByName("gRandomValues").AsVector();
+            this.emissionRate = this.Effect.GetVariableScalar("gEmissionRate");
+            this.velocitySensitivity = this.Effect.GetVariableScalar("gVelocitySensitivity");
+            this.horizontalVelocity = this.Effect.GetVariableVector("gHorizontalVelocity");
+            this.verticalVelocity = this.Effect.GetVariableVector("gVerticalVelocity");
+            this.randomValues = this.Effect.GetVariableVector("gRandomValues");
 
-            this.maxDuration = this.Effect.GetVariableByName("gMaxDuration").AsScalar();
-            this.maxDurationRandomness = this.Effect.GetVariableByName("gMaxDurationRandomness").AsScalar();
-            this.endVelocity = this.Effect.GetVariableByName("gEndVelocity").AsScalar();
-            this.gravity = this.Effect.GetVariableByName("gGravity").AsVector();
-            this.startSize = this.Effect.GetVariableByName("gStartSize").AsVector();
-            this.endSize = this.Effect.GetVariableByName("gEndSize").AsVector();
-            this.minColor = this.Effect.GetVariableByName("gMinColor").AsVector();
-            this.maxColor = this.Effect.GetVariableByName("gMaxColor").AsVector();
-            this.rotateSpeed = this.Effect.GetVariableByName("gRotateSpeed").AsVector();
+            this.maxDuration = this.Effect.GetVariableScalar("gMaxDuration");
+            this.maxDurationRandomness = this.Effect.GetVariableScalar("gMaxDurationRandomness");
+            this.endVelocity = this.Effect.GetVariableScalar("gEndVelocity");
+            this.gravity = this.Effect.GetVariableVector("gGravity");
+            this.startSize = this.Effect.GetVariableVector("gStartSize");
+            this.endSize = this.Effect.GetVariableVector("gEndSize");
+            this.minColor = this.Effect.GetVariableVector("gMinColor");
+            this.maxColor = this.Effect.GetVariableVector("gMaxColor");
+            this.rotateSpeed = this.Effect.GetVariableVector("gRotateSpeed");
         }
         /// <summary>
         /// Get technique by vertex type
@@ -499,7 +492,7 @@ namespace Engine.Effects
         /// <param name="stage">Stage</param>
         /// <param name="mode">Mode</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
+        public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
             throw new Exception(string.Format("Bad stage for effect. Use particle class: {0}", stage));
         }
@@ -508,7 +501,7 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="vertexType">VertexType</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public EffectTechnique GetTechniqueForStreamOut(VertexTypes vertexType)
+        public EngineEffectTechnique GetTechniqueForStreamOut(VertexTypes vertexType)
         {
             if (vertexType == VertexTypes.GPUParticle)
             {
@@ -528,7 +521,7 @@ namespace Engine.Effects
         /// <param name="mode">Mode</param>
         /// <param name="rotation">Rotation</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public virtual EffectTechnique GetTechniqueForDrawing(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode, bool rotation)
+        public virtual EngineEffectTechnique GetTechniqueForDrawing(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode, bool rotation)
         {
             if (stage == DrawingStages.Drawing)
             {
@@ -591,7 +584,7 @@ namespace Engine.Effects
             Color4 maxColor,
             Vector2 rotateSpeed,
             uint textureCount,
-            ShaderResourceView textures)
+            EngineShaderResourceView textures)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;

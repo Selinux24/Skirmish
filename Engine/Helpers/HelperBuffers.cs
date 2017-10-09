@@ -10,7 +10,7 @@ namespace Engine.Helpers
     /// <summary>
     /// Helper methods for graphic resources
     /// </summary>
-    public static class HelperBuffers
+    static class HelperBuffers
     {
         /// <summary>
         /// Creates an inmutable index buffer
@@ -229,7 +229,7 @@ namespace Engine.Helpers
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
 
-            Counters.RegBuffer(typeof(T), name, usage, binding, sizeInBytes, length);
+            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, length);
 
             var description = new BufferDescription()
             {
@@ -259,7 +259,7 @@ namespace Engine.Helpers
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Length;
 
-            Counters.RegBuffer(typeof(T), name, usage, binding, sizeInBytes, data.Length);
+            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, data.Length);
 
             using (var dstr = new DataStream(sizeInBytes, true, true))
             {

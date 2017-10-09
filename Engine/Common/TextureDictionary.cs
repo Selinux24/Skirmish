@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Common
 {
@@ -9,14 +8,14 @@ namespace Engine.Common
     /// Texture by material dictionary
     /// </summary>
     [Serializable]
-    public class TextureDictionary : Dictionary<string, ShaderResourceView>
+    public class TextureDictionary : Dictionary<string, EngineShaderResourceView>
     {
         /// <summary>
         /// Gets textures by image name
         /// </summary>
         /// <param name="image">Image name</param>
         /// <returns>Return texture by image name if exists</returns>
-        public new ShaderResourceView this[string image]
+        public new EngineShaderResourceView this[string image]
         {
             get
             {

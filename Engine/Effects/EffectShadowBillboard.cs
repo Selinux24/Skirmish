@@ -1,12 +1,5 @@
 ﻿using SharpDX;
 using System;
-using Device = SharpDX.Direct3D11.Device;
-using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
-using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
-using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
 {
@@ -20,61 +13,61 @@ namespace Engine.Effects
         /// <summary>
         /// Billboard shadow map drawing technique
         /// </summary>
-        protected readonly EffectTechnique ShadowMapBillboard = null;
+        protected readonly EngineEffectTechnique ShadowMapBillboard = null;
 
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EffectMatrixVariable worldViewProjection = null;
+        private EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
-        private EffectVectorVariable eyePositionWorld = null;
+        private EngineEffectVariableVector eyePositionWorld = null;
         /// <summary>
         /// Start radius
         /// </summary>
-        private EffectScalarVariable startRadius = null;
+        private EngineEffectVariableScalar startRadius = null;
         /// <summary>
         /// End radius
         /// </summary>
-        private EffectScalarVariable endRadius = null;
+        private EngineEffectVariableScalar endRadius = null;
         /// <summary>
         /// Wind direction effect variable
         /// </summary>
-        private EffectVectorVariable windDirection = null;
+        private EngineEffectVariableVector windDirection = null;
         /// <summary>
         /// Wind strength effect variable
         /// </summary>
-        private EffectScalarVariable windStrength = null;
+        private EngineEffectVariableScalar windStrength = null;
         /// <summary>
         /// Time effect variable
         /// </summary>
-        private EffectScalarVariable totalTime = null;
+        private EngineEffectVariableScalar totalTime = null;
         /// <summary>
         /// Texture count variable
         /// </summary>
-        private EffectScalarVariable textureCount = null;
+        private EngineEffectVariableScalar textureCount = null;
         /// <summary>
         /// Toggle UV coordinates by primitive ID
         /// </summary>
-        private EffectScalarVariable uvToggleByPID = null;
+        private EngineEffectVariableScalar uvToggleByPID = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private EffectShaderResourceVariable textures = null;
+        private EngineEffectVariableTexture textures = null;
         /// <summary>
         /// Random texture effect variable
         /// </summary>
-        private EffectShaderResourceVariable textureRandom = null;
+        private EngineEffectVariableTexture textureRandom = null;
 
         /// <summary>
         /// Current texture array
         /// </summary>
-        private ShaderResourceView currentTextures = null;
+        private EngineShaderResourceView currentTextures = null;
         /// <summary>
         /// Current random texture
         /// </summary>
-        private ShaderResourceView currentTextureRandom = null;
+        private EngineShaderResourceView currentTextureRandom = null;
 
         /// <summary>
         /// World view projection matrix
@@ -213,7 +206,7 @@ namespace Engine.Effects
         /// <summary>
         /// Texture
         /// </summary>
-        protected ShaderResourceView Textures
+        protected EngineShaderResourceView Textures
         {
             get
             {
@@ -234,7 +227,7 @@ namespace Engine.Effects
         /// <summary>
         /// Random texture
         /// </summary>
-        protected ShaderResourceView TextureRandom
+        protected EngineShaderResourceView TextureRandom
         {
             get
             {
@@ -256,26 +249,26 @@ namespace Engine.Effects
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectShadowBillboard(Device device, byte[] effect, bool compile)
-            : base(device, effect, compile)
+        public EffectShadowBillboard(Graphics graphics, byte[] effect, bool compile)
+            : base(graphics, effect, compile)
         {
             this.ShadowMapBillboard = this.Effect.GetTechniqueByName("ShadowMapBillboard");
 
-            this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
-            this.eyePositionWorld = this.Effect.GetVariableByName("gEyePositionWorld").AsVector();
-            this.startRadius = this.Effect.GetVariableByName("gStartRadius").AsScalar();
-            this.endRadius = this.Effect.GetVariableByName("gEndRadius").AsScalar();
-            this.textureCount = this.Effect.GetVariableByName("gTextureCount").AsScalar();
-            this.uvToggleByPID = this.Effect.GetVariableByName("gUVToggleByPID").AsScalar();
-            this.textures = this.Effect.GetVariableByName("gTextureArray").AsShaderResource();
+            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.eyePositionWorld = this.Effect.GetVariableVector("gEyePositionWorld");
+            this.startRadius = this.Effect.GetVariableScalar("gStartRadius");
+            this.endRadius = this.Effect.GetVariableScalar("gEndRadius");
+            this.textureCount = this.Effect.GetVariableScalar("gTextureCount");
+            this.uvToggleByPID = this.Effect.GetVariableScalar("gUVToggleByPID");
+            this.textures = this.Effect.GetVariableTexture("gTextureArray");
 
-            this.windDirection = this.Effect.GetVariableByName("gWindDirection").AsVector();
-            this.windStrength = this.Effect.GetVariableByName("gWindStrength").AsScalar();
-            this.totalTime = this.Effect.GetVariableByName("gTotalTime").AsScalar();
-            this.textureRandom = this.Effect.GetVariableByName("gTextureRandom").AsShaderResource();
+            this.windDirection = this.Effect.GetVariableVector("gWindDirection");
+            this.windStrength = this.Effect.GetVariableScalar("gWindStrength");
+            this.totalTime = this.Effect.GetVariableScalar("gTotalTime");
+            this.textureRandom = this.Effect.GetVariableTexture("gTextureRandom");
         }
         /// <summary>
         /// Get technique by vertex type
@@ -285,7 +278,7 @@ namespace Engine.Effects
         /// <param name="stage">Stage</param>
         /// <param name="mode">Mode</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
+        public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
             if (stage == DrawingStages.Drawing)
             {
@@ -326,7 +319,7 @@ namespace Engine.Effects
             Vector3 windDirection,
             float windStrength,
             float totalTime,
-            ShaderResourceView randomTexture)
+            EngineShaderResourceView randomTexture)
         {
             this.WorldViewProjection = world * viewProjection;
             this.EyePositionWorld = eyePositionWorld;
@@ -349,7 +342,7 @@ namespace Engine.Effects
             float endRadius,
             uint textureCount,
             bool uvToggle,
-            ShaderResourceView texture)
+            EngineShaderResourceView texture)
         {
             this.StartRadius = startRadius;
             this.EndRadius = endRadius;

@@ -106,9 +106,9 @@ namespace Engine
 
                 this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
-                for (int p = 0; p < technique.Description.PassCount; p++)
+                for (int p = 0; p < technique.PassCount; p++)
                 {
-                    technique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                    technique.Apply(this.Game.Graphics, p, 0);
 
                     this.Game.Graphics.DeviceContext.Draw(this.drawCount, this.vertexBuffer.Offset);
 

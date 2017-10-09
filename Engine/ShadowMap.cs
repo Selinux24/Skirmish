@@ -1,22 +1,11 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.DXGI;
 using System;
-using BindFlags = SharpDX.Direct3D11.BindFlags;
-using CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags;
-using DepthStencilView = SharpDX.Direct3D11.DepthStencilView;
-using DepthStencilViewDescription = SharpDX.Direct3D11.DepthStencilViewDescription;
-using DepthStencilViewDimension = SharpDX.Direct3D11.DepthStencilViewDimension;
-using DepthStencilViewFlags = SharpDX.Direct3D11.DepthStencilViewFlags;
-using ResourceOptionFlags = SharpDX.Direct3D11.ResourceOptionFlags;
-using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using ShaderResourceViewDescription = SharpDX.Direct3D11.ShaderResourceViewDescription;
-using Texture2D = SharpDX.Direct3D11.Texture2D;
-using Texture2DDescription = SharpDX.Direct3D11.Texture2DDescription;
 
 namespace Engine
 {
+    using Engine.Common;
+    using Helpers;
+
     /// <summary>
     /// Shadow map
     /// </summary>
@@ -42,82 +31,12 @@ namespace Engine
         /// <summary>
         /// Depth map
         /// </summary>
-        public DepthStencilView DepthMap { get; protected set; }
+        public EngineDepthStencilView DepthMap { get; protected set; }
         /// <summary>
         /// Deph map texture
         /// </summary>
-        public ShaderResourceView Texture { get; protected set; }
+        public EngineShaderResourceView Texture { get; protected set; }
 
-        /// <summary>
-        /// Generate internal resources
-        /// </summary>
-        /// <param name="game">Game instance</param>
-        /// <param name="width">Buffer width</param>
-        /// <param name="height">Buffer height</param>
-        /// <param name="dsv">Depth stencil view to be created</param>
-        /// <param name="srv">Texture to be created</param>
-        private static void GenerateResources(Game game, int width, int height, out DepthStencilView dsv, out ShaderResourceView srv)
-        {
-            Texture2D depthMap = new Texture2D(
-                game.Graphics.Device,
-                new Texture2DDescription
-                {
-                    Width = width,
-                    Height = height,
-                    MipLevels = 1,
-                    ArraySize = 1,
-                    Format = Format.R24G8_Typeless,
-                    SampleDescription = game.Graphics.CurrentSampleDescription,
-                    Usage = ResourceUsage.Default,
-                    BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
-                    CpuAccessFlags = CpuAccessFlags.None,
-                    OptionFlags = ResourceOptionFlags.None
-                });
-
-            using (depthMap)
-            {
-                var dsDimension = game.Graphics.MultiSampled ?
-                    DepthStencilViewDimension.Texture2DMultisampled :
-                    DepthStencilViewDimension.Texture2D;
-
-                var dsDescription = new DepthStencilViewDescription
-                {
-                    Flags = DepthStencilViewFlags.None,
-                    Format = Format.D24_UNorm_S8_UInt,
-                    Dimension = dsDimension,
-                    Texture2D = new DepthStencilViewDescription.Texture2DResource()
-                    {
-                        MipSlice = 0,
-                    },
-                    Texture2DMS = new DepthStencilViewDescription.Texture2DMultisampledResource()
-                    {
-
-                    },
-                };
-
-                var rvDimension = game.Graphics.MultiSampled ?
-                    ShaderResourceViewDimension.Texture2DMultisampled :
-                    ShaderResourceViewDimension.Texture2D;
-
-                var rvDescription = new ShaderResourceViewDescription
-                {
-                    Format = Format.R24_UNorm_X8_Typeless,
-                    Dimension = rvDimension,
-                    Texture2D = new ShaderResourceViewDescription.Texture2DResource()
-                    {
-                        MipLevels = 1,
-                        MostDetailedMip = 0
-                    },
-                    Texture2DMS = new ShaderResourceViewDescription.Texture2DMultisampledResource()
-                    {
-
-                    },
-                };
-
-                dsv = new DepthStencilView(game.Graphics.Device, depthMap, dsDescription);
-                srv = new ShaderResourceView(game.Graphics.Device, depthMap, rvDescription);
-            }
-        }
         /// <summary>
         /// Sets shadow light
         /// </summary>
@@ -144,9 +63,9 @@ namespace Engine
 
             this.Viewport = new Viewport(0, 0, width, height, 0, 1.0f);
 
-            DepthStencilView dsv;
-            ShaderResourceView srv;
-            GenerateResources(game, width, height, out dsv, out srv);
+            EngineDepthStencilView dsv;
+            EngineShaderResourceView srv;
+            game.Graphics.CreateShadowMapTextures(width, height, out dsv, out srv);
             this.DepthMap = dsv;
             this.Texture = srv;
         }

@@ -3,8 +3,6 @@ using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine
 {
@@ -297,7 +295,7 @@ namespace Engine
             /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="terrainTechnique">Technique for drawing</param>
-            public void Draw(DrawContext context, BufferManager bufferManager, EffectTechnique terrainTechnique)
+            public void Draw(DrawContext context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique)
             {
                 this.visibleNodesHigh = Array.FindAll(this.NodesHigh, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
                 this.visibleNodesMedium = Array.FindAll(this.NodesMedium, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
@@ -316,7 +314,7 @@ namespace Engine
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="terrainTechnique">Technique for drawing</param>
             /// <param name="nodeList">Node list</param>
-            private void DrawNodeList(DrawContext context, BufferManager bufferManager, EffectTechnique terrainTechnique, MapGridNode[] nodeList)
+            private void DrawNodeList(DrawContext context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique, MapGridNode[] nodeList)
             {
                 for (int i = 0; i < nodeList.Length; i++)
                 {
@@ -334,9 +332,9 @@ namespace Engine
                             Counters.PrimitivesPerFrame += gNode.IBDesc.Count / 3;
                         }
 
-                        for (int p = 0; p < terrainTechnique.Description.PassCount; p++)
+                        for (int p = 0; p < terrainTechnique.PassCount; p++)
                         {
-                            terrainTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                            terrainTechnique.Apply(this.Game.Graphics, p, 0);
 
                             this.Game.Graphics.DeviceContext.DrawIndexed(
                                 gNode.IBDesc.Count,
@@ -580,27 +578,27 @@ namespace Engine
         /// <summary>
         /// Terrain low res textures
         /// </summary>
-        private ShaderResourceView terrainTexturesLR = null;
+        private EngineShaderResourceView terrainTexturesLR = null;
         /// <summary>
         /// Terrain high res textures
         /// </summary>
-        private ShaderResourceView terrainTexturesHR = null;
+        private EngineShaderResourceView terrainTexturesHR = null;
         /// <summary>
         /// Terrain normal maps
         /// </summary>
-        private ShaderResourceView terrainNormalMaps = null;
+        private EngineShaderResourceView terrainNormalMaps = null;
         /// <summary>
         /// Terrain specular maps
         /// </summary>
-        private ShaderResourceView terrainSpecularMaps = null;
+        private EngineShaderResourceView terrainSpecularMaps = null;
         /// <summary>
         /// Color textures for alpha map
         /// </summary>
-        private ShaderResourceView colorTextures = null;
+        private EngineShaderResourceView colorTextures = null;
         /// <summary>
         /// Alpha map
         /// </summary>
-        private ShaderResourceView alphaMap = null;
+        private EngineShaderResourceView alphaMap = null;
         /// <summary>
         /// Slope ranges
         /// </summary>
@@ -779,7 +777,7 @@ namespace Engine
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <returns>Returns the selected technique</returns>
-        private EffectTechnique SetTechniqueTerrain(DrawContext context)
+        private EngineEffectTechnique SetTechniqueTerrain(DrawContext context)
         {
             if (context.DrawerMode == DrawerModesEnum.Forward) return this.SetTechniqueTerrainDefault(context);
             if (context.DrawerMode == DrawerModesEnum.Deferred) return this.SetTechniqueTerrainDeferred(context);
@@ -791,7 +789,7 @@ namespace Engine
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <returns>Returns the selected technique</returns>
-        private EffectTechnique SetTechniqueTerrainDefault(DrawContext context)
+        private EngineEffectTechnique SetTechniqueTerrainDefault(DrawContext context)
         {
             EffectDefaultTerrain effect = DrawerPool.EffectDefaultTerrain;
 
@@ -841,9 +839,9 @@ namespace Engine
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <returns>Returns the selected technique</returns>
-        private EffectTechnique SetTechniqueTerrainDeferred(DrawContext context)
+        private EngineEffectTechnique SetTechniqueTerrainDeferred(DrawContext context)
         {
-            EffectDeferredTerrain effect = DrawerPool.EffectDeferredTerrain;
+            var effect = DrawerPool.EffectDeferredTerrain;
 
             this.Game.Graphics.SetBlendDefault();
 
@@ -884,7 +882,7 @@ namespace Engine
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <returns>Returns the selected technique</returns>
-        private EffectTechnique SetTechniqueTerrainShadowMap(DrawContext context)
+        private EngineEffectTechnique SetTechniqueTerrainShadowMap(DrawContext context)
         {
             EffectShadowTerrain effect = DrawerPool.EffectShadowTerrain;
 

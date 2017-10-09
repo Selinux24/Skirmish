@@ -53,6 +53,7 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <OutputPath>bin\x86\Release\</OutputPath>
@@ -174,10 +175,21 @@
     <Compile Include="Common\BufferManager.cs" />
     <Compile Include="Common\DrawContext.cs" />
     <Compile Include="Common\DrawerModesEnum.cs" />
+    <Compile Include="Common\EngineDepthStencilView.cs" />
+    <Compile Include="Common\EngineEffect.cs" />
+    <Compile Include="Common\EngineEffectTechnique.cs" />
+    <Compile Include="Common\EngineEffectVariable.cs" />
+    <Compile Include="Common\EngineEffectVariableMatrix.cs" />
+    <Compile Include="Common\EngineEffectVariableScalar.cs" />
+    <Compile Include="Common\EngineEffectVariableTexture.cs" />
+    <Compile Include="Common\EngineEffectVariableVector.cs" />
+    <Compile Include="Common\EngineRenderTargetView.cs" />
+    <Compile Include="Common\EngineShaderResourceView.cs" />
     <Compile Include="Common\IndexBufferShapeEnum.cs" />
     <Compile Include="Common\Intersection.cs" />
     <Compile Include="Common\ManipulatorController.cs" />
     <Compile Include="Common\ModelBaseDescription.cs" />
+    <Compile Include="Common\EngineBuffer.cs" />
     <Compile Include="Common\TimerTick.cs" />
     <Compile Include="Common\UpdateContext.cs" />
     <Compile Include="Common\UseMaterials.cs" />
@@ -197,6 +209,7 @@
     <Compile Include="Helpers\DDS\DDSHeaderDX10.cs" />
     <Compile Include="Helpers\DDS\DDSPixelFormat.cs" />
     <Compile Include="Helpers\HelperTextures.cs" />
+    <Compile Include="Helpers\TextureDescription.cs" />
     <Compile Include="IComposed.cs" />
     <Compile Include="IControllable.cs" />
     <Compile Include="ICullable.cs" />

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using BindFlags = SharpDX.Direct3D11.BindFlags;
-using ResourceUsage = SharpDX.Direct3D11.ResourceUsage;
 
 namespace Engine
 {
@@ -418,7 +416,7 @@ namespace Engine
         /// <param name="binding">Binding flags</param>
         /// <param name="sizeInBytes">Size in bytes</param>
         /// <param name="length">Number of elements</param>
-        public static void RegBuffer(Type type, string name, ResourceUsage usage, BindFlags binding, long sizeInBytes, int length)
+        public static void RegBuffer(Type type, string name, int usage, int binding, long sizeInBytes, int length)
         {
             Buffers++;
 

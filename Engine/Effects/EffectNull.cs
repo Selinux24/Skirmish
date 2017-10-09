@@ -1,8 +1,5 @@
 ﻿using SharpDX;
 using System;
-using Device = SharpDX.Direct3D11.Device;
-using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
 
 namespace Engine.Effects
 {
@@ -16,12 +13,12 @@ namespace Engine.Effects
         /// <summary>
         /// Position color drawing technique
         /// </summary>
-        public readonly EffectTechnique Null = null;
+        public readonly EngineEffectTechnique Null = null;
 
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EffectMatrixVariable worldViewProjection = null;
+        private EngineEffectVariableMatrix worldViewProjection = null;
 
         /// <summary>
         /// World view projection matrix
@@ -41,15 +38,15 @@ namespace Engine.Effects
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectNull(Device device, byte[] effect, bool compile)
-            : base(device, effect, compile)
+        public EffectNull(Graphics graphics, byte[] effect, bool compile)
+            : base(graphics, effect, compile)
         {
             this.Null = this.Effect.GetTechniqueByName("Null");
 
-            this.worldViewProjection = this.Effect.GetVariableByName("gWorldViewProjection").AsMatrix();
+            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
         }
         /// <summary>
         /// Get technique by vertex type
@@ -59,7 +56,7 @@ namespace Engine.Effects
         /// <param name="stage">Stage</param>
         /// <param name="mode">Mode</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
+        public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
             if (stage == DrawingStages.Drawing)
             {

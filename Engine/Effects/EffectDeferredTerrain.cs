@@ -1,12 +1,5 @@
 ﻿using SharpDX;
 using System;
-using Device = SharpDX.Direct3D11.Device;
-using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
-using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
-using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
 {
@@ -20,85 +13,85 @@ namespace Engine.Effects
         /// <summary>
         /// Deferred with alpha map drawing technique
         /// </summary>
-        public readonly EffectTechnique TerrainAlphaMapDeferred = null;
+        public readonly EngineEffectTechnique TerrainAlphaMapDeferred = null;
         /// <summary>
         /// Deferred with slopes drawing technique
         /// </summary>
-        public readonly EffectTechnique TerrainSlopesDeferred = null;
+        public readonly EngineEffectTechnique TerrainSlopesDeferred = null;
         /// <summary>
         /// Deferred full drawing technique
         /// </summary>
-        public readonly EffectTechnique TerrainFullDeferred = null;
+        public readonly EngineEffectTechnique TerrainFullDeferred = null;
 
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private EffectMatrixVariable world = null;
+        private EngineEffectVariableMatrix world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EffectMatrixVariable worldViewProjection = null;
+        private EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Texture resolution effect variable
         /// </summary>
-        private EffectScalarVariable textureResolution = null;
+        private EngineEffectVariableScalar textureResolution = null;
         /// <summary>
         /// Low resolution textures effect variable
         /// </summary>
-        private EffectShaderResourceVariable diffuseMapLR = null;
+        private EngineEffectVariableTexture diffuseMapLR = null;
         /// <summary>
         /// High resolution textures effect variable
         /// </summary>
-        private EffectShaderResourceVariable diffuseMapHR = null;
+        private EngineEffectVariableTexture diffuseMapHR = null;
         /// <summary>
         /// Normal map effect variable
         /// </summary>
-        private EffectShaderResourceVariable normalMap = null;
+        private EngineEffectVariableTexture normalMap = null;
         /// <summary>
         /// Specular map effect variable
         /// </summary>
-        private EffectShaderResourceVariable specularMap = null;
+        private EngineEffectVariableTexture specularMap = null;
         /// <summary>
         /// Color texture array effect variable
         /// </summary>
-        private EffectShaderResourceVariable colorTextures = null;
+        private EngineEffectVariableTexture colorTextures = null;
         /// <summary>
         /// Alpha map effect variable
         /// </summary>
-        private EffectShaderResourceVariable alphaMap = null;
+        private EngineEffectVariableTexture alphaMap = null;
         /// <summary>
         /// Slope ranges effect variable
         /// </summary>
-        private EffectVectorVariable parameters = null;
+        private EngineEffectVariableVector parameters = null;
         /// <summary>
         /// Material index effect variable
         /// </summary>
-        private EffectScalarVariable materialIndex = null;
+        private EngineEffectVariableScalar materialIndex = null;
 
         /// <summary>
         /// Current low resolution diffuse map
         /// </summary>
-        private ShaderResourceView currentDiffuseMapLR = null;
+        private EngineShaderResourceView currentDiffuseMapLR = null;
         /// <summary>
         /// Current hihg resolution diffuse map
         /// </summary>
-        private ShaderResourceView currentDiffuseMapHR = null;
+        private EngineShaderResourceView currentDiffuseMapHR = null;
         /// <summary>
         /// Current normal map
         /// </summary>
-        private ShaderResourceView currentNormalMap = null;
+        private EngineShaderResourceView currentNormalMap = null;
         /// <summary>
         /// Current specular map
         /// </summary>
-        private ShaderResourceView currentSpecularMap = null;
+        private EngineShaderResourceView currentSpecularMap = null;
         /// <summary>
         /// Current color texture array
         /// </summary>
-        private ShaderResourceView currentColorTextures = null;
+        private EngineShaderResourceView currentColorTextures = null;
         /// <summary>
         /// Current alpha map
         /// </summary>
-        private ShaderResourceView currentAlphaMap = null;
+        private EngineShaderResourceView currentAlphaMap = null;
 
         /// <summary>
         /// World matrix
@@ -145,7 +138,7 @@ namespace Engine.Effects
         /// <summary>
         /// Low resolution textures
         /// </summary>
-        protected ShaderResourceView DiffuseMapLR
+        protected EngineShaderResourceView DiffuseMapLR
         {
             get
             {
@@ -166,7 +159,7 @@ namespace Engine.Effects
         /// <summary>
         /// High resolution textures
         /// </summary>
-        protected ShaderResourceView DiffuseMapHR
+        protected EngineShaderResourceView DiffuseMapHR
         {
             get
             {
@@ -187,7 +180,7 @@ namespace Engine.Effects
         /// <summary>
         /// Normal map
         /// </summary>
-        protected ShaderResourceView NormalMap
+        protected EngineShaderResourceView NormalMap
         {
             get
             {
@@ -208,7 +201,7 @@ namespace Engine.Effects
         /// <summary>
         /// Scpecular map
         /// </summary>
-        protected ShaderResourceView SpecularMap
+        protected EngineShaderResourceView SpecularMap
         {
             get
             {
@@ -229,7 +222,7 @@ namespace Engine.Effects
         /// <summary>
         /// Color textures for alpha map
         /// </summary>
-        protected ShaderResourceView ColorTextures
+        protected EngineShaderResourceView ColorTextures
         {
             get
             {
@@ -250,7 +243,7 @@ namespace Engine.Effects
         /// <summary>
         /// Alpha map
         /// </summary>
-        protected ShaderResourceView AlphaMap
+        protected EngineShaderResourceView AlphaMap
         {
             get
             {
@@ -300,28 +293,28 @@ namespace Engine.Effects
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectDeferredTerrain(Device device, byte[] effect, bool compile)
-            : base(device, effect, compile)
+        public EffectDeferredTerrain(Graphics graphics, byte[] effect, bool compile)
+            : base(graphics, effect, compile)
         {
             this.TerrainAlphaMapDeferred = this.Effect.GetTechniqueByName("TerrainAlphaMapDeferred");
             this.TerrainSlopesDeferred = this.Effect.GetTechniqueByName("TerrainSlopesDeferred");
             this.TerrainFullDeferred = this.Effect.GetTechniqueByName("TerrainFullDeferred");
 
-            this.world = this.Effect.GetVariableByName("gVSWorld").AsMatrix();
-            this.worldViewProjection = this.Effect.GetVariableByName("gVSWorldViewProjection").AsMatrix();
-            this.textureResolution = this.Effect.GetVariableByName("gVSTextureResolution").AsScalar();
+            this.world = this.Effect.GetVariableMatrix("gVSWorld");
+            this.worldViewProjection = this.Effect.GetVariableMatrix("gVSWorldViewProjection");
+            this.textureResolution = this.Effect.GetVariableScalar("gVSTextureResolution");
 
-            this.diffuseMapLR = this.Effect.GetVariableByName("gPSDiffuseMapLRArray").AsShaderResource();
-            this.diffuseMapHR = this.Effect.GetVariableByName("gPSDiffuseMapHRArray").AsShaderResource();
-            this.normalMap = this.Effect.GetVariableByName("gPSNormalMapArray").AsShaderResource();
-            this.specularMap = this.Effect.GetVariableByName("gPSSpecularMapArray").AsShaderResource();
-            this.colorTextures = this.Effect.GetVariableByName("gPSColorTextureArray").AsShaderResource();
-            this.alphaMap = this.Effect.GetVariableByName("gPSAlphaTexture").AsShaderResource();
-            this.parameters = this.Effect.GetVariableByName("gPSParams").AsVector();
-            this.materialIndex = this.Effect.GetVariableByName("gPSMaterialIndex").AsScalar();
+            this.diffuseMapLR = this.Effect.GetVariableTexture("gPSDiffuseMapLRArray");
+            this.diffuseMapHR = this.Effect.GetVariableTexture("gPSDiffuseMapHRArray");
+            this.normalMap = this.Effect.GetVariableTexture("gPSNormalMapArray");
+            this.specularMap = this.Effect.GetVariableTexture("gPSSpecularMapArray");
+            this.colorTextures = this.Effect.GetVariableTexture("gPSColorTextureArray");
+            this.alphaMap = this.Effect.GetVariableTexture("gPSAlphaTexture");
+            this.parameters = this.Effect.GetVariableVector("gPSParams");
+            this.materialIndex = this.Effect.GetVariableScalar("gPSMaterialIndex");
         }
         /// <summary>
         /// Get technique by vertex type
@@ -331,9 +324,9 @@ namespace Engine.Effects
         /// <param name="stage">Stage</param>
         /// <param name="mode">Mode</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
+        public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
-            EffectTechnique technique = null;
+            EngineEffectTechnique technique = null;
 
             if (stage == DrawingStages.Drawing)
             {
@@ -382,15 +375,15 @@ namespace Engine.Effects
         /// <param name="proportion">Lerping proportion</param>
         public void UpdatePerObject(
             uint materialIndex,
-            ShaderResourceView normalMap,
-            ShaderResourceView specularMap,
+            EngineShaderResourceView normalMap,
+            EngineShaderResourceView specularMap,
             bool useAlphaMap,
-            ShaderResourceView alphaMap,
-            ShaderResourceView colorTextures,
+            EngineShaderResourceView alphaMap,
+            EngineShaderResourceView colorTextures,
             bool useSlopes,
             Vector2 slopeRanges,
-            ShaderResourceView diffuseMapLR,
-            ShaderResourceView diffuseMapHR,
+            EngineShaderResourceView diffuseMapLR,
+            EngineShaderResourceView diffuseMapHR,
             float proportion)
         {
             this.MaterialIndex = materialIndex;

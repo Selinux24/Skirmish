@@ -1,10 +1,11 @@
-﻿using SharpDX;
-using SharpDX.Direct3D11;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
+    using SharpDX;
+    using SharpDX.Direct3D11;
+
     /// <summary>
     /// Billboard vertex format
     /// </summary>

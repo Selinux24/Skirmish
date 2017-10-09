@@ -272,9 +272,9 @@ namespace Engine
                                         count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
                                         count *= instanceCount;
 
-                                        for (int p = 0; p < technique.Description.PassCount; p++)
+                                        for (int p = 0; p < technique.PassCount; p++)
                                         {
-                                            technique.GetPassByIndex(p).Apply(this.Graphics.DeviceContext, 0);
+                                            technique.Apply(this.Game.Graphics, p, 0);
 
                                             mesh.Draw(this.Game.Graphics, index, length);
 

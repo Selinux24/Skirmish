@@ -1,7 +1,5 @@
 ﻿using SharpDX;
 using SharpDX.DXGI;
-using RenderTargetView = SharpDX.Direct3D11.RenderTargetView;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine
 {
@@ -24,11 +22,11 @@ namespace Engine
         /// <summary>
         /// Minimap render target
         /// </summary>
-        private RenderTargetView renderTarget;
+        private EngineRenderTargetView renderTarget;
         /// <summary>
         /// Minimap texture
         /// </summary>
-        private ShaderResourceView renderTexture;
+        private EngineShaderResourceView renderTexture;
         /// <summary>
         /// Context to draw
         /// </summary>
@@ -67,8 +65,8 @@ namespace Engine
 
             using (var texture = this.Graphics.CreateRenderTargetTexture(Format.R8G8B8A8_UNorm, description.Width, description.Height))
             {
-                this.renderTarget = new RenderTargetView(this.Graphics.Device, texture);
-                this.renderTexture = new ShaderResourceView(this.Graphics.Device, texture);
+                this.renderTarget = new EngineRenderTargetView(this.Graphics.Device, texture);
+                this.renderTexture = new EngineShaderResourceView(this.Graphics.Device, texture);
             }
 
             this.InitializeContext();
@@ -116,7 +114,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            
+
         }
         /// <summary>
         /// Draw objects
@@ -129,7 +127,7 @@ namespace Engine
                 this.drawContext.GameTime = context.GameTime;
 
                 this.Game.Graphics.SetViewport(this.viewport);
-                this.Game.Graphics.SetRenderTarget(this.renderTarget, true, Color.Black, null, false);
+                this.Game.Graphics.SetRenderTargets(this.renderTarget, true, Color.Black, null, false);
 
                 for (int i = 0; i < this.Drawables.Length; i++)
                 {

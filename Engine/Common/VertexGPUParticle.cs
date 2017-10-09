@@ -1,11 +1,11 @@
 ﻿using SharpDX;
 using System;
 using System.Runtime.InteropServices;
-using InputClassification = SharpDX.Direct3D11.InputClassification;
-using InputElement = SharpDX.Direct3D11.InputElement;
 
 namespace Engine.Common
 {
+    using SharpDX.Direct3D11;
+
     /// <summary>
     /// Particle data buffer
     /// </summary>

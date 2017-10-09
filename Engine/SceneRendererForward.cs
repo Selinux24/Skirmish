@@ -4,13 +4,11 @@
 using System.Diagnostics;
 #endif
 using SharpDX;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using DepthStencilClearFlags = SharpDX.Direct3D11.DepthStencilClearFlags;
-using DepthStencilView = SharpDX.Direct3D11.DepthStencilView;
 
 namespace Engine
 {
     using Engine.Common;
+    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Forward renderer class
@@ -66,7 +64,7 @@ namespace Engine
         /// <summary>
         /// Low definition shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMapLow
+        protected EngineShaderResourceView ShadowMapLow
         {
             get
             {
@@ -81,7 +79,7 @@ namespace Engine
         /// <summary>
         /// High definition shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMapHigh
+        protected EngineShaderResourceView ShadowMapHigh
         {
             get
             {
@@ -494,7 +492,7 @@ namespace Engine
         /// </summary>
         /// <param name="result">Resource type</param>
         /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
-        public virtual ShaderResourceView GetResource(SceneRendererResultEnum result)
+        public virtual EngineShaderResourceView GetResource(SceneRendererResultEnum result)
         {
             if (result == SceneRendererResultEnum.ShadowMapStatic) return this.ShadowMapLow;
             if (result == SceneRendererResultEnum.ShadowMapDynamic) return this.ShadowMapHigh;
@@ -506,13 +504,13 @@ namespace Engine
         /// </summary>
         /// <param name="viewport">Viewport</param>
         /// <param name="dsv">Deph stencil buffer</param>
-        private void BindShadowMap(Viewport viewport, DepthStencilView dsv)
+        private void BindShadowMap(Viewport viewport, EngineDepthStencilView dsv)
         {
             //Set shadow mapper viewport
             this.Game.Graphics.SetViewport(viewport);
 
             //Set shadow map depth map without render target
-            this.Game.Graphics.SetRenderTarget(
+            this.Game.Graphics.SetRenderTargets(
                 null,
                 false,
                 Color.Transparent,

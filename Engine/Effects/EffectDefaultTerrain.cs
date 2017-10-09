@@ -1,13 +1,5 @@
 ﻿using SharpDX;
 using System;
-using Device = SharpDX.Direct3D11.Device;
-using EffectMatrixVariable = SharpDX.Direct3D11.EffectMatrixVariable;
-using EffectScalarVariable = SharpDX.Direct3D11.EffectScalarVariable;
-using EffectShaderResourceVariable = SharpDX.Direct3D11.EffectShaderResourceVariable;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using EffectVariable = SharpDX.Direct3D11.EffectVariable;
-using EffectVectorVariable = SharpDX.Direct3D11.EffectVectorVariable;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
 
 namespace Engine.Effects
 {
@@ -21,173 +13,173 @@ namespace Engine.Effects
         /// <summary>
         /// Forward with alpha map drawing technique
         /// </summary>
-        public readonly EffectTechnique TerrainAlphaMapForward = null;
+        public readonly EngineEffectTechnique TerrainAlphaMapForward = null;
         /// <summary>
         /// Forward with slopes drawing technique
         /// </summary>
-        public readonly EffectTechnique TerrainSlopesForward = null;
+        public readonly EngineEffectTechnique TerrainSlopesForward = null;
         /// <summary>
         /// Forward full drawing technique
         /// </summary>
-        public readonly EffectTechnique TerrainFullForward = null;
+        public readonly EngineEffectTechnique TerrainFullForward = null;
 
         /// <summary>
         /// Directional lights effect variable
         /// </summary>
-        private EffectVariable dirLights = null;
+        private EngineEffectVariable dirLights = null;
         /// <summary>
         /// Point lights effect variable
         /// </summary>
-        private EffectVariable pointLights = null;
+        private EngineEffectVariable pointLights = null;
         /// <summary>
         /// Spot light effect variable
         /// </summary>
-        private EffectVariable spotLights = null;
+        private EngineEffectVariable spotLights = null;
         /// <summary>
         /// Global ambient light effect variable;
         /// </summary>
-        private EffectScalarVariable globalAmbient;
+        private EngineEffectVariableScalar globalAmbient;
         /// <summary>
         /// Light count effect variable
         /// </summary>
-        private EffectVectorVariable lightCount = null;
+        private EngineEffectVariableVector lightCount = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
-        private EffectVectorVariable eyePositionWorld = null;
+        private EngineEffectVariableVector eyePositionWorld = null;
         /// <summary>
         /// Fog start effect variable
         /// </summary>
-        private EffectScalarVariable fogStart = null;
+        private EngineEffectVariableScalar fogStart = null;
         /// <summary>
         /// Fog range effect variable
         /// </summary>
-        private EffectScalarVariable fogRange = null;
+        private EngineEffectVariableScalar fogRange = null;
         /// <summary>
         /// Fog color effect variable
         /// </summary>
-        private EffectVectorVariable fogColor = null;
+        private EngineEffectVariableVector fogColor = null;
         /// <summary>
         /// Shadow maps flag effect variable
         /// </summary>
-        private EffectScalarVariable shadowMaps = null;
+        private EngineEffectVariableScalar shadowMaps = null;
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private EffectMatrixVariable world = null;
+        private EngineEffectVariableMatrix world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EffectMatrixVariable worldViewProjection = null;
+        private EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Texture resolution effect variable
         /// </summary>
-        private EffectScalarVariable textureResolution = null;
+        private EngineEffectVariableScalar textureResolution = null;
         /// <summary>
         /// From light View * Projection transform for low definition shadows
         /// </summary>
-        private EffectMatrixVariable fromLightViewProjectionLD = null;
+        private EngineEffectVariableMatrix fromLightViewProjectionLD = null;
         /// <summary>
         /// From light View * Projection transform for high definition shadows
         /// </summary>
-        private EffectMatrixVariable fromLightViewProjectionHD = null;
+        private EngineEffectVariableMatrix fromLightViewProjectionHD = null;
         /// <summary>
         /// Use diffuse map color variable
         /// </summary>
-        private EffectScalarVariable useColorDiffuse = null;
+        private EngineEffectVariableScalar useColorDiffuse = null;
         /// <summary>
         /// Use specular map color variable
         /// </summary>
-        private EffectScalarVariable useColorSpecular = null;
+        private EngineEffectVariableScalar useColorSpecular = null;
         /// <summary>
         /// Material index effect variable
         /// </summary>
-        private EffectScalarVariable materialIndex = null;
+        private EngineEffectVariableScalar materialIndex = null;
         /// <summary>
         /// Low resolution textures effect variable
         /// </summary>
-        private EffectShaderResourceVariable diffuseMapLR = null;
+        private EngineEffectVariableTexture diffuseMapLR = null;
         /// <summary>
         /// High resolution textures effect variable
         /// </summary>
-        private EffectShaderResourceVariable diffuseMapHR = null;
+        private EngineEffectVariableTexture diffuseMapHR = null;
         /// <summary>
         /// Normal map effect variable
         /// </summary>
-        private EffectShaderResourceVariable normalMap = null;
+        private EngineEffectVariableTexture normalMap = null;
         /// <summary>
         /// Specular map effect variable
         /// </summary>
-        private EffectShaderResourceVariable specularMap = null;
+        private EngineEffectVariableTexture specularMap = null;
         /// <summary>
         /// Low definition shadow map effect variable
         /// </summary>
-        private EffectShaderResourceVariable shadowMapLD = null;
+        private EngineEffectVariableTexture shadowMapLD = null;
         /// <summary>
         /// High definition shadow map effect variable
         /// </summary>
-        private EffectShaderResourceVariable shadowMapHD = null;
+        private EngineEffectVariableTexture shadowMapHD = null;
         /// <summary>
         /// Color texture array effect variable
         /// </summary>
-        private EffectShaderResourceVariable colorTextures = null;
+        private EngineEffectVariableTexture colorTextures = null;
         /// <summary>
         /// Alpha map effect variable
         /// </summary>
-        private EffectShaderResourceVariable alphaMap = null;
+        private EngineEffectVariableTexture alphaMap = null;
         /// <summary>
         /// Slope ranges effect variable
         /// </summary>
-        private EffectVectorVariable parameters = null;
+        private EngineEffectVariableVector parameters = null;
         /// <summary>
         /// Material palette width effect variable
         /// </summary>
-        private EffectScalarVariable materialPaletteWidth = null;
+        private EngineEffectVariableScalar materialPaletteWidth = null;
         /// <summary>
         /// Material palette
         /// </summary>
-        private EffectShaderResourceVariable materialPalette = null;
+        private EngineEffectVariableTexture materialPalette = null;
         /// <summary>
         /// Level of detail ranges effect variable
         /// </summary>
-        private EffectVectorVariable lod = null;
+        private EngineEffectVariableVector lod = null;
 
         /// <summary>
         /// Current diffuse map (Low resolution)
         /// </summary>
-        private ShaderResourceView currentDiffuseMapLR = null;
+        private EngineShaderResourceView currentDiffuseMapLR = null;
         /// <summary>
         /// Current normal map (High resolution)
         /// </summary>
-        private ShaderResourceView currentDiffuseMapHR = null;
+        private EngineShaderResourceView currentDiffuseMapHR = null;
         /// <summary>
         /// Current normal map
         /// </summary>
-        private ShaderResourceView currentNormalMap = null;
+        private EngineShaderResourceView currentNormalMap = null;
         /// <summary>
         /// Current specular map
         /// </summary>
-        private ShaderResourceView currentSpecularMap = null;
+        private EngineShaderResourceView currentSpecularMap = null;
         /// <summary>
         /// Current low definition shadow map
         /// </summary>
-        private ShaderResourceView currentShadowMapLD = null;
+        private EngineShaderResourceView currentShadowMapLD = null;
         /// <summary>
         /// Current high definition shadow map
         /// </summary>
-        private ShaderResourceView currentShadowMapHD = null;
+        private EngineShaderResourceView currentShadowMapHD = null;
         /// <summary>
         /// Current color texure array
         /// </summary>
-        private ShaderResourceView currentColorTextures = null;
+        private EngineShaderResourceView currentColorTextures = null;
         /// <summary>
         /// Current alpha map
         /// </summary>
-        private ShaderResourceView currentAlphaMap = null;
+        private EngineShaderResourceView currentAlphaMap = null;
         /// <summary>
         /// Current material palette
         /// </summary>
-        private ShaderResourceView currentMaterialPalette = null;
+        private EngineShaderResourceView currentMaterialPalette = null;
 
         /// <summary>
         /// Directional lights
@@ -196,21 +188,11 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.dirLights.GetRawValue(default(BufferDirectionalLight).GetStride() * BufferDirectionalLight.MAX))
-                {
-                    ds.Position = 0;
-
-                    return ds.ReadRange<BufferDirectionalLight>(BufferDirectionalLight.MAX);
-                }
+                return this.dirLights.GetValue<BufferDirectionalLight>(BufferDirectionalLight.MAX);
             }
             set
             {
-                using (DataStream ds = DataStream.Create<BufferDirectionalLight>(value, true, false))
-                {
-                    ds.Position = 0;
-
-                    this.dirLights.SetRawValue(ds, default(BufferDirectionalLight).GetStride() * BufferDirectionalLight.MAX);
-                }
+                this.dirLights.SetValue(value, BufferDirectionalLight.MAX);
             }
         }
         /// <summary>
@@ -220,21 +202,11 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.pointLights.GetRawValue(default(BufferPointLight).GetStride() * BufferPointLight.MAX))
-                {
-                    ds.Position = 0;
-
-                    return ds.ReadRange<BufferPointLight>(BufferPointLight.MAX);
-                }
+                return this.pointLights.GetValue<BufferPointLight>(BufferPointLight.MAX);
             }
             set
             {
-                using (DataStream ds = DataStream.Create<BufferPointLight>(value, true, false))
-                {
-                    ds.Position = 0;
-
-                    this.pointLights.SetRawValue(ds, default(BufferPointLight).GetStride() * BufferPointLight.MAX);
-                }
+                this.pointLights.SetValue(value, BufferPointLight.MAX);
             }
         }
         /// <summary>
@@ -244,21 +216,11 @@ namespace Engine.Effects
         {
             get
             {
-                using (DataStream ds = this.spotLights.GetRawValue(default(BufferSpotLight).GetStride() * BufferSpotLight.MAX))
-                {
-                    ds.Position = 0;
-
-                    return ds.ReadRange<BufferSpotLight>(BufferSpotLight.MAX);
-                }
+                return this.spotLights.GetValue<BufferSpotLight>(BufferSpotLight.MAX);
             }
             set
             {
-                using (DataStream ds = DataStream.Create<BufferSpotLight>(value, true, false))
-                {
-                    ds.Position = 0;
-
-                    this.spotLights.SetRawValue(ds, default(BufferSpotLight).GetStride() * BufferSpotLight.MAX);
-                }
+                this.spotLights.SetValue(value, BufferSpotLight.MAX);
             }
         }
         /// <summary>
@@ -482,7 +444,7 @@ namespace Engine.Effects
         /// <summary>
         /// Low resolution textures
         /// </summary>
-        protected ShaderResourceView DiffuseMapLR
+        protected EngineShaderResourceView DiffuseMapLR
         {
             get
             {
@@ -503,7 +465,7 @@ namespace Engine.Effects
         /// <summary>
         /// High resolution textures
         /// </summary>
-        protected ShaderResourceView DiffuseMapHR
+        protected EngineShaderResourceView DiffuseMapHR
         {
             get
             {
@@ -524,7 +486,7 @@ namespace Engine.Effects
         /// <summary>
         /// Normal map
         /// </summary>
-        protected ShaderResourceView NormalMap
+        protected EngineShaderResourceView NormalMap
         {
             get
             {
@@ -545,7 +507,7 @@ namespace Engine.Effects
         /// <summary>
         /// Scpecular map
         /// </summary>
-        protected ShaderResourceView SpecularMap
+        protected EngineShaderResourceView SpecularMap
         {
             get
             {
@@ -566,7 +528,7 @@ namespace Engine.Effects
         /// <summary>
         /// Low definition shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMapLD
+        protected EngineShaderResourceView ShadowMapLD
         {
             get
             {
@@ -587,7 +549,7 @@ namespace Engine.Effects
         /// <summary>
         /// High definition shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMapHD
+        protected EngineShaderResourceView ShadowMapHD
         {
             get
             {
@@ -608,7 +570,7 @@ namespace Engine.Effects
         /// <summary>
         /// Color textures for alpha map
         /// </summary>
-        protected ShaderResourceView ColorTextures
+        protected EngineShaderResourceView ColorTextures
         {
             get
             {
@@ -629,7 +591,7 @@ namespace Engine.Effects
         /// <summary>
         /// Alpha map
         /// </summary>
-        protected ShaderResourceView AlphaMap
+        protected EngineShaderResourceView AlphaMap
         {
             get
             {
@@ -678,7 +640,7 @@ namespace Engine.Effects
         /// <summary>
         /// Material palette
         /// </summary>
-        protected ShaderResourceView MaterialPalette
+        protected EngineShaderResourceView MaterialPalette
         {
             get
             {
@@ -718,52 +680,52 @@ namespace Engine.Effects
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectDefaultTerrain(Device device, byte[] effect, bool compile)
-            : base(device, effect, compile)
+        public EffectDefaultTerrain(Graphics graphics, byte[] effect, bool compile)
+            : base(graphics, effect, compile)
         {
             this.TerrainAlphaMapForward = this.Effect.GetTechniqueByName("TerrainAlphaMapForward");
             this.TerrainSlopesForward = this.Effect.GetTechniqueByName("TerrainSlopesForward");
             this.TerrainFullForward = this.Effect.GetTechniqueByName("TerrainFullForward");
 
             //Globals
-            this.materialPaletteWidth = this.Effect.GetVariableByName("gMaterialPaletteWidth").AsScalar();
-            this.materialPalette = this.Effect.GetVariableByName("gMaterialPalette").AsShaderResource();
-            this.lod = this.Effect.GetVariableByName("gLOD").AsVector();
+            this.materialPaletteWidth = this.Effect.GetVariableScalar("gMaterialPaletteWidth");
+            this.materialPalette = this.Effect.GetVariableTexture("gMaterialPalette");
+            this.lod = this.Effect.GetVariableVector("gLOD");
 
             //Per frame
-            this.world = this.Effect.GetVariableByName("gVSWorld").AsMatrix();
-            this.worldViewProjection = this.Effect.GetVariableByName("gVSWorldViewProjection").AsMatrix();
-            this.textureResolution = this.Effect.GetVariableByName("gVSTextureResolution").AsScalar();
+            this.world = this.Effect.GetVariableMatrix("gVSWorld");
+            this.worldViewProjection = this.Effect.GetVariableMatrix("gVSWorldViewProjection");
+            this.textureResolution = this.Effect.GetVariableScalar("gVSTextureResolution");
 
-            this.fromLightViewProjectionLD = this.Effect.GetVariableByName("gPSLightViewProjectionLD").AsMatrix();
-            this.fromLightViewProjectionHD = this.Effect.GetVariableByName("gPSLightViewProjectionHD").AsMatrix();
-            this.eyePositionWorld = this.Effect.GetVariableByName("gPSEyePositionWorld").AsVector();
-            this.globalAmbient = this.Effect.GetVariableByName("gPSGlobalAmbient").AsScalar();
-            this.lightCount = this.Effect.GetVariableByName("gPSLightCount").AsVector();
-            this.shadowMaps = this.Effect.GetVariableByName("gPSShadows").AsScalar();
-            this.fogColor = this.Effect.GetVariableByName("gPSFogColor").AsVector();
-            this.fogStart = this.Effect.GetVariableByName("gPSFogStart").AsScalar();
-            this.fogRange = this.Effect.GetVariableByName("gPSFogRange").AsScalar();
-            this.dirLights = this.Effect.GetVariableByName("gPSDirLights");
-            this.pointLights = this.Effect.GetVariableByName("gPSPointLights");
-            this.spotLights = this.Effect.GetVariableByName("gPSSpotLights");
-            this.shadowMapLD = this.Effect.GetVariableByName("gPSShadowMapLD").AsShaderResource();
-            this.shadowMapHD = this.Effect.GetVariableByName("gPSShadowMapHD").AsShaderResource();
+            this.fromLightViewProjectionLD = this.Effect.GetVariableMatrix("gPSLightViewProjectionLD");
+            this.fromLightViewProjectionHD = this.Effect.GetVariableMatrix("gPSLightViewProjectionHD");
+            this.eyePositionWorld = this.Effect.GetVariableVector("gPSEyePositionWorld");
+            this.globalAmbient = this.Effect.GetVariableScalar("gPSGlobalAmbient");
+            this.lightCount = this.Effect.GetVariableVector("gPSLightCount");
+            this.shadowMaps = this.Effect.GetVariableScalar("gPSShadows");
+            this.fogColor = this.Effect.GetVariableVector("gPSFogColor");
+            this.fogStart = this.Effect.GetVariableScalar("gPSFogStart");
+            this.fogRange = this.Effect.GetVariableScalar("gPSFogRange");
+            this.dirLights = this.Effect.GetVariable("gPSDirLights");
+            this.pointLights = this.Effect.GetVariable("gPSPointLights");
+            this.spotLights = this.Effect.GetVariable("gPSSpotLights");
+            this.shadowMapLD = this.Effect.GetVariableTexture("gPSShadowMapLD");
+            this.shadowMapHD = this.Effect.GetVariableTexture("gPSShadowMapHD");
 
             //Per object
-            this.parameters = this.Effect.GetVariableByName("gPSParams").AsVector();
-            this.useColorDiffuse = this.Effect.GetVariableByName("gPSUseColorDiffuse").AsScalar();
-            this.useColorSpecular = this.Effect.GetVariableByName("gPSUseColorSpecular").AsScalar();
-            this.materialIndex = this.Effect.GetVariableByName("gPSMaterialIndex").AsScalar();
-            this.normalMap = this.Effect.GetVariableByName("gPSNormalMapArray").AsShaderResource();
-            this.specularMap = this.Effect.GetVariableByName("gPSSpecularMapArray").AsShaderResource();
-            this.colorTextures = this.Effect.GetVariableByName("gPSColorTextureArray").AsShaderResource();
-            this.alphaMap = this.Effect.GetVariableByName("gPSAlphaTexture").AsShaderResource();
-            this.diffuseMapLR = this.Effect.GetVariableByName("gPSDiffuseMapLRArray").AsShaderResource();
-            this.diffuseMapHR = this.Effect.GetVariableByName("gPSDiffuseMapHRArray").AsShaderResource();
+            this.parameters = this.Effect.GetVariableVector("gPSParams");
+            this.useColorDiffuse = this.Effect.GetVariableScalar("gPSUseColorDiffuse");
+            this.useColorSpecular = this.Effect.GetVariableScalar("gPSUseColorSpecular");
+            this.materialIndex = this.Effect.GetVariableScalar("gPSMaterialIndex");
+            this.normalMap = this.Effect.GetVariableTexture("gPSNormalMapArray");
+            this.specularMap = this.Effect.GetVariableTexture("gPSSpecularMapArray");
+            this.colorTextures = this.Effect.GetVariableTexture("gPSColorTextureArray");
+            this.alphaMap = this.Effect.GetVariableTexture("gPSAlphaTexture");
+            this.diffuseMapLR = this.Effect.GetVariableTexture("gPSDiffuseMapLRArray");
+            this.diffuseMapHR = this.Effect.GetVariableTexture("gPSDiffuseMapHRArray");
         }
         /// <summary>
         /// Get technique by vertex type
@@ -773,9 +735,9 @@ namespace Engine.Effects
         /// <param name="stage">Stage</param>
         /// <param name="mode">Mode</param>
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
+        public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
-            EffectTechnique technique = null;
+            EngineEffectTechnique technique = null;
 
             if (stage == DrawingStages.Drawing)
             {
@@ -802,7 +764,7 @@ namespace Engine.Effects
         /// <param name="lod2">Medium level of detail maximum distance</param>
         /// <param name="lod3">Low level of detail maximum distance</param>
         public void UpdateGlobals(
-            ShaderResourceView materialPalette,
+            EngineShaderResourceView materialPalette,
             uint materialPaletteWidth,
             float lod1,
             float lod2,
@@ -833,8 +795,8 @@ namespace Engine.Effects
             Vector3 eyePositionWorld,
             SceneLights lights,
             int shadowMaps,
-            ShaderResourceView shadowMapLD,
-            ShaderResourceView shadowMapHD,
+            EngineShaderResourceView shadowMapLD,
+            EngineShaderResourceView shadowMapHD,
             Matrix fromLightViewProjectionLD,
             Matrix fromLightViewProjectionHD)
         {
@@ -922,15 +884,15 @@ namespace Engine.Effects
         /// <param name="proportion">Lerping proportion</param>
         /// <param name="materialIndex">Marerial index</param>
         public void UpdatePerObject(
-            ShaderResourceView normalMap,
-            ShaderResourceView specularMap,
+            EngineShaderResourceView normalMap,
+            EngineShaderResourceView specularMap,
             bool useAlphaMap,
-            ShaderResourceView alphaMap,
-            ShaderResourceView colorTextures,
+            EngineShaderResourceView alphaMap,
+            EngineShaderResourceView colorTextures,
             bool useSlopes,
             Vector2 slopeRanges,
-            ShaderResourceView diffuseMapLR,
-            ShaderResourceView diffuseMapHR,
+            EngineShaderResourceView diffuseMapLR,
+            EngineShaderResourceView diffuseMapHR,
             float proportion,
             uint materialIndex)
         {

@@ -5,19 +5,13 @@ using System.Diagnostics;
 using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
-using Buffer = SharpDX.Direct3D11.Buffer;
-using VertexBufferBinding = SharpDX.Direct3D11.VertexBufferBinding;
-using DepthStencilView = SharpDX.Direct3D11.DepthStencilView;
-using ShaderResourceView = SharpDX.Direct3D11.ShaderResourceView;
-using DepthStencilClearFlags = SharpDX.Direct3D11.DepthStencilClearFlags;
-using EffectTechnique = SharpDX.Direct3D11.EffectTechnique;
-using InputLayout = SharpDX.Direct3D11.InputLayout;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
     using Engine.Helpers;
+    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Deferred renderer class
@@ -157,7 +151,7 @@ namespace Engine
         /// <summary>
         /// Low definition shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMapLow
+        protected EngineShaderResourceView ShadowMapLow
         {
             get
             {
@@ -172,7 +166,7 @@ namespace Engine
         /// <summary>
         /// High definition shadow map
         /// </summary>
-        protected ShaderResourceView ShadowMapHigh
+        protected EngineShaderResourceView ShadowMapHigh
         {
             get
             {
@@ -191,7 +185,7 @@ namespace Engine
         /// <summary>
         /// Geometry map
         /// </summary>
-        protected ShaderResourceView[] GeometryMap
+        protected EngineShaderResourceView[] GeometryMap
         {
             get
             {
@@ -206,7 +200,7 @@ namespace Engine
         /// <summary>
         /// Light map
         /// </summary>
-        protected ShaderResourceView[] LightMap
+        protected EngineShaderResourceView[] LightMap
         {
             get
             {
@@ -236,25 +230,10 @@ namespace Engine
             this.geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 3);
             this.lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 1);
 
-            this.dirLightInputLayout = new InputLayout(
-                game.Graphics.Device,
-                DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.GetPassByIndex(0).Description.Signature,
-                VertexPosition.Input(BufferSlot));
-
-            this.pointLightInputLayout = new InputLayout(
-                game.Graphics.Device,
-                DrawerPool.EffectDeferredComposer.DeferredPointLight.GetPassByIndex(0).Description.Signature,
-                VertexPosition.Input(BufferSlot));
-
-            this.spotLightInputLayout = new InputLayout(
-                game.Graphics.Device,
-                DrawerPool.EffectDeferredComposer.DeferredSpotLight.GetPassByIndex(0).Description.Signature,
-                VertexPosition.Input(BufferSlot));
-
-            this.combineLightsInputLayout = new InputLayout(
-                game.Graphics.Device,
-                DrawerPool.EffectDeferredComposer.DeferredCombineLights.GetPassByIndex(0).Description.Signature,
-                VertexPosition.Input(BufferSlot));
+            this.dirLightInputLayout = DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.Create(game.Graphics, VertexPosition.Input(BufferSlot));
+            this.pointLightInputLayout = DrawerPool.EffectDeferredComposer.DeferredPointLight.Create(game.Graphics, VertexPosition.Input(BufferSlot));
+            this.spotLightInputLayout = DrawerPool.EffectDeferredComposer.DeferredSpotLight.Create(game.Graphics, VertexPosition.Input(BufferSlot));
+            this.combineLightsInputLayout = DrawerPool.EffectDeferredComposer.DeferredCombineLights.Create(game.Graphics, VertexPosition.Input(BufferSlot));
 
             this.UpdateContext = new UpdateContext()
             {
@@ -815,7 +794,7 @@ namespace Engine
         /// </summary>
         /// <param name="result">Resource type</param>
         /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
-        public virtual ShaderResourceView GetResource(SceneRendererResultEnum result)
+        public virtual EngineShaderResourceView GetResource(SceneRendererResultEnum result)
         {
             if (result == SceneRendererResultEnum.ShadowMapStatic) return this.ShadowMapLow;
             if (result == SceneRendererResultEnum.ShadowMapDynamic) return this.ShadowMapHigh;
@@ -942,13 +921,13 @@ namespace Engine
         /// </summary>
         /// <param name="viewport">Viewport</param>
         /// <param name="dsv">Deph stencil buffer</param>
-        private void BindShadowMap(Viewport viewport, DepthStencilView dsv)
+        private void BindShadowMap(Viewport viewport, EngineDepthStencilView dsv)
         {
             //Set shadow mapper viewport
             this.Game.Graphics.SetViewport(viewport);
 
             //Set shadow map depth map without render target
-            this.Game.Graphics.SetRenderTarget(
+            this.Game.Graphics.SetRenderTargets(
                 null,
                 false,
                 Color.Transparent,
@@ -1055,9 +1034,9 @@ namespace Engine
                         context.ShadowMapLow,
                         context.ShadowMapHigh);
 
-                    for (int p = 0; p < effectTechnique.Description.PassCount; p++)
+                    for (int p = 0; p < effectTechnique.PassCount; p++)
                     {
-                        effectTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                        effectTechnique.Apply(this.Game.Graphics, p, 0);
 
                         this.Game.Graphics.DeviceContext.DrawIndexed(
                             this.screenGeometry.IndexCount,
@@ -1220,11 +1199,11 @@ namespace Engine
         /// <param name="geometry">Geometry</param>
         /// <param name="effect">Effect</param>
         /// <param name="effectTechnique">Technique</param>
-        private void DrawSingleLight(LightGeometry geometry, EffectDeferredComposer effect, EffectTechnique effectTechnique)
+        private void DrawSingleLight(LightGeometry geometry, EffectDeferredComposer effect, EngineEffectTechnique effectTechnique)
         {
-            for (int p = 0; p < effectTechnique.Description.PassCount; p++)
+            for (int p = 0; p < effectTechnique.PassCount; p++)
             {
-                effectTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                effectTechnique.Apply(this.Game.Graphics, p, 0);
 
                 this.Game.Graphics.DeviceContext.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
 
@@ -1279,9 +1258,9 @@ namespace Engine
 #if DEBUG
                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                for (int p = 0; p < effectTechnique.Description.PassCount; p++)
+                for (int p = 0; p < effectTechnique.PassCount; p++)
                 {
-                    effectTechnique.GetPassByIndex(p).Apply(this.Game.Graphics.DeviceContext, 0);
+                    effectTechnique.Apply(this.Game.Graphics, p, 0);
 
                     this.Game.Graphics.DeviceContext.DrawIndexed(this.screenGeometry.IndexCount, this.screenGeometry.Offset, 0);
 

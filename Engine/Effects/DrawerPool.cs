@@ -1,5 +1,4 @@
-﻿using SharpDX.Direct3D11;
-using System;
+﻿using System;
 
 namespace Engine.Effects
 {
@@ -91,31 +90,31 @@ namespace Engine.Effects
         /// <summary>
         /// Initializes pool
         /// </summary>
-        /// <param name="device">Device</param>
-        public static void Initialize(Device device)
+        /// <param name="graphics">Device</param>
+        public static void Initialize(Graphics graphics)
         {
-            EffectNull = CreateEffect<EffectNull>(device, Resources.ShaderNullFxo, Resources.ShaderNullFx);
+            EffectNull = CreateEffect<EffectNull>(graphics, Resources.ShaderNullFxo, Resources.ShaderNullFx);
 
-            EffectDefaultSprite = CreateEffect<EffectDefaultSprite>(device, Resources.ShaderDefaultSpriteFxo, Resources.ShaderDefaultSpriteFxo);
-            EffectDefaultFont = CreateEffect<EffectDefaultFont>(device, Resources.ShaderDefaultFontFxo, Resources.ShaderDefaultFontFxo);
-            EffectDefaultCubemap = CreateEffect<EffectDefaultCubemap>(device, Resources.ShaderDefaultCubemapFxo, Resources.ShaderDefaultCubemapFx);
-            EffectDefaultBillboard = CreateEffect<EffectDefaultBillboard>(device, Resources.ShaderDefaultBillboardFxo, Resources.ShaderDefaultBillboardFx);
-            EffectDefaultClouds = CreateEffect<EffectDefaultClouds>(device, Resources.ShaderDefaultCloudsFxo, Resources.ShaderDefaultCloudsFx);
-            EffectDefaultBasic = CreateEffect<EffectDefaultBasic>(device, Resources.ShaderDefaultBasicFxo, Resources.ShaderDefaultBasicFx);
-            EffectDefaultTerrain = CreateEffect<EffectDefaultTerrain>(device, Resources.ShaderDefaultTerrainFxo, Resources.ShaderDefaultTerrainFx);
-            EffectDefaultSkyScattering = CreateEffect<EffectDefaultSkyScattering>(device, Resources.ShaderDefaultSkyScatteringFxo, Resources.ShaderDefaultSkyScatteringFx);
-            EffectDefaultCPUParticles = CreateEffect<EffectDefaultCPUParticles>(device, Resources.ShaderDefaultCPUParticlesFxo, Resources.ShaderDefaultCPUParticlesFx);
-            EffectDefaultGPUParticles = CreateEffect<EffectDefaultGPUParticles>(device, Resources.ShaderDefaultGPUParticlesFxo, Resources.ShaderDefaultGPUParticlesFx);
+            EffectDefaultSprite = CreateEffect<EffectDefaultSprite>(graphics, Resources.ShaderDefaultSpriteFxo, Resources.ShaderDefaultSpriteFxo);
+            EffectDefaultFont = CreateEffect<EffectDefaultFont>(graphics, Resources.ShaderDefaultFontFxo, Resources.ShaderDefaultFontFxo);
+            EffectDefaultCubemap = CreateEffect<EffectDefaultCubemap>(graphics, Resources.ShaderDefaultCubemapFxo, Resources.ShaderDefaultCubemapFx);
+            EffectDefaultBillboard = CreateEffect<EffectDefaultBillboard>(graphics, Resources.ShaderDefaultBillboardFxo, Resources.ShaderDefaultBillboardFx);
+            EffectDefaultClouds = CreateEffect<EffectDefaultClouds>(graphics, Resources.ShaderDefaultCloudsFxo, Resources.ShaderDefaultCloudsFx);
+            EffectDefaultBasic = CreateEffect<EffectDefaultBasic>(graphics, Resources.ShaderDefaultBasicFxo, Resources.ShaderDefaultBasicFx);
+            EffectDefaultTerrain = CreateEffect<EffectDefaultTerrain>(graphics, Resources.ShaderDefaultTerrainFxo, Resources.ShaderDefaultTerrainFx);
+            EffectDefaultSkyScattering = CreateEffect<EffectDefaultSkyScattering>(graphics, Resources.ShaderDefaultSkyScatteringFxo, Resources.ShaderDefaultSkyScatteringFx);
+            EffectDefaultCPUParticles = CreateEffect<EffectDefaultCPUParticles>(graphics, Resources.ShaderDefaultCPUParticlesFxo, Resources.ShaderDefaultCPUParticlesFx);
+            EffectDefaultGPUParticles = CreateEffect<EffectDefaultGPUParticles>(graphics, Resources.ShaderDefaultGPUParticlesFxo, Resources.ShaderDefaultGPUParticlesFx);
 
-            EffectDeferredComposer = CreateEffect<EffectDeferredComposer>(device, Resources.ShaderDeferredComposerFxo, Resources.ShaderDeferredComposerFx);
-            EffectDeferredBasic = CreateEffect<EffectDeferredBasic>(device, Resources.ShaderDeferredBasicFxo, Resources.ShaderDeferredBasicFxo);
-            EffectDeferredTerrain = CreateEffect<EffectDeferredTerrain>(device, Resources.ShaderDeferredTerrainFxo, Resources.ShaderDeferredTerrainFx);
+            EffectDeferredComposer = CreateEffect<EffectDeferredComposer>(graphics, Resources.ShaderDeferredComposerFxo, Resources.ShaderDeferredComposerFx);
+            EffectDeferredBasic = CreateEffect<EffectDeferredBasic>(graphics, Resources.ShaderDeferredBasicFxo, Resources.ShaderDeferredBasicFxo);
+            EffectDeferredTerrain = CreateEffect<EffectDeferredTerrain>(graphics, Resources.ShaderDeferredTerrainFxo, Resources.ShaderDeferredTerrainFx);
 
-            EffectShadowBillboard = CreateEffect<EffectShadowBillboard>(device, Resources.ShaderShadowBillboardFxo, Resources.ShaderShadowBillboardFx);
-            EffectShadowBasic = CreateEffect<EffectShadowBasic>(device, Resources.ShaderShadowBasicFxo, Resources.ShaderShadowBasicFx);
-            EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(device, Resources.ShaderShadowTerrainFxo, Resources.ShaderShadowTerrainFx);
+            EffectShadowBillboard = CreateEffect<EffectShadowBillboard>(graphics, Resources.ShaderShadowBillboardFxo, Resources.ShaderShadowBillboardFx);
+            EffectShadowBasic = CreateEffect<EffectShadowBasic>(graphics, Resources.ShaderShadowBasicFxo, Resources.ShaderShadowBasicFx);
+            EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(graphics, Resources.ShaderShadowTerrainFxo, Resources.ShaderShadowTerrainFx);
 
-            EffectPostBlur = CreateEffect<EffectPostBlur>(device, Resources.ShaderPostBlurFxo, Resources.ShaderPostBlurFx);
+            EffectPostBlur = CreateEffect<EffectPostBlur>(graphics, Resources.ShaderPostBlurFxo, Resources.ShaderPostBlurFx);
         }
         /// <summary>
         /// Dispose of used resources
@@ -150,15 +149,15 @@ namespace Engine.Effects
         /// Creates a new effect from resources
         /// </summary>
         /// <typeparam name="T">Effect type</typeparam>
-        /// <param name="device">Graphics device</param>
+        /// <param name="graphics">Graphics device</param>
         /// <param name="resFxo">Compiled resource</param>
         /// <param name="resFx">Source code resource</param>
         /// <returns>Returns the new generated effect instance</returns>
-        private static T CreateEffect<T>(Device device, byte[] resFxo, byte[] resFx) where T : Drawer
+        private static T CreateEffect<T>(Graphics graphics, byte[] resFxo, byte[] resFx) where T : Drawer
         {
             var res = resFxo != null ? resFxo : resFx;
 
-            return (T)Activator.CreateInstance(typeof(T), device, res, false);
+            return (T)Activator.CreateInstance(typeof(T), graphics, res, false);
         }
 
         /// <summary>
@@ -167,8 +166,8 @@ namespace Engine.Effects
         /// <param name="materialPalette">Material palette</param>
         /// <param name="materialPaletteWidth">Material palette width</param>
         public static void UpdateSceneGlobals(
-            ShaderResourceView materialPalette, uint materialPaletteWidth,
-            ShaderResourceView animationPalette, uint animationPaletteWidth)
+            EngineShaderResourceView materialPalette, uint materialPaletteWidth,
+            EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
             EffectDefaultBillboard.UpdateGlobals(
                 materialPalette, materialPaletteWidth,
