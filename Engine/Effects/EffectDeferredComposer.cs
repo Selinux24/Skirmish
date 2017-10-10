@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Effects
 {
@@ -127,31 +126,31 @@ namespace Engine.Effects
         /// <summary>
         /// Current target 1
         /// </summary>
-        private EngineShaderResourceView currentTG1Map = null;
+        private EngineTexture currentTG1Map = null;
         /// <summary>
         /// Current target 2
         /// </summary>
-        private EngineShaderResourceView currentTG2Map = null;
+        private EngineTexture currentTG2Map = null;
         /// <summary>
         /// Current target 3
         /// </summary>
-        private EngineShaderResourceView currentTG3Map = null;
+        private EngineTexture currentTG3Map = null;
         /// <summary>
         /// Current low definition shadow map
         /// </summary>
-        private EngineShaderResourceView currentShadowMapLD = null;
+        private EngineTexture currentShadowMapLD = null;
         /// <summary>
         /// Current high definition shadow map
         /// </summary>
-        private EngineShaderResourceView currentShadowMapHD = null;
+        private EngineTexture currentShadowMapHD = null;
         /// <summary>
         /// Current light map
         /// </summary>
-        private EngineShaderResourceView currentLightMap = null;
+        private EngineTexture currentLightMap = null;
         /// <summary>
         /// Current material palette
         /// </summary>
-        private EngineShaderResourceView currentMaterialPalette = null;
+        private EngineTexture currentMaterialPalette = null;
 
         /// <summary>
         /// World matrix
@@ -216,15 +215,11 @@ namespace Engine.Effects
         {
             get
             {
-                Vector4 v = this.eyePositionWorld.GetFloatVector();
-
-                return new Vector3(v.X, v.Y, v.Z);
+                return this.eyePositionWorld.GetVector<Vector3>();
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
-
-                this.eyePositionWorld.Set(v4);
+                this.eyePositionWorld.Set(value);
             }
         }
         /// <summary>
@@ -318,7 +313,7 @@ namespace Engine.Effects
         {
             get
             {
-                return new Color4(this.fogColor.GetFloatVector());
+                return this.fogColor.GetVector<Color4>();
             }
             set
             {
@@ -342,7 +337,7 @@ namespace Engine.Effects
         /// <summary>
         /// Color Map
         /// </summary>
-        protected EngineShaderResourceView TG1Map
+        protected EngineTexture TG1Map
         {
             get
             {
@@ -363,7 +358,7 @@ namespace Engine.Effects
         /// <summary>
         /// Normal Map
         /// </summary>
-        protected EngineShaderResourceView TG2Map
+        protected EngineTexture TG2Map
         {
             get
             {
@@ -384,7 +379,7 @@ namespace Engine.Effects
         /// <summary>
         /// Depth Map
         /// </summary>
-        protected EngineShaderResourceView TG3Map
+        protected EngineTexture TG3Map
         {
             get
             {
@@ -405,7 +400,7 @@ namespace Engine.Effects
         /// <summary>
         /// Low definition shadow map
         /// </summary>
-        protected EngineShaderResourceView ShadowMapLD
+        protected EngineTexture ShadowMapLD
         {
             get
             {
@@ -426,7 +421,7 @@ namespace Engine.Effects
         /// <summary>
         /// High definition shadow map
         /// </summary>
-        protected EngineShaderResourceView ShadowMapHD
+        protected EngineTexture ShadowMapHD
         {
             get
             {
@@ -447,7 +442,7 @@ namespace Engine.Effects
         /// <summary>
         /// Light Map
         /// </summary>
-        protected EngineShaderResourceView LightMap
+        protected EngineTexture LightMap
         {
             get
             {
@@ -472,17 +467,17 @@ namespace Engine.Effects
         {
             get
             {
-                return (uint)this.materialPaletteWidth.GetFloat();
+                return this.materialPaletteWidth.GetUInt();
             }
             set
             {
-                this.materialPaletteWidth.Set((float)value);
+                this.materialPaletteWidth.Set(value);
             }
         }
         /// <summary>
         /// Material palette
         /// </summary>
-        protected EngineShaderResourceView MaterialPalette
+        protected EngineTexture MaterialPalette
         {
             get
             {
@@ -507,15 +502,11 @@ namespace Engine.Effects
         {
             get
             {
-                var v = this.lod.GetFloatVector();
-
-                return new Vector3(v.X, v.Y, v.Z);
+                return this.lod.GetVector<Vector3>();
             }
             set
             {
-                var v = new Vector4(value, 0);
-
-                this.lod.Set(v);
+                this.lod.Set(value);
             }
         }
 
@@ -568,7 +559,7 @@ namespace Engine.Effects
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
         public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
-            throw new Exception("Use technique variables directly");
+            throw new EngineException("Use technique variables directly");
         }
 
         /// <summary>
@@ -580,7 +571,7 @@ namespace Engine.Effects
         /// <param name="lod2">Medium level of detail maximum distance</param>
         /// <param name="lod3">Low level of detail maximum distance</param>
         public void UpdateGlobals(
-            EngineShaderResourceView materialPalette,
+            EngineTexture materialPalette,
             uint materialPaletteWidth,
             float lod1,
             float lod2,
@@ -604,9 +595,9 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
-            EngineShaderResourceView colorMap,
-            EngineShaderResourceView normalMap,
-            EngineShaderResourceView depthMap)
+            EngineTexture colorMap,
+            EngineTexture normalMap,
+            EngineTexture depthMap)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
@@ -630,8 +621,8 @@ namespace Engine.Effects
             Matrix lightViewProjectionLD,
             Matrix lightViewProjectionHD,
             int shadowMaps,
-            EngineShaderResourceView shadowMapLD,
-            EngineShaderResourceView shadowMapHD)
+            EngineTexture shadowMapLD,
+            EngineTexture shadowMapHD)
         {
             this.DirectionalLight = new BufferDirectionalLight(light);
 
@@ -691,8 +682,8 @@ namespace Engine.Effects
             float fogStart,
             float fogRange,
             Color4 fogColor,
-            EngineShaderResourceView depthMap,
-            EngineShaderResourceView lightMap)
+            EngineTexture depthMap,
+            EngineTexture lightMap)
         {
             this.WorldViewProjection = world * viewProjection;
             this.EyePositionWorld = eyePositionWorld;

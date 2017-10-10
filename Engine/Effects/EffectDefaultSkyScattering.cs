@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Effects
 {
@@ -69,7 +68,7 @@ namespace Engine.Effects
         {
             get
             {
-                return this.sphereRadii.GetFloatVector();
+                return this.sphereRadii.GetVector<Vector4>();
             }
             set
             {
@@ -83,7 +82,7 @@ namespace Engine.Effects
         {
             get
             {
-                return this.scatteringCoefficients.GetFloatVector();
+                return this.scatteringCoefficients.GetVector<Vector4>();
             }
             set
             {
@@ -97,7 +96,7 @@ namespace Engine.Effects
         {
             get
             {
-                return this.inverseWaveLength.GetFloatVector();
+                return this.inverseWaveLength.GetVector<Vector4>();
             }
             set
             {
@@ -111,7 +110,7 @@ namespace Engine.Effects
         {
             get
             {
-                return this.misc.GetFloatVector();
+                return this.misc.GetVector<Vector4>();
             }
             set
             {
@@ -125,9 +124,7 @@ namespace Engine.Effects
         {
             get
             {
-                Vector4 v = this.backColor.GetFloatVector();
-
-                return new Color4(v.X, v.Y, v.Z, v.W);
+                return this.backColor.GetVector<Color4>();
             }
             set
             {
@@ -141,15 +138,11 @@ namespace Engine.Effects
         {
             get
             {
-                Vector4 v = this.lightDirectionWorld.GetFloatVector();
-
-                return new Vector3(v.X, v.Y, v.Z);
+                return this.lightDirectionWorld.GetVector<Vector3>();
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
-
-                this.lightDirectionWorld.Set(v4);
+                this.lightDirectionWorld.Set(value);
             }
         }
         /// <summary>
@@ -208,17 +201,17 @@ namespace Engine.Effects
                         case DrawerModesEnum.Deferred:
                             return this.SkyScattering; //TODO: build a proper deferred scattering effect
                         default:
-                            throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                            throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }
                 }
                 else
                 {
-                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                 }
             }
             else
             {
-                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
+                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
             }
         }
 

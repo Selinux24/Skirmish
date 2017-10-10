@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Effects
 {
@@ -27,7 +26,7 @@ namespace Engine.Effects
         /// <summary>
         /// Current cube texture
         /// </summary>
-        private EngineShaderResourceView currentCubeTexture = null;
+        private EngineTexture currentCubeTexture = null;
 
         /// <summary>
         /// World view projection matrix
@@ -46,7 +45,7 @@ namespace Engine.Effects
         /// <summary>
         /// Texture
         /// </summary>
-        protected EngineShaderResourceView CubeTexture
+        protected EngineTexture CubeTexture
         {
             get
             {
@@ -100,17 +99,17 @@ namespace Engine.Effects
                         case DrawerModesEnum.Deferred:
                             return this.ForwardCubemap; //TODO: build a proper deferred cubemap
                         default:
-                            throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                            throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }
                 }
                 else
                 {
-                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                 }
             }
             else
             {
-                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
+                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
             }
         }
         /// <summary>
@@ -129,7 +128,7 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="texture">Texture</param>
         public void UpdatePerObject(
-            EngineShaderResourceView cubeTexture)
+            EngineTexture cubeTexture)
         {
             this.CubeTexture = cubeTexture;
         }

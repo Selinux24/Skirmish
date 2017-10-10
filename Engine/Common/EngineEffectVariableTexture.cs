@@ -3,20 +3,34 @@ namespace Engine.Common
 {
     using SharpDX.Direct3D11;
 
-    class EngineEffectVariableTexture
+    /// <summary>
+    /// Effect texture variable
+    /// </summary>
+    public class EngineEffectVariableTexture
     {
+        /// <summary>
+        /// Effect variable
+        /// </summary>
         private EffectShaderResourceVariable variable = null;
 
-        internal EngineEffectVariableTexture(EffectShaderResourceVariable variable)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="variable">Variable</param>
+        public EngineEffectVariableTexture(EffectShaderResourceVariable variable)
         {
             this.variable = variable;
         }
 
-        public void SetResource(EngineShaderResourceView resource)
+        /// <summary>
+        /// Sets the resource to the shader
+        /// </summary>
+        /// <param name="resource">Resource</param>
+        public void SetResource(EngineTexture resource)
         {
             if (resource != null)
             {
-                this.variable.SetResource(resource.SRV);
+                this.variable.SetResource(resource.GetResource());
             }
             else
             {
@@ -24,9 +38,13 @@ namespace Engine.Common
             }
         }
 
-        public EngineShaderResourceView GetResource()
+        /// <summary>
+        /// Gets the resource from the shader
+        /// </summary>
+        /// <returns>Returns the resource from the shader</returns>
+        public EngineTexture GetResource()
         {
-            return new EngineShaderResourceView(this.variable.GetResource());
+            return new EngineTexture(this.variable.GetResource());
         }
     }
 }

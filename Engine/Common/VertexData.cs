@@ -476,7 +476,7 @@ namespace Engine.Common
 
             else
             {
-                throw new Exception(string.Format("Unknown vertex type: {0}", vertexType));
+                throw new EngineException(string.Format("Unknown vertex type: {0}", vertexType));
             }
 
             return vertexList.ToArray();

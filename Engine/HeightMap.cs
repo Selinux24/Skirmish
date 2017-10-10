@@ -29,7 +29,7 @@ namespace Engine
 
                 if (colorBitmap.Height != heightBitmap.Height || colorBitmap.Width != heightBitmap.Width)
                 {
-                    throw new Exception("Height map and color map must have the same size");
+                    throw new EngineException("Height map and color map must have the same size");
                 }
             }
 

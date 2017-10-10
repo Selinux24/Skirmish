@@ -29,27 +29,27 @@ namespace Engine.Common
         /// <summary>
         /// Emission texture
         /// </summary>
-        public EngineShaderResourceView EmissionTexture { get; set; }
+        public EngineTexture EmissionTexture { get; set; }
         /// <summary>
         /// Ambient texture
         /// </summary>
-        public EngineShaderResourceView AmbientTexture { get; set; }
+        public EngineTexture AmbientTexture { get; set; }
         /// <summary>
         /// Diffuse texture
         /// </summary>
-        public EngineShaderResourceView DiffuseTexture { get; set; }
+        public EngineTexture DiffuseTexture { get; set; }
         /// <summary>
         /// Specular texture
         /// </summary>
-        public EngineShaderResourceView SpecularTexture { get; set; }
+        public EngineTexture SpecularTexture { get; set; }
         /// <summary>
         /// Reflective texture
         /// </summary>
-        public EngineShaderResourceView ReflectiveTexture { get; set; }
+        public EngineTexture ReflectiveTexture { get; set; }
         /// <summary>
         /// Normal map
         /// </summary>
-        public EngineShaderResourceView NormalMap { get; set; }
+        public EngineTexture NormalMap { get; set; }
 
         /// <summary>
         /// Resource index

@@ -24,11 +24,11 @@ namespace Engine
         /// <summary>
         /// Sky texture 1
         /// </summary>
-        private EngineShaderResourceView skyTexture1 = null;
+        private EngineTexture skyTexture1 = null;
         /// <summary>
         /// Sky texture 2
         /// </summary>
-        private EngineShaderResourceView skyTexture2 = null;
+        private EngineTexture skyTexture2 = null;
         /// <summary>
         /// Brightness
         /// </summary>

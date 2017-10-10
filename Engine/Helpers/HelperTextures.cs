@@ -128,14 +128,14 @@ namespace Engine.Helpers
 
             return textureList;
         }
-        private static EngineShaderResourceView CreateResource(Graphics graphics, TextureDescription tDesc)
+        private static EngineTexture CreateResource(Graphics graphics, TextureDescription tDesc)
         {
             var fmtSupport = graphics.Device.CheckFormatSupport(tDesc.Format);
             var autogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
 
             using (var texture = CreateTexture2D(graphics, tDesc.Width, tDesc.Height, tDesc.Format, 1, autogen))
             {
-                EngineShaderResourceView result = null;
+                EngineTexture result = null;
 
                 if (autogen)
                 {
@@ -148,24 +148,24 @@ namespace Engine.Helpers
                             MipLevels = (autogen) ? -1 : 1,
                         }
                     };
-                    result = new EngineShaderResourceView(graphics.Device, texture, description);
+                    result = new EngineTexture(graphics, texture, description);
                 }
                 else
                 {
-                    result = new EngineShaderResourceView(graphics.Device, texture);
+                    result = new EngineTexture(graphics, texture);
                 }
 
                 graphics.DeviceContext.UpdateSubresource(tDesc.GetDataBox(), texture, 0);
 
                 if (autogen)
                 {
-                    graphics.DeviceContext.GenerateMips(result.SRV);
+                    result.GenerateMips(graphics);
                 }
 
                 return result;
             }
         }
-        private static EngineShaderResourceView CreateResource(Graphics graphics, TextureDescription[] tDescList)
+        private static EngineTexture CreateResource(Graphics graphics, TextureDescription[] tDescList)
         {
             var textureDescription = tDescList[0];
 
@@ -174,7 +174,7 @@ namespace Engine.Helpers
 
             using (var textureArray = CreateTexture2D(graphics, textureDescription.Width, textureDescription.Height, textureDescription.Format, tDescList.Length, autogen))
             {
-                EngineShaderResourceView result = null;
+                EngineTexture result = null;
 
                 if (autogen)
                 {
@@ -189,11 +189,11 @@ namespace Engine.Helpers
                         }
                     };
 
-                    result = new EngineShaderResourceView(graphics.Device, textureArray, desc);
+                    result = new EngineTexture(graphics, textureArray, desc);
                 }
                 else
                 {
-                    result = new EngineShaderResourceView(graphics.Device, textureArray);
+                    result = new EngineTexture(graphics, textureArray);
                 }
 
                 for (int i = 0; i < tDescList.Length; i++)
@@ -206,7 +206,7 @@ namespace Engine.Helpers
 
                 if (autogen)
                 {
-                    graphics.DeviceContext.GenerateMips(result.SRV);
+                    result.GenerateMips(graphics);
                 }
 
                 return result;
@@ -237,7 +237,7 @@ namespace Engine.Helpers
         /// <param name="graphics">Graphics device</param>
         /// <param name="buffer">Data buffer</param>
         /// <returns>Returns the resource view</returns>
-        public static EngineShaderResourceView LoadTexture(this Graphics graphics, byte[] buffer)
+        public static EngineTexture LoadTexture(this Graphics graphics, byte[] buffer)
         {
             try
             {
@@ -259,7 +259,7 @@ namespace Engine.Helpers
         /// <param name="graphics">Graphics device</param>
         /// <param name="filename">Path to file</param>
         /// <returns>Returns the resource view</returns>
-        public static EngineShaderResourceView LoadTexture(this Graphics graphics, string filename)
+        public static EngineTexture LoadTexture(this Graphics graphics, string filename)
         {
             try
             {
@@ -281,7 +281,7 @@ namespace Engine.Helpers
         /// <param name="graphics">Graphics device</param>
         /// <param name="stream">Stream</param>
         /// <returns>Returns the resource view</returns>
-        public static EngineShaderResourceView LoadTexture(this Graphics graphics, MemoryStream stream)
+        public static EngineTexture LoadTexture(this Graphics graphics, MemoryStream stream)
         {
             try
             {
@@ -303,7 +303,7 @@ namespace Engine.Helpers
         /// <param name="graphics">Graphics device</param>
         /// <param name="filenames">Path file collection</param>
         /// <returns>Returns the resource view</returns>
-        public static EngineShaderResourceView LoadTextureArray(this Graphics graphics, string[] filenames)
+        public static EngineTexture LoadTextureArray(this Graphics graphics, string[] filenames)
         {
             try
             {
@@ -328,7 +328,7 @@ namespace Engine.Helpers
         /// <param name="graphics">Graphics device</param>
         /// <param name="streams">Stream collection</param>
         /// <returns>Returns the resource view</returns>
-        public static EngineShaderResourceView LoadTextureArray(this Graphics graphics, MemoryStream[] streams)
+        public static EngineTexture LoadTextureArray(this Graphics graphics, MemoryStream[] streams)
         {
             try
             {
@@ -355,7 +355,7 @@ namespace Engine.Helpers
         /// <param name="format">Format</param>
         /// <param name="faceSize">Face size</param>
         /// <returns>Returns the resource view</returns>
-        public static EngineShaderResourceView LoadTextureCube(this Graphics graphics, string filename, Format format, int faceSize)
+        public static EngineTexture LoadTextureCube(this Graphics graphics, string filename, Format format, int faceSize)
         {
             try
             {
@@ -377,7 +377,7 @@ namespace Engine.Helpers
                         OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
                     }))
                 {
-                    return new EngineShaderResourceView(graphics.Device, cubeTex);
+                    return new EngineTexture(graphics, cubeTex);
                 }
             }
             catch (Exception ex)
@@ -393,7 +393,7 @@ namespace Engine.Helpers
         /// <param name="format">Format</param>
         /// <param name="faceSize">Face size</param>
         /// <returns>Returns the resource view</returns>
-        public static EngineShaderResourceView LoadTextureCube(this Graphics graphics, MemoryStream stream, Format format, int faceSize)
+        public static EngineTexture LoadTextureCube(this Graphics graphics, MemoryStream stream, Format format, int faceSize)
         {
             try
             {
@@ -415,7 +415,7 @@ namespace Engine.Helpers
                         OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
                     }))
                 {
-                    return new EngineShaderResourceView(graphics.Device, cubeTex);
+                    return new EngineTexture(graphics, cubeTex);
                 }
             }
             catch (Exception ex)
@@ -430,7 +430,7 @@ namespace Engine.Helpers
         /// <param name="size">Texture size</param>
         /// <param name="values">Color values</param>
         /// <returns>Returns created texture</returns>
-        public static EngineShaderResourceView CreateTexture1D(this Graphics graphics, int size, Vector4[] values)
+        public static EngineTexture CreateTexture1D(this Graphics graphics, int size, Vector4[] values)
         {
             try
             {
@@ -453,7 +453,7 @@ namespace Engine.Helpers
                         },
                         str))
                     {
-                        return new EngineShaderResourceView(graphics.Device, randTex);
+                        return new EngineTexture(graphics, randTex);
                     }
                 }
             }
@@ -469,7 +469,7 @@ namespace Engine.Helpers
         /// <param name="size">Texture size</param>
         /// <param name="values">Color values</param>
         /// <returns>Returns created texture</returns>
-        public static EngineShaderResourceView CreateTexture2D(this Graphics graphics, int size, Vector4[] values)
+        public static EngineTexture CreateTexture2D(this Graphics graphics, int size, Vector4[] values)
         {
             try
             {
@@ -499,7 +499,7 @@ namespace Engine.Helpers
                         },
                         new[] { dBox }))
                     {
-                        return new EngineShaderResourceView(graphics.Device, texture);
+                        return new EngineTexture(graphics, texture);
                     }
                 }
             }
@@ -517,7 +517,7 @@ namespace Engine.Helpers
         /// <param name="max">Maximum value</param>
         /// <param name="seed">Random seed</param>
         /// <returns>Returns created texture</returns>
-        public static EngineShaderResourceView CreateRandomTexture(this Graphics graphics, int size, float min, float max, int seed = 0)
+        public static EngineTexture CreateRandomTexture(this Graphics graphics, int size, float min, float max, int seed = 0)
         {
             try
             {
@@ -580,7 +580,7 @@ namespace Engine.Helpers
         /// <param name="height">Height</param>
         /// <param name="dsv">Resulting Depth Stencil View</param>
         /// <param name="srv">Resulting Shader Resource View</param>
-        public static void CreateShadowMapTextures(this Graphics graphics, int width, int height, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
+        public static void CreateShadowMapTextures(this Graphics graphics, int width, int height, out EngineDepthStencilView dsv, out EngineTexture srv)
         {
             var depthMap = new Texture2D(
                 graphics.Device,
@@ -638,8 +638,8 @@ namespace Engine.Helpers
                     },
                 };
 
-                dsv = new EngineDepthStencilView(graphics.Device, depthMap, dsDescription);
-                srv = new EngineShaderResourceView(graphics.Device, depthMap, rvDescription);
+                dsv = new EngineDepthStencilView(graphics, depthMap, dsDescription);
+                srv = new EngineTexture(graphics, depthMap, rvDescription);
             }
         }
     }

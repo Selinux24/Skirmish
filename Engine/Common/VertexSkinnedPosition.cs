@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -93,7 +92,7 @@ namespace Engine.Common
             if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
             else if (channel == VertexDataChannels.Weights) return (T)(object)(new[] { this.Weight1, this.Weight2, this.Weight3, (1.0f - this.Weight1 - this.Weight2 - this.Weight3) });
             else if (channel == VertexDataChannels.BoneIndices) return (T)(object)(new[] { this.BoneIndex1, this.BoneIndex2, this.BoneIndex3, this.BoneIndex4 });
-            else throw new Exception(string.Format("Channel data not found: {0}", channel));
+            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
         }
         /// <summary>
         /// Sets the channer value
@@ -121,7 +120,7 @@ namespace Engine.Common
                 this.BoneIndex3 = boneIndices[2];
                 this.BoneIndex4 = boneIndices[3];
             }
-            else throw new Exception(string.Format("Channel data not found: {0}", channel));
+            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
         }
 
         /// <summary>

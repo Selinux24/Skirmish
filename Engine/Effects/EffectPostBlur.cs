@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Effects
 {
@@ -35,7 +34,7 @@ namespace Engine.Effects
         /// <summary>
         /// Current diffuse map
         /// </summary>
-        private EngineShaderResourceView currentDiffuseMap = null;
+        private EngineTexture currentDiffuseMap = null;
 
         /// <summary>
         /// World view projection matrix
@@ -58,15 +57,11 @@ namespace Engine.Effects
         {
             get
             {
-                Vector4 v = this.blurDirection.GetFloatVector();
-
-                return new Vector2(v.X, v.Y);
+                return this.blurDirection.GetVector<Vector2>();
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, 0f, 0f);
-
-                this.blurDirection.Set(v4);
+                this.blurDirection.Set(value);
             }
         }
         /// <summary>
@@ -76,21 +71,17 @@ namespace Engine.Effects
         {
             get
             {
-                Vector4 v = this.textureSize.GetFloatVector();
-
-                return new Vector2(v.X, v.Y);
+                return this.textureSize.GetVector<Vector2>();
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, 0f, 0f);
-
-                this.textureSize.Set(v4);
+                this.textureSize.Set(value);
             }
         }
         /// <summary>
         /// Diffuse map
         /// </summary>
-        protected EngineShaderResourceView DiffuseMap
+        protected EngineTexture DiffuseMap
         {
             get
             {
@@ -143,12 +134,12 @@ namespace Engine.Effects
                 }
                 else
                 {
-                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                 }
             }
             else
             {
-                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
+                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
             }
         }
 
@@ -165,7 +156,7 @@ namespace Engine.Effects
             Matrix viewProjection,
             Vector2 direction,
             Vector2 size,
-            EngineShaderResourceView diffuseMap)
+            EngineTexture diffuseMap)
         {
             this.WorldViewProjection = world * viewProjection;
             this.BlurDirection = direction;

@@ -114,7 +114,7 @@ namespace Engine.Content
 
                                         if (skeleton != null)
                                         {
-                                            throw new Exception("Only one armature definition per file!");
+                                            throw new EngineException("Only one armature definition per file!");
                                         }
 
                                         Matrix trn = transform * node.ReadMatrix();
@@ -236,7 +236,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new Exception(string.Format("Model not found: {0}", fileName));
+                throw new EngineException(string.Format("Model not found: {0}", fileName));
             }
         }
 
@@ -1457,7 +1457,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new Exception("El valor no es un Vector2 válido.");
+                throw new EngineException("El valor no es un Vector2 válido.");
             }
         }
         /// <summary>
@@ -1473,7 +1473,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new Exception("El valor no es un Vector3 válido.");
+                throw new EngineException("El valor no es un Vector3 válido.");
             }
         }
         /// <summary>
@@ -1489,7 +1489,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new Exception("El valor no es un Vector4 válido.");
+                throw new EngineException("El valor no es un Vector4 válido.");
             }
         }
         /// <summary>
@@ -1509,7 +1509,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new Exception("El valor no es un Color4 válido.");
+                throw new EngineException("El valor no es un Color4 válido.");
             }
         }
         /// <summary>
@@ -1559,7 +1559,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new Exception("El valor no es una matriz válida.");
+                throw new EngineException("El valor no es una matriz válida.");
             }
         }
 
@@ -1635,7 +1635,7 @@ namespace Engine.Content
             int stride = source.TechniqueCommon.Accessor.Stride;
             if (stride != 1)
             {
-                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(float)));
+                throw new EngineException(string.Format("Stride not supported for {1}: {0}", stride, typeof(float)));
             }
 
             int length = source.TechniqueCommon.Accessor.Count;
@@ -1661,7 +1661,7 @@ namespace Engine.Content
             int stride = source.TechniqueCommon.Accessor.Stride;
             if (stride != 1)
             {
-                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(string)));
+                throw new EngineException(string.Format("Stride not supported for {1}: {0}", stride, typeof(string)));
             }
 
             int length = source.TechniqueCommon.Accessor.Count;
@@ -1687,7 +1687,7 @@ namespace Engine.Content
             int stride = source.TechniqueCommon.Accessor.Stride;
             if (stride != 1)
             {
-                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(string)));
+                throw new EngineException(string.Format("Stride not supported for {1}: {0}", stride, typeof(string)));
             }
 
             int length = source.TechniqueCommon.Accessor.Count;
@@ -1713,7 +1713,7 @@ namespace Engine.Content
             int stride = source.TechniqueCommon.Accessor.Stride;
             if (stride != 2)
             {
-                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(Vector2)));
+                throw new EngineException(string.Format("Stride not supported for {1}: {0}", stride, typeof(Vector2)));
             }
 
             int length = source.TechniqueCommon.Accessor.Count;
@@ -1744,7 +1744,7 @@ namespace Engine.Content
             int stride = source.TechniqueCommon.Accessor.Stride;
             if (stride != 3)
             {
-                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(Vector3)));
+                throw new EngineException(string.Format("Stride not supported for {1}: {0}", stride, typeof(Vector3)));
             }
 
             int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
@@ -1778,7 +1778,7 @@ namespace Engine.Content
             int stride = source.TechniqueCommon.Accessor.Stride;
             if (stride != 4)
             {
-                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(Vector3)));
+                throw new EngineException(string.Format("Stride not supported for {1}: {0}", stride, typeof(Vector3)));
             }
 
             int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
@@ -1814,7 +1814,7 @@ namespace Engine.Content
             int stride = source.TechniqueCommon.Accessor.Stride;
             if (stride != 16)
             {
-                throw new Exception(string.Format("Stride not supported for {1}: {0}", stride, typeof(Matrix)));
+                throw new EngineException(string.Format("Stride not supported for {1}: {0}", stride, typeof(Matrix)));
             }
 
             int length = source.TechniqueCommon.Accessor.Count;

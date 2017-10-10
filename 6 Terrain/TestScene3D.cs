@@ -39,7 +39,7 @@ namespace TerrainTest
         private bool useDebugTex = false;
         private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapDynamic;
         private SceneObject<SpriteTexture> shadowMapDrawer = null;
-        private EngineShaderResourceView debugTex = null;
+        private EngineTexture debugTex = null;
         private int graphIndex = -1;
 
         private SceneObject<TextDrawer> title = null;

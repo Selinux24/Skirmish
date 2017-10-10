@@ -165,7 +165,7 @@ namespace Engine.Helpers
                 }
                 else
                 {
-                    throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
+                    throw new EngineException(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
                 }
             }
 
@@ -421,7 +421,7 @@ namespace Engine.Helpers
             }
             else
             {
-                throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
+                throw new EngineException(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
             }
         }
         /// <summary>
@@ -491,7 +491,7 @@ namespace Engine.Helpers
             }
             else
             {
-                throw new Exception(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
+                throw new EngineException(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
             }
         }
 

@@ -60,7 +60,7 @@ namespace Engine.Common
         /// <summary>
         /// Font texture
         /// </summary>
-        public EngineShaderResourceView Texture { get; private set; }
+        public EngineTexture Texture { get; private set; }
         /// <summary>
         /// Gets map keys
         /// </summary>

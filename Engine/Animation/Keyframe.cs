@@ -42,7 +42,7 @@ namespace Engine.Animation
                 }
                 else
                 {
-                    throw new Exception("Bad transform");
+                    throw new EngineException("Bad transform");
                 }
             }
         }

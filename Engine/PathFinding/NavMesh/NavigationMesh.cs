@@ -199,7 +199,7 @@ namespace Engine.PathFinding.NavMesh
         {
             if (!this.agentTypeData.ContainsKey(agent))
             {
-                throw new Exception("Bad agent type. Include the agent in navigation mesh settings before generation.");
+                throw new EngineException("Bad agent type. Include the agent in navigation mesh settings before generation.");
             }
 
             var navMesh = this.agentTypeData[agent].NavigationMesh;

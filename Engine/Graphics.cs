@@ -375,7 +375,7 @@ namespace Engine
 
             using (Resource backBuffer = Resource.FromSwapChain<Texture2D>(swapChain, 0))
             {
-                this.renderTargetView = new EngineRenderTargetView(this.Device, backBuffer);
+                this.renderTargetView = new EngineRenderTargetView(this, backBuffer);
             }
 
             #endregion
@@ -399,7 +399,7 @@ namespace Engine
                 });
 
             this.depthStencilView = new EngineDepthStencilView(
-                this.Device,
+                this,
                 this.depthStencilBuffer,
                 new DepthStencilViewDescription()
                 {
@@ -907,13 +907,13 @@ namespace Engine
         public void Begin()
         {
             this.DeviceContext.ClearDepthStencilView(
-                this.depthStencilView.DSV,
+                this.depthStencilView.GetDepthStencil(),
                 DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
                 1.0f,
                 0);
 
             this.DeviceContext.ClearRenderTargetView(
-                this.renderTargetView.RTV[0],
+                this.renderTargetView.GetRenderTarget(),
                 GameEnvironment.Background);
         }
         /// <summary>
@@ -973,8 +973,8 @@ namespace Engine
         /// <param name="clearDSFlags">Stencil cleraring flags</param>
         public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, EngineDepthStencilView depthMap, bool clearDS, DepthStencilClearFlags clearDSFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
         {
-            var dsv = depthMap != null ? depthMap.DSV : null;
-            var rtv = renderTargets != null ? renderTargets.RTV.ToArray() : null;
+            var dsv = depthMap != null ? depthMap.GetDepthStencil() : null;
+            var rtv = renderTargets != null ? renderTargets.GetRenderTargets() : null;
             var rtvCount = renderTargets != null ? renderTargets.Count : 0;
 
             this.DeviceContext.OutputMerger.SetTargets(dsv, rtvCount, rtv);
@@ -1005,7 +1005,7 @@ namespace Engine
         public void ClearDepthStencilBuffer(EngineDepthStencilView depthMap, DepthStencilClearFlags clearDSFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
         {
             this.DeviceContext.ClearDepthStencilView(
-                depthMap.DSV,
+                depthMap.GetDepthStencil(),
                 clearDSFlags,
                 1.0f, 0);
         }

@@ -59,11 +59,11 @@ namespace Engine.Effects
         /// <summary>
         /// Current first texture
         /// </summary>
-        private EngineShaderResourceView currentFirstTexture = null;
+        private EngineTexture currentFirstTexture = null;
         /// <summary>
         /// Current second texture
         /// </summary>
-        private EngineShaderResourceView currentSecondTexture = null;
+        private EngineTexture currentSecondTexture = null;
 
         /// <summary>
         /// World view projection matrix
@@ -82,7 +82,7 @@ namespace Engine.Effects
         /// <summary>
         /// First layer texture
         /// </summary>
-        protected EngineShaderResourceView FirstTexture
+        protected EngineTexture FirstTexture
         {
             get
             {
@@ -103,7 +103,7 @@ namespace Engine.Effects
         /// <summary>
         /// Second layer texture
         /// </summary>
-        protected EngineShaderResourceView SecondTexture
+        protected EngineTexture SecondTexture
         {
             get
             {
@@ -156,15 +156,11 @@ namespace Engine.Effects
         {
             get
             {
-                var v = this.firstTranslation.GetFloatVector();
-
-                return new Vector2(v.X, v.Y);
+                return this.firstTranslation.GetVector<Vector2>();
             }
             set
             {
-                var v = new Vector4(value.X, value.Y, 0, 0);
-
-                this.firstTranslation.Set(v);
+                this.firstTranslation.Set(value);
             }
         }
         /// <summary>
@@ -174,15 +170,11 @@ namespace Engine.Effects
         {
             get
             {
-                var v = this.secondTranslation.GetFloatVector();
-
-                return new Vector2(v.X, v.Y);
+                return this.secondTranslation.GetVector<Vector2>();
             }
             set
             {
-                var v = new Vector4(value.X, value.Y, 0, 0);
-
-                this.secondTranslation.Set(v);
+                this.secondTranslation.Set(value);
             }
         }
         /// <summary>
@@ -266,8 +258,8 @@ namespace Engine.Effects
             Matrix viewProjection,
             float brightness,
             float fadingDistance,
-            EngineShaderResourceView firstTexture,
-            EngineShaderResourceView secondTexture)
+            EngineTexture firstTexture,
+            EngineTexture secondTexture)
         {
             this.WorldViewProjection = world * viewProjection;
 

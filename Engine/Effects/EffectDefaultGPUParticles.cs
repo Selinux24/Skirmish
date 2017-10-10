@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Effects
 {
@@ -113,7 +112,7 @@ namespace Engine.Effects
         /// <summary>
         /// Current texture array
         /// </summary>
-        private EngineShaderResourceView currentTextureArray = null;
+        private EngineTexture currentTextureArray = null;
 
         /// <summary>
         /// World matrix
@@ -150,15 +149,11 @@ namespace Engine.Effects
         {
             get
             {
-                Vector4 v = this.eyePositionWorld.GetFloatVector();
-
-                return new Vector3(v.X, v.Y, v.Z);
+                return this.eyePositionWorld.GetVector<Vector3>();
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
-
-                this.eyePositionWorld.Set(v4);
+                this.eyePositionWorld.Set(value);
             }
         }
         /// <summary>
@@ -196,7 +191,7 @@ namespace Engine.Effects
         {
             get
             {
-                return (uint)this.textureCount.GetInt();
+                return this.textureCount.GetUInt();
             }
             set
             {
@@ -206,7 +201,7 @@ namespace Engine.Effects
         /// <summary>
         /// Textures
         /// </summary>
-        protected EngineShaderResourceView TextureArray
+        protected EngineTexture TextureArray
         {
             get
             {
@@ -260,15 +255,11 @@ namespace Engine.Effects
         {
             get
             {
-                var v4 = this.horizontalVelocity.GetFloatVector();
-
-                return new Vector2(v4.X, v4.Y);
+                return this.horizontalVelocity.GetVector<Vector2>();
             }
             set
             {
-                var v4 = new Vector4(value.X, value.Y, 0, 0);
-
-                this.horizontalVelocity.Set(v4);
+                this.horizontalVelocity.Set(value);
             }
         }
         /// <summary>
@@ -278,15 +269,11 @@ namespace Engine.Effects
         {
             get
             {
-                var v4 = this.verticalVelocity.GetFloatVector();
-
-                return new Vector2(v4.X, v4.Y);
+                return this.verticalVelocity.GetVector<Vector2>();
             }
             set
             {
-                var v4 = new Vector4(value.X, value.Y, 0, 0);
-
-                this.verticalVelocity.Set(v4);
+                this.verticalVelocity.Set(value);
             }
         }
         /// <summary>
@@ -296,7 +283,7 @@ namespace Engine.Effects
         {
             get
             {
-                return this.randomValues.GetFloatVector();
+                return this.randomValues.GetVector<Vector4>();
             }
             set
             {
@@ -353,15 +340,11 @@ namespace Engine.Effects
         {
             get
             {
-                Vector4 v = this.gravity.GetFloatVector();
-
-                return new Vector3(v.X, v.Y, v.Z);
+                return this.gravity.GetVector<Vector3>();
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, value.Z, 1f);
-
-                this.gravity.Set(v4);
+                this.gravity.Set(value);
             }
         }
         /// <summary>
@@ -371,15 +354,11 @@ namespace Engine.Effects
         {
             get
             {
-                Vector4 v = this.startSize.GetFloatVector();
-
-                return new Vector2(v.X, v.Y);
+                return this.startSize.GetVector<Vector2>();
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, 1f, 1f);
-
-                this.startSize.Set(v4);
+                this.startSize.Set(value);
             }
         }
         /// <summary>
@@ -389,15 +368,11 @@ namespace Engine.Effects
         {
             get
             {
-                Vector4 v = this.endSize.GetFloatVector();
-
-                return new Vector2(v.X, v.Y);
+                return this.endSize.GetVector<Vector2>();
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, 1f, 1f);
-
-                this.endSize.Set(v4);
+                this.endSize.Set(value);
             }
         }
         /// <summary>
@@ -407,7 +382,7 @@ namespace Engine.Effects
         {
             get
             {
-                return new Color4(this.minColor.GetFloatVector());
+                return this.minColor.GetVector<Color4>();
             }
             set
             {
@@ -421,7 +396,7 @@ namespace Engine.Effects
         {
             get
             {
-                return new Color4(this.maxColor.GetFloatVector());
+                return this.maxColor.GetVector<Color4>();
             }
             set
             {
@@ -435,15 +410,11 @@ namespace Engine.Effects
         {
             get
             {
-                Vector4 v = this.rotateSpeed.GetFloatVector();
-
-                return new Vector2(v.X, v.Y);
+                return this.rotateSpeed.GetVector<Vector2>();
             }
             set
             {
-                Vector4 v4 = new Vector4(value.X, value.Y, 1f, 1f);
-
-                this.rotateSpeed.Set(v4);
+                this.rotateSpeed.Set(value);
             }
         }
 
@@ -494,7 +465,7 @@ namespace Engine.Effects
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
         public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
-            throw new Exception(string.Format("Bad stage for effect. Use particle class: {0}", stage));
+            throw new EngineException(string.Format("Bad stage for effect. Use particle class: {0}", stage));
         }
         /// <summary>
         /// Get technique by vertex type
@@ -509,7 +480,7 @@ namespace Engine.Effects
             }
             else
             {
-                throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, DrawingStages.StreamOut));
+                throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, DrawingStages.StreamOut));
             }
         }
         /// <summary>
@@ -532,17 +503,17 @@ namespace Engine.Effects
                         case DrawerModesEnum.Forward:
                             return rotation ? this.RotationDraw : this.NonRotationDraw;
                         default:
-                            throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                            throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }
                 }
                 else
                 {
-                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                 }
             }
             else
             {
-                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
+                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
             }
         }
         /// <summary>
@@ -584,7 +555,7 @@ namespace Engine.Effects
             Color4 maxColor,
             Vector2 rotateSpeed,
             uint textureCount,
-            EngineShaderResourceView textures)
+            EngineTexture textures)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;

@@ -26,7 +26,7 @@ namespace Engine
         /// <summary>
         /// Minimap texture
         /// </summary>
-        private EngineShaderResourceView renderTexture;
+        private EngineTexture renderTexture;
         /// <summary>
         /// Context to draw
         /// </summary>
@@ -65,8 +65,8 @@ namespace Engine
 
             using (var texture = this.Graphics.CreateRenderTargetTexture(Format.R8G8B8A8_UNorm, description.Width, description.Height))
             {
-                this.renderTarget = new EngineRenderTargetView(this.Graphics.Device, texture);
-                this.renderTexture = new EngineShaderResourceView(this.Graphics.Device, texture);
+                this.renderTarget = new EngineRenderTargetView(this.Graphics, texture);
+                this.renderTexture = new EngineTexture(this.Graphics, texture);
             }
 
             this.InitializeContext();

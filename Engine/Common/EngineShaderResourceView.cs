@@ -4,31 +4,70 @@ namespace Engine.Common
 {
     using SharpDX.Direct3D11;
 
-    public class EngineShaderResourceView : IDisposable
+    /// <summary>
+    /// Texture view
+    /// </summary>
+    public class EngineTexture : IDisposable
     {
-        internal ShaderResourceView SRV { get; set; }
+        /// <summary>
+        /// Shader resource view
+        /// </summary>
+        private ShaderResourceView srv = null;
 
-        internal EngineShaderResourceView(ShaderResourceView srv)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="srv">Shader resource view</param>
+        public EngineTexture(ShaderResourceView srv)
         {
-            this.SRV = srv;
+            this.srv = srv;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="texture">Texture</param>
+        public EngineTexture(Graphics graphics, Resource texture)
+        {
+            this.srv = new ShaderResourceView(graphics.Device, texture);
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="texture">Texture</param>
+        /// <param name="description">Texture description</param>
+        public EngineTexture(Graphics graphics, Resource texture, ShaderResourceViewDescription description)
+        {
+            this.srv = new ShaderResourceView(graphics.Device, texture, description);
         }
 
-        public EngineShaderResourceView(Device device, Resource texture)
+        /// <summary>
+        /// Generate mips
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        public void GenerateMips(Graphics graphics)
         {
-            this.SRV = new ShaderResourceView(device, texture);
+            graphics.DeviceContext.GenerateMips(this.srv);
+        }
+        /// <summary>
+        /// Get the internal shader resource view
+        /// </summary>
+        /// <returns>Returns the internal shader resource view</returns>
+        public ShaderResourceView GetResource()
+        {
+            return this.srv;
         }
 
-        public EngineShaderResourceView(Device device, Resource texture, ShaderResourceViewDescription description)
-        {
-            this.SRV = new ShaderResourceView(device, texture, description);
-        }
-
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
         public void Dispose()
         {
-            if (this.SRV != null)
+            if (this.srv != null)
             {
-                this.SRV.Dispose();
-                this.SRV = null;
+                this.srv.Dispose();
+                this.srv = null;
             }
         }
     }

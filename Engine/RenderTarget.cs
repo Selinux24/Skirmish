@@ -27,7 +27,7 @@ namespace Engine
         /// <summary>
         /// Buffer textures
         /// </summary>
-        public EngineShaderResourceView[] Textures { get; protected set; }
+        public EngineTexture[] Textures { get; protected set; }
         /// <summary>
         /// Render targets
         /// </summary>
@@ -71,7 +71,7 @@ namespace Engine
             int width = this.Game.Form.RenderWidth;
             int height = this.Game.Form.RenderHeight;
 
-            this.Textures = new EngineShaderResourceView[this.BufferCount];
+            this.Textures = new EngineTexture[this.BufferCount];
             this.Targets = new EngineRenderTargetView();
 
             for (int i = 0; i < this.BufferCount; i++)
@@ -79,9 +79,9 @@ namespace Engine
                 var tex = this.Game.Graphics.CreateRenderTargetTexture(this.RenderTargetFormat, width, height);
                 using (tex)
                 {
-                    this.Targets.Add(this.Game.Graphics.Device, tex);
+                    this.Targets.Add(this.Game.Graphics, tex);
 
-                    this.Textures[i] = new EngineShaderResourceView(this.Game.Graphics.Device, tex);
+                    this.Textures[i] = new EngineTexture(this.Game.Graphics, tex);
                 }
             }
         }

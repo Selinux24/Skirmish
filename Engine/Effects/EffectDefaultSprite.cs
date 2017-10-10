@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Effects
 {
@@ -63,7 +62,7 @@ namespace Engine.Effects
         /// <summary>
         /// Current texture array
         /// </summary>
-        private EngineShaderResourceView currentTextures = null;
+        private EngineTexture currentTextures = null;
 
         /// <summary>
         /// World matrix
@@ -100,11 +99,11 @@ namespace Engine.Effects
         {
             get
             {
-                return (int)this.textureIndex.GetFloat();
+                return this.textureIndex.GetInt();
             }
             set
             {
-                this.textureIndex.Set((float)value);
+                this.textureIndex.Set(value);
             }
         }
         /// <summary>
@@ -114,7 +113,7 @@ namespace Engine.Effects
         {
             get
             {
-                return new Color4(this.color.GetFloatVector());
+                return this.color.GetVector<Color4>();
             }
             set
             {
@@ -124,7 +123,7 @@ namespace Engine.Effects
         /// <summary>
         /// Texture
         /// </summary>
-        protected EngineShaderResourceView Textures
+        protected EngineTexture Textures
         {
             get
             {
@@ -188,12 +187,12 @@ namespace Engine.Effects
                 }
                 else
                 {
-                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                 }
             }
             else
             {
-                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
+                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
             }
         }
         /// <summary>
@@ -225,12 +224,12 @@ namespace Engine.Effects
                 }
                 else
                 {
-                    throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                 }
             }
             else
             {
-                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
+                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
             }
         }
 
@@ -254,7 +253,7 @@ namespace Engine.Effects
         /// <param name="textureIndex">Texture index</param>
         public void UpdatePerObject(
             Color4 color,
-            EngineShaderResourceView texture,
+            EngineTexture texture,
             int textureIndex)
         {
             this.Color = color;

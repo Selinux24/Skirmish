@@ -102,7 +102,7 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
             else if (channel == VertexDataChannels.Color) return (T)(object)this.Color;
-            else throw new Exception(string.Format("Channel data not found: {0}", channel));
+            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
         }
         /// <summary>
         /// Sets the channer value
@@ -114,7 +114,7 @@ namespace Engine.Common
         {
             if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
             else if (channel == VertexDataChannels.Color) this.Color = (Color4)(object)value;
-            else throw new Exception(string.Format("Channel data not found: {0}", channel));
+            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
         }
 
         /// <summary>

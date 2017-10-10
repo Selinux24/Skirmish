@@ -205,7 +205,7 @@ namespace Engine
             /// <summary>
             /// Foliage textures
             /// </summary>
-            public EngineShaderResourceView Textures;
+            public EngineTexture Textures;
             /// <summary>
             /// Foliage texture count
             /// </summary>
@@ -382,7 +382,7 @@ namespace Engine
         /// <summary>
         /// Random texture
         /// </summary>
-        private EngineShaderResourceView textureRandom = null;
+        private EngineTexture textureRandom = null;
         /// <summary>
         /// Folliage map for vegetation planting task
         /// </summary>

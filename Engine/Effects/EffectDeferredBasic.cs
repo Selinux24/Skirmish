@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Effects
 {
@@ -135,19 +134,19 @@ namespace Engine.Effects
         /// <summary>
         /// Current diffuse map
         /// </summary>
-        private EngineShaderResourceView currentDiffuseMap = null;
+        private EngineTexture currentDiffuseMap = null;
         /// <summary>
         /// Current normal map
         /// </summary>
-        private EngineShaderResourceView currentNormalMap = null;
+        private EngineTexture currentNormalMap = null;
         /// <summary>
         /// Current specular map
         /// </summary>
-        private EngineShaderResourceView currentSpecularMap = null;
+        private EngineTexture currentSpecularMap = null;
         /// <summary>
         /// Current animation palette
         /// </summary>
-        private EngineShaderResourceView currentAnimationPalette = null;
+        private EngineTexture currentAnimationPalette = null;
 
         /// <summary>
         /// World matrix
@@ -184,7 +183,7 @@ namespace Engine.Effects
         {
             get
             {
-                return (uint)this.animationOffset.GetInt();
+                return this.animationOffset.GetUInt();
             }
             set
             {
@@ -198,11 +197,11 @@ namespace Engine.Effects
         {
             get
             {
-                return (uint)this.materialIndex.GetFloat();
+                return this.materialIndex.GetUInt();
             }
             set
             {
-                this.materialIndex.Set((float)value);
+                this.materialIndex.Set(value);
             }
         }
         /// <summary>
@@ -212,17 +211,17 @@ namespace Engine.Effects
         {
             get
             {
-                return (uint)this.textureIndex.GetFloat();
+                return this.textureIndex.GetUInt();
             }
             set
             {
-                this.textureIndex.Set((float)value);
+                this.textureIndex.Set(value);
             }
         }
         /// <summary>
         /// Diffuse map
         /// </summary>
-        protected EngineShaderResourceView DiffuseMap
+        protected EngineTexture DiffuseMap
         {
             get
             {
@@ -243,7 +242,7 @@ namespace Engine.Effects
         /// <summary>
         /// Normal map
         /// </summary>
-        protected EngineShaderResourceView NormalMap
+        protected EngineTexture NormalMap
         {
             get
             {
@@ -264,7 +263,7 @@ namespace Engine.Effects
         /// <summary>
         /// Specular map
         /// </summary>
-        protected EngineShaderResourceView SpecularMap
+        protected EngineTexture SpecularMap
         {
             get
             {
@@ -289,17 +288,17 @@ namespace Engine.Effects
         {
             get
             {
-                return (uint)this.animationPaletteWidth.GetFloat();
+                return this.animationPaletteWidth.GetUInt();
             }
             set
             {
-                this.animationPaletteWidth.Set((float)value);
+                this.animationPaletteWidth.Set(value);
             }
         }
         /// <summary>
         /// Animation palette
         /// </summary>
-        protected EngineShaderResourceView AnimationPalette
+        protected EngineTexture AnimationPalette
         {
             get
             {
@@ -396,17 +395,17 @@ namespace Engine.Effects
                         case VertexTypes.PositionNormalTextureTangentSkinned:
                             return instanced ? this.InstancingPositionNormalTextureTangentSkinned : this.PositionNormalTextureTangentSkinned;
                         default:
-                            throw new Exception(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                            throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }
                 }
                 else
                 {
-                    throw new Exception(string.Format("Bad mode for effect: {0}", mode));
+                    throw new EngineException(string.Format("Bad mode for effect: {0}", mode));
                 }
             }
             else
             {
-                throw new Exception(string.Format("Bad stage for effect: {0}", stage));
+                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
             }
         }
 
@@ -416,7 +415,7 @@ namespace Engine.Effects
         /// <param name="animationPalette">Animation palette texture</param>
         /// <param name="animationPaletteWith">Animation palette texture width</param>
         public void UpdateGlobals(
-            EngineShaderResourceView animationPalette,
+            EngineTexture animationPalette,
             uint animationPaletteWidth)
         {
             this.AnimationPalette = animationPalette;
@@ -444,9 +443,9 @@ namespace Engine.Effects
         /// <param name="textureIndex">Texture index</param>
         /// <param name="animationOffset">Animation index</param>
         public void UpdatePerObject(
-            EngineShaderResourceView diffuseMap,
-            EngineShaderResourceView normalMap,
-            EngineShaderResourceView specularMap,
+            EngineTexture diffuseMap,
+            EngineTexture normalMap,
+            EngineTexture specularMap,
             uint materialIndex,
             uint textureIndex,
             uint animationOffset)
