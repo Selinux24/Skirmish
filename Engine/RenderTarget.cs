@@ -71,19 +71,16 @@ namespace Engine
             int width = this.Game.Form.RenderWidth;
             int height = this.Game.Form.RenderHeight;
 
-            this.Textures = new EngineTexture[this.BufferCount];
-            this.Targets = new EngineRenderTargetView();
+            EngineRenderTargetView targets;
+            EngineTexture[] textures;
+            this.Game.Graphics.CreateRenderTargetTexture(
+                this.RenderTargetFormat,
+                width, height, this.BufferCount,
+                out targets,
+                out textures);
 
-            for (int i = 0; i < this.BufferCount; i++)
-            {
-                var tex = this.Game.Graphics.CreateRenderTargetTexture(this.RenderTargetFormat, width, height);
-                using (tex)
-                {
-                    this.Targets.Add(this.Game.Graphics, tex);
-
-                    this.Textures[i] = new EngineTexture(this.Game.Graphics, tex);
-                }
-            }
+            this.Targets = targets;
+            this.Textures = textures;
         }
         /// <summary>
         /// Disposes all targets and depth buffer

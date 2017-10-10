@@ -539,19 +539,21 @@ namespace Engine.Helpers
             }
         }
         /// <summary>
-        /// Creates a texture for render target use
+        /// Creates a new render tarjet and his texture
         /// </summary>
-        /// <param name="graphics">Device</param>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="format">Format</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
-        /// <returns>Returns new texture</returns>
-        public static Texture2D CreateRenderTargetTexture(this Graphics graphics, Format format, int width, int height)
+        /// <param name="rtv">Render target</param>
+        /// <param name="srv">Texture</param>
+        public static void CreateRenderTargetTexture(this Graphics graphics, Format format, int width, int height, out EngineRenderTargetView rtv, out EngineTexture srv)
         {
             try
             {
                 Counters.Textures++;
 
-                return new Texture2D(
+                using (var texture = new Texture2D(
                     graphics.Device,
                     new Texture2DDescription()
                     {
@@ -565,7 +567,58 @@ namespace Engine.Helpers
                         BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
                         CpuAccessFlags = CpuAccessFlags.None,
                         OptionFlags = ResourceOptionFlags.None
-                    });
+                    }))
+                {
+                    rtv = new EngineRenderTargetView(graphics, texture);
+                    srv = new EngineTexture(graphics, texture);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateRenderTargetTexture Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Creates a new multiple render target and his textures
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="format">Format</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="size">Render target list size</param>
+        /// <param name="rtv">Render target</param>
+        /// <param name="srv">Textures</param>
+        public static void CreateRenderTargetTexture(this Graphics graphics, Format format, int width, int height, int size, out EngineRenderTargetView rtv, out EngineTexture[] srv)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                rtv = new EngineRenderTargetView();
+                srv = new EngineTexture[size];
+
+                for (int i = 0; i < size; i++)
+                {
+                    using (var texture = new Texture2D(
+                        graphics.Device,
+                        new Texture2DDescription()
+                        {
+                            Width = width,
+                            Height = height,
+                            MipLevels = 1,
+                            ArraySize = 1,
+                            Format = format,
+                            SampleDescription = graphics.CurrentSampleDescription,
+                            Usage = ResourceUsage.Default,
+                            BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                            CpuAccessFlags = CpuAccessFlags.None,
+                            OptionFlags = ResourceOptionFlags.None
+                        }))
+                    {
+                        rtv.Add(graphics, texture);
+                        srv[i] = new EngineTexture(graphics, texture);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -580,7 +633,7 @@ namespace Engine.Helpers
         /// <param name="height">Height</param>
         /// <param name="dsv">Resulting Depth Stencil View</param>
         /// <param name="srv">Resulting Shader Resource View</param>
-        public static void CreateShadowMapTextures(this Graphics graphics, int width, int height, out EngineDepthStencilView dsv, out EngineTexture srv)
+        public static void CreateShadowMapTextures(this Graphics graphics, Format format, int width, int height, out EngineDepthStencilView dsv, out EngineTexture srv)
         {
             var depthMap = new Texture2D(
                 graphics.Device,
@@ -590,7 +643,7 @@ namespace Engine.Helpers
                     Height = height,
                     MipLevels = 1,
                     ArraySize = 1,
-                    Format = Format.R24G8_Typeless,
+                    Format = format,
                     SampleDescription = graphics.CurrentSampleDescription,
                     Usage = ResourceUsage.Default,
                     BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
@@ -640,6 +693,45 @@ namespace Engine.Helpers
 
                 dsv = new EngineDepthStencilView(graphics, depthMap, dsDescription);
                 srv = new EngineTexture(graphics, depthMap, rvDescription);
+            }
+        }
+        /// <summary>
+        /// Create depth stencil view
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="format">Format</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="dsv">Resulting depth stencil view</param>
+        public static void CreateDepthStencil(this Graphics graphics, Format format, int width, int height, out EngineDepthStencilView dsv)
+        {
+            using (var dsb = new Texture2D(
+                graphics.Device,
+                new Texture2DDescription()
+                {
+                    Width = width,
+                    Height = height,
+                    MipLevels = 1,
+                    ArraySize = 1,
+                    Format = format,
+                    SampleDescription = graphics.CurrentSampleDescription,
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.DepthStencil,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.None,
+                }))
+            {
+                var description = new DepthStencilViewDescription()
+                {
+                    Format = format,
+                    Dimension = graphics.MultiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
+                    Texture2D = new DepthStencilViewDescription.Texture2DResource()
+                    {
+                        MipSlice = 0
+                    },
+                };
+
+                dsv = new EngineDepthStencilView(graphics, dsb, description);
             }
         }
     }

@@ -184,7 +184,7 @@
     <Compile Include="Common\EngineEffectVariableTexture.cs" />
     <Compile Include="Common\EngineEffectVariableVector.cs" />
     <Compile Include="Common\EngineRenderTargetView.cs" />
-    <Compile Include="Common\EngineShaderResourceView.cs" />
+    <Compile Include="Common\EngineTexture.cs" />
     <Compile Include="Common\IndexBufferShapeEnum.cs" />
     <Compile Include="Common\Intersection.cs" />
     <Compile Include="Common\ManipulatorController.cs" />

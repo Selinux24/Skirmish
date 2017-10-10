@@ -1,10 +1,11 @@
 ﻿using SharpDX;
+using SharpDX.DXGI;
 using System;
 
 namespace Engine
 {
     using Engine.Common;
-    using Helpers;
+    using Engine.Helpers;
 
     /// <summary>
     /// Shadow map
@@ -65,7 +66,7 @@ namespace Engine
 
             EngineDepthStencilView dsv;
             EngineTexture srv;
-            game.Graphics.CreateShadowMapTextures(width, height, out dsv, out srv);
+            game.Graphics.CreateShadowMapTextures(Format.R24G8_Typeless, width, height, out dsv, out srv);
             this.DepthMap = dsv;
             this.Texture = srv;
         }

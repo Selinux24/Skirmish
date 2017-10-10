@@ -31,14 +31,6 @@ namespace Engine
         /// Multisample quality
         /// </summary>
         private int msQuality = 0;
-
-        public SampleDescription CurrentSampleDescription
-        {
-            get
-            {
-                return new SampleDescription(this.msCount, this.msQuality);
-            }
-        }
         /// <summary>
         /// Swap chain
         /// </summary>
@@ -47,10 +39,6 @@ namespace Engine
         /// Render target view
         /// </summary>
         private EngineRenderTargetView renderTargetView = null;
-        /// <summary>
-        /// Depth stencil buffer
-        /// </summary>
-        private Texture2D depthStencilBuffer = null;
         /// <summary>
         /// Depth stencil view
         /// </summary>
@@ -191,6 +179,11 @@ namespace Engine
         protected Format DepthFormat = DepthBufferFormats.D24_UNorm_S8_UInt;
 
         /// <summary>
+        /// Device description
+        /// </summary>
+        public readonly string DeviceDescription = null;
+
+        /// <summary>
         /// Graphics device
         /// </summary>
         public Device Device { get; private set; }
@@ -198,10 +191,6 @@ namespace Engine
         /// Graphics inmmediate context
         /// </summary>
         public DeviceContext DeviceContext { get; private set; }
-        /// <summary>
-        /// Device description
-        /// </summary>
-        public readonly string DeviceDescription = null;
         /// <summary>
         /// Screen viewport
         /// </summary>
@@ -236,6 +225,16 @@ namespace Engine
                 return this.msCount > 1;
             }
         }
+        /// <summary>
+        /// Current sample description
+        /// </summary>
+        public SampleDescription CurrentSampleDescription
+        {
+            get
+            {
+                return new SampleDescription(this.msCount, this.msQuality);
+            }
+        }
 
         /// <summary>
         /// Gets desktop mode description
@@ -243,11 +242,11 @@ namespace Engine
         /// <returns>Returns current desktop mode description</returns>
         public static OutputDescription GetDesktopMode()
         {
-            using (Factory1 factory = new Factory1())
+            using (var factory = new Factory1())
             {
-                using (Adapter1 adapter = factory.GetAdapter1(0))
+                using (var adapter = factory.GetAdapter1(0))
                 {
-                    using (Output adapterOutput = adapter.GetOutput(0))
+                    using (var adapterOutput = adapter.GetOutput(0))
                     {
                         return adapterOutput.Description;
                     }
@@ -264,7 +263,7 @@ namespace Engine
         public Graphics(EngineForm form, bool vsyncEnabled = false, int refreshRate = 0, int multiSampling = 0)
         {
             Adapter1 adapter = null;
-            ModeDescription displayMode = this.FindModeDescription(
+            var displayMode = this.FindModeDescription(
                 this.BufferFormat,
                 form.RenderWidth,
                 form.RenderHeight,
@@ -278,7 +277,7 @@ namespace Engine
 
                 if (multiSampling != 0)
                 {
-                    using (Device tmpDevice = new Device(adapter))
+                    using (var tmpDevice = new Device(adapter))
                     {
                         this.CheckMultisample(tmpDevice, multiSampling, out this.msCount, out this.msQuality);
                     }
@@ -299,6 +298,7 @@ namespace Engine
                 creationFlags,
                 new[]
                 {
+                    FeatureLevel.Level_11_1,
                     FeatureLevel.Level_11_0,
                     FeatureLevel.Level_10_1,
                     FeatureLevel.Level_10_0,
@@ -327,7 +327,7 @@ namespace Engine
 
             #region Alt + Enter
 
-            using (Factory factory = this.swapChain.GetParent<Factory>())
+            using (var factory = this.swapChain.GetParent<Factory>())
             {
                 factory.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAltEnter);
             }
@@ -373,7 +373,7 @@ namespace Engine
 
             #region Render Target
 
-            using (Resource backBuffer = Resource.FromSwapChain<Texture2D>(swapChain, 0))
+            using (var backBuffer = Resource.FromSwapChain<Texture2D>(swapChain, 0))
             {
                 this.renderTargetView = new EngineRenderTargetView(this, backBuffer);
             }
@@ -382,34 +382,7 @@ namespace Engine
 
             #region Depth Stencil Buffer and View
 
-            this.depthStencilBuffer = new Texture2D(
-                this.Device,
-                new Texture2DDescription()
-                {
-                    Width = width,
-                    Height = height,
-                    MipLevels = 1,
-                    ArraySize = 1,
-                    Format = this.DepthFormat,
-                    SampleDescription = this.CurrentSampleDescription,
-                    Usage = ResourceUsage.Default,
-                    BindFlags = BindFlags.DepthStencil,
-                    CpuAccessFlags = CpuAccessFlags.None,
-                    OptionFlags = ResourceOptionFlags.None,
-                });
-
-            this.depthStencilView = new EngineDepthStencilView(
-                this,
-                this.depthStencilBuffer,
-                new DepthStencilViewDescription()
-                {
-                    Format = this.DepthFormat,
-                    Dimension = this.MultiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
-                    Texture2D = new DepthStencilViewDescription.Texture2DResource()
-                    {
-                        MipSlice = 0
-                    },
-                });
+            this.CreateDepthStencil(this.DepthFormat, width, height, out this.depthStencilView);
 
             #endregion
 
@@ -1288,7 +1261,6 @@ namespace Engine
                 Counters.RasterizerStateChanges++;
             }
         }
-
         /// <summary>
         /// Checks the multi-sample specified count
         /// </summary>
@@ -1305,26 +1277,6 @@ namespace Engine
             {
                 sampleCount = multiSampling;
                 maxQualityLevel = maxQuality - 1;
-            }
-        }
-        /// <summary>
-        /// Checks the multi-sample maximum quality
-        /// </summary>
-        /// <param name="tmpDevice">Temporary device</param>
-        /// <param name="sampleCount">Sample count</param>
-        /// <param name="maxQualityLevel">Maximum quality level</param>
-        private void CheckMultisample(Device tmpDevice, out int sampleCount, out int maxQualityLevel)
-        {
-            sampleCount = 1;
-            maxQualityLevel = 0;
-            for (int count = 1; count <= Device.MultisampleCountMaximum; count++)
-            {
-                int maxQuality = tmpDevice.CheckMultisampleQualityLevels(this.BufferFormat, count);
-                if (maxQuality > 0)
-                {
-                    sampleCount = count;
-                    maxQualityLevel = maxQuality - 1;
-                }
             }
         }
         /// <summary>
@@ -1432,7 +1384,6 @@ namespace Engine
         private void DisposeResources()
         {
             Helper.Dispose(this.renderTargetView);
-            Helper.Dispose(this.depthStencilBuffer);
             Helper.Dispose(this.depthStencilView);
 
             Helper.Dispose(this.depthStencilzBufferEnabled);

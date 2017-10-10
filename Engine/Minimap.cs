@@ -63,11 +63,11 @@ namespace Engine
 
             this.viewport = new Viewport(0, 0, description.Width, description.Height);
 
-            using (var texture = this.Graphics.CreateRenderTargetTexture(Format.R8G8B8A8_UNorm, description.Width, description.Height))
-            {
-                this.renderTarget = new EngineRenderTargetView(this.Graphics, texture);
-                this.renderTexture = new EngineTexture(this.Graphics, texture);
-            }
+            this.Graphics.CreateRenderTargetTexture(
+                Format.R8G8B8A8_UNorm,
+                description.Width, description.Height,
+                out this.renderTarget,
+                out this.renderTexture);
 
             this.InitializeContext();
         }
