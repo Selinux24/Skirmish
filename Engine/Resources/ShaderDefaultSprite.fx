@@ -18,7 +18,7 @@ cbuffer cbPerInstance : register(b2)
 	float gTextureIndex;
 };
 
-Texture2DArray gTextureArray;
+Texture2DArray gTextureArray : register(t0);
 
 /**********************************************************************************************************
 POSITION COLOR

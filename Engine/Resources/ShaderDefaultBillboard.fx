@@ -6,8 +6,8 @@ cbuffer cbGlobal : register(b0)
 	uint gMaterialPaletteWidth;
 	float3 gLOD;
 };
-Texture2D gMaterialPalette;
-Texture1D gTextureRandom;
+Texture2D gMaterialPalette : register(t0);
+Texture1D gTextureRandom : register(t1);
 
 cbuffer cbFixed : register(b1)
 {
@@ -52,9 +52,9 @@ cbuffer cbPerFrame : register(b2)
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
 };
-Texture2DArray gTextureArray;
-Texture2D gShadowMapLD;
-Texture2D gShadowMapHD;
+Texture2DArray gTextureArray : register(t2);
+Texture2D gShadowMapLD : register(t3);
+Texture2D gShadowMapHD : register(t4);
 
 float3 CalcWindTranslation(uint primID, float3 pos, float3 windDirection, float windStrength)
 {

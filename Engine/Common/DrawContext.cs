@@ -46,7 +46,7 @@ namespace Engine.Common
         /// <summary>
         /// Shadow maps
         /// </summary>
-        public int ShadowMaps { get; set; }
+        public uint ShadowMaps { get; set; }
         /// <summary>
         /// View * projection from light matrix for static shadows
         /// </summary>

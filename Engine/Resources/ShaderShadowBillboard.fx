@@ -34,8 +34,8 @@ cbuffer cbFixed : register(b2)
 	};
 };
 
-Texture2DArray gTextureArray;
-Texture1D gTextureRandom;
+Texture2DArray gTextureArray : register(t0);
+Texture1D gTextureRandom : register(t1);
 
 float3 CalcWindTranslation(uint primID, float3 pos)
 {

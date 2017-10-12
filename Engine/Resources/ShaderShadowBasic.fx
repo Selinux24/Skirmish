@@ -5,7 +5,7 @@ cbuffer cbGlobals : register(b0)
 {
 	uint gAnimationPaletteWidth;
 };
-Texture2D gAnimationPalette;
+Texture2D gAnimationPalette : register(t0);
 
 cbuffer cbVSPerFrame : register(b1)
 {
@@ -20,7 +20,7 @@ cbuffer cbVSPerInstance : register(b2)
 	uint PAD23;
 };
 
-Texture2DArray gPSDiffuseMapArray;
+Texture2DArray gPSDiffuseMapArray : register(t1);
 
 cbuffer cbPSPerInstance : register(b5)
 {

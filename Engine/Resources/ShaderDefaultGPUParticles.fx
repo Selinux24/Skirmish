@@ -40,7 +40,7 @@ cbuffer cbFixed : register(b2)
 	};
 };
 
-Texture2DArray gTextureArray;
+Texture2DArray gTextureArray : register(t0);
 
 /***********************************************************
  * STREAM OUT                                              *

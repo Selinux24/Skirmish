@@ -8,7 +8,7 @@ cbuffer cbPerFrame : register(b0)
 	float4 gColor;
 };
 
-Texture2D gTexture;
+Texture2D gTexture : register(t0);
 
 PSVertexPositionTexture VSFont(VSVertexPositionTexture input)
 {

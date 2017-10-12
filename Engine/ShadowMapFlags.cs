@@ -6,7 +6,7 @@ namespace Engine
     /// Flags
     /// </summary>
     [Flags]
-    public enum ShadowMapFlags : int
+    public enum ShadowMapFlags : uint
     {
         /// <summary>
         /// None

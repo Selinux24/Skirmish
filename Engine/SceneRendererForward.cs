@@ -363,7 +363,7 @@ namespace Engine
                         #endregion
 
                         //Set shadow map flags to drawing context
-                        this.DrawContext.ShadowMaps = (int)flags;
+                        this.DrawContext.ShadowMaps = (uint)flags;
                     }
 
                     #endregion

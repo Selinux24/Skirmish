@@ -1,6 +1,7 @@
 ﻿
 namespace Engine.Common
 {
+    using System;
     using SharpDX.Direct3D11;
 
     /// <summary>

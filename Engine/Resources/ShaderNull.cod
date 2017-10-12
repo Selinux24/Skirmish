@@ -67,7 +67,7 @@ fxgroup
                 //   v0.x <- input.positionLocal.x; v0.y <- input.positionLocal.y; v0.z <- input.positionLocal.z; 
                 //   o0.x <- <VSNull return value>.x; o0.y <- <VSNull return value>.y; o0.z <- <VSNull return value>.z; o0.w <- <VSNull return value>.w
                 //
-                #line 10 "D:\Users\Selinux\Documents\GitHub\SharpDX-Tests\Engine\Resources\ShaderNull.fx"
+                #line 10 "D:\Users\Selinux\Documents\GitHub\Skirmish\Engine\Resources\ShaderNull.fx"
                 mov r0.xyz, v0.xyzx
                 mov r0.w, l(1.000000)
                 dp4 o0.x, r0.xyzw, cb0[0].xyzw

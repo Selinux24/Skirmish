@@ -30,7 +30,7 @@ cbuffer cbFixed : register(b1)
 	};
 };
 
-Texture2DArray gTextureArray;
+Texture2DArray gTextureArray : register(t0);
 
 float3 ComputeParticlePosition(float3 position, float3 velocity, float age, float normalizedAge)
 {

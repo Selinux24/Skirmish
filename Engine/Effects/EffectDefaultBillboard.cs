@@ -216,15 +216,15 @@ namespace Engine.Effects
         {
             get
             {
-                Int4 v = this.lightCount.GetVector<Int4>();
+                var v = this.lightCount.GetVector<Int3>();
 
                 return new int[] { v.X, v.Y, v.Z };
             }
             set
             {
-                Int4 v4 = new Int4(value[0], value[1], value[2], 0);
+                var v = new Int3(value[0], value[1], value[2]);
 
-                this.lightCount.Set(v4);
+                this.lightCount.Set(v);
             }
         }
         /// <summary>
@@ -286,11 +286,11 @@ namespace Engine.Effects
         /// <summary>
         /// Shadow maps flag
         /// </summary>
-        protected int ShadowMaps
+        protected uint ShadowMaps
         {
             get
             {
-                return this.shadowMaps.GetInt();
+                return this.shadowMaps.GetUInt();
             }
             set
             {
@@ -722,7 +722,7 @@ namespace Engine.Effects
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             SceneLights lights,
-            int shadowMaps,
+            uint shadowMaps,
             EngineTexture shadowMapLD,
             EngineTexture shadowMapHD,
             Matrix fromLightViewProjectionLD,

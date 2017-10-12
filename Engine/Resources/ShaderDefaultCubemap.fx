@@ -6,7 +6,7 @@ cbuffer cbPerFrame : register(b0)
 	float4x4 gWorldViewProjection;
 };
 
-TextureCube gCubemap;
+TextureCube gCubemap : register(t0);
 
 PSVertexPosition VSCubic(VSVertexPosition input)
 {

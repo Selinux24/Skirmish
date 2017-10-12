@@ -323,11 +323,11 @@ namespace Engine.Effects
         /// <summary>
         /// Shadow maps flag
         /// </summary>
-        protected int ShadowMaps
+        protected uint ShadowMaps
         {
             get
             {
-                return this.shadowMaps.GetInt();
+                return this.shadowMaps.GetUInt();
             }
             set
             {
@@ -620,7 +620,7 @@ namespace Engine.Effects
             SceneLightDirectional light,
             Matrix lightViewProjectionLD,
             Matrix lightViewProjectionHD,
-            int shadowMaps,
+            uint shadowMaps,
             EngineTexture shadowMapLD,
             EngineTexture shadowMapHD)
         {

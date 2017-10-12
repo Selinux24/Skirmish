@@ -20,11 +20,11 @@ cbuffer cbPerInstance : register(b2)
 	uint gAnimationOffset;
 };
 
-Texture2D gAnimationPalette;
+Texture2D gAnimationPalette : register(t0);
 
-Texture2DArray gDiffuseMapArray;
-Texture2DArray gNormalMapArray;
-Texture2DArray gSpecularMapArray;
+Texture2DArray gDiffuseMapArray : register(t1);
+Texture2DArray gNormalMapArray : register(t2);
+Texture2DArray gSpecularMapArray : register(t3);
 
 /**********************************************************************************************************
 POSITION COLOR

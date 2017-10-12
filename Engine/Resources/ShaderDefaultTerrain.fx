@@ -8,7 +8,7 @@ cbuffer cbGlobals : register(b0)
 	uint gMaterialPaletteWidth;
 	float3 gLOD;
 };
-Texture2D gMaterialPalette;
+Texture2D gMaterialPalette : register(t0);
 
 cbuffer cbVSPerFrame : register(b1)
 {
@@ -34,8 +34,8 @@ cbuffer cbPSPerFrame : register(b3)
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
 };
-Texture2D gPSShadowMapLD;
-Texture2D gPSShadowMapHD;
+Texture2D gPSShadowMapLD : register(t1);
+Texture2D gPSShadowMapHD : register(t2);
 
 cbuffer cbPSPerObject : register(b4)
 {

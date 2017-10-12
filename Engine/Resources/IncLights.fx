@@ -365,7 +365,7 @@ inline ComputeLightsOutput ComputeDirectionalLightLOD1(ComputeDirectionalLightsI
 
 	float cShadowFactor = 1;
 	[flatten]
-	if (input.dirLight.CastShadow == 1)
+    if (input.dirLight.CastShadow == 1 && input.shadows > 0)
 	{
 		cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 	}
@@ -383,7 +383,7 @@ inline ComputeLightsOutput ComputeDirectionalLightLOD2(ComputeDirectionalLightsI
 
 	float cShadowFactor = 1;
 	[flatten]
-	if (input.dirLight.CastShadow == 1)
+    if (input.dirLight.CastShadow == 1 && input.shadows > 0)
 	{
 		cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 	}
@@ -401,7 +401,7 @@ inline ComputeLightsOutput ComputeDirectionalLightLOD3(ComputeDirectionalLightsI
 
 	float cShadowFactor = 1;
 	[flatten]
-	if (input.dirLight.CastShadow == 1)
+    if (input.dirLight.CastShadow == 1 && input.shadows > 0)
 	{
 		cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 	}
@@ -614,7 +614,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
 		float3 R = 2 * dot(L, input.pNormal) * input.pNormal - L;
 
 		float cShadowFactor = 1;
-		if (input.dirLights[i].CastShadow == 1)
+        if (input.dirLights[i].CastShadow == 1 && input.shadows > 0)
 		{
 			cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 		}
@@ -680,7 +680,7 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 		float3 L = normalize(-input.dirLights[i].Direction);
 
 		float cShadowFactor = 1;
-		if (input.dirLights[i].CastShadow == 1)
+        if (input.dirLights[i].CastShadow == 1 && input.shadows > 0)
 		{
 			cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 		}
@@ -735,7 +735,7 @@ inline float4 ComputeLightsLOD3(ComputeLightsInput input)
 		float3 L = normalize(-input.dirLights[i].Direction);
 
 		float cShadowFactor = 1;
-		if (input.dirLights[i].CastShadow == 1)
+        if (input.dirLights[i].CastShadow == 1 && input.shadows > 0)
 		{
 			cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 		}
