@@ -1,28 +1,20 @@
-﻿using System.Collections.Generic;
-#if DEBUG
+﻿#if DEBUG
 using System.Diagnostics;
 #endif
 using SharpDX;
-using SharpDX.Direct3D;
 using SharpDX.DXGI;
+using System.Collections.Generic;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
-    using Engine.Helpers;
-    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Deferred renderer class
     /// </summary>
     public class SceneRendererDeferred : ISceneRenderer
     {
-        /// <summary>
-        /// Render helper geometry buffer slot
-        /// </summary>
-        public static int BufferSlot = 15;
-
         /// <summary>
         /// Shadow map size
         /// </summary>
@@ -41,24 +33,9 @@ namespace Engine
         private const int CullIndexDrawIndex = 2;
 
         /// <summary>
-        /// Light geometry
-        /// </summary>
-        struct LightGeometry
-        {
-            /// <summary>
-            /// Geometry offset
-            /// </summary>
-            public int Offset;
-            /// <summary>
-            /// Index count
-            /// </summary>
-            public int IndexCount;
-        }
-
-        /// <summary>
         /// View port
         /// </summary>
-        private Viewport viewport;
+        public Viewport viewport;
         /// <summary>
         /// High definition shadow mapper
         /// </summary>
@@ -80,45 +57,9 @@ namespace Engine
         /// </summary>
         private RenderTarget lightBuffer = null;
         /// <summary>
-        /// Window vertex buffer
+        /// Light drawer
         /// </summary>
-        private Buffer lightGeometryVertexBuffer;
-        /// <summary>
-        /// Vertex buffer binding
-        /// </summary>
-        private VertexBufferBinding lightGeometryVertexBufferBinding;
-        /// <summary>
-        /// Window index buffer
-        /// </summary>
-        private Buffer lightGeometryIndexBuffer;
-        /// <summary>
-        /// Screen geometry
-        /// </summary>
-        private LightGeometry screenGeometry;
-        /// <summary>
-        /// Point light geometry
-        /// </summary>
-        private LightGeometry pointLightGeometry;
-        /// <summary>
-        /// Spot ligth geometry
-        /// </summary>
-        private LightGeometry spotLightGeometry;
-        /// <summary>
-        /// Input layout for directional lights
-        /// </summary>
-        private InputLayout dirLightInputLayout;
-        /// <summary>
-        /// Input layout for point lights
-        /// </summary>
-        private InputLayout pointLightInputLayout;
-        /// <summary>
-        /// Input layout for spot ligths
-        /// </summary>
-        private InputLayout spotLightInputLayout;
-        /// <summary>
-        /// Input layout for result light map
-        /// </summary>
-        private InputLayout combineLightsInputLayout;
+        private SceneRendererDeferredLights lightDrawer = null;
 
         /// <summary>
         /// Game
@@ -221,6 +162,8 @@ namespace Engine
         {
             this.Game = game;
 
+            this.lightDrawer = new SceneRendererDeferredLights(game.Graphics);
+
             this.UpdateRectangleAndView();
 
             this.shadowMapperLow = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
@@ -229,11 +172,6 @@ namespace Engine
 
             this.geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 3);
             this.lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 1);
-
-            this.dirLightInputLayout = DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.Create(game.Graphics, VertexPosition.Input(BufferSlot));
-            this.pointLightInputLayout = DrawerPool.EffectDeferredComposer.DeferredPointLight.Create(game.Graphics, VertexPosition.Input(BufferSlot));
-            this.spotLightInputLayout = DrawerPool.EffectDeferredComposer.DeferredSpotLight.Create(game.Graphics, VertexPosition.Input(BufferSlot));
-            this.combineLightsInputLayout = DrawerPool.EffectDeferredComposer.DeferredCombineLights.Create(game.Graphics, VertexPosition.Input(BufferSlot));
 
             this.UpdateContext = new UpdateContext()
             {
@@ -261,13 +199,7 @@ namespace Engine
             Helper.Dispose(this.shadowMapperHigh);
             Helper.Dispose(this.geometryBuffer);
             Helper.Dispose(this.lightBuffer);
-            Helper.Dispose(this.lightGeometryVertexBuffer);
-            Helper.Dispose(this.lightGeometryIndexBuffer);
-
-            Helper.Dispose(this.dirLightInputLayout);
-            Helper.Dispose(this.pointLightInputLayout);
-            Helper.Dispose(this.spotLightInputLayout);
-            Helper.Dispose(this.combineLightsInputLayout);
+            Helper.Dispose(this.lightDrawer);
         }
         /// <summary>
         /// Resizes buffers
@@ -428,7 +360,7 @@ namespace Engine
 #if DEBUG
                             Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                            var toCullShadowObjs = shadowObjs.FindAll(s => s is ICullable).ConvertAll<ICullable>(s => (ICullable)s);
+                            var toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
 
                             var sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
 
@@ -473,7 +405,7 @@ namespace Engine
 #if DEBUG
                             swCull = Stopwatch.StartNew();
 #endif
-                            toCullShadowObjs = shadowObjs.FindAll(s => s is ICullable).ConvertAll<ICullable>(s => (ICullable)s);
+                            toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
 
                             sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
 
@@ -536,7 +468,7 @@ namespace Engine
                         bool draw = false;
                         if (scene.PerformFrustumCulling)
                         {
-                            var toCullDeferred = deferredEnabledComponents.FindAll(s => s is ICullable).ConvertAll<ICullable>(s => (ICullable)s);
+                            var toCullDeferred = deferredEnabledComponents.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
 
                             //Frustum culling
                             draw = this.cullManager.Cull(this.DrawContext.Frustum, CullIndexDrawIndex, toCullDeferred);
@@ -822,99 +754,7 @@ namespace Engine
 
             this.ViewProjection = Sprite.CreateViewOrthoProjection(this.Width, this.Height);
 
-            List<VertexPosition> verts = new List<VertexPosition>();
-            List<uint> indx = new List<uint>();
-
-            {
-                Vector3[] cv;
-                uint[] indices;
-                GeometryUtil.CreateScreen(
-                    Game.Form,
-                    out cv,
-                    out indices);
-                var vertices = new VertexPosition[cv.Length];
-                for (int i = 0; i < vertices.Length; i++)
-                {
-                    vertices[i] = new VertexPosition() { Position = cv[i] };
-                }
-
-                this.screenGeometry.Offset = indx.Count;
-                this.screenGeometry.IndexCount = indices.Length;
-
-                verts.AddRange(vertices);
-                indx.AddRange(indices);
-            }
-
-            {
-                Vector3[] cv;
-                uint[] indices;
-                GeometryUtil.CreateSphere(
-                    1, 16, 16,
-                    out cv,
-                    out indices);
-                var vertices = new VertexPosition[cv.Length];
-                for (int i = 0; i < vertices.Length; i++)
-                {
-                    vertices[i] = new VertexPosition() { Position = cv[i] };
-                }
-
-                this.pointLightGeometry.Offset = indx.Count;
-                this.pointLightGeometry.IndexCount = indices.Length;
-
-                //Sum offsets
-                for (int i = 0; i < indices.Length; i++)
-                {
-                    indices[i] += (uint)verts.Count;
-                }
-
-                verts.AddRange(vertices);
-                indx.AddRange(indices);
-            }
-
-            {
-                Vector3[] cv;
-                uint[] indices;
-                GeometryUtil.CreateSphere(
-                    1, 16, 16,
-                    out cv,
-                    out indices);
-                var vertices = new VertexPosition[cv.Length];
-                for (int i = 0; i < vertices.Length; i++)
-                {
-                    vertices[i] = new VertexPosition() { Position = cv[i] };
-                }
-
-                this.spotLightGeometry.Offset = indx.Count;
-                this.spotLightGeometry.IndexCount = indices.Length;
-
-                //Sum offsets
-                for (int i = 0; i < indices.Length; i++)
-                {
-                    indices[i] += (uint)verts.Count;
-                }
-
-                verts.AddRange(vertices);
-                indx.AddRange(indices);
-            }
-
-            if (this.lightGeometryVertexBuffer == null)
-            {
-                this.lightGeometryVertexBuffer = this.Game.Graphics.CreateVertexBufferWrite("Deferred Redenderer Light Geometry", verts.ToArray());
-                this.lightGeometryVertexBufferBinding = new VertexBufferBinding(this.lightGeometryVertexBuffer, verts[0].GetStride(), 0);
-            }
-            else
-            {
-                this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.lightGeometryVertexBuffer, verts.ToArray());
-            }
-
-            if (this.lightGeometryIndexBuffer == null)
-            {
-                this.lightGeometryIndexBuffer = this.Game.Graphics.CreateIndexBufferWrite("Deferred Redenderer Light Geometry", indx.ToArray());
-            }
-            else
-            {
-                this.Game.Graphics.DeviceContext.WriteDiscardBuffer(this.lightGeometryIndexBuffer, indx.ToArray());
-            }
+            this.lightDrawer.Update(this.Game.Graphics, this.Width, this.Height);
         }
         /// <summary>
         /// Binds graphics for shadow mapping pass
@@ -933,7 +773,7 @@ namespace Engine
                 Color.Transparent,
                 dsv,
                 true,
-                DepthStencilClearFlags.Depth);
+                false);
         }
         /// <summary>
         /// Binds graphics for g-buffer pass
@@ -946,7 +786,7 @@ namespace Engine
             //Set g-buffer render targets
             this.Game.Graphics.SetRenderTargets(
                 this.geometryBuffer.Targets, true, Color.Black,
-                this.Game.Graphics.DefaultDepthStencil, true);
+                this.Game.Graphics.DefaultDepthStencil, true, true);
         }
         /// <summary>
         /// Binds graphics for light acummulation pass
@@ -959,7 +799,7 @@ namespace Engine
             //Set light buffer to draw lights
             this.Game.Graphics.SetRenderTargets(
                 this.lightBuffer.Targets, true, Color.Black,
-                this.Game.Graphics.DefaultDepthStencil, false);
+                this.Game.Graphics.DefaultDepthStencil, false, false);
         }
         /// <summary>
         /// Binds graphics for results pass
@@ -1004,10 +844,7 @@ namespace Engine
             this.Game.Graphics.SetDepthStencilRDZDisabled();
             this.Game.Graphics.SetBlendDeferredLighting();
 
-            this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
-            this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.lightGeometryVertexBufferBinding);
-            this.Game.Graphics.IASetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
-
+            this.lightDrawer.BindGeometry(this.Game.Graphics);
 #if DEBUG
             swPrepare.Stop();
 #endif
@@ -1019,10 +856,7 @@ namespace Engine
 #endif
             if (directionalLights != null && directionalLights.Length > 0)
             {
-                var effectTechnique = effect.DeferredDirectionalLight;
-
-                this.Game.Graphics.IAInputLayout = this.dirLightInputLayout;
-                Counters.IAInputLayoutSets++;
+                this.lightDrawer.BindDirectional(this.Game.Graphics);
 
                 for (int i = 0; i < directionalLights.Length; i++)
                 {
@@ -1034,17 +868,7 @@ namespace Engine
                         context.ShadowMapLow,
                         context.ShadowMapHigh);
 
-                    for (int p = 0; p < effectTechnique.PassCount; p++)
-                    {
-                        effectTechnique.Apply(this.Game.Graphics, p, 0);
-
-                        this.Game.Graphics.DeviceContext.DrawIndexed(
-                            this.screenGeometry.IndexCount,
-                            this.screenGeometry.Offset,
-                            0);
-
-                        Counters.DrawCallsPerFrame++;
-                    }
+                    this.lightDrawer.DrawDirectional(this.Game.Graphics, effect);
                 }
             }
 #if DEBUG
@@ -1058,10 +882,7 @@ namespace Engine
 #endif
             if (pointLights != null && pointLights.Length > 0)
             {
-                var geometry = this.pointLightGeometry;
-
-                this.Game.Graphics.IAInputLayout = this.pointLightInputLayout;
-                Counters.IAInputLayoutSets++;
+                this.lightDrawer.BindPoint(this.Game.Graphics);
 
                 for (int i = 0; i < pointLights.Length; i++)
                 {
@@ -1073,15 +894,7 @@ namespace Engine
                         context.World * light.Local,
                         context.ViewProjection);
 
-                    this.Game.Graphics.SetRasterizerStencilPass();
-                    this.Game.Graphics.SetDepthStencilVolumeMarking();
-                    this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
-                    this.DrawSingleLight(geometry, effect, effect.DeferredPointStencil);
-
-                    this.Game.Graphics.SetRasterizerLightingPass();
-                    this.Game.Graphics.SetDepthStencilVolumeDrawing(0);
-                    this.Game.Graphics.DeviceContext.OutputMerger.DepthStencilReference = 0;
-                    this.DrawSingleLight(geometry, effect, effect.DeferredPointLight);
+                    this.lightDrawer.DrawPoint(this.Game.Graphics, effect);
                 }
             }
 #if DEBUG
@@ -1095,10 +908,7 @@ namespace Engine
 #endif
             if (spotLights != null && spotLights.Length > 0)
             {
-                var geometry = this.spotLightGeometry;
-
-                this.Game.Graphics.IAInputLayout = this.spotLightInputLayout;
-                Counters.IAInputLayoutSets++;
+                this.lightDrawer.BindSpot(this.Game.Graphics);
 
                 for (int i = 0; i < spotLights.Length; i++)
                 {
@@ -1110,14 +920,7 @@ namespace Engine
                         context.World * light.Local,
                         context.ViewProjection);
 
-                    this.Game.Graphics.SetRasterizerStencilPass();
-                    this.Game.Graphics.SetDepthStencilVolumeMarking();
-                    this.Game.Graphics.ClearDepthStencilBuffer(this.Game.Graphics.DefaultDepthStencil, DepthStencilClearFlags.Stencil);
-                    this.DrawSingleLight(geometry, effect, effect.DeferredSpotStencil);
-
-                    this.Game.Graphics.SetRasterizerLightingPass();
-                    this.Game.Graphics.SetDepthStencilVolumeDrawing(0);
-                    this.DrawSingleLight(geometry, effect, effect.DeferredSpotLight);
+                    this.lightDrawer.DrawSpot(this.Game.Graphics, effect);
                 }
             }
 #if DEBUG
@@ -1194,23 +997,6 @@ namespace Engine
 #endif
         }
         /// <summary>
-        /// Draws a single light
-        /// </summary>
-        /// <param name="geometry">Geometry</param>
-        /// <param name="effect">Effect</param>
-        /// <param name="effectTechnique">Technique</param>
-        private void DrawSingleLight(LightGeometry geometry, EffectDeferredComposer effect, EngineEffectTechnique effectTechnique)
-        {
-            for (int p = 0; p < effectTechnique.PassCount; p++)
-            {
-                effectTechnique.Apply(this.Game.Graphics, p, 0);
-
-                this.Game.Graphics.DeviceContext.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
-
-                Counters.DrawCallsPerFrame++;
-            }
-        }
-        /// <summary>
         /// Draw result
         /// </summary>
         /// <param name="context">Drawing context</param>
@@ -1229,7 +1015,6 @@ namespace Engine
                 Stopwatch swInit = Stopwatch.StartNew();
 #endif
                 var effect = DrawerPool.EffectDeferredComposer;
-                var effectTechnique = effect.DeferredCombineLights;
 
                 effect.UpdateComposer(
                     context.World,
@@ -1242,10 +1027,7 @@ namespace Engine
                     this.GeometryMap[2],
                     this.LightMap[0]);
 
-                this.Game.Graphics.IAInputLayout = this.combineLightsInputLayout;
-                this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
-                this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.lightGeometryVertexBufferBinding);
-                this.Game.Graphics.IASetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
+                this.lightDrawer.BindResult(this.Game.Graphics);
 
                 this.Game.Graphics.SetDepthStencilNone();
                 this.Game.Graphics.SetRasterizerDefault();
@@ -1258,14 +1040,7 @@ namespace Engine
 #if DEBUG
                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                for (int p = 0; p < effectTechnique.PassCount; p++)
-                {
-                    effectTechnique.Apply(this.Game.Graphics, p, 0);
-
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.screenGeometry.IndexCount, this.screenGeometry.Offset, 0);
-
-                    Counters.DrawCallsPerFrame++;
-                }
+                this.lightDrawer.DrawResult(this.Game.Graphics, effect);
 #if DEBUG
                 swDraw.Stop();
 
@@ -1308,9 +1083,6 @@ namespace Engine
                     if (c.AlphaEnabled) this.Game.Graphics.SetBlendTransparent();
                     else this.Game.Graphics.SetBlendDefault();
 
-                    //if (c.AlphaEnabled) this.Game.Graphics.SetBlendDefaultAlpha();
-                    //else this.Game.Graphics.SetBlendDefault();
-
                     c.Get<IDrawable>().Draw(context);
                 }
             });
@@ -1324,13 +1096,11 @@ namespace Engine
         /// <param name="deferred">Deferred drawing</param>
         private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components, bool deferred)
         {
-            components.ForEach((c) =>
+            components.FindAll(c => c.Is<IDrawable>()).ForEach((c) =>
             {
                 Counters.MaxInstancesPerFrame += c.Count;
 
-                var cull = c.Get<ICullable>();
-
-                var visible = cull != null ? !this.cullManager.IsVisible(index, cull) : true;
+                var visible = (c is ICullable) ? !this.cullManager.IsVisible(index, (ICullable)c) : true;
                 if (visible)
                 {
                     this.Game.Graphics.SetRasterizerDefault();

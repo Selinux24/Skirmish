@@ -916,7 +916,7 @@ namespace Engine
         /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
         public void SetDefaultRenderTarget(bool clear = true)
         {
-            this.SetRenderTargets(this.renderTargetView, clear, GameEnvironment.Background, this.depthStencilView, clear);
+            this.SetRenderTargets(this.renderTargetView, clear, GameEnvironment.Background, this.depthStencilView, clear, clear);
         }
         /// <summary>
         /// Sets viewport
@@ -942,9 +942,9 @@ namespace Engine
         /// <param name="clearRT">Indicates whether the target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="depthMap">Depth map</param>
-        /// <param name="clearDS">Indicates whether the stencil buffer must be cleared</param>
-        /// <param name="clearDSFlags">Stencil cleraring flags</param>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, EngineDepthStencilView depthMap, bool clearDS, DepthStencilClearFlags clearDSFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil)
         {
             var dsv = depthMap != null ? depthMap.GetDepthStencil() : null;
             var rtv = renderTargets != null ? renderTargets.GetRenderTargets() : null;
@@ -962,8 +962,12 @@ namespace Engine
                 }
             }
 
-            if (clearDS && dsv != null)
+            if ((clearDepth || clearStencil) && dsv != null)
             {
+                DepthStencilClearFlags clearDSFlags = 0;
+                if (clearDepth) clearDSFlags |= DepthStencilClearFlags.Depth;
+                if (clearStencil) clearDSFlags |= DepthStencilClearFlags.Stencil;
+
                 this.DeviceContext.ClearDepthStencilView(
                     dsv,
                     clearDSFlags,
@@ -974,13 +978,21 @@ namespace Engine
         /// Clear depth / stencil buffer
         /// </summary>
         /// <param name="depthMap">Depth buffer</param>
-        /// <param name="clearDSFlags">Clear flags</param>
-        public void ClearDepthStencilBuffer(EngineDepthStencilView depthMap, DepthStencilClearFlags clearDSFlags = DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil)
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        public void ClearDepthStencilBuffer(EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil)
         {
-            this.DeviceContext.ClearDepthStencilView(
-                depthMap.GetDepthStencil(),
-                clearDSFlags,
-                1.0f, 0);
+            if ((clearDepth || clearStencil) && depthMap != null)
+            {
+                DepthStencilClearFlags clearDSFlags = 0;
+                if (clearDepth) clearDSFlags |= DepthStencilClearFlags.Depth;
+                if (clearStencil) clearDSFlags |= DepthStencilClearFlags.Stencil;
+
+                this.DeviceContext.ClearDepthStencilView(
+                    depthMap.GetDepthStencil(),
+                    clearDSFlags,
+                    1.0f, 0);
+            }
         }
         /// <summary>
         /// Enables z-buffer for write

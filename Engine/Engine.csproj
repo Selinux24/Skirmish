@@ -279,6 +279,7 @@
     </Compile>
     <Compile Include="SceneCullManager.cs" />
     <Compile Include="SceneObject.cs" />
+    <Compile Include="SceneRendererDeferredLights.cs" />
     <Compile Include="SegmentPath.cs" />
     <Compile Include="ShadowMapFlags.cs" />
     <Compile Include="SkyPlane.cs" />

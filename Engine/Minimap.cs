@@ -127,7 +127,7 @@ namespace Engine
                 this.drawContext.GameTime = context.GameTime;
 
                 this.Game.Graphics.SetViewport(this.viewport);
-                this.Game.Graphics.SetRenderTargets(this.renderTarget, true, Color.Black, null, false);
+                this.Game.Graphics.SetRenderTargets(this.renderTarget, true, Color.Black, null, false, false);
 
                 for (int i = 0; i < this.Drawables.Length; i++)
                 {

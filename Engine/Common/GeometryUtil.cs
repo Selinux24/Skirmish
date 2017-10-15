@@ -408,18 +408,42 @@ namespace Engine.Common
         /// <summary>
         /// Creates a screen of VertexPositionTexture VertexData
         /// </summary>
+        /// <param name="renderWidth">Render area width</param>
+        /// <param name="renderHeight">Render area height</param>
+        /// <param name="vertices">Resulting positions</param>
+        /// <param name="indices">Resulting indices</param>
+        public static void CreateScreen(int renderWidth, int renderHeight, out Vector3[] vertices, out uint[] indices)
+        {
+            Vector2[] uvs;
+            CreateScreen(renderWidth, renderHeight, out vertices, out uvs, out indices);
+        }
+        /// <summary>
+        /// Creates a screen of VertexPositionTexture VertexData
+        /// </summary>
         /// <param name="form">Form</param>
         /// <param name="vertices">Resulting positions</param>
         /// <param name="uvs">Resulting uv coordinates</param>
         /// <param name="indices">Resulting indices</param>
         public static void CreateScreen(EngineForm form, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
         {
+            CreateScreen(form.RenderWidth, form.RenderHeight, out vertices, out uvs, out indices);
+        }
+        /// <summary>
+        /// Creates a screen of VertexPositionTexture VertexData
+        /// </summary>
+        /// <param name="renderWidth">Render area width</param>
+        /// <param name="renderHeight">Render area height</param>
+        /// <param name="vertices">Resulting positions</param>
+        /// <param name="uvs">Resulting uv coordinates</param>
+        /// <param name="indices">Resulting indices</param>
+        public static void CreateScreen(int renderWidth, int renderHeight, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
+        {
             vertices = new Vector3[4];
             uvs = new Vector2[4];
             indices = new uint[6];
 
-            float width = form.RenderWidth;
-            float height = form.RenderHeight;
+            float width = renderWidth;
+            float height = renderHeight;
 
             float left = (float)((width / 2) * -1);
             float right = left + (float)width;

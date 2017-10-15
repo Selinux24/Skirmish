@@ -8,7 +8,6 @@ using SharpDX;
 namespace Engine
 {
     using Engine.Common;
-    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Forward renderer class
@@ -516,7 +515,7 @@ namespace Engine
                 Color.Transparent,
                 dsv,
                 true,
-                DepthStencilClearFlags.Depth);
+                false);
         }
         /// <summary>
         /// Draw components for shadow mapping
