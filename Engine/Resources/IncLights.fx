@@ -600,17 +600,18 @@ struct ComputeLightsInput
 	Texture2D shadowMapHD;
 };
 
-inline float4 ComputeLightsLOD1(ComputeLightsInput input)
+inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
 {
 	float4 lDiffuse = 0;
 	float4 lSpecular = 0;
+
+    float3 V = normalize(input.ePosition - input.pPosition);
 
 	uint i = 0;
 
 	for (i = 0; i < input.dirLightsCount; i++)
 	{
 		float3 L = normalize(-input.dirLights[i].Direction);
-		float3 V = normalize(input.ePosition - input.pPosition);
 		float3 R = 2 * dot(L, input.pNormal) * input.pNormal - L;
 
 		float cShadowFactor = 1;
@@ -619,51 +620,49 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
 			cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 		}
 
-		float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal) * cShadowFactor;
-		float4 cSpecular = SpecularBlinnPhongPass(input.dirLights[i].Specular, input.k.Shininess, L, input.pNormal, V) * cShadowFactor;
+		float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal);
+		float4 cSpecular = SpecularBlinnPhongPass(input.dirLights[i].Specular, input.k.Shininess, L, input.pNormal, V);
 
-		lDiffuse += cDiffuse * cShadowFactor;
-		lSpecular += cSpecular * cShadowFactor;
-	}
+        lDiffuse += (cDiffuse * cShadowFactor);
+        lSpecular += (cSpecular * cShadowFactor);
+    }
 
 	for (i = 0; i < input.pointLightsCount; i++)
 	{
 		float D = length(input.pointLights[i].Position - input.pPosition);
 		float3 L = normalize(input.pointLights[i].Position - input.pPosition);
-		float3 V = normalize(input.ePosition - input.pPosition);
 		float3 R = 2 * dot(L, input.pNormal) * input.pNormal - L;
 
 		float attenuation = CalcSphericAttenuation(input.pointLights[i].Intensity, input.pointLights[i].Radius, D);
 
-		float4 cDiffuse = DiffusePass(input.pointLights[i].Diffuse, L, input.pNormal) * attenuation;
-		float4 cSpecular = SpecularBlinnPhongPass(input.pointLights[i].Specular, input.k.Shininess, L, input.pNormal, V) * attenuation;
+		float4 cDiffuse = DiffusePass(input.pointLights[i].Diffuse, L, input.pNormal);
+		float4 cSpecular = SpecularBlinnPhongPass(input.pointLights[i].Specular, input.k.Shininess, L, input.pNormal, V);
 
 		lDiffuse += (cDiffuse * attenuation);
-		lSpecular += (cSpecular * attenuation);
-	}
+        lSpecular += (cSpecular * attenuation);
+    }
 
 	for (i = 0; i < input.spotLightsCount; i++)
 	{
 		float D = length(input.spotLights[i].Position - input.pPosition);
 		float3 L = normalize(input.spotLights[i].Position - input.pPosition);
-		float3 V = normalize(input.ePosition - input.pPosition);
 		float3 R = 2 * dot(L, input.pNormal) * input.pNormal - L;
 
 		float attenuation = CalcSphericAttenuation(input.spotLights[i].Intensity, input.spotLights[i].Radius, D);
 		attenuation *= CalcSpotCone(input.spotLights[i].Direction, input.spotLights[i].Angle, L);
 
-		float4 cDiffuse = DiffusePass(input.spotLights[i].Diffuse, L, input.pNormal) * attenuation;
-		float4 cSpecular = SpecularBlinnPhongPass(input.spotLights[i].Specular, input.k.Shininess, L, input.pNormal, V) * attenuation;
+		float4 cDiffuse = DiffusePass(input.spotLights[i].Diffuse, L, input.pNormal);
+		float4 cSpecular = SpecularBlinnPhongPass(input.spotLights[i].Specular, input.k.Shininess, L, input.pNormal, V);
 
 		lDiffuse += (cDiffuse * attenuation);
-		lSpecular += (cSpecular * attenuation);
-	}
+        lSpecular += (cSpecular * attenuation);
+    }
 
 	float4 emissive = input.k.Emissive;
 	float4 ambient = input.k.Ambient * input.Ga;
 
 	float4 diffuse = input.k.Diffuse * lDiffuse;
-	float4 specular = input.k.Specular * lSpecular * input.pColorSpecular;
+    float4 specular = input.k.Specular * lSpecular * dist * input.pColorSpecular;
 
 	float4 color = (emissive + ambient + diffuse + specular) * input.pColorDiffuse;
 
@@ -685,10 +684,10 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 			cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 		}
 
-		float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal) * cShadowFactor;
+		float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal);
 
-		lDiffuse += cDiffuse;
-	}
+        lDiffuse += (cDiffuse * cShadowFactor);
+    }
 
 	for (i = 0; i < input.pointLightsCount; i++)
 	{
@@ -697,10 +696,10 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 
 		float attenuation = CalcSphericAttenuation(input.pointLights[i].Intensity, input.pointLights[i].Radius, D);
 
-		float4 cDiffuse = DiffusePass(input.pointLights[i].Diffuse, L, input.pNormal) * attenuation;
+		float4 cDiffuse = DiffusePass(input.pointLights[i].Diffuse, L, input.pNormal);
 
-		lDiffuse += cDiffuse;
-	}
+        lDiffuse += (cDiffuse * attenuation);
+    }
 
 	for (i = 0; i < input.spotLightsCount; i++)
 	{
@@ -710,10 +709,10 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 		float attenuation = CalcSphericAttenuation(input.spotLights[i].Intensity, input.spotLights[i].Radius, D);
 		attenuation *= CalcSpotCone(input.spotLights[i].Direction, input.spotLights[i].Angle, L);
 
-		float4 cDiffuse = DiffusePass(input.spotLights[i].Diffuse, L, input.pNormal) * attenuation;
+		float4 cDiffuse = DiffusePass(input.spotLights[i].Diffuse, L, input.pNormal);
 
-		lDiffuse += cDiffuse;
-	}
+        lDiffuse += (cDiffuse * attenuation);
+    }
 
 	float4 emissive = input.k.Emissive;
 	float4 ambient = input.k.Ambient * input.Ga;
@@ -740,10 +739,10 @@ inline float4 ComputeLightsLOD3(ComputeLightsInput input)
 			cShadowFactor = CalcShadowFactor(input.shadows, input.sLightPositionLD, input.sLightPositionHD, input.shadowMapLD, input.shadowMapHD);
 		}
 
-		float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal) * cShadowFactor;
+		float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal);
 
-		lDiffuse += cDiffuse;
-	}
+        lDiffuse += (cDiffuse * cShadowFactor);
+    }
 
 	float4 emissive = input.k.Emissive;
 	float4 ambient = input.k.Ambient * input.Ga;
@@ -797,16 +796,16 @@ inline float4 ComputeLights(ComputeLightsInput input)
 		float4 color = 0;
 		if (distToEye < input.lod.x)
 		{
-			color = ComputeLightsLOD1(input);
-		}
+            color = ComputeLightsLOD1(input, 1.0f - (distToEye / input.lod.x));
+        }
 		else if (distToEye < input.lod.y)
 		{
-			color = ComputeLightsLOD2(input);
-		}
+            color = ComputeLightsLOD2(input);
+        }
 		else if (distToEye < input.lod.z)
 		{
-			color = ComputeLightsLOD3(input);
-		}
+            color = ComputeLightsLOD3(input);
+        }
 		else
 		{
 			color = ComputeLightsLOD4(input);

@@ -639,17 +639,11 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	float4 specularMap = 1;
 	if (gPSUseColorSpecular == true)
 	{
-		specularMap = gPSSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
-	}
+        specularMap = gPSSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    }
 
-	float3 normalWorld = input.normalWorld;
-
-	float distToEye = length(gPSEyePositionWorld - input.positionWorld);
-	if (distToEye <= gLOD.x)
-	{
-		float3 normalMap = gPSNormalMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
-		normalWorld = NormalSampleToWorldSpace(normalMap, input.normalWorld, input.tangentWorld);
-	}
+    float3 normalMap = gPSNormalMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
+    float3 normalWorld = NormalSampleToWorldSpace(normalMap, input.normalWorld, input.tangentWorld);
 
 	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
 	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
