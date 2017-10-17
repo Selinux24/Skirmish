@@ -92,7 +92,7 @@ namespace Engine
         /// <summary>
         /// Low definition shadow map
         /// </summary>
-        protected EngineTexture ShadowMapLow
+        protected EngineShaderResourceView ShadowMapLow
         {
             get
             {
@@ -107,7 +107,7 @@ namespace Engine
         /// <summary>
         /// High definition shadow map
         /// </summary>
-        protected EngineTexture ShadowMapHigh
+        protected EngineShaderResourceView ShadowMapHigh
         {
             get
             {
@@ -126,7 +126,7 @@ namespace Engine
         /// <summary>
         /// Geometry map
         /// </summary>
-        protected EngineTexture[] GeometryMap
+        protected EngineShaderResourceView[] GeometryMap
         {
             get
             {
@@ -141,7 +141,7 @@ namespace Engine
         /// <summary>
         /// Light map
         /// </summary>
-        protected EngineTexture[] LightMap
+        protected EngineShaderResourceView[] LightMap
         {
             get
             {
@@ -726,7 +726,7 @@ namespace Engine
         /// </summary>
         /// <param name="result">Resource type</param>
         /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
-        public virtual EngineTexture GetResource(SceneRendererResultEnum result)
+        public virtual EngineShaderResourceView GetResource(SceneRendererResultEnum result)
         {
             if (result == SceneRendererResultEnum.ShadowMapStatic) return this.ShadowMapLow;
             if (result == SceneRendererResultEnum.ShadowMapDynamic) return this.ShadowMapHigh;

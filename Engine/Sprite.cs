@@ -80,7 +80,7 @@ namespace Engine
         /// <summary>
         /// Sprite texture
         /// </summary>
-        private EngineTexture spriteTexture = null;
+        private EngineShaderResourceView spriteTexture = null;
 
         /// <summary>
         /// Gets or sets text left position in 2D screen
@@ -215,6 +215,8 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            var graphics = this.Game.Graphics;
+
             if (this.indexBuffer.Count > 0)
             {
                 this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
@@ -244,11 +246,9 @@ namespace Engine
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
-                    technique.Apply(this.Game.Graphics, p, 0);
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
-
-                    Counters.DrawCallsPerFrame++;
+                    graphics.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
                 }
             }
         }

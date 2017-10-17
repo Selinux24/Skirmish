@@ -205,7 +205,7 @@ namespace Engine
             /// <summary>
             /// Foliage textures
             /// </summary>
-            public EngineTexture Textures;
+            public EngineShaderResourceView Textures;
             /// <summary>
             /// Foliage texture count
             /// </summary>
@@ -336,6 +336,8 @@ namespace Engine
             {
                 if (this.vertexDrawCount > 0)
                 {
+                    var graphics = this.Game.Graphics;
+
                     if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                     {
                         Counters.InstancesPerFrame++;
@@ -344,11 +346,9 @@ namespace Engine
 
                     for (int p = 0; p < technique.PassCount; p++)
                     {
-                        technique.Apply(this.Game.Graphics, p, 0);
+                        graphics.EffectPassApply(technique, p, 0);
 
-                        this.Game.Graphics.DeviceContext.Draw(this.vertexDrawCount, this.VertexBuffer.Offset);
-
-                        Counters.DrawCallsPerFrame++;
+                        graphics.Draw(this.vertexDrawCount, this.VertexBuffer.Offset);
                     }
                 }
             }
@@ -382,7 +382,7 @@ namespace Engine
         /// <summary>
         /// Random texture
         /// </summary>
-        private EngineTexture textureRandom = null;
+        private EngineShaderResourceView textureRandom = null;
         /// <summary>
         /// Folliage map for vegetation planting task
         /// </summary>

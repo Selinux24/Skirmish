@@ -26,6 +26,6 @@ namespace Engine
         /// </summary>
         /// <param name="result">Resource type</param>
         /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
-        EngineTexture GetResource(SceneRendererResultEnum result);
+        EngineShaderResourceView GetResource(SceneRendererResultEnum result);
     }
 }

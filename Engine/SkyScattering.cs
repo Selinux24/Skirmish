@@ -250,6 +250,8 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight != null && this.indexBuffer.Count > 0)
             {
+                var graphics = this.Game.Graphics;
+
                 this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
@@ -284,11 +286,9 @@ namespace Engine
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
-                    technique.Apply(this.Game.Graphics, p, 0);
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
-
-                    Counters.DrawCallsPerFrame++;
+                    graphics.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
                 }
             }
         }

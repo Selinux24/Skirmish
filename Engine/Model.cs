@@ -209,6 +209,8 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            var graphics = this.Game.Graphics;
+
             int count = 0;
             int instanceCount = 0;
 
@@ -305,11 +307,9 @@ namespace Engine
 
                             for (int p = 0; p < technique.PassCount; p++)
                             {
-                                technique.Apply(this.Game.Graphics, p, 0);
+                                graphics.EffectPassApply(technique, p, 0);
 
-                                mesh.Draw(this.Game.Graphics);
-
-                                Counters.DrawCallsPerFrame++;
+                                mesh.Draw(graphics);
                             }
                         }
                     }

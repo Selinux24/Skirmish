@@ -29,7 +29,7 @@ namespace Engine
         /// <summary>
         /// Cube map texture
         /// </summary>
-        private EngineTexture cubeMapTexture = null;
+        private EngineShaderResourceView cubeMapTexture = null;
 
         /// <summary>
         /// Manipulator
@@ -75,6 +75,8 @@ namespace Engine
         {
             if (this.indexBuffer.Count > 0)
             {
+                var graphics = this.Game.Graphics;
+
                 this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
@@ -102,11 +104,12 @@ namespace Engine
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
-                    technique.Apply(this.Game.Graphics, p, 0);
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
-
-                    Counters.DrawCallsPerFrame++;
+                    graphics.DrawIndexed(
+                        this.indexBuffer.Count,
+                        this.indexBuffer.Offset,
+                        this.vertexBuffer.Offset);
                 }
             }
         }
@@ -115,7 +118,7 @@ namespace Engine
         /// Set the instance texture
         /// </summary>
         /// <param name="texture">Texture</param>
-        public void SetTexture(EngineTexture texture)
+        public void SetTexture(EngineShaderResourceView texture)
         {
             this.cubeMapTexture = texture;
         }

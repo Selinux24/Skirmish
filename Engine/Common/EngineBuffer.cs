@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace Engine.Common
 {
-    using Engine.Helpers;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -34,14 +33,7 @@ namespace Engine.Common
         /// <param name="dynamic">Dynamic flag</param>
         public EngineBuffer(Graphics graphics, string name, T[] data, bool dynamic)
         {
-            if (dynamic)
-            {
-                this.VertexBuffer = graphics.CreateVertexBufferWrite<T>(name, data);
-            }
-            else
-            {
-                this.VertexBuffer = graphics.CreateVertexBufferImmutable<T>(name, data);
-            }
+            this.VertexBuffer = graphics.CreateVertexBuffer<T>(name, data, dynamic);
 
             this.VertexBufferBinding = new[]
             {

@@ -26,7 +26,7 @@ namespace Engine.Common
         /// Sets the resource to the shader
         /// </summary>
         /// <param name="resource">Resource</param>
-        public void SetResource(EngineTexture resource)
+        public void SetResource(EngineShaderResourceView resource)
         {
             if (resource != null)
             {
@@ -42,9 +42,9 @@ namespace Engine.Common
         /// Gets the resource from the shader
         /// </summary>
         /// <returns>Returns the resource from the shader</returns>
-        public EngineTexture GetResource()
+        public EngineShaderResourceView GetResource()
         {
-            return new EngineTexture(this.variable.GetResource());
+            return new EngineShaderResourceView(this.variable.GetResource());
         }
     }
 }

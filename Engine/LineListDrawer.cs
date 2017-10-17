@@ -92,6 +92,8 @@ namespace Engine
 
             if (this.drawCount > 0)
             {
+                var graphics = this.Game.Graphics;
+
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
                     Counters.InstancesPerFrame += this.dictionary.Count;
@@ -117,11 +119,9 @@ namespace Engine
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
-                    technique.Apply(this.Game.Graphics, p, 0);
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    this.Game.Graphics.DeviceContext.Draw(this.drawCount, this.vertexBuffer.Offset);
-
-                    Counters.DrawCallsPerFrame++;
+                    graphics.Draw(this.drawCount, this.vertexBuffer.Offset);
                 }
             }
         }

@@ -316,6 +316,8 @@ namespace Engine
             /// <param name="nodeList">Node list</param>
             private void DrawNodeList(DrawContext context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique, MapGridNode[] nodeList)
             {
+                var graphics = this.Game.Graphics;
+
                 for (int i = 0; i < nodeList.Length; i++)
                 {
                     var gNode = nodeList[i];
@@ -334,14 +336,12 @@ namespace Engine
 
                         for (int p = 0; p < terrainTechnique.PassCount; p++)
                         {
-                            terrainTechnique.Apply(this.Game.Graphics, p, 0);
+                            graphics.EffectPassApply(terrainTechnique, p, 0);
 
-                            this.Game.Graphics.DeviceContext.DrawIndexed(
+                            graphics.DrawIndexed(
                                 gNode.IBDesc.Count,
                                 gNode.IBDesc.Offset,
                                 gNode.VBDesc.Offset);
-
-                            Counters.DrawCallsPerFrame++;
                         }
                     }
                 }
@@ -578,27 +578,27 @@ namespace Engine
         /// <summary>
         /// Terrain low res textures
         /// </summary>
-        private EngineTexture terrainTexturesLR = null;
+        private EngineShaderResourceView terrainTexturesLR = null;
         /// <summary>
         /// Terrain high res textures
         /// </summary>
-        private EngineTexture terrainTexturesHR = null;
+        private EngineShaderResourceView terrainTexturesHR = null;
         /// <summary>
         /// Terrain normal maps
         /// </summary>
-        private EngineTexture terrainNormalMaps = null;
+        private EngineShaderResourceView terrainNormalMaps = null;
         /// <summary>
         /// Terrain specular maps
         /// </summary>
-        private EngineTexture terrainSpecularMaps = null;
+        private EngineShaderResourceView terrainSpecularMaps = null;
         /// <summary>
         /// Color textures for alpha map
         /// </summary>
-        private EngineTexture colorTextures = null;
+        private EngineShaderResourceView colorTextures = null;
         /// <summary>
         /// Alpha map
         /// </summary>
-        private EngineTexture alphaMap = null;
+        private EngineShaderResourceView alphaMap = null;
         /// <summary>
         /// Slope ranges
         /// </summary>

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace Engine.Common
 {
-    using Engine.Helpers;
     using SharpDX.Direct3D;
     using SharpDX.Direct3D11;
     using SharpDX.DXGI;
@@ -94,11 +93,97 @@ namespace Engine.Common
                 var data = vKeys[i].Data.ToArray();
                 int slot = vertexBuffers.Count;
 
-                vertexBuffers.Add(graphics.CreateVertexBuffer(vKeys[i].Name, data, vKeys[i].Dynamic));
+                vertexBuffers.Add(CreateVertexBuffers(graphics, vKeys[i].Name, data, vKeys[i].Dynamic));
                 vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[slot], data[0].GetStride(), 0));
 
                 vKeys[i].Input.AddRange(data[0].GetInput(slot));
             }
+        }
+        /// <summary>
+        /// Creates a vertex buffer from IVertexData
+        /// </summary>
+        /// <param name="graphics">Graphics device</param>
+        /// <param name="name">Buffer name</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        /// <returns>Returns new buffer</returns>
+        private static Buffer CreateVertexBuffers(Graphics graphics, string name, IVertexData[] vertices, bool dynamic)
+        {
+            Buffer buffer = null;
+
+            if (vertices != null && vertices.Length > 0)
+            {
+                if (vertices[0].VertexType == VertexTypes.Billboard)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexBillboard>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.Particle)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexCPUParticle>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.GPUParticle)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexGPUParticle>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.Position)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPosition>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionColor)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionColor>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionNormalColor>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionTexture)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionTexture>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionNormalTexture>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionNormalTextureTangent>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.Terrain)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexTerrain>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPosition>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionColor>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionNormalColor>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionTexture>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionNormalTexture>(vertices), dynamic);
+                }
+                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
+                {
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionNormalTextureTangent>(vertices), dynamic);
+                }
+                else
+                {
+                    throw new EngineException(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
+                }
+            }
+
+            return buffer;
         }
         /// <summary>
         /// Creates the instancing buffer
@@ -113,7 +198,7 @@ namespace Engine.Common
             int instancingBufferOffset = vertexBuffers.Count;
 
             var instancingData = new VertexInstancingData[instances];
-            vertexBuffers.Add(graphics.CreateVertexBufferWrite(null, instancingData));
+            vertexBuffers.Add(graphics.CreateVertexBuffer(null, instancingData, true));
             vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[instancingBufferOffset], instancingData[0].GetStride(), 0));
 
             foreach (var item in vKeys)
@@ -344,10 +429,11 @@ namespace Engine.Common
             if (!inputLayouts.ContainsKey(technique))
             {
                 var key = this.vertexData[slot];
+                var signature = technique.GetSignature();
 
                 this.inputLayouts.Add(
                     technique,
-                    technique.Create(this.game.Graphics, key.Input.ToArray()));
+                    this.game.Graphics.CreateInputLayout(signature, key.Input.ToArray()));
             }
 
             this.game.Graphics.IAInputLayout = inputLayouts[technique];
@@ -364,7 +450,7 @@ namespace Engine.Common
             {
                 var instancingBuffer = this.VertexBuffers[this.VertexBuffers.Length - 1];
 
-                this.game.Graphics.DeviceContext.WriteDiscardBuffer(instancingBuffer, data);
+                this.game.Graphics.WriteDiscardBuffer(instancingBuffer, data);
             }
         }
         /// <summary>
@@ -379,22 +465,7 @@ namespace Engine.Common
             {
                 var buffer = this.VertexBuffers[vertexBufferSlot];
 
-                this.game.Graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, vertexBufferOffset, data);
-            }
-        }
-        /// <summary>
-        /// Writes data into buffer
-        /// </summary>
-        /// <param name="vertexBufferSlot">Slot</param>
-        /// <param name="vertexBufferOffset">Offset</param>
-        /// <param name="data">Data to write</param>
-        public void WriteBuffer(int vertexBufferSlot, int vertexBufferOffset, IVertexData[] data)
-        {
-            if (data != null && data.Length > 0)
-            {
-                var buffer = this.VertexBuffers[vertexBufferSlot];
-
-                this.game.Graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, vertexBufferOffset, data);
+                this.game.Graphics.WriteNoOverwriteBuffer(buffer, vertexBufferOffset, data);
             }
         }
         /// <summary>
@@ -408,7 +479,7 @@ namespace Engine.Common
             {
                 var buffer = this.IndexBuffers[indexBufferSlot];
 
-                this.game.Graphics.DeviceContext.WriteNoOverwriteBuffer(buffer, indexBufferOffset, data);
+                this.game.Graphics.WriteNoOverwriteBuffer(buffer, indexBufferOffset, data);
             }
         }
     }

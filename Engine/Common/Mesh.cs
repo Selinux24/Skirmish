@@ -126,7 +126,7 @@ namespace Engine.Common
             {
                 if (this.IndexBuffer.Count > 0)
                 {
-                    graphics.DeviceContext.DrawIndexed(
+                    graphics.DrawIndexed(
                         this.IndexBuffer.Count,
                         this.IndexBuffer.Offset, this.VertexBuffer.Offset);
                 }
@@ -135,7 +135,7 @@ namespace Engine.Common
             {
                 if (this.VertexBuffer.Count > 0)
                 {
-                    graphics.DeviceContext.Draw(
+                    graphics.Draw(
                         this.VertexBuffer.Count,
                         this.VertexBuffer.Offset);
                 }
@@ -155,7 +155,7 @@ namespace Engine.Common
                 {
                     if (this.IndexBuffer.Count > 0)
                     {
-                        graphics.DeviceContext.DrawIndexedInstanced(
+                        graphics.DrawIndexedInstanced(
                             this.IndexBuffer.Count,
                             count,
                             this.IndexBuffer.Offset, this.VertexBuffer.Offset, startInstanceLocation);
@@ -165,7 +165,7 @@ namespace Engine.Common
                 {
                     if (this.VertexBuffer.Count > 0)
                     {
-                        graphics.DeviceContext.DrawInstanced(
+                        graphics.DrawInstanced(
                             this.VertexBuffer.Count,
                             count,
                             this.VertexBuffer.Offset, startInstanceLocation);

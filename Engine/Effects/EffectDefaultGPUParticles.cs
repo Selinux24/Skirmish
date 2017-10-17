@@ -112,7 +112,7 @@ namespace Engine.Effects
         /// <summary>
         /// Current texture array
         /// </summary>
-        private EngineTexture currentTextureArray = null;
+        private EngineShaderResourceView currentTextureArray = null;
 
         /// <summary>
         /// World matrix
@@ -201,7 +201,7 @@ namespace Engine.Effects
         /// <summary>
         /// Textures
         /// </summary>
-        protected EngineTexture TextureArray
+        protected EngineShaderResourceView TextureArray
         {
             get
             {
@@ -555,7 +555,7 @@ namespace Engine.Effects
             Color4 maxColor,
             Vector2 rotateSpeed,
             uint textureCount,
-            EngineTexture textures)
+            EngineShaderResourceView textures)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;

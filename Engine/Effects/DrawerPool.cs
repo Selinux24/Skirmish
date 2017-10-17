@@ -166,8 +166,8 @@ namespace Engine.Effects
         /// <param name="materialPalette">Material palette</param>
         /// <param name="materialPaletteWidth">Material palette width</param>
         public static void UpdateSceneGlobals(
-            EngineTexture materialPalette, uint materialPaletteWidth,
-            EngineTexture animationPalette, uint animationPaletteWidth)
+            EngineShaderResourceView materialPalette, uint materialPaletteWidth,
+            EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
             EffectDefaultBillboard.UpdateGlobals(
                 materialPalette, materialPaletteWidth,

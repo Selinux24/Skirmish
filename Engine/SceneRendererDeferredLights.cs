@@ -8,7 +8,6 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
-    using Engine.Helpers;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -83,10 +82,10 @@ namespace Engine
         /// <param name="graphics">Graphics</param>
         public SceneRendererDeferredLights(Graphics graphics)
         {
-            this.dirLightInputLayout = DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.Create(graphics, VertexPosition.Input(BufferSlot));
-            this.pointLightInputLayout = DrawerPool.EffectDeferredComposer.DeferredPointLight.Create(graphics, VertexPosition.Input(BufferSlot));
-            this.spotLightInputLayout = DrawerPool.EffectDeferredComposer.DeferredSpotLight.Create(graphics, VertexPosition.Input(BufferSlot));
-            this.combineLightsInputLayout = DrawerPool.EffectDeferredComposer.DeferredCombineLights.Create(graphics, VertexPosition.Input(BufferSlot));
+            this.dirLightInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.GetSignature(), VertexPosition.Input(BufferSlot));
+            this.pointLightInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredPointLight.GetSignature(), VertexPosition.Input(BufferSlot));
+            this.spotLightInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredSpotLight.GetSignature(), VertexPosition.Input(BufferSlot));
+            this.combineLightsInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredCombineLights.GetSignature(), VertexPosition.Input(BufferSlot));
         }
 
         /// <summary>
@@ -188,21 +187,21 @@ namespace Engine
 
             if (this.lightGeometryVertexBuffer == null)
             {
-                this.lightGeometryVertexBuffer = graphics.CreateVertexBufferWrite("Deferred Redenderer Light Geometry", verts.ToArray());
+                this.lightGeometryVertexBuffer = graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", verts.ToArray(), true);
                 this.lightGeometryVertexBufferBinding = new VertexBufferBinding(this.lightGeometryVertexBuffer, verts[0].GetStride(), 0);
             }
             else
             {
-                graphics.DeviceContext.WriteDiscardBuffer(this.lightGeometryVertexBuffer, verts.ToArray());
+                graphics.WriteDiscardBuffer(this.lightGeometryVertexBuffer, verts.ToArray());
             }
 
             if (this.lightGeometryIndexBuffer == null)
             {
-                this.lightGeometryIndexBuffer = graphics.CreateIndexBufferWrite("Deferred Redenderer Light Geometry", indx.ToArray());
+                this.lightGeometryIndexBuffer = graphics.CreateIndexBuffer("Deferred Redenderer Light Geometry", indx.ToArray(), true);
             }
             else
             {
-                graphics.DeviceContext.WriteDiscardBuffer(this.lightGeometryIndexBuffer, indx.ToArray());
+                graphics.WriteDiscardBuffer(this.lightGeometryIndexBuffer, indx.ToArray());
             }
         }
         /// <summary>
@@ -215,11 +214,9 @@ namespace Engine
         {
             for (int p = 0; p < effectTechnique.PassCount; p++)
             {
-                effectTechnique.Apply(graphics, p, 0);
+                graphics.EffectPassApply(effectTechnique, p, 0);
 
-                graphics.DeviceContext.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
-
-                Counters.DrawCallsPerFrame++;
+                graphics.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
             }
         }
         /// <summary>
@@ -252,14 +249,12 @@ namespace Engine
 
             for (int p = 0; p < effectTechnique.PassCount; p++)
             {
-                effectTechnique.Apply(graphics, p, 0);
+                graphics.EffectPassApply(effectTechnique, p, 0);
 
-                graphics.DeviceContext.DrawIndexed(
+                graphics.DrawIndexed(
                     this.screenGeometry.IndexCount,
                     this.screenGeometry.Offset,
                     0);
-
-                Counters.DrawCallsPerFrame++;
             }
         }
         /// <summary>
@@ -287,7 +282,6 @@ namespace Engine
 
             graphics.SetRasterizerLightingPass();
             graphics.SetDepthStencilVolumeDrawing(0);
-            graphics.DeviceContext.OutputMerger.DepthStencilReference = 0;
             this.DrawSingleLight(graphics, geometry, effect.DeferredPointLight);
         }
         /// <summary>
@@ -315,7 +309,6 @@ namespace Engine
 
             graphics.SetRasterizerLightingPass();
             graphics.SetDepthStencilVolumeDrawing(0);
-            graphics.DeviceContext.OutputMerger.DepthStencilReference = 0;
             this.DrawSingleLight(graphics, geometry, effect.DeferredSpotLight);
         }
         /// <summary>
@@ -341,11 +334,9 @@ namespace Engine
 
             for (int p = 0; p < effectTechnique.PassCount; p++)
             {
-                effectTechnique.Apply(graphics, p, 0);
+                graphics.EffectPassApply(effectTechnique, p, 0);
 
-                graphics.DeviceContext.DrawIndexed(this.screenGeometry.IndexCount, this.screenGeometry.Offset, 0);
-
-                Counters.DrawCallsPerFrame++;
+                graphics.DrawIndexed(this.screenGeometry.IndexCount, this.screenGeometry.Offset, 0);
             }
         }
     }

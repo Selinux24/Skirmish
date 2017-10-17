@@ -36,7 +36,7 @@ namespace Engine
         /// <summary>
         /// Deph map texture
         /// </summary>
-        public EngineTexture Texture { get; protected set; }
+        public EngineShaderResourceView Texture { get; protected set; }
 
         /// <summary>
         /// Sets shadow light
@@ -65,7 +65,7 @@ namespace Engine
             this.Viewport = new Viewport(0, 0, width, height, 0, 1.0f);
 
             EngineDepthStencilView dsv;
-            EngineTexture srv;
+            EngineShaderResourceView srv;
             game.Graphics.CreateShadowMapTextures(Format.R24G8_Typeless, width, height, out dsv, out srv);
             this.DepthMap = dsv;
             this.Texture = srv;

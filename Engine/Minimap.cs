@@ -26,7 +26,7 @@ namespace Engine
         /// <summary>
         /// Minimap texture
         /// </summary>
-        private EngineTexture renderTexture;
+        private EngineShaderResourceView renderTexture;
         /// <summary>
         /// Context to draw
         /// </summary>

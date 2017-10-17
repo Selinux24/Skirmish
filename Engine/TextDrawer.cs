@@ -271,6 +271,8 @@ namespace Engine
         /// <param name="color">Color</param>
         private void DrawText(DrawContext context, EngineEffectTechnique technique, Matrix local, Color4 color)
         {
+            var graphics = this.Game.Graphics;
+
             #region Per frame update
 
             DrawerPool.EffectDefaultFont.UpdatePerFrame(
@@ -283,9 +285,9 @@ namespace Engine
 
             for (int p = 0; p < technique.PassCount; p++)
             {
-                technique.Apply(this.Game.Graphics, p, 0);
+                graphics.EffectPassApply(technique, p, 0);
 
-                this.Game.Graphics.DeviceContext.DrawIndexed(this.indexDrawCount, this.indexBuffer.Offset, this.vertexBuffer.Offset);
+                graphics.DrawIndexed(this.indexDrawCount, this.indexBuffer.Offset, this.vertexBuffer.Offset);
             }
         }
         /// <summary>

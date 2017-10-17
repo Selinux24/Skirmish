@@ -76,6 +76,8 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
+            var graphics = this.Game.Graphics;
+
             if (this.dictionary.Count > 0)
             {
                 this.WriteDataInBuffer();
@@ -108,11 +110,9 @@ namespace Engine
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
-                    technique.Apply(this.Game.Graphics, p, 0);
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    this.Game.Graphics.DeviceContext.Draw(this.drawCount, this.vertexBuffer.Offset);
-
-                    Counters.DrawCallsPerFrame++;
+                    graphics.Draw(this.drawCount, this.vertexBuffer.Offset);
                 }
             }
         }

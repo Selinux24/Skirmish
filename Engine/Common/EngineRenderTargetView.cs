@@ -36,20 +36,18 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="resource">Resource</param>
-        public EngineRenderTargetView(Graphics graphics, Resource resource)
+        /// <param name="rtv">Render target view</param>
+        internal EngineRenderTargetView(RenderTargetView rtv)
         {
-            this.rtv.Add(new RenderTargetView(graphics.Device, resource));
+            this.rtv.Add(rtv);
         }
         /// <summary>
         /// Adds a new Render Target to the collection
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="resource">Resource</param>
-        public void Add(Graphics graphics, Resource resource)
+        /// <param name="rtv">Render target view</param>
+        internal void Add(RenderTargetView rtv)
         {
-            this.rtv.Add(new RenderTargetView(graphics.Device, resource));
+            this.rtv.Add(rtv);
         }
 
         /// <summary>

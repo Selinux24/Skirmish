@@ -62,7 +62,7 @@ namespace Engine.Effects
         /// <summary>
         /// Current texture array
         /// </summary>
-        private EngineTexture currentTextures = null;
+        private EngineShaderResourceView currentTextures = null;
 
         /// <summary>
         /// World matrix
@@ -123,7 +123,7 @@ namespace Engine.Effects
         /// <summary>
         /// Texture
         /// </summary>
-        protected EngineTexture Textures
+        protected EngineShaderResourceView Textures
         {
             get
             {
@@ -253,7 +253,7 @@ namespace Engine.Effects
         /// <param name="textureIndex">Texture index</param>
         public void UpdatePerObject(
             Color4 color,
-            EngineTexture texture,
+            EngineShaderResourceView texture,
             int textureIndex)
         {
             this.Color = color;

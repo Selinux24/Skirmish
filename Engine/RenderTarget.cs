@@ -27,7 +27,7 @@ namespace Engine
         /// <summary>
         /// Buffer textures
         /// </summary>
-        public EngineTexture[] Textures { get; protected set; }
+        public EngineShaderResourceView[] Textures { get; protected set; }
         /// <summary>
         /// Render targets
         /// </summary>
@@ -72,7 +72,7 @@ namespace Engine
             int height = this.Game.Form.RenderHeight;
 
             EngineRenderTargetView targets;
-            EngineTexture[] textures;
+            EngineShaderResourceView[] textures;
             this.Game.Graphics.CreateRenderTargetTexture(
                 this.RenderTargetFormat,
                 width, height, this.BufferCount,

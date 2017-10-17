@@ -24,11 +24,11 @@ namespace Engine
         /// <summary>
         /// Sky texture 1
         /// </summary>
-        private EngineTexture skyTexture1 = null;
+        private EngineShaderResourceView skyTexture1 = null;
         /// <summary>
         /// Sky texture 2
         /// </summary>
-        private EngineTexture skyTexture2 = null;
+        private EngineShaderResourceView skyTexture2 = null;
         /// <summary>
         /// Brightness
         /// </summary>
@@ -145,7 +145,7 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            
+
         }
 
         /// <summary>
@@ -175,6 +175,8 @@ namespace Engine
         {
             if (this.indexBuffer.Count > 0)
             {
+                var graphics = this.Game.Graphics;
+
                 this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
@@ -209,15 +211,16 @@ namespace Engine
                         this.PerturbationScale);
                 }
 
-                this.Game.Graphics.SetBlendAdditive();
+                graphics.SetBlendAdditive();
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
-                    technique.Apply(this.Game.Graphics, p, 0);
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    this.Game.Graphics.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
-
-                    Counters.DrawCallsPerFrame++;
+                    graphics.DrawIndexed(
+                        this.indexBuffer.Count,
+                        this.indexBuffer.Offset,
+                        this.vertexBuffer.Offset);
                 }
             }
         }

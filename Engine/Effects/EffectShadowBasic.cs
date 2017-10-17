@@ -118,11 +118,11 @@ namespace Engine.Effects
         /// <summary>
         /// Current animation palette
         /// </summary>
-        private EngineTexture currentAnimationPalette = null;
+        private EngineShaderResourceView currentAnimationPalette = null;
         /// <summary>
         /// Current diffuse map
         /// </summary>
-        private EngineTexture currentDiffuseMap = null;
+        private EngineShaderResourceView currentDiffuseMap = null;
 
         /// <summary>
         /// World view projection matrix
@@ -183,7 +183,7 @@ namespace Engine.Effects
         /// <summary>
         /// Animation palette
         /// </summary>
-        protected EngineTexture AnimationPalette
+        protected EngineShaderResourceView AnimationPalette
         {
             get
             {
@@ -204,7 +204,7 @@ namespace Engine.Effects
         /// <summary>
         /// Diffuse map
         /// </summary>
-        protected EngineTexture DiffuseMap
+        protected EngineShaderResourceView DiffuseMap
         {
             get
             {
@@ -317,7 +317,7 @@ namespace Engine.Effects
         /// <param name="animationPalette">Animation palette texture</param>
         /// <param name="animationPaletteWith">Animation palette texture width</param>
         public void UpdateGlobals(
-            EngineTexture animationPalette,
+            EngineShaderResourceView animationPalette,
             uint animationPaletteWidth)
         {
             this.AnimationPalette = animationPalette;
@@ -340,7 +340,7 @@ namespace Engine.Effects
         /// <param name="textureIndex">Texture index</param>
         /// <param name="animationOffset">Animation index</param>
         public void UpdatePerObject(
-            EngineTexture diffuseMap,
+            EngineShaderResourceView diffuseMap,
             uint textureIndex,
             uint animationOffset)
         {

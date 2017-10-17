@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX.D3DCompiler;
+
 namespace Engine.Common
 {
     using SharpDX.Direct3D11;
@@ -34,27 +35,22 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Apply the variable values to the effect technique
+        /// Gets the pass in the specified index
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="index">Index</param>
-        /// <param name="flags">Flags</param>
-        public void Apply(Graphics graphics, int index, int flags)
+        /// <param name="index">Pass index</param>
+        /// <returns>Returns the effect pass</returns>
+        internal EffectPass GetPass(int index)
         {
-            this.techinque.GetPassByIndex(index).Apply(graphics.DeviceContext, flags);
+            return this.techinque.GetPassByIndex(index);
         }
         /// <summary>
-        /// Creates a new input layout
+        /// Gets the shader byte code
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="elements">Elements</param>
-        /// <returns></returns>
-        public InputLayout Create(Graphics graphics, InputElement[] elements)
+        /// <param name="pass">Pass index</param>
+        /// <returns>Returns the shader byte code</returns>
+        internal ShaderBytecode GetSignature(int pass = 0)
         {
-            return new InputLayout(
-                graphics.Device,
-                this.techinque.GetPassByIndex(0).Description.Signature,
-                elements);
+            return this.techinque.GetPassByIndex(pass).Description.Signature;
         }
     }
 }

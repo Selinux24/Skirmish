@@ -107,6 +107,8 @@ namespace Engine
             /// <param name="sceneryEffect">Scenery effect</param>
             public void DrawScenery(DrawContext context, Drawer sceneryEffect, BufferManager bufferManager)
             {
+                var graphics = this.Game.Graphics;
+
                 int count = 0;
 
                 foreach (string meshName in this.DrawingData.Meshes.Keys)
@@ -159,11 +161,9 @@ namespace Engine
 
                         for (int p = 0; p < technique.PassCount; p++)
                         {
-                            technique.Apply(this.Game.Graphics, p, 0);
+                            graphics.EffectPassApply(technique, p, 0);
 
-                            mesh.Draw(this.Game.Graphics);
-
-                            Counters.DrawCallsPerFrame++;
+                            mesh.Draw(graphics);
                         }
                     }
                 }

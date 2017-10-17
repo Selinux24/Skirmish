@@ -43,7 +43,7 @@ namespace Engine
         /// <summary>
         /// Texture
         /// </summary>
-        public EngineTexture Texture { get; set; }
+        public EngineShaderResourceView Texture { get; set; }
         /// <summary>
         /// Drawing channels
         /// </summary>
@@ -126,6 +126,8 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            var graphics = this.Game.Graphics;
+
             this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
             if (context.DrawerMode != DrawerModesEnum.ShadowMap)
@@ -143,11 +145,12 @@ namespace Engine
 
             for (int p = 0; p < technique.PassCount; p++)
             {
-                technique.Apply(this.Game.Graphics, p, 0);
+                graphics.EffectPassApply(technique, p, 0);
 
-                this.Graphics.DeviceContext.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
-
-                Counters.DrawCallsPerFrame++;
+                this.Graphics.DrawIndexed(
+                    this.indexBuffer.Count, 
+                    this.indexBuffer.Offset, 
+                    this.vertexBuffer.Offset);
             }
         }
         /// <summary>

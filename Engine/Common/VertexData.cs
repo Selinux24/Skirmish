@@ -482,6 +482,16 @@ namespace Engine.Common
             return vertexList.ToArray();
         }
         /// <summary>
+        /// Convert IVertexData array to IVertexData type
+        /// </summary>
+        /// <typeparam name="T">IVertexData type</typeparam>
+        /// <param name="vertices">Vertex list</param>
+        /// <returns></returns>
+        public static T[] Convert<T>(IVertexData[] vertices) where T : struct, IVertexData
+        {
+            return Array.ConvertAll(vertices, v => (T)v);
+        }
+        /// <summary>
         /// Apply weighted transforms to the vertext data
         /// </summary>
         /// <param name="vertex">Vertex data</param>

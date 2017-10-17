@@ -59,11 +59,11 @@ namespace Engine.Effects
         /// <summary>
         /// Current first texture
         /// </summary>
-        private EngineTexture currentFirstTexture = null;
+        private EngineShaderResourceView currentFirstTexture = null;
         /// <summary>
         /// Current second texture
         /// </summary>
-        private EngineTexture currentSecondTexture = null;
+        private EngineShaderResourceView currentSecondTexture = null;
 
         /// <summary>
         /// World view projection matrix
@@ -82,7 +82,7 @@ namespace Engine.Effects
         /// <summary>
         /// First layer texture
         /// </summary>
-        protected EngineTexture FirstTexture
+        protected EngineShaderResourceView FirstTexture
         {
             get
             {
@@ -103,7 +103,7 @@ namespace Engine.Effects
         /// <summary>
         /// Second layer texture
         /// </summary>
-        protected EngineTexture SecondTexture
+        protected EngineShaderResourceView SecondTexture
         {
             get
             {
@@ -258,8 +258,8 @@ namespace Engine.Effects
             Matrix viewProjection,
             float brightness,
             float fadingDistance,
-            EngineTexture firstTexture,
-            EngineTexture secondTexture)
+            EngineShaderResourceView firstTexture,
+            EngineShaderResourceView secondTexture)
         {
             this.WorldViewProjection = world * viewProjection;
 

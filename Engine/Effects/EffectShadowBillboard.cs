@@ -62,11 +62,11 @@ namespace Engine.Effects
         /// <summary>
         /// Current texture array
         /// </summary>
-        private EngineTexture currentTextures = null;
+        private EngineShaderResourceView currentTextures = null;
         /// <summary>
         /// Current random texture
         /// </summary>
-        private EngineTexture currentTextureRandom = null;
+        private EngineShaderResourceView currentTextureRandom = null;
 
         /// <summary>
         /// World view projection matrix
@@ -197,7 +197,7 @@ namespace Engine.Effects
         /// <summary>
         /// Texture
         /// </summary>
-        protected EngineTexture Textures
+        protected EngineShaderResourceView Textures
         {
             get
             {
@@ -218,7 +218,7 @@ namespace Engine.Effects
         /// <summary>
         /// Random texture
         /// </summary>
-        protected EngineTexture TextureRandom
+        protected EngineShaderResourceView TextureRandom
         {
             get
             {
@@ -310,7 +310,7 @@ namespace Engine.Effects
             Vector3 windDirection,
             float windStrength,
             float totalTime,
-            EngineTexture randomTexture)
+            EngineShaderResourceView randomTexture)
         {
             this.WorldViewProjection = world * viewProjection;
             this.EyePositionWorld = eyePositionWorld;
@@ -333,7 +333,7 @@ namespace Engine.Effects
             float endRadius,
             uint textureCount,
             bool uvToggle,
-            EngineTexture texture)
+            EngineShaderResourceView texture)
         {
             this.StartRadius = startRadius;
             this.EndRadius = endRadius;

@@ -135,23 +135,23 @@ namespace Engine.Effects
         /// <summary>
         /// Current texture array
         /// </summary>
-        private EngineTexture currentTextures = null;
+        private EngineShaderResourceView currentTextures = null;
         /// <summary>
         /// Current low definition shadow map
         /// </summary>
-        private EngineTexture currentShadowMapLD = null;
+        private EngineShaderResourceView currentShadowMapLD = null;
         /// <summary>
         /// Current high definition shadow map
         /// </summary>
-        private EngineTexture currentShadowMapHD = null;
+        private EngineShaderResourceView currentShadowMapHD = null;
         /// <summary>
         /// Current random texture
         /// </summary>
-        private EngineTexture currentTextureRandom = null;
+        private EngineShaderResourceView currentTextureRandom = null;
         /// <summary>
         /// Current material palette
         /// </summary>
-        private EngineTexture currentMaterialPalette = null;
+        private EngineShaderResourceView currentMaterialPalette = null;
 
         /// <summary>
         /// Directional lights
@@ -426,7 +426,7 @@ namespace Engine.Effects
         /// <summary>
         /// Texture
         /// </summary>
-        protected EngineTexture Textures
+        protected EngineShaderResourceView Textures
         {
             get
             {
@@ -447,7 +447,7 @@ namespace Engine.Effects
         /// <summary>
         /// Low definition shadow map
         /// </summary>
-        protected EngineTexture ShadowMapLD
+        protected EngineShaderResourceView ShadowMapLD
         {
             get
             {
@@ -468,7 +468,7 @@ namespace Engine.Effects
         /// <summary>
         /// High definition shadow map
         /// </summary>
-        protected EngineTexture ShadowMapHD
+        protected EngineShaderResourceView ShadowMapHD
         {
             get
             {
@@ -531,7 +531,7 @@ namespace Engine.Effects
         /// <summary>
         /// Random texture
         /// </summary>
-        protected EngineTexture TextureRandom
+        protected EngineShaderResourceView TextureRandom
         {
             get
             {
@@ -566,7 +566,7 @@ namespace Engine.Effects
         /// <summary>
         /// Material palette
         /// </summary>
-        protected EngineTexture MaterialPalette
+        protected EngineShaderResourceView MaterialPalette
         {
             get
             {
@@ -684,7 +684,7 @@ namespace Engine.Effects
         /// <param name="lod2">Medium level of detail maximum distance</param>
         /// <param name="lod3">Low level of detail maximum distance</param>
         public void UpdateGlobals(
-            EngineTexture materialPalette,
+            EngineShaderResourceView materialPalette,
             uint materialPaletteWidth,
             float lod1,
             float lod2,
@@ -723,20 +723,20 @@ namespace Engine.Effects
             Vector3 eyePositionWorld,
             SceneLights lights,
             uint shadowMaps,
-            EngineTexture shadowMapLD,
-            EngineTexture shadowMapHD,
+            EngineShaderResourceView shadowMapLD,
+            EngineShaderResourceView shadowMapHD,
             Matrix fromLightViewProjectionLD,
             Matrix fromLightViewProjectionHD,
             Vector3 windDirection,
             float windStrength,
             float totalTime,
-            EngineTexture randomTexture,
+            EngineShaderResourceView randomTexture,
             float startRadius,
             float endRadius,
             uint materialIndex,
             uint textureCount,
             bool uvToggle,
-            EngineTexture texture)
+            EngineShaderResourceView texture)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;

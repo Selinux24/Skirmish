@@ -34,7 +34,7 @@ namespace Engine.Effects
         /// <summary>
         /// Current diffuse map
         /// </summary>
-        private EngineTexture currentDiffuseMap = null;
+        private EngineShaderResourceView currentDiffuseMap = null;
 
         /// <summary>
         /// World view projection matrix
@@ -81,7 +81,7 @@ namespace Engine.Effects
         /// <summary>
         /// Diffuse map
         /// </summary>
-        protected EngineTexture DiffuseMap
+        protected EngineShaderResourceView DiffuseMap
         {
             get
             {
@@ -156,7 +156,7 @@ namespace Engine.Effects
             Matrix viewProjection,
             Vector2 direction,
             Vector2 size,
-            EngineTexture diffuseMap)
+            EngineShaderResourceView diffuseMap)
         {
             this.WorldViewProjection = world * viewProjection;
             this.BlurDirection = direction;

@@ -1,7 +1,11 @@
 ﻿using SharpDX;
+using SharpDX.D3DCompiler;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Engine
 {
@@ -32,9 +36,17 @@ namespace Engine
         /// </summary>
         private int msQuality = 0;
         /// <summary>
+        /// Graphics device
+        /// </summary>
+        private Device1 device = null;
+        /// <summary>
+        /// Graphics inmmediate context
+        /// </summary>
+        private DeviceContext1 deviceContext = null;
+        /// <summary>
         /// Swap chain
         /// </summary>
-        private SwapChain swapChain = null;
+        private SwapChain1 swapChain = null;
         /// <summary>
         /// Render target view
         /// </summary>
@@ -116,6 +128,7 @@ namespace Engine
         /// Blend state for transparent defered composer blending
         /// </summary>
         private BlendState blendDeferredComposerTransparent = null;
+
         /// <summary>
         /// Default rasterizer
         /// </summary>
@@ -124,6 +137,7 @@ namespace Engine
         /// Wireframe rasterizer
         /// </summary>
         private RasterizerState rasterizerWireframe = null;
+
         /// <summary>
         /// No-cull rasterizer
         /// </summary>
@@ -183,14 +197,6 @@ namespace Engine
         /// </summary>
         public readonly string DeviceDescription = null;
 
-        /// <summary>
-        /// Graphics device
-        /// </summary>
-        public Device Device { get; private set; }
-        /// <summary>
-        /// Graphics inmmediate context
-        /// </summary>
-        public DeviceContext DeviceContext { get; private set; }
         /// <summary>
         /// Screen viewport
         /// </summary>
@@ -292,7 +298,8 @@ namespace Engine
             creationFlags |= DeviceCreationFlags.Debug;
 #endif
 
-            Device device = null;
+            Device nDevice;
+            SwapChain nSwapChain;
             Device.CreateWithSwapChain(
                 DriverType.Hardware,
                 creationFlags,
@@ -317,11 +324,13 @@ namespace Engine
                     SwapEffect = SwapEffect.Discard,
                     Flags = SwapChainFlags.None,
                 },
-                out device,
-                out this.swapChain);
+                out nDevice,
+                out nSwapChain);
 
-            this.Device = device;
-            this.DeviceContext = device.ImmediateContext;
+            this.device = new Device1(nDevice.NativePointer);
+            this.swapChain = new SwapChain1(nSwapChain.NativePointer);
+
+            this.deviceContext = this.device.ImmediateContext1;
 
             this.PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -375,7 +384,7 @@ namespace Engine
 
             using (var backBuffer = Resource.FromSwapChain<Texture2D>(swapChain, 0))
             {
-                this.renderTargetView = new EngineRenderTargetView(this, backBuffer);
+                this.renderTargetView = new EngineRenderTargetView(new RenderTargetView(this.device, backBuffer));
             }
 
             #endregion
@@ -391,7 +400,7 @@ namespace Engine
             #region Z-buffer enabled for write depth-stencil state
 
             this.depthStencilzBufferEnabled = new DepthStencilState(
-                this.Device,
+                this.device,
                 new DepthStencilStateDescription()
                 {
                     IsDepthEnabled = true,
@@ -424,7 +433,7 @@ namespace Engine
             #region Z-buffer disabled for write depth-stencil state
 
             this.depthStencilzBufferDisabled = new DepthStencilState(
-                this.Device,
+                this.device,
                 new DepthStencilStateDescription()
                 {
                     IsDepthEnabled = false,
@@ -457,7 +466,7 @@ namespace Engine
             #region Z-buffer enabled for read depth-stencil state
 
             this.depthStencilRDzBufferEnabled = new DepthStencilState(
-                this.Device,
+                this.device,
                 new DepthStencilStateDescription()
                 {
                     IsDepthEnabled = true,
@@ -470,7 +479,7 @@ namespace Engine
             #region Z-buffer disabled for read depth-stencil state
 
             this.depthStencilRDzBufferDisabled = new DepthStencilState(
-                this.Device,
+                this.device,
                 new DepthStencilStateDescription()
                 {
                     IsDepthEnabled = false,
@@ -483,7 +492,7 @@ namespace Engine
             #region No depth, no stencil state
 
             this.depthStencilNone = new DepthStencilState(
-                this.Device,
+                this.device,
                 new DepthStencilStateDescription()
                 {
                     IsDepthEnabled = false,
@@ -500,7 +509,7 @@ namespace Engine
             #region Depth-stencil state for volume marking (Value != 0 if object is inside of the current drawing volume)
 
             this.depthStencilVolumeMarking = new DepthStencilState(
-                this.Device,
+                this.device,
                 new DepthStencilStateDescription()
                 {
                     IsDepthEnabled = true,
@@ -533,7 +542,7 @@ namespace Engine
             #region Depth-stencil state for volume drawing (Process pixels if stencil value != stencil reference)
 
             this.depthStencilVolumeDrawing = new DepthStencilState(
-                this.Device,
+                this.device,
                 new DepthStencilStateDescription()
                 {
                     IsDepthEnabled = false,
@@ -569,7 +578,7 @@ namespace Engine
 
             //Default rasterizer state
             this.rasterizerDefault = new RasterizerState(
-                this.Device,
+                this.device,
                 new RasterizerStateDescription()
                 {
                     CullMode = CullMode.Back,
@@ -586,7 +595,7 @@ namespace Engine
 
             //Wireframe rasterizer state
             this.rasterizerWireframe = new RasterizerState(
-                this.Device,
+                this.device,
                 new RasterizerStateDescription()
                 {
                     CullMode = CullMode.Back,
@@ -603,7 +612,7 @@ namespace Engine
 
             //No cull rasterizer state
             this.rasterizerNoCull = new RasterizerState(
-                this.Device,
+                this.device,
                 new RasterizerStateDescription()
                 {
                     CullMode = CullMode.None,
@@ -620,7 +629,7 @@ namespace Engine
 
             //Counter clockwise cull rasterizer state
             this.rasterizerCullFrontFace = new RasterizerState(
-                this.Device,
+                this.device,
                 new RasterizerStateDescription()
                 {
                     CullMode = CullMode.Back,
@@ -637,7 +646,7 @@ namespace Engine
 
             //Stencil pass rasterizer state
             this.rasterizerStencilPass = new RasterizerState(
-                this.Device,
+                this.device,
                 new RasterizerStateDescription()
                 {
                     CullMode = CullMode.None,
@@ -654,7 +663,7 @@ namespace Engine
 
             //Counter clockwise cull rasterizer state
             this.rasterizerLightingPass = new RasterizerState(
-                this.Device,
+                this.device,
                 new RasterizerStateDescription()
                 {
                     CullMode = CullMode.Back,
@@ -690,7 +699,7 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendDefault = new BlendState(this.Device, desc);
+                this.blendDefault = new BlendState(this.device, desc);
             }
             #endregion
 
@@ -711,7 +720,7 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendDefaultAlpha = new BlendState(this.Device, desc);
+                this.blendDefaultAlpha = new BlendState(this.device, desc);
             }
             #endregion
 
@@ -732,7 +741,7 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendTransparent = new BlendState(this.Device, desc);
+                this.blendTransparent = new BlendState(this.device, desc);
             }
             #endregion
 
@@ -753,7 +762,7 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendAdditive = new BlendState(this.Device, desc);
+                this.blendAdditive = new BlendState(this.device, desc);
             }
             #endregion
 
@@ -790,7 +799,7 @@ namespace Engine
                 desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendDeferredComposer = new BlendState(this.Device, desc);
+                this.blendDeferredComposer = new BlendState(this.device, desc);
             }
             #endregion
 
@@ -828,7 +837,7 @@ namespace Engine
                 desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendDeferredComposerTransparent = new BlendState(this.Device, desc);
+                this.blendDeferredComposerTransparent = new BlendState(this.device, desc);
             }
             #endregion
 
@@ -847,7 +856,7 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
 
-                this.blendDeferredLighting = new BlendState(this.Device, desc);
+                this.blendDeferredLighting = new BlendState(this.device, desc);
             }
             #endregion
 
@@ -879,13 +888,13 @@ namespace Engine
         /// </summary>
         public void Begin()
         {
-            this.DeviceContext.ClearDepthStencilView(
+            this.deviceContext.ClearDepthStencilView(
                 this.depthStencilView.GetDepthStencil(),
                 DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
                 1.0f,
                 0);
 
-            this.DeviceContext.ClearRenderTargetView(
+            this.deviceContext.ClearRenderTargetView(
                 this.renderTargetView.GetRenderTarget(),
                 GameEnvironment.Background);
         }
@@ -924,7 +933,7 @@ namespace Engine
         /// <param name="viewport">Viewport</param>
         public void SetViewport(Viewport viewport)
         {
-            this.DeviceContext.Rasterizer.SetViewport(viewport);
+            this.deviceContext.Rasterizer.SetViewport(viewport);
         }
         /// <summary>
         /// Sets viewport
@@ -932,7 +941,7 @@ namespace Engine
         /// <param name="viewport">Viewport</param>
         public void SetViewport(ViewportF viewport)
         {
-            this.DeviceContext.Rasterizer.SetViewport(viewport);
+            this.deviceContext.Rasterizer.SetViewport(viewport);
         }
         /// <summary>
         /// Set render targets
@@ -950,13 +959,13 @@ namespace Engine
             var rtv = renderTargets != null ? renderTargets.GetRenderTargets() : null;
             var rtvCount = renderTargets != null ? renderTargets.Count : 0;
 
-            this.DeviceContext.OutputMerger.SetTargets(dsv, rtvCount, rtv);
+            this.deviceContext.OutputMerger.SetTargets(dsv, rtvCount, rtv);
 
             if (clearRT && rtv != null && rtvCount > 0)
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    this.DeviceContext.ClearRenderTargetView(
+                    this.deviceContext.ClearRenderTargetView(
                         rtv[i],
                         clearRTColor);
                 }
@@ -968,11 +977,19 @@ namespace Engine
                 if (clearDepth) clearDSFlags |= DepthStencilClearFlags.Depth;
                 if (clearStencil) clearDSFlags |= DepthStencilClearFlags.Stencil;
 
-                this.DeviceContext.ClearDepthStencilView(
+                this.deviceContext.ClearDepthStencilView(
                     dsv,
                     clearDSFlags,
                     1.0f, 0);
             }
+        }
+        /// <summary>
+        /// Sets targets for stream output
+        /// </summary>
+        /// <param name="streamOutBinding">Stream output binding</param>
+        public void SetStreamOutputTargets(StreamOutputBufferBinding[] streamOutBinding)
+        {
+            this.deviceContext.StreamOutput.SetTargets(streamOutBinding);
         }
         /// <summary>
         /// Clear depth / stencil buffer
@@ -988,7 +1005,7 @@ namespace Engine
                 if (clearDepth) clearDSFlags |= DepthStencilClearFlags.Depth;
                 if (clearStencil) clearDSFlags |= DepthStencilClearFlags.Stencil;
 
-                this.DeviceContext.ClearDepthStencilView(
+                this.deviceContext.ClearDepthStencilView(
                     depthMap.GetDepthStencil(),
                     clearDSFlags,
                     1.0f, 0);
@@ -1042,6 +1059,7 @@ namespace Engine
         public void SetDepthStencilVolumeDrawing(int stencilRef)
         {
             this.SetDepthStencilState(this.depthStencilVolumeDrawing, stencilRef);
+            this.deviceContext.OutputMerger.DepthStencilReference = stencilRef;
         }
         /// <summary>
         /// Sets default blend state
@@ -1143,7 +1161,7 @@ namespace Engine
         {
             if (this.currentVertexBufferFirstSlot != firstSlot || this.currentVertexBufferBindings != vertexBufferBindings)
             {
-                this.DeviceContext.InputAssembler.SetVertexBuffers(firstSlot, vertexBufferBindings);
+                this.deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vertexBufferBindings);
                 Counters.IAVertexBuffersSets++;
 
                 this.currentVertexBufferFirstSlot = firstSlot;
@@ -1160,7 +1178,7 @@ namespace Engine
         {
             if (this.currentIndexBufferRef != indexBufferRef || this.currentIndexFormat != format || this.currentIndexOffset != offset)
             {
-                this.DeviceContext.InputAssembler.SetIndexBuffer(indexBufferRef, format, offset);
+                this.deviceContext.InputAssembler.SetIndexBuffer(indexBufferRef, format, offset);
                 Counters.IAIndexBufferSets++;
 
                 this.currentIndexBufferRef = indexBufferRef;
@@ -1181,7 +1199,7 @@ namespace Engine
             {
                 if (this.currentIAPrimitiveTopology != value)
                 {
-                    this.DeviceContext.InputAssembler.PrimitiveTopology = value;
+                    this.deviceContext.InputAssembler.PrimitiveTopology = value;
                     Counters.IAPrimitiveTopologySets++;
 
                     this.currentIAPrimitiveTopology = value;
@@ -1201,7 +1219,7 @@ namespace Engine
             {
                 if (this.currentIAInputLayout != value)
                 {
-                    this.DeviceContext.InputAssembler.InputLayout = value;
+                    this.deviceContext.InputAssembler.InputLayout = value;
                     Counters.IAInputLayoutSets++;
 
                     this.currentIAInputLayout = value;
@@ -1222,7 +1240,7 @@ namespace Engine
 
             this.DisposeResources();
 
-            Helper.Dispose(this.Device);
+            Helper.Dispose(this.device);
         }
 
         /// <summary>
@@ -1233,7 +1251,7 @@ namespace Engine
         {
             if (this.currentDepthStencilState != state || this.currentDepthStencilStateRef != stencilRef)
             {
-                this.Device.ImmediateContext.OutputMerger.SetDepthStencilState(state, stencilRef);
+                this.device.ImmediateContext.OutputMerger.SetDepthStencilState(state, stencilRef);
 
                 this.currentDepthStencilState = state;
                 this.currentDepthStencilStateRef = stencilRef;
@@ -1251,7 +1269,7 @@ namespace Engine
         {
             if (this.currentBlendState != state)
             {
-                this.Device.ImmediateContext.OutputMerger.SetBlendState(state, blendFactor, sampleMask);
+                this.device.ImmediateContext.OutputMerger.SetBlendState(state, blendFactor, sampleMask);
 
                 this.currentBlendState = state;
 
@@ -1266,7 +1284,7 @@ namespace Engine
         {
             if (this.currentRasterizerState != state)
             {
-                this.Device.ImmediateContext.Rasterizer.State = state;
+                this.device.ImmediateContext.Rasterizer.State = state;
 
                 this.currentRasterizerState = state;
 
@@ -1420,6 +1438,1145 @@ namespace Engine
             Helper.Dispose(this.blendDeferredLighting);
             Helper.Dispose(this.blendDeferredComposer);
             Helper.Dispose(this.blendDeferredComposerTransparent);
+        }
+
+        /// <summary>
+        /// Creates a resource view from a texture description
+        /// </summary>
+        /// <param name="description">Texture description</param>
+        /// <returns>Returns the new shader resource view</returns>
+        private ShaderResourceView CreateResource(TextureDescription description)
+        {
+            var fmtSupport = this.device.CheckFormatSupport(description.Format);
+            var autogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
+
+            using (var texture = this.CreateTexture2D(description.Width, description.Height, description.Format, 1, autogen))
+            {
+                ShaderResourceView result = null;
+
+                if (autogen)
+                {
+                    var desc = new ShaderResourceViewDescription()
+                    {
+                        Format = texture.Description.Format,
+                        Dimension = ShaderResourceViewDimension.Texture2D,
+                        Texture2D = new ShaderResourceViewDescription.Texture2DResource()
+                        {
+                            MipLevels = (autogen) ? -1 : 1,
+                        }
+                    };
+                    result = new ShaderResourceView(this.device, texture, desc);
+                }
+                else
+                {
+                    result = new ShaderResourceView(this.device, texture);
+                }
+
+                this.deviceContext.UpdateSubresource(description.GetDataBox(), texture, 0);
+
+                if (autogen)
+                {
+                    this.deviceContext.GenerateMips(result);
+                }
+
+                return result;
+            }
+        }
+        /// <summary>
+        /// Creates a resource view from a texture description list
+        /// </summary>
+        /// <param name="descriptions">Texture description list</param>
+        /// <returns>Returns the new shader resource view</returns>
+        private ShaderResourceView CreateResource(TextureDescription[] descriptions)
+        {
+            var textureDescription = descriptions[0];
+
+            var fmtSupport = this.device.CheckFormatSupport(textureDescription.Format);
+            var autogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
+
+            using (var textureArray = this.CreateTexture2D(textureDescription.Width, textureDescription.Height, textureDescription.Format, descriptions.Length, autogen))
+            {
+                ShaderResourceView result = null;
+
+                if (autogen)
+                {
+                    var desc = new ShaderResourceViewDescription()
+                    {
+                        Format = textureDescription.Format,
+                        Dimension = ShaderResourceViewDimension.Texture2DArray,
+                        Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
+                        {
+                            ArraySize = descriptions.Length,
+                            MipLevels = (autogen) ? -1 : 1,
+                        }
+                    };
+
+                    result = new ShaderResourceView(this.device, textureArray, desc);
+                }
+                else
+                {
+                    result = new ShaderResourceView(this.device, textureArray);
+                }
+
+                for (int i = 0; i < descriptions.Length; i++)
+                {
+                    int mipSize;
+                    var index = textureArray.CalculateSubResourceIndex(0, i, out mipSize);
+
+                    this.deviceContext.UpdateSubresource(descriptions[i].GetDataBox(), textureArray, index);
+                }
+
+                if (autogen)
+                {
+                    this.deviceContext.GenerateMips(result);
+                }
+
+                return result;
+            }
+        }
+        /// <summary>
+        /// Creates a Texture2D
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="format">Format</param>
+        /// <param name="arraySize">Size</param>
+        /// <param name="generateMips">Generate mips for the texture</param>
+        /// <returns>Returns the Texture2D</returns>
+        private Texture2D CreateTexture2D(int width, int height, Format format, int arraySize, bool generateMips)
+        {
+            var description = new Texture2DDescription()
+            {
+                Width = width,
+                Height = height,
+                ArraySize = arraySize,
+                BindFlags = (generateMips) ? BindFlags.ShaderResource | BindFlags.RenderTarget : BindFlags.ShaderResource,
+                Usage = ResourceUsage.Default,
+                CpuAccessFlags = CpuAccessFlags.None,
+                Format = format,
+                MipLevels = (generateMips) ? 0 : 1,
+                OptionFlags = (generateMips) ? ResourceOptionFlags.GenerateMipMaps : ResourceOptionFlags.None,
+                SampleDescription = new SampleDescription(1, 0),
+            };
+
+            return new Texture2D(this.device, description);
+        }
+
+        /// <summary>
+        /// Loads a texture from memory in the graphics device
+        /// </summary>
+        /// <param name="buffer">Data buffer</param>
+        /// <returns>Returns the resource view</returns>
+        internal EngineShaderResourceView LoadTexture(byte[] buffer)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var resource = HelperTextures.ReadTexture(buffer))
+                {
+                    return new EngineShaderResourceView(CreateResource(resource));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from byte array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture from file in the graphics device
+        /// </summary>
+        /// <param name="filename">Path to file</param>
+        /// <returns>Returns the resource view</returns>
+        internal EngineShaderResourceView LoadTexture(string filename)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var resource = HelperTextures.ReadTexture(filename))
+                {
+                    return new EngineShaderResourceView(CreateResource(resource));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from file Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture from file in the graphics device
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <returns>Returns the resource view</returns>
+        internal EngineShaderResourceView LoadTexture(MemoryStream stream)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var resource = HelperTextures.ReadTexture(stream))
+                {
+                    return new EngineShaderResourceView(CreateResource(resource));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from stream Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture array from a file collection in the graphics device
+        /// </summary>
+        /// <param name="filenames">Path file collection</param>
+        /// <returns>Returns the resource view</returns>
+        internal EngineShaderResourceView LoadTextureArray(string[] filenames)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                var textureList = HelperTextures.ReadTexture(filenames);
+
+                var resource = this.CreateResource(textureList);
+
+                Helper.Dispose(textureList);
+
+                return new EngineShaderResourceView(resource);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from file array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture array from a file collection in the graphics device
+        /// </summary>
+        /// <param name="streams">Stream collection</param>
+        /// <returns>Returns the resource view</returns>
+        internal EngineShaderResourceView LoadTextureArray(MemoryStream[] streams)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                var textureList = HelperTextures.ReadTexture(streams);
+
+                var resource = this.CreateResource(textureList);
+
+                Helper.Dispose(textureList);
+
+                return new EngineShaderResourceView(resource);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from stream array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a cube texture from file in the graphics device
+        /// </summary>
+        /// <param name="filename">Path to file</param>
+        /// <param name="format">Format</param>
+        /// <param name="faceSize">Face size</param>
+        /// <returns>Returns the resource view</returns>
+        internal EngineShaderResourceView LoadTextureCube(string filename, Format format, int faceSize)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var cubeTex = new Texture2D(
+                    this.device,
+                    new Texture2DDescription()
+                    {
+                        Width = faceSize,
+                        Height = faceSize,
+                        MipLevels = 0,
+                        ArraySize = 6,
+                        SampleDescription = new SampleDescription(1, 0),
+                        Format = format,
+                        Usage = ResourceUsage.Default,
+                        BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                        CpuAccessFlags = CpuAccessFlags.None,
+                        OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
+                    }))
+                {
+                    return new EngineShaderResourceView(new ShaderResourceView(this.device, cubeTex));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTextureCube from filename Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a cube texture from file in the graphics device
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <param name="format">Format</param>
+        /// <param name="faceSize">Face size</param>
+        /// <returns>Returns the resource view</returns>
+        internal EngineShaderResourceView LoadTextureCube(MemoryStream stream, Format format, int faceSize)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var cubeTex = new Texture2D(
+                    this.device,
+                    new Texture2DDescription()
+                    {
+                        Width = faceSize,
+                        Height = faceSize,
+                        MipLevels = 0,
+                        ArraySize = 6,
+                        SampleDescription = new SampleDescription(1, 0),
+                        Format = format,
+                        Usage = ResourceUsage.Default,
+                        BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                        CpuAccessFlags = CpuAccessFlags.None,
+                        OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
+                    }))
+                {
+                    return new EngineShaderResourceView(new ShaderResourceView(this.device, cubeTex));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTextureCube from stream Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Creates a texture filled with specified values
+        /// </summary>
+        /// <param name="size">Texture size</param>
+        /// <param name="values">Color values</param>
+        /// <returns>Returns created texture</returns>
+        internal EngineShaderResourceView CreateTexture1D(int size, Vector4[] values)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var str = DataStream.Create(values, false, false))
+                {
+                    using (var randTex = new Texture1D(
+                        this.device,
+                        new Texture1DDescription()
+                        {
+                            Format = Format.R32G32B32A32_Float,
+                            Width = size,
+                            ArraySize = 1,
+                            MipLevels = 1,
+                            Usage = ResourceUsage.Immutable,
+                            BindFlags = BindFlags.ShaderResource,
+                            CpuAccessFlags = CpuAccessFlags.None,
+                            OptionFlags = ResourceOptionFlags.None,
+                        },
+                        str))
+                    {
+                        return new EngineShaderResourceView(new ShaderResourceView(this.device, randTex));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateTexture1D from value array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Creates a texture filled with specified values
+        /// </summary>
+        /// <param name="size">Texture size</param>
+        /// <param name="values">Color values</param>
+        /// <returns>Returns created texture</returns>
+        internal EngineShaderResourceView CreateTexture2D(int size, Vector4[] values)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                var tmp = new Vector4[size * size];
+                Array.Copy(values, tmp, values.Length);
+
+                using (var str = DataStream.Create(tmp, false, false))
+                {
+                    var dBox = new DataBox(str.DataPointer, size * (int)FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
+
+                    using (var texture = new Texture2D(
+                        this.device,
+                        new Texture2DDescription()
+                        {
+                            Format = Format.R32G32B32A32_Float,
+                            Width = size,
+                            Height = size,
+                            ArraySize = 1,
+                            MipLevels = 1,
+                            SampleDescription = new SampleDescription(1, 0),
+                            Usage = ResourceUsage.Immutable,
+                            BindFlags = BindFlags.ShaderResource,
+                            CpuAccessFlags = CpuAccessFlags.None,
+                            OptionFlags = ResourceOptionFlags.None,
+                        },
+                        new[] { dBox }))
+                    {
+                        return new EngineShaderResourceView(new ShaderResourceView(this.device, texture));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateTexture2D from value array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Creates a random 1D texture
+        /// </summary>
+        /// <param name="size">Texture size</param>
+        /// <param name="min">Minimum value</param>
+        /// <param name="max">Maximum value</param>
+        /// <param name="seed">Random seed</param>
+        /// <returns>Returns created texture</returns>
+        internal EngineShaderResourceView CreateRandomTexture(int size, float min, float max, int seed = 0)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                Random rnd = new Random(seed);
+
+                var randomValues = new List<Vector4>();
+                for (int i = 0; i < size; i++)
+                {
+                    randomValues.Add(rnd.NextVector4(new Vector4(min), new Vector4(max)));
+                }
+
+                return this.CreateTexture1D(size, randomValues.ToArray());
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateRandomTexture Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Creates a new render tarjet and his texture
+        /// </summary>
+        /// <param name="format">Format</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="rtv">Render target</param>
+        /// <param name="srv">Texture</param>
+        internal void CreateRenderTargetTexture(Format format, int width, int height, out EngineRenderTargetView rtv, out EngineShaderResourceView srv)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var texture = new Texture2D(
+                    this.device,
+                    new Texture2DDescription()
+                    {
+                        Width = width,
+                        Height = height,
+                        MipLevels = 1,
+                        ArraySize = 1,
+                        Format = format,
+                        SampleDescription = this.CurrentSampleDescription,
+                        Usage = ResourceUsage.Default,
+                        BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                        CpuAccessFlags = CpuAccessFlags.None,
+                        OptionFlags = ResourceOptionFlags.None
+                    }))
+                {
+                    rtv = new EngineRenderTargetView(new RenderTargetView(this.device, texture));
+                    srv = new EngineShaderResourceView(new ShaderResourceView(this.device, texture));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateRenderTargetTexture Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Creates a new multiple render target and his textures
+        /// </summary>
+        /// <param name="format">Format</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="size">Render target list size</param>
+        /// <param name="rtv">Render target</param>
+        /// <param name="srv">Textures</param>
+        internal void CreateRenderTargetTexture(Format format, int width, int height, int size, out EngineRenderTargetView rtv, out EngineShaderResourceView[] srv)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                rtv = new EngineRenderTargetView();
+                srv = new EngineShaderResourceView[size];
+
+                for (int i = 0; i < size; i++)
+                {
+                    using (var texture = new Texture2D(
+                        this.device,
+                        new Texture2DDescription()
+                        {
+                            Width = width,
+                            Height = height,
+                            MipLevels = 1,
+                            ArraySize = 1,
+                            Format = format,
+                            SampleDescription = this.CurrentSampleDescription,
+                            Usage = ResourceUsage.Default,
+                            BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                            CpuAccessFlags = CpuAccessFlags.None,
+                            OptionFlags = ResourceOptionFlags.None
+                        }))
+                    {
+                        rtv.Add(new RenderTargetView(this.device, texture));
+                        srv[i] = new EngineShaderResourceView(new ShaderResourceView(this.device, texture));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("CreateRenderTargetTexture Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Creates a set of texture and depth stencil view for shadow mapping
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="dsv">Resulting Depth Stencil View</param>
+        /// <param name="srv">Resulting Shader Resource View</param>
+        internal void CreateShadowMapTextures(Format format, int width, int height, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
+        {
+            var depthMap = new Texture2D(
+                this.device,
+                new Texture2DDescription
+                {
+                    Width = width,
+                    Height = height,
+                    MipLevels = 1,
+                    ArraySize = 1,
+                    Format = format,
+                    SampleDescription = this.CurrentSampleDescription,
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.None
+                });
+
+            using (depthMap)
+            {
+                var dsDimension = this.MultiSampled ?
+                    DepthStencilViewDimension.Texture2DMultisampled :
+                    DepthStencilViewDimension.Texture2D;
+
+                var dsDescription = new DepthStencilViewDescription
+                {
+                    Flags = DepthStencilViewFlags.None,
+                    Format = Format.D24_UNorm_S8_UInt,
+                    Dimension = dsDimension,
+                    Texture2D = new DepthStencilViewDescription.Texture2DResource()
+                    {
+                        MipSlice = 0,
+                    },
+                    Texture2DMS = new DepthStencilViewDescription.Texture2DMultisampledResource()
+                    {
+
+                    },
+                };
+
+                var rvDimension = this.MultiSampled ?
+                    ShaderResourceViewDimension.Texture2DMultisampled :
+                    ShaderResourceViewDimension.Texture2D;
+
+                var rvDescription = new ShaderResourceViewDescription
+                {
+                    Format = Format.R24_UNorm_X8_Typeless,
+                    Dimension = rvDimension,
+                    Texture2D = new ShaderResourceViewDescription.Texture2DResource()
+                    {
+                        MipLevels = 1,
+                        MostDetailedMip = 0
+                    },
+                    Texture2DMS = new ShaderResourceViewDescription.Texture2DMultisampledResource()
+                    {
+
+                    },
+                };
+
+                dsv = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
+                srv = new EngineShaderResourceView(new ShaderResourceView(this.device, depthMap, rvDescription));
+            }
+        }
+        /// <summary>
+        /// Create depth stencil view
+        /// </summary>
+        /// <param name="format">Format</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="dsv">Resulting depth stencil view</param>
+        internal void CreateDepthStencil(Format format, int width, int height, out EngineDepthStencilView dsv)
+        {
+            using (var dsb = new Texture2D(
+                this.device,
+                new Texture2DDescription()
+                {
+                    Width = width,
+                    Height = height,
+                    MipLevels = 1,
+                    ArraySize = 1,
+                    Format = format,
+                    SampleDescription = this.CurrentSampleDescription,
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.DepthStencil,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.None,
+                }))
+            {
+                var description = new DepthStencilViewDescription()
+                {
+                    Format = format,
+                    Dimension = this.MultiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
+                    Texture2D = new DepthStencilViewDescription.Texture2DResource()
+                    {
+                        MipSlice = 0
+                    },
+                };
+
+                dsv = new EngineDepthStencilView(new DepthStencilView(this.device, dsb, description));
+            }
+        }
+        /// <summary>
+        /// Creates a new Input Layout for a Shader
+        /// </summary>
+        /// <param name="shaderBytecode">Byte code</param>
+        /// <param name="elements">Input elements</param>
+        /// <returns>Returns a new Input Layout</returns>
+        internal InputLayout CreateInputLayout(ShaderBytecode shaderBytecode, InputElement[] elements)
+        {
+            return new InputLayout(this.device, shaderBytecode, elements);
+        }
+
+        /// <summary>
+        /// Loads vertex shader from file
+        /// </summary>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="input">Input elements</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Retuns vertex shader description</returns>
+        internal EngineVertexShader LoadVertexShader(
+            string filename,
+            string entryPoint,
+            InputElement[] input,
+            string profile)
+        {
+            return LoadVertexShader(
+                File.ReadAllBytes(filename),
+                entryPoint,
+                input,
+                profile);
+        }
+        /// <summary>
+        /// Loads vertex shader from file
+        /// </summary>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="input">Input elements</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Retuns vertex shader description</returns>
+        internal EngineVertexShader LoadVertexShader(
+            string filename,
+            string entryPoint,
+            InputElement[] input,
+            string profile,
+            out string compilationErrors)
+        {
+            return LoadVertexShader(
+                File.ReadAllBytes(filename),
+                entryPoint,
+                input,
+                profile,
+                out compilationErrors);
+        }
+        /// <summary>
+        /// Loads vertex shader from byte code
+        /// </summary>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="input">Input elements</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Retuns vertex shader description</returns>
+        internal EngineVertexShader LoadVertexShader(
+            byte[] byteCode,
+            string entryPoint,
+            InputElement[] input,
+            string profile)
+        {
+            string compilationErrors;
+            return LoadVertexShader(
+                byteCode,
+                entryPoint,
+                input,
+                profile,
+                out compilationErrors);
+        }
+        /// <summary>
+        /// Loads vertex shader from byte code
+        /// </summary>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="input">Input elements</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Retuns vertex shader description</returns>
+        internal EngineVertexShader LoadVertexShader(
+            byte[] byteCode,
+            string entryPoint,
+            InputElement[] input,
+            string profile,
+            out string compilationErrors)
+        {
+            compilationErrors = null;
+            using (ShaderIncludeManager includeManager = new ShaderIncludeManager())
+            using (CompilationResult cmpResult = ShaderBytecode.Compile(
+                byteCode,
+                entryPoint,
+                profile,
+                ShaderFlags.EnableStrictness,
+                EffectFlags.None,
+                null,
+                includeManager))
+            {
+                if (cmpResult.HasErrors)
+                {
+                    compilationErrors = cmpResult.Message;
+                }
+
+                InputLayout layout = new InputLayout(
+                    this.device,
+                    ShaderSignature.GetInputSignature(cmpResult.Bytecode),
+                    input);
+
+                VertexShader vertexShader = new VertexShader(
+                    this.device,
+                    cmpResult.Bytecode);
+
+                return new EngineVertexShader(vertexShader, layout);
+            }
+        }
+        /// <summary>
+        /// Loads a pixel shader from file
+        /// </summary>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns pixel shader description</returns>
+        internal EnginePixelShader LoadPixelShader(
+            string filename,
+            string entryPoint,
+            string profile)
+        {
+            string compilationErrors;
+            return LoadPixelShader(
+                File.ReadAllBytes(filename),
+                entryPoint,
+                profile,
+                out compilationErrors);
+        }
+        /// <summary>
+        /// Loads a pixel shader from file
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns pixel shader description</returns>
+        internal EnginePixelShader LoadPixelShader(
+            string filename,
+            string entryPoint,
+            string profile,
+            out string compilationErrors)
+        {
+            return LoadPixelShader(
+                File.ReadAllBytes(filename),
+                entryPoint,
+                profile,
+                out compilationErrors);
+        }
+        /// <summary>
+        /// Loads a pixel shader from byte code
+        /// </summary>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns pixel shader description</returns>
+        internal EnginePixelShader LoadPixelShader(
+            byte[] byteCode,
+            string entryPoint,
+            string profile)
+        {
+            string compilationErrors;
+            return LoadPixelShader(
+                byteCode,
+                entryPoint,
+                profile,
+                out compilationErrors);
+        }
+        /// <summary>
+        /// Loads a pixel shader from byte code
+        /// </summary>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns pixel shader description</returns>
+        internal EnginePixelShader LoadPixelShader(
+            byte[] byteCode,
+            string entryPoint,
+            string profile,
+            out string compilationErrors)
+        {
+            compilationErrors = null;
+
+            using (ShaderIncludeManager includeManager = new ShaderIncludeManager())
+            using (CompilationResult cmpResult = ShaderBytecode.Compile(
+                byteCode,
+                entryPoint,
+                profile,
+                ShaderFlags.EnableStrictness,
+                EffectFlags.None,
+                null,
+                includeManager))
+            {
+                if (cmpResult.HasErrors)
+                {
+                    compilationErrors = cmpResult.Message;
+                }
+
+                return new EnginePixelShader(new PixelShader(this.device, cmpResult.Bytecode));
+            }
+        }
+
+        /// <summary>
+        /// Loads an effect from byte code
+        /// </summary>
+        /// <param name="bytes">Byte code</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns loaded effect</returns>
+        internal EngineEffect CompileEffect(byte[] bytes, string profile)
+        {
+            using (var includeManager = new ShaderIncludeManager())
+            using (var cmpResult = ShaderBytecode.Compile(
+                bytes,
+                null,
+                profile,
+                ShaderFlags.EnableStrictness,
+                EffectFlags.None,
+                null,
+                includeManager))
+            {
+                var effect = new Effect(
+                    this.device,
+                    cmpResult.Bytecode.Data,
+                    EffectFlags.None);
+
+                return new EngineEffect(effect);
+            }
+        }
+        /// <summary>
+        /// Loads an effect from pre-compiled file
+        /// </summary>
+        /// <param name="bytes">Pre-compiled byte code</param>
+        /// <returns>Returns loaded effect</returns>
+        internal EngineEffect LoadEffect(byte[] bytes)
+        {
+            using (var ms = new MemoryStream(bytes))
+            {
+                ms.Position = 0;
+
+                using (var effectCode = ShaderBytecode.FromStream(ms))
+                {
+                    var effect = new Effect(
+                        this.device,
+                        effectCode.Data,
+                        EffectFlags.None);
+
+                    return new EngineEffect(effect);
+                }
+            }
+        }
+        /// <summary>
+        /// Apply effect pass
+        /// </summary>
+        /// <param name="technique"></param>
+        /// <param name="index"></param>
+        /// <param name="flags"></param>
+        internal void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
+        {
+            technique.GetPass(index).Apply(this.deviceContext, flags);
+        }
+
+        /// <summary>
+        /// Creates an index buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="name">Buffer name</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        internal Buffer CreateIndexBuffer<T>(string name, T[] data, bool dynamic)
+            where T : struct
+        {
+            return CreateBuffer<T>(
+                name,
+                data,
+                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                BindFlags.IndexBuffer,
+                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+        }
+        /// <summary>
+        /// Creates a vertex buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="name">Buffer name</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        internal Buffer CreateVertexBuffer<T>(string name, T[] data, bool dynamic)
+            where T : struct
+        {
+            return CreateBuffer<T>(
+                name,
+                data,
+                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                BindFlags.VertexBuffer,
+                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+        }
+        /// <summary>
+        /// Creates a buffer for the specified data type
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="name">Buffer name</param>
+        /// <param name="length">Buffer length</param>
+        /// <param name="usage">Resource usage</param>
+        /// <param name="binding">Binding</param>
+        /// <param name="access">Cpu access</param>
+        /// <returns>Returns created buffer</returns>
+        internal Buffer CreateBuffer<T>(string name, int length, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+            where T : struct
+        {
+            int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
+
+            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, length);
+
+            var description = new BufferDescription()
+            {
+                Usage = usage,
+                SizeInBytes = sizeInBytes,
+                BindFlags = binding,
+                CpuAccessFlags = access,
+                OptionFlags = ResourceOptionFlags.None,
+                StructureByteStride = 0,
+            };
+
+            return new Buffer(this.device, description);
+        }
+        /// <summary>
+        /// Creates a buffer for the specified data type
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="name">Buffer name</param>
+        /// <param name="data">Data</param>
+        /// <param name="usage">Resource usage</param>
+        /// <param name="binding">Binding</param>
+        /// <param name="access">Cpu access</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        internal Buffer CreateBuffer<T>(string name, T[] data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+            where T : struct
+        {
+            int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Length;
+
+            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, data.Length);
+
+            using (var dstr = new DataStream(sizeInBytes, true, true))
+            {
+                dstr.WriteRange(data);
+                dstr.Position = 0;
+
+                var description = new BufferDescription()
+                {
+                    Usage = usage,
+                    SizeInBytes = sizeInBytes,
+                    BindFlags = binding,
+                    CpuAccessFlags = access,
+                    OptionFlags = ResourceOptionFlags.None,
+                    StructureByteStride = 0,
+                };
+
+                return new Buffer(this.device, dstr, description);
+            }
+        }
+
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="data">Complete data</param>
+        internal void WriteDiscardBuffer<T>(Buffer buffer, params T[] data)
+            where T : struct
+        {
+            WriteDiscardBuffer<T>(buffer, 0, data);
+        }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="data">Complete data</param>
+        internal void WriteNoOverwriteBuffer<T>(Buffer buffer, params T[] data)
+            where T : struct
+        {
+            WriteNoOverwriteBuffer<T>(buffer, 0, data);
+        }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Buffer element offset to write</param>
+        /// <param name="data">Complete data</param>
+        internal void WriteDiscardBuffer<T>(Buffer buffer, long offset, params T[] data)
+            where T : struct
+        {
+            Counters.BufferWrites++;
+
+            if (data != null && data.Length > 0)
+            {
+                DataStream stream;
+                this.deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out stream);
+                using (stream)
+                {
+                    stream.Position = Marshal.SizeOf(default(T)) * offset;
+                    stream.WriteRange(data);
+                }
+                this.deviceContext.UnmapSubresource(buffer, 0);
+            }
+        }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Buffer element offset to write</param>
+        /// <param name="data">Complete data</param>
+        internal void WriteNoOverwriteBuffer<T>(Buffer buffer, long offset, params T[] data)
+            where T : struct
+        {
+            Counters.BufferWrites++;
+
+            if (data != null && data.Length > 0)
+            {
+                DataStream stream;
+                this.deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out stream);
+                using (stream)
+                {
+                    stream.Position = Marshal.SizeOf(default(T)) * offset;
+                    stream.WriteRange(data);
+                }
+                this.deviceContext.UnmapSubresource(buffer, 0);
+            }
+        }
+
+        /// <summary>
+        /// Reads an array of values from the specified buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphics context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="length">Array length</param>
+        /// <returns>Returns readed data</returns>
+        internal T[] ReadBuffer<T>(Buffer buffer, int length)
+            where T : struct
+        {
+            return ReadBuffer<T>(buffer, 0, length);
+        }
+        /// <summary>
+        /// Reads an array of values from the specified buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphics context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Offset to read</param>
+        /// <param name="length">Array length</param>
+        /// <returns>Returns readed data</returns>
+        internal T[] ReadBuffer<T>(Buffer buffer, long offset, int length)
+            where T : struct
+        {
+            Counters.BufferReads++;
+
+            T[] data = new T[length];
+
+            DataStream stream;
+            this.deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out stream);
+            using (stream)
+            {
+                stream.Position = Marshal.SizeOf(default(T)) * offset;
+
+                for (int i = 0; i < length; i++)
+                {
+                    data[i] = stream.Read<T>();
+                }
+            }
+            this.deviceContext.UnmapSubresource(buffer, 0);
+
+            return data;
+        }
+
+
+        internal void Draw(int vertexCount, int startVertexLocation)
+        {
+            this.deviceContext.Draw(vertexCount, startVertexLocation);
+
+            Counters.DrawCallsPerFrame++;
+        }
+        internal void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
+        {
+            this.deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
+
+            Counters.DrawCallsPerFrame++;
+        }
+        internal void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation)
+        {
+            this.deviceContext.DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
+
+            Counters.DrawCallsPerFrame++;
+        }
+        internal void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
+        {
+            this.deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
+
+            Counters.DrawCallsPerFrame++;
+        }
+        internal void DrawAuto()
+        {
+            this.deviceContext.DrawAuto();
+
+            Counters.DrawCallsPerFrame++;
         }
     }
 }

@@ -183,13 +183,16 @@
     <Compile Include="Common\EngineEffectVariableScalar.cs" />
     <Compile Include="Common\EngineEffectVariableTexture.cs" />
     <Compile Include="Common\EngineEffectVariableVector.cs" />
+    <Compile Include="Common\EnginePixelShader.cs" />
     <Compile Include="Common\EngineRenderTargetView.cs" />
-    <Compile Include="Common\EngineTexture.cs" />
+    <Compile Include="Common\EngineShaderResourceView.cs" />
+    <Compile Include="Common\EngineVertexShader.cs" />
     <Compile Include="Common\IndexBufferShapeEnum.cs" />
     <Compile Include="Common\Intersection.cs" />
     <Compile Include="Common\ManipulatorController.cs" />
     <Compile Include="Common\ModelBaseDescription.cs" />
     <Compile Include="Common\EngineBuffer.cs" />
+    <Compile Include="Common\ShaderIncludeManager.cs" />
     <Compile Include="Common\TimerTick.cs" />
     <Compile Include="Common\UpdateContext.cs" />
     <Compile Include="Common\UseMaterials.cs" />
@@ -531,7 +534,6 @@
     <Compile Include="Common\VertexPositionColor.cs" />
     <Compile Include="Drawable.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Helpers\HelperBuffers.cs" />
     <Compile Include="Helpers\HelperShaders.cs" />
     <Compile Include="Common\VertexSkinnedPositionNormalTexture.cs" />
     <Compile Include="Common\VertexPositionTexture.cs" />

@@ -17,12 +17,10 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="resource">Resource</param>
-        /// <param name="description">Depth stencil view description</param>
-        public EngineDepthStencilView(Graphics graphics, Resource resource, DepthStencilViewDescription description)
+        /// <param name="dsv">Depth stencil view</param>
+        internal EngineDepthStencilView(DepthStencilView dsv)
         {
-            this.dsv = new DepthStencilView(graphics.Device, resource, description);
+            this.dsv = dsv;
         }
 
         /// <summary>

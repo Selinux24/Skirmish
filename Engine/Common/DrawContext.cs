@@ -58,11 +58,11 @@ namespace Engine.Common
         /// <summary>
         /// Low definition shadow map
         /// </summary>
-        public EngineTexture ShadowMapLow { get; set; }
+        public EngineShaderResourceView ShadowMapLow { get; set; }
         /// <summary>
         /// High definition shadow map
         /// </summary>
-        public EngineTexture ShadowMapHigh { get; set; }
+        public EngineShaderResourceView ShadowMapHigh { get; set; }
 
         /// <summary>
         /// Constructor

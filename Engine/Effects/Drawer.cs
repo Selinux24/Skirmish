@@ -29,7 +29,7 @@ namespace Engine.Effects
             this.Graphics = graphics;
             if (compile)
             {
-                this.Effect = graphics.CompileEffect(effect);
+                this.Effect = graphics.CompileEffect(effect, HelperShaders.FXProfile);
             }
             else
             {

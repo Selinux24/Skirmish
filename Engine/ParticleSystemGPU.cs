@@ -5,7 +5,6 @@ namespace Engine
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
-    using Engine.Helpers;
     using SharpDX;
     using SharpDX.Direct3D;
     using SharpDX.Direct3D11;
@@ -74,7 +73,7 @@ namespace Engine
         /// <summary>
         /// Particle texture
         /// </summary>
-        public EngineTexture Texture { get; private set; }
+        public EngineShaderResourceView Texture { get; private set; }
         /// <summary>
         /// Texture count
         /// </summary>
@@ -218,9 +217,9 @@ namespace Engine
             this.drawingBinding = new[] { new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0) };
             this.streamOutBinding = new[] { new StreamOutputBufferBinding(this.streamOutBuffer, 0) };
 
-            this.streamOutInputLayout = DrawerPool.EffectDefaultGPUParticles.ParticleStreamOut.Create(game.Graphics, VertexGPUParticle.Input(BufferSlot));
-            this.rotatingInputLayout = DrawerPool.EffectDefaultGPUParticles.RotationDraw.Create(game.Graphics, VertexGPUParticle.Input(BufferSlot));
-            this.nonRotatingInputLayout = DrawerPool.EffectDefaultGPUParticles.NonRotationDraw.Create(game.Graphics, VertexGPUParticle.Input(BufferSlot));
+            this.streamOutInputLayout = game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultGPUParticles.ParticleStreamOut.GetSignature(), VertexGPUParticle.Input(BufferSlot));
+            this.rotatingInputLayout = game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultGPUParticles.RotationDraw.GetSignature(), VertexGPUParticle.Input(BufferSlot));
+            this.nonRotatingInputLayout = game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultGPUParticles.NonRotationDraw.GetSignature(), VertexGPUParticle.Input(BufferSlot));
         }
         /// <summary>
         /// Dispose resources
@@ -293,34 +292,34 @@ namespace Engine
         /// <param name="effect">Effect for stream out</param>
         private void StreamOut(EffectDefaultGPUParticles effect)
         {
+            var graphics = this.Game.Graphics;
+
             var techniqueForStreamOut = effect.GetTechniqueForStreamOut(VertexTypes.GPUParticle);
 
-            this.Game.Graphics.IAInputLayout = this.streamOutInputLayout;
-            this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.firstRun ? this.emitterBinding : this.drawingBinding);
-            this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
+            graphics.IAInputLayout = this.streamOutInputLayout;
+            graphics.IASetVertexBuffers(BufferSlot, this.firstRun ? this.emitterBinding : this.drawingBinding);
+            graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
-            this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(this.streamOutBinding);
+            graphics.SetStreamOutputTargets(this.streamOutBinding);
             Counters.SOTargetsSet++;
 
             for (int p = 0; p < techniqueForStreamOut.PassCount; p++)
             {
-                techniqueForStreamOut.Apply(this.Game.Graphics, p, 0);
+                graphics.EffectPassApply(techniqueForStreamOut, p, 0);
 
                 if (this.firstRun)
                 {
-                    this.Game.Graphics.DeviceContext.Draw(1, 0);
+                    graphics.Draw(1, 0);
 
                     this.firstRun = false;
                 }
                 else
                 {
-                    this.Game.Graphics.DeviceContext.DrawAuto();
+                    graphics.DrawAuto();
                 }
-
-                Counters.DrawCallsPerFrame++;
             }
 
-            this.Game.Graphics.DeviceContext.StreamOutput.SetTargets(null);
+            graphics.SetStreamOutputTargets(null);
             Counters.SOTargetsSet++;
         }
         /// <summary>
@@ -342,6 +341,8 @@ namespace Engine
         /// <param name="drawerMode">Drawe mode</param>
         private void Draw(EffectDefaultGPUParticles effect, DrawerModesEnum drawerMode)
         {
+            var graphics = this.Game.Graphics;
+
             if (drawerMode != DrawerModesEnum.ShadowMap)
             {
                 Counters.InstancesPerFrame++;
@@ -356,28 +357,26 @@ namespace Engine
                 drawerMode,
                 rot);
 
-            this.Game.Graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
-            this.Game.Graphics.IASetVertexBuffers(BufferSlot, this.drawingBinding);
-            this.Game.Graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
+            graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
+            graphics.IASetVertexBuffers(BufferSlot, this.drawingBinding);
+            graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
-            this.Game.Graphics.SetDepthStencilRDZEnabled();
+            graphics.SetDepthStencilRDZEnabled();
 
             if (this.Transparent)
             {
-                this.Game.Graphics.SetBlendDefaultAlpha();
+                graphics.SetBlendDefaultAlpha();
             }
             else
             {
-                this.Game.Graphics.SetBlendDefault();
+                graphics.SetBlendDefault();
             }
 
             for (int p = 0; p < techniqueForDrawing.PassCount; p++)
             {
-                techniqueForDrawing.Apply(this.Game.Graphics, p, 0);
+                graphics.EffectPassApply(techniqueForDrawing, p, 0);
 
-                this.Game.Graphics.DeviceContext.DrawAuto();
-
-                Counters.DrawCallsPerFrame++;
+                graphics.DrawAuto();
             }
         }
 

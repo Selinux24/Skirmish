@@ -26,7 +26,7 @@ namespace Engine.Effects
         /// <summary>
         /// Current cube texture
         /// </summary>
-        private EngineTexture currentCubeTexture = null;
+        private EngineShaderResourceView currentCubeTexture = null;
 
         /// <summary>
         /// World view projection matrix
@@ -45,7 +45,7 @@ namespace Engine.Effects
         /// <summary>
         /// Texture
         /// </summary>
-        protected EngineTexture CubeTexture
+        protected EngineShaderResourceView CubeTexture
         {
             get
             {
@@ -128,7 +128,7 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="texture">Texture</param>
         public void UpdatePerObject(
-            EngineTexture cubeTexture)
+            EngineShaderResourceView cubeTexture)
         {
             this.CubeTexture = cubeTexture;
         }
