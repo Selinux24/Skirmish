@@ -23,8 +23,8 @@ namespace Engine.Helpers.DDS
         public readonly static int StructSize = Marshal.SizeOf(new DDSHeaderDX10());
 
         public Format DXGIFormat;
-        public int Dimension;
-        public int MiscFlag; // see D3D11_RESOURCE_MISC_FLAG
+        public ResourceDimension Dimension;
+        public ResourceOptionFlags MiscFlag;
         public int ArraySize;
         public int Reserved;
 
@@ -48,7 +48,7 @@ namespace Engine.Helpers.DDS
 
             format = this.DXGIFormat;
 
-            switch ((ResourceDimension)this.Dimension)
+            switch (this.Dimension)
             {
                 case ResourceDimension.Texture1D:
                     // D3DX writes 1D textures with a fixed Height of 1
@@ -60,8 +60,7 @@ namespace Engine.Helpers.DDS
                     break;
 
                 case ResourceDimension.Texture2D:
-                    //D3D11_RESOURCE_MISC_TEXTURECUBE
-                    if ((this.MiscFlag & 0x4) > 0)
+                    if (this.MiscFlag.HasFlag(ResourceOptionFlags.TextureCube))
                     {
                         arraySize *= 6;
                         isCubeMap = true;
@@ -85,7 +84,7 @@ namespace Engine.Helpers.DDS
                     return false;
             }
 
-            resDim = (ResourceDimension)this.Dimension;
+            resDim = this.Dimension;
 
             return true;
         }

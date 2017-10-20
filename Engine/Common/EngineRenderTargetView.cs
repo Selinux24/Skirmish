@@ -13,7 +13,7 @@ namespace Engine.Common
         /// <summary>
         /// Render target list
         /// </summary>
-        private List<RenderTargetView> rtv = new List<RenderTargetView>();
+        private List<RenderTargetView1> rtv = new List<RenderTargetView1>();
 
         /// <summary>
         /// Gets the render target count
@@ -37,7 +37,7 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="rtv">Render target view</param>
-        internal EngineRenderTargetView(RenderTargetView rtv)
+        internal EngineRenderTargetView(RenderTargetView1 rtv)
         {
             this.rtv.Add(rtv);
         }
@@ -45,7 +45,7 @@ namespace Engine.Common
         /// Adds a new Render Target to the collection
         /// </summary>
         /// <param name="rtv">Render target view</param>
-        internal void Add(RenderTargetView rtv)
+        internal void Add(RenderTargetView1 rtv)
         {
             this.rtv.Add(rtv);
         }
@@ -54,7 +54,7 @@ namespace Engine.Common
         /// Gets the render target
         /// </summary>
         /// <returns>Returns the internal render target</returns>
-        public RenderTargetView GetRenderTarget()
+        public RenderTargetView1 GetRenderTarget()
         {
             return this.rtv[0];
         }
@@ -62,7 +62,7 @@ namespace Engine.Common
         /// Gets the render targets
         /// </summary>
         /// <returns>Returns the internal render target list</returns>
-        public RenderTargetView[] GetRenderTargets()
+        public RenderTargetView1[] GetRenderTargets()
         {
             return this.rtv.ToArray();
         }

@@ -38,15 +38,15 @@ namespace Engine
         /// <summary>
         /// Graphics device
         /// </summary>
-        private Device1 device = null;
+        private Device5 device = null;
         /// <summary>
         /// Graphics inmmediate context
         /// </summary>
-        private DeviceContext1 deviceContext = null;
+        private DeviceContext3 deviceContext = null;
         /// <summary>
         /// Swap chain
         /// </summary>
-        private SwapChain1 swapChain = null;
+        private SwapChain4 swapChain = null;
         /// <summary>
         /// Render target view
         /// </summary>
@@ -67,11 +67,12 @@ namespace Engine
         /// <summary>
         /// Current blend state
         /// </summary>
-        private BlendState currentBlendState = null;
+        private BlendState1 currentBlendState = null;
         /// <summary>
         /// Current rasterizer state
         /// </summary>
-        private RasterizerState currentRasterizerState = null;
+        private RasterizerState2 currentRasterizerState = null;
+
         /// <summary>
         /// Depth stencil state with z-buffer enabled for write
         /// </summary>
@@ -100,60 +101,61 @@ namespace Engine
         /// Depth stencil state for volume drawing
         /// </summary>
         private DepthStencilState depthStencilVolumeDrawing = null;
+
         /// <summary>
         /// Default blend state
         /// </summary>
-        private BlendState blendDefault = null;
+        private BlendState1 blendDefault = null;
         /// <summary>
         /// Default alpha blend state
         /// </summary>
-        private BlendState blendDefaultAlpha = null;
+        private BlendState1 blendDefaultAlpha = null;
         /// <summary>
         /// Blend state for transparent blending
         /// </summary>
-        private BlendState blendTransparent = null;
+        private BlendState1 blendTransparent = null;
         /// <summary>
         /// Additive blend state
         /// </summary>
-        private BlendState blendAdditive = null;
+        private BlendState1 blendAdditive = null;
         /// <summary>
         /// Blend state for deferred lighting blending
         /// </summary>
-        private BlendState blendDeferredLighting = null;
+        private BlendState1 blendDeferredLighting = null;
         /// <summary>
         /// Blend state for defered composer blending
         /// </summary>
-        private BlendState blendDeferredComposer = null;
+        private BlendState1 blendDeferredComposer = null;
         /// <summary>
         /// Blend state for transparent defered composer blending
         /// </summary>
-        private BlendState blendDeferredComposerTransparent = null;
+        private BlendState1 blendDeferredComposerTransparent = null;
 
         /// <summary>
         /// Default rasterizer
         /// </summary>
-        private RasterizerState rasterizerDefault = null;
+        private RasterizerState2 rasterizerDefault = null;
         /// <summary>
         /// Wireframe rasterizer
         /// </summary>
-        private RasterizerState rasterizerWireframe = null;
-
+        private RasterizerState2 rasterizerWireframe = null;
         /// <summary>
         /// No-cull rasterizer
         /// </summary>
-        private RasterizerState rasterizerNoCull = null;
+        private RasterizerState2 rasterizerNoCull = null;
         /// <summary>
         /// Cull counter-clockwise face rasterizer
         /// </summary>
-        private RasterizerState rasterizerCullFrontFace = null;
+        private RasterizerState2 rasterizerCullFrontFace = null;
         /// <summary>
         /// Stencil pass rasterizer (No Cull, No depth limit)
         /// </summary>
-        private RasterizerState rasterizerStencilPass = null;
+        private RasterizerState2 rasterizerStencilPass = null;
         /// <summary>
         /// Lighting pass rasterizer (Cull Front faces, No depth limit)
         /// </summary>
-        private RasterizerState rasterizerLightingPass = null;
+        private RasterizerState2 rasterizerLightingPass = null;
+
         /// <summary>
         /// Current vertex buffer first slot
         /// </summary>
@@ -195,7 +197,7 @@ namespace Engine
         /// <summary>
         /// Device description
         /// </summary>
-        public readonly string DeviceDescription = null;
+        public string DeviceDescription { get; private set; }
 
         /// <summary>
         /// Screen viewport
@@ -243,53 +245,141 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets desktop mode description
+        /// Finds mode description
         /// </summary>
-        /// <returns>Returns current desktop mode description</returns>
-        public static OutputDescription GetDesktopMode()
+        /// <param name="device">Device</param>
+        /// <param name="format">Format</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="fullScreen">True for full screen modes</param>
+        /// <param name="refreshRate">Refresh date</param>
+        /// <returns>Returns found mode description</returns>
+        private static ModeDescription1 FindModeDescription(Device5 device, Format format, int width, int height, bool fullScreen, int refreshRate)
         {
             using (var factory = new Factory1())
+            using (var factory5 = new Factory5(factory.NativePointer))
             {
-                using (var adapter = factory.GetAdapter1(0))
+                using (var firstAdapter = factory5.GetAdapter1(0))
+                using (var firstAdapter4 = new Adapter4(firstAdapter.NativePointer))
                 {
-                    using (var adapterOutput = adapter.GetOutput(0))
+                    using (var output = firstAdapter.GetOutput(0))
+                    using (var output6 = new Output6(output.NativePointer))
                     {
-                        return adapterOutput.Description;
+                        try
+                        {
+                            var displayModeList = output6.GetDisplayModeList1(
+                                format,
+                                DisplayModeEnumerationFlags.Interlaced);
+
+                            displayModeList = Array.FindAll(displayModeList, d => d.Width == width && d.Height == height);
+                            if (displayModeList.Length > 0)
+                            {
+                                if (refreshRate > 0)
+                                {
+                                    Array.Sort(displayModeList, (d1, d2) =>
+                                    {
+                                        float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
+                                        float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
+
+                                        f1 = Math.Abs(refreshRate - f1);
+                                        f2 = Math.Abs(refreshRate - f2);
+
+                                        return f1.CompareTo(f2);
+                                    });
+                                }
+                                else
+                                {
+                                    Array.Sort(displayModeList, (d1, d2) =>
+                                    {
+                                        float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
+                                        float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
+
+                                        return f2.CompareTo(f1);
+                                    });
+                                }
+
+                                return displayModeList[0];
+                            }
+                        }
+                        catch
+                        {
+
+                        }
+
+                        try
+                        {
+                            ModeDescription1 result;
+                            ModeDescription1 desc = new ModeDescription1()
+                            {
+                                Width = width,
+                                Height = height,
+                                Format = format,
+                            };
+                            output6.FindClosestMatchingMode1(
+                                ref desc,
+                                out result,
+                                device);
+
+                            result.Width = width;
+                            result.Height = height;
+
+                            return result;
+                        }
+                        catch
+                        {
+
+                        }
                     }
                 }
             }
+
+            return new ModeDescription1()
+            {
+                Width = width,
+                Height = height,
+                Format = format,
+                RefreshRate = new Rational(0, 1),
+                Scaling = DisplayModeScaling.Unspecified,
+                ScanlineOrdering = DisplayModeScanlineOrder.Unspecified,
+            };
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="form">Game form</param>
+        /// <param name="vsyncEnabled">Vertical sync enabled</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multisampling</param>
         public Graphics(EngineForm form, bool vsyncEnabled = false, int refreshRate = 0, int multiSampling = 0)
         {
-            Adapter1 adapter = null;
-            var displayMode = this.FindModeDescription(
+            var displayMode = FindModeDescription(
+                this.device,
                 this.BufferFormat,
                 form.RenderWidth,
                 form.RenderHeight,
                 form.IsFullscreen,
-                refreshRate,
-                out adapter);
+                refreshRate);
 
-            using (adapter)
+            this.vsyncEnabled = vsyncEnabled && displayMode.RefreshRate != new Rational(0, 1);
+
+            using (var factory = new Factory1())
+            using (var factory5 = new Factory5(factory.NativePointer))
             {
-                this.vsyncEnabled = vsyncEnabled && displayMode.RefreshRate != new Rational(0, 1);
-
-                if (multiSampling != 0)
+                using (var adapter = factory5.GetAdapter1(0))
+                using (var adapter4 = new Adapter4(adapter.NativePointer))
                 {
-                    using (var tmpDevice = new Device(adapter))
+                    if (multiSampling != 0)
                     {
-                        this.CheckMultisample(tmpDevice, multiSampling, out this.msCount, out this.msQuality);
+                        using (var tmpDevice = new Device(adapter4))
+                        using (var tmpDevice5 = new Device5(tmpDevice.NativePointer))
+                        {
+                            this.CheckMultisample(tmpDevice5, multiSampling, out this.msCount, out this.msQuality);
+                        }
                     }
-                }
 
-                this.DeviceDescription = string.Format("{0}", adapter.Description1.Description);
+                    this.DeviceDescription = string.Format("{0}", adapter4.Description2.Description);
+                }
             }
 
             DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
@@ -307,16 +397,19 @@ namespace Engine
                 {
                     FeatureLevel.Level_11_1,
                     FeatureLevel.Level_11_0,
-                    FeatureLevel.Level_10_1,
-                    FeatureLevel.Level_10_0,
-                    FeatureLevel.Level_9_3,
-                    FeatureLevel.Level_9_2,
-                    FeatureLevel.Level_9_1,
                 },
                 new SwapChainDescription()
                 {
-                    BufferCount = 1,
-                    ModeDescription = displayMode,
+                    BufferCount = 2,
+                    ModeDescription = new ModeDescription()
+                    {
+                        Format = displayMode.Format,
+                        Width = displayMode.Width,
+                        Height = displayMode.Height,
+                        RefreshRate = displayMode.RefreshRate,
+                        Scaling = displayMode.Scaling,
+                        ScanlineOrdering = displayMode.ScanlineOrdering,
+                    },
                     Usage = Usage.RenderTargetOutput,
                     OutputHandle = form.Handle,
                     SampleDescription = this.CurrentSampleDescription,
@@ -327,16 +420,16 @@ namespace Engine
                 out nDevice,
                 out nSwapChain);
 
-            this.device = new Device1(nDevice.NativePointer);
-            this.swapChain = new SwapChain1(nSwapChain.NativePointer);
+            this.device = new Device5(nDevice.NativePointer);
+            this.swapChain = new SwapChain4(nSwapChain.NativePointer);
 
-            this.deviceContext = this.device.ImmediateContext1;
+            this.deviceContext = this.device.ImmediateContext3;
 
             this.PrepareDevice(displayMode.Width, displayMode.Height, false);
 
             #region Alt + Enter
 
-            using (var factory = this.swapChain.GetParent<Factory>())
+            using (var factory = this.swapChain.GetParent<Factory5>())
             {
                 factory.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAltEnter);
             }
@@ -384,7 +477,7 @@ namespace Engine
 
             using (var backBuffer = Resource.FromSwapChain<Texture2D>(swapChain, 0))
             {
-                this.renderTargetView = new EngineRenderTargetView(new RenderTargetView(this.device, backBuffer));
+                this.renderTargetView = new EngineRenderTargetView(new RenderTargetView1(this.device, backBuffer));
             }
 
             #endregion
@@ -577,9 +670,9 @@ namespace Engine
             #region Rasterizer States
 
             //Default rasterizer state
-            this.rasterizerDefault = new RasterizerState(
+            this.rasterizerDefault = new RasterizerState2(
                 this.device,
-                new RasterizerStateDescription()
+                new RasterizerStateDescription2()
                 {
                     CullMode = CullMode.Back,
                     FillMode = FillMode.Solid,
@@ -594,9 +687,9 @@ namespace Engine
                 });
 
             //Wireframe rasterizer state
-            this.rasterizerWireframe = new RasterizerState(
+            this.rasterizerWireframe = new RasterizerState2(
                 this.device,
-                new RasterizerStateDescription()
+                new RasterizerStateDescription2()
                 {
                     CullMode = CullMode.Back,
                     FillMode = FillMode.Wireframe,
@@ -611,9 +704,9 @@ namespace Engine
                 });
 
             //No cull rasterizer state
-            this.rasterizerNoCull = new RasterizerState(
+            this.rasterizerNoCull = new RasterizerState2(
                 this.device,
-                new RasterizerStateDescription()
+                new RasterizerStateDescription2()
                 {
                     CullMode = CullMode.None,
                     FillMode = FillMode.Solid,
@@ -628,9 +721,9 @@ namespace Engine
                 });
 
             //Counter clockwise cull rasterizer state
-            this.rasterizerCullFrontFace = new RasterizerState(
+            this.rasterizerCullFrontFace = new RasterizerState2(
                 this.device,
-                new RasterizerStateDescription()
+                new RasterizerStateDescription2()
                 {
                     CullMode = CullMode.Back,
                     FillMode = FillMode.Solid,
@@ -645,9 +738,9 @@ namespace Engine
                 });
 
             //Stencil pass rasterizer state
-            this.rasterizerStencilPass = new RasterizerState(
+            this.rasterizerStencilPass = new RasterizerState2(
                 this.device,
-                new RasterizerStateDescription()
+                new RasterizerStateDescription2()
                 {
                     CullMode = CullMode.None,
                     FillMode = FillMode.Solid,
@@ -662,9 +755,9 @@ namespace Engine
                 });
 
             //Counter clockwise cull rasterizer state
-            this.rasterizerLightingPass = new RasterizerState(
+            this.rasterizerLightingPass = new RasterizerState2(
                 this.device,
-                new RasterizerStateDescription()
+                new RasterizerStateDescription2()
                 {
                     CullMode = CullMode.Back,
                     FillMode = FillMode.Solid,
@@ -684,7 +777,7 @@ namespace Engine
 
             #region Default blend state (No alpha)
             {
-                BlendStateDescription desc = new BlendStateDescription();
+                BlendStateDescription1 desc = new BlendStateDescription1();
                 desc.AlphaToCoverageEnable = false;
                 desc.IndependentBlendEnable = false;
 
@@ -699,13 +792,13 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendDefault = new BlendState(this.device, desc);
+                this.blendDefault = new BlendState1(this.device, desc);
             }
             #endregion
 
             #region Alpha blend state
             {
-                BlendStateDescription desc = new BlendStateDescription();
+                BlendStateDescription1 desc = new BlendStateDescription1();
                 desc.AlphaToCoverageEnable = false;
                 desc.IndependentBlendEnable = false;
 
@@ -720,13 +813,13 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendDefaultAlpha = new BlendState(this.device, desc);
+                this.blendDefaultAlpha = new BlendState1(this.device, desc);
             }
             #endregion
 
             #region Transparent blend state
             {
-                BlendStateDescription desc = new BlendStateDescription();
+                BlendStateDescription1 desc = new BlendStateDescription1();
                 desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = false;
 
@@ -741,13 +834,13 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendTransparent = new BlendState(this.device, desc);
+                this.blendTransparent = new BlendState1(this.device, desc);
             }
             #endregion
 
             #region Additive blend state
             {
-                BlendStateDescription desc = new BlendStateDescription();
+                BlendStateDescription1 desc = new BlendStateDescription1();
                 desc.AlphaToCoverageEnable = false;
                 desc.IndependentBlendEnable = false;
 
@@ -762,13 +855,13 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendAdditive = new BlendState(this.device, desc);
+                this.blendAdditive = new BlendState1(this.device, desc);
             }
             #endregion
 
             #region Deferred composer blend state (no alpha)
             {
-                BlendStateDescription desc = new BlendStateDescription();
+                BlendStateDescription1 desc = new BlendStateDescription1();
                 desc.AlphaToCoverageEnable = false;
                 desc.IndependentBlendEnable = true;
 
@@ -799,13 +892,13 @@ namespace Engine
                 desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendDeferredComposer = new BlendState(this.device, desc);
+                this.blendDeferredComposer = new BlendState1(this.device, desc);
             }
             #endregion
 
             #region Deferred composer transparent blend state
             {
-                BlendStateDescription desc = new BlendStateDescription();
+                BlendStateDescription1 desc = new BlendStateDescription1();
                 desc.AlphaToCoverageEnable = true;
                 desc.IndependentBlendEnable = true;
 
@@ -837,13 +930,13 @@ namespace Engine
                 desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
 
-                this.blendDeferredComposerTransparent = new BlendState(this.device, desc);
+                this.blendDeferredComposerTransparent = new BlendState1(this.device, desc);
             }
             #endregion
 
             #region Deferred lighting blend state
             {
-                BlendStateDescription desc = new BlendStateDescription();
+                BlendStateDescription1 desc = new BlendStateDescription1();
                 desc.AlphaToCoverageEnable = false;
                 desc.IndependentBlendEnable = false;
 
@@ -856,7 +949,7 @@ namespace Engine
                 desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
                 desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
 
-                this.blendDeferredLighting = new BlendState(this.device, desc);
+                this.blendDeferredLighting = new BlendState1(this.device, desc);
             }
             #endregion
 
@@ -1265,7 +1358,7 @@ namespace Engine
         /// <param name="state">Blend state</param>
         /// <param name="blendFactor">Blend factor</param>
         /// <param name="sampleMask">Sample mask</param>
-        private void SetBlendState(BlendState state, Color4? blendFactor = null, int sampleMask = -1)
+        private void SetBlendState(BlendState1 state, Color4? blendFactor = null, int sampleMask = -1)
         {
             if (this.currentBlendState != state)
             {
@@ -1280,7 +1373,7 @@ namespace Engine
         /// Sets rasterizer state
         /// </summary>
         /// <param name="state">Rasterizer state</param>
-        private void SetRasterizerState(RasterizerState state)
+        private void SetRasterizerState(RasterizerState2 state)
         {
             if (this.currentRasterizerState != state)
             {
@@ -1298,115 +1391,16 @@ namespace Engine
         /// <param name="multiSampling">Multi-sample count</param>
         /// <param name="sampleCount">Sample count</param>
         /// <param name="maxQualityLevel">Maximum quality level</param>
-        private void CheckMultisample(Device tmpDevice, int multiSampling, out int sampleCount, out int maxQualityLevel)
+        private void CheckMultisample(Device5 tmpDevice, int multiSampling, out int sampleCount, out int maxQualityLevel)
         {
             sampleCount = 1;
             maxQualityLevel = 0;
-            int maxQuality = tmpDevice.CheckMultisampleQualityLevels(this.BufferFormat, multiSampling);
+            int maxQuality = tmpDevice.CheckMultisampleQualityLevels1(this.BufferFormat, multiSampling, CheckMultisampleQualityLevelsFlags.None);
             if (maxQuality > 0)
             {
                 sampleCount = multiSampling;
                 maxQualityLevel = maxQuality - 1;
             }
-        }
-        /// <summary>
-        /// Finds mode description
-        /// </summary>
-        /// <param name="format">Format</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="fullScreen">True for full screen modes</param>
-        /// <param name="refreshRate">Refresh date</param>
-        /// <param name="adapter">Selected adapter</param>
-        /// <returns>Returns found mode description</returns>
-        private ModeDescription FindModeDescription(Format format, int width, int height, bool fullScreen, int refreshRate, out Adapter1 adapter)
-        {
-            adapter = null;
-
-            using (Factory1 factory = new Factory1())
-            {
-                adapter = factory.GetAdapter1(0);
-
-                using (Adapter1 firstAdapter = factory.GetAdapter1(0))
-                {
-                    using (Output adapterOutput = firstAdapter.GetOutput(0))
-                    {
-                        try
-                        {
-                            var displayModeList = adapterOutput.GetDisplayModeList(
-                                format,
-                                DisplayModeEnumerationFlags.Interlaced);
-
-                            displayModeList = Array.FindAll(displayModeList, d => d.Width == width && d.Height == height);
-                            if (displayModeList.Length > 0)
-                            {
-                                if (refreshRate > 0)
-                                {
-                                    Array.Sort(displayModeList, (d1, d2) =>
-                                    {
-                                        float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                        float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
-
-                                        f1 = Math.Abs(refreshRate - f1);
-                                        f2 = Math.Abs(refreshRate - f2);
-
-                                        return f1.CompareTo(f2);
-                                    });
-                                }
-                                else
-                                {
-                                    Array.Sort(displayModeList, (d1, d2) =>
-                                    {
-                                        float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                        float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
-
-                                        return f2.CompareTo(f1);
-                                    });
-                                }
-
-                                return displayModeList[0];
-                            }
-                        }
-                        catch
-                        {
-
-                        }
-
-                        try
-                        {
-                            ModeDescription result;
-                            adapterOutput.GetClosestMatchingMode(
-                                null,
-                                new ModeDescription()
-                                {
-                                    Format = format,
-                                    Width = width,
-                                    Height = height,
-                                },
-                                out result);
-
-                            result.Width = width;
-                            result.Height = height;
-
-                            return result;
-                        }
-                        catch
-                        {
-
-                        }
-                    }
-                }
-            }
-
-            return new ModeDescription()
-            {
-                Width = width,
-                Height = height,
-                Format = format,
-                RefreshRate = new Rational(0, 1),
-                Scaling = DisplayModeScaling.Unspecified,
-                ScanlineOrdering = DisplayModeScanlineOrder.Unspecified,
-            };
         }
         /// <summary>
         /// Dispose resources
@@ -1445,31 +1439,31 @@ namespace Engine
         /// </summary>
         /// <param name="description">Texture description</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ShaderResourceView CreateResource(TextureDescription description)
+        private ShaderResourceView1 CreateResource(TextureData description)
         {
             var fmtSupport = this.device.CheckFormatSupport(description.Format);
             var autogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
 
             using (var texture = this.CreateTexture2D(description.Width, description.Height, description.Format, 1, autogen))
             {
-                ShaderResourceView result = null;
+                ShaderResourceView1 result = null;
 
                 if (autogen)
                 {
-                    var desc = new ShaderResourceViewDescription()
+                    var desc = new ShaderResourceViewDescription1()
                     {
                         Format = texture.Description.Format,
                         Dimension = ShaderResourceViewDimension.Texture2D,
-                        Texture2D = new ShaderResourceViewDescription.Texture2DResource()
+                        Texture2D = new ShaderResourceViewDescription1.Texture2DResource1()
                         {
                             MipLevels = (autogen) ? -1 : 1,
                         }
                     };
-                    result = new ShaderResourceView(this.device, texture, desc);
+                    result = new ShaderResourceView1(this.device, texture, desc);
                 }
                 else
                 {
-                    result = new ShaderResourceView(this.device, texture);
+                    result = new ShaderResourceView1(this.device, texture);
                 }
 
                 this.deviceContext.UpdateSubresource(description.GetDataBox(), texture, 0);
@@ -1487,7 +1481,7 @@ namespace Engine
         /// </summary>
         /// <param name="descriptions">Texture description list</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ShaderResourceView CreateResource(TextureDescription[] descriptions)
+        private ShaderResourceView1 CreateResource(TextureData[] descriptions)
         {
             var textureDescription = descriptions[0];
 
@@ -1496,26 +1490,26 @@ namespace Engine
 
             using (var textureArray = this.CreateTexture2D(textureDescription.Width, textureDescription.Height, textureDescription.Format, descriptions.Length, autogen))
             {
-                ShaderResourceView result = null;
+                ShaderResourceView1 result = null;
 
                 if (autogen)
                 {
-                    var desc = new ShaderResourceViewDescription()
+                    var desc = new ShaderResourceViewDescription1()
                     {
                         Format = textureDescription.Format,
                         Dimension = ShaderResourceViewDimension.Texture2DArray,
-                        Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
+                        Texture2DArray = new ShaderResourceViewDescription1.Texture2DArrayResource1()
                         {
                             ArraySize = descriptions.Length,
                             MipLevels = (autogen) ? -1 : 1,
                         }
                     };
 
-                    result = new ShaderResourceView(this.device, textureArray, desc);
+                    result = new ShaderResourceView1(this.device, textureArray, desc);
                 }
                 else
                 {
-                    result = new ShaderResourceView(this.device, textureArray);
+                    result = new ShaderResourceView1(this.device, textureArray);
                 }
 
                 for (int i = 0; i < descriptions.Length; i++)
@@ -1543,9 +1537,9 @@ namespace Engine
         /// <param name="arraySize">Size</param>
         /// <param name="generateMips">Generate mips for the texture</param>
         /// <returns>Returns the Texture2D</returns>
-        private Texture2D CreateTexture2D(int width, int height, Format format, int arraySize, bool generateMips)
+        private Texture2D1 CreateTexture2D(int width, int height, Format format, int arraySize, bool generateMips)
         {
-            var description = new Texture2DDescription()
+            var description = new Texture2DDescription1()
             {
                 Width = width,
                 Height = height,
@@ -1557,9 +1551,10 @@ namespace Engine
                 MipLevels = (generateMips) ? 0 : 1,
                 OptionFlags = (generateMips) ? ResourceOptionFlags.GenerateMipMaps : ResourceOptionFlags.None,
                 SampleDescription = new SampleDescription(1, 0),
+                TextureLayout = TextureLayout.Undefined,
             };
 
-            return new Texture2D(this.device, description);
+            return new Texture2D1(this.device, description);
         }
 
         /// <summary>
@@ -1702,7 +1697,7 @@ namespace Engine
                         OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
                     }))
                 {
-                    return new EngineShaderResourceView(new ShaderResourceView(this.device, cubeTex));
+                    return new EngineShaderResourceView(new ShaderResourceView1(this.device, cubeTex));
                 }
             }
             catch (Exception ex)
@@ -1739,7 +1734,7 @@ namespace Engine
                         OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
                     }))
                 {
-                    return new EngineShaderResourceView(new ShaderResourceView(this.device, cubeTex));
+                    return new EngineShaderResourceView(new ShaderResourceView1(this.device, cubeTex));
                 }
             }
             catch (Exception ex)
@@ -1776,7 +1771,7 @@ namespace Engine
                         },
                         str))
                     {
-                        return new EngineShaderResourceView(new ShaderResourceView(this.device, randTex));
+                        return new EngineShaderResourceView(new ShaderResourceView1(this.device, randTex));
                     }
                 }
             }
@@ -1821,7 +1816,7 @@ namespace Engine
                         },
                         new[] { dBox }))
                     {
-                        return new EngineShaderResourceView(new ShaderResourceView(this.device, texture));
+                        return new EngineShaderResourceView(new ShaderResourceView1(this.device, texture));
                     }
                 }
             }
@@ -1889,8 +1884,8 @@ namespace Engine
                         OptionFlags = ResourceOptionFlags.None
                     }))
                 {
-                    rtv = new EngineRenderTargetView(new RenderTargetView(this.device, texture));
-                    srv = new EngineShaderResourceView(new ShaderResourceView(this.device, texture));
+                    rtv = new EngineRenderTargetView(new RenderTargetView1(this.device, texture));
+                    srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, texture));
                 }
             }
             catch (Exception ex)
@@ -1934,8 +1929,8 @@ namespace Engine
                             OptionFlags = ResourceOptionFlags.None
                         }))
                     {
-                        rtv.Add(new RenderTargetView(this.device, texture));
-                        srv[i] = new EngineShaderResourceView(new ShaderResourceView(this.device, texture));
+                        rtv.Add(new RenderTargetView1(this.device, texture));
+                        srv[i] = new EngineShaderResourceView(new ShaderResourceView1(this.device, texture));
                     }
                 }
             }
@@ -1994,11 +1989,11 @@ namespace Engine
                     ShaderResourceViewDimension.Texture2DMultisampled :
                     ShaderResourceViewDimension.Texture2D;
 
-                var rvDescription = new ShaderResourceViewDescription
+                var rvDescription = new ShaderResourceViewDescription1
                 {
                     Format = Format.R24_UNorm_X8_Typeless,
                     Dimension = rvDimension,
-                    Texture2D = new ShaderResourceViewDescription.Texture2DResource()
+                    Texture2D = new ShaderResourceViewDescription1.Texture2DResource1()
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0
@@ -2010,7 +2005,7 @@ namespace Engine
                 };
 
                 dsv = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
-                srv = new EngineShaderResourceView(new ShaderResourceView(this.device, depthMap, rvDescription));
+                srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
             }
         }
         /// <summary>

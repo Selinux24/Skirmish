@@ -1,10 +1,11 @@
-﻿using Engine.Properties;
-using SharpDX;
+﻿using SharpDX;
 using SharpDX.Windows;
 using System.Windows.Forms;
 
 namespace Engine
 {
+    using Engine.Properties;
+
     /// <summary>
     /// Engine render form
     /// </summary>
@@ -59,14 +60,7 @@ namespace Engine
             base.IsFullscreen = fullScreen;
             this.AllowUserResizing = !fullScreen;
 
-            if (fullScreen)
-            {
-                this.Size = new System.Drawing.Size(screenWidth, screenHeight);
-            }
-            else
-            {
-                this.ClientSize = new System.Drawing.Size(screenWidth, screenHeight);
-            }
+            this.Size = new System.Drawing.Size(screenWidth, screenHeight);
 
             this.UpdateSizes(fullScreen);
 

@@ -212,7 +212,7 @@
     <Compile Include="Helpers\DDS\DDSHeaderDX10.cs" />
     <Compile Include="Helpers\DDS\DDSPixelFormat.cs" />
     <Compile Include="Helpers\HelperTextures.cs" />
-    <Compile Include="Helpers\TextureDescription.cs" />
+    <Compile Include="Helpers\TextureData.cs" />
     <Compile Include="IComposed.cs" />
     <Compile Include="IControllable.cs" />
     <Compile Include="ICullable.cs" />

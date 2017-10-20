@@ -125,6 +125,27 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets desktop mode description
+        /// </summary>
+        /// <returns>Returns current desktop mode description</returns>
+        private static OutputDescription1 GetDesktopMode()
+        {
+            using (var factory = new Factory1())
+            using (var factory5 = new Factory5(factory.NativePointer))
+            {
+                using (var adapter = factory5.GetAdapter1(0))
+                using (var adapter4 = new Adapter4(adapter.NativePointer))
+                {
+                    using (var adapterOutput = adapter4.GetOutput(0))
+                    using (var adapterOutput6 = new Output6(adapterOutput.NativePointer))
+                    {
+                        return adapterOutput6.Description1;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="name">Name, for the game form</param>
@@ -147,10 +168,10 @@ namespace Engine
 
             if (screenWidth == 0 || screenHeight == 0)
             {
-                OutputDescription mode = Graphics.GetDesktopMode();
+                var mode = GetDesktopMode();
 
-                screenWidth = mode.DesktopBounds.Right - mode.DesktopBounds.Left;
-                screenHeight = mode.DesktopBounds.Bottom - mode.DesktopBounds.Top;
+                screenWidth = mode.DesktopCoordinates.Right - mode.DesktopCoordinates.Left;
+                screenHeight = mode.DesktopCoordinates.Bottom - mode.DesktopCoordinates.Top;
             }
 
             this.Form = new EngineForm(name, screenWidth, screenHeight, fullScreen);

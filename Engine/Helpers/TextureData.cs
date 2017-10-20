@@ -8,7 +8,7 @@ namespace Engine.Helpers
     using Engine.Helpers.DDS;
     using SharpDX.Direct3D11;
 
-    class TextureDescription : IDisposable
+    class TextureData : IDisposable
     {
         private DataStream stream;
 
@@ -18,7 +18,7 @@ namespace Engine.Helpers
         public int Width { get; private set; }
         public int Height { get; private set; }
 
-        public TextureDescription(BitmapSource bitmap)
+        public TextureData(BitmapSource bitmap)
         {
             this.IsCubeMap = false;
 
@@ -35,7 +35,7 @@ namespace Engine.Helpers
             // Copy the content of the WIC to the buffer
             bitmap.CopyPixels(this.Stride, this.stream);
         }
-        public TextureDescription(DDSHeader header, DDSHeaderDX10? header10, byte[] bitData, int offset, int maxsize)
+        public TextureData(DDSHeader header, DDSHeaderDX10? header10, byte[] bitData, int offset, int maxsize)
         {
             this.IsCubeMap = false;
 

@@ -48,60 +48,60 @@ namespace Engine.Helpers
                 return formatConverter;
             }
         }
-        public static TextureDescription ReadTexture(byte[] buffer)
+        public static TextureData ReadTexture(byte[] buffer)
         {
             DDSHeader header;
             int offset;
             if (DDSHeader.GetInfo(buffer, out header, out offset))
             {
-                return new TextureDescription(header, null, buffer, offset, 0);
+                return new TextureData(header, null, buffer, offset, 0);
             }
             else
             {
                 using (var stream = new MemoryStream(buffer))
                 using (var bitmap = ReadBitmap(stream))
                 {
-                    return new TextureDescription(bitmap);
+                    return new TextureData(bitmap);
                 }
             }
         }
-        public static TextureDescription ReadTexture(string filename)
+        public static TextureData ReadTexture(string filename)
         {
             DDSHeader header;
             int offset;
             byte[] buffer;
             if (DDSHeader.GetInfo(filename, out header, out offset, out buffer))
             {
-                return new TextureDescription(header, null, buffer, offset, 0);
+                return new TextureData(header, null, buffer, offset, 0);
             }
             else
             {
                 using (var bitmap = ReadBitmap(filename))
                 {
-                    return new TextureDescription(bitmap);
+                    return new TextureData(bitmap);
                 }
             }
         }
-        public static TextureDescription ReadTexture(MemoryStream stream)
+        public static TextureData ReadTexture(MemoryStream stream)
         {
             DDSHeader header;
             int offset;
             byte[] buffer;
             if (DDSHeader.GetInfo(stream, out header, out offset, out buffer))
             {
-                return new TextureDescription(header, null, buffer, offset, 0);
+                return new TextureData(header, null, buffer, offset, 0);
             }
             else
             {
                 using (var bitmap = ReadBitmap(stream))
                 {
-                    return new TextureDescription(bitmap);
+                    return new TextureData(bitmap);
                 }
             }
         }
-        public static TextureDescription[] ReadTexture(string[] filenames)
+        public static TextureData[] ReadTexture(string[] filenames)
         {
-            TextureDescription[] textureList = new TextureDescription[filenames.Length];
+            TextureData[] textureList = new TextureData[filenames.Length];
 
             for (int i = 0; i < filenames.Length; i++)
             {
@@ -110,9 +110,9 @@ namespace Engine.Helpers
 
             return textureList;
         }
-        public static TextureDescription[] ReadTexture(MemoryStream[] streams)
+        public static TextureData[] ReadTexture(MemoryStream[] streams)
         {
-            TextureDescription[] textureList = new TextureDescription[streams.Length];
+            TextureData[] textureList = new TextureData[streams.Length];
 
             for (int i = 0; i < streams.Length; i++)
             {
