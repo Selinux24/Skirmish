@@ -243,6 +243,46 @@ namespace Engine
                 return new SampleDescription(this.msCount, this.msQuality);
             }
         }
+        /// <summary>
+        /// Gets or sets the input assembler's primitive topology
+        /// </summary>
+        public PrimitiveTopology IAPrimitiveTopology
+        {
+            get
+            {
+                return this.currentIAPrimitiveTopology;
+            }
+            set
+            {
+                if (this.currentIAPrimitiveTopology != value)
+                {
+                    this.deviceContext.InputAssembler.PrimitiveTopology = value;
+                    Counters.IAPrimitiveTopologySets++;
+
+                    this.currentIAPrimitiveTopology = value;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets or sets the input assembler's input layout
+        /// </summary>
+        public InputLayout IAInputLayout
+        {
+            get
+            {
+                return this.currentIAInputLayout;
+            }
+            set
+            {
+                if (this.currentIAInputLayout != value)
+                {
+                    this.deviceContext.InputAssembler.InputLayout = value;
+                    Counters.IAInputLayoutSets++;
+
+                    this.currentIAInputLayout = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Finds mode description
@@ -450,6 +490,10 @@ namespace Engine
             this.deviceContext = this.device.ImmediateContext3;
 
             this.PrepareDevice(displayMode.Width, displayMode.Height, false);
+
+#if DEBUG
+            this.ConfigureDebugLayer();
+#endif
 
             #region Alt + Enter
 
@@ -999,6 +1043,39 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Configure debug layer messages
+        /// </summary>
+        private void ConfigureDebugLayer()
+        {
+            using (var d3dDebug = this.device.QueryInterface<DeviceDebug>())
+            using (var d3dInfoQueue = d3dDebug.QueryInterface<InfoQueue>())
+            {
+                d3dInfoQueue.SetBreakOnSeverity(MessageSeverity.Corruption, true);
+                d3dInfoQueue.SetBreakOnSeverity(MessageSeverity.Error, true);
+
+                var idHide = new MessageId[]
+                {
+                    MessageId.MessageIdDeviceDrawRenderTargetViewNotSet,
+                };
+
+                var sevHide = new MessageSeverity[]
+                {
+                    MessageSeverity.Warning,
+                };
+
+                var filter = new InfoQueueFilter()
+                {
+                    DenyList = new InfoQueueFilterDescription()
+                    {
+                        Ids = idHide,
+                        Severities = sevHide,
+                    }
+                };
+
+                d3dInfoQueue.AddStorageFilterEntries(filter);
+            }
+        }
 
         /// <summary>
         /// Begin frame
@@ -1303,46 +1380,7 @@ namespace Engine
                 this.currentIndexOffset = offset;
             }
         }
-        /// <summary>
-        /// Gets or sets the input assembler's primitive topology
-        /// </summary>
-        public PrimitiveTopology IAPrimitiveTopology
-        {
-            get
-            {
-                return this.currentIAPrimitiveTopology;
-            }
-            set
-            {
-                if (this.currentIAPrimitiveTopology != value)
-                {
-                    this.deviceContext.InputAssembler.PrimitiveTopology = value;
-                    Counters.IAPrimitiveTopologySets++;
 
-                    this.currentIAPrimitiveTopology = value;
-                }
-            }
-        }
-        /// <summary>
-        /// Gets or sets the input assembler's input layout
-        /// </summary>
-        public InputLayout IAInputLayout
-        {
-            get
-            {
-                return this.currentIAInputLayout;
-            }
-            set
-            {
-                if (this.currentIAInputLayout != value)
-                {
-                    this.deviceContext.InputAssembler.InputLayout = value;
-                    Counters.IAInputLayoutSets++;
-
-                    this.currentIAInputLayout = value;
-                }
-            }
-        }
         /// <summary>
         /// Dispose created resources
         /// </summary>

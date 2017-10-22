@@ -5,7 +5,6 @@ using System;
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Shadow map
