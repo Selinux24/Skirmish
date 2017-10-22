@@ -13,27 +13,23 @@ namespace Engine.Helpers.DDS
     [StructLayout(LayoutKind.Sequential)]
     struct DDSHeader
     {
-        public const int DDS_MAGIC = 0x20534444;
+        /// <summary>
+        /// DDS_MAGIC
+        /// </summary>
+        const int DDSMagic = 0x20534444;
 
-        const int DDS_FOURCC = 0x00000004;// DDPF_FOURCC
-
-        const int DDS_HEADER_FLAGS_TEXTURE = 0x00001007;// DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT
-        const int DDS_HEADER_FLAGS_MIPMAP = 0x00020000;// DDSD_MIPMAPCOUNT
-        const int DDS_HEADER_FLAGS_VOLUME = 0x00800000;// DDSD_DEPTH
-        const int DDS_HEADER_FLAGS_PITCH = 0x00000008;// DDSD_PITCH
-        const int DDS_HEADER_FLAGS_LINEARSIZE = 0x00080000;// DDSD_LINEARSIZE
-
-        const int DDS_CUBEMAP = 0x00000200;// DDSCAPS2_CUBEMAP
-        const int DDS_CUBEMAP_POSITIVEX = 0x00000600;// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEX
-        const int DDS_CUBEMAP_NEGATIVEX = 0x00000a00;// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEX
-        const int DDS_CUBEMAP_POSITIVEY = 0x00001200;// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEY
-        const int DDS_CUBEMAP_NEGATIVEY = 0x00002200;// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEY
-        const int DDS_CUBEMAP_POSITIVEZ = 0x00004200;// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_POSITIVEZ
-        const int DDS_CUBEMAP_NEGATIVEZ = 0x00008200;// DDSCAPS2_CUBEMAP | DDSCAPS2_CUBEMAP_NEGATIVEZ
-        const int DDS_CUBEMAP_ALLFACES = (DDS_CUBEMAP_POSITIVEX | DDS_CUBEMAP_NEGATIVEX | DDS_CUBEMAP_POSITIVEY | DDS_CUBEMAP_NEGATIVEY | DDS_CUBEMAP_POSITIVEZ | DDS_CUBEMAP_NEGATIVEZ);
-
+        /// <summary>
+        /// Size of DDS Header
+        /// </summary>
         public readonly static int StructSize = Marshal.SizeOf(new DDSHeader());
 
+        /// <summary>
+        /// Gets info from byte data
+        /// </summary>
+        /// <param name="data">Data</param>
+        /// <param name="header">Resulting Header</param>
+        /// <param name="offset">Resulting Offset</param>
+        /// <returns>Returns true if the byte data contains a DDS Header</returns>
         public static bool GetInfo(byte[] data, out DDSHeader header, out int offset)
         {
             // Validate DDS file in memory
@@ -45,9 +41,9 @@ namespace Engine.Helpers.DDS
                 return false;
             }
 
-            //first is magic number
+            // First is magic number
             int dwMagicNumber = BitConverter.ToInt32(data, 0);
-            if (dwMagicNumber != DDSHeader.DDS_MAGIC)
+            if (dwMagicNumber != DDSHeader.DDSMagic)
             {
                 return false;
             }
@@ -62,8 +58,7 @@ namespace Engine.Helpers.DDS
             }
 
             // Check for DX10 extension
-            bool bDXT10Header = false;
-            if (header.IsDX10)
+            if (header.PixelFormat.IsDX10())
             {
                 // Must be long enough for both headers and magic value
                 if (data.Length < (DDSHeader.StructSize + 4 + DDSHeaderDX10.StructSize))
@@ -71,76 +66,97 @@ namespace Engine.Helpers.DDS
                     return false;
                 }
 
-                bDXT10Header = true;
+                offset = 4 + DDSHeader.StructSize + DDSHeaderDX10.StructSize;
             }
-
-            offset = 4 + DDSHeader.StructSize + (bDXT10Header ? DDSHeaderDX10.StructSize : 0);
+            else
+            {
+                offset = 4 + DDSHeader.StructSize;
+            }
 
             return true;
         }
+        /// <summary>
+        /// Gets info from file
+        /// </summary>
+        /// <param name="filename">File name</param>
+        /// <param name="header">Resulting Header</param>
+        /// <param name="offset">Resulting Offset</param>
+        /// <param name="buffer">Readed byte buffer</param>
+        /// <returns>Returns true if the file contains a DDS Header</returns>
         public static bool GetInfo(string filename, out DDSHeader header, out int offset, out byte[] buffer)
         {
             buffer = File.ReadAllBytes(filename);
             return GetInfo(buffer, out header, out offset);
         }
+        /// <summary>
+        /// Gets info from stream
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <param name="header">Resulting Header</param>
+        /// <param name="offset">Resulting Offset</param>
+        /// <param name="buffer">Readed byte buffer</param>
+        /// <returns>Returns true if the stream contains a DDS Header</returns>
         public static bool GetInfo(MemoryStream stream, out DDSHeader header, out int offset, out byte[] buffer)
         {
             buffer = stream.GetBuffer();
             return GetInfo(buffer, out header, out offset);
         }
-
-        public int Size;
-        public int Flags;
-        public int Height;
-        public int Width;
-        public int PitchOrLinearSize;
-        public int Depth;
-        public int MipMapCount;
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 11)]
-        public int[] Reserved1;
-
-        public DDSPixelFormat PixelFormat;
-        public int Caps;
-        public int Caps2;
-        public int Caps3;
-        public int Caps4;
-        public int Reserved2;
-
-        public bool IsDX10
+        /// <summary>
+        /// Validates the texture
+        /// </summary>
+        /// <param name="header">DDS Header</param>
+        /// <param name="header10">DDS header DX10</param>
+        /// <param name="depth">Returns the texture depth</param>
+        /// <param name="format">Returns the texture format</param>
+        /// <param name="resDim">Returns the texture dimension</param>
+        /// <param name="arraySize">Returns the texture array size</param>
+        /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
+        /// <returns>Returns true if the texture is valid</returns>
+        public static bool ValidateTexture(DDSHeader header, DDSHeaderDX10? header10, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
         {
-            get
+            if (header10.HasValue)
             {
-                var pf = this.PixelFormat;
-
-                return
-                    ((pf.Flags & DDS_FOURCC) > 0) &&
-                    (DDSPixelFormat.MakeFourCC('D', 'X', '1', '0') == pf.FourCC);
+                return ValidateTexture(header10.Value, header.Flags, out depth, out format, out resDim, out arraySize, out isCubeMap);
+            }
+            else
+            {
+                return ValidateTexture(header, out depth, out format, out resDim, out arraySize, out isCubeMap);
             }
         }
-        public bool Validate(ref int width, ref int height, ref int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
+        /// <summary>
+        /// Validates the texture
+        /// </summary>
+        /// <param name="header">DDS Header</param>
+        /// <param name="depth">Returns the texture depth</param>
+        /// <param name="format">Returns the texture format</param>
+        /// <param name="resDim">Returns the texture dimension</param>
+        /// <param name="arraySize">Returns the texture array size</param>
+        /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
+        /// <returns>Returns true if the texture is valid</returns>
+        private static bool ValidateTexture(DDSHeader header, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
         {
+            depth = 0;
             format = Format.Unknown;
             resDim = ResourceDimension.Unknown;
             arraySize = 1;
             isCubeMap = false;
 
-            format = this.PixelFormat.GetDXGIFormat();
-
+            format = header.PixelFormat.GetDXGIFormat();
             if (format == Format.Unknown)
             {
                 return false;
             }
 
-            if ((this.Flags & DDS_HEADER_FLAGS_VOLUME) > 0)
+            if (header.Flags.HasFlag(DDSFlagsEnum.Depth))
             {
                 resDim = ResourceDimension.Texture3D;
             }
             else
             {
-                if ((this.Caps2 & DDS_CUBEMAP) > 0)
+                if (header.Caps2.HasFlag(DDSCaps2Enum.Cubemap))
                 {
                     // We require all six faces to be defined
-                    if ((this.Caps2 & DDS_CUBEMAP_ALLFACES) != DDS_CUBEMAP_ALLFACES)
+                    if ((header.Caps2 & DDSCaps2Enum.AllFaces) != DDSCaps2Enum.AllFaces)
                     {
                         return false;
                     }
@@ -155,5 +171,135 @@ namespace Engine.Helpers.DDS
 
             return true;
         }
+        /// <summary>
+        /// Validates the texture
+        /// </summary>
+        /// <param name="header">DDS DX10 header</param>
+        /// <param name="flags">Flags</param>
+        /// <param name="depth">Returns the texture depth</param>
+        /// <param name="format">Returns the texture format</param>
+        /// <param name="resDim">Returns the texture dimension</param>
+        /// <param name="arraySize">Returns the texture array size</param>
+        /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
+        /// <returns>Returns true if the texture is valid</returns>
+        private static bool ValidateTexture(DDSHeaderDX10 header, DDSFlagsEnum flags, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
+        {
+            depth = 0;
+            format = Format.Unknown;
+            resDim = ResourceDimension.Unknown;
+            arraySize = 1;
+            isCubeMap = false;
+
+            arraySize = header.ArraySize;
+            if (arraySize == 0)
+            {
+                return false;
+            }
+
+            if (header.MiscFlag2 != DDSFlagsDX10Enum.AlphaModeUnknown)
+            {
+                return false;
+            }
+
+            if (DDSPixelFormat.BitsPerPixel(header.DXGIFormat) == 0)
+            {
+                return false;
+            }
+
+            format = header.DXGIFormat;
+
+            switch (header.Dimension)
+            {
+                case ResourceDimension.Texture1D:
+                    depth = 1;
+                    break;
+
+                case ResourceDimension.Texture2D:
+                    if (header.MiscFlag.HasFlag(ResourceOptionFlags.TextureCube))
+                    {
+                        arraySize *= 6;
+                        isCubeMap = true;
+                    }
+                    depth = 1;
+                    break;
+
+                case ResourceDimension.Texture3D:
+                    if (!flags.HasFlag(DDSFlagsEnum.Depth))
+                    {
+                        return false;
+                    }
+
+                    if (arraySize > 1)
+                    {
+                        return false;
+                    }
+                    break;
+
+                default:
+                    return false;
+            }
+
+            resDim = header.Dimension;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Struct size (Must be 124)
+        /// </summary>
+        public int Size;
+        /// <summary>
+        /// Flags to indicate which members contain valid data.
+        /// </summary>
+        public DDSFlagsEnum Flags;
+        /// <summary>
+        /// Surface height (in pixels).
+        /// </summary>
+        public int Height;
+        /// <summary>
+        /// Surface width (in pixels).
+        /// </summary>
+        public int Width;
+        /// <summary>
+        /// The pitch or number of bytes per scan line in an uncompressed texture; the total number of bytes in the top level texture for a compressed texture.
+        /// </summary>
+        public int PitchOrLinearSize;
+        /// <summary>
+        /// Depth of a volume texture (in pixels), otherwise unused.
+        /// </summary>
+        public int Depth;
+        /// <summary>
+        /// Number of mipmap levels, otherwise unused.
+        /// </summary>
+        public int MipMapCount;
+        /// <summary>
+        /// Unused.
+        /// </summary>
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 11)]
+        public int[] Reserved1;
+        /// <summary>
+        /// The pixel format
+        /// </summary>
+        public DDSPixelFormat PixelFormat;
+        /// <summary>
+        /// Specifies the complexity of the surfaces stored.
+        /// </summary>
+        public DDSCapsEnum Caps;
+        /// <summary>
+        /// Additional detail about the surfaces stored.
+        /// </summary>
+        public DDSCaps2Enum Caps2;
+        /// <summary>
+        /// Unused.
+        /// </summary>
+        public int Caps3;
+        /// <summary>
+        /// Unused.
+        /// </summary>
+        public int Caps4;
+        /// <summary>
+        /// Unused.
+        /// </summary>
+        public int Reserved2;
     }
 }

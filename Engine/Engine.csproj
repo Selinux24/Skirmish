@@ -208,10 +208,14 @@
     <Compile Include="FoliageMap.cs" />
     <Compile Include="GroundGardener.cs" />
     <Compile Include="GroundGardenerDescription.cs" />
+    <Compile Include="Helpers\DDS\DDPFFlags.cs" />
+    <Compile Include="Helpers\DDS\DDSCaps2Enum.cs" />
+    <Compile Include="Helpers\DDS\DDSCapsEnum.cs" />
+    <Compile Include="Helpers\DDS\DDSFlagsDX10Enum.cs" />
+    <Compile Include="Helpers\DDS\DDSFlagsEnum.cs" />
     <Compile Include="Helpers\DDS\DDSHeader.cs" />
     <Compile Include="Helpers\DDS\DDSHeaderDX10.cs" />
     <Compile Include="Helpers\DDS\DDSPixelFormat.cs" />
-    <Compile Include="Helpers\HelperTextures.cs" />
     <Compile Include="Helpers\TextureData.cs" />
     <Compile Include="IComposed.cs" />
     <Compile Include="IControllable.cs" />

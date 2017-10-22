@@ -10,17 +10,32 @@ namespace Engine.Helpers.DDS
     [StructLayout(LayoutKind.Sequential)]
     struct DDSPixelFormat
     {
-        const int DDS_FOURCC = 0x00000004;// DDPF_FOURCC
-        const int DDS_ALPHA = 0x00000002;// DDPF_ALPHA
-        const int DDS_LUMINANCE = 0x00020000;// DDPF_LUMINANCE
-        const int DDS_RGB = 0x00000040;// DDPF_RGB
-
+        /// <summary>
+        /// Size of structure
+        /// </summary>
         public readonly static int StructSize = Marshal.SizeOf(new DDSPixelFormat());
 
+        /// <summary>
+        /// Make four CC
+        /// </summary>
+        /// <param name="ch0">Char 0</param>
+        /// <param name="ch1">Char 1</param>
+        /// <param name="ch2">Char 2</param>
+        /// <param name="ch3">Char 3</param>
+        /// <returns>Returns the integer result</returns>
         public static int MakeFourCC(int ch0, int ch1, int ch2, int ch3)
         {
             return ((int)(byte)(ch0) | ((int)(byte)(ch1) << 8) | ((int)(byte)(ch2) << 16) | ((int)(byte)(ch3) << 24));
         }
+        /// <summary>
+        /// Gets the surface info
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="fmt">Format</param>
+        /// <param name="outNumBytes">Resulting number of bytes</param>
+        /// <param name="outRowBytes">Resulting number of bytes in a row</param>
+        /// <param name="outNumRows">Resulting number of rows</param>
         public static void GetSurfaceInfo(int width, int height, Format fmt, out int outNumBytes, out int outRowBytes, out int outNumRows)
         {
             int numBytes = 0;
@@ -100,6 +115,11 @@ namespace Engine.Helpers.DDS
             outRowBytes = rowBytes;
             outNumRows = numRows;
         }
+        /// <summary>
+        /// Gets the number of bits per pixel for the specified format
+        /// </summary>
+        /// <param name="fmt">Format</param>
+        /// <returns>Returns the bits per pixel</returns>
         public static int BitsPerPixel(Format fmt)
         {
             switch (fmt)
@@ -227,25 +247,57 @@ namespace Engine.Helpers.DDS
             }
         }
 
+        /// <summary>
+        /// Structure size; set to 32 (bytes)
+        /// </summary>
         public int Size;
-        public int Flags;
+        /// <summary>
+        /// Values which indicate what type of data is in the surface.
+        /// </summary>
+        public DDPFFlags Flags;
+        /// <summary>
+        /// Four-character codes for specifying compressed or custom formats. Possible values include: DXT1, DXT2, DXT3, DXT4, or DXT5. A FourCC of DX10 indicates the prescense of the DDS_HEADER_DXT10 extended header, and the dxgiFormat member of that structure indicates the true format. When using a four-character code, dwFlags must include DDPF_FOURCC.
+        /// </summary>
         public int FourCC;
+        /// <summary>
+        /// Number of bits in an RGB (possibly including alpha) format. Valid when dwFlags includes DDPF_RGB, DDPF_LUMINANCE, or DDPF_YUV.
+        /// </summary>
         public int RGBBitCount;
+        /// <summary>
+        /// Red (or lumiannce or Y) mask for reading color data. For instance, given the A8R8G8B8 format, the red mask would be 0x00ff0000.
+        /// </summary>
         public uint RBitMask;
+        /// <summary>
+        /// Green (or U) mask for reading color data. For instance, given the A8R8G8B8 format, the green mask would be 0x0000ff00.
+        /// </summary>
         public uint GBitMask;
+        /// <summary>
+        /// Blue (or V) mask for reading color data. For instance, given the A8R8G8B8 format, the blue mask would be 0x000000ff.
+        /// </summary>
         public uint BBitMask;
+        /// <summary>
+        /// Alpha mask for reading alpha data. dwFlags must include DDPF_ALPHAPIXELS or DDPF_ALPHA. For instance, given the A8R8G8B8 format, the alpha mask would be 0xff000000.
+        /// </summary>
         public uint ABitMask;
 
-        public bool IsBitMask(uint r, uint g, uint b, uint a)
+        /// <summary>
+        /// Gets wether this pixel format has a DDS_HEADER_DXT10 structure
+        /// </summary>
+        public bool IsDX10()
         {
-            return (this.RBitMask == r && this.GBitMask == g && this.BBitMask == b && this.ABitMask == a);
+            return
+                (this.Flags.HasFlag(DDPFFlags.DDPF_FOURCC)) &&
+                (MakeFourCC('D', 'X', '1', '0') == this.FourCC);
         }
+        /// <summary>
+        /// Gets the equivalent DXGI format
+        /// </summary>
+        /// <returns>Returns the equivalent DXGI format</returns>
         public Format GetDXGIFormat()
         {
-            if ((this.Flags & DDS_RGB) > 0)
+            if (this.Flags.HasFlag(DDPFFlags.DDPF_RGB))
             {
                 // Note that sRGB formats are written using the "DX10" extended header
-
                 switch (this.RGBBitCount)
                 {
                     case 32:
@@ -318,7 +370,7 @@ namespace Engine.Helpers.DDS
                         break;
                 }
             }
-            else if ((this.Flags & DDS_LUMINANCE) > 0)
+            else if (this.Flags.HasFlag(DDPFFlags.DDPF_LUMINANCE))
             {
                 if (8 == this.RGBBitCount)
                 {
@@ -342,72 +394,72 @@ namespace Engine.Helpers.DDS
                     }
                 }
             }
-            else if ((this.Flags & DDS_ALPHA) > 0)
+            else if (this.Flags.HasFlag(DDPFFlags.DDPF_ALPHA))
             {
                 if (8 == this.RGBBitCount)
                 {
                     return Format.A8_UNorm;
                 }
             }
-            else if ((this.Flags & DDS_FOURCC) > 0)
+            else if (this.Flags.HasFlag(DDPFFlags.DDPF_FOURCC))
             {
-                if (DDSPixelFormat.MakeFourCC('D', 'X', 'T', '1') == this.FourCC)
+                if (MakeFourCC('D', 'X', 'T', '1') == this.FourCC)
                 {
                     return Format.BC1_UNorm;
                 }
-                if (DDSPixelFormat.MakeFourCC('D', 'X', 'T', '3') == this.FourCC)
+                if (MakeFourCC('D', 'X', 'T', '3') == this.FourCC)
                 {
                     return Format.BC2_UNorm;
                 }
-                if (DDSPixelFormat.MakeFourCC('D', 'X', 'T', '5') == this.FourCC)
+                if (MakeFourCC('D', 'X', 'T', '5') == this.FourCC)
                 {
                     return Format.BC3_UNorm;
                 }
 
                 // While pre-mulitplied alpha isn't directly supported by the DXGI formats,
                 // they are basically the same as these BC formats so they can be mapped
-                if (DDSPixelFormat.MakeFourCC('D', 'X', 'T', '2') == this.FourCC)
+                if (MakeFourCC('D', 'X', 'T', '2') == this.FourCC)
                 {
                     return Format.BC2_UNorm;
                 }
-                if (DDSPixelFormat.MakeFourCC('D', 'X', 'T', '4') == this.FourCC)
+                if (MakeFourCC('D', 'X', 'T', '4') == this.FourCC)
                 {
                     return Format.BC3_UNorm;
                 }
 
-                if (DDSPixelFormat.MakeFourCC('A', 'T', 'I', '1') == this.FourCC)
+                if (MakeFourCC('A', 'T', 'I', '1') == this.FourCC)
                 {
                     return Format.BC4_UNorm;
                 }
-                if (DDSPixelFormat.MakeFourCC('B', 'C', '4', 'U') == this.FourCC)
+                if (MakeFourCC('B', 'C', '4', 'U') == this.FourCC)
                 {
                     return Format.BC4_UNorm;
                 }
-                if (DDSPixelFormat.MakeFourCC('B', 'C', '4', 'S') == this.FourCC)
+                if (MakeFourCC('B', 'C', '4', 'S') == this.FourCC)
                 {
                     return Format.BC4_SNorm;
                 }
 
-                if (DDSPixelFormat.MakeFourCC('A', 'T', 'I', '2') == this.FourCC)
+                if (MakeFourCC('A', 'T', 'I', '2') == this.FourCC)
                 {
                     return Format.BC5_UNorm;
                 }
-                if (DDSPixelFormat.MakeFourCC('B', 'C', '5', 'U') == this.FourCC)
+                if (MakeFourCC('B', 'C', '5', 'U') == this.FourCC)
                 {
                     return Format.BC5_UNorm;
                 }
-                if (DDSPixelFormat.MakeFourCC('B', 'C', '5', 'S') == this.FourCC)
+                if (MakeFourCC('B', 'C', '5', 'S') == this.FourCC)
                 {
                     return Format.BC5_SNorm;
                 }
 
                 // BC6H and BC7 are written using the "DX10" extended header
 
-                if (DDSPixelFormat.MakeFourCC('R', 'G', 'B', 'G') == this.FourCC)
+                if (MakeFourCC('R', 'G', 'B', 'G') == this.FourCC)
                 {
                     return Format.R8G8_B8G8_UNorm;
                 }
-                if (DDSPixelFormat.MakeFourCC('G', 'R', 'G', 'B') == this.FourCC)
+                if (MakeFourCC('G', 'R', 'G', 'B') == this.FourCC)
                 {
                     return Format.G8R8_G8B8_UNorm;
                 }
@@ -442,6 +494,18 @@ namespace Engine.Helpers.DDS
             }
 
             return Format.Unknown;
+        }
+        /// <summary>
+        /// Gets if the specified color components were the bit mask
+        /// </summary>
+        /// <param name="r">Red</param>
+        /// <param name="g">Green</param>
+        /// <param name="b">Blue</param>
+        /// <param name="a">Alpha</param>
+        /// <returns>Returns true if the specified color components were the bit mask</returns>
+        private bool IsBitMask(uint r, uint g, uint b, uint a)
+        {
+            return (this.RBitMask == r && this.GBitMask == g && this.BBitMask == b && this.ABitMask == a);
         }
     };
 }

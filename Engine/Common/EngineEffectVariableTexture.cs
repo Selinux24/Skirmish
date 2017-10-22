@@ -44,7 +44,7 @@ namespace Engine.Common
         /// <returns>Returns the resource from the shader</returns>
         public EngineShaderResourceView GetResource()
         {
-            var srv = new ShaderResourceView1(this.variable.GetResource().NativePointer);
+            var srv = this.variable.GetResource().QueryInterface<ShaderResourceView1>();
 
             return new EngineShaderResourceView(srv);
         }

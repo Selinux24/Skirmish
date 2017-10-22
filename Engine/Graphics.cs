@@ -38,7 +38,7 @@ namespace Engine
         /// <summary>
         /// Graphics device
         /// </summary>
-        private Device5 device = null;
+        private Device3 device = null;
         /// <summary>
         /// Graphics inmmediate context
         /// </summary>
@@ -254,20 +254,24 @@ namespace Engine
         /// <param name="fullScreen">True for full screen modes</param>
         /// <param name="refreshRate">Refresh date</param>
         /// <returns>Returns found mode description</returns>
-        private static ModeDescription1 FindModeDescription(Device5 device, Format format, int width, int height, bool fullScreen, int refreshRate)
+        private static ModeDescription1 FindModeDescription(Device3 device, Format format, int width, int height, bool fullScreen, int refreshRate)
         {
-            using (var factory = new Factory1())
-            using (var factory5 = new Factory5(factory.NativePointer))
+#if DEBUG
+            using (var tmpFactory = new Factory2(true))
+#else
+            using (var tmpFactory = new Factory2())
+#endif
+            using (var factory = tmpFactory.QueryInterface<Factory5>())
             {
-                using (var firstAdapter = factory5.GetAdapter1(0))
-                using (var firstAdapter4 = new Adapter4(firstAdapter.NativePointer))
+                using (var tmpAdapter = factory.GetAdapter1(0))
+                using (var adapter = tmpAdapter.QueryInterface<Adapter4>())
                 {
-                    using (var output = firstAdapter.GetOutput(0))
-                    using (var output6 = new Output6(output.NativePointer))
+                    using (var tmpOutput = adapter.GetOutput(0))
+                    using (var output = tmpOutput.QueryInterface<Output6>())
                     {
                         try
                         {
-                            var displayModeList = output6.GetDisplayModeList1(
+                            var displayModeList = output.GetDisplayModeList1(
                                 format,
                                 DisplayModeEnumerationFlags.Interlaced);
 
@@ -315,7 +319,7 @@ namespace Engine
                                 Height = height,
                                 Format = format,
                             };
-                            output6.FindClosestMatchingMode1(
+                            output.FindClosestMatchingMode1(
                                 ref desc,
                                 out result,
                                 device);
@@ -343,6 +347,30 @@ namespace Engine
                 ScanlineOrdering = DisplayModeScanlineOrder.Unspecified,
             };
         }
+        /// <summary>
+        /// Checks the multi-sample specified count
+        /// </summary>
+        /// <param name="device">Temporary device</param>
+        /// <param name="format">Format</param>
+        /// <param name="multiSampling">Multi-sample count</param>
+        /// <param name="sampleCount">Sample count</param>
+        /// <param name="maxQualityLevel">Maximum quality level</param>
+        /// <returns>Returns true y the device supports MS for the specified format</returns>
+        private static bool CheckMultisample(Device3 device, Format format, int multiSampling, out int sampleCount, out int maxQualityLevel)
+        {
+            sampleCount = 1;
+            maxQualityLevel = 0;
+            int maxQuality = device.CheckMultisampleQualityLevels1(format, multiSampling, CheckMultisampleQualityLevelsFlags.None);
+            if (maxQuality > 0)
+            {
+                sampleCount = multiSampling;
+                maxQualityLevel = maxQuality - 1;
+
+                return true;
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Constructor
@@ -363,65 +391,61 @@ namespace Engine
 
             this.vsyncEnabled = vsyncEnabled && displayMode.RefreshRate != new Rational(0, 1);
 
-            using (var factory = new Factory1())
-            using (var factory5 = new Factory5(factory.NativePointer))
+#if DEBUG
+            using (var tmpFactory = new Factory2(true))
+#else
+            using (var tmpFactory = new Factory2())
+#endif
+            using (var factory = tmpFactory.QueryInterface<Factory5>())
             {
-                using (var adapter = factory5.GetAdapter1(0))
-                using (var adapter4 = new Adapter4(adapter.NativePointer))
+                using (var tmpAdapter = factory.GetAdapter1(0))
+                using (var adapter = tmpAdapter.QueryInterface<Adapter4>())
                 {
-                    if (multiSampling != 0)
-                    {
-                        using (var tmpDevice = new Device(adapter4))
-                        using (var tmpDevice5 = new Device5(tmpDevice.NativePointer))
-                        {
-                            this.CheckMultisample(tmpDevice5, multiSampling, out this.msCount, out this.msQuality);
-                        }
-                    }
+                    this.DeviceDescription = string.Format("{0}", adapter.Description2.Description);
 
-                    this.DeviceDescription = string.Format("{0}", adapter4.Description2.Description);
-                }
-            }
-
-            DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
+                    DeviceCreationFlags creationFlags = DeviceCreationFlags.None;
 
 #if DEBUG
-            creationFlags |= DeviceCreationFlags.Debug;
+                    creationFlags |= DeviceCreationFlags.Debug;
 #endif
+                    using (var tmpDevice = new Device(adapter, creationFlags, FeatureLevel.Level_11_1, FeatureLevel.Level_11_0))
+                    {
+                        this.device = tmpDevice.QueryInterface<Device3>();
+                    }
+                }
 
-            Device nDevice;
-            SwapChain nSwapChain;
-            Device.CreateWithSwapChain(
-                DriverType.Hardware,
-                creationFlags,
-                new[]
+                if (multiSampling != 0)
                 {
-                    FeatureLevel.Level_11_1,
-                    FeatureLevel.Level_11_0,
-                },
-                new SwapChainDescription()
+                    CheckMultisample(this.device, this.BufferFormat, multiSampling, out this.msCount, out this.msQuality);
+                }
+
+                var desc = new SwapChainDescription1()
                 {
                     BufferCount = 2,
-                    ModeDescription = new ModeDescription()
-                    {
-                        Format = displayMode.Format,
-                        Width = displayMode.Width,
-                        Height = displayMode.Height,
-                        RefreshRate = displayMode.RefreshRate,
-                        Scaling = displayMode.Scaling,
-                        ScanlineOrdering = displayMode.ScanlineOrdering,
-                    },
-                    Usage = Usage.RenderTargetOutput,
-                    OutputHandle = form.Handle,
+                    Format = displayMode.Format,
+                    Width = displayMode.Width,
+                    Height = displayMode.Height,
+                    Stereo = displayMode.Stereo,
                     SampleDescription = this.CurrentSampleDescription,
-                    IsWindowed = !form.IsFullscreen,
-                    SwapEffect = SwapEffect.Discard,
+                    AlphaMode = AlphaMode.Ignore,
+                    Scaling = Scaling.Stretch,
+                    Usage = Usage.RenderTargetOutput,
+                    SwapEffect = SwapEffect.Sequential,
                     Flags = SwapChainFlags.None,
-                },
-                out nDevice,
-                out nSwapChain);
+                };
+                var fsdesc = new SwapChainFullScreenDescription()
+                {
+                    RefreshRate = displayMode.RefreshRate,
+                    Scaling = displayMode.Scaling,
+                    ScanlineOrdering = displayMode.ScanlineOrdering,
+                    Windowed = !form.IsFullscreen,
+                };
 
-            this.device = new Device5(nDevice.NativePointer);
-            this.swapChain = new SwapChain4(nSwapChain.NativePointer);
+                using (var tmpSwapChain = new SwapChain1(factory, this.device, form.Handle, ref desc, fsdesc))
+                {
+                    this.swapChain = tmpSwapChain.QueryInterface<SwapChain4>();
+                }
+            }
 
             this.deviceContext = this.device.ImmediateContext3;
 
@@ -475,7 +499,7 @@ namespace Engine
 
             #region Render Target
 
-            using (var backBuffer = Resource.FromSwapChain<Texture2D>(swapChain, 0))
+            using (var backBuffer = Resource.FromSwapChain<Resource>(this.swapChain, 0))
             {
                 this.renderTargetView = new EngineRenderTargetView(new RenderTargetView1(this.device, backBuffer));
             }
@@ -1385,24 +1409,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Checks the multi-sample specified count
-        /// </summary>
-        /// <param name="tmpDevice">Temporary device</param>
-        /// <param name="multiSampling">Multi-sample count</param>
-        /// <param name="sampleCount">Sample count</param>
-        /// <param name="maxQualityLevel">Maximum quality level</param>
-        private void CheckMultisample(Device5 tmpDevice, int multiSampling, out int sampleCount, out int maxQualityLevel)
-        {
-            sampleCount = 1;
-            maxQualityLevel = 0;
-            int maxQuality = tmpDevice.CheckMultisampleQualityLevels1(this.BufferFormat, multiSampling, CheckMultisampleQualityLevelsFlags.None);
-            if (maxQuality > 0)
-            {
-                sampleCount = multiSampling;
-                maxQualityLevel = maxQuality - 1;
-            }
-        }
-        /// <summary>
         /// Dispose resources
         /// </summary>
         private void DisposeResources()
@@ -1441,14 +1447,17 @@ namespace Engine
         /// <returns>Returns the new shader resource view</returns>
         private ShaderResourceView1 CreateResource(TextureData description)
         {
-            var fmtSupport = this.device.CheckFormatSupport(description.Format);
-            var autogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
+            bool mipAutogen = false;
 
-            using (var texture = this.CreateTexture2D(description.Width, description.Height, description.Format, 1, autogen))
+            if (description.MipMaps == 1)
             {
-                ShaderResourceView1 result = null;
+                var fmtSupport = this.device.CheckFormatSupport(description.Format);
+                mipAutogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
+            }
 
-                if (autogen)
+            if (mipAutogen)
+            {
+                using (var texture = this.CreateTexture2D(description.Width, description.Height, description.Format, 1, mipAutogen))
                 {
                     var desc = new ShaderResourceViewDescription1()
                     {
@@ -1456,24 +1465,42 @@ namespace Engine
                         Dimension = ShaderResourceViewDimension.Texture2D,
                         Texture2D = new ShaderResourceViewDescription1.Texture2DResource1()
                         {
-                            MipLevels = (autogen) ? -1 : 1,
-                        }
+                            MipLevels = -1,
+                        },
                     };
-                    result = new ShaderResourceView1(this.device, texture, desc);
-                }
-                else
-                {
-                    result = new ShaderResourceView1(this.device, texture);
-                }
 
-                this.deviceContext.UpdateSubresource(description.GetDataBox(), texture, 0);
+                    var result = new ShaderResourceView1(this.device, texture, desc);
 
-                if (autogen)
-                {
+                    this.deviceContext.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
+
                     this.deviceContext.GenerateMips(result);
-                }
 
-                return result;
+                    return result;
+                }
+            }
+            else
+            {
+                var width = description.Width;
+                var height = description.Height;
+                var format = description.Format;
+                var mipMaps = description.MipMaps;
+                var arraySize = description.ArraySize;
+                var data = description.GetDataBoxes(0);
+
+                using (var texture = this.CreateTexture2D(width, height, format, mipMaps, arraySize, data))
+                {
+                    var desc = new ShaderResourceViewDescription1()
+                    {
+                        Format = format,
+                        Dimension = ShaderResourceViewDimension.Texture2D,
+                        Texture2D = new ShaderResourceViewDescription1.Texture2DResource1()
+                        {
+                            MipLevels = mipMaps,
+                        },
+                    };
+
+                    return new ShaderResourceView1(this.device, texture, desc);
+                }
             }
         }
         /// <summary>
@@ -1483,53 +1510,74 @@ namespace Engine
         /// <returns>Returns the new shader resource view</returns>
         private ShaderResourceView1 CreateResource(TextureData[] descriptions)
         {
-            var textureDescription = descriptions[0];
+            var description = descriptions[0];
 
-            var fmtSupport = this.device.CheckFormatSupport(textureDescription.Format);
-            var autogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
+            bool mipAutogen = false;
 
-            using (var textureArray = this.CreateTexture2D(textureDescription.Width, textureDescription.Height, textureDescription.Format, descriptions.Length, autogen))
+            if (description.MipMaps == 1)
             {
-                ShaderResourceView1 result = null;
+                var fmtSupport = this.device.CheckFormatSupport(description.Format);
+                mipAutogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
+            }
 
-                if (autogen)
+            if (mipAutogen)
+            {
+                using (var textureArray = this.CreateTexture2D(description.Width, description.Height, description.Format, descriptions.Length, mipAutogen))
                 {
                     var desc = new ShaderResourceViewDescription1()
                     {
-                        Format = textureDescription.Format,
+                        Format = description.Format,
                         Dimension = ShaderResourceViewDimension.Texture2DArray,
                         Texture2DArray = new ShaderResourceViewDescription1.Texture2DArrayResource1()
                         {
                             ArraySize = descriptions.Length,
-                            MipLevels = (autogen) ? -1 : 1,
-                        }
+                            MipLevels = -1,
+                        },
                     };
 
-                    result = new ShaderResourceView1(this.device, textureArray, desc);
-                }
-                else
-                {
-                    result = new ShaderResourceView1(this.device, textureArray);
-                }
+                    var result = new ShaderResourceView1(this.device, textureArray, desc);
 
-                for (int i = 0; i < descriptions.Length; i++)
-                {
-                    int mipSize;
-                    var index = textureArray.CalculateSubResourceIndex(0, i, out mipSize);
+                    for (int i = 0; i < descriptions.Length; i++)
+                    {
+                        int mipSize;
+                        var index = textureArray.CalculateSubResourceIndex(0, i, out mipSize);
 
-                    this.deviceContext.UpdateSubresource(descriptions[i].GetDataBox(), textureArray, index);
-                }
+                        this.deviceContext.UpdateSubresource(descriptions[i].GetDataBox(0, 0), textureArray, index);
+                    }
 
-                if (autogen)
-                {
                     this.deviceContext.GenerateMips(result);
-                }
 
-                return result;
+                    return result;
+                }
+            }
+            else
+            {
+                var width = description.Width;
+                var height = description.Height;
+                var format = description.Format;
+                var mipMaps = description.MipMaps;
+                var arraySize = description.ArraySize;
+                var data = description.GetDataBoxes();
+
+                using (var textureArray = this.CreateTexture2D(width, height, format, mipMaps, arraySize, data))
+                {
+                    var desc = new ShaderResourceViewDescription1()
+                    {
+                        Format = format,
+                        Dimension = ShaderResourceViewDimension.Texture2DArray,
+                        Texture2DArray = new ShaderResourceViewDescription1.Texture2DArrayResource1()
+                        {
+                            ArraySize = arraySize,
+                            MipLevels = mipMaps,
+                        },
+                    };
+
+                    return new ShaderResourceView1(this.device, textureArray, desc);
+                }
             }
         }
         /// <summary>
-        /// Creates a Texture2D
+        /// Creates an empty Texture2D
         /// </summary>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
@@ -1556,6 +1604,33 @@ namespace Engine
 
             return new Texture2D1(this.device, description);
         }
+        /// <summary>
+        /// Creates a Texture2D
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="format">Format</param>
+        /// <param name="data"></param>
+        /// <returns>Returns the Texture2D</returns>
+        private Texture2D1 CreateTexture2D(int width, int height, Format format, int mipMaps, int arraySize, DataBox[] data)
+        {
+            var description = new Texture2DDescription1()
+            {
+                Width = width,
+                Height = height,
+                ArraySize = arraySize,
+                BindFlags = BindFlags.ShaderResource,
+                Usage = ResourceUsage.Default,
+                CpuAccessFlags = CpuAccessFlags.None,
+                Format = format,
+                MipLevels = mipMaps,
+                OptionFlags = ResourceOptionFlags.None,
+                SampleDescription = new SampleDescription(1, 0),
+                TextureLayout = TextureLayout.Undefined,
+            };
+
+            return new Texture2D1(this.device, description, data);
+        }
 
         /// <summary>
         /// Loads a texture from memory in the graphics device
@@ -1568,7 +1643,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = HelperTextures.ReadTexture(buffer))
+                using (var resource = TextureData.ReadTexture(buffer))
                 {
                     return new EngineShaderResourceView(CreateResource(resource));
                 }
@@ -1589,7 +1664,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = HelperTextures.ReadTexture(filename))
+                using (var resource = TextureData.ReadTexture(filename))
                 {
                     return new EngineShaderResourceView(CreateResource(resource));
                 }
@@ -1610,7 +1685,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = HelperTextures.ReadTexture(stream))
+                using (var resource = TextureData.ReadTexture(stream))
                 {
                     return new EngineShaderResourceView(CreateResource(resource));
                 }
@@ -1631,7 +1706,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                var textureList = HelperTextures.ReadTexture(filenames);
+                var textureList = TextureData.ReadTexture(filenames);
 
                 var resource = this.CreateResource(textureList);
 
@@ -1655,7 +1730,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                var textureList = HelperTextures.ReadTexture(streams);
+                var textureList = TextureData.ReadTexture(streams);
 
                 var resource = this.CreateResource(textureList);
 
@@ -1681,9 +1756,9 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var cubeTex = new Texture2D(
+                using (var cubeTex = new Texture2D1(
                     this.device,
-                    new Texture2DDescription()
+                    new Texture2DDescription1()
                     {
                         Width = faceSize,
                         Height = faceSize,
@@ -1718,9 +1793,9 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var cubeTex = new Texture2D(
+                using (var cubeTex = new Texture2D1(
                     this.device,
-                    new Texture2DDescription()
+                    new Texture2DDescription1()
                     {
                         Width = faceSize,
                         Height = faceSize,
@@ -1799,9 +1874,9 @@ namespace Engine
                 {
                     var dBox = new DataBox(str.DataPointer, size * (int)FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
 
-                    using (var texture = new Texture2D(
+                    using (var texture = new Texture2D1(
                         this.device,
-                        new Texture2DDescription()
+                        new Texture2DDescription1()
                         {
                             Format = Format.R32G32B32A32_Float,
                             Width = size,
@@ -1868,9 +1943,9 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var texture = new Texture2D(
+                using (var texture = new Texture2D1(
                     this.device,
-                    new Texture2DDescription()
+                    new Texture2DDescription1()
                     {
                         Width = width,
                         Height = height,
@@ -1913,9 +1988,9 @@ namespace Engine
 
                 for (int i = 0; i < size; i++)
                 {
-                    using (var texture = new Texture2D(
+                    using (var texture = new Texture2D1(
                         this.device,
-                        new Texture2DDescription()
+                        new Texture2DDescription1()
                         {
                             Width = width,
                             Height = height,
@@ -1948,9 +2023,9 @@ namespace Engine
         /// <param name="srv">Resulting Shader Resource View</param>
         internal void CreateShadowMapTextures(Format format, int width, int height, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
         {
-            var depthMap = new Texture2D(
+            var depthMap = new Texture2D1(
                 this.device,
-                new Texture2DDescription
+                new Texture2DDescription1()
                 {
                     Width = width,
                     Height = height,
@@ -2017,9 +2092,9 @@ namespace Engine
         /// <param name="dsv">Resulting depth stencil view</param>
         internal void CreateDepthStencil(Format format, int width, int height, out EngineDepthStencilView dsv)
         {
-            using (var dsb = new Texture2D(
+            using (var dsb = new Texture2D1(
                 this.device,
-                new Texture2DDescription()
+                new Texture2DDescription1()
                 {
                     Width = width,
                     Height = height,
@@ -2542,31 +2617,59 @@ namespace Engine
             return data;
         }
 
-
+        /// <summary>
+        /// Draw
+        /// </summary>
+        /// <param name="vertexCount">Vertex count</param>
+        /// <param name="startVertexLocation">Start vertex location</param>
         internal void Draw(int vertexCount, int startVertexLocation)
         {
             this.deviceContext.Draw(vertexCount, startVertexLocation);
 
             Counters.DrawCallsPerFrame++;
         }
+        /// <summary>
+        /// Draw indexed
+        /// </summary>
+        /// <param name="indexCount">Index count</param>
+        /// <param name="startIndexLocation">Start vertex location</param>
+        /// <param name="baseVertexLocation">Base vertex location</param>
         internal void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
         {
             this.deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
 
             Counters.DrawCallsPerFrame++;
         }
+        /// <summary>
+        /// Draw instanced
+        /// </summary>
+        /// <param name="vertexCountPerInstance">Vertex count per instance</param>
+        /// <param name="instanceCount">Instance count</param>
+        /// <param name="startVertexLocation">Start vertex location</param>
+        /// <param name="startInstanceLocation">Start instance count</param>
         internal void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation)
         {
             this.deviceContext.DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
 
             Counters.DrawCallsPerFrame++;
         }
+        /// <summary>
+        /// Draw indexed instanced
+        /// </summary>
+        /// <param name="indexCountPerInstance">Index count per instance</param>
+        /// <param name="instanceCount">Instance count</param>
+        /// <param name="startIndexLocation">Start index location</param>
+        /// <param name="baseVertexLocation">Base vertex location</param>
+        /// <param name="startInstanceLocation">Start instance location</param>
         internal void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
         {
             this.deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
 
             Counters.DrawCallsPerFrame++;
         }
+        /// <summary>
+        /// Draw auto
+        /// </summary>
         internal void DrawAuto()
         {
             this.deviceContext.DrawAuto();

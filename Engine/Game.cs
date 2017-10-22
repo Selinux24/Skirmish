@@ -131,13 +131,13 @@ namespace Engine
         private static OutputDescription1 GetDesktopMode()
         {
             using (var factory = new Factory1())
-            using (var factory5 = new Factory5(factory.NativePointer))
+            using (var factory5 = factory.QueryInterface<Factory5>())
             {
                 using (var adapter = factory5.GetAdapter1(0))
-                using (var adapter4 = new Adapter4(adapter.NativePointer))
+                using (var adapter4 = adapter.QueryInterface<Adapter4>())
                 {
                     using (var adapterOutput = adapter4.GetOutput(0))
-                    using (var adapterOutput6 = new Output6(adapterOutput.NativePointer))
+                    using (var adapterOutput6 = adapterOutput.QueryInterface<Output6>())
                     {
                         return adapterOutput6.Description1;
                     }
