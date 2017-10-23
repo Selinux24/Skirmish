@@ -10,10 +10,6 @@ namespace Engine.Effects
     public abstract class Drawer : IDrawer
     {
         /// <summary>
-        /// Graphics device
-        /// </summary>
-        protected Graphics Graphics = null;
-        /// <summary>
         /// Effect
         /// </summary>
         protected EngineEffect Effect = null;
@@ -26,7 +22,6 @@ namespace Engine.Effects
         /// <param name="compile">Compile effect</param>
         public Drawer(Graphics graphics, byte[] effect, bool compile)
         {
-            this.Graphics = graphics;
             if (compile)
             {
                 this.Effect = graphics.CompileEffect(effect, HelperShaders.FXProfile);
@@ -46,6 +41,14 @@ namespace Engine.Effects
                 this.Effect.Dispose();
                 this.Effect = null;
             }
+        }
+
+        /// <summary>
+        /// Optimize effect
+        /// </summary>
+        public void Optimize()
+        {
+            this.Effect.Optimize();
         }
         /// <summary>
         /// Get technique by vertex type

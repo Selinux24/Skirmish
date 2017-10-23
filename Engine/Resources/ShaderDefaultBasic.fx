@@ -491,7 +491,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 		diffuseMap = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	}
 
-	float4 specularMap = 1;
+	float4 specularMap = 0;
 	if (gPSUseColorSpecular == true)
 	{
 		specularMap = gPSSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
@@ -636,7 +636,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 		diffuseMap = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
 	}
 
-	float4 specularMap = 1;
+	float4 specularMap = 0;
 	if (gPSUseColorSpecular == true)
 	{
         specularMap = gPSSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));

@@ -24,6 +24,17 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Optimizes the effect
+        /// </summary>
+        public void Optimize()
+        {
+            if (!this.effect.IsOptimized)
+            {
+                this.effect.Optimize();
+            }
+        }
+
+        /// <summary>
         /// Gets a technique by name
         /// </summary>
         /// <param name="name">Name</param>

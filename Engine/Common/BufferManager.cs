@@ -284,13 +284,8 @@ namespace Engine.Common
         public void Dispose()
         {
             Helper.Dispose(this.VertexBuffers);
-            this.VertexBuffers = null;
-
             Helper.Dispose(this.IndexBuffers);
-            this.IndexBuffers = null;
-
             Helper.Dispose(this.inputLayouts);
-            this.inputLayouts = null;
         }
 
         /// <summary>

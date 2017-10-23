@@ -243,10 +243,10 @@ namespace Engine
 
             FontMap.ClearCache();
 
-            Helper.Dispose(this.Graphics);
             Helper.Dispose(this.Input);
             Helper.Dispose(this.Form);
             Helper.Dispose(this.ResourceManager);
+            Helper.Dispose(this.Graphics);
         }
         /// <summary>
         /// Close game

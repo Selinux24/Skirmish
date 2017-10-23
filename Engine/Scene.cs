@@ -330,6 +330,7 @@ namespace Engine
         /// </summary>
         public virtual void Dispose()
         {
+            Helper.Dispose(this.BufferManager);
             Helper.Dispose(this.Renderer);
             Helper.Dispose(this.camera);
             Helper.Dispose(this.components);

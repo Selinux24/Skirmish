@@ -157,7 +157,11 @@ namespace Engine.Effects
         {
             var res = resFxo != null ? resFxo : resFx;
 
-            return (T)Activator.CreateInstance(typeof(T), graphics, res, false);
+            var effect = (T)Activator.CreateInstance(typeof(T), graphics, res, false);
+
+            effect.Optimize();
+
+            return effect;
         }
 
         /// <summary>
