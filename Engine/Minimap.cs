@@ -65,7 +65,7 @@ namespace Engine
 
             this.Graphics.CreateRenderTargetTexture(
                 Format.R8G8B8A8_UNorm,
-                description.Width, description.Height,
+                description.Width, description.Height, false,
                 out this.renderTarget,
                 out this.renderTexture);
 

@@ -187,25 +187,6 @@ namespace Engine
         /// </summary>
         public bool PerformFrustumCulling { get; set; }
         /// <summary>
-        /// Scene render mode
-        /// </summary>
-        public SceneModesEnum RenderMode
-        {
-            get
-            {
-                return this.sceneMode;
-            }
-            set
-            {
-                if (this.sceneMode != value)
-                {
-                    this.sceneMode = value;
-
-                    this.SetRenderMode();
-                }
-            }
-        }
-        /// <summary>
         /// Path finder
         /// </summary>
         public PathFinderDescription PathFinderDescription = new PathFinderDescription();
@@ -236,7 +217,7 @@ namespace Engine
 
             this.PerformFrustumCulling = true;
 
-            this.RenderMode = sceneMode;
+            this.SetRenderMode(sceneMode);
 
             this.UpdateGlobalResources = true;
         }
@@ -335,23 +316,52 @@ namespace Engine
             Helper.Dispose(this.camera);
             Helper.Dispose(this.components);
         }
+
+        /// <summary>
+        /// Gets the render mode
+        /// </summary>
+        /// <returns>Returns the render mode</returns>
+        public SceneModesEnum GetRenderMode()
+        {
+            return this.sceneMode;
+        }
         /// <summary>
         /// Change renderer mode
         /// </summary>
-        private void SetRenderMode()
+        /// <param name="mode">New renderer mode</param>
+        /// <returns>Returns true if the renderer changes correctly</returns>
+        public bool SetRenderMode(SceneModesEnum mode)
         {
-            Helper.Dispose(this.Renderer);
+            bool isValid = false;
 
-            Counters.ClearAll();
+            ISceneRenderer renderer = null;
 
-            if (this.sceneMode == SceneModesEnum.ForwardLigthning)
+            if (mode == SceneModesEnum.ForwardLigthning)
             {
-                this.Renderer = new SceneRendererForward(this.Game);
+                if (SceneRendererForward.Validate(this.Game.Graphics))
+                {
+                    renderer = new SceneRendererForward(this.Game);
+                    isValid = true;
+                }
             }
-            else if (this.sceneMode == SceneModesEnum.DeferredLightning)
+            else if (mode == SceneModesEnum.DeferredLightning)
             {
-                this.Renderer = new SceneRendererDeferred(this.Game);
+                if (SceneRendererDeferred.Validate(this.Game.Graphics))
+                {
+                    renderer = new SceneRendererDeferred(this.Game);
+                    isValid = true;
+                }
             }
+
+            if (isValid)
+            {
+                Helper.Dispose(this.Renderer);
+                Counters.ClearAll();
+                this.Renderer = renderer;
+                this.sceneMode = mode;
+            }
+
+            return isValid;
         }
 
         /// <summary>

@@ -1361,9 +1361,9 @@ namespace TerrainTest
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
                     SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning;
+                    SceneModesEnum.ForwardLigthning);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.C))
@@ -1445,7 +1445,7 @@ namespace TerrainTest
                 Counters.BufferBytes / 1024,
                 Counters.BufferReads,
                 Counters.BufferWrites,
-                this.RenderMode,
+                this.GetRenderMode(),
                 this.shadowResult,
                 Counters.PrimitivesPerFrame);
             this.counters1.Instance.Text = txt1;

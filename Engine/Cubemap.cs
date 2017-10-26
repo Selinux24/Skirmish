@@ -155,7 +155,7 @@ namespace Engine
         /// <param name="textures">Texture names</param>
         protected virtual void InitializeTexture(string contentPath, params string[] textures)
         {
-            var image = ImageContent.Array(contentPath, textures);
+            var image = ImageContent.Cubic(contentPath, textures[0]);
             this.cubeMapTexture = this.Game.ResourceManager.CreateResource(image);
         }
     }

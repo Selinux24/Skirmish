@@ -104,10 +104,11 @@ namespace Engine.Helpers
         public static TextureData ReadTexture(byte[] buffer)
         {
             DDSHeader header;
+            DDSHeaderDX10? header10;
             int offset;
-            if (DDSHeader.GetInfo(buffer, out header, out offset))
+            if (DDSHeader.GetInfo(buffer, out header, out header10, out offset))
             {
-                return new TextureData(header, null, buffer, offset, 0);
+                return new TextureData(header, header10, buffer, offset, 0);
             }
             else
             {
@@ -126,11 +127,12 @@ namespace Engine.Helpers
         public static TextureData ReadTexture(string filename)
         {
             DDSHeader header;
+            DDSHeaderDX10? header10;
             int offset;
             byte[] buffer;
-            if (DDSHeader.GetInfo(filename, out header, out offset, out buffer))
+            if (DDSHeader.GetInfo(filename, out header, out header10, out offset, out buffer))
             {
-                return new TextureData(header, null, buffer, offset, 0);
+                return new TextureData(header, header10, buffer, offset, 0);
             }
             else
             {
@@ -148,11 +150,12 @@ namespace Engine.Helpers
         public static TextureData ReadTexture(MemoryStream stream)
         {
             DDSHeader header;
+            DDSHeaderDX10? header10;
             int offset;
             byte[] buffer;
-            if (DDSHeader.GetInfo(stream, out header, out offset, out buffer))
+            if (DDSHeader.GetInfo(stream, out header, out header10, out offset, out buffer))
             {
-                return new TextureData(header, null, buffer, offset, 0);
+                return new TextureData(header, header10, buffer, offset, 0);
             }
             else
             {
@@ -331,12 +334,10 @@ namespace Engine.Helpers
             int numBytes = 0;
             int rowBytes = 0;
             int numRows = 0;
-            int totalSize = this.data.Length;
-
-            int index = 0;
 
             for (int j = 0; j < this.ArraySize; j++)
             {
+                int index = 0;
                 int width = this.Width;
                 int height = this.Height;
                 int depth = this.Depth;
@@ -360,6 +361,11 @@ namespace Engine.Helpers
                     }
 
                     offset += numBytes * depth;
+
+                    if (offset > this.data.Length)
+                    {
+                        throw new Exception("File too short");
+                    }
 
                     width = width >> 1;
                     height = height >> 1;

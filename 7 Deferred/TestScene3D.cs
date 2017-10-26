@@ -557,9 +557,9 @@ namespace DeferredTest
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.RenderMode = this.RenderMode == SceneModesEnum.ForwardLigthning ?
+                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
                     SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning;
+                    SceneModesEnum.ForwardLigthning);
             }
 
             base.Update(gameTime);
@@ -925,7 +925,7 @@ namespace DeferredTest
 
             this.title.Instance.Text = string.Format(
                 this.titleMask,
-                this.RenderMode,
+                this.GetRenderMode(),
                 this.Lights.DirectionalLights.Length,
                 this.Lights.PointLights.Length,
                 this.Lights.SpotLights.Length,

@@ -566,7 +566,7 @@ namespace Engine
 
             #region Depth Stencil Buffer and View
 
-            this.CreateDepthStencil(this.DepthFormat, width, height, out this.depthStencilView);
+            this.CreateDepthStencil(this.DepthFormat, width, height, true, out this.depthStencilView);
 
             #endregion
 
@@ -1518,6 +1518,119 @@ namespace Engine
         }
 
         /// <summary>
+        /// Creates an index buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="name">Buffer name</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
+        internal Buffer CreateIndexBuffer<T>(string name, T[] data, bool dynamic)
+            where T : struct
+        {
+            return CreateBuffer<T>(
+                name,
+                data,
+                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                BindFlags.IndexBuffer,
+                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+        }
+        /// <summary>
+        /// Creates a vertex buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="name">Buffer name</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        internal Buffer CreateVertexBuffer<T>(string name, T[] data, bool dynamic)
+            where T : struct
+        {
+            return CreateBuffer<T>(
+                name,
+                data,
+                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                BindFlags.VertexBuffer,
+                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+        }
+        /// <summary>
+        /// Creates a buffer for the specified data type
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="name">Buffer name</param>
+        /// <param name="length">Buffer length</param>
+        /// <param name="usage">Resource usage</param>
+        /// <param name="binding">Binding</param>
+        /// <param name="access">Cpu access</param>
+        /// <returns>Returns created buffer</returns>
+        internal Buffer CreateBuffer<T>(string name, int length, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+            where T : struct
+        {
+            int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
+
+            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, length);
+
+            var description = new BufferDescription()
+            {
+                Usage = usage,
+                SizeInBytes = sizeInBytes,
+                BindFlags = binding,
+                CpuAccessFlags = access,
+                OptionFlags = ResourceOptionFlags.None,
+                StructureByteStride = 0,
+            };
+
+            return new Buffer(this.device, description);
+        }
+        /// <summary>
+        /// Creates a buffer for the specified data type
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="name">Buffer name</param>
+        /// <param name="data">Data</param>
+        /// <param name="usage">Resource usage</param>
+        /// <param name="binding">Binding</param>
+        /// <param name="access">Cpu access</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        internal Buffer CreateBuffer<T>(string name, T[] data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+            where T : struct
+        {
+            int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Length;
+
+            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, data.Length);
+
+            using (var dstr = new DataStream(sizeInBytes, true, true))
+            {
+                dstr.WriteRange(data);
+                dstr.Position = 0;
+
+                var description = new BufferDescription()
+                {
+                    Usage = usage,
+                    SizeInBytes = sizeInBytes,
+                    BindFlags = binding,
+                    CpuAccessFlags = access,
+                    OptionFlags = ResourceOptionFlags.None,
+                    StructureByteStride = 0,
+                };
+
+                return new Buffer(this.device, dstr, description);
+            }
+        }
+        /// <summary>
+        /// Creates a new Input Layout for a Shader
+        /// </summary>
+        /// <param name="shaderBytecode">Byte code</param>
+        /// <param name="elements">Input elements</param>
+        /// <returns>Returns a new Input Layout</returns>
+        internal InputLayout CreateInputLayout(ShaderBytecode shaderBytecode, InputElement[] elements)
+        {
+            return new InputLayout(this.device, shaderBytecode, elements);
+        }
+
+        /// <summary>
         /// Creates a resource view from a texture description
         /// </summary>
         /// <param name="description">Texture description</param>
@@ -1534,9 +1647,26 @@ namespace Engine
 
             if (mipAutogen)
             {
-                using (var texture = this.CreateTexture2D(description.Width, description.Height, description.Format, 1, mipAutogen))
+                Texture2D1 texture = null;
+                ShaderResourceViewDescription1 desc;
+
+                if (description.IsCubeMap)
                 {
-                    var desc = new ShaderResourceViewDescription1()
+                    texture = this.CreateTexture2DCube(description.Width, description.Format, 1, mipAutogen);
+                    desc = new ShaderResourceViewDescription1()
+                    {
+                        Format = texture.Description.Format,
+                        Dimension = ShaderResourceViewDimension.TextureCube,
+                        TextureCube = new ShaderResourceViewDescription.TextureCubeResource()
+                        {
+                            MipLevels = -1,
+                        }
+                    };
+                }
+                else
+                {
+                    texture = this.CreateTexture2D(description.Width, description.Height, description.Format, 1, mipAutogen);
+                    desc = new ShaderResourceViewDescription1()
                     {
                         Format = texture.Description.Format,
                         Dimension = ShaderResourceViewDimension.Texture2D,
@@ -1545,7 +1675,10 @@ namespace Engine
                             MipLevels = -1,
                         },
                     };
+                }
 
+                using (texture)
+                {
                     var result = new ShaderResourceView1(this.device, texture, desc);
 
                     this.deviceContext.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
@@ -1562,11 +1695,28 @@ namespace Engine
                 var format = description.Format;
                 var mipMaps = description.MipMaps;
                 var arraySize = description.ArraySize;
-                var data = description.GetDataBoxes(0);
+                var data = description.GetDataBoxes();
 
-                using (var texture = this.CreateTexture2D(width, height, format, mipMaps, arraySize, data))
+                Texture2D1 texture = null;
+                ShaderResourceViewDescription1 desc;
+
+                if (description.IsCubeMap)
                 {
-                    var desc = new ShaderResourceViewDescription1()
+                    texture = this.CreateTexture2DCube(width, format, mipMaps, 1, data);
+                    desc = new ShaderResourceViewDescription1()
+                    {
+                        Format = format,
+                        Dimension = ShaderResourceViewDimension.TextureCube,
+                        TextureCube = new ShaderResourceViewDescription.TextureCubeResource()
+                        {
+                            MipLevels = mipMaps,
+                        }
+                    };
+                }
+                else
+                {
+                    texture = this.CreateTexture2D(width, height, format, mipMaps, arraySize, data);
+                    desc = new ShaderResourceViewDescription1()
                     {
                         Format = format,
                         Dimension = ShaderResourceViewDimension.Texture2D,
@@ -1575,7 +1725,10 @@ namespace Engine
                             MipLevels = mipMaps,
                         },
                     };
+                }
 
+                using (texture)
+                {
                     return new ShaderResourceView1(this.device, texture, desc);
                 }
             }
@@ -1599,9 +1752,27 @@ namespace Engine
 
             if (mipAutogen)
             {
-                using (var textureArray = this.CreateTexture2D(description.Width, description.Height, description.Format, descriptions.Length, mipAutogen))
+                Texture2D1 textureArray = null;
+                ShaderResourceViewDescription1 desc;
+
+                if (description.IsCubeMap)
                 {
-                    var desc = new ShaderResourceViewDescription1()
+                    textureArray = this.CreateTexture2DCube(description.Width, description.Format, descriptions.Length, mipAutogen);
+                    desc = new ShaderResourceViewDescription1()
+                    {
+                        Format = description.Format,
+                        Dimension = ShaderResourceViewDimension.TextureCubeArray,
+                        TextureCubeArray = new ShaderResourceViewDescription.TextureCubeArrayResource()
+                        {
+                            CubeCount = descriptions.Length,
+                            MipLevels = -1,
+                        }
+                    };
+                }
+                else
+                {
+                    textureArray = this.CreateTexture2D(description.Width, description.Height, description.Format, descriptions.Length, mipAutogen);
+                    desc = new ShaderResourceViewDescription1()
                     {
                         Format = description.Format,
                         Dimension = ShaderResourceViewDimension.Texture2DArray,
@@ -1611,7 +1782,10 @@ namespace Engine
                             MipLevels = -1,
                         },
                     };
+                }
 
+                using (textureArray)
+                {
                     var result = new ShaderResourceView1(this.device, textureArray, desc);
 
                     for (int i = 0; i < descriptions.Length; i++)
@@ -1633,12 +1807,35 @@ namespace Engine
                 var height = description.Height;
                 var format = description.Format;
                 var mipMaps = description.MipMaps;
-                var arraySize = description.ArraySize;
-                var data = description.GetDataBoxes();
+                var arraySize = descriptions.Length;
+                var data = new List<DataBox>();
 
-                using (var textureArray = this.CreateTexture2D(width, height, format, mipMaps, arraySize, data))
+                for (int i = 0; i < descriptions.Length; i++)
                 {
-                    var desc = new ShaderResourceViewDescription1()
+                    data.AddRange(descriptions[i].GetDataBoxes());
+                }
+
+                Texture2D1 textureArray = null;
+                ShaderResourceViewDescription1 desc;
+
+                if (description.IsCubeMap)
+                {
+                    textureArray = this.CreateTexture2DCube(width, format, mipMaps, arraySize, data.ToArray());
+                    desc = new ShaderResourceViewDescription1()
+                    {
+                        Format = format,
+                        Dimension = ShaderResourceViewDimension.TextureCube,
+                        TextureCubeArray = new ShaderResourceViewDescription.TextureCubeArrayResource()
+                        {
+                            CubeCount = arraySize,
+                            MipLevels = mipMaps,
+                        },
+                    };
+                }
+                else
+                {
+                    textureArray = this.CreateTexture2D(width, height, format, mipMaps, arraySize, data.ToArray());
+                    desc = new ShaderResourceViewDescription1()
                     {
                         Format = format,
                         Dimension = ShaderResourceViewDimension.Texture2DArray,
@@ -1648,7 +1845,10 @@ namespace Engine
                             MipLevels = mipMaps,
                         },
                     };
+                }
 
+                using (textureArray)
+                {
                     return new ShaderResourceView1(this.device, textureArray, desc);
                 }
             }
@@ -1687,7 +1887,9 @@ namespace Engine
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="format">Format</param>
-        /// <param name="data"></param>
+        /// <param name="mipMaps">Mipmap count</param>
+        /// <param name="arraySize">Array size</param>
+        /// <param name="data">Initial data</param>
         /// <returns>Returns the Texture2D</returns>
         private Texture2D1 CreateTexture2D(int width, int height, Format format, int mipMaps, int arraySize, DataBox[] data)
         {
@@ -1702,6 +1904,61 @@ namespace Engine
                 Format = format,
                 MipLevels = mipMaps,
                 OptionFlags = ResourceOptionFlags.None,
+                SampleDescription = new SampleDescription(1, 0),
+                TextureLayout = TextureLayout.Undefined,
+            };
+
+            return new Texture2D1(this.device, description, data);
+        }
+        /// <summary>
+        /// Creates a Texture2DCube
+        /// </summary>
+        /// <param name="faceSize">Face size</param>
+        /// <param name="format">Format</param>
+        /// <param name="arraySize">Array size</param>
+        /// <param name="generateMips">Generate mips for the texture</param>
+        /// <returns>Returns the Texture2DCube</returns>
+        private Texture2D1 CreateTexture2DCube(int faceSize, Format format, int arraySize, bool generateMips)
+        {
+            var description = new Texture2DDescription1()
+            {
+                Width = faceSize,
+                Height = faceSize,
+                ArraySize = arraySize * 6,
+                BindFlags = (generateMips) ? BindFlags.ShaderResource | BindFlags.RenderTarget : BindFlags.ShaderResource,
+                Usage = ResourceUsage.Default,
+                CpuAccessFlags = CpuAccessFlags.None,
+                Format = format,
+                MipLevels = (generateMips) ? 0 : 1,
+                OptionFlags = (generateMips) ? ResourceOptionFlags.TextureCube | ResourceOptionFlags.GenerateMipMaps : ResourceOptionFlags.TextureCube,
+                SampleDescription = new SampleDescription(1, 0),
+                TextureLayout = TextureLayout.Undefined,
+            };
+
+            return new Texture2D1(this.device, description);
+        }
+        /// <summary>
+        /// Creates a Texture2DCube
+        /// </summary>
+        /// <param name="faceSize">Face size</param>
+        /// <param name="format">Format</param>
+        /// <param name="mipMaps">Mipmap count</param>
+        /// <param name="arraySize">Array size</param>
+        /// <param name="data">Initial data</param>
+        /// <returns>Returns the Texture2DCube</returns>
+        private Texture2D1 CreateTexture2DCube(int faceSize, Format format, int mipMaps, int arraySize, DataBox[] data)
+        {
+            var description = new Texture2DDescription1()
+            {
+                Width = faceSize,
+                Height = faceSize,
+                ArraySize = arraySize * 6,
+                BindFlags = BindFlags.ShaderResource,
+                Usage = ResourceUsage.Default,
+                CpuAccessFlags = CpuAccessFlags.None,
+                Format = format,
+                MipLevels = mipMaps,
+                OptionFlags = ResourceOptionFlags.TextureCube,
                 SampleDescription = new SampleDescription(1, 0),
                 TextureLayout = TextureLayout.Undefined,
             };
@@ -1824,32 +2081,16 @@ namespace Engine
         /// Loads a cube texture from file in the graphics device
         /// </summary>
         /// <param name="filename">Path to file</param>
-        /// <param name="format">Format</param>
-        /// <param name="faceSize">Face size</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureCube(string filename, Format format, int faceSize)
+        internal EngineShaderResourceView LoadTextureCube(string filename)
         {
             try
             {
                 Counters.Textures++;
 
-                using (var cubeTex = new Texture2D1(
-                    this.device,
-                    new Texture2DDescription1()
-                    {
-                        Width = faceSize,
-                        Height = faceSize,
-                        MipLevels = 0,
-                        ArraySize = 6,
-                        SampleDescription = new SampleDescription(1, 0),
-                        Format = format,
-                        Usage = ResourceUsage.Default,
-                        BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                        CpuAccessFlags = CpuAccessFlags.None,
-                        OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
-                    }))
+                using (var resource = TextureData.ReadTexture(filename))
                 {
-                    return new EngineShaderResourceView(new ShaderResourceView1(this.device, cubeTex));
+                    return new EngineShaderResourceView(CreateResource(resource));
                 }
             }
             catch (Exception ex)
@@ -1861,32 +2102,16 @@ namespace Engine
         /// Loads a cube texture from file in the graphics device
         /// </summary>
         /// <param name="stream">Stream</param>
-        /// <param name="format">Format</param>
-        /// <param name="faceSize">Face size</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureCube(MemoryStream stream, Format format, int faceSize)
+        internal EngineShaderResourceView LoadTextureCube(MemoryStream stream)
         {
             try
             {
                 Counters.Textures++;
 
-                using (var cubeTex = new Texture2D1(
-                    this.device,
-                    new Texture2DDescription1()
-                    {
-                        Width = faceSize,
-                        Height = faceSize,
-                        MipLevels = 0,
-                        ArraySize = 6,
-                        SampleDescription = new SampleDescription(1, 0),
-                        Format = format,
-                        Usage = ResourceUsage.Default,
-                        BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                        CpuAccessFlags = CpuAccessFlags.None,
-                        OptionFlags = ResourceOptionFlags.GenerateMipMaps | ResourceOptionFlags.TextureCube,
-                    }))
+                using (var resource = TextureData.ReadTexture(stream))
                 {
-                    return new EngineShaderResourceView(new ShaderResourceView1(this.device, cubeTex));
+                    return new EngineShaderResourceView(CreateResource(resource));
                 }
             }
             catch (Exception ex)
@@ -1894,6 +2119,55 @@ namespace Engine
                 throw new EngineException("LoadTextureCube from stream Error. See inner exception for details", ex);
             }
         }
+        /// <summary>
+        /// Loads a cube texture array from file in the graphics device
+        /// </summary>
+        /// <param name="filenames">Path file collection</param>
+        /// <returns>Returns the resource view</returns>
+        internal EngineShaderResourceView LoadTextureCubeArray(string[] filenames)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                var textureList = TextureData.ReadTexture(filenames);
+
+                var resource = this.CreateResource(textureList);
+
+                Helper.Dispose(textureList);
+
+                return new EngineShaderResourceView(resource);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTextureCube from filename Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a cube texture array from file in the graphics device
+        /// </summary>
+        /// <param name="streams">Stream collection</param>
+        /// <returns>Returns the resource view</returns>
+        internal EngineShaderResourceView LoadTextureCubeArray(MemoryStream[] streams)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                var textureList = TextureData.ReadTexture(streams);
+
+                var resource = this.CreateResource(textureList);
+
+                Helper.Dispose(textureList);
+
+                return new EngineShaderResourceView(resource);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTextureCube from stream Error. See inner exception for details", ex);
+            }
+        }
+
         /// <summary>
         /// Creates a texture filled with specified values
         /// </summary>
@@ -2007,18 +2281,78 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Create depth stencil view
+        /// </summary>
+        /// <param name="format">Format</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="useSamples">Use samples if available</param>
+        /// <param name="dsv">Resulting depth stencil view</param>
+        internal void CreateDepthStencil(Format format, int width, int height, bool useSamples, out EngineDepthStencilView dsv)
+        {
+            bool multiSampled = false;
+            SampleDescription sampleDescription = new SampleDescription(1, 0);
+            if (useSamples)
+            {
+                multiSampled = this.MultiSampled;
+                sampleDescription = this.CurrentSampleDescription;
+            }
+
+            using (var texture = new Texture2D1(
+                this.device,
+                new Texture2DDescription1()
+                {
+                    Width = width,
+                    Height = height,
+                    MipLevels = 1,
+                    ArraySize = 1,
+                    Format = format,
+                    SampleDescription = sampleDescription,
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.DepthStencil,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.None,
+                }))
+            {
+                var description = new DepthStencilViewDescription()
+                {
+                    Format = format,
+                    Dimension = multiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
+                    Texture2D = new DepthStencilViewDescription.Texture2DResource()
+                    {
+
+                    },
+                    Texture2DMS = new DepthStencilViewDescription.Texture2DMultisampledResource()
+                    {
+
+                    },
+                };
+
+                dsv = new EngineDepthStencilView(new DepthStencilView(this.device, texture, description));
+            }
+        }
+        /// <summary>
         /// Creates a new render tarjet and his texture
         /// </summary>
         /// <param name="format">Format</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
+        /// <param name="useSamples">Use samples if available</param>
         /// <param name="rtv">Render target</param>
         /// <param name="srv">Texture</param>
-        internal void CreateRenderTargetTexture(Format format, int width, int height, out EngineRenderTargetView rtv, out EngineShaderResourceView srv)
+        internal void CreateRenderTargetTexture(Format format, int width, int height, bool useSamples, out EngineRenderTargetView rtv, out EngineShaderResourceView srv)
         {
             try
             {
                 Counters.Textures++;
+
+                bool multiSampled = false;
+                SampleDescription sampleDescription = new SampleDescription(1, 0);
+                if (useSamples)
+                {
+                    multiSampled = this.MultiSampled;
+                    sampleDescription = this.CurrentSampleDescription;
+                }
 
                 using (var texture = new Texture2D1(
                     this.device,
@@ -2029,15 +2363,41 @@ namespace Engine
                         MipLevels = 1,
                         ArraySize = 1,
                         Format = format,
-                        SampleDescription = new SampleDescription(1, 0),
+                        SampleDescription = sampleDescription,
                         Usage = ResourceUsage.Default,
                         BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
                         CpuAccessFlags = CpuAccessFlags.None,
                         OptionFlags = ResourceOptionFlags.None
                     }))
                 {
-                    rtv = new EngineRenderTargetView(new RenderTargetView1(this.device, texture));
-                    srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, texture));
+                    var rtvDesc = new RenderTargetViewDescription1()
+                    {
+                        Format = format,
+                    };
+                    var srvDesc = new ShaderResourceViewDescription1()
+                    {
+                        Format = format,
+                    };
+
+                    if (multiSampled)
+                    {
+                        rtvDesc.Dimension = RenderTargetViewDimension.Texture2DMultisampled;
+                        rtvDesc.Texture2DMS = new RenderTargetViewDescription.Texture2DMultisampledResource();
+
+                        srvDesc.Dimension = ShaderResourceViewDimension.Texture2DMultisampled;
+                        srvDesc.Texture2DMS = new ShaderResourceViewDescription.Texture2DMultisampledResource();
+                    }
+                    else
+                    {
+                        rtvDesc.Dimension = RenderTargetViewDimension.Texture2D;
+                        rtvDesc.Texture2D = new RenderTargetViewDescription1.Texture2DResource();
+
+                        srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
+                        srvDesc.Texture2D = new ShaderResourceViewDescription1.Texture2DResource1() { MipLevels = 1 };
+                    }
+
+                    rtv = new EngineRenderTargetView(new RenderTargetView1(this.device, texture, rtvDesc));
+                    srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, texture, srvDesc));
                 }
             }
             catch (Exception ex)
@@ -2052,13 +2412,22 @@ namespace Engine
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="arraySize">Render target list size</param>
+        /// <param name="useSamples">Use samples if available</param>
         /// <param name="rtv">Render target</param>
         /// <param name="srv">Textures</param>
-        internal void CreateRenderTargetTexture(Format format, int width, int height, int arraySize, out EngineRenderTargetView rtv, out EngineShaderResourceView[] srv)
+        internal void CreateRenderTargetTexture(Format format, int width, int height, int arraySize, bool useSamples, out EngineRenderTargetView rtv, out EngineShaderResourceView[] srv)
         {
             try
             {
                 Counters.Textures++;
+
+                bool multiSampled = false;
+                SampleDescription sampleDescription = new SampleDescription(1, 0);
+                if (useSamples)
+                {
+                    multiSampled = this.MultiSampled;
+                    sampleDescription = this.CurrentSampleDescription;
+                }
 
                 rtv = new EngineRenderTargetView();
                 srv = new EngineShaderResourceView[arraySize];
@@ -2074,15 +2443,41 @@ namespace Engine
                             MipLevels = 1,
                             ArraySize = 1,
                             Format = format,
-                            SampleDescription = new SampleDescription(1, 0),
+                            SampleDescription = sampleDescription,
                             Usage = ResourceUsage.Default,
                             BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
                             CpuAccessFlags = CpuAccessFlags.None,
                             OptionFlags = ResourceOptionFlags.None
                         }))
                     {
-                        rtv.Add(new RenderTargetView1(this.device, texture));
-                        srv[i] = new EngineShaderResourceView(new ShaderResourceView1(this.device, texture));
+                        var rtvDesc = new RenderTargetViewDescription1()
+                        {
+                            Format = format,
+                        };
+                        var srvDesc = new ShaderResourceViewDescription1()
+                        {
+                            Format = format,
+                        };
+
+                        if (multiSampled)
+                        {
+                            rtvDesc.Dimension = RenderTargetViewDimension.Texture2DMultisampled;
+                            rtvDesc.Texture2DMS = new RenderTargetViewDescription.Texture2DMultisampledResource();
+
+                            srvDesc.Dimension = ShaderResourceViewDimension.Texture2DMultisampled;
+                            srvDesc.Texture2DMS = new ShaderResourceViewDescription.Texture2DMultisampledResource();
+                        }
+                        else
+                        {
+                            rtvDesc.Dimension = RenderTargetViewDimension.Texture2D;
+                            rtvDesc.Texture2D = new RenderTargetViewDescription1.Texture2DResource();
+
+                            srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
+                            srvDesc.Texture2D = new ShaderResourceViewDescription1.Texture2DResource1() { MipLevels = 1 };
+                        }
+
+                        rtv.Add(new RenderTargetView1(this.device, texture, rtvDesc));
+                        srv[i] = new EngineShaderResourceView(new ShaderResourceView1(this.device, texture, srvDesc));
                     }
                 }
             }
@@ -2142,54 +2537,6 @@ namespace Engine
                 };
                 srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
             }
-        }
-        /// <summary>
-        /// Create depth stencil view
-        /// </summary>
-        /// <param name="format">Format</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="dsv">Resulting depth stencil view</param>
-        internal void CreateDepthStencil(Format format, int width, int height, out EngineDepthStencilView dsv)
-        {
-            using (var dsb = new Texture2D1(
-                this.device,
-                new Texture2DDescription1()
-                {
-                    Width = width,
-                    Height = height,
-                    MipLevels = 1,
-                    ArraySize = 1,
-                    Format = format,
-                    SampleDescription = this.CurrentSampleDescription,
-                    Usage = ResourceUsage.Default,
-                    BindFlags = BindFlags.DepthStencil,
-                    CpuAccessFlags = CpuAccessFlags.None,
-                    OptionFlags = ResourceOptionFlags.None,
-                }))
-            {
-                var description = new DepthStencilViewDescription()
-                {
-                    Format = format,
-                    Dimension = this.MultiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
-                    Texture2D = new DepthStencilViewDescription.Texture2DResource()
-                    {
-                        MipSlice = 0
-                    },
-                };
-
-                dsv = new EngineDepthStencilView(new DepthStencilView(this.device, dsb, description));
-            }
-        }
-        /// <summary>
-        /// Creates a new Input Layout for a Shader
-        /// </summary>
-        /// <param name="shaderBytecode">Byte code</param>
-        /// <param name="elements">Input elements</param>
-        /// <returns>Returns a new Input Layout</returns>
-        internal InputLayout CreateInputLayout(ShaderBytecode shaderBytecode, InputElement[] elements)
-        {
-            return new InputLayout(this.device, shaderBytecode, elements);
         }
 
         /// <summary>
@@ -2452,109 +2799,6 @@ namespace Engine
         internal void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
         {
             technique.GetPass(index).Apply(this.deviceContext, flags);
-        }
-
-        /// <summary>
-        /// Creates an index buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="name">Buffer name</param>
-        /// <param name="data">Data to write in the buffer</param>
-        /// <returns>Returns created buffer initialized with the specified data</returns>
-        /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        internal Buffer CreateIndexBuffer<T>(string name, T[] data, bool dynamic)
-            where T : struct
-        {
-            return CreateBuffer<T>(
-                name,
-                data,
-                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                BindFlags.IndexBuffer,
-                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
-        }
-        /// <summary>
-        /// Creates a vertex buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="name">Buffer name</param>
-        /// <param name="data">Data to write in the buffer</param>
-        /// <param name="dynamic">Dynamic or Inmutable</param>
-        /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateVertexBuffer<T>(string name, T[] data, bool dynamic)
-            where T : struct
-        {
-            return CreateBuffer<T>(
-                name,
-                data,
-                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                BindFlags.VertexBuffer,
-                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
-        }
-        /// <summary>
-        /// Creates a buffer for the specified data type
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
-        /// <param name="name">Buffer name</param>
-        /// <param name="length">Buffer length</param>
-        /// <param name="usage">Resource usage</param>
-        /// <param name="binding">Binding</param>
-        /// <param name="access">Cpu access</param>
-        /// <returns>Returns created buffer</returns>
-        internal Buffer CreateBuffer<T>(string name, int length, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
-            where T : struct
-        {
-            int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
-
-            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, length);
-
-            var description = new BufferDescription()
-            {
-                Usage = usage,
-                SizeInBytes = sizeInBytes,
-                BindFlags = binding,
-                CpuAccessFlags = access,
-                OptionFlags = ResourceOptionFlags.None,
-                StructureByteStride = 0,
-            };
-
-            return new Buffer(this.device, description);
-        }
-        /// <summary>
-        /// Creates a buffer for the specified data type
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
-        /// <param name="name">Buffer name</param>
-        /// <param name="data">Data</param>
-        /// <param name="usage">Resource usage</param>
-        /// <param name="binding">Binding</param>
-        /// <param name="access">Cpu access</param>
-        /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateBuffer<T>(string name, T[] data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
-            where T : struct
-        {
-            int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Length;
-
-            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, data.Length);
-
-            using (var dstr = new DataStream(sizeInBytes, true, true))
-            {
-                dstr.WriteRange(data);
-                dstr.Position = 0;
-
-                var description = new BufferDescription()
-                {
-                    Usage = usage,
-                    SizeInBytes = sizeInBytes,
-                    BindFlags = binding,
-                    CpuAccessFlags = access,
-                    OptionFlags = ResourceOptionFlags.None,
-                    StructureByteStride = 0,
-                };
-
-                return new Buffer(this.device, dstr, description);
-            }
         }
 
         /// <summary>

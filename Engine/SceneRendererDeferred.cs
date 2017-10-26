@@ -154,6 +154,11 @@ namespace Engine
             }
         }
 
+        public static bool Validate(Graphics graphics)
+        {
+            return !graphics.MultiSampled;
+        }
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -170,8 +175,8 @@ namespace Engine
             this.shadowMapperHigh = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
             this.cullManager = new SceneCullManager();
 
-            this.geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 3);
-            this.lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, 1);
+            this.geometryBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, false, 3);
+            this.lightBuffer = new RenderTarget(game, Format.R32G32B32A32_Float, false, 1);
 
             this.UpdateContext = new UpdateContext()
             {

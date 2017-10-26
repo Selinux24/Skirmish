@@ -49,6 +49,14 @@ namespace Engine
         /// </summary>
         protected Game Game;
         /// <summary>
+        /// Renderer width
+        /// </summary>
+        protected int Width;
+        /// <summary>
+        /// Renderer height
+        /// </summary>
+        protected int Height;
+        /// <summary>
         /// Update context
         /// </summary>
         protected UpdateContext UpdateContext = null;
@@ -95,6 +103,12 @@ namespace Engine
         /// </summary>
         protected bool Updated { get; set; }
 
+
+        public static bool Validate(Graphics graphics)
+        {
+            return true;
+        }
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -137,7 +151,7 @@ namespace Engine
         /// </summary>
         public virtual void Resize()
         {
-
+            
         }
         /// <summary>
         /// Updates scene components
@@ -499,10 +513,10 @@ namespace Engine
         }
 
         /// <summary>
-        /// Binds graphics for shadow mapping pass
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
-        /// <param name="dsv">Deph stencil buffer</param>
+           /// Binds graphics for shadow mapping pass
+           /// </summary>
+           /// <param name="viewport">Viewport</param>
+           /// <param name="dsv">Deph stencil buffer</param>
         private void BindShadowMap(Viewport viewport, EngineDepthStencilView dsv)
         {
             //Set shadow mapper viewport

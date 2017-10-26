@@ -8,7 +8,6 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
-    using Engine.Helpers;
 
     /// <summary>
     /// Engine resource manager
@@ -62,39 +61,54 @@ namespace Engine
             }
             else
             {
-                if (imageContent.IsArray)
+                if (imageContent.IsCubic)
                 {
-                    if (imageContent.Paths != null && imageContent.Paths.Length > 0)
+                    if (imageContent.IsArray)
                     {
-                        view = this.Get(imageContent.Paths);
+                        if (imageContent.Paths != null)
+                        {
+                            view = this.GetCubic(imageContent.Paths);
+                        }
+                        else if (imageContent.Streams != null)
+                        {
+                            view = this.GetCubic(imageContent.Streams);
+                        }
                     }
-                    else if (imageContent.Streams != null && imageContent.Streams.Length > 0)
+                    else
                     {
-                        view = this.Get(imageContent.Streams);
-                    }
-                }
-                else if (imageContent.IsCubic)
-                {
-                    int faceSize = imageContent.CubicFaceSize;
-
-                    if (imageContent.Path != null)
-                    {
-                        view = this.Get(imageContent.Path, faceSize);
-                    }
-                    else if (imageContent.Stream != null)
-                    {
-                        view = this.Get(imageContent.Stream, faceSize);
+                        if (imageContent.Path != null)
+                        {
+                            view = this.GetCubic(imageContent.Path);
+                        }
+                        else if (imageContent.Stream != null)
+                        {
+                            view = this.GetCubic(imageContent.Stream);
+                        }
                     }
                 }
                 else
                 {
-                    if (imageContent.Path != null)
+                    if (imageContent.IsArray)
                     {
-                        view = this.Get(imageContent.Path);
+                        if (imageContent.Paths != null && imageContent.Paths.Length > 0)
+                        {
+                            view = this.Get(imageContent.Paths);
+                        }
+                        else if (imageContent.Streams != null && imageContent.Streams.Length > 0)
+                        {
+                            view = this.Get(imageContent.Streams);
+                        }
                     }
-                    else if (imageContent.Stream != null)
+                    else
                     {
-                        view = this.Get(imageContent.Stream);
+                        if (imageContent.Path != null)
+                        {
+                            view = this.Get(imageContent.Path);
+                        }
+                        else if (imageContent.Stream != null)
+                        {
+                            view = this.Get(imageContent.Stream);
+                        }
                     }
                 }
             }
@@ -307,13 +321,12 @@ namespace Engine
         /// Gets the shader resource view or creates if not exists
         /// </summary>
         /// <param name="path">Path to file</param>
-        /// <param name="size">Cube size</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView Get(string path, int size)
+        private EngineShaderResourceView GetCubic(string path)
         {
             if (!this.resources.ContainsKey(path))
             {
-                var view = this.game.Graphics.LoadTextureCube(path, Format.R8G8B8A8_UNorm, size);
+                var view = this.game.Graphics.LoadTextureCube(path);
                 this.resources.Add(path, view);
             }
 
@@ -323,15 +336,46 @@ namespace Engine
         /// Gets the shader resource view or creates if not exists
         /// </summary>
         /// <param name="stream">Memory stream</param>
-        /// <param name="size">Cube size</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView Get(MemoryStream stream, int size)
+        private EngineShaderResourceView GetCubic(MemoryStream stream)
         {
             string md5 = stream.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
                 stream.Position = 0;
-                var view = this.game.Graphics.LoadTextureCube(stream, Format.R8G8B8A8_UNorm, size);
+                var view = this.game.Graphics.LoadTextureCube(stream);
+                this.resources.Add(md5, view);
+            }
+
+            return this.resources[md5];
+        }
+        /// <summary>
+        /// Gets the shader resource view or creates if not exists
+        /// </summary>
+        /// <param name="paths">Paths to files</param>
+        /// <returns>Returns the created resource view</returns>
+        private EngineShaderResourceView GetCubic(string[] paths)
+        {
+            string md5 = paths.GetMd5Sum();
+            if (!this.resources.ContainsKey(md5))
+            {
+                var view = this.game.Graphics.LoadTextureCubeArray(paths);
+                this.resources.Add(md5, view);
+            }
+
+            return this.resources[md5];
+        }
+        /// <summary>
+        /// Gets the shader resource view or creates if not exists
+        /// </summary>
+        /// <param name="stream">Memory streams</param>
+        /// <returns>Returns the created resource view</returns>
+        private EngineShaderResourceView GetCubic(MemoryStream[] streams)
+        {
+            string md5 = streams.GetMd5Sum();
+            if (!this.resources.ContainsKey(md5))
+            {
+                var view = this.game.Graphics.LoadTextureCubeArray(streams);
                 this.resources.Add(md5, view);
             }
 

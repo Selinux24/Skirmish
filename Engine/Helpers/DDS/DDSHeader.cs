@@ -28,12 +28,14 @@ namespace Engine.Helpers.DDS
         /// </summary>
         /// <param name="data">Data</param>
         /// <param name="header">Resulting Header</param>
+        /// <param name="header10">Resulting Header DX10</param>
         /// <param name="offset">Resulting Offset</param>
         /// <returns>Returns true if the byte data contains a DDS Header</returns>
-        public static bool GetInfo(byte[] data, out DDSHeader header, out int offset)
+        public static bool GetInfo(byte[] data, out DDSHeader header, out DDSHeaderDX10? header10, out int offset)
         {
             // Validate DDS file in memory
             header = new DDSHeader();
+            header10 = null;
             offset = 0;
 
             if (data.Length < (sizeof(uint) + DDSHeader.StructSize))
@@ -60,13 +62,17 @@ namespace Engine.Helpers.DDS
             // Check for DX10 extension
             if (header.PixelFormat.IsDX10())
             {
+                var h10Offset = 4 + DDSHeader.StructSize + DDSHeaderDX10.StructSize;
+
                 // Must be long enough for both headers and magic value
-                if (data.Length < (DDSHeader.StructSize + 4 + DDSHeaderDX10.StructSize))
+                if (data.Length < h10Offset)
                 {
                     return false;
                 }
 
-                offset = 4 + DDSHeader.StructSize + DDSHeaderDX10.StructSize;
+                header10 = data.ToStructure<DDSHeaderDX10>(4, DDSHeaderDX10.StructSize);
+
+                offset = h10Offset;
             }
             else
             {
@@ -80,26 +86,28 @@ namespace Engine.Helpers.DDS
         /// </summary>
         /// <param name="filename">File name</param>
         /// <param name="header">Resulting Header</param>
+        /// <param name="header10">Resulting Header DX10</param>
         /// <param name="offset">Resulting Offset</param>
         /// <param name="buffer">Readed byte buffer</param>
         /// <returns>Returns true if the file contains a DDS Header</returns>
-        public static bool GetInfo(string filename, out DDSHeader header, out int offset, out byte[] buffer)
+        public static bool GetInfo(string filename, out DDSHeader header, out DDSHeaderDX10? header10, out int offset, out byte[] buffer)
         {
             buffer = File.ReadAllBytes(filename);
-            return GetInfo(buffer, out header, out offset);
+            return GetInfo(buffer, out header, out header10, out offset);
         }
         /// <summary>
         /// Gets info from stream
         /// </summary>
         /// <param name="stream">Stream</param>
         /// <param name="header">Resulting Header</param>
+        /// <param name="header10">Resulting Header DX10</param>
         /// <param name="offset">Resulting Offset</param>
         /// <param name="buffer">Readed byte buffer</param>
         /// <returns>Returns true if the stream contains a DDS Header</returns>
-        public static bool GetInfo(MemoryStream stream, out DDSHeader header, out int offset, out byte[] buffer)
+        public static bool GetInfo(MemoryStream stream, out DDSHeader header, out DDSHeaderDX10? header10, out int offset, out byte[] buffer)
         {
             buffer = stream.GetBuffer();
-            return GetInfo(buffer, out header, out offset);
+            return GetInfo(buffer, out header, out header10, out offset);
         }
         /// <summary>
         /// Validates the texture

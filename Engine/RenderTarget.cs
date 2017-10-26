@@ -4,7 +4,6 @@ using System;
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Render target
@@ -25,6 +24,10 @@ namespace Engine
         /// </summary>
         public int BufferCount { get; protected set; }
         /// <summary>
+        /// Use samples if available
+        /// </summary>
+        public bool UseSamples { get; protected set; }
+        /// <summary>
         /// Buffer textures
         /// </summary>
         public EngineShaderResourceView[] Textures { get; protected set; }
@@ -38,11 +41,13 @@ namespace Engine
         /// </summary>
         /// <param name="game">Game</param>
         /// <param name="format">Format</param>
+        /// <param name="useSamples">Use samples if available</param>
         /// <param name="count">Buffer count</param>
-        public RenderTarget(Game game, Format format, int count)
+        public RenderTarget(Game game, Format format, bool useSamples, int count)
         {
             this.Game = game;
             this.RenderTargetFormat = format;
+            this.UseSamples = useSamples;
             this.BufferCount = count;
 
             this.CreateTargets();
@@ -75,7 +80,7 @@ namespace Engine
             EngineShaderResourceView[] textures;
             this.Game.Graphics.CreateRenderTargetTexture(
                 this.RenderTargetFormat,
-                width, height, this.BufferCount,
+                width, height, this.BufferCount, this.UseSamples,
                 out targets,
                 out textures);
 

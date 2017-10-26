@@ -89,10 +89,6 @@ namespace Engine.Content
         /// </summary>
         public bool IsCubic { get; set; }
         /// <summary>
-        /// Cubic face size
-        /// </summary>
-        public int CubicFaceSize { get; set; }
-        /// <summary>
         /// Gets the image count into the image content
         /// </summary>
         public int Count
@@ -169,9 +165,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="texture">Path to texture</param>
-        /// <param name="faceSize">Face size</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Cubic(string contentFolder, string texture, int faceSize)
+        public static ImageContent Cubic(string contentFolder, string texture)
         {
             var p = ContentManager.FindPaths(contentFolder, texture);
 
@@ -179,22 +174,19 @@ namespace Engine.Content
             {
                 Paths = p,
                 IsCubic = true,
-                CubicFaceSize = faceSize,
             };
         }
         /// <summary>
         /// Creates a cubic texture image
         /// </summary>
         /// <param name="texture">Texture stream</param>
-        /// <param name="faceSize">Face size</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Cubic(MemoryStream texture, int faceSize)
+        public static ImageContent Cubic(MemoryStream texture)
         {
             return new ImageContent()
             {
                 Stream = texture,
                 IsCubic = true,
-                CubicFaceSize = faceSize,
             };
         }
 
