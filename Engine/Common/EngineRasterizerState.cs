@@ -26,13 +26,15 @@ namespace Engine.Common
                 CullMode = CullMode.Back,
                 FillMode = FillMode.Solid,
                 IsFrontCounterClockwise = false,
-                IsAntialiasedLineEnabled = false,
-                IsMultisampleEnabled = false,
+                IsAntialiasedLineEnabled = graphics.MultiSampled,
+                IsMultisampleEnabled = graphics.MultiSampled,
                 IsScissorEnabled = false,
                 IsDepthClipEnabled = true,
                 DepthBias = 0,
                 DepthBiasClamp = 0.0f,
                 SlopeScaledDepthBias = 0.0f,
+                ForcedSampleCount = 0,
+                ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
             return graphics.CreateRasterizerState(desc);
@@ -49,13 +51,15 @@ namespace Engine.Common
                 CullMode = CullMode.Back,
                 FillMode = FillMode.Wireframe,
                 IsFrontCounterClockwise = false,
-                IsAntialiasedLineEnabled = true,
-                IsMultisampleEnabled = true,
+                IsAntialiasedLineEnabled = graphics.MultiSampled,
+                IsMultisampleEnabled = graphics.MultiSampled,
                 IsScissorEnabled = false,
                 IsDepthClipEnabled = true,
                 DepthBias = 0,
                 DepthBiasClamp = 0.0f,
                 SlopeScaledDepthBias = 0.0f,
+                ForcedSampleCount = 0,
+                ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
             return graphics.CreateRasterizerState(desc);
@@ -72,13 +76,15 @@ namespace Engine.Common
                 CullMode = CullMode.None,
                 FillMode = FillMode.Solid,
                 IsFrontCounterClockwise = false,
-                IsAntialiasedLineEnabled = false,
-                IsMultisampleEnabled = false,
+                IsAntialiasedLineEnabled = graphics.MultiSampled,
+                IsMultisampleEnabled = graphics.MultiSampled,
                 IsScissorEnabled = false,
                 IsDepthClipEnabled = true,
                 DepthBias = 0,
                 DepthBiasClamp = 0.0f,
                 SlopeScaledDepthBias = 0.0f,
+                ForcedSampleCount = 0,
+                ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
             return graphics.CreateRasterizerState(desc);
@@ -95,13 +101,15 @@ namespace Engine.Common
                 CullMode = CullMode.Back,
                 FillMode = FillMode.Solid,
                 IsFrontCounterClockwise = true,
-                IsAntialiasedLineEnabled = false,
-                IsMultisampleEnabled = false,
+                IsAntialiasedLineEnabled = graphics.MultiSampled,
+                IsMultisampleEnabled = graphics.MultiSampled,
                 IsScissorEnabled = false,
                 IsDepthClipEnabled = true,
                 DepthBias = 0,
                 DepthBiasClamp = 0.0f,
                 SlopeScaledDepthBias = 0.0f,
+                ForcedSampleCount = 0,
+                ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
             return graphics.CreateRasterizerState(desc);
@@ -118,13 +126,15 @@ namespace Engine.Common
                 CullMode = CullMode.None,
                 FillMode = FillMode.Solid,
                 IsFrontCounterClockwise = false,
-                IsAntialiasedLineEnabled = false,
-                IsMultisampleEnabled = false,
+                IsAntialiasedLineEnabled = graphics.MultiSampled,
+                IsMultisampleEnabled = graphics.MultiSampled,
                 IsScissorEnabled = false,
                 IsDepthClipEnabled = false,
                 DepthBias = 0,
                 DepthBiasClamp = 0.0f,
                 SlopeScaledDepthBias = 0.0f,
+                ForcedSampleCount = 0,
+                ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
             return graphics.CreateRasterizerState(desc);
@@ -141,13 +151,15 @@ namespace Engine.Common
                 CullMode = CullMode.Back,
                 FillMode = FillMode.Solid,
                 IsFrontCounterClockwise = true,
-                IsAntialiasedLineEnabled = false,
-                IsMultisampleEnabled = false,
+                IsAntialiasedLineEnabled = graphics.MultiSampled,
+                IsMultisampleEnabled = graphics.MultiSampled,
                 IsScissorEnabled = false,
                 IsDepthClipEnabled = false,
                 DepthBias = 0,
                 DepthBiasClamp = 0.0f,
                 SlopeScaledDepthBias = 0.0f,
+                ForcedSampleCount = 0,
+                ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
             return graphics.CreateRasterizerState(desc);
