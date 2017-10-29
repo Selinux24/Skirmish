@@ -403,7 +403,7 @@
     <Compile Include="TriangleListDrawerDescription.cs" />
     <Compile Include="Updatable.cs" />
     <Compile Include="Vector2i.cs" />
-    <Compile Include="Vertex3i.cs" />
+    <Compile Include="Vector3i.cs" />
     <Compile Include="PathFinding\NavMesh\Region.cs" />
     <Compile Include="PathFinding\NavMesh\RegionFlags.cs" />
     <Compile Include="PathFinding\NavMesh\RegionId.cs" />

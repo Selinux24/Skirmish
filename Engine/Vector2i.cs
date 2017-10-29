@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Engine
 {
     /// <summary>
 	/// A 2d vector represented by integers.
 	/// </summary>
-	[Serializable]
+    [StructLayout(LayoutKind.Sequential)]
     public struct Vector2i : IEquatable<Vector2i>
     {
         /// <summary>

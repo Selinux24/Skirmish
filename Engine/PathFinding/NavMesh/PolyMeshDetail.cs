@@ -241,7 +241,7 @@ namespace Engine.PathFinding.NavMesh
                         break;
                     }
 
-                    Vertex3i pv = mesh.Vertices[pvi];
+                    Vector3i pv = mesh.Vertices[pvi];
                     Vector3 v = new Vector3(pv.X, pv.Y, pv.Z);
                     v.X *= mesh.CellSize;
                     v.Y *= mesh.CellHeight;
@@ -313,7 +313,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="verts"></param>
         /// <param name="borderSize"></param>
         /// <param name="hp"></param>
-        private void GetHeightData(CompactHeightField compactField, PolyMeshPolygon poly, int polyCount, Vertex3i[] verts, int borderSize, HeightFieldPatch hp)
+        private void GetHeightData(CompactHeightField compactField, PolyMeshPolygon poly, int polyCount, Vector3i[] verts, int borderSize, HeightFieldPatch hp)
         {
             var stack = new List<CompactHeightFieldSpanReference>();
             bool empty = true;
@@ -439,7 +439,7 @@ namespace Engine.PathFinding.NavMesh
         /// <param name="borderSize">Heightfield border size</param>
         /// <param name="hp">HeightPatch which extracts heightfield data</param>
         /// <param name="stack">Temporary stack of CompactSpanReferences</param>
-        private void GetHeightDataSeedsFromVertices(CompactHeightField compactField, PolyMeshPolygon poly, int polyCount, Vertex3i[] verts, int borderSize, HeightFieldPatch hp, List<CompactHeightFieldSpanReference> stack)
+        private void GetHeightDataSeedsFromVertices(CompactHeightField compactField, PolyMeshPolygon poly, int polyCount, Vector3i[] verts, int borderSize, HeightFieldPatch hp, List<CompactHeightFieldSpanReference> stack)
         {
             hp.SetAll(0);
 

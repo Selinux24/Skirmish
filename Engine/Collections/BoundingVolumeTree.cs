@@ -52,8 +52,8 @@ namespace Engine.Collections
             for (int i = minIndex + 1; i < maxIndex; i++)
             {
                 BoundingVolumeTreeNode it = items[i];
-                Vertex3i.ComponentMin(ref it.Bounds.Min, ref bounds.Min, out bounds.Min);
-                Vertex3i.ComponentMax(ref it.Bounds.Max, ref bounds.Max, out bounds.Max);
+                Vector3i.ComponentMin(ref it.Bounds.Min, ref bounds.Min, out bounds.Min);
+                Vector3i.ComponentMax(ref it.Bounds.Max, ref bounds.Max, out bounds.Max);
             }
         }
         /// <summary>
