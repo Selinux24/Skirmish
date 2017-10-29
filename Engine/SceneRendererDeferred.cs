@@ -62,6 +62,20 @@ namespace Engine
         private SceneRendererDeferredLights lightDrawer = null;
 
         /// <summary>
+        /// Blend state for deferred lighting blending
+        /// </summary>
+        private EngineBlendState blendDeferredLighting = null;
+        /// <summary>
+        /// Blend state for defered composer blending
+        /// </summary>
+        private EngineBlendState blendDeferredComposer = null;
+        /// <summary>
+        /// Blend state for transparent defered composer blending
+        /// </summary>
+        private EngineBlendState blendDeferredComposerTransparent = null;
+
+
+        /// <summary>
         /// Game
         /// </summary>
         protected Game Game;
@@ -194,6 +208,10 @@ namespace Engine
                 Name = "Secondary",
                 DrawerMode = DrawerModesEnum.ShadowMap,
             };
+
+            this.blendDeferredComposer = EngineBlendState.DeferredComposer(this.Game.Graphics, 3);
+            this.blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(this.Game.Graphics, 3);
+            this.blendDeferredLighting = EngineBlendState.DeferredLighting(this.Game.Graphics);
         }
         /// <summary>
         /// Dispose objects
@@ -205,6 +223,10 @@ namespace Engine
             Helper.Dispose(this.geometryBuffer);
             Helper.Dispose(this.lightBuffer);
             Helper.Dispose(this.lightDrawer);
+
+            Helper.Dispose(this.blendDeferredLighting);
+            Helper.Dispose(this.blendDeferredComposer);
+            Helper.Dispose(this.blendDeferredComposerTransparent);
         }
         /// <summary>
         /// Resizes buffers
@@ -847,7 +869,7 @@ namespace Engine
                 this.GeometryMap[2]);
 
             this.Game.Graphics.SetDepthStencilRDZDisabled();
-            this.Game.Graphics.SetBlendDeferredLighting();
+            this.SetBlendDeferredLighting();
 
             this.lightDrawer.BindGeometry(this.Game.Graphics);
 #if DEBUG
@@ -1115,8 +1137,8 @@ namespace Engine
 
                     if (deferred)
                     {
-                        if (c.AlphaEnabled) this.Game.Graphics.SetBlendDeferredComposerTransparent();
-                        else this.Game.Graphics.SetBlendDeferredComposer();
+                        if (c.AlphaEnabled) this.SetBlendDeferredComposerTransparent();
+                        else this.SetBlendDeferredComposer();
                     }
                     else
                     {
@@ -1127,6 +1149,28 @@ namespace Engine
                     c.Get<IDrawable>().Draw(context);
                 }
             });
+        }
+
+        /// <summary>
+        /// Sets deferred composer blend state
+        /// </summary>
+        public void SetBlendDeferredComposer()
+        {
+            this.Game.Graphics.SetBlendState(this.blendDeferredComposer);
+        }
+        /// <summary>
+        /// Sets transparent deferred composer blend state
+        /// </summary>
+        public void SetBlendDeferredComposerTransparent()
+        {
+            this.Game.Graphics.SetBlendState(this.blendDeferredComposerTransparent);
+        }
+        /// <summary>
+        /// Sets deferred lighting blend state
+        /// </summary>
+        public void SetBlendDeferredLighting()
+        {
+            this.Game.Graphics.SetBlendState(this.blendDeferredLighting);
         }
     }
 }

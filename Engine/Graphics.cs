@@ -70,102 +70,70 @@ namespace Engine
         /// <summary>
         /// Current depth-stencil state
         /// </summary>
-        private DepthStencilState currentDepthStencilState = null;
-        /// <summary>
-        /// Current depth-stencil state reference value
-        /// </summary>
-        private int currentDepthStencilStateRef = 0;
+        private EngineDepthStencilState currentDepthStencilState = null;
         /// <summary>
         /// Current blend state
         /// </summary>
-        private BlendState1 currentBlendState = null;
+        private EngineBlendState currentBlendState = null;
         /// <summary>
         /// Current rasterizer state
         /// </summary>
-        private RasterizerState2 currentRasterizerState = null;
+        private EngineRasterizerState currentRasterizerState = null;
 
         /// <summary>
         /// Depth stencil state with z-buffer enabled for write
         /// </summary>
-        private DepthStencilState depthStencilzBufferEnabled = null;
+        private EngineDepthStencilState depthStencilzBufferEnabled = null;
         /// <summary>
         /// Depth stencil state with z-buffer disabled for write
         /// </summary>
-        private DepthStencilState depthStencilzBufferDisabled = null;
+        private EngineDepthStencilState depthStencilzBufferDisabled = null;
         /// <summary>
         /// Depth stencil state with z-buffer enabled for read
         /// </summary>
-        private DepthStencilState depthStencilRDzBufferEnabled = null;
+        private EngineDepthStencilState depthStencilRDzBufferEnabled = null;
         /// <summary>
         /// Depth stencil state with z-buffer disabled for read
         /// </summary>
-        private DepthStencilState depthStencilRDzBufferDisabled = null;
+        private EngineDepthStencilState depthStencilRDzBufferDisabled = null;
         /// <summary>
         /// No depth, no stencil
         /// </summary>
-        private DepthStencilState depthStencilNone = null;
-        /// <summary>
-        /// Depth stencil state for volume marking
-        /// </summary>
-        private DepthStencilState depthStencilVolumeMarking = null;
-        /// <summary>
-        /// Depth stencil state for volume drawing
-        /// </summary>
-        private DepthStencilState depthStencilVolumeDrawing = null;
+        private EngineDepthStencilState depthStencilNone = null;
 
         /// <summary>
         /// Default blend state
         /// </summary>
-        private BlendState1 blendDefault = null;
+        private EngineBlendState blendDefault = null;
         /// <summary>
         /// Default alpha blend state
         /// </summary>
-        private BlendState1 blendDefaultAlpha = null;
+        private EngineBlendState blendDefaultAlpha = null;
         /// <summary>
         /// Blend state for transparent blending
         /// </summary>
-        private BlendState1 blendTransparent = null;
+        private EngineBlendState blendTransparent = null;
         /// <summary>
         /// Additive blend state
         /// </summary>
-        private BlendState1 blendAdditive = null;
-        /// <summary>
-        /// Blend state for deferred lighting blending
-        /// </summary>
-        private BlendState1 blendDeferredLighting = null;
-        /// <summary>
-        /// Blend state for defered composer blending
-        /// </summary>
-        private BlendState1 blendDeferredComposer = null;
-        /// <summary>
-        /// Blend state for transparent defered composer blending
-        /// </summary>
-        private BlendState1 blendDeferredComposerTransparent = null;
+        private EngineBlendState blendAdditive = null;
 
         /// <summary>
         /// Default rasterizer
         /// </summary>
-        private RasterizerState2 rasterizerDefault = null;
+        private EngineRasterizerState rasterizerDefault = null;
         /// <summary>
         /// Wireframe rasterizer
         /// </summary>
-        private RasterizerState2 rasterizerWireframe = null;
+        private EngineRasterizerState rasterizerWireframe = null;
         /// <summary>
         /// No-cull rasterizer
         /// </summary>
-        private RasterizerState2 rasterizerNoCull = null;
+        private EngineRasterizerState rasterizerNoCull = null;
         /// <summary>
         /// Cull counter-clockwise face rasterizer
         /// </summary>
-        private RasterizerState2 rasterizerCullFrontFace = null;
-        /// <summary>
-        /// Stencil pass rasterizer (No Cull, No depth limit)
-        /// </summary>
-        private RasterizerState2 rasterizerStencilPass = null;
-        /// <summary>
-        /// Lighting pass rasterizer (Cull Front faces, No depth limit)
-        /// </summary>
-        private RasterizerState2 rasterizerLightingPass = null;
+        private EngineRasterizerState rasterizerCullFrontFace = null;
 
         /// <summary>
         /// Current vertex buffer first slot
@@ -574,176 +542,31 @@ namespace Engine
 
             #region Z-buffer enabled for write depth-stencil state
 
-            this.depthStencilzBufferEnabled = new DepthStencilState(
-                this.device,
-                new DepthStencilStateDescription()
-                {
-                    IsDepthEnabled = true,
-                    DepthWriteMask = DepthWriteMask.All,
-                    DepthComparison = Comparison.Less,
-
-                    IsStencilEnabled = true,
-                    StencilReadMask = 0xFF,
-                    StencilWriteMask = 0xFF,
-
-                    FrontFace = new DepthStencilOperationDescription()
-                    {
-                        FailOperation = StencilOperation.Keep,
-                        DepthFailOperation = StencilOperation.Increment,
-                        PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.Always,
-                    },
-
-                    BackFace = new DepthStencilOperationDescription()
-                    {
-                        FailOperation = StencilOperation.Keep,
-                        DepthFailOperation = StencilOperation.Decrement,
-                        PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.Always,
-                    },
-                });
+            this.depthStencilzBufferEnabled = EngineDepthStencilState.ZBufferEnabled(this);
 
             #endregion
 
             #region Z-buffer disabled for write depth-stencil state
 
-            this.depthStencilzBufferDisabled = new DepthStencilState(
-                this.device,
-                new DepthStencilStateDescription()
-                {
-                    IsDepthEnabled = false,
-                    DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.Never,
-
-                    IsStencilEnabled = true,
-                    StencilReadMask = 0xFF,
-                    StencilWriteMask = 0xFF,
-
-                    FrontFace = new DepthStencilOperationDescription()
-                    {
-                        FailOperation = StencilOperation.Keep,
-                        DepthFailOperation = StencilOperation.Increment,
-                        PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.Always,
-                    },
-
-                    BackFace = new DepthStencilOperationDescription()
-                    {
-                        FailOperation = StencilOperation.Keep,
-                        DepthFailOperation = StencilOperation.Decrement,
-                        PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.Always,
-                    },
-                });
+            this.depthStencilzBufferDisabled = EngineDepthStencilState.ZBufferDisabled(this);
 
             #endregion
 
             #region Z-buffer enabled for read depth-stencil state
 
-            this.depthStencilRDzBufferEnabled = new DepthStencilState(
-                this.device,
-                new DepthStencilStateDescription()
-                {
-                    IsDepthEnabled = true,
-                    DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.Less,
-                });
+            this.depthStencilRDzBufferEnabled = EngineDepthStencilState.RDzBufferEnabled(this);
 
             #endregion
 
             #region Z-buffer disabled for read depth-stencil state
 
-            this.depthStencilRDzBufferDisabled = new DepthStencilState(
-                this.device,
-                new DepthStencilStateDescription()
-                {
-                    IsDepthEnabled = false,
-                    DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.Never,
-                });
+            this.depthStencilRDzBufferDisabled = EngineDepthStencilState.RDzBufferDisabled(this);
 
             #endregion
 
             #region No depth, no stencil state
 
-            this.depthStencilNone = new DepthStencilState(
-                this.device,
-                new DepthStencilStateDescription()
-                {
-                    IsDepthEnabled = false,
-                    DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.Never,
-
-                    IsStencilEnabled = false,
-                    StencilReadMask = 0xFF,
-                    StencilWriteMask = 0xFF,
-                });
-
-            #endregion
-
-            #region Depth-stencil state for volume marking (Value != 0 if object is inside of the current drawing volume)
-
-            this.depthStencilVolumeMarking = new DepthStencilState(
-                this.device,
-                new DepthStencilStateDescription()
-                {
-                    IsDepthEnabled = true,
-                    DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.Less,
-
-                    IsStencilEnabled = true,
-                    StencilReadMask = 0xFF,
-                    StencilWriteMask = 0xFF,
-
-                    FrontFace = new DepthStencilOperationDescription()
-                    {
-                        FailOperation = StencilOperation.Keep,
-                        DepthFailOperation = StencilOperation.Decrement,
-                        PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.Always,
-                    },
-
-                    BackFace = new DepthStencilOperationDescription()
-                    {
-                        FailOperation = StencilOperation.Keep,
-                        DepthFailOperation = StencilOperation.Increment,
-                        PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.Always,
-                    },
-                });
-
-            #endregion
-
-            #region Depth-stencil state for volume drawing (Process pixels if stencil value != stencil reference)
-
-            this.depthStencilVolumeDrawing = new DepthStencilState(
-                this.device,
-                new DepthStencilStateDescription()
-                {
-                    IsDepthEnabled = false,
-                    DepthWriteMask = DepthWriteMask.Zero,
-                    DepthComparison = Comparison.Never,
-
-                    IsStencilEnabled = true,
-                    StencilReadMask = 0xFF,
-                    StencilWriteMask = 0x00,
-
-                    FrontFace = new DepthStencilOperationDescription()
-                    {
-                        FailOperation = StencilOperation.Keep,
-                        DepthFailOperation = StencilOperation.Keep,
-                        PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.NotEqual,
-                    },
-
-                    BackFace = new DepthStencilOperationDescription()
-                    {
-                        FailOperation = StencilOperation.Keep,
-                        DepthFailOperation = StencilOperation.Keep,
-                        PassOperation = StencilOperation.Keep,
-                        Comparison = Comparison.NotEqual,
-                    },
-                });
+            this.depthStencilNone = EngineDepthStencilState.None(this);
 
             #endregion
 
@@ -752,288 +575,25 @@ namespace Engine
             #region Rasterizer States
 
             //Default rasterizer state
-            this.rasterizerDefault = new RasterizerState2(
-                this.device,
-                new RasterizerStateDescription2()
-                {
-                    CullMode = CullMode.Back,
-                    FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = false,
-                    IsAntialiasedLineEnabled = false,
-                    IsMultisampleEnabled = false,
-                    IsScissorEnabled = false,
-                    IsDepthClipEnabled = true,
-                    DepthBias = 0,
-                    DepthBiasClamp = 0.0f,
-                    SlopeScaledDepthBias = 0.0f,
-                });
+            this.rasterizerDefault = EngineRasterizerState.Default(this);
 
             //Wireframe rasterizer state
-            this.rasterizerWireframe = new RasterizerState2(
-                this.device,
-                new RasterizerStateDescription2()
-                {
-                    CullMode = CullMode.Back,
-                    FillMode = FillMode.Wireframe,
-                    IsFrontCounterClockwise = false,
-                    IsAntialiasedLineEnabled = true,
-                    IsMultisampleEnabled = true,
-                    IsScissorEnabled = false,
-                    IsDepthClipEnabled = true,
-                    DepthBias = 0,
-                    DepthBiasClamp = 0.0f,
-                    SlopeScaledDepthBias = 0.0f,
-                });
+            this.rasterizerWireframe = EngineRasterizerState.Wireframe(this);
 
             //No cull rasterizer state
-            this.rasterizerNoCull = new RasterizerState2(
-                this.device,
-                new RasterizerStateDescription2()
-                {
-                    CullMode = CullMode.None,
-                    FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = false,
-                    IsAntialiasedLineEnabled = false,
-                    IsMultisampleEnabled = false,
-                    IsScissorEnabled = false,
-                    IsDepthClipEnabled = true,
-                    DepthBias = 0,
-                    DepthBiasClamp = 0.0f,
-                    SlopeScaledDepthBias = 0.0f,
-                });
+            this.rasterizerNoCull = EngineRasterizerState.NoCull(this);
 
             //Counter clockwise cull rasterizer state
-            this.rasterizerCullFrontFace = new RasterizerState2(
-                this.device,
-                new RasterizerStateDescription2()
-                {
-                    CullMode = CullMode.Back,
-                    FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = true,
-                    IsAntialiasedLineEnabled = false,
-                    IsMultisampleEnabled = false,
-                    IsScissorEnabled = false,
-                    IsDepthClipEnabled = true,
-                    DepthBias = 0,
-                    DepthBiasClamp = 0.0f,
-                    SlopeScaledDepthBias = 0.0f,
-                });
-
-            //Stencil pass rasterizer state
-            this.rasterizerStencilPass = new RasterizerState2(
-                this.device,
-                new RasterizerStateDescription2()
-                {
-                    CullMode = CullMode.None,
-                    FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = false,
-                    IsAntialiasedLineEnabled = false,
-                    IsMultisampleEnabled = false,
-                    IsScissorEnabled = false,
-                    IsDepthClipEnabled = false,
-                    DepthBias = 0,
-                    DepthBiasClamp = 0.0f,
-                    SlopeScaledDepthBias = 0.0f,
-                });
-
-            //Counter clockwise cull rasterizer state
-            this.rasterizerLightingPass = new RasterizerState2(
-                this.device,
-                new RasterizerStateDescription2()
-                {
-                    CullMode = CullMode.Back,
-                    FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = true,
-                    IsAntialiasedLineEnabled = false,
-                    IsMultisampleEnabled = false,
-                    IsScissorEnabled = false,
-                    IsDepthClipEnabled = false,
-                    DepthBias = 0,
-                    DepthBiasClamp = 0.0f,
-                    SlopeScaledDepthBias = 0.0f,
-                });
+            this.rasterizerCullFrontFace = EngineRasterizerState.CullFrontFace(this);
 
             #endregion
 
             #region Blend States
 
-            #region Default blend state (No alpha)
-            {
-                BlendStateDescription1 desc = new BlendStateDescription1();
-                desc.AlphaToCoverageEnable = false;
-                desc.IndependentBlendEnable = false;
-
-                desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.Zero;
-
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-
-                this.blendDefault = new BlendState1(this.device, desc);
-            }
-            #endregion
-
-            #region Alpha blend state
-            {
-                BlendStateDescription1 desc = new BlendStateDescription1();
-                desc.AlphaToCoverageEnable = false;
-                desc.IndependentBlendEnable = false;
-
-                desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-
-                this.blendDefaultAlpha = new BlendState1(this.device, desc);
-            }
-            #endregion
-
-            #region Transparent blend state
-            {
-                BlendStateDescription1 desc = new BlendStateDescription1();
-                desc.AlphaToCoverageEnable = true;
-                desc.IndependentBlendEnable = false;
-
-                desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-
-                this.blendTransparent = new BlendState1(this.device, desc);
-            }
-            #endregion
-
-            #region Additive blend state
-            {
-                BlendStateDescription1 desc = new BlendStateDescription1();
-                desc.AlphaToCoverageEnable = false;
-                desc.IndependentBlendEnable = false;
-
-                desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.One;
-
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-
-                this.blendAdditive = new BlendState1(this.device, desc);
-            }
-            #endregion
-
-            #region Deferred composer blend state (no alpha)
-            {
-                BlendStateDescription1 desc = new BlendStateDescription1();
-                desc.AlphaToCoverageEnable = false;
-                desc.IndependentBlendEnable = true;
-
-                desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-
-                desc.RenderTarget[1].IsBlendEnabled = true;
-                desc.RenderTarget[1].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[1].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[1].SourceBlend = BlendOption.One;
-                desc.RenderTarget[1].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[1].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[1].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[1].DestinationAlphaBlend = BlendOption.Zero;
-
-                desc.RenderTarget[2].IsBlendEnabled = true;
-                desc.RenderTarget[2].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[2].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[2].SourceBlend = BlendOption.One;
-                desc.RenderTarget[2].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
-
-                this.blendDeferredComposer = new BlendState1(this.device, desc);
-            }
-            #endregion
-
-            #region Deferred composer transparent blend state
-            {
-                BlendStateDescription1 desc = new BlendStateDescription1();
-                desc.AlphaToCoverageEnable = true;
-                desc.IndependentBlendEnable = true;
-
-                //Transparent blending only in first buffer
-                desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
-
-                desc.RenderTarget[1].IsBlendEnabled = true;
-                desc.RenderTarget[1].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[1].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[1].SourceBlend = BlendOption.One;
-                desc.RenderTarget[1].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[1].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[1].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[1].DestinationAlphaBlend = BlendOption.Zero;
-
-                desc.RenderTarget[2].IsBlendEnabled = true;
-                desc.RenderTarget[2].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[2].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[2].SourceBlend = BlendOption.One;
-                desc.RenderTarget[2].DestinationBlend = BlendOption.Zero;
-                desc.RenderTarget[2].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[2].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[2].DestinationAlphaBlend = BlendOption.Zero;
-
-                this.blendDeferredComposerTransparent = new BlendState1(this.device, desc);
-            }
-            #endregion
-
-            #region Deferred lighting blend state
-            {
-                BlendStateDescription1 desc = new BlendStateDescription1();
-                desc.AlphaToCoverageEnable = false;
-                desc.IndependentBlendEnable = false;
-
-                desc.RenderTarget[0].IsBlendEnabled = true;
-                desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-                desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationBlend = BlendOption.One;
-                desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-                desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-                desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
-
-                this.blendDeferredLighting = new BlendState1(this.device, desc);
-            }
-            #endregion
+            this.blendDefault = EngineBlendState.Default(this);
+            this.blendDefaultAlpha = EngineBlendState.DefaultAlpha(this);
+            this.blendTransparent = EngineBlendState.Transparent(this);
+            this.blendAdditive = EngineBlendState.Additive(this);
 
             #endregion
 
@@ -1266,68 +826,32 @@ namespace Engine
             this.SetDepthStencilState(this.depthStencilNone);
         }
         /// <summary>
-        /// Sets depth stencil for volume marking
-        /// </summary>
-        public void SetDepthStencilVolumeMarking()
-        {
-            this.SetDepthStencilState(this.depthStencilVolumeMarking);
-        }
-        /// <summary>
-        /// Sets depth stencil for volume drawing
-        /// </summary>
-        public void SetDepthStencilVolumeDrawing(int stencilRef)
-        {
-            this.SetDepthStencilState(this.depthStencilVolumeDrawing, stencilRef);
-            this.deviceContext.OutputMerger.DepthStencilReference = stencilRef;
-        }
-        /// <summary>
         /// Sets default blend state
         /// </summary>
         public void SetBlendDefault()
         {
-            this.SetBlendState(this.blendDefault, Color.Transparent, -1);
+            this.SetBlendState(this.blendDefault);
         }
         /// <summary>
         /// Sets default alpha blend state
         /// </summary>
         public void SetBlendDefaultAlpha()
         {
-            this.SetBlendState(this.blendDefaultAlpha, Color.Transparent, -1);
+            this.SetBlendState(this.blendDefaultAlpha);
         }
         /// <summary>
         /// Sets transparent blend state
         /// </summary>
         public void SetBlendTransparent()
         {
-            this.SetBlendState(this.blendTransparent, Color.Transparent, -1);
+            this.SetBlendState(this.blendTransparent);
         }
         /// <summary>
         /// Sets additive blend state
         /// </summary>
         public void SetBlendAdditive()
         {
-            this.SetBlendState(this.blendAdditive, Color.Transparent, -1);
-        }
-        /// <summary>
-        /// Sets deferred composer blend state
-        /// </summary>
-        public void SetBlendDeferredComposer()
-        {
-            this.SetBlendState(this.blendDeferredComposer, Color.Transparent, -1);
-        }
-        /// <summary>
-        /// Sets transparent deferred composer blend state
-        /// </summary>
-        public void SetBlendDeferredComposerTransparent()
-        {
-            this.SetBlendState(this.blendDeferredComposerTransparent, Color.Transparent, -1);
-        }
-        /// <summary>
-        /// Sets deferred lighting blend state
-        /// </summary>
-        public void SetBlendDeferredLighting()
-        {
-            this.SetBlendState(this.blendDeferredLighting, Color.Transparent, -1);
+            this.SetBlendState(this.blendAdditive);
         }
         /// <summary>
         /// Sets default rasterizer
@@ -1356,20 +880,6 @@ namespace Engine
         public void SetRasterizerCullFrontFace()
         {
             this.SetRasterizerState(this.rasterizerCullFrontFace);
-        }
-        /// <summary>
-        /// Sets stencil pass rasterizer
-        /// </summary>
-        public void SetRasterizerStencilPass()
-        {
-            this.SetRasterizerState(this.rasterizerStencilPass);
-        }
-        /// <summary>
-        /// Stes lighting pass rasterizer
-        /// </summary>
-        public void SetRasterizerLightingPass()
-        {
-            this.SetRasterizerState(this.rasterizerLightingPass);
         }
         /// <summary>
         /// Bind an array of vertex buffers to the input-assembler stage.
@@ -1436,55 +946,6 @@ namespace Engine
             }
 #endif
         }
-
-        /// <summary>
-        /// Sets depth stencil state
-        /// </summary>
-        /// <param name="state">Depth stencil state</param>
-        private void SetDepthStencilState(DepthStencilState state, int stencilRef = 0)
-        {
-            if (this.currentDepthStencilState != state || this.currentDepthStencilStateRef != stencilRef)
-            {
-                this.device.ImmediateContext.OutputMerger.SetDepthStencilState(state, stencilRef);
-
-                this.currentDepthStencilState = state;
-                this.currentDepthStencilStateRef = stencilRef;
-
-                Counters.DepthStencilStateChanges++;
-            }
-        }
-        /// <summary>
-        /// Stes blend state
-        /// </summary>
-        /// <param name="state">Blend state</param>
-        /// <param name="blendFactor">Blend factor</param>
-        /// <param name="sampleMask">Sample mask</param>
-        private void SetBlendState(BlendState1 state, Color4? blendFactor = null, int sampleMask = -1)
-        {
-            if (this.currentBlendState != state)
-            {
-                this.device.ImmediateContext.OutputMerger.SetBlendState(state, blendFactor, sampleMask);
-
-                this.currentBlendState = state;
-
-                Counters.BlendStateChanges++;
-            }
-        }
-        /// <summary>
-        /// Sets rasterizer state
-        /// </summary>
-        /// <param name="state">Rasterizer state</param>
-        private void SetRasterizerState(RasterizerState2 state)
-        {
-            if (this.currentRasterizerState != state)
-            {
-                this.device.ImmediateContext.Rasterizer.State = state;
-
-                this.currentRasterizerState = state;
-
-                Counters.RasterizerStateChanges++;
-            }
-        }
         /// <summary>
         /// Dispose resources
         /// </summary>
@@ -1498,23 +959,94 @@ namespace Engine
             Helper.Dispose(this.depthStencilRDzBufferEnabled);
             Helper.Dispose(this.depthStencilRDzBufferDisabled);
             Helper.Dispose(this.depthStencilNone);
-            Helper.Dispose(this.depthStencilVolumeMarking);
-            Helper.Dispose(this.depthStencilVolumeDrawing);
 
             Helper.Dispose(this.rasterizerDefault);
             Helper.Dispose(this.rasterizerWireframe);
             Helper.Dispose(this.rasterizerNoCull);
             Helper.Dispose(this.rasterizerCullFrontFace);
-            Helper.Dispose(this.rasterizerStencilPass);
-            Helper.Dispose(this.rasterizerLightingPass);
 
             Helper.Dispose(this.blendDefault);
             Helper.Dispose(this.blendDefaultAlpha);
             Helper.Dispose(this.blendTransparent);
             Helper.Dispose(this.blendAdditive);
-            Helper.Dispose(this.blendDeferredLighting);
-            Helper.Dispose(this.blendDeferredComposer);
-            Helper.Dispose(this.blendDeferredComposerTransparent);
+        }
+
+        /// <summary>
+        /// Sets depth stencil state
+        /// </summary>
+        /// <param name="state">Depth stencil state</param>
+        internal void SetDepthStencilState(EngineDepthStencilState state)
+        {
+            if (this.currentDepthStencilState != state)
+            {
+                this.device.ImmediateContext.OutputMerger.SetDepthStencilState(state.GetDepthStencilState(), state.StencilRef);
+                this.device.ImmediateContext.OutputMerger.DepthStencilReference = state.StencilRef;
+
+                this.currentDepthStencilState = state;
+
+                Counters.DepthStencilStateChanges++;
+            }
+        }
+        /// <summary>
+        /// Stes blend state
+        /// </summary>
+        /// <param name="state">Blend state</param>
+        internal void SetBlendState(EngineBlendState state)
+        {
+            if (this.currentBlendState != state)
+            {
+                this.device.ImmediateContext.OutputMerger.SetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
+
+                this.currentBlendState = state;
+
+                Counters.BlendStateChanges++;
+            }
+        }
+        /// <summary>
+        /// Sets rasterizer state
+        /// </summary>
+        /// <param name="state">Rasterizer state</param>
+        internal void SetRasterizerState(EngineRasterizerState state)
+        {
+            if (this.currentRasterizerState != state)
+            {
+                this.device.ImmediateContext.Rasterizer.State = state.GetRasterizerState();
+
+                this.currentRasterizerState = state;
+
+                Counters.RasterizerStateChanges++;
+            }
+        }
+
+        /// <summary>
+        /// Creates a new blend state
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="blendFactor">Blend factor</param>
+        /// <param name="sampleMask">Sample mask</param>
+        /// <returns>Returns a new blend state</returns>
+        internal EngineBlendState CreateBlendState(BlendStateDescription1 description, Color4? blendFactor, int sampleMask)
+        {
+            return new EngineBlendState(new BlendState1(this.device, description), blendFactor, sampleMask);
+        }
+        /// <summary>
+        /// Creates a new rasterizer state
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <returns>Returns a new rasterizer state</returns>
+        internal EngineRasterizerState CreateRasterizerState(RasterizerStateDescription2 description)
+        {
+            return new EngineRasterizerState(new RasterizerState2(this.device, description));
+        }
+        /// <summary>
+        /// Creates a new depth stencil state
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="stencilRef">Stencil reference</param>
+        /// <returns>Returns a new depth stencil state</returns>
+        internal EngineDepthStencilState CreateDepthStencilState(DepthStencilStateDescription description, int stencilRef)
+        {
+            return new EngineDepthStencilState(new DepthStencilState(this.device, description), stencilRef);
         }
 
         /// <summary>
