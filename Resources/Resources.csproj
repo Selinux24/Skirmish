@@ -105,9 +105,7 @@
     <None Include="Blender\Buildings\Garage\concrete.jpg" />
     <None Include="Blender\Furniture\Lamps\concrete.jpg" />
     <None Include="Blender\Buildings\Dungeon\BaseMap.png" />
-    <Content Include="Blender\Buildings\Helipod\helipod.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <None Include="Blender\Buildings\Helipod\helipod.png" />
     <None Include="Blender\Furniture\StreetLamp\StreetLamp.blend" />
     <None Include="Blender\Scenery\Clif\clif.blend" />
     <None Include="Blender\Scenery\Ground\ground_nmap.png" />
