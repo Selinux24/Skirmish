@@ -17,9 +17,9 @@ namespace Engine
         /// </summary>
         public string[] TransformNames;
         /// <summary>
-        /// Transform dependeces
+        /// Transform dependences
         /// </summary>
-        public int[] TransformDependeces;
+        public int[] TransformDependences;
 
         /// <summary>
         /// Constructor

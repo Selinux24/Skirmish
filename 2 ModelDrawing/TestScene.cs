@@ -103,6 +103,7 @@ namespace ModelDrawing
 
             var desc = new ModelDescription()
             {
+                UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
                     ModelContent = content,

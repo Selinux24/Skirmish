@@ -84,6 +84,7 @@ namespace SceneTest
                 DeferredEnabled = true,
                 DepthEnabled = true,
                 AlphaEnabled = false,
+                UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
                     ModelContent = content

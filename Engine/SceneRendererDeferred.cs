@@ -33,6 +33,16 @@ namespace Engine
         private const int CullIndexDrawIndex = 2;
 
         /// <summary>
+        /// Validates the renderer against the current device configuration
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <returns>Returns true if the renderer is valid</returns>
+        public static bool Validate(Graphics graphics)
+        {
+            return !graphics.MultiSampled;
+        }
+
+        /// <summary>
         /// View port
         /// </summary>
         public Viewport viewport;
@@ -73,7 +83,6 @@ namespace Engine
         /// Blend state for transparent defered composer blending
         /// </summary>
         private EngineBlendState blendDeferredComposerTransparent = null;
-
 
         /// <summary>
         /// Game
@@ -166,11 +175,6 @@ namespace Engine
 
                 return null;
             }
-        }
-
-        public static bool Validate(Graphics graphics)
-        {
-            return !graphics.MultiSampled;
         }
 
         /// <summary>

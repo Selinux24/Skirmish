@@ -132,7 +132,7 @@ namespace Engine
         {
             this.TextureIndex = description.TextureIndex;
 
-            if (description.TransformDependeces != null && description.TransformDependeces.Length > 0)
+            if (description.TransformDependences != null && description.TransformDependences.Length > 0)
             {
                 for (int i = 0; i < description.TransformNames.Length; i++)
                 {
@@ -145,7 +145,7 @@ namespace Engine
                     var thisMan = this[thisName].Manipulator;
                     thisMan.Updated += new EventHandler(ManipulatorUpdated);
 
-                    var parentIndex = description.TransformDependeces[i];
+                    var parentIndex = description.TransformDependences[i];
                     if (parentIndex >= 0)
                     {
                         var parentName = description.TransformNames[parentIndex];
@@ -270,6 +270,7 @@ namespace Engine
                             if (context.DrawerMode == DrawerModesEnum.Forward)
                             {
                                 ((EffectDefaultBasic)effect).UpdatePerObject(
+                                    this.UseAnisotropicFiltering,
                                     mat.DiffuseTexture,
                                     mat.NormalMap,
                                     mat.SpecularTexture,
@@ -280,6 +281,7 @@ namespace Engine
                             else if (context.DrawerMode == DrawerModesEnum.Deferred)
                             {
                                 ((EffectDeferredBasic)effect).UpdatePerObject(
+                                    this.UseAnisotropicFiltering,
                                     mat.DiffuseTexture,
                                     mat.NormalMap,
                                     mat.SpecularTexture,

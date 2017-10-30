@@ -71,7 +71,7 @@ namespace Engine
             /// <summary>
             /// Current quadtree node
             /// </summary>
-            public PickingQuadTreeNode<Triangle> Current { get; private set; }
+            public PickingQuadTreeNode<Triangle> Current { get; set; }
 
             /// <summary>
             /// Cosntructor
@@ -91,15 +91,6 @@ namespace Engine
                 Helper.Dispose(this.DrawingData);
             }
 
-            /// <summary>
-            /// Updates the scenery patch
-            /// </summary>
-            /// <param name="context">Context</param>
-            /// <param name="node">Node</param>
-            public void Update(UpdateContext context, PickingQuadTreeNode<Triangle> node)
-            {
-                this.Current = node;
-            }
             /// <summary>
             /// Draws the scenery patch
             /// </summary>
@@ -124,6 +115,7 @@ namespace Engine
                         if (context.DrawerMode == DrawerModesEnum.Forward)
                         {
                             ((EffectDefaultBasic)sceneryEffect).UpdatePerObject(
+                                true,
                                 mat.DiffuseTexture,
                                 mat.NormalMap,
                                 mat.SpecularTexture,
@@ -134,6 +126,7 @@ namespace Engine
                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
                         {
                             ((EffectDeferredBasic)sceneryEffect).UpdatePerObject(
+                                true,
                                 mat.DiffuseTexture,
                                 mat.NormalMap,
                                 mat.SpecularTexture,
@@ -332,23 +325,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref context.Frustum);
-            if (this.visibleNodes != null && this.visibleNodes.Length > 0)
-            {
-                //Sort nodes - draw far nodes first
-                Array.Sort(this.visibleNodes, (n1, n2) =>
-                {
-                    float d1 = (n1.Center - context.EyePosition).LengthSquared();
-                    float d2 = (n2.Center - context.EyePosition).LengthSquared();
-
-                    return -d1.CompareTo(d2);
-                });
-
-                foreach (var node in this.visibleNodes)
-                {
-                    this.patchDictionary[node.Id].Update(context, node);
-                }
-            }
+            
         }
         /// <summary>
         /// Objects drawing
@@ -412,6 +389,69 @@ namespace Engine
                 {
                     this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, this.BufferManager);
                 }
+            }
+        }
+        /// <summary>
+        /// Culling
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <returns>Returns true if the object is culled</returns>
+        public override bool Cull(BoundingSphere sphere)
+        {
+            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref sphere);
+
+            return this.CullNodes(sphere.Center);
+        }
+        /// <summary>
+        /// Culling
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <returns>Returns true if the object is culled</returns>
+        public override bool Cull(BoundingFrustum frustum)
+        {
+            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref frustum);
+
+            return this.CullNodes(frustum.GetCameraParams().Position);
+        }
+        /// <summary>
+        /// Culling
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <returns>Returns true if the object is culled</returns>
+        public override bool Cull(BoundingBox box)
+        {
+            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref box);
+
+            return this.CullNodes(box.GetCenter());
+        }
+        /// <summary>
+        /// Node culling
+        /// </summary>
+        /// <param name="pov">Point of view</param>
+        /// <returns>Returns true if the object is culled</returns>
+        private bool CullNodes(Vector3 pov)
+        {
+            if (this.visibleNodes != null && this.visibleNodes.Length > 0)
+            {
+                //Sort nodes - draw far nodes first
+                Array.Sort(this.visibleNodes, (n1, n2) =>
+                {
+                    float d1 = (n1.Center - pov).LengthSquared();
+                    float d2 = (n2.Center - pov).LengthSquared();
+
+                    return -d1.CompareTo(d2);
+                });
+
+                foreach (var node in this.visibleNodes)
+                {
+                    this.patchDictionary[node.Id].Current = node;
+                }
+
+                return false;
+            }
+            else
+            {
+                return true;
             }
         }
 

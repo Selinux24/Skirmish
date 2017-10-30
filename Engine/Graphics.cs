@@ -136,6 +136,19 @@ namespace Engine
         private EngineRasterizerState rasterizerCullFrontFace = null;
 
         /// <summary>
+        /// Sampler point
+        /// </summary>
+        private SamplerState samplerPoint = null;
+        /// <summary>
+        /// Sampler linear
+        /// </summary>
+        private SamplerState samplerLinear = null;
+        /// <summary>
+        /// Sampler anisotropic
+        /// </summary>
+        private SamplerState samplerAnisotropic = null;
+
+        /// <summary>
         /// Current vertex buffer first slot
         /// </summary>
         private int currentVertexBufferFirstSlot = -1;
@@ -597,6 +610,28 @@ namespace Engine
 
             #endregion
 
+            #region Sampler States
+
+            var descPoint = SamplerStateDescription.Default();
+            descPoint.Filter = Filter.MinMagMipPoint;
+
+            var descLinear = SamplerStateDescription.Default();
+            descLinear.Filter = Filter.MinMagMipLinear;
+            descLinear.AddressU = TextureAddressMode.Wrap;
+            descLinear.AddressV = TextureAddressMode.Wrap;
+
+            var descAnisotropic = SamplerStateDescription.Default();
+            descAnisotropic.Filter = Filter.Anisotropic;
+            descAnisotropic.MaximumAnisotropy = 4;
+            descAnisotropic.AddressU = TextureAddressMode.Wrap;
+            descAnisotropic.AddressV = TextureAddressMode.Wrap;
+
+            this.samplerPoint = this.CreateSamplerState(descPoint);
+            this.samplerLinear = this.CreateSamplerState(descLinear);
+            this.samplerAnisotropic = this.CreateSamplerState(descAnisotropic);
+
+            #endregion
+
             #region Set Defaults
 
             this.SetDefaultViewport();
@@ -1016,6 +1051,31 @@ namespace Engine
 
                 Counters.RasterizerStateChanges++;
             }
+        }
+
+        /// <summary>
+        /// Gets the sampler point state
+        /// </summary>
+        /// <returns>Gets the sampler state</returns>
+        internal SamplerState GetSamplerPoint()
+        {
+            return this.samplerPoint;
+        }
+        /// <summary>
+        /// Gets the sampler linear state
+        /// </summary>
+        /// <returns>Gets the sampler state</returns>
+        internal SamplerState GetSamplerLinear()
+        {
+            return this.samplerLinear;
+        }
+        /// <summary>
+        /// Gets the sampler anisotropic state
+        /// </summary>
+        /// <returns>Gets the sampler state</returns>
+        internal SamplerState GetSamplerAnisotropic()
+        {
+            return this.samplerAnisotropic;
         }
 
         /// <summary>
@@ -2331,6 +2391,16 @@ namespace Engine
         internal void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
         {
             technique.GetPass(index).Apply(this.deviceContext, flags);
+        }
+
+        /// <summary>
+        /// Creates a new Sampler state
+        /// </summary>
+        /// <param name="description">Sampler description</param>
+        /// <returns>Returns the new sampler state</returns>
+        internal SamplerState CreateSamplerState(SamplerStateDescription description)
+        {
+            return new SamplerState(this.device, description);
         }
 
         /// <summary>

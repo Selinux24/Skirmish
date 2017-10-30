@@ -29,6 +29,10 @@ namespace Engine.Common
         /// </summary>
         public bool LoadNormalMaps = true;
         /// <summary>
+        /// Use anisotropic filtering
+        /// </summary>
+        public bool UseAnisotropicFiltering = false;
+        /// <summary>
         /// Dynamic buffers
         /// </summary>
         public bool Dynamic = false;

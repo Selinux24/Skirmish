@@ -176,6 +176,7 @@
     <Compile Include="Common\DrawContext.cs" />
     <Compile Include="Common\DrawerModesEnum.cs" />
     <Compile Include="Common\EngineDepthStencilState.cs" />
+    <Compile Include="Common\EngineEffectVariableSampler.cs" />
     <Compile Include="Common\EngineRasterizerState.cs" />
     <Compile Include="Common\EngineBlendState.cs" />
     <Compile Include="Common\EngineDepthStencilView.cs" />

@@ -670,7 +670,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
 	float4 ambient = input.k.Ambient * input.Ga;
 
 	float4 diffuse = input.k.Diffuse * lDiffuse;
-    float4 specular = input.k.Specular * lSpecular * dist * input.pColorSpecular;
+    float4 specular = saturate(input.k.Specular * lSpecular * input.pColorSpecular * dist);
 
 	float4 color = (emissive + ambient + diffuse + specular) * input.pColorDiffuse;
 

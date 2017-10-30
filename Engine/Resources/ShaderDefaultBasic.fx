@@ -69,6 +69,10 @@ cbuffer cbPSPerInstance : register(b5)
 	bool PAD52;
 };
 
+SamplerState SamplerDiffuse : register(s0);
+SamplerState SamplerNormal : register(s1);
+SamplerState SamplerSpecular : register(s2);
+
 /**********************************************************************************************************
 POSITION COLOR
 **********************************************************************************************************/
@@ -348,7 +352,7 @@ PSVertexPositionTexture VSPositionTextureSkinnedI(VSVertexPositionTextureSkinned
 
 float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 textureColor = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 textureColor = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 
 	if (gPSFogRange > 0)
 	{
@@ -361,35 +365,35 @@ float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 }
 float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 color = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 color = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 
 	//Grayscale of red channel
 	return float4(color.rrr, 1);
 }
 float4 PSPositionTextureGREEN(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 color = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 color = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 
 	//Grayscale of green channel
 	return float4(color.ggg, 1);
 }
 float4 PSPositionTextureBLUE(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 color = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 color = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 
 	//Grayscale of blue channel
 	return float4(color.bbb, 1);
 }
 float4 PSPositionTextureALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 color = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 color = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 
 	//Grayscale of alpha channel
 	return float4(color.aaa, 1);
 }
 float4 PSPositionTextureNOALPHA(PSVertexPositionTexture input) : SV_TARGET
 {
-	float4 color = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    float4 color = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 
 	//Color channel
 	return float4(color.rgb, 1);
@@ -488,14 +492,14 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	float4 diffuseMap = 1;
 	if (gPSUseColorDiffuse == true)
 	{
-		diffuseMap = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
-	}
+        diffuseMap = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
+    }
 
-	float4 specularMap = 0;
+	float4 specularMap = 1;
 	if (gPSUseColorSpecular == true)
 	{
-		specularMap = gPSSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
-	}
+        specularMap = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex, input.textureIndex));
+    }
 
 	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
 	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
@@ -633,16 +637,16 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	float4 diffuseMap = 1;
 	if (gPSUseColorDiffuse == true)
 	{
-		diffuseMap = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
-	}
-
-	float4 specularMap = 0;
-	if (gPSUseColorSpecular == true)
-	{
-        specularMap = gPSSpecularMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+        diffuseMap = gPSDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
     }
 
-    float3 normalMap = gPSNormalMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
+	float4 specularMap = 1;
+	if (gPSUseColorSpecular == true)
+	{
+        specularMap = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex, input.textureIndex));
+    }
+
+    float3 normalMap = gPSNormalMapArray.Sample(SamplerNormal, float3(input.tex, input.textureIndex)).rgb;
     float3 normalWorld = NormalSampleToWorldSpace(normalMap, input.normalWorld, input.tangentWorld);
 
 	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);

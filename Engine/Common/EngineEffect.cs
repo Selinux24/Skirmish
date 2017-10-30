@@ -88,6 +88,15 @@ namespace Engine.Common
         {
             return new EngineEffectVariableMatrix(this.effect.GetVariableByName(name).AsMatrix());
         }
+        /// <summary>
+        /// Get variable by name
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <returns>Returns the variable</returns>
+        public EngineEffectVariableSampler GetVariableSampler(string name)
+        {
+            return new EngineEffectVariableSampler(this.effect.GetVariableByName(name).AsSampler());
+        }
 
         /// <summary>
         /// Dipose resources

@@ -26,6 +26,9 @@ Texture2DArray gDiffuseMapArray : register(t1);
 Texture2DArray gNormalMapArray : register(t2);
 Texture2DArray gSpecularMapArray : register(t3);
 
+SamplerState SamplerDiffuse : register(s0);
+SamplerState SamplerNormal : register(s1);
+
 /**********************************************************************************************************
 POSITION COLOR
 **********************************************************************************************************/
@@ -278,7 +281,7 @@ GBufferPSOutput PSPositionTexture(PSVertexPositionTexture input)
 {
 	GBufferPSOutput output = (GBufferPSOutput) 0;
 
-	output.color = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    output.color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 	output.normal = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	output.depth = float4(input.positionWorld, gMaterialIndex);
 
@@ -375,7 +378,7 @@ GBufferPSOutput PSPositionNormalTexture(PSVertexPositionNormalTexture input)
 {
 	GBufferPSOutput output = (GBufferPSOutput) 0;
 
-	output.color = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+    output.color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 	output.normal = float4(input.normalWorld, 0);
 	output.depth = float4(input.positionWorld, gMaterialIndex);
 
@@ -484,8 +487,8 @@ GBufferPSOutput PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTang
 {
 	GBufferPSOutput output = (GBufferPSOutput) 0;
 
-	float4 color = gDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
-	float3 normalMapSample = gNormalMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)).rgb;
+    float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
+    float3 normalMapSample = gNormalMapArray.Sample(SamplerNormal, float3(input.tex, input.textureIndex)).rgb;
 	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
 	output.color = color;

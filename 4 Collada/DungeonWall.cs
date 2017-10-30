@@ -84,6 +84,7 @@ namespace Collada
                     Name = "wall",
                     Instances = 7,
                     CastShadow = true,
+                    UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
                         ContentFolder = "Resources",

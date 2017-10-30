@@ -238,6 +238,7 @@ namespace Engine
                                         if (context.DrawerMode == DrawerModesEnum.Forward)
                                         {
                                             ((EffectDefaultBasic)effect).UpdatePerObject(
+                                                this.UseAnisotropicFiltering,
                                                 mat.DiffuseTexture,
                                                 mat.NormalMap,
                                                 mat.SpecularTexture,
@@ -248,6 +249,7 @@ namespace Engine
                                         else if (context.DrawerMode == DrawerModesEnum.Deferred)
                                         {
                                             ((EffectDeferredBasic)effect).UpdatePerObject(
+                                                this.UseAnisotropicFiltering,
                                                 mat.DiffuseTexture,
                                                 mat.NormalMap,
                                                 mat.SpecularTexture,

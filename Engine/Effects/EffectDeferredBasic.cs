@@ -130,7 +130,18 @@ namespace Engine.Effects
         /// Animation palette
         /// </summary>
         private EngineEffectVariableTexture animationPalette = null;
-
+        /// <summary>
+        /// Use anisotropic sampling
+        /// </summary>
+        private bool? anisotropic;
+        /// <summary>
+        /// Sampler for diffuse maps
+        /// </summary>
+        private EngineEffectVariableSampler samplerDiffuse = null;
+        /// <summary>
+        /// Sampler for normal maps
+        /// </summary>
+        private EngineEffectVariableSampler samplerNormal = null;
         /// <summary>
         /// Current diffuse map
         /// </summary>
@@ -316,6 +327,28 @@ namespace Engine.Effects
                 }
             }
         }
+        /// <summary>
+        /// Gets or sets if the effect use anisotropic filtering
+        /// </summary>
+        public bool Anisotropic
+        {
+            get
+            {
+                return this.anisotropic == true;
+            }
+            set
+            {
+                if (this.anisotropic != value)
+                {
+                    this.anisotropic = value;
+
+                    var sampler = this.anisotropic == true ? this.Graphics.GetSamplerAnisotropic() : this.Graphics.GetSamplerLinear();
+
+                    this.samplerDiffuse.SetValue(0, sampler);
+                    this.samplerNormal.SetValue(0, sampler);
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -357,6 +390,10 @@ namespace Engine.Effects
             this.specularMap = this.Effect.GetVariableTexture("gSpecularMapArray");
             this.animationPaletteWidth = this.Effect.GetVariableScalar("gAnimationPaletteWidth");
             this.animationPalette = this.Effect.GetVariableTexture("gAnimationPalette");
+
+            //Samplers
+            this.samplerDiffuse = this.Effect.GetVariableSampler("SamplerDiffuse");
+            this.samplerNormal = this.Effect.GetVariableSampler("SamplerNormal");
         }
         /// <summary>
         /// Get technique by vertex type
@@ -436,6 +473,7 @@ namespace Engine.Effects
         /// <summary>
         /// Update per model object data
         /// </summary>
+        /// <param name="useAnisotropic">Use anisotropic filtering</param>
         /// <param name="diffuseMap">Diffuse map</param>
         /// <param name="normalMap">Normal map</param>
         /// <param name="specularMap">Specular map</param>
@@ -443,6 +481,7 @@ namespace Engine.Effects
         /// <param name="textureIndex">Texture index</param>
         /// <param name="animationOffset">Animation index</param>
         public void UpdatePerObject(
+            bool useAnisotropic,
             EngineShaderResourceView diffuseMap,
             EngineShaderResourceView normalMap,
             EngineShaderResourceView specularMap,
@@ -450,6 +489,8 @@ namespace Engine.Effects
             uint textureIndex,
             uint animationOffset)
         {
+            this.Anisotropic = useAnisotropic;
+
             this.DiffuseMap = diffuseMap;
             this.NormalMap = normalMap;
             this.SpecularMap = specularMap;

@@ -10,6 +10,10 @@ namespace Engine.Effects
     public abstract class Drawer : IDrawer
     {
         /// <summary>
+        /// Graphics instance
+        /// </summary>
+        protected Graphics Graphics = null;
+        /// <summary>
         /// Effect
         /// </summary>
         protected EngineEffect Effect = null;
@@ -22,6 +26,8 @@ namespace Engine.Effects
         /// <param name="compile">Compile effect</param>
         public Drawer(Graphics graphics, byte[] effect, bool compile)
         {
+            this.Graphics = graphics;
+
             if (compile)
             {
                 this.Effect = graphics.CompileEffect(effect, HelperShaders.FXProfile);

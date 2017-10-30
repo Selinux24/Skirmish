@@ -84,7 +84,7 @@ namespace SceneTest
             var desc = new LineListDrawerDescription() { DepthEnabled = true, Count = 10000 };
             this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(6, 30, 00), 0.0001f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(6, 30, 00), 10f);
         }
 
         private void InitializeTextBoxes()
@@ -192,6 +192,7 @@ namespace SceneTest
                 DepthEnabled = true,
                 AlphaEnabled = false,
                 SphericVolume = false,
+                UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
                     ModelContent = content,
@@ -207,6 +208,7 @@ namespace SceneTest
                 DepthEnabled = true,
                 AlphaEnabled = false,
                 SphericVolume = false,
+                UseAnisotropicFiltering = true,
                 Instances = 8,
                 Content = new ContentDescription()
                 {
@@ -237,6 +239,7 @@ namespace SceneTest
                     CastShadow = true,
                     Static = true,
                     SphericVolume = false,
+                    UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
                         ContentFolder = "SceneTextures/buildings/obelisk",
@@ -251,6 +254,7 @@ namespace SceneTest
                     CastShadow = true,
                     Static = true,
                     SphericVolume = false,
+                    UseAnisotropicFiltering = true,
                     Instances = 4,
                     Content = new ContentDescription()
                     {

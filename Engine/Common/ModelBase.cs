@@ -50,6 +50,10 @@ namespace Engine.Common
             }
         }
         /// <summary>
+        /// Use anisotropic filtering
+        /// </summary>
+        public virtual bool UseAnisotropicFiltering { get; set; }
+        /// <summary>
         /// Gets the skinning list used by the current drawing data
         /// </summary>
         public virtual SkinningData[] SkinningData
@@ -141,6 +145,8 @@ namespace Engine.Common
 
                 this.LevelOfDetail = this.defaultLevelOfDetail;
             }
+
+            this.UseAnisotropicFiltering = description.UseAnisotropicFiltering;
         }
         /// <summary>
         /// Dispose model buffers

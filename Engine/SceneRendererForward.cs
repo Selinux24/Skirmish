@@ -32,6 +32,16 @@ namespace Engine
         private const int CullIndexDrawIndex = 2;
 
         /// <summary>
+        /// Validates the renderer against the current device configuration
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <returns>Returns true if the renderer is valid</returns>
+        public static bool Validate(Graphics graphics)
+        {
+            return true;
+        }
+
+        /// <summary>
         /// High definition shadow mapper
         /// </summary>
         private ShadowMap shadowMapperHigh = null;
@@ -102,12 +112,6 @@ namespace Engine
         /// Gets or sets whether the renderer was updated
         /// </summary>
         protected bool Updated { get; set; }
-
-
-        public static bool Validate(Graphics graphics)
-        {
-            return true;
-        }
 
         /// <summary>
         /// Constructor

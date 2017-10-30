@@ -346,7 +346,7 @@ namespace TerrainTest
                     ModelContentFilename = "Leopard.xml",
                 },
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
-                TransformDependeces = new[] { 1, 2, -1 },
+                TransformDependences = new[] { 1, 2, -1 },
             };
             this.tankP1 = this.AddComponent<Model>(tDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
             this.tankP2 = this.AddComponent<Model>(tDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
