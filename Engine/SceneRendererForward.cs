@@ -155,7 +155,7 @@ namespace Engine
         /// </summary>
         public virtual void Resize()
         {
-            
+
         }
         /// <summary>
         /// Updates scene components
@@ -517,10 +517,10 @@ namespace Engine
         }
 
         /// <summary>
-           /// Binds graphics for shadow mapping pass
-           /// </summary>
-           /// <param name="viewport">Viewport</param>
-           /// <param name="dsv">Deph stencil buffer</param>
+        /// Binds graphics for shadow mapping pass
+        /// </summary>
+        /// <param name="viewport">Viewport</param>
+        /// <param name="dsv">Deph stencil buffer</param>
         private void BindShadowMap(Viewport viewport, EngineDepthStencilView dsv)
         {
             //Set shadow mapper viewport
@@ -528,12 +528,9 @@ namespace Engine
 
             //Set shadow map depth map without render target
             this.Game.Graphics.SetRenderTargets(
-                null,
-                false,
-                Color.Transparent,
-                dsv,
-                true,
-                false);
+                null, false, Color.Transparent,
+                dsv, true, false,
+                true);
         }
         /// <summary>
         /// Draw components for shadow mapping

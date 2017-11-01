@@ -136,19 +136,6 @@ namespace Engine
         private EngineRasterizerState rasterizerCullFrontFace = null;
 
         /// <summary>
-        /// Sampler point
-        /// </summary>
-        private SamplerState samplerPoint = null;
-        /// <summary>
-        /// Sampler linear
-        /// </summary>
-        private SamplerState samplerLinear = null;
-        /// <summary>
-        /// Sampler anisotropic
-        /// </summary>
-        private SamplerState samplerAnisotropic = null;
-
-        /// <summary>
         /// Current vertex buffer first slot
         /// </summary>
         private int currentVertexBufferFirstSlot = -1;
@@ -176,6 +163,10 @@ namespace Engine
         /// Current input layout set in input assembler
         /// </summary>
         private InputLayout currentIAInputLayout = null;
+        /// <summary>
+        /// Null shader resources for shader clearing
+        /// </summary>
+        private ShaderResourceView[] nullSrv = new ShaderResourceView[CommonShaderStage.InputResourceSlotCount];
 
         /// <summary>
         /// Back buffer format
@@ -610,28 +601,6 @@ namespace Engine
 
             #endregion
 
-            #region Sampler States
-
-            var descPoint = SamplerStateDescription.Default();
-            descPoint.Filter = Filter.MinMagMipPoint;
-
-            var descLinear = SamplerStateDescription.Default();
-            descLinear.Filter = Filter.MinMagMipLinear;
-            descLinear.AddressU = TextureAddressMode.Wrap;
-            descLinear.AddressV = TextureAddressMode.Wrap;
-
-            var descAnisotropic = SamplerStateDescription.Default();
-            descAnisotropic.Filter = Filter.Anisotropic;
-            descAnisotropic.MaximumAnisotropy = 4;
-            descAnisotropic.AddressU = TextureAddressMode.Wrap;
-            descAnisotropic.AddressV = TextureAddressMode.Wrap;
-
-            this.samplerPoint = this.CreateSamplerState(descPoint);
-            this.samplerLinear = this.CreateSamplerState(descLinear);
-            this.samplerAnisotropic = this.CreateSamplerState(descAnisotropic);
-
-            #endregion
-
             #region Set Defaults
 
             this.SetDefaultViewport();
@@ -684,10 +653,6 @@ namespace Engine
                     Ids = new MessageId[]
                     {
                         MessageId.MessageIdDeviceDrawRenderTargetViewNotSet,
-
-                        //TODO: After normal draw with shadows, shadow textures must be cleared from OM before new shadow buffer binding
-                        MessageId.MessageIdDevicePixelShaderSetShaderResourcesHazard,
-                        MessageId.MessageIdDeviceOutputMergerSetRenderTargetsHazard,
                     },
                 }
             };
@@ -739,7 +704,10 @@ namespace Engine
         /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
         public void SetDefaultRenderTarget(bool clear = true)
         {
-            this.SetRenderTargets(this.renderTargetView, clear, GameEnvironment.Background, this.depthStencilView, clear, clear);
+            this.SetRenderTargets(
+                this.renderTargetView, clear, GameEnvironment.Background,
+                this.depthStencilView, clear, clear,
+                false);
         }
         /// <summary>
         /// Sets viewport
@@ -767,8 +735,14 @@ namespace Engine
         /// <param name="depthMap">Depth map</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil)
+        /// <param name="freeOMResources">Indicates whether the Output merger Shader Resources must be cleared</param>
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil, bool freeOMResources)
         {
+            if (freeOMResources)
+            {
+                this.ClearOMShaderResources();
+            }
+
             var dsv = depthMap != null ? depthMap.GetDepthStencil() : null;
             var rtv = renderTargets != null ? renderTargets.GetRenderTargets() : null;
             var rtvCount = renderTargets != null ? renderTargets.Count : 0;
@@ -796,6 +770,17 @@ namespace Engine
                     clearDSFlags,
                     1.0f, 0);
             }
+        }
+        /// <summary>
+        /// Clear Output merger shader resources
+        /// </summary>
+        private void ClearOMShaderResources()
+        {
+            this.deviceContext.VertexShader.SetShaderResources(0, nullSrv);
+            this.deviceContext.HullShader.SetShaderResources(0, nullSrv);
+            this.deviceContext.DomainShader.SetShaderResources(0, nullSrv);
+            this.deviceContext.GeometryShader.SetShaderResources(0, nullSrv);
+            this.deviceContext.PixelShader.SetShaderResources(0, nullSrv);
         }
         /// <summary>
         /// Sets targets for stream output
@@ -1051,31 +1036,6 @@ namespace Engine
 
                 Counters.RasterizerStateChanges++;
             }
-        }
-
-        /// <summary>
-        /// Gets the sampler point state
-        /// </summary>
-        /// <returns>Gets the sampler state</returns>
-        internal SamplerState GetSamplerPoint()
-        {
-            return this.samplerPoint;
-        }
-        /// <summary>
-        /// Gets the sampler linear state
-        /// </summary>
-        /// <returns>Gets the sampler state</returns>
-        internal SamplerState GetSamplerLinear()
-        {
-            return this.samplerLinear;
-        }
-        /// <summary>
-        /// Gets the sampler anisotropic state
-        /// </summary>
-        /// <returns>Gets the sampler state</returns>
-        internal SamplerState GetSamplerAnisotropic()
-        {
-            return this.samplerAnisotropic;
         }
 
         /// <summary>
@@ -2398,9 +2358,9 @@ namespace Engine
         /// </summary>
         /// <param name="description">Sampler description</param>
         /// <returns>Returns the new sampler state</returns>
-        internal SamplerState CreateSamplerState(SamplerStateDescription description)
+        internal EngineSamplerState CreateSamplerState(SamplerStateDescription description)
         {
-            return new SamplerState(this.device, description);
+            return new EngineSamplerState(new SamplerState(this.device, description));
         }
 
         /// <summary>

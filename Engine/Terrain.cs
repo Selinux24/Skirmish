@@ -603,6 +603,10 @@ namespace Engine
         /// Slope ranges
         /// </summary>
         private Vector2 slopeRanges = Vector2.Zero;
+        /// <summary>
+        /// Use anisotropic
+        /// </summary>
+        private bool useAnisotropic = false;
 
         /// <summary>
         /// Gets the used material list
@@ -704,6 +708,8 @@ namespace Engine
             }
 
             #endregion
+
+            this.useAlphaMap = description.UseAnisotropic;
 
             //Get vertices and indices from heightmap
             VertexData[] vertices;
@@ -814,6 +820,7 @@ namespace Engine
             #region Per object update
 
             effect.UpdatePerObject(
+                this.useAnisotropic,
                 this.terrainNormalMaps,
                 this.terrainSpecularMaps,
                 this.useAlphaMap,
@@ -858,6 +865,7 @@ namespace Engine
 
             effect.UpdatePerObject(
                 (uint)this.terrainMaterial.ResourceIndex,
+                this.useAnisotropic,
                 this.terrainNormalMaps,
                 this.terrainSpecularMaps,
                 this.useAlphaMap,

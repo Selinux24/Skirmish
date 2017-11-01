@@ -799,12 +799,9 @@ namespace Engine
 
             //Set shadow map depth map without render target
             this.Game.Graphics.SetRenderTargets(
-                null,
-                false,
-                Color.Transparent,
-                dsv,
-                true,
-                false);
+                null, false, Color.Transparent,
+                dsv, true, false,
+                true);
         }
         /// <summary>
         /// Binds graphics for g-buffer pass
@@ -817,7 +814,8 @@ namespace Engine
             //Set g-buffer render targets
             this.Game.Graphics.SetRenderTargets(
                 this.geometryBuffer.Targets, true, Color.Black,
-                this.Game.Graphics.DefaultDepthStencil, true, true);
+                this.Game.Graphics.DefaultDepthStencil, true, true,
+                false);
         }
         /// <summary>
         /// Binds graphics for light acummulation pass
@@ -830,7 +828,8 @@ namespace Engine
             //Set light buffer to draw lights
             this.Game.Graphics.SetRenderTargets(
                 this.lightBuffer.Targets, true, Color.Black,
-                this.Game.Graphics.DefaultDepthStencil, false, false);
+                this.Game.Graphics.DefaultDepthStencil, false, false,
+                false);
         }
         /// <summary>
         /// Binds graphics for results pass

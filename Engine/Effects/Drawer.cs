@@ -40,7 +40,7 @@ namespace Engine.Effects
         /// <summary>
         /// Dispose resources
         /// </summary>
-        public void Dispose()
+        public virtual void Dispose()
         {
             if (this.Effect != null)
             {

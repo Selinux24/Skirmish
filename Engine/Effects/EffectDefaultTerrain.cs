@@ -143,6 +143,18 @@ namespace Engine.Effects
         /// Level of detail ranges effect variable
         /// </summary>
         private EngineEffectVariableVector lod = null;
+        /// <summary>
+        /// Sampler for diffuse maps
+        /// </summary>
+        private EngineEffectVariableSampler samplerDiffuse = null;
+        /// <summary>
+        /// Sampler for normal maps
+        /// </summary>
+        private EngineEffectVariableSampler samplerNormal = null;
+        /// <summary>
+        /// Sampler for specular maps
+        /// </summary>
+        private EngineEffectVariableSampler samplerSpecular = null;
 
         /// <summary>
         /// Current diffuse map (Low resolution)
@@ -180,6 +192,23 @@ namespace Engine.Effects
         /// Current material palette
         /// </summary>
         private EngineShaderResourceView currentMaterialPalette = null;
+        /// <summary>
+        /// Use anisotropic sampling
+        /// </summary>
+        private bool? anisotropic = null;
+
+        /// <summary>
+        /// Sampler point
+        /// </summary>
+        private EngineSamplerState samplerPoint = null;
+        /// <summary>
+        /// Sampler linear
+        /// </summary>
+        private EngineSamplerState samplerLinear = null;
+        /// <summary>
+        /// Sampler anisotropic
+        /// </summary>
+        private EngineSamplerState samplerAnisotropic = null;
 
         /// <summary>
         /// Directional lights
@@ -668,6 +697,31 @@ namespace Engine.Effects
                 this.lod.Set(value);
             }
         }
+        /// <summary>
+        /// Gets or sets if the effect use anisotropic filtering
+        /// </summary>
+        public bool Anisotropic
+        {
+            get
+            {
+                return this.anisotropic == true;
+            }
+            set
+            {
+                if (this.anisotropic != value)
+                {
+                    this.anisotropic = value;
+
+                    var sampler = this.anisotropic == true ?
+                        this.samplerAnisotropic.GetSamplerState() :
+                        this.samplerLinear.GetSamplerState();
+
+                    this.samplerDiffuse.SetValue(0, sampler);
+                    this.samplerNormal.SetValue(0, sampler);
+                    this.samplerSpecular.SetValue(0, sampler);
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -718,7 +772,29 @@ namespace Engine.Effects
             this.alphaMap = this.Effect.GetVariableTexture("gPSAlphaTexture");
             this.diffuseMapLR = this.Effect.GetVariableTexture("gPSDiffuseMapLRArray");
             this.diffuseMapHR = this.Effect.GetVariableTexture("gPSDiffuseMapHRArray");
+
+            //Samplers
+            this.samplerDiffuse = this.Effect.GetVariableSampler("SamplerDiffuse");
+            this.samplerSpecular = this.Effect.GetVariableSampler("SamplerSpecular");
+            this.samplerNormal = this.Effect.GetVariableSampler("SamplerNormal");
+
+            //Initialize states
+            this.samplerPoint = EngineSamplerState.Point(graphics);
+            this.samplerLinear = EngineSamplerState.Linear(graphics);
+            this.samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 8);
         }
+        /// <summary>
+        /// Dispose
+        /// </summary>
+        public override void Dispose()
+        {
+            Helper.Dispose(this.samplerPoint);
+            Helper.Dispose(this.samplerLinear);
+            Helper.Dispose(this.samplerAnisotropic);
+
+            base.Dispose();
+        }
+
         /// <summary>
         /// Get technique by vertex type
         /// </summary>
@@ -864,6 +940,7 @@ namespace Engine.Effects
         /// <summary>
         /// Update per model object data
         /// </summary>
+        /// <param name="useAnisotropic">Use anisotropic filtering</param>
         /// <param name="normalMap">Normal map</param>
         /// <param name="specularMap">Specular map</param>
         /// <param name="useAlphaMap">Use alpha mapping</param>
@@ -876,6 +953,7 @@ namespace Engine.Effects
         /// <param name="proportion">Lerping proportion</param>
         /// <param name="materialIndex">Marerial index</param>
         public void UpdatePerObject(
+            bool useAnisotropic,
             EngineShaderResourceView normalMap,
             EngineShaderResourceView specularMap,
             bool useAlphaMap,
@@ -888,6 +966,8 @@ namespace Engine.Effects
             float proportion,
             uint materialIndex)
         {
+            this.Anisotropic = useAnisotropic;
+
             this.NormalMap = normalMap;
             this.SpecularMap = specularMap;
             this.UseColorSpecular = specularMap != null;

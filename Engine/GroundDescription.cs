@@ -35,6 +35,10 @@ namespace Engine
         /// Quadtree
         /// </summary>
         public QuadtreeDescription Quadtree = new QuadtreeDescription();
+        /// <summary>
+        /// Use anisotropic filtering
+        /// </summary>
+        public bool UseAnisotropic = true;
 
         /// <summary>
         /// Constructor

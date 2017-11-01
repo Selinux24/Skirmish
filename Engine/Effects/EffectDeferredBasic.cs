@@ -131,10 +131,6 @@ namespace Engine.Effects
         /// </summary>
         private EngineEffectVariableTexture animationPalette = null;
         /// <summary>
-        /// Use anisotropic sampling
-        /// </summary>
-        private bool? anisotropic;
-        /// <summary>
         /// Sampler for diffuse maps
         /// </summary>
         private EngineEffectVariableSampler samplerDiffuse = null;
@@ -142,6 +138,7 @@ namespace Engine.Effects
         /// Sampler for normal maps
         /// </summary>
         private EngineEffectVariableSampler samplerNormal = null;
+
         /// <summary>
         /// Current diffuse map
         /// </summary>
@@ -158,6 +155,19 @@ namespace Engine.Effects
         /// Current animation palette
         /// </summary>
         private EngineShaderResourceView currentAnimationPalette = null;
+        /// <summary>
+        /// Use anisotropic sampling
+        /// </summary>
+        private bool? anisotropic = null;
+
+        /// <summary>
+        /// Sampler linear
+        /// </summary>
+        private EngineSamplerState samplerLinear = null;
+        /// <summary>
+        /// Sampler anisotropic
+        /// </summary>
+        private EngineSamplerState samplerAnisotropic = null;
 
         /// <summary>
         /// World matrix
@@ -342,7 +352,9 @@ namespace Engine.Effects
                 {
                     this.anisotropic = value;
 
-                    var sampler = this.anisotropic == true ? this.Graphics.GetSamplerAnisotropic() : this.Graphics.GetSamplerLinear();
+                    var sampler = this.anisotropic == true ?
+                        this.samplerAnisotropic.GetSamplerState() :
+                        this.samplerLinear.GetSamplerState();
 
                     this.samplerDiffuse.SetValue(0, sampler);
                     this.samplerNormal.SetValue(0, sampler);
@@ -394,7 +406,22 @@ namespace Engine.Effects
             //Samplers
             this.samplerDiffuse = this.Effect.GetVariableSampler("SamplerDiffuse");
             this.samplerNormal = this.Effect.GetVariableSampler("SamplerNormal");
+
+            //Initialize states
+            this.samplerLinear = EngineSamplerState.Linear(graphics);
+            this.samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 4);
         }
+        /// <summary>
+        /// Dispose
+        /// </summary>
+        public override void Dispose()
+        {
+            Helper.Dispose(this.samplerLinear);
+            Helper.Dispose(this.samplerAnisotropic);
+
+            base.Dispose();
+        }
+
         /// <summary>
         /// Get technique by vertex type
         /// </summary>
