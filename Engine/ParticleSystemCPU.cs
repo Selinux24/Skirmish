@@ -61,7 +61,11 @@ namespace Engine
         /// Time to end
         /// </summary>
         public float TimeToEnd { get; private set; }
-
+        
+        /// <summary>
+        /// Particle system Name
+        /// </summary>
+        public string Name { get; set; }
         /// <summary>
         /// Particle emitter
         /// </summary>
@@ -133,11 +137,13 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="name">Name</param>
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
-        public ParticleSystemCPU(Game game, ParticleSystemDescription description, ParticleEmitter emitter)
+        public ParticleSystemCPU(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             this.Game = game;
+            this.Name = name;
 
             this.MaximumAge = description.MaxDuration;
             this.MaximumAgeVariation = description.MaxDurationRandomness;

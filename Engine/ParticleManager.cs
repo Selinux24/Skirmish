@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -132,15 +133,26 @@ namespace Engine
         /// <param name="emitter">Particle emitter</param>
         public void AddParticleSystem(ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
+            this.AddParticleSystem(null, type, description, emitter);
+        }
+        /// <summary>
+        /// Adds a new particle system to the collection
+        /// </summary>
+        /// <param name="name">Particle system name</param>
+        /// <param name="type">Particle system type</param>
+        /// <param name="description">Particle system description</param>
+        /// <param name="emitter">Particle emitter</param>
+        public void AddParticleSystem(string name, ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
+        {
             IParticleSystem pSystem = null;
 
             if (type == ParticleSystemTypes.CPU)
             {
-                pSystem = new ParticleSystemCPU(this.Game, description, emitter);
+                pSystem = new ParticleSystemCPU(this.Game, name, description, emitter);
             }
             else if (type == ParticleSystemTypes.GPU)
             {
-                pSystem = new ParticleSystemGPU(this.Game, description, emitter);
+                pSystem = new ParticleSystemGPU(this.Game, name, description, emitter);
             }
             else
             {
@@ -159,6 +171,22 @@ namespace Engine
         public IParticleSystem GetParticleSystem(int index)
         {
             return index < this.particleSystems.Count ? this.particleSystems[index] : null;
+        }
+        /// <summary>
+        /// Gets a particle systema by name
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <returns>Returns the particle system at specified name</returns>
+        public IParticleSystem GetParticleSystem(string name)
+        {
+            if (!string.IsNullOrWhiteSpace(name))
+            {
+                return this.particleSystems.Find(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+            }
+            else
+            {
+                return null;
+            }
         }
 
         /// <summary>

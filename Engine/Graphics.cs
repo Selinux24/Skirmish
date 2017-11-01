@@ -740,7 +740,7 @@ namespace Engine
         {
             if (freeOMResources)
             {
-                this.ClearOMShaderResources();
+                this.ClearShaderResources();
             }
 
             var dsv = depthMap != null ? depthMap.GetDepthStencil() : null;
@@ -772,9 +772,9 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Clear Output merger shader resources
+        /// Clear shader resources
         /// </summary>
-        private void ClearOMShaderResources()
+        private void ClearShaderResources()
         {
             this.deviceContext.VertexShader.SetShaderResources(0, nullSrv);
             this.deviceContext.HullShader.SetShaderResources(0, nullSrv);

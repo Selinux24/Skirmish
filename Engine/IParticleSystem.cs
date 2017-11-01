@@ -10,6 +10,10 @@ namespace Engine
     public interface IParticleSystem : IDisposable
     {
         /// <summary>
+        /// Gets the particle system name
+        /// </summary>
+        string Name { get; }
+        /// <summary>
         /// Gets wheter the particles system is active or not
         /// </summary>
         bool Active { get; }

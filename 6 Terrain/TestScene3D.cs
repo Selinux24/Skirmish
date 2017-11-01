@@ -1491,7 +1491,6 @@ namespace TerrainTest
             }
         }
 
-
         private Vector3 GetRandomPoint(Random rnd, Vector3 offset)
         {
             BoundingBox bbox = this.terrain.Instance.GetBoundingBox();
@@ -1652,47 +1651,71 @@ namespace TerrainTest
         }
         private void AddSmokePlumeSystem(AIAgent agent)
         {
-            Vector3 velocity = Vector3.Up;
+            var plumeFire = this.pManager.Instance.GetParticleSystem("plumeFire");
+            var plumeSmoke = this.pManager.Instance.GetParticleSystem("plumeSmoke");
+
             float duration = this.rnd.NextFloat(6, 36);
             float rate = this.rnd.NextFloat(0.1f, 1f);
 
-            var emitter1 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
+            if (plumeFire == null)
             {
-                Velocity = velocity,
-                Duration = duration,
-                EmissionRate = rate * 0.5f,
-                InfiniteDuration = false,
-                MaximumDistance = 100f,
-            };
+                var emitter1 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
+                {
+                    Velocity = Vector3.Up,
+                    Duration = duration,
+                    EmissionRate = rate * 0.5f,
+                    InfiniteDuration = false,
+                    MaximumDistance = 100f,
+                };
 
-            var emitter2 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
+                this.pManager.Instance.AddParticleSystem("plumeFire", ParticleSystemTypes.CPU, this.pFire, emitter1);
+            }
+            else
             {
-                Velocity = velocity,
-                Duration = duration + (duration * 0.1f),
-                EmissionRate = rate,
-                InfiniteDuration = false,
-                MaximumDistance = 500f,
-            };
+                plumeFire.Emitter.Duration = duration;
+            }
 
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
+            if (plumeSmoke == null)
+            {
+                var emitter2 = new MovingEmitter(agent.Manipulator, Vector3.Zero)
+                {
+                    Velocity = Vector3.Up,
+                    Duration = duration + (duration * 0.1f),
+                    EmissionRate = rate,
+                    InfiniteDuration = false,
+                    MaximumDistance = 500f,
+                };
+
+                this.pManager.Instance.AddParticleSystem("plumeSmoke", ParticleSystemTypes.CPU, this.pPlume, emitter2);
+            }
+            else
+            {
+                plumeSmoke.Emitter.Duration = duration + (duration * 0.1f);
+            }
         }
         private void AddSmokeSystem(AIAgent agent)
         {
-            Vector3 velocity = Vector3.Up;
+            var smoke = this.pManager.Instance.GetParticleSystem("smoke");
+
             float duration = this.rnd.NextFloat(5, 15);
-            float rate = this.rnd.NextFloat(0.1f, 1f);
 
-            var emitter = new MovingEmitter(agent.Manipulator, Vector3.Zero)
+            if (smoke == null)
             {
-                Velocity = velocity,
-                Duration = duration + (duration * 0.1f),
-                EmissionRate = rate,
-                InfiniteDuration = false,
-                MaximumDistance = 500f,
-            };
+                var emitter = new MovingEmitter(agent.Manipulator, Vector3.Zero)
+                {
+                    Velocity = Vector3.Up,
+                    Duration = duration + (duration * 0.1f),
+                    EmissionRate = this.rnd.NextFloat(0.1f, 1f),
+                    InfiniteDuration = false,
+                    MaximumDistance = 500f,
+                };
 
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter);
+                this.pManager.Instance.AddParticleSystem("smoke", ParticleSystemTypes.CPU, this.pPlume, emitter);
+            }
+            else
+            {
+                smoke.Emitter.Duration = duration + (duration * 0.1f);
+            }
         }
         private void AddDustSystem(AIAgent agent, Vector3 delta)
         {
