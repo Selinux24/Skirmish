@@ -85,10 +85,7 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.dictionary.Count > 0)
-            {
-                this.WriteDataInBuffer();
-            }
+            this.WriteDataInBuffer();
 
             if (this.drawCount > 0)
             {

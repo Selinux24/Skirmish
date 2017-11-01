@@ -4,12 +4,14 @@ using Engine.Content;
 using SharpDX;
 using SharpDX.Direct3D;
 using System;
+using System.Collections.Generic;
 
 namespace ModelDrawing
 {
     public class TestScene : Scene
     {
         private const int layerHUD = 99;
+        private const int layerEffects = 2;
 
         private SceneObject<TextDrawer> text = null;
         private SceneObject<TextDrawer> statistics = null;
@@ -27,6 +29,7 @@ namespace ModelDrawing
         private ParticleSystemDescription pSmokeExplosion = null;
 
         private SceneObject<ParticleManager> pManager = null;
+        private SceneObject<LineListDrawer> pManagerLineDrawer = null;
 
         private Random rnd = new Random();
 
@@ -50,6 +53,7 @@ namespace ModelDrawing
             this.InitializeTexts();
             this.InitializeFloor();
             this.InitializeModels();
+            this.InitializeParticleVolumeDrawer();
         }
         private void InitializeTexts()
         {
@@ -123,6 +127,15 @@ namespace ModelDrawing
 
             this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription());
         }
+        private void InitializeParticleVolumeDrawer()
+        {
+            var desc = new LineListDrawerDescription()
+            {
+                Count = 20000
+            };
+            this.pManagerLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);
+            this.pManagerLineDrawer.Visible = true;
+        }
 
         public override void Update(GameTime gameTime)
         {
@@ -191,6 +204,11 @@ namespace ModelDrawing
             {
                 this.AddSystem();
             }
+
+            if (this.pManagerLineDrawer.Visible)
+            {
+                this.DrawVolumes();
+            }
         }
         private void AddSystem()
         {
@@ -211,6 +229,8 @@ namespace ModelDrawing
             {
                 AddProjectileTrailSystem();
             }
+
+            this.DrawVolumes();
         }
         private void AddExplosionSystem()
         {
@@ -380,6 +400,20 @@ namespace ModelDrawing
 
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter21);
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.GPU, this.pPlume, emitter22);
+        }
+
+        private List<Line3D> lines = new List<Line3D>();
+        private void DrawVolumes()
+        {
+            lines.Clear();
+
+            var count = this.pManager.Instance.Count;
+            for (int i = 0; i < count; i++)
+            {
+                lines.AddRange(Line3D.CreateWiredBox(this.pManager.Instance.GetParticleSystem(i).Emitter.GetBoundingBox()));
+            }
+
+            this.pManagerLineDrawer.Instance.SetLines(Color.Red, lines.ToArray());
         }
 
         public override void Draw(GameTime gameTime)

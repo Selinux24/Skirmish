@@ -3,6 +3,7 @@
 namespace Engine
 {
     using Engine.Common;
+    using SharpDX;
 
     /// <summary>
     /// CPU particle manager
@@ -99,6 +100,28 @@ namespace Engine
             {
                 if (p.Emitter.Visible) p.Draw(context);
             });
+        }
+        /// <summary>
+        /// Performs frustum culling with the active emitters
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <returns>Returns true if all emitters were culled</returns>
+        public override bool Cull(BoundingFrustum frustum)
+        {
+            bool cull = false;
+
+            this.particleSystems.ForEach(p =>
+            {
+                var c = p.Emitter.Cull(frustum);
+                if (c)
+                {
+                    cull = true;
+                }
+
+                p.Emitter.Visible = c;
+            });
+
+            return cull;
         }
 
         /// <summary>

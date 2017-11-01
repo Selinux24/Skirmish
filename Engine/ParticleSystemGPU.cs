@@ -189,6 +189,7 @@ namespace Engine
             this.TextureCount = (uint)imgContent.Count;
 
             this.Emitter = emitter;
+            this.Emitter.SetBoundingBox(ParticleEmitter.GenerateBBox(description.MaxDuration, this.EndSize, this.HorizontalVelocity, this.VerticalVelocity));
             this.MaxConcurrentParticles = this.Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
 
             this.TimeToEnd = this.Emitter.Duration + this.MaximumAge;
@@ -300,8 +301,9 @@ namespace Engine
             graphics.IASetVertexBuffers(BufferSlot, this.firstRun ? this.emitterBinding : this.drawingBinding);
             graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
+            graphics.SetDepthStencilNone();
+
             graphics.SetStreamOutputTargets(this.streamOutBinding);
-            Counters.SOTargetsSet++;
 
             for (int p = 0; p < techniqueForStreamOut.PassCount; p++)
             {
@@ -320,7 +322,6 @@ namespace Engine
             }
 
             graphics.SetStreamOutputTargets(null);
-            Counters.SOTargetsSet++;
         }
         /// <summary>
         /// Toggle stream out and drawing buffers

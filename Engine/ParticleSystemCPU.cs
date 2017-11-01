@@ -161,6 +161,7 @@ namespace Engine
             this.TextureCount = (uint)imgContent.Count;
 
             this.Emitter = emitter;
+            this.Emitter.SetBoundingBox(ParticleEmitter.GenerateBBox(description.MaxDuration, this.EndSize, this.HorizontalVelocity, this.VerticalVelocity));
             this.MaxConcurrentParticles = this.Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
 
             this.particles = new VertexCPUParticle[this.MaxConcurrentParticles];

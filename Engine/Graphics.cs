@@ -789,6 +789,7 @@ namespace Engine
         public void SetStreamOutputTargets(StreamOutputBufferBinding[] streamOutBinding)
         {
             this.deviceContext.StreamOutput.SetTargets(streamOutBinding);
+            Counters.SOTargetsSet++;
         }
         /// <summary>
         /// Clear depth / stencil buffer

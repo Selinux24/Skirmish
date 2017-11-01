@@ -76,15 +76,12 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            var graphics = this.Game.Graphics;
-
-            if (this.dictionary.Count > 0)
-            {
-                this.WriteDataInBuffer();
-            }
+            this.WriteDataInBuffer();
 
             if (this.drawCount > 0)
             {
+                var graphics = this.Game.Graphics;
+
                 if (context.DrawerMode != DrawerModesEnum.ShadowMap)
                 {
                     Counters.InstancesPerFrame += this.dictionary.Count;
