@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -91,27 +92,44 @@ namespace Engine
 
                 this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && i.LevelOfDetail != LevelOfDetailEnum.None);
 
-                //TODO: Sort by LOD
-                //Array.Sort(this.instancesTmp, (i1, i2) =>
-                //{
-                //    var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
-
-                //    if (i == 0)
-                //    {
-                //        var da = Vector3.DistanceSquared(i1.Manipulator.Position, context.EyePosition);
-                //        var db = Vector3.DistanceSquared(i2.Manipulator.Position, context.EyePosition);
-                //        i = da.CompareTo(db);
-                //    }
-
-                //    if (i == 0)
-                //    {
-                //        i = i1.Id.CompareTo(i2.Id);
-                //    }
-
-                //    //return this.AlphaEnabled ? -i : i;
-                //    return i;
-                //});
+                this.UpdateInstances(context);
             }
+        }
+        /// <summary>
+        /// Updates the instances order
+        /// </summary>
+        /// <param name="context">Context</param>
+        private async void UpdateInstances(UpdateContext context)
+        {
+            await Task.Run(() =>
+            {
+                //Sort by LOD
+                Array.Sort(this.instancesTmp, (i1, i2) =>
+                {
+                    var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+
+                    if (i == 0)
+                    {
+                        var da = Vector3.DistanceSquared(i1.Manipulator.Position, context.EyePosition);
+                        var db = Vector3.DistanceSquared(i2.Manipulator.Position, context.EyePosition);
+                        i = da.CompareTo(db);
+                    }
+
+                    if (i == 0)
+                    {
+                        i = i1.Id.CompareTo(i2.Id);
+                    }
+
+                    if (this.Description.AlphaEnabled)
+                    {
+                        return -i;
+                    }
+                    else
+                    {
+                        return i;
+                    }
+                });
+            });
         }
         /// <summary>
         /// Draw

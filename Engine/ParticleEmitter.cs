@@ -37,6 +37,10 @@ namespace Engine
         /// Current emitter bounding box
         /// </summary>
         private BoundingBox currentBoundingBox;
+        /// <summary>
+        /// Visible flag
+        /// </summary>
+        private bool visible = false;
 
         /// <summary>
         /// Emitter position
@@ -79,7 +83,17 @@ namespace Engine
         /// <summary>
         /// Gets or sets wheter the emitter particles is visible
         /// </summary>
-        public bool Visible { get; set; }
+        public bool Visible
+        {
+            get
+            {
+                return this.visible && (this.Distance <= this.MaximumDistance);
+            }
+            set
+            {
+                this.visible = value;
+            }
+        }
 
         /// <summary>
         /// Total particle system time
@@ -120,10 +134,6 @@ namespace Engine
             }
 
             this.Distance = Vector3.Distance(this.Position, context.EyePosition);
-            if (this.Distance > this.MaximumDistance)
-            {
-                this.Visible = false;
-            }
         }
 
         /// <summary>

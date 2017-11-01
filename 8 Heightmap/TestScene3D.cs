@@ -335,11 +335,12 @@ namespace HeightmapTest
                 ColormapFileName = "desert0cm.bmp",
                 CellSize = 15,
                 MaximumHeight = 150,
-                TextureResolution = 75f,
+                TextureResolution = 100f,
                 Textures = new HeightmapDescription.TexturesDescription()
                 {
                     ContentPath = "Textures",
                     NormalMaps = new[] { "normal001.dds", "normal002.dds" },
+                    SpecularMaps = new[] { "specular001.dds", "specular002.dds" },
 
                     UseAlphaMapping = true,
                     AlphaMap = "alpha001.dds",
@@ -361,6 +362,7 @@ namespace HeightmapTest
             var gDesc = new GroundDescription()
             {
                 Name = "Terrain",
+                UseAnisotropic = true,
                 Quadtree = new GroundDescription.QuadtreeDescription()
                 {
                     MaximumDepth = 5,
@@ -820,7 +822,8 @@ namespace HeightmapTest
             this.Camera.FarPlaneDistance = far;
             this.Camera.Position = new Vector3(24, 12, 14);
             this.Camera.Interest = new Vector3(0, 10, 0);
-            //this.Camera.MovementDelta *= 10f;
+            this.Camera.MovementDelta = 45f;
+            this.Camera.SlowMovementDelta = 20f;
 
             this.skydom.Instance.RayleighScattering *= 0.8f;
             this.skydom.Instance.MieScattering *= 0.1f;
@@ -859,6 +862,8 @@ namespace HeightmapTest
 
             Ray cursorRay = this.GetPickingRay();
 
+            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+
             #region Walk / Fly
 
             if (this.Game.Input.KeyJustReleased(Keys.P))
@@ -893,22 +898,22 @@ namespace HeightmapTest
 
                 if (this.Game.Input.KeyPressed(Keys.A))
                 {
-                    this.Camera.MoveLeft(gameTime, false);
+                    this.Camera.MoveLeft(gameTime, !shift);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.D))
                 {
-                    this.Camera.MoveRight(gameTime, false);
+                    this.Camera.MoveRight(gameTime, !shift);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.W))
                 {
-                    this.Camera.MoveForward(gameTime, false);
+                    this.Camera.MoveForward(gameTime, !shift);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.S))
                 {
-                    this.Camera.MoveBackward(gameTime, false);
+                    this.Camera.MoveBackward(gameTime, !shift);
                 }
             }
             else
@@ -922,24 +927,26 @@ namespace HeightmapTest
                         0, 0);
                 }
 
+                float delta = shift ? 8 : 4;
+
                 if (this.Game.Input.KeyPressed(Keys.A))
                 {
-                    this.soldier.Transform.MoveLeft(gameTime, 4);
+                    this.soldier.Transform.MoveLeft(gameTime, delta);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.D))
                 {
-                    this.soldier.Transform.MoveRight(gameTime, 4);
+                    this.soldier.Transform.MoveRight(gameTime, delta);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.W))
                 {
-                    this.soldier.Transform.MoveForward(gameTime, 4);
+                    this.soldier.Transform.MoveForward(gameTime, delta);
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.S))
                 {
-                    this.soldier.Transform.MoveBackward(gameTime, 4);
+                    this.soldier.Transform.MoveBackward(gameTime, delta);
                 }
 
                 Vector3 position;

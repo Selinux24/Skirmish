@@ -72,7 +72,7 @@ namespace Engine
             /// <param name="node">Foliage Node</param>
             /// <param name="map">Foliage map</param>
             /// <param name="description">Terrain vegetation description</param>
-            public void Plant(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
+            public async void Plant(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
             {
                 if (!this.Planting)
                 {
@@ -81,12 +81,14 @@ namespace Engine
                     this.Channel = description.Index;
                     this.Planting = true;
 
-                    var t = Task.Factory.StartNew<VertexBillboard[]>(() => PlantTask(scene, node, map, description), TaskCreationOptions.PreferFairness);
-
-                    t.ContinueWith(task =>
+                    var result = await Task.Run(() =>
                     {
-                        PlantThreadCompleted(task.Result);
+                        return PlantTask(scene, node, map, description);
                     });
+
+                    this.Planting = false;
+                    this.Planted = true;
+                    this.FoliageData = result;
                 }
             }
             /// <summary>
@@ -165,16 +167,6 @@ namespace Engine
                 }
 
                 return vertexData.ToArray();
-            }
-            /// <summary>
-            /// Planting task completed
-            /// </summary>
-            /// <param name="vData">Vertex data generated in asynchronous task</param>
-            private void PlantThreadCompleted(VertexBillboard[] vData)
-            {
-                this.Planting = false;
-                this.Planted = true;
-                this.FoliageData = vData;
             }
         }
         /// <summary>
