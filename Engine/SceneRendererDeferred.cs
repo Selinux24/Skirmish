@@ -815,7 +815,7 @@ namespace Engine
             this.Game.Graphics.SetRenderTargets(
                 this.geometryBuffer.Targets, true, Color.Black,
                 this.Game.Graphics.DefaultDepthStencil, true, true,
-                false);
+                true);
         }
         /// <summary>
         /// Binds graphics for light acummulation pass

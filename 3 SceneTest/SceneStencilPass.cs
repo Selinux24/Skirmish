@@ -9,7 +9,7 @@ namespace SceneTest
 {
     public class SceneStencilPass : Scene
     {
-        private float spaceSize = 40;
+        private float spaceSize = 10;
 
         private SceneObject<Model> floorAsphalt = null;
 
@@ -21,6 +21,8 @@ namespace SceneTest
         private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
+
+        private bool animateLightColors = false;
 
         public SceneStencilPass(Game game)
             : base(game)
@@ -34,7 +36,7 @@ namespace SceneTest
 
             this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = 500;
-            this.Camera.Goto(-20, 10, 40f);
+            this.Camera.Goto(-10, 8, 20f);
             this.Camera.LookTo(0, 0, 0);
 
             this.InitializeFloorAsphalt();
@@ -72,7 +74,7 @@ namespace SceneTest
             MaterialContent mat = MaterialContent.Default;
             mat.DiffuseTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_normal.dds";
-            //mat.SpecularTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_specular.dds";
+            mat.SpecularTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
             var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, mat);
 
@@ -101,6 +103,7 @@ namespace SceneTest
                     Name = "Obelisk",
                     CastShadow = true,
                     Static = true,
+                    UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
                         ContentFolder = "SceneStencilPass/buildings/obelisk",
@@ -119,7 +122,7 @@ namespace SceneTest
             Vector3[] n = null;
             Vector2[] uv = null;
             uint[] ix = null;
-            GeometryUtil.CreateSphere(0.25f, (uint)16, (uint)5, out v, out n, out uv, out ix);
+            GeometryUtil.CreateSphere(0.1f, (uint)16, (uint)5, out v, out n, out uv, out ix);
 
             VertexData[] vertices = new VertexData[v.Length];
             for (int i = 0; i < v.Length; i++)
@@ -167,6 +170,18 @@ namespace SceneTest
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.L))
+            {
+                this.animateLightColors = !this.animateLightColors;
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
@@ -260,20 +275,31 @@ namespace SceneTest
         private void UpdateLight(GameTime gameTime)
         {
             Vector3 position = Vector3.Zero;
+            float h = 3.0f;
+            float r = 3.0f;
+            float hv = 1.0f;
+            float av = 1f;
 
-            position.X = 3.0f * (float)Math.Cos(0.4f * this.Game.GameTime.TotalSeconds);
-            position.Y = 5f;
-            position.Z = 3.0f * (float)Math.Sin(0.4f * this.Game.GameTime.TotalSeconds);
+            position.X = r * (float)Math.Cos(av * this.Game.GameTime.TotalSeconds);
+            position.Y = hv * (float)Math.Sin(av * this.Game.GameTime.TotalSeconds);
+            position.Z = r * (float)Math.Sin(av * this.Game.GameTime.TotalSeconds);
 
-            this.Lights.PointLights[0].Position = position;
-            this.lightEmitter1.Transform.SetPosition(position);
+            var pos1 = position + new Vector3(0, h, 0);
+            var col1 = animateLightColors ? new Color4(pos1.X, pos1.Y, pos1.Z, 1.0f) : Color.White;
 
-            position.X *= -1;
-            position.Z *= -1;
+            this.lightEmitter1.Transform.SetPosition(pos1);
+            this.Lights.PointLights[0].Position = pos1;
+            this.Lights.PointLights[0].DiffuseColor = col1;
+            this.Lights.PointLights[0].SpecularColor = col1;
 
-            this.Lights.SpotLights[0].Position = position;
-            this.Lights.SpotLights[0].Direction = -Vector3.Normalize(new Vector3(position.X, 0, position.Z));
-            this.lightEmitter2.Transform.SetPosition(position);
+            var pos2 = (position * -1) + new Vector3(0, h, 0);
+            var col2 = animateLightColors ? new Color4(pos2.X, pos2.Y, pos2.Z, 1.0f) : Color.White;
+
+            this.lightEmitter2.Transform.SetPosition(pos2);
+            this.Lights.SpotLights[0].Position = pos2;
+            this.Lights.SpotLights[0].Direction = -Vector3.Normalize(new Vector3(pos2.X, 0, pos2.Z));
+            this.Lights.SpotLights[0].DiffuseColor = col2;
+            this.Lights.SpotLights[0].SpecularColor = col2;
         }
         private void UpdateLightDrawingVolumes()
         {

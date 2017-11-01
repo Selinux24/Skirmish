@@ -44,8 +44,8 @@ namespace SceneTest
             this.InitializeTextBoxes();
             this.InitializeSkyEffects();
             this.InitializeFloor();
-            this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10));
-            this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10));
+            this.InitializeColorGroup(1, 0.1f, new Vector3(-10, 0, -10), false);
+            this.InitializeColorGroup(128, 1f, new Vector3(-10.5f, 0, -10), true);
         }
 
         private void InitializeTextBoxes()
@@ -142,7 +142,7 @@ namespace SceneTest
 
             this.floor = this.AddComponent<Model>(desc);
         }
-        private SceneObject<Model> InitializeSphere(MaterialContent material)
+        private SceneObject<Model> InitializeSphere(string name, MaterialContent material)
         {
             Vector3[] v = null;
             Vector3[] n = null;
@@ -165,8 +165,10 @@ namespace SceneTest
 
             var desc = new ModelDescription()
             {
+                Name = name,
                 Static = true,
                 CastShadow = true,
+                UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
                     ModelContent = content,
@@ -175,7 +177,7 @@ namespace SceneTest
 
             return this.AddComponent<Model>(desc);
         }
-        private MaterialContent GenerateMaterial(Color4 diffuse, Color4 specular, float shininess)
+        private MaterialContent GenerateMaterial(Color4 diffuse, Color4 specular, float shininess, bool nmap)
         {
             return new MaterialContent()
             {
@@ -183,12 +185,14 @@ namespace SceneTest
                 AmbientColor = new Color4(0.8f, 0.8f, 0.8f, 1f),
 
                 DiffuseColor = diffuse,
+                DiffuseTexture = "SceneMaterials/white.png",
+                NormalMapTexture = nmap ? "SceneMaterials/nmap1.jpg" : "SceneMaterials/nmap2.png",
 
                 SpecularColor = specular,
                 Shininess = shininess,
             };
         }
-        private void InitializeColorGroup(float shininess, float specularFactor, Vector3 position)
+        private void InitializeColorGroup(float shininess, float specularFactor, Vector3 position, bool nmap)
         {
             int n = 32;
 
@@ -203,8 +207,8 @@ namespace SceneTest
                         var diffuse = new Color4(r / 256f, g / 256f, b / 256f, 1);
                         var specular = new Color4(r / 256f * specularFactor, g / 256f * specularFactor, b / 256f * specularFactor, 1);
 
-                        var material = this.GenerateMaterial(diffuse, specular, shininess);
-                        var model = this.InitializeSphere(material);
+                        var material = this.GenerateMaterial(diffuse, specular, shininess, nmap);
+                        var model = this.InitializeSphere(string.Format("Sphere {0}.{1}.{2}", r, g, b), material);
                         model.Transform.SetPosition(new Vector3(r * f, (g * f) + 1f, b * f) + position);
                     }
                 }
@@ -216,6 +220,13 @@ namespace SceneTest
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.Exit();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning);
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
