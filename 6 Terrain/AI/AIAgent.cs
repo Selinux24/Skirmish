@@ -3,6 +3,7 @@ using Engine.Common;
 using Engine.PathFinding;
 using SharpDX;
 using System;
+using System.Threading.Tasks;
 
 namespace TerrainTest.AI
 {
@@ -11,6 +12,8 @@ namespace TerrainTest.AI
         private Behavior currentBehavior = null;
 
         private float lastDistance = 0f;
+
+        private bool lookingForRoute = false;
 
         public Brain Parent { get; protected set; }
         public AIStatus Status { get; protected set; }
@@ -226,6 +229,10 @@ namespace TerrainTest.AI
             {
                 this.currentBehavior = this.RetreatBehavior;
             }
+            else if (state == AIStates.None)
+            {
+                this.Controller.Clear();
+            }
         }
         public void Clear()
         {
@@ -330,19 +337,28 @@ namespace TerrainTest.AI
             }
         }
 
-
         public virtual void SetRouteToPoint(Vector3 point, float speed, bool refine)
         {
             if (this.AgentType != null & this.Parent.Scene != null)
             {
-                var refineDelta = refine ?
-                    speed * 0.1f :
-                    0f;
+                var refineDelta = refine ? speed * 0.1f : 0f;
 
-                var p = this.Parent.Scene.FindPath(this.AgentType, this.Manipulator.Position, point, true, refineDelta);
-                if (p != null)
+                if (this.lookingForRoute == false)
                 {
-                    this.FollowPath(p, speed);
+                    this.lookingForRoute = true;
+
+                    var task = Task.Run(async () =>
+                    {
+                        await Task.Delay(100);
+
+                        var r = this.Parent.Scene.FindPath(this.AgentType, this.Manipulator.Position, point, true, refineDelta);
+                        if (r != null)
+                        {
+                            this.FollowPath(r, speed);
+                        }
+
+                        this.lookingForRoute = false;
+                    });
                 }
             }
         }

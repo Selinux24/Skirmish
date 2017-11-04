@@ -8,6 +8,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace TerrainTest
 {
@@ -29,12 +30,7 @@ namespace TerrainTest
         private float walkerVelocity = 8f;
         private SceneObject followTarget;
         private bool follow = false;
-        private NavigationMeshAgentType walkerAgentType = new NavigationMeshAgentType()
-        {
-            Height = 1f,
-            Radius = 0.2f,
-            MaxClimb = 0.9f,
-        };
+        private NavigationMeshAgentType walkerAgentType = null;
 
         private bool useDebugTex = false;
         private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapDynamic;
@@ -58,7 +54,7 @@ namespace TerrainTest
 
         private SceneObject<Model> tankP1 = null;
         private SceneObject<Model> tankP2 = null;
-        private NavigationMeshAgentType tankAgentType = new NavigationMeshAgentType();
+        private NavigationMeshAgentType tankAgentType = null;
         private Vector3 tankLeftCat = Vector3.Zero;
         private Vector3 tankRightCat = Vector3.Zero;
 
@@ -331,6 +327,18 @@ namespace TerrainTest
 
             #endregion
 
+            #region Walker
+
+            this.walkerAgentType = new NavigationMeshAgentType()
+            {
+                Name = "Walker type",
+                Height = 1f,
+                Radius = 0.2f,
+                MaxClimb = 0.9f,
+            };
+
+            #endregion
+
             #region Tank
 
             sw.Restart();
@@ -360,9 +368,13 @@ namespace TerrainTest
             this.tankP2.Transform.SetScale(0.2f, true);
 
             var tankbbox = this.tankP1.Geometry.GetBoundingBox();
-            tankAgentType.Height = tankbbox.GetY();
-            tankAgentType.Radius = tankbbox.GetX() * 0.5f;
-            tankAgentType.MaxClimb = tankbbox.GetY() * 0.1f;
+            this.tankAgentType = new NavigationMeshAgentType()
+            {
+                Name = "Tank type",
+                Height = tankbbox.GetY(),
+                Radius = tankbbox.GetX() * 0.5f,
+                MaxClimb = tankbbox.GetY() * 0.1f,
+            };
 
             this.tankLeftCat = new Vector3(tankbbox.Maximum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
             this.tankRightCat = new Vector3(tankbbox.Minimum.X, tankbbox.Minimum.Y, tankbbox.Maximum.Z);
@@ -560,30 +572,33 @@ namespace TerrainTest
                 ContentPath = "resources/Terrain/Foliage/Billboard",
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "grass.png" },
-                    Saturation = 2f,
+                    VegetarionTextures = new[] { "grass0.png" },
+                    Saturation = 0.5f,
                     StartRadius = 0f,
                     EndRadius = 50f,
                     MinSize = new Vector2(0.25f, 0.25f),
                     MaxSize = new Vector2(0.5f, 0.75f),
+                    Seed = 1,
                 },
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "grass.png" },
-                    Saturation = 2f,
+                    VegetarionTextures = new[] { "grass1.png" },
+                    Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 50f,
                     MinSize = new Vector2(0.25f, 0.25f),
                     MaxSize = new Vector2(0.5f, 0.75f),
+                    Seed = 2,
                 },
                 ChannelBlue = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "grass.png" },
-                    Saturation = 2f,
+                    VegetarionTextures = new[] { "grass2.png" },
+                    Saturation = 20f,
                     StartRadius = 0f,
                     EndRadius = 50f,
                     MinSize = new Vector2(0.25f, 0.25f),
                     MaxSize = new Vector2(0.5f, 0.75f),
+                    Seed = 3,
                 }
             };
             this.gardener = this.AddComponent<GroundGardener>(grDesc, SceneObjectUsageEnum.None, this.layerTerrain);
@@ -922,7 +937,7 @@ namespace TerrainTest
             #endregion
 
             this.Camera.Goto(this.helicopter.Transform.Position + Vector3.One * 25f);
-            this.Camera.LookTo(this.helicopter.Transform.Position);
+            this.Camera.LookTo(0, 10, 0);
 
             this.helicopter.Instance.AnimationController.SetPath(this.animations["heli_default"]);
 
@@ -1218,10 +1233,12 @@ namespace TerrainTest
                 float pickedDistance;
                 if (this.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance))
                 {
-                    var p = this.FindPath(this.tankAgentType, this.tankP1.Transform.Position, pickedPosition, false, 0f);
-                    if (p != null)
+                    var t1Position = this.tankP1.Transform.Position;
+
+                    var result = this.FindPath(this.tankAgentType, t1Position, pickedPosition, false, 0f);
+                    if (result != null)
                     {
-                        this.DEBUGDrawTankPath(this.tankP1.Transform.Position, p);
+                        this.DEBUGDrawTankPath(t1Position, result);
                     }
                 }
             }
@@ -1233,14 +1250,21 @@ namespace TerrainTest
                 float pickedDistance;
                 if (this.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance))
                 {
-                    var p = this.FindPath(this.tankAgentType, this.tankP1.Transform.Position, pickedPosition, true, 0.25f);
-                    if (p != null)
+                    var task = Task.Run(() =>
                     {
-                        this.tankP1Agent.Clear();
-                        this.tankP1Agent.FollowPath(p, 10);
+                        return this.FindPath(this.tankAgentType, this.tankP1.Transform.Position, pickedPosition, true, 0.25f);
+                    });
 
-                        this.DEBUGDrawTankPath(this.tankP1.Transform.Position, p);
-                    }
+                    task.ContinueWith((t) =>
+                    {
+                        if (t.Result != null)
+                        {
+                            this.tankP1Agent.Clear();
+                            this.tankP1Agent.FollowPath(t.Result, 10);
+
+                            this.DEBUGDrawTankPath(this.tankP1.Transform.Position, t.Result);
+                        }
+                    });
                 }
             }
 
@@ -1569,13 +1593,13 @@ namespace TerrainTest
         }
         private void Agent_Attacking(BehaviorEventArgs e)
         {
-            this.AddProjectileTrailSystem(e.Active, e.Passive, 100f);
+            this.AddProjectileTrailSystem(e.Active, e.Passive, 50f);
         }
         private void Agent_Damaged(BehaviorEventArgs e)
         {
             this.AddExplosionSystem(e.Passive);
             this.AddExplosionSystem(e.Passive);
-            this.AddSmokeSystem(e.Passive);
+            this.AddSmokeSystem(e.Passive, false);
         }
         private void Agent_Destroyed(BehaviorEventArgs e)
         {
@@ -1602,7 +1626,7 @@ namespace TerrainTest
                 this.AddExplosionSystem(e.Passive);
                 this.AddExplosionSystem(e.Passive);
                 this.AddExplosionSystem(e.Passive);
-                this.AddSmokePlumeSystem(e.Passive);
+                this.AddSmokePlumeSystem(e.Passive, true);
             }
         }
 
@@ -1649,10 +1673,21 @@ namespace TerrainTest
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pExplosion, emitter1);
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pSmokeExplosion, emitter2);
         }
-        private void AddSmokePlumeSystem(AIAgent agent)
+        private void AddSmokePlumeSystem(AIAgent agent, bool unique)
         {
-            var plumeFire = this.pManager.Instance.GetParticleSystem("plumeFire");
-            var plumeSmoke = this.pManager.Instance.GetParticleSystem("plumeSmoke");
+            IParticleSystem plumeFire = null;
+            IParticleSystem plumeSmoke = null;
+            string plumeFireSystemName = null;
+            string plumeSmokeSystemName = null;
+
+            if (!unique)
+            {
+                plumeFireSystemName = "plumeFire." + agent.SceneObject.Name;
+                plumeSmokeSystemName = "plumeSmoke." + agent.SceneObject.Name;
+
+                plumeFire = this.pManager.Instance.GetParticleSystem("plumeFire");
+                plumeSmoke = this.pManager.Instance.GetParticleSystem("plumeSmoke");
+            }
 
             float duration = this.rnd.NextFloat(6, 36);
             float rate = this.rnd.NextFloat(0.1f, 1f);
@@ -1668,7 +1703,7 @@ namespace TerrainTest
                     MaximumDistance = 100f,
                 };
 
-                this.pManager.Instance.AddParticleSystem("plumeFire", ParticleSystemTypes.CPU, this.pFire, emitter1);
+                this.pManager.Instance.AddParticleSystem(plumeFireSystemName, ParticleSystemTypes.CPU, this.pFire, emitter1);
             }
             else
             {
@@ -1686,16 +1721,23 @@ namespace TerrainTest
                     MaximumDistance = 500f,
                 };
 
-                this.pManager.Instance.AddParticleSystem("plumeSmoke", ParticleSystemTypes.CPU, this.pPlume, emitter2);
+                this.pManager.Instance.AddParticleSystem(plumeSmokeSystemName, ParticleSystemTypes.CPU, this.pPlume, emitter2);
             }
             else
             {
                 plumeSmoke.Emitter.Duration = duration + (duration * 0.1f);
             }
         }
-        private void AddSmokeSystem(AIAgent agent)
+        private void AddSmokeSystem(AIAgent agent, bool unique)
         {
-            var smoke = this.pManager.Instance.GetParticleSystem("smoke");
+            IParticleSystem smoke = null;
+            string smokeSystemName = null;
+
+            if (!unique)
+            {
+                smokeSystemName = "smoke." + agent.SceneObject.Name;
+                smoke = this.pManager.Instance.GetParticleSystem(smokeSystemName);
+            }
 
             float duration = this.rnd.NextFloat(5, 15);
 
@@ -1710,7 +1752,7 @@ namespace TerrainTest
                     MaximumDistance = 500f,
                 };
 
-                this.pManager.Instance.AddParticleSystem("smoke", ParticleSystemTypes.CPU, this.pPlume, emitter);
+                this.pManager.Instance.AddParticleSystem(smokeSystemName, ParticleSystemTypes.CPU, this.pPlume, emitter);
             }
             else
             {
@@ -1730,9 +1772,11 @@ namespace TerrainTest
         }
         private void AddProjectileTrailSystem(AIAgent agent, AIAgent target, float speed)
         {
-            var emitter = new LinealEmitter(agent.Manipulator.Position, target.Manipulator.Position, speed)
+            var targetDelta = this.rnd.NextVector3(-Vector3.One, Vector3.One);
+
+            var emitter = new LinealEmitter(agent.Manipulator.Position, target.Manipulator.Position + targetDelta, speed)
             {
-                EmissionRate = 0.001f,
+                EmissionRate = 0.0001f,
                 MaximumDistance = 100f,
             };
 

@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh
     /// <summary>
     /// Do pathfinding calculations on the TiledNavMesh
     /// </summary>
-    class NavigationMeshQuery
+    class NavigationMeshQuery : IDisposable
     {
         /// <summary>
         /// Heuristic scale
@@ -237,7 +237,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Query data
         /// </summary>
-        class QueryData
+        class QueryData : IDisposable
         {
             public bool Status;
             public Node LastBestNode;
@@ -254,6 +254,14 @@ namespace Engine.PathFinding.NavMesh
             public QueryData()
             {
                 this.Filter = new NavigationMeshQueryFilter();
+            }
+
+            public void Dispose()
+            {
+                if (this.Filter != null)
+                {
+                    this.Filter = null;
+                }
             }
         }
         /// <summary>
@@ -296,7 +304,7 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Query data
         /// </summary>
-        private QueryData query;
+        private QueryData queryData;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NavigationMeshQuery"/> class.
@@ -315,6 +323,27 @@ namespace Engine.PathFinding.NavMesh
 
             this.nodePool = new NodePool(maxNodes);
             this.openList = new PriorityQueue<Node>(maxNodes);
+        }
+        /// <summary>
+        /// Resources dispose
+        /// </summary>
+        public void Dispose()
+        {
+            this.areaCost = null;
+
+            if (this.nodePool != null)
+            {
+                this.nodePool.Clear();
+                this.nodePool = null;
+            }
+
+            if (this.openList != null)
+            {
+                this.openList.Clear();
+                this.openList = null;
+            }
+
+            Helper.Dispose(this.queryData);
         }
 
         /// <summary>
@@ -1771,14 +1800,14 @@ namespace Engine.PathFinding.NavMesh
             }
 
             //init path state
-            query = new QueryData();
-            query.Status = false;
-            query.Start = startPoint;
-            query.End = endPoint;
+            queryData = new QueryData();
+            queryData.Status = false;
+            queryData.Start = startPoint;
+            queryData.End = endPoint;
 
             if (startPoint.Polygon == endPoint.Polygon)
             {
-                this.query.Status = true;
+                this.queryData.Status = true;
                 return true;
             }
 
@@ -1794,11 +1823,11 @@ namespace Engine.PathFinding.NavMesh
             startNode.Flags = NodeFlags.Open;
             openList.Push(startNode);
 
-            query.Status = true;
-            query.LastBestNode = startNode;
-            query.LastBestNodeCost = startNode.TotalCost;
+            queryData.Status = true;
+            queryData.LastBestNode = startNode;
+            queryData.LastBestNodeCost = startNode.TotalCost;
 
-            return query.Status;
+            return queryData.Status;
         }
         /// <summary>
         /// Update the sliced path as agents move across the path.
@@ -1808,13 +1837,13 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>True if updated, false if not</returns>
         public bool UpdateSlicedFindPath(int maxIter, ref int doneIters)
         {
-            if (query.Status != true)
-                return query.Status;
+            if (queryData.Status != true)
+                return queryData.Status;
 
             //make sure the request is still valid
-            if (!this.navigationMesh.IsValidPolyRef(query.Start.Polygon) || !this.navigationMesh.IsValidPolyRef(query.End.Polygon))
+            if (!this.navigationMesh.IsValidPolyRef(queryData.Start.Polygon) || !this.navigationMesh.IsValidPolyRef(queryData.End.Polygon))
             {
-                query.Status = false;
+                queryData.Status = false;
                 return false;
             }
 
@@ -1828,12 +1857,12 @@ namespace Engine.PathFinding.NavMesh
                 bestNode.SetNodeFlagClosed();
 
                 //reached the goal, stop searching
-                if (bestNode.Id == query.End.Polygon)
+                if (bestNode.Id == queryData.End.Polygon)
                 {
-                    query.LastBestNode = bestNode;
-                    query.Status = true;
+                    queryData.LastBestNode = bestNode;
+                    queryData.Status = true;
                     doneIters = iter;
-                    return query.Status;
+                    return queryData.Status;
                 }
 
                 //get current poly and tile
@@ -1843,9 +1872,9 @@ namespace Engine.PathFinding.NavMesh
                 if (!this.navigationMesh.TryGetTileAndPolyByRef(bestRef, out bestTile, out bestPoly))
                 {
                     //the polygon has disappeared during the sliced query, fail
-                    query.Status = false;
+                    queryData.Status = false;
                     doneIters = iter;
-                    return query.Status;
+                    return queryData.Status;
                 }
 
                 //get parent poly and tile
@@ -1867,17 +1896,17 @@ namespace Engine.PathFinding.NavMesh
                     if (invalidParent || (grandpaRef != PolyId.Null && !this.navigationMesh.IsValidPolyRef(grandpaRef)))
                     {
                         //the polygon has disappeared during the sliced query, fail
-                        query.Status = false;
+                        queryData.Status = false;
                         doneIters = iter;
-                        return query.Status;
+                        return queryData.Status;
                     }
                 }
 
                 //decide whether to test raycast to previous nodes
                 bool tryLOS = false;
-                if ((query.Options & FindPathOptions.AnyAngle) != 0)
+                if ((queryData.Options & FindPathOptions.AnyAngle) != 0)
                 {
-                    if ((parentRef != PolyId.Null) && (parentNode.Position - bestNode.Position).LengthSquared() < query.RaycastLimitSquared)
+                    if ((parentRef != PolyId.Null) && (parentNode.Position - bestNode.Position).LengthSquared() < queryData.RaycastLimitSquared)
                     {
                         tryLOS = true;
                     }
@@ -1898,7 +1927,7 @@ namespace Engine.PathFinding.NavMesh
                     Poly neighborPoly;
                     this.navigationMesh.TryGetTileAndPolyByRefUnsafe(neighborRef, out neighborTile, out neighborPoly);
 
-                    if (!query.Filter.PassFilter(neighborRef, neighborTile, neighborPoly))
+                    if (!queryData.Filter.PassFilter(neighborRef, neighborTile, neighborPoly))
                     {
                         continue;
                     }
@@ -1939,7 +1968,7 @@ namespace Engine.PathFinding.NavMesh
                     }
                     else
                     {
-                        float curCost = query.Filter.GetCost(bestNode.Position, neighborNode.Position,
+                        float curCost = queryData.Filter.GetCost(bestNode.Position, neighborNode.Position,
                             parentRef, parentTile, parentPoly,
                             bestRef, bestTile, bestPoly,
                             neighborRef, neighborTile, neighborPoly);
@@ -1948,10 +1977,10 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     //special case for last node
-                    if (neighborRef == query.End.Polygon)
+                    if (neighborRef == queryData.End.Polygon)
                     {
                         //cost
-                        float endCost = query.Filter.GetCost(bestNode.Position, neighborNode.Position,
+                        float endCost = queryData.Filter.GetCost(bestNode.Position, neighborNode.Position,
                             bestRef, bestTile, bestPoly,
                             neighborRef, neighborTile, neighborPoly,
                             PolyId.Null, null, null);
@@ -1961,7 +1990,7 @@ namespace Engine.PathFinding.NavMesh
                     }
                     else
                     {
-                        heuristic = (neighborNode.Position - query.End.Position).Length() * HeuristicScale;
+                        heuristic = (neighborNode.Position - queryData.End.Position).Length() * HeuristicScale;
                     }
 
                     float total = cost + heuristic;
@@ -2002,10 +2031,10 @@ namespace Engine.PathFinding.NavMesh
                     }
 
                     //update nearest node to target so far
-                    if (heuristic < query.LastBestNodeCost)
+                    if (heuristic < queryData.LastBestNodeCost)
                     {
-                        query.LastBestNodeCost = heuristic;
-                        query.LastBestNode = neighborNode;
+                        queryData.LastBestNodeCost = heuristic;
+                        queryData.LastBestNode = neighborNode;
                     }
                 }
             }
@@ -2013,12 +2042,12 @@ namespace Engine.PathFinding.NavMesh
             //exhausted all nodes, but could not find path
             if (openList.Empty())
             {
-                query.Status = true;
+                queryData.Status = true;
             }
 
             doneIters = iter;
 
-            return query.Status;
+            return queryData.Status;
         }
         /// <summary>
         /// Save the sliced path 
@@ -2031,22 +2060,22 @@ namespace Engine.PathFinding.NavMesh
         {
             path.Clear();
 
-            if (query.Status == false)
+            if (queryData.Status == false)
             {
-                query = new QueryData();
+                queryData = new QueryData();
                 return false;
             }
 
-            if (query.Start.Polygon == query.End.Polygon)
+            if (queryData.Start.Polygon == queryData.End.Polygon)
             {
                 //special case: the search starts and ends at the same poly
-                path.Add(query.Start.Polygon);
+                path.Add(queryData.Start.Polygon);
             }
             else
             {
                 //reverse the path
                 Node prev = null;
-                Node node = query.LastBestNode;
+                Node node = queryData.LastBestNode;
                 NodeFlags prevRay = 0;
                 do
                 {
@@ -2089,7 +2118,7 @@ namespace Engine.PathFinding.NavMesh
             }
 
             //reset query
-            query = new QueryData();
+            queryData = new QueryData();
 
             return true;
         }
@@ -2111,16 +2140,16 @@ namespace Engine.PathFinding.NavMesh
                 return false;
             }
 
-            if (query.Status == false)
+            if (queryData.Status == false)
             {
-                query = new QueryData();
+                queryData = new QueryData();
                 return false;
             }
 
-            if (query.Start.Polygon == query.End.Polygon)
+            if (queryData.Start.Polygon == queryData.End.Polygon)
             {
                 //special case: the search starts and ends at the same poly
-                path.Add(query.Start.Polygon);
+                path.Add(queryData.Start.Polygon);
             }
             else
             {
@@ -2136,7 +2165,7 @@ namespace Engine.PathFinding.NavMesh
 
                 if (node == null)
                 {
-                    node = query.LastBestNode;
+                    node = queryData.LastBestNode;
                 }
 
                 //reverse the path
@@ -2182,7 +2211,7 @@ namespace Engine.PathFinding.NavMesh
             }
 
             //reset query
-            query = new QueryData();
+            queryData = new QueryData();
 
             return true;
         }

@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -92,43 +91,40 @@ namespace Engine
 
                 this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && i.LevelOfDetail != LevelOfDetailEnum.None);
 
-                this.UpdateInstances(context);
+                this.SortInstances(context.EyePosition);
             }
         }
         /// <summary>
         /// Updates the instances order
         /// </summary>
-        /// <param name="context">Context</param>
-        private async void UpdateInstances(UpdateContext context)
+        /// <param name="eyePosition">Eye position</param>
+        private void SortInstances(Vector3 eyePosition)
         {
-            await Task.Run(() =>
+            //Sort by LOD
+            Array.Sort(this.instancesTmp, (i1, i2) =>
             {
-                //Sort by LOD
-                Array.Sort(this.instancesTmp, (i1, i2) =>
+                var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+
+                if (i == 0)
                 {
-                    var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+                    var da = Vector3.DistanceSquared(i1.Manipulator.Position, eyePosition);
+                    var db = Vector3.DistanceSquared(i2.Manipulator.Position, eyePosition);
+                    i = da.CompareTo(db);
+                }
 
-                    if (i == 0)
-                    {
-                        var da = Vector3.DistanceSquared(i1.Manipulator.Position, context.EyePosition);
-                        var db = Vector3.DistanceSquared(i2.Manipulator.Position, context.EyePosition);
-                        i = da.CompareTo(db);
-                    }
+                if (i == 0)
+                {
+                    i = i1.Id.CompareTo(i2.Id);
+                }
 
-                    if (i == 0)
-                    {
-                        i = i1.Id.CompareTo(i2.Id);
-                    }
-
-                    if (this.Description.AlphaEnabled)
-                    {
-                        return -i;
-                    }
-                    else
-                    {
-                        return i;
-                    }
-                });
+                if (this.Description.AlphaEnabled)
+                {
+                    return -i;
+                }
+                else
+                {
+                    return i;
+                }
             });
         }
         /// <summary>

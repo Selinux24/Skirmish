@@ -44,6 +44,11 @@ namespace Engine
             }
 
             /// <summary>
+            /// Updating nodes flag for asynchronous task
+            /// </summary>
+            private bool updatingNodes = false;
+
+            /// <summary>
             /// Game
             /// </summary>
             public Game Game = null;
@@ -189,119 +194,126 @@ namespace Engine
             /// <param name="eyePosition">Eye position</param>
             public void Update(Vector3 eyePosition)
             {
-                this.UpdateNodes(eyePosition);
+                if (this.updatingNodes == false)
+                {
+                    var task = Task.Run(() =>
+                    {
+                        this.updatingNodes = true;
+                        this.UpdateNodes(eyePosition);
+                    });
+
+                    task.ContinueWith((t) =>
+                    {
+                        this.updatingNodes = false;
+                    });
+                }
             }
             /// <summary>
             /// Update terrain nodes
             /// </summary>
             /// <param name="eyePosition">Eye position</param>
-            private async void UpdateNodes(Vector3 eyePosition)
+            private void UpdateNodes(Vector3 eyePosition)
             {
-                await Task.Run(async () =>
+                var node = this.drawingQuadTree.FindNode(eyePosition);
+
+                if (node != null && this.lastNode != node)
                 {
-                    await Task.Delay(100);
+                    this.lastNode = node;
 
-                    var node = this.drawingQuadTree.FindNode(eyePosition);
+                    this.NodesHigh[0].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideTop, node, this.dictVB, this.dictIB);
+                    this.NodesHigh[1].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideBottom, node, this.dictVB, this.dictIB);
+                    this.NodesHigh[2].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideLeft, node, this.dictVB, this.dictIB);
+                    this.NodesHigh[3].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideRight, node, this.dictVB, this.dictIB);
+                    this.NodesHigh[4].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerTopLeft, IndexBufferShapeEnum.CornerTopLeft, node, this.dictVB, this.dictIB);
+                    this.NodesHigh[5].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerTopRight, IndexBufferShapeEnum.CornerTopRight, node, this.dictVB, this.dictIB);
+                    this.NodesHigh[6].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerBottomLeft, IndexBufferShapeEnum.CornerBottomLeft, node, this.dictVB, this.dictIB);
+                    this.NodesHigh[7].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerBottomRight, IndexBufferShapeEnum.CornerBottomRight, node, this.dictVB, this.dictIB);
+                    this.NodesHigh[8].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.Full, IndexBufferShapeEnum.Full, node, this.dictVB, this.dictIB);
 
-                    if (node != null && this.lastNode != node)
-                    {
-                        this.lastNode = node;
+                    this.NodesMedium[0].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideTop, this.NodesHigh[0].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[1].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesMedium[0].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[2].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.CornerTopLeft, IndexBufferShapeEnum.SideLeft, this.NodesMedium[1].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[3].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesMedium[0].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[4].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.CornerTopRight, IndexBufferShapeEnum.SideRight, this.NodesMedium[3].Node, this.dictVB, this.dictIB);
 
-                        this.NodesHigh[0].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideTop, node, this.dictVB, this.dictIB);
-                        this.NodesHigh[1].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideBottom, node, this.dictVB, this.dictIB);
-                        this.NodesHigh[2].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideLeft, node, this.dictVB, this.dictIB);
-                        this.NodesHigh[3].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideRight, node, this.dictVB, this.dictIB);
-                        this.NodesHigh[4].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerTopLeft, IndexBufferShapeEnum.CornerTopLeft, node, this.dictVB, this.dictIB);
-                        this.NodesHigh[5].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerTopRight, IndexBufferShapeEnum.CornerTopRight, node, this.dictVB, this.dictIB);
-                        this.NodesHigh[6].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerBottomLeft, IndexBufferShapeEnum.CornerBottomLeft, node, this.dictVB, this.dictIB);
-                        this.NodesHigh[7].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.CornerBottomRight, IndexBufferShapeEnum.CornerBottomRight, node, this.dictVB, this.dictIB);
-                        this.NodesHigh[8].Set(LevelOfDetailEnum.High, IndexBufferShapeEnum.Full, IndexBufferShapeEnum.Full, node, this.dictVB, this.dictIB);
+                    this.NodesMedium[5].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideBottom, this.NodesHigh[1].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[6].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesMedium[5].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[7].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.CornerBottomLeft, IndexBufferShapeEnum.SideLeft, this.NodesMedium[6].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[8].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesMedium[5].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[9].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.CornerBottomRight, IndexBufferShapeEnum.SideRight, this.NodesMedium[8].Node, this.dictVB, this.dictIB);
 
-                        this.NodesMedium[0].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideTop, this.NodesHigh[0].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[1].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesMedium[0].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[2].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.CornerTopLeft, IndexBufferShapeEnum.SideLeft, this.NodesMedium[1].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[3].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesMedium[0].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[4].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.CornerTopRight, IndexBufferShapeEnum.SideRight, this.NodesMedium[3].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[10].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideLeft, this.NodesHigh[2].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[11].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesMedium[10].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[12].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesMedium[10].Node, this.dictVB, this.dictIB);
 
-                        this.NodesMedium[5].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideBottom, this.NodesHigh[1].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[6].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesMedium[5].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[7].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.CornerBottomLeft, IndexBufferShapeEnum.SideLeft, this.NodesMedium[6].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[8].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesMedium[5].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[9].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.CornerBottomRight, IndexBufferShapeEnum.SideRight, this.NodesMedium[8].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[13].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideRight, this.NodesHigh[3].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[14].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesMedium[13].Node, this.dictVB, this.dictIB);
+                    this.NodesMedium[15].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesMedium[13].Node, this.dictVB, this.dictIB);
 
-                        this.NodesMedium[10].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideLeft, this.NodesHigh[2].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[11].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesMedium[10].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[12].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesMedium[10].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[0].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideTop, this.NodesMedium[0].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[1].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesLow[0].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[2].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesLow[1].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[3].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.CornerTopLeft, IndexBufferShapeEnum.SideLeft, this.NodesLow[2].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[4].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesLow[0].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[5].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesLow[4].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[6].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.CornerTopRight, IndexBufferShapeEnum.SideRight, this.NodesLow[5].Node, this.dictVB, this.dictIB);
 
-                        this.NodesMedium[13].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideRight, this.NodesHigh[3].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[14].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesMedium[13].Node, this.dictVB, this.dictIB);
-                        this.NodesMedium[15].Set(LevelOfDetailEnum.Medium, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesMedium[13].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[7].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideBottom, this.NodesMedium[5].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[8].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesLow[7].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[9].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesLow[8].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[10].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.CornerBottomLeft, IndexBufferShapeEnum.SideLeft, this.NodesLow[9].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[11].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesLow[7].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[12].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesLow[11].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[13].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.CornerBottomRight, IndexBufferShapeEnum.SideRight, this.NodesLow[12].Node, this.dictVB, this.dictIB);
 
-                        this.NodesLow[0].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideTop, this.NodesMedium[0].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[1].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesLow[0].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[2].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesLow[1].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[3].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.CornerTopLeft, IndexBufferShapeEnum.SideLeft, this.NodesLow[2].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[4].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesLow[0].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[5].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesLow[4].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[6].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.CornerTopRight, IndexBufferShapeEnum.SideRight, this.NodesLow[5].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[14].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideLeft, this.NodesMedium[10].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[15].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesLow[14].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[16].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesLow[15].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[17].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesLow[14].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[18].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesLow[17].Node, this.dictVB, this.dictIB);
 
-                        this.NodesLow[7].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideBottom, this.NodesMedium[5].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[8].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesLow[7].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[9].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesLow[8].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[10].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.CornerBottomLeft, IndexBufferShapeEnum.SideLeft, this.NodesLow[9].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[11].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesLow[7].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[12].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesLow[11].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[13].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.CornerBottomRight, IndexBufferShapeEnum.SideRight, this.NodesLow[12].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[19].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideRight, this.NodesMedium[13].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[20].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesLow[19].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[21].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesLow[20].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[22].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesLow[19].Node, this.dictVB, this.dictIB);
+                    this.NodesLow[23].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesLow[22].Node, this.dictVB, this.dictIB);
 
-                        this.NodesLow[14].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideLeft, this.NodesMedium[10].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[15].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesLow[14].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[16].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesLow[15].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[17].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesLow[14].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[18].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesLow[17].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[0].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideTop, this.NodesLow[0].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[1].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[0].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[2].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[1].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[3].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[2].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[4].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.CornerTopLeft, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[3].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[5].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesMinimum[0].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[6].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesMinimum[5].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[7].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesMinimum[6].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[8].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.CornerTopRight, IndexBufferShapeEnum.SideRight, this.NodesMinimum[7].Node, this.dictVB, this.dictIB);
 
-                        this.NodesLow[19].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideRight, this.NodesMedium[13].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[20].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesLow[19].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[21].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesLow[20].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[22].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesLow[19].Node, this.dictVB, this.dictIB);
-                        this.NodesLow[23].Set(LevelOfDetailEnum.Low, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesLow[22].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[9].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideBottom, this.NodesLow[7].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[10].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[9].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[11].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[10].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[12].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[11].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[13].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.CornerBottomLeft, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[12].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[14].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesMinimum[9].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[15].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesMinimum[14].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[16].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesMinimum[15].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[17].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.CornerBottomRight, IndexBufferShapeEnum.SideRight, this.NodesMinimum[16].Node, this.dictVB, this.dictIB);
 
-                        this.NodesMinimum[0].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideTop, this.NodesLow[0].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[1].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[0].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[2].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[1].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[3].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[2].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[4].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.CornerTopLeft, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[3].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[5].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesMinimum[0].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[6].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesMinimum[5].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[7].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideTop, IndexBufferShapeEnum.SideRight, this.NodesMinimum[6].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[8].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.CornerTopRight, IndexBufferShapeEnum.SideRight, this.NodesMinimum[7].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[18].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideLeft, this.NodesLow[14].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[19].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesMinimum[18].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[20].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesMinimum[19].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[21].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesMinimum[20].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[22].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[18].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[23].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[22].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[24].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[23].Node, this.dictVB, this.dictIB);
 
-                        this.NodesMinimum[9].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideBottom, this.NodesLow[7].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[10].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[9].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[11].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[10].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[12].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[11].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[13].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.CornerBottomLeft, IndexBufferShapeEnum.SideLeft, this.NodesMinimum[12].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[14].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesMinimum[9].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[15].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesMinimum[14].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[16].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideBottom, IndexBufferShapeEnum.SideRight, this.NodesMinimum[15].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[17].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.CornerBottomRight, IndexBufferShapeEnum.SideRight, this.NodesMinimum[16].Node, this.dictVB, this.dictIB);
-
-                        this.NodesMinimum[18].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideLeft, this.NodesLow[14].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[19].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesMinimum[18].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[20].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesMinimum[19].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[21].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideTop, this.NodesMinimum[20].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[22].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[18].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[23].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[22].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[24].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideLeft, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[23].Node, this.dictVB, this.dictIB);
-
-                        this.NodesMinimum[25].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideRight, this.NodesLow[19].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[26].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesMinimum[25].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[27].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesMinimum[26].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[28].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesMinimum[27].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[29].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[25].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[30].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[29].Node, this.dictVB, this.dictIB);
-                        this.NodesMinimum[31].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[30].Node, this.dictVB, this.dictIB);
-                    }
-                });
+                    this.NodesMinimum[25].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideRight, this.NodesLow[19].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[26].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesMinimum[25].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[27].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesMinimum[26].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[28].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideTop, this.NodesMinimum[27].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[29].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[25].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[30].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[29].Node, this.dictVB, this.dictIB);
+                    this.NodesMinimum[31].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[30].Node, this.dictVB, this.dictIB);
+                }
             }
 
             /// <summary>

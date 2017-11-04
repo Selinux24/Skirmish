@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine
@@ -65,7 +66,20 @@ namespace Engine
         /// <summary>
         /// Visible radius
         /// </summary>
-        public float VisibleRadius = 200f;
+        public float VisibleRadius
+        {
+            get
+            {
+                float vRadius = 0;
+
+                for (int i = 0; i < this.Channels.Length; i++)
+                {
+                    vRadius = Math.Max(vRadius, this.Channels[i].EndRadius);
+                }
+
+                return vRadius;
+            }
+        }
         /// <summary>
         /// Node size
         /// </summary>
@@ -75,8 +89,8 @@ namespace Engine
         /// </summary>
         public MaterialDescription Material = new MaterialDescription();
         /// <summary>
-                                                                                /// Red vegetation channel from map
-                                                                                /// </summary>
+        /// Red vegetation channel from map
+        /// </summary>
         public Channel ChannelRed = new Channel();
         /// <summary>
         /// Green vegetation channel from map

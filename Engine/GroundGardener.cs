@@ -72,7 +72,8 @@ namespace Engine
             /// <param name="node">Foliage Node</param>
             /// <param name="map">Foliage map</param>
             /// <param name="description">Terrain vegetation description</param>
-            public async void Plant(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
+            /// <param name="delay">Task delay</param>
+            public void Plant(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, int delay)
             {
                 if (!this.Planting)
                 {
@@ -81,14 +82,19 @@ namespace Engine
                     this.Channel = description.Index;
                     this.Planting = true;
 
-                    var result = await Task.Run(() =>
+                    var task = Task.Run(async () =>
                     {
+                        await Task.Delay(delay);
+
                         return PlantTask(scene, node, map, description);
                     });
 
-                    this.Planting = false;
-                    this.Planted = true;
-                    this.FoliageData = result;
+                    task.ContinueWith((t) =>
+                    {
+                        this.Planting = false;
+                        this.Planted = true;
+                        this.FoliageData = t.Result;
+                    });
                 }
             }
             /// <summary>
@@ -113,53 +119,55 @@ namespace Engine
                     Random rnd = new Random(description.Seed);
                     BoundingBox bbox = node.BoundingBox;
                     int count = (int)Math.Min(MAX, MAX * description.Saturation);
+                    int iterations = MAX * 2;
 
                     //Number of points
-                    while (count > 0)
+                    while (count > 0 && iterations > 0)
                     {
-                        try
+                        iterations--;
+
+                        Vector3 pos = new Vector3(
+                            rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
+                            bbox.Maximum.Y + 1f,
+                            rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
+
+                        bool plant = false;
+                        if (map != null)
                         {
-                            Vector3 pos = new Vector3(
-                                rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
-                                bbox.Maximum.Y + 1f,
-                                rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
+                            Color4 c = map.GetRelative(pos, min, max);
 
-                            bool plant = false;
-                            if (map != null)
+                            if (c[description.Index] > 0)
                             {
-                                Color4 c = map.GetRelative(pos, min, max);
-
-                                if (c[description.Index] > 0)
-                                {
-                                    plant = rnd.NextFloat(0, 1) < (c[description.Index]);
-                                }
+                                plant = rnd.NextFloat(0, 1) < (c[description.Index]);
                             }
-                            else
-                            {
-                                plant = true;
-                            }
+                        }
+                        else
+                        {
+                            plant = true;
+                        }
 
-                            if (plant)
+                        if (plant)
+                        {
+                            Vector3 intersectionPoint;
+                            Triangle t;
+                            float d;
+                            if (scene.FindTopGroundPosition(pos.X, pos.Z, out intersectionPoint, out t, out d))
                             {
-                                Vector3 intersectionPoint;
-                                Triangle t;
-                                float d;
-                                if (scene.FindTopGroundPosition(pos.X, pos.Z, out intersectionPoint, out t, out d))
+                                if (t.Normal.Y > 0.5f)
                                 {
-                                    if (t.Normal.Y > 0.5f)
+                                    vertexData.Add(new VertexBillboard()
                                     {
-                                        vertexData.Add(new VertexBillboard()
-                                        {
-                                            Position = intersectionPoint,
-                                            Size = new Vector2(
-                                                rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                                                rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
-                                        });
-                                    }
+                                        Position = intersectionPoint,
+                                        Size = new Vector2(
+                                            rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
+                                            rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
+                                    });
+
+                                    count--;
                                 }
                             }
                         }
-                        finally
+                        else
                         {
                             count--;
                         }
@@ -343,6 +351,12 @@ namespace Engine
                         graphics.Draw(this.vertexDrawCount, this.VertexBuffer.Offset);
                     }
                 }
+            }
+
+
+            public override string ToString()
+            {
+                return string.Format("{0} => Attached: {1}; HasPatch: {2}", this.Id, this.Attached, this.CurrentPatch != null);
             }
         }
 
@@ -585,13 +599,16 @@ namespace Engine
 
                         if (!fPatch.Planted)
                         {
-                            fPatch.Plant(this.Scene, node, this.foliageMap, this.foliageMapChannels[i]);
+                            fPatch.Plant(this.Scene, node, this.foliageMap, this.foliageMapChannels[i], i * 100);
                         }
                         else
                         {
                             if (!this.foliageBuffers.Exists(b => b.CurrentPatch == fPatch))
                             {
-                                toAssign.Add(fPatch);
+                                if (fPatch.FoliageData.Length > 0)
+                                {
+                                    toAssign.Add(fPatch);
+                                }
                             }
                         }
                     }

@@ -19,7 +19,6 @@ namespace Engine.PathFinding.NavMesh
         class AgentTypeData
         {
             public TiledNavigationMesh NavigationMesh;
-            public NavigationMeshQuery Query;
             public NavigationMeshNode[] Nodes;
         }
 
@@ -98,7 +97,6 @@ namespace Engine.PathFinding.NavMesh
                 agent.Radius);
 
             var tnm = new TiledNavigationMesh(builder);
-            var query = new NavigationMeshQuery(tnm, 2048);
 
             var nodes = new List<NavigationMeshNode>();
             for (int m = 0; m < pmd.MeshCount; m++)
@@ -124,7 +122,6 @@ namespace Engine.PathFinding.NavMesh
             nm.agentTypeData.Add(agent, new AgentTypeData()
             {
                 NavigationMesh = tnm,
-                Query = query,
                 Nodes = nodes.ToArray(),
             });
         }
@@ -175,10 +172,13 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Returns path between the specified points if exists</returns>
         public Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
-            Vector3[] path;
-            if (this.agentTypeData[agent].Query.FindPath(from, to, out path))
+            using (var query = new NavigationMeshQuery(this.agentTypeData[agent].NavigationMesh, 2048))
             {
-                return path;
+                Vector3[] path;
+                if (query.FindPath(from, to, out path))
+                {
+                    return path;
+                }
             }
 
             return null;
@@ -192,7 +192,10 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Returns true if the specified position is walkable</returns>
         public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
         {
-            return this.agentTypeData[agent].Query.IsWalkable(position, out nearest);
+            using (var query = new NavigationMeshQuery(this.agentTypeData[agent].NavigationMesh, 2048))
+            {
+                return query.IsWalkable(position, out nearest);
+            }
         }
 
         internal Crowds.Crowd AddCrowd(bool adaptative, AgentType agent)

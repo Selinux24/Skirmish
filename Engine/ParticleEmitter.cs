@@ -134,6 +134,8 @@ namespace Engine
             }
 
             this.Distance = Vector3.Distance(this.Position, context.EyePosition);
+
+            this.currentBoundingBox = this.GetBoundingBox();
         }
 
         /// <summary>
