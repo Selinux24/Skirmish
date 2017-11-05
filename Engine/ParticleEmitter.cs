@@ -30,13 +30,15 @@ namespace Engine
         }
 
         /// <summary>
-        /// Previous emitter bounding box
-        /// </summary>
-        private BoundingBox? previousBoundingBox;
-        /// <summary>
         /// Current emitter bounding box
         /// </summary>
-        private BoundingBox currentBoundingBox;
+        /// <remarks>The box grows when position changes</remarks>
+        private BoundingBox? currentBoundingBox;
+        /// <summary>
+        /// Original bounding box
+        /// </summary>
+        /// <remarks>This box isn't transformed if position changes</remarks>
+        private BoundingBox boundingBox;
         /// <summary>
         /// Visible flag
         /// </summary>
@@ -135,7 +137,23 @@ namespace Engine
 
             this.Distance = Vector3.Distance(this.Position, context.EyePosition);
 
-            this.currentBoundingBox = this.GetBoundingBox();
+            this.UpdateBoundingBox();
+        }
+        /// <summary>
+        /// Updates the internal bounding box
+        /// </summary>
+        protected virtual void UpdateBoundingBox()
+        {
+            var tmp = currentBoundingBox;
+
+            currentBoundingBox = new BoundingBox(
+                this.boundingBox.Minimum + this.Position, 
+                this.boundingBox.Maximum + this.Position);
+
+            if (tmp != null)
+            {
+                currentBoundingBox = BoundingBox.Merge(tmp.Value, currentBoundingBox.Value);
+            }
         }
 
         /// <summary>
@@ -160,7 +178,7 @@ namespace Engine
         {
             distance = null;
 
-            var bbox = this.currentBoundingBox;
+            var bbox = this.GetBoundingBox();
 
             var inside = frustum.Contains(ref bbox) != ContainmentType.Disjoint;
             if (inside)
@@ -180,7 +198,7 @@ namespace Engine
         {
             distance = null;
 
-            var bbox = this.currentBoundingBox;
+            var bbox = this.GetBoundingBox();
 
             var inside = box.Contains(ref bbox) != ContainmentType.Disjoint;
             if (inside)
@@ -200,7 +218,7 @@ namespace Engine
         {
             distance = null;
 
-            var bbox = this.currentBoundingBox;
+            var bbox = this.GetBoundingBox();
 
             var inside = sphere.Contains(ref bbox) != ContainmentType.Disjoint;
             if (inside)
@@ -217,8 +235,8 @@ namespace Engine
         /// <param name="bbox">Bounding box</param>
         public void SetBoundingBox(BoundingBox bbox)
         {
-            this.previousBoundingBox = null;
-            this.currentBoundingBox = bbox;
+            this.boundingBox = bbox;
+            this.currentBoundingBox = null;
         }
         /// <summary>
         /// Gets the internal bounding box updated with position
@@ -226,17 +244,7 @@ namespace Engine
         /// <returns>Returns the internal bounding box for culling tests</returns>
         public virtual BoundingBox GetBoundingBox()
         {
-            var nBbox = new BoundingBox(this.currentBoundingBox.Minimum + this.Position, this.currentBoundingBox.Maximum + this.Position);
-            if (previousBoundingBox == null)
-            {
-                previousBoundingBox = nBbox;
-            }
-            else
-            {
-                previousBoundingBox = BoundingBox.Merge(previousBoundingBox.Value, nBbox);
-            }
-
-            return previousBoundingBox.Value;
+            return currentBoundingBox.HasValue ? currentBoundingBox.Value : new BoundingBox();
         }
     }
 }
