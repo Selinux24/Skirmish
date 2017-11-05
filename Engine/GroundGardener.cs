@@ -29,13 +29,18 @@ namespace Engine
             public const int MAX = 1024 * 8;
 
             /// <summary>
-            /// Foliage populated flag
-            /// </summary>
-            public bool Planted = false;
-            /// <summary>
             /// Foliage generated data
             /// </summary>
-            public VertexBillboard[] FoliageData = null;
+            private VertexBillboard[] foliageData = null;
+
+            /// <summary>
+            /// Foliage populating flag
+            /// </summary>
+            public bool Planting { get; protected set; }
+            /// <summary>
+            /// Foliage populated flag
+            /// </summary>
+            public bool Planted { get; protected set; }
             /// <summary>
             /// Gets the node to wich this patch is currently assigned
             /// </summary>
@@ -45,15 +50,24 @@ namespace Engine
             /// </summary>
             public int Channel { get; protected set; }
             /// <summary>
-            /// Foliage populating flag
+            /// Returns true if the path has foliage data
             /// </summary>
-            public bool Planting { get; private set; }
+            public bool HasData
+            {
+                get
+                {
+                    return this.foliageData != null && this.foliageData.Length > 0;
+                }
+            }
 
             /// <summary>
             /// Constructor
             /// </summary>
             public FoliagePatch()
             {
+                this.Planted = false;
+                this.Planting = false;
+
                 this.CurrentNode = null;
                 this.Channel = -1;
             }
@@ -62,7 +76,7 @@ namespace Engine
             /// </summary>
             public void Dispose()
             {
-                this.FoliageData = null;
+                this.foliageData = null;
             }
 
             /// <summary>
@@ -93,7 +107,7 @@ namespace Engine
                     {
                         this.Planting = false;
                         this.Planted = true;
-                        this.FoliageData = t.Result;
+                        this.foliageData = t.Result;
                     });
                 }
             }
@@ -176,6 +190,28 @@ namespace Engine
 
                 return vertexData.ToArray();
             }
+            /// <summary>
+            /// Get foliage data
+            /// </summary>
+            /// <param name="eyePosition">Eye position</param>
+            /// <param name="transparent">Use transparency</param>
+            /// <returns>Returns the foliage data ordered by distance to eye position. Far first if transparency specified, near first otherwise</returns>
+            /// <remarks>Returns the foliage data</remarks>
+            public VertexBillboard[] GetData(Vector3 eyePosition, bool transparent)
+            {
+                //Sort data
+                Array.Sort(this.foliageData, (f1, f2) =>
+                {
+                    float d1 = Vector3.DistanceSquared(f1.Position, eyePosition);
+                    float d2 = Vector3.DistanceSquared(f2.Position, eyePosition);
+
+                    var res = d1.CompareTo(d2);
+
+                    return transparent ? -res : res;
+                });
+
+                return this.foliageData;
+            }
         }
         /// <summary>
         /// Foliage map channel
@@ -246,10 +282,6 @@ namespace Engine
             private static int ID = 0;
 
             /// <summary>
-            /// Vertex buffer descriptor
-            /// </summary>
-            public BufferDescriptor VertexBuffer = null;
-            /// <summary>
             /// Vertex count
             /// </summary>
             private int vertexDrawCount = 0;
@@ -262,15 +294,19 @@ namespace Engine
             /// <summary>
             /// Buffer id
             /// </summary>
-            public int Id = 0;
+            public readonly int Id = 0;
             /// <summary>
             /// Foliage attached to buffer flag
             /// </summary>
-            public bool Attached = false;
+            public bool Attached { get; protected set; }
             /// <summary>
             /// Current attached patch
             /// </summary>
             public FoliagePatch CurrentPatch { get; protected set; }
+            /// <summary>
+            /// Vertex buffer descriptor
+            /// </summary>
+            public BufferDescriptor VertexBuffer = null;
 
             /// <summary>
             /// Constructor
@@ -282,7 +318,8 @@ namespace Engine
             {
                 this.Game = game;
                 this.Id = ++ID;
-
+                this.Attached = false;
+                this.CurrentPatch = null;
                 this.VertexBuffer = bufferManager.Add(string.Format("{1}.{0}", this.Id, name), new VertexBillboard[FoliagePatch.MAX], true, 0);
             }
             /// <summary>
@@ -297,32 +334,26 @@ namespace Engine
             /// Attachs the specified patch to buffer
             /// </summary>
             /// <param name="eyePosition">Eye position</param>
+            /// <param name="transparent">The billboards were transparent</param>
             /// <param name="patch">Patch</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void AttachFoliage(Vector3 eyePosition, FoliagePatch patch, BufferManager bufferManager)
+            public void AttachFoliage(Vector3 eyePosition, bool transparent, FoliagePatch patch, BufferManager bufferManager)
             {
                 this.vertexDrawCount = 0;
                 this.Attached = false;
                 this.CurrentPatch = null;
 
-                if (patch.FoliageData != null && patch.FoliageData.Length > 0)
+                if (patch.HasData)
                 {
-                    //Sort data
-                    Array.Sort(patch.FoliageData, (f1, f2) =>
-                    {
-                        float d1 = Vector3.DistanceSquared(f1.Position, eyePosition);
-                        float d2 = Vector3.DistanceSquared(f2.Position, eyePosition);
-
-                        return -d1.CompareTo(d2);
-                    });
+                    var data = patch.GetData(eyePosition, transparent);
 
                     //Attach data
                     bufferManager.WriteBuffer(
                         this.VertexBuffer.Slot,
                         this.VertexBuffer.Offset,
-                        patch.FoliageData);
+                        data);
 
-                    this.vertexDrawCount = patch.FoliageData.Length;
+                    this.vertexDrawCount = data.Length;
                     this.Attached = true;
                     this.CurrentPatch = patch;
                 }
@@ -353,7 +384,10 @@ namespace Engine
                 }
             }
 
-
+            /// <summary>
+            /// Gets the text representation of the buffer
+            /// </summary>
+            /// <returns>Returns the text representation of the buffer</returns>
             public override string ToString()
             {
                 return string.Format("{0} => Attached: {1}; HasPatch: {2}", this.Id, this.Attached, this.CurrentPatch != null);
@@ -379,12 +413,10 @@ namespace Engine
         /// Foliage buffer list
         /// </summary>
         private List<FoliageBuffer> foliageBuffers = new List<FoliageBuffer>();
-
         /// <summary>
         /// Wind total time
         /// </summary>
         private float windTime = 0;
-
         /// <summary>
         /// Random texture
         /// </summary>
@@ -556,13 +588,17 @@ namespace Engine
 
             if (this.visibleNodes != null && this.visibleNodes.Length > 0)
             {
+                bool transparent = this.Description.AlphaEnabled;
+
                 //Sort fartest first
                 Array.Sort(this.visibleNodes, (f1, f2) =>
                 {
                     float d1 = Vector3.DistanceSquared(f1.Center, context.EyePosition);
                     float d2 = Vector3.DistanceSquared(f2.Center, context.EyePosition);
 
-                    return -d1.CompareTo(d2);
+                    var res = d1.CompareTo(d2);
+
+                    return transparent ? -res : res;
                 });
 
                 #region Assign foliage patches
@@ -605,7 +641,7 @@ namespace Engine
                         {
                             if (!this.foliageBuffers.Exists(b => b.CurrentPatch == fPatch))
                             {
-                                if (fPatch.FoliageData.Length > 0)
+                                if (fPatch.HasData)
                                 {
                                     toAssign.Add(fPatch);
                                 }
@@ -649,7 +685,7 @@ namespace Engine
 
                         while (toAssign.Count > 0 && freeBuffers.Count > 0)
                         {
-                            freeBuffers[0].AttachFoliage(context.EyePosition, toAssign[0], this.BufferManager);
+                            freeBuffers[0].AttachFoliage(context.EyePosition, this.Description.AlphaEnabled, toAssign[0], this.BufferManager);
 
                             toAssign.RemoveAt(0);
                             freeBuffers.RemoveAt(0);
@@ -743,8 +779,6 @@ namespace Engine
         {
             var effect = DrawerPool.EffectDefaultBillboard;
 
-            this.Game.Graphics.SetBlendTransparent();
-
             #region Per frame update
 
             effect.UpdatePerFrame(
@@ -781,8 +815,6 @@ namespace Engine
         private EngineEffectTechnique SetTechniqueVegetationShadowMap(DrawContext context, int channel)
         {
             var effect = DrawerPool.EffectShadowBillboard;
-
-            this.Game.Graphics.SetBlendTransparent();
 
             #region Per frame update
 
