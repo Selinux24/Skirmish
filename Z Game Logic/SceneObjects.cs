@@ -78,6 +78,7 @@ namespace GameLogic
         #region Keys
 
         private Keys keyExit = Keys.Escape;
+        private Keys keyChangeMode = Keys.R;
 
         private Keys keyDebugFrustum = Keys.Space;
         private Keys keyDebugVolumes = Keys.F1;
@@ -358,6 +359,13 @@ namespace GameLogic
                 if (this.Game.Input.KeyJustReleased(this.keyExit))
                 {
                     this.Game.Exit();
+                }
+
+                if (this.Game.Input.KeyJustReleased(this.keyChangeMode))
+                {
+                    this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
+                        SceneModesEnum.DeferredLightning :
+                        SceneModesEnum.ForwardLigthning);
                 }
 
                 bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);

@@ -61,7 +61,7 @@ namespace Engine
         /// Time to end
         /// </summary>
         public float TimeToEnd { get; private set; }
-        
+
         /// <summary>
         /// Particle system Name
         /// </summary>
@@ -132,6 +132,10 @@ namespace Engine
         /// Trasparent particles
         /// </summary>
         public bool Transparent { get; private set; }
+        /// <summary>
+        /// Additive particles
+        /// </summary>
+        public bool Additive { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -158,6 +162,7 @@ namespace Engine
             this.RotateSpeed = new Vector2(description.MinRotateSpeed, description.MaxRotateSpeed);
             this.VelocitySensitivity = description.EmitterVelocitySensitivity;
             this.Transparent = description.Transparent;
+            this.Additive = description.Additive;
 
             ImageContent imgContent = new ImageContent()
             {
@@ -237,7 +242,11 @@ namespace Engine
 
                 graphics.SetDepthStencilRDZEnabled();
 
-                if (this.Transparent)
+                if (this.Additive)
+                {
+                    graphics.SetBlendAdditive();
+                }
+                else if (this.Transparent)
                 {
                     graphics.SetBlendDefaultAlpha();
                 }

@@ -325,12 +325,15 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Culling
+        /// Performs culling test
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        public override bool Cull(BoundingFrustum frustum)
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public override bool Cull(BoundingFrustum frustum, out float? distance)
         {
             bool cull = false;
+            distance = null;
 
             if (this.hasVolumes)
             {
@@ -348,15 +351,23 @@ namespace Engine
                 cull = false;
             }
 
+            if (!cull)
+            {
+                distance = Vector3.DistanceSquared(this.Manipulator.Position, frustum.GetCameraParams().Position);
+            }
+
             return cull;
         }
         /// <summary>
-        /// Culling
+        /// Performs culling test
         /// </summary>
         /// <param name="box">Box</param>
-        public override bool Cull(BoundingBox box)
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the box</returns>
+        public override bool Cull(BoundingBox box, out float? distance)
         {
             bool cull = false;
+            distance = null;
 
             if (this.hasVolumes)
             {
@@ -374,15 +385,23 @@ namespace Engine
                 cull = false;
             }
 
+            if (!cull)
+            {
+                distance = Vector3.DistanceSquared(this.Manipulator.Position, box.GetCenter());
+            }
+
             return cull;
         }
         /// <summary>
-        /// Culling
+        /// Performs culling test
         /// </summary>
         /// <param name="sphere">Sphere</param>
-        public override bool Cull(BoundingSphere sphere)
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the sphere</returns>
+        public override bool Cull(BoundingSphere sphere, out float? distance)
         {
             bool cull = false;
+            distance = null;
 
             if (this.hasVolumes)
             {
@@ -398,6 +417,11 @@ namespace Engine
             else
             {
                 cull = false;
+            }
+
+            if (!cull)
+            {
+                distance = Vector3.DistanceSquared(this.Manipulator.Position, sphere.Center);
             }
 
             return cull;

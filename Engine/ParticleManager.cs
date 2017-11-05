@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine
 {
     using Engine.Common;
-    using SharpDX;
 
     /// <summary>
     /// CPU particle manager
@@ -106,21 +106,29 @@ namespace Engine
         /// Performs frustum culling with the active emitters
         /// </summary>
         /// <param name="frustum">Frustum</param>
+        /// <param name="distance">If the at least one of the internal emitters is visible, returns the distance to the item</param>
         /// <returns>Returns true if all emitters were culled</returns>
-        public override bool Cull(BoundingFrustum frustum)
+        public override bool Cull(BoundingFrustum frustum, out float? distance)
         {
-            bool cull = false;
+            bool cull = true;
+            distance = float.MaxValue;
 
             this.particleSystems.ForEach(p =>
             {
-                var c = p.Emitter.Cull(frustum);
-                if (c)
+                float? d;
+                var c = p.Emitter.Cull(frustum, out d);
+                if (!c)
                 {
-                    cull = true;
+                    cull = false;
                 }
 
-                p.Emitter.Visible = c;
+                p.Emitter.Visible = !c;
             });
+
+            if (!cull)
+            {
+                distance = float.MaxValue;
+            }
 
             return cull;
         }

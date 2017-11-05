@@ -80,6 +80,7 @@ namespace AnimationTest
                 {
                     TextureIndex = 1,
                     CastShadow = true,
+                    UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
                         ContentFolder = "Resources/Soldier",
@@ -92,7 +93,7 @@ namespace AnimationTest
             #region Floor
 
             {
-                float l = 20f;
+                float l = 15f;
                 float h = 0f;
 
                 VertexData[] vertices = new VertexData[]
@@ -123,6 +124,7 @@ namespace AnimationTest
                     DeferredEnabled = true,
                     DepthEnabled = true,
                     AlphaEnabled = false,
+                    UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
                         ModelContent = content,

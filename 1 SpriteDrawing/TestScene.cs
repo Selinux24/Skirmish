@@ -4,7 +4,7 @@ namespace SpriteDrawing
 {
     public class TestScene : Scene
     {
-        private const float delta = 25f;
+        private const float delta = 250f;
 
         private SceneObject<Sprite> background = null;
         private SceneObject<Sprite> spriteFixed = null;
@@ -23,9 +23,9 @@ namespace SpriteDrawing
             SpriteDescription spriteMovDesc = new SpriteDescription()
             {
                 ContentPath = "Resources",
-                Textures = new[] { "smiley.jpg" },
-                Width = 128,
-                Height = 128,
+                Textures = new[] { "smiley.png" },
+                Width = 256,
+                Height = 256,
                 FitScreen = true,
             };
             this.spriteMov = this.AddComponent<Sprite>(spriteMovDesc, SceneObjectUsageEnum.None, 3);
@@ -34,8 +34,8 @@ namespace SpriteDrawing
             {
                 ContentPath = "Resources",
                 Textures = new[] { "seafloor.dds" },
-                Width = 256,
-                Height = 256,
+                Width = 512,
+                Height = 512,
                 FitScreen = true,
             };
             this.spriteFixed = this.AddComponent<Sprite>(spriteFixedDesc, SceneObjectUsageEnum.None, 2);

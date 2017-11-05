@@ -48,6 +48,7 @@ namespace Engine
             settings.MaxEndSize = 1f;
 
             settings.Transparent = true;
+            settings.Additive = false;
 
             settings.Scale(scale);
 
@@ -90,6 +91,7 @@ namespace Engine
             settings.MaxEndSize = 4f;
 
             settings.Transparent = true;
+            settings.Additive = true;
 
             settings.Scale(scale);
 
@@ -133,6 +135,7 @@ namespace Engine
             settings.MaxEndSize = 20;
 
             settings.Transparent = true;
+            settings.Additive = false;
 
             settings.Scale(scale);
 
@@ -178,6 +181,7 @@ namespace Engine
             settings.MaxEndSize = 1.0f;
 
             settings.Transparent = true;
+            settings.Additive = false;
 
             settings.Scale(scale);
 
@@ -223,6 +227,7 @@ namespace Engine
             settings.MaxEndSize = 10;
 
             settings.Transparent = true;
+            settings.Additive = true;
 
             settings.Scale(scale);
 
@@ -269,6 +274,7 @@ namespace Engine
             settings.MaxEndSize = 20;
 
             settings.Transparent = true;
+            settings.Additive = false;
 
             settings.Scale(scale);
 
@@ -370,6 +376,10 @@ namespace Engine
         /// Gets or sets wheter the particles were transparent
         /// </summary>
         public bool Transparent { get; set; }
+        /// <summary>
+        /// Gets or sets wheter the particles were additive
+        /// </summary>
+        public bool Additive { get; set; }
 
         /// <summary>
         /// Emitter velocity sensitivity

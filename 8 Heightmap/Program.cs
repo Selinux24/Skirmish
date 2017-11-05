@@ -9,7 +9,7 @@ namespace HeightmapTest
 #if DEBUG
             using (Game cl = new Game("8 Heightmap", false, 800, 450, false, 0, 4))
 #else
-            using (Game cl = new Game("8 Heightmap", true, 0, 0, true, 0, 4))
+            using (Game cl = new Game("8 Heightmap", true, 0, 0, true, 0, 0))
 #endif
             {
 #if DEBUG

@@ -42,24 +42,39 @@ namespace Engine
         /// Performs culling test
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        public virtual bool Cull(BoundingFrustum frustum)
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
+        public virtual bool Cull(BoundingFrustum frustum, out float? distance)
         {
+            distance = float.MaxValue;
+
             return false;
         }
         /// <summary>
         /// Performs culling test
         /// </summary>
         /// <param name="box">Box</param>
-        public virtual bool Cull(BoundingBox box)
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the box</returns>
+        /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
+        public virtual bool Cull(BoundingBox box, out float? distance)
         {
+            distance = float.MaxValue;
+
             return false;
         }
         /// <summary>
         /// Performs culling test
         /// </summary>
         /// <param name="sphere">Sphere</param>
-        public virtual bool Cull(BoundingSphere sphere)
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the sphere</returns>
+        /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
+        public virtual bool Cull(BoundingSphere sphere, out float? distance)
         {
+            distance = float.MaxValue;
+
             return false;
         }
     }

@@ -155,6 +155,13 @@ namespace Collada
                 this.Game.Exit();
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning);
+            }
+
             this.UpdateCamera(gameTime);
 
             this.UpdateLight(gameTime);

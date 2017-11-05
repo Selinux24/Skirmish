@@ -11,16 +11,22 @@ namespace Engine
         /// Performs culling test
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        bool Cull(BoundingFrustum frustum);
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        bool Cull(BoundingFrustum frustum, out float? distance);
         /// <summary>
         /// Performs culling test
         /// </summary>
         /// <param name="box">Box</param>
-        bool Cull(BoundingBox box);
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the box</returns>
+        bool Cull(BoundingBox box, out float? distance);
         /// <summary>
         /// Performs culling test
         /// </summary>
         /// <param name="sphere">Sphere</param>
-        bool Cull(BoundingSphere sphere);
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the sphere</returns>
+        bool Cull(BoundingSphere sphere, out float? distance);
     }
 }

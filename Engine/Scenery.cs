@@ -325,7 +325,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            
+
         }
         /// <summary>
         /// Objects drawing
@@ -392,60 +392,68 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Culling
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <returns>Returns true if the object is culled</returns>
-        public override bool Cull(BoundingSphere sphere)
-        {
-            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref sphere);
-
-            return this.CullNodes(sphere.Center);
-        }
-        /// <summary>
-        /// Culling
+        /// Performs culling test
         /// </summary>
         /// <param name="frustum">Frustum</param>
-        /// <returns>Returns true if the object is culled</returns>
-        public override bool Cull(BoundingFrustum frustum)
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public override bool Cull(BoundingFrustum frustum, out float? distance)
         {
             this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref frustum);
 
-            return this.CullNodes(frustum.GetCameraParams().Position);
+            return this.CullNodes(frustum.GetCameraParams().Position, out distance);
         }
         /// <summary>
-        /// Culling
+        /// Performs culling test
         /// </summary>
         /// <param name="box">Box</param>
-        /// <returns>Returns true if the object is culled</returns>
-        public override bool Cull(BoundingBox box)
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the box</returns>
+        public override bool Cull(BoundingBox box, out float? distance)
         {
             this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref box);
 
-            return this.CullNodes(box.GetCenter());
+            return this.CullNodes(box.GetCenter(), out distance);
+        }
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the sphere</returns>
+        public override bool Cull(BoundingSphere sphere, out float? distance)
+        {
+            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref sphere);
+
+            return this.CullNodes(sphere.Center, out distance);
         }
         /// <summary>
         /// Node culling
         /// </summary>
         /// <param name="pov">Point of view</param>
+        /// <param name="distance">Returns the distance to the nearest visible node</param>
         /// <returns>Returns true if the object is culled</returns>
-        private bool CullNodes(Vector3 pov)
+        private bool CullNodes(Vector3 pov, out float? distance)
         {
+            distance = null;
+
             if (this.visibleNodes != null && this.visibleNodes.Length > 0)
             {
-                //Sort nodes - draw far nodes first
+                //Sort nodes - draw nearest nodes first
                 Array.Sort(this.visibleNodes, (n1, n2) =>
                 {
                     float d1 = (n1.Center - pov).LengthSquared();
                     float d2 = (n2.Center - pov).LengthSquared();
 
-                    return -d1.CompareTo(d2);
+                    return d1.CompareTo(d2);
                 });
 
                 foreach (var node in this.visibleNodes)
                 {
                     this.patchDictionary[node.Id].Current = node;
                 }
+
+                distance = Vector3.DistanceSquared(pov, this.visibleNodes[0].Center);
 
                 return false;
             }

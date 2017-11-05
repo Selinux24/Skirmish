@@ -1098,24 +1098,51 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawShadowsComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components)
         {
-            components.FindAll(c => c.Is<IDrawable>()).ForEach((c) =>
+            var opaques = components.FindAll(c =>
             {
+                if (c.AlphaEnabled) return false;
+
+                if (!c.Is<Drawable>()) return false;
+
                 var cull = c.Get<ICullable>();
 
-                var visible = cull != null ? !this.cullManager.IsVisible(index, cull) : true;
-                if (visible)
+                return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
+            });
+            if (opaques.Count > 0)
+            {
+                opaques.Sort((c1, c2) =>
+                {
+                    int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+                    if (res == 0)
+                    {
+                        var cull1 = c1.Get<ICullable>();
+                        var cull2 = c2.Get<ICullable>();
+
+                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance.Value : float.MaxValue;
+                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance.Value : float.MaxValue;
+
+                        res = -d1.CompareTo(d2);
+                    }
+
+                    if(res == 0)
+                    {
+                        res = c1.Order.CompareTo(c2.Order);
+                    }
+
+                    return res;
+                });
+
+                opaques.ForEach((c) =>
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
-
-                    if (c.DepthEnabled) this.Game.Graphics.SetDepthStencilZEnabled();
-                    else this.Game.Graphics.SetDepthStencilZDisabled();
+                    this.Game.Graphics.SetDepthStencilZEnabled();
 
                     if (c.AlphaEnabled) this.Game.Graphics.SetBlendTransparent();
                     else this.Game.Graphics.SetBlendDefault();
 
                     c.Get<IDrawable>().Draw(context);
-                }
-            });
+                });
+            }
         }
         /// <summary>
         /// Draw components
@@ -1126,32 +1153,119 @@ namespace Engine
         /// <param name="deferred">Deferred drawing</param>
         private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components, bool deferred)
         {
-            components.FindAll(c => c.Is<IDrawable>()).ForEach((c) =>
+            //First opaques
+            var opaques = components.FindAll(c =>
             {
-                Counters.MaxInstancesPerFrame += c.Count;
+                if (c.AlphaEnabled) return false;
 
-                var visible = (c is ICullable) ? !this.cullManager.IsVisible(index, (ICullable)c) : true;
-                if (visible)
+                if (!c.Is<Drawable>()) return false;
+
+                var cull = c.Get<ICullable>();
+
+                return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
+            });
+            if (opaques.Count > 0)
+            {
+                opaques.Sort((c1, c2) =>
                 {
+                    int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+                    if (res == 0)
+                    {
+                        var cull1 = c1.Get<ICullable>();
+                        var cull2 = c2.Get<ICullable>();
+
+                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance.Value : float.MaxValue;
+                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance.Value : float.MaxValue;
+
+                        res = -d1.CompareTo(d2);
+                    }
+
+                    if (res == 0)
+                    {
+                        res = c1.Order.CompareTo(c2.Order);
+                    }
+
+                    return res;
+                });
+
+                opaques.ForEach((c) =>
+                {
+                    Counters.MaxInstancesPerFrame += c.Count;
+
                     this.Game.Graphics.SetRasterizerDefault();
+
+                    if (deferred)
+                    {
+                        this.SetBlendDeferredComposer();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetBlendDefault();
+                    }
 
                     if (c.DepthEnabled) this.Game.Graphics.SetDepthStencilZEnabled();
                     else this.Game.Graphics.SetDepthStencilZDisabled();
 
+                    c.Get<IDrawable>().Draw(context);
+                });
+            }
+
+            //Then transparents
+            var transparents = components.FindAll(c =>
+            {
+                if (!c.AlphaEnabled) return false;
+
+                if (!c.Is<Drawable>()) return false;
+
+                var cull = c.Get<ICullable>();
+
+                return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
+            });
+            if (transparents.Count > 0)
+            {
+                transparents.Sort((c1, c2) =>
+                {
+                    int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+                    if (res == 0)
+                    {
+                        var cull1 = c1.Get<ICullable>();
+                        var cull2 = c2.Get<ICullable>();
+
+                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance.Value : float.MaxValue;
+                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance.Value : float.MaxValue;
+
+                        res = -d1.CompareTo(d2);
+                    }
+
+                    if (res == 0)
+                    {
+                        res = -c1.Order.CompareTo(c2.Order);
+                    }
+
+                    return -res;
+                });
+
+                transparents.ForEach((c) =>
+                {
+                    Counters.MaxInstancesPerFrame += c.Count;
+
+                    this.Game.Graphics.SetRasterizerDefault();
+
                     if (deferred)
                     {
-                        if (c.AlphaEnabled) this.SetBlendDeferredComposerTransparent();
-                        else this.SetBlendDeferredComposer();
+                        this.SetBlendDeferredComposerTransparent();
                     }
                     else
                     {
-                        if (c.AlphaEnabled) this.Game.Graphics.SetBlendTransparent();
-                        else this.Game.Graphics.SetBlendDefault();
+                        this.Game.Graphics.SetBlendTransparent();
                     }
 
+                    if (c.DepthEnabled) this.Game.Graphics.SetDepthStencilZEnabled();
+                    else this.Game.Graphics.SetDepthStencilZDisabled();
+
                     c.Get<IDrawable>().Draw(context);
-                }
-            });
+                });
+            }
         }
 
         /// <summary>
