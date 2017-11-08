@@ -172,13 +172,6 @@ namespace SceneTest
                 this.Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
-            {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.L))
             {
                 this.animateLightColors = !this.animateLightColors;
