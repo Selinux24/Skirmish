@@ -127,7 +127,7 @@ namespace Collada
                 };
             }
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalColor, vertices, ix, mat);
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, ix, mat);
 
             var desc = new ModelDescription()
             {

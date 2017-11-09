@@ -124,7 +124,7 @@ namespace SceneTest
                 Shininess = 1024,
             };
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, mat);
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, indices, mat);
 
             var desc = new ModelDescription()
             {
@@ -161,7 +161,7 @@ namespace SceneTest
                 };
             }
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, ix, material);
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, ix, material);
 
             var desc = new ModelDescription()
             {

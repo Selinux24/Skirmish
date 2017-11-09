@@ -103,7 +103,7 @@ namespace ModelDrawing
             var material = MaterialContent.Default;
             material.DiffuseTexture = "resources/floor.png";
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, material);
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, indices, material);
 
             var desc = new ModelDescription()
             {

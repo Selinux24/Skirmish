@@ -180,19 +180,18 @@ namespace Engine.Common
                             vertexType = VertexData.GetSkinnedEquivalent(vertexType);
                         }
 
-                        if (description.LoadNormalMaps)
+                        if (description.LoadNormalMaps &&
+                            VertexData.IsTextured(vertexType) &&
+                            !VertexData.IsTangent(vertexType))
                         {
-                            if (!VertexData.IsTangent(vertexType))
+                            MeshMaterial meshMaterial = drw.Materials[material];
+                            if (meshMaterial.NormalMap != null)
                             {
-                                MeshMaterial meshMaterial = drw.Materials[material];
-                                if (meshMaterial.NormalMap != null)
-                                {
-                                    //Get tangent equivalent
-                                    vertexType = VertexData.GetTangentEquivalent(vertexType);
+                                //Get tangent equivalent
+                                vertexType = VertexData.GetTangentEquivalent(vertexType);
 
-                                    //Compute tangents
-                                    geometry.ComputeTangents();
-                                }
+                                //Compute tangents
+                                geometry.ComputeTangents();
                             }
                         }
 

@@ -27,7 +27,7 @@ namespace Engine.Content
         {
             Matrix transform = Matrix.Identity;
 
-            if(content.Scale != 1f)
+            if (content.Scale != 1f)
             {
                 transform = Matrix.Scaling(content.Scale);
             }
@@ -390,7 +390,14 @@ namespace Engine.Content
                     {
                         foreach (SubMeshContent subMesh in info)
                         {
-                            subMesh.Material = FindMaterialTarget(subMesh.Material, dae.LibraryVisualScenes);
+                            string materialName = FindMaterialTarget(subMesh.Material, dae.LibraryVisualScenes);
+                            if (!string.IsNullOrEmpty(materialName))
+                            {
+                                var mat = modelContent.Materials[materialName];
+
+                                subMesh.Material = materialName;
+                                subMesh.Textured = (mat.DiffuseTexture != null);
+                            }
 
                             modelContent.Geometry.Add(geometry.Id, subMesh.Material, subMesh);
                         }
@@ -602,15 +609,15 @@ namespace Engine.Content
             {
                 List<VertexData> verts = new List<VertexData>();
 
-                VertexTypes vertexType = EnumerateSemantics(polyList.Inputs);
-
                 Input vertexInput = polyList[EnumSemantics.Vertex];
                 Input normalInput = polyList[EnumSemantics.Normal];
                 Input texCoordInput = polyList[EnumSemantics.TexCoord];
+                Input colorsInput = polyList[EnumSemantics.Color];
 
                 Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
                 Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
                 Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
+                Color3[] colors = colorsInput != null ? meshSources[colorsInput.Offset].ReadColor3() : null;
 
                 int index = 0;
                 int inputCount = polyList.Inputs.Length;
@@ -650,6 +657,12 @@ namespace Engine.Content
                             vert.Texture = tex;
                         }
 
+                        if (colorsInput != null)
+                        {
+                            int cIndex = polyList.P[index + colorsInput.Offset];
+                            vert.Color = new Color4(colors[cIndex], 1);
+                        }
+
                         verts.Add(vert);
 
                         index += inputCount;
@@ -668,7 +681,6 @@ namespace Engine.Content
                 SubMeshContent meshInfo = new SubMeshContent()
                 {
                     Topology = PrimitiveTopology.TriangleList,
-                    VertexType = vertexType,
                     Vertices = data,
                     Material = polyList.Material,
                     IsVolume = isVolume,
@@ -693,8 +705,6 @@ namespace Engine.Content
             foreach (var polygon in polygons)
             {
                 List<VertexData> verts = new List<VertexData>();
-
-                VertexTypes vertexType = EnumerateSemantics(polygon.Inputs);
 
                 Input vertexInput = polygon[EnumSemantics.Vertex];
                 Input normalInput = polygon[EnumSemantics.Normal];
@@ -760,7 +770,6 @@ namespace Engine.Content
                 SubMeshContent meshInfo = new SubMeshContent()
                 {
                     Topology = PrimitiveTopology.TriangleList,
-                    VertexType = vertexType,
                     Vertices = data,
                     Material = polygon.Material,
                     IsVolume = isVolume,
@@ -770,50 +779,6 @@ namespace Engine.Content
             }
 
             return res.ToArray();
-        }
-        /// <summary>
-        /// Enumerate semantics
-        /// </summary>
-        /// <param name="inputs">Input list</param>
-        /// <returns>Return vertex types of inputs</returns>
-        private static VertexTypes EnumerateSemantics(Input[] inputs)
-        {
-            if (Array.Exists(inputs, i => i.Semantic == EnumSemantics.Vertex))
-            {
-                if (Array.Exists(inputs, i => i.Semantic == EnumSemantics.Normal))
-                {
-                    if (Array.Exists(inputs, i => i.Semantic == EnumSemantics.TexCoord))
-                    {
-                        if (Array.Exists(inputs, i => i.Semantic == EnumSemantics.Tangent))
-                        {
-                            return VertexTypes.PositionNormalTextureTangent;
-                        }
-                        else
-                        {
-                            return VertexTypes.PositionNormalTexture;
-                        }
-                    }
-                    else
-                    {
-                        return VertexTypes.PositionNormalColor;
-                    }
-                }
-                else
-                {
-                    if (Array.Exists(inputs, i => i.Semantic == EnumSemantics.TexCoord))
-                    {
-                        return VertexTypes.PositionTexture;
-                    }
-                    else
-                    {
-                        return VertexTypes.PositionColor;
-                    }
-                }
-            }
-            else
-            {
-                return VertexTypes.Unknown;
-            }
         }
 
         #endregion
@@ -1803,6 +1768,76 @@ namespace Engine.Content
             }
 
             return verts.ToArray();
+        }
+        /// <summary>
+        /// Reads a Color3 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Color3 array</returns>
+        public static Color3[] ReadColor3(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != 3)
+            {
+                throw new EngineException(string.Format("Stride not supported for {1}: {0}", stride, typeof(Color3)));
+            }
+
+            int r = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "R");
+            int g = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "G");
+            int b = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "B");
+
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            List<Color3> colors = new List<Color3>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                //To left handed -> Z flipped to Y
+                Color3 v = new Color3(
+                    source.FloatArray[i + r],
+                    source.FloatArray[i + g],
+                    source.FloatArray[i + b]);
+
+                colors.Add(v);
+            }
+
+            return colors.ToArray();
+        }
+        /// <summary>
+        /// Reads a Color4 array from a source
+        /// </summary>
+        /// <param name="source">Source</param>
+        /// <returns>Returns the Color4 array</returns>
+        public static Color4[] ReadColor4(this Source source)
+        {
+            int stride = source.TechniqueCommon.Accessor.Stride;
+            if (stride != 4)
+            {
+                throw new EngineException(string.Format("Stride not supported for {1}: {0}", stride, typeof(Color4)));
+            }
+
+            int r = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "R");
+            int g = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "G");
+            int b = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "B");
+            int a = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "A");
+
+            int length = source.TechniqueCommon.Accessor.Count;
+
+            List<Color4> colors = new List<Color4>();
+
+            for (int i = 0; i < length * stride; i += stride)
+            {
+                //To left handed -> Z flipped to Y
+                Color4 v = new Color4(
+                    source.FloatArray[i + r],
+                    source.FloatArray[i + g],
+                    source.FloatArray[i + b],
+                    source.FloatArray[i + a]);
+
+                colors.Add(v);
+            }
+
+            return colors.ToArray();
         }
         /// <summary>
         /// Reads a Matrix array from a source

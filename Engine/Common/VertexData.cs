@@ -343,6 +343,59 @@ namespace Engine.Common
                 vertexTypes == VertexTypes.PositionNormalTextureTangentSkinned;
         }
         /// <summary>
+        /// Gets the vertex type based on vertex data
+        /// </summary>
+        /// <param name="v">Vertex</param>
+        /// <param name="preferTextured">Sets wether textured formats were prefered over vertex colored formats</param>
+        /// <returns>Returns the vertex type</returns>
+        public static VertexTypes GetVertexType(VertexData v, bool preferTextured = true)
+        {
+            if (v.Position.HasValue)
+            {
+                if (v.Normal.HasValue)
+                {
+                    if (!preferTextured && v.Color.HasValue)
+                    {
+                        return VertexTypes.PositionNormalColor;
+                    }
+                    else if (preferTextured && v.Texture.HasValue)
+                    {
+                        if (v.Tangent.HasValue)
+                        {
+                            return VertexTypes.PositionNormalTextureTangent;
+                        }
+                        else
+                        {
+                            return VertexTypes.PositionNormalTexture;
+                        }
+                    }
+                    else
+                    {
+                        return VertexTypes.PositionNormalColor;
+                    }
+                }
+                else
+                {
+                    if (!preferTextured && v.Color.HasValue)
+                    {
+                        return VertexTypes.PositionColor;
+                    }
+                    else if (preferTextured && v.Texture.HasValue)
+                    {
+                        return VertexTypes.PositionTexture;
+                    }
+                    else
+                    {
+                        return VertexTypes.PositionColor;
+                    }
+                }
+            }
+            else
+            {
+                return VertexTypes.Unknown;
+            }
+        }
+        /// <summary>
         /// Gets skinned equivalent for specified non skinning type
         /// </summary>
         /// <param name="vertexType">Vertex type</param>

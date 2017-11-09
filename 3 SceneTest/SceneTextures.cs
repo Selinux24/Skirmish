@@ -181,7 +181,7 @@ namespace SceneTest
             mat.NormalMapTexture = "SceneTextures/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneTextures/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, mat);
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, indices, mat);
 
             var desc = new ModelDescription()
             {

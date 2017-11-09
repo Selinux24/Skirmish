@@ -193,7 +193,7 @@ namespace Skybox
                 };
             }
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalColor, vertices, ix, mat);
+            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, ix, mat);
 
             var mFireDesc = new ModelDescription()
             {

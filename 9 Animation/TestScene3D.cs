@@ -24,6 +24,8 @@ namespace AnimationTest
         private Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
         private SceneObject<TriangleListDrawer> soldierTris = null;
         private SceneObject<LineListDrawer> soldierLines = null;
+        private Color soldierTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
+        private Color soldierLinesColor = new Color(Color.Red.ToColor3(), 1f);
         private bool showSoldierDEBUG = false;
 
         private Random rnd = new Random();
@@ -115,7 +117,7 @@ namespace AnimationTest
                 mat.NormalMapTexture = "resources/d_road_asphalt_stripes_normal.dds";
                 mat.SpecularTexture = "resources/d_road_asphalt_stripes_specular.dds";
 
-                var content = ModelContent.Generate(PrimitiveTopology.TriangleList, VertexTypes.PositionNormalTexture, vertices, indices, mat);
+                var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, indices, mat);
 
                 var desc = new ModelDescription()
                 {
@@ -133,6 +135,13 @@ namespace AnimationTest
 
                 this.floor = this.AddComponent<Model>(desc);
             }
+
+            #endregion
+
+            #region Debug
+
+            this.soldierTris = this.AddComponent<TriangleListDrawer>(new TriangleListDrawerDescription() { Count = 5000, Color = soldierTrisColor });
+            this.soldierLines = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { Count = 1000, Color = soldierLinesColor });
 
             #endregion
 
@@ -226,27 +235,11 @@ namespace AnimationTest
 
             if (this.showSoldierDEBUG)
             {
-                Color color = new Color(Color.Red.ToColor3(), 0.6f);
                 Triangle[] tris = this.soldier.Instance.GetTriangles(true);
                 BoundingBox bbox = this.soldier.Instance.GetBoundingBox(true);
 
-                if (this.soldierTris == null)
-                {
-                    this.soldierTris = this.AddComponent<TriangleListDrawer>(new TriangleListDrawerDescription() { Triangles = tris, Color = color });
-                }
-                else
-                {
-                    this.soldierTris.Instance.SetTriangles(color, tris);
-                }
-
-                if (this.soldierLines == null)
-                {
-                    this.soldierLines = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { Lines = Line3D.CreateWiredBox(bbox), Color = color });
-                }
-                else
-                {
-                    this.soldierLines.Instance.SetLines(color, Line3D.CreateWiredBox(bbox));
-                }
+                this.soldierTris.Instance.SetTriangles(soldierTrisColor, tris);
+                this.soldierLines.Instance.SetLines(soldierLinesColor, Line3D.CreateWiredBox(bbox));
 
                 this.soldierTris.Active = this.soldierTris.Visible = true;
                 this.soldierLines.Active = this.soldierLines.Visible = true;

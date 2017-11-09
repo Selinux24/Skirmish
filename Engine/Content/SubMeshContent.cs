@@ -25,6 +25,11 @@ namespace Engine.Content
         /// Indices
         /// </summary>
         private List<uint> indices = new List<uint>();
+        /// <summary>
+        /// The submesh has attached a textured material
+        /// </summary>
+        /// <remarks>It's used for vertex type calculation</remarks>
+        private bool textured = false;
 
         /// <summary>
         /// Submesh id
@@ -37,7 +42,7 @@ namespace Engine.Content
         /// <summary>
         /// Vertex type
         /// </summary>
-        public VertexTypes VertexType { get; set; }
+        public VertexTypes VertexType { get; private set; }
         /// <summary>
         /// Vertices
         /// </summary>
@@ -49,10 +54,13 @@ namespace Engine.Content
             }
             set
             {
+                this.VertexType = VertexTypes.Unknown;
+
                 this.vertices.Clear();
                 if (value != null && value.Length > 0)
                 {
                     this.vertices.AddRange(value);
+                    this.VertexType = VertexData.GetVertexType(this.vertices[0], this.textured);
                 }
             }
         }
@@ -82,6 +90,25 @@ namespace Engine.Content
         /// Gets or sets whether the current submesh content is a volume mesh
         /// </summary>
         public bool IsVolume { get; set; }
+        /// <summary>
+        /// Gets or sets wether the submesh has attached a textured material
+        /// </summary>
+        public bool Textured
+        {
+            get
+            {
+                return this.textured;
+            }
+            set
+            {
+                this.textured = value;
+
+                if (this.vertices != null && this.vertices.Count > 0)
+                {
+                    this.VertexType = VertexData.GetVertexType(this.vertices[0], this.textured);
+                }
+            }
+        }
 
         /// <summary>
         /// Submesh grouping optimization
@@ -104,6 +131,7 @@ namespace Engine.Content
                 string material = meshArray[0].Material;
                 PrimitiveTopology topology = meshArray[0].Topology;
                 VertexTypes vertexType = meshArray[0].VertexType;
+                bool textured = meshArray[0].Textured;
 
                 List<VertexData> vertices = new List<VertexData>();
                 List<uint> indices = new List<uint>();
@@ -146,6 +174,7 @@ namespace Engine.Content
 
                     indices = indices,
                     vertices = vertices,
+                    textured = textured,
                 };
             }
 
@@ -225,6 +254,8 @@ namespace Engine.Content
                         this.vertices[i + 2] = v2;
                     }
                 }
+
+                this.VertexType = VertexData.GetVertexType(this.vertices[0], this.textured);
             }
         }
         /// <summary>

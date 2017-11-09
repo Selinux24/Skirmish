@@ -364,12 +364,11 @@ namespace Engine.Content
         /// Generate model content from scratch
         /// </summary>
         /// <param name="topology">Topology</param>
-        /// <param name="vertexType">Vertex type</param>
         /// <param name="vertices">Vertex list</param>
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent Generate(PrimitiveTopology topology, VertexTypes vertexType, VertexData[] vertices, uint[] indices, MaterialContent material = null)
+        public static ModelContent Generate(PrimitiveTopology topology, VertexData[] vertices, uint[] indices, MaterialContent material = null)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -380,13 +379,16 @@ namespace Engine.Content
                 modelContent.Materials.Add(ModelContent.DefaultMaterial, material);
             }
 
+            var materialName = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial;
+            var textured = modelContent.Materials[materialName].DiffuseTexture != null;
+
             SubMeshContent geo = new SubMeshContent()
             {
                 Topology = topology,
-                VertexType = vertexType,
                 Vertices = vertices,
                 Indices = indices,
-                Material = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial,
+                Material = materialName,
+                Textured = textured,
             };
 
             modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
@@ -433,10 +435,10 @@ namespace Engine.Content
             SubMeshContent geo = new SubMeshContent()
             {
                 Topology = PrimitiveTopology.TriangleList,
-                VertexType = VertexTypes.PositionNormalTexture,
                 Material = materialName,
                 Vertices = vertices,
                 Indices = indices,
+                Textured = true,
             };
 
             modelContent.Images.Add(texureName, textureImage);
