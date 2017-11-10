@@ -3,19 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "1 SpriteDrawing", "1 SpriteDrawing\1 SpriteDrawing.csproj", "{07F24264-227B-4B09-85FD-816D7EE352D3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "01 SpriteDrawing", "01 SpriteDrawing\01 SpriteDrawing.csproj", "{07F24264-227B-4B09-85FD-816D7EE352D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "2 ModelDrawing", "2 ModelDrawing\2 ModelDrawing.csproj", "{817BF123-186B-4376-9332-B9CA2CFA0E3E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "02 ModelDrawing", "02 ModelDrawing\02 ModelDrawing.csproj", "{817BF123-186B-4376-9332-B9CA2CFA0E3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "4 Collada", "4 Collada\4 Collada.csproj", "{FF89A7CD-9431-4E86-B68C-50EF25328593}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "04 Collada", "04 Collada\04 Collada.csproj", "{FF89A7CD-9431-4E86-B68C-50EF25328593}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "5 Skybox", "5 Skybox\5 Skybox.csproj", "{D3A5818B-5917-424E-AFF5-75BBFEECC842}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "05 Skybox", "05 Skybox\05 Skybox.csproj", "{D3A5818B-5917-424E-AFF5-75BBFEECC842}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine", "Engine\Engine.csproj", "{A4BAC380-82CB-4DB8-953F-A291F0BEF559}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Z Game Logic", "Z Game Logic\Z Game Logic.csproj", "{B2FD073B-C51B-4FD8-9EE2-7408E4F86B1C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "6 Terrain", "6 Terrain\6 Terrain.csproj", "{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "06 Terrain", "06 Terrain\06 Terrain.csproj", "{8CEE7DC9-F0DB-471A-8296-42FD46CC65F1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{0C3F6AF7-3FB9-4008-AF42-67F6997077F1}"
 	ProjectSection(SolutionItems) = preProject
@@ -30,17 +30,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Effect Compile x86.cmd = Effect Compile x86.cmd
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "7 Deferred", "7 Deferred\7 Deferred.csproj", "{8D6E5A81-11E2-478E-97B9-14CCC15BB396}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "07 Deferred", "07 Deferred\07 Deferred.csproj", "{8D6E5A81-11E2-478E-97B9-14CCC15BB396}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "8 Heightmap", "8 Heightmap\8 Heightmap.csproj", "{5F35C198-01BF-48A9-887C-2A99390226E0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "08 Heightmap", "08 Heightmap\08 Heightmap.csproj", "{5F35C198-01BF-48A9-887C-2A99390226E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Resources.csproj", "{28391C85-9275-4E62-A159-3C67DFADC428}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "9 Animation", "9 Animation\9 Animation.csproj", "{E3320FA8-28C2-4D85-8F58-B9033520BC02}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "09 Animation", "09 Animation\09 Animation.csproj", "{E3320FA8-28C2-4D85-8F58-B9033520BC02}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentCollada", "ContentCollada\ContentCollada.csproj", "{B5E51939-46DC-412D-A096-E1C892F95FB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3 SceneTest", "3 SceneTest\3 SceneTest.csproj", "{CE29A59F-3400-4C87-8D53-320B9E365C6C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "03 SceneTest", "03 SceneTest\03 SceneTest.csproj", "{CE29A59F-3400-4C87-8D53-320B9E365C6C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
