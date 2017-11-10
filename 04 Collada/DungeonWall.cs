@@ -2,7 +2,6 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
-using SharpDX.Direct3D;
 
 namespace Collada
 {
@@ -127,7 +126,7 @@ namespace Collada
                 };
             }
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, ix, mat);
+            var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
 
             var desc = new ModelDescription()
             {

@@ -60,6 +60,10 @@ namespace Engine
                 return this.instanceCount;
             }
         }
+        /// <summary>
+        /// Gets or sets the maximum number of instances to draw
+        /// </summary>
+        public int MaximumCount { get; set; }
 
         /// <summary>
         /// Constructor
@@ -75,6 +79,8 @@ namespace Engine
 
             this.instances = Helper.CreateArray(this.instanceCount, () => new ModelInstance(this));
             this.instancingData = new VertexInstancingData[this.instanceCount];
+
+            this.MaximumCount = -1;
         }
         /// <summary>
         /// Update
@@ -89,7 +95,7 @@ namespace Engine
                     if (i.Active) i.Update(context);
                 });
 
-                this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && i.LevelOfDetail != LevelOfDetailEnum.None);
+                this.instancesTmp = Array.FindAll(this.instances, i => i.LevelOfDetail != LevelOfDetailEnum.None);
 
                 this.SortInstances(context.EyePosition);
             }
@@ -222,79 +228,90 @@ namespace Engine
 
                     #endregion
 
+                    int maxCount = this.MaximumCount >= 0 ?
+                        Math.Min(this.MaximumCount, this.Count) :
+                        this.Count;
+
                     //Render by level of detail
                     for (int l = 1; l < (int)LevelOfDetailEnum.Minimum + 1; l *= 2)
                     {
-                        LevelOfDetailEnum lod = (LevelOfDetailEnum)l;
-
-                        //Get instances in this LOD
-                        var ins = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
-                        if (ins != null && ins.Length > 0)
+                        if (maxCount > 0)
                         {
-                            var drawingData = this.GetDrawingData(lod);
-                            if (drawingData != null)
+                            LevelOfDetailEnum lod = (LevelOfDetailEnum)l;
+
+                            //Get instances in this LOD
+                            var ins = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
+                            if (ins != null && ins.Length > 0)
                             {
-                                var index = Array.IndexOf(this.instancesTmp, ins[0]);
-                                var length = ins.Length;
-
-                                instanceCount += length;
-
-                                foreach (string meshName in drawingData.Meshes.Keys)
+                                var drawingData = this.GetDrawingData(lod);
+                                if (drawingData != null)
                                 {
-                                    var dictionary = drawingData.Meshes[meshName];
+                                    var index = Array.IndexOf(this.instancesTmp, ins[0]);
+                                    var length = Math.Min(maxCount, ins.Length);
+                                    maxCount -= length;
 
-                                    foreach (string material in dictionary.Keys)
+                                    if (length > 0)
                                     {
-                                        #region Per object update
+                                        instanceCount += length;
 
-                                        var mat = drawingData.Materials[material];
-
-                                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                                        foreach (string meshName in drawingData.Meshes.Keys)
                                         {
-                                            ((EffectDefaultBasic)effect).UpdatePerObject(
-                                                this.UseAnisotropicFiltering,
-                                                mat.DiffuseTexture,
-                                                mat.NormalMap,
-                                                mat.SpecularTexture,
-                                                mat.ResourceIndex,
-                                                0,
-                                                0);
-                                        }
-                                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                                        {
-                                            ((EffectDeferredBasic)effect).UpdatePerObject(
-                                                this.UseAnisotropicFiltering,
-                                                mat.DiffuseTexture,
-                                                mat.NormalMap,
-                                                mat.SpecularTexture,
-                                                mat.ResourceIndex,
-                                                0,
-                                                0);
-                                        }
-                                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                                        {
-                                            ((EffectShadowBasic)effect).UpdatePerObject(
-                                                mat.DiffuseTexture,
-                                                0,
-                                                0);
-                                        }
+                                            var dictionary = drawingData.Meshes[meshName];
 
-                                        #endregion
+                                            foreach (string material in dictionary.Keys)
+                                            {
+                                                #region Per object update
 
-                                        var mesh = dictionary[material];
-                                        this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+                                                var mat = drawingData.Materials[material];
 
-                                        var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                                        this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+                                                if (context.DrawerMode == DrawerModesEnum.Forward)
+                                                {
+                                                    ((EffectDefaultBasic)effect).UpdatePerObject(
+                                                        this.UseAnisotropicFiltering,
+                                                        mat.DiffuseTexture,
+                                                        mat.NormalMap,
+                                                        mat.SpecularTexture,
+                                                        mat.ResourceIndex,
+                                                        0,
+                                                        0);
+                                                }
+                                                else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                                                {
+                                                    ((EffectDeferredBasic)effect).UpdatePerObject(
+                                                        this.UseAnisotropicFiltering,
+                                                        mat.DiffuseTexture,
+                                                        mat.NormalMap,
+                                                        mat.SpecularTexture,
+                                                        mat.ResourceIndex,
+                                                        0,
+                                                        0);
+                                                }
+                                                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                                                {
+                                                    ((EffectShadowBasic)effect).UpdatePerObject(
+                                                        mat.DiffuseTexture,
+                                                        0,
+                                                        0);
+                                                }
 
-                                        count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
-                                        count *= instanceCount;
+                                                #endregion
 
-                                        for (int p = 0; p < technique.PassCount; p++)
-                                        {
-                                            graphics.EffectPassApply(technique, p, 0);
+                                                var mesh = dictionary[material];
+                                                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                                            mesh.Draw(graphics, index, length);
+                                                var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
+                                                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+
+                                                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+                                                count *= instanceCount;
+
+                                                for (int p = 0; p < technique.PassCount; p++)
+                                                {
+                                                    graphics.EffectPassApply(technique, p, 0);
+
+                                                    mesh.Draw(graphics, index, length);
+                                                }
+                                            }
                                         }
                                     }
                                 }

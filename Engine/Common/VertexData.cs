@@ -566,7 +566,7 @@ namespace Engine.Common
                     if (weight > 0)
                     {
                         byte index = boneIndices[w];
-                        var boneTransform = boneTransforms[index];
+                        var boneTransform = boneTransforms != null ? boneTransforms[index] : Matrix.Identity;
 
                         Vector3 p;
                         Vector3.TransformCoordinate(ref position, ref boneTransform, out p);

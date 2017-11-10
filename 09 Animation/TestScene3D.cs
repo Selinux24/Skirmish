@@ -5,7 +5,6 @@ using Engine.Content;
 using SharpDX;
 using System;
 using System.Collections.Generic;
-using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Animation
 {
@@ -117,7 +116,7 @@ namespace Animation
                 mat.NormalMapTexture = "resources/d_road_asphalt_stripes_normal.dds";
                 mat.SpecularTexture = "resources/d_road_asphalt_stripes_specular.dds";
 
-                var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, indices, mat);
+                var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
                 var desc = new ModelDescription()
                 {

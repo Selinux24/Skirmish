@@ -2,7 +2,6 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 
@@ -103,7 +102,7 @@ namespace ModelDrawing
             var material = MaterialContent.Default;
             material.DiffuseTexture = "resources/floor.png";
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, indices, material);
+            var content = ModelContent.GenerateTriangleList(vertices, indices, material);
 
             var desc = new ModelDescription()
             {

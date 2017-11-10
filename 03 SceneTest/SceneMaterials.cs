@@ -2,7 +2,6 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
-using SharpDX.Direct3D;
 
 namespace SceneTest
 {
@@ -124,7 +123,7 @@ namespace SceneTest
                 Shininess = 1024,
             };
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, indices, mat);
+            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var desc = new ModelDescription()
             {
@@ -161,7 +160,7 @@ namespace SceneTest
                 };
             }
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, ix, material);
+            var content = ModelContent.GenerateTriangleList(vertices, ix, material);
 
             var desc = new ModelDescription()
             {

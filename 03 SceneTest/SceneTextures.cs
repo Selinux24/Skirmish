@@ -3,7 +3,6 @@ using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 
@@ -181,7 +180,7 @@ namespace SceneTest
             mat.NormalMapTexture = "SceneTextures/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneTextures/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, indices, mat);
+            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
             var desc = new ModelDescription()
             {

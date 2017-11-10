@@ -5,7 +5,6 @@ using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
 using System.Collections.Generic;
-using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Skybox
 {
@@ -193,7 +192,7 @@ namespace Skybox
                 };
             }
 
-            var content = ModelContent.Generate(PrimitiveTopology.TriangleList, vertices, ix, mat);
+            var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
 
             var mFireDesc = new ModelDescription()
             {

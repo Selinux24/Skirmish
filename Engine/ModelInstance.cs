@@ -38,6 +38,10 @@ namespace Engine
         /// </summary>
         private Triangle[] triangleCache = null;
         /// <summary>
+        /// Coarse bounding sphere
+        /// </summary>
+        private BoundingSphere coarseBoundingSphere;
+        /// <summary>
         /// Bounding sphere
         /// </summary>
         private BoundingSphere boundingSphere;
@@ -118,13 +122,18 @@ namespace Engine
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
 
             var drawData = model.GetDrawingData(LevelOfDetailEnum.High);
-            if (drawData != null && drawData.Lights != null && drawData.Lights.Length > 0)
+            if (drawData != null)
             {
-                this.Lights = new SceneLight[drawData.Lights.Length];
+                this.coarseBoundingSphere = BoundingSphere.FromPoints(drawData.GetPoints(true));
 
-                for (int l = 0; l < drawData.Lights.Length; l++)
+                if (drawData.Lights != null && drawData.Lights.Length > 0)
                 {
-                    this.Lights[l] = drawData.Lights[l].Clone();
+                    this.Lights = new SceneLight[drawData.Lights.Length];
+
+                    for (int l = 0; l < drawData.Lights.Length; l++)
+                    {
+                        this.Lights[l] = drawData.Lights[l].Clone();
+                    }
                 }
             }
         }
@@ -145,7 +154,7 @@ namespace Engine
                 }
             }
 
-            this.SetLOD(context.EyePosition);
+            this.SetLOD(context.EyePosition, context.Frustum);
         }
 
         /// <summary>
@@ -506,28 +515,40 @@ namespace Engine
         /// Set level of detail values
         /// </summary>
         /// <param name="origin">Origin point</param>
-        private void SetLOD(Vector3 origin)
+        /// <param name="frustum">Camera frustum</param>
+        private void SetLOD(Vector3 origin, BoundingFrustum frustum)
         {
-            var dist = Vector3.Distance(this.Manipulator.Position, origin) - this.GetBoundingSphere().Radius;
-            if (dist < GameEnvironment.LODDistanceHigh)
+            var position = this.Manipulator.Position;
+            var radius = this.coarseBoundingSphere.Radius;
+            var bsph = new BoundingSphere(position, radius);
+
+            if (frustum.Contains(bsph) != ContainmentType.Disjoint)
             {
-                this.LevelOfDetail = LevelOfDetailEnum.High;
-            }
-            else if (dist < GameEnvironment.LODDistanceMedium)
-            {
-                this.LevelOfDetail = LevelOfDetailEnum.Medium;
-            }
-            else if (dist < GameEnvironment.LODDistanceLow)
-            {
-                this.LevelOfDetail = LevelOfDetailEnum.Low;
-            }
-            else if (dist < GameEnvironment.LODDistanceMinimum)
-            {
-                this.LevelOfDetail = LevelOfDetailEnum.Minimum;
+                var dist = Vector3.Distance(position, origin) - radius;
+                if (dist < GameEnvironment.LODDistanceHigh)
+                {
+                    this.LevelOfDetail = LevelOfDetailEnum.High;
+                }
+                else if (dist < GameEnvironment.LODDistanceMedium)
+                {
+                    this.LevelOfDetail = LevelOfDetailEnum.Medium;
+                }
+                else if (dist < GameEnvironment.LODDistanceLow)
+                {
+                    this.LevelOfDetail = LevelOfDetailEnum.Low;
+                }
+                else if (dist < GameEnvironment.LODDistanceMinimum)
+                {
+                    this.LevelOfDetail = LevelOfDetailEnum.Minimum;
+                }
+                else
+                {
+                    this.levelOfDetail = LevelOfDetailEnum.None;
+                }
             }
             else
             {
-                this.LevelOfDetail = LevelOfDetailEnum.None;
+                this.levelOfDetail = LevelOfDetailEnum.None;
             }
         }
 

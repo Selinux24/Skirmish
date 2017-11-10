@@ -360,6 +360,10 @@ namespace Engine.Content
         /// </summary>
         public SkinningContent SkinningInfo { get; set; }
 
+        public static ModelContent GenerateTriangleList(VertexData[] vertices, uint[] indices, MaterialContent material = null)
+        {
+            return Generate(PrimitiveTopology.TriangleList, vertices, indices, material);
+        }
         /// <summary>
         /// Generate model content from scratch
         /// </summary>
@@ -368,7 +372,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent Generate(PrimitiveTopology topology, VertexData[] vertices, uint[] indices, MaterialContent material = null)
+        private static ModelContent Generate(PrimitiveTopology topology, VertexData[] vertices, uint[] indices, MaterialContent material = null)
         {
             ModelContent modelContent = new ModelContent();
 
