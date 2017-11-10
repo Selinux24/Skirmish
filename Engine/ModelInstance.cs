@@ -519,7 +519,7 @@ namespace Engine
         private void SetLOD(Vector3 origin, BoundingFrustum frustum)
         {
             var position = this.Manipulator.Position;
-            var radius = this.coarseBoundingSphere.Radius;
+            var radius = this.coarseBoundingSphere.Radius * this.Manipulator.Scaling.Length();
             var bsph = new BoundingSphere(position, radius);
 
             if (frustum.Contains(bsph) != ContainmentType.Disjoint)
