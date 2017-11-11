@@ -159,17 +159,17 @@ namespace Instancing
                 string[] anim = new[] { "soldier_stand", "soldier_idle", "soldier_idle2" };
 
                 Random rnd = new Random(1);
-                var vMin = new Vector3(1, 0, 1) * -50;
-                var vMax = new Vector3(1, 0, 1) * 50;
+                float l = 5;
+                var vMax = new Vector3(l - 1, 0, l - 1);
+                var vMin = -vMax;
+                int side = 10;
+                Vector3 delta = new Vector3(l * side, 0, l * side) - new Vector3(l, 0, l);
 
+                int x = 0;
+                int y = 0;
                 for (int i = 0; i < this.troops.Count; i++)
                 {
-                    var iPos = rnd.NextVector3(vMin, vMax);
-
-                    if (i == 0)
-                    {
-                        iPos = Vector3.Zero;
-                    }
+                    var iPos = new Vector3(x * l * 2, 0, y * l * 2) - delta + rnd.NextVector3(vMin, vMax);
 
                     this.troops.Instance[i].Manipulator.SetPosition(iPos, true);
                     this.troops.Instance[i].Manipulator.SetRotation(iPos.Z, 0, 0, true);
@@ -178,6 +178,13 @@ namespace Instancing
                     this.troops.Instance[i].AnimationController.TimeDelta = 0.4f + (0.1f * (i % 2));
                     this.troops.Instance[i].AnimationController.AddPath(this.animations[anim[i % 3]]);
                     this.troops.Instance[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
+
+                    x++;
+                    if (x >= side)
+                    {
+                        x = 0;
+                        y++;
+                    }
                 }
             }
 

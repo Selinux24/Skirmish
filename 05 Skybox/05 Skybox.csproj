@@ -209,7 +209,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="5 Skybox_TemporaryKey.pfx" />
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\app.manifest" />

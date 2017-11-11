@@ -204,7 +204,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="4 Collada_TemporaryKey.pfx" />
     <None Include="app.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
