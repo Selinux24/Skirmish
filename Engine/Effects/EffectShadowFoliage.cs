@@ -5,14 +5,22 @@ namespace Engine.Effects
     using Engine.Common;
 
     /// <summary>
-    /// Billboard effect
+    /// Foliage shadows effect
     /// </summary>
-    public class EffectShadowBillboard : Drawer
+    public class EffectShadowFoliage : Drawer
     {
         /// <summary>
-        /// Billboard shadow map drawing technique
+        /// Foliage shadow map drawing technique
         /// </summary>
-        public readonly EngineEffectTechnique ShadowMapBillboard = null;
+        public readonly EngineEffectTechnique ShadowMapFoliage4 = null;
+        /// <summary>
+        /// Foliage shadow map drawing technique
+        /// </summary>
+        public readonly EngineEffectTechnique ShadowMapFoliage8 = null;
+        /// <summary>
+        /// Foliage shadow map drawing technique
+        /// </summary>
+        public readonly EngineEffectTechnique ShadowMapFoliage16 = null;
 
         /// <summary>
         /// World view projection effect variable
@@ -30,6 +38,22 @@ namespace Engine.Effects
         /// End radius
         /// </summary>
         private EngineEffectVariableScalar endRadius = null;
+        /// <summary>
+        /// Wind direction effect variable
+        /// </summary>
+        private EngineEffectVariableVector windDirection = null;
+        /// <summary>
+        /// Wind strength effect variable
+        /// </summary>
+        private EngineEffectVariableScalar windStrength = null;
+        /// <summary>
+        /// Time effect variable
+        /// </summary>
+        private EngineEffectVariableScalar totalTime = null;
+        /// <summary>
+        /// Position delta
+        /// </summary>
+        private EngineEffectVariableVector delta = null;
         /// <summary>
         /// Texture count variable
         /// </summary>
@@ -109,6 +133,62 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Wind direction
+        /// </summary>
+        protected Vector3 WindDirection
+        {
+            get
+            {
+                return this.windDirection.GetVector<Vector3>();
+            }
+            set
+            {
+                this.windDirection.Set(value);
+            }
+        }
+        /// <summary>
+        /// Wind strength
+        /// </summary>
+        protected float WindStrength
+        {
+            get
+            {
+                return this.windStrength.GetFloat();
+            }
+            set
+            {
+                this.windStrength.Set(value);
+            }
+        }
+        /// <summary>
+        /// Time
+        /// </summary>
+        protected float TotalTime
+        {
+            get
+            {
+                return this.totalTime.GetFloat();
+            }
+            set
+            {
+                this.totalTime.Set(value);
+            }
+        }
+        /// <summary>
+        /// Position delta
+        /// </summary>
+        protected Vector3 Delta
+        {
+            get
+            {
+                return this.delta.GetVector<Vector3>();
+            }
+            set
+            {
+                this.delta.Set(value);
+            }
+        }
+        /// <summary>
         /// Texture count
         /// </summary>
         protected uint TextureCount
@@ -171,10 +251,12 @@ namespace Engine.Effects
         /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectShadowBillboard(Graphics graphics, byte[] effect, bool compile)
+        public EffectShadowFoliage(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.ShadowMapBillboard = this.Effect.GetTechniqueByName("ShadowMapBillboard");
+            this.ShadowMapFoliage4 = this.Effect.GetTechniqueByName("ShadowMapFoliage4");
+            this.ShadowMapFoliage8 = this.Effect.GetTechniqueByName("ShadowMapFoliage8");
+            this.ShadowMapFoliage16 = this.Effect.GetTechniqueByName("ShadowMapFoliage16");
 
             this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
             this.eyePositionWorld = this.Effect.GetVariableVector("gEyePositionWorld");
@@ -183,6 +265,10 @@ namespace Engine.Effects
             this.textureCount = this.Effect.GetVariableScalar("gTextureCount");
             this.textures = this.Effect.GetVariableTexture("gTextureArray");
 
+            this.windDirection = this.Effect.GetVariableVector("gWindDirection");
+            this.windStrength = this.Effect.GetVariableScalar("gWindStrength");
+            this.totalTime = this.Effect.GetVariableScalar("gTotalTime");
+            this.delta = this.Effect.GetVariableVector("gDelta");
             this.textureRandom = this.Effect.GetVariableTexture("gTextureRandom");
         }
         /// <summary>
@@ -203,16 +289,28 @@ namespace Engine.Effects
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
+        /// <param name="windDirection">Wind direction</param>
+        /// <param name="windStrength">Wind strength</param>
+        /// <param name="totalTime">Total time</param>
+        /// <param name="delta">Delta</param>
         /// <param name="randomTexture">Random texture</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
+            Vector3 windDirection,
+            float windStrength,
+            float totalTime,
+            Vector3 delta,
             EngineShaderResourceView randomTexture)
         {
             this.WorldViewProjection = world * viewProjection;
             this.EyePositionWorld = eyePositionWorld;
 
+            this.WindDirection = windDirection;
+            this.WindStrength = windStrength;
+            this.TotalTime = totalTime;
+            this.Delta = delta;
             this.TextureRandom = randomTexture;
         }
         /// <summary>

@@ -391,36 +391,40 @@ namespace Heightmap
                 },
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "grass0.png" },
+                    VegetationTextures = new[] { "grass_v.dds" },
                     Saturation = 0.05f,
                     StartRadius = 0f,
-                    EndRadius = 150f,
-                    MinSize = new Vector2(1f, 1f),
-                    MaxSize = new Vector2(1.5f, 2f),
+                    EndRadius = 100f,
+                    MinSize = new Vector2(0.5f, 0.5f),
+                    MaxSize = new Vector2(1.5f, 1.5f),
                     Seed = 1,
-                    WindEffect = 0.8f,
+                    WindEffect = 0.3f,
+                    Count = 4,
                 },
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "grass2.png" },
+                    VegetationTextures = new[] { "grass_v.dds" },
                     Saturation = 10f,
                     StartRadius = 0f,
-                    EndRadius = 140f,
-                    MinSize = new Vector2(1f, 0.5f),
-                    MaxSize = new Vector2(2f, 1f),
+                    EndRadius = 100f,
+                    MinSize = new Vector2(0.5f, 0.5f),
+                    MaxSize = new Vector2(1f, 1f),
                     Seed = 2,
                     WindEffect = 0.2f,
+                    Count = 4,
                 },
                 ChannelBlue = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "grass1.png" },
-                    Saturation = 0.05f,
+                    VegetationTextures = new[] { "grass1.png" },
+                    Saturation = 0.005f,
                     StartRadius = 0f,
                     EndRadius = 150f,
-                    MinSize = new Vector2(2f, 2f),
-                    MaxSize = new Vector2(2.5f, 3f),
+                    MinSize = new Vector2(0.5f, 0.5f),
+                    MaxSize = new Vector2(1f, 1f),
+                    Delta = new Vector3(0, -0.05f, 0),
                     Seed = 3,
                     WindEffect = 0.3f,
+                    Count = 1,
                 },
             };
             this.gardener = this.AddComponent<GroundGardener>(vDesc, SceneObjectUsageEnum.None, layerFoliage);
@@ -438,7 +442,7 @@ namespace Heightmap
                 VegetationMap = "map_flowers.png",
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "flower0.dds" },
+                    VegetationTextures = new[] { "flower0.dds" },
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
@@ -449,7 +453,7 @@ namespace Heightmap
                 },
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "flower1.dds" },
+                    VegetationTextures = new[] { "flower1.dds" },
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
@@ -460,7 +464,7 @@ namespace Heightmap
                 },
                 ChannelBlue = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "flower2.dds" },
+                    VegetationTextures = new[] { "flower2.dds" },
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 140f,

@@ -160,6 +160,12 @@
   <data name="ShaderDefaultBillboardFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderDefaultbillboard.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="ShaderDefaultFoliageFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\ShaderDefaultFoliage.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDefaultFoliageFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderDefaultFoliage.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="ShaderDefaultCloudsFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\ShaderDefaultClouds.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -219,6 +225,12 @@
   </data>
   <data name="ShaderShadowBillboardFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderShadowbillboard.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderShadowFoliageFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\ShaderShadowFoliage.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderShadowFoliageFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shaderShadowFoliage.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="ShaderShadowBasicFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shadershadowbasic.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

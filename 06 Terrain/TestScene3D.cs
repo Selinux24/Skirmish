@@ -572,33 +572,16 @@ namespace Terrain
                 ContentPath = "resources/Terrain/Foliage/Billboard",
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
-                    VegetarionTextures = new[] { "grass0.png" },
-                    Saturation = 0.5f,
+                    VegetationTextures = new[] { "grass_v.dds" },
+                    Saturation = 10f,
                     StartRadius = 0f,
                     EndRadius = 50f,
                     MinSize = new Vector2(0.25f, 0.25f),
-                    MaxSize = new Vector2(0.5f, 0.75f),
+                    MaxSize = new Vector2(0.5f, 0.5f),
+                    Delta = new Vector3(0.2f, 0f, 0.2f),
+                    WindEffect = 0.5f,
                     Seed = 1,
-                },
-                ChannelGreen = new GroundGardenerDescription.Channel()
-                {
-                    VegetarionTextures = new[] { "grass1.png" },
-                    Saturation = 0.1f,
-                    StartRadius = 0f,
-                    EndRadius = 50f,
-                    MinSize = new Vector2(0.25f, 0.25f),
-                    MaxSize = new Vector2(0.5f, 0.75f),
-                    Seed = 2,
-                },
-                ChannelBlue = new GroundGardenerDescription.Channel()
-                {
-                    VegetarionTextures = new[] { "grass2.png" },
-                    Saturation = 20f,
-                    StartRadius = 0f,
-                    EndRadius = 50f,
-                    MinSize = new Vector2(0.25f, 0.25f),
-                    MaxSize = new Vector2(0.5f, 0.75f),
-                    Seed = 3,
+                    Count = 4,
                 }
             };
             this.gardener = this.AddComponent<GroundGardener>(grDesc, SceneObjectUsageEnum.None, this.layerTerrain);

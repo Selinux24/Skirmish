@@ -8,6 +8,7 @@ del *.cod
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultClouds.fxo ShaderDefaultClouds.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultCubemap.fxo ShaderDefaultCubemap.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultBillboard.fxo ShaderDefaultBillboard.fx
+"%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultFoliage.fxo ShaderDefaultFoliage.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultCPUParticles.fxo ShaderDefaultCPUParticles.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultGPUParticles.fxo ShaderDefaultGPUParticles.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultBasic.fxo ShaderDefaultBasic.fx
@@ -19,6 +20,7 @@ del *.cod
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDeferredComposer.fxo ShaderDeferredComposer.fx
 
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadowBillboard.fxo ShaderShadowBillboard.fx
+"%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadowFoliage.fxo ShaderShadowFoliage.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadowBasic.fxo ShaderShadowBasic.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadowTerrain.fxo ShaderShadowTerrain.fx
 

@@ -204,8 +204,10 @@
     <Compile Include="Common\UseSkinningData.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
     <Compile Include="Content\ContentDescription.cs" />
+    <Compile Include="Effects\EffectDefaultFoliage.cs" />
     <Compile Include="Effects\EffectDefaultClouds.cs" />
     <Compile Include="Effects\EffectPostBlur.cs" />
+    <Compile Include="Effects\EffectShadowFoliage.cs" />
     <Compile Include="Effects\EffectShadowBillboard.cs" />
     <Compile Include="Effects\EffectDeferredTerrain.cs" />
     <Compile Include="Effects\EffectShadowTerrain.cs" />
@@ -559,11 +561,13 @@
     <None Include="Engine.snk" />
     <None Include="packages.config" />
     <None Include="Resources\ShaderDefaultClouds.fxo" />
+    <None Include="Resources\ShaderDefaultFoliage.fxo" />
     <None Include="Resources\ShaderPostBlur.fx" />
     <None Include="Resources\ShaderPostBlur.fxo" />
     <None Include="Resources\IncScattering.fx" />
     <None Include="Resources\ShaderShadowBillboard.fx" />
     <None Include="Resources\ShaderShadowBillboard.fxo" />
+    <None Include="Resources\ShaderShadowFoliage.fxo" />
     <None Include="Resources\ShaderShadowTerrain.fxo" />
     <None Include="Resources\ShaderDeferredTerrain.fxo" />
     <None Include="Resources\ShaderShadowTerrain.fx" />
@@ -597,6 +601,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="engine.ico" />
+    <None Include="Resources\IncHelpers.fx" />
+    <None Include="Resources\ShaderDefaultFoliage.fx" />
+    <None Include="Resources\ShaderShadowFoliage.fx" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -6,14 +6,22 @@ namespace Engine.Effects
     using Engine.Common;
 
     /// <summary>
-    /// Billboard effect
+    /// Foliage effect
     /// </summary>
-    public class EffectDefaultBillboard : Drawer
+    public class EffectDefaultFoliage : Drawer
     {
         /// <summary>
-        /// Billboard drawing technique
+        /// Foliage drawing technique
         /// </summary>
-        public readonly EngineEffectTechnique ForwardBillboard = null;
+        public readonly EngineEffectTechnique ForwardFoliage4 = null;
+        /// <summary>
+        /// Foliage drawing technique
+        /// </summary>
+        public readonly EngineEffectTechnique ForwardFoliage8 = null;
+        /// <summary>
+        /// Foliage drawing technique
+        /// </summary>
+        public readonly EngineEffectTechnique ForwardFoliage16 = null;
 
         /// <summary>
         /// Directional lights effect variable
@@ -107,6 +115,22 @@ namespace Engine.Effects
         /// High definition shadow map effect variable
         /// </summary>
         private EngineEffectVariableTexture shadowMapHD = null;
+        /// <summary>
+        /// Wind direction effect variable
+        /// </summary>
+        private EngineEffectVariableVector windDirection = null;
+        /// <summary>
+        /// Wind strength effect variable
+        /// </summary>
+        private EngineEffectVariableScalar windStrength = null;
+        /// <summary>
+        /// Time effect variable
+        /// </summary>
+        private EngineEffectVariableScalar totalTime = null;
+        /// <summary>
+        /// Position delta
+        /// </summary>
+        private EngineEffectVariableVector delta = null;
         /// <summary>
         /// Random texture effect variable
         /// </summary>
@@ -504,6 +528,62 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Wind direction
+        /// </summary>
+        protected Vector3 WindDirection
+        {
+            get
+            {
+                return this.windDirection.GetVector<Vector3>();
+            }
+            set
+            {
+                this.windDirection.Set(value);
+            }
+        }
+        /// <summary>
+        /// Wind strength
+        /// </summary>
+        protected float WindStrength
+        {
+            get
+            {
+                return this.windStrength.GetFloat();
+            }
+            set
+            {
+                this.windStrength.Set(value);
+            }
+        }
+        /// <summary>
+        /// Time
+        /// </summary>
+        protected float TotalTime
+        {
+            get
+            {
+                return this.totalTime.GetFloat();
+            }
+            set
+            {
+                this.totalTime.Set(value);
+            }
+        }
+        /// <summary>
+        /// Position delta
+        /// </summary>
+        protected Vector3 Delta
+        {
+            get
+            {
+                return this.delta.GetVector<Vector3>();
+            }
+            set
+            {
+                this.delta.Set(value);
+            }
+        }
+        /// <summary>
         /// Random texture
         /// </summary>
         protected EngineShaderResourceView TextureRandom
@@ -580,10 +660,12 @@ namespace Engine.Effects
         /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectDefaultBillboard(Graphics graphics, byte[] effect, bool compile)
+        public EffectDefaultFoliage(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.ForwardBillboard = this.Effect.GetTechniqueByName("ForwardBillboard");
+            this.ForwardFoliage4 = this.Effect.GetTechniqueByName("ForwardFoliage4");
+            this.ForwardFoliage8 = this.Effect.GetTechniqueByName("ForwardFoliage8");
+            this.ForwardFoliage16 = this.Effect.GetTechniqueByName("ForwardFoliage16");
 
             this.world = this.Effect.GetVariableMatrix("gWorld");
             this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
@@ -608,6 +690,10 @@ namespace Engine.Effects
             this.normalMaps = this.Effect.GetVariableTexture("gNormalMapArray");
             this.shadowMapLD = this.Effect.GetVariableTexture("gShadowMapLD");
             this.shadowMapHD = this.Effect.GetVariableTexture("gShadowMapHD");
+            this.windDirection = this.Effect.GetVariableVector("gWindDirection");
+            this.windStrength = this.Effect.GetVariableScalar("gWindStrength");
+            this.totalTime = this.Effect.GetVariableScalar("gTotalTime");
+            this.delta = this.Effect.GetVariableVector("gDelta");
             this.textureRandom = this.Effect.GetVariableTexture("gTextureRandom");
             this.materialPaletteWidth = this.Effect.GetVariableScalar("gMaterialPaletteWidth");
             this.materialPalette = this.Effect.GetVariableTexture("gMaterialPalette");
@@ -658,6 +744,10 @@ namespace Engine.Effects
         /// <param name="shadowMapHD">High definition shadow map texture</param>
         /// <param name="fromLightViewProjectionLD">Low definition map from camera View * Projection transform</param>
         /// <param name="fromLightViewProjectionHD">High definition map from camera View * Projection transform</param>
+        /// <param name="windDirection">Wind direction</param>
+        /// <param name="windStrength">Wind strength</param>
+        /// <param name="totalTime">Total time</param>
+        /// <param name="delta">Delta</param>
         /// <param name="randomTexture">Random texture</param>
         /// <param name="startRadius">Drawing start radius</param>
         /// <param name="endRadius">Drawing end radius</param>
@@ -676,6 +766,10 @@ namespace Engine.Effects
             EngineShaderResourceView shadowMapHD,
             Matrix fromLightViewProjectionLD,
             Matrix fromLightViewProjectionHD,
+            Vector3 windDirection,
+            float windStrength,
+            float totalTime,
+            Vector3 delta,
             EngineShaderResourceView randomTexture,
             float startRadius,
             float endRadius,
@@ -759,6 +853,10 @@ namespace Engine.Effects
             this.SpotLights = bSpotLights;
             this.LightCount = lCount;
 
+            this.WindDirection = windDirection;
+            this.WindStrength = windStrength;
+            this.TotalTime = totalTime;
+            this.Delta = delta;
             this.TextureRandom = randomTexture;
         }
     }

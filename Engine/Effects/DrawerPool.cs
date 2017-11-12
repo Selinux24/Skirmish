@@ -32,6 +32,10 @@ namespace Engine.Effects
         /// </summary>
         public static EffectDefaultBillboard EffectDefaultBillboard { get; private set; }
         /// <summary>
+        /// Foliage effect
+        /// </summary>
+        public static EffectDefaultFoliage EffectDefaultFoliage { get; private set; }
+        /// <summary>
         /// Clouds effect
         /// </summary>
         public static EffectDefaultClouds EffectDefaultClouds { get; private set; }
@@ -70,9 +74,13 @@ namespace Engine.Effects
         public static EffectDeferredTerrain EffectDeferredTerrain { get; private set; }
 
         /// <summary>
-        /// Billboards effect
+        /// Billboard shadows effect
         /// </summary>
         public static EffectShadowBillboard EffectShadowBillboard { get; private set; }
+        /// <summary>
+        /// Foliage shadows effect
+        /// </summary>
+        public static EffectShadowFoliage EffectShadowFoliage { get; private set; }
         /// <summary>
         /// Shadows effect
         /// </summary>
@@ -99,6 +107,7 @@ namespace Engine.Effects
             EffectDefaultFont = CreateEffect<EffectDefaultFont>(graphics, Resources.ShaderDefaultFontFxo, Resources.ShaderDefaultFontFxo);
             EffectDefaultCubemap = CreateEffect<EffectDefaultCubemap>(graphics, Resources.ShaderDefaultCubemapFxo, Resources.ShaderDefaultCubemapFx);
             EffectDefaultBillboard = CreateEffect<EffectDefaultBillboard>(graphics, Resources.ShaderDefaultBillboardFxo, Resources.ShaderDefaultBillboardFx);
+            EffectDefaultFoliage = CreateEffect<EffectDefaultFoliage>(graphics, Resources.ShaderDefaultFoliageFxo, Resources.ShaderDefaultFoliageFx);
             EffectDefaultClouds = CreateEffect<EffectDefaultClouds>(graphics, Resources.ShaderDefaultCloudsFxo, Resources.ShaderDefaultCloudsFx);
             EffectDefaultBasic = CreateEffect<EffectDefaultBasic>(graphics, Resources.ShaderDefaultBasicFxo, Resources.ShaderDefaultBasicFx);
             EffectDefaultTerrain = CreateEffect<EffectDefaultTerrain>(graphics, Resources.ShaderDefaultTerrainFxo, Resources.ShaderDefaultTerrainFx);
@@ -111,6 +120,7 @@ namespace Engine.Effects
             EffectDeferredTerrain = CreateEffect<EffectDeferredTerrain>(graphics, Resources.ShaderDeferredTerrainFxo, Resources.ShaderDeferredTerrainFx);
 
             EffectShadowBillboard = CreateEffect<EffectShadowBillboard>(graphics, Resources.ShaderShadowBillboardFxo, Resources.ShaderShadowBillboardFx);
+            EffectShadowFoliage = CreateEffect<EffectShadowFoliage>(graphics, Resources.ShaderShadowFoliageFxo, Resources.ShaderShadowFoliageFx);
             EffectShadowBasic = CreateEffect<EffectShadowBasic>(graphics, Resources.ShaderShadowBasicFxo, Resources.ShaderShadowBasicFx);
             EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(graphics, Resources.ShaderShadowTerrainFxo, Resources.ShaderShadowTerrainFx);
 
@@ -127,6 +137,7 @@ namespace Engine.Effects
             Helper.Dispose(EffectDefaultFont);
             Helper.Dispose(EffectDefaultCubemap);
             Helper.Dispose(EffectDefaultBillboard);
+            Helper.Dispose(EffectDefaultFoliage);
             Helper.Dispose(EffectDefaultClouds);
             Helper.Dispose(EffectDefaultBasic);
             Helper.Dispose(EffectDefaultTerrain);
@@ -139,6 +150,7 @@ namespace Engine.Effects
             Helper.Dispose(EffectDeferredTerrain);
 
             Helper.Dispose(EffectShadowBillboard);
+            Helper.Dispose(EffectShadowFoliage);
             Helper.Dispose(EffectShadowBasic);
             Helper.Dispose(EffectShadowTerrain);
 
@@ -177,9 +189,13 @@ namespace Engine.Effects
                 materialPalette, materialPaletteWidth,
                 GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
 
+            EffectDefaultFoliage.UpdateGlobals(
+                materialPalette, materialPaletteWidth,
+                GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
+
             EffectDefaultBasic.UpdateGlobals(
-                materialPalette, materialPaletteWidth, 
-                animationPalette, animationPaletteWidth, 
+                materialPalette, materialPaletteWidth,
+                animationPalette, animationPaletteWidth,
                 GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
             EffectDefaultTerrain.UpdateGlobals(
                 materialPalette, materialPaletteWidth,

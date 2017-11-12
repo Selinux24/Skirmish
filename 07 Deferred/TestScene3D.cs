@@ -245,7 +245,7 @@ namespace Deferred
                     ContentPath = "Resources/Vegetation",
                     ChannelRed = new GroundGardenerDescription.Channel()
                     {
-                        VegetarionTextures = new[] { "grass.png" },
+                        VegetationTextures = new[] { "grass.png" },
                         Saturation = 20f,
                         StartRadius = 0f,
                         EndRadius = 50f,

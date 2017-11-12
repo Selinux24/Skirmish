@@ -239,17 +239,25 @@ namespace Engine
             /// </summary>
             public Vector2 MaxSize;
             /// <summary>
+            /// Delta
+            /// </summary>
+            public Vector3 Delta;
+            /// <summary>
             /// Foliage textures
             /// </summary>
             public EngineShaderResourceView Textures;
+            /// <summary>
+            /// Foliage normal maps
+            /// </summary>
+            public EngineShaderResourceView NormalMaps;
             /// <summary>
             /// Foliage texture count
             /// </summary>
             public uint TextureCount;
             /// <summary>
-            /// Toggles UV horizontal coordinate by primitive ID
+            /// Foliage normal map count
             /// </summary>
-            public bool ToggleUV;
+            public uint NormalMapCount;
             /// <summary>
             /// Foliage start radius
             /// </summary>
@@ -262,6 +270,10 @@ namespace Engine
             /// Wind effect
             /// </summary>
             public float WindEffect;
+            /// <summary>
+            /// Gometry output count
+            /// </summary>
+            public int Count;
 
             /// <summary>
             /// Dispose
@@ -269,6 +281,7 @@ namespace Engine
             public void Dispose()
             {
                 Helper.Dispose(this.Textures);
+                Helper.Dispose(this.NormalMaps);
             }
         }
         /// <summary>
@@ -503,7 +516,7 @@ namespace Engine
 
                 if (!string.IsNullOrEmpty(description.VegetationMap))
                 {
-                    ImageContent foliageMapImage = new ImageContent()
+                    var foliageMapImage = new ImageContent()
                     {
                         Streams = ContentManager.FindContent(contentPath, description.VegetationMap),
                     };
@@ -513,12 +526,34 @@ namespace Engine
                 for (int i = 0; i < description.Channels.Length; i++)
                 {
                     var channel = description.Channels[i];
-                    if (channel != null && channel.VegetarionTextures != null && channel.VegetarionTextures.Length > 0)
+                    if (channel != null && channel.Enabled)
                     {
-                        ImageContent foliageTextures = new ImageContent()
+                        EngineShaderResourceView foliageTextures = null;
+                        EngineShaderResourceView foliageNormalMaps = null;
+                        uint textureCount = 0;
+                        uint normalMapCount = 0;
+
+                        if (channel.VegetationTextures != null && channel.VegetationTextures.Length > 0)
                         {
-                            Streams = ContentManager.FindContent(contentPath, channel.VegetarionTextures),
-                        };
+                            var image = new ImageContent()
+                            {
+                                Streams = ContentManager.FindContent(contentPath, channel.VegetationTextures),
+                            };
+
+                            foliageTextures = this.Game.ResourceManager.CreateResource(image);
+                            textureCount = (uint)image.Count;
+                        }
+
+                        if (channel.VegetationNormalMaps != null && channel.VegetationNormalMaps.Length > 0)
+                        {
+                            var image = new ImageContent()
+                            {
+                                Streams = ContentManager.FindContent(contentPath, channel.VegetationNormalMaps),
+                            };
+
+                            foliageNormalMaps = this.Game.ResourceManager.CreateResource(image);
+                            normalMapCount = (uint)image.Count;
+                        }
 
                         foliageChannels.Add(
                             new FoliageMapChannel()
@@ -528,12 +563,15 @@ namespace Engine
                                 Saturation = channel.Saturation,
                                 MinSize = channel.MinSize,
                                 MaxSize = channel.MaxSize,
+                                Delta = channel.Delta,
                                 StartRadius = channel.StartRadius,
                                 EndRadius = channel.EndRadius,
-                                TextureCount = (uint)foliageTextures.Count,
-                                Textures = this.Game.ResourceManager.CreateResource(foliageTextures),
-                                ToggleUV = channel.ToggleUV,
+                                TextureCount = textureCount,
+                                NormalMapCount = normalMapCount,
+                                Textures = foliageTextures,
+                                NormalMaps = foliageNormalMaps,
                                 WindEffect = channel.WindEffect,
+                                Count = channel.Count,
                             });
                     }
                 }
@@ -786,7 +824,9 @@ namespace Engine
         /// <returns>Returns the selected technique</returns>
         private EngineEffectTechnique SetTechniqueVegetationDefault(DrawContext context, int channel)
         {
-            var effect = DrawerPool.EffectDefaultBillboard;
+            var channelData = this.foliageMapChannels[channel];
+
+            var effect = DrawerPool.EffectDefaultFoliage;
 
             #region Per frame update
 
@@ -801,19 +841,24 @@ namespace Engine
                 context.FromLightViewProjectionLow,
                 context.FromLightViewProjectionHigh,
                 this.WindDirection,
-                this.WindStrength * this.foliageMapChannels[channel].WindEffect,
-                this.windTime * this.foliageMapChannels[channel].WindEffect,
+                this.WindStrength * channelData.WindEffect,
+                this.windTime * channelData.WindEffect,
+                channelData.Delta,
                 this.textureRandom,
-                this.foliageMapChannels[channel].StartRadius,
-                this.foliageMapChannels[channel].EndRadius,
-                (uint)this.material.ResourceIndex,
-                this.foliageMapChannels[channel].TextureCount,
-                this.foliageMapChannels[channel].ToggleUV,
-                this.foliageMapChannels[channel].Textures);
+                channelData.StartRadius,
+                channelData.EndRadius,
+                this.material.ResourceIndex,
+                channelData.TextureCount,
+                channelData.NormalMapCount,
+                channelData.Textures,
+                channelData.NormalMaps);
 
             #endregion
 
-            return effect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.DrawerMode);
+            if (channelData.Count == 1) return effect.ForwardFoliage4;
+            if (channelData.Count == 2) return effect.ForwardFoliage8;
+            if (channelData.Count == 4) return effect.ForwardFoliage16;
+            else return null;
         }
         /// <summary>
         /// Sets thecnique for vegetation drawing in shadow mapping
@@ -823,7 +868,9 @@ namespace Engine
         /// <returns>Returns the selected technique</returns>
         private EngineEffectTechnique SetTechniqueVegetationShadowMap(DrawContext context, int channel)
         {
-            var effect = DrawerPool.EffectShadowBillboard;
+            var channelData = this.foliageMapChannels[channel];
+
+            var effect = DrawerPool.EffectShadowFoliage;
 
             #region Per frame update
 
@@ -832,8 +879,9 @@ namespace Engine
                 context.ViewProjection,
                 context.EyePosition,
                 this.WindDirection,
-                this.WindStrength * this.foliageMapChannels[channel].WindEffect,
-                this.windTime * this.foliageMapChannels[channel].WindEffect,
+                this.WindStrength * channelData.WindEffect,
+                this.windTime * channelData.WindEffect,
+                channelData.Delta,
                 this.textureRandom);
 
             #endregion
@@ -841,15 +889,17 @@ namespace Engine
             #region Per object update
 
             effect.UpdatePerObject(
-                this.foliageMapChannels[channel].StartRadius,
-                this.foliageMapChannels[channel].EndRadius,
-                this.foliageMapChannels[channel].TextureCount,
-                this.foliageMapChannels[channel].ToggleUV,
-                this.foliageMapChannels[channel].Textures);
+                channelData.StartRadius,
+                channelData.EndRadius,
+                channelData.TextureCount,
+                channelData.Textures);
 
             #endregion
 
-            return effect.GetTechnique(VertexTypes.Billboard, false, DrawingStages.Drawing, context.DrawerMode);
+            if (channelData.Count == 1) return effect.ShadowMapFoliage4;
+            if (channelData.Count == 2) return effect.ShadowMapFoliage8;
+            if (channelData.Count == 4) return effect.ShadowMapFoliage16;
+            else return null;
         }
 
         /// <summary>

@@ -203,6 +203,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] ShaderDefaultFoliageFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderDefaultFoliageFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderDefaultFoliageFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderDefaultFoliageFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] ShaderDefaultFontFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultFontFx", resourceCulture);
@@ -436,6 +456,26 @@ namespace Engine.Properties {
         internal static byte[] ShaderShadowBillboardFxo {
             get {
                 object obj = ResourceManager.GetObject("ShaderShadowBillboardFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderShadowFoliageFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderShadowFoliageFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderShadowFoliageFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderShadowFoliageFxo", resourceCulture);
                 return ((byte[])(obj));
             }
         }

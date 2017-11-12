@@ -282,7 +282,8 @@ struct PSVertexBillboard
 	float4 positionHomogeneous : SV_POSITION;
 	float3 positionWorld : POSITION;
 	float3 normalWorld : NORMAL;
-	float2 tex : TEXCOORD0;
+	float3 tangentWorld : TANGENT;
+    float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PrimitiveID;
 };
 struct PSCPUParticle

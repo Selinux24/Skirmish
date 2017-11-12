@@ -27,7 +27,7 @@ namespace Instancing
 
         public TestScene(Game game) : base(game, SceneModesEnum.ForwardLigthning)
         {
-
+            
         }
 
         public override void Initialize()

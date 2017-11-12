@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Ground gardener description
     /// </summary>
@@ -19,7 +17,11 @@ namespace Engine
             /// <summary>
             /// Texture names array for vegetation
             /// </summary>
-            public string[] VegetarionTextures = null;
+            public string[] VegetationTextures = null;
+            /// <summary>
+            /// Normal maps names array for vegetation
+            /// </summary>
+            public string[] VegetationNormalMaps = null;
             /// <summary>
             /// Vegetation sprite minimum size
             /// </summary>
@@ -28,6 +30,10 @@ namespace Engine
             /// Vegetation sprite maximum size
             /// </summary>
             public Vector2 MaxSize = Vector2.One * 2f;
+            /// <summary>
+            /// Delta
+            /// </summary>
+            public Vector3 Delta = new Vector3(0.5f, 0.0f, 0.5f);
             /// <summary>
             /// Drawing radius for vegetation
             /// </summary>
@@ -45,13 +51,17 @@ namespace Engine
             /// </summary>
             public float Saturation = 0.1f;
             /// <summary>
-            /// Toggles UV in shader by instance
-            /// </summary>
-            public bool ToggleUV = true;
-            /// <summary>
             /// Wind effect
             /// </summary>
             public float WindEffect = 1f;
+            /// <summary>
+            /// Channel enabled
+            /// </summary>
+            public bool Enabled = true;
+            /// <summary>
+            /// Geometry output count
+            /// </summary>
+            public int Count = 1;
         }
 
         /// <summary>
@@ -91,15 +101,15 @@ namespace Engine
         /// <summary>
         /// Red vegetation channel from map
         /// </summary>
-        public Channel ChannelRed = new Channel();
+        public Channel ChannelRed = new Channel() { Enabled = false };
         /// <summary>
         /// Green vegetation channel from map
         /// </summary>
-        public Channel ChannelGreen = new Channel();
+        public Channel ChannelGreen = new Channel() { Enabled = false };
         /// <summary>
         /// Blue vegetation channel from map
         /// </summary>
-        public Channel ChannelBlue = new Channel();
+        public Channel ChannelBlue = new Channel() { Enabled = false };
         /// <summary>
         /// Gets the active channel list
         /// </summary>

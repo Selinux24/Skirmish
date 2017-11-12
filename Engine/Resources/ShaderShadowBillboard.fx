@@ -1,3 +1,4 @@
+#include "IncHelpers.fx"
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
@@ -7,51 +8,21 @@ cbuffer cbPerFrame : register(b0)
 	float3 gEyePositionWorld;
 	float gStartRadius;
 	float gEndRadius;
-	float3 gWindDirection;
-	float gWindStrength;
-	float gTotalTime;
+    float3 gPAD01;
 };
 cbuffer cbPerObject : register(b1)
 {
 	uint gTextureCount;
-	uint gUVToggleByPID;
+    uint3 gPAD11;
 };
-cbuffer cbFixed : register(b2)
-{
-	float2 gQuadTexCL[4] =
-	{
-		float2(0.0f, 1.0f),
-		float2(0.0f, 0.0f),
-		float2(1.0f, 1.0f),
-		float2(1.0f, 0.0f)
-	};
-	float2 gQuadTexCR[4] =
-	{
-		float2(1.0f, 1.0f),
-		float2(1.0f, 0.0f),
-		float2(0.0f, 1.0f),
-		float2(0.0f, 0.0f)
-	};
-};
-
 Texture2DArray gTextureArray : register(t0);
 Texture1D gTextureRandom : register(t1);
-
-float3 CalcWindTranslation(uint primID, float3 pos)
-{
-	float3 vWind = sin(gTotalTime + (pos.x + pos.y + pos.z) * 0.1f) + (gWindDirection * gWindStrength);
-
-	float sRandom = gTextureRandom.SampleLevel(SamplerLinear, primID, 0).x;
-
-	return pos + (vWind * min(1, sRandom));
-}
 
 GSVertexBillboard VSBillboard(VSVertexBillboard input)
 {
 	GSVertexBillboard output;
 
 	output.centerWorld = input.positionWorld;
-	output.centerWorld.y += (input.sizeWorld.y * 0.45f);
 	output.sizeWorld = input.sizeWorld;
 
 	return output;
@@ -60,52 +31,34 @@ GSVertexBillboard VSBillboard(VSVertexBillboard input)
 [maxvertexcount(4)]
 void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSShadowMapBillboard> outputStream)
 {
-	float3 look = gEyePositionWorld - input[0].centerWorld;
-	if (gEndRadius == 0 || length(look) < gEndRadius)
-	{
+    float3 look = gEyePositionWorld - input[0].centerWorld;
+    if (gEndRadius == 0 || length(look) < gEndRadius)
+    {
 		//Compute the local coordinate system of the sprite relative to the world space such that the billboard is aligned with the y-axis and faces the eye.
-		look.y = 0.0f; // y-axis aligned, so project to xz-plane
-		look = normalize(look);
-		float3 up = float3(0.0f, 1.0f, 0.0f);
-		float3 right = cross(up, look);
+        look.y = 0.0f; // y-axis aligned, so project to xz-plane
+        look = normalize(look);
+        float3 up = float3(0.0f, 1.0f, 0.0f);
+        float3 right = cross(up, look);
 
 		//Compute triangle strip vertices (quad) in world space.
-		float halfWidth = 0.5f * input[0].sizeWorld.x;
-		float halfHeight = 0.5f * input[0].sizeWorld.y;
-		float4 v[4] = { float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0) };
-		v[0] = float4(input[0].centerWorld + halfWidth * right - halfHeight * up, 1.0f);
-		v[1] = float4(input[0].centerWorld + halfWidth * right + halfHeight * up, 1.0f);
-		v[2] = float4(input[0].centerWorld - halfWidth * right - halfHeight * up, 1.0f);
-		v[3] = float4(input[0].centerWorld - halfWidth * right + halfHeight * up, 1.0f);
-
-		if (gWindStrength > 0)
-		{
-			v[1].xyz = CalcWindTranslation(primID, v[1].xyz);
-			v[3].xyz = CalcWindTranslation(primID, v[3].xyz);
-		}
+        float halfWidth = 0.5f * input[0].sizeWorld.x;
+        float halfHeight = 0.5f * input[0].sizeWorld.y;
+        float4 v[4] = { float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0) };
+        BuildQuad(input[0].centerWorld, halfWidth, halfHeight, up, right, 0, v);
 
 		//Transform quad vertices to world space and output them as a triangle strip.
-		PSShadowMapBillboard gout;
+        PSShadowMapBillboard gout;
 		[unroll]
-		for (int i = 0; i < 4; ++i)
-		{
-			gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
-			gout.depth = v[i];
+        for (int i = 0; i < 4; ++i)
+        {
+            gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
+            gout.depth = v[i];
+            gout.tex = BillboardTexCoords[i];
+            gout.primitiveID = primID;
 
-			if (gUVToggleByPID == 0 || fmod(primID, 2) < 1)
-			{
-				gout.tex = gQuadTexCL[i];
-			}
-			else
-			{
-				gout.tex = gQuadTexCR[i];
-			}
-			
-			gout.primitiveID = primID;
-
-			outputStream.Append(gout);
-		}
-	}
+            outputStream.Append(gout);
+        }
+    }
 }
 
 float4 PSBillboard(PSShadowMapBillboard input) : SV_Target
