@@ -73,43 +73,41 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.indexBuffer.Count > 0)
+            var mode = context.DrawerMode;
+
+            if ((mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
             {
-                var graphics = this.Game.Graphics;
-
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-
-                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                if (this.indexBuffer.Count > 0)
                 {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-                }
+                    var effect = DrawerPool.EffectDefaultCubemap;
+                    var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, mode);
+                    if (technique != null)
+                    {
+                        if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
+                        {
+                            Counters.InstancesPerFrame++;
+                            Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+                        }
 
-                var effect = DrawerPool.EffectDefaultCubemap;
-                var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
+                        this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+                        this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+                        effect.UpdatePerFrame(this.local, context.ViewProjection);
+                        effect.UpdatePerObject(this.cubeMapTexture);
 
-                #region Per frame update
+                        var graphics = this.Game.Graphics;
 
-                effect.UpdatePerFrame(this.local, context.ViewProjection);
+                        for (int p = 0; p < technique.PassCount; p++)
+                        {
+                            graphics.EffectPassApply(technique, p, 0);
 
-                #endregion
-
-                #region Per object update
-
-                effect.UpdatePerObject(this.cubeMapTexture);
-
-                #endregion
-
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    graphics.DrawIndexed(
-                        this.indexBuffer.Count,
-                        this.indexBuffer.Offset,
-                        this.vertexBuffer.Offset);
+                            graphics.DrawIndexed(
+                                this.indexBuffer.Count,
+                                this.indexBuffer.Offset,
+                                this.vertexBuffer.Offset);
+                        }
+                    }
                 }
             }
         }

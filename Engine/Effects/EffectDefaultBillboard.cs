@@ -654,14 +654,18 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Billboard)
                 {
-                    switch (mode)
+                    if (mode.HasFlag(DrawerModesEnum.Forward))
                     {
-                        case DrawerModesEnum.Forward:
-                            return this.ForwardBillboard;
-                        case DrawerModesEnum.Deferred:
-                            return this.ForwardBillboard; //TODO: build a proper deferred billboard
-                        default:
-                            throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                        return this.ForwardBillboard;
+                    }
+                    else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                    {
+                        //TODO: build a proper deferred billboard
+                        return this.ForwardBillboard; 
+                    }
+                    else
+                    {
+                        throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }
                 }
                 else

@@ -902,7 +902,7 @@ namespace Engine.Effects
         {
             if (stage == DrawingStages.Drawing)
             {
-                if (mode == DrawerModesEnum.Forward)
+                if (mode.HasFlag(DrawerModesEnum.Forward))
                 {
                     switch (vertexType)
                     {

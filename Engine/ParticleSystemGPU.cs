@@ -354,46 +354,53 @@ namespace Engine
         /// <param name="drawerMode">Drawe mode</param>
         private void Draw(EffectDefaultGPUParticles effect, DrawerModesEnum drawerMode)
         {
-            var graphics = this.Game.Graphics;
-
-            if (drawerMode != DrawerModesEnum.ShadowMap)
+            if (drawerMode.HasFlag(DrawerModesEnum.ShadowMap) ||
+                (drawerMode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Transparent) ||
+                (drawerMode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Transparent))
             {
-                Counters.InstancesPerFrame++;
-            }
+                var rot = this.RotateSpeed != Vector2.Zero;
 
-            var rot = this.RotateSpeed != Vector2.Zero;
+                var techniqueForDrawing = effect.GetTechniqueForDrawing(
+                    VertexTypes.GPUParticle,
+                    false,
+                    DrawingStages.Drawing,
+                    drawerMode,
+                    rot);
+                if (techniqueForDrawing != null)
+                {
+                    if (!drawerMode.HasFlag(DrawerModesEnum.ShadowMap))
+                    {
+                        Counters.InstancesPerFrame++;
+                    }
 
-            var techniqueForDrawing = effect.GetTechniqueForDrawing(
-                VertexTypes.GPUParticle,
-                false,
-                DrawingStages.Drawing,
-                drawerMode,
-                rot);
+                    var graphics = this.Game.Graphics;
 
-            graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
-            graphics.IASetVertexBuffers(BufferSlot, this.drawingBinding);
-            graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
+                    graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
+                    graphics.IASetVertexBuffers(BufferSlot, this.drawingBinding);
+                    graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
-            graphics.SetDepthStencilRDZEnabled();
+                    graphics.SetDepthStencilRDZEnabled();
 
-            if (this.Additive)
-            {
-                graphics.SetBlendAdditive();
-            }
-            else if (this.Transparent)
-            {
-                graphics.SetBlendDefaultAlpha();
-            }
-            else
-            {
-                graphics.SetBlendDefault();
-            }
+                    if (this.Additive)
+                    {
+                        graphics.SetBlendAdditive();
+                    }
+                    else if (this.Transparent)
+                    {
+                        graphics.SetBlendDefaultAlpha();
+                    }
+                    else
+                    {
+                        graphics.SetBlendDefault();
+                    }
 
-            for (int p = 0; p < techniqueForDrawing.PassCount; p++)
-            {
-                graphics.EffectPassApply(techniqueForDrawing, p, 0);
+                    for (int p = 0; p < techniqueForDrawing.PassCount; p++)
+                    {
+                        graphics.EffectPassApply(techniqueForDrawing, p, 0);
 
-                graphics.DrawAuto();
+                        graphics.DrawAuto();
+                    }
+                }
             }
         }
 

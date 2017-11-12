@@ -98,8 +98,8 @@ namespace Engine
             /// <param name="sceneryEffect">Scenery effect</param>
             public void DrawScenery(DrawContext context, Drawer sceneryEffect, BufferManager bufferManager)
             {
+                var mode = context.DrawerMode;
                 var graphics = this.Game.Graphics;
-
                 int count = 0;
 
                 foreach (string meshName in this.DrawingData.Meshes.Keys)
@@ -108,60 +108,63 @@ namespace Engine
 
                     foreach (string material in dictionary.Keys)
                     {
-                        #region Per object update
-
-                        var mat = this.DrawingData.Materials[material];
-
-                        if (context.DrawerMode == DrawerModesEnum.Forward)
-                        {
-                            ((EffectDefaultBasic)sceneryEffect).UpdatePerObject(
-                                true,
-                                mat.DiffuseTexture,
-                                mat.NormalMap,
-                                mat.SpecularTexture,
-                                mat.ResourceIndex,
-                                0,
-                                0);
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                        {
-                            ((EffectDeferredBasic)sceneryEffect).UpdatePerObject(
-                                true,
-                                mat.DiffuseTexture,
-                                mat.NormalMap,
-                                mat.SpecularTexture,
-                                mat.ResourceIndex,
-                                0,
-                                0);
-                        }
-                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                        {
-                            ((EffectShadowBasic)sceneryEffect).UpdatePerObject(
-                                mat.DiffuseTexture,
-                                0,
-                                0);
-                        }
-
-                        #endregion
-
                         var mesh = dictionary[material];
-                        bufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                        bufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
-
-                        count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count : mesh.VertexBuffer.Count;
-
-                        for (int p = 0; p < technique.PassCount; p++)
+                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, mode);
+                        if (technique != null)
                         {
-                            graphics.EffectPassApply(technique, p, 0);
+                            #region Per object update
 
-                            mesh.Draw(graphics);
+                            var mat = this.DrawingData.Materials[material];
+
+                            if (mode.HasFlag(DrawerModesEnum.Forward))
+                            {
+                                ((EffectDefaultBasic)sceneryEffect).UpdatePerObject(
+                                    true,
+                                    mat.DiffuseTexture,
+                                    mat.NormalMap,
+                                    mat.SpecularTexture,
+                                    mat.ResourceIndex,
+                                    0,
+                                    0);
+                            }
+                            else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                            {
+                                ((EffectDeferredBasic)sceneryEffect).UpdatePerObject(
+                                    true,
+                                    mat.DiffuseTexture,
+                                    mat.NormalMap,
+                                    mat.SpecularTexture,
+                                    mat.ResourceIndex,
+                                    0,
+                                    0);
+                            }
+                            else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
+                            {
+                                ((EffectShadowBasic)sceneryEffect).UpdatePerObject(
+                                    mat.DiffuseTexture,
+                                    0,
+                                    0);
+                            }
+
+                            #endregion
+
+                            bufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+                            bufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+
+                            count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count : mesh.VertexBuffer.Count;
+
+                            for (int p = 0; p < technique.PassCount; p++)
+                            {
+                                graphics.EffectPassApply(technique, p, 0);
+
+                                mesh.Draw(graphics);
+                            }
                         }
                     }
                 }
 
-                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                if (!mode.HasFlag(DrawerModesEnum.ShadowMap) && count > 0)
                 {
                     Counters.InstancesPerFrame++;
                     Counters.PrimitivesPerFrame += count / 3;
@@ -333,61 +336,69 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
+            var mode = context.DrawerMode;
 
-            if (nodes != null && nodes.Length > 0)
+            if (mode.HasFlag(DrawerModesEnum.ShadowMap) ||
+                mode.HasFlag(DrawerModesEnum.OpaqueOnly))
             {
-                Drawer sceneryEffect = null;
-
-                if (context.DrawerMode == DrawerModesEnum.Forward)
+                var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
+                if (nodes != null && nodes.Length > 0)
                 {
-                    sceneryEffect = DrawerPool.EffectDefaultBasic;
+                    Drawer sceneryEffect = null;
 
-                    #region Per frame update
+                    if (mode.HasFlag(DrawerModesEnum.Forward))
+                    {
+                        sceneryEffect = DrawerPool.EffectDefaultBasic;
 
-                    ((EffectDefaultBasic)sceneryEffect).UpdatePerFrame(
-                        context.World,
-                        context.ViewProjection,
-                        context.EyePosition,
-                        context.Lights,
-                        context.ShadowMaps,
-                        context.ShadowMapLow,
-                        context.ShadowMapHigh,
-                        context.FromLightViewProjectionLow,
-                        context.FromLightViewProjectionHigh);
+                        #region Per frame update
 
-                    #endregion
-                }
-                else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                {
-                    sceneryEffect = DrawerPool.EffectDeferredBasic;
+                        DrawerPool.EffectDefaultBasic.UpdatePerFrame(
+                            context.World,
+                            context.ViewProjection,
+                            context.EyePosition,
+                            context.Lights,
+                            context.ShadowMaps,
+                            context.ShadowMapLow,
+                            context.ShadowMapHigh,
+                            context.FromLightViewProjectionLow,
+                            context.FromLightViewProjectionHigh);
 
-                    #region Per frame update
+                        #endregion
+                    }
+                    else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                    {
+                        sceneryEffect = DrawerPool.EffectDeferredBasic;
 
-                    ((EffectDeferredBasic)sceneryEffect).UpdatePerFrame(
-                        context.World,
-                        context.ViewProjection);
+                        #region Per frame update
 
-                    #endregion
-                }
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                {
-                    sceneryEffect = DrawerPool.EffectShadowBasic;
+                        DrawerPool.EffectDeferredBasic.UpdatePerFrame(
+                            context.World,
+                            context.ViewProjection);
 
-                    #region Per frame update
+                        #endregion
+                    }
+                    else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
+                    {
+                        sceneryEffect = DrawerPool.EffectShadowBasic;
 
-                    ((EffectShadowBasic)sceneryEffect).UpdatePerFrame(
-                        context.World,
-                        context.ViewProjection);
+                        #region Per frame update
 
-                    #endregion
-                }
+                        DrawerPool.EffectShadowBasic.UpdatePerFrame(
+                            context.World,
+                            context.ViewProjection);
 
-                this.Game.Graphics.SetBlendDefault();
+                        #endregion
+                    }
 
-                foreach (var node in nodes)
-                {
-                    this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, this.BufferManager);
+                    if (sceneryEffect != null)
+                    {
+                        this.Game.Graphics.SetBlendDefault();
+
+                        foreach (var node in nodes)
+                        {
+                            this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, this.BufferManager);
+                        }
+                    }
                 }
             }
         }

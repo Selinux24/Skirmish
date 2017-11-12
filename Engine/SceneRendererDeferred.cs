@@ -1098,19 +1098,17 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawShadowsComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components)
         {
-            var opaques = components.FindAll(c =>
+            var objects = components.FindAll(c =>
             {
-                if (c.AlphaEnabled) return false;
-
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
 
                 return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
             });
-            if (opaques.Count > 0)
+            if (objects.Count > 0)
             {
-                opaques.Sort((c1, c2) =>
+                objects.Sort((c1, c2) =>
                 {
                     int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
                     if (res == 0)
@@ -1124,7 +1122,7 @@ namespace Engine
                         res = -d1.CompareTo(d2);
                     }
 
-                    if(res == 0)
+                    if (res == 0)
                     {
                         res = c1.Order.CompareTo(c2.Order);
                     }
@@ -1132,7 +1130,7 @@ namespace Engine
                     return res;
                 });
 
-                opaques.ForEach((c) =>
+                objects.ForEach((c) =>
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
                     this.Game.Graphics.SetDepthStencilZEnabled();
@@ -1153,11 +1151,11 @@ namespace Engine
         /// <param name="deferred">Deferred drawing</param>
         private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components, bool deferred)
         {
+            var mode = context.DrawerMode;
+
             //First opaques
             var opaques = components.FindAll(c =>
             {
-                if (c.AlphaEnabled) return false;
-
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
@@ -1166,6 +1164,8 @@ namespace Engine
             });
             if (opaques.Count > 0)
             {
+                context.DrawerMode = mode | DrawerModesEnum.OpaqueOnly;
+
                 opaques.Sort((c1, c2) =>
                 {
                     int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
@@ -1213,8 +1213,6 @@ namespace Engine
             //Then transparents
             var transparents = components.FindAll(c =>
             {
-                if (!c.AlphaEnabled) return false;
-
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
@@ -1223,6 +1221,8 @@ namespace Engine
             });
             if (transparents.Count > 0)
             {
+                context.DrawerMode = mode | DrawerModesEnum.TransparentOnly;
+
                 transparents.Sort((c1, c2) =>
                 {
                     int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
@@ -1266,26 +1266,28 @@ namespace Engine
                     c.Get<IDrawable>().Draw(context);
                 });
             }
+
+            context.DrawerMode = mode;
         }
 
         /// <summary>
         /// Sets deferred composer blend state
         /// </summary>
-        public void SetBlendDeferredComposer()
+        private void SetBlendDeferredComposer()
         {
             this.Game.Graphics.SetBlendState(this.blendDeferredComposer);
         }
         /// <summary>
         /// Sets transparent deferred composer blend state
         /// </summary>
-        public void SetBlendDeferredComposerTransparent()
+        private void SetBlendDeferredComposerTransparent()
         {
             this.Game.Graphics.SetBlendState(this.blendDeferredComposerTransparent);
         }
         /// <summary>
         /// Sets deferred lighting blend state
         /// </summary>
-        public void SetBlendDeferredLighting()
+        private void SetBlendDeferredLighting()
         {
             this.Game.Graphics.SetBlendState(this.blendDeferredLighting);
         }

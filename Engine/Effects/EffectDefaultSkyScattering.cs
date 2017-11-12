@@ -194,14 +194,18 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Position)
                 {
-                    switch (mode)
+                    if (mode.HasFlag(DrawerModesEnum.Forward))
                     {
-                        case DrawerModesEnum.Forward:
-                            return this.SkyScattering;
-                        case DrawerModesEnum.Deferred:
-                            return this.SkyScattering; //TODO: build a proper deferred scattering effect
-                        default:
-                            throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                        return this.SkyScattering;
+                    }
+                    else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                    {
+                        //TODO: build a proper deferred scattering effect
+                        return this.SkyScattering;
+                    }
+                    else
+                    {
+                        throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }
                 }
                 else

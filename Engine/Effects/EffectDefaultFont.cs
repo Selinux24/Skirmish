@@ -128,7 +128,7 @@ namespace Engine.Effects
         {
             if (stage == DrawingStages.Drawing)
             {
-                if (vertexType == VertexTypes.PositionTexture && mode == DrawerModesEnum.Forward)
+                if (vertexType == VertexTypes.PositionTexture && mode.HasFlag(DrawerModesEnum.Forward))
                 {
                     return this.FontDrawer;
                 }

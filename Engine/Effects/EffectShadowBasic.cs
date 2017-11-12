@@ -272,7 +272,7 @@ namespace Engine.Effects
         {
             if (stage == DrawingStages.Drawing)
             {
-                if (mode == DrawerModesEnum.ShadowMap)
+                if (mode.HasFlag(DrawerModesEnum.ShadowMap))
                 {
                     switch (vertexType)
                     {

@@ -62,6 +62,10 @@ namespace Engine.Common
         /// </summary>
         public bool Textured { get; private set; }
         /// <summary>
+        /// Has transparency
+        /// </summary>
+        public bool Transparent { get; private set; }
+        /// <summary>
         /// Topology
         /// </summary>
         public PrimitiveTopology Topology { get; private set; }
@@ -88,11 +92,12 @@ namespace Engine.Common
         /// </summary>
         /// <param name="name">Mesh name</param>
         /// <param name="material">Material name</param>
+        /// <param name="isTransparent">Has transparency</param>
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         /// <param name="instanced">Instanced</param>
-        public Mesh(string name, string material, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced)
+        public Mesh(string name, string material, bool isTransparent, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced)
         {
             var vFirst = vertices[0];
 
@@ -106,6 +111,7 @@ namespace Engine.Common
             this.VertextType = vFirst.VertexType;
             this.VertexBufferStride = vFirst.GetStride();
             this.Textured = VertexData.IsTextured(vFirst.VertexType);
+            this.Transparent = isTransparent;
             this.Skinned = VertexData.IsSkinned(vFirst.VertexType);
             this.Instanced = instanced;
         }

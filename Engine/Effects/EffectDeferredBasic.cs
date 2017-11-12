@@ -434,7 +434,7 @@ namespace Engine.Effects
         {
             if (stage == DrawingStages.Drawing)
             {
-                if (mode == DrawerModesEnum.Deferred)
+                if (mode.HasFlag(DrawerModesEnum.Deferred))
                 {
                     switch (vertexType)
                     {

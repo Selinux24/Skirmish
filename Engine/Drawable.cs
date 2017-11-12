@@ -14,10 +14,6 @@ namespace Engine
         /// </summary>
         public virtual Game Game { get { return this.Scene.Game; } }
         /// <summary>
-        /// Graphics device
-        /// </summary>
-        public virtual Graphics Graphics { get { return this.Scene.Game.Graphics; } }
-        /// <summary>
         /// Buffer manager
         /// </summary>
         public virtual BufferManager BufferManager { get { return this.Scene.BufferManager; } }

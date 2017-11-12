@@ -247,48 +247,51 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            var keyLight = context.Lights.KeyLight;
-            if (keyLight != null && this.indexBuffer.Count > 0)
+            var mode = context.DrawerMode;
+
+            if (mode.HasFlag(DrawerModesEnum.OpaqueOnly))
             {
-                var graphics = this.Game.Graphics;
-
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-
-                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                var keyLight = context.Lights.KeyLight;
+                if (keyLight != null && this.indexBuffer.Count > 0)
                 {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-                }
+                    var effect = DrawerPool.EffectDefaultSkyScattering;
+                    var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, mode);
+                    if (technique != null)
+                    {
+                        Counters.InstancesPerFrame++;
+                        Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
 
-                var effect = DrawerPool.EffectDefaultSkyScattering;
-                var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, context.DrawerMode);
+                        this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+                        this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+                        effect.UpdatePerFrame(
+                            Matrix.Translation(context.EyePosition),
+                            context.ViewProjection,
+                            this.PlanetRadius,
+                            this.PlanetAtmosphereRadius,
+                            this.SphereOuterRadius,
+                            this.SphereInnerRadius,
+                            this.Brightness,
+                            this.RayleighScattering,
+                            this.RayleighScattering4PI,
+                            this.MieScattering,
+                            this.MieScattering4PI,
+                            this.InvWaveLength4,
+                            this.ScatteringScale,
+                            this.RayleighScaleDepth,
+                            context.Lights.FogColor,
+                            keyLight.Direction,
+                            this.HDRExposure);
 
-                effect.UpdatePerFrame(
-                    Matrix.Translation(context.EyePosition),
-                    context.ViewProjection,
-                    this.PlanetRadius,
-                    this.PlanetAtmosphereRadius,
-                    this.SphereOuterRadius,
-                    this.SphereInnerRadius,
-                    this.Brightness,
-                    this.RayleighScattering,
-                    this.RayleighScattering4PI,
-                    this.MieScattering,
-                    this.MieScattering4PI,
-                    this.InvWaveLength4,
-                    this.ScatteringScale,
-                    this.RayleighScaleDepth,
-                    context.Lights.FogColor,
-                    keyLight.Direction,
-                    this.HDRExposure);
+                        var graphics = this.Game.Graphics;
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
+                        for (int p = 0; p < technique.PassCount; p++)
+                        {
+                            graphics.EffectPassApply(technique, p, 0);
 
-                    graphics.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
+                            graphics.DrawIndexed(this.indexBuffer.Count, this.indexBuffer.Offset, this.vertexBuffer.Offset);
+                        }
+                    }
                 }
             }
         }

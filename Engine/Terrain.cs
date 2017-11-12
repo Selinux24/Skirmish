@@ -343,19 +343,18 @@ namespace Engine
             /// <param name="nodeList">Node list</param>
             private void DrawNodeList(DrawContext context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique, MapGridNode[] nodeList)
             {
+                var mode = context.DrawerMode;
                 var graphics = this.Game.Graphics;
 
                 for (int i = 0; i < nodeList.Length; i++)
                 {
                     var gNode = nodeList[i];
-
-                    bufferManager.SetInputAssembler(terrainTechnique, gNode.VBDesc.Slot, PrimitiveTopology.TriangleList);
-
-                    bufferManager.SetIndexBuffer(gNode.IBDesc.Slot);
-
                     if (gNode.IBDesc.Count > 0)
                     {
-                        if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                        bufferManager.SetInputAssembler(terrainTechnique, gNode.VBDesc.Slot, PrimitiveTopology.TriangleList);
+                        bufferManager.SetIndexBuffer(gNode.IBDesc.Slot);
+
+                        if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
                         {
                             Counters.InstancesPerFrame++;
                             Counters.PrimitivesPerFrame += gNode.IBDesc.Count / 3;
@@ -800,23 +799,19 @@ namespace Engine
         /// <param name="context">Draw context</param>
         public override void Draw(DrawContext context)
         {
-            var terrainTechnique = this.SetTechniqueTerrain(context);
-            if (terrainTechnique != null)
+            var mode = context.DrawerMode;
+
+            if (mode.HasFlag(DrawerModesEnum.ShadowMap) || mode.HasFlag(DrawerModesEnum.OpaqueOnly))
             {
-                this.Map.Draw(context, this.BufferManager, terrainTechnique);
+                EngineEffectTechnique terrainTechnique = null;
+                if (mode.HasFlag(DrawerModesEnum.Forward)) terrainTechnique = this.SetTechniqueTerrainDefault(context);
+                if (mode.HasFlag(DrawerModesEnum.Deferred)) terrainTechnique = this.SetTechniqueTerrainDeferred(context);
+                if (mode.HasFlag(DrawerModesEnum.ShadowMap)) terrainTechnique = this.SetTechniqueTerrainShadowMap(context);
+                if (terrainTechnique != null)
+                {
+                    this.Map.Draw(context, this.BufferManager, terrainTechnique);
+                }
             }
-        }
-        /// <summary>
-        /// Sets thecnique for terrain drawing
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueTerrain(DrawContext context)
-        {
-            if (context.DrawerMode == DrawerModesEnum.Forward) return this.SetTechniqueTerrainDefault(context);
-            if (context.DrawerMode == DrawerModesEnum.Deferred) return this.SetTechniqueTerrainDeferred(context);
-            if (context.DrawerMode == DrawerModesEnum.ShadowMap) return this.SetTechniqueTerrainShadowMap(context);
-            else return null;
         }
         /// <summary>
         /// Sets thecnique for terrain drawing with forward renderer
@@ -825,11 +820,7 @@ namespace Engine
         /// <returns>Returns the selected technique</returns>
         private EngineEffectTechnique SetTechniqueTerrainDefault(DrawContext context)
         {
-            EffectDefaultTerrain effect = DrawerPool.EffectDefaultTerrain;
-
-            this.Game.Graphics.SetBlendDefault();
-
-            #region Per frame update
+            var effect = DrawerPool.EffectDefaultTerrain;
 
             effect.UpdatePerFrame(
                 context.World,
@@ -843,10 +834,6 @@ namespace Engine
                 context.FromLightViewProjectionLow,
                 context.FromLightViewProjectionHigh);
 
-            #endregion
-
-            #region Per object update
-
             effect.UpdatePerObject(
                 this.useAnisotropic,
                 this.terrainNormalMaps,
@@ -859,9 +846,7 @@ namespace Engine
                 this.terrainTexturesLR,
                 this.terrainTexturesHR,
                 this.proportion,
-                (uint)this.terrainMaterial.ResourceIndex);
-
-            #endregion
+                this.terrainMaterial.ResourceIndex);
 
             if (this.useAlphaMap && this.useSlopes) { return effect.TerrainFullForward; }
             if (this.useAlphaMap) { return effect.TerrainAlphaMapForward; }
@@ -878,21 +863,13 @@ namespace Engine
         {
             var effect = DrawerPool.EffectDeferredTerrain;
 
-            this.Game.Graphics.SetBlendDefault();
-
-            #region Per frame update
-
             effect.UpdatePerFrame(
                 context.World,
                 context.ViewProjection,
                 this.textureResolution);
 
-            #endregion
-
-            #region Per object update
-
             effect.UpdatePerObject(
-                (uint)this.terrainMaterial.ResourceIndex,
+                this.terrainMaterial.ResourceIndex,
                 this.useAnisotropic,
                 this.terrainNormalMaps,
                 this.terrainSpecularMaps,
@@ -904,8 +881,6 @@ namespace Engine
                 this.terrainTexturesLR,
                 this.terrainTexturesHR,
                 this.proportion);
-
-            #endregion
 
             if (this.useAlphaMap && this.useSlopes) { return effect.TerrainFullDeferred; }
             if (this.useAlphaMap) { return effect.TerrainAlphaMapDeferred; }
@@ -920,19 +895,11 @@ namespace Engine
         /// <returns>Returns the selected technique</returns>
         private EngineEffectTechnique SetTechniqueTerrainShadowMap(DrawContext context)
         {
-            EffectShadowTerrain effect = DrawerPool.EffectShadowTerrain;
+            var effect = DrawerPool.EffectShadowTerrain;
 
-            this.Game.Graphics.SetBlendDefault();
+            effect.UpdatePerFrame(context.World, context.ViewProjection);
 
-            #region Per frame update
-
-            effect.UpdatePerFrame(
-                context.World,
-                context.ViewProjection);
-
-            #endregion
-
-            return effect.GetTechnique(VertexTypes.Terrain, false, DrawingStages.Drawing, context.DrawerMode);
+            return effect.TerrainShadowMap;
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using SharpDX.Direct3D;
+﻿using SharpDX;
+using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
@@ -385,6 +386,7 @@ namespace Engine.Content
 
             var materialName = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial;
             var textured = modelContent.Materials[materialName].DiffuseTexture != null;
+            var transparent = modelContent.Materials[materialName].Transparent != Color.Transparent;
 
             SubMeshContent geo = new SubMeshContent()
             {
@@ -393,6 +395,7 @@ namespace Engine.Content
                 Indices = indices,
                 Material = materialName,
                 Textured = textured,
+                Transparent = transparent,
             };
 
             modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
@@ -443,6 +446,7 @@ namespace Engine.Content
                 Vertices = vertices,
                 Indices = indices,
                 Textured = true,
+                Transparent = false,
             };
 
             modelContent.Images.Add(texureName, textureImage);

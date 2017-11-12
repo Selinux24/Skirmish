@@ -11,6 +11,7 @@ namespace Instancing
     class TestScene : Scene
     {
         private const int layerObjects = 0;
+        private const int layerTerrain = 1;
         private const int layerHUD = 99;
 
         private SceneObject<TextDrawer> title = null;
@@ -18,6 +19,8 @@ namespace Instancing
         private SceneObject<Sprite> backPannel = null;
 
         private SceneObject<ModelInstanced> floor = null;
+
+        private SceneObject<ModelInstanced> trees = null;
 
         private SceneObject<ModelInstanced> troops = null;
         private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
@@ -85,6 +88,7 @@ namespace Instancing
 
                 var desc = new ModelInstancedDescription()
                 {
+                    Name = "Floor",
                     Static = true,
                     CastShadow = true,
                     DeferredEnabled = true,
@@ -115,6 +119,60 @@ namespace Instancing
                         x = 0;
                         y++;
                     }
+                }
+            }
+
+            #endregion
+
+            #region Trees
+
+            {
+                int instances = 40;
+
+                var treeDesc = new ModelInstancedDescription()
+                {
+                    Name = "Trees",
+                    CastShadow = true,
+                    Static = true,
+                    Instances = instances,
+                    AlphaEnabled = true,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = @"Resources/Trees",
+                        ModelContentFilename = @"tree.xml",
+                    }
+                };
+                this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsageEnum.None, layerTerrain);
+
+                int side = instances / 4;
+                float groundSide = 55f;
+
+                for (int i = 0; i < this.trees.Count; i++)
+                {
+                    var iPos = Vector3.Zero;
+
+                    if (i < side)
+                    {
+                        iPos = new Vector3((i - ((side * 0) + (side * 0.5f))) * side, 0, +groundSide);
+                    }
+                    else if (i < side * 2)
+                    {
+                        iPos = new Vector3(+groundSide, 0, (i - ((side * 1) + (side * 0.5f))) * side);
+                    }
+                    else if (i < side * 3)
+                    {
+                        iPos = new Vector3((i - ((side * 2) + (side * 0.5f))) * side, 0, -groundSide);
+                    }
+                    else if (i < side * 4)
+                    {
+                        iPos = new Vector3(-groundSide, 0, (i - ((side * 3) + (side * 0.5f))) * side);
+                    }
+
+                    this.trees.Instance[i].Manipulator.SetPosition(iPos, true);
+                    this.trees.Instance[i].Manipulator.SetRotation(iPos.Z + iPos.X, 0, 0, true);
+                    this.trees.Instance[i].Manipulator.SetScale(2 + (i % 3 * 0.2f), true);
+                    this.trees.Instance[i].TextureIndex = (uint)(i % 2);
                 }
             }
 

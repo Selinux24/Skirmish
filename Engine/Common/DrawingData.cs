@@ -254,6 +254,7 @@ namespace Engine.Common
                             Mesh nMesh = new Mesh(
                                 meshName,
                                 geometry.Material,
+                                geometry.Transparent,
                                 geometry.Topology,
                                 vertexList,
                                 indices,

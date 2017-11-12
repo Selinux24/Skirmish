@@ -541,19 +541,17 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawShadowComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components)
         {
-            var opaques = components.FindAll(c =>
+            var objects = components.FindAll(c =>
             {
-                if (c.AlphaEnabled) return false;
-
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
 
                 return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
             });
-            if (opaques.Count > 0)
+            if (objects.Count > 0)
             {
-                opaques.Sort((c1, c2) =>
+                objects.Sort((c1, c2) =>
                 {
                     int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
                     if (res == 0)
@@ -575,7 +573,7 @@ namespace Engine
                     return res;
                 });
 
-                opaques.ForEach((c) =>
+                objects.ForEach((c) =>
                 {
                     this.Game.Graphics.SetRasterizerCullFrontFace();
                     this.Game.Graphics.SetDepthStencilZEnabled();
@@ -596,11 +594,11 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components)
         {
+            var mode = context.DrawerMode;
+
             //First opaques
             var opaques = components.FindAll(c =>
             {
-                if (c.AlphaEnabled) return false;
-
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
@@ -609,6 +607,8 @@ namespace Engine
             });
             if (opaques.Count > 0)
             {
+                context.DrawerMode = mode | DrawerModesEnum.OpaqueOnly;
+
                 opaques.Sort((c1, c2) =>
                 {
                     int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
@@ -648,8 +648,6 @@ namespace Engine
             //Then transparents
             var transparents = components.FindAll(c =>
             {
-                if (!c.AlphaEnabled) return false;
-
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
@@ -658,6 +656,8 @@ namespace Engine
             });
             if (transparents.Count > 0)
             {
+                context.DrawerMode = mode | DrawerModesEnum.TransparentOnly;
+
                 transparents.Sort((c1, c2) =>
                 {
                     int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
@@ -693,6 +693,8 @@ namespace Engine
                     c.Get<IDrawable>().Draw(context);
                 });
             }
+
+            context.DrawerMode = mode;
         }
     }
 }

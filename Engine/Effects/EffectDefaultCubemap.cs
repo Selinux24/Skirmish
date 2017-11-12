@@ -92,14 +92,18 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Position)
                 {
-                    switch (mode)
+                    if (mode.HasFlag(DrawerModesEnum.Forward))
                     {
-                        case DrawerModesEnum.Forward:
-                            return this.ForwardCubemap;
-                        case DrawerModesEnum.Deferred:
-                            return this.ForwardCubemap; //TODO: build a proper deferred cubemap
-                        default:
-                            throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                        return this.ForwardCubemap;
+                    }
+                    else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                    {
+                        //TODO: build a proper deferred cubemap
+                        return this.ForwardCubemap;
+                    }
+                    else
+                    {
+                        throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }
                 }
                 else

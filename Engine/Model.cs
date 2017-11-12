@@ -215,22 +215,23 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            var graphics = this.Game.Graphics;
-
-            int count = 0;
-            int instanceCount = 0;
-
             if (this.DrawingData != null)
             {
+                int count = 0;
+                int instanceCount = 0;
+
                 instanceCount++;
 
-                Drawer effect = null;
-                if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectDefaultBasic;
-                else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectDeferredBasic;
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadowBasic;
+                var mode = context.DrawerMode;
 
+                Drawer effect = null;
+                if (mode.HasFlag(DrawerModesEnum.Forward)) effect = DrawerPool.EffectDefaultBasic;
+                else if (mode.HasFlag(DrawerModesEnum.Deferred)) effect = DrawerPool.EffectDeferredBasic;
+                else if (mode.HasFlag(DrawerModesEnum.ShadowMap)) effect = DrawerPool.EffectShadowBasic;
                 if (effect != null)
                 {
+                    var graphics = this.Game.Graphics;
+
                     foreach (string meshName in this.DrawingData.Meshes.Keys)
                     {
                         var dictionary = this.DrawingData.Meshes[meshName];
@@ -239,7 +240,7 @@ namespace Engine
 
                         #region Per frame update
 
-                        if (context.DrawerMode == DrawerModesEnum.Forward)
+                        if (mode.HasFlag(DrawerModesEnum.Forward))
                         {
                             ((EffectDefaultBasic)effect).UpdatePerFrame(
                                 localTransform,
@@ -252,13 +253,13 @@ namespace Engine
                                 context.FromLightViewProjectionLow,
                                 context.FromLightViewProjectionHigh);
                         }
-                        else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                        else if (mode.HasFlag(DrawerModesEnum.Deferred))
                         {
                             ((EffectDeferredBasic)effect).UpdatePerFrame(
                                 localTransform,
                                 context.ViewProjection);
                         }
-                        else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                        else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
                         {
                             ((EffectShadowBasic)effect).UpdatePerFrame(
                                 localTransform,
@@ -269,11 +270,23 @@ namespace Engine
 
                         foreach (string material in dictionary.Keys)
                         {
+                            var mesh = dictionary[material];
+                            bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
+
+                            if (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && transparent)
+                            {
+                                continue;
+                            }
+                            if (mode.HasFlag(DrawerModesEnum.TransparentOnly) && !transparent)
+                            {
+                                continue;
+                            }
+
                             #region Per object update
 
                             var mat = this.DrawingData.Materials[material];
 
-                            if (context.DrawerMode == DrawerModesEnum.Forward)
+                            if (mode.HasFlag(DrawerModesEnum.Forward))
                             {
                                 ((EffectDefaultBasic)effect).UpdatePerObject(
                                     this.UseAnisotropicFiltering,
@@ -284,7 +297,7 @@ namespace Engine
                                     this.TextureIndex,
                                     this.AnimationIndex);
                             }
-                            else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                            else if (mode.HasFlag(DrawerModesEnum.Deferred))
                             {
                                 ((EffectDeferredBasic)effect).UpdatePerObject(
                                     this.UseAnisotropicFiltering,
@@ -295,7 +308,7 @@ namespace Engine
                                     this.TextureIndex,
                                     this.AnimationIndex);
                             }
-                            else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                            else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
                             {
                                 ((EffectShadowBasic)effect).UpdatePerObject(
                                     mat.DiffuseTexture,
@@ -305,10 +318,9 @@ namespace Engine
 
                             #endregion
 
-                            var mesh = dictionary[material];
                             this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                            var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
+                            var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, mode);
                             this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                             count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
@@ -322,12 +334,12 @@ namespace Engine
                         }
                     }
                 }
-            }
 
-            if (context.DrawerMode != DrawerModesEnum.ShadowMap)
-            {
-                Counters.InstancesPerFrame += instanceCount;
-                Counters.PrimitivesPerFrame += count;
+                if (!mode.HasFlag(DrawerModesEnum.ShadowMap) && count > 0)
+                {
+                    Counters.InstancesPerFrame += instanceCount;
+                    Counters.PrimitivesPerFrame += count;
+                }
             }
         }
         /// <summary>

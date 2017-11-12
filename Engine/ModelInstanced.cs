@@ -106,7 +106,7 @@ namespace Engine
         /// <param name="eyePosition">Eye position</param>
         private void SortInstances(Vector3 eyePosition)
         {
-            //Sort by LOD
+            //Sort by LOD, distance and id
             Array.Sort(this.instancesTmp, (i1, i2) =>
             {
                 var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
@@ -123,14 +123,7 @@ namespace Engine
                     i = i1.Id.CompareTo(i2.Id);
                 }
 
-                if (this.Description.AlphaEnabled)
-                {
-                    return -i;
-                }
-                else
-                {
-                    return i;
-                }
+                return i;
             });
         }
         /// <summary>
@@ -139,68 +132,69 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            var graphics = this.Game.Graphics;
-
-            int count = 0;
-            int instanceCount = 0;
-
             if (this.VisibleCount > 0)
             {
-                #region Update instancing data
+                var mode = context.DrawerMode;
 
-                //Process only visible instances
-                if (this.instancesTmp != null && this.instancesTmp.Length > 0)
+                int count = 0;
+                int instanceCount = 0;
+
+                Drawer effect = null;
+                if (mode.HasFlag(DrawerModesEnum.Forward)) effect = DrawerPool.EffectDefaultBasic;
+                else if (mode.HasFlag(DrawerModesEnum.Deferred)) effect = DrawerPool.EffectDeferredBasic;
+                else if (mode.HasFlag(DrawerModesEnum.ShadowMap)) effect = DrawerPool.EffectShadowBasic;
+                if (effect != null)
                 {
-                    LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;
-                    DrawingData drawingData = null;
-                    int instanceIndex = 0;
+                    var graphics = this.Game.Graphics;
 
-                    for (int i = 0; i < this.instancesTmp.Length; i++)
+                    #region Update instancing data
+
+                    //Process only visible instances
+                    if (this.instancesTmp != null && this.instancesTmp.Length > 0)
                     {
-                        var current = this.instancesTmp[i];
-                        if (current != null)
+                        LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;
+                        DrawingData drawingData = null;
+                        int instanceIndex = 0;
+
+                        for (int i = 0; i < this.instancesTmp.Length; i++)
                         {
-                            if (lastLod != current.LevelOfDetail)
+                            var current = this.instancesTmp[i];
+                            if (current != null)
                             {
-                                lastLod = current.LevelOfDetail;
-                                drawingData = this.GetDrawingData(lastLod);
+                                if (lastLod != current.LevelOfDetail)
+                                {
+                                    lastLod = current.LevelOfDetail;
+                                    drawingData = this.GetDrawingData(lastLod);
+                                }
+
+                                this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
+                                this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
+
+                                if (drawingData != null && drawingData.SkinningData != null)
+                                {
+                                    current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
+
+                                    this.instancingData[instanceIndex].AnimationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
+
+                                    current.InvalidateCache();
+                                }
+
+                                instanceIndex++;
                             }
+                        }
 
-                            this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
-                            this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
-
-                            if (drawingData != null && drawingData.SkinningData != null)
-                            {
-                                current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
-
-                                this.instancingData[instanceIndex].AnimationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
-
-                                current.InvalidateCache();
-                            }
-
-                            instanceIndex++;
+                        //Writes instancing data
+                        if (instanceIndex > 0)
+                        {
+                            this.BufferManager.WriteInstancingData(this.instancingData);
                         }
                     }
 
-                    //Writes instancing data
-                    if (instanceIndex > 0)
-                    {
-                        this.BufferManager.WriteInstancingData(this.instancingData);
-                    }
-                }
+                    #endregion
 
-                #endregion
-
-                Drawer effect = null;
-                if (context.DrawerMode == DrawerModesEnum.Forward) effect = DrawerPool.EffectDefaultBasic;
-                else if (context.DrawerMode == DrawerModesEnum.Deferred) effect = DrawerPool.EffectDeferredBasic;
-                else if (context.DrawerMode == DrawerModesEnum.ShadowMap) effect = DrawerPool.EffectShadowBasic;
-
-                if (effect != null)
-                {
                     #region Per frame update
 
-                    if (context.DrawerMode == DrawerModesEnum.Forward)
+                    if (mode.HasFlag(DrawerModesEnum.Forward))
                     {
                         ((EffectDefaultBasic)effect).UpdatePerFrame(
                             context.World,
@@ -213,13 +207,13 @@ namespace Engine
                             context.FromLightViewProjectionLow,
                             context.FromLightViewProjectionHigh);
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.Deferred)
+                    else if (mode.HasFlag(DrawerModesEnum.Deferred))
                     {
                         ((EffectDeferredBasic)effect).UpdatePerFrame(
                             context.World,
                             context.ViewProjection);
                     }
-                    else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
+                    else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
                     {
                         ((EffectShadowBasic)effect).UpdatePerFrame(
                             context.World,
@@ -240,14 +234,14 @@ namespace Engine
                             LevelOfDetailEnum lod = (LevelOfDetailEnum)l;
 
                             //Get instances in this LOD
-                            var ins = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
-                            if (ins != null && ins.Length > 0)
+                            var lodInstances = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
+                            if (lodInstances != null && lodInstances.Length > 0)
                             {
                                 var drawingData = this.GetDrawingData(lod);
                                 if (drawingData != null)
                                 {
-                                    var index = Array.IndexOf(this.instancesTmp, ins[0]);
-                                    var length = Math.Min(maxCount, ins.Length);
+                                    var index = Array.IndexOf(this.instancesTmp, lodInstances[0]);
+                                    var length = Math.Min(maxCount, lodInstances.Length);
                                     maxCount -= length;
 
                                     if (length > 0)
@@ -260,56 +254,71 @@ namespace Engine
 
                                             foreach (string material in dictionary.Keys)
                                             {
-                                                #region Per object update
-
-                                                var mat = drawingData.Materials[material];
-
-                                                if (context.DrawerMode == DrawerModesEnum.Forward)
-                                                {
-                                                    ((EffectDefaultBasic)effect).UpdatePerObject(
-                                                        this.UseAnisotropicFiltering,
-                                                        mat.DiffuseTexture,
-                                                        mat.NormalMap,
-                                                        mat.SpecularTexture,
-                                                        mat.ResourceIndex,
-                                                        0,
-                                                        0);
-                                                }
-                                                else if (context.DrawerMode == DrawerModesEnum.Deferred)
-                                                {
-                                                    ((EffectDeferredBasic)effect).UpdatePerObject(
-                                                        this.UseAnisotropicFiltering,
-                                                        mat.DiffuseTexture,
-                                                        mat.NormalMap,
-                                                        mat.SpecularTexture,
-                                                        mat.ResourceIndex,
-                                                        0,
-                                                        0);
-                                                }
-                                                else if (context.DrawerMode == DrawerModesEnum.ShadowMap)
-                                                {
-                                                    ((EffectShadowBasic)effect).UpdatePerObject(
-                                                        mat.DiffuseTexture,
-                                                        0,
-                                                        0);
-                                                }
-
-                                                #endregion
-
                                                 var mesh = dictionary[material];
-                                                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
-
-                                                var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, context.DrawerMode);
-                                                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
-
-                                                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
-                                                count *= instanceCount;
-
-                                                for (int p = 0; p < technique.PassCount; p++)
+                                                var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, mode);
+                                                if (technique != null)
                                                 {
-                                                    graphics.EffectPassApply(technique, p, 0);
+                                                    bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
+                                                    if (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && transparent)
+                                                    {
+                                                        continue;
+                                                    }
+                                                    if (mode.HasFlag(DrawerModesEnum.TransparentOnly) && !transparent)
+                                                    {
+                                                        continue;
+                                                    }
 
-                                                    mesh.Draw(graphics, index, length);
+                                                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
+                                                    {
+                                                        count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+                                                        count *= instanceCount;
+                                                    }
+
+                                                    #region Per object update
+
+                                                    var mat = drawingData.Materials[material];
+
+                                                    if (mode.HasFlag(DrawerModesEnum.Forward))
+                                                    {
+                                                        ((EffectDefaultBasic)effect).UpdatePerObject(
+                                                            this.UseAnisotropicFiltering,
+                                                            mat.DiffuseTexture,
+                                                            mat.NormalMap,
+                                                            mat.SpecularTexture,
+                                                            mat.ResourceIndex,
+                                                            0,
+                                                            0);
+                                                    }
+                                                    else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                                                    {
+                                                        ((EffectDeferredBasic)effect).UpdatePerObject(
+                                                            this.UseAnisotropicFiltering,
+                                                            mat.DiffuseTexture,
+                                                            mat.NormalMap,
+                                                            mat.SpecularTexture,
+                                                            mat.ResourceIndex,
+                                                            0,
+                                                            0);
+                                                    }
+                                                    else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
+                                                    {
+                                                        ((EffectShadowBasic)effect).UpdatePerObject(
+                                                            mat.DiffuseTexture,
+                                                            0,
+                                                            0);
+                                                    }
+
+                                                    #endregion
+
+                                                    this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+                                                    this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+
+                                                    for (int p = 0; p < technique.PassCount; p++)
+                                                    {
+                                                        graphics.EffectPassApply(technique, p, 0);
+
+                                                        mesh.Draw(graphics, index, length);
+                                                    }
                                                 }
                                             }
                                         }
@@ -319,12 +328,12 @@ namespace Engine
                         }
                     }
                 }
-            }
 
-            if (context.DrawerMode != DrawerModesEnum.ShadowMap)
-            {
-                Counters.InstancesPerFrame += instanceCount;
-                Counters.PrimitivesPerFrame += count;
+                if (!mode.HasFlag(DrawerModesEnum.ShadowMap) && count > 0)
+                {
+                    Counters.InstancesPerFrame += instanceCount;
+                    Counters.PrimitivesPerFrame += count;
+                }
             }
         }
         /// <summary>

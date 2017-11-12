@@ -12,7 +12,7 @@ namespace Engine.Effects
         /// <summary>
         /// Shadow mapping technique
         /// </summary>
-        protected readonly EngineEffectTechnique TerrainShadowMap = null;
+        public readonly EngineEffectTechnique TerrainShadowMap = null;
 
         /// <summary>
         /// World view projection effect variable
@@ -57,22 +57,7 @@ namespace Engine.Effects
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
         public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
-            EngineEffectTechnique technique = null;
-
-            if (stage == DrawingStages.Drawing)
-            {
-                if (vertexType == VertexTypes.Terrain)
-                {
-                    if (mode == DrawerModesEnum.ShadowMap) technique = this.TerrainShadowMap;
-                }
-            }
-
-            if (technique == null)
-            {
-                throw new EngineException(string.Format("Bad vertex type for effect, stage and mode: {0} - {1} - {2}", vertexType, stage, mode));
-            }
-
-            return technique;
+            throw new EngineException("Use technique variables directly");
         }
 
         /// <summary>

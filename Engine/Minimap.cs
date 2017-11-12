@@ -63,7 +63,7 @@ namespace Engine
 
             this.viewport = new Viewport(0, 0, description.Width, description.Height);
 
-            this.Graphics.CreateRenderTargetTexture(
+            this.Game.Graphics.CreateRenderTargetTexture(
                 Format.R8G8B8A8_UNorm,
                 description.Width, description.Height, false,
                 out this.renderTarget,

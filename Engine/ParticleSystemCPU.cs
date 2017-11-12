@@ -215,68 +215,77 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Draw(DrawContext context)
         {
-            if (this.ActiveParticles > 0)
+            var mode = context.DrawerMode;
+
+            if (mode.HasFlag(DrawerModesEnum.ShadowMap) ||
+                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Transparent) ||
+                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Transparent))
             {
-                var graphics = this.Game.Graphics;
-
-                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                if (this.ActiveParticles > 0)
                 {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.ActiveParticles;
-                }
+                    var rot = this.RotateSpeed != Vector2.Zero;
 
-                var rot = this.RotateSpeed != Vector2.Zero;
+                    var effect = DrawerPool.EffectDefaultCPUParticles;
 
-                var effect = DrawerPool.EffectDefaultCPUParticles;
+                    var technique = effect.GetTechnique(
+                        VertexTypes.Particle,
+                        false,
+                        DrawingStages.Drawing,
+                        mode,
+                        rot);
+                    if (technique != null)
+                    {
+                        if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
+                        {
+                            Counters.InstancesPerFrame++;
+                            Counters.PrimitivesPerFrame += this.ActiveParticles;
+                        }
 
-                var technique = effect.GetTechnique(
-                    VertexTypes.Particle,
-                    false,
-                    DrawingStages.Drawing,
-                    context.DrawerMode,
-                    rot);
+                        var graphics = this.Game.Graphics;
 
-                graphics.IASetVertexBuffers(BufferSlot, this.buffer.VertexBufferBinding);
-                graphics.IAInputLayout = rot ? this.buffer.InputLayouts[0] : this.buffer.InputLayouts[1];
-                graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
+                        graphics.IASetVertexBuffers(BufferSlot, this.buffer.VertexBufferBinding);
+                        graphics.IAInputLayout = rot ? this.buffer.InputLayouts[0] : this.buffer.InputLayouts[1];
+                        graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
-                graphics.SetDepthStencilRDZEnabled();
+                        graphics.SetDepthStencilRDZEnabled();
 
-                if (this.Additive)
-                {
-                    graphics.SetBlendAdditive();
-                }
-                else if (this.Transparent)
-                {
-                    graphics.SetBlendDefaultAlpha();
-                }
-                else
-                {
-                    graphics.SetBlendDefault();
-                }
+                        if (this.Additive)
+                        {
+                            graphics.SetBlendAdditive();
+                        }
+                        else if (this.Transparent)
+                        {
+                            graphics.SetBlendDefaultAlpha();
+                        }
+                        else
+                        {
+                            graphics.SetBlendDefault();
+                        }
 
-                effect.UpdatePerFrame(
-                    context.World,
-                    context.ViewProjection,
-                    context.EyePosition,
-                    this.Emitter.TotalTime,
-                    this.MaximumAge,
-                    this.MaximumAgeVariation,
-                    this.VelocityAtEnd,
-                    this.Gravity,
-                    this.StartSize,
-                    this.EndSize,
-                    this.MinimumColor,
-                    this.MaximumColor,
-                    this.RotateSpeed,
-                    this.TextureCount,
-                    this.Texture);
+                        effect.UpdatePerFrame(
+                            context.World,
+                            context.ViewProjection,
+                            context.EyePosition,
+                            this.Emitter.TotalTime,
+                            this.MaximumAge,
+                            this.MaximumAgeVariation,
+                            this.VelocityAtEnd,
+                            this.Gravity,
+                            this.StartSize,
+                            this.EndSize,
+                            this.MinimumColor,
+                            this.MaximumColor,
+                            this.RotateSpeed,
+                            this.TextureCount,
+                            this.Texture);
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
+                        for (int p = 0; p < technique.PassCount; p++)
+                        {
+                            graphics.EffectPassApply(technique, p, 0);
 
-                    graphics.Draw(this.ActiveParticles, 0);
+                            graphics.Draw(this.ActiveParticles, 0);
+                        }
+                    }
                 }
             }
         }

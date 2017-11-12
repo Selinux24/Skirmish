@@ -275,12 +275,13 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Billboard)
                 {
-                    switch (mode)
+                    if (mode.HasFlag(DrawerModesEnum.ShadowMap))
                     {
-                        case DrawerModesEnum.ShadowMap:
-                            return this.ShadowMapBillboard;
-                        default:
-                            throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                        return this.ShadowMapBillboard;
+                    }
+                    else
+                    {
+                        throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }
                 }
                 else

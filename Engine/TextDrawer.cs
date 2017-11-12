@@ -223,33 +223,38 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (!string.IsNullOrWhiteSpace(this.text))
+            var mode = context.DrawerMode;
+            if (mode.HasFlag(DrawerModesEnum.TransparentOnly))
             {
-                if (this.updateBuffers)
+                if (!string.IsNullOrWhiteSpace(this.text))
                 {
-                    this.BufferManager.WriteBuffer(this.vertexBuffer.Slot, this.vertexBuffer.Offset, this.vertices);
-                    this.BufferManager.WriteBuffer(this.indexBuffer.Slot, this.indexBuffer.Offset, this.indices);
+                    if (this.updateBuffers)
+                    {
+                        this.BufferManager.WriteBuffer(this.vertexBuffer.Slot, this.vertexBuffer.Offset, this.vertices);
+                        this.BufferManager.WriteBuffer(this.indexBuffer.Slot, this.indexBuffer.Offset, this.indices);
 
-                    this.vertexDrawCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
-                    this.indexDrawCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
+                        this.vertexDrawCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
+                        this.indexDrawCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
 
-                    this.updateBuffers = false;
+                        this.updateBuffers = false;
+                    }
+
+                    this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+
+                    var effect = DrawerPool.EffectDefaultFont;
+                    var technique = effect.FontDrawer;
+
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+
+                    if (this.ShadowColor != Color.Transparent)
+                    {
+                        //Draw shadow
+                        this.DrawText(effect, technique, this.localShadow, this.ShadowColor);
+                    }
+
+                    //Draw text
+                    this.DrawText(effect, technique, this.local, this.TextColor);
                 }
-
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-
-                var technique = DrawerPool.EffectDefaultFont.FontDrawer;
-
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
-
-                if (this.ShadowColor != Color.Transparent)
-                {
-                    //Draw shadow
-                    this.DrawText(context, technique, this.localShadow, this.ShadowColor);
-                }
-
-                //Draw text
-                this.DrawText(context, technique, this.local, this.TextColor);
             }
         }
         /// <summary>
@@ -265,23 +270,19 @@ namespace Engine
         /// <summary>
         /// Draw text
         /// </summary>
-        /// <param name="context">Context</param>
+        /// <param name="effect">Effect</param>
         /// <param name="technique">Technique</param>
-        /// <param name="position">Position</param>
+        /// <param name="local">Local transform</param>
         /// <param name="color">Color</param>
-        private void DrawText(DrawContext context, EngineEffectTechnique technique, Matrix local, Color4 color)
+        private void DrawText(EffectDefaultFont effect, EngineEffectTechnique technique, Matrix local, Color4 color)
         {
-            var graphics = this.Game.Graphics;
-
-            #region Per frame update
-
-            DrawerPool.EffectDefaultFont.UpdatePerFrame(
+            effect.UpdatePerFrame(
                 local,
                 this.viewProjection,
                 color,
                 this.fontMap.Texture);
 
-            #endregion
+            var graphics = this.Game.Graphics;
 
             for (int p = 0; p < technique.PassCount; p++)
             {

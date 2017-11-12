@@ -173,54 +173,61 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.indexBuffer.Count > 0)
+            var mode = context.DrawerMode;
+
+            if (mode.HasFlag(DrawerModesEnum.ShadowMap) ||
+                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
             {
-                var graphics = this.Game.Graphics;
-
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-
-                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                if (this.indexBuffer.Count > 0)
                 {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-                }
+                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
+                    {
+                        Counters.InstancesPerFrame++;
+                        Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+                    }
 
-                var effect = DrawerPool.EffectDefaultClouds;
-                var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
+                    this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+                    var effect = DrawerPool.EffectDefaultClouds;
+                    var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
 
-                effect.UpdatePerFrame(
-                    this.rotation * Matrix.Translation(context.EyePosition),
-                    context.ViewProjection,
-                    this.brightness,
-                    this.FadingDistance,
-                    this.skyTexture1,
-                    this.skyTexture2);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
-                if (this.mode == SkyPlaneMode.Static)
-                {
-                    effect.UpdatePerFrameStatic(
-                        this.firstLayerTranslation,
-                        this.secondLayerTranslation);
-                }
-                else
-                {
-                    effect.UpdatePerFramePerturbed(
-                        this.translation,
-                        this.PerturbationScale);
-                }
+                    effect.UpdatePerFrame(
+                        this.rotation * Matrix.Translation(context.EyePosition),
+                        context.ViewProjection,
+                        this.brightness,
+                        this.FadingDistance,
+                        this.skyTexture1,
+                        this.skyTexture2);
 
-                graphics.SetBlendAdditive();
+                    if (this.mode == SkyPlaneMode.Static)
+                    {
+                        effect.UpdatePerFrameStatic(
+                            this.firstLayerTranslation,
+                            this.secondLayerTranslation);
+                    }
+                    else
+                    {
+                        effect.UpdatePerFramePerturbed(
+                            this.translation,
+                            this.PerturbationScale);
+                    }
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
+                    var graphics = this.Game.Graphics;
 
-                    graphics.DrawIndexed(
-                        this.indexBuffer.Count,
-                        this.indexBuffer.Offset,
-                        this.vertexBuffer.Offset);
+                    graphics.SetBlendAdditive();
+
+                    for (int p = 0; p < technique.PassCount; p++)
+                    {
+                        graphics.EffectPassApply(technique, p, 0);
+
+                        graphics.DrawIndexed(
+                            this.indexBuffer.Count,
+                            this.indexBuffer.Offset,
+                            this.vertexBuffer.Offset);
+                    }
                 }
             }
         }

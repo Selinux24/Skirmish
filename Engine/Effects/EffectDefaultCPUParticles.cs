@@ -360,12 +360,13 @@ namespace Engine.Effects
             {
                 if (vertexType == VertexTypes.Particle)
                 {
-                    switch (mode)
+                    if (mode.HasFlag(DrawerModesEnum.Forward))
                     {
-                        case DrawerModesEnum.Forward:
-                            return rotation ? this.RotationDraw : this.NonRotationDraw;
-                        default:
-                            throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
+                        return rotation ? this.RotationDraw : this.NonRotationDraw;
+                    }
+                    else
+                    {
+                        throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
                     }
                 }
                 else

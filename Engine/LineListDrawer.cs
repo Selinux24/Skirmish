@@ -85,40 +85,47 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            this.WriteDataInBuffer();
+            var mode = context.DrawerMode;
 
-            if (this.drawCount > 0)
+            if (mode.HasFlag(DrawerModesEnum.ShadowMap) ||
+                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
             {
-                var graphics = this.Game.Graphics;
+                this.WriteDataInBuffer();
 
-                if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                if (this.drawCount > 0)
                 {
-                    Counters.InstancesPerFrame += this.dictionary.Count;
-                    Counters.PrimitivesPerFrame += this.drawCount / 2;
-                }
+                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
+                    {
+                        Counters.InstancesPerFrame += this.dictionary.Count;
+                        Counters.PrimitivesPerFrame += this.drawCount / 2;
+                    }
 
-                var effect = DrawerPool.EffectDefaultBasic;
-                var technique = effect.GetTechnique(VertexTypes.PositionColor, false, DrawingStages.Drawing, context.DrawerMode);
+                    var effect = DrawerPool.EffectDefaultBasic;
+                    var technique = effect.GetTechnique(VertexTypes.PositionColor, false, DrawingStages.Drawing, mode);
 
-                #region Per frame update
+                    #region Per frame update
 
-                effect.UpdatePerFrame(context.World, context.ViewProjection);
+                    effect.UpdatePerFrame(context.World, context.ViewProjection);
 
-                #endregion
+                    #endregion
 
-                #region Per object update
+                    #region Per object update
 
-                effect.UpdatePerObject(false, null, null, null, 0, 0, 0);
+                    effect.UpdatePerObject(false, null, null, null, 0, 0, 0);
 
-                #endregion
+                    #endregion
 
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.LineList);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.LineList);
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
+                    var graphics = this.Game.Graphics;
 
-                    graphics.Draw(this.drawCount, this.vertexBuffer.Offset);
+                    for (int p = 0; p < technique.PassCount; p++)
+                    {
+                        graphics.EffectPassApply(technique, p, 0);
+
+                        graphics.Draw(this.drawCount, this.vertexBuffer.Offset);
+                    }
                 }
             }
         }

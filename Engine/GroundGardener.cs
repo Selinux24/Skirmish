@@ -369,7 +369,7 @@ namespace Engine
                 {
                     var graphics = this.Game.Graphics;
 
-                    if (context.DrawerMode != DrawerModesEnum.ShadowMap)
+                    if (!context.DrawerMode.HasFlag(DrawerModesEnum.ShadowMap))
                     {
                         Counters.InstancesPerFrame++;
                         Counters.PrimitivesPerFrame += this.vertexDrawCount / 3;
@@ -732,24 +732,31 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.visibleNodes != null && this.visibleNodes.Length > 0)
-            {
-                foreach (var item in this.visibleNodes)
-                {
-                    var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch != null && b.CurrentPatch.CurrentNode == item);
-                    if (buffers.Count > 0)
-                    {
-                        foreach (var buffer in buffers)
-                        {
-                            var vegetationTechnique = this.SetTechniqueVegetation(context, buffer.CurrentPatch.Channel);
-                            if (vegetationTechnique != null)
-                            {
-                                this.BufferManager.SetInputAssembler(
-                                    vegetationTechnique,
-                                    buffer.VertexBuffer.Slot,
-                                    PrimitiveTopology.PointList);
+            var mode = context.DrawerMode;
 
-                                buffer.DrawFoliage(context, vegetationTechnique);
+            if ((mode.HasFlag(DrawerModesEnum.ShadowMap)) ||
+                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
+            {
+                if (this.visibleNodes != null && this.visibleNodes.Length > 0)
+                {
+                    foreach (var item in this.visibleNodes)
+                    {
+                        var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch != null && b.CurrentPatch.CurrentNode == item);
+                        if (buffers.Count > 0)
+                        {
+                            foreach (var buffer in buffers)
+                            {
+                                var vegetationTechnique = this.SetTechniqueVegetation(context, buffer.CurrentPatch.Channel);
+                                if (vegetationTechnique != null)
+                                {
+                                    this.BufferManager.SetInputAssembler(
+                                        vegetationTechnique,
+                                        buffer.VertexBuffer.Slot,
+                                        PrimitiveTopology.PointList);
+
+                                    buffer.DrawFoliage(context, vegetationTechnique);
+                                }
                             }
                         }
                     }
@@ -765,8 +772,10 @@ namespace Engine
         /// <returns>Returns the selected technique</returns>
         private EngineEffectTechnique SetTechniqueVegetation(DrawContext context, int channel)
         {
-            if (context.DrawerMode == DrawerModesEnum.Forward) return this.SetTechniqueVegetationDefault(context, channel);
-            if (context.DrawerMode == DrawerModesEnum.ShadowMap) return this.SetTechniqueVegetationShadowMap(context, channel);
+            var mode = context.DrawerMode;
+
+            if (mode.HasFlag(DrawerModesEnum.Forward)) return this.SetTechniqueVegetationDefault(context, channel);
+            if (mode.HasFlag(DrawerModesEnum.ShadowMap)) return this.SetTechniqueVegetationShadowMap(context, channel);
             else return null;
         }
         /// <summary>

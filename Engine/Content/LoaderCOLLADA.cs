@@ -397,6 +397,7 @@ namespace Engine.Content
 
                                 subMesh.Material = materialName;
                                 subMesh.Textured = (mat.DiffuseTexture != null);
+                                subMesh.Transparent = mat.Transparent != Color.Transparent;
                             }
 
                             modelContent.Geometry.Add(geometry.Id, subMesh.Material, subMesh);
@@ -1422,7 +1423,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new EngineException("El valor no es un Vector2 válido.");
+                throw new EngineException("Value cannot be parsed to Vector2.");
             }
         }
         /// <summary>
@@ -1438,7 +1439,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new EngineException("El valor no es un Vector3 válido.");
+                throw new EngineException("Value cannot be parsed to Vector3.");
             }
         }
         /// <summary>
@@ -1454,7 +1455,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new EngineException("El valor no es un Vector4 válido.");
+                throw new EngineException("Value cannot be parsed to Vector4.");
             }
         }
         /// <summary>
@@ -1474,7 +1475,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new EngineException("El valor no es un Color4 válido.");
+                throw new EngineException("Value cannot be parsed to Color4.");
             }
         }
         /// <summary>
@@ -1524,7 +1525,7 @@ namespace Engine.Content
             }
             else
             {
-                throw new EngineException("El valor no es una matriz válida.");
+                throw new EngineException("Value cannot be parsed to Matrix 4x4.");
             }
         }
 
