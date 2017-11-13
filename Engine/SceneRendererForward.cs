@@ -648,6 +648,8 @@ namespace Engine
             //Then transparents
             var transparents = components.FindAll(c =>
             {
+                if (!c.AlphaEnabled) return false;
+
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();

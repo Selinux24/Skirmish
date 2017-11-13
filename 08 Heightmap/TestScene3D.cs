@@ -20,6 +20,7 @@ namespace Heightmap
         private const int layerFoliage = 2;
         private const int layerEffects = 3;
         private const int layerHUD = 99;
+        private const int layerCursor = 100;
 
         private Random rnd = new Random();
 
@@ -95,12 +96,14 @@ namespace Heightmap
 
             var cursorDesc = new SpriteDescription()
             {
+                Name = "Cursor",
                 Textures = new[] { "target.png" },
+                Color = Color.Red,
                 Width = 20,
                 Height = 20,
             };
 
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI, layerCursor);
 
             #endregion
 
@@ -126,6 +129,7 @@ namespace Heightmap
 
             var spDesc = new SpriteDescription()
             {
+                Name = "Background",
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.help2.Instance.Top + this.help2.Instance.Height + 3,
@@ -383,6 +387,7 @@ namespace Heightmap
             sw.Restart();
             var vDesc = new GroundGardenerDescription()
             {
+                Name = "Grass",
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map.png",
                 Material = new MaterialDescription()
@@ -403,7 +408,8 @@ namespace Heightmap
                 },
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
-                    VegetationTextures = new[] { "grass_v.dds" },
+                    VegetationTextures = new[] { "grass_d.dds" },
+                    VegetationNormalMaps = new[] { "grass_n.dds" },
                     Saturation = 10f,
                     StartRadius = 0f,
                     EndRadius = 100f,
@@ -438,6 +444,7 @@ namespace Heightmap
             sw.Restart();
             var vDesc2 = new GroundGardenerDescription()
             {
+                Name = "Flowers",
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map_flowers.png",
                 ChannelRed = new GroundGardenerDescription.Channel()
@@ -548,6 +555,11 @@ namespace Heightmap
             this.load.Instance.Text = loadingText;
 
             #endregion
+        }
+
+        public override void Initialized()
+        {
+            base.Initialized();
 
             this.SetGround(this.terrain, true);
 
@@ -847,9 +859,12 @@ namespace Heightmap
 
             var bboxesDrawerDesc = new LineListDrawerDescription()
             {
+                Name = "DEBUG++ Terrain nodes bounding boxes",
+                AlphaEnabled = true,
                 DepthEnabled = true,
+                Dynamic = true,
+                Color = new Color4(1.0f, 0.0f, 0.0f, 0.55f),
                 Lines = listBoxes,
-                Color = new Color(1.0f, 0.0f, 0.0f, 0.5f),
             };
             this.bboxesDrawer = this.AddComponent<LineListDrawer>(bboxesDrawerDesc);
             this.bboxesDrawer.Visible = false;

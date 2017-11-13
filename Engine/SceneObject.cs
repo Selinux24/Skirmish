@@ -1,14 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine
 {
+    /// <summary>
+    /// Scene object
+    /// </summary>
     public class SceneObject : IDisposable
     {
+        /// <summary>
+        /// Internal object
+        /// </summary>
         protected object baseObject = null;
 
         /// <summary>
@@ -67,6 +69,11 @@ namespace Engine
             }
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="obj">Object</param>
+        /// <param name="description">Description</param>
         protected SceneObject(object obj, SceneObjectDescription description)
         {
             this.baseObject = obj;
@@ -83,7 +90,22 @@ namespace Engine
             this.AlphaEnabled = description.AlphaEnabled;
             this.Usage = SceneObjectUsageEnum.None;
         }
+        /// <summary>
+        /// Resource dispose
+        /// </summary>
+        public void Dispose()
+        {
+            if (this.baseObject is IDisposable)
+            {
+                Helper.Dispose((IDisposable)this.baseObject);
+            }
+        }
 
+        /// <summary>
+        /// Gets the internal instance as specified type
+        /// </summary>
+        /// <typeparam name="T">Result type</typeparam>
+        /// <returns>Returns the instance as type</returns>
         public T Get<T>()
         {
             if (this.baseObject is T)
@@ -93,23 +115,35 @@ namespace Engine
 
             return default(T);
         }
-
+        /// <summary>
+        /// Gets if the instance implements type
+        /// </summary>
+        /// <typeparam name="T">Result type</typeparam>
+        /// <returns>Returns true if the instance implements the type</returns>
         public bool Is<T>()
         {
             return (this.baseObject is T);
         }
 
-        public void Dispose()
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the instance as text</returns>
+        public override string ToString()
         {
-            if (this.baseObject is IDisposable)
-            {
-                Helper.Dispose((IDisposable)this.baseObject);
-            }
+            return string.Format("SceneObject: {0}", this.Name);
         }
     }
 
+    /// <summary>
+    /// Scene object
+    /// </summary>
+    /// <typeparam name="T">Internal instance type</typeparam>
     public class SceneObject<T> : SceneObject
     {
+        /// <summary>
+        /// Gets the instance
+        /// </summary>
         public T Instance
         {
             get
@@ -117,6 +151,9 @@ namespace Engine
                 return (T)base.baseObject;
             }
         }
+        /// <summary>
+        /// Gets the geometry helper
+        /// </summary>
         public IRayPickable<Triangle> Geometry
         {
             get
@@ -124,6 +161,9 @@ namespace Engine
                 return this.Get<IRayPickable<Triangle>>();
             }
         }
+        /// <summary>
+        /// Gets the 3D manipulator helper
+        /// </summary>
         public Manipulator3D Transform
         {
             get
@@ -131,6 +171,9 @@ namespace Engine
                 return this.Get<ITransformable3D>()?.Manipulator;
             }
         }
+        /// <summary>
+        /// Gets the 2D manipulator helper
+        /// </summary>
         public Manipulator2D ScreenTransform
         {
             get
@@ -139,11 +182,22 @@ namespace Engine
             }
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="obj">Instance</param>
+        /// <param name="description">Description</param>
         public SceneObject(T obj, SceneObjectDescription description) : base(obj, description)
         {
 
         }
 
+        /// <summary>
+        /// Gets the component by index
+        /// </summary>
+        /// <typeparam name="Y">Component type</typeparam>
+        /// <param name="index">Index</param>
+        /// <returns>Returns the component at index that implements type</returns>
         public Y GetComponent<Y>(int index)
         {
             var cmpObj = this.Get<IComposed>();

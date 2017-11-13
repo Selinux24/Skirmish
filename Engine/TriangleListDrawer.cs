@@ -86,36 +86,29 @@ namespace Engine
 
                 if (this.drawCount > 0)
                 {
-                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
-                    {
-                        Counters.InstancesPerFrame += this.dictionary.Count;
-                        Counters.PrimitivesPerFrame += this.drawCount / 3;
-                    }
-
                     var effect = DrawerPool.EffectDefaultBasic;
                     var technique = effect.GetTechnique(VertexTypes.PositionColor, false, DrawingStages.Drawing, mode);
-
-                    #region Per frame update
-
-                    effect.UpdatePerFrame(context.World, context.ViewProjection);
-
-                    #endregion
-
-                    #region Per object update
-
-                    effect.UpdatePerObject(false, null, null, null, 0, 0, 0);
-
-                    #endregion
-
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
-
-                    var graphics = this.Game.Graphics;
-
-                    for (int p = 0; p < technique.PassCount; p++)
+                    if (technique != null)
                     {
-                        graphics.EffectPassApply(technique, p, 0);
+                        if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
+                        {
+                            Counters.InstancesPerFrame += this.dictionary.Count;
+                            Counters.PrimitivesPerFrame += this.drawCount / 3;
+                        }
 
-                        graphics.Draw(this.drawCount, this.vertexBuffer.Offset);
+                        effect.UpdatePerFrame(context.World, context.ViewProjection);
+                        effect.UpdatePerObject(false, null, null, null, 0, 0, 0);
+
+                        this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+
+                        var graphics = this.Game.Graphics;
+
+                        for (int p = 0; p < technique.PassCount; p++)
+                        {
+                            graphics.EffectPassApply(technique, p, 0);
+
+                            graphics.Draw(this.drawCount, this.vertexBuffer.Offset);
+                        }
                     }
                 }
             }

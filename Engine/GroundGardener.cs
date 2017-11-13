@@ -530,10 +530,15 @@ namespace Engine
                     {
                         EngineShaderResourceView foliageTextures = null;
                         EngineShaderResourceView foliageNormalMaps = null;
-                        uint textureCount = 0;
-                        uint normalMapCount = 0;
+                        int textureCount = channel.VegetationTextures != null ? channel.VegetationTextures.Length : 0;
+                        int normalMapCount = channel.VegetationNormalMaps != null ? channel.VegetationNormalMaps.Length : 0;
 
-                        if (channel.VegetationTextures != null && channel.VegetationTextures.Length > 0)
+                        if (normalMapCount != 0 && normalMapCount != textureCount)
+                        {
+                            throw new EngineException("Normal map arrays must have the same slices than diffuse texture arrays");
+                        }
+
+                        if (textureCount > 0)
                         {
                             var image = new ImageContent()
                             {
@@ -541,10 +546,9 @@ namespace Engine
                             };
 
                             foliageTextures = this.Game.ResourceManager.CreateResource(image);
-                            textureCount = (uint)image.Count;
                         }
 
-                        if (channel.VegetationNormalMaps != null && channel.VegetationNormalMaps.Length > 0)
+                        if (normalMapCount > 0)
                         {
                             var image = new ImageContent()
                             {
@@ -552,7 +556,6 @@ namespace Engine
                             };
 
                             foliageNormalMaps = this.Game.ResourceManager.CreateResource(image);
-                            normalMapCount = (uint)image.Count;
                         }
 
                         foliageChannels.Add(
@@ -566,8 +569,8 @@ namespace Engine
                                 Delta = channel.Delta,
                                 StartRadius = channel.StartRadius,
                                 EndRadius = channel.EndRadius,
-                                TextureCount = textureCount,
-                                NormalMapCount = normalMapCount,
+                                TextureCount = (uint)textureCount,
+                                NormalMapCount = (uint)normalMapCount,
                                 Textures = foliageTextures,
                                 NormalMaps = foliageNormalMaps,
                                 WindEffect = channel.WindEffect,

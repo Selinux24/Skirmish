@@ -32,6 +32,7 @@ namespace Engine
         {
             return new TextDrawerDescription()
             {
+                Name = string.Format("TextBox {0} {1}", font, size),
                 Font = font,
                 FontSize = size,
                 TextColor = textColor,

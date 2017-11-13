@@ -153,6 +153,11 @@ void GSFoliage8(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, 
             gout.primitiveID = primID;
 
             outputStream.Append(gout);
+
+            if (i % 4 == 3)
+            {
+                outputStream.RestartStrip();
+            }
         }
     }
 }
@@ -179,11 +184,11 @@ void GSFoliage16(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
             float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0),
             float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0), float4(0, 0, 0, 0)
         };
-        float3 p[4] = 
-        { 
-            float3(+gDelta.x, 0.0f, +gDelta.z), 
-            float3(+gDelta.x, 0.0f, -gDelta.z), 
-            float3(-gDelta.x, 0.0f, +gDelta.z), 
+        float3 p[4] =
+        {
+            float3(+gDelta.x, 0.0f, +gDelta.z),
+            float3(+gDelta.x, 0.0f, -gDelta.z),
+            float3(-gDelta.x, 0.0f, +gDelta.z),
             float3(-gDelta.x, 0.0f, -gDelta.z)
         };
 
@@ -219,6 +224,11 @@ void GSFoliage16(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
             gout.primitiveID = primID;
 
             outputStream.Append(gout);
+
+            if (i % 4 == 3)
+            {
+                outputStream.RestartStrip();
+            }
         }
     }
 }

@@ -133,6 +133,11 @@ void GSFoliage8(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, 
             gout.primitiveID = primID;
 
             outputStream.Append(gout);
+
+            if (i % 4 == 3)
+            {
+                outputStream.RestartStrip();
+            }
         }
     }
 }
@@ -197,6 +202,11 @@ void GSFoliage16(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
             gout.primitiveID = primID;
 
             outputStream.Append(gout);
+
+            if (i % 4 == 3)
+            {
+                outputStream.RestartStrip();
+            }
         }
     }
 }
