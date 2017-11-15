@@ -20,7 +20,7 @@ namespace SceneTest
                 cl.LockMouse = true;
 #endif
 
-                cl.AddScene(new SceneTextures(cl) { Active = true });
+                cl.AddScene<SceneTextures>();
 
                 cl.Run();
             }

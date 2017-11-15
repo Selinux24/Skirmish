@@ -15,11 +15,11 @@ namespace Engine
         /// <summary>
         /// Default ligths
         /// </summary>
-        public static readonly SceneLights Default = CreateDefault();
+        public static SceneLights Default { get { return CreateDefault(); } }
         /// <summary>
         /// Empty lights
         /// </summary>
-        public static readonly SceneLights Empty = new SceneLights();
+        public static SceneLights Empty { get { return new SceneLights(); } }
 
         /// <summary>
         /// Create default set of lights

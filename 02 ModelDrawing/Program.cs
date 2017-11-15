@@ -20,7 +20,7 @@ namespace ModelDrawing
                 cl.LockMouse = true;
 #endif
                 
-                cl.AddScene(new TestScene(cl) { Active = true, });
+                cl.AddScene<TestScene>();
 
                 cl.Run();
             }

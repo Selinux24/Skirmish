@@ -191,6 +191,11 @@ namespace SceneTest
 
             #endregion
 
+            if (this.Game.Input.KeyJustReleased(Keys.Tab))
+            {
+                this.Game.SetScene<SceneTextures>();
+            }
+
             #region Debug
 
             if (this.Game.Input.KeyJustReleased(Keys.F1))

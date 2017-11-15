@@ -3,6 +3,7 @@ using SharpDX.Windows;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -18,6 +19,8 @@ namespace Engine
         /// Scene list
         /// </summary>
         private List<Scene> scenes = new List<Scene>();
+
+        private Scene nextScene = null;
         /// <summary>
         /// Application exiting flag
         /// </summary>
@@ -200,14 +203,37 @@ namespace Engine
             RenderLoop.Run(this.Form, this.Frame);
         }
         /// <summary>
-        /// Adds scene to collection
+        /// Adds a new scene to collection
         /// </summary>
-        /// <param name="scene">Scene</param>
-        public void AddScene(Scene scene)
+        /// <typeparam name="T">Type of scene</typeparam>
+        /// <param name="active">Sets the new scene as active</param>
+        /// <param name="order">The processing order of the scene</param>
+        public void AddScene<T>(bool active = true, int order = 1) where T : Scene
+        {
+            Scene scene = (T)Activator.CreateInstance(typeof(T), new[] { this });
+            scene.Active = active;
+            scene.Order = order;
+
+            this.AddScene(scene);
+        }
+        /// <summary>
+        /// Creates a new scene and sets it as the unique active scene
+        /// </summary>
+        /// <typeparam name="T">Type of scene</typeparam>
+        /// <remarks>Current scenes will be removed from internal scene collection</remarks>
+        public void SetScene<T>() where T : Scene
+        {
+            this.nextScene = (T)Activator.CreateInstance(typeof(T), new[] { this });
+        }
+        /// <summary>
+        /// Adds a scene to the internal scene collection
+        /// </summary>
+        /// <param name="scene">New scene</param>
+        private void AddScene(Scene scene)
         {
             this.scenes.Add(scene);
             this.scenes.Sort(
-                delegate(Scene p1, Scene p2)
+                delegate (Scene p1, Scene p2)
                 {
                     return p2.Order.CompareTo(p1.Order);
                 });
@@ -311,6 +337,38 @@ namespace Engine
                 //Exit form
                 this.Form.Close();
             }
+            else if (this.nextScene != null)
+            {
+                this.ChangeScene(this.nextScene);
+                this.nextScene = null;
+            }
+        }
+        /// <summary>
+        /// Unloads the current scenes and loads the specified scene
+        /// </summary>
+        /// <param name="sceneToLoad">Scene to load</param>
+        private void ChangeScene(Scene sceneToLoad)
+        {
+            foreach (var s in this.scenes)
+            {
+                s.Active = false;
+            }
+
+            Task.Run(() =>
+            {
+                List<Scene> toDispose = new List<Scene>(this.scenes);
+                this.scenes.Clear();
+
+                this.AddScene(sceneToLoad);
+                sceneToLoad.Active = true;
+
+                foreach (var s in toDispose)
+                {
+                    s.Dispose();
+                }
+                toDispose.Clear();
+                toDispose = null;
+            });
         }
     }
 }

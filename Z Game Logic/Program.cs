@@ -20,7 +20,7 @@ namespace GameLogic
 
                 GameEnvironment.Background = Color.CornflowerBlue;
 
-                game.AddScene(new SceneObjects(game) { Active = true, });
+                game.AddScene<SceneObjects>();
 
                 game.Run();
             }
