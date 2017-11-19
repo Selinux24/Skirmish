@@ -13,29 +13,23 @@ namespace Engine
         #region Preconfigured lights
 
         /// <summary>
-        /// Default ligths
-        /// </summary>
-        public static SceneLights Default { get { return CreateDefault(); } }
-        /// <summary>
-        /// Empty lights
-        /// </summary>
-        public static SceneLights Empty { get { return new SceneLights(); } }
-
-        /// <summary>
         /// Create default set of lights
         /// </summary>
         /// <returns>Returns default set of ligths</returns>
         public static SceneLights CreateDefault()
         {
+            var lights = new[]
+            {
+                SceneLightDirectional.KeyLight,
+                SceneLightDirectional.FillLight,
+                SceneLightDirectional.BackLight,
+            };
+
             return new SceneLights()
             {
                 GlobalAmbientLight = 0.1f,
-                DirectionalLights = new[]
-                {
-                    SceneLightDirectional.KeyLight,
-                    SceneLightDirectional.FillLight,
-                    SceneLightDirectional.BackLight,
-                },
+                DirectionalLights = lights,
+                visibleDirectionalLights = lights,
             };
         }
 
@@ -56,7 +50,7 @@ namespace Engine
         /// <summary>
         /// Visible directional lights
         /// </summary>
-        private SceneLightDirectional[] visibleDirectionalLights = null;
+        private SceneLightDirectional[] visibleDirectionalLights = new SceneLightDirectional[] { };
         /// <summary>
         /// Visible position lights
         /// </summary>

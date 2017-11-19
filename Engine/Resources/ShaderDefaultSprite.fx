@@ -16,6 +16,7 @@ cbuffer cbPerObject : register(b1)
 cbuffer cbPerInstance : register(b2)
 {
 	float gTextureIndex;
+    float3 gPAD21;
 };
 
 Texture2DArray gTextureArray : register(t0);
@@ -56,7 +57,7 @@ PSVertexPositionTexture VSPositionTexture(VSVertexPositionTexture input)
 
 float4 PSPositionTexture(PSVertexPositionTexture input) : SV_TARGET
 {
-	return gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)) * gColor;
+    return saturate(gTextureArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex)) * gColor);
 }
 float4 PSPositionTextureRED(PSVertexPositionTexture input) : SV_TARGET
 {

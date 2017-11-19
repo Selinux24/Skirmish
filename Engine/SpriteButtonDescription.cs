@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine
 {
     using Engine.Common;
@@ -9,13 +10,36 @@ namespace Engine
     public class SpriteButtonDescription : SceneObjectDescription
     {
         /// <summary>
+        /// Two state button
+        /// </summary>
+        public bool TwoStateButton;
+
+        /// <summary>
         /// Texture to show when released state
         /// </summary>
         public string TextureReleased;
         /// <summary>
+        /// Released button color
+        /// </summary>
+        public Color4 ColorReleased;
+        /// <summary>
+        /// Texture released UV map
+        /// </summary>
+        public Vector4 TextureReleasedUVMap;
+
+        /// <summary>
         /// Texture to show when pressed state
         /// </summary>
         public string TexturePressed;
+        /// <summary>
+        /// Pressed button color
+        /// </summary>
+        public Color4 ColorPressed;
+        /// <summary>
+        /// Texture pressed UV map
+        /// </summary>
+        public Vector4 TexturePressedUVMap;
+
         /// <summary>
         /// Left position
         /// </summary>
@@ -52,6 +76,10 @@ namespace Engine
             this.DeferredEnabled = false;
             this.DepthEnabled = false;
             this.AlphaEnabled = true;
+
+            this.TwoStateButton = false;
+            this.ColorReleased = new Color4(1f, 1f, 1f, 1f);
+            this.ColorPressed = new Color4(1f, 1f, 1f, 1f);
         }
     }
 }

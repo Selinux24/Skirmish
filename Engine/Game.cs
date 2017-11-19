@@ -354,21 +354,17 @@ namespace Engine
                 s.Active = false;
             }
 
-            Task.Run(() =>
+            List<Scene> toDispose = new List<Scene>(this.scenes);
+            foreach (var s in toDispose)
             {
-                List<Scene> toDispose = new List<Scene>(this.scenes);
-                this.scenes.Clear();
+                s.Dispose();
+            }
+            toDispose.Clear();
+            toDispose = null;
 
-                this.AddScene(sceneToLoad);
-                sceneToLoad.Active = true;
-
-                foreach (var s in toDispose)
-                {
-                    s.Dispose();
-                }
-                toDispose.Clear();
-                toDispose = null;
-            });
+            this.scenes.Clear();
+            this.AddScene(sceneToLoad);
+            sceneToLoad.Active = true;
         }
     }
 }

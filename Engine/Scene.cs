@@ -213,7 +213,7 @@ namespace Engine
                 this.Game.Form.RenderWidth,
                 this.Game.Form.RenderHeight);
 
-            this.Lights = SceneLights.Default;
+            this.Lights = SceneLights.CreateDefault();
 
             this.PerformFrustumCulling = true;
 

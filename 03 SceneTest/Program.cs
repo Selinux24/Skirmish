@@ -7,20 +7,12 @@ namespace SceneTest
         static void Main()
         {
 #if DEBUG
-            using (Game cl = new Game("3 SceneTest", false, 800, 450, true, 0, 0))
+            using (Game cl = new Game("3 SceneTest", false, 1600, 900, true, 0, 8))
 #else
             using (Game cl = new Game("3 SceneTest", true, 0, 0, true, 0, 0))
 #endif
             {
-#if DEBUG
-                cl.VisibleMouse = false;
-                cl.LockMouse = false;
-#else
-                cl.VisibleMouse = false;
-                cl.LockMouse = true;
-#endif
-
-                cl.AddScene<SceneTextures>();
+                cl.AddScene<SceneStart>();
 
                 cl.Run();
             }

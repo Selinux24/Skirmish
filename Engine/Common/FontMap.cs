@@ -58,6 +58,10 @@ namespace Engine.Common
         /// </summary>
         public float Size { get; private set; }
         /// <summary>
+        /// Font style
+        /// </summary>
+        public FontMapStyleEnum Style { get; private set; }
+        /// <summary>
         /// Font texture
         /// </summary>
         public EngineShaderResourceView Texture { get; private set; }
@@ -88,16 +92,18 @@ namespace Engine.Common
         /// <param name="game">Game</param>
         /// <param name="font">Font name</param>
         /// <param name="size">Size</param>
+        /// <param name="bold">Weight</param>
         /// <returns>Returns created font map</returns>
-        public static FontMap Map(Game game, string font, float size)
+        public static FontMap Map(Game game, string font, float size, FontMapStyleEnum style)
         {
-            var fMap = gCache.Find(f => f.Font == font && f.Size == size);
+            var fMap = gCache.Find(f => f.Font == font && f.Size == size && f.Style == style);
             if (fMap == null)
             {
                 fMap = new FontMap()
                 {
                     Font = font,
                     Size = size,
+                    Style = style,
                 };
 
                 using (var bmp = new Bitmap(TEXTURESIZE, TEXTURESIZE))
@@ -110,16 +116,14 @@ namespace Engine.Common
                         new Region(new System.Drawing.RectangleF(0, 0, TEXTURESIZE, TEXTURESIZE)));
 
                     using (var fmt = StringFormat.GenericDefault)
-                    using (var fnt = new Font(font, size, FontStyle.Regular, GraphicsUnit.Pixel))
+                    using (var fnt = new Font(font, size, (FontStyle)style, GraphicsUnit.Pixel))
                     {
                         float left = 0f;
                         float top = 0f;
 
-                        char[] keys = FontMap.ValidKeys;
-
-                        for (int i = 0; i < keys.Length; i++)
+                        for (int i = 0; i < ValidKeys.Length; i++)
                         {
-                            char c = keys[i];
+                            char c = ValidKeys[i];
 
                             var s = gra.MeasureString(
                                 c.ToString(),
@@ -135,7 +139,7 @@ namespace Engine.Common
                             if (left + s.Width >= TEXTURESIZE)
                             {
                                 left = 0f;
-                                top += s.Height + 1;
+                                top += (int)s.Height + 1;
                             }
 
                             gra.DrawString(
@@ -157,6 +161,7 @@ namespace Engine.Common
                             fMap.map.Add(c, chr);
 
                             left += s.Width;
+                            left = (int)left;
                         }
                     }
 
@@ -226,29 +231,23 @@ namespace Engine.Common
             {
                 if (this.map.ContainsKey(c))
                 {
-                    FontMapChar chr = this.map[c];
+                    var chr = this.map[c];
 
                     Vector3[] cv;
                     Vector2[] cuv;
                     uint[] ci;
                     GeometryUtil.CreateSprite(
                         pos,
-                        chr.Width,
-                        chr.Height,
-                        0,
-                        0,
-                        chr.X,
-                        chr.Y,
-                        FontMap.TEXTURESIZE,
-                        out cv,
-                        out cuv,
-                        out ci);
+                        chr.Width, chr.Height, 0, 0,
+                        chr.X, (int)chr.Y,
+                        TEXTURESIZE,
+                        out cv, out cuv, out ci);
 
                     ci.ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
 
                     vertList.AddRange(VertexPositionTexture.Generate(cv, cuv));
 
-                    pos.X += chr.Width - (this.Size / 6f);
+                    pos.X += chr.Width - (chr.Width * 0.3333f);
                     if (chr.Height > height) height = chr.Height;
                 }
             }

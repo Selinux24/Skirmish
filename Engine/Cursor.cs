@@ -11,6 +11,15 @@ namespace Engine
     public class Cursor : Sprite
     {
         /// <summary>
+        /// Times Cursor.Show() were called
+        /// </summary>
+        private static int showCount = 1;
+        /// <summary>
+        /// Times Cursor.Hide() were called
+        /// </summary>
+        private static int hideCount = 0;
+
+        /// <summary>
         /// Mouse screen position
         /// </summary>
         public static Point ScreenPosition
@@ -33,20 +42,36 @@ namespace Engine
         /// Gets or sets whether the cursor is positioned on center of the image
         /// </summary>
         public bool Centered { get; set; }
+        /// <summary>
+        /// Position delta
+        /// </summary>
+        public Vector2 Delta { get; set; }
 
         /// <summary>
         /// Shows the cursor
         /// </summary>
         public static void Show()
         {
-            System.Windows.Forms.Cursor.Show();
+            while (hideCount > 0)
+            {
+                hideCount--;
+                System.Windows.Forms.Cursor.Show();
+            }
+
+            showCount++;
         }
         /// <summary>
         /// Hides the cursor
         /// </summary>
         public static void Hide()
         {
-            System.Windows.Forms.Cursor.Hide();
+            while (showCount > 0)
+            {
+                showCount--;
+                System.Windows.Forms.Cursor.Hide();
+            }
+
+            hideCount++;
         }
 
         /// <summary>
@@ -54,10 +79,11 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Sprite description</param>
-        public Cursor(Scene scene, SpriteDescription description)
+        public Cursor(Scene scene, CursorDescription description)
             : base(scene, description)
         {
             this.Centered = description.Centered;
+            this.Delta = description.Delta;
         }
 
         /// <summary>
@@ -80,9 +106,9 @@ namespace Engine
                 top = (this.Game.Input.MouseY);
             }
 
-            this.CursorPosition = new Vector2((int)left, (int)top);
+            this.CursorPosition = new Vector2((int)left, (int)top) + this.Delta;
 
-            if (this.Centered && this.Game.Form.IsFullscreen)
+            if (this.Centered && this.Game.Input.LockMouse)
             {
                 this.Manipulator.SetPosition(this.Game.Form.RelativeCenter);
             }

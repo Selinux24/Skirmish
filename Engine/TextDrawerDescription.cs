@@ -2,8 +2,6 @@
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Text drawer description
     /// </summary>
@@ -18,7 +16,19 @@ namespace Engine
         /// <returns>Returns the new generated description</returns>
         public static TextDrawerDescription Generate(string font, int size, Color textColor)
         {
-            return Generate(font, size, textColor, Color.Transparent);
+            return Generate(font, size, FontMapStyleEnum.Regular, textColor, Color.Transparent);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="font">Font name</param>
+        /// <param name="size">Size</param>
+        /// <param name="style">Style</param>
+        /// <param name="textColor">Text color</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription Generate(string font, int size, FontMapStyleEnum style, Color textColor)
+        {
+            return Generate(font, size, style, textColor, Color.Transparent);
         }
         /// <summary>
         /// Generates a new description
@@ -30,11 +40,25 @@ namespace Engine
         /// <returns>Returns the new generated description</returns>
         public static TextDrawerDescription Generate(string font, int size, Color textColor, Color shadowColor)
         {
+            return Generate(font, size, FontMapStyleEnum.Regular, textColor, shadowColor);
+        }
+        /// <summary>
+        /// Generates a new description
+        /// </summary>
+        /// <param name="font">Font name</param>
+        /// <param name="size">Size</param>
+        /// <param name="style">Style</param>
+        /// <param name="textColor">Text color</param>
+        /// <param name="shadowColor">Shadow color</param>
+        /// <returns>Returns the new generated description</returns>
+        public static TextDrawerDescription Generate(string font, int size, FontMapStyleEnum style, Color textColor, Color shadowColor)
+        {
             return new TextDrawerDescription()
             {
-                Name = string.Format("TextBox {0} {1}", font, size),
+                Name = string.Format("TextBox {0} {1} {2}", font, size, style),
                 Font = font,
                 FontSize = size,
+                Style = style,
                 TextColor = textColor,
                 ShadowColor = shadowColor,
             };
@@ -49,6 +73,10 @@ namespace Engine
         /// </summary>
         public int FontSize;
         /// <summary>
+        /// Font style
+        /// </summary>
+        public FontMapStyleEnum Style;
+        /// <summary>
         /// Text color
         /// </summary>
         public Color4 TextColor;
@@ -56,6 +84,10 @@ namespace Engine
         /// Shadow color
         /// </summary>
         public Color4 ShadowColor;
+        /// <summary>
+        /// Shadow position delta
+        /// </summary>
+        public Vector2 ShadowDelta;
 
         /// <summary>
         /// Constructor
@@ -68,6 +100,9 @@ namespace Engine
             this.DeferredEnabled = false;
             this.DepthEnabled = false;
             this.AlphaEnabled = true;
+
+            this.Style = FontMapStyleEnum.Regular;
+            this.ShadowDelta = new Vector2(1, -1);
         }
     }
 }

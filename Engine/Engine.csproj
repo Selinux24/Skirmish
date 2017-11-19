@@ -213,6 +213,7 @@
     <Compile Include="Effects\EffectShadowTerrain.cs" />
     <Compile Include="Effects\EffectDefaultSkyScattering.cs" />
     <Compile Include="FoliageMap.cs" />
+    <Compile Include="FontMapStyleEnum.cs" />
     <Compile Include="GroundGardener.cs" />
     <Compile Include="GroundGardenerDescription.cs" />
     <Compile Include="Helpers\DDS\DDPFFlags.cs" />
@@ -301,6 +302,7 @@
     <Compile Include="SkyScattering.cs" />
     <Compile Include="SkyPlaneDescription.cs" />
     <Compile Include="SkyScatteringDescription.cs" />
+    <Compile Include="CursorDescription.cs" />
     <Compile Include="SpriteProgressBar.cs" />
     <Compile Include="SpriteProgressBarDescription.cs" />
     <Compile Include="SteerManipulatorController.cs" />

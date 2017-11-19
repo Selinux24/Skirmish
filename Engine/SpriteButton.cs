@@ -16,9 +16,13 @@ namespace Engine
         public event EventHandler Click;
 
         /// <summary>
-        /// Button sprite
+        /// Pressed sprite button
         /// </summary>
-        private Sprite button = null;
+        private Sprite buttonPressed = null;
+        /// <summary>
+        /// Release sprite button
+        /// </summary>
+        private Sprite buttonReleased = null;
         /// <summary>
         /// Button text drawer
         /// </summary>
@@ -52,8 +56,6 @@ namespace Engine
                 }
 
                 this.pressed = value;
-
-                this.button.TextureIndex = this.pressed ? 1 : 0;
             }
         }
         /// <summary>
@@ -79,11 +81,11 @@ namespace Engine
         /// <summary>
         /// Button width
         /// </summary>
-        public int Width { get { return (int)this.button.Width; } }
+        public int Width { get { return this.buttonReleased.Width; } }
         /// <summary>
         /// Button height
         /// </summary>
-        public int Height { get { return (int)this.button.Height; } }
+        public int Height { get { return this.buttonReleased.Height; } }
         /// <summary>
         /// Gets or sets the button text
         /// </summary>
@@ -110,10 +112,7 @@ namespace Engine
         /// Gets bounding rectangle of button
         /// </summary>
         /// <remarks>Bounding rectangle without text</remarks>
-        public Rectangle Rectangle
-        {
-            get { return this.button.Rectangle; }
-        }
+        public Rectangle Rectangle { get { return this.buttonReleased.Rectangle; } }
 
         /// <summary>
         /// Constructor
@@ -124,15 +123,40 @@ namespace Engine
         public SpriteButton(Scene scene, SpriteButtonDescription description)
             : base(scene, description)
         {
-            this.button = new Sprite(
-                scene,
-                new SpriteDescription()
+            var spriteDesc = new SpriteDescription()
+            {
+                Width = description.Width,
+                Height = description.Height,
+                Color = description.ColorReleased,
+                FitScreen = false,
+            };
+
+            if (!string.IsNullOrEmpty(description.TextureReleased))
+            {
+                spriteDesc.Textures = new[] { description.TextureReleased };
+                spriteDesc.UVMap = description.TextureReleasedUVMap;
+            }
+
+            this.buttonReleased = new Sprite(scene, spriteDesc);
+
+            if (description.TwoStateButton)
+            {
+                var spriteDesc2 = new SpriteDescription()
                 {
-                    Textures = new[] { description.TextureReleased, description.TexturePressed },
                     Width = description.Width,
                     Height = description.Height,
+                    Color = description.ColorPressed,
                     FitScreen = false,
-                });
+                };
+
+                if (!string.IsNullOrEmpty(description.TexturePressed))
+                {
+                    spriteDesc2.Textures = new[] { description.TexturePressed };
+                    spriteDesc2.UVMap = description.TexturePressedUVMap;
+                }
+
+                this.buttonPressed = new Sprite(scene, spriteDesc2);
+            }
 
             if (description.TextDescription != null)
             {
@@ -150,10 +174,16 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-            if (this.button != null)
+            if (this.buttonReleased != null)
             {
-                this.button.Dispose();
-                this.button = null;
+                this.buttonReleased.Dispose();
+                this.buttonReleased = null;
+            }
+
+            if (this.buttonPressed != null)
+            {
+                this.buttonPressed.Dispose();
+                this.buttonPressed = null;
             }
 
             if (this.text != null)
@@ -168,14 +198,20 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            this.button.Left = this.Left;
-            this.button.Top = this.Top;
+            this.buttonReleased.Left = this.Left;
+            this.buttonReleased.Top = this.Top;
+
+            if (this.buttonPressed != null)
+            {
+                this.buttonPressed.Left = this.Left;
+                this.buttonPressed.Top = this.Top;
+            }
 
             if (!string.IsNullOrEmpty(this.Text))
             {
                 //Center text
-                float leftmove = ((float)this.button.Width * 0.5f) - ((float)this.text.Width * 0.5f);
-                float topmove = ((float)this.button.Height * 0.5f) - ((float)this.text.Height * 0.5f);
+                float leftmove = ((float)this.Width * 0.5f) - ((float)this.text.Width * 0.5f);
+                float topmove = ((float)this.Height * 0.5f) - ((float)this.text.Height * 0.5f);
 
                 this.text.Left = this.Left + (int)leftmove;
                 this.text.Top = this.Top + (int)topmove;
@@ -183,7 +219,8 @@ namespace Engine
                 this.text.Update(context);
             }
 
-            this.button.Update(context);
+            this.buttonReleased.Update(context);
+            if (this.buttonPressed != null) this.buttonPressed.Update(context);
         }
         /// <summary>
         /// Draws button
@@ -191,7 +228,14 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            this.button.Draw(context);
+            if (this.pressed && this.buttonPressed != null)
+            {
+                this.buttonPressed.Draw(context);
+            }
+            else
+            {
+                this.buttonReleased.Draw(context);
+            }
 
             if (!string.IsNullOrEmpty(this.Text))
             {
@@ -203,7 +247,8 @@ namespace Engine
         /// </summary>
         public virtual void Resize()
         {
-            if (this.button != null) this.button.Resize();
+            this.buttonReleased.Resize();
+            if (this.buttonPressed != null) this.buttonPressed.Resize();
             if (this.text != null) this.text.Resize();
         }
         /// <summary>

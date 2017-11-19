@@ -18,6 +18,10 @@ namespace Engine
         /// </summary>
         public string[] Textures;
         /// <summary>
+        /// UV map
+        /// </summary>
+        public Vector4? UVMap = null;
+        /// <summary>
         /// Content path
         /// </summary>
         public string ContentPath = "Resources";

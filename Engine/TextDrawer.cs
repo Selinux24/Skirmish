@@ -47,6 +47,7 @@ namespace Engine
         /// Text shadow translarion matrix
         /// </summary>
         private Matrix localShadow;
+
         /// <summary>
         /// View * projection matrix
         /// </summary>
@@ -59,6 +60,14 @@ namespace Engine
         /// Text position in 2D screen
         /// </summary>
         private Vector2 position = Vector2.Zero;
+        /// <summary>
+        /// The text draws vertically centered on screen
+        /// </summary>
+        private bool centerVertically = false;
+        /// <summary>
+        /// The text draws horizontally centered on screen
+        /// </summary>
+        private bool centerHorizontally = false;
         /// <summary>
         /// Text
         /// </summary>
@@ -115,7 +124,7 @@ namespace Engine
         /// <summary>
         /// Gets or sets relative position of shadow
         /// </summary>
-        public Vector2 ShadowRelative { get; set; }
+        public Vector2 ShadowDelta { get; set; }
 
         /// <summary>
         /// Gets or sest text position in 2D screen
@@ -188,7 +197,7 @@ namespace Engine
                 this.Game.Form.RenderWidth.NextPair(),
                 this.Game.Form.RenderHeight.NextPair());
 
-            this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize);
+            this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize, description.Style);
 
             VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
             uint[] indices = new uint[FontMap.MAXTEXTLENGTH * 6];
@@ -198,7 +207,7 @@ namespace Engine
 
             this.TextColor = description.TextColor;
             this.ShadowColor = description.ShadowColor;
-            this.ShadowRelative = new Vector2(1, -1);
+            this.ShadowDelta = description.ShadowDelta;
 
             this.MapText();
         }
@@ -266,6 +275,24 @@ namespace Engine
                 this.Game.Form.RenderWidth.NextPair(),
                 this.Game.Form.RenderHeight.NextPair());
         }
+        /// <summary>
+        /// Centers vertically the text
+        /// </summary>
+        public void CenterVertically()
+        {
+            this.centerVertically = true;
+
+            this.UpdatePosition();
+        }
+        /// <summary>
+        /// Centers horinzontally the text
+        /// </summary>
+        public void CenterHorizontally()
+        {
+            this.centerHorizontally = true;
+
+            this.UpdatePosition();
+        }
 
         /// <summary>
         /// Draw text
@@ -311,13 +338,31 @@ namespace Engine
         /// </summary>
         private void UpdatePosition()
         {
-            float x = +this.position.X - this.Game.Form.RelativeCenter.X;
-            float y = -this.position.Y + this.Game.Form.RelativeCenter.Y;
+            float x = 0;
+            float y = 0;
+
+            if (this.centerHorizontally)
+            {
+                x = -(this.Width * 0.5f);
+            }
+            else
+            {
+                x = +this.position.X - this.Game.Form.RelativeCenter.X;
+            }
+
+            if (this.centerVertically)
+            {
+                y = +(this.Height * 0.5f);
+            }
+            else
+            {
+                y = -this.position.Y + this.Game.Form.RelativeCenter.Y;
+            }
 
             this.local = Matrix.Translation(x, y, 0f);
 
-            x = +this.position.X + this.ShadowRelative.X - this.Game.Form.RelativeCenter.X;
-            y = -this.position.Y + this.ShadowRelative.Y + this.Game.Form.RelativeCenter.Y;
+            x += this.ShadowDelta.X;
+            y += this.ShadowDelta.Y;
 
             this.localShadow = Matrix.Translation(x, y, 0f);
         }

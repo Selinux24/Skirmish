@@ -249,15 +249,16 @@ namespace Terrain
             #region Cursor 2D
 
             sw.Restart();
-            var c2DDesc = new SpriteDescription()
+            var c2DDesc = new CursorDescription()
             {
                 Name = "Cursor2D",
                 ContentPath = "resources/Cursor",
                 Textures = new[] { "target.png" },
+                Color = Color.Red,
                 Width = 16,
                 Height = 16,
             };
-            this.cursor2D = this.AddComponent<Cursor>(c2DDesc, SceneObjectUsageEnum.UI, this.layerHud);
+            this.cursor2D = this.AddComponent<Cursor>(c2DDesc, SceneObjectUsageEnum.UI, this.layerHud + 1);
             this.cursor2D.Instance.Color = Color.Red;
             this.cursor2D.Visible = false;
             sw.Stop();

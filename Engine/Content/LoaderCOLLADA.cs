@@ -567,9 +567,84 @@ namespace Engine.Content
         /// <param name="meshSources">Mesh sources</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessTriangles(Triangles[] triangles, Source[] meshSourcesrsion, bool isVolume)
+        private static SubMeshContent[] ProcessTriangles(Triangles[] triangles, Source[] meshSources, bool isVolume)
         {
-            throw new NotImplementedException();
+            List<SubMeshContent> res = new List<SubMeshContent>();
+
+            foreach (var triangle in triangles)
+            {
+                List<VertexData> verts = new List<VertexData>();
+
+                Input vertexInput = triangle[EnumSemantics.Vertex];
+                Input normalInput = triangle[EnumSemantics.Normal];
+                Input texCoordInput = triangle[EnumSemantics.TexCoord];
+
+                Vector3[] positions = vertexInput != null ? meshSources[vertexInput.Offset].ReadVector3() : null;
+                Vector3[] normals = normalInput != null ? meshSources[normalInput.Offset].ReadVector3() : null;
+                Vector2[] texCoords = texCoordInput != null ? meshSources[texCoordInput.Offset].ReadVector2() : null;
+
+                int inputCount = triangle.Inputs.Length;
+
+                for (int i = 0; i < triangle.Count; i++)
+                {
+                    for (int t = 0; t < 3; t++)
+                    {
+                        int index = (i * inputCount * 3) + (t * inputCount);
+
+                        VertexData vert = new VertexData()
+                        {
+                            FaceIndex = i,
+                        };
+
+                        if (vertexInput != null)
+                        {
+                            var vIndex = triangle.P[index + vertexInput.Offset];
+                            vert.VertexIndex = vIndex;
+                            vert.Position = positions[vIndex];
+                        }
+
+                        if (normalInput != null)
+                        {
+                            var nIndex = triangle.P[index + normalInput.Offset];
+                            vert.Normal = normals[nIndex];
+                        }
+
+                        if (texCoordInput != null)
+                        {
+                            var tIndex = triangle.P[index + texCoordInput.Offset];
+                            Vector2 tex = texCoords[tIndex];
+
+                            //Invert Vertical coordinate
+                            tex.Y = -tex.Y;
+
+                            vert.Texture = tex;
+                        }
+
+                        verts.Add(vert);
+                    }
+                }
+
+                //Reorder vertices
+                VertexData[] data = new VertexData[verts.Count];
+                for (int i = 0; i < data.Length; i += 3)
+                {
+                    data[i + 0] = verts[i + 0];
+                    data[i + 1] = verts[i + 2];
+                    data[i + 2] = verts[i + 1];
+                }
+
+                SubMeshContent meshInfo = new SubMeshContent()
+                {
+                    Topology = PrimitiveTopology.TriangleList,
+                    Vertices = data,
+                    Material = triangle.Material,
+                    IsVolume = isVolume,
+                };
+
+                res.Add(meshInfo);
+            }
+
+            return res.ToArray();
         }
         /// <summary>
         /// Process triangle fans

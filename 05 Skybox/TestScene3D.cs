@@ -70,15 +70,15 @@ namespace Skybox
 
             #region Cursor
 
-            SpriteDescription cursorDesc = new SpriteDescription()
+            var cursorDesc = new CursorDescription()
             {
                 Name = "Cursor",
                 Textures = new[] { "target.png" },
+                Color = Color.Purple,
                 Width = 16,
                 Height = 16,
             };
-
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI);
+            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI, layerHUD + 1);
 
             #endregion
 

@@ -395,6 +395,56 @@ namespace Engine.Common
             indices[5] = 1;
         }
         /// <summary>
+        /// Creates a sprite of VertexPositionTexture VertexData
+        /// </summary>
+        /// <param name="position">Sprite position</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="formWidth">Render form width</param>
+        /// <param name="formHeight">Render form height</param>
+        /// <param name="uvMap">UV map</param>
+        /// <param name="vertices">Result vertices</param>
+        /// <param name="indices">Result indices</param>
+        /// <param name="uvs">Result texture uvs</param>
+        public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, Vector4 uvMap, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
+        {
+            vertices = new Vector3[4];
+            uvs = new Vector2[4];
+
+            float left = (formWidth * 0.5f * -1f) + position.X;
+            float right = left + width;
+            float top = (formHeight * 0.5f) - position.Y;
+            float bottom = top - height;
+
+            //Texture map
+            float u0 = uvMap.X;
+            float v0 = uvMap.Y;
+            float u1 = uvMap.Z;
+            float v1 = uvMap.W;
+
+            vertices[0] = new Vector3(left, top, 0.0f);
+            uvs[0] = new Vector2(u0, v0);
+
+            vertices[1] = new Vector3(right, bottom, 0.0f);
+            uvs[1] = new Vector2(u1, v1);
+
+            vertices[2] = new Vector3(left, bottom, 0.0f);
+            uvs[2] = new Vector2(u0, v1);
+
+            vertices[3] = new Vector3(right, top, 0.0f);
+            uvs[3] = new Vector2(u1, v0);
+
+            indices = new uint[6];
+
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 2;
+
+            indices[3] = 0;
+            indices[4] = 3;
+            indices[5] = 1;
+        }
+        /// <summary>
         /// Creates a screen of VertexPositionTexture VertexData
         /// </summary>
         /// <param name="form">Form</param>

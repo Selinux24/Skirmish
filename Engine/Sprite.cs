@@ -173,7 +173,7 @@ namespace Engine
         {
             this.Textured = description.Textures != null && description.Textures.Length > 0;
 
-            this.InitializeBuffers(description.Name, this.Textured);
+            this.InitializeBuffers(description.Name, this.Textured, description.UVMap);
 
             if (this.Textured)
             {
@@ -242,8 +242,8 @@ namespace Engine
                             graphics.EffectPassApply(technique, p, 0);
 
                             graphics.DrawIndexed(
-                                this.indexBuffer.Count, 
-                                this.indexBuffer.Offset, 
+                                this.indexBuffer.Count,
+                                this.indexBuffer.Offset,
                                 this.vertexBuffer.Offset);
                         }
                     }
@@ -255,19 +255,29 @@ namespace Engine
         /// </summary>
         /// <param name="name">Buffer name</param>
         /// <param name="textured">Use a textured buffer</param>
-        private void InitializeBuffers(string name, bool textured)
+        private void InitializeBuffers(string name, bool textured, Vector4? uvMap)
         {
             Vector3[] vData;
             Vector2[] uvs;
             uint[] iData;
-            GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, out vData, out uvs, out iData);
             if (textured)
             {
+                if (uvMap.HasValue)
+                {
+                    GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, uvMap.Value, out vData, out uvs, out iData);
+                }
+                else
+                {
+                    GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, out vData, out uvs, out iData);
+                }
+
                 var vertices = VertexPositionTexture.Generate(vData, uvs);
                 this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
             }
             else
             {
+                GeometryUtil.CreateSprite(Vector2.Zero, 1, 1, 0, 0, out vData, out uvs, out iData);
+
                 var vertices = VertexPositionColor.Generate(vData, Color4.White);
                 this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
             }

@@ -4,7 +4,6 @@ using SharpDX.DXGI;
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Minimap
@@ -100,12 +99,12 @@ namespace Engine
 
             this.drawContext = new DrawContext()
             {
-                DrawerMode = DrawerModesEnum.Forward,
+                DrawerMode = DrawerModesEnum.Forward | DrawerModesEnum.OpaqueOnly,
                 World = Matrix.Identity,
                 ViewProjection = view * proj,
                 EyePosition = eyePos,
                 EyeTarget = target,
-                Lights = SceneLights.Default,
+                Lights = SceneLights.CreateDefault(),
             };
         }
         /// <summary>
@@ -129,8 +128,8 @@ namespace Engine
                 this.Game.Graphics.SetViewport(this.viewport);
 
                 this.Game.Graphics.SetRenderTargets(
-                    this.renderTarget, true, Color.Black, 
-                    null, false, false, 
+                    this.renderTarget, true, Color.Black,
+                    null, false, false,
                     false);
 
                 for (int i = 0; i < this.Drawables.Length; i++)
@@ -174,6 +173,19 @@ namespace Engine
         public virtual void Resize()
         {
             this.minimapBox.Resize();
+        }
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
+        public override bool Cull(BoundingFrustum frustum, out float? distance)
+        {
+            this.drawContext.Lights.Cull(frustum, this.drawContext.EyePosition);
+
+            return base.Cull(frustum, out distance);
         }
     }
 }

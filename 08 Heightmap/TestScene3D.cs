@@ -94,7 +94,7 @@ namespace Heightmap
 
             #region Cursor
 
-            var cursorDesc = new SpriteDescription()
+            var cursorDesc = new CursorDescription()
             {
                 Name = "Cursor",
                 Textures = new[] { "target.png" },
