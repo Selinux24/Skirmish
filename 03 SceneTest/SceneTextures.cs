@@ -44,6 +44,16 @@ namespace SceneTest
         private SceneObject<SkyScattering> sky = null;
         private SceneObject<SkyPlane> skyPlane = null;
 
+        private SceneObject<TriangleListDrawer> testCube = null;
+
+        private ParticleSystemDescription pPlume = null;
+        private ParticleSystemDescription pFire = null;
+        private ParticleSystemDescription pDust = null;
+        private ParticleSystemDescription pProjectile = null;
+        private ParticleSystemDescription pExplosion = null;
+        private ParticleSystemDescription pSmokeExplosion = null;
+        private SceneObject<ParticleManager> pManager = null;
+
         private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
@@ -87,6 +97,8 @@ namespace SceneTest
             this.InitializeVehiclesLeopard();
             this.InitializeLamps();
             this.InitializeStreetLamps();
+            this.InitializeTestCube();
+            this.InitializeParticles();
 
             var desc = new LineListDrawerDescription() { DepthEnabled = true, Count = 10000 };
             this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
@@ -515,6 +527,58 @@ namespace SceneTest
             this.Lights.AddRange(this.streetlampI.Instance[6].Lights);
             this.Lights.AddRange(this.streetlampI.Instance[7].Lights);
             this.Lights.AddRange(this.streetlampI.Instance[8].Lights);
+        }
+        private void InitializeTestCube()
+        {
+            var bbox = new BoundingBox(
+                -Vector3.One + Vector3.UnitY + (Vector3.UnitX * 20),
+                +Vector3.One + Vector3.UnitY + (Vector3.UnitX * 20));
+            var cubeTris = Triangle.ComputeTriangleList(SharpDX.Direct3D.PrimitiveTopology.TriangleList, bbox);
+
+            var desc = new TriangleListDrawerDescription()
+            {
+                Name = "Test Cube",
+                Triangles = cubeTris,
+                Color = Color.Red,
+                DepthEnabled = true,
+            };
+
+            this.testCube = this.AddComponent<TriangleListDrawer>(desc);
+        }
+        private void InitializeParticles()
+        {
+            this.pPlume = ParticleSystemDescription.InitializeSmokePlume("SceneTextures/particles", "smoke.png", 10f);
+            this.pFire = ParticleSystemDescription.InitializeFire("SceneTextures/particles", "fire.png", 10f);
+            this.pDust = ParticleSystemDescription.InitializeDust("SceneTextures/particles", "smoke.png", 10f);
+            this.pProjectile = ParticleSystemDescription.InitializeProjectileTrail("SceneTextures/particles", "smoke.png", 10f);
+            this.pExplosion = ParticleSystemDescription.InitializeExplosion("SceneTextures/particles", "fire.png", 10f);
+            this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("SceneTextures/particles", "smoke.png", 10f);
+
+            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Manager" });
+
+            this.pPlume.Gravity += Vector3.UnitX * 10f;
+            this.pPlume.MaxHorizontalVelocity *= 5f;
+            float d = 500;
+            var positions = new Vector3[]
+            {
+                new Vector3(+d,0,+d),
+                new Vector3(+d,0,-d),
+                new Vector3(-d,0,+d),
+                new Vector3(-d,0,-d),
+            };
+            for (int i = 0; i < positions.Length; i++)
+            {
+                this.pManager.Instance.AddParticleSystem(
+                    ParticleSystemTypes.CPU,
+                    this.pPlume,
+                    new ParticleEmitter()
+                    {
+                        Position = positions[i],
+                        InfiniteDuration = true,
+                        EmissionRate = 0.05f,
+                        MaximumDistance = 1000f,
+                    });
+            }
         }
 
         public override void Update(GameTime gameTime)
