@@ -12,8 +12,13 @@ namespace SceneTest
         SceneObject<Cursor> cursor = null;
         SceneObject<Model> backGround = null;
         SceneObject<TextDrawer> title = null;
-        SceneObject<SpriteButton> startButton = null;
+        SceneObject<SpriteButton> sceneMaterialsButton = null;
+        SceneObject<SpriteButton> sceneStencilPassButton = null;
+        SceneObject<SpriteButton> sceneTexturesButton = null;
         SceneObject<SpriteButton> exitButton = null;
+
+        private Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
 
         public SceneStart(Game game) : base(game)
         {
@@ -69,11 +74,11 @@ namespace SceneTest
 
             #endregion
 
-            #region Start button
+            #region Scene buttons
 
             var startButtonDesc = new SpriteButtonDescription()
             {
-                Name = "Start button",
+                Name = "Scene buttons",
 
                 Width = 200,
                 Height = 40,
@@ -82,11 +87,11 @@ namespace SceneTest
 
                 TextureReleased = "common/buttons.png",
                 TextureReleasedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorReleased = new Color4(Color.CornflowerBlue.RGB(), 0.8f),
+                ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f),
 
                 TexturePressed = "common/buttons.png",
                 TexturePressedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorPressed = new Color4(Color.CornflowerBlue.RGB() * 1.2f, 0.9f),
+                ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f),
 
                 TextDescription = new TextDrawerDescription()
                 {
@@ -96,7 +101,9 @@ namespace SceneTest
                     TextColor = Color.Gold,
                 }
             };
-            this.startButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.sceneMaterialsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.sceneStencilPassButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.sceneTexturesButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
 
             #endregion
 
@@ -113,11 +120,11 @@ namespace SceneTest
 
                 TextureReleased = "common/buttons.png",
                 TextureReleasedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorReleased = new Color4(Color.CornflowerBlue.RGB(), 0.8f),
+                ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f),
 
                 TexturePressed = "common/buttons.png",
                 TexturePressedUVMap = new Vector4(44, 30, 556, 136) / 600f,
-                ColorPressed = new Color4(Color.CornflowerBlue.RGB() * 1.2f, 0.9f),
+                ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f),
 
                 TextDescription = new TextDrawerDescription()
                 {
@@ -141,13 +148,23 @@ namespace SceneTest
             this.title.Instance.CenterHorizontally();
             this.title.Instance.Top = this.Game.Form.RenderHeight / 4;
 
-            this.startButton.Instance.Text = "Start";
-            this.startButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 2) - (this.startButton.Instance.Width / 2);
-            this.startButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.startButton.Instance.Height / 2);
-            this.startButton.Instance.Click += startButtonClick;
+            this.sceneMaterialsButton.Instance.Text = "Materials";
+            this.sceneMaterialsButton.Instance.Left = ((this.Game.Form.RenderWidth / 5) * 1) - (this.sceneMaterialsButton.Instance.Width / 2);
+            this.sceneMaterialsButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneMaterialsButton.Instance.Height / 2);
+            this.sceneMaterialsButton.Instance.Click += sceneButtonClick;
+
+            this.sceneStencilPassButton.Instance.Text = "Stencil Pass";
+            this.sceneStencilPassButton.Instance.Left = ((this.Game.Form.RenderWidth / 5) * 2) - (this.sceneStencilPassButton.Instance.Width / 2);
+            this.sceneStencilPassButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneStencilPassButton.Instance.Height / 2);
+            this.sceneStencilPassButton.Instance.Click += sceneButtonClick;
+
+            this.sceneTexturesButton.Instance.Text = "Textures";
+            this.sceneTexturesButton.Instance.Left = ((this.Game.Form.RenderWidth / 5) * 3) - (this.sceneTexturesButton.Instance.Width / 2);
+            this.sceneTexturesButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneTexturesButton.Instance.Height / 2);
+            this.sceneTexturesButton.Instance.Click += sceneButtonClick;
 
             this.exitButton.Instance.Text = "Exit";
-            this.exitButton.Instance.Left = (this.Game.Form.RenderWidth / 6) * 4 - (this.exitButton.Instance.Width / 2);
+            this.exitButton.Instance.Left = (this.Game.Form.RenderWidth / 5) * 4 - (this.exitButton.Instance.Width / 2);
             this.exitButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Instance.Height / 2);
             this.exitButton.Instance.Click += exitButtonClick;
         }
@@ -170,9 +187,20 @@ namespace SceneTest
             this.Camera.LookTo(position);
         }
 
-        private void startButtonClick(object sender, EventArgs e)
+        private void sceneButtonClick(object sender, EventArgs e)
         {
-            this.Game.SetScene<SceneMaterials>();
+            if (sender == this.sceneMaterialsButton.Instance)
+            {
+                this.Game.SetScene<SceneMaterials>();
+            }
+            else if (sender == this.sceneStencilPassButton.Instance)
+            {
+                this.Game.SetScene<SceneStencilPass>();
+            }
+            else if (sender == this.sceneTexturesButton.Instance)
+            {
+                this.Game.SetScene<SceneTextures>();
+            }
         }
         private void exitButtonClick(object sender, EventArgs e)
         {

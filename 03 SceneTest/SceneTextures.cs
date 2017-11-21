@@ -60,6 +60,14 @@ namespace SceneTest
         {
             base.Initialize();
 
+#if DEBUG
+            this.Game.VisibleMouse = false;
+            this.Game.LockMouse = false;
+#else
+            this.Game.VisibleMouse = false;
+            this.Game.LockMouse = true;
+#endif
+
             this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = 2000;
             this.Camera.Goto(-20, 10, -40f);
@@ -513,7 +521,7 @@ namespace SceneTest
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                this.Game.SetScene<SceneStart>();
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);

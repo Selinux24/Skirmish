@@ -20,6 +20,7 @@ namespace Terrain
         private const int MaxGridDrawer = 10000;
 
         private int layerHud = 99;
+        private int layerGameHud = 50;
         private int layerObjects = 0;
         private int layerTerrain = 1;
         private int layerEffects = 2;
@@ -153,11 +154,14 @@ namespace Terrain
             {
                 var desc = new LineListDrawerDescription()
                 {
+                    Name = "++DEBUG++ Lights",
                     DepthEnabled = true,
                     Count = 5000,
                 };
                 this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.lightsVolumeDrawer.Visible = false;
             }
+
             #endregion
 
             #region Camera
@@ -189,6 +193,7 @@ namespace Terrain
 
             var spDesc = new SpriteDescription()
             {
+                Name = "Back Pannel",
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.counters2.Instance.Top + this.counters2.Instance.Height + 3,
@@ -199,15 +204,16 @@ namespace Terrain
 
             var spbDesc = new SpriteProgressBarDescription()
             {
+                Name = "Progress bar",
                 Width = 50,
                 Height = 5,
                 BaseColor = Color.Red,
                 ProgressColor = Color.Green,
             };
 
-            this.hProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerHud);
-            this.t1ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerHud);
-            this.t2ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerHud);
+            this.hProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerGameHud);
+            this.t1ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerGameHud);
+            this.t2ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerGameHud);
 
             this.hProgressBar.Instance.Top = 120;
             this.t1ProgressBar.Instance.Top = 120;
@@ -570,6 +576,7 @@ namespace Terrain
             sw.Restart();
             var grDesc = new GroundGardenerDescription()
             {
+                Name = "Grass",
                 ContentPath = "resources/Terrain/Foliage/Billboard",
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
@@ -601,7 +608,7 @@ namespace Terrain
             this.pExplosion = ParticleSystemDescription.InitializeExplosion("resources/particles", "fire.png");
             this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources/particles", "smoke.png");
 
-            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription(), SceneObjectUsageEnum.None, layerEffects);
+            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Manager" }, SceneObjectUsageEnum.None, layerEffects);
 
             #endregion
 
@@ -812,6 +819,7 @@ namespace Terrain
                 int smTop = this.Game.Form.RenderHeight - height;
                 var stDescription = new SpriteTextureDescription()
                 {
+                    Name = "++DEBUG++ Shadow Map",
                     Left = smLeft,
                     Top = smTop,
                     Width = width,
@@ -828,7 +836,11 @@ namespace Terrain
 
             #region DEBUG Path finding Graph
             {
-                var desc = new TriangleListDrawerDescription() { Count = MaxGridDrawer };
+                var desc = new TriangleListDrawerDescription()
+                {
+                    Name = "++DEBUG++ Path finding Graph",
+                    Count = MaxGridDrawer
+                };
                 this.terrainGraphDrawer = this.AddComponent<TriangleListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
                 this.terrainGraphDrawer.Visible = false;
             }
@@ -859,6 +871,7 @@ namespace Terrain
 
                 var desc = new LineListDrawerDescription()
                 {
+                    Name = "++DEBUG++ Ground position test",
                     Count = oks.Count + errs.Count
                 };
                 this.terrainLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
@@ -879,6 +892,7 @@ namespace Terrain
             {
                 var desc = new LineListDrawerDescription()
                 {
+                    Name = "++DEBUG++ Picking test",
                     Count = MaxPickingTest
                 };
                 this.terrainPointDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
@@ -890,6 +904,7 @@ namespace Terrain
             {
                 var desc = new LineListDrawerDescription()
                 {
+                    Name = "++DEBUG++ Helicopter manipulator",
                     Count = 1000
                 };
                 this.movingObjLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
@@ -901,6 +916,7 @@ namespace Terrain
             {
                 var desc = new LineListDrawerDescription()
                 {
+                    Name = "++DEBUG++ Trajectory",
                     Count = 20000
                 };
                 this.curveLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
@@ -913,6 +929,7 @@ namespace Terrain
             {
                 var desc = new LineListDrawerDescription()
                 {
+                    Name = "++DEBUG++ Static Volumes",
                     Count = 20000
                 };
                 this.staticObjLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);

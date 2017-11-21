@@ -33,6 +33,14 @@ namespace SceneTest
         {
             base.Initialize();
 
+#if DEBUG
+            this.Game.VisibleMouse = false;
+            this.Game.LockMouse = false;
+#else
+            this.Game.VisibleMouse = false;
+            this.Game.LockMouse = true;
+#endif
+
             this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = 500;
             this.Camera.Goto(-10, 8, 20f);
@@ -168,7 +176,7 @@ namespace SceneTest
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                this.Game.SetScene<SceneStart>();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.L))

@@ -611,7 +611,13 @@ namespace Engine
 
                 opaques.Sort((c1, c2) =>
                 {
-                    int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+                    int res = c1.Order.CompareTo(c2.Order); 
+
+                    if (res == 0)
+                    {
+                        res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+                    }
+
                     if (res == 0)
                     {
                         var cull1 = c1.Get<ICullable>();
@@ -621,11 +627,6 @@ namespace Engine
                         var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance.Value : float.MaxValue;
 
                         res = -d1.CompareTo(d2);
-                    }
-
-                    if (res == 0)
-                    {
-                        res = c1.Order.CompareTo(c2.Order);
                     }
 
                     return res;
@@ -638,8 +639,14 @@ namespace Engine
                     this.Game.Graphics.SetRasterizerDefault();
                     this.Game.Graphics.SetBlendDefault();
 
-                    if (c.DepthEnabled) this.Game.Graphics.SetDepthStencilZEnabled();
-                    else this.Game.Graphics.SetDepthStencilZDisabled();
+                    if (c.DepthEnabled)
+                    {
+                        this.Game.Graphics.SetDepthStencilZEnabled();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetDepthStencilZDisabled();
+                    }
 
                     c.Get<IDrawable>().Draw(context);
                 });
@@ -689,8 +696,14 @@ namespace Engine
                     this.Game.Graphics.SetRasterizerDefault();
                     this.Game.Graphics.SetBlendTransparent();
 
-                    if (c.DepthEnabled) this.Game.Graphics.SetDepthStencilZEnabled();
-                    else this.Game.Graphics.SetDepthStencilZDisabled();
+                    if (c.DepthEnabled)
+                    {
+                        this.Game.Graphics.SetDepthStencilZEnabled();
+                    }
+                    else
+                    {
+                        this.Game.Graphics.SetDepthStencilZDisabled();
+                    }
 
                     c.Get<IDrawable>().Draw(context);
                 });
