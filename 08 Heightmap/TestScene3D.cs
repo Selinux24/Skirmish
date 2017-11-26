@@ -540,10 +540,6 @@ namespace Heightmap
                 Texture1Name = "perturb001.dds",
                 Texture2Name = "cloud001.dds",
                 Mode = SkyPlaneMode.Perturbed,
-                MaxBrightness = 0.8f,
-                MinBrightness = 0.5f,
-                Repeat = 5,
-                Velocity = 1f,
                 Direction = new Vector2(1, 1),
             };
             this.clouds = this.AddComponent<SkyPlane>(scDesc);
@@ -844,7 +840,7 @@ namespace Heightmap
             this.skydom.Instance.RayleighScattering *= 0.8f;
             this.skydom.Instance.MieScattering *= 0.1f;
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(7, 55, 00), 1f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 55, 00), 1f);
 
             this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
             this.ToggleFog();

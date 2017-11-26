@@ -317,7 +317,8 @@ namespace Engine
                 long deferred_compose = 0;
                 long deferred_composeInit = 0;
                 long deferred_composeDraw = 0;
-                long deferred_draw2D = 0;
+                long disabledDeferred_cull = 0;
+                long disabledDeferred_draw = 0;
 #endif
 #if DEBUG
                 Stopwatch swTotal = Stopwatch.StartNew();
@@ -612,24 +613,50 @@ namespace Engine
                     var deferredDisabledComponents = visibleComponents.FindAll(c => !c.DeferredEnabled);
                     if (deferredDisabledComponents.Count > 0)
                     {
-                        #region Draw deferred disabled components
+                        #region Cull
 #if DEBUG
-                        Stopwatch swDraw = Stopwatch.StartNew();
+                        Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                        //Set forward mode
-                        this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
+                        bool draw = false;
+                        if (scene.PerformFrustumCulling)
+                        {
+                            var toCullNotDeferred = deferredDisabledComponents.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
 
-                        //Draw scene
-                        this.DrawResultComponents(gameTime, this.DrawContext, CullIndexDrawIndex, deferredDisabledComponents, false);
-
-                        //Set deferred mode
-                        this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
+                            //Frustum culling
+                            draw = this.cullManager.Cull(this.DrawContext.Frustum, CullIndexDrawIndex, toCullNotDeferred);
+                        }
+                        else
+                        {
+                            draw = true;
+                        }
 #if DEBUG
-                        swDraw.Stop();
+                        swCull.Stop();
 
-                        deferred_draw2D = swDraw.ElapsedTicks;
+                        disabledDeferred_cull = swCull.ElapsedTicks;
 #endif
                         #endregion
+
+                        if (draw)
+                        {
+                            #region Draw deferred disabled components
+#if DEBUG
+                            Stopwatch swDraw = Stopwatch.StartNew();
+#endif
+                            //Set forward mode
+                            this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
+
+                            //Draw scene
+                            this.DrawResultComponents(gameTime, this.DrawContext, CullIndexDrawIndex, deferredDisabledComponents, false);
+
+                            //Set deferred mode
+                            this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
+#if DEBUG
+                            swDraw.Stop();
+
+                            disabledDeferred_draw = swDraw.ElapsedTicks;
+#endif
+                            #endregion
+                        }
                     }
 
                     #endregion
@@ -655,23 +682,25 @@ namespace Engine
                         prcDraw * 100f));
                 }
 
-                long totalDeferred = deferred_cull + deferred_gbuffer + deferred_lbuffer + deferred_compose + deferred_draw2D;
+                long totalDeferred = deferred_cull + deferred_gbuffer + deferred_lbuffer + deferred_compose + disabledDeferred_cull + disabledDeferred_draw;
                 if (totalDeferred > 0)
                 {
                     float prcCull = (float)deferred_cull / (float)totalDeferred;
+                    float prcDCull = (float)disabledDeferred_cull / (float)totalDeferred;
                     float prcGBuffer = (float)deferred_gbuffer / (float)totalDeferred;
                     float prcLBuffer = (float)deferred_lbuffer / (float)totalDeferred;
                     float prcCompose = (float)deferred_compose / (float)totalDeferred;
-                    float prcDraw2D = (float)deferred_draw2D / (float)totalDeferred;
+                    float prcDraw = (float)disabledDeferred_draw / (float)totalDeferred;
 
                     Counters.SetStatistics("Scene.Draw.totalDeferred", string.Format(
-                        "DR = {0:000000}; Cull {1:00}%; GBuffer {2:00}%; LBuffer {3:00}%; Compose {4:00}%; Draw2D {5:00}%",
+                        "DR = {0:000000}; Cull {1:00}%; GBuffer {2:00}%; LBuffer {3:00}%; Compose {4:00}%; DeferredDisabledCull {5:00}%; DeferredDisabledDraw {6:00}%",
                         totalDeferred,
                         prcCull * 100f,
                         prcGBuffer * 100f,
                         prcLBuffer * 100f,
                         prcCompose * 100f,
-                        prcDraw2D * 100f));
+                        prcDCull * 100f,
+                        prcDraw * 100f));
 
                     if (deferred_gbuffer > 0)
                     {
@@ -838,7 +867,7 @@ namespace Engine
         {
             //Restore backbuffer as render target and clear it
             this.Game.Graphics.SetDefaultViewport();
-            this.Game.Graphics.SetDefaultRenderTarget(false);
+            this.Game.Graphics.SetDefaultRenderTarget();
         }
         /// <summary>
         /// Draw lights

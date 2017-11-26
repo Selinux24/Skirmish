@@ -138,7 +138,7 @@ namespace Engine
                 }
 
                 this.Game.Graphics.SetDefaultViewport();
-                this.Game.Graphics.SetDefaultRenderTarget(false);
+                this.Game.Graphics.SetDefaultRenderTarget(false, false, false);
             }
 
             this.minimapBox.Texture = this.renderTexture;

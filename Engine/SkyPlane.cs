@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -50,9 +51,17 @@ namespace Engine
         /// </summary>
         private SkyPlaneMode mode;
         /// <summary>
+        /// Traslation direction
+        /// </summary>
+        private Vector2 direction;
+        /// <summary>
         /// Plane rotation (Y)
         /// </summary>
         private Matrix rotation;
+        /// <summary>
+        /// Clouds color
+        /// </summary>
+        private Color4 color;
 
         /// <summary>
         /// First layer translation
@@ -79,13 +88,42 @@ namespace Engine
         /// </summary>
         public float Velocity { get; set; }
         /// <summary>
-        /// Direction
+        /// Gets or sets the traslation direction
         /// </summary>
-        public Vector2 Direction { get; set; }
+        public Vector2 Direction
+        {
+            get
+            {
+                return this.direction;
+            }
+            set
+            {
+                this.direction = value;
+
+                if (this.direction != Vector2.Zero)
+                {
+                    float a = Helper.AngleSigned(Vector2.UnitX, Vector2.Normalize(this.direction));
+
+                    this.rotation = Matrix.RotationY(a);
+                }
+            }
+        }
         /// <summary>
         /// Perturbation scale
         /// </summary>
         public float PerturbationScale { get; set; }
+        /// <summary>
+        /// Gets or sets the clouds base color
+        /// </summary>
+        public Color4 CloudsBaseColor { get; set; }
+        /// <summary>
+        /// Gets or sets the color palette use flag
+        /// </summary>
+        public bool UseCloudsColorPalette { get; set; }
+        /// <summary>
+        /// Clouds color palette
+        /// </summary>
+        public List<Tuple<float, Color4>> CloudsColorPalette { get; set; }
 
         /// <summary>
         /// Constructor
@@ -108,20 +146,17 @@ namespace Engine
             this.skyTexture2 = this.Game.ResourceManager.CreateResource(img2);
 
             this.mode = description.Mode;
+            this.rotation = Matrix.Identity;
+
             this.MaxBrightness = description.MaxBrightness;
             this.MinBrightness = description.MinBrightness;
             this.FadingDistance = description.FadingDistance;
             this.Velocity = description.Velocity;
             this.PerturbationScale = description.PerturbationScale;
             this.Direction = description.Direction;
-            this.rotation = Matrix.Identity;
-
-            if (this.Direction != Vector2.Zero)
-            {
-                float a = Helper.AngleSigned(Vector2.UnitY, Vector2.Normalize(this.Direction));
-
-                this.rotation = Matrix.RotationY(a);
-            }
+            this.CloudsBaseColor = description.CloudBaseColor;
+            this.CloudsColorPalette = description.CloudsColorPalette;
+            this.UseCloudsColorPalette = description.UseCloudsColorPalette;
 
             //Create sky plane
             Vector3[] vData;
@@ -166,6 +201,15 @@ namespace Engine
             {
                 this.brightness = Math.Min(this.MaxBrightness, context.Lights.KeyLight.Brightness + this.MinBrightness);
             }
+
+            if (this.UseCloudsColorPalette)
+            {
+                this.color = (this.CloudsBaseColor + this.GetCloudColor(this.Scene.TimeOfDay)) * 0.5f;
+            }
+            else
+            {
+                this.color = this.CloudsBaseColor;
+            }
         }
         /// <summary>
         /// Draws content
@@ -198,6 +242,7 @@ namespace Engine
                         this.rotation * Matrix.Translation(context.EyePosition),
                         context.ViewProjection,
                         this.brightness,
+                        this.color,
                         this.FadingDistance,
                         this.skyTexture1,
                         this.skyTexture2);
@@ -230,6 +275,34 @@ namespace Engine
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the cloud color base on time of day
+        /// </summary>
+        /// <param name="timeOfDay">Time of day class</param>
+        /// <returns>Returns the color base on time of day meridian angle</returns>
+        private Color4 GetCloudColor(TimeOfDay timeOfDay)
+        {
+            for (int i = 0; i < this.CloudsColorPalette.Count; i++)
+            {
+                if (this.CloudsColorPalette[i].Item1 > timeOfDay.MeridianAngle)
+                {
+                    if (i > 0)
+                    {
+                        var from = this.CloudsColorPalette[i - 1];
+                        var to = this.CloudsColorPalette[i];
+                        float amount = (timeOfDay.MeridianAngle - from.Item1) / (to.Item1 - from.Item1);
+                        return Color4.Lerp(from.Item2, to.Item2, amount);
+                    }
+                    else
+                    {
+                        return this.CloudsColorPalette[i].Item2;
+                    }
+                }
+            }
+
+            return Color4.White;
         }
     }
 }

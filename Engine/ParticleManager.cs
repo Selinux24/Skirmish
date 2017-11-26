@@ -139,9 +139,10 @@ namespace Engine
         /// <param name="type">Particle system type</param>
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
-        public void AddParticleSystem(ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
+        /// <returns>Returns the new particle system</returns>
+        public IParticleSystem AddParticleSystem(ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            this.AddParticleSystem(null, type, description, emitter);
+            return this.AddParticleSystem(null, type, description, emitter);
         }
         /// <summary>
         /// Adds a new particle system to the collection
@@ -150,7 +151,8 @@ namespace Engine
         /// <param name="type">Particle system type</param>
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
-        public void AddParticleSystem(string name, ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
+        /// <returns>Returns the new particle system</returns>
+        public IParticleSystem AddParticleSystem(string name, ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             IParticleSystem pSystem = null;
 
@@ -170,6 +172,8 @@ namespace Engine
             this.AllocatedParticleCount += pSystem.MaxConcurrentParticles;
 
             this.particleSystems.Add(pSystem);
+
+            return pSystem;
         }
         /// <summary>
         /// Gets a particle systema by index

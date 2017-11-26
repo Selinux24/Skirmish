@@ -244,6 +244,7 @@
     <Compile Include="ParticleManagerDescription.cs" />
     <Compile Include="ParticleSystemCPU.cs" />
     <Compile Include="ParticleSystemDescription.cs" />
+    <Compile Include="ParticleSystemParams.cs" />
     <Compile Include="ParticleSystemTypes.cs" />
     <Compile Include="ParticleTypes.cs" />
     <Compile Include="Effects\EffectDefaultCPUParticles.cs" />

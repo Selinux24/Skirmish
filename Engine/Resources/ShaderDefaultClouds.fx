@@ -10,9 +10,10 @@ Texture2D gCloudTexture2 : register(t1);
 cbuffer cbPerFrame : register(b0)
 {
 	float4x4 gWorldViewProjection;
+    float3 gColor;
 	float gBrightness;
 	float gFadingDistance;
-	float2 PAD1;
+	float3 PAD1;
 };
 cbuffer cbPerFrameStatic : register(b1)
 {
@@ -43,7 +44,7 @@ float4 PSClouds(PSVertexPositionTexture input) : SV_TARGET
 	float4 color1 = gCloudTexture1.Sample(SamplerAnisotropic, input.tex + gFirstTranslation);
 	float4 color2 = gCloudTexture2.Sample(SamplerAnisotropic, input.tex + gSecondTranslation);
 
-	float4 color = lerp(color1, color2, 0.5f) * gBrightness;
+    float4 color = lerp(color1, color2, 0.5f) * float4(gColor, 1) * gBrightness;
 
 	if (gFadingDistance > 0)
 	{
@@ -64,7 +65,7 @@ float4 PSClouds2(PSVertexPositionTexture input) : SV_TARGET
 	perturbValue.xy += (input.tex.xy + gTranslation);
 
 	// Now sample the color from the cloud texture using the perturbed sampling coordinates.
-	float4 color = gCloudTexture2.Sample(SamplerAnisotropic, perturbValue.xy) * gBrightness;
+    float4 color = gCloudTexture2.Sample(SamplerAnisotropic, perturbValue.xy) * float4(gColor, 1) * gBrightness;
 
 	if (gFadingDistance > 0)
 	{

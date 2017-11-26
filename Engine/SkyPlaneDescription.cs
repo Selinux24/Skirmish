@@ -1,9 +1,9 @@
 ﻿using SharpDX;
+using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Sky plane description
     /// </summary>
@@ -30,6 +30,10 @@ namespace Engine
         /// Minimum brightness value when animated with key light
         /// </summary>
         public float MinBrightness { get; set; }
+        /// <summary>
+        /// Gets or sets the clouds base color
+        /// </summary>
+        public Color4 CloudBaseColor { get; set; }
         /// <summary>
         /// Clouds quad size
         /// </summary>
@@ -70,6 +74,14 @@ namespace Engine
         /// Sky plane mode
         /// </summary>
         public SkyPlaneMode Mode { get; set; }
+        /// <summary>
+        /// Use the clouds color palette
+        /// </summary>
+        public bool UseCloudsColorPalette { get; set; }
+        /// <summary>
+        /// Clouds color palette
+        /// </summary>
+        public List<Tuple<float, Color4>> CloudsColorPalette { get; set; }
 
         /// <summary>
         /// Constructor
@@ -85,6 +97,7 @@ namespace Engine
 
             this.MaxBrightness = 0.75f;
             this.MinBrightness = 0.15f;
+            this.CloudBaseColor = new Color4(1f, 1f, 1f, 1f);
             this.Size = 100;
             this.Repeat = 2;
             this.PlaneWidth = 50;
@@ -95,6 +108,24 @@ namespace Engine
             this.Direction = Vector2.One;
             this.PerturbationScale = 0.3f;
             this.Mode = SkyPlaneMode.Static;
+
+            this.UseCloudsColorPalette = true;
+            this.CloudsColorPalette = new List<Tuple<float, Color4>>();
+            this.CloudsColorPalette.AddRange(new []
+            {
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.00f, Color.Black),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.20f, Color.Black),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.22f, Color.Purple),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.25f, Color.Orange),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.28f, Color.Yellow),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.40f, Color.LightYellow),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.60f, Color.Yellow),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.70f, Color.Orange),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.75f, Color.Red),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.76f, Color.DarkRed),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 0.80f, Color.Black),
+                new Tuple<float, Color4>(MathUtil.TwoPi * 1.00f, Color.Black),
+            });
         }
     }
 }

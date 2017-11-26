@@ -164,6 +164,10 @@ namespace Engine
         /// </summary>
         public Color4 FogColor { get; protected set; }
         /// <summary>
+        /// Intensity
+        /// </summary>
+        public float Intensity { get; protected set; }
+        /// <summary>
         /// Gets light by name
         /// </summary>
         /// <param name="name">Light name</param>
@@ -413,7 +417,7 @@ namespace Engine
                 float e = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
                 float b = e;
                 float ga = Math.Min(e, 0.5f);
-                float f = Math.Min(e, 1f);
+                this.Intensity = Math.Min(e, 1f);
 
                 Vector3 keyDir = timeOfDay.LightDirection;
                 Vector3 backDir = new Vector3(-keyDir.X, keyDir.Y, -keyDir.Z);
@@ -447,7 +451,7 @@ namespace Engine
                     backLight.Direction = backDir;
                 }
 
-                this.FogColor = this.BaseFogColor * f;
+                this.FogColor = this.BaseFogColor * this.Intensity;
             }
         }
     }

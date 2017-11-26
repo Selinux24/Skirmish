@@ -22,6 +22,10 @@ namespace Engine
         /// </summary>
         int MaxConcurrentParticles { get; }
         /// <summary>
+        /// Particle system parameters
+        /// </summary>
+        ParticleSystemParams Parameters { get; }
+        /// <summary>
         /// Gets the particle emitter reference
         /// </summary>
         ParticleEmitter Emitter { get; }

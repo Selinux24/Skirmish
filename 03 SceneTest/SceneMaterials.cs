@@ -245,11 +245,6 @@ namespace SceneTest
 
             #endregion
 
-            if (this.Game.Input.KeyJustReleased(Keys.Tab))
-            {
-                this.Game.SetScene<SceneStencilPass>();
-            }
-
             base.Update(gameTime);
 
             this.runtime.Instance.Text = this.Game.RuntimeText;

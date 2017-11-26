@@ -395,7 +395,7 @@ namespace Engine
 #endif
                     //Set default render target and depth buffer, and clear it
                     this.Game.Graphics.SetDefaultViewport();
-                    this.Game.Graphics.SetDefaultRenderTarget(true);
+                    this.Game.Graphics.SetDefaultRenderTarget();
 #if DEBUG
                     swPreparation.Stop();
 
@@ -611,7 +611,7 @@ namespace Engine
 
                 opaques.Sort((c1, c2) =>
                 {
-                    int res = c1.Order.CompareTo(c2.Order); 
+                    int res = c1.Order.CompareTo(c2.Order);
 
                     if (res == 0)
                     {

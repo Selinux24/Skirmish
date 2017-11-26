@@ -701,12 +701,14 @@ namespace Engine
         /// <summary>
         /// Sets default render target
         /// </summary>
-        /// <param name="clear">Indicates whether the target and stencil buffer must be cleared</param>
-        public void SetDefaultRenderTarget(bool clear = true)
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        public void SetDefaultRenderTarget(bool clearRT = true, bool clearDepth = true, bool clearStencil = true)
         {
             this.SetRenderTargets(
-                this.renderTargetView, clear, GameEnvironment.Background,
-                this.depthStencilView, clear, clear,
+                this.renderTargetView, clearRT, GameEnvironment.Background,
+                this.depthStencilView, clearDepth, clearStencil,
                 false);
         }
         /// <summary>

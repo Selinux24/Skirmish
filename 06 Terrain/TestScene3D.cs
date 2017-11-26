@@ -540,6 +540,7 @@ namespace Terrain
                 Repeat = 5,
                 Velocity = 1,
                 Direction = new Vector2(1, 1),
+                UseCloudsColorPalette = false,
             });
             sw.Stop();
             loadingText += string.Format("clouds: {0} ", sw.Elapsed.TotalSeconds);

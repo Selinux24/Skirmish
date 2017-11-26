@@ -38,6 +38,10 @@ namespace Engine.Effects
         /// Clouds fadding distance effect variable
         /// </summary>
         private EngineEffectVariableScalar fadingDistance = null;
+        /// <summary>
+        /// Cloud color effect variable
+        /// </summary>
+        private EngineEffectVariableVector color = null;
 
         /// <summary>
         /// First layer translation effect variable
@@ -136,6 +140,20 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Cloud Color
+        /// </summary>
+        protected Color3 Color
+        {
+            get
+            {
+                return this.color.GetVector<Color3>();
+            }
+            set
+            {
+                this.color.Set(value);
+            }
+        }
+        /// <summary>
         /// Clouds fadding distance
         /// </summary>
         protected float FadingDistance
@@ -223,6 +241,7 @@ namespace Engine.Effects
 
             this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
             this.brightness = this.Effect.GetVariableScalar("gBrightness");
+            this.color = this.Effect.GetVariableVector("gColor");
             this.fadingDistance = this.Effect.GetVariableScalar("gFadingDistance");
 
             this.firstTranslation = this.Effect.GetVariableVector("gFirstTranslation");
@@ -250,6 +269,7 @@ namespace Engine.Effects
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="brightness">Brightness</param>
+        /// <param name="color">Cloud color</param>
         /// <param name="fadingDistance">FadingDistance</param>
         /// <param name="firstTexture">First texture</param>
         /// <param name="secondTexture">Second texture</param>
@@ -257,6 +277,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection,
             float brightness,
+            Color4 color,
             float fadingDistance,
             EngineShaderResourceView firstTexture,
             EngineShaderResourceView secondTexture)
@@ -264,6 +285,7 @@ namespace Engine.Effects
             this.WorldViewProjection = world * viewProjection;
 
             this.Brightness = brightness;
+            this.Color = color.RGB();
             this.FadingDistance = fadingDistance;
 
             this.FirstTexture = firstTexture;

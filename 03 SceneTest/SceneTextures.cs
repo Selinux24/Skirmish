@@ -15,6 +15,8 @@ namespace SceneTest
         private float baseHeight = 0.1f;
         private float spaceSize = 40;
 
+        private Random rnd = new Random();
+
         private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> runtime = null;
         private SceneObject<Sprite> backPannel = null;
@@ -53,6 +55,13 @@ namespace SceneTest
         private ParticleSystemDescription pExplosion = null;
         private ParticleSystemDescription pSmokeExplosion = null;
         private SceneObject<ParticleManager> pManager = null;
+
+        private IParticleSystem[] particlePlumes = null;
+        private Vector3 plumeGravity = new Vector3(0, 5, 0);
+        private float plumeMaxHorizontalVelocity = 25f;
+        private Vector2 wind = new Vector2(0, 0);
+        private Vector2 nextWind = new Vector2();
+        private float nextWindChange = 0;
 
         private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
@@ -103,7 +112,7 @@ namespace SceneTest
             var desc = new LineListDrawerDescription() { DepthEnabled = true, Count = 10000 };
             this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(6, 30, 00), 10f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 00, 00), 5f);
         }
 
         private void InitializeTextBoxes()
@@ -556,8 +565,6 @@ namespace SceneTest
 
             this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Manager" });
 
-            this.pPlume.Gravity += Vector3.UnitX * 10f;
-            this.pPlume.MaxHorizontalVelocity *= 5f;
             float d = 500;
             var positions = new Vector3[]
             {
@@ -566,9 +573,10 @@ namespace SceneTest
                 new Vector3(-d,0,+d),
                 new Vector3(-d,0,-d),
             };
+            this.particlePlumes = new IParticleSystem[positions.Length];
             for (int i = 0; i < positions.Length; i++)
             {
-                this.pManager.Instance.AddParticleSystem(
+                this.particlePlumes[i] = this.pManager.Instance.AddParticleSystem(
                     ParticleSystemTypes.CPU,
                     this.pPlume,
                     new ParticleEmitter()
@@ -597,10 +605,13 @@ namespace SceneTest
 
             #endregion
 
-            if (this.Game.Input.KeyJustReleased(Keys.Tab))
-            {
-                this.Game.SetScene<SceneMaterials>();
-            }
+            #region Wind
+
+            this.UpdateWind(gameTime);
+            this.UpdateSkyEffects();
+            this.UpdateParticles();
+
+            #endregion
 
             #region Debug
 
@@ -643,6 +654,35 @@ namespace SceneTest
             base.Update(gameTime);
 
             this.runtime.Instance.Text = this.Game.RuntimeText;
+        }
+
+        private void UpdateWind(GameTime gameTime)
+        {
+            if (this.nextWindChange <= 0)
+            {
+                this.nextWindChange = this.rnd.NextFloat(0, 120);
+
+                var limits = Vector2.One * 100f;
+                this.nextWind = this.rnd.NextVector2(-limits, limits);
+            }
+
+            this.wind = Vector2.Lerp(this.wind, this.nextWind, 0.001f);
+            this.nextWindChange -= gameTime.ElapsedSeconds;
+        }
+        private void UpdateSkyEffects()
+        {
+            this.skyPlane.Instance.Direction = Vector2.Normalize(this.wind);
+            this.skyPlane.Instance.Velocity = Math.Min(1f, MathUtil.Lerp(this.skyPlane.Instance.Velocity, this.wind.Length() / 100f, 0.001f));
+        }
+        private void UpdateParticles()
+        {
+            for (int i = 0; i < this.particlePlumes.Length; i++)
+            {
+                var gravity = new Vector3(plumeGravity.X - wind.X, plumeGravity.Y, plumeGravity.Z - wind.Y);
+
+                this.particlePlumes[i].Parameters.Gravity = gravity;
+                this.particlePlumes[i].Parameters.MaxHorizontalVelocity = plumeMaxHorizontalVelocity;
+            }
         }
 
         private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
