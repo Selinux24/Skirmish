@@ -83,20 +83,31 @@ namespace Engine.Common
         /// Creates the vertex buffers
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="reservedSlots">Reserved slots</param>
         /// <param name="vKeys">Vertices</param>
         /// <param name="vertexBuffers">Vertex buffer collection</param>
         /// <param name="vertexBufferBindings">Vertex buffer bindings</param>
-        private static void CreateVertexBuffers(Graphics graphics, List<VertexBufferDescription> vKeys, List<Buffer> vertexBuffers, List<VertexBufferBinding> vertexBufferBindings)
+        private static void CreateVertexBuffers(Graphics graphics, int reservedSlots, List<VertexBufferDescription> vKeys, List<Buffer> vertexBuffers, List<VertexBufferBinding> vertexBufferBindings)
         {
             for (int i = 0; i < vKeys.Count; i++)
             {
                 var data = vKeys[i].Data.ToArray();
                 int slot = vertexBuffers.Count;
 
-                vertexBuffers.Add(CreateVertexBuffers(graphics, vKeys[i].Name, data, vKeys[i].Dynamic));
-                vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[slot], data[0].GetStride(), 0));
+                if (i < reservedSlots)
+                {
+                    vertexBuffers.Add(null);
+                    vertexBufferBindings.Add(new VertexBufferBinding());
 
-                vKeys[i].Input.AddRange(data[0].GetInput(slot));
+                    vKeys[i].Input.Clear();
+                }
+                else
+                {
+                    vertexBuffers.Add(CreateVertexBuffers(graphics, vKeys[i].Name, data, vKeys[i].Dynamic));
+                    vertexBufferBindings.Add(new VertexBufferBinding(vertexBuffers[slot], data[0].GetStride(), 0));
+
+                    vKeys[i].Input.AddRange(data[0].GetInput(slot));
+                }
             }
         }
         /// <summary>
@@ -228,6 +239,10 @@ namespace Engine.Common
         /// </summary>
         private Game game = null;
         /// <summary>
+        /// Reserved slots
+        /// </summary>
+        private int reservedSlots = 0;
+        /// <summary>
         /// Vertex keys
         /// </summary>
         private List<VertexBufferDescription> vertexData = new List<VertexBufferDescription>();
@@ -274,9 +289,16 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        public BufferManager(Game game)
+        /// <param name="reservedSlots">Reserved slots</param>
+        public BufferManager(Game game, int reservedSlots = 1)
         {
             this.game = game;
+            this.reservedSlots = reservedSlots;
+
+            for (int i = 0; i < reservedSlots; i++)
+            {
+                this.vertexData.Add(new VertexBufferDescription(VertexTypes.Unknown, true));
+            }
         }
         /// <summary>
         /// Free resources from memory
@@ -307,17 +329,17 @@ namespace Engine.Common
         /// Adds vertices to manager
         /// </summary>
         /// <param name="id">Id</param>
-        /// <param name="vertexData">Vertex list</param>
+        /// <param name="data">Vertex list</param>
         /// <param name="dynamic">Add to dynamic buffers</param>
         /// <param name="instances">Add instancing space</param>
-        public BufferDescriptor Add(string id, IVertexData[] vertexData, bool dynamic, int instances)
+        public BufferDescriptor Add(string id, IVertexData[] data, bool dynamic, int instances)
         {
             int offset = -1;
             int slot = -1;
 
-            if (vertexData != null && vertexData.Length > 0)
+            if (data != null && data.Length > 0)
             {
-                VertexTypes vType = vertexData[0].VertexType;
+                VertexTypes vType = data[0].VertexType;
 
                 var keyIndex = this.vertexData.FindIndex(k => k.Type == vType && k.Dynamic == dynamic && (k.Instances > 0 == instances > 0));
                 if (keyIndex < 0)
@@ -331,13 +353,13 @@ namespace Engine.Common
 
                 offset = key.Data.Count;
 
-                key.Data.AddRange(vertexData);
+                key.Data.AddRange(data);
                 key.Instances += instances;
 
                 slot = keyIndex;
             }
 
-            return new BufferDescriptor(slot, offset, vertexData.Length);
+            return new BufferDescriptor(slot, offset, data.Length);
         }
         /// <summary>
         /// Adds indices to manager
@@ -382,7 +404,7 @@ namespace Engine.Common
             var vertexBufferBindings = new List<VertexBufferBinding>();
             var indexBuffers = new List<Buffer>();
 
-            CreateVertexBuffers(this.game.Graphics, this.vertexData, vertexBuffers, vertexBufferBindings);
+            CreateVertexBuffers(this.game.Graphics, this.reservedSlots, this.vertexData, vertexBuffers, vertexBufferBindings);
             if (instances > 0)
             {
                 CreateInstancingBuffers(this.game.Graphics, this.vertexData, instances, vertexBuffers, vertexBufferBindings);

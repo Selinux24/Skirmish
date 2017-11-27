@@ -465,57 +465,7 @@ namespace Engine.Effects
         /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
         public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
         {
-            throw new EngineException(string.Format("Bad stage for effect. Use particle class: {0}", stage));
-        }
-        /// <summary>
-        /// Get technique by vertex type
-        /// </summary>
-        /// <param name="vertexType">VertexType</param>
-        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public EngineEffectTechnique GetTechniqueForStreamOut(VertexTypes vertexType)
-        {
-            if (vertexType == VertexTypes.GPUParticle)
-            {
-                return this.ParticleStreamOut;
-            }
-            else
-            {
-                throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, DrawingStages.StreamOut));
-            }
-        }
-        /// <summary>
-        /// Get technique by vertex type
-        /// </summary>
-        /// <param name="vertexType">VertexType</param>
-        /// <param name="instanced">Use instancing data</param>
-        /// <param name="stage">Stage</param>
-        /// <param name="mode">Mode</param>
-        /// <param name="rotation">Rotation</param>
-        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public virtual EngineEffectTechnique GetTechniqueForDrawing(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode, bool rotation)
-        {
-            if (stage == DrawingStages.Drawing)
-            {
-                if (vertexType == VertexTypes.GPUParticle)
-                {
-                    if (mode.HasFlag(DrawerModesEnum.Forward))
-                    {
-                        return rotation ? this.RotationDraw : this.NonRotationDraw;
-                    }
-                    else
-                    {
-                        throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
-                    }
-                }
-                else
-                {
-                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
-                }
-            }
-            else
-            {
-                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
-            }
+            throw new EngineException("Use technique variables directly");
         }
         /// <summary>
         /// Update per frame data

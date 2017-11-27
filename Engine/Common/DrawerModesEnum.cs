@@ -25,11 +25,11 @@ namespace Engine.Common
         /// </summary>
         ShadowMap = 4,
         /// <summary>
-        /// 
+        /// Opaque only
         /// </summary>
         OpaqueOnly = 8,
         /// <summary>
-        /// 
+        /// Transparent only
         /// </summary>
         TransparentOnly = 16,
     }

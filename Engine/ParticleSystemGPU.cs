@@ -14,7 +14,7 @@ namespace Engine
     /// </summary>
     public class ParticleSystemGPU : IParticleSystem
     {
-        public static int BufferSlot = 13;
+        public static int BufferSlot = 0;
 
         /// <summary>
         /// Emitter initialization buffer
@@ -141,7 +141,7 @@ namespace Engine
 
             this.TimeToEnd = this.Emitter.Duration + this.Parameters.MaxDuration;
 
-            VertexGPUParticle[] data = Helper.CreateArray(1, new VertexGPUParticle()
+            var data = Helper.CreateArray(1, new VertexGPUParticle()
             {
                 Position = this.Emitter.Position,
                 Velocity = this.Emitter.Velocity,
@@ -165,9 +165,10 @@ namespace Engine
             this.drawingBinding = new[] { new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0) };
             this.streamOutBinding = new[] { new StreamOutputBufferBinding(this.streamOutBuffer, 0) };
 
-            this.streamOutInputLayout = game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultGPUParticles.ParticleStreamOut.GetSignature(), VertexGPUParticle.Input(BufferSlot));
-            this.rotatingInputLayout = game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultGPUParticles.RotationDraw.GetSignature(), VertexGPUParticle.Input(BufferSlot));
-            this.nonRotatingInputLayout = game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultGPUParticles.NonRotationDraw.GetSignature(), VertexGPUParticle.Input(BufferSlot));
+            var effect = DrawerPool.EffectDefaultGPUParticles;
+            this.streamOutInputLayout = game.Graphics.CreateInputLayout(effect.ParticleStreamOut.GetSignature(), VertexGPUParticle.Input(BufferSlot));
+            this.rotatingInputLayout = game.Graphics.CreateInputLayout(effect.RotationDraw.GetSignature(), VertexGPUParticle.Input(BufferSlot));
+            this.nonRotatingInputLayout = game.Graphics.CreateInputLayout(effect.NonRotationDraw.GetSignature(), VertexGPUParticle.Input(BufferSlot));
         }
         /// <summary>
         /// Dispose resources
@@ -198,40 +199,47 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Draw(DrawContext context)
         {
-            var effect = DrawerPool.EffectDefaultGPUParticles;
+            var drawerMode = context.DrawerMode;
 
-            #region Per frame update
+            if (drawerMode.HasFlag(DrawerModesEnum.ShadowMap) ||
+                (drawerMode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Parameters.Transparent) ||
+                (drawerMode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Parameters.Transparent))
+            {
+                var effect = DrawerPool.EffectDefaultGPUParticles;
 
-            effect.UpdatePerFrame(
-                context.World,
-                context.ViewProjection,
-                context.EyePosition,
-                this.Emitter.TotalTime,
-                this.Emitter.ElapsedTime,
-                this.Emitter.EmissionRate,
-                this.Parameters.EmitterVelocitySensitivity,
-                this.Parameters.HorizontalVelocity,
-                this.Parameters.VerticalVelocity,
-                this.rnd.NextVector4(Vector4.Zero, Vector4.One),
-                this.Parameters.MaxDuration,
-                this.Parameters.MaxDurationRandomness,
-                this.Parameters.EndVelocity,
-                this.Parameters.Gravity,
-                this.Parameters.StartSize,
-                this.Parameters.EndSize,
-                this.Parameters.MinColor,
-                this.Parameters.MaxColor,
-                this.Parameters.RotateSpeed,
-                this.TextureCount,
-                this.Texture);
+                #region Per frame update
 
-            #endregion
+                effect.UpdatePerFrame(
+                    context.World,
+                    context.ViewProjection,
+                    context.EyePosition,
+                    this.Emitter.TotalTime,
+                    this.Emitter.ElapsedTime,
+                    this.Emitter.EmissionRate,
+                    this.Parameters.EmitterVelocitySensitivity,
+                    this.Parameters.HorizontalVelocity,
+                    this.Parameters.VerticalVelocity,
+                    this.rnd.NextVector4(Vector4.Zero, Vector4.One),
+                    this.Parameters.MaxDuration,
+                    this.Parameters.MaxDurationRandomness,
+                    this.Parameters.EndVelocity,
+                    this.Parameters.Gravity,
+                    this.Parameters.StartSize,
+                    this.Parameters.EndSize,
+                    this.Parameters.MinColor,
+                    this.Parameters.MaxColor,
+                    this.Parameters.RotateSpeed,
+                    this.TextureCount,
+                    this.Texture);
 
-            this.StreamOut(effect);
+                #endregion
 
-            this.ToggleBuffers();
+                this.StreamOut(effect);
 
-            this.Draw(effect, context.DrawerMode);
+                this.ToggleBuffers();
+
+                this.Draw(effect, context.DrawerMode);
+            }
         }
 
         /// <summary>
@@ -242,15 +250,14 @@ namespace Engine
         {
             var graphics = this.Game.Graphics;
 
-            var techniqueForStreamOut = effect.GetTechniqueForStreamOut(VertexTypes.GPUParticle);
-
             graphics.IAInputLayout = this.streamOutInputLayout;
             graphics.IASetVertexBuffers(BufferSlot, this.firstRun ? this.emitterBinding : this.drawingBinding);
             graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
-
             graphics.SetDepthStencilNone();
 
             graphics.SetStreamOutputTargets(this.streamOutBinding);
+
+            var techniqueForStreamOut = effect.ParticleStreamOut;
 
             for (int p = 0; p < techniqueForStreamOut.PassCount; p++)
             {
@@ -289,52 +296,42 @@ namespace Engine
         /// <param name="drawerMode">Drawe mode</param>
         private void Draw(EffectDefaultGPUParticles effect, DrawerModesEnum drawerMode)
         {
-            if (drawerMode.HasFlag(DrawerModesEnum.ShadowMap) ||
-                (drawerMode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Parameters.Transparent) ||
-                (drawerMode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Parameters.Transparent))
+            var rot = this.Parameters.RotateSpeed != Vector2.Zero;
+
+            var techniqueForDrawing = rot ? effect.RotationDraw : effect.NonRotationDraw;
+            if (techniqueForDrawing != null)
             {
-                var rot = this.Parameters.RotateSpeed != Vector2.Zero;
-
-                var techniqueForDrawing = effect.GetTechniqueForDrawing(
-                    VertexTypes.GPUParticle,
-                    false,
-                    DrawingStages.Drawing,
-                    drawerMode,
-                    rot);
-                if (techniqueForDrawing != null)
+                if (!drawerMode.HasFlag(DrawerModesEnum.ShadowMap))
                 {
-                    if (!drawerMode.HasFlag(DrawerModesEnum.ShadowMap))
-                    {
-                        Counters.InstancesPerFrame++;
-                    }
+                    Counters.InstancesPerFrame++;
+                }
 
-                    var graphics = this.Game.Graphics;
+                var graphics = this.Game.Graphics;
 
-                    graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
-                    graphics.IASetVertexBuffers(BufferSlot, this.drawingBinding);
-                    graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
+                graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
+                graphics.IASetVertexBuffers(BufferSlot, this.drawingBinding);
+                graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
-                    graphics.SetDepthStencilRDZEnabled();
+                graphics.SetDepthStencilRDZEnabled();
 
-                    if (this.Parameters.Additive)
-                    {
-                        graphics.SetBlendAdditive();
-                    }
-                    else if (this.Parameters.Transparent)
-                    {
-                        graphics.SetBlendDefaultAlpha();
-                    }
-                    else
-                    {
-                        graphics.SetBlendDefault();
-                    }
+                if (this.Parameters.Additive)
+                {
+                    graphics.SetBlendAdditive();
+                }
+                else if (this.Parameters.Transparent)
+                {
+                    graphics.SetBlendDefaultAlpha();
+                }
+                else
+                {
+                    graphics.SetBlendDefault();
+                }
 
-                    for (int p = 0; p < techniqueForDrawing.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(techniqueForDrawing, p, 0);
+                for (int p = 0; p < techniqueForDrawing.PassCount; p++)
+                {
+                    graphics.EffectPassApply(techniqueForDrawing, p, 0);
 
-                        graphics.DrawAuto();
-                    }
+                    graphics.DrawAuto();
                 }
             }
         }

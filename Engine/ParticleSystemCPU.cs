@@ -13,7 +13,7 @@ namespace Engine
     /// </summary>
     public class ParticleSystemCPU : IParticleSystem
     {
-        public static int BufferSlot = 14;
+        public static int BufferSlot = 0;
 
         /// <summary>
         /// Particle list
