@@ -250,4 +250,10 @@
   <data name="ShaderPostBlurFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\ShaderPostBlur.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="ShaderDefaultWaterFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\ShaderDefaultWater.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderDefaultWaterFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\ShaderDefaultWater.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

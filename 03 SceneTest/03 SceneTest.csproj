@@ -151,6 +151,7 @@
   <ItemGroup>
     <Compile Include="SceneMaterials.cs" />
     <Compile Include="SceneStart.cs" />
+    <Compile Include="SceneWater.cs" />
     <Compile Include="SceneStencilPass.cs" />
     <Compile Include="SceneTextures.cs" />
     <Compile Include="Program.cs" />

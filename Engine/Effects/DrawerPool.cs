@@ -59,6 +59,10 @@ namespace Engine.Effects
         /// GPU Particles drawing effect
         /// </summary>
         public static EffectDefaultGPUParticles EffectDefaultGPUParticles { get; private set; }
+        /// <summary>
+        /// Water drawing effect
+        /// </summary>
+        public static EffectDefaultWater EffectDefaultWater { get; private set; }
 
         /// <summary>
         /// Deferred lightning effect
@@ -114,6 +118,7 @@ namespace Engine.Effects
             EffectDefaultSkyScattering = CreateEffect<EffectDefaultSkyScattering>(graphics, Resources.ShaderDefaultSkyScatteringFxo, Resources.ShaderDefaultSkyScatteringFx);
             EffectDefaultCPUParticles = CreateEffect<EffectDefaultCPUParticles>(graphics, Resources.ShaderDefaultCPUParticlesFxo, Resources.ShaderDefaultCPUParticlesFx);
             EffectDefaultGPUParticles = CreateEffect<EffectDefaultGPUParticles>(graphics, Resources.ShaderDefaultGPUParticlesFxo, Resources.ShaderDefaultGPUParticlesFx);
+            EffectDefaultWater = CreateEffect<EffectDefaultWater>(graphics, Resources.ShaderDefaultWaterFxo, Resources.ShaderDefaultWaterFx);
 
             EffectDeferredComposer = CreateEffect<EffectDeferredComposer>(graphics, Resources.ShaderDeferredComposerFxo, Resources.ShaderDeferredComposerFx);
             EffectDeferredBasic = CreateEffect<EffectDeferredBasic>(graphics, Resources.ShaderDeferredBasicFxo, Resources.ShaderDeferredBasicFxo);
@@ -144,6 +149,7 @@ namespace Engine.Effects
             Helper.Dispose(EffectDefaultSkyScattering);
             Helper.Dispose(EffectDefaultCPUParticles);
             Helper.Dispose(EffectDefaultGPUParticles);
+            Helper.Dispose(EffectDefaultWater);
 
             Helper.Dispose(EffectDeferredComposer);
             Helper.Dispose(EffectDeferredBasic);

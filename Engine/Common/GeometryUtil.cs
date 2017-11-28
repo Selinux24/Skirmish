@@ -820,6 +820,47 @@ namespace Engine.Common
             indices = indexList.ToArray();
         }
         /// <summary>
+        /// Creates a XZ plane of position normal texture data
+        /// </summary>
+        /// <param name="size">Plane size</param>
+        /// <param name="height">Plane height</param>
+        /// <param name="vertices">Gets the plane vertices</param>
+        /// <param name="normals">Gets the plane normals</param>
+        /// <param name="uvs">Gets the plane uvs</param>
+        /// <param name="indices">Gets the plane indices</param>
+        public static void CreatePlane(float size, float height, out Vector3[] vertices, out Vector3[] normals, out Vector2[] uvs, out uint[] indices)
+        {
+            vertices = new Vector3[]
+            {
+                new Vector3(-size, +height, -size),
+                new Vector3(-size, +height, +size),
+                new Vector3(+size, +height, -size),
+                new Vector3(+size, +height, +size),
+            };
+
+            normals = new Vector3[]
+            {
+                Vector3.Up,
+                Vector3.Up,
+                Vector3.Up,
+                Vector3.Up,
+            };
+
+            uvs = new Vector2[]
+            {
+                new Vector2(0.0f, 0.0f),
+                new Vector2(0.0f, size),
+                new Vector2(size, 0.0f),
+                new Vector2(size, size),
+            };
+
+            indices = new uint[]
+            {
+                0, 1, 2,
+                1, 3, 2,
+            };
+        }
+        /// <summary>
         /// Creates a curve plane
         /// </summary>
         /// <param name="size">Quad size</param>

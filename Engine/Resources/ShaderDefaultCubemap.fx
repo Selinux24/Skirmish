@@ -13,14 +13,14 @@ PSVertexPosition VSCubic(VSVertexPosition input)
 	PSVertexPosition output;
 	
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection).xyww;
-	output.positionLocal = input.positionLocal;
+    output.positionWorld = input.positionLocal;
 	
 	return output;
 }
 
 float4 PSForwardCubic(PSVertexPosition input) : SV_Target
 {
-	return gCubemap.Sample(SamplerLinear, input.positionLocal);
+    return gCubemap.Sample(SamplerLinear, input.positionWorld);
 }
 
 technique11 ForwardCubemap

@@ -206,6 +206,7 @@
     <Compile Include="Content\ContentDescription.cs" />
     <Compile Include="Effects\EffectDefaultFoliage.cs" />
     <Compile Include="Effects\EffectDefaultClouds.cs" />
+    <Compile Include="Effects\EffectDefaultWater.cs" />
     <Compile Include="Effects\EffectPostBlur.cs" />
     <Compile Include="Effects\EffectShadowFoliage.cs" />
     <Compile Include="Effects\EffectShadowBillboard.cs" />
@@ -304,6 +305,8 @@
     <Compile Include="SkyPlaneDescription.cs" />
     <Compile Include="SkyScatteringDescription.cs" />
     <Compile Include="CursorDescription.cs" />
+    <Compile Include="WaterDescription.cs" />
+    <Compile Include="Water.cs" />
     <Compile Include="SpriteProgressBar.cs" />
     <Compile Include="SpriteProgressBarDescription.cs" />
     <Compile Include="SteerManipulatorController.cs" />
@@ -565,6 +568,7 @@
     <None Include="packages.config" />
     <None Include="Resources\ShaderDefaultClouds.fxo" />
     <None Include="Resources\ShaderDefaultFoliage.fxo" />
+    <None Include="Resources\ShaderDefaultWater.fxo" />
     <None Include="Resources\ShaderPostBlur.fx" />
     <None Include="Resources\ShaderPostBlur.fxo" />
     <None Include="Resources\IncScattering.fx" />
@@ -607,6 +611,7 @@
     <None Include="Resources\IncHelpers.fx" />
     <None Include="Resources\ShaderDefaultFoliage.fx" />
     <None Include="Resources\ShaderShadowFoliage.fx" />
+    <None Include="Resources\ShaderDefaultWater.fx" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

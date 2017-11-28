@@ -306,7 +306,7 @@ struct PSGPUParticle
 struct PSVertexPosition
 {
 	float4 positionHomogeneous : SV_POSITION;
-	float3 positionLocal : POSITION;
+    float3 positionWorld : POSITION;
 };
 struct PSVertexPositionColor
 {
