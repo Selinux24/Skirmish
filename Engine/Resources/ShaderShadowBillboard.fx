@@ -1,4 +1,3 @@
-#include "IncHelpers.fx"
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 

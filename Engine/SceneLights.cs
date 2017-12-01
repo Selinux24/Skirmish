@@ -219,6 +219,18 @@ namespace Engine
         /// Far light distance definition for shadow maps
         /// </summary>
         public float FarLightsDistance { get; set; }
+        /// <summary>
+        /// Gets or sets the color palette use flag
+        /// </summary>
+        public bool UseSunColorPalette { get; set; }
+        /// <summary>
+        /// Sun color palette
+        /// </summary>
+        public List<Tuple<float, Color4>> SunColorPalette { get; set; }
+        /// <summary>
+        /// Sun color
+        /// </summary>
+        public Color4 SunColor { get; set; }
 
         /// <summary>
         /// Constructor
@@ -230,6 +242,20 @@ namespace Engine
             this.ShadowHDDistance = 50f;
             this.ShadowLDDistance = 150f;
             this.FarLightsDistance = 1000000f;
+
+            this.SunColor = Color.White;
+
+            this.UseSunColorPalette = true;
+            this.SunColorPalette = new List<Tuple<float, Color4>>();
+            this.SunColorPalette.AddRange(new[]
+            {
+                new Tuple<float, Color4>(MathUtil.Pi * -1.00f, Color.Black),
+                new Tuple<float, Color4>(MathUtil.Pi * 0.02f, Color.Orange),
+                new Tuple<float, Color4>(MathUtil.Pi * 0.20f, Color.White),
+                new Tuple<float, Color4>(MathUtil.Pi * 0.70f, Color.White),
+                new Tuple<float, Color4>(MathUtil.Pi * 0.98f, Color.Orange),
+                new Tuple<float, Color4>(MathUtil.Pi * 2.00f, Color.Black),
+            });
         }
         /// <summary>
         /// Adds the specified new light to colection
@@ -425,6 +451,11 @@ namespace Engine
                 float tan = (float)Math.Tan(timeOfDay.Elevation);
                 Vector3 fillDir = tan >= 0f ? Vector3.Cross(keyDir, backDir) : Vector3.Cross(backDir, keyDir);
 
+                if (this.UseSunColorPalette)
+                {
+                    this.SunColor = this.GetSunColor(timeOfDay);
+                }
+
                 this.GlobalAmbientLight = ga;
 
                 var keyLight = this.KeyLight;
@@ -433,6 +464,11 @@ namespace Engine
                     keyLight.Brightness = keyLight.BaseBrightness * b;
 
                     keyLight.Direction = keyDir;
+
+                    if (this.UseSunColorPalette)
+                    {
+                        keyLight.SpecularColor = this.SunColor * b;
+                    }
                 }
 
                 var fillLight = this.FillLight;
@@ -453,6 +489,35 @@ namespace Engine
 
                 this.FogColor = this.BaseFogColor * this.Intensity;
             }
+        }
+        /// <summary>
+        /// Gets the sun color based on time of day
+        /// </summary>
+        /// <param name="timeOfDay">Time of day class</param>
+        /// <returns>Returns the color base on time of day meridian angle</returns>
+        private Color4 GetSunColor(TimeOfDay timeOfDay)
+        {
+            float angle = MathUtil.Clamp(timeOfDay.MeridianAngle - MathUtil.PiOverTwo, 0, MathUtil.Pi);
+
+            for (int i = 0; i < this.SunColorPalette.Count; i++)
+            {
+                if (this.SunColorPalette[i].Item1 > angle)
+                {
+                    if (i > 0)
+                    {
+                        var from = this.SunColorPalette[i - 1];
+                        var to = this.SunColorPalette[i];
+                        float amount = (angle - from.Item1) / (to.Item1 - from.Item1);
+                        return Color4.Lerp(from.Item2, to.Item2, amount);
+                    }
+                    else
+                    {
+                        return this.SunColorPalette[i].Item2;
+                    }
+                }
+            }
+
+            return Color4.White;
         }
     }
 }

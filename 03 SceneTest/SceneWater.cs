@@ -12,7 +12,12 @@ namespace SceneTest
         public SceneWater(Game game)
             : base(game)
         {
+            Vector3 L = Vector3.Normalize(new Vector3(-1, -1, 0));
+            Vector3 V = Vector3.Normalize(new Vector3(+1, -1, 0));
+            Vector3 N = Vector3.Normalize(new Vector3(0, +1, 0));
 
+            float d1 = Vector3.Dot(N, Vector3.Normalize(L + V));
+            float d2 = Vector3.Dot(Vector3.Reflect(V, N), L);
         }
 
         public override void Initialize()
@@ -35,7 +40,9 @@ namespace SceneTest
             this.water = this.AddComponent<Water>(new WaterDescription()
             {
                 PlaneSize = 1000f,
-                WaterColor = Color.SandyBrown,
+                HeightmapIterations = 8,
+                GeometryIterations = 4,
+                ColorIterations = 8,
             });
             this.sky = this.AddComponent<SkyScattering>(new SkyScatteringDescription());
 

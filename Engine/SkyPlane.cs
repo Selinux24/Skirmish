@@ -116,14 +116,6 @@ namespace Engine
         /// Gets or sets the clouds base color
         /// </summary>
         public Color4 CloudsBaseColor { get; set; }
-        /// <summary>
-        /// Gets or sets the color palette use flag
-        /// </summary>
-        public bool UseCloudsColorPalette { get; set; }
-        /// <summary>
-        /// Clouds color palette
-        /// </summary>
-        public List<Tuple<float, Color4>> CloudsColorPalette { get; set; }
 
         /// <summary>
         /// Constructor
@@ -155,8 +147,6 @@ namespace Engine
             this.PerturbationScale = description.PerturbationScale;
             this.Direction = description.Direction;
             this.CloudsBaseColor = description.CloudBaseColor;
-            this.CloudsColorPalette = description.CloudsColorPalette;
-            this.UseCloudsColorPalette = description.UseCloudsColorPalette;
 
             //Create sky plane
             Vector3[] vData;
@@ -202,14 +192,7 @@ namespace Engine
                 this.brightness = Math.Min(this.MaxBrightness, context.Lights.KeyLight.Brightness + this.MinBrightness);
             }
 
-            if (this.UseCloudsColorPalette)
-            {
-                this.color = (this.CloudsBaseColor + this.GetCloudColor(this.Scene.TimeOfDay)) * 0.5f;
-            }
-            else
-            {
-                this.color = this.CloudsBaseColor;
-            }
+            this.color = (this.CloudsBaseColor + context.Lights.SunColor) * 0.5f;
         }
         /// <summary>
         /// Draws content
@@ -275,34 +258,6 @@ namespace Engine
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets the cloud color base on time of day
-        /// </summary>
-        /// <param name="timeOfDay">Time of day class</param>
-        /// <returns>Returns the color base on time of day meridian angle</returns>
-        private Color4 GetCloudColor(TimeOfDay timeOfDay)
-        {
-            for (int i = 0; i < this.CloudsColorPalette.Count; i++)
-            {
-                if (this.CloudsColorPalette[i].Item1 > timeOfDay.MeridianAngle)
-                {
-                    if (i > 0)
-                    {
-                        var from = this.CloudsColorPalette[i - 1];
-                        var to = this.CloudsColorPalette[i];
-                        float amount = (timeOfDay.MeridianAngle - from.Item1) / (to.Item1 - from.Item1);
-                        return Color4.Lerp(from.Item2, to.Item2, amount);
-                    }
-                    else
-                    {
-                        return this.CloudsColorPalette[i].Item2;
-                    }
-                }
-            }
-
-            return Color4.White;
         }
     }
 }

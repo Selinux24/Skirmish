@@ -1,4 +1,3 @@
-#include "IncHelpers.fx"
 #include "IncLights.fx"
 #include "IncVertexFormats.fx"
 
@@ -11,35 +10,24 @@ cbuffer cbVSPerFrame : register(b1)
 cbuffer cbPSPerFrame : register(b3)
 {
     float3 gPSEyePositionWorld;
-    float3 gPSLightDirection;
     float3 gPSBaseColor;
     float3 gPSWaterColor;
     float4 gPSWaveParams;
     float gPSTotalTime;
+    float gPSAmbient;
+    float gPSPAD31;
     uint3 gPSIters;
+    uint gPSLightCount;
+    DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
 };
 
-static const float2x2 octave_m = float2x2(1.6, 1.2, -1.2, 1.6);
+static const float2x2 octaveMatrix = float2x2(1.6, 1.2, -1.6, 1.2);
+static const float waterShinniness = 60.0f;
+static const float specularPassNRM = (waterShinniness + 8.0) / (PI * 8.0);
+static const float positionEpsilonNRM = (0.1f / 10000.0f);
 
-// lighting
-float diffuse(float3 n, float3 l)
-{
-    return max(0, dot(n, l)) * 0.4 + 0.6;
-}
-float specular(float3 n, float3 l, float3 e, float s)
-{
-    float nrm = (s + 8.0) / (PI * 8.0);
-    return pow(max(dot(reflect(e, n), l), 0.0), s) * nrm;
-}
-
-float3 getSkyColor(float3 eyeDir)
-{
-    eyeDir.y = max(eyeDir.y, 0.0);
-    return float3(pow(1.0 - eyeDir.y, 2.0), 1.0 - eyeDir.y, 0.6 + (1.0 - eyeDir.y) * 0.4);
-}
-
-// sea
-float sea_octave(float2 uv, float choppy)
+// Sea geometry
+float Octave(float2 uv, float choppy)
 {
     uv += Noise(uv);
     float2 wv = 1.0 - abs(sin(uv));
@@ -48,99 +36,54 @@ float sea_octave(float2 uv, float choppy)
     float v = 1.0 - pow(max(0, wv.x * wv.y), 0.65);
     return pow(max(0, v), choppy);
 }
-
-float map(float3 position, float time)
+float Map(float3 position, float time, uint iterations)
 {
     float freq = gPSWaveParams.w;
     float amp = gPSWaveParams.x;
     float choppy = gPSWaveParams.y;
     float2 uv = position.xz;
-    uv.x *= 0.75;
 
-    float d, h = 0.0;
-    for (uint i = 0; i < gPSIters.y; i++)
+    float h = 0.0;
+    for (uint i = 0; i < iterations; i++)
     {
-        d = sea_octave((uv + time) * freq, choppy);
-        d += sea_octave((uv - time) * freq, choppy);
+        float d = Octave((uv + time) * freq, choppy) + Octave((uv - time) * freq, choppy);
+
         h += d * amp;
-        uv = mul(uv, octave_m);
+        uv = mul(uv, octaveMatrix);
         freq *= 1.9;
         amp *= 0.22;
         choppy = lerp(choppy, 1.0, 0.2);
     }
     return position.y - h;
 }
-
-float map_detailed(float3 position, float time)
-{
-    float freq = gPSWaveParams.w;
-    float amp = gPSWaveParams.x;
-    float choppy = gPSWaveParams.y;
-    float2 uv = position.xz;
-    uv.x *= 0.75;
-
-    float d, h = 0.0;
-    for (uint i = 0; i < gPSIters.z; i++)
-    {
-        d = sea_octave((uv + time) * freq, choppy);
-        d += sea_octave((uv - time) * freq, choppy);
-        h += d * amp;
-        uv = mul(uv, octave_m);
-        freq *= 1.9;
-        amp *= 0.22;
-        choppy = lerp(choppy, 1.0, 0.2);
-    }
-    return position.y - h;
-}
-
-float3 getSeaColor(float3 position, float3 normal, float3 lightDir, float3 eyeDir, float epsilon)
-{
-    float fresnel = clamp(1.0 - dot(normal, -eyeDir), 0.0, 1.0);
-    fresnel = pow(fresnel, 3.0) * 0.65;
-        
-    float3 reflected = getSkyColor(reflect(eyeDir, normal));
-    float3 refracted = gPSBaseColor + pow(diffuse(normal, lightDir), 80.0) * gPSWaterColor * 0.12;
-    
-    float3 color = lerp(refracted, reflected, fresnel);
-    
-    float atten = max(1.0 - epsilon, 0.0);
-    color += gPSWaterColor * (position.y - gPSWaveParams.x) * 0.18 * atten;
-    
-    float spec = specular(normal, lightDir, eyeDir, 60.0);
-    color += float3(spec, spec, spec);
-    
-    return color;
-}
-
-float3 getNormal(float3 postion, float epsilon, float time)
+float3 GetNormal(float3 position, float epsilon, float time)
 {
     float3 n;
-    n.y = map_detailed(postion, time);
-    n.x = map_detailed(float3(postion.x + epsilon, postion.y, postion.z), time) - n.y;
-    n.z = map_detailed(float3(postion.x, postion.y, postion.z + epsilon), time) - n.y;
+    n.y = Map(position, time, gPSIters.z);
+    n.x = Map(position + float3(epsilon, 0, 0), time, gPSIters.z) - n.y;
+    n.z = Map(position + float3(0, 0, epsilon), time, gPSIters.z) - n.y;
     n.y = epsilon;
     return normalize(n);
 }
-
-float3 heightMapTracing(float3 eyePos, float3 eyeDir, float time)
+float3 HeightMapTracing(float3 eyePos, float3 eyeDir, float time)
 {
     float3 p = 0;
 
     float tm = 0.0;
     float tx = 1000.0;
-    float hx = map(eyePos + eyeDir * tx, time);
+    float hx = Map(eyePos + eyeDir * tx, time, gPSIters.y);
     if (hx > 0.0)
     {
         return tx;
     }
 
-    float hm = map(eyePos + eyeDir * tm, time);
+    float hm = Map(eyePos + eyeDir * tm, time, gPSIters.y);
     float tmid = 0.0;
     for (uint i = 0; i < gPSIters.x; i++)
     {
         tmid = lerp(tm, tx, hm / (hm - hx));
         p = eyePos + eyeDir * tmid;
-        float hmid = map(p, time);
+        float hmid = Map(p, time, gPSIters.y);
         if (hmid < 0.0)
         {
             tx = tmid;
@@ -156,6 +99,31 @@ float3 heightMapTracing(float3 eyePos, float3 eyeDir, float time)
     return p;
 }
 
+// Water lighting
+void GetLightColor(DirectionalLight light, float3 normal, float3 eyeDir, out float3 diffusePass, out float3 specularPass)
+{
+    float3 lightDir = normalize(-light.Direction);
+
+    diffusePass = DiffusePass(light.Diffuse, -lightDir, normal).rgb;
+    specularPass = SpecularBlinnPhongPass(light.Specular, waterShinniness, lightDir, normal, eyeDir).rgb;
+}
+float3 GetSkyColor(float3 eyeDir)
+{
+    eyeDir.y = max(eyeDir.y, 0.0);
+    return float3(pow(1.0 - eyeDir.y, 2.0), 1.0 - eyeDir.y, 0.6 + (1.0 - eyeDir.y) * 0.4);
+}
+float3 GetSeaColor(float3 position, float3 normal, float3 eyeDir, float ambient, float3 diffuse, float3 specular, float fresnel, float atten)
+{
+    float3 refracted = (gPSBaseColor + pow(diffuse * 0.4 + float3(0.6, 0.6, 0.6), 80.0) * gPSWaterColor * 0.12) * clamp(ambient * 1.5f, 0.1, 1);
+    float3 reflected = GetSkyColor(reflect(eyeDir, normal)) * clamp(ambient * 2, 0.1, 1);
+    
+    float3 color = lerp(refracted, reflected, fresnel);
+    color += gPSWaterColor * (position.y - gPSWaveParams.x) * atten;
+    color += specular * specularPassNRM;
+
+    return color;
+}
+
 PSVertexPosition VSWater(VSVertexPosition input)
 {
     PSVertexPosition output = (PSVertexPosition) 0;
@@ -169,22 +137,40 @@ PSVertexPosition VSWater(VSVertexPosition input)
 float4 PSWater(PSVertexPosition input) : SV_TARGET
 {
     float3 eyePos = gPSEyePositionWorld;
-    float3 eyeDir = -normalize(eyePos - input.positionWorld);
+    float3 eyeDir = normalize(eyePos - input.positionWorld);
 
-    // time    
+    // Get the current time    
     float time = (1.0f + gPSTotalTime * gPSWaveParams.z);
     
-    // tracing
-    float3 hmPosition = heightMapTracing(eyePos, eyeDir, time);
+    // Get the geometry (position and normal)
+    float3 hmPosition = HeightMapTracing(eyePos, -eyeDir, time);
     float3 toPosition = hmPosition - eyePos;
-    float epsilon = dot(toPosition, toPosition) * 0.00001f;
-    float3 normal = getNormal(hmPosition, epsilon, time);
+    float epsilon = dot(toPosition, toPosition) * positionEpsilonNRM;
+    float3 hmNormal = GetNormal(hmPosition, epsilon, time);
 
-    float3 color = lerp(
-        getSkyColor(eyeDir),
-        getSeaColor(hmPosition, normal, normalize(gPSLightDirection), eyeDir, epsilon),
-    	pow(smoothstep(0.0f, -0.05f, eyeDir.y), 0.3f));
-        
+    // Get lighting params
+    float attenuation = max(1.0 - epsilon, 0.0) * 0.18;
+    float fresnel = clamp(1.0 - dot(hmNormal, eyeDir), 0.0, 1.0);
+    fresnel = pow(fresnel, 6.0) * 0.65;
+
+    // Do light color
+    float3 lDiffuse = 0;
+    float3 lSpecular = 0;
+    if (gPSLightCount > 0)
+    {
+        for (uint i = 0; i < gPSLightCount.x; i++)
+        {
+            float3 diffuse = 0;
+            float3 specular = 0;
+            GetLightColor(gPSDirLights[i], hmNormal, eyeDir, diffuse, specular);
+            lDiffuse += diffuse;
+            lSpecular += specular;
+        }
+    }
+
+    // Do sea color
+    float3 color = GetSeaColor(hmPosition, hmNormal, eyeDir, gPSAmbient, lDiffuse, lSpecular, fresnel, attenuation);
+
     return float4(color, 1.0f);
 }
 

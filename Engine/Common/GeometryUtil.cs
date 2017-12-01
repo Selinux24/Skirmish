@@ -828,14 +828,14 @@ namespace Engine.Common
         /// <param name="normals">Gets the plane normals</param>
         /// <param name="uvs">Gets the plane uvs</param>
         /// <param name="indices">Gets the plane indices</param>
-        public static void CreatePlane(float size, float height, out Vector3[] vertices, out Vector3[] normals, out Vector2[] uvs, out uint[] indices)
+        public static void CreateXZPlane(float size, float height, out Vector3[] vertices, out Vector3[] normals, out Vector2[] uvs, out uint[] indices)
         {
             vertices = new Vector3[]
             {
-                new Vector3(-size, +height, -size),
-                new Vector3(-size, +height, +size),
-                new Vector3(+size, +height, -size),
-                new Vector3(+size, +height, +size),
+                new Vector3(-size*0.5f, +height, -size*0.5f),
+                new Vector3(-size*0.5f, +height, +size*0.5f),
+                new Vector3(+size*0.5f, +height, -size*0.5f),
+                new Vector3(+size*0.5f, +height, +size*0.5f),
             };
 
             normals = new Vector3[]

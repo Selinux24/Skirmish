@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.Effects
 {
@@ -15,6 +16,18 @@ namespace Engine.Effects
         public readonly EngineEffectTechnique Water = null;
 
         /// <summary>
+        /// Directional lights effect variable
+        /// </summary>
+        private EngineEffectVariable dirLights = null;
+        /// <summary>
+        /// Light count effect variable
+        /// </summary>
+        private EngineEffectVariableScalar lightCount = null;
+        /// <summary>
+        /// Ambient effect variable
+        /// </summary>
+        private EngineEffectVariableScalar ambient = null;
+        /// <summary>
         /// World matrix effect variable
         /// </summary>
         private EngineEffectVariableMatrix world = null;
@@ -26,10 +39,6 @@ namespace Engine.Effects
         /// Eye position effect variable
         /// </summary>
         private EngineEffectVariableVector eyePositionWorld = null;
-        /// <summary>
-        /// Main light direction effect
-        /// </summary>
-        private EngineEffectVariableVector lightDirection = null;
         /// <summary>
         /// Base color effect variable
         /// </summary>
@@ -51,6 +60,48 @@ namespace Engine.Effects
         /// </summary>
         private EngineEffectVariableVector iterParams = null;
 
+        /// <summary>
+        /// Directional lights
+        /// </summary>
+        protected BufferDirectionalLight[] DirLights
+        {
+            get
+            {
+                return this.dirLights.GetValue<BufferDirectionalLight>(BufferDirectionalLight.MAX);
+            }
+            set
+            {
+                this.dirLights.SetValue(value, BufferDirectionalLight.MAX);
+            }
+        }
+        /// <summary>
+        /// Light count
+        /// </summary>
+        protected int LightCount
+        {
+            get
+            {
+                return (int)this.lightCount.GetUInt();
+            }
+            set
+            {
+                this.lightCount.Set(value);
+            }
+        }
+        /// <summary>
+        /// Ambient
+        /// </summary>
+        protected float Ambient
+        {
+            get
+            {
+                return this.ambient.GetFloat();
+            }
+            set
+            {
+                this.ambient.Set(value);
+            }
+        }
         /// <summary>
         /// World matrix
         /// </summary>
@@ -91,20 +142,6 @@ namespace Engine.Effects
             set
             {
                 this.eyePositionWorld.Set(value);
-            }
-        }
-        /// <summary>
-        /// Main light direction
-        /// </summary>
-        protected Vector3 LightDirection
-        {
-            get
-            {
-                return this.lightDirection.GetVector<Vector3>();
-            }
-            set
-            {
-                this.lightDirection.Set(value);
             }
         }
         /// <summary>
@@ -193,12 +230,15 @@ namespace Engine.Effects
             this.worldViewProjection = this.Effect.GetVariableMatrix("gVSWorldViewProjection");
 
             this.eyePositionWorld = this.Effect.GetVariableVector("gPSEyePositionWorld");
-            this.lightDirection = this.Effect.GetVariableVector("gPSLightDirection");
             this.baseColor = this.Effect.GetVariableVector("gPSBaseColor");
             this.waterColor = this.Effect.GetVariableVector("gPSWaterColor");
             this.waveParams = this.Effect.GetVariableVector("gPSWaveParams");
             this.totalTime = this.Effect.GetVariableScalar("gPSTotalTime");
             this.iterParams = this.Effect.GetVariableVector("gPSIters");
+            this.ambient = this.Effect.GetVariableScalar("gPSAmbient");
+
+            this.dirLights = this.Effect.GetVariable("gPSDirLights");
+            this.lightCount = this.Effect.GetVariableScalar("gPSLightCount");
         }
         /// <summary>
         /// Get technique by vertex type
@@ -234,7 +274,7 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePosition,
-            Vector3 lightDirection,
+            SceneLights lights,
             Color baseColor,
             Color waterColor,
             float waveHeight,
@@ -243,18 +283,36 @@ namespace Engine.Effects
             float waveFrequency,
             float totalTime,
             int steps = 8,
-            int geometryIterations = 3,
-            int colorIterations = 5)
+            int geometryIterations = 4,
+            int colorIterations = 6)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
             this.EyePositionWorld = eyePosition;
-            this.LightDirection = lightDirection;
             this.BaseColor = baseColor.RGB();
             this.WaterColor = waterColor.RGB();
             this.WaveParams = new Vector4(waveHeight, waveChoppy, waveSpeed, waveFrequency);
             this.TotalTime = totalTime;
             this.IterParams = new Int3(steps, geometryIterations, colorIterations);
+
+            var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
+            int lCount = 0;
+
+            if (lights != null)
+            {
+                var dirLights = lights.GetVisibleDirectionalLights();
+                for (int i = 0; i < Math.Min(dirLights.Length, BufferDirectionalLight.MAX); i++)
+                {
+                    bDirLights[i] = new BufferDirectionalLight(dirLights[i]);
+                }
+
+                lCount = Math.Min(dirLights.Length, BufferDirectionalLight.MAX);
+
+                this.Ambient = lights.GlobalAmbientLight;
+            }
+
+            this.DirLights = bDirLights;
+            this.LightCount = lCount;
         }
     }
 }

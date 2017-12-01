@@ -46,6 +46,8 @@ namespace SceneTest
         private SceneObject<SkyScattering> sky = null;
         private SceneObject<SkyPlane> skyPlane = null;
 
+        private SceneObject<Water> water = null;
+
         private SceneObject<TriangleListDrawer> testCube = null;
 
         private ParticleSystemDescription pPlume = null;
@@ -108,6 +110,7 @@ namespace SceneTest
             this.InitializeStreetLamps();
             this.InitializeTestCube();
             this.InitializeParticles();
+            this.InitializeWater();
 
             var desc = new LineListDrawerDescription() { DepthEnabled = true, Count = 10000 };
             this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
@@ -587,6 +590,11 @@ namespace SceneTest
                         MaximumDistance = 1000f,
                     });
             }
+        }
+        private void InitializeWater()
+        {
+            WaterDescription waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -100f);
+            this.water = this.AddComponent<Water>(waterDesc, SceneObjectUsageEnum.None);
         }
 
         public override void Update(GameTime gameTime)

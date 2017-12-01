@@ -74,14 +74,6 @@ namespace Engine
         /// Sky plane mode
         /// </summary>
         public SkyPlaneMode Mode { get; set; }
-        /// <summary>
-        /// Use the clouds color palette
-        /// </summary>
-        public bool UseCloudsColorPalette { get; set; }
-        /// <summary>
-        /// Clouds color palette
-        /// </summary>
-        public List<Tuple<float, Color4>> CloudsColorPalette { get; set; }
 
         /// <summary>
         /// Constructor
@@ -108,24 +100,6 @@ namespace Engine
             this.Direction = Vector2.One;
             this.PerturbationScale = 0.3f;
             this.Mode = SkyPlaneMode.Static;
-
-            this.UseCloudsColorPalette = true;
-            this.CloudsColorPalette = new List<Tuple<float, Color4>>();
-            this.CloudsColorPalette.AddRange(new []
-            {
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.00f, Color.Black),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.20f, Color.Black),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.22f, Color.Purple),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.25f, Color.Orange),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.28f, Color.Yellow),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.40f, Color.LightYellow),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.60f, Color.Yellow),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.70f, Color.Orange),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.75f, Color.Red),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.76f, Color.DarkRed),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 0.80f, Color.Black),
-                new Tuple<float, Color4>(MathUtil.TwoPi * 1.00f, Color.Black),
-            });
         }
     }
 }

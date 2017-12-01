@@ -43,6 +43,7 @@ namespace Skybox
         private SceneObject<Scenery> ruins = null;
         private SceneObject<LineListDrawer> volumesDrawer = null;
         private SceneObject<TriangleListDrawer> graphDrawer = null;
+        private SceneObject<Water> water = null;
 
         private SceneObject<ParticleManager> pManager = null;
         private ParticleSystemDescription pPlume = null;
@@ -67,6 +68,8 @@ namespace Skybox
         public override void Initialize()
         {
             base.Initialize();
+
+            this.InitializeCamera();
 
             #region Cursor
 
@@ -102,6 +105,7 @@ namespace Skybox
 
             var spDesc = new SpriteDescription()
             {
+                Name = "UI Back pannel",
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
                 Height = this.fps.Instance.Top + this.fps.Instance.Height + 3,
@@ -154,6 +158,13 @@ namespace Skybox
                 }
             };
             this.ruins = this.AddComponent<Scenery>(desc);
+
+            #endregion
+
+            #region Water
+
+            WaterDescription waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -1f);
+            this.water = this.AddComponent<Water>(waterDesc, SceneObjectUsageEnum.None);
 
             #endregion
 
@@ -291,13 +302,11 @@ namespace Skybox
             {
                 Settings = nvSettings,
             };
-
-            this.InitializeCamera();
         }
         private void InitializeCamera()
         {
             this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 50.0f;
+            this.Camera.FarPlaneDistance = 5000.0f;
             this.Camera.Goto(new Vector3(-6, this.walker.Height, 5));
             this.Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
             this.Camera.MovementDelta = 4f;

@@ -18,7 +18,7 @@ namespace Engine
                     "Key light",
                     true,
                     new Color4(1, 0.9607844f, 0.8078432f, 1f),
-                    new Color4(1, 0.9607844f, 0.8078432f, 1f),
+                    new Color4(1, 0.9607844f, 0.8078432f, 1f) * 0.5f,
                     true,
                     new Vector3(-0.5265408f, -0.5735765f, -0.6275069f),
                     1f);
@@ -52,7 +52,7 @@ namespace Engine
                     "Back light",
                     false,
                     new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
-                    new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
+                    new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f) * 0.25f,
                     true,
                     new Vector3(0.4545195f, -0.7660444f, 0.4545195f),
                     1f);

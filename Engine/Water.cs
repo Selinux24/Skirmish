@@ -82,15 +82,18 @@ namespace Engine
                         effect.UpdatePerFrame(
                             context.World,
                             context.ViewProjection,
-                            context.EyePosition,
-                            context.Lights.KeyLight.Direction,
+                            context.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
+                            context.Lights,
                             this.Description.BaseColor,
                             this.Description.WaterColor,
                             this.Description.WaveHeight,
                             this.Description.WaveChoppy,
                             this.Description.WaveSpeed,
                             this.Description.WaveFrequency,
-                            context.GameTime.TotalSeconds);
+                            context.GameTime.TotalSeconds,
+                            this.Description.HeightmapIterations,
+                            this.Description.GeometryIterations,
+                            this.Description.ColorIterations);
 
                         var graphics = this.Game.Graphics;
 
@@ -119,7 +122,7 @@ namespace Engine
             Vector3[] nData;
             Vector2[] uvs;
             uint[] iData;
-            GeometryUtil.CreatePlane(planeSize, planeHeight, out vData, out nData, out uvs, out iData);
+            GeometryUtil.CreateXZPlane(planeSize, planeHeight, out vData, out nData, out uvs, out iData);
 
             var vertices = VertexPositionTexture.Generate(vData, uvs);
             this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);

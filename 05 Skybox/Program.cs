@@ -7,7 +7,7 @@ namespace Skybox
         static void Main()
         {
 #if DEBUG
-            using (Game cl = new Game("5 Skybox", false, 800, 450, true, 0, 4))
+            using (Game cl = new Game("5 Skybox", false, 1600, 900, true, 0, 0))
 #else
             using (Game cl = new Game("5 Skybox", true, 0, 0, true, 0, 0))
 #endif
