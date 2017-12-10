@@ -70,42 +70,40 @@ namespace Engine
                 if (this.indexBuffer.Count > 0)
                 {
                     var effect = DrawerPool.EffectDefaultWater;
-                    var technique = effect.Water;
-                    if (technique != null)
+                    var technique = DrawerPool.EffectDefaultWater.Water;
+
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+
+                    this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+
+                    effect.UpdatePerFrame(
+                        context.World,
+                        context.ViewProjection,
+                        context.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
+                        context.Lights,
+                        this.Description.BaseColor,
+                        this.Description.WaterColor,
+                        this.Description.WaveHeight,
+                        this.Description.WaveChoppy,
+                        this.Description.WaveSpeed,
+                        this.Description.WaveFrequency,
+                        context.GameTime.TotalSeconds,
+                        this.Description.HeightmapIterations,
+                        this.Description.GeometryIterations,
+                        this.Description.ColorIterations);
+
+                    var graphics = this.Game.Graphics;
+
+                    for (int p = 0; p < technique.PassCount; p++)
                     {
-                        Counters.InstancesPerFrame++;
-                        Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+                        graphics.EffectPassApply(technique, p, 0);
 
-                        this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                        this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
-
-                        effect.UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection,
-                            context.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
-                            context.Lights,
-                            this.Description.BaseColor,
-                            this.Description.WaterColor,
-                            this.Description.WaveHeight,
-                            this.Description.WaveChoppy,
-                            this.Description.WaveSpeed,
-                            this.Description.WaveFrequency,
-                            context.GameTime.TotalSeconds,
-                            this.Description.HeightmapIterations,
-                            this.Description.GeometryIterations,
-                            this.Description.ColorIterations);
-
-                        var graphics = this.Game.Graphics;
-
-                        for (int p = 0; p < technique.PassCount; p++)
-                        {
-                            graphics.EffectPassApply(technique, p, 0);
-
-                            graphics.DrawIndexed(
-                                this.indexBuffer.Count,
-                                this.indexBuffer.Offset,
-                                this.vertexBuffer.Offset);
-                        }
+                        graphics.DrawIndexed(
+                            this.indexBuffer.Count,
+                            this.indexBuffer.Offset,
+                            this.vertexBuffer.Offset);
                     }
                 }
             }

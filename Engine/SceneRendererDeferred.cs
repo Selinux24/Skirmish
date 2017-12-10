@@ -213,9 +213,11 @@ namespace Engine
                 DrawerMode = DrawerModesEnum.ShadowMap,
             };
 
-            this.blendDeferredComposer = EngineBlendState.DeferredComposer(this.Game.Graphics, 3);
-            this.blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(this.Game.Graphics, 3);
-            this.blendDeferredLighting = EngineBlendState.DeferredLighting(this.Game.Graphics);
+            var graphics = this.Game.Graphics;
+
+            this.blendDeferredComposer = EngineBlendState.DeferredComposer(graphics, 3);
+            this.blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(graphics, 3);
+            this.blendDeferredLighting = EngineBlendState.DeferredLighting(graphics);
         }
         /// <summary>
         /// Dispose objects
@@ -823,11 +825,13 @@ namespace Engine
         /// <param name="dsv">Deph stencil buffer</param>
         private void BindShadowMap(Viewport viewport, EngineDepthStencilView dsv)
         {
+            var graphics = this.Game.Graphics;
+
             //Set shadow mapper viewport
-            this.Game.Graphics.SetViewport(viewport);
+            graphics.SetViewport(viewport);
 
             //Set shadow map depth map without render target
-            this.Game.Graphics.SetRenderTargets(
+            graphics.SetRenderTargets(
                 null, false, Color.Transparent,
                 dsv, true, false,
                 true);
@@ -837,13 +841,15 @@ namespace Engine
         /// </summary>
         private void BindGBuffer()
         {
+            var graphics = this.Game.Graphics;
+
             //Set local viewport
-            this.Game.Graphics.SetViewport(this.viewport);
+            graphics.SetViewport(this.viewport);
 
             //Set g-buffer render targets
-            this.Game.Graphics.SetRenderTargets(
+            graphics.SetRenderTargets(
                 this.geometryBuffer.Targets, true, Color.Black,
-                this.Game.Graphics.DefaultDepthStencil, true, true,
+                graphics.DefaultDepthStencil, true, true,
                 true);
         }
         /// <summary>
@@ -851,13 +857,15 @@ namespace Engine
         /// </summary>
         private void BindLights()
         {
+            var graphics = this.Game.Graphics;
+
             //Set local viewport
-            this.Game.Graphics.SetViewport(this.viewport);
+            graphics.SetViewport(this.viewport);
 
             //Set light buffer to draw lights
-            this.Game.Graphics.SetRenderTargets(
+            graphics.SetRenderTargets(
                 this.lightBuffer.Targets, true, Color.Black,
-                this.Game.Graphics.DefaultDepthStencil, false, false,
+                graphics.DefaultDepthStencil, false, false,
                 false);
         }
         /// <summary>
@@ -865,9 +873,11 @@ namespace Engine
         /// </summary>
         private void BindResult()
         {
+            var graphics = this.Game.Graphics;
+
             //Restore backbuffer as render target and clear it
-            this.Game.Graphics.SetDefaultViewport();
-            this.Game.Graphics.SetDefaultRenderTarget();
+            graphics.SetDefaultViewport();
+            graphics.SetDefaultRenderTarget();
         }
         /// <summary>
         /// Draw lights
@@ -875,6 +885,8 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         private void DrawLights(DrawContext context)
         {
+            var graphics = this.Game.Graphics;
+
 #if DEBUG
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
@@ -900,10 +912,10 @@ namespace Engine
                 this.GeometryMap[1],
                 this.GeometryMap[2]);
 
-            this.Game.Graphics.SetDepthStencilRDZDisabled();
+            graphics.SetDepthStencilRDZDisabled();
             this.SetBlendDeferredLighting();
 
-            this.lightDrawer.BindGeometry(this.Game.Graphics);
+            this.lightDrawer.BindGeometry(graphics);
 #if DEBUG
             swPrepare.Stop();
 #endif
@@ -915,7 +927,7 @@ namespace Engine
 #endif
             if (directionalLights != null && directionalLights.Length > 0)
             {
-                this.lightDrawer.BindDirectional(this.Game.Graphics);
+                this.lightDrawer.BindDirectional(graphics);
 
                 for (int i = 0; i < directionalLights.Length; i++)
                 {
@@ -927,7 +939,7 @@ namespace Engine
                         context.ShadowMapLow,
                         context.ShadowMapHigh);
 
-                    this.lightDrawer.DrawDirectional(this.Game.Graphics, effect);
+                    this.lightDrawer.DrawDirectional(graphics, effect);
                 }
             }
 #if DEBUG
@@ -941,7 +953,7 @@ namespace Engine
 #endif
             if (pointLights != null && pointLights.Length > 0)
             {
-                this.lightDrawer.BindPoint(this.Game.Graphics);
+                this.lightDrawer.BindPoint(graphics);
 
                 for (int i = 0; i < pointLights.Length; i++)
                 {
@@ -953,7 +965,7 @@ namespace Engine
                         context.World * light.Local,
                         context.ViewProjection);
 
-                    this.lightDrawer.DrawPoint(this.Game.Graphics, effect);
+                    this.lightDrawer.DrawPoint(graphics, effect);
                 }
             }
 #if DEBUG
@@ -967,7 +979,7 @@ namespace Engine
 #endif
             if (spotLights != null && spotLights.Length > 0)
             {
-                this.lightDrawer.BindSpot(this.Game.Graphics);
+                this.lightDrawer.BindSpot(graphics);
 
                 for (int i = 0; i < spotLights.Length; i++)
                 {
@@ -979,7 +991,7 @@ namespace Engine
                         context.World * light.Local,
                         context.ViewProjection);
 
-                    this.lightDrawer.DrawSpot(this.Game.Graphics, effect);
+                    this.lightDrawer.DrawSpot(graphics, effect);
                 }
             }
 #if DEBUG
@@ -1061,6 +1073,8 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         private void DrawResult(DrawContext context)
         {
+            var graphics = this.Game.Graphics;
+
 #if DEBUG
             long total = 0;
             long init = 0;
@@ -1086,11 +1100,11 @@ namespace Engine
                     this.GeometryMap[2],
                     this.LightMap[0]);
 
-                this.lightDrawer.BindResult(this.Game.Graphics);
+                this.lightDrawer.BindResult(graphics);
 
-                this.Game.Graphics.SetDepthStencilNone();
-                this.Game.Graphics.SetRasterizerDefault();
-                this.Game.Graphics.SetBlendDefault();
+                graphics.SetDepthStencilNone();
+                graphics.SetRasterizerDefault();
+                graphics.SetBlendDefault();
 #if DEBUG
                 swInit.Stop();
 
@@ -1099,7 +1113,7 @@ namespace Engine
 #if DEBUG
                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                this.lightDrawer.DrawResult(this.Game.Graphics, effect);
+                this.lightDrawer.DrawResult(graphics, effect);
 #if DEBUG
                 swDraw.Stop();
 
@@ -1127,6 +1141,8 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawShadowsComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components)
         {
+            var graphics = this.Game.Graphics;
+
             var objects = components.FindAll(c =>
             {
                 if (!c.Is<Drawable>()) return false;
@@ -1161,11 +1177,17 @@ namespace Engine
 
                 objects.ForEach((c) =>
                 {
-                    this.Game.Graphics.SetRasterizerCullFrontFace();
-                    this.Game.Graphics.SetDepthStencilZEnabled();
+                    graphics.SetRasterizerCullFrontFace();
+                    graphics.SetDepthStencilZEnabled();
 
-                    if (c.AlphaEnabled) this.Game.Graphics.SetBlendTransparent();
-                    else this.Game.Graphics.SetBlendDefault();
+                    if (c.AlphaEnabled)
+                    {
+                        graphics.SetBlendTransparent();
+                    }
+                    else
+                    {
+                        graphics.SetBlendDefault();
+                    }
 
                     c.Get<IDrawable>().Draw(context);
                 });
@@ -1181,6 +1203,7 @@ namespace Engine
         private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components, bool deferred)
         {
             var mode = context.DrawerMode;
+            var graphics = this.Game.Graphics;
 
             //First opaques
             var opaques = components.FindAll(c =>
@@ -1222,7 +1245,7 @@ namespace Engine
                 {
                     Counters.MaxInstancesPerFrame += c.Count;
 
-                    this.Game.Graphics.SetRasterizerDefault();
+                    graphics.SetRasterizerDefault();
 
                     if (deferred)
                     {
@@ -1230,16 +1253,16 @@ namespace Engine
                     }
                     else
                     {
-                        this.Game.Graphics.SetBlendDefault();
+                        graphics.SetBlendDefault();
                     }
 
                     if (c.DepthEnabled)
                     {
-                        this.Game.Graphics.SetDepthStencilZEnabled();
+                        graphics.SetDepthStencilZEnabled();
                     }
                     else
                     {
-                        this.Game.Graphics.SetDepthStencilZDisabled();
+                        graphics.SetDepthStencilZDisabled();
                     }
 
                     c.Get<IDrawable>().Draw(context);
@@ -1287,7 +1310,7 @@ namespace Engine
                 {
                     Counters.MaxInstancesPerFrame += c.Count;
 
-                    this.Game.Graphics.SetRasterizerDefault();
+                    graphics.SetRasterizerDefault();
 
                     if (deferred)
                     {
@@ -1295,16 +1318,16 @@ namespace Engine
                     }
                     else
                     {
-                        this.Game.Graphics.SetBlendTransparent();
+                        graphics.SetBlendDefaultAlpha();
                     }
 
                     if (c.DepthEnabled)
                     {
-                        this.Game.Graphics.SetDepthStencilZEnabled();
+                        graphics.SetDepthStencilZEnabled();
                     }
                     else
                     {
-                        this.Game.Graphics.SetDepthStencilZDisabled();
+                        graphics.SetDepthStencilZDisabled();
                     }
 
                     c.Get<IDrawable>().Draw(context);

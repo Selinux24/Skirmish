@@ -121,9 +121,9 @@ namespace Engine
         {
             this.Static = true;
             this.CastShadow = false;
-            this.DeferredEnabled = false;
+            this.DeferredEnabled = true;
             this.DepthEnabled = true;
-            this.AlphaEnabled = true;
+            this.AlphaEnabled = false;
         }
     }
 }

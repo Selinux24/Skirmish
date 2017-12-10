@@ -774,6 +774,7 @@ namespace Engine
         public override void Draw(DrawContext context)
         {
             var mode = context.DrawerMode;
+            var graphics = this.Game.Graphics;
 
             if ((mode.HasFlag(DrawerModesEnum.ShadowMap)) ||
                 (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
@@ -781,6 +782,8 @@ namespace Engine
             {
                 if (this.visibleNodes != null && this.visibleNodes.Length > 0)
                 {
+                    graphics.SetBlendTransparent();
+
                     foreach (var item in this.visibleNodes)
                     {
                         var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch != null && b.CurrentPatch.CurrentNode == item);

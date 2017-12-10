@@ -337,6 +337,7 @@ namespace Engine
         public override void Draw(DrawContext context)
         {
             var mode = context.DrawerMode;
+            var graphics = this.Game.Graphics;
 
             if (mode.HasFlag(DrawerModesEnum.ShadowMap) ||
                 mode.HasFlag(DrawerModesEnum.OpaqueOnly))
@@ -396,7 +397,7 @@ namespace Engine
 
                     if (sceneryEffect != null)
                     {
-                        this.Game.Graphics.SetBlendDefault();
+                        graphics.SetBlendDefault();
 
                         foreach (var node in nodes)
                         {

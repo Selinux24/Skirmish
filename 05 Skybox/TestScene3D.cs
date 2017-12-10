@@ -11,6 +11,7 @@ namespace Skybox
     public class TestScene3D : Scene
     {
         private const int layerHUD = 99;
+        private const float alpha = 0.25f;
 
         private Vector2[] firePositions = new[]
         {
@@ -19,8 +20,8 @@ namespace Skybox
             new Vector2(+5, -5),
             new Vector2(-5, -5),
         };
-        private Color ruinsVolumeColor = Color.Green;
-        private Color torchVolumeColor = Color.GreenYellow;
+        private Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
+        private Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
         private int bsphSlices = 20;
         private int bsphStacks = 10;
 
@@ -229,10 +230,10 @@ namespace Skybox
 
             #region DEBUG drawers
 
-            this.volumesDrawer = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { Count = 10000 });
+            this.volumesDrawer = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { AlphaEnabled = true, Count = 10000 });
             this.volumesDrawer.Visible = false;
 
-            this.graphDrawer = this.AddComponent<TriangleListDrawer>(new TriangleListDrawerDescription() { Count = 10000 });
+            this.graphDrawer = this.AddComponent<TriangleListDrawer>(new TriangleListDrawerDescription() { AlphaEnabled = true, Count = 10000 });
             this.graphDrawer.Visible = false;
 
             #endregion
@@ -500,7 +501,7 @@ namespace Skybox
                 var light = this.Lights.PointLights[i];
 
                 this.volumesDrawer.Instance.SetLines(
-                    light.DiffuseColor,
+                    new Color4(light.DiffuseColor.RGB(), alpha),
                     Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
             }
         }
@@ -509,7 +510,7 @@ namespace Skybox
             var light = this.Lights.PointLights[0];
 
             this.volumesDrawer.Instance.SetLines(
-                light.DiffuseColor,
+                new Color4(light.DiffuseColor.RGB(), alpha),
                 Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
         }
         private void DEBUGUpdateGraphDrawer()
@@ -521,7 +522,7 @@ namespace Skybox
                 Color[] regions = new Color[nodes.Length];
                 for (int i = 0; i < nodes.Length; i++)
                 {
-                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.55f);
+                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), alpha);
                 }
 
                 this.graphDrawer.Instance.Clear();

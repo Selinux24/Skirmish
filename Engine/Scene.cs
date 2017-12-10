@@ -334,11 +334,13 @@ namespace Engine
         {
             bool isValid = false;
 
+            var graphics = this.Game.Graphics;
+
             ISceneRenderer renderer = null;
 
             if (mode == SceneModesEnum.ForwardLigthning)
             {
-                if (SceneRendererForward.Validate(this.Game.Graphics))
+                if (SceneRendererForward.Validate(graphics))
                 {
                     renderer = new SceneRendererForward(this.Game);
                     isValid = true;
@@ -346,7 +348,7 @@ namespace Engine
             }
             else if (mode == SceneModesEnum.DeferredLightning)
             {
-                if (SceneRendererDeferred.Validate(this.Game.Graphics))
+                if (SceneRendererDeferred.Validate(graphics))
                 {
                     renderer = new SceneRendererDeferred(this.Game);
                     isValid = true;

@@ -121,13 +121,15 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            var graphics = this.Game.Graphics;
+
             if (this.Drawables != null && this.Drawables.Length > 0)
             {
                 this.drawContext.GameTime = context.GameTime;
 
-                this.Game.Graphics.SetViewport(this.viewport);
+                graphics.SetViewport(this.viewport);
 
-                this.Game.Graphics.SetRenderTargets(
+                graphics.SetRenderTargets(
                     this.renderTarget, true, Color.Black,
                     null, false, false,
                     false);
@@ -137,8 +139,8 @@ namespace Engine
                     this.Drawables[i].Get<IDrawable>()?.Draw(this.drawContext);
                 }
 
-                this.Game.Graphics.SetDefaultViewport();
-                this.Game.Graphics.SetDefaultRenderTarget(false, false, false);
+                graphics.SetDefaultViewport();
+                graphics.SetDefaultRenderTarget(false, false, false);
             }
 
             this.minimapBox.Texture = this.renderTexture;

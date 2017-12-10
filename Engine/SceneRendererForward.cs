@@ -394,8 +394,9 @@ namespace Engine
                     Stopwatch swPreparation = Stopwatch.StartNew();
 #endif
                     //Set default render target and depth buffer, and clear it
-                    this.Game.Graphics.SetDefaultViewport();
-                    this.Game.Graphics.SetDefaultRenderTarget();
+                    var graphics = this.Game.Graphics;
+                    graphics.SetDefaultViewport();
+                    graphics.SetDefaultRenderTarget();
 #if DEBUG
                     swPreparation.Stop();
 
@@ -523,11 +524,13 @@ namespace Engine
         /// <param name="dsv">Deph stencil buffer</param>
         private void BindShadowMap(Viewport viewport, EngineDepthStencilView dsv)
         {
+            var graphics = this.Game.Graphics;
+
             //Set shadow mapper viewport
-            this.Game.Graphics.SetViewport(viewport);
+            graphics.SetViewport(viewport);
 
             //Set shadow map depth map without render target
-            this.Game.Graphics.SetRenderTargets(
+            graphics.SetRenderTargets(
                 null, false, Color.Transparent,
                 dsv, true, false,
                 true);
@@ -541,6 +544,8 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawShadowComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components)
         {
+            var graphics = this.Game.Graphics;
+
             var objects = components.FindAll(c =>
             {
                 if (!c.Is<Drawable>()) return false;
@@ -575,11 +580,17 @@ namespace Engine
 
                 objects.ForEach((c) =>
                 {
-                    this.Game.Graphics.SetRasterizerCullFrontFace();
-                    this.Game.Graphics.SetDepthStencilZEnabled();
+                    graphics.SetRasterizerCullFrontFace();
+                    graphics.SetDepthStencilZEnabled();
 
-                    if (c.AlphaEnabled) this.Game.Graphics.SetBlendTransparent();
-                    else this.Game.Graphics.SetBlendDefault();
+                    if (c.AlphaEnabled)
+                    {
+                        graphics.SetBlendTransparent();
+                    }
+                    else
+                    {
+                        graphics.SetBlendDefault();
+                    }
 
                     c.Get<IDrawable>().Draw(context);
                 });
@@ -595,6 +606,7 @@ namespace Engine
         private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components)
         {
             var mode = context.DrawerMode;
+            var graphics = this.Game.Graphics;
 
             //First opaques
             var opaques = components.FindAll(c =>
@@ -636,16 +648,16 @@ namespace Engine
                 {
                     Counters.MaxInstancesPerFrame += c.Count;
 
-                    this.Game.Graphics.SetRasterizerDefault();
-                    this.Game.Graphics.SetBlendDefault();
+                    graphics.SetRasterizerDefault();
+                    graphics.SetBlendDefault();
 
                     if (c.DepthEnabled)
                     {
-                        this.Game.Graphics.SetDepthStencilZEnabled();
+                        graphics.SetDepthStencilZEnabled();
                     }
                     else
                     {
-                        this.Game.Graphics.SetDepthStencilZDisabled();
+                        graphics.SetDepthStencilZDisabled();
                     }
 
                     c.Get<IDrawable>().Draw(context);
@@ -693,16 +705,16 @@ namespace Engine
                 {
                     Counters.MaxInstancesPerFrame += c.Count;
 
-                    this.Game.Graphics.SetRasterizerDefault();
-                    this.Game.Graphics.SetBlendTransparent();
+                    graphics.SetRasterizerDefault();
+                    graphics.SetBlendDefaultAlpha();
 
                     if (c.DepthEnabled)
                     {
-                        this.Game.Graphics.SetDepthStencilZEnabled();
+                        graphics.SetDepthStencilZEnabled();
                     }
                     else
                     {
-                        this.Game.Graphics.SetDepthStencilZDisabled();
+                        graphics.SetDepthStencilZDisabled();
                     }
 
                     c.Get<IDrawable>().Draw(context);
