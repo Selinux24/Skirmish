@@ -165,71 +165,32 @@ namespace Engine.Effects
             this.color = this.Effect.GetVariableVector("gColor");
             this.textures = this.Effect.GetVariableTexture("gTextureArray");
         }
+
         /// <summary>
         /// Get technique by vertex type
         /// </summary>
         /// <param name="vertexType">VertexType</param>
-        /// <param name="instanced">Use instancing data</param>
-        /// <param name="stage">Stage</param>
-        /// <param name="mode">Mode</param>
-        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
-        {
-            if (stage == DrawingStages.Drawing)
-            {
-                if (vertexType == VertexTypes.PositionColor)
-                {
-                    return this.PositionColor;
-                }
-                else if (vertexType == VertexTypes.PositionTexture)
-                {
-                    return this.PositionTexture;
-                }
-                else
-                {
-                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
-                }
-            }
-            else
-            {
-                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
-            }
-        }
-        /// <summary>
-        /// Get technique by vertex type
-        /// </summary>
-        /// <param name="vertexType">VertexType</param>
-        /// <param name="instanced">Use instancing data</param>
-        /// <param name="stage">Stage</param>
-        /// <param name="mode">Mode</param>
         /// <param name="channel">Color channel</param>
-        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public virtual EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode, SpriteTextureChannelsEnum channel)
+        /// <returns>Returns the technique to process the specified vertex type</returns>
+        public EngineEffectTechnique GetTechnique(VertexTypes vertexType, SpriteTextureChannelsEnum channel)
         {
-            if (stage == DrawingStages.Drawing)
+            if (vertexType == VertexTypes.PositionColor)
             {
-                if (vertexType == VertexTypes.PositionColor)
-                {
-                    return this.PositionColor;
-                }
-                else if (vertexType == VertexTypes.PositionTexture)
-                {
-                    if (channel == SpriteTextureChannelsEnum.All) return this.PositionTexture;
-                    else if (channel == SpriteTextureChannelsEnum.Red) return this.PositionTextureRED;
-                    else if (channel == SpriteTextureChannelsEnum.Green) return this.PositionTextureGREEN;
-                    else if (channel == SpriteTextureChannelsEnum.Blue) return this.PositionTextureBLUE;
-                    else if (channel == SpriteTextureChannelsEnum.Alpha) return this.PositionTextureALPHA;
-                    else if (channel == SpriteTextureChannelsEnum.NoAlpha) return this.PositionTextureNOALPHA;
-                    else return this.PositionTexture;
-                }
-                else
-                {
-                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
-                }
+                return this.PositionColor;
+            }
+            else if (vertexType == VertexTypes.PositionTexture)
+            {
+                if (channel == SpriteTextureChannelsEnum.All) return this.PositionTexture;
+                else if (channel == SpriteTextureChannelsEnum.Red) return this.PositionTextureRED;
+                else if (channel == SpriteTextureChannelsEnum.Green) return this.PositionTextureGREEN;
+                else if (channel == SpriteTextureChannelsEnum.Blue) return this.PositionTextureBLUE;
+                else if (channel == SpriteTextureChannelsEnum.Alpha) return this.PositionTextureALPHA;
+                else if (channel == SpriteTextureChannelsEnum.NoAlpha) return this.PositionTextureNOALPHA;
+                else return this.PositionTexture;
             }
             else
             {
-                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
+                throw new EngineException(string.Format("Bad vertex type for effect: {0}", vertexType));
             }
         }
 

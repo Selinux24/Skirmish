@@ -96,7 +96,9 @@ namespace Engine
             /// </summary>
             /// <param name="context">Drawing context</param>
             /// <param name="sceneryEffect">Scenery effect</param>
-            public void DrawScenery(DrawContext context, Drawer sceneryEffect, BufferManager bufferManager)
+            /// <param name="techniqueFn">Function for technique</param>
+            /// <param name="bufferManager">Buffer manager</param>
+            public void DrawScenery(DrawContext context, Drawer sceneryEffect, GetTechniqueDelegate techniqueFn, BufferManager bufferManager)
             {
                 var mode = context.DrawerMode;
                 var graphics = this.Game.Graphics;
@@ -110,56 +112,54 @@ namespace Engine
                     {
                         var mesh = dictionary[material];
 
-                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, mode);
-                        if (technique != null)
+                        var technique = techniqueFn(mesh.VertextType, mesh.Instanced);
+
+                        #region Per object update
+
+                        var mat = this.DrawingData.Materials[material];
+
+                        if (mode.HasFlag(DrawerModesEnum.Forward))
                         {
-                            #region Per object update
+                            ((EffectDefaultBasic)sceneryEffect).UpdatePerObject(
+                                true,
+                                mat.DiffuseTexture,
+                                mat.NormalMap,
+                                mat.SpecularTexture,
+                                mat.ResourceIndex,
+                                0,
+                                0);
+                        }
+                        else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                        {
+                            ((EffectDeferredBasic)sceneryEffect).UpdatePerObject(
+                                true,
+                                mat.DiffuseTexture,
+                                mat.NormalMap,
+                                mat.SpecularTexture,
+                                mat.ResourceIndex,
+                                0,
+                                0);
+                        }
+                        else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
+                        {
+                            ((EffectShadowBasic)sceneryEffect).UpdatePerObject(
+                                mat.DiffuseTexture,
+                                0,
+                                0);
+                        }
 
-                            var mat = this.DrawingData.Materials[material];
+                        #endregion
 
-                            if (mode.HasFlag(DrawerModesEnum.Forward))
-                            {
-                                ((EffectDefaultBasic)sceneryEffect).UpdatePerObject(
-                                    true,
-                                    mat.DiffuseTexture,
-                                    mat.NormalMap,
-                                    mat.SpecularTexture,
-                                    mat.ResourceIndex,
-                                    0,
-                                    0);
-                            }
-                            else if (mode.HasFlag(DrawerModesEnum.Deferred))
-                            {
-                                ((EffectDeferredBasic)sceneryEffect).UpdatePerObject(
-                                    true,
-                                    mat.DiffuseTexture,
-                                    mat.NormalMap,
-                                    mat.SpecularTexture,
-                                    mat.ResourceIndex,
-                                    0,
-                                    0);
-                            }
-                            else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
-                            {
-                                ((EffectShadowBasic)sceneryEffect).UpdatePerObject(
-                                    mat.DiffuseTexture,
-                                    0,
-                                    0);
-                            }
+                        bufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+                        bufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
-                            #endregion
+                        count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count : mesh.VertexBuffer.Count;
 
-                            bufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
-                            bufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+                        for (int p = 0; p < technique.PassCount; p++)
+                        {
+                            graphics.EffectPassApply(technique, p, 0);
 
-                            count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count : mesh.VertexBuffer.Count;
-
-                            for (int p = 0; p < technique.PassCount; p++)
-                            {
-                                graphics.EffectPassApply(technique, p, 0);
-
-                                mesh.Draw(graphics);
-                            }
+                            mesh.Draw(graphics);
                         }
                     }
                 }
@@ -345,10 +345,12 @@ namespace Engine
                 if (nodes != null && nodes.Length > 0)
                 {
                     Drawer sceneryEffect = null;
+                    GetTechniqueDelegate techniqueFn = null;
 
                     if (mode.HasFlag(DrawerModesEnum.Forward))
                     {
                         sceneryEffect = DrawerPool.EffectDefaultBasic;
+                        techniqueFn = DrawerPool.EffectDefaultBasic.GetTechnique;
 
                         #region Per frame update
 
@@ -368,6 +370,7 @@ namespace Engine
                     else if (mode.HasFlag(DrawerModesEnum.Deferred))
                     {
                         sceneryEffect = DrawerPool.EffectDeferredBasic;
+                        techniqueFn = DrawerPool.EffectDeferredBasic.GetTechnique;
 
                         #region Per frame update
 
@@ -380,6 +383,7 @@ namespace Engine
                     else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
                     {
                         sceneryEffect = DrawerPool.EffectShadowBasic;
+                        techniqueFn = DrawerPool.EffectShadowBasic.GetTechnique;
 
                         #region Per frame update
 
@@ -396,7 +400,7 @@ namespace Engine
 
                         foreach (var node in nodes)
                         {
-                            this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, this.BufferManager);
+                            this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, techniqueFn, this.BufferManager);
                         }
                     }
                 }

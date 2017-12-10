@@ -1,6 +1,4 @@
 
-static const uint gSamples = 2;
-
 float vernierScale(float fCos)
 {
 	float x = 1.0 - fCos;
@@ -24,6 +22,7 @@ float mieScale(float3 lightDirection, float3 viewDirection)
 }
 
 void vertexPhase(
+    uint samples,
 	float3 positionLocal, float3 lightDirection, float4 backColor,
 	float4 sphereRadii, float4 scatteringCoeffs, float4 invWaveLength, float4 misc,
 	out float4 colorM, out float4 colorR, out float3 rayPos)
@@ -67,7 +66,7 @@ void vertexPhase(
 		color = 0;
 
 		// Now loop through the sample rays
-		for (uint i = 0; i < gSamples; i++)
+        for (uint i = 0; i < samples; i++)
 		{
 			float sampleHeight = length(samplePoint);
 			float sampleDepth = exp(scaleOverScaleDepth * (innerRadius - sampleHeight));

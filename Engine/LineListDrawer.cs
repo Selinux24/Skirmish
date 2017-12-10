@@ -96,28 +96,26 @@ namespace Engine
                 if (this.drawCount > 0)
                 {
                     var effect = DrawerPool.EffectDefaultBasic;
-                    var technique = effect.GetTechnique(VertexTypes.PositionColor, false, DrawingStages.Drawing, mode);
-                    if (technique != null)
+
+                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
                     {
-                        if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
-                        {
-                            Counters.InstancesPerFrame += this.dictionary.Count;
-                            Counters.PrimitivesPerFrame += this.drawCount / 2;
-                        }
+                        Counters.InstancesPerFrame += this.dictionary.Count;
+                        Counters.PrimitivesPerFrame += this.drawCount / 2;
+                    }
 
-                        effect.UpdatePerFrame(context.World, context.ViewProjection);
-                        effect.UpdatePerObject(false, null, null, null, 0, 0, 0);
+                    effect.UpdatePerFrame(context.World, context.ViewProjection);
+                    effect.UpdatePerObject(false, null, null, null, 0, 0, 0);
 
-                        this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.LineList);
+                    var technique = effect.GetTechnique(VertexTypes.PositionColor, false);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.LineList);
 
-                        var graphics = this.Game.Graphics;
+                    var graphics = this.Game.Graphics;
 
-                        for (int p = 0; p < technique.PassCount; p++)
-                        {
-                            graphics.EffectPassApply(technique, p, 0);
+                    for (int p = 0; p < technique.PassCount; p++)
+                    {
+                        graphics.EffectPassApply(technique, p, 0);
 
-                            graphics.Draw(this.drawCount, this.vertexBuffer.Offset);
-                        }
+                        graphics.Draw(this.drawCount, this.vertexBuffer.Offset);
                     }
                 }
             }

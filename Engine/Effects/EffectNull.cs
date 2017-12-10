@@ -47,32 +47,6 @@ namespace Engine.Effects
 
             this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
         }
-        /// <summary>
-        /// Get technique by vertex type
-        /// </summary>
-        /// <param name="vertexType">VertexType</param>
-        /// <param name="instanced">Use instancing data</param>
-        /// <param name="stage">Stage</param>
-        /// <param name="mode">Mode</param>
-        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
-        {
-            if (stage == DrawingStages.Drawing)
-            {
-                if (vertexType == VertexTypes.Position)
-                {
-                    return this.Null;
-                }
-                else
-                {
-                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
-                }
-            }
-            else
-            {
-                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
-            }
-        }
 
         /// <summary>
         /// Update per frame data

@@ -140,9 +140,22 @@ namespace Engine
                 int instanceCount = 0;
 
                 Drawer effect = null;
-                if (mode.HasFlag(DrawerModesEnum.Forward)) effect = DrawerPool.EffectDefaultBasic;
-                else if (mode.HasFlag(DrawerModesEnum.Deferred)) effect = DrawerPool.EffectDeferredBasic;
-                else if (mode.HasFlag(DrawerModesEnum.ShadowMap)) effect = DrawerPool.EffectShadowBasic;
+                GetTechniqueDelegate techniqueFn = null;
+                if (mode.HasFlag(DrawerModesEnum.Forward))
+                {
+                    effect = DrawerPool.EffectDefaultBasic;
+                    techniqueFn = DrawerPool.EffectDefaultBasic.GetTechnique;
+                }
+                else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                {
+                    effect = DrawerPool.EffectDeferredBasic;
+                    techniqueFn = DrawerPool.EffectDeferredBasic.GetTechnique;
+                }
+                else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
+                {
+                    effect = DrawerPool.EffectShadowBasic;
+                    techniqueFn = DrawerPool.EffectShadowBasic.GetTechnique;
+                }
                 if (effect != null)
                 {
                     var graphics = this.Game.Graphics;
@@ -255,70 +268,69 @@ namespace Engine
                                             foreach (string material in dictionary.Keys)
                                             {
                                                 var mesh = dictionary[material];
-                                                var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, mode);
-                                                if (technique != null)
+
+                                                bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
+                                                if (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && transparent)
                                                 {
-                                                    bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
-                                                    if (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && transparent)
-                                                    {
-                                                        continue;
-                                                    }
-                                                    if (mode.HasFlag(DrawerModesEnum.TransparentOnly) && !transparent)
-                                                    {
-                                                        continue;
-                                                    }
+                                                    continue;
+                                                }
+                                                if (mode.HasFlag(DrawerModesEnum.TransparentOnly) && !transparent)
+                                                {
+                                                    continue;
+                                                }
 
-                                                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
-                                                    {
-                                                        count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
-                                                        count *= instanceCount;
-                                                    }
+                                                if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
+                                                {
+                                                    count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+                                                    count *= instanceCount;
+                                                }
 
-                                                    #region Per object update
+                                                #region Per object update
 
-                                                    var mat = drawingData.Materials[material];
+                                                var mat = drawingData.Materials[material];
 
-                                                    if (mode.HasFlag(DrawerModesEnum.Forward))
-                                                    {
-                                                        ((EffectDefaultBasic)effect).UpdatePerObject(
-                                                            this.UseAnisotropicFiltering,
-                                                            mat.DiffuseTexture,
-                                                            mat.NormalMap,
-                                                            mat.SpecularTexture,
-                                                            mat.ResourceIndex,
-                                                            0,
-                                                            0);
-                                                    }
-                                                    else if (mode.HasFlag(DrawerModesEnum.Deferred))
-                                                    {
-                                                        ((EffectDeferredBasic)effect).UpdatePerObject(
-                                                            this.UseAnisotropicFiltering,
-                                                            mat.DiffuseTexture,
-                                                            mat.NormalMap,
-                                                            mat.SpecularTexture,
-                                                            mat.ResourceIndex,
-                                                            0,
-                                                            0);
-                                                    }
-                                                    else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
-                                                    {
-                                                        ((EffectShadowBasic)effect).UpdatePerObject(
-                                                            mat.DiffuseTexture,
-                                                            0,
-                                                            0);
-                                                    }
+                                                if (mode.HasFlag(DrawerModesEnum.Forward))
+                                                {
+                                                    ((EffectDefaultBasic)effect).UpdatePerObject(
+                                                        this.UseAnisotropicFiltering,
+                                                        mat.DiffuseTexture,
+                                                        mat.NormalMap,
+                                                        mat.SpecularTexture,
+                                                        mat.ResourceIndex,
+                                                        0,
+                                                        0);
+                                                }
+                                                else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                                                {
+                                                    ((EffectDeferredBasic)effect).UpdatePerObject(
+                                                        this.UseAnisotropicFiltering,
+                                                        mat.DiffuseTexture,
+                                                        mat.NormalMap,
+                                                        mat.SpecularTexture,
+                                                        mat.ResourceIndex,
+                                                        0,
+                                                        0);
+                                                }
+                                                else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
+                                                {
+                                                    ((EffectShadowBasic)effect).UpdatePerObject(
+                                                        mat.DiffuseTexture,
+                                                        0,
+                                                        0);
+                                                }
 
-                                                    #endregion
+                                                #endregion
 
-                                                    this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
-                                                    this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+                                                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                                                    for (int p = 0; p < technique.PassCount; p++)
-                                                    {
-                                                        graphics.EffectPassApply(technique, p, 0);
+                                                var technique = techniqueFn(mesh.VertextType, mesh.Instanced);
+                                                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
-                                                        mesh.Draw(graphics, index, length);
-                                                    }
+                                                for (int p = 0; p < technique.PassCount; p++)
+                                                {
+                                                    graphics.EffectPassApply(technique, p, 0);
+
+                                                    mesh.Draw(graphics, index, length);
                                                 }
                                             }
                                         }

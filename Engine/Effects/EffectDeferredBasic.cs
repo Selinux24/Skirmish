@@ -427,49 +427,35 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="vertexType">VertexType</param>
         /// <param name="instanced">Use instancing data</param>
-        /// <param name="stage">Stage</param>
-        /// <param name="mode">Mode</param>
-        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
+        /// <returns>Returns the technique to process the specified vertex type</returns>
+        public EngineEffectTechnique GetTechnique(
+            VertexTypes vertexType,
+            bool instanced)
         {
-            if (stage == DrawingStages.Drawing)
+            switch (vertexType)
             {
-                if (mode.HasFlag(DrawerModesEnum.Deferred))
-                {
-                    switch (vertexType)
-                    {
-                        case VertexTypes.PositionColor:
-                            return instanced ? this.InstancingPositionColor : this.PositionColor;
-                        case VertexTypes.PositionTexture:
-                            return instanced ? this.InstancingPositionTexture : this.PositionTexture;
-                        case VertexTypes.PositionNormalColor:
-                            return instanced ? this.InstancingPositionNormalColor : this.PositionNormalColor;
-                        case VertexTypes.PositionNormalTexture:
-                            return instanced ? this.InstancingPositionNormalTexture : this.PositionNormalTexture;
-                        case VertexTypes.PositionNormalTextureTangent:
-                            return instanced ? this.InstancingPositionNormalTextureTangent : this.PositionNormalTextureTangent;
-                        case VertexTypes.PositionColorSkinned:
-                            return instanced ? this.InstancingPositionColorSkinned : this.PositionColorSkinned;
-                        case VertexTypes.PositionTextureSkinned:
-                            return instanced ? this.InstancingPositionTextureSkinned : this.PositionTextureSkinned;
-                        case VertexTypes.PositionNormalColorSkinned:
-                            return instanced ? this.InstancingPositionNormalColorSkinned : this.PositionNormalColorSkinned;
-                        case VertexTypes.PositionNormalTextureSkinned:
-                            return instanced ? this.InstancingPositionNormalTextureSkinned : this.PositionNormalTextureSkinned;
-                        case VertexTypes.PositionNormalTextureTangentSkinned:
-                            return instanced ? this.InstancingPositionNormalTextureTangentSkinned : this.PositionNormalTextureTangentSkinned;
-                        default:
-                            throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
-                    }
-                }
-                else
-                {
-                    throw new EngineException(string.Format("Bad mode for effect: {0}", mode));
-                }
-            }
-            else
-            {
-                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
+                case VertexTypes.PositionColor:
+                    return instanced ? this.InstancingPositionColor : this.PositionColor;
+                case VertexTypes.PositionTexture:
+                    return instanced ? this.InstancingPositionTexture : this.PositionTexture;
+                case VertexTypes.PositionNormalColor:
+                    return instanced ? this.InstancingPositionNormalColor : this.PositionNormalColor;
+                case VertexTypes.PositionNormalTexture:
+                    return instanced ? this.InstancingPositionNormalTexture : this.PositionNormalTexture;
+                case VertexTypes.PositionNormalTextureTangent:
+                    return instanced ? this.InstancingPositionNormalTextureTangent : this.PositionNormalTextureTangent;
+                case VertexTypes.PositionColorSkinned:
+                    return instanced ? this.InstancingPositionColorSkinned : this.PositionColorSkinned;
+                case VertexTypes.PositionTextureSkinned:
+                    return instanced ? this.InstancingPositionTextureSkinned : this.PositionTextureSkinned;
+                case VertexTypes.PositionNormalColorSkinned:
+                    return instanced ? this.InstancingPositionNormalColorSkinned : this.PositionNormalColorSkinned;
+                case VertexTypes.PositionNormalTextureSkinned:
+                    return instanced ? this.InstancingPositionNormalTextureSkinned : this.PositionNormalTextureSkinned;
+                case VertexTypes.PositionNormalTextureTangentSkinned:
+                    return instanced ? this.InstancingPositionNormalTextureTangentSkinned : this.PositionNormalTextureTangentSkinned;
+                default:
+                    throw new EngineException(string.Format("Bad vertex type for effect: {0}", vertexType));
             }
         }
 

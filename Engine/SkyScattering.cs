@@ -255,7 +255,7 @@ namespace Engine
                 if (keyLight != null && this.indexBuffer.Count > 0)
                 {
                     var effect = DrawerPool.EffectDefaultSkyScattering;
-                    var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, mode);
+                    var technique = effect.SkyScatteringMedium;
                     if (technique != null)
                     {
                         Counters.InstancesPerFrame++;

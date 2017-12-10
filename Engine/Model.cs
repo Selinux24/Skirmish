@@ -225,9 +225,22 @@ namespace Engine
                 var mode = context.DrawerMode;
 
                 Drawer effect = null;
-                if (mode.HasFlag(DrawerModesEnum.Forward)) effect = DrawerPool.EffectDefaultBasic;
-                else if (mode.HasFlag(DrawerModesEnum.Deferred)) effect = DrawerPool.EffectDeferredBasic;
-                else if (mode.HasFlag(DrawerModesEnum.ShadowMap)) effect = DrawerPool.EffectShadowBasic;
+                GetTechniqueDelegate techniqueFn = null;
+                if (mode.HasFlag(DrawerModesEnum.Forward))
+                {
+                    effect = DrawerPool.EffectDefaultBasic;
+                    techniqueFn = DrawerPool.EffectDefaultBasic.GetTechnique;
+                }
+                else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                {
+                    effect = DrawerPool.EffectDeferredBasic;
+                    techniqueFn = DrawerPool.EffectDeferredBasic.GetTechnique;
+                }
+                else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
+                {
+                    effect = DrawerPool.EffectShadowBasic;
+                    techniqueFn = DrawerPool.EffectShadowBasic.GetTechnique;
+                }
                 if (effect != null)
                 {
                     var graphics = this.Game.Graphics;
@@ -320,7 +333,7 @@ namespace Engine
 
                             this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                            var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, DrawingStages.Drawing, mode);
+                            var technique = techniqueFn(mesh.VertextType, mesh.Instanced);
                             this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                             count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;

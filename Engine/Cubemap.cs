@@ -81,32 +81,30 @@ namespace Engine
                 if (this.indexBuffer.Count > 0)
                 {
                     var effect = DrawerPool.EffectDefaultCubemap;
-                    var technique = effect.GetTechnique(VertexTypes.Position, false, DrawingStages.Drawing, mode);
-                    if (technique != null)
+                    var technique = DrawerPool.EffectDefaultCubemap.ForwardCubemap;
+
+                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
                     {
-                        if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
-                        {
-                            Counters.InstancesPerFrame++;
-                            Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-                        }
+                        Counters.InstancesPerFrame++;
+                        Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+                    }
 
-                        this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                        this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+                    this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
-                        effect.UpdatePerFrame(this.local, context.ViewProjection);
-                        effect.UpdatePerObject(this.cubeMapTexture);
+                    effect.UpdatePerFrame(this.local, context.ViewProjection);
+                    effect.UpdatePerObject(this.cubeMapTexture);
 
-                        var graphics = this.Game.Graphics;
+                    var graphics = this.Game.Graphics;
 
-                        for (int p = 0; p < technique.PassCount; p++)
-                        {
-                            graphics.EffectPassApply(technique, p, 0);
+                    for (int p = 0; p < technique.PassCount; p++)
+                    {
+                        graphics.EffectPassApply(technique, p, 0);
 
-                            graphics.DrawIndexed(
-                                this.indexBuffer.Count,
-                                this.indexBuffer.Offset,
-                                this.vertexBuffer.Offset);
-                        }
+                        graphics.DrawIndexed(
+                            this.indexBuffer.Count,
+                            this.indexBuffer.Offset,
+                            this.vertexBuffer.Offset);
                     }
                 }
             }

@@ -10,9 +10,17 @@ namespace Engine.Effects
     public class EffectDefaultSkyScattering : Drawer
     {
         /// <summary>
-        /// Default sky scattering technique
+        /// Low sky scattering technique
         /// </summary>
-        protected readonly EngineEffectTechnique SkyScattering = null;
+        public readonly EngineEffectTechnique SkyScatteringLow = null;
+        /// <summary>
+        /// Medium sky scattering technique
+        /// </summary>
+        public readonly EngineEffectTechnique SkyScatteringMedium = null;
+        /// <summary>
+        /// High sky scattering technique
+        /// </summary>
+        public readonly EngineEffectTechnique SkyScatteringHigh = null;
 
         /// <summary>
         /// World view projection effect variable
@@ -169,7 +177,9 @@ namespace Engine.Effects
         public EffectDefaultSkyScattering(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.SkyScattering = this.Effect.GetTechniqueByName("SkyScattering");
+            this.SkyScatteringLow = this.Effect.GetTechniqueByName("SkyScatteringLow");
+            this.SkyScatteringMedium = this.Effect.GetTechniqueByName("SkyScatteringMedium");
+            this.SkyScatteringHigh = this.Effect.GetTechniqueByName("SkyScatteringHigh");
 
             this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
             this.sphereRadii = this.Effect.GetVariableVector("gSphereRadii");
@@ -179,44 +189,6 @@ namespace Engine.Effects
             this.backColor = this.Effect.GetVariableVector("gBackColor");
             this.lightDirectionWorld = this.Effect.GetVariableVector("gLightDirection");
             this.hdrExposure = this.Effect.GetVariableScalar("gHDRExposure");
-        }
-        /// <summary>
-        /// Get technique by vertex type
-        /// </summary>
-        /// <param name="vertexType">VertexType</param>
-        /// <param name="instanced">Use instancing data</param>
-        /// <param name="stage">Stage</param>
-        /// <param name="mode">Mode</param>
-        /// <returns>Returns the technique to process the specified vertex type in the specified pipeline stage</returns>
-        public override EngineEffectTechnique GetTechnique(VertexTypes vertexType, bool instanced, DrawingStages stage, DrawerModesEnum mode)
-        {
-            if (stage == DrawingStages.Drawing)
-            {
-                if (vertexType == VertexTypes.Position)
-                {
-                    if (mode.HasFlag(DrawerModesEnum.Forward))
-                    {
-                        return this.SkyScattering;
-                    }
-                    else if (mode.HasFlag(DrawerModesEnum.Deferred))
-                    {
-                        //TODO: build a proper deferred scattering effect
-                        return this.SkyScattering;
-                    }
-                    else
-                    {
-                        throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
-                    }
-                }
-                else
-                {
-                    throw new EngineException(string.Format("Bad vertex type for effect and stage: {0} - {1}", vertexType, stage));
-                }
-            }
-            else
-            {
-                throw new EngineException(string.Format("Bad stage for effect: {0}", stage));
-            }
         }
 
         /// <summary>

@@ -161,65 +161,57 @@ namespace Engine
                     var rot = this.Parameters.RotateSpeed != Vector2.Zero;
 
                     var effect = DrawerPool.EffectDefaultCPUParticles;
+                    var technique = rot ? effect.RotationDraw : effect.NonRotationDraw;
 
-                    var technique = effect.GetTechnique(
-                        VertexTypes.Particle,
-                        false,
-                        DrawingStages.Drawing,
-                        mode,
-                        rot);
-                    if (technique != null)
+                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
                     {
-                        if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
-                        {
-                            Counters.InstancesPerFrame++;
-                            Counters.PrimitivesPerFrame += this.ActiveParticles;
-                        }
+                        Counters.InstancesPerFrame++;
+                        Counters.PrimitivesPerFrame += this.ActiveParticles;
+                    }
 
-                        var graphics = this.Game.Graphics;
+                    var graphics = this.Game.Graphics;
 
-                        graphics.IASetVertexBuffers(BufferSlot, this.buffer.VertexBufferBinding);
-                        graphics.IAInputLayout = rot ? this.buffer.InputLayouts[0] : this.buffer.InputLayouts[1];
-                        graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
+                    graphics.IASetVertexBuffers(BufferSlot, this.buffer.VertexBufferBinding);
+                    graphics.IAInputLayout = rot ? this.buffer.InputLayouts[0] : this.buffer.InputLayouts[1];
+                    graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
-                        graphics.SetDepthStencilRDZEnabled();
+                    graphics.SetDepthStencilRDZEnabled();
 
-                        if (this.Parameters.Additive)
-                        {
-                            graphics.SetBlendAdditive();
-                        }
-                        else if (this.Parameters.Transparent)
-                        {
-                            graphics.SetBlendDefaultAlpha();
-                        }
-                        else
-                        {
-                            graphics.SetBlendDefault();
-                        }
+                    if (this.Parameters.Additive)
+                    {
+                        graphics.SetBlendAdditive();
+                    }
+                    else if (this.Parameters.Transparent)
+                    {
+                        graphics.SetBlendDefaultAlpha();
+                    }
+                    else
+                    {
+                        graphics.SetBlendDefault();
+                    }
 
-                        effect.UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection,
-                            context.EyePosition,
-                            this.Emitter.TotalTime,
-                            this.Parameters.MaxDuration,
-                            this.Parameters.MaxDurationRandomness,
-                            this.Parameters.EndVelocity,
-                            this.Parameters.Gravity,
-                            this.Parameters.StartSize,
-                            this.Parameters.EndSize,
-                            this.Parameters.MinColor,
-                            this.Parameters.MaxColor,
-                            this.Parameters.RotateSpeed,
-                            this.TextureCount,
-                            this.Texture);
+                    effect.UpdatePerFrame(
+                        context.World,
+                        context.ViewProjection,
+                        context.EyePosition,
+                        this.Emitter.TotalTime,
+                        this.Parameters.MaxDuration,
+                        this.Parameters.MaxDurationRandomness,
+                        this.Parameters.EndVelocity,
+                        this.Parameters.Gravity,
+                        this.Parameters.StartSize,
+                        this.Parameters.EndSize,
+                        this.Parameters.MinColor,
+                        this.Parameters.MaxColor,
+                        this.Parameters.RotateSpeed,
+                        this.TextureCount,
+                        this.Texture);
 
-                        for (int p = 0; p < technique.PassCount; p++)
-                        {
-                            graphics.EffectPassApply(technique, p, 0);
+                    for (int p = 0; p < technique.PassCount; p++)
+                    {
+                        graphics.EffectPassApply(technique, p, 0);
 
-                            graphics.Draw(this.ActiveParticles, 0);
-                        }
+                        graphics.Draw(this.ActiveParticles, 0);
                     }
                 }
             }
