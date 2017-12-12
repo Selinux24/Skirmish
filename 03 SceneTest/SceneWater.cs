@@ -6,6 +6,9 @@ namespace SceneTest
 {
     public class SceneWater : Scene
     {
+        private const float fogStart = 150f;
+        private const float fogRange = 200f;
+
         private SceneObject<Water> water = null;
         private SceneObject<SkyScattering> sky = null;
 
@@ -37,6 +40,8 @@ namespace SceneTest
             this.Camera.Goto(80, 10, 100f);
             this.Camera.LookTo(0, 0, 0);
 
+            this.Lights.BaseFogColor = Color.White;
+
             this.water = this.AddComponent<Water>(new WaterDescription()
             {
                 Name = "Water",
@@ -59,6 +64,11 @@ namespace SceneTest
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.SetScene<SceneStart>();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F))
+            {
+                this.ToggleFog();
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
@@ -100,6 +110,12 @@ namespace SceneTest
             {
                 this.Camera.MoveBackward(gameTime, shift);
             }
+        }
+
+        private void ToggleFog()
+        {
+            this.Lights.FogStart = this.Lights.FogStart == 0f ? fogStart : 0f;
+            this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
         }
     }
 }

@@ -59,6 +59,18 @@ namespace Engine.Effects
         /// Iteration parameters effect variable
         /// </summary>
         private EngineEffectVariableVector iterParams = null;
+        /// <summary>
+        /// Fog start effect variable
+        /// </summary>
+        private EngineEffectVariableScalar fogStart = null;
+        /// <summary>
+        /// Fog range effect variable
+        /// </summary>
+        private EngineEffectVariableScalar fogRange = null;
+        /// <summary>
+        /// Fog color effect variable
+        /// </summary>
+        private EngineEffectVariableVector fogColor = null;
 
         /// <summary>
         /// Directional lights
@@ -214,6 +226,48 @@ namespace Engine.Effects
                 this.iterParams.Set(value);
             }
         }
+        /// <summary>
+        /// Fog start distance
+        /// </summary>
+        protected float FogStart
+        {
+            get
+            {
+                return this.fogStart.GetFloat();
+            }
+            set
+            {
+                this.fogStart.Set(value);
+            }
+        }
+        /// <summary>
+        /// Fog range distance
+        /// </summary>
+        protected float FogRange
+        {
+            get
+            {
+                return this.fogRange.GetFloat();
+            }
+            set
+            {
+                this.fogRange.Set(value);
+            }
+        }
+        /// <summary>
+        /// Fog color
+        /// </summary>
+        protected Color3 FogColor
+        {
+            get
+            {
+                return this.fogColor.GetVector<Color3>();
+            }
+            set
+            {
+                this.fogColor.Set(value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -239,6 +293,10 @@ namespace Engine.Effects
 
             this.dirLights = this.Effect.GetVariable("gPSDirLights");
             this.lightCount = this.Effect.GetVariableScalar("gPSLightCount");
+
+            this.fogStart = this.Effect.GetVariableScalar("gPSFogStart");
+            this.fogRange = this.Effect.GetVariableScalar("gPSFogRange");
+            this.fogColor = this.Effect.GetVariableVector("gPSFogColor");
         }
 
         /// <summary>
@@ -297,6 +355,16 @@ namespace Engine.Effects
                 lCount = Math.Min(dirLights.Length, BufferDirectionalLight.MAX);
 
                 this.Ambient = lights.GlobalAmbientLight;
+
+                this.FogStart = lights.FogStart;
+                this.FogRange = lights.FogRange;
+                this.FogColor = lights.FogColor.RGB();
+            }
+            else
+            {
+                this.FogStart = 0;
+                this.FogRange = 0;
+                this.FogColor = Color.Transparent.RGB();
             }
 
             this.DirLights = bDirLights;

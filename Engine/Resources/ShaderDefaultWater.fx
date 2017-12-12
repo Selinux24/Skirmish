@@ -13,9 +13,11 @@ cbuffer cbPSPerFrame : register(b3)
     float3 gPSBaseColor;
     float3 gPSWaterColor;
     float4 gPSWaveParams;
-    float gPSTotalTime;
     float gPSAmbient;
-    float gPSPAD31;
+    float gPSFogRange;
+    float gPSFogStart;
+    float3 gPSFogColor;
+    float gPSTotalTime;
     uint3 gPSIters;
     uint gPSLightCount;
     DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
@@ -141,7 +143,9 @@ PSVertexPosition VSWater(VSVertexPosition input)
 float4 PSWater(PSVertexPosition input) : SV_TARGET
 {
     float3 eyePos = gPSEyePositionWorld;
-    float3 eyeDir = normalize(eyePos - input.positionWorld);
+    float3 eyeDir = eyePos - input.positionWorld;
+    float distToEye = length(eyeDir);
+    eyeDir /= distToEye;
 
     // Get the current time    
     float time = (1.0f + gPSTotalTime * gPSWaveParams.z);
@@ -152,25 +156,38 @@ float4 PSWater(PSVertexPosition input) : SV_TARGET
     float epsilon = dot(toPosition, toPosition) * positionEpsilonNRM;
     float3 hmNormal = GetNormal(hmPosition, epsilon, time);
 
-    // Do light color
-    float3 lDiffuse = 0;
-    float3 lSpecular = 0;
-    if (gPSLightCount > 0)
+    float fog = 0;
+    if (gPSFogRange > 0)
     {
-        for (uint i = 0; i < gPSLightCount.x; i++)
-        {
-            float3 diffuse = 0;
-            float3 specular = 0;
-            GetLightColor(gPSDirLights[i], hmNormal, eyeDir, diffuse, specular);
-            lDiffuse += diffuse;
-            lSpecular += specular;
-        }
+        fog = CalcFogFactor(distToEye, gPSFogStart, gPSFogRange);
     }
 
-    // Do sea color
-    float3 color = GetSeaColor(hmPosition, hmNormal, eyeDir, gPSAmbient, saturate(lDiffuse), lSpecular, epsilon);
+    if (fog >= 1)
+    {
+        return float4(gPSFogColor, 1);
+    }
+    else
+    {
+        // Do light color
+        float3 lDiffuse = 0;
+        float3 lSpecular = 0;
+        if (gPSLightCount > 0)
+        {
+            for (uint i = 0; i < gPSLightCount.x; i++)
+            {
+                float3 diffuse = 0;
+                float3 specular = 0;
+                GetLightColor(gPSDirLights[i], hmNormal, eyeDir, diffuse, specular);
+                lDiffuse += diffuse;
+                lSpecular += specular;
+            }
+        }
 
-    return float4(color, 1.0f);
+        // Do sea color
+        float3 color = GetSeaColor(hmPosition, hmNormal, eyeDir, gPSAmbient, saturate(lDiffuse), lSpecular, epsilon);
+
+        return float4(lerp(color, gPSFogColor, fog), 1.0f);
+    }
 }
 
 technique11 Water
