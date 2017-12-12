@@ -307,6 +307,7 @@
     <Compile Include="SkyPlaneDescription.cs" />
     <Compile Include="SkyScatteringDescription.cs" />
     <Compile Include="CursorDescription.cs" />
+    <Compile Include="SkyScatteringResolutionEnum.cs" />
     <Compile Include="WaterDescription.cs" />
     <Compile Include="Water.cs" />
     <Compile Include="SpriteProgressBar.cs" />

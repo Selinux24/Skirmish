@@ -2,8 +2,6 @@
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Sky scattering description
     /// </summary>
@@ -86,6 +84,10 @@ namespace Engine
         /// HDR exposure
         /// </summary>
         public float HDRExposure { get; set; }
+        /// <summary>
+        /// Resolution
+        /// </summary>
+        public SkyScatteringResolutionEnum Resolution { get; set; }
 
         /// <summary>
         /// Constructor
@@ -105,6 +107,7 @@ namespace Engine
             this.WaveLength = SunLightWaveLength;
             this.Brightness = EarthSkyBrightness;
             this.HDRExposure = 2.0f;
+            this.Resolution = SkyScatteringResolutionEnum.Low;
 
             this.Static = true;
             this.CastShadow = false;

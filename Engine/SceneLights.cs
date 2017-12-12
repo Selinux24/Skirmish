@@ -440,13 +440,12 @@ namespace Engine
         {
             if (timeOfDay.Updated)
             {
-                float e = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
-                float b = e;
-                float ga = Math.Min(e, 0.5f);
-                this.Intensity = Math.Min(e, 1f);
+                float b = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
+                float ga = Math.Min(b, 0.5f);
+                this.Intensity = Math.Min(b, 1f);
 
                 Vector3 keyDir = timeOfDay.LightDirection;
-                Vector3 backDir = new Vector3(-keyDir.X, keyDir.Y, -keyDir.Z);
+                Vector3 backDir = -Vector3.Reflect(keyDir, Vector3.Up);
 
                 float tan = (float)Math.Tan(timeOfDay.Elevation);
                 Vector3 fillDir = tan >= 0f ? Vector3.Cross(keyDir, backDir) : Vector3.Cross(backDir, keyDir);

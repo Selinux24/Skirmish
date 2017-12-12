@@ -112,13 +112,17 @@ float3 GetSkyColor(float3 eyeDir)
     eyeDir.y = max(eyeDir.y, 0.0);
     return float3(pow(1.0 - eyeDir.y, 2.0), 1.0 - eyeDir.y, 0.6 + (1.0 - eyeDir.y) * 0.4);
 }
-float3 GetSeaColor(float3 position, float3 normal, float3 eyeDir, float ambient, float3 diffuse, float3 specular, float fresnel, float atten)
+float3 GetSeaColor(float3 position, float3 normal, float3 eyeDir, float ambient, float3 diffuse, float3 specular, float epsilon)
 {
     float3 refracted = (gPSBaseColor + pow(diffuse * 0.4 + float3(0.6, 0.6, 0.6), 80.0) * gPSWaterColor * 0.12) * clamp(ambient * 1.5f, 0.1, 1);
     float3 reflected = GetSkyColor(reflect(eyeDir, normal)) * clamp(ambient * 2, 0.1, 1);
+
+    float attenuation = max(1.0 - epsilon, 0.0) * 0.18;
+    float fresnel = clamp(1.0 - dot(normal, eyeDir), 0.0, 1.0);
+    fresnel = pow(fresnel, 6.0) * 0.65;
     
     float3 color = lerp(refracted, reflected, fresnel);
-    color += gPSWaterColor * (position.y - gPSWaveParams.x) * atten;
+    color += gPSWaterColor * (position.y - gPSWaveParams.x) * attenuation;
     color += specular * specularPassNRM;
 
     return color;
@@ -148,11 +152,6 @@ float4 PSWater(PSVertexPosition input) : SV_TARGET
     float epsilon = dot(toPosition, toPosition) * positionEpsilonNRM;
     float3 hmNormal = GetNormal(hmPosition, epsilon, time);
 
-    // Get lighting params
-    float attenuation = max(1.0 - epsilon, 0.0) * 0.18;
-    float fresnel = clamp(1.0 - dot(hmNormal, eyeDir), 0.0, 1.0);
-    fresnel = pow(fresnel, 6.0) * 0.65;
-
     // Do light color
     float3 lDiffuse = 0;
     float3 lSpecular = 0;
@@ -169,7 +168,7 @@ float4 PSWater(PSVertexPosition input) : SV_TARGET
     }
 
     // Do sea color
-    float3 color = GetSeaColor(hmPosition, hmNormal, eyeDir, gPSAmbient, lDiffuse, lSpecular, fresnel, attenuation);
+    float3 color = GetSeaColor(hmPosition, hmNormal, eyeDir, gPSAmbient, saturate(lDiffuse), lSpecular, epsilon);
 
     return float4(color, 1.0f);
 }

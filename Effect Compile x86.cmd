@@ -14,6 +14,7 @@ del *.cod
 "%DXSDK_DIR%Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultBasic.fxo ShaderDefaultBasic.fx
 "%DXSDK_DIR%Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultTerrain.fxo ShaderDefaultTerrain.fx
 "%DXSDK_DIR%Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultSkyScattering.fxo ShaderDefaultSkyScattering.fx
+"%DXSDK_DIR%Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDefaultWater.fxo ShaderDefaultWater.fx
 
 "%DXSDK_DIR%Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDeferredBasic.fxo ShaderDeferredBasic.fx
 "%DXSDK_DIR%Utilities\bin\x86\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderDeferredTerrain.fxo ShaderDeferredTerrain.fx

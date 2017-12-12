@@ -39,12 +39,17 @@ namespace SceneTest
 
             this.water = this.AddComponent<Water>(new WaterDescription()
             {
+                Name = "Water",
                 PlaneSize = 1000f,
                 HeightmapIterations = 8,
                 GeometryIterations = 4,
                 ColorIterations = 8,
             });
-            this.sky = this.AddComponent<SkyScattering>(new SkyScatteringDescription());
+            this.sky = this.AddComponent<SkyScattering>(new SkyScatteringDescription()
+            {
+                Name = "Sky",
+                Resolution = SkyScatteringResolutionEnum.High
+            });
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(5, 00, 00), 10f);
         }
