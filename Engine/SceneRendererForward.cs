@@ -706,7 +706,7 @@ namespace Engine
                     Counters.MaxInstancesPerFrame += c.Count;
 
                     graphics.SetRasterizerDefault();
-                    graphics.SetBlendDefaultAlpha();
+                    graphics.SetBlendTransparent();
 
                     if (c.DepthEnabled)
                     {

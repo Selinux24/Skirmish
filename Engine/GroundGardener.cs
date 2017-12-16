@@ -782,7 +782,7 @@ namespace Engine
             {
                 if (this.visibleNodes != null && this.visibleNodes.Length > 0)
                 {
-                    graphics.SetBlendTransparent();
+                    graphics.SetBlendDefaultAlpha();
 
                     foreach (var item in this.visibleNodes)
                     {

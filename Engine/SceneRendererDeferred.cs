@@ -877,7 +877,7 @@ namespace Engine
 
             //Restore backbuffer as render target and clear it
             graphics.SetDefaultViewport();
-            graphics.SetDefaultRenderTarget();
+            graphics.SetDefaultRenderTarget(true, false, true);
         }
         /// <summary>
         /// Draw lights
@@ -1318,7 +1318,7 @@ namespace Engine
                     }
                     else
                     {
-                        graphics.SetBlendDefaultAlpha();
+                        graphics.SetBlendTransparent();
                     }
 
                     if (c.DepthEnabled)
