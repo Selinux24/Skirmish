@@ -162,7 +162,7 @@ namespace Engine
         /// </summary>
         /// <param name="full"></param>
         /// <returns>Returns all the triangles of the ground</returns>
-        public Triangle[] GetVolume(bool full)
+        public virtual Triangle[] GetVolume(bool full)
         {
             List<Triangle> res = new List<Triangle>();
 

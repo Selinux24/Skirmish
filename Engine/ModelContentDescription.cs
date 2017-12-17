@@ -30,5 +30,10 @@ namespace Engine
         /// </summary>
         [XmlElement("scale")]
         public float Scale = 1f;
+        /// <summary>
+        /// Use controller transforms
+        /// </summary>
+        [XmlElement("use_controller_transform")]
+        public bool UseControllerTransform = true;
     }
 }

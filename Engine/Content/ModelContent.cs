@@ -588,5 +588,55 @@ namespace Engine.Content
 
             return triangles.ToArray();
         }
+        /// <summary>
+        /// Creates a new content filtering with the specified geometry name
+        /// </summary>
+        /// <param name="geometryName">Geometry name</param>
+        /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
+        public ModelContent Filter(string geometryName)
+        {
+            var geo = this.Geometry.FindAll(g => string.Equals(g.Key, geometryName + "-mesh", StringComparison.OrdinalIgnoreCase));
+
+            if (geo.Count > 0)
+            {
+                var res = new ModelContent();
+                res.Images = this.Images;
+                res.Materials = this.Materials;
+
+                foreach (var g in geo)
+                {
+                    res.Geometry.Add(g.Key, g.Value);
+                }
+
+                return res;
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Creates a new content filtering with the specified geometry names
+        /// </summary>
+        /// <param name="geometryNames">Geometry names</param>
+        /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
+        public ModelContent Filter(string[] geometryNames)
+        {
+            var geo = this.Geometry.FindAll(g => Array.Exists(geometryNames, i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)));
+
+            if (geo.Count > 0)
+            {
+                var res = new ModelContent();
+                res.Images = this.Images;
+                res.Materials = this.Materials;
+
+                foreach (var g in geo)
+                {
+                    res.Geometry.Add(g.Key, g.Value);
+                }
+
+                return res;
+            }
+
+            return null;
+        }
     }
 }

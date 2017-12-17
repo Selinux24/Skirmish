@@ -631,8 +631,8 @@ namespace Engine
             this.deviceDebug = this.device.QueryInterface<DeviceDebug>();
             this.deviceDebugInfoQueue = this.deviceDebug.QueryInterface<InfoQueue>();
 
-            this.deviceDebugInfoQueue.SetBreakOnSeverity(MessageSeverity.Corruption, true);
-            this.deviceDebugInfoQueue.SetBreakOnSeverity(MessageSeverity.Error, true);
+            //this.deviceDebugInfoQueue.SetBreakOnSeverity(MessageSeverity.Corruption, true);
+            //this.deviceDebugInfoQueue.SetBreakOnSeverity(MessageSeverity.Error, true);
 
             var severityFilter = new InfoQueueFilter()
             {

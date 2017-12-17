@@ -376,6 +376,33 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Sets instance transforms
+        /// </summary>
+        /// <param name="transforms">Transform matrix list</param>
+        public void SetTransforms(Matrix[] transforms)
+        {
+            if (transforms != null && transforms.Length > 0)
+            {
+                if (this.instances != null && this.instances.Length > 0)
+                {
+                    for (int i = 0; i < this.instances.Length; i++)
+                    {
+                        if (i < transforms.Length)
+                        {
+                            this.instances[i].Manipulator.SetTransform(transforms[i]);
+                            this.instances[i].Active = true;
+                            this.instances[i].Visible = true;
+                        }
+                        else
+                        {
+                            this.instances[i].Active = false;
+                            this.instances[i].Visible = false;
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
         /// Gets the instance list
         /// </summary>
         /// <returns>Returns an array with the instance list</returns>

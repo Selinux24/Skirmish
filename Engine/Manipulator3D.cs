@@ -459,6 +459,11 @@ namespace Engine
                 if (updateState) this.UpdateLocalTransform();
             }
         }
+
+        public void SetTransform(Matrix transform)
+        {
+            this.SetLocalTransform(transform);
+        }
         /// <summary>
         /// Look at target
         /// </summary>
@@ -470,6 +475,7 @@ namespace Engine
         {
             LookAt(target, Vector3.Up, yAxisOnly, interpolationAmount, updateState);
         }
+
         /// <summary>
         /// Look at target
         /// </summary>

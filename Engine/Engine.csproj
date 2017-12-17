@@ -242,6 +242,9 @@
     <Compile Include="BasicManipulatorController.cs" />
     <Compile Include="MaterialDescription.cs" />
     <Compile Include="ModelPart.cs" />
+    <Compile Include="ModularSceneryAssetConfiguration.cs" />
+    <Compile Include="ModularSceneryAssetDescription.cs" />
+    <Compile Include="ModularSceneryAssetReference.cs" />
     <Compile Include="NormalPath.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />
@@ -299,6 +302,8 @@
     <Compile Include="SceneCullManager.cs" />
     <Compile Include="SceneObject.cs" />
     <Compile Include="SceneRendererDeferredLights.cs" />
+    <Compile Include="ModularScenery.cs" />
+    <Compile Include="ModularSceneryDescription.cs" />
     <Compile Include="SegmentPath.cs" />
     <Compile Include="ShadowMapFlags.cs" />
     <Compile Include="SkyPlane.cs" />

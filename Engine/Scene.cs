@@ -411,7 +411,14 @@ namespace Engine
         /// <returns>Returns the new generated resource</returns>
         private T CreateResource<T>(SceneObjectDescription description) where T : BaseSceneObject
         {
-            return (T)Activator.CreateInstance(typeof(T), this, description);
+            try
+            {
+                return (T)Activator.CreateInstance(typeof(T), this, description);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("Resource creation error", ex);
+            }
         }
         /// <summary>
         /// Adds component to collection
@@ -974,9 +981,33 @@ namespace Engine
                     break;
                 }
 
-                var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
-                if (pickable != null)
+                if (obj.Item1.Is<IComposed>())
                 {
+                    var components = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    foreach (var pickable in components)
+                    {
+                        Vector3 p;
+                        Triangle t;
+                        float d;
+                        if (pickable.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                        {
+                            if (d < bestDistance)
+                            {
+                                bestDistance = d;
+
+                                position = p;
+                                item = t;
+                                distance = d;
+                            }
+
+                            picked = true;
+                        }
+                    }
+                }
+                else if (obj.Item1.Is<IRayPickable<Triangle>>())
+                {
+                    var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
+
                     Vector3 p;
                     Triangle t;
                     float d;
@@ -1022,9 +1053,28 @@ namespace Engine
 
             foreach (var obj in coarse)
             {
-                var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
-                if (pickable != null)
+                if (obj.Item1.Is<IComposed>())
                 {
+                    var components = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    foreach (var pickable in components)
+                    {
+                        Vector3 p;
+                        Triangle t;
+                        float d;
+                        if (pickable.PickFirst(ref ray, facingOnly, out p, out t, out d))
+                        {
+                            position = p;
+                            item = t;
+                            distance = d;
+
+                            return true;
+                        }
+                    }
+                }
+                else if (obj.Item1.Is<IRayPickable<Triangle>>())
+                {
+                    var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
+
                     Vector3 p;
                     Triangle t;
                     float d;
@@ -1069,9 +1119,26 @@ namespace Engine
 
             foreach (var obj in coarse)
             {
-                var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
-                if (pickable != null)
+                if (obj.Item1.Is<IComposed>())
                 {
+                    var components = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    foreach (var pickable in components)
+                    {
+                        Vector3[] p;
+                        Triangle[] t;
+                        float[] d;
+                        if (pickable.PickAll(ref ray, facingOnly, out p, out t, out d))
+                        {
+                            lPositions.AddRange(p);
+                            lTriangles.AddRange(t);
+                            lDistances.AddRange(d);
+                        }
+                    }
+                }
+                else if (obj.Item1.Is<IRayPickable<Triangle>>())
+                {
+                    var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
+
                     Vector3[] p;
                     Triangle[] t;
                     float[] d;
