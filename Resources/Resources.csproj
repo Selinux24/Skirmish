@@ -122,6 +122,7 @@
     <Content Include="Blender\Scenery\Clif\dirt_2048x2048.jpg" />
     <Content Include="Blender\Scenery\Ground\buildings.png" />
     <None Include="Blender\Scenery\ModularDungeon\Assets.blend" />
+    <None Include="Blender\Scenery\ModularDungeon\box.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Door.blend" />
     <None Include="Blender\Scenery\ModularDungeon\torch.blend" />
     <None Include="Blender\Vehicles\CapitalShip\Booster.bmp" />
@@ -157,9 +158,11 @@
     <None Include="Blender\Vehicles\Jagdpanther\turbakCL.jpg" />
     <None Include="Blender\Scenery\ModularDungeon\floor_d.jpg" />
     <None Include="Blender\Scenery\ModularDungeon\floor_n.jpg" />
-    <None Include="Blender\Scenery\ModularDungeon\torch.jpg" />
     <None Include="Blender\Scenery\ModularDungeon\wall_d.jpg" />
     <None Include="Blender\Scenery\ModularDungeon\wall_n.jpg" />
+    <None Include="Blender\Scenery\ModularDungeon\atlas1.jpg" />
+    <None Include="Blender\Scenery\ModularDungeon\crate_d.jpg" />
+    <None Include="Blender\Scenery\ModularDungeon\crate_n.png" />
     <Content Include="Collada\Buildings\Dungeon\BaseMap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -222,6 +225,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\atlas1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\crate_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\crate_n.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\floor_d.jpg">
@@ -406,6 +415,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\Assets.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\box.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\Door.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Tests\AniCube\aniCube.dae" />

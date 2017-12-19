@@ -4,6 +4,7 @@ using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Collada
 {
@@ -21,11 +22,13 @@ namespace Collada
         private SceneObject<ModularScenery> scenery = null;
 
         private SceneObject<ModelInstanced> torchs = null;
+        private SceneObject<ModelInstanced> crates = null;
 
         private SceneObject<ParticleManager> particles = null;
         private ParticleSystemDescription pFire = null;
 
         private SceneObject<TriangleListDrawer> graphDrawer = null;
+        private SceneObject<LineListDrawer> bboxesDrawer = null;
 
         public ModularDungeon(Game game)
             : base(game)
@@ -41,7 +44,8 @@ namespace Collada
             this.InitializeEffects();
             this.InitializeModularScenery();
             this.InitializeEnvironment();
-            this.InitializeSceneryObjects();
+            this.InitializeSceneryTorchs();
+            this.InitializeSceneryCrates();
             this.InitializeDebug();
             this.InitializeCamera();
         }
@@ -108,7 +112,7 @@ namespace Collada
             {
                 Name = "Player",
                 Height = 1.5f,
-                MaxClimb = 0.8f,
+                MaxClimb = 0.7f,
                 Radius = 0.5f,
                 Velocity = 4f,
                 VelocitySlow = 1f,
@@ -124,7 +128,7 @@ namespace Collada
                 }
             };
         }
-        private void InitializeSceneryObjects()
+        private void InitializeSceneryTorchs()
         {
             var rot0 = Quaternion.Identity;
             var rot90 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo);
@@ -154,6 +158,7 @@ namespace Collada
                 CastShadow = true,
                 Instances = trn.Length,
                 Static = true,
+                UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
                     ContentFolder = "Resources",
@@ -162,6 +167,8 @@ namespace Collada
             };
 
             this.torchs = this.AddComponent<ModelInstanced>(desc, SceneObjectUsageEnum.Ground);
+
+            this.AttachToGround(this.torchs, true);
 
             this.torchs.Instance.SetTransforms(trn);
 
@@ -185,10 +192,66 @@ namespace Collada
                 this.Lights.AddRange(this.torchs.Instance[i].Lights);
             }
         }
+        private void InitializeSceneryCrates()
+        {
+            var rot0 = Quaternion.Identity;
+            var rot90 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo);
+            var rot180 = Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi);
+            var rot270 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo * 3);
+
+            var trn = new Matrix[]
+            {
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.3f), new Vector3(-2.1f,0,8.4f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 1.2f), new Vector3(-2,0.8f,8.4f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.35f + MathUtil.PiOverTwo), new Vector3(-1.25f,0,8.3f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 2.29f), new Vector3(-2.2f,0,6)),
+
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.3f), new Vector3(14.1f,0,-2.4f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 1.2f), new Vector3(14,0.8f,-2.4f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.35f), new Vector3(13.25f,0,-2.3f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 2.29f), new Vector3(14.2f,0,0)),
+            };
+
+            var desc = new ModelInstancedDescription()
+            {
+                Name = "Crates",
+                CastShadow = true,
+                Instances = trn.Length,
+                Static = true,
+                UseAnisotropicFiltering = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "Resources",
+                    ModelContentFilename = "box.xml",
+                },
+            };
+
+            this.crates = this.AddComponent<ModelInstanced>(desc, SceneObjectUsageEnum.Ground);
+
+            this.AttachToGround(this.crates, true);
+
+            this.crates.Instance.SetTransforms(trn);
+        }
         private void InitializeDebug()
         {
-            this.graphDrawer = this.AddComponent<TriangleListDrawer>(new TriangleListDrawerDescription() { AlphaEnabled = true, Count = 10000 });
+            var graphDrawerDesc = new TriangleListDrawerDescription()
+            {
+                Name = "DEBUG++ Graph",
+                AlphaEnabled = true,
+                Count = 10000,
+            };
+            this.graphDrawer = this.AddComponent<TriangleListDrawer>(graphDrawerDesc);
             this.graphDrawer.Visible = false;
+
+            var bboxesDrawerDesc = new LineListDrawerDescription()
+            {
+                Name = "DEBUG++ Bounding volumes",
+                AlphaEnabled = true,
+                Color = new Color4(1.0f, 0.0f, 0.0f, 0.55f),
+                Count = 10000,
+            };
+            this.bboxesDrawer = this.AddComponent<LineListDrawer>(bboxesDrawerDesc);
+            this.bboxesDrawer.Visible = false;
         }
         private void InitializeCamera()
         {
@@ -205,27 +268,48 @@ namespace Collada
         {
             base.Initialized();
 
-            var nodes = this.GetNodes(this.agent);
-            if (nodes != null && nodes.Length > 0)
+            //Graph
             {
-                Random clrRnd = new Random(24);
-                Color[] regions = new Color[nodes.Length];
-                for (int i = 0; i < nodes.Length; i++)
+                var nodes = this.GetNodes(this.agent);
+                if (nodes != null && nodes.Length > 0)
                 {
-                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.4f);
+                    Random clrRnd = new Random(24);
+                    Color[] regions = new Color[nodes.Length];
+                    for (int i = 0; i < nodes.Length; i++)
+                    {
+                        regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.4f);
+                    }
+
+                    this.graphDrawer.Instance.Clear();
+
+                    for (int i = 0; i < nodes.Length; i++)
+                    {
+                        var node = (NavigationMeshNode)nodes[i];
+                        var color = regions[node.RegionId];
+                        var poly = node.Poly;
+                        var tris = poly.Triangulate();
+
+                        this.graphDrawer.Instance.AddTriangles(color, tris);
+                    }
+                }
+            }
+
+            //Boxes
+            {
+                List<BoundingBox> bboxes = new List<BoundingBox>();
+
+                for (int i = 0; i < this.torchs.Instance.Count; i++)
+                {
+                    bboxes.Add(this.torchs.Instance[i].GetBoundingBox());
                 }
 
-                this.graphDrawer.Instance.Clear();
-
-                for (int i = 0; i < nodes.Length; i++)
+                for (int i = 0; i < this.crates.Instance.Count; i++)
                 {
-                    var node = (NavigationMeshNode)nodes[i];
-                    var color = regions[node.RegionId];
-                    var poly = node.Poly;
-                    var tris = poly.Triangulate();
-
-                    this.graphDrawer.Instance.AddTriangles(color, tris);
+                    bboxes.Add(this.crates.Instance[i].GetBoundingBox());
                 }
+
+                var listBoxes = Line3D.CreateWiredBox(bboxes.ToArray());
+                this.bboxesDrawer.Instance.SetLines(Color.Green, listBoxes);
             }
         }
 
@@ -241,6 +325,11 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
                 this.graphDrawer.Visible = !this.graphDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.bboxesDrawer.Visible = !this.bboxesDrawer.Visible;
             }
 
             this.UpdateCamera(gameTime);

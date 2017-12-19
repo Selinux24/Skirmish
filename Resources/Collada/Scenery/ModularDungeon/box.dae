@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.79.0 commit date:2017-09-11, commit time:10:43, hash:5bd8ac9</authoring_tool>
+    </contributor>
+    <created>2017-12-19T22:07:10</created>
+    <modified>2017-12-19T22:07:10</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_images>
+    <image id="crate_d_jpg" name="crate_d_jpg">
+      <init_from>crate_d.jpg</init_from>
+    </image>
+    <image id="crate_n_png" name="crate_n_png">
+      <init_from>crate_n.png</init_from>
+    </image>
+  </library_images>
+  <library_effects>
+    <effect id="Crate-effect">
+      <profile_COMMON>
+        <newparam sid="crate_d_jpg-surface">
+          <surface type="2D">
+            <init_from>crate_d_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="crate_d_jpg-sampler">
+          <sampler2D>
+            <source>crate_d_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="crate_n_png-surface">
+          <surface type="2D">
+            <init_from>crate_n_png</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="crate_n_png-sampler">
+          <sampler2D>
+            <source>crate_n_png-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="crate_d_jpg-sampler" texcoord="UVMap"/>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.1 0.1 0.1 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">10</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="crate_n_png-sampler" texcoord="UVMap"/>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="Crate-material" name="Crate">
+      <instance_effect url="#Crate-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="Dn_Crate-mesh" name="Dn_Crate">
+      <mesh>
+        <source id="Dn_Crate-mesh-positions">
+          <float_array id="Dn_Crate-mesh-positions-array" count="24">1 1 -1 1 -1 -1 -1 -0.9999998 -1 -0.9999997 1 -1 1 0.9999995 1 0.9999994 -1.000001 1 -1 -0.9999997 1 -1 1 1</float_array>
+          <technique_common>
+            <accessor source="#Dn_Crate-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Dn_Crate-mesh-normals">
+          <float_array id="Dn_Crate-mesh-normals-array" count="36">0 0 -1 0 0 1 1 0 -2.38419e-7 0 -1 -4.76837e-7 -1 2.38419e-7 -1.49012e-7 2.68221e-7 1 2.38419e-7 0 0 -1 0 0 1 1 -5.96046e-7 3.27825e-7 -4.76837e-7 -1 0 -1 2.38419e-7 -1.19209e-7 2.08616e-7 1 0</float_array>
+          <technique_common>
+            <accessor source="#Dn_Crate-mesh-normals-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Dn_Crate-mesh-map">
+          <float_array id="Dn_Crate-mesh-map-array" count="72">-0.9910232 0.997008 0.002992153 1.991023 -0.9910233 1.991023 0.002992093 0.997008 -0.9910233 0.002992689 0.002992153 0.002992451 0.002992451 0.002992153 0.9970076 -0.9910232 0.9970079 0.002992093 -0.9910233 -0.991023 0.002992153 0.002991974 -0.9910232 0.002992451 1.991023 0.002992153 0.9970079 -0.9910231 1.991023 -0.9910233 0.9970075 0.00299251 0.002992272 0.997008 0.002992153 0.002992451 -0.9910232 0.997008 0.002992093 0.997008 0.002992153 1.991023 0.002992093 0.997008 -0.9910232 0.9970079 -0.9910233 0.002992689 0.002992451 0.002992153 0.002992153 -0.9910233 0.9970076 -0.9910232 -0.9910233 -0.991023 0.002991914 -0.9910233 0.002992153 0.002991974 1.991023 0.002992153 0.997008 0.002992153 0.9970079 -0.9910231 0.9970075 0.00299251 0.9970076 0.9970076 0.002992272 0.997008</float_array>
+          <technique_common>
+            <accessor source="#Dn_Crate-mesh-map-array" count="36" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Dn_Crate-mesh-vertices">
+          <input semantic="POSITION" source="#Dn_Crate-mesh-positions"/>
+        </vertices>
+        <triangles material="Crate-material" count="12">
+          <input semantic="VERTEX" source="#Dn_Crate-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Dn_Crate-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Dn_Crate-mesh-map" offset="2" set="0"/>
+          <p>0 0 0 2 0 1 3 0 2 7 1 3 5 1 4 4 1 5 4 2 6 1 2 7 0 2 8 5 3 9 2 3 10 1 3 11 2 4 12 7 4 13 3 4 14 0 5 15 7 5 16 4 5 17 0 6 18 1 6 19 2 6 20 7 7 21 6 7 22 5 7 23 4 8 24 5 8 25 1 8 26 5 9 27 6 9 28 2 9 29 2 10 30 6 10 31 7 10 32 0 11 33 3 11 34 7 11 35</p>
+        </triangles>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="Dn_Crate" name="Dn_Crate" type="NODE">
+        <matrix sid="transform">0.4 0 0 0 0 0.4 0 0 0 0 0.4 0.4 0 0 0 1</matrix>
+        <instance_geometry url="#Dn_Crate-mesh" name="Dn_Crate">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="Crate-material" target="#Crate-material"/>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

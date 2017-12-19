@@ -120,6 +120,16 @@ namespace Engine
         /// </summary>
         public Vector3 Down { get; private set; }
         /// <summary>
+        /// Returns the average scale magnitude (x+y+z)/3
+        /// </summary>
+        public float AveragingScale
+        {
+            get
+            {
+                return (this.scaling.X + this.scaling.Y + this.scaling.Z) * 0.3333f;
+            }
+        }
+        /// <summary>
         /// Parent manipulator
         /// </summary>
         public Manipulator3D Parent { get; set; }

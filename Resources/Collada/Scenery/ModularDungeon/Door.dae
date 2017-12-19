@@ -5,27 +5,43 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.79.0 commit date:2017-09-11, commit time:10:43, hash:5bd8ac9</authoring_tool>
     </contributor>
-    <created>2017-12-19T20:18:26</created>
-    <modified>2017-12-19T20:18:26</modified>
+    <created>2017-12-19T22:06:35</created>
+    <modified>2017-12-19T22:06:35</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_images>
-    <image id="torch_jpg" name="torch_jpg">
-      <init_from>torch.jpg</init_from>
+    <image id="floor_d_jpg" name="floor_d_jpg">
+      <init_from>floor_d.jpg</init_from>
+    </image>
+    <image id="floor_n_jpg" name="floor_n_jpg">
+      <init_from>floor_n.jpg</init_from>
+    </image>
+    <image id="atlas1_jpg" name="atlas1_jpg">
+      <init_from>atlas1.jpg</init_from>
     </image>
   </library_images>
   <library_effects>
-    <effect id="Material_Door-effect">
+    <effect id="Material_Base-effect">
       <profile_COMMON>
-        <newparam sid="torch_jpg-surface">
+        <newparam sid="floor_d_jpg-surface">
           <surface type="2D">
-            <init_from>torch_jpg</init_from>
+            <init_from>floor_d_jpg</init_from>
           </surface>
         </newparam>
-        <newparam sid="torch_jpg-sampler">
+        <newparam sid="floor_d_jpg-sampler">
           <sampler2D>
-            <source>torch_jpg-surface</source>
+            <source>floor_d_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="floor_n_jpg-surface">
+          <surface type="2D">
+            <init_from>floor_n_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="floor_n_jpg-sampler">
+          <sampler2D>
+            <source>floor_n_jpg-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -37,7 +53,50 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="torch_jpg-sampler" texcoord="UVMap"/>
+              <texture texture="floor_d_jpg-sampler" texcoord="UVMap"/>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.1 0.1 0.1 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">10</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="floor_n_jpg-sampler" texcoord="UVMap"/>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
+    <effect id="Material_Door-effect">
+      <profile_COMMON>
+        <newparam sid="atlas1_jpg-surface">
+          <surface type="2D">
+            <init_from>atlas1_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="atlas1_jpg-sampler">
+          <sampler2D>
+            <source>atlas1_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="atlas1_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.05 0.05 0.05 1</color>
@@ -54,14 +113,14 @@
     </effect>
     <effect id="Material_Frame-effect">
       <profile_COMMON>
-        <newparam sid="torch_jpg-surface">
+        <newparam sid="atlas1_jpg-surface">
           <surface type="2D">
-            <init_from>torch_jpg</init_from>
+            <init_from>atlas1_jpg</init_from>
           </surface>
         </newparam>
-        <newparam sid="torch_jpg-sampler">
+        <newparam sid="atlas1_jpg-sampler">
           <sampler2D>
-            <source>torch_jpg-surface</source>
+            <source>atlas1_jpg-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -73,7 +132,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="torch_jpg-sampler" texcoord="UVMap"/>
+              <texture texture="atlas1_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.1 0.1 0.1 1</color>
@@ -90,6 +149,9 @@
     </effect>
   </library_effects>
   <library_materials>
+    <material id="Material_Base-material" name="Material_Base">
+      <instance_effect url="#Material_Base-effect"/>
+    </material>
     <material id="Material_Door-material" name="Material_Door">
       <instance_effect url="#Material_Door-effect"/>
     </material>
@@ -98,6 +160,48 @@
     </material>
   </library_materials>
   <library_geometries>
+    <geometry id="Dn_Wall-mesh" name="Dn_Wall">
+      <mesh>
+        <source id="Dn_Wall-mesh-positions">
+          <float_array id="Dn_Wall-mesh-positions-array" count="24">-0.1 1 4 -0.1000002 -0.9999997 4.000001 0.09999996 1 3.999999 0.09999978 -1 4 -0.1 1 3.063151 -0.1000002 -0.9999998 3.063152 0.1 1 3.06315 0.0999999 -1 3.063152</float_array>
+          <technique_common>
+            <accessor source="#Dn_Wall-mesh-positions-array" count="8" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Dn_Wall-mesh-normals">
+          <float_array id="Dn_Wall-mesh-normals-array" count="36">-1.49011e-6 -1 0 4.76837e-6 4.76837e-7 1 -1.26738e-6 -4.76837e-7 -1 -2.38419e-6 1 0 1 0 0 -1 0 0 -1.19209e-6 -1 0 3.57628e-6 4.76837e-7 1 -4.76837e-6 -7.15255e-7 -1 -1.19209e-6 1 -1.59056e-7 1 0 0 -1 0 0</float_array>
+          <technique_common>
+            <accessor source="#Dn_Wall-mesh-normals-array" count="12" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Dn_Wall-mesh-map">
+          <float_array id="Dn_Wall-mesh-map-array" count="72">-0.103745 0.5344976 -0.003745019 1.002921 -0.103745 1.002922 1.002784 1.101215 0.002784132 1.001215 1.002784 1.001216 0.9999997 0.4481484 0 0.531576 0 0.4481483 1.00625 0.9999995 1.10625 0.5315759 1.10625 1 0.9999999 0.9999994 0 0.531576 0.9999999 0.5315753 0.9999996 -0.02027589 0 0.4481483 0 -0.02027589 -0.103745 0.5344976 -0.003745019 0.5344974 -0.003745019 1.002921 1.002784 1.101215 0.002784371 1.101215 0.002784132 1.001215 0.9999997 0.4481484 1.00625 0.5315753 0 0.531576 1.00625 0.9999995 1.00625 0.5315753 1.10625 0.5315759 0.9999999 0.9999994 0 1 0 0.531576 0.9999996 -0.02027589 0.9999997 0.4481484 0 0.4481483</float_array>
+          <technique_common>
+            <accessor source="#Dn_Wall-mesh-map-array" count="36" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Dn_Wall-mesh-vertices">
+          <input semantic="POSITION" source="#Dn_Wall-mesh-positions"/>
+        </vertices>
+        <triangles material="Material_Base-material" count="12">
+          <input semantic="VERTEX" source="#Dn_Wall-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Dn_Wall-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Dn_Wall-mesh-map" offset="2" set="0"/>
+          <p>5 0 0 3 0 1 1 0 2 0 1 3 3 1 4 2 1 5 4 2 6 7 2 7 5 2 8 2 3 9 4 3 10 0 3 11 2 4 12 7 4 13 6 4 14 0 5 15 5 5 16 1 5 17 5 6 18 7 6 19 3 6 20 0 7 21 1 7 22 3 7 23 4 8 24 6 8 25 7 8 26 2 9 27 6 9 28 4 9 29 2 10 30 3 10 31 7 10 32 0 11 33 4 11 34 5 11 35</p>
+        </triangles>
+      </mesh>
+    </geometry>
     <geometry id="Door-mesh" name="Door">
       <mesh>
         <source id="Door-mesh-positions">
@@ -185,6 +289,16 @@
   </library_geometries>
   <library_visual_scenes>
     <visual_scene id="Scene" name="Scene">
+      <node id="Dn_Wall" name="Dn_Wall" type="NODE">
+        <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
+        <instance_geometry url="#Dn_Wall-mesh" name="Dn_Wall">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="Material_Base-material" target="#Material_Base-material"/>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
       <node id="Door" name="Door" type="NODE">
         <matrix sid="transform">1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Door-mesh" name="Door">

@@ -464,8 +464,8 @@ namespace Engine
         /// <param name="frustum">Camera frustum</param>
         private void SetLOD(Vector3 origin, BoundingFrustum frustum)
         {
-            var position = this.Manipulator.Position;
-            var radius = this.coarseBoundingSphere.Radius * this.Manipulator.Scaling.Length();
+            var position = Vector3.TransformCoordinate(this.coarseBoundingSphere.Center, this.Manipulator.LocalTransform);
+            var radius = this.coarseBoundingSphere.Radius * this.Manipulator.AveragingScale;
             var bsph = new BoundingSphere(position, radius);
 
             if (frustum.Contains(bsph) != ContainmentType.Disjoint)

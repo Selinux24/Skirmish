@@ -638,7 +638,11 @@ namespace Engine.Content
 
             return null;
         }
-
+        /// <summary>
+        /// Creates a new content filtering with the specified geometry name mask
+        /// </summary>
+        /// <param name="mask">Name mask</param>
+        /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
         public ModelContent FilterMask(string mask)
         {
             var geo = this.Geometry.FindAll(g =>

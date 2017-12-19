@@ -1180,7 +1180,7 @@ namespace Engine
             obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
         }
         /// <summary>
-        /// Attach geomtry to ground
+        /// Attach geometry to ground
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="obj">Object</param>
