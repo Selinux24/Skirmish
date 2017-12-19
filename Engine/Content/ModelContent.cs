@@ -638,5 +638,28 @@ namespace Engine.Content
 
             return null;
         }
+
+        public ModelContent FilterMask(string mask)
+        {
+            var geo = this.Geometry.FindAll(g =>
+                g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
+                g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
+
+            if (geo.Count > 0)
+            {
+                var res = new ModelContent();
+                res.Images = this.Images;
+                res.Materials = this.Materials;
+
+                foreach (var g in geo)
+                {
+                    res.Geometry.Add(g.Key, g.Value);
+                }
+
+                return res;
+            }
+
+            return null;
+        }
     }
 }

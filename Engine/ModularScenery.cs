@@ -112,7 +112,7 @@ namespace Engine
                         Instances = instances,
                         Content = new ContentDescription()
                         {
-                            ModelContent = content.Filter(assetName),
+                            ModelContent = content.FilterMask(assetName),
                         }
                     },
                     SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding);
