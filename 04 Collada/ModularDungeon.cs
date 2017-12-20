@@ -112,7 +112,7 @@ namespace Collada
             {
                 Name = "Player",
                 Height = 1.5f,
-                MaxClimb = 0.7f,
+                MaxClimb = 0.8f,
                 Radius = 0.5f,
                 Velocity = 4f,
                 VelocitySlow = 1f,
@@ -124,7 +124,8 @@ namespace Collada
                 {
                     Agents = new[] { agent },
                     CellSize = 0.1f,
-                    CellHeight = 0.08f,
+                    CellHeight = 0.1f,
+                    ContourFlags = ContourBuildFlags.TessellateAreaEdges,
                 }
             };
         }
@@ -150,6 +151,8 @@ namespace Collada
 
                 Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot90, new Vector3(12,0,5)),
                 Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot270, new Vector3(12,0,-5)),
+
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot90, new Vector3(0,4,-17)),
             };
 
             var desc = new ModelInstancedDescription()
@@ -260,8 +263,8 @@ namespace Collada
             this.Camera.MovementDelta = this.agent.Velocity;
             this.Camera.SlowMovementDelta = this.agent.VelocitySlow;
             this.Camera.Mode = CameraModes.Free;
-            this.Camera.Position = new Vector3(0, 1.5f, -12);
-            this.Camera.Interest = new Vector3(0, 0, 0);
+            this.Camera.Position = new Vector3(0, 5.5f, -22);
+            this.Camera.Interest = new Vector3(0, 4.5f, 0);
         }
 
         public override void Initialized()
