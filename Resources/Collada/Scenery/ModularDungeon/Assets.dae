@@ -5,26 +5,32 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.79.0 commit date:2017-09-11, commit time:10:43, hash:5bd8ac9</authoring_tool>
     </contributor>
-    <created>2017-12-20T22:12:15</created>
-    <modified>2017-12-20T22:12:15</modified>
+    <created>2017-12-21T00:15:33</created>
+    <modified>2017-12-21T00:15:33</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_images>
+    <image id="wall_d_jpg" name="wall_d_jpg">
+      <init_from>wall_d.jpg</init_from>
+    </image>
+    <image id="wall_n_jpg" name="wall_n_jpg">
+      <init_from>wall_n.jpg</init_from>
+    </image>
+    <image id="atlas1_jpg" name="atlas1_jpg">
+      <init_from>atlas1.jpg</init_from>
+    </image>
     <image id="floor_d_jpg" name="floor_d_jpg">
       <init_from>floor_d.jpg</init_from>
     </image>
     <image id="floor_n_jpg" name="floor_n_jpg">
       <init_from>floor_n.jpg</init_from>
     </image>
-    <image id="atlas1_jpg" name="atlas1_jpg">
-      <init_from>atlas1.jpg</init_from>
+    <image id="lava_d_jpg" name="lava_d_jpg">
+      <init_from>lava_d.jpg</init_from>
     </image>
-    <image id="wall_d_jpg" name="wall_d_jpg">
-      <init_from>wall_d.jpg</init_from>
-    </image>
-    <image id="wall_n_jpg" name="wall_n_jpg">
-      <init_from>wall_n.jpg</init_from>
+    <image id="lava_n_jpg" name="lava_n_jpg">
+      <init_from>lava_n.jpg</init_from>
     </image>
     <image id="rock_d_jpg" name="rock_d_jpg">
       <init_from>rock_d.jpg</init_from>
@@ -34,26 +40,26 @@
     </image>
   </library_images>
   <library_effects>
-    <effect id="Material_Base-effect">
+    <effect id="Material_Ceiling-effect">
       <profile_COMMON>
-        <newparam sid="floor_d_jpg-surface">
+        <newparam sid="wall_d_jpg-surface">
           <surface type="2D">
-            <init_from>floor_d_jpg</init_from>
+            <init_from>wall_d_jpg</init_from>
           </surface>
         </newparam>
-        <newparam sid="floor_d_jpg-sampler">
+        <newparam sid="wall_d_jpg-sampler">
           <sampler2D>
-            <source>floor_d_jpg-surface</source>
+            <source>wall_d_jpg-surface</source>
           </sampler2D>
         </newparam>
-        <newparam sid="floor_n_jpg-surface">
+        <newparam sid="wall_n_jpg-surface">
           <surface type="2D">
-            <init_from>floor_n_jpg</init_from>
+            <init_from>wall_n_jpg</init_from>
           </surface>
         </newparam>
-        <newparam sid="floor_n_jpg-sampler">
+        <newparam sid="wall_n_jpg-sampler">
           <sampler2D>
-            <source>floor_n_jpg-surface</source>
+            <source>wall_n_jpg-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -65,7 +71,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="floor_d_jpg-sampler" texcoord="UVMap"/>
+              <texture texture="wall_d_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.1 0.1 0.1 1</color>
@@ -80,7 +86,7 @@
           <extra>
             <technique profile="FCOLLADA">
               <bump>
-                <texture texture="floor_n_jpg-sampler" texcoord="UVMap"/>
+                <texture texture="wall_n_jpg-sampler" texcoord="UVMap"/>
               </bump>
             </technique>
           </extra>
@@ -123,16 +129,26 @@
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="Material_Frame-effect">
+    <effect id="Material_Wall-effect">
       <profile_COMMON>
-        <newparam sid="atlas1_jpg-surface">
+        <newparam sid="wall_d_jpg-surface">
           <surface type="2D">
-            <init_from>atlas1_jpg</init_from>
+            <init_from>wall_d_jpg</init_from>
           </surface>
         </newparam>
-        <newparam sid="atlas1_jpg-sampler">
+        <newparam sid="wall_d_jpg-sampler">
           <sampler2D>
-            <source>atlas1_jpg-surface</source>
+            <source>wall_d_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="wall_n_jpg-surface">
+          <surface type="2D">
+            <init_from>wall_n_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="wall_n_jpg-sampler">
+          <sampler2D>
+            <source>wall_n_jpg-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -144,22 +160,29 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="atlas1_jpg-sampler" texcoord="UVMap"/>
+              <texture texture="wall_d_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.1 0.1 0.1 1</color>
             </specular>
             <shininess>
-              <float sid="shininess">75</float>
+              <float sid="shininess">10</float>
             </shininess>
             <index_of_refraction>
               <float sid="index_of_refraction">1</float>
             </index_of_refraction>
           </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="wall_n_jpg-sampler" texcoord="UVMap"/>
+              </bump>
+            </technique>
+          </extra>
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="Material_Base_001-effect">
+    <effect id="Material_Floor-effect">
       <profile_COMMON>
         <newparam sid="floor_d_jpg-surface">
           <surface type="2D">
@@ -212,26 +235,26 @@
         </technique>
       </profile_COMMON>
     </effect>
-    <effect id="Material_Doors-effect">
+    <effect id="Material_LandSlide-effect">
       <profile_COMMON>
-        <newparam sid="wall_d_jpg-surface">
+        <newparam sid="lava_d_jpg-surface">
           <surface type="2D">
-            <init_from>wall_d_jpg</init_from>
+            <init_from>lava_d_jpg</init_from>
           </surface>
         </newparam>
-        <newparam sid="wall_d_jpg-sampler">
+        <newparam sid="lava_d_jpg-sampler">
           <sampler2D>
-            <source>wall_d_jpg-surface</source>
+            <source>lava_d_jpg-surface</source>
           </sampler2D>
         </newparam>
-        <newparam sid="wall_n_jpg-surface">
+        <newparam sid="lava_n_jpg-surface">
           <surface type="2D">
-            <init_from>wall_n_jpg</init_from>
+            <init_from>lava_n_jpg</init_from>
           </surface>
         </newparam>
-        <newparam sid="wall_n_jpg-sampler">
+        <newparam sid="lava_n_jpg-sampler">
           <sampler2D>
-            <source>wall_n_jpg-surface</source>
+            <source>lava_n_jpg-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -243,7 +266,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="wall_d_jpg-sampler" texcoord="UVMap"/>
+              <texture texture="lava_d_jpg-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.5 0.5 0.5 1</color>
@@ -258,7 +281,7 @@
           <extra>
             <technique profile="FCOLLADA">
               <bump>
-                <texture texture="wall_n_jpg-sampler" texcoord="UVMap"/>
+                <texture texture="lava_n_jpg-sampler" texcoord="UVMap"/>
               </bump>
             </technique>
           </extra>
@@ -318,6 +341,59 @@
         </technique>
       </profile_COMMON>
     </effect>
+    <effect id="Material_Trap-effect">
+      <profile_COMMON>
+        <newparam sid="floor_d_jpg-surface">
+          <surface type="2D">
+            <init_from>floor_d_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="floor_d_jpg-sampler">
+          <sampler2D>
+            <source>floor_d_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="floor_n_jpg-surface">
+          <surface type="2D">
+            <init_from>floor_n_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="floor_n_jpg-sampler">
+          <sampler2D>
+            <source>floor_n_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="floor_d_jpg-sampler" texcoord="UVMap"/>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.1 0.1 0.1 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">10</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="floor_n_jpg-sampler" texcoord="UVMap"/>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
     <effect id="Material_Pikes-effect">
       <profile_COMMON>
         <newparam sid="atlas1_jpg-surface">
@@ -354,28 +430,87 @@
         </technique>
       </profile_COMMON>
     </effect>
+    <effect id="Material_Base-effect">
+      <profile_COMMON>
+        <newparam sid="wall_d_jpg-surface">
+          <surface type="2D">
+            <init_from>wall_d_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="wall_d_jpg-sampler">
+          <sampler2D>
+            <source>wall_d_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <newparam sid="wall_n_jpg-surface">
+          <surface type="2D">
+            <init_from>wall_n_jpg</init_from>
+          </surface>
+        </newparam>
+        <newparam sid="wall_n_jpg-sampler">
+          <sampler2D>
+            <source>wall_n_jpg-surface</source>
+          </sampler2D>
+        </newparam>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <texture texture="wall_d_jpg-sampler" texcoord="UVMap"/>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.1 0.1 0.1 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">10</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+          <extra>
+            <technique profile="FCOLLADA">
+              <bump>
+                <texture texture="wall_n_jpg-sampler" texcoord="UVMap"/>
+              </bump>
+            </technique>
+          </extra>
+        </technique>
+      </profile_COMMON>
+    </effect>
   </library_effects>
   <library_materials>
-    <material id="Material_Base-material" name="Material_Base">
-      <instance_effect url="#Material_Base-effect"/>
+    <material id="Material_Ceiling-material" name="Material_Ceiling">
+      <instance_effect url="#Material_Ceiling-effect"/>
     </material>
     <material id="Material_Door-material" name="Material_Door">
       <instance_effect url="#Material_Door-effect"/>
     </material>
-    <material id="Material_Frame-material" name="Material_Frame">
-      <instance_effect url="#Material_Frame-effect"/>
+    <material id="Material_Wall-material" name="Material_Wall">
+      <instance_effect url="#Material_Wall-effect"/>
     </material>
-    <material id="Material_Base_001-material" name="Material_Base_001">
-      <instance_effect url="#Material_Base_001-effect"/>
+    <material id="Material_Floor-material" name="Material_Floor">
+      <instance_effect url="#Material_Floor-effect"/>
     </material>
-    <material id="Material_Doors-material" name="Material_Doors">
-      <instance_effect url="#Material_Doors-effect"/>
+    <material id="Material_LandSlide-material" name="Material_LandSlide">
+      <instance_effect url="#Material_LandSlide-effect"/>
     </material>
     <material id="Material_Stairs-material" name="Material_Stairs">
       <instance_effect url="#Material_Stairs-effect"/>
     </material>
+    <material id="Material_Trap-material" name="Material_Trap">
+      <instance_effect url="#Material_Trap-effect"/>
+    </material>
     <material id="Material_Pikes-material" name="Material_Pikes">
       <instance_effect url="#Material_Pikes-effect"/>
+    </material>
+    <material id="Material_Base-material" name="Material_Base">
+      <instance_effect url="#Material_Base-effect"/>
     </material>
   </library_materials>
   <library_geometries>
@@ -413,7 +548,7 @@
         <vertices id="Dn_Ceiling_1-mesh-vertices">
           <input semantic="POSITION" source="#Dn_Ceiling_1-mesh-positions"/>
         </vertices>
-        <triangles material="Material_Base-material" count="12">
+        <triangles material="Material_Ceiling-material" count="12">
           <input semantic="VERTEX" source="#Dn_Ceiling_1-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Dn_Ceiling_1-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Dn_Ceiling_1-mesh-map" offset="2" set="0"/>
@@ -497,7 +632,7 @@
         <vertices id="Dn_Door_1_Frame-mesh-vertices">
           <input semantic="POSITION" source="#Dn_Door_1_Frame-mesh-positions"/>
         </vertices>
-        <triangles material="Material_Frame-material" count="308">
+        <triangles material="Material_Door-material" count="308">
           <input semantic="VERTEX" source="#Dn_Door_1_Frame-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Dn_Door_1_Frame-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Dn_Door_1_Frame-mesh-map" offset="2" set="0"/>
@@ -539,7 +674,7 @@
         <vertices id="Dn_Door_1_Wall-mesh-vertices">
           <input semantic="POSITION" source="#Dn_Door_1_Wall-mesh-positions"/>
         </vertices>
-        <triangles material="Material_Base_001-material" count="12">
+        <triangles material="Material_Wall-material" count="12">
           <input semantic="VERTEX" source="#Dn_Door_1_Wall-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Dn_Door_1_Wall-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Dn_Door_1_Wall-mesh-map" offset="2" set="0"/>
@@ -581,7 +716,7 @@
         <vertices id="Dn_Door_2-mesh-vertices">
           <input semantic="POSITION" source="#Dn_Door_2-mesh-positions"/>
         </vertices>
-        <triangles material="Material_Base-material" count="224">
+        <triangles material="Material_Wall-material" count="224">
           <input semantic="VERTEX" source="#Dn_Door_2-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Dn_Door_2-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Dn_Door_2-mesh-map" offset="2" set="0"/>
@@ -623,7 +758,7 @@
         <vertices id="Dn_Door_3-mesh-vertices">
           <input semantic="POSITION" source="#Dn_Door_3-mesh-positions"/>
         </vertices>
-        <triangles material="Material_Base-material" count="224">
+        <triangles material="Material_Wall-material" count="224">
           <input semantic="VERTEX" source="#Dn_Door_3-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Dn_Door_3-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Dn_Door_3-mesh-map" offset="2" set="0"/>
@@ -665,7 +800,7 @@
         <vertices id="Dn_Floor_1-mesh-vertices">
           <input semantic="POSITION" source="#Dn_Floor_1-mesh-positions"/>
         </vertices>
-        <triangles material="Material_Base-material" count="12">
+        <triangles material="Material_Floor-material" count="12">
           <input semantic="VERTEX" source="#Dn_Floor_1-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Dn_Floor_1-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Dn_Floor_1-mesh-map" offset="2" set="0"/>
@@ -707,7 +842,7 @@
         <vertices id="Dn_Landslide_1-mesh-vertices">
           <input semantic="POSITION" source="#Dn_Landslide_1-mesh-positions"/>
         </vertices>
-        <triangles material="Material_Doors-material" count="76">
+        <triangles material="Material_LandSlide-material" count="76">
           <input semantic="VERTEX" source="#Dn_Landslide_1-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Dn_Landslide_1-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Dn_Landslide_1-mesh-map" offset="2" set="0"/>
@@ -791,7 +926,7 @@
         <vertices id="Dn_Trap_1-mesh-vertices">
           <input semantic="POSITION" source="#Dn_Trap_1-mesh-positions"/>
         </vertices>
-        <triangles material="Material_Base-material" count="68">
+        <triangles material="Material_Trap-material" count="68">
           <input semantic="VERTEX" source="#Dn_Trap_1-mesh-vertices" offset="0"/>
           <input semantic="NORMAL" source="#Dn_Trap_1-mesh-normals" offset="1"/>
           <input semantic="TEXCOORD" source="#Dn_Trap_1-mesh-map" offset="2" set="0"/>
@@ -891,13 +1026,13 @@
         <instance_geometry url="#Dn_Ceiling_1-mesh" name="Dn_Ceiling_1">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material_Base-material" target="#Material_Base-material"/>
+              <instance_material symbol="Material_Ceiling-material" target="#Material_Ceiling-material"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="Dn_Door_1" name="Dn_Door_1" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 -12 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 1 0 6 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Dn_Door_1-mesh" name="Dn_Door_1">
           <bind_material>
             <technique_common>
@@ -907,41 +1042,41 @@
         </instance_geometry>
       </node>
       <node id="Dn_Door_1_Frame" name="Dn_Door_1_Frame" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 -12 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 1 0 6 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Dn_Door_1_Frame-mesh" name="Dn_Door_1_Frame">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material_Frame-material" target="#Material_Frame-material"/>
+              <instance_material symbol="Material_Door-material" target="#Material_Door-material"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="Dn_Door_1_Wall" name="Dn_Door_1_Wall" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 -12 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 1 0 6 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Dn_Door_1_Wall-mesh" name="Dn_Door_1_Wall">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material_Base_001-material" target="#Material_Base_001-material"/>
+              <instance_material symbol="Material_Wall-material" target="#Material_Wall-material"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="Dn_Door_2" name="Dn_Door_2" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 -3 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 1 0 3 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Dn_Door_2-mesh" name="Dn_Door_2">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material_Base-material" target="#Material_Base-material"/>
+              <instance_material symbol="Material_Wall-material" target="#Material_Wall-material"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="Dn_Door_3" name="Dn_Door_3" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 2 0 4 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 2 0 10 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Dn_Door_3-mesh" name="Dn_Door_3">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material_Base-material" target="#Material_Base-material"/>
+              <instance_material symbol="Material_Wall-material" target="#Material_Wall-material"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
@@ -951,23 +1086,23 @@
         <instance_geometry url="#Dn_Floor_1-mesh" name="Dn_Floor_1">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material_Base-material" target="#Material_Base-material"/>
+              <instance_material symbol="Material_Floor-material" target="#Material_Floor-material"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="Dn_Landslide_1" name="Dn_Landslide_1" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 8 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 1 0 -9 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Dn_Landslide_1-mesh" name="Dn_Landslide_1">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material_Doors-material" target="#Material_Doors-material"/>
+              <instance_material symbol="Material_LandSlide-material" target="#Material_LandSlide-material"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="Dn_Stairs_1" name="Dn_Stairs_1" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 11 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 1 0 -6 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Dn_Stairs_1-mesh" name="Dn_Stairs_1">
           <bind_material>
             <technique_common>
@@ -977,17 +1112,17 @@
         </instance_geometry>
       </node>
       <node id="Dn_Trap_1" name="Dn_Trap_1" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 -9 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 3 0 1 0 0 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Dn_Trap_1-mesh" name="Dn_Trap_1">
           <bind_material>
             <technique_common>
-              <instance_material symbol="Material_Base-material" target="#Material_Base-material"/>
+              <instance_material symbol="Material_Trap-material" target="#Material_Trap-material"/>
             </technique_common>
           </bind_material>
         </instance_geometry>
       </node>
       <node id="Dn_Trap_1_Pikes" name="Dn_Trap_1_Pikes" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 -8.95074 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 3 0 1 0 0.04926014 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Dn_Trap_1_Pikes-mesh" name="Dn_Trap_1_Pikes">
           <bind_material>
             <technique_common>
@@ -997,7 +1132,7 @@
         </instance_geometry>
       </node>
       <node id="Dn_Wall_1" name="Dn_Wall_1" type="NODE">
-        <matrix sid="transform">1 0 0 0 0 1 0 -6 0 0 1 0 0 0 0 1</matrix>
+        <matrix sid="transform">1 0 0 0 0 1 0 -3 0 0 1 0 0 0 0 1</matrix>
         <instance_geometry url="#Dn_Wall_1-mesh" name="Dn_Wall_1">
           <bind_material>
             <technique_common>

@@ -98,7 +98,7 @@ namespace Collada
                 CastShadow = true,
                 Content = new ContentDescription()
                 {
-                    ContentFolder = "Resources",
+                    ContentFolder = "Resources/Dungeon",
                     ModelContentFilename = "assets.xml",
                 },
                 AssetsConfigurationFile = "assetsmap.xml",
@@ -164,7 +164,7 @@ namespace Collada
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
-                    ContentFolder = "Resources",
+                    ContentFolder = "Resources/Dungeon",
                     ModelContentFilename = "torch.xml",
                 },
             };
@@ -224,7 +224,7 @@ namespace Collada
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
-                    ContentFolder = "Resources",
+                    ContentFolder = "Resources/Dungeon",
                     ModelContentFilename = "box.xml",
                 },
             };

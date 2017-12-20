@@ -174,57 +174,63 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SceneryDungeon.cs" />
-    <Content Include="Resources\atlas1.jpg">
+    <Content Include="Resources\Dungeon\atlas1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\crate_d.jpg">
+    <Content Include="Resources\Dungeon\crate_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\crate_n.png">
+    <Content Include="Resources\Dungeon\crate_n.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\fire.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\box.xml">
+    <Content Include="Resources\Dungeon\box.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Dungeon\lava_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\rock_d.jpg">
+    <Content Include="Resources\Dungeon\lava_n.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\rock_n.jpg">
+    <Content Include="Resources\Dungeon\rock_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\torch.xml">
+    <Content Include="Resources\Dungeon\rock_n.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\AssetsMap.xml">
+    <Content Include="Resources\Dungeon\torch.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Dungeon\AssetsMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Resources\Concrete_15_UV_H_CM_1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\torch.dae">
+    <Content Include="Resources\Dungeon\torch.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Dungeon\wall_n.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\wall_n.jpg">
+    <Content Include="Resources\Dungeon\wall_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\wall_d.jpg">
+    <Content Include="Resources\Dungeon\floor_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\floor_d.jpg">
+    <Content Include="Resources\Dungeon\floor_n.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\floor_n.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="Resources\Dungeon\Assets.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Assets.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\torch.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="Resources\Dungeon\torch.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Wall.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -281,13 +287,13 @@
     <Content Include="Resources\Wall.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Assets.dae">
+    <Content Include="Resources\Dungeon\Assets.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>
       </SubType>
     </Content>
-    <Content Include="Resources\box.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    <Content Include="Resources\Dungeon\box.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
   <ItemGroup>

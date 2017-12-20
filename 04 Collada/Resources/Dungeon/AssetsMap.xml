@@ -162,9 +162,11 @@
         </asset>
         <asset asset_name="Dn_Floor_1">
           <position>0 0 0</position>
+          <rotation>0 1 0 -4.371139E-08</rotation>
         </asset>
         <asset asset_name="Dn_Trap_1">
           <position>-2 0 0</position>
+          <rotation>0 0.707106769 0 -0.707106769</rotation>
         </asset>
 
         <asset asset_name="Dn_Ceiling_1">
@@ -216,6 +218,7 @@
         </asset>
         <asset asset_name="Dn_Floor_1">
           <position>2 0 0</position>
+          <rotation>0 1 0 -4.371139E-08</rotation>
         </asset>
 
         <asset asset_name="Dn_Ceiling_1">
