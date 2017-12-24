@@ -245,6 +245,7 @@
     <Compile Include="ModularSceneryAssetConfiguration.cs" />
     <Compile Include="ModularSceneryAssetDescription.cs" />
     <Compile Include="ModularSceneryAssetReference.cs" />
+    <Compile Include="ModularSceneryAssetTypeEnum.cs" />
     <Compile Include="NormalPath.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />

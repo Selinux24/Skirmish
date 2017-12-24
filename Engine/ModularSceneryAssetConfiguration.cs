@@ -23,6 +23,11 @@ namespace Engine
         [XmlArray("map")]
         [XmlArrayItem("item", typeof(ModularSceneryAssetReference))]
         public ModularSceneryAssetReference[] Map = null;
+        /// <summary>
+        /// Maintain texture direction for ceilings and floors, avoiding asset map rotations
+        /// </summary>
+        [XmlAttribute("maintain_texture_direction")]
+        public bool MaintainTextureDirection = true;
 
         /// <summary>
         /// Gets the instance counter dictionary

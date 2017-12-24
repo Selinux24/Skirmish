@@ -134,11 +134,15 @@ namespace Engine
                 var asset = Array.Find(assetsConfiguration.Assets, a => a.Name == item.AssetName);
 
                 var complexAssetTransform = item.GetTransform();
+                var complexAssetRotation = item.Rotation;
 
                 var assetTransforms = asset.GetInstanceTransforms();
 
                 foreach (var basicAsset in assetTransforms.Keys)
                 {
+                    //Get basic asset type
+                    var basicAssetType = Array.Find(asset.Assets, a => a.AssetName == basicAsset).Type;
+
                     if (!transforms.ContainsKey(basicAsset))
                     {
                         transforms.Add(basicAsset, new List<Matrix>());
@@ -147,7 +151,21 @@ namespace Engine
                     var trnList = new List<Matrix>();
                     Array.ForEach(assetTransforms[basicAsset], t =>
                     {
-                        trnList.Add(t * complexAssetTransform);
+                        var basicTrn = t;
+
+                        if (assetsConfiguration.MaintainTextureDirection)
+                        {
+                            if (basicAssetType == ModularSceneryAssetTypeEnum.Floor ||
+                                basicAssetType == ModularSceneryAssetTypeEnum.Ceiling ||
+                                basicAssetType == ModularSceneryAssetTypeEnum.TrapFloor ||
+                                basicAssetType == ModularSceneryAssetTypeEnum.TrapCeiling)
+                            {
+                                //Invert complex asset rotation
+                                basicTrn = Matrix.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
+                            }
+                        }
+
+                        trnList.Add(basicTrn * complexAssetTransform);
                     });
 
                     transforms[basicAsset].AddRange(trnList);

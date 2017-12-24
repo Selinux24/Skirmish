@@ -165,7 +165,8 @@ namespace Collada
                 Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot270, new Vector3(-12,0,-1)),
                 Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot270, new Vector3(5,0,-1)),
 
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot90, new Vector3(0,4,-17)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot0, new Vector3(-1,4,-19)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot180, new Vector3(1,4,-19)),
             };
 
             var desc = new ModelInstancedDescription()
@@ -218,6 +219,7 @@ namespace Collada
             var trnList = new Matrix[]
             {
                 Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot90 * Quaternion.RotationAxis(Vector3.ForwardLH, -MathUtil.Pi/16f) , new Vector3(12,3.25f,2)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi -0.15f) , new Vector3(31.2f,0.5f,-11.5f)),
             };
 
             var desc = new ModelInstancedDescription()
@@ -309,8 +311,10 @@ namespace Collada
 
             var trn = new Matrix[]
             {
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0, new Vector3(-1f,0,-2)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0, new Vector3(-1f,0,2)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0, new Vector3(-1f,0,-8)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0, new Vector3(-1f,0,-4)),
+
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot90, new Vector3(0,4,-17)),
             };
 
             var desc = new ModelInstancedDescription()
@@ -360,8 +364,8 @@ namespace Collada
             this.Camera.MovementDelta = this.agent.Velocity;
             this.Camera.SlowMovementDelta = this.agent.VelocitySlow;
             this.Camera.Mode = CameraModes.Free;
-            this.Camera.Position = new Vector3(0, 5.5f, -22);
-            this.Camera.Interest = new Vector3(0, 4.5f, 0);
+            this.Camera.Position = new Vector3(-8, 5.5f, -26);
+            this.Camera.Interest = new Vector3(-6, 5.5f, -26);
         }
 
         public override void Initialized()
@@ -417,6 +421,13 @@ namespace Collada
                 for (int i = 0; i < this.crates.Instance.Count; i++)
                 {
                     bboxes.Add(this.crates.Instance[i].GetBoundingBox());
+                }
+                this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(bboxes.ToArray()));
+
+                bboxes.Clear();
+                for (int i = 0; i < this.banners.Instance.Count; i++)
+                {
+                    bboxes.Add(this.banners.Instance[i].GetBoundingBox());
                 }
                 this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(bboxes.ToArray()));
             }
