@@ -12,6 +12,8 @@ namespace Collada
     {
         private const int layerHUD = 99;
 
+        private const float maxDistance = 50;
+
         private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> fps = null;
         private SceneObject<TextDrawer> picks = null;
@@ -22,10 +24,13 @@ namespace Collada
         private SceneObject<ModularScenery> scenery = null;
 
         private SceneObject<ModelInstanced> torchs = null;
+        private SceneObject<ModelInstanced> lamps = null;
         private SceneObject<ModelInstanced> crates = null;
+        private SceneObject<ModelInstanced> banners = null;
 
         private SceneObject<ParticleManager> particles = null;
         private ParticleSystemDescription pFire = null;
+        private ParticleSystemDescription pFireSmall = null;
 
         private SceneObject<TriangleListDrawer> graphDrawer = null;
         private SceneObject<LineListDrawer> bboxesDrawer = null;
@@ -45,7 +50,9 @@ namespace Collada
             this.InitializeModularScenery();
             this.InitializeEnvironment();
             this.InitializeSceneryTorchs();
+            this.InitializeSceneryLamps();
             this.InitializeSceneryCrates();
+            this.InitializeSceneryBanners();
             this.InitializeDebug();
             this.InitializeCamera();
         }
@@ -58,6 +65,10 @@ namespace Collada
             this.Lights.FillLight.Enabled = true;
             this.Lights.FillLight.Direction = Vector3.Down;
             this.Lights.FillLight.Brightness *= 0.25f;
+
+            this.Lights.BaseFogColor = Color.Black;
+            this.Lights.FogRange = 10f;
+            this.Lights.FogStart = maxDistance - 20f;
         }
         private void InitializeUI()
         {
@@ -88,6 +99,11 @@ namespace Collada
             this.particles = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" });
 
             this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.25f);
+
+            this.pFireSmall = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.05f);
+            this.pFireSmall.MaxHorizontalVelocity *= 0.25f;
+            this.pFireSmall.MaxVerticalVelocity *= 0.25f;
+            this.pFireSmall.MaxEndSize *= 0.5f;
         }
         private void InitializeModularScenery()
         {
@@ -136,7 +152,7 @@ namespace Collada
             var rot180 = Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi);
             var rot270 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo * 3);
 
-            var trn = new Matrix[]
+            var trnList = new Matrix[]
             {
                 Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot90, new Vector3(0,0,9)),
                 Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot0, new Vector3(-3,0,6)),
@@ -149,9 +165,6 @@ namespace Collada
                 Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot270, new Vector3(-12,0,-1)),
                 Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot270, new Vector3(5,0,-1)),
 
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot90, new Vector3(12,0,5)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot270, new Vector3(12,0,-5)),
-
                 Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot90, new Vector3(0,4,-17)),
             };
 
@@ -159,7 +172,7 @@ namespace Collada
             {
                 Name = "Torchs",
                 CastShadow = true,
-                Instances = trn.Length,
+                Instances = trnList.Length,
                 Static = true,
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
@@ -173,11 +186,11 @@ namespace Collada
 
             this.AttachToGround(this.torchs, true);
 
-            this.torchs.Instance.SetTransforms(trn);
+            this.torchs.Instance.SetTransforms(trnList);
 
             for (int i = 0; i < this.torchs.Instance.Count; i++)
             {
-                var torchTrn = this.torchs.Instance[i].Manipulator.LocalTransform;
+                var trn = this.torchs.Instance[i].Manipulator.LocalTransform;
 
                 var lights = this.torchs.Instance[i].Lights;
                 foreach (var light in lights)
@@ -185,7 +198,7 @@ namespace Collada
                     var pointL = light as SceneLightPoint;
                     if (pointL != null)
                     {
-                        var pos = Vector3.TransformCoordinate(pointL.Position, torchTrn);
+                        var pos = Vector3.TransformCoordinate(pointL.Position, trn);
 
                         var emitter = new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f };
                         this.particles.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter);
@@ -193,6 +206,58 @@ namespace Collada
                 }
 
                 this.Lights.AddRange(this.torchs.Instance[i].Lights);
+            }
+        }
+        private void InitializeSceneryLamps()
+        {
+            var rot0 = Quaternion.Identity;
+            var rot90 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo);
+            var rot180 = Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi);
+            var rot270 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo * 3);
+
+            var trnList = new Matrix[]
+            {
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot90 * Quaternion.RotationAxis(Vector3.ForwardLH, -MathUtil.Pi/16f) , new Vector3(12,3.25f,2)),
+            };
+
+            var desc = new ModelInstancedDescription()
+            {
+                Name = "Lamps",
+                CastShadow = true,
+                Instances = trnList.Length,
+                Static = true,
+                UseAnisotropicFiltering = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "Resources/Dungeon",
+                    ModelContentFilename = "lamp.xml",
+                },
+            };
+
+            this.lamps = this.AddComponent<ModelInstanced>(desc, SceneObjectUsageEnum.None);
+
+            this.AttachToGround(this.lamps, true);
+
+            this.lamps.Instance.SetTransforms(trnList);
+
+            for (int i = 0; i < this.lamps.Instance.Count; i++)
+            {
+                var trn = this.lamps.Instance[i].Manipulator.LocalTransform;
+
+                var lights = this.lamps.Instance[i].Lights;
+                foreach (var light in lights)
+                {
+                    var pointL = light as SceneLightPoint;
+                    if (pointL != null)
+                    {
+                        var pos = Vector3.TransformCoordinate(pointL.Position, trn);
+
+                        var emitter = new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.025f };
+                        this.particles.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFireSmall, emitter);
+                    }
+                }
+
+                this.Lights.AddRange(this.lamps.Instance[i].Lights);
             }
         }
         private void InitializeSceneryCrates()
@@ -235,6 +300,38 @@ namespace Collada
 
             this.crates.Instance.SetTransforms(trn);
         }
+        private void InitializeSceneryBanners()
+        {
+            var rot0 = Quaternion.Identity;
+            var rot90 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo);
+            var rot180 = Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi);
+            var rot270 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo * 3);
+
+            var trn = new Matrix[]
+            {
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0, new Vector3(-1f,0,-2)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0, new Vector3(-1f,0,2)),
+            };
+
+            var desc = new ModelInstancedDescription()
+            {
+                Name = "Banners",
+                CastShadow = true,
+                Instances = trn.Length,
+                Static = true,
+                AlphaEnabled = true,
+                UseAnisotropicFiltering = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "Resources/Dungeon",
+                    ModelContentFilename = "banner.xml",
+                },
+            };
+
+            this.banners = this.AddComponent<ModelInstanced>(desc, SceneObjectUsageEnum.None);
+
+            this.banners.Instance.SetTransforms(trn);
+        }
         private void InitializeDebug()
         {
             var graphDrawerDesc = new TriangleListDrawerDescription()
@@ -259,7 +356,7 @@ namespace Collada
         private void InitializeCamera()
         {
             this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 500;
+            this.Camera.FarPlaneDistance = maxDistance;
             this.Camera.MovementDelta = this.agent.Velocity;
             this.Camera.SlowMovementDelta = this.agent.VelocitySlow;
             this.Camera.Mode = CameraModes.Free;
@@ -299,20 +396,29 @@ namespace Collada
 
             //Boxes
             {
+                Random rndBoxes = new Random(1);
+
                 List<BoundingBox> bboxes = new List<BoundingBox>();
 
                 for (int i = 0; i < this.torchs.Instance.Count; i++)
                 {
                     bboxes.Add(this.torchs.Instance[i].GetBoundingBox());
                 }
+                this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(bboxes.ToArray()));
 
+                bboxes.Clear();
+                for (int i = 0; i < this.lamps.Instance.Count; i++)
+                {
+                    bboxes.Add(this.lamps.Instance[i].GetBoundingBox());
+                }
+                this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(bboxes.ToArray()));
+
+                bboxes.Clear();
                 for (int i = 0; i < this.crates.Instance.Count; i++)
                 {
                     bboxes.Add(this.crates.Instance[i].GetBoundingBox());
                 }
-
-                var listBoxes = Line3D.CreateWiredBox(bboxes.ToArray());
-                this.bboxesDrawer.Instance.SetLines(Color.Green, listBoxes);
+                this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(bboxes.ToArray()));
             }
         }
 

@@ -1397,10 +1397,20 @@ namespace Engine
         {
             finalPosition = Vector3.Zero;
 
+            if (prevPosition == newPosition)
+            {
+                finalPosition = newPosition;
+                return true;
+            }
+
+            //Adjust agent height
+            var position = newPosition;
+            position.Y -= (agent.Height * 0.5f);
+
             Vector3 walkerPos;
             Triangle t;
             float d;
-            if (this.FindNearestGroundPosition(newPosition, out walkerPos, out t, out d))
+            if (this.FindNearestGroundPosition(position, out walkerPos, out t, out d))
             {
                 Vector3? nearest;
                 if (this.IsWalkable(agent, walkerPos, out nearest))
