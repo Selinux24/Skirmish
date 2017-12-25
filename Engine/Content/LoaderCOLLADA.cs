@@ -32,7 +32,11 @@ namespace Engine.Content
                 transform = Matrix.Scaling(content.Scale);
             }
 
-            return Load(contentFolder, content.ModelFileName, content.VolumeMeshes, content.Animation, content.UseControllerTransform, transform);
+            return Load(
+                contentFolder, content.ModelFileName, 
+                transform, content.UseControllerTransform, 
+                content.VolumeMeshes, 
+                content.Animation);
         }
         /// <summary>
         /// Load a collada model
@@ -44,7 +48,7 @@ namespace Engine.Content
         /// <param name="useControllerTransform">Use controller transform</param>
         /// <param name="transform">Transform</param>
         /// <returns>Returns the loaded contents</returns>
-        private static ModelContent[] Load(string contentFolder, string fileName, string[] volumes, AnimationDescription animation, bool useControllerTransform, Matrix transform)
+        private static ModelContent[] Load(string contentFolder, string fileName, Matrix transform, bool useControllerTransform, string[] volumes, AnimationDescription animation)
         {
             MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList != null && modelList.Length > 0)
@@ -53,182 +57,22 @@ namespace Engine.Content
 
                 for (int i = 0; i < modelList.Length; i++)
                 {
-                    COLLADA dae = COLLADA.Load(modelList[i]);
+                    var dae = COLLADA.Load(modelList[i]);
 
-                    ModelContent modelContent = new ModelContent();
+                    var modelContent = new ModelContent();
 
-                    #region Scene Objects
-
+                    //Scene Objects
                     ProcessLibraryLights(dae, modelContent);
-
                     ProcessLibraryImages(dae, modelContent, contentFolder);
                     ProcessLibraryMaterial(dae, modelContent);
-
                     ProcessLibraryGeometries(dae, modelContent, volumes);
                     ProcessLibraryControllers(dae, modelContent);
 
-                    #endregion
+                    //Scene Relations
+                    ProcessVisualScene(dae, transform, useControllerTransform, modelContent);
 
-                    #region Scene Relations
-
-                    if (dae.Scene.InstanceVisualScene != null)
-                    {
-                        Skeleton skeleton = null;
-                        List<string> controllers = new List<string>();
-
-                        string sceneUrl = dae.Scene.InstanceVisualScene.Url;
-
-                        VisualScene vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl));
-                        if (vScene != null)
-                        {
-                            if (vScene.Nodes != null && vScene.Nodes.Length > 0)
-                            {
-                                foreach (Node node in vScene.Nodes)
-                                {
-                                    if (node.IsLight)
-                                    {
-                                        #region Lights
-
-                                        Matrix trn = useControllerTransform ? transform * node.ReadMatrix() : transform;
-
-                                        if (!trn.IsIdentity)
-                                        {
-                                            if (node.InstanceLight != null && node.InstanceLight.Length > 0)
-                                            {
-                                                foreach (InstanceWithExtra il in node.InstanceLight)
-                                                {
-                                                    string lightName = il.Url.Replace("#", "");
-
-                                                    var light = modelContent.Lights[lightName];
-
-                                                    light.Name = lightName;
-                                                    light.Transform = trn;
-                                                }
-                                            }
-                                        }
-
-                                        #endregion
-                                    }
-                                    else if (node.IsArmature)
-                                    {
-                                        #region Armatures (Skeletons)
-
-                                        if (skeleton != null)
-                                        {
-                                            throw new EngineException("Only one armature definition per file!");
-                                        }
-
-                                        Matrix trn = useControllerTransform ? transform * node.ReadMatrix() : transform;
-
-                                        if (node.Nodes != null && node.Nodes.Length > 0)
-                                        {
-                                            Joint root = ProcessJoints(null, node.Nodes[0]);
-
-                                            skeleton = new Skeleton(root);
-                                        }
-
-                                        #endregion
-                                    }
-                                    else if (node.HasGeometry)
-                                    {
-                                        #region Geometry nodes
-
-                                        Matrix trn = useControllerTransform ? transform * node.ReadMatrix() : transform;
-
-                                        if (!trn.IsIdentity)
-                                        {
-                                            if (node.InstanceGeometry != null && node.InstanceGeometry.Length > 0)
-                                            {
-                                                foreach (InstanceGeometry ig in node.InstanceGeometry)
-                                                {
-                                                    string meshName = ig.Url.Replace("#", "");
-
-                                                    foreach (var submesh in modelContent.Geometry[meshName].Values)
-                                                    {
-                                                        submesh.Transform(trn);
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                        #endregion
-                                    }
-                                    else if (node.HasController)
-                                    {
-                                        #region Controllers
-
-                                        //TODO: Where to apply this transform?
-                                        Matrix trn = useControllerTransform ? transform * node.ReadMatrix() : transform;
-
-                                        if (node.InstanceController != null && node.InstanceController.Length > 0)
-                                        {
-                                            foreach (InstanceController ic in node.InstanceController)
-                                            {
-                                                string controllerName = ic.Url.Replace("#", "");
-
-                                                controllers.Add(controllerName);
-                                            }
-                                        }
-
-                                        #endregion
-                                    }
-                                    else
-                                    {
-                                        #region Default node
-
-                                        //TODO: Where to apply this transform?
-                                        Matrix trn = useControllerTransform ? transform * node.ReadMatrix() : transform;
-
-                                        if (node.Nodes != null)
-                                        {
-                                            foreach (var child in node.Nodes)
-                                            {
-                                                Matrix childTrn = child.ReadMatrix();
-
-                                                if (child.InstanceGeometry != null && child.InstanceGeometry.Length > 0)
-                                                {
-                                                    foreach (InstanceGeometry ig in child.InstanceGeometry)
-                                                    {
-                                                        string meshName = ig.Url.Replace("#", "");
-
-                                                        foreach (var submesh in modelContent.Geometry[meshName].Values)
-                                                        {
-                                                            if (!childTrn.IsIdentity)
-                                                            {
-                                                                submesh.Transform(childTrn);
-                                                            }
-                                                        }
-                                                    }
-                                                }
-
-                                            }
-                                        }
-
-                                        #endregion
-                                    }
-                                }
-                            }
-                        }
-
-                        if (skeleton != null && controllers.Count > 0)
-                        {
-                            modelContent.SkinningInfo = new SkinningContent()
-                            {
-                                Controller = controllers.ToArray(),
-                                Skeleton = skeleton,
-                            };
-                        }
-                    }
-
-                    #endregion
-
-                    #region Animations
-
-                    ProcessLibraryAnimations(dae, modelContent);
-
-                    modelContent.Animations.Definition = animation;
-
-                    #endregion
+                    //Animations
+                    ProcessLibraryAnimations(dae, modelContent, animation);
 
                     res[i] = modelContent;
                 }
@@ -431,7 +275,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessLibraryAnimations(COLLADA dae, ModelContent modelContent)
+        /// <param name="animation">Animation description</param>
+        private static void ProcessLibraryAnimations(COLLADA dae, ModelContent modelContent, AnimationDescription animation)
         {
             if (dae.LibraryAnimations != null && dae.LibraryAnimations.Length > 0)
             {
@@ -445,6 +290,8 @@ namespace Engine.Content
                         modelContent.Animations[animationLib.Id] = info;
                     }
                 }
+
+                modelContent.Animations.Definition = animation;
             }
         }
 
@@ -1479,12 +1326,265 @@ namespace Engine.Content
         }
 
         #endregion
+
+        #region Visual Scene
+
+        /// <summary>
+        /// Process visual scene
+        /// </summary>
+        /// <param name="dae">Dae object</param>
+        /// <param name="transform">Parent transform</param>
+        /// <param name="useControllerTransform">Use parent controller transform</param>
+        /// <param name="modelContent">Model content</param>
+        private static void ProcessVisualScene(COLLADA dae, Matrix transform, bool useControllerTransform, ModelContent modelContent)
+        {
+            if (dae.Scene.InstanceVisualScene != null)
+            {
+                string sceneUrl = dae.Scene.InstanceVisualScene.Url;
+
+                var vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl, StringComparison.OrdinalIgnoreCase));
+                if (vScene != null)
+                {
+                    Skeleton skeleton = null;
+                    string[] controllers = null;
+                    if (!ProcessSceneNodes(
+                        vScene.Nodes,
+                        transform, useControllerTransform,
+                        modelContent,
+                        out skeleton,
+                        out controllers))
+                    {
+                        throw new EngineException("Error processing scene. Bad visual scene configuration.");
+                    }
+
+                    if (skeleton != null && controllers.Length > 0)
+                    {
+                        modelContent.SkinningInfo = new SkinningContent()
+                        {
+                            Controller = controllers,
+                            Skeleton = skeleton,
+                        };
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Process a node list from a visual scene
+        /// </summary>
+        /// <param name="nodes">Node list</param>
+        /// <param name="transform">Parent transform</param>
+        /// <param name="useControllerTransform">Use parent controller transform</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="skeleton">Resulting skeleton</param>
+        /// <param name="controllers">Resulting controller names</param>
+        /// <returns>Returns true if all the nodes and child nodes were processed correctly</returns>
+        private static bool ProcessSceneNodes(Node[] nodes, Matrix transform, bool useControllerTransform, ModelContent modelContent, out Skeleton skeleton, out string[] controllers)
+        {
+            bool result = true;
+
+            skeleton = null;
+            controllers = new string[] { };
+
+            if (nodes != null && nodes.Length > 0)
+            {
+                List<string> lControllers = new List<string>();
+
+                foreach (Node childNode in nodes)
+                {
+                    Skeleton pSkeleton;
+                    string[] pControllers;
+                    if (ProcessSceneNode(
+                        childNode,
+                        transform, useControllerTransform,
+                        modelContent,
+                        out pSkeleton, out pControllers))
+                    {
+                        if (pSkeleton != null)
+                        {
+                            if (skeleton != null)
+                            {
+                                throw new EngineException("Only one armature definition per file!");
+                            }
+
+                            skeleton = pSkeleton;
+                        }
+
+                        lControllers.AddRange(pControllers);
+                    }
+                    else
+                    {
+                        result = false;
+                    }
+                }
+
+                controllers = lControllers.ToArray();
+            }
+
+            return result;
+        }
+        /// <summary>
+        /// Process a node from a visual scene node list
+        /// </summary>
+        /// <param name="node">Node to process</param>
+        /// <param name="transform">Parent transform</param>
+        /// <param name="useControllerTransform">Use parent controller transform</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="skeleton">Resulting skeleton</param>
+        /// <param name="controllers">Resulting controller names</param>
+        /// <returns>Returns true if the node and its childs were processed correctly</returns>
+        private static bool ProcessSceneNode(Node node, Matrix transform, bool useControllerTransform, ModelContent modelContent, out Skeleton skeleton, out string[] controllers)
+        {
+            bool result = true;
+
+            skeleton = null;
+            controllers = new string[] { };
+
+            Matrix trn = useControllerTransform ? transform * node.ReadMatrix() : transform;
+
+            bool processChilds = true;
+            List<string> lControllers = new List<string>();
+
+            if (node.IsLight)
+            {
+                #region Lights
+
+                if (!trn.IsIdentity)
+                {
+                    if (node.InstanceLight != null && node.InstanceLight.Length > 0)
+                    {
+                        foreach (InstanceWithExtra il in node.InstanceLight)
+                        {
+                            string lightName = il.Url.Replace("#", "");
+
+                            var light = modelContent.Lights[lightName];
+
+                            light.Name = lightName;
+                            light.Transform = trn;
+                        }
+                    }
+                }
+
+                #endregion
+            }
+            else if (node.IsArmature)
+            {
+                processChilds = false;
+
+                #region Armatures (Skeletons)
+
+                if (node.Nodes != null && node.Nodes.Length > 0)
+                {
+                    Joint root = ProcessJoints(null, node.Nodes[0]);
+
+                    skeleton = new Skeleton(root);
+                }
+
+                #endregion
+            }
+            else if (node.HasGeometry)
+            {
+                #region Geometry nodes
+
+                if (!trn.IsIdentity)
+                {
+                    if (node.InstanceGeometry != null && node.InstanceGeometry.Length > 0)
+                    {
+                        foreach (InstanceGeometry ig in node.InstanceGeometry)
+                        {
+                            string meshName = ig.Url.Replace("#", "");
+
+                            foreach (var submesh in modelContent.Geometry[meshName].Values)
+                            {
+                                submesh.Transform(trn);
+                            }
+                        }
+                    }
+                }
+
+                #endregion
+            }
+            else if (node.HasController)
+            {
+                #region Controllers
+
+                if (node.InstanceController != null && node.InstanceController.Length > 0)
+                {
+                    foreach (InstanceController ic in node.InstanceController)
+                    {
+                        string controllerName = ic.Url.Replace("#", "");
+
+                        lControllers.Add(controllerName);
+                    }
+                }
+
+                #endregion
+            }
+            else
+            {
+                processChilds = false;
+
+                #region Default node
+
+                if (node.Nodes != null && node.Nodes.Length > 0)
+                {
+                    foreach (var child in node.Nodes)
+                    {
+                        Matrix childTrn = child.ReadMatrix();
+
+                        if (child.InstanceGeometry != null && child.InstanceGeometry.Length > 0)
+                        {
+                            foreach (InstanceGeometry ig in child.InstanceGeometry)
+                            {
+                                string meshName = ig.Url.Replace("#", "");
+
+                                foreach (var submesh in modelContent.Geometry[meshName].Values)
+                                {
+                                    if (!childTrn.IsIdentity)
+                                    {
+                                        submesh.Transform(childTrn);
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+
+                #endregion
+            }
+
+            if (processChilds)
+            {
+                Skeleton pSkeleton;
+                string[] pControllers;
+                if (ProcessSceneNodes(
+                    node.Nodes,
+                    trn, true,
+                    modelContent,
+                    out pSkeleton,
+                    out pControllers))
+                {
+                    if (pSkeleton != null) skeleton = pSkeleton;
+                    lControllers.AddRange(pControllers);
+                }
+                else
+                {
+                    result = false;
+                }
+            }
+
+            controllers = lControllers.ToArray();
+
+            return result;
+        }
+
+        #endregion
     }
 
     /// <summary>
     /// Extensions for collada to sharpDX data parse
     /// </summary>
-    public static class LoaderCOLLADAExtensions
+    static class LoaderCOLLADAExtensions
     {
         /// <summary>
         /// Reads a Vector2 from BasicFloat2
