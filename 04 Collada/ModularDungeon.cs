@@ -11,6 +11,7 @@ namespace Collada
     public class ModularDungeon : Scene
     {
         private const int layerHUD = 99;
+        private const int layerEffects = 98;
 
         private const float maxDistance = 50;
 
@@ -96,7 +97,7 @@ namespace Collada
         }
         private void InitializeEffects()
         {
-            this.particles = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" });
+            this.particles = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }, SceneObjectUsageEnum.None, layerEffects);
 
             this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.25f);
 
@@ -271,15 +272,15 @@ namespace Collada
 
             var trn = new Matrix[]
             {
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.3f), new Vector3(-2.1f,0,8.4f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 1.2f), new Vector3(-2,0.8f,8.4f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.35f + MathUtil.PiOverTwo), new Vector3(-1.25f,0,8.3f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 2.29f), new Vector3(-2.2f,0,6)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0,                                             new Vector3(-2.25f,0,8.25f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.5f, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 1.20f),  new Vector3(-2.05f,1,8.25f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot90,                                            new Vector3(-1.25f,0,8.25f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0,                                             new Vector3(-2.25f,0,6)),
 
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.3f), new Vector3(14.1f,0,-2.4f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 1.2f), new Vector3(14,0.8f,-2.4f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.35f), new Vector3(13.25f,0,-2.3f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 2.29f), new Vector3(14.2f,0,0)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.30f), new Vector3(13.90f,0,-2.4f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 1.20f), new Vector3(13.25f,1,-2.4f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.35f), new Vector3(12.80f,0,-2.3f)),
+                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 2.29f), new Vector3(13.80f,0,1)),
             };
 
             var desc = new ModelInstancedDescription()

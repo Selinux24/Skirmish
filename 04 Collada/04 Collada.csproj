@@ -314,7 +314,7 @@
       </SubType>
     </Content>
     <Content Include="Resources\Dungeon\box.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Dungeon\lamp.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
