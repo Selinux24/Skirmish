@@ -174,101 +174,92 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SceneryDungeon.cs" />
-    <Content Include="Resources\Dungeon\atlas1.jpg">
+    <Content Include="Resources\ModularDungeon\atlas1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\bark_d.dds">
+    <Content Include="Resources\ModularDungeon\bark_d.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\bark_n.dds">
+    <Content Include="Resources\ModularDungeon\bark_n.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\bronze_d.jpg">
+    <Content Include="Resources\ModularDungeon\bronze_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\bronze_n.jpg">
+    <Content Include="Resources\ModularDungeon\bronze_n.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\crate_d.jpg">
+    <Content Include="Resources\ModularDungeon\crate_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\crate_n.png">
+    <Content Include="Resources\ModularDungeon\crate_n.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\banner.xml">
+    <Content Include="Resources\ModularDungeon\banner.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\lamp.xml">
+    <Content Include="Resources\ModularDungeon\lamp.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\rag_d.png">
+    <Content Include="Resources\ModularDungeon\rag_d.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\fire.png">
+    <Content Include="Resources\ModularDungeon\fire.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\box.xml">
+    <Content Include="Resources\ModularDungeon\box.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\lava_d.jpg">
+    <Content Include="Resources\ModularDungeon\lava_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\lava_n.jpg">
+    <Content Include="Resources\ModularDungeon\lava_n.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\rock_d.jpg">
+    <Content Include="Resources\ModularDungeon\rock_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\rock_n.jpg">
+    <Content Include="Resources\ModularDungeon\rock_n.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\torch.xml">
+    <Content Include="Resources\ModularDungeon\torch.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\AssetsMap.xml">
+    <Content Include="Resources\ModularDungeon\AssetsMap.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Resources\Concrete_15_UV_H_CM_1.jpg">
+    <Content Include="Resources\DungeonWall\Concrete_15_UV_H_CM_1.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\torch.dae">
+    <Content Include="Resources\ModularDungeon\torch.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\wall_n.jpg">
+    <Content Include="Resources\ModularDungeon\wall_n.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\wall_d.jpg">
+    <Content Include="Resources\ModularDungeon\wall_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\floor_d.jpg">
+    <Content Include="Resources\ModularDungeon\floor_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\floor_n.jpg">
+    <Content Include="Resources\ModularDungeon\floor_n.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\Assets.xml">
+    <Content Include="Resources\ModularDungeon\Assets.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\torch.jpg">
+    <Content Include="Resources\ModularDungeon\torch.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Wall.xml">
+    <Content Include="Resources\DungeonWall\Wall.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon.xml">
+    <Content Include="Resources\SceneryDungeon\Dungeon.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Corridor1.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\NormalMap.bmp">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Room2.xml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Room1.xml">
+    <Content Include="Resources\DungeonWall\NormalMap.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -292,34 +283,26 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Content Include="Resources\Room1.dae">
+    <Content Include="Resources\SceneryDungeon\Dungeon.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Resources\Corridor1.dae">
+    <Content Include="Resources\DungeonWall\Wall.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
-    <Content Include="Resources\Room2.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Dungeon.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Wall.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Dungeon\Assets.dae">
+    <Content Include="Resources\ModularDungeon\Assets.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>
       </SubType>
     </Content>
-    <Content Include="Resources\Dungeon\box.dae">
+    <Content Include="Resources\ModularDungeon\box.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\lamp.dae">
+    <Content Include="Resources\ModularDungeon\lamp.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Dungeon\banner.dae">
+    <Content Include="Resources\ModularDungeon\banner.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -350,11 +333,6 @@
       <Project>{A4BAC380-82CB-4DB8-953F-A291F0BEF559}</Project>
       <Name>Engine</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Resources\BaseMap.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

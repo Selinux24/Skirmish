@@ -52,9 +52,9 @@ namespace Collada
             this.agent = new Player()
             {
                 Name = "Player",
-                Height = 1,
-                MaxClimb = 1,
-                Radius = 0.35f,
+                Height = 0.75f,
+                MaxClimb = 0.5f,
+                Radius = 0.15f,
                 Velocity = 4f,
                 VelocitySlow = 1f,
             };
@@ -69,7 +69,7 @@ namespace Collada
                     },
                     Content = new ContentDescription()
                     {
-                        ContentFolder = "Resources",
+                        ContentFolder = "Resources/SceneryDungeon",
                         ModelContentFilename = "Dungeon.xml",
                     },
                 });

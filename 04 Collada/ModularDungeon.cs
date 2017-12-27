@@ -74,7 +74,7 @@ namespace Collada
         private void InitializeUI()
         {
             this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
-            this.title.Instance.Text = "Collada Dungeon Scene";
+            this.title.Instance.Text = "Collada Modular Dungeon Scene";
             this.title.Instance.Position = Vector2.Zero;
 
             this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
@@ -99,9 +99,9 @@ namespace Collada
         {
             this.particles = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }, SceneObjectUsageEnum.None, layerEffects);
 
-            this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.25f);
+            this.pFire = ParticleSystemDescription.InitializeFire("resources/ModularDungeon", "fire.png", 0.25f);
 
-            this.pFireSmall = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.05f);
+            this.pFireSmall = ParticleSystemDescription.InitializeFire("resources/ModularDungeon", "fire.png", 0.05f);
             this.pFireSmall.MaxHorizontalVelocity *= 0.25f;
             this.pFireSmall.MaxVerticalVelocity *= 0.25f;
             this.pFireSmall.MaxEndSize *= 0.5f;
@@ -115,7 +115,7 @@ namespace Collada
                 CastShadow = true,
                 Content = new ContentDescription()
                 {
-                    ContentFolder = "Resources/Dungeon",
+                    ContentFolder = "Resources/ModularDungeon",
                     ModelContentFilename = "assets.xml",
                 },
                 AssetsConfigurationFile = "assetsmap.xml",
@@ -179,7 +179,7 @@ namespace Collada
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
-                    ContentFolder = "Resources/Dungeon",
+                    ContentFolder = "Resources/ModularDungeon",
                     ModelContentFilename = "torch.xml",
                 },
             };
@@ -232,7 +232,7 @@ namespace Collada
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
-                    ContentFolder = "Resources/Dungeon",
+                    ContentFolder = "Resources/ModularDungeon",
                     ModelContentFilename = "lamp.xml",
                 },
             };
@@ -292,7 +292,7 @@ namespace Collada
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
-                    ContentFolder = "Resources/Dungeon",
+                    ContentFolder = "Resources/ModularDungeon",
                     ModelContentFilename = "box.xml",
                 },
             };
@@ -328,7 +328,7 @@ namespace Collada
                 UseAnisotropicFiltering = true,
                 Content = new ContentDescription()
                 {
-                    ContentFolder = "Resources/Dungeon",
+                    ContentFolder = "Resources/ModularDungeon",
                     ModelContentFilename = "banner.xml",
                 },
             };

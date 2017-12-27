@@ -86,7 +86,7 @@ namespace Collada
                     UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
-                        ContentFolder = "Resources",
+                        ContentFolder = "Resources/DungeonWall",
                         ModelContentFilename = "wall.xml",
                     }
                 });
