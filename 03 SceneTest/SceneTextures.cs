@@ -688,8 +688,12 @@ namespace SceneTest
             {
                 var gravity = new Vector3(plumeGravity.X - wind.X, plumeGravity.Y, plumeGravity.Z - wind.Y);
 
-                this.particlePlumes[i].Parameters.Gravity = gravity;
-                this.particlePlumes[i].Parameters.MaxHorizontalVelocity = plumeMaxHorizontalVelocity;
+                var parameters = this.particlePlumes[i].Parameters;
+
+                parameters.Gravity = gravity;
+                parameters.MaxHorizontalVelocity = plumeMaxHorizontalVelocity;
+
+                this.particlePlumes[i].Parameters = parameters;
             }
         }
 

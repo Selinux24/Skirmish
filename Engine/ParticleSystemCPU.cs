@@ -69,7 +69,7 @@ namespace Engine
         /// <summary>
         /// Particle system parameters
         /// </summary>
-        public ParticleSystemParams Parameters { get; private set; }
+        public ParticleSystemParams Parameters { get; set; }
         /// <summary>
         /// Particle emitter
         /// </summary>
@@ -97,7 +97,7 @@ namespace Engine
             this.Game = game;
             this.Name = name;
 
-            this.Parameters = new ParticleSystemParams(description);
+            this.Parameters = new ParticleSystemParams(description) * emitter.Scale;
 
             var imgContent = new ImageContent()
             {

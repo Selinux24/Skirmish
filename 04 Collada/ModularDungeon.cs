@@ -4,7 +4,6 @@ using Engine.PathFinding;
 using Engine.PathFinding.NavMesh;
 using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Collada
 {
@@ -13,7 +12,7 @@ namespace Collada
         private const int layerHUD = 99;
         private const int layerEffects = 98;
 
-        private const float maxDistance = 50;
+        private const float maxDistance = 35;
 
         private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> fps = null;
@@ -23,15 +22,6 @@ namespace Collada
         private Player agent = null;
 
         private SceneObject<ModularScenery> scenery = null;
-
-        private SceneObject<ModelInstanced> torchs = null;
-        private SceneObject<ModelInstanced> lamps = null;
-        private SceneObject<ModelInstanced> crates = null;
-        private SceneObject<ModelInstanced> banners = null;
-
-        private SceneObject<ParticleManager> particles = null;
-        private ParticleSystemDescription pFire = null;
-        private ParticleSystemDescription pFireSmall = null;
 
         private SceneObject<TriangleListDrawer> graphDrawer = null;
         private SceneObject<LineListDrawer> bboxesDrawer = null;
@@ -47,13 +37,8 @@ namespace Collada
             base.Initialize();
 
             this.InitializeUI();
-            this.InitializeEffects();
             this.InitializeModularScenery();
             this.InitializeEnvironment();
-            this.InitializeSceneryTorchs();
-            this.InitializeSceneryLamps();
-            this.InitializeSceneryCrates();
-            this.InitializeSceneryBanners();
             this.InitializeDebug();
             this.InitializeCamera();
         }
@@ -95,17 +80,6 @@ namespace Collada
 
             this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
         }
-        private void InitializeEffects()
-        {
-            this.particles = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }, SceneObjectUsageEnum.None, layerEffects);
-
-            this.pFire = ParticleSystemDescription.InitializeFire("resources/ModularDungeon", "fire.png", 0.25f);
-
-            this.pFireSmall = ParticleSystemDescription.InitializeFire("resources/ModularDungeon", "fire.png", 0.05f);
-            this.pFireSmall.MaxHorizontalVelocity *= 0.25f;
-            this.pFireSmall.MaxVerticalVelocity *= 0.25f;
-            this.pFireSmall.MaxEndSize *= 0.5f;
-        }
         private void InitializeModularScenery()
         {
             var desc = new ModularSceneryDescription()
@@ -113,6 +87,7 @@ namespace Collada
                 Name = "Dungeon",
                 UseAnisotropic = true,
                 CastShadow = true,
+                AlphaEnabled = true,
                 Content = new ContentDescription()
                 {
                     ContentFolder = "Resources/ModularDungeon",
@@ -145,197 +120,6 @@ namespace Collada
                     ContourFlags = ContourBuildFlags.TessellateAreaEdges,
                 }
             };
-        }
-        private void InitializeSceneryTorchs()
-        {
-            var rot0 = Quaternion.Identity;
-            var rot90 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo);
-            var rot180 = Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi);
-            var rot270 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo * 3);
-
-            var trnList = new Matrix[]
-            {
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot90, new Vector3(0,0,9)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot0, new Vector3(-3,0,6)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot180, new Vector3(3,0,6)),
-
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot180, new Vector3(1,0,-4)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot180, new Vector3(1,0,-8)),
-
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot270, new Vector3(-5,0,-1)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot270, new Vector3(-12,0,-1)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot270, new Vector3(5,0,-1)),
-
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot0, new Vector3(-1,4,-19)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.75f, Vector3.Zero, rot180, new Vector3(1,4,-19)),
-            };
-
-            var desc = new ModelInstancedDescription()
-            {
-                Name = "Torchs",
-                CastShadow = true,
-                Instances = trnList.Length,
-                Static = true,
-                UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Resources/ModularDungeon",
-                    ModelContentFilename = "torch.xml",
-                },
-            };
-
-            this.torchs = this.AddComponent<ModelInstanced>(desc, SceneObjectUsageEnum.Ground);
-
-            this.AttachToGround(this.torchs, true);
-
-            this.torchs.Instance.SetTransforms(trnList);
-
-            for (int i = 0; i < this.torchs.Instance.Count; i++)
-            {
-                var trn = this.torchs.Instance[i].Manipulator.LocalTransform;
-
-                var lights = this.torchs.Instance[i].Lights;
-                foreach (var light in lights)
-                {
-                    var pointL = light as SceneLightPoint;
-                    if (pointL != null)
-                    {
-                        var pos = Vector3.TransformCoordinate(pointL.Position, trn);
-
-                        var emitter = new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f };
-                        this.particles.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter);
-                    }
-                }
-
-                this.Lights.AddRange(this.torchs.Instance[i].Lights);
-            }
-        }
-        private void InitializeSceneryLamps()
-        {
-            var rot0 = Quaternion.Identity;
-            var rot90 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo);
-            var rot180 = Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi);
-            var rot270 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo * 3);
-
-            var trnList = new Matrix[]
-            {
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot90 * Quaternion.RotationAxis(Vector3.ForwardLH, -MathUtil.Pi/16f) , new Vector3(12,3.25f,2)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi -0.15f) , new Vector3(31.2f,0.5f,-11.5f)),
-            };
-
-            var desc = new ModelInstancedDescription()
-            {
-                Name = "Lamps",
-                CastShadow = true,
-                Instances = trnList.Length,
-                Static = true,
-                UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Resources/ModularDungeon",
-                    ModelContentFilename = "lamp.xml",
-                },
-            };
-
-            this.lamps = this.AddComponent<ModelInstanced>(desc, SceneObjectUsageEnum.None);
-
-            this.AttachToGround(this.lamps, true);
-
-            this.lamps.Instance.SetTransforms(trnList);
-
-            for (int i = 0; i < this.lamps.Instance.Count; i++)
-            {
-                var trn = this.lamps.Instance[i].Manipulator.LocalTransform;
-
-                var lights = this.lamps.Instance[i].Lights;
-                foreach (var light in lights)
-                {
-                    var pointL = light as SceneLightPoint;
-                    if (pointL != null)
-                    {
-                        var pos = Vector3.TransformCoordinate(pointL.Position, trn);
-
-                        var emitter = new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.025f };
-                        this.particles.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFireSmall, emitter);
-                    }
-                }
-
-                this.Lights.AddRange(this.lamps.Instance[i].Lights);
-            }
-        }
-        private void InitializeSceneryCrates()
-        {
-            var rot0 = Quaternion.Identity;
-            var rot90 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo);
-            var rot180 = Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi);
-            var rot270 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo * 3);
-
-            var trn = new Matrix[]
-            {
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0,                                             new Vector3(-2.25f,0,8.25f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One*0.5f, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 1.20f),  new Vector3(-2.05f,1,8.25f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot90,                                            new Vector3(-1.25f,0,8.25f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0,                                             new Vector3(-2.25f,0,6)),
-
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.30f), new Vector3(13.90f,0,-2.4f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 1.20f), new Vector3(13.25f,1,-2.4f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 0.35f), new Vector3(12.80f,0,-2.3f)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, Quaternion.RotationAxis(Vector3.Up, 2.29f), new Vector3(13.80f,0,1)),
-            };
-
-            var desc = new ModelInstancedDescription()
-            {
-                Name = "Crates",
-                CastShadow = true,
-                Instances = trn.Length,
-                Static = true,
-                UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Resources/ModularDungeon",
-                    ModelContentFilename = "box.xml",
-                },
-            };
-
-            this.crates = this.AddComponent<ModelInstanced>(desc, SceneObjectUsageEnum.Ground);
-
-            this.AttachToGround(this.crates, true);
-
-            this.crates.Instance.SetTransforms(trn);
-        }
-        private void InitializeSceneryBanners()
-        {
-            var rot0 = Quaternion.Identity;
-            var rot90 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo);
-            var rot180 = Quaternion.RotationAxis(Vector3.Up, MathUtil.Pi);
-            var rot270 = Quaternion.RotationAxis(Vector3.Up, MathUtil.PiOverTwo * 3);
-
-            var trn = new Matrix[]
-            {
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0, new Vector3(-1f,0,-8)),
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot0, new Vector3(-1f,0,-4)),
-
-                Matrix.Transformation(Vector3.Zero, Quaternion.Identity, Vector3.One, Vector3.Zero, rot90, new Vector3(0,4,-17)),
-            };
-
-            var desc = new ModelInstancedDescription()
-            {
-                Name = "Banners",
-                CastShadow = true,
-                Instances = trn.Length,
-                Static = true,
-                AlphaEnabled = true,
-                UseAnisotropicFiltering = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Resources/ModularDungeon",
-                    ModelContentFilename = "banner.xml",
-                },
-            };
-
-            this.banners = this.AddComponent<ModelInstanced>(desc, SceneObjectUsageEnum.None);
-
-            this.banners.Instance.SetTransforms(trn);
         }
         private void InitializeDebug()
         {
@@ -403,34 +187,12 @@ namespace Collada
             {
                 Random rndBoxes = new Random(1);
 
-                List<BoundingBox> bboxes = new List<BoundingBox>();
+                var dict = this.scenery.Instance.GetObjectVolumes();
 
-                for (int i = 0; i < this.torchs.Instance.Count; i++)
+                foreach (var item in dict.Values)
                 {
-                    bboxes.Add(this.torchs.Instance[i].GetBoundingBox());
+                    this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(item.ToArray()));
                 }
-                this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(bboxes.ToArray()));
-
-                bboxes.Clear();
-                for (int i = 0; i < this.lamps.Instance.Count; i++)
-                {
-                    bboxes.Add(this.lamps.Instance[i].GetBoundingBox());
-                }
-                this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(bboxes.ToArray()));
-
-                bboxes.Clear();
-                for (int i = 0; i < this.crates.Instance.Count; i++)
-                {
-                    bboxes.Add(this.crates.Instance[i].GetBoundingBox());
-                }
-                this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(bboxes.ToArray()));
-
-                bboxes.Clear();
-                for (int i = 0; i < this.banners.Instance.Count; i++)
-                {
-                    bboxes.Add(this.banners.Instance[i].GetBoundingBox());
-                }
-                this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(bboxes.ToArray()));
             }
         }
 

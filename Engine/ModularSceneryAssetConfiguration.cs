@@ -18,6 +18,12 @@ namespace Engine
         [XmlArrayItem("asset", typeof(ModularSceneryAssetDescription))]
         public ModularSceneryAssetDescription[] Assets = null;
         /// <summary>
+        /// Particle systems
+        /// </summary>
+        [XmlArray("particles")]
+        [XmlArrayItem("system", typeof(ParticleSystemDescription))]
+        public ParticleSystemDescription[] ParticleSystems = null;
+        /// <summary>
         /// Assets map
         /// </summary>
         [XmlArray("map")]
@@ -28,16 +34,22 @@ namespace Engine
         /// </summary>
         [XmlAttribute("maintain_texture_direction")]
         public bool MaintainTextureDirection = true;
+        /// <summary>
+        /// Map objects
+        /// </summary>
+        [XmlArray("objects")]
+        [XmlArrayItem("item", typeof(ModularSceneryObjectReference))]
+        public ModularSceneryObjectReference[] Objects = null;
 
         /// <summary>
         /// Gets the instance counter dictionary
         /// </summary>
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
-        public Dictionary<string, int> GetInstanceCounter()
+        public Dictionary<string, int> GetMapInstanceCounter()
         {
             Dictionary<string, int> res = new Dictionary<string, int>();
 
-            foreach (var item in Map)
+            foreach (var item in this.Map)
             {
                 var asset = this.Assets
                     .Where(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase))
@@ -56,6 +68,26 @@ namespace Engine
                         res[key] += assetInstanceCount[key];
                     }
                 }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets the instance counter dictionary
+        /// </summary>
+        /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
+        public Dictionary<string, int> GetObjectsInstanceCounter()
+        {
+            Dictionary<string, int> res = new Dictionary<string, int>();
+
+            foreach (var item in this.Objects)
+            {
+                if (!res.ContainsKey(item.AssetName))
+                {
+                    res.Add(item.AssetName, 0);
+                }
+
+                res[item.AssetName] += 1;
             }
 
             return res;

@@ -17,6 +17,18 @@ namespace Engine
         /// Assets dictionary
         /// </summary>
         private Dictionary<string, SceneObject<ModelInstanced>> assets = new Dictionary<string, SceneObject<ModelInstanced>>();
+        /// <summary>
+        /// Objects dictionary
+        /// </summary>
+        private Dictionary<string, SceneObject<ModelInstanced>> objects = new Dictionary<string, SceneObject<ModelInstanced>>();
+        /// <summary>
+        /// Particle manager
+        /// </summary>
+        private SceneObject<ParticleManager> particleManager = null;
+        /// <summary>
+        /// Particle descriptors dictionary
+        /// </summary>
+        private Dictionary<string, ParticleSystemDescription> particleDescriptors = new Dictionary<string, ParticleSystemDescription>();
 
         /// <summary>
         /// Gets the description
@@ -76,9 +88,13 @@ namespace Engine
                 assetsConfiguration = Helper.DeserializeFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.Content.ContentFolder, description.AssetsConfigurationFile));
             }
 
+            this.InitializeParticles(assetsConfiguration);
+
             this.InitializeAssets(content, assetsConfiguration);
 
             this.ParseAssetsMap(assetsConfiguration);
+
+            this.InitializeObjects(content, assetsConfiguration);
         }
         /// <summary>
         /// Dispose of created resources
@@ -89,6 +105,32 @@ namespace Engine
         }
 
         /// <summary>
+        /// Initialize the particle system and the particle descriptions
+        /// </summary>
+        /// <param name="assetsConfiguration"></param>
+        private void InitializeParticles(ModularSceneryAssetConfiguration assetsConfiguration)
+        {
+            if (assetsConfiguration.ParticleSystems != null && assetsConfiguration.ParticleSystems.Length > 0)
+            {
+                this.particleManager = this.Scene.AddComponent<ParticleManager>(
+                    new ParticleManagerDescription()
+                    {
+                        Name = string.Format("{0}.{1}", this.Description.Name, "Particle Manager"),
+                    },
+                    SceneObjectUsageEnum.None,
+                    98);
+
+                foreach (var item in assetsConfiguration.ParticleSystems)
+                {
+                    item.ContentPath = item.ContentPath ?? this.Description.Content.ContentFolder;
+
+                    var pDesc = ParticleSystemDescription.Initialize(item);
+
+                    this.particleDescriptors.Add(item.Name, pDesc);
+                }
+            }
+        }
+        /// <summary>
         /// Initialize all assets into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
@@ -96,28 +138,32 @@ namespace Engine
         private void InitializeAssets(ModelContent content, ModularSceneryAssetConfiguration assetsConfiguration)
         {
             // Get instance count for all single geometries from Map
-            var instanceCounter = assetsConfiguration.GetInstanceCounter();
+            var instanceCounter = assetsConfiguration.GetMapInstanceCounter();
 
             // Load all single geometries into single instanced model components
             foreach (var assetName in instanceCounter.Keys)
             {
                 var instances = instanceCounter[assetName];
 
-                var model = this.Scene.AddComponent<ModelInstanced>(
-                    new ModelInstancedDescription()
-                    {
-                        Name = string.Format("{0}.{1}", this.Description.Name, assetName),
-                        CastShadow = this.Description.CastShadow,
-                        UseAnisotropicFiltering = this.Description.UseAnisotropic,
-                        Instances = instances,
-                        Content = new ContentDescription()
+                var modelContent = content.FilterMask(assetName);
+                if (modelContent != null)
+                {
+                    var model = this.Scene.AddComponent<ModelInstanced>(
+                        new ModelInstancedDescription()
                         {
-                            ModelContent = content.FilterMask(assetName),
-                        }
-                    },
-                    SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding);
+                            Name = string.Format("{0}.{1}", this.Description.Name, assetName),
+                            CastShadow = this.Description.CastShadow,
+                            UseAnisotropicFiltering = this.Description.UseAnisotropic,
+                            Instances = instances,
+                            Content = new ContentDescription()
+                            {
+                                ModelContent = modelContent,
+                            }
+                        },
+                        SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding);
 
-                this.assets.Add(assetName, model);
+                    this.assets.Add(assetName, model);
+                }
             }
         }
         /// <summary>
@@ -177,6 +223,91 @@ namespace Engine
                 this.assets[assetName].Instance.SetTransforms(transforms[assetName].ToArray());
             }
         }
+        /// <summary>
+        /// Initialize all objects into asset dictionary 
+        /// </summary>
+        /// <param name="content">Assets model content</param>
+        /// <param name="assetsConfiguration">Assets configuration</param>
+        private void InitializeObjects(ModelContent content, ModularSceneryAssetConfiguration assetsConfiguration)
+        {
+            // Get instance count for all single geometries from Map
+            var instanceCounter = assetsConfiguration.GetObjectsInstanceCounter();
+
+            // Load all single geometries into single instanced model components
+            foreach (var assetName in instanceCounter.Keys)
+            {
+                var instances = instanceCounter[assetName];
+
+                var modelContent = content.FilterMask(assetName);
+                if (modelContent != null)
+                {
+                    var model = this.Scene.AddComponent<ModelInstanced>(
+                        new ModelInstancedDescription()
+                        {
+                            Name = string.Format("{0}.{1}", this.Description.Name, assetName),
+                            CastShadow = this.Description.CastShadow,
+                            UseAnisotropicFiltering = this.Description.UseAnisotropic,
+                            Instances = instances,
+                            AlphaEnabled = this.Description.AlphaEnabled,
+                            Content = new ContentDescription()
+                            {
+                                ModelContent = modelContent,
+                            }
+                        },
+                        SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding);
+
+                    //Positioning
+                    List<Matrix> trnList = new List<Matrix>();
+                    List<ParticleEmitterDescription> lightEmitterList = new List<ParticleEmitterDescription>();
+                    Array.ForEach(assetsConfiguration.Objects, (o) =>
+                    {
+                        if (string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            trnList.Add(o.GetTransform());
+                            lightEmitterList.Add(o.ParticleLight);
+                        }
+                    });
+
+                    model.Instance.SetTransforms(trnList.ToArray());
+
+                    for (int i = 0; i < model.Instance.Count; i++)
+                    {
+                        var trn = model.Instance[i].Manipulator.LocalTransform;
+
+                        var lights = model.Instance[i].Lights;
+                        if (lights != null && lights.Length > 0)
+                        {
+                            var emitterDesc = lightEmitterList[i];
+                            if (emitterDesc != null)
+                            {
+                                foreach (var light in lights)
+                                {
+                                    var pointL = light as SceneLightPoint;
+                                    if (pointL != null)
+                                    {
+                                        var pos = Vector3.TransformCoordinate(pointL.Position, trn);
+
+                                        var emitter = new ParticleEmitter(emitterDesc)
+                                        {
+                                            Position = pos,
+                                        };
+
+                                        this.particleManager.Instance.AddParticleSystem(
+                                            ParticleSystemTypes.CPU,
+                                            this.particleDescriptors[emitterDesc.Name],
+                                            emitter);
+                                    }
+                                }
+                            }
+
+                            this.Scene.Lights.AddRange(lights);
+                        }
+                    }
+
+                    this.objects.Add(assetName, model);
+                }
+            }
+        }
 
         /// <summary>
         /// Objects updating
@@ -213,6 +344,27 @@ namespace Engine
             }
 
             return triangles.ToArray();
+        }
+
+        /// <summary>
+        /// Gets all objects volumes
+        /// </summary>
+        /// <returns>Returns a dictionary of object volumes by object name</returns>
+        public Dictionary<string, List<BoundingBox>> GetObjectVolumes()
+        {
+            var res = new Dictionary<string, List<BoundingBox>>();
+
+            foreach (var item in this.objects.Keys)
+            {
+                res.Add(item, new List<BoundingBox>());
+
+                for (int i = 0; i < this.objects[item].Instance.Count; i++)
+                {
+                    res[item].Add(this.objects[item].Instance[i].GetBoundingBox());
+                }
+            }
+
+            return res;
         }
     }
 }

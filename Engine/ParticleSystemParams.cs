@@ -1,17 +1,39 @@
 ﻿using SharpDX;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine
 {
     /// <summary>
     /// Particle system dynamic parameters
     /// </summary>
-    public class ParticleSystemParams
+    public struct ParticleSystemParams
     {
+        /// <summary>
+        /// Scale operator
+        /// </summary>
+        /// <param name="p">Particle parameters</param>
+        /// <param name="scale">Scale</param>
+        /// <returns>Returns a new particle system parameters set scaled to the specified value</returns>
+        public static ParticleSystemParams operator *(ParticleSystemParams p, float scale)
+        {
+            if (scale != 1f)
+            {
+                p.MaxHorizontalVelocity *= scale;
+                p.MinHorizontalVelocity *= scale;
+                p.MaxVerticalVelocity *= scale;
+                p.MinVerticalVelocity *= scale;
+
+                p.Gravity *= scale;
+                p.EndVelocity *= scale;
+
+                p.MinStartSize *= scale;
+                p.MaxStartSize *= scale;
+                p.MinEndSize *= scale;
+                p.MaxEndSize *= scale;
+            }
+
+            return p;
+        }
+
         /// <summary>
         /// Maximum horizontal velocity
         /// </summary>
@@ -286,7 +308,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="description">Particle system description</param>
-        public ParticleSystemParams(ParticleSystemDescription description)
+        public ParticleSystemParams(ParticleSystemDescription description) : this()
         {
             this.minHorizontalVelocity = 0f;
             this.maxHorizontalVelocity = 0f;
@@ -329,6 +351,15 @@ namespace Engine
             this.MaxStartSize = description.MaxStartSize;
             this.MinEndSize = description.MinEndSize;
             this.MaxEndSize = description.MaxEndSize;
+        }
+
+        /// <summary>
+        /// Scales the particle system
+        /// </summary>
+        /// <param name="scale">Scale to apply</param>
+        public void Scale(float scale)
+        {
+            this *= scale;
         }
     }
 }

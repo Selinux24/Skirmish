@@ -244,9 +244,11 @@
     <Compile Include="ModelPart.cs" />
     <Compile Include="ModularSceneryAssetConfiguration.cs" />
     <Compile Include="ModularSceneryAssetDescription.cs" />
+    <Compile Include="ModularSceneryObjectReference.cs" />
     <Compile Include="ModularSceneryAssetReference.cs" />
     <Compile Include="ModularSceneryAssetTypeEnum.cs" />
     <Compile Include="NormalPath.cs" />
+    <Compile Include="ParticleEmitterDescription.cs" />
     <Compile Include="ParticleManager.cs" />
     <Compile Include="ParticleManagerDescription.cs" />
     <Compile Include="ParticleSystemCPU.cs" />

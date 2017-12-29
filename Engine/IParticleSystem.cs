@@ -24,7 +24,7 @@ namespace Engine
         /// <summary>
         /// Particle system parameters
         /// </summary>
-        ParticleSystemParams Parameters { get; }
+        ParticleSystemParams Parameters { get; set; }
         /// <summary>
         /// Gets the particle emitter reference
         /// </summary>

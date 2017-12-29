@@ -53,6 +53,10 @@ namespace Engine
         /// </summary>
         public Vector3 Velocity { get; set; }
         /// <summary>
+        /// Emitter scale
+        /// </summary>
+        public float Scale { get; set; }
+        /// <summary>
         /// Emission rate
         /// </summary>
         public float EmissionRate { get; set; }
@@ -113,11 +117,27 @@ namespace Engine
         {
             this.Position = Vector3.Zero;
             this.Velocity = Vector3.Up;
+            this.Scale = 1f;
             this.EmissionRate = 1f;
             this.Duration = 0f;
             this.InfiniteDuration = false;
             this.MaximumDistance = GameEnvironment.LODDistanceLow;
             this.Distance = 0f;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="desc">Description</param>
+        public ParticleEmitter(ParticleEmitterDescription desc)
+        {
+            this.Position = desc.Position;
+            this.Velocity = desc.Velocity;
+            this.Scale = desc.Scale;
+            this.EmissionRate = desc.EmissionRate;
+            this.Duration = desc.Duration;
+            this.InfiniteDuration = desc.InfiniteDuration;
+            this.MaximumDistance = desc.MaximumDistance;
+            this.Distance = desc.Distance;
         }
 
         /// <summary>

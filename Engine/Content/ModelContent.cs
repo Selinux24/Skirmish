@@ -660,6 +660,18 @@ namespace Engine.Content
                     res.Geometry.Add(g.Key, g.Value);
                 }
 
+                var lights = this.Lights.FindAll(l => 
+                    l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
+                    l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
+
+                if (lights.Count > 0)
+                {
+                    foreach (var l in lights)
+                    {
+                        res.Lights.Add(l.Key, l.Value);
+                    }
+                }
+
                 return res;
             }
 

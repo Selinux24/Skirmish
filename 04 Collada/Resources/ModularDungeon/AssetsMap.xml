@@ -891,6 +891,29 @@
       </references>
     </asset>
   </assets>
+  <particles>
+    <system name="torchFire" type="Fire" textureName="fire.png">
+    </system>
+    <system name="lampFire" type="Fire" textureName="candleLight.png">
+      <minHorizontalVelocity>-0</minHorizontalVelocity>
+      <maxHorizontalVelocity>0</maxHorizontalVelocity>
+      <minVerticalVelocity>-0</minVerticalVelocity>
+      <maxVerticalVelocity>0</maxVerticalVelocity>
+
+      <minStartSize>0.25</minStartSize>
+      <maxStartSize>0.5</maxStartSize>
+      <minEndSize>0.25</minEndSize>
+      <maxEndSize>0.5</maxEndSize>
+    
+      <maxDuration>0.25</maxDuration>
+      <maxDurationRandomness>0.01</maxDurationRandomness>
+
+      <gravity>0 0 0</gravity>
+      
+      <minColor>1 1 1 0</minColor>
+      <maxColor>1 1 1 0.5</maxColor>
+    </system>
+  </particles>
   <map>
     <item asset_name="Corridor1">
       <position>-6 0 0</position>
@@ -961,4 +984,126 @@
       <rotation>rot270</rotation>
     </item>
   </map>
+  <objects>
+    <item asset_name="Dn_Torch">
+      <position>0 0 9</position>
+      <rotation>rot90</rotation>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
+    </item>
+    <item asset_name="Dn_Torch">
+      <position>-3 0 6</position>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
+    </item>
+    <item asset_name="Dn_Torch">
+      <position>3 0 6</position>
+      <rotation>rot180</rotation>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
+    </item>
+
+    <item asset_name="Dn_Torch">
+      <position>1 0 -4</position>
+      <rotation>rot180</rotation>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
+    </item>
+    <item asset_name="Dn_Torch">
+      <position>1 0 -8</position>
+      <rotation>rot180</rotation>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
+    </item>
+
+    <item asset_name="Dn_Torch">
+      <position>-5 0 -1</position>
+      <rotation>rot270</rotation>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
+    </item>
+    <item asset_name="Dn_Torch">
+      <position>-12 0 -1</position>
+      <rotation>rot270</rotation>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
+    </item>
+    <item asset_name="Dn_Torch">
+      <position>5 0 -1</position>
+      <rotation>rot270</rotation>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
+    </item>
+
+    <item asset_name="Dn_Torch">
+      <position>-1 4 -19</position>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.001"></particleLight>
+    </item>
+    <item asset_name="Dn_Torch">
+      <position>1 4 -19</position>
+      <rotation>rot180</rotation>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.001"></particleLight>
+    </item>
+
+    <item asset_name="Dn_Lamp">
+      <position>12 3.25 2</position>
+      <rotation>-0.06930859 0.7037019 -0.06930859 0.7037019</rotation>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
+    <item asset_name="Dn_Lamp">
+      <position>31.2 0.5 -11.5</position>
+      <rotation>0 0.9971888 0 0.07492971</rotation>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
+
+    <item asset_name="Dn_Rag">
+      <position>-1 0 -8</position>
+    </item>
+    <item asset_name="Dn_Rag">
+      <position>-1 0 -4</position>
+    </item>
+    <item asset_name="Dn_Rag">
+      <position>0 4 -17</position>
+      <rotation>rot90</rotation>
+    </item>
+
+    <item asset_name="Dn_Crate">
+      <position>-2.25 0 8.25 </position>
+    </item>
+    <item asset_name="Dn_Crate">
+      <position>-1.25 0 8.25</position>
+      <rotation>rot90</rotation>
+    </item>
+    <item asset_name="Dn_Crate">
+      <position>-2.25 0 6</position>
+    </item>
+    <item asset_name="Dn_Crate">
+      <position>-2.05 1 8.25</position>
+      <rotation>0 0.5646425 0 0.8253356</rotation>
+      <scale>0.5</scale>
+    </item>
+
+    <item asset_name="Dn_Crate">
+      <position>13.90 0 -2.4</position>
+      <rotation>0 0.1494381 0 0.9887711</rotation>
+    </item>
+    <item asset_name="Dn_Crate">
+      <position>13.25 1 -2.4</position>
+      <rotation>0 0.5646425 0 0.8253356</rotation>
+    </item>
+    <item asset_name="Dn_Crate">
+      <position>12.80 0 -2.3</position>
+      <rotation>0 0.1741081 0 0.9847265</rotation>
+    </item>
+    <item asset_name="Dn_Crate">
+      <position>13.80 0 1</position>
+      <rotation>0 0.9107101 0 0.4130462</rotation>
+    </item>
+  </objects>
 </ModularSceneryAssetConfiguration>
