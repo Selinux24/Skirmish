@@ -78,11 +78,11 @@ namespace Engine.PathFinding.NavMesh
             var voxelMaxClimb = settings.GetVoxelMaxClimb(agent);
 
             var hf = HeightField.Build(bbox, triangles, settings.CellSize, settings.CellHeight, voxelAgentHeight, voxelMaxClimb);
-            var chf = CompactHeightField.Build(hf, settings.MinRegionSize, settings.MergedRegionSize, voxelAgentHeight, voxelAgentRadius, voxelMaxClimb);
+            var chf = CompactHeightField.Build(hf, settings.RegionMinSize, settings.RegionMergedSize, voxelAgentHeight, voxelAgentRadius, voxelMaxClimb);
 
-            var cs = chf.BuildContourSet(settings.MaxEdgeError, settings.MaxEdgeLength, settings.ContourFlags);
+            var cs = chf.BuildContourSet(settings.EdgeMaxError, settings.EdgeMaxLength, settings.ContourFlags);
             var pm = new PolyMesh(cs, settings.CellSize, settings.CellHeight, 0, settings.VertsPerPoly);
-            var pmd = new PolyMeshDetail(pm, chf, settings.SampleDistance, settings.MaxSampleError);
+            var pmd = new PolyMeshDetail(pm, chf, settings.DetailSampleDistance, settings.DetailSampleMaxError);
 
             var builder = new NavigationMeshBuilder(
                 pm,

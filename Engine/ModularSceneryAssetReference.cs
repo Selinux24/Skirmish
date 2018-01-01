@@ -22,6 +22,11 @@ namespace Engine
         [XmlAttribute("type")]
         public ModularSceneryAssetTypeEnum Type = ModularSceneryAssetTypeEnum.None;
         /// <summary>
+        /// Load model lights into scene
+        /// </summary>
+        [XmlAttribute("load_lights")]
+        public bool LoadLights = true;
+        /// <summary>
         /// Position
         /// </summary>
         [XmlIgnore]
@@ -70,6 +75,10 @@ namespace Engine
                 if (floats.Length == 4)
                 {
                     Rotation = new Quaternion(floats);
+                }
+                else if (floats.Length == 3)
+                {
+                    Rotation = Quaternion.RotationYawPitchRoll(floats[0], floats[1], floats[2]);
                 }
                 else
                 {

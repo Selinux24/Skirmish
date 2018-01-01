@@ -1008,15 +1008,16 @@ namespace Engine.Common
         /// </summary>
         /// <param name="vertexListItems">Vertex list item list</param>
         /// <returns>Returns the minimum bounding box that contains all the specified vertex list item list</returns>
-        public static BoundingBox CreateBoundingBox<T>(T[] vertexListItems) where T : IVertexList
+        public static BoundingBox CreateBoundingBox<T>(IEnumerable<T> vertexListItems) where T : IVertexList
         {
-            BoundingBox bbox = new BoundingBox();
+            var bbox = new BoundingBox();
 
-            for (int i = 0; i < vertexListItems.Length; i++)
+            int index = 0;
+            foreach (var item in vertexListItems)
             {
-                BoundingBox tbox = BoundingBox.FromPoints(vertexListItems[i].GetVertices());
+                var tbox = BoundingBox.FromPoints(item.GetVertices());
 
-                if (i == 0)
+                if (index == 0)
                 {
                     bbox = tbox;
                 }
@@ -1024,6 +1025,8 @@ namespace Engine.Common
                 {
                     bbox = BoundingBox.Merge(bbox, tbox);
                 }
+
+                index++;
             }
 
             return bbox;

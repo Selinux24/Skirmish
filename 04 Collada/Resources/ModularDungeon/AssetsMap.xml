@@ -605,7 +605,7 @@
       </references>
     </asset>
     <asset>
-      <name>Room1</name>
+      <name>Room3x3</name>
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>0 0 -2</position>
@@ -718,7 +718,7 @@
       </references>
     </asset>
     <asset>
-      <name>Room2</name>
+      <name>Room3x5</name>
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>0 0 -2</position>
@@ -890,6 +890,271 @@
         </asset>
       </references>
     </asset>
+    <asset>
+      <name>Room5x5</name>
+      <references>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>4 0 -4</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>2 0 -4</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>0 0 -4</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>-2 0 -4</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>-4 0 -4</position>
+        </asset>
+
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>4 0 -2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>2 0 -2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>0 0 -2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>-2 0 -2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>-4 0 -2</position>
+        </asset>
+        
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>4 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>2 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>0 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>-2 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>-4 0 0</position>
+        </asset>
+
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>4 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>2 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>0 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>-2 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>-4 0 2</position>
+        </asset>
+
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>4 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>2 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>0 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>-2 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>-4 0 4</position>
+        </asset>
+
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>4 0 -4</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>2 0 -4</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>0 0 -4</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>-2 0 -4</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>-4 0 -4</position>
+        </asset>
+        
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>4 0 -2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>2 0 -2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>0 0 -2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>-2 0 -2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>-4 0 -2</position>
+        </asset>
+
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>4 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>2 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>0 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>-2 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>-4 0 0</position>
+        </asset>
+
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>4 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>2 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>0 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>-2 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>-4 0 2</position>
+        </asset>
+        
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>4 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>2 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>0 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>-2 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Ceiling">
+          <position>-4 0 4</position>
+        </asset>
+
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>4 0 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>2 0 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Door_2" type="Wall">
+          <position>0 0 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-2 0 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-4 0 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>4 0 -5</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>2 0 -5</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>0 0 -5</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-2 0 -5</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-4 0 -5</position>
+          <rotation>rot270</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 0 4</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 0 2</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 0 0</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 0 -2</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 0 -4</position>
+          <rotation>rot180</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-5 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-5 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-5 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-5 0 -2</position>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-5 0 -4</position>
+        </asset>
+
+        <asset asset_name="Dn_Beam_2" type="Wall">
+          <position>-2.5 0 -2</position>
+        </asset>
+        <asset asset_name="Dn_Beam_2" type="Wall">
+          <position>-2.5 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Beam_4" type="Wall">
+          <position>-2.5 0 2</position>
+          <rotation>rot270</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Beam_4" type="Wall">
+          <position>2.5 0 -2</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Beam_2" type="Wall">
+          <position>2.5 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Beam_2" type="Wall">
+          <position>2.5 0 2</position>
+        </asset>
+      </references>
+    </asset>
   </assets>
   <particles>
     <system name="torchFire" type="Fire" textureName="fire.png">
@@ -904,12 +1169,12 @@
       <maxStartSize>0.5</maxStartSize>
       <minEndSize>0.25</minEndSize>
       <maxEndSize>0.5</maxEndSize>
-    
+
       <maxDuration>0.25</maxDuration>
       <maxDurationRandomness>0.01</maxDurationRandomness>
 
       <gravity>0 0 0</gravity>
-      
+
       <minColor>1 1 1 0</minColor>
       <maxColor>1 1 1 0.5</maxColor>
     </system>
@@ -928,7 +1193,7 @@
       <position>-12 0 0</position>
       <rotation>rot180</rotation>
     </item>
-    <item asset_name="Room1">
+    <item asset_name="Room3x3">
       <position>0 0 6</position>
       <rotation>rot180</rotation>
     </item>
@@ -956,7 +1221,7 @@
     <item asset_name="Corridor2">
       <position>30 0 -12</position>
     </item>
-    <item asset_name="Corridor1">
+    <item asset_name="TCross1">
       <position>36 0 -12</position>
     </item>
     <item asset_name="CorridorEnd2">
@@ -979,74 +1244,85 @@
       <rotation>rot270</rotation>
     </item>
 
-    <item asset_name="Room2">
+    <item asset_name="Room3x5">
       <position>12 0 0</position>
       <rotation>rot270</rotation>
+    </item>
+    <item asset_name="Room5x5">
+      <position>36 0 -4</position>
+      <rotation>rot180</rotation>
     </item>
   </map>
   <objects>
     <item asset_name="Dn_Torch">
-      <position>0 0 9</position>
+      <position>0 2 8.9</position>
       <rotation>rot90</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
     <item asset_name="Dn_Torch">
-      <position>-3 0 6</position>
+      <position>-2.9 2 6</position>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
     <item asset_name="Dn_Torch">
-      <position>3 0 6</position>
+      <position>2.9 2 6</position>
       <rotation>rot180</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
 
     <item asset_name="Dn_Torch">
-      <position>1 0 -4</position>
+      <position>0.9 2 -4</position>
       <rotation>rot180</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
     <item asset_name="Dn_Torch">
-      <position>1 0 -8</position>
+      <position>0.9 2 -8</position>
       <rotation>rot180</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
 
     <item asset_name="Dn_Torch">
-      <position>-5 0 -1</position>
+      <position>-5 2 -0.9</position>
       <rotation>rot270</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
     <item asset_name="Dn_Torch">
-      <position>-12 0 -1</position>
+      <position>-12 2 -0.9</position>
       <rotation>rot270</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
     <item asset_name="Dn_Torch">
-      <position>5 0 -1</position>
+      <position>5 2 -0.9</position>
       <rotation>rot270</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
 
     <item asset_name="Dn_Torch">
-      <position>-1 4 -19</position>
+      <position>-0.9 6 -19</position>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.001"></particleLight>
     </item>
     <item asset_name="Dn_Torch">
-      <position>1 4 -19</position>
+      <position>0.9 6 -19</position>
       <rotation>rot180</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.001"></particleLight>
     </item>
 
+    <item asset_name="Dn_Torch">
+      <position>36 2 0.9</position>
+      <rotation>rot90</rotation>
+      <scale>0.75</scale>
+      <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
+    </item>
+    
     <item asset_name="Dn_Lamp">
       <position>12 3.25 2</position>
       <rotation>-0.06930859 0.7037019 -0.06930859 0.7037019</rotation>
@@ -1062,14 +1338,28 @@
       </particleLight>
     </item>
 
+    <item asset_name="Dn_Lamp" load_lights="false">
+      <position>34 0.02 -2.5</position>
+      <rotation>0.12 1.9 0</rotation>
+    </item>
+    <item asset_name="Dn_Lamp">
+      <position>38 3.25 -6</position>
+      <rotation>-0.06930859 0.7037019 -0.06930859 0.7037019</rotation>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
+    
     <item asset_name="Dn_Rag">
-      <position>-1 0 -8</position>
+      <position>-0.95 3 -8</position>
+      <scale>0.5</scale>
     </item>
     <item asset_name="Dn_Rag">
-      <position>-1 0 -4</position>
+      <position>-0.95 3 -4</position>
+      <scale>0.5</scale>
     </item>
     <item asset_name="Dn_Rag">
-      <position>0 4 -17</position>
+      <position>0 7 -17</position>
       <rotation>rot90</rotation>
     </item>
 
@@ -1104,6 +1394,63 @@
     <item asset_name="Dn_Crate">
       <position>13.80 0 1</position>
       <rotation>0 0.9107101 0 0.4130462</rotation>
+    </item>
+
+    <item asset_name="Dn_Candle_1">
+      <position>0.5 4 -26.8</position>
+      <scale>0.4</scale>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
+    <item asset_name="Dn_Candle_1">
+      <position>-1.5 4 -26.8</position>
+      <scale>0.4</scale>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
+    <item asset_name="Dn_Candle_1" load_lights="false">
+      <position>-3.5 4 -26.8</position>
+      <scale>0.4</scale>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
+    <item asset_name="Dn_Candle_1">
+      <position>-5.5 4 -26.8</position>
+      <scale>0.4</scale>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
+    <item asset_name="Dn_Candle_1">
+      <position>-7.5 4 -26.8</position>
+      <scale>0.4</scale>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
+
+    <item asset_name="Dn_Stone_1">
+      <position>0.8 4 -26</position>
+      <scale>0.4</scale>
+    </item>
+    <item asset_name="Dn_Stone_2">
+      <position>32 0 -8</position>
+      <scale>0.4</scale>
+    </item>
+    <item asset_name="Dn_Stone_1">
+      <position>33 0 -8.5</position>
+      <scale>0.4</scale>
+    </item>
+    <item asset_name="Dn_Stone_1">
+      <position>37 0 -8</position>
+      <scale>0.2</scale>
+    </item>
+    <item asset_name="Dn_Stone_3">
+      <position>36.9 0 -4.5</position>
+      <scale>0.5</scale>
     </item>
   </objects>
 </ModularSceneryAssetConfiguration>

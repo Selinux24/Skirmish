@@ -1,4 +1,6 @@
 ﻿
+using SharpDX;
+
 namespace Engine.PathFinding.NavMesh
 {
     /// <summary>
@@ -29,23 +31,19 @@ namespace Engine.PathFinding.NavMesh
         /// Gets or sets the minimum number of spans that can form a region. Any less than this, and they will be
         /// merged with another region.
         /// </summary>
-        public int MinRegionSize { get; set; }
+        public int RegionMinSize { get; set; }
         /// <summary>
         /// Gets or sets the size of the merged regions
         /// </summary>
-        public int MergedRegionSize { get; set; }
+        public int RegionMergedSize { get; set; }
         /// <summary>
         /// Gets or sets the maximum edge length allowed
         /// </summary>
-        public int MaxEdgeLength { get; set; }
+        public int EdgeMaxLength { get; set; }
         /// <summary>
         /// Gets or sets the maximum error allowed
         /// </summary>
-        public float MaxEdgeError { get; set; }
-        /// <summary>
-        /// Gets or sets the flags that determine how the <see cref="ContourSet"/> is generated.
-        /// </summary>
-        public ContourBuildFlags ContourFlags { get; set; }
+        public float EdgeMaxError { get; set; }
         /// <summary>
         /// Gets or sets the number of vertices a polygon can have.
         /// </summary>
@@ -53,11 +51,29 @@ namespace Engine.PathFinding.NavMesh
         /// <summary>
         /// Gets or sets the sampling distance for the PolyMeshDetail
         /// </summary>
-        public int SampleDistance { get; set; }
+        public int DetailSampleDistance { get; set; }
         /// <summary>
         /// Gets or sets the maximium error allowed in sampling for the PolyMeshDetail
         /// </summary>
-        public int MaxSampleError { get; set; }
+        public int DetailSampleMaxError { get; set; }
+
+        /// <summary>
+        /// Partition type
+        /// </summary>
+        public int PartitionType { get; set; }
+        /// <summary>
+        /// Bounds of the area to mesh
+        /// </summary>
+        public BoundingBox Bounds { get; set; }
+        /// <summary>
+        /// Tile size
+        /// </summary>
+        public float TileSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the flags that determine how the <see cref="ContourSet"/> is generated.
+        /// </summary>
+        public ContourBuildFlags ContourFlags { get; set; }
         /// <summary>
         /// Gets or sets a value indicating whether a bounding volume tree is generated for the mesh.
         /// </summary>
@@ -75,23 +91,24 @@ namespace Engine.PathFinding.NavMesh
         {
             this.CellSize = 0.3f;
             this.CellHeight = 0.2f;
-            this.MinRegionSize = 8;
-            this.MergedRegionSize = 20;
-            this.MaxEdgeLength = 12;
-            this.MaxEdgeError = 1.8f;
+            this.RegionMinSize = 8;
+            this.RegionMergedSize = 20;
+            this.EdgeMaxLength = 12;
+            this.EdgeMaxError = 1.8f;
             this.ContourFlags = ContourBuildFlags.None;
             this.VertsPerPoly = 6;
-            this.SampleDistance = 6;
-            this.MaxSampleError = 1;
+            this.DetailSampleDistance = 6;
+            this.DetailSampleMaxError = 1;
             this.BuildBoundingVolumeTree = true;
 
             this.Agents = new[]
             {
                 new NavigationMeshAgentType()
                 {
-                    MaxClimb = 1f,
                     Height = 2.0f,
                     Radius = 0.6f,
+                    MaxClimb = 1f,
+                    MaxSlope = 45f,
                 }
             };
         }

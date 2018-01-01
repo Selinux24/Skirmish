@@ -7,6 +7,7 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
+    using System.Linq;
 
     /// <summary>
     /// Terrain model
@@ -256,51 +257,46 @@ namespace Engine
                         },
                         SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding);
 
-                    //Positioning
-                    List<Matrix> trnList = new List<Matrix>();
-                    List<ParticleEmitterDescription> lightEmitterList = new List<ParticleEmitterDescription>();
-                    Array.ForEach(assetsConfiguration.Objects, (o) =>
-                    {
-                        if (string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            trnList.Add(o.GetTransform());
-                            lightEmitterList.Add(o.ParticleLight);
-                        }
-                    });
+                    //Get the object list to process
+                    var objList = Array.FindAll(assetsConfiguration.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
 
-                    model.Instance.SetTransforms(trnList.ToArray());
+                    //Positioning
+                    model.Instance.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
 
                     for (int i = 0; i < model.Instance.Count; i++)
                     {
-                        var trn = model.Instance[i].Manipulator.LocalTransform;
-
-                        var lights = model.Instance[i].Lights;
-                        if (lights != null && lights.Length > 0)
+                        if (objList[i].LoadLights)
                         {
-                            var emitterDesc = lightEmitterList[i];
-                            if (emitterDesc != null)
+                            var trn = model.Instance[i].Manipulator.LocalTransform;
+
+                            var lights = model.Instance[i].Lights;
+                            if (lights != null && lights.Length > 0)
                             {
-                                foreach (var light in lights)
+                                var emitterDesc = objList[i].ParticleLight;
+                                if (emitterDesc != null)
                                 {
-                                    var pointL = light as SceneLightPoint;
-                                    if (pointL != null)
+                                    foreach (var light in lights)
                                     {
-                                        var pos = Vector3.TransformCoordinate(pointL.Position, trn);
-
-                                        var emitter = new ParticleEmitter(emitterDesc)
+                                        var pointL = light as SceneLightPoint;
+                                        if (pointL != null)
                                         {
-                                            Position = pos,
-                                        };
+                                            var pos = Vector3.TransformCoordinate(pointL.Position, trn);
 
-                                        this.particleManager.Instance.AddParticleSystem(
-                                            ParticleSystemTypes.CPU,
-                                            this.particleDescriptors[emitterDesc.Name],
-                                            emitter);
+                                            var emitter = new ParticleEmitter(emitterDesc)
+                                            {
+                                                Position = pos,
+                                            };
+
+                                            this.particleManager.Instance.AddParticleSystem(
+                                                ParticleSystemTypes.CPU,
+                                                this.particleDescriptors[emitterDesc.Name],
+                                                emitter);
+                                        }
                                     }
                                 }
-                            }
 
-                            this.Scene.Lights.AddRange(lights);
+                                this.Scene.Lights.AddRange(lights);
+                            }
                         }
                     }
 

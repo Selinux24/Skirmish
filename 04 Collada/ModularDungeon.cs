@@ -105,6 +105,7 @@ namespace Collada
                 Name = "Player",
                 Height = 1.5f,
                 MaxClimb = 0.8f,
+                MaxSlope = 45f,
                 Radius = 0.5f,
                 Velocity = 4f,
                 VelocitySlow = 1f,

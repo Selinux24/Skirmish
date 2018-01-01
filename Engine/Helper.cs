@@ -748,7 +748,7 @@ namespace Engine
         /// <typeparam name="T">Type of values</typeparam>
         /// <param name="left">Left value</param>
         /// <param name="right">Right value</param>
-        public static void SwapValues<T>(ref T left, ref T right)
+        public static void Swap<T>(ref T left, ref T right)
         {
             T temp = left;
             left = right;
@@ -1493,6 +1493,15 @@ namespace Engine
             }
 
             return desc;
+        }
+        /// <summary>
+        /// Align to 4 bytes
+        /// </summary>
+        /// <param name="x">Value to align</param>
+        /// <returns></returns>
+        public static int Align4(int x)
+        {
+            return (x + 3) & ~3;
         }
     }
 }

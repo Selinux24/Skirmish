@@ -1,11 +1,15 @@
 ﻿
-namespace Engine.PathFinding.NavMesh
+namespace Engine.PathFinding.NavMesh2
 {
     /// <summary>
-    /// Navigation mesh agent type
+    /// Agent description
     /// </summary>
-    public class NavigationMeshAgentType : AgentType
+    public struct Agent
     {
+        /// <summary>
+        /// Gets or sets the height of the agent
+        /// </summary>
+        public float Height { get; set; }
         /// <summary>
         /// Gets or sets the radius of the agent
         /// </summary>

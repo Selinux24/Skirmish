@@ -388,7 +388,7 @@ namespace Engine.PathFinding.NavMesh
 
                             if (tmin > tmax)
                             {
-                                Helper.SwapValues(ref tmin, ref tmax);
+                                Helper.Swap(ref tmin, ref tmax);
                             }
 
                             link.BMin = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f);
@@ -401,7 +401,7 @@ namespace Engine.PathFinding.NavMesh
 
                             if (tmin > tmax)
                             {
-                                Helper.SwapValues(ref tmin, ref tmax);
+                                Helper.Swap(ref tmin, ref tmax);
                             }
 
                             link.BMin = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f);

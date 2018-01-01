@@ -97,6 +97,21 @@ namespace Engine
                 return Helper.Angle(this.Normal, Vector3.Down);
             }
         }
+        /// <summary>
+        /// Gets the point at index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Returns the point at intex</returns>
+        public Vector3 this[int index]
+        {
+            get
+            {
+                if (index == 0) return this.Point1;
+                else if (index == 1) return this.Point2;
+                else if (index == 2) return this.Point3;
+                else throw new EngineException("Bad triangle vertex index.");
+            }
+        }
 
         /// <summary>
         /// Generate a triangle list from vertices

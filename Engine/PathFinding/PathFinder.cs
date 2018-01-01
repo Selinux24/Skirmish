@@ -48,6 +48,15 @@ namespace Engine.PathFinding
             {
                 return NavigationMesh.Build(triangles, (NavigationMeshGenerationSettings)settings);
             }
+            else if (settings is NavMesh2.Settings)
+            {
+                //DEBUG WIP NavMesh2
+                var g = new PathFinding.NavMesh2.InputGeometry(triangles);
+                var s = (NavMesh2.Settings)settings;
+                var n = NavMesh2.NavMesh.Build(s, g);
+
+                return null;
+            }
             else
             {
                 throw new EngineException("Bad Graph type");
