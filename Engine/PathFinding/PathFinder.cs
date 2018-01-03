@@ -48,11 +48,11 @@ namespace Engine.PathFinding
             {
                 return NavigationMesh.Build(triangles, (NavigationMeshGenerationSettings)settings);
             }
-            else if (settings is NavMesh2.Settings)
+            else if (settings is NavMesh2.BuildSettings)
             {
                 //DEBUG WIP NavMesh2
                 var g = new PathFinding.NavMesh2.InputGeometry(triangles);
-                var s = (NavMesh2.Settings)settings;
+                var s = (NavMesh2.BuildSettings)settings;
                 var n = NavMesh2.NavMesh.Build(s, g);
 
                 return null;

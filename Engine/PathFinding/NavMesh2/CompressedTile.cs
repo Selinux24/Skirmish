@@ -13,9 +13,9 @@ namespace Engine.PathFinding.NavMesh2
         /// Counter describing modifications to the tile.
         /// </summary>
         public int Salt;
-        public char[] Compressed;
+        public byte[] Compressed;
         public int CompressedSize;
-        public char[] Data;
+        public byte[] Data;
         public int DataSize;
         public uint Flags;
         public CompressedTile Next;

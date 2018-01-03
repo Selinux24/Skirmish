@@ -23,7 +23,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The area id assigned to the span.
         /// </summary>
-        public uint area;
+        public byte area;
         /// <summary>
         /// The next span higher up in column.
         /// </summary>

@@ -20,6 +20,7 @@ namespace Collada
         private SceneObject<Sprite> backPannel = null;
 
         private Player agent = null;
+        //private Player2 agent = null;
 
         private SceneObject<ModularScenery> scenery = null;
 
@@ -121,6 +122,27 @@ namespace Collada
                     ContourFlags = ContourBuildFlags.TessellateAreaEdges,
                 }
             };
+
+            /*
+            this.agent = new Player2()
+            {
+                Name = "Player",
+                Height = 1.5f,
+                MaxClimb = 0.8f,
+                MaxSlope = 45f,
+                Radius = 0.5f,
+                Velocity = 4f,
+                VelocitySlow = 1f,
+            };
+
+            var nmsettings = Engine.PathFinding.NavMesh2.BuildSettings.Default;
+            nmsettings.Agents = new[] { this.agent };
+
+            this.PathFinderDescription = new PathFinderDescription()
+            {
+                Settings = nmsettings
+            };
+            */
         }
         private void InitializeDebug()
         {

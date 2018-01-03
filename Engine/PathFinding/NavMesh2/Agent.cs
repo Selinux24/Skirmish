@@ -4,12 +4,26 @@ namespace Engine.PathFinding.NavMesh2
     /// <summary>
     /// Agent description
     /// </summary>
-    public struct Agent
+    public class Agent : AgentType
     {
         /// <summary>
-        /// Gets or sets the height of the agent
+        /// Default agent
         /// </summary>
-        public float Height { get; set; }
+        public static Agent Default
+        {
+            get
+            {
+                return new Agent()
+                {
+                    Name = "Default",
+                    Height = 2.0f,
+                    Radius = 0.6f,
+                    MaxClimb = 0.9f,
+                    MaxSlope = 45.0f,
+                };
+            }
+        }
+
         /// <summary>
         /// Gets or sets the radius of the agent
         /// </summary>

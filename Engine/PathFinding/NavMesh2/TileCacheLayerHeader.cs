@@ -40,26 +40,26 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Width of the layer.
         /// </summary>
-        public char width;
+        public byte width;
         /// <summary>
         /// Height of the layer.
         /// </summary>
-        public char height;
+        public byte height;
         /// <summary>
         /// Minx usable sub-region.
         /// </summary>
-        public char minx;
+        public byte minx;
         /// <summary>
         /// Maxx usable sub-region.
         /// </summary>
-        public char maxx;
+        public byte maxx;
         /// <summary>
         /// Miny usable sub-region.
         /// </summary>
-        public char miny;
+        public byte miny;
         /// <summary>
         /// Maxy usable sub-region.
         /// </summary>
-        public char maxy;
+        public byte maxy;
     };
 }

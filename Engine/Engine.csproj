@@ -264,7 +264,9 @@
     <Compile Include="PathFinding\NavMesh2\BoundsItem.cs" />
     <Compile Include="PathFinding\NavMesh2\ChunkyTriMesh.cs" />
     <Compile Include="PathFinding\NavMesh2\ChunkyTriMeshNode.cs" />
+    <Compile Include="PathFinding\NavMesh2\CompactCell.cs" />
     <Compile Include="PathFinding\NavMesh2\CompactHeightfield.cs" />
+    <Compile Include="PathFinding\NavMesh2\CompactSpan.cs" />
     <Compile Include="PathFinding\NavMesh2\CompressedTile.cs" />
     <Compile Include="PathFinding\NavMesh2\Config.cs" />
     <Compile Include="PathFinding\NavMesh2\ConvexVolume.cs" />
@@ -280,7 +282,8 @@
     <Compile Include="PathFinding\NavMesh2\NodePool.cs" />
     <Compile Include="PathFinding\NavMesh2\NodeQueue.cs" />
     <Compile Include="PathFinding\NavMesh2\RasterizationContext.cs" />
-    <Compile Include="PathFinding\NavMesh2\Settings.cs" />
+    <Compile Include="PathFinding\NavMesh2\BuildSettings.cs" />
+    <Compile Include="PathFinding\NavMesh2\SamplePartitionTypeEnum.cs" />
     <Compile Include="PathFinding\NavMesh2\Span.cs" />
     <Compile Include="PathFinding\NavMesh2\SpanPool.cs" />
     <Compile Include="PathFinding\NavMesh2\TileCache.cs" />

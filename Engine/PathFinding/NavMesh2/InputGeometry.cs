@@ -17,15 +17,14 @@ namespace Engine.PathFinding.NavMesh2
 
         private float[] m_offMeshConVerts;
         private float[] m_offMeshConRads;
-        private char[] m_offMeshConDirs;
-        private char[] m_offMeshConAreas;
+        private byte[] m_offMeshConDirs;
+        private byte[] m_offMeshConAreas;
         private short[] m_offMeshConFlags;
         private int[] m_offMeshConId;
         int m_offMeshConCount;
 
         public BoundingBox BoundingBox;
         public IEnumerable<Triangle> Triangles;
-        public Vector3[] Vertices;
 
         public InputGeometry()
         {
@@ -34,8 +33,8 @@ namespace Engine.PathFinding.NavMesh2
 
             m_offMeshConVerts = new float[MaxOffmeshConnections * 3 * 2];
             m_offMeshConRads = new float[MaxOffmeshConnections];
-            m_offMeshConDirs = new char[MaxOffmeshConnections];
-            m_offMeshConAreas = new char[MaxOffmeshConnections];
+            m_offMeshConDirs = new byte[MaxOffmeshConnections];
+            m_offMeshConAreas = new byte[MaxOffmeshConnections];
             m_offMeshConFlags = new short[MaxOffmeshConnections];
             m_offMeshConId = new int[MaxOffmeshConnections];
             m_offMeshConCount = 0;
@@ -45,9 +44,6 @@ namespace Engine.PathFinding.NavMesh2
         {
             this.Triangles = triangles;
             this.BoundingBox = GeometryUtil.CreateBoundingBox(triangles);
-            List<Vector3> vertices = new List<Vector3>();
-            triangles.ForEach(t => vertices.AddRange(t.GetVertices()));
-            this.Vertices = vertices.Distinct().ToArray();
 
             CreateChunkyTriMesh(triangles.ToArray(), 256, out m_chunkyMesh);
         }
@@ -71,7 +67,7 @@ namespace Engine.PathFinding.NavMesh2
 
             cm.nodes = new ChunkyTriMeshNode[nchunks * 4];
 
-            cm.tris = new Triangle[ntris];
+            cm.tris = new int[ntris];
             cm.ntris = ntris;
 
             // Build tree
@@ -98,14 +94,15 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
 
-            int curTri = 0;
             int curNode = 0;
+            int curTri = 0;
             Subdivide(
                 items,
                 0, ntris, trisPerChunk,
                 ref curNode, cm.nodes, nchunks * 4,
-                curTri, cm.tris, tris);
+                ref curTri, cm.tris, tris);
 
+            items = null;
             cm.nnodes = curNode;
 
             // Calc max tris per node.
@@ -128,7 +125,7 @@ namespace Engine.PathFinding.NavMesh2
         private void Subdivide(
             BoundsItem[] items, int imin, int imax, int trisPerChunk,
             ref int curNode, ChunkyTriMeshNode[] nodes, int maxNodes,
-            int curTri, Triangle[] outTris, Triangle[] inTris)
+            ref int curTri, int[] outTris, Triangle[] inTris)
         {
             int inum = imax - imin;
             int icur = curNode;
@@ -151,7 +148,7 @@ namespace Engine.PathFinding.NavMesh2
 
                 for (int i = imin; i < imax; ++i)
                 {
-                    outTris[curTri] = inTris[items[i].i];
+                    outTris[curTri] = items[i].i;
                     curTri++;
                 }
             }
@@ -187,14 +184,14 @@ namespace Engine.PathFinding.NavMesh2
                 // Left
                 Subdivide(
                     items, imin, isplit, trisPerChunk,
-                    ref curNode, nodes, maxNodes, 
-                    curTri, outTris, inTris);
+                    ref curNode, nodes, maxNodes,
+                    ref curTri, outTris, inTris);
 
                 // Right
                 Subdivide(
                     items, isplit, imax, trisPerChunk,
-                    ref curNode, nodes, maxNodes, 
-                    curTri, outTris, inTris);
+                    ref curNode, nodes, maxNodes,
+                    ref curTri, outTris, inTris);
 
                 int iescape = curNode - icur;
 

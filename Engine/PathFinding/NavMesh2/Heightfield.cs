@@ -16,7 +16,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Bounds in world space. [(x, y, z)]
         /// </summary>
-        public BoundingBox b;
+        public BoundingBox boundingBox;
         /// <summary>
         /// The size of each cell. (On the xz-plane.)
         /// </summary>
