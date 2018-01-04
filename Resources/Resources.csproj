@@ -129,6 +129,7 @@
     <None Include="Blender\Scenery\ModularDungeon\Dn_Furniture.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Landslides.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Stairs.blend" />
+    <None Include="Blender\Scenery\ModularDungeon\Dn_Tables.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Traps.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Walls.blend" />
     <None Include="Blender\Vehicles\CapitalShip\Booster.bmp" />

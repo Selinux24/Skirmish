@@ -1452,5 +1452,16 @@
       <position>36.9 0 -4.5</position>
       <scale>0.5</scale>
     </item>
+
+    <item asset_name="Dn_Table_1">
+      <position>36 0 -4</position>
+    </item>
+    <item asset_name="Dn_Candle_1">
+      <position>36 1 -4</position>
+      <scale>0.4</scale>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
   </objects>
 </ModularSceneryAssetConfiguration>
