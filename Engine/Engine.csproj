@@ -275,6 +275,8 @@
     <Compile Include="PathFinding\NavMesh2\HeightfieldLayer.cs" />
     <Compile Include="PathFinding\NavMesh2\HeightfieldLayerSet.cs" />
     <Compile Include="PathFinding\NavMesh2\InputGeometry.cs" />
+    <Compile Include="PathFinding\NavMesh2\LayerRegion.cs" />
+    <Compile Include="PathFinding\NavMesh2\LayerSweepSpan.cs" />
     <Compile Include="PathFinding\NavMesh2\MeshTile.cs" />
     <Compile Include="PathFinding\NavMesh2\NavMeshParams.cs" />
     <Compile Include="PathFinding\NavMesh2\NavMeshQuery.cs" />
@@ -656,6 +658,9 @@
     <None Include="Resources\ShaderShadowFoliage.fx" />
     <None Include="Resources\ShaderDefaultWater.fx" />
     <None Include="Resources\IncMaterials.fx" />
+    <Content Include="PathFinding\NavMesh2\DEBUGTris.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

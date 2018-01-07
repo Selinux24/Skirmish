@@ -51,7 +51,9 @@ namespace Engine.PathFinding
             else if (settings is NavMesh2.BuildSettings)
             {
                 //DEBUG WIP NavMesh2
-                var g = new PathFinding.NavMesh2.InputGeometry(triangles);
+                var tris = NavMesh2.InputGeometry.DebugTris();
+                var g = new NavMesh2.InputGeometry(tris);
+                //var g = new NavMesh2.InputGeometry(triangles);
                 var s = (NavMesh2.BuildSettings)settings;
                 var n = NavMesh2.NavMesh.Build(s, g);
 

@@ -48,7 +48,7 @@ namespace Engine.PathFinding.NavMesh2
             m_tiles = new CompressedTile[tcparams.MaxTiles];
             m_posLookup = new CompressedTile[m_tileLutSize];
 
-            for (int i = tcparams.MaxTiles - 1; i >= 0; --i)
+            for (int i = tcparams.MaxTiles - 1; i >= 0; i--)
             {
                 m_tiles[i] = new CompressedTile();
                 m_tiles[i].Salt = 1;
@@ -58,6 +58,7 @@ namespace Engine.PathFinding.NavMesh2
 
             // Init ID generator values.
             m_tileBits = (uint)Math.Log(Helper.NextPowerOfTwo(tcparams.MaxTiles), 2);
+
             // Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
             m_saltBits = Math.Min(31, 32 - m_tileBits);
             if (m_saltBits < 10)

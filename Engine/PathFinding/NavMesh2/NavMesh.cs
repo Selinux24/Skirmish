@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.NavMesh2
 {
@@ -44,7 +45,7 @@ namespace Engine.PathFinding.NavMesh2
                 WalkableHeight = walkableHeight,
                 WalkableClimb = walkableClimb,
                 WalkableRadius = walkableRadius,
-                MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellHeight),
+                MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize),
                 MaxSimplificationError = settings.EdgeMaxError,
                 MinRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize),
                 MergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize),
@@ -110,9 +111,9 @@ namespace Engine.PathFinding.NavMesh2
                 for (int x = 0; x < tw; x++)
                 {
                     TileCacheData[] tiles;
-                    RasterizeTileLayers(x, y, settings, cfg, geometry, out tiles);
+                    int ntiles = RasterizeTileLayers(x, y, settings, cfg, geometry, out tiles);
 
-                    for (int i = 0; i < tiles.Length; ++i)
+                    for (int i = 0; i < ntiles; ++i)
                     {
                         tileCache.AddTile(tiles[i], 1);
 
@@ -226,14 +227,12 @@ namespace Engine.PathFinding.NavMesh2
             // and array which can hold the max number of triangles you need to process.
             rc.triareas = new byte[chunkyMesh.maxTrisPerChunk];
 
-            Vector2 tbmin;
-            Vector2 tbmax;
-            tbmin.X = tcfg.BoundingBox.Minimum.X;
-            tbmin.Y = tcfg.BoundingBox.Minimum.Z;
-            tbmax.X = tcfg.BoundingBox.Maximum.X;
-            tbmax.Y = tcfg.BoundingBox.Maximum.Z;
-            int[] cid = new int[512];// TODO: Make grow when returning too many items.
-            int ncid = GetChunksOverlappingRect(chunkyMesh, tbmin, tbmax, cid, 512);
+            Vector2 tbmin = new Vector2(tcfg.BoundingBox.Minimum.X, tcfg.BoundingBox.Minimum.Z);
+            Vector2 tbmax = new Vector2(tcfg.BoundingBox.Maximum.X, tcfg.BoundingBox.Maximum.Z);
+
+            List<int> cid = new List<int>();
+            GetChunksOverlappingRect(chunkyMesh, tbmin, tbmax, cid);
+            int ncid = cid.Count;
             if (ncid == 0)
             {
                 return 0; // empty
@@ -241,7 +240,7 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < ncid; i++)
             {
-                Triangle[] tris = chunkyMesh.GetTriangles(geometry.Triangles, cid[i]);
+                var tris = chunkyMesh.GetTriangles(geometry.Triangles, cid[i]);
 
                 MarkWalkableTriangles(tcfg.WalkableSlopeAngle, tris, rc.triareas);
 
@@ -279,7 +278,7 @@ namespace Engine.PathFinding.NavMesh2
 
             // (Optional) Mark areas.
             ConvexVolume[] vols = geometry.GetConvexVolumes();
-            for (int i = 0; i < vols.Length; ++i)
+            for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
             {
                 MarkConvexPolyArea(
                     vols[i].verts, vols[i].nverts,
@@ -287,7 +286,8 @@ namespace Engine.PathFinding.NavMesh2
                     vols[i].area, rc.chf);
             }
 
-            rc.lset = BuildHeightfieldLayers(rc.chf, tcfg.BorderSize, tcfg.WalkableHeight, rc.lset);
+            //TODO: Here we are! - The layer set is always empty
+            BuildHeightfieldLayers(rc.chf, tcfg.BorderSize, tcfg.WalkableHeight, out rc.lset);
 
             FastLZCompressor comp;
             rc.ntiles = 0;
@@ -338,9 +338,84 @@ namespace Engine.PathFinding.NavMesh2
             return n;
         }
 
-        private static void MarkConvexPolyArea(float[] verts, int nverts, float hmin, float hmax, int area, CompactHeightfield chf)
+        private static void MarkConvexPolyArea(Vector3[] verts, int nverts, float hmin, float hmax, byte areaId, CompactHeightfield chf)
         {
-            throw new NotImplementedException();
+            Vector3 bmin = verts[0];
+            Vector3 bmax = verts[0];
+
+            for (int i = 1; i < nverts; ++i)
+            {
+                Vector3.Min(bmin, verts[i * 3]);
+                Vector3.Max(bmax, verts[i * 3]);
+            }
+            bmin[1] = hmin;
+            bmax[1] = hmax;
+
+            int minx = (int)((bmin[0] - chf.boundingBox.Minimum[0]) / chf.cs);
+            int miny = (int)((bmin[1] - chf.boundingBox.Minimum[1]) / chf.ch);
+            int minz = (int)((bmin[2] - chf.boundingBox.Minimum[2]) / chf.cs);
+            int maxx = (int)((bmax[0] - chf.boundingBox.Minimum[0]) / chf.cs);
+            int maxy = (int)((bmax[1] - chf.boundingBox.Minimum[1]) / chf.ch);
+            int maxz = (int)((bmax[2] - chf.boundingBox.Minimum[2]) / chf.cs);
+
+            if (maxx < 0) return;
+            if (minx >= chf.width) return;
+            if (maxz < 0) return;
+            if (minz >= chf.height) return;
+
+            if (minx < 0) minx = 0;
+            if (maxx >= chf.width) maxx = chf.width - 1;
+            if (minz < 0) minz = 0;
+            if (maxz >= chf.height) maxz = chf.height - 1;
+
+
+            // TODO: Optimize.
+            for (int z = minz; z <= maxz; ++z)
+            {
+                for (int x = minx; x <= maxx; ++x)
+                {
+                    CompactCell c = chf.cells[x + z * chf.width];
+                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
+                    {
+                        CompactSpan s = chf.spans[i];
+                        if (chf.areas[i] == AreaNull)
+                        {
+                            continue;
+                        }
+
+                        if ((int)s.y >= miny && (int)s.y <= maxy)
+                        {
+                            Vector3 p = new Vector3();
+                            p[0] = chf.boundingBox.Minimum[0] + (x + 0.5f) * chf.cs;
+                            p[1] = 0;
+                            p[2] = chf.boundingBox.Minimum[2] + (z + 0.5f) * chf.cs;
+
+                            if (PointInPoly(nverts, verts, p))
+                            {
+                                chf.areas[i] = areaId;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private static bool PointInPoly(int nvert, Vector3[] verts, Vector3 p)
+        {
+            bool c = false;
+
+            for (int i = 0, j = nvert - 1; i < nvert; j = i++)
+            {
+                Vector3 vi = verts[i];
+                Vector3 vj = verts[j];
+                if (((vi[2] > p[2]) != (vj[2] > p[2])) &&
+                    (p[0] < (vj[0] - vi[0]) * (p[2] - vi[2]) / (vj[2] - vi[2]) + vi[0]))
+                {
+                    c = !c;
+                }
+            }
+
+            return c;
         }
 
         private static bool BuildTileCacheLayer(FastLZCompressor comp, TileCacheLayerHeader header, byte[] heights, byte[] areas, byte[] cons, byte[] data, int dataSize)
@@ -348,9 +423,614 @@ namespace Engine.PathFinding.NavMesh2
             throw new NotImplementedException();
         }
 
-        private static HeightfieldLayerSet BuildHeightfieldLayers(CompactHeightfield chf, int borderSize, int walkableHeight, HeightfieldLayerSet lset)
+        private static bool BuildHeightfieldLayers(CompactHeightfield chf, int borderSize, int walkableHeight, out HeightfieldLayerSet lset)
         {
-            throw new NotImplementedException();
+            lset = null;
+
+            int w = chf.width;
+            int h = chf.height;
+
+            byte[] srcReg = new byte[chf.spanCount];
+
+            int nsweeps = chf.width;
+            LayerSweepSpan[] sweeps = new LayerSweepSpan[nsweeps];
+
+            // Partition walkable area into monotone regions.
+            int[] prevCount = new int[256];
+            byte regId = 0;
+
+            for (int y = borderSize; y < h - borderSize; ++y)
+            {
+                byte sweepId = 0;
+
+                for (int x = borderSize; x < w - borderSize; ++x)
+                {
+                    CompactCell c = chf.cells[x + y * w];
+
+                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
+                    {
+                        CompactSpan s = chf.spans[i];
+                        if (chf.areas[i] == AreaNull) continue;
+
+                        byte sid = 0xff;
+
+                        // -x
+                        if (GetCon(s, 0) != NotConnected)
+                        {
+                            int ax = x + GetDirOffsetX(0);
+                            int ay = y + GetDirOffsetY(0);
+                            int ai = (int)chf.cells[ax + ay * w].index + GetCon(s, 0);
+                            if (chf.areas[ai] != AreaNull && srcReg[ai] != 0xff)
+                            {
+                                sid = srcReg[ai];
+                            }
+                        }
+
+                        if (sid == 0xff)
+                        {
+                            sid = sweepId++;
+                            sweeps[sid].nei = 0xff;
+                            sweeps[sid].ns = 0;
+                        }
+
+                        // -y
+                        if (GetCon(s, 3) != NotConnected)
+                        {
+                            int ax = x + GetDirOffsetX(3);
+                            int ay = y + GetDirOffsetY(3);
+                            int ai = (int)chf.cells[ax + ay * w].index + GetCon(s, 3);
+                            byte nr = srcReg[ai];
+                            if (nr != 0xff)
+                            {
+                                // Set neighbour when first valid neighbour is encoutered.
+                                if (sweeps[sid].ns == 0)
+                                    sweeps[sid].nei = nr;
+
+                                if (sweeps[sid].nei == nr)
+                                {
+                                    // Update existing neighbour
+                                    sweeps[sid].ns++;
+                                    prevCount[nr]++;
+                                }
+                                else
+                                {
+                                    // This is hit if there is nore than one neighbour.
+                                    // Invalidate the neighbour.
+                                    sweeps[sid].nei = 0xff;
+                                }
+                            }
+                        }
+
+                        srcReg[i] = sid;
+                    }
+                }
+
+                // Create unique ID.
+                for (int i = 0; i < sweepId; ++i)
+                {
+                    // If the neighbour is set and there is only one continuous connection to it,
+                    // the sweep will be merged with the previous one, else new region is created.
+                    if (sweeps[i].nei != 0xff && prevCount[sweeps[i].nei] == sweeps[i].ns)
+                    {
+                        sweeps[i].id = sweeps[i].nei;
+                    }
+                    else
+                    {
+                        if (regId == 255)
+                        {
+                            throw new EngineException("rcBuildHeightfieldLayers: Region ID overflow.");
+                        }
+                        sweeps[i].id = regId++;
+                    }
+                }
+
+                // Remap local sweep ids to region ids.
+                for (int x = borderSize; x < w - borderSize; ++x)
+                {
+                    CompactCell c = chf.cells[x + y * w];
+                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
+                    {
+                        if (srcReg[i] != 0xff)
+                        {
+                            srcReg[i] = sweeps[srcReg[i]].id;
+                        }
+                    }
+                }
+            }
+
+            // Allocate and init layer regions.
+            int nregs = regId;
+            LayerRegion[] regs = new LayerRegion[nregs];
+
+            for (int i = 0; i < nregs; ++i)
+            {
+                regs[i].layerId = 0xff;
+                regs[i].ymin = 0xffff;
+                regs[i].ymax = 0;
+            }
+
+            // Find region neighbours and overlapping regions.
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    CompactCell c = chf.cells[x + y * w];
+
+                    byte[] lregs = new byte[LayerRegion.MaxLayers];
+                    int nlregs = 0;
+
+                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
+                    {
+                        CompactSpan s = chf.spans[i];
+                        byte ri = srcReg[i];
+                        if (ri == 0xff)
+                        {
+                            continue;
+                        }
+
+                        regs[ri].ymin = Math.Min(regs[ri].ymin, s.y);
+                        regs[ri].ymax = Math.Max(regs[ri].ymax, s.y);
+
+                        // Collect all region layers.
+                        if (nlregs < LayerRegion.MaxLayers)
+                        {
+                            lregs[nlregs++] = ri;
+                        }
+
+                        // Update neighbours
+                        for (int dir = 0; dir < 4; ++dir)
+                        {
+                            if (GetCon(s, dir) != NotConnected)
+                            {
+                                int ax = x + GetDirOffsetX(dir);
+                                int ay = y + GetDirOffsetY(dir);
+                                int ai = (int)chf.cells[ax + ay * w].index + GetCon(s, dir);
+                                byte rai = srcReg[ai];
+                                if (rai != 0xff && rai != ri)
+                                {
+                                    // Don't check return value -- if we cannot add the neighbor
+                                    // it will just cause a few more regions to be created, which
+                                    // is fine.
+                                    AddUnique(regs[ri].neis, ref regs[ri].nneis, LayerRegion.MaxNeighbors, rai);
+                                }
+                            }
+                        }
+
+                    }
+
+                    // Update overlapping regions.
+                    for (int i = 0; i < nlregs - 1; ++i)
+                    {
+                        for (int j = i + 1; j < nlregs; ++j)
+                        {
+                            if (lregs[i] != lregs[j])
+                            {
+                                LayerRegion ri = regs[lregs[i]];
+                                LayerRegion rj = regs[lregs[j]];
+
+                                if (!AddUnique(ri.layers, ref ri.nlayers, LayerRegion.MaxLayers, lregs[j]) ||
+                                    !AddUnique(rj.layers, ref rj.nlayers, LayerRegion.MaxLayers, lregs[i]))
+                                {
+                                    throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Create 2D layers from regions.
+            byte layerId = 0;
+
+            int MaxStack = 64;
+            byte[] stack = new byte[MaxStack];
+            int nstack = 0;
+
+            for (int i = 0; i < nregs; ++i)
+            {
+                LayerRegion root = regs[i];
+
+                // Skip already visited.
+                if (root.layerId != 0xff)
+                {
+                    continue;
+                }
+
+                // Start search.
+                root.layerId = layerId;
+                root.isBase = true;
+
+                nstack = 0;
+                stack[nstack++] = (byte)i;
+
+                while (nstack != 0)
+                {
+                    // Pop front
+                    LayerRegion reg = regs[stack[0]];
+                    nstack--;
+                    for (int j = 0; j < nstack; ++j)
+                    {
+                        stack[j] = stack[j + 1];
+                    }
+
+                    int nneis = reg.nneis;
+                    for (int j = 0; j < nneis; ++j)
+                    {
+                        byte nei = reg.neis[j];
+                        LayerRegion regn = regs[nei];
+
+                        // Skip already visited.
+                        if (regn.layerId != 0xff)
+                        {
+                            continue;
+                        }
+
+                        // Skip if the neighbour is overlapping root region.
+                        if (Contains(root.layers, root.nlayers, nei))
+                        {
+                            continue;
+                        }
+
+                        // Skip if the height range would become too large.
+                        int ymin = Math.Min(root.ymin, regn.ymin);
+                        int ymax = Math.Max(root.ymax, regn.ymax);
+                        if ((ymax - ymin) >= 255)
+                        {
+                            continue;
+                        }
+
+                        if (nstack < MaxStack)
+                        {
+                            // Deepen
+                            stack[nstack++] = nei;
+
+                            // Mark layer id
+                            regn.layerId = layerId;
+
+                            // Merge current layers to root.
+                            for (int k = 0; k < regn.nlayers; ++k)
+                            {
+                                if (!AddUnique(root.layers, ref root.nlayers, LayerRegion.MaxLayers, regn.layers[k]))
+                                {
+                                    throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
+                                }
+                            }
+
+                            root.ymin = Math.Min(root.ymin, regn.ymin);
+                            root.ymax = Math.Max(root.ymax, regn.ymax);
+                        }
+                    }
+                }
+
+                layerId++;
+            }
+
+            // Merge non-overlapping regions that are close in height.
+            ushort mergeHeight = (ushort)(walkableHeight * 4);
+
+            for (int i = 0; i < nregs; ++i)
+            {
+                LayerRegion ri = regs[i];
+                if (!ri.isBase)
+                {
+                    continue;
+                }
+
+                byte newId = ri.layerId;
+
+                for (;;)
+                {
+                    byte oldId = 0xff;
+
+                    for (int j = 0; j < nregs; ++j)
+                    {
+                        if (i == j)
+                        {
+                            continue;
+                        }
+
+                        LayerRegion rj = regs[j];
+                        if (!rj.isBase)
+                        {
+                            continue;
+                        }
+
+                        // Skip if the regions are not close to each other.
+                        if (!OverlapRange(ri.ymin, (ushort)(ri.ymax + mergeHeight), rj.ymin, (ushort)(rj.ymax + mergeHeight)))
+                        {
+                            continue;
+                        }
+
+                        // Skip if the height range would become too large.
+                        int ymin = Math.Min(ri.ymin, rj.ymin);
+                        int ymax = Math.Max(ri.ymax, rj.ymax);
+                        if ((ymax - ymin) >= 255)
+                        {
+                            continue;
+                        }
+
+                        // Make sure that there is no overlap when merging 'ri' and 'rj'.
+                        bool overlap = false;
+
+                        // Iterate over all regions which have the same layerId as 'rj'
+                        for (int k = 0; k < nregs; ++k)
+                        {
+                            if (regs[k].layerId != rj.layerId)
+                            {
+                                continue;
+                            }
+
+                            // Check if region 'k' is overlapping region 'ri'
+                            // Index to 'regs' is the same as region id.
+                            if (Contains(ri.layers, ri.nlayers, (byte)k))
+                            {
+                                overlap = true;
+                                break;
+                            }
+                        }
+
+                        // Cannot merge of regions overlap.
+                        if (overlap)
+                        {
+                            continue;
+                        }
+
+                        // Can merge i and j.
+                        oldId = rj.layerId;
+                        break;
+                    }
+
+                    // Could not find anything to merge with, stop.
+                    if (oldId == 0xff)
+                    {
+                        break;
+                    }
+
+                    // Merge
+                    for (int j = 0; j < nregs; ++j)
+                    {
+                        LayerRegion rj = regs[j];
+                        if (rj.layerId == oldId)
+                        {
+                            rj.isBase = false;
+                            // Remap layerIds.
+                            rj.layerId = newId;
+                            // Add overlaid layers from 'rj' to 'ri'.
+                            for (int k = 0; k < rj.nlayers; ++k)
+                            {
+                                if (!AddUnique(ri.layers, ref ri.nlayers, LayerRegion.MaxLayers, rj.layers[k]))
+                                {
+                                    throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
+                                }
+                            }
+
+                            // Update height bounds.
+                            ri.ymin = Math.Min(ri.ymin, rj.ymin);
+                            ri.ymax = Math.Max(ri.ymax, rj.ymax);
+                        }
+                    }
+                }
+            }
+
+            // Compact layerIds
+            byte[] remap = new byte[256];
+
+            // Find number of unique layers.
+            layerId = 0;
+            for (int i = 0; i < nregs; i++)
+            {
+                remap[regs[i].layerId] = 1;
+            }
+
+            for (int i = 0; i < 256; i++)
+            {
+                if (remap[i] == 0)
+                {
+                    remap[i] = layerId++;
+                }
+                else
+                {
+                    remap[i] = 0xff;
+                }
+            }
+
+            // Remap ids.
+            for (int i = 0; i < nregs; ++i)
+            {
+                regs[i].layerId = remap[regs[i].layerId];
+            }
+
+            // No layers, return empty.
+            if (layerId == 0)
+            {
+                return true;
+            }
+
+            // Create layers.
+            int lw = w - borderSize * 2;
+            int lh = h - borderSize * 2;
+
+            // Build contracted bbox for layers.
+            Vector3 bmin = chf.boundingBox.Minimum;
+            Vector3 bmax = chf.boundingBox.Maximum;
+            bmin[0] += borderSize * chf.cs;
+            bmin[2] += borderSize * chf.cs;
+            bmax[0] -= borderSize * chf.cs;
+            bmax[2] -= borderSize * chf.cs;
+
+            lset = new HeightfieldLayerSet();
+
+            lset.nlayers = layerId;
+            lset.layers = new HeightfieldLayer[lset.nlayers];
+
+            // Store layers.
+            for (int i = 0; i < lset.nlayers; ++i)
+            {
+                byte curId = (byte)i;
+
+                HeightfieldLayer layer = lset.layers[i];
+
+                int gridSize = lw * lh;
+
+                layer.heights = new byte[gridSize];
+                layer.areas = new byte[gridSize];
+                layer.cons = new byte[gridSize];
+
+                // Find layer height bounds.
+                int hmin = 0, hmax = 0;
+                for (int j = 0; j < nregs; ++j)
+                {
+                    if (regs[j].isBase && regs[j].layerId == curId)
+                    {
+                        hmin = regs[j].ymin;
+                        hmax = regs[j].ymax;
+                    }
+                }
+
+                layer.width = (byte)lw;
+                layer.height = (byte)lh;
+                layer.cs = chf.cs;
+                layer.ch = chf.ch;
+
+                // Adjust the bbox to fit the heightfield.
+                layer.boundingBox = new BoundingBox(bmin, bmax);
+                layer.boundingBox.Minimum[1] = bmin[1] + hmin * chf.ch;
+                layer.boundingBox.Maximum[1] = bmin[1] + hmax * chf.ch;
+                layer.hmin = (ushort)hmin;
+                layer.hmax = (ushort)hmax;
+
+                // Update usable data region.
+                layer.minx = layer.width;
+                layer.maxx = 0;
+                layer.miny = layer.height;
+                layer.maxy = 0;
+
+                // Copy height and area from compact heightfield. 
+                for (int y = 0; y < lh; ++y)
+                {
+                    for (int x = 0; x < lw; ++x)
+                    {
+                        int cx = borderSize + x;
+                        int cy = borderSize + y;
+                        CompactCell c = chf.cells[cx + cy * w];
+                        for (int j = (int)c.index, nj = (int)(c.index + c.count); j < nj; ++j)
+                        {
+                            CompactSpan s = chf.spans[j];
+                            // Skip unassigned regions.
+                            if (srcReg[j] == 0xff)
+                            {
+                                continue;
+                            }
+
+                            // Skip of does nto belong to current layer.
+                            byte lid = regs[srcReg[j]].layerId;
+                            if (lid != curId)
+                            {
+                                continue;
+                            }
+
+                            // Update data bounds.
+                            layer.minx = (byte)Math.Min(layer.minx, x);
+                            layer.maxx = (byte)Math.Max(layer.maxx, x);
+                            layer.miny = (byte)Math.Min(layer.miny, y);
+                            layer.maxy = (byte)Math.Max(layer.maxy, y);
+
+                            // Store height and area type.
+                            int idx = x + y * lw;
+                            layer.heights[idx] = (byte)(s.y - hmin);
+                            layer.areas[idx] = chf.areas[j];
+
+                            // Check connection.
+                            byte portal = 0;
+                            byte con = 0;
+                            for (int dir = 0; dir < 4; ++dir)
+                            {
+                                if (GetCon(s, dir) != NotConnected)
+                                {
+                                    int ax = cx + GetDirOffsetX(dir);
+                                    int ay = cy + GetDirOffsetY(dir);
+                                    int ai = (int)chf.cells[ax + ay * w].index + GetCon(s, dir);
+                                    byte alid = (byte)(srcReg[ai] != 0xff ? regs[srcReg[ai]].layerId : 0xff);
+                                    // Portal mask
+                                    if (chf.areas[ai] != AreaNull && lid != alid)
+                                    {
+                                        portal |= (byte)(1 << dir);
+
+                                        // Update height so that it matches on both sides of the portal.
+                                        CompactSpan ass = chf.spans[ai];
+                                        if (ass.y > hmin)
+                                        {
+                                            layer.heights[idx] = Math.Max(layer.heights[idx], (byte)(ass.y - hmin));
+                                        }
+                                    }
+                                    // Valid connection mask
+                                    if (chf.areas[ai] != AreaNull && lid == alid)
+                                    {
+                                        int nx = ax - borderSize;
+                                        int ny = ay - borderSize;
+                                        if (nx >= 0 && ny >= 0 && nx < lw && ny < lh)
+                                        {
+                                            con |= (byte)(1 << dir);
+                                        }
+                                    }
+                                }
+                            }
+
+                            layer.cons[idx] = (byte)((portal << 4) | con);
+                        }
+                    }
+                }
+
+                if (layer.minx > layer.maxx)
+                {
+                    layer.minx = layer.maxx = 0;
+                }
+
+                if (layer.miny > layer.maxy)
+                {
+                    layer.miny = layer.maxy = 0;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool OverlapRange(ushort amin, ushort amax, ushort bmin, ushort bmax)
+        {
+            return (amin > bmax || amax < bmin) ? false : true;
+        }
+
+        private static bool Contains(byte[] a, byte an, byte v)
+        {
+            int n = (int)an;
+
+            for (int i = 0; i < n; ++i)
+            {
+                if (a[i] == v)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool AddUnique(byte[] a, ref byte an, int anMax, byte v)
+        {
+            if (Contains(a, an, v))
+            {
+                return true;
+            }
+
+            if ((int)an >= anMax)
+            {
+                return false;
+            }
+
+            a[an] = v;
+            an++;
+
+            return true;
         }
 
         private static void FilterLowHangingWalkableObstacles(int walkableClimb, Heightfield solid)
@@ -726,8 +1406,6 @@ namespace Engine.PathFinding.NavMesh2
 
         private static bool RasterizeTri(Triangle tri, byte area, Heightfield hf, BoundingBox b, float cs, float ics, float ich, int flagMergeThr)
         {
-            //TODO: Here we are! -> This never adds a span
-
             int w = hf.width;
             int h = hf.height;
             float by = b.Maximum.Y - b.Minimum.Y;
@@ -736,7 +1414,7 @@ namespace Engine.PathFinding.NavMesh2
             var t = BoundingBox.FromPoints(tri.GetVertices());
 
             // If the triangle does not touch the bbox of the heightfield, skip the triagle.
-            if (t.Contains(b) == ContainmentType.Disjoint)
+            if (b.Contains(t) == ContainmentType.Disjoint)
             {
                 return true;
             }
@@ -748,14 +1426,14 @@ namespace Engine.PathFinding.NavMesh2
             y1 = MathUtil.Clamp(y1, 0, h - 1);
 
             // Clip the triangle into all grid cells it touches.
-            float[] inb = new float[3 * 4];
-            float[] inrow = new float[3 * 4];
-            float[] p1 = new float[3 * 4];
-            float[] p2 = new float[3 * 4];
+            Vector3[] inb = new Vector3[7];
+            Vector3[] inrow = new Vector3[7];
+            Vector3[] p1 = new Vector3[7];
+            Vector3[] p2 = new Vector3[7];
 
-            Array.Copy(tri.Point1.ToArray(), 0, inb, 0, 3);
-            Array.Copy(tri.Point2.ToArray(), 0, inb, 1 * 3, 3);
-            Array.Copy(tri.Point3.ToArray(), 0, inb, 2 * 3, 3);
+            inb[0] = tri.Point1;
+            inb[1] = tri.Point2;
+            inb[2] = tri.Point3;
             int nvrow = 0;
             int nvIn = 3;
 
@@ -768,11 +1446,12 @@ namespace Engine.PathFinding.NavMesh2
                 if (nvrow < 3) continue;
 
                 // find the horizontal bounds in the row
-                float minX = inrow[0], maxX = inrow[0];
-                for (int i = 1; i < nvrow; ++i)
+                float minX = inrow[0].X;
+                float maxX = inrow[0].X;
+                for (int i = 1; i < nvrow; i++)
                 {
-                    if (minX > inrow[i * 3]) minX = inrow[i * 3];
-                    if (maxX < inrow[i * 3]) maxX = inrow[i * 3];
+                    if (minX > inrow[i].X) minX = inrow[i].X;
+                    if (maxX < inrow[i].X) maxX = inrow[i].X;
                 }
                 int x0 = (int)((minX - b.Minimum.X) * ics);
                 int x1 = (int)((maxX - b.Minimum.X) * ics);
@@ -791,24 +1470,25 @@ namespace Engine.PathFinding.NavMesh2
                     if (nv < 3) continue;
 
                     // Calculate min and max of the span.
-                    float smin = p1[1], smax = p1[1];
+                    float sminY = p1[0].Y;
+                    float smaxY = p1[0].Y;
                     for (int i = 1; i < nv; ++i)
                     {
-                        smin = Math.Min(smin, p1[i * 3 + 1]);
-                        smax = Math.Min(smax, p1[i * 3 + 1]);
+                        sminY = Math.Min(sminY, p1[i].Y);
+                        smaxY = Math.Min(smaxY, p1[i].Y);
                     }
-                    smin -= b.Minimum.Y;
-                    smax -= b.Minimum.Y;
+                    sminY -= b.Minimum.Y;
+                    smaxY -= b.Minimum.Y;
                     // Skip the span if it is outside the heightfield bbox
-                    if (smax < 0.0f) continue;
-                    if (smin > by) continue;
+                    if (smaxY < 0.0f) continue;
+                    if (sminY > by) continue;
                     // Clamp the span to the heightfield bbox.
-                    if (smin < 0.0f) smin = 0;
-                    if (smax > by) smax = by;
+                    if (sminY < 0.0f) sminY = 0;
+                    if (smaxY > by) smaxY = by;
 
                     // Snap the span to the heightfield height grid.
-                    ushort ismin = (ushort)MathUtil.Clamp((int)Math.Floor(smin * ich), 0, Span.SpanMaxHeight);
-                    ushort ismax = (ushort)MathUtil.Clamp((int)Math.Ceiling(smax * ich), ismin + 1, Span.SpanMaxHeight);
+                    ushort ismin = (ushort)MathUtil.Clamp((int)Math.Floor(sminY * ich), 0, Span.SpanMaxHeight);
+                    ushort ismax = (ushort)MathUtil.Clamp((int)Math.Ceiling(smaxY * ich), ismin + 1, Span.SpanMaxHeight);
 
                     if (!AddSpan(hf, x, y, ismin, ismax, area, flagMergeThr))
                     {
@@ -906,42 +1586,42 @@ namespace Engine.PathFinding.NavMesh2
             hf.freelist = cur;
         }
 
-        private static void DividePoly(float[] inn, int nin, ref float[] out1, ref int nout1, ref float[] out2, ref int nout2, float x, int axis)
+        private static void DividePoly(
+            Vector3[] inn, int nin,
+            ref Vector3[] out1, ref int nout1,
+            ref Vector3[] out2, ref int nout2,
+            float x, int axis)
         {
             float[] d = new float[12];
-            for (int i = 0; i < nin; ++i)
+            for (int i = 0; i < nin; i++)
             {
-                d[i] = x - inn[i * 3 + axis];
+                d[i] = x - inn[i][axis];
             }
 
-            int m = 0, n = 0;
-            for (int i = 0, j = nin - 1; i < nin; j = i, ++i)
+            int m = 0;
+            int n = 0;
+            for (int i = 0, j = nin - 1; i < nin; j = i, i++)
             {
                 bool ina = d[j] >= 0;
                 bool inb = d[i] >= 0;
                 if (ina != inb)
                 {
                     float s = d[j] / (d[j] - d[i]);
-                    out1[m * 3 + 0] = inn[j * 3 + 0] + (inn[i * 3 + 0] - inn[j * 3 + 0]) * s;
-                    out1[m * 3 + 1] = inn[j * 3 + 1] + (inn[i * 3 + 1] - inn[j * 3 + 1]) * s;
-                    out1[m * 3 + 2] = inn[j * 3 + 2] + (inn[i * 3 + 2] - inn[j * 3 + 2]) * s;
+                    out1[m].X = inn[j].X + (inn[i].X - inn[j].X) * s;
+                    out1[m].Y = inn[j].Y + (inn[i].Y - inn[j].Y) * s;
+                    out1[m].Z = inn[j].Z + (inn[i].Z - inn[j].Z) * s;
 
-                    Array.Copy(out2, n * 3, out1, m * 3, 3);
-                    m++;
-                    n++;
+                    out2[n++] = out1[m++];
+
                     // add the i'th point to the right polygon. Do NOT add points that are on the dividing line
                     // since these were already added above
                     if (d[i] > 0)
                     {
-
-                        Array.Copy(out1, m * 3, inn, i * 3, 3);
-                        m++;
+                        out1[m++] = inn[i];
                     }
                     else if (d[i] < 0)
                     {
-
-                        Array.Copy(out2, n * 3, inn, i * 3, 3);
-                        n++;
+                        out2[n++] = inn[i];
                     }
                 }
                 else // same side
@@ -949,18 +1629,14 @@ namespace Engine.PathFinding.NavMesh2
                     // add the i'th point to the right polygon. Addition is done even for points on the dividing line
                     if (d[i] >= 0)
                     {
-
-                        Array.Copy(out1, m * 3, inn, i * 3, 3);
-                        m++;
+                        out1[m++] = inn[i];
 
                         if (d[i] != 0) continue;
                     }
 
-                    Array.Copy(out2, n * 3, inn, i * 3, 3);
-                    n++;
+                    out1[n++] = inn[i];
                 }
             }
-
 
             nout1 = m;
             nout2 = n;
@@ -977,7 +1653,7 @@ namespace Engine.PathFinding.NavMesh2
                 var tri = tris[i];
                 norm = tri.Normal;
                 // Check if the face is walkable.
-                if (norm[1] > walkableThr)
+                if (norm.Y > walkableThr)
                 {
                     areas[i] = WalkableArea;
                 }
@@ -1018,7 +1694,7 @@ namespace Engine.PathFinding.NavMesh2
                     // If there are no spans at this cell, just leave the data to index=0, count=0.
                     if (s == null) continue;
 
-                    CompactCell c = chf.cells[x + y * w];
+                    CompactCell c = new CompactCell();
                     c.index = (uint)idx;
                     c.count = 0;
                     while (s != null)
@@ -1036,11 +1712,13 @@ namespace Engine.PathFinding.NavMesh2
 
                         s = s.next;
                     }
+
+                    chf.cells[x + y * w] = c;
                 }
             }
 
             // Find neighbour connections.
-            int MaxLayers = NotConnected - 1;
+            int maxLayers = NotConnected - 1;
             int tooHighNeighbour = 0;
             for (int y = 0; y < h; ++y)
             {
@@ -1077,7 +1755,7 @@ namespace Engine.PathFinding.NavMesh2
                                 {
                                     // Mark direction as walkable.
                                     int lidx = k - (int)nc.index;
-                                    if (lidx < 0 || lidx > MaxLayers)
+                                    if (lidx < 0 || lidx > maxLayers)
                                     {
                                         tooHighNeighbour = Math.Max(tooHighNeighbour, lidx);
                                         continue;
@@ -1092,9 +1770,9 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
 
-            if (tooHighNeighbour > MaxLayers)
+            if (tooHighNeighbour > maxLayers)
             {
-                throw new EngineException(string.Format("Heightfield has too many layers {0} (max: {1})", tooHighNeighbour, MaxLayers));
+                throw new EngineException(string.Format("Heightfield has too many layers {0} (max: {1})", tooHighNeighbour, maxLayers));
             }
 
             return chf;
@@ -1137,11 +1815,10 @@ namespace Engine.PathFinding.NavMesh2
             return spanCount;
         }
 
-        private static int GetChunksOverlappingRect(ChunkyTriMesh cm, Vector2 bmin, Vector2 bmax, int[] ids, int maxIds)
+        private static void GetChunksOverlappingRect(ChunkyTriMesh cm, Vector2 bmin, Vector2 bmax, List<int> ids)
         {
             // Traverse tree
             int i = 0;
-            int n = 0;
             while (i < cm.nnodes)
             {
                 ChunkyTriMeshNode node = cm.nodes[i];
@@ -1150,11 +1827,7 @@ namespace Engine.PathFinding.NavMesh2
 
                 if (isLeafNode && overlap)
                 {
-                    if (n < maxIds)
-                    {
-                        ids[n] = i;
-                        n++;
-                    }
+                    ids.Add(i);
                 }
 
                 if (overlap || isLeafNode)
@@ -1167,8 +1840,6 @@ namespace Engine.PathFinding.NavMesh2
                     i += escapeIndex;
                 }
             }
-
-            return n;
         }
 
         private static bool CheckOverlapRect(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax)
