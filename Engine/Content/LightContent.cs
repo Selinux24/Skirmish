@@ -80,7 +80,7 @@ namespace Engine.Content
         /// <returns>Returns the new generate spot light</returns>
         public SceneLightSpot CreateSpotLight()
         {
-            float radius = this.GetRadius(this.QuadraticAttenuation, 0.01f);
+            float radius = this.GetRadius(this.QuadraticAttenuation, 0.5f);
             float intensity = this.ConstantAttenuation * radius;
 
             return new SceneLightSpot(this.Name, false, this.Color, this.Color, true, this.Transform, this.FallOffAngle, radius, intensity);
@@ -91,7 +91,7 @@ namespace Engine.Content
         /// <returns>Returns the new generate point light</returns>
         public SceneLightPoint CreatePointLight()
         {
-            float radius = this.GetRadius(this.QuadraticAttenuation, 0.01f);
+            float radius = this.GetRadius(this.QuadraticAttenuation, 0.5f);
             float intensity = this.ConstantAttenuation * radius;
 
             return new SceneLightPoint(this.Name, false, this.Color, this.Color, true, this.Transform, radius, intensity);

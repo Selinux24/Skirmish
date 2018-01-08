@@ -2,12 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
-    using System.Linq;
 
     /// <summary>
     /// Terrain model

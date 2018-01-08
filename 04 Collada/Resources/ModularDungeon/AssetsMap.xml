@@ -931,7 +931,7 @@
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>2 0 0</position>
         </asset>
-        <asset asset_name="Dn_Floor_1" type="Floor">
+        <asset asset_name="Dn_Floor_2" type="Floor">
           <position>0 0 0</position>
         </asset>
         <asset asset_name="Dn_Floor_1" type="Floor">
@@ -1116,43 +1116,58 @@
           <rotation>rot180</rotation>
         </asset>
 
-        <asset asset_name="Dn_Wall_1" type="Wall">
+        <asset asset_name="Dn_Wall_2" type="Wall">
           <position>-5 0 4</position>
         </asset>
-        <asset asset_name="Dn_Wall_1" type="Wall">
+        <asset asset_name="Dn_Wall_2" type="Wall">
           <position>-5 0 2</position>
         </asset>
-        <asset asset_name="Dn_Wall_1" type="Wall">
+        <asset asset_name="Dn_Wall_2" type="Wall">
           <position>-5 0 0</position>
         </asset>
-        <asset asset_name="Dn_Wall_1" type="Wall">
+        <asset asset_name="Dn_Wall_2" type="Wall">
           <position>-5 0 -2</position>
         </asset>
-        <asset asset_name="Dn_Wall_1" type="Wall">
+        <asset asset_name="Dn_Wall_2" type="Wall">
           <position>-5 0 -4</position>
         </asset>
 
-        <asset asset_name="Dn_Beam_2" type="Wall">
+        <asset asset_name="Dn_Column_1" type="Wall">
           <position>-2.5 0 -2</position>
         </asset>
-        <asset asset_name="Dn_Beam_2" type="Wall">
+        <asset asset_name="Dn_Column_1" type="Wall">
           <position>-2.5 0 0</position>
         </asset>
-        <asset asset_name="Dn_Beam_4" type="Wall">
+        <asset asset_name="Dn_Column_2" type="Wall">
           <position>-2.5 0 2</position>
           <rotation>rot270</rotation>
         </asset>
 
-        <asset asset_name="Dn_Beam_4" type="Wall">
+        <asset asset_name="Dn_Column_3" type="Wall">
           <position>2.5 0 -2</position>
-          <rotation>rot180</rotation>
+          <rotation>rot270</rotation>
         </asset>
-        <asset asset_name="Dn_Beam_2" type="Wall">
+        <asset asset_name="Dn_Column_2" type="Wall">
           <position>2.5 0 0</position>
         </asset>
-        <asset asset_name="Dn_Beam_2" type="Wall">
+        <asset asset_name="Dn_Column_2" type="Wall">
           <position>2.5 0 2</position>
         </asset>
+
+        <asset asset_name="Dn_Hook_1">
+          <position>2.5 0 2</position>
+          <rotation>rot90</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Hook_1">
+          <position>-2.5 0 -2</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Hook_1">
+          <position>-2.5 0 2</position>
+          <rotation>rot270</rotation>
+        </asset>
+
       </references>
     </asset>
   </assets>
@@ -1343,7 +1358,7 @@
       <rotation>0.12 1.9 0</rotation>
     </item>
     <item asset_name="Dn_Lamp">
-      <position>38 3.25 -6</position>
+      <position>38 3.30 -6</position>
       <rotation>-0.06930859 0.7037019 -0.06930859 0.7037019</rotation>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
         <velocity>0 0 0</velocity>
@@ -1454,14 +1469,18 @@
     </item>
 
     <item asset_name="Dn_Table_1">
-      <position>36 0 -4</position>
+      <position>36 0 -4.1</position>
+      <rotation>0.1 0 0</rotation>
     </item>
     <item asset_name="Dn_Candle_1">
-      <position>36 1 -4</position>
+      <position>36 1 -4.5</position>
       <scale>0.4</scale>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
         <velocity>0 0 0</velocity>
       </particleLight>
+    </item>
+    <item asset_name="Dn_Floor_Gap_1">
+      <position>36 0 -4</position>
     </item>
   </objects>
 </ModularSceneryAssetConfiguration>

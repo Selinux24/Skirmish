@@ -9,7 +9,7 @@ namespace Collada
 #if DEBUG
             using (Game cl = new Game("4 Collada", false, 1280, 720, true, 0, 4))
 #else
-            using (Game cl = new Game("4 Collada", true, 0, 0, true, 0, 8))
+            using (Game cl = new Game("4 Collada", true, 0, 0, true, 0, 0))
 #endif
             {
 #if DEBUG
