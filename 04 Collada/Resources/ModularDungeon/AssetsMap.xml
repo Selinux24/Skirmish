@@ -1227,8 +1227,9 @@
     <item asset_name="Corridor1">
       <position>12 0 -12</position>
     </item>
-    <item asset_name="Corridor1">
+    <item asset_name="TCross1">
       <position>18 0 -12</position>
+      <rotation>rot180</rotation>
     </item>
     <item asset_name="Corridor1">
       <position>24 0 -12</position>
@@ -1266,6 +1267,9 @@
     <item asset_name="Room5x5">
       <position>36 0 -4</position>
       <rotation>rot180</rotation>
+    </item>
+    <item asset_name="Room5x5">
+      <position>18 0 -20</position>
     </item>
   </map>
   <objects>
@@ -1393,7 +1397,19 @@
       <rotation>0 0.5646425 0 0.8253356</rotation>
       <scale>0.5</scale>
     </item>
-
+    <item asset_name="Dn_Chest_2">
+      <position>2.1 0 4</position>
+      <rotation>rot189</rotation>
+    </item>
+    <item asset_name="Dn_Chest_1">
+      <position>2.5 0 6</position>
+      <rotation>rot180</rotation>
+    </item>
+    <item asset_name="Dn_Chest_1">
+      <position>2 0 8</position>
+      <rotation>rot137</rotation>
+    </item>
+    
     <item asset_name="Dn_Crate">
       <position>13.90 0 -2.4</position>
       <rotation>0 0.1494381 0 0.9887711</rotation>
@@ -1481,6 +1497,18 @@
     </item>
     <item asset_name="Dn_Floor_Gap_1">
       <position>36 0 -4</position>
+    </item>
+
+    <item asset_name="Dn_Floor_Gap_1">
+      <position>18 0 -20</position>
+    </item>
+    <item asset_name="Dn_Chest_2">
+      <position>18 0 -22</position>
+      <rotation>rot270</rotation>
+    </item>
+    <item asset_name="Dn_Treasure_1">
+      <position>18 0 -22</position>
+      <rotation>rot270</rotation>
     </item>
   </objects>
 </ModularSceneryAssetConfiguration>
