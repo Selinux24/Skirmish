@@ -1236,6 +1236,7 @@
     </item>
     <item asset_name="Corridor2">
       <position>30 0 -12</position>
+      <rotation>rot180</rotation>
     </item>
     <item asset_name="TCross1">
       <position>36 0 -12</position>
@@ -1508,6 +1509,10 @@
     </item>
     <item asset_name="Dn_Treasure_1">
       <position>18 0 -22</position>
+      <rotation>rot270</rotation>
+    </item>
+    <item asset_name="Dn_Jail_1">
+      <position>18 0 -15</position>
       <rotation>rot270</rotation>
     </item>
   </objects>

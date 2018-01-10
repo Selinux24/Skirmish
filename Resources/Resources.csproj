@@ -185,6 +185,7 @@
     <None Include="Blender\Scenery\ModularDungeon\green-algae.png" />
     <None Include="Blender\Scenery\ModularDungeon\jewels_d.png" />
     <None Include="Blender\Scenery\ModularDungeon\treasure_d.jpg" />
+    <None Include="Blender\Weapons\golden_f.jpg" />
     <Content Include="Collada\Buildings\Dungeon\BaseMap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -493,6 +494,7 @@
     <Content Include="Collada\Scenery\ModularDungeon\banner.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Blender\Weapons\Dn_Weapons.blend" />
     <None Include="Collada\Tests\AniCube\aniCube.dae" />
     <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_diffuse.dds" />
     <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_normal.dds" />
