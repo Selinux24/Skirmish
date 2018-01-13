@@ -749,7 +749,7 @@ namespace Engine.Effects
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             SceneLights lights,
-            uint shadowMaps,
+            ShadowMapFlags shadowMaps,
             EngineShaderResourceView shadowMapLD,
             EngineShaderResourceView shadowMapHD,
             Matrix fromLightViewProjectionLD,
@@ -820,7 +820,7 @@ namespace Engine.Effects
                 this.FromLightViewProjectionHD = fromLightViewProjectionHD;
                 this.ShadowMapLD = shadowMapLD;
                 this.ShadowMapHD = shadowMapHD;
-                this.ShadowMaps = shadowMaps;
+                this.ShadowMaps = (uint)shadowMaps;
             }
             else
             {

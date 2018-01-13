@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Directional light
     /// </summary>
-    public class SceneLightDirectional : SceneLight
+    public class SceneLightDirectional : SceneLight, ISceneLightDirectional
     {
         /// <summary>
         /// Primary default light source

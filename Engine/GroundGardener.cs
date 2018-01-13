@@ -372,6 +372,25 @@ namespace Engine
                 }
             }
             /// <summary>
+            /// Draw foliage shadows
+            /// </summary>
+            /// <param name="context">Context</param>
+            /// <param name="technique">Technique</param>
+            public void DrawFoliageShadows(DrawContextShadows context, EngineEffectTechnique technique)
+            {
+                if (this.vertexDrawCount > 0)
+                {
+                    var graphics = this.Game.Graphics;
+
+                    for (int p = 0; p < technique.PassCount; p++)
+                    {
+                        graphics.EffectPassApply(technique, p, 0);
+
+                        graphics.Draw(this.vertexDrawCount, this.VertexBuffer.Offset);
+                    }
+                }
+            }
+            /// <summary>
             /// Draws the foliage data
             /// </summary>
             /// <param name="context">Drawing context</param>
@@ -382,11 +401,8 @@ namespace Engine
                 {
                     var graphics = this.Game.Graphics;
 
-                    if (!context.DrawerMode.HasFlag(DrawerModesEnum.ShadowMap))
-                    {
-                        Counters.InstancesPerFrame++;
-                        Counters.PrimitivesPerFrame += this.vertexDrawCount / 3;
-                    }
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += this.vertexDrawCount / 3;
 
                     for (int p = 0; p < technique.PassCount; p++)
                     {
@@ -768,6 +784,40 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Draws the gardener shadows
+        /// </summary>
+        /// <param name="context">Context</param>
+        public override void DrawShadows(DrawContextShadows context)
+        {
+            if (this.visibleNodes != null && this.visibleNodes.Length > 0)
+            {
+                var graphics = this.Game.Graphics;
+
+                graphics.SetBlendDefaultAlpha();
+
+                foreach (var item in this.visibleNodes)
+                {
+                    var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch != null && b.CurrentPatch.CurrentNode == item);
+                    if (buffers.Count > 0)
+                    {
+                        foreach (var buffer in buffers)
+                        {
+                            var vegetationTechnique = this.SetTechniqueVegetationShadowMap(context, buffer.CurrentPatch.Channel);
+                            if (vegetationTechnique != null)
+                            {
+                                this.BufferManager.SetInputAssembler(
+                                    vegetationTechnique,
+                                    buffer.VertexBuffer.Slot,
+                                    PrimitiveTopology.PointList);
+
+                                buffer.DrawFoliageShadows(context, vegetationTechnique);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
         /// Draws the gardener
         /// </summary>
         /// <param name="context">Drawing context</param>
@@ -776,8 +826,7 @@ namespace Engine
             var mode = context.DrawerMode;
             var graphics = this.Game.Graphics;
 
-            if ((mode.HasFlag(DrawerModesEnum.ShadowMap)) ||
-                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+            if ((mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
                 (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
             {
                 if (this.visibleNodes != null && this.visibleNodes.Length > 0)
@@ -791,7 +840,7 @@ namespace Engine
                         {
                             foreach (var buffer in buffers)
                             {
-                                var vegetationTechnique = this.SetTechniqueVegetation(context, buffer.CurrentPatch.Channel);
+                                var vegetationTechnique = this.SetTechniqueVegetationDefault(context, buffer.CurrentPatch.Channel);
                                 if (vegetationTechnique != null)
                                 {
                                     this.BufferManager.SetInputAssembler(
@@ -808,20 +857,6 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Sets thecnique for vegetation drawing
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <param name="channel">Channel</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueVegetation(DrawContext context, int channel)
-        {
-            var mode = context.DrawerMode;
-
-            if (mode.HasFlag(DrawerModesEnum.Forward)) return this.SetTechniqueVegetationDefault(context, channel);
-            if (mode.HasFlag(DrawerModesEnum.ShadowMap)) return this.SetTechniqueVegetationShadowMap(context, channel);
-            else return null;
-        }
         /// <summary>
         /// Sets thecnique for vegetation drawing with forward renderer
         /// </summary>
@@ -842,10 +877,10 @@ namespace Engine
                 context.EyePosition,
                 context.Lights,
                 context.ShadowMaps,
-                context.ShadowMapLow,
-                context.ShadowMapHigh,
-                context.FromLightViewProjectionLow,
-                context.FromLightViewProjectionHigh,
+                context.ShadowMapLow.Texture,
+                context.ShadowMapHigh.Texture,
+                context.ShadowMapLow.FromLightViewProjectionArray[0],
+                context.ShadowMapHigh.FromLightViewProjectionArray[0],
                 this.WindDirection,
                 this.WindStrength * channelData.WindEffect,
                 this.windTime * channelData.WindEffect,
@@ -872,7 +907,7 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         /// <param name="channel">Channel</param>
         /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueVegetationShadowMap(DrawContext context, int channel)
+        private EngineEffectTechnique SetTechniqueVegetationShadowMap(DrawContextShadows context, int channel)
         {
             var channelData = this.foliageMapChannels[channel];
 

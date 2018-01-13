@@ -1,13 +1,12 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
     /// <summary>
     /// Spot light
     /// </summary>
-    public class SceneLightSpot : SceneLight, ISceneLightPosition
+    public class SceneLightSpot : SceneLight, ISceneLightOmnidirectional, ISceneLightDirectional
     {
         /// <summary>
         /// Initial transform

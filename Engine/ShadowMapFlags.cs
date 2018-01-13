@@ -20,5 +20,9 @@ namespace Engine
         /// High definition shadow map
         /// </summary>
         HighDefinition = 2,
+        /// <summary>
+        /// Cube shadow map
+        /// </summary>
+        CubeMap = 4,
     }
 }

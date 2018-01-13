@@ -201,8 +201,7 @@ namespace Engine
         {
             var drawerMode = context.DrawerMode;
 
-            if (drawerMode.HasFlag(DrawerModesEnum.ShadowMap) ||
-                (drawerMode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Parameters.Transparent) ||
+            if ((drawerMode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Parameters.Transparent) ||
                 (drawerMode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Parameters.Transparent))
             {
                 var effect = DrawerPool.EffectDefaultGPUParticles;

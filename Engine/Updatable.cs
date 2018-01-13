@@ -20,6 +20,9 @@
         /// Update state
         /// </summary>
         /// <param name="context">Context</param>
-        public abstract void Update(UpdateContext context);
+        public virtual void Update(UpdateContext context)
+        {
+
+        }
     }
 }

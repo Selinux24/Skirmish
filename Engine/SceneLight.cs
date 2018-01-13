@@ -6,7 +6,7 @@ namespace Engine
     /// Scene ligth
     /// </summary>
     public abstract class SceneLight
-    { 
+    {
         /// <summary>
         /// Light name
         /// </summary>
@@ -16,7 +16,7 @@ namespace Engine
         /// </summary>
         public bool Enabled { get; set; }
         /// <summary>
-        /// Gets or stes wheter the light casts shadow
+        /// Gets or sets wheter the light casts shadow
         /// </summary>
         public bool CastShadow { get; set; }
         /// <summary>

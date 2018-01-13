@@ -315,9 +315,26 @@ namespace Engine
                     this.NodesMinimum[31].Set(LevelOfDetailEnum.Minimum, IndexBufferShapeEnum.SideRight, IndexBufferShapeEnum.SideBottom, this.NodesMinimum[30].Node, this.dictVB, this.dictIB);
                 }
             }
-
             /// <summary>
-            /// Draws 
+            /// Draw shadows 
+            /// </summary>
+            /// <param name="context">Draw context</param>
+            /// <param name="bufferManager">Buffer manager</param>
+            /// <param name="terrainTechnique">Technique for drawing</param>
+            public void DrawShadows(DrawContextShadows context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique)
+            {
+                this.visibleNodesHigh = Array.FindAll(this.NodesHigh, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                this.visibleNodesMedium = Array.FindAll(this.NodesMedium, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                this.visibleNodesLow = Array.FindAll(this.NodesLow, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                this.visibleNodesMinimum = Array.FindAll(this.NodesMinimum, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+
+                this.DrawNodeList(DrawerModesEnum.ShadowMap, bufferManager, terrainTechnique, this.visibleNodesHigh);
+                this.DrawNodeList(DrawerModesEnum.ShadowMap, bufferManager, terrainTechnique, this.visibleNodesMedium);
+                this.DrawNodeList(DrawerModesEnum.ShadowMap, bufferManager, terrainTechnique, this.visibleNodesLow);
+                this.DrawNodeList(DrawerModesEnum.ShadowMap, bufferManager, terrainTechnique, this.visibleNodesMinimum);
+            }
+            /// <summary>
+            /// Draw
             /// </summary>
             /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
@@ -329,21 +346,21 @@ namespace Engine
                 this.visibleNodesLow = Array.FindAll(this.NodesLow, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
                 this.visibleNodesMinimum = Array.FindAll(this.NodesMinimum, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
 
-                this.DrawNodeList(context, bufferManager, terrainTechnique, this.visibleNodesHigh);
-                this.DrawNodeList(context, bufferManager, terrainTechnique, this.visibleNodesMedium);
-                this.DrawNodeList(context, bufferManager, terrainTechnique, this.visibleNodesLow);
-                this.DrawNodeList(context, bufferManager, terrainTechnique, this.visibleNodesMinimum);
+                var mode = context.DrawerMode;
+                this.DrawNodeList(mode, bufferManager, terrainTechnique, this.visibleNodesHigh);
+                this.DrawNodeList(mode, bufferManager, terrainTechnique, this.visibleNodesMedium);
+                this.DrawNodeList(mode, bufferManager, terrainTechnique, this.visibleNodesLow);
+                this.DrawNodeList(mode, bufferManager, terrainTechnique, this.visibleNodesMinimum);
             }
             /// <summary>
             /// Draws the visible node list
             /// </summary>
-            /// <param name="context">Draw context</param>
+            /// <param name="mode">Drawer mode</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="terrainTechnique">Technique for drawing</param>
             /// <param name="nodeList">Node list</param>
-            private void DrawNodeList(DrawContext context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique, MapGridNode[] nodeList)
+            private void DrawNodeList(DrawerModesEnum mode, BufferManager bufferManager, EngineEffectTechnique terrainTechnique, MapGridNode[] nodeList)
             {
-                var mode = context.DrawerMode;
                 var graphics = this.Game.Graphics;
 
                 for (int i = 0; i < nodeList.Length; i++)
@@ -794,6 +811,18 @@ namespace Engine
             this.Map.Update(context.EyePosition);
         }
         /// <summary>
+        /// Draws the terrain components shadows
+        /// </summary>
+        /// <param name="context">Draw context</param>
+        public override void DrawShadows(DrawContextShadows context)
+        {
+            var terrainTechnique = this.SetTechniqueTerrainShadowMap(context);
+            if (terrainTechnique != null)
+            {
+                this.Map.DrawShadows(context, this.BufferManager, terrainTechnique);
+            }
+        }
+        /// <summary>
         /// Draws the terrain components
         /// </summary>
         /// <param name="context">Draw context</param>
@@ -801,16 +830,12 @@ namespace Engine
         {
             var mode = context.DrawerMode;
 
-            if (mode.HasFlag(DrawerModesEnum.ShadowMap) || mode.HasFlag(DrawerModesEnum.OpaqueOnly))
+            EngineEffectTechnique terrainTechnique = null;
+            if (mode.HasFlag(DrawerModesEnum.Forward)) terrainTechnique = this.SetTechniqueTerrainDefault(context as DrawContext);
+            if (mode.HasFlag(DrawerModesEnum.Deferred)) terrainTechnique = this.SetTechniqueTerrainDeferred(context as DrawContext);
+            if (terrainTechnique != null)
             {
-                EngineEffectTechnique terrainTechnique = null;
-                if (mode.HasFlag(DrawerModesEnum.Forward)) terrainTechnique = this.SetTechniqueTerrainDefault(context);
-                if (mode.HasFlag(DrawerModesEnum.Deferred)) terrainTechnique = this.SetTechniqueTerrainDeferred(context);
-                if (mode.HasFlag(DrawerModesEnum.ShadowMap)) terrainTechnique = this.SetTechniqueTerrainShadowMap(context);
-                if (terrainTechnique != null)
-                {
-                    this.Map.Draw(context, this.BufferManager, terrainTechnique);
-                }
+                this.Map.Draw(context, this.BufferManager, terrainTechnique);
             }
         }
         /// <summary>
@@ -829,10 +854,10 @@ namespace Engine
                 context.EyePosition,
                 context.Lights,
                 context.ShadowMaps,
-                context.ShadowMapLow,
-                context.ShadowMapHigh,
-                context.FromLightViewProjectionLow,
-                context.FromLightViewProjectionHigh);
+                context.ShadowMapLow.Texture,
+                context.ShadowMapHigh.Texture,
+                context.ShadowMapLow.FromLightViewProjectionArray[0],
+                context.ShadowMapHigh.FromLightViewProjectionArray[0]);
 
             effect.UpdatePerObject(
                 this.useAnisotropic,
@@ -893,7 +918,7 @@ namespace Engine
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueTerrainShadowMap(DrawContext context)
+        private EngineEffectTechnique SetTechniqueTerrainShadowMap(DrawContextShadows context)
         {
             var effect = DrawerPool.EffectShadowTerrain;
 

@@ -78,18 +78,20 @@ namespace Engine
                     this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
                     this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
+                    var dwContext = context as DrawContext;
+
                     effect.UpdatePerFrame(
-                        context.World,
-                        context.ViewProjection,
-                        context.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
-                        context.Lights,
+                        dwContext.World,
+                        dwContext.ViewProjection,
+                        dwContext.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
+                        dwContext.Lights,
                         this.Description.BaseColor,
                         this.Description.WaterColor,
                         this.Description.WaveHeight,
                         this.Description.WaveChoppy,
                         this.Description.WaveSpeed,
                         this.Description.WaveFrequency,
-                        context.GameTime.TotalSeconds,
+                        dwContext.GameTime.TotalSeconds,
                         this.Description.HeightmapIterations,
                         this.Description.GeometryIterations,
                         this.Description.ColorIterations);

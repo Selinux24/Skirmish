@@ -608,7 +608,7 @@ namespace Engine.Effects
             SceneLightDirectional light,
             Matrix lightViewProjectionLD,
             Matrix lightViewProjectionHD,
-            uint shadowMaps,
+            ShadowMapFlags shadowMaps,
             EngineShaderResourceView shadowMapLD,
             EngineShaderResourceView shadowMapHD)
         {
@@ -618,7 +618,7 @@ namespace Engine.Effects
             this.LightViewProjectionHD = lightViewProjectionHD;
             this.ShadowMapLD = shadowMapLD;
             this.ShadowMapHD = shadowMapHD;
-            this.ShadowMaps = shadowMaps;
+            this.ShadowMaps = (uint)shadowMaps;
         }
         /// <summary>
         /// Updates per spot light variables

@@ -87,8 +87,7 @@ namespace Engine
         {
             var mode = context.DrawerMode;
 
-            if (mode.HasFlag(DrawerModesEnum.ShadowMap) ||
-                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+            if ((mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
                 (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
             {
                 this.WriteDataInBuffer();
@@ -97,11 +96,8 @@ namespace Engine
                 {
                     var effect = DrawerPool.EffectDefaultBasic;
 
-                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
-                    {
-                        Counters.InstancesPerFrame += this.dictionary.Count;
-                        Counters.PrimitivesPerFrame += this.drawCount / 2;
-                    }
+                    Counters.InstancesPerFrame += this.dictionary.Count;
+                    Counters.PrimitivesPerFrame += this.drawCount / 2;
 
                     effect.UpdatePerFrame(context.World, context.ViewProjection);
                     effect.UpdatePerObject(false, null, null, null, 0, 0, 0);

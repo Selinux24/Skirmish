@@ -202,17 +202,13 @@ namespace Engine
         {
             var mode = context.DrawerMode;
 
-            if (mode.HasFlag(DrawerModesEnum.ShadowMap) ||
-                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+            if ((mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
                 (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
             {
                 if (this.indexBuffer.Count > 0)
                 {
-                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
-                    {
-                        Counters.InstancesPerFrame++;
-                        Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-                    }
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
 
                     this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 

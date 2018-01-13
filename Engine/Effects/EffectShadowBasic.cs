@@ -324,6 +324,7 @@ namespace Engine.Effects
         /// <summary>
         /// Update per model object data
         /// </summary>
+        /// <param name="diffuseMap">Diffuse map</param>
         /// <param name="textureIndex">Texture index</param>
         /// <param name="animationOffset">Animation index</param>
         public void UpdatePerObject(

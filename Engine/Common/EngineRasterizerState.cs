@@ -164,6 +164,31 @@ namespace Engine.Common
 
             return graphics.CreateRasterizerState(desc);
         }
+        /// <summary>
+        /// Creates a shadow mapping rasterizer state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <returns>Creates the shadow mapping rasterizer state</returns>
+        public static EngineRasterizerState ShadowMapping(Graphics graphics)
+        {
+            var desc = new RasterizerStateDescription2()
+            {
+                CullMode = CullMode.Back,
+                FillMode = FillMode.Solid,
+                IsFrontCounterClockwise = false,
+                IsAntialiasedLineEnabled = graphics.MultiSampled,
+                IsMultisampleEnabled = graphics.MultiSampled,
+                IsScissorEnabled = false,
+                IsDepthClipEnabled = true,
+                DepthBias = 85,
+                DepthBiasClamp = 0.0f,
+                SlopeScaledDepthBias = 5.0f,
+                ForcedSampleCount = 0,
+                ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
+            };
+
+            return graphics.CreateRasterizerState(desc);
+        }
 
         /// <summary>
         /// Constructor

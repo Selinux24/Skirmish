@@ -177,6 +177,7 @@
     <Compile Include="Common\BufferManager.cs" />
     <Compile Include="Common\DrawContext.cs" />
     <Compile Include="Common\DrawerModesEnum.cs" />
+    <Compile Include="Common\DrawContextShadows.cs" />
     <Compile Include="Common\EngineSamplerState.cs" />
     <Compile Include="Common\EngineDepthStencilState.cs" />
     <Compile Include="Common\EngineEffectVariableSampler.cs" />
@@ -206,10 +207,12 @@
     <Compile Include="Common\UseSkinningData.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
     <Compile Include="Content\ContentDescription.cs" />
+    <Compile Include="CubicShadowMap.cs" />
     <Compile Include="Effects\EffectDefaultFoliage.cs" />
     <Compile Include="Effects\EffectDefaultClouds.cs" />
     <Compile Include="Effects\EffectDefaultWater.cs" />
     <Compile Include="Effects\EffectPostBlur.cs" />
+    <Compile Include="Effects\EffectShadowPoint.cs" />
     <Compile Include="Effects\EffectShadowFoliage.cs" />
     <Compile Include="Effects\EffectShadowBillboard.cs" />
     <Compile Include="Effects\EffectDeferredTerrain.cs" />
@@ -234,7 +237,9 @@
     <Compile Include="IDrawable.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />
-    <Compile Include="ISceneLightPosition.cs" />
+    <Compile Include="ISceneLightDirectional.cs" />
+    <Compile Include="ISceneLightOmnidirectional.cs" />
+    <Compile Include="IShadowMap.cs" />
     <Compile Include="ITransformable2D.cs" />
     <Compile Include="ITransformable3D.cs" />
     <Compile Include="IUpdatable.cs" />
@@ -620,6 +625,7 @@
     <None Include="Resources\ShaderShadowBillboard.fx" />
     <None Include="Resources\ShaderShadowBillboard.fxo" />
     <None Include="Resources\ShaderShadowFoliage.fxo" />
+    <None Include="Resources\ShaderShadowPoints.fxo" />
     <None Include="Resources\ShaderShadowTerrain.fxo" />
     <None Include="Resources\ShaderDeferredTerrain.fxo" />
     <None Include="Resources\ShaderShadowTerrain.fx" />
@@ -661,6 +667,7 @@
     <Content Include="PathFinding\NavMesh2\DEBUGTris.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="Resources\ShaderShadowPoints.fx" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

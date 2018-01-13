@@ -29,7 +29,6 @@ namespace Engine
             {
                 GlobalAmbientLight = 0.1f,
                 DirectionalLights = lights,
-                visibleDirectionalLights = lights,
             };
         }
 
@@ -48,13 +47,9 @@ namespace Engine
         /// </summary>
         private List<SceneLightSpot> spotLights = new List<SceneLightSpot>();
         /// <summary>
-        /// Visible directional lights
+        /// Visible lights
         /// </summary>
-        private SceneLightDirectional[] visibleDirectionalLights = new SceneLightDirectional[] { };
-        /// <summary>
-        /// Visible position lights
-        /// </summary>
-        private List<ISceneLightPosition> visiblePositionLights = new List<ISceneLightPosition>();
+        private List<SceneLight> visibleLights = new List<SceneLight>();
 
         /// <summary>
         /// Gets or sets directional lights
@@ -198,13 +193,29 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Gets a collection of light that cast shadow
+        /// Gets a collection of directional lights that cast shadow
         /// </summary>
-        public SceneLightDirectional[] ShadowCastingLights
+        public ISceneLightDirectional[] DirectionalShadowCastingLights
         {
             get
             {
-                return this.directionalLights.FindAll(l => l.CastShadow).ToArray();
+                return this.visibleLights
+                    .Where(l => l.CastShadow && l is ISceneLightDirectional)
+                    .Select(l => (ISceneLightDirectional)l)
+                    .ToArray();
+            }
+        }
+        /// <summary>
+        /// Gets a collection of omnidirectional lights that cast shadow
+        /// </summary>
+        public ISceneLightOmnidirectional[] OmnidirectionalShadowCastingLights
+        {
+            get
+            {
+                return this.visibleLights
+                    .Where(l => l.CastShadow && l is ISceneLightOmnidirectional)
+                    .Select(l => (ISceneLightOmnidirectional)l)
+                    .ToArray();
             }
         }
         /// <summary>
@@ -231,6 +242,70 @@ namespace Engine
         /// Sun color
         /// </summary>
         public Color4 SunColor { get; set; }
+
+        /// <summary>
+        /// Gets from light view * projection matrix
+        /// </summary>
+        /// <param name="lightPosition">Light position</param>
+        /// <param name="eyePosition">Eye position</param>
+        /// <param name="shadowDistance">Shadows visible distance</param>
+        /// <returns>Returns the from light view * projection matrix</returns>
+        public static Matrix GetFromLightViewProjection(Vector3 lightPosition, Vector3 eyePosition, float shadowDistance)
+        {
+            // View from light to scene center position
+            var view = Matrix.LookAtLH(lightPosition, eyePosition, Vector3.Up);
+
+            // Transform bounding sphere to light space.
+            Vector3 sphereCenterLS = Vector3.TransformCoordinate(eyePosition, view);
+
+            // Ortho frustum in light space encloses scene.
+            float xleft = sphereCenterLS.X - shadowDistance;
+            float xright = sphereCenterLS.X + shadowDistance;
+            float ybottom = sphereCenterLS.Y - shadowDistance;
+            float ytop = sphereCenterLS.Y + shadowDistance;
+            float znear = sphereCenterLS.Z - shadowDistance;
+            float zfar = sphereCenterLS.Z + shadowDistance;
+
+            // Orthogonal projection from center
+            var projection = Matrix.OrthoOffCenterLH(xleft, xright, ybottom, ytop, znear, zfar);
+
+            return view * projection;
+        }
+        /// <summary>
+        /// Gets from light view * projection matrix cube
+        /// </summary>
+        /// <param name="lightPosition">Light position</param>
+        /// <param name="radius">Light radius</param>
+        /// <returns>Returns the from light view * projection matrix cube</returns>
+        public static Matrix[] GetFromOmniLightViewProjection(Vector3 lightPosition, float radius)
+        {
+            // Orthogonal projection from center
+            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, radius);
+
+            return new Matrix[]
+            {
+                GetFromOmniLightViewProjection(lightPosition, Vector3.Left, Vector3.Up)* projection,
+                GetFromOmniLightViewProjection(lightPosition, Vector3.Right, Vector3.Up)* projection,
+                GetFromOmniLightViewProjection(lightPosition, Vector3.Up, Vector3.BackwardLH) * projection,
+                GetFromOmniLightViewProjection(lightPosition, Vector3.Down, Vector3.ForwardLH)* projection,
+                GetFromOmniLightViewProjection(lightPosition, Vector3.ForwardLH, Vector3.Up)* projection,
+                GetFromOmniLightViewProjection(lightPosition, Vector3.BackwardLH, Vector3.Up)* projection,
+            };
+        }
+        /// <summary>
+        /// Gets the omnidirectional from light view matrix
+        /// </summary>
+        /// <param name="lightPosition">Light direction</param>
+        /// <param name="direction">Direction</param>
+        /// <param name="up">Up vector</param>
+        /// <returns>Returns the omnidirectional from light view matrix</returns>
+        public static Matrix GetFromOmniLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
+        {
+            // View from light to scene center position
+            var mat = Matrix.LookAtLH(lightPosition, lightPosition + direction, up);
+
+            return mat;
+        }
 
         /// <summary>
         /// Constructor
@@ -367,7 +442,13 @@ namespace Engine
         /// <param name="viewerPosition">Viewer position</param>
         public void Cull(BoundingFrustum frustum, Vector3 viewerPosition)
         {
-            this.visibleDirectionalLights = this.directionalLights.FindAll(l => l.Enabled == true).ToArray();
+            this.visibleLights.Clear();
+
+            var dLights = this.directionalLights.FindAll(l => l.Enabled == true);
+            if (dLights.Count > 0)
+            {
+                this.visibleLights.AddRange(dLights);
+            }
 
             var pLights = this.pointLights.FindAll(l =>
             {
@@ -380,6 +461,22 @@ namespace Engine
 
                 return false;
             });
+            if (pLights.Count > 0)
+            {
+                pLights.Sort((l1, l2) =>
+                {
+                    float d1 = Vector3.Distance(viewerPosition, l1.Position);
+                    float d2 = Vector3.Distance(viewerPosition, l2.Position);
+
+                    float f1 = l1.Radius / d1 == 0 ? 1 : d1;
+                    float f2 = l2.Radius / d2 == 0 ? 1 : d2;
+
+                    return f1.CompareTo(f2);
+                });
+
+                this.visibleLights.AddRange(pLights);
+            }
+
             var sLights = this.spotLights.FindAll(l =>
             {
                 if (l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
@@ -391,21 +488,21 @@ namespace Engine
 
                 return false;
             });
-
-            this.visiblePositionLights.Clear();
-            if (pLights.Count > 0) pLights.ForEach(l => this.visiblePositionLights.Add(l));
-            if (sLights.Count > 0) sLights.ForEach(l => this.visiblePositionLights.Add(l));
-
-            this.visiblePositionLights.Sort((l1, l2) =>
+            if (sLights.Count > 0)
             {
-                float d1 = Vector3.Distance(viewerPosition, l1.Position);
-                float d2 = Vector3.Distance(viewerPosition, l2.Position);
+                sLights.Sort((l1, l2) =>
+                {
+                    float d1 = Vector3.Distance(viewerPosition, l1.Position);
+                    float d2 = Vector3.Distance(viewerPosition, l2.Position);
 
-                float f1 = l1.Radius / d1 == 0 ? 1 : d1;
-                float f2 = l2.Radius / d2 == 0 ? 1 : d2;
+                    float f1 = l1.Radius / d1 == 0 ? 1 : d1;
+                    float f2 = l2.Radius / d2 == 0 ? 1 : d2;
 
-                return f1.CompareTo(f2);
-            });
+                    return f1.CompareTo(f2);
+                });
+
+                this.visibleLights.AddRange(sLights);
+            }
         }
         /// <summary>
         /// Gets the visible directional lights
@@ -413,7 +510,10 @@ namespace Engine
         /// <returns>Returns the visible directional lights array</returns>
         public SceneLightDirectional[] GetVisibleDirectionalLights()
         {
-            return this.visibleDirectionalLights;
+            return this.visibleLights
+                .FindAll(l => l is SceneLightDirectional)
+                .Cast<SceneLightDirectional>()
+                .ToArray();
         }
         /// <summary>
         /// Gets the visible point lights
@@ -421,7 +521,10 @@ namespace Engine
         /// <returns>Returns the visible point lights array</returns>
         public SceneLightPoint[] GetVisiblePointLights()
         {
-            return this.visiblePositionLights.FindAll(l => l is SceneLightPoint).Cast<SceneLightPoint>().ToArray();
+            return this.visibleLights
+                .FindAll(l => l is SceneLightPoint)
+                .Cast<SceneLightPoint>()
+                .ToArray();
         }
         /// <summary>
         /// Gets the visible spot lights
@@ -429,7 +532,10 @@ namespace Engine
         /// <returns>Returns the visible spot lights array</returns>
         public SceneLightSpot[] GetVisibleSpotLights()
         {
-            return this.visiblePositionLights.FindAll(l => l is SceneLightSpot).Cast<SceneLightSpot>().ToArray();
+            return this.visibleLights
+                .FindAll(l => l is SceneLightSpot)
+                .Cast<SceneLightSpot>()
+                .ToArray();
         }
 
         /// <summary>
@@ -517,6 +623,40 @@ namespace Engine
             }
 
             return Color4.White;
+        }
+        /// <summary>
+        /// Gets light position and direction for shadow casting directional lights
+        /// </summary>
+        /// <param name="light">Light</param>
+        /// <param name="lightPosition">Light position</param>
+        /// <param name="lightDirection">Light direction</param>
+        /// <remarks>Returns true if the light has valid parameters</remarks>
+        public bool GetDirectionalLightShadowParams(ISceneLightDirectional light, out Vector3 lightPosition, out Vector3 lightDirection)
+        {
+            lightPosition = Vector3.Zero;
+            lightDirection = Vector3.Zero;
+
+            if (light is SceneLightDirectional)
+            {
+                var lightDir = (SceneLightDirectional)light;
+
+                // Calc light position outside the scene volume
+                lightPosition = lightDir.GetPosition(this.FarLightsDistance);
+                lightDirection = lightDir.Direction;
+
+                return true;
+            }
+            else if (light is SceneLightSpot)
+            {
+                var lightSpot = (SceneLightSpot)light;
+
+                lightPosition = lightSpot.Position;
+                lightDirection = lightSpot.Direction;
+
+                return true;
+            }
+
+            return false;
         }
     }
 }

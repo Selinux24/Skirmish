@@ -8,44 +8,29 @@ namespace Engine
     /// <summary>
     /// Shadow map
     /// </summary>
-    public class ShadowMap : IDisposable
+    public class ShadowMap : IShadowMap, IDisposable
     {
         /// <summary>
-        /// Game class
+        /// Game instance
         /// </summary>
         protected Game Game { get; private set; }
-
-        /// <summary>
-        /// Map width
-        /// </summary>
-        public int Width { get; private set; }
-        /// <summary>
-        /// Map height
-        /// </summary>
-        public int Height { get; private set; }
         /// <summary>
         /// Viewport
         /// </summary>
-        public Viewport Viewport { get; private set; }
+        protected Viewport Viewport { get; set; }
         /// <summary>
         /// Depth map
         /// </summary>
-        public EngineDepthStencilView DepthMap { get; protected set; }
+        protected EngineDepthStencilView DepthMap { get; set; }
+
         /// <summary>
         /// Deph map texture
         /// </summary>
         public EngineShaderResourceView Texture { get; protected set; }
-
         /// <summary>
-        /// Sets shadow light
+        /// From light view projection
         /// </summary>
-        /// <param name="light">Light</param>
-        public static void SetLight(SceneLightDirectional light, float lightDistance, out Vector3 lightPosition, out Vector3 lightDirection)
-        {
-            // Calc light position outside the scene volume
-            lightPosition = light.GetPosition(lightDistance);
-            lightDirection = light.Direction;
-        }
+        public Matrix[] FromLightViewProjectionArray { get; set; }
 
         /// <summary>
         /// Constructor
@@ -57,9 +42,6 @@ namespace Engine
         {
             this.Game = game;
 
-            this.Width = width;
-            this.Height = height;
-
             this.Viewport = new Viewport(0, 0, width, height, 0, 1.0f);
 
             EngineDepthStencilView dsv;
@@ -67,32 +49,8 @@ namespace Engine
             game.Graphics.CreateShadowMapTextures(width, height, out dsv, out srv);
             this.DepthMap = dsv;
             this.Texture = srv;
-        }
-        /// <summary>
-        /// Gets from light view * projection matrix
-        /// </summary>
-        /// <param name="eyePosition">Eye position</param>
-        /// <param name="shadowDistance">Shadows visible distance</param>
-        public Matrix GetFromLightViewProjection(Vector3 lightPosition, Vector3 eyePosition, float shadowDistance)
-        {
-            // View from light to scene center position
-            var view = Matrix.LookAtLH(lightPosition, eyePosition, Vector3.Up);
 
-            // Transform bounding sphere to light space.
-            Vector3 sphereCenterLS = Vector3.TransformCoordinate(eyePosition, view);
-
-            // Ortho frustum in light space encloses scene.
-            float xleft = sphereCenterLS.X - shadowDistance;
-            float xright = sphereCenterLS.X + shadowDistance;
-            float ybottom = sphereCenterLS.Y - shadowDistance;
-            float ytop = sphereCenterLS.Y + shadowDistance;
-            float znear = sphereCenterLS.Z - shadowDistance;
-            float zfar = sphereCenterLS.Z + shadowDistance;
-
-            // Orthogonal projection from center
-            var projection = Matrix.OrthoOffCenterLH(xleft, xright, ybottom, ytop, znear, zfar);
-
-            return view * projection;
+            this.FromLightViewProjectionArray = new[] { Matrix.Identity };
         }
         /// <summary>
         /// Release of resources
@@ -101,6 +59,22 @@ namespace Engine
         {
             Helper.Dispose(this.DepthMap);
             Helper.Dispose(this.Texture);
+        }
+
+        /// <summary>
+        /// Binds the shadow map data to graphics
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        public void Bind(Graphics graphics)
+        {
+            //Set shadow mapper viewport
+            graphics.SetViewport(this.Viewport);
+
+            //Set shadow map depth map without render target
+            graphics.SetRenderTargets(
+                null, false, Color.Transparent,
+                this.DepthMap, true, false,
+                true);
         }
     }
 }

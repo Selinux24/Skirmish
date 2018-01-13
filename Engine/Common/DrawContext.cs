@@ -12,13 +12,14 @@ namespace Engine.Common
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// Game time
-        /// </summary>
-        public GameTime GameTime { get; set; }
-        /// <summary>
         /// Drawer mode
         /// </summary>
         public DrawerModesEnum DrawerMode { get; set; }
+
+        /// <summary>
+        /// Game time
+        /// </summary>
+        public GameTime GameTime { get; set; }
         /// <summary>
         /// World matrix
         /// </summary>
@@ -43,26 +44,23 @@ namespace Engine.Common
         /// Lights
         /// </summary>
         public SceneLights Lights { get; set; }
+
         /// <summary>
         /// Shadow maps
         /// </summary>
-        public uint ShadowMaps { get; set; }
-        /// <summary>
-        /// View * projection from light matrix for static shadows
-        /// </summary>
-        public Matrix FromLightViewProjectionLow { get; set; }
-        /// <summary>
-        /// View * projection from light matrix for dynamic shadows
-        /// </summary>
-        public Matrix FromLightViewProjectionHigh { get; set; }
+        public ShadowMapFlags ShadowMaps { get; set; }
         /// <summary>
         /// Low definition shadow map
         /// </summary>
-        public EngineShaderResourceView ShadowMapLow { get; set; }
+        public IShadowMap ShadowMapLow { get; set; }
         /// <summary>
         /// High definition shadow map
         /// </summary>
-        public EngineShaderResourceView ShadowMapHigh { get; set; }
+        public IShadowMap ShadowMapHigh { get; set; }
+        /// <summary>
+        /// Cube shadow map
+        /// </summary>
+        public IShadowMap[] ShadowMapCube { get; set; }
 
         /// <summary>
         /// Constructor

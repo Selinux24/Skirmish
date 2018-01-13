@@ -143,6 +143,42 @@ namespace Engine.Common
             return graphics.CreateDepthStencilState(desc, 0);
         }
         /// <summary>
+        /// Creates a depth state for shadow mapping
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <returns>Creates the shadow mapping depth state</returns>
+        public static EngineDepthStencilState ShadowMapping(Graphics graphics)
+        {
+            var desc = new DepthStencilStateDescription()
+            {
+                IsDepthEnabled = true,
+                DepthWriteMask = DepthWriteMask.All,
+                DepthComparison = Comparison.Less,
+
+                IsStencilEnabled = false,
+                StencilReadMask = 0xFF,
+                StencilWriteMask = 0xFF,
+
+                FrontFace = new DepthStencilOperationDescription()
+                {
+                    FailOperation = StencilOperation.Keep,
+                    DepthFailOperation = StencilOperation.Keep,
+                    PassOperation = StencilOperation.Keep,
+                    Comparison = Comparison.Equal,
+                },
+
+                BackFace = new DepthStencilOperationDescription()
+                {
+                    FailOperation = StencilOperation.Keep,
+                    DepthFailOperation = StencilOperation.Keep,
+                    PassOperation = StencilOperation.Keep,
+                    Comparison = Comparison.Equal,
+                },
+            };
+
+            return graphics.CreateDepthStencilState(desc, 0);
+        }
+        /// <summary>
         /// Creates a Depth-stencil state for volume marking
         /// </summary>
         /// <param name="graphics">Graphics</param>

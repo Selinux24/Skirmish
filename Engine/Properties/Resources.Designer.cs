@@ -503,6 +503,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] ShaderShadowPointFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderShadowPointFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderShadowPointFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderShadowPointFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] ShaderShadowTerrainFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderShadowTerrainFx", resourceCulture);

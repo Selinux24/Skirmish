@@ -5,6 +5,7 @@ using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine
@@ -100,6 +101,10 @@ namespace Engine
         /// No depth, no stencil
         /// </summary>
         private EngineDepthStencilState depthStencilNone = null;
+        /// <summary>
+        /// Depth stencil state for shadow mapping
+        /// </summary>
+        private EngineDepthStencilState depthStencilShadowMapping = null;
 
         /// <summary>
         /// Default blend state
@@ -134,6 +139,10 @@ namespace Engine
         /// Cull counter-clockwise face rasterizer
         /// </summary>
         private EngineRasterizerState rasterizerCullFrontFace = null;
+        /// <summary>
+        /// Shadow mapping rasterizer state
+        /// </summary>
+        private EngineRasterizerState rasterizerShadowMapping = null;
 
         /// <summary>
         /// Current vertex buffer first slot
@@ -542,64 +551,14 @@ namespace Engine
 
             #endregion
 
-            #region Depth Stencil States
+            //Depth Stencil States
+            this.CreateDepthStencilStates();
 
-            #region Z-buffer enabled for write depth-stencil state
+            //Rasterizer States
+            this.CreateRasterizerStates();
 
-            this.depthStencilzBufferEnabled = EngineDepthStencilState.ZBufferEnabled(this);
-
-            #endregion
-
-            #region Z-buffer disabled for write depth-stencil state
-
-            this.depthStencilzBufferDisabled = EngineDepthStencilState.ZBufferDisabled(this);
-
-            #endregion
-
-            #region Z-buffer enabled for read depth-stencil state
-
-            this.depthStencilRDzBufferEnabled = EngineDepthStencilState.RDzBufferEnabled(this);
-
-            #endregion
-
-            #region Z-buffer disabled for read depth-stencil state
-
-            this.depthStencilRDzBufferDisabled = EngineDepthStencilState.RDzBufferDisabled(this);
-
-            #endregion
-
-            #region No depth, no stencil state
-
-            this.depthStencilNone = EngineDepthStencilState.None(this);
-
-            #endregion
-
-            #endregion
-
-            #region Rasterizer States
-
-            //Default rasterizer state
-            this.rasterizerDefault = EngineRasterizerState.Default(this);
-
-            //Wireframe rasterizer state
-            this.rasterizerWireframe = EngineRasterizerState.Wireframe(this);
-
-            //No cull rasterizer state
-            this.rasterizerNoCull = EngineRasterizerState.NoCull(this);
-
-            //Counter clockwise cull rasterizer state
-            this.rasterizerCullFrontFace = EngineRasterizerState.CullFrontFace(this);
-
-            #endregion
-
-            #region Blend States
-
-            this.blendDefault = EngineBlendState.Default(this);
-            this.blendDefaultAlpha = EngineBlendState.DefaultAlpha(this);
-            this.blendTransparent = EngineBlendState.Transparent(this);
-            this.blendAdditive = EngineBlendState.Additive(this);
-
-            #endregion
+            //Blend States
+            this.CreateBlendStates();
 
             #region Set Defaults
 
@@ -620,6 +579,59 @@ namespace Engine
                     this.Resized(this, new EventArgs());
                 }
             }
+        }
+        /// <summary>
+        /// Creates the default depth stencil states
+        /// </summary>
+        private void CreateDepthStencilStates()
+        {
+            //Z-buffer enabled for write depth-stencil state
+            this.depthStencilzBufferEnabled = EngineDepthStencilState.ZBufferEnabled(this);
+
+            //Z-buffer disabled for write depth-stencil state
+            this.depthStencilzBufferDisabled = EngineDepthStencilState.ZBufferDisabled(this);
+
+            //Z-buffer enabled for read depth-stencil state
+            this.depthStencilRDzBufferEnabled = EngineDepthStencilState.RDzBufferEnabled(this);
+
+            //Z-buffer disabled for read depth-stencil state
+            this.depthStencilRDzBufferDisabled = EngineDepthStencilState.RDzBufferDisabled(this);
+
+            //No depth, no stencil state
+            this.depthStencilNone = EngineDepthStencilState.None(this);
+
+            //Shadow mapping state
+            this.depthStencilShadowMapping = EngineDepthStencilState.ShadowMapping(this);
+        }
+        /// <summary>
+        /// Creates the default rasterizer states
+        /// </summary>
+        private void CreateRasterizerStates()
+        {
+            //Default rasterizer state
+            this.rasterizerDefault = EngineRasterizerState.Default(this);
+
+            //Wireframe rasterizer state
+            this.rasterizerWireframe = EngineRasterizerState.Wireframe(this);
+
+            //No cull rasterizer state
+            this.rasterizerNoCull = EngineRasterizerState.NoCull(this);
+
+            //Counter clockwise cull rasterizer state
+            this.rasterizerCullFrontFace = EngineRasterizerState.CullFrontFace(this);
+
+            //Shadow mapping state
+            this.rasterizerShadowMapping = EngineRasterizerState.ShadowMapping(this);
+        }
+        /// <summary>
+        /// Creates the blend states
+        /// </summary>
+        private void CreateBlendStates()
+        {
+            this.blendDefault = EngineBlendState.Default(this);
+            this.blendDefaultAlpha = EngineBlendState.DefaultAlpha(this);
+            this.blendTransparent = EngineBlendState.Transparent(this);
+            this.blendAdditive = EngineBlendState.Additive(this);
         }
 
 #if DEBUG
@@ -720,12 +732,32 @@ namespace Engine
             this.deviceContext.Rasterizer.SetViewport(viewport);
         }
         /// <summary>
+        /// Sets viewports
+        /// </summary>
+        /// <param name="viewports">Viewports</param>
+        public void SetViewports(IEnumerable<Viewport> viewports)
+        {
+            var rawVpArray = viewports.Select(v => (SharpDX.Mathematics.Interop.RawViewportF)v).ToArray();
+
+            this.deviceContext.Rasterizer.SetViewports(rawVpArray);
+        }
+        /// <summary>
         /// Sets viewport
         /// </summary>
         /// <param name="viewport">Viewport</param>
         public void SetViewport(ViewportF viewport)
         {
             this.deviceContext.Rasterizer.SetViewport(viewport);
+        }
+        /// <summary>
+        /// Sets viewports
+        /// </summary>
+        /// <param name="viewports">Viewports</param>
+        public void SetViewports(IEnumerable<ViewportF> viewports)
+        {
+            var rawVpArray = viewports.Select(v => (SharpDX.Mathematics.Interop.RawViewportF)v).ToArray();
+
+            this.deviceContext.Rasterizer.SetViewports(rawVpArray);
         }
         /// <summary>
         /// Set render targets
@@ -849,6 +881,13 @@ namespace Engine
             this.SetDepthStencilState(this.depthStencilNone);
         }
         /// <summary>
+        /// Sets the depth state for shadow mapping
+        /// </summary>
+        public void SetDepthStencilShadowMapping()
+        {
+            this.SetDepthStencilState(this.depthStencilShadowMapping);
+        }
+        /// <summary>
         /// Sets default blend state
         /// </summary>
         public void SetBlendDefault()
@@ -903,6 +942,13 @@ namespace Engine
         public void SetRasterizerCullFrontFace()
         {
             this.SetRasterizerState(this.rasterizerCullFrontFace);
+        }
+        /// <summary>
+        /// Sets shadow mapping rasterizer state
+        /// </summary>
+        public void SetRasterizerShadowMapping()
+        {
+            this.SetRasterizerState(this.rasterizerShadowMapping);
         }
         /// <summary>
         /// Bind an array of vertex buffers to the input-assembler stage.
@@ -982,11 +1028,13 @@ namespace Engine
             Helper.Dispose(this.depthStencilRDzBufferEnabled);
             Helper.Dispose(this.depthStencilRDzBufferDisabled);
             Helper.Dispose(this.depthStencilNone);
+            Helper.Dispose(this.depthStencilShadowMapping);
 
             Helper.Dispose(this.rasterizerDefault);
             Helper.Dispose(this.rasterizerWireframe);
             Helper.Dispose(this.rasterizerNoCull);
             Helper.Dispose(this.rasterizerCullFrontFace);
+            Helper.Dispose(this.rasterizerShadowMapping);
 
             Helper.Dispose(this.blendDefault);
             Helper.Dispose(this.blendDefaultAlpha);
@@ -1207,7 +1255,7 @@ namespace Engine
 
                 if (description.IsCubeMap)
                 {
-                    texture = this.CreateTexture2DCube(description.Width, description.Format, 1, mipAutogen);
+                    texture = this.CreateTexture2DCube(description.Width, description.Height, description.Format, 1, mipAutogen);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = texture.Description.Format,
@@ -1257,7 +1305,7 @@ namespace Engine
 
                 if (description.IsCubeMap)
                 {
-                    texture = this.CreateTexture2DCube(width, format, mipMaps, 1, data);
+                    texture = this.CreateTexture2DCube(width, height, format, mipMaps, 1, data);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = format,
@@ -1312,7 +1360,7 @@ namespace Engine
 
                 if (description.IsCubeMap)
                 {
-                    textureArray = this.CreateTexture2DCube(description.Width, description.Format, descriptions.Length, mipAutogen);
+                    textureArray = this.CreateTexture2DCube(description.Width, description.Height, description.Format, descriptions.Length, mipAutogen);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = description.Format,
@@ -1375,7 +1423,7 @@ namespace Engine
 
                 if (description.IsCubeMap)
                 {
-                    textureArray = this.CreateTexture2DCube(width, format, mipMaps, arraySize, data.ToArray());
+                    textureArray = this.CreateTexture2DCube(width, height, format, mipMaps, arraySize, data.ToArray());
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = format,
@@ -1468,17 +1516,18 @@ namespace Engine
         /// <summary>
         /// Creates a Texture2DCube
         /// </summary>
-        /// <param name="faceSize">Face size</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
         /// <param name="format">Format</param>
         /// <param name="arraySize">Array size</param>
         /// <param name="generateMips">Generate mips for the texture</param>
         /// <returns>Returns the Texture2DCube</returns>
-        private Texture2D1 CreateTexture2DCube(int faceSize, Format format, int arraySize, bool generateMips)
+        private Texture2D1 CreateTexture2DCube(int width, int height, Format format, int arraySize, bool generateMips)
         {
             var description = new Texture2DDescription1()
             {
-                Width = faceSize,
-                Height = faceSize,
+                Width = width,
+                Height = height,
                 ArraySize = arraySize * 6,
                 BindFlags = (generateMips) ? BindFlags.ShaderResource | BindFlags.RenderTarget : BindFlags.ShaderResource,
                 Usage = ResourceUsage.Default,
@@ -1495,18 +1544,19 @@ namespace Engine
         /// <summary>
         /// Creates a Texture2DCube
         /// </summary>
-        /// <param name="faceSize">Face size</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
         /// <param name="format">Format</param>
         /// <param name="mipMaps">Mipmap count</param>
         /// <param name="arraySize">Array size</param>
         /// <param name="data">Initial data</param>
         /// <returns>Returns the Texture2DCube</returns>
-        private Texture2D1 CreateTexture2DCube(int faceSize, Format format, int mipMaps, int arraySize, DataBox[] data)
+        private Texture2D1 CreateTexture2DCube(int width, int height, Format format, int mipMaps, int arraySize, DataBox[] data)
         {
             var description = new Texture2DDescription1()
             {
-                Width = faceSize,
-                Height = faceSize,
+                Width = width,
+                Height = height,
                 ArraySize = arraySize * 6,
                 BindFlags = BindFlags.ShaderResource,
                 Usage = ResourceUsage.Default,
@@ -2088,6 +2138,58 @@ namespace Engine
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0
+                    },
+                };
+                srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
+            }
+        }
+        /// <summary>
+        /// Creates a cubic texture for shadow mapping
+        /// </summary>
+        /// <param name="srv">Resulting Shader Resource View</param>
+        internal void CreateCubicShadowMapTextures(int width, int height, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
+        {
+            var depthMap = new Texture2D1(
+                this.device,
+                new Texture2DDescription1()
+                {
+                    Width = width,
+                    Height = height,
+                    ArraySize = 6,
+                    BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
+                    Usage = ResourceUsage.Default,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    Format = Format.R24G8_Typeless,
+                    MipLevels = 1,
+                    OptionFlags = ResourceOptionFlags.TextureCube,
+                    SampleDescription = new SampleDescription(1, 0),
+                    TextureLayout = TextureLayout.Undefined,
+                });
+
+            using (depthMap)
+            {
+                var dsDescription = new DepthStencilViewDescription
+                {
+                    Flags = DepthStencilViewFlags.None,
+                    Format = Format.D24_UNorm_S8_UInt,
+                    Dimension = DepthStencilViewDimension.Texture2DArray,
+                    Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                    {
+                        ArraySize = 6,
+                        FirstArraySlice = 0,
+                        MipSlice = 0,
+                    },
+                };
+                dsv = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
+
+                var rvDescription = new ShaderResourceViewDescription1
+                {
+                    Format = Format.R24_UNorm_X8_Typeless,
+                    Dimension = ShaderResourceViewDimension.TextureCube,
+                    TextureCube = new ShaderResourceViewDescription.TextureCubeResource()
+                    {
+                        MipLevels = 1,
+                        MostDetailedMip = 0,
                     },
                 };
                 srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));

@@ -93,6 +93,10 @@ namespace Engine.Effects
         /// Terrain drawing effect
         /// </summary>
         public static EffectShadowTerrain EffectShadowTerrain { get; private set; }
+        /// <summary>
+        /// Point shadows effect
+        /// </summary>
+        public static EffectShadowPoint EffectShadowPoint { get; private set; }
 
         /// <summary>
         /// Blur effect
@@ -128,6 +132,7 @@ namespace Engine.Effects
             EffectShadowFoliage = CreateEffect<EffectShadowFoliage>(graphics, Resources.ShaderShadowFoliageFxo, Resources.ShaderShadowFoliageFx);
             EffectShadowBasic = CreateEffect<EffectShadowBasic>(graphics, Resources.ShaderShadowBasicFxo, Resources.ShaderShadowBasicFx);
             EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(graphics, Resources.ShaderShadowTerrainFxo, Resources.ShaderShadowTerrainFx);
+            EffectShadowPoint = CreateEffect<EffectShadowPoint>(graphics, Resources.ShaderShadowPointFxo, Resources.ShaderShadowPointFx);
 
             EffectPostBlur = CreateEffect<EffectPostBlur>(graphics, Resources.ShaderPostBlurFxo, Resources.ShaderPostBlurFx);
         }
@@ -159,6 +164,7 @@ namespace Engine.Effects
             Helper.Dispose(EffectShadowFoliage);
             Helper.Dispose(EffectShadowBasic);
             Helper.Dispose(EffectShadowTerrain);
+            Helper.Dispose(EffectShadowPoint);
 
             Helper.Dispose(EffectPostBlur);
         }
@@ -213,6 +219,8 @@ namespace Engine.Effects
                 GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
 
             EffectShadowBasic.UpdateGlobals(animationPalette, animationPaletteWidth);
+
+            EffectShadowPoint.UpdateGlobals(animationPalette, animationPaletteWidth);
         }
     }
 }

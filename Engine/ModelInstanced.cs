@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -28,6 +29,10 @@ namespace Engine
         /// Instances
         /// </summary>
         private int instanceCount = 0;
+        /// <summary>
+        /// Write instancing data to graphics flag
+        /// </summary>
+        private bool hasDataToWrite = false;
 
         /// <summary>
         /// Gets manipulator per instance list
@@ -99,6 +104,48 @@ namespace Engine
 
                 this.SortInstances(context.EyePosition);
             }
+
+            #region Update instancing data
+
+            //Process only visible instances
+            if (this.instancesTmp != null && this.instancesTmp.Length > 0)
+            {
+                LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;
+                DrawingData drawingData = null;
+                int instanceIndex = 0;
+
+                for (int i = 0; i < this.instancesTmp.Length; i++)
+                {
+                    var current = this.instancesTmp[i];
+                    if (current != null)
+                    {
+                        if (lastLod != current.LevelOfDetail)
+                        {
+                            lastLod = current.LevelOfDetail;
+                            drawingData = this.GetDrawingData(lastLod);
+                        }
+
+                        this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
+                        this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
+
+                        if (drawingData != null && drawingData.SkinningData != null)
+                        {
+                            current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
+
+                            this.instancingData[instanceIndex].AnimationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
+
+                            current.InvalidateCache();
+                        }
+
+                        instanceIndex++;
+                    }
+                }
+
+                //Mark to write instancing data
+                hasDataToWrite = instanceIndex > 0;
+            }
+
+            #endregion
         }
         /// <summary>
         /// Updates the instances order
@@ -127,11 +174,132 @@ namespace Engine
             });
         }
         /// <summary>
+        /// Shadow Drawing
+        /// </summary>
+        /// <param name="context">Context</param>
+        public override void DrawShadows(DrawContextShadows context)
+        {
+            if (this.hasDataToWrite)
+            {
+                this.BufferManager.WriteInstancingData(this.instancingData);
+            }
+
+            if (this.VisibleCount > 0)
+            {
+                Drawer effect = null;
+                GetTechniqueDelegate techniqueFn = null;
+
+                if (context.ShadowMap is ShadowMap)
+                {
+                    effect = DrawerPool.EffectShadowBasic;
+                    techniqueFn = DrawerPool.EffectShadowBasic.GetTechnique;
+                }
+                else if (context.ShadowMap is CubicShadowMap)
+                {
+                    effect = DrawerPool.EffectShadowPoint;
+                    techniqueFn = DrawerPool.EffectShadowPoint.GetTechnique;
+                }
+
+                if (effect != null)
+                {
+                    var graphics = this.Game.Graphics;
+
+                    if (context.ShadowMap is ShadowMap)
+                    {
+                        ((EffectShadowBasic)effect).UpdatePerFrame(
+                            context.World,
+                            context.ShadowMap.FromLightViewProjectionArray[0]);
+                    }
+                    else if (context.ShadowMap is CubicShadowMap)
+                    {
+                        ((EffectShadowPoint)effect).UpdatePerFrame(
+                            context.World,
+                            context.ShadowMap.FromLightViewProjectionArray);
+                    }
+
+                    int maxCount = this.MaximumCount >= 0 ?
+                    Math.Min(this.MaximumCount, this.Count) :
+                    this.Count;
+
+                    //Render by level of detail
+                    for (int l = 1; l < (int)LevelOfDetailEnum.Minimum + 1; l *= 2)
+                    {
+                        if (maxCount > 0)
+                        {
+                            LevelOfDetailEnum lod = (LevelOfDetailEnum)l;
+
+                            //Get instances in this LOD
+                            var lodInstances = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
+                            if (lodInstances != null && lodInstances.Length > 0)
+                            {
+                                var drawingData = this.GetDrawingData(lod);
+                                if (drawingData != null)
+                                {
+                                    var index = Array.IndexOf(this.instancesTmp, lodInstances[0]);
+                                    var length = Math.Min(maxCount, lodInstances.Length);
+                                    maxCount -= length;
+
+                                    if (length > 0)
+                                    {
+                                        foreach (string meshName in drawingData.Meshes.Keys)
+                                        {
+                                            var dictionary = drawingData.Meshes[meshName];
+
+                                            foreach (string material in dictionary.Keys)
+                                            {
+                                                var mesh = dictionary[material];
+
+                                                bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
+
+                                                var mat = drawingData.Materials[material];
+
+                                                if (context.ShadowMap is ShadowMap)
+                                                {
+                                                    ((EffectShadowBasic)effect).UpdatePerObject(
+                                                        mat.DiffuseTexture,
+                                                        0,
+                                                        0);
+                                                }
+                                                else if (context.ShadowMap is CubicShadowMap)
+                                                {
+                                                    ((EffectShadowPoint)effect).UpdatePerObject(
+                                                        mat.DiffuseTexture,
+                                                        0,
+                                                        0);
+                                                }
+
+                                                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+
+                                                var technique = techniqueFn(mesh.VertextType, mesh.Instanced);
+                                                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+
+                                                for (int p = 0; p < technique.PassCount; p++)
+                                                {
+                                                    graphics.EffectPassApply(technique, p, 0);
+
+                                                    mesh.Draw(graphics, index, length);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
         /// Draw
         /// </summary>
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
+            if (this.hasDataToWrite)
+            {
+                this.BufferManager.WriteInstancingData(this.instancingData);
+            }
+
             if (this.VisibleCount > 0)
             {
                 var mode = context.DrawerMode;
@@ -151,59 +319,10 @@ namespace Engine
                     effect = DrawerPool.EffectDeferredBasic;
                     techniqueFn = DrawerPool.EffectDeferredBasic.GetTechnique;
                 }
-                else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
-                {
-                    effect = DrawerPool.EffectShadowBasic;
-                    techniqueFn = DrawerPool.EffectShadowBasic.GetTechnique;
-                }
+
                 if (effect != null)
                 {
                     var graphics = this.Game.Graphics;
-
-                    #region Update instancing data
-
-                    //Process only visible instances
-                    if (this.instancesTmp != null && this.instancesTmp.Length > 0)
-                    {
-                        LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;
-                        DrawingData drawingData = null;
-                        int instanceIndex = 0;
-
-                        for (int i = 0; i < this.instancesTmp.Length; i++)
-                        {
-                            var current = this.instancesTmp[i];
-                            if (current != null)
-                            {
-                                if (lastLod != current.LevelOfDetail)
-                                {
-                                    lastLod = current.LevelOfDetail;
-                                    drawingData = this.GetDrawingData(lastLod);
-                                }
-
-                                this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
-                                this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
-
-                                if (drawingData != null && drawingData.SkinningData != null)
-                                {
-                                    current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
-
-                                    this.instancingData[instanceIndex].AnimationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
-
-                                    current.InvalidateCache();
-                                }
-
-                                instanceIndex++;
-                            }
-                        }
-
-                        //Writes instancing data
-                        if (instanceIndex > 0)
-                        {
-                            this.BufferManager.WriteInstancingData(this.instancingData);
-                        }
-                    }
-
-                    #endregion
 
                     #region Per frame update
 
@@ -215,20 +334,14 @@ namespace Engine
                             context.EyePosition,
                             context.Lights,
                             context.ShadowMaps,
-                            context.ShadowMapLow,
-                            context.ShadowMapHigh,
-                            context.FromLightViewProjectionLow,
-                            context.FromLightViewProjectionHigh);
+                            context.ShadowMapLow.Texture,
+                            context.ShadowMapHigh.Texture,
+                            context.ShadowMapLow.FromLightViewProjectionArray[0],
+                            context.ShadowMapHigh.FromLightViewProjectionArray[0]);
                     }
                     else if (mode.HasFlag(DrawerModesEnum.Deferred))
                     {
                         ((EffectDeferredBasic)effect).UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection);
-                    }
-                    else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
-                    {
-                        ((EffectShadowBasic)effect).UpdatePerFrame(
                             context.World,
                             context.ViewProjection);
                     }
@@ -279,11 +392,8 @@ namespace Engine
                                                     continue;
                                                 }
 
-                                                if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
-                                                {
-                                                    count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
-                                                    count *= instanceCount;
-                                                }
+                                                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+                                                count *= instanceCount;
 
                                                 #region Per object update
 
@@ -311,13 +421,6 @@ namespace Engine
                                                         0,
                                                         0);
                                                 }
-                                                else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
-                                                {
-                                                    ((EffectShadowBasic)effect).UpdatePerObject(
-                                                        mat.DiffuseTexture,
-                                                        0,
-                                                        0);
-                                                }
 
                                                 #endregion
 
@@ -341,11 +444,8 @@ namespace Engine
                     }
                 }
 
-                if (!mode.HasFlag(DrawerModesEnum.ShadowMap) && count > 0)
-                {
-                    Counters.InstancesPerFrame += instanceCount;
-                    Counters.PrimitivesPerFrame += count;
-                }
+                Counters.InstancesPerFrame += instanceCount;
+                Counters.PrimitivesPerFrame += count;
             }
         }
         /// <summary>
@@ -427,6 +527,84 @@ namespace Engine
             }
 
             return res;
+        }
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <param name="distance">If any instance is inside the volume, returns zero</param>
+        /// <returns>Returns true if all of the instances were outside of the frustum</returns>
+        public override bool Cull(BoundingFrustum frustum, out float? distance)
+        {
+            if (this.instancesTmp != null && this.instancesTmp.Length > 0)
+            {
+                var item = this.instancesTmp.FirstOrDefault(i =>
+                {
+                    float? iDistance;
+                    return !i.Cull(frustum, out iDistance);
+                });
+
+                if (item != null)
+                {
+                    distance = 0;
+                    return false;
+                }
+            }
+
+            distance = null;
+            return true;
+        }
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="distance">If any instance is inside the volume, returns zero</param>
+        /// <returns>Returns true if all of the instances were outside of the sphere</returns>
+        public override bool Cull(BoundingSphere sphere, out float? distance)
+        {
+            if (this.instancesTmp != null && this.instancesTmp.Length > 0)
+            {
+                var item = this.instancesTmp.FirstOrDefault(i =>
+                {
+                    float? iDistance;
+                    return !i.Cull(sphere, out iDistance);
+                });
+
+                if (item != null)
+                {
+                    distance = 0;
+                    return false;
+                }
+            }
+
+            distance = null;
+            return true;
+        }
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="distance">If any instance is inside the volume, returns zero</param>
+        /// <returns>Returns true if all of the instances were outside of the box</returns>
+        public override bool Cull(BoundingBox box, out float? distance)
+        {
+            if (this.instancesTmp != null && this.instancesTmp.Length > 0)
+            {
+                var item = this.instancesTmp.FirstOrDefault(i =>
+                {
+                    float? iDistance;
+                    return !i.Cull(box, out iDistance);
+                });
+
+                if (item != null)
+                {
+                    distance = 0;
+                    return false;
+                }
+            }
+
+            distance = null;
+            return true;
         }
     }
 }

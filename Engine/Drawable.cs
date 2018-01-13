@@ -29,10 +29,21 @@ namespace Engine
         }
 
         /// <summary>
+        /// Draw shadows
+        /// </summary>
+        /// <param name="context">Context</param>
+        public virtual void DrawShadows(DrawContextShadows context)
+        {
+
+        }
+        /// <summary>
         /// Draw
         /// </summary>
         /// <param name="context">Context</param>
-        public abstract void Draw(DrawContext context);
+        public virtual void Draw(DrawContext context)
+        {
+
+        }
 
         /// <summary>
         /// Performs culling test

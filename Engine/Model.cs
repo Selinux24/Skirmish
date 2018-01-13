@@ -210,6 +210,96 @@ namespace Engine
             this.SetLOD(context.EyePosition, context.Frustum);
         }
         /// <summary>
+        /// Draw shadows
+        /// </summary>
+        /// <param name="context"></param>
+        public override void DrawShadows(DrawContextShadows context)
+        {
+            if (this.DrawingData != null)
+            {
+                int count = 0;
+                int instanceCount = 0;
+
+                instanceCount++;
+
+                Drawer effect = null;
+                GetTechniqueDelegate techniqueFn = null;
+
+                if (context.ShadowMap is ShadowMap)
+                {
+                    effect = DrawerPool.EffectShadowBasic;
+                    techniqueFn = DrawerPool.EffectShadowBasic.GetTechnique;
+                }
+                else if (context.ShadowMap is CubicShadowMap)
+                {
+                    effect = DrawerPool.EffectShadowPoint;
+                    techniqueFn = DrawerPool.EffectShadowPoint.GetTechnique;
+                }
+
+                if (effect != null)
+                {
+                    var graphics = this.Game.Graphics;
+
+                    foreach (string meshName in this.DrawingData.Meshes.Keys)
+                    {
+                        var dictionary = this.DrawingData.Meshes[meshName];
+
+                        var localTransform = this.GetTransformByName(meshName) * context.World;
+
+                        if (context.ShadowMap is ShadowMap)
+                        {
+                            ((EffectShadowBasic)effect).UpdatePerFrame(
+                                localTransform,
+                                context.ShadowMap.FromLightViewProjectionArray[0]);
+                        }
+                        else if (context.ShadowMap is CubicShadowMap)
+                        {
+                            ((EffectShadowPoint)effect).UpdatePerFrame(
+                                localTransform,
+                                context.ShadowMap.FromLightViewProjectionArray);
+                        }
+
+                        foreach (string material in dictionary.Keys)
+                        {
+                            var mesh = dictionary[material];
+                            bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
+
+                            var mat = this.DrawingData.Materials[material];
+
+                            if (context.ShadowMap is ShadowMap)
+                            {
+                                ((EffectShadowBasic)effect).UpdatePerObject(
+                                    mat.DiffuseTexture,
+                                    this.TextureIndex,
+                                    this.AnimationIndex);
+                            }
+                            else if (context.ShadowMap is CubicShadowMap)
+                            {
+                                ((EffectShadowPoint)effect).UpdatePerObject(
+                                    mat.DiffuseTexture,
+                                    this.TextureIndex,
+                                    this.AnimationIndex);
+                            }
+
+                            this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+
+                            var technique = techniqueFn(mesh.VertextType, mesh.Instanced);
+                            this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+
+                            count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+
+                            for (int p = 0; p < technique.PassCount; p++)
+                            {
+                                graphics.EffectPassApply(technique, p, 0);
+
+                                mesh.Draw(graphics);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
         /// Draw
         /// </summary>
         /// <param name="context">Context</param>
@@ -236,11 +326,7 @@ namespace Engine
                     effect = DrawerPool.EffectDeferredBasic;
                     techniqueFn = DrawerPool.EffectDeferredBasic.GetTechnique;
                 }
-                else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
-                {
-                    effect = DrawerPool.EffectShadowBasic;
-                    techniqueFn = DrawerPool.EffectShadowBasic.GetTechnique;
-                }
+
                 if (effect != null)
                 {
                     var graphics = this.Game.Graphics;
@@ -261,20 +347,14 @@ namespace Engine
                                 context.EyePosition,
                                 context.Lights,
                                 context.ShadowMaps,
-                                context.ShadowMapLow,
-                                context.ShadowMapHigh,
-                                context.FromLightViewProjectionLow,
-                                context.FromLightViewProjectionHigh);
+                                context.ShadowMapLow.Texture,
+                                context.ShadowMapHigh.Texture,
+                                context.ShadowMapLow.FromLightViewProjectionArray[0],
+                                context.ShadowMapHigh.FromLightViewProjectionArray[0]);
                         }
                         else if (mode.HasFlag(DrawerModesEnum.Deferred))
                         {
                             ((EffectDeferredBasic)effect).UpdatePerFrame(
-                                localTransform,
-                                context.ViewProjection);
-                        }
-                        else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
-                        {
-                            ((EffectShadowBasic)effect).UpdatePerFrame(
                                 localTransform,
                                 context.ViewProjection);
                         }
@@ -321,13 +401,6 @@ namespace Engine
                                     this.TextureIndex,
                                     this.AnimationIndex);
                             }
-                            else if (mode.HasFlag(DrawerModesEnum.ShadowMap))
-                            {
-                                ((EffectShadowBasic)effect).UpdatePerObject(
-                                    mat.DiffuseTexture,
-                                    this.TextureIndex,
-                                    this.AnimationIndex);
-                            }
 
                             #endregion
 
@@ -348,11 +421,8 @@ namespace Engine
                     }
                 }
 
-                if (!mode.HasFlag(DrawerModesEnum.ShadowMap) && count > 0)
-                {
-                    Counters.InstancesPerFrame += instanceCount;
-                    Counters.PrimitivesPerFrame += count;
-                }
+                Counters.InstancesPerFrame += instanceCount;
+                Counters.PrimitivesPerFrame += count;
             }
         }
         /// <summary>

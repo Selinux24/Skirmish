@@ -238,6 +238,12 @@
   <data name="ShaderShadowBasicFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shadershadowbasic.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="ShaderShadowPointFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadershadowpoints.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShaderShadowPointFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\resources\shadershadowpoints.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="ShaderShadowTerrainFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shadershadowterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

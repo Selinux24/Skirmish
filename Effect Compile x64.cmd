@@ -24,5 +24,6 @@ del *.cod
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadowFoliage.fxo ShaderShadowFoliage.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadowBasic.fxo ShaderShadowBasic.fx
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadowTerrain.fxo ShaderShadowTerrain.fx
+"%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderShadowPoints.fxo ShaderShadowPoints.fx
 
 "%DXSDK_DIR%bin\x64\"fxc /O0 /Fc /Zi /T  fx_5_0 /Fo ShaderPostBlur.fxo ShaderPostBlur.fx

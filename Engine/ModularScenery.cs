@@ -277,6 +277,8 @@ namespace Engine
                                 {
                                     foreach (var light in lights)
                                     {
+                                        light.CastShadow = true;
+
                                         var pointL = light as SceneLightPoint;
                                         if (pointL != null)
                                         {

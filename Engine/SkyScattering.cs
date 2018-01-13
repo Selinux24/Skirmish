@@ -256,7 +256,9 @@ namespace Engine
 
             if (mode.HasFlag(DrawerModesEnum.OpaqueOnly))
             {
-                var keyLight = context.Lights.KeyLight;
+                var dwContext = context as DrawContext;
+
+                var keyLight = dwContext.Lights.KeyLight;
                 if (keyLight != null && this.indexBuffer.Count > 0)
                 {
                     Counters.InstancesPerFrame++;
@@ -282,8 +284,8 @@ namespace Engine
                     this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
                     effect.UpdatePerFrame(
-                        Matrix.Translation(context.EyePosition),
-                        context.ViewProjection,
+                        Matrix.Translation(dwContext.EyePosition),
+                        dwContext.ViewProjection,
                         this.PlanetRadius,
                         this.PlanetAtmosphereRadius,
                         this.SphereOuterRadius,
@@ -296,7 +298,7 @@ namespace Engine
                         this.InvWaveLength4,
                         this.ScatteringScale,
                         this.RayleighScaleDepth,
-                        context.Lights.FogColor,
+                        dwContext.Lights.FogColor,
                         keyLight.Direction,
                         this.HDRExposure);
 

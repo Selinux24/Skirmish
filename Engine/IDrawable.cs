@@ -8,6 +8,11 @@
     public interface IDrawable
     {
         /// <summary>
+        /// Draw shadows
+        /// </summary>
+        /// <param name="context">Context</param>
+        void DrawShadows(DrawContextShadows context);
+        /// <summary>
         /// Draw
         /// </summary>
         /// <param name="context">Context</param>

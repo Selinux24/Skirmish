@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Point light
     /// </summary>
-    public class SceneLightPoint : SceneLight, ISceneLightPosition
+    public class SceneLightPoint : SceneLight, ISceneLightOmnidirectional
     {
         /// <summary>
         /// Initial transform
