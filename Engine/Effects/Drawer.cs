@@ -64,5 +64,13 @@ namespace Engine.Effects
     /// <param name="vertexType">Vertex type</param>
     /// <param name="instanced">Instanced technique</param>
     /// <returns>Returns a technique</returns>
-    delegate EngineEffectTechnique GetTechniqueDelegate(VertexTypes vertexType, bool instanced);
+    delegate EngineEffectTechnique GetDrawingTechniqueDelegate(VertexTypes vertexType, bool instanced);
+    /// <summary>
+    /// Get technique function delegate
+    /// </summary>
+    /// <param name="vertexType">Vertex type</param>
+    /// <param name="instanced">Instanced technique</param>
+    /// <param name="transparent">Transparent textures technique</param>
+    /// <returns>Returns a technique</returns>
+    delegate EngineEffectTechnique GetShadowMappingTechniqueDelegate(VertexTypes vertexType, bool instanced, bool transparent);
 }

@@ -187,7 +187,7 @@ namespace Engine
             if (this.VisibleCount > 0)
             {
                 Drawer effect = null;
-                GetTechniqueDelegate techniqueFn = null;
+                GetShadowMappingTechniqueDelegate techniqueFn = null;
 
                 if (context.ShadowMap is ShadowMap)
                 {
@@ -270,7 +270,7 @@ namespace Engine
 
                                                 this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                                                var technique = techniqueFn(mesh.VertextType, mesh.Instanced);
+                                                var technique = techniqueFn(mesh.VertextType, mesh.Instanced, mesh.Transparent);
                                                 this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                                                 for (int p = 0; p < technique.PassCount; p++)
@@ -308,7 +308,7 @@ namespace Engine
                 int instanceCount = 0;
 
                 Drawer effect = null;
-                GetTechniqueDelegate techniqueFn = null;
+                GetDrawingTechniqueDelegate techniqueFn = null;
                 if (mode.HasFlag(DrawerModesEnum.Forward))
                 {
                     effect = DrawerPool.EffectDefaultBasic;

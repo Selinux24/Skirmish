@@ -429,6 +429,9 @@ float4 PSDefault(GSShadowMapTexture input) : SV_Target
 	}
 }
 
+/**********************************************************************************************************
+OPAQUES
+**********************************************************************************************************/
 technique11 ShadowMapPositionColor
 {
 	pass P0
@@ -509,8 +512,8 @@ technique11 ShadowMapPositionTexture
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionTexture()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 technique11 ShadowMapPositionTextureI
 {
@@ -518,8 +521,8 @@ technique11 ShadowMapPositionTextureI
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureI()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 technique11 ShadowMapPositionTextureSkinned
 {
@@ -527,8 +530,8 @@ technique11 ShadowMapPositionTextureSkinned
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinned()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 technique11 ShadowMapPositionTextureSkinnedI
 {
@@ -536,8 +539,8 @@ technique11 ShadowMapPositionTextureSkinnedI
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinnedI()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 
 technique11 ShadowMapPositionNormalTexture
@@ -546,8 +549,8 @@ technique11 ShadowMapPositionNormalTexture
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTexture()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 technique11 ShadowMapPositionNormalTextureI
 {
@@ -555,8 +558,8 @@ technique11 ShadowMapPositionNormalTextureI
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureI()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 technique11 ShadowMapPositionNormalTextureSkinned
 {
@@ -564,8 +567,8 @@ technique11 ShadowMapPositionNormalTextureSkinned
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinned()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 technique11 ShadowMapPositionNormalTextureSkinnedI
 {
@@ -573,8 +576,8 @@ technique11 ShadowMapPositionNormalTextureSkinnedI
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinnedI()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 
 technique11 ShadowMapPositionNormalTextureTangent
@@ -583,8 +586,8 @@ technique11 ShadowMapPositionNormalTextureTangent
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangent()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 technique11 ShadowMapPositionNormalTextureTangentI
 {
@@ -592,8 +595,8 @@ technique11 ShadowMapPositionNormalTextureTangentI
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentI()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 technique11 ShadowMapPositionNormalTextureTangentSkinned
 {
@@ -601,8 +604,8 @@ technique11 ShadowMapPositionNormalTextureTangentSkinned
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinned()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
 }
 technique11 ShadowMapPositionNormalTextureTangentSkinnedI
 {
@@ -610,6 +613,120 @@ technique11 ShadowMapPositionNormalTextureTangentSkinnedI
 	{
 		SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinnedI()));
         SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
-		SetPixelShader(CompileShader(ps_5_0, PSDefault()));
-	}
+        SetPixelShader(NULL);
+    }
+}
+
+/**********************************************************************************************************
+TEXTURE TRANSPARENCY
+**********************************************************************************************************/
+technique11 ShadowMapPositionTextureTransparent
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTexture()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionTextureTransparentI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureI()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionTextureTransparentSkinned
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinned()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionTextureTransparentSkinnedI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinnedI()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+
+technique11 ShadowMapPositionNormalTextureTransparent
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTexture()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTransparentI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureI()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTransparentSkinned
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinned()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTransparentSkinnedI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinnedI()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+
+technique11 ShadowMapPositionNormalTextureTangentTransparent
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangent()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTangentTransparentI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentI()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTangentTransparentSkinned
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinned()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTangentTransparentSkinnedI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinnedI()));
+        SetGeometryShader(CompileShader(gs_5_0, GSPointShadowMapTexture()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
 }

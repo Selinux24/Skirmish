@@ -97,7 +97,7 @@ namespace Engine
             /// <param name="sceneryEffect">Scenery effect</param>
             /// <param name="techniqueFn">Function for technique</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawSceneryShadows(DrawContextShadows context, Drawer sceneryEffect, GetTechniqueDelegate techniqueFn, BufferManager bufferManager)
+            public void DrawSceneryShadows(DrawContextShadows context, Drawer sceneryEffect, GetShadowMappingTechniqueDelegate techniqueFn, BufferManager bufferManager)
             {
                 var graphics = this.Game.Graphics;
 
@@ -109,7 +109,7 @@ namespace Engine
                     {
                         var mesh = dictionary[material];
 
-                        var technique = techniqueFn(mesh.VertextType, mesh.Instanced);
+                        var technique = techniqueFn(mesh.VertextType, mesh.Instanced, mesh.Transparent);
 
                         #region Per object update
 
@@ -151,7 +151,7 @@ namespace Engine
             /// <param name="sceneryEffect">Scenery effect</param>
             /// <param name="techniqueFn">Function for technique</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawScenery(DrawContext context, Drawer sceneryEffect, GetTechniqueDelegate techniqueFn, BufferManager bufferManager)
+            public void DrawScenery(DrawContext context, Drawer sceneryEffect, GetDrawingTechniqueDelegate techniqueFn, BufferManager bufferManager)
             {
                 var mode = context.DrawerMode;
                 var graphics = this.Game.Graphics;
@@ -385,7 +385,7 @@ namespace Engine
                 var graphics = this.Game.Graphics;
 
                 Drawer sceneryEffect = null;
-                GetTechniqueDelegate techniqueFn = null;
+                GetShadowMappingTechniqueDelegate techniqueFn = null;
 
                 if (context.ShadowMap is ShadowMap)
                 {
@@ -432,7 +432,7 @@ namespace Engine
                 if (nodes != null && nodes.Length > 0)
                 {
                     Drawer sceneryEffect = null;
-                    GetTechniqueDelegate techniqueFn = null;
+                    GetDrawingTechniqueDelegate techniqueFn = null;
 
                     if (mode.HasFlag(DrawerModesEnum.Forward))
                     {
