@@ -234,11 +234,10 @@ namespace Engine
                 Name = "Shadow mapping",
             };
 
-            var graphics = this.Game.Graphics;
 
-            this.blendDeferredComposer = EngineBlendState.DeferredComposer(graphics, 3);
-            this.blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(graphics, 3);
-            this.blendDeferredLighting = EngineBlendState.DeferredLighting(graphics);
+            this.blendDeferredComposer = EngineBlendState.DeferredComposer(game.Graphics, 3);
+            this.blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(game.Graphics, 3);
+            this.blendDeferredLighting = EngineBlendState.DeferredLighting(game.Graphics);
         }
         /// <summary>
         /// Dispose objects
@@ -376,6 +375,8 @@ namespace Engine
 #endif
                     #endregion
 
+                    #region Shadow mapping
+
                     ShadowMapFlags flags = ShadowMapFlags.None;
 
                     flags |= DoShadowMapping(gameTime, scene);
@@ -384,6 +385,8 @@ namespace Engine
 
                     //Set shadow map flags to drawing context
                     this.DrawContext.ShadowMaps = flags;
+
+                    #endregion
 
                     #region Deferred rendering
 
@@ -692,6 +695,8 @@ namespace Engine
             var shadowCastingLights = scene.Lights.DirectionalShadowCastingLights;
             if (shadowCastingLights.Length > 0)
             {
+                var graphics = this.Game.Graphics;
+
 #if DEBUG
                 Stopwatch swShadowsPreparation = Stopwatch.StartNew();
 #endif
@@ -750,7 +755,7 @@ namespace Engine
                                 scene.Lights.ShadowLDDistance);
 
                             this.shadowMapperLow.FromLightViewProjectionArray = new[] { fromLightVP };
-                            this.shadowMapperLow.Bind(this.Game.Graphics);
+                            this.shadowMapperLow.Bind(graphics);
 
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowLowIndex, shadowObjs);
 #if DEBUG
@@ -788,7 +793,7 @@ namespace Engine
                                 scene.Lights.ShadowHDDistance);
 
                             this.shadowMapperHigh.FromLightViewProjectionArray = new[] { fromLightVP };
-                            this.shadowMapperHigh.Bind(this.Game.Graphics);
+                            this.shadowMapperHigh.Bind(graphics);
 
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowHighIndex, shadowObjs);
 #if DEBUG
@@ -818,6 +823,8 @@ namespace Engine
             var shadowCastingLights = scene.Lights.OmnidirectionalShadowCastingLights;
             if (shadowCastingLights.Length > 0)
             {
+                var graphics = this.Game.Graphics;
+
 #if DEBUG
                 Stopwatch swShadowsPreparation = Stopwatch.StartNew();
 #endif
@@ -866,7 +873,7 @@ namespace Engine
                                 shadowCastingLights[0].Radius);
 
                             this.shadowMapperCube[c].FromLightViewProjectionArray = vpArray;
-                            this.shadowMapperCube[c].Bind(this.Game.Graphics);
+                            this.shadowMapperCube[c].Bind(graphics);
 
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowCubicIndex, shadowObjs);
 #if DEBUG
