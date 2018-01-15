@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.79.0 commit date:2017-09-11, commit time:10:43, hash:5bd8ac9</authoring_tool>
     </contributor>
-    <created>2018-01-10T19:56:10</created>
-    <modified>2018-01-10T19:56:10</modified>
+    <created>2018-01-15T23:49:58</created>
+    <modified>2018-01-15T23:49:58</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -85,7 +85,7 @@
           <color sid="color">0.06382227 1 0.05031207</color>
           <constant_attenuation>1</constant_attenuation>
           <linear_attenuation>0</linear_attenuation>
-          <quadratic_attenuation>1</quadratic_attenuation>
+          <quadratic_attenuation>0.03999996</quadratic_attenuation>
         </point>
       </technique_common>
       <extra>
@@ -101,7 +101,7 @@
           <shadow_g sid="blender_shadow_g" type="float">0</shadow_g>
           <shadow_b sid="blender_shadow_b" type="float">0</shadow_b>
           <energy sid="blender_energy" type="float">1</energy>
-          <dist sid="blender_dist" type="float">1</dist>
+          <dist sid="blender_dist" type="float">5</dist>
           <spotsize sid="spotsize" type="float">45</spotsize>
           <spotblend sid="spotblend" type="float">0.15</spotblend>
           <halo_intensity sid="blnder_halo_intensity" type="float">1</halo_intensity>
@@ -3460,7 +3460,7 @@
           </bind_material>
         </instance_geometry>
         <node id="Dn_Candle_1_Light" name="Dn_Candle_1_Light" type="NODE">
-          <matrix sid="transform">1 0 0 -0.002780914 0 1 0 7.03335e-6 0 0 1 0.330942 0 0 0 1</matrix>
+          <matrix sid="transform">1 0 0 -0.002780914 0 1 0 7.03335e-6 0 0 1 0.3510569 0 0 0 1</matrix>
           <instance_light url="#Dn_Candle_1_Light-light"/>
         </node>
       </node>
@@ -3668,7 +3668,7 @@
           </bind_material>
         </instance_geometry>
         <node id="Dn_Lamp_1_Light" name="Dn_Lamp_1_Light" type="NODE">
-          <matrix sid="transform">1 0 0 0.2046328 0 1 0 0 0 0 1 -0.2913351 0 0 0 1</matrix>
+          <matrix sid="transform">1 0 0 0.2046328 0 1 0 0 0 0 1 -0.2720183 0 0 0 1</matrix>
           <instance_light url="#Dn_Lamp_1_Light-light"/>
         </node>
       </node>
@@ -3782,7 +3782,7 @@
           </bind_material>
         </instance_geometry>
         <node id="Dn_Torch_1_Light" name="Dn_Torch_1_Light" type="NODE">
-          <matrix sid="transform">1 0 0 0.6154509 0 1 0 0 0 0 1 1.109441 0 0 0 1</matrix>
+          <matrix sid="transform">1 0 0 0.6600652 0 1 0 0 0 0 1 1.339376 0 0 0 1</matrix>
           <instance_light url="#Dn_Torch_1_Light-light"/>
         </node>
       </node>

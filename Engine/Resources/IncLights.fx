@@ -19,7 +19,8 @@ struct PointLight
     float3 Position;
     float Intensity;
     float Radius;
-    float3 Pad;
+    float CastShadow;
+    float2 PerspectiveValues;
 };
 struct SpotLight
 {
@@ -30,7 +31,8 @@ struct SpotLight
     float3 Direction;
     float Intensity;
     float Radius;
-    float3 Pad;
+    float CastShadow;
+    float2 Pad;
 };
 
 static const uint MaxSampleCount = 16;
@@ -54,6 +56,15 @@ static float2 poissonDisk[MaxSampleCount] =
 	float2(0.9920505f, 0.0855163f),
 	float2(-0.687256f, 0.6711345f)
 };
+
+static float minShadowFactor = 0.2;
+
+float PointShadowPCFDepth(float3 toPixel, float2 perspectiveValues)
+{
+    float3 toPixelAbs = abs(toPixel);
+    float z = max(toPixelAbs.x, max(toPixelAbs.y, toPixelAbs.z));
+    return (perspectiveValues.x * z + perspectiveValues.y) / z;
+}
 
 inline float CalcShadowFactor(uint shadows, float4 lightPositionLD, float4 lightPositionHD, Texture2D shadowMapLD, Texture2D shadowMapHD)
 {
@@ -130,7 +141,6 @@ inline float4 SpecularPhongPass(float4 lSpecular, float lShininess, float3 V, fl
 }
 inline float4 SpecularBlinnPhongPass(float4 lSpecular, float lShininess, float3 L, float3 N, float3 V)
 {
-    //return pow(max(0, dot(N, normalize(L + V))), lShininess) * lSpecular;
     return pow(max(0, dot(reflect(V, N), -L)), lShininess) * lSpecular;
 }
 
@@ -282,6 +292,7 @@ struct ComputePointLightsInput
     float3 pPosition;
     float3 pNormal;
     float3 ePosition;
+    TextureCube<float> shadowCubic;
 };
 
 inline ComputeLightsOutput ComputePointLightLOD1(ComputePointLightsInput input, float dist)
@@ -291,12 +302,21 @@ inline ComputeLightsOutput ComputePointLightLOD1(ComputePointLightsInput input, 
     L /= D;
     float3 V = normalize(input.ePosition - input.pPosition);
 
+    float cShadowFactor = 1;
+    [flatten]
+    if (input.pointLight.CastShadow == 1)
+    {
+        float3 toPixel = input.pPosition - input.pointLight.Position;
+        float depth = PointShadowPCFDepth(toPixel, input.pointLight.PerspectiveValues);
+        cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, toPixel, depth));
+    }
+
     float attenuation = CalcSphericAttenuation(input.pointLight.Intensity, input.pointLight.Radius, D);
 
     ComputeLightsOutput output;
 
-    output.diffuse = DiffusePass(input.pointLight.Diffuse, L, input.pNormal) * attenuation;
-    output.specular = SpecularBlinnPhongPass(input.pointLight.Specular, input.shininess, L, input.pNormal, V) * dist * attenuation;
+    output.diffuse = DiffusePass(input.pointLight.Diffuse, L, input.pNormal) * attenuation * cShadowFactor;
+    output.specular = SpecularBlinnPhongPass(input.pointLight.Specular, input.shininess, L, input.pNormal, V) * dist * attenuation * cShadowFactor;
 
     return output;
 }
@@ -306,11 +326,20 @@ inline ComputeLightsOutput ComputePointLightLOD2(ComputePointLightsInput input)
     float D = length(L);
     L /= D;
 
+    float cShadowFactor = 1;
+    [flatten]
+    if (input.pointLight.CastShadow == 1)
+    {
+        float3 toPixel = input.pPosition - input.pointLight.Position;
+        float depth = PointShadowPCFDepth(toPixel, input.pointLight.PerspectiveValues);
+        cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, toPixel, depth));
+    }
+
     float attenuation = CalcSphericAttenuation(input.pointLight.Intensity, input.pointLight.Radius, D);
 
     ComputeLightsOutput output;
 
-    output.diffuse = DiffusePass(input.pointLight.Diffuse, L, input.pNormal) * attenuation;
+    output.diffuse = DiffusePass(input.pointLight.Diffuse, L, input.pNormal) * attenuation * cShadowFactor;
     output.specular = 0;
 
     return output;
@@ -424,6 +453,7 @@ struct ComputeLightsInput
     uint shadows;
     Texture2D shadowMapLD;
     Texture2D shadowMapHD;
+    TextureCubeArray<float> shadowCubic;
 };
 
 inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
@@ -455,22 +485,33 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
 
     for (i = 0; i < input.pointLightsCount; i++)
     {
-        float D = length(input.pointLights[i].Position - input.pPosition);
-        float3 L = normalize(input.pointLights[i].Position - input.pPosition);
+        float3 P = input.pointLights[i].Position - input.pPosition;
+        float D = length(P);
+        float3 L = P / D;
+
+        float cShadowFactor = 1;
+        [flatten]
+        if (input.pointLights[i].CastShadow == 1)
+        {
+            float3 toPixel = input.pPosition - input.pointLights[i].Position;
+            float depth = PointShadowPCFDepth(toPixel, input.pointLights[i].PerspectiveValues);
+            cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, float4(toPixel, i), depth));
+        }
 
         float attenuation = CalcSphericAttenuation(input.pointLights[i].Intensity, input.pointLights[i].Radius, D);
 
         float4 cDiffuse = DiffusePass(input.pointLights[i].Diffuse, L, input.pNormal);
         float4 cSpecular = SpecularBlinnPhongPass(input.pointLights[i].Specular, input.k.Shininess, L, input.pNormal, V);
 
-        lDiffuse += (cDiffuse * attenuation);
-        lSpecular += (cSpecular * attenuation);
+        lDiffuse += (cDiffuse * cShadowFactor * attenuation);
+        lSpecular += (cSpecular * cShadowFactor * attenuation);
     }
 
     for (i = 0; i < input.spotLightsCount; i++)
     {
-        float D = length(input.spotLights[i].Position - input.pPosition);
-        float3 L = normalize(input.spotLights[i].Position - input.pPosition);
+        float3 P = input.spotLights[i].Position - input.pPosition;
+        float D = length(P);
+        float3 L = P / D;
 
         float attenuation = CalcSphericAttenuation(input.spotLights[i].Intensity, input.spotLights[i].Radius, D);
         attenuation *= CalcSpotCone(input.spotLights[i].Direction, input.spotLights[i].Angle, L);
@@ -516,20 +557,31 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 
     for (i = 0; i < input.pointLightsCount; i++)
     {
-        float D = length(input.pointLights[i].Position - input.pPosition);
-        float3 L = normalize(input.pointLights[i].Position - input.pPosition);
+        float3 P = input.pointLights[i].Position - input.pPosition;
+        float D = length(P);
+        float3 L = P / D;
+
+        float cShadowFactor = 1;
+        [flatten]
+        if (input.pointLights[i].CastShadow == 1)
+        {
+            float3 toPixel = input.pPosition - input.pointLights[i].Position;
+            float depth = PointShadowPCFDepth(toPixel, input.pointLights[i].PerspectiveValues);
+            cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, float4(toPixel, i), depth));
+        }
 
         float attenuation = CalcSphericAttenuation(input.pointLights[i].Intensity, input.pointLights[i].Radius, D);
 
         float4 cDiffuse = DiffusePass(input.pointLights[i].Diffuse, L, input.pNormal);
 
-        lDiffuse += (cDiffuse * attenuation);
+        lDiffuse += (cDiffuse * attenuation * cShadowFactor);
     }
 
     for (i = 0; i < input.spotLightsCount; i++)
     {
-        float D = length(input.spotLights[i].Position - input.pPosition);
-        float3 L = normalize(input.spotLights[i].Position - input.pPosition);
+        float3 P = input.spotLights[i].Position - input.pPosition;
+        float D = length(P);
+        float3 L = P / D;
 
         float attenuation = CalcSphericAttenuation(input.spotLights[i].Intensity, input.spotLights[i].Radius, D);
         attenuation *= CalcSpotCone(input.spotLights[i].Direction, input.spotLights[i].Angle, L);

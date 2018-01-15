@@ -193,32 +193,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Gets a collection of directional lights that cast shadow
-        /// </summary>
-        public ISceneLightDirectional[] DirectionalShadowCastingLights
-        {
-            get
-            {
-                return this.visibleLights
-                    .Where(l => l.CastShadow && l is ISceneLightDirectional)
-                    .Select(l => (ISceneLightDirectional)l)
-                    .ToArray();
-            }
-        }
-        /// <summary>
-        /// Gets a collection of omnidirectional lights that cast shadow
-        /// </summary>
-        public ISceneLightOmnidirectional[] OmnidirectionalShadowCastingLights
-        {
-            get
-            {
-                return this.visibleLights
-                    .Where(l => l.CastShadow && l is ISceneLightOmnidirectional)
-                    .Select(l => (ISceneLightOmnidirectional)l)
-                    .ToArray();
-            }
-        }
-        /// <summary>
         /// High definition shadows distance
         /// </summary>
         public float ShadowHDDistance { get; set; }
@@ -277,19 +251,19 @@ namespace Engine
         /// <param name="lightPosition">Light position</param>
         /// <param name="radius">Light radius</param>
         /// <returns>Returns the from light view * projection matrix cube</returns>
-        public static Matrix[] GetFromOmniLightViewProjection(Vector3 lightPosition, float radius)
+        public static Matrix[] GetFromOmniLightViewProjection(ISceneLightOmnidirectional light)
         {
             // Orthogonal projection from center
-            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, radius);
+            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, light.Radius);
 
             return new Matrix[]
             {
-                GetFromOmniLightViewProjection(lightPosition, Vector3.Left, Vector3.Up)* projection,
-                GetFromOmniLightViewProjection(lightPosition, Vector3.Right, Vector3.Up)* projection,
-                GetFromOmniLightViewProjection(lightPosition, Vector3.Up, Vector3.BackwardLH) * projection,
-                GetFromOmniLightViewProjection(lightPosition, Vector3.Down, Vector3.ForwardLH)* projection,
-                GetFromOmniLightViewProjection(lightPosition, Vector3.ForwardLH, Vector3.Up)* projection,
-                GetFromOmniLightViewProjection(lightPosition, Vector3.BackwardLH, Vector3.Up)* projection,
+                GetFromOmniLightViewProjection(light.Position, Vector3.Right,      Vector3.Up)         * projection,
+                GetFromOmniLightViewProjection(light.Position, Vector3.Left,       Vector3.Up)         * projection,
+                GetFromOmniLightViewProjection(light.Position, Vector3.Up,         Vector3.BackwardLH) * projection,
+                GetFromOmniLightViewProjection(light.Position, Vector3.Down,       Vector3.ForwardLH)  * projection,
+                GetFromOmniLightViewProjection(light.Position, Vector3.ForwardLH,  Vector3.Up)         * projection,
+                GetFromOmniLightViewProjection(light.Position, Vector3.BackwardLH, Vector3.Up)         * projection,
             };
         }
         /// <summary>
@@ -302,9 +276,7 @@ namespace Engine
         public static Matrix GetFromOmniLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
         {
             // View from light to scene center position
-            var mat = Matrix.LookAtLH(lightPosition, lightPosition + direction, up);
-
-            return mat;
+            return Matrix.LookAtLH(lightPosition, lightPosition + direction, up);
         }
 
         /// <summary>
@@ -535,6 +507,29 @@ namespace Engine
             return this.visibleLights
                 .FindAll(l => l is SceneLightSpot)
                 .Cast<SceneLightSpot>()
+                .ToArray();
+        }
+
+        /// <summary>
+        /// Gets a collection of directional lights that cast shadow
+        /// </summary>
+        public ISceneLightDirectional[] GetDirectionalShadowCastingLights()
+        {
+            return this.visibleLights
+                .Where(l => l.CastShadow && l is ISceneLightDirectional)
+                .Select(l => (ISceneLightDirectional)l)
+                .ToArray();
+        }
+        /// <summary>
+        /// Gets a collection of omnidirectional lights that cast shadow
+        /// </summary>
+        /// <param name="eyePosition">Eye position</param>
+        public ISceneLightOmnidirectional[] GetOmnidirectionalShadowCastingLights(Vector3 eyePosition)
+        {
+            return this.pointLights
+                .Where(l => l.Enabled && l.CastShadow)
+                .Select(l => (ISceneLightOmnidirectional)l)
+                .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
                 .ToArray();
         }
 

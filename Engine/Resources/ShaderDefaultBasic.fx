@@ -41,14 +41,14 @@ cbuffer cbPSPerFrame : register(b3)
 	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
-	float PAD31;
-	float PAD32;
+    float2 gPSightPerspectiveValues;
 	DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
 };
 Texture2D gPSShadowMapLD : register(t2);
 Texture2D gPSShadowMapHD : register(t3);
+TextureCubeArray<float> gPSShadowMapCubic : register(t4);
 
 cbuffer cbPSPerObject : register(b4)
 {
@@ -57,9 +57,9 @@ cbuffer cbPSPerObject : register(b4)
 	bool PAD41;
 	bool PAD42;
 };
-Texture2DArray gPSDiffuseMapArray : register(t4);
-Texture2DArray gPSNormalMapArray : register(t5);
-Texture2DArray gPSSpecularMapArray : register(t6);
+Texture2DArray gPSDiffuseMapArray : register(t5);
+Texture2DArray gPSNormalMapArray : register(t6);
+Texture2DArray gPSSpecularMapArray : register(t7);
 
 cbuffer cbPSPerInstance : register(b5)
 {
@@ -272,6 +272,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.shadows = gPSShadows;
 	lInput.shadowMapLD = gPSShadowMapLD;
 	lInput.shadowMapHD = gPSShadowMapHD;
+    lInput.shadowCubic = gPSShadowMapCubic;
 
 	return ComputeLights(lInput);
 }
@@ -528,6 +529,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	lInput.shadows = gPSShadows;
 	lInput.shadowMapLD = gPSShadowMapLD;
 	lInput.shadowMapHD = gPSShadowMapHD;
+    lInput.shadowCubic = gPSShadowMapCubic;
 
 	return ComputeLights(lInput);
 }
@@ -676,6 +678,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	lInput.shadows = gPSShadows;
 	lInput.shadowMapLD = gPSShadowMapLD;
 	lInput.shadowMapHD = gPSShadowMapHD;
+    lInput.shadowCubic = gPSShadowMapCubic;
 
 	return ComputeLights(lInput);
 }

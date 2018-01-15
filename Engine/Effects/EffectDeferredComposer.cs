@@ -107,6 +107,10 @@ namespace Engine.Effects
         /// </summary>
         private EngineEffectVariableTexture shadowMapHD = null;
         /// <summary>
+        /// Cubic shadow map effect variable
+        /// </summary>
+        private EngineEffectVariableTexture shadowMapCubic = null;
+        /// <summary>
         /// Light Map effect variable
         /// </summary>
         private EngineEffectVariableTexture lightMap = null;
@@ -143,6 +147,10 @@ namespace Engine.Effects
         /// Current high definition shadow map
         /// </summary>
         private EngineShaderResourceView currentShadowMapHD = null;
+        /// <summary>
+        /// Current cubic shadow map
+        /// </summary>
+        private EngineShaderResourceView currentShadowMapCubic = null;
         /// <summary>
         /// Current light map
         /// </summary>
@@ -440,6 +448,27 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Cubic shadow map
+        /// </summary>
+        protected EngineShaderResourceView ShadowMapCubic
+        {
+            get
+            {
+                return this.shadowMapCubic.GetResource();
+            }
+            set
+            {
+                if (this.currentShadowMapCubic != value)
+                {
+                    this.shadowMapCubic.SetResource(value);
+
+                    this.currentShadowMapCubic = value;
+
+                    Counters.TextureUpdates++;
+                }
+            }
+        }
+        /// <summary>
         /// Light Map
         /// </summary>
         protected EngineShaderResourceView LightMap
@@ -544,6 +573,7 @@ namespace Engine.Effects
             this.tg3Map = this.Effect.GetVariableTexture("gTG3Map");
             this.shadowMapLD = this.Effect.GetVariableTexture("gShadowMapLD");
             this.shadowMapHD = this.Effect.GetVariableTexture("gShadowMapHD");
+            this.shadowMapCubic = this.Effect.GetVariableTexture("gShadowMapCubic");
             this.lightMap = this.Effect.GetVariableTexture("gLightMap");
             this.materialPaletteWidth = this.Effect.GetVariableScalar("gMaterialPaletteWidth");
             this.materialPalette = this.Effect.GetVariableTexture("gMaterialPalette");
@@ -599,26 +629,28 @@ namespace Engine.Effects
         /// Updates per directional light variables
         /// </summary>
         /// <param name="light">Light</param>
-        /// <param name="lightViewProjectionLD">View * projection from light matrix for low definition shadows</param>
-        /// <param name="lightViewProjectionHD">View * projection from light matrix for high definition shadows</param>
         /// <param name="shadowMaps">Shadow map flags</param>
-        /// <param name="shadowMapLD">Low definition shadow map texture</param>
-        /// <param name="shadowMapHD">High definition shadow map texture</param>
+        /// <param name="shadowMapLD">Low definition shadow map</param>
+        /// <param name="shadowMapHD">High definition shadow map</param>
         public void UpdatePerLight(
             SceneLightDirectional light,
-            Matrix lightViewProjectionLD,
-            Matrix lightViewProjectionHD,
             ShadowMapFlags shadowMaps,
-            EngineShaderResourceView shadowMapLD,
-            EngineShaderResourceView shadowMapHD)
+            IShadowMap shadowMapLD,
+            IShadowMap shadowMapHD)
         {
             this.DirectionalLight = new BufferDirectionalLight(light);
 
-            this.LightViewProjectionLD = lightViewProjectionLD;
-            this.LightViewProjectionHD = lightViewProjectionHD;
-            this.ShadowMapLD = shadowMapLD;
-            this.ShadowMapHD = shadowMapHD;
             this.ShadowMaps = (uint)shadowMaps;
+            if (shadowMapLD != null)
+            {
+                this.ShadowMapLD = shadowMapLD.Texture;
+                this.LightViewProjectionLD = shadowMapLD.FromLightViewProjectionArray[0];
+            }
+            if (shadowMapHD != null)
+            {
+                this.ShadowMapHD = shadowMapHD.Texture;
+                this.LightViewProjectionHD = shadowMapHD.FromLightViewProjectionArray[0];
+            }
         }
         /// <summary>
         /// Updates per spot light variables
@@ -626,14 +658,23 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         /// <param name="transform">Translation matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="shadowMaps">Shadow map flags</param>
+        /// <param name="shadowMapCubic">Cubic shadow map</param>
         public void UpdatePerLight(
             SceneLightPoint light,
             Matrix transform,
-            Matrix viewProjection)
+            Matrix viewProjection,
+            ShadowMapFlags shadowMaps,
+            IShadowMap shadowMapCubic)
         {
             this.PointLight = new BufferPointLight(light);
             this.World = transform;
             this.WorldViewProjection = transform * viewProjection;
+            this.ShadowMaps = (uint)shadowMaps;
+            if (shadowMapCubic != null)
+            {
+                this.ShadowMapCubic = shadowMapCubic.Texture;
+            }
         }
         /// <summary>
         /// Updates per spot light variables

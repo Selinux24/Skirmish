@@ -46,8 +46,9 @@ Texture2D gTG2Map : register(t1);
 Texture2D gTG3Map : register(t2);
 Texture2D gShadowMapLD : register(t3);
 Texture2D gShadowMapHD : register(t4);
-Texture2D gLightMap : register(t5);
-Texture2D gMaterialPalette : register(t6);
+TextureCube<float> gShadowMapCubic : register(t5);
+Texture2D gLightMap : register(t6);
+Texture2D gMaterialPalette : register(t7);
 
 struct PSLightInput
 {
@@ -149,6 +150,7 @@ float4 PSPointLight(PSLightInput input) : SV_TARGET
 		linput.pNormal = normal;
 		linput.ePosition = gEyePositionWorld;
 		linput.lod = gLOD;
+        linput.shadowCubic = gShadowMapCubic;
 
 		ComputeLightsOutput loutput = ComputePointLight(linput);
 

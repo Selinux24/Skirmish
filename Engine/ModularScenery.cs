@@ -273,12 +273,13 @@ namespace Engine
                             if (lights != null && lights.Length > 0)
                             {
                                 var emitterDesc = objList[i].ParticleLight;
-                                if (emitterDesc != null)
-                                {
-                                    foreach (var light in lights)
-                                    {
-                                        light.CastShadow = true;
 
+                                foreach (var light in lights)
+                                {
+                                    light.CastShadow = objList[i].CastShadows;
+
+                                    if (emitterDesc != null)
+                                    {
                                         var pointL = light as SceneLightPoint;
                                         if (pointL != null)
                                         {

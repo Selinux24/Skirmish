@@ -238,6 +238,13 @@ namespace Collada
                 this.bboxesDrawer.Visible = !this.bboxesDrawer.Visible;
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning);
+            }
+
             this.UpdateCamera(gameTime);
 
             this.fps.Instance.Text = this.Game.RuntimeText;

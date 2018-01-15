@@ -247,13 +247,13 @@ namespace Skybox
 
             this.movingFireLight = new SceneLightPoint(
                 "Moving fire light",
-                false,
+                true,
                 Color.Orange,
                 Color.Orange,
                 true,
                 Vector3.Zero,
-                5f,
-                10f);
+                15f,
+                20f);
 
             this.Lights.Add(this.movingFireLight);
 
@@ -286,7 +286,7 @@ namespace Skybox
                     true,
                     firePositions3D[i],
                     4f,
-                    5f);
+                    20f);
 
                 this.Lights.Add(this.torchLights[i]);
 

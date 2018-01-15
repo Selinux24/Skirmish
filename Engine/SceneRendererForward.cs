@@ -414,7 +414,7 @@ namespace Engine
         {
             ShadowMapFlags flags = ShadowMapFlags.None;
 
-            var shadowCastingLights = scene.Lights.DirectionalShadowCastingLights;
+            var shadowCastingLights = scene.Lights.GetDirectionalShadowCastingLights();
             if (shadowCastingLights.Length > 0)
             {
                 var graphics = this.Game.Graphics;
@@ -542,7 +542,7 @@ namespace Engine
         {
             ShadowMapFlags flags = ShadowMapFlags.None;
 
-            var shadowCastingLights = scene.Lights.OmnidirectionalShadowCastingLights;
+            var shadowCastingLights = scene.Lights.GetOmnidirectionalShadowCastingLights(scene.Camera.Position);
             if (shadowCastingLights.Length > 0)
             {
                 var graphics = this.Game.Graphics;
@@ -567,13 +567,18 @@ namespace Engine
                 {
                     for (int c = 0; c < Math.Min(MaxCubicShadows, shadowCastingLights.Length); c++)
                     {
+                        var light = shadowCastingLights[c];
+                        light.ShadowMapIndex = c;
+
+                        var shadowMapper = this.shadowMapperCube[c];
+
                         #region Cull
 #if DEBUG
                         Stopwatch swCull = Stopwatch.StartNew();
 #endif
                         var toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll(s => s.Get<ICullable>());
 
-                        var sph = new BoundingSphere(shadowCastingLights[0].Position, shadowCastingLights[0].Radius);
+                        var sph = new BoundingSphere(light.Position, light.Radius);
 
                         var doShadows = this.cullManager.Cull(sph, CullIndexShadowCubicIndex, toCullShadowObjs);
 #if DEBUG
@@ -584,18 +589,16 @@ namespace Engine
                         if (doShadows)
                         {
                             flags |= ShadowMapFlags.CubeMap;
-                            this.DrawShadowsContext.ShadowMap = this.shadowMapperCube[c];
+                            this.DrawShadowsContext.ShadowMap = shadowMapper;
 
                             #region Draw
 #if DEBUG
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                            var vpArray = SceneLights.GetFromOmniLightViewProjection(
-                                shadowCastingLights[0].Position,
-                                shadowCastingLights[0].Radius);
+                            var vpArray = SceneLights.GetFromOmniLightViewProjection(light);
 
-                            this.shadowMapperCube[c].FromLightViewProjectionArray = vpArray;
-                            this.shadowMapperCube[c].Bind(graphics);
+                            shadowMapper.FromLightViewProjectionArray = vpArray;
+                            shadowMapper.Bind(graphics);
 
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowCubicIndex, shadowObjs);
 #if DEBUG

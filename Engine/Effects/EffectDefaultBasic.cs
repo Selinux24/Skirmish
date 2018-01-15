@@ -228,6 +228,10 @@ namespace Engine.Effects
         /// </summary>
         private EngineEffectVariableTexture shadowMapHD = null;
         /// <summary>
+        /// Cubic shadows map effect variable
+        /// </summary>
+        private EngineEffectVariableTexture shadowMapCubic = null;
+        /// <summary>
         /// Animation palette width effect variable
         /// </summary>
         private EngineEffectVariableScalar animationPaletteWidth = null;
@@ -280,6 +284,10 @@ namespace Engine.Effects
         /// Current high definition shadow map
         /// </summary>
         private EngineShaderResourceView currentShadowMapHD = null;
+        /// <summary>
+        /// Current cubic shadow map
+        /// </summary>
+        private EngineShaderResourceView currentShadowMapCubic = null;
         /// <summary>
         /// Current animation palette
         /// </summary>
@@ -682,6 +690,27 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Cubic shadow map
+        /// </summary>
+        protected EngineShaderResourceView ShadowMapCubic
+        {
+            get
+            {
+                return this.shadowMapCubic.GetResource();
+            }
+            set
+            {
+                if (this.currentShadowMapCubic != value)
+                {
+                    this.shadowMapCubic.SetResource(value);
+
+                    this.currentShadowMapCubic = value;
+
+                    Counters.TextureUpdates++;
+                }
+            }
+        }
+        /// <summary>
         /// Animation palette width
         /// </summary>
         protected uint AnimationPaletteWidth
@@ -855,6 +884,7 @@ namespace Engine.Effects
             this.shadowMaps = this.Effect.GetVariableScalar("gPSShadows");
             this.shadowMapLD = this.Effect.GetVariableTexture("gPSShadowMapLD");
             this.shadowMapHD = this.Effect.GetVariableTexture("gPSShadowMapHD");
+            this.shadowMapCubic = this.Effect.GetVariableTexture("gPSShadowMapCubic");
 
             //Per object
             this.useColorDiffuse = this.Effect.GetVariableScalar("gPSUseColorDiffuse");
@@ -897,7 +927,7 @@ namespace Engine.Effects
         /// <param name="instanced">Use instancing data</param>
         /// <returns>Returns the technique to process the specified vertex type</returns>
         public EngineEffectTechnique GetTechnique(
-            VertexTypes vertexType, 
+            VertexTypes vertexType,
             bool instanced)
         {
             switch (vertexType)
@@ -963,7 +993,15 @@ namespace Engine.Effects
             Matrix world,
             Matrix viewProjection)
         {
-            this.UpdatePerFrame(world, viewProjection, Vector3.Zero, null, 0, null, null, Matrix.Identity, Matrix.Identity);
+            this.UpdatePerFrame(
+                world,
+                viewProjection,
+                Vector3.Zero,
+                null,
+                ShadowMapFlags.None,
+                null,
+                null,
+                null);
         }
         /// <summary>
         /// Update per frame data
@@ -973,20 +1011,18 @@ namespace Engine.Effects
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMaps">Shadow map flags</param>
-        /// <param name="shadowMapLD">Low definition shadow map texture</param>
-        /// <param name="shadowMapHD">High definition shadow map texture</param>
-        /// <param name="fromLightViewProjectionLD">Low definition map from light View * Projection transform</param>
-        /// <param name="fromLightViewProjectionHD">High definition map from light View * Projection transform</param>
+        /// <param name="shadowMapLD">Low definition shadow map</param>
+        /// <param name="shadowMapHD">High definition shadow map</param>
+        /// <param name="shadowMapCubic">Cubic shadow map array</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             SceneLights lights,
             ShadowMapFlags shadowMaps,
-            EngineShaderResourceView shadowMapLD,
-            EngineShaderResourceView shadowMapHD,
-            Matrix fromLightViewProjectionLD,
-            Matrix fromLightViewProjectionHD)
+            IShadowMap shadowMapLD,
+            IShadowMap shadowMapHD,
+            IShadowMap[] shadowMapCubic)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
@@ -1029,11 +1065,21 @@ namespace Engine.Effects
                 this.FogRange = lights.FogRange;
                 this.FogColor = lights.FogColor;
 
-                this.FromLightViewProjectionLD = fromLightViewProjectionLD;
-                this.FromLightViewProjectionHD = fromLightViewProjectionHD;
-                this.ShadowMapLD = shadowMapLD;
-                this.ShadowMapHD = shadowMapHD;
                 this.ShadowMaps = (uint)shadowMaps;
+                if (shadowMapLD != null)
+                {
+                    this.FromLightViewProjectionLD = shadowMapLD.FromLightViewProjectionArray[0];
+                    this.ShadowMapLD = shadowMapLD.Texture;
+                }
+                if (shadowMapHD != null)
+                {
+                    this.FromLightViewProjectionHD = shadowMapHD.FromLightViewProjectionArray[0];
+                    this.ShadowMapHD = shadowMapHD.Texture;
+                }
+                if (shadowMapCubic != null && shadowMapCubic.Length > 0)
+                {
+                    this.ShadowMapCubic = shadowMapCubic[0].Texture;
+                }
             }
             else
             {
@@ -1043,11 +1089,12 @@ namespace Engine.Effects
                 this.FogRange = 0;
                 this.FogColor = Color.Transparent;
 
-                this.FromLightViewProjectionLD = Matrix.Identity;
-                this.FromLightViewProjectionHD = Matrix.Identity;
-                this.ShadowMapLD = null;
-                this.ShadowMapHD = null;
                 this.ShadowMaps = 0;
+                this.ShadowMapLD = null;
+                this.FromLightViewProjectionLD = Matrix.Identity;
+                this.ShadowMapHD = null;
+                this.FromLightViewProjectionHD = Matrix.Identity;
+                this.ShadowMapCubic = null;
             }
 
             this.GlobalAmbient = globalAmbient;

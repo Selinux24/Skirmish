@@ -449,10 +449,9 @@ namespace Engine
                             dwContext.EyePosition,
                             dwContext.Lights,
                             dwContext.ShadowMaps,
-                            dwContext.ShadowMapLow.Texture,
-                            dwContext.ShadowMapHigh.Texture,
-                            dwContext.ShadowMapLow.FromLightViewProjectionArray[0],
-                            dwContext.ShadowMapHigh.FromLightViewProjectionArray[0]);
+                            dwContext.ShadowMapLow,
+                            dwContext.ShadowMapHigh,
+                            dwContext.ShadowMapCube);
 
                         #endregion
                     }

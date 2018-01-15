@@ -31,6 +31,16 @@ SamplerComparisonState SamplerComparisonLessEqual
 
     ComparisonFunc = LESS_EQUAL;
 };
+SamplerComparisonState PCFSampler
+{
+    Filter = COMPARISON_MIN_MAG_MIP_LINEAR;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    AddressW = CLAMP;
+    MaxAnisotropy = 1;
+
+    ComparisonFunc = LESS_EQUAL;
+};
 
 inline float2 EncodeColor(float3 rgb24)
 {

@@ -30,7 +30,7 @@ namespace Engine.Effects
         /// </summary>
         public Vector3 Direction;
         /// <summary>
-        /// Light cast shadows
+        /// The light casts shadow
         /// </summary>
         public float CastShadow;
 
@@ -93,17 +93,13 @@ namespace Engine.Effects
         /// </summary>
         public float Radius;
         /// <summary>
-        /// Padding
+        /// The light casts shadow
         /// </summary>
-        public float Pad1;
+        public float CastShadow;
         /// <summary>
-        /// Padding
+        /// Perspective values
         /// </summary>
-        public float Pad2;
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public float Pad3;
+        public Vector2 PerspectiveValues;
 
         /// <summary>
         /// Constructor
@@ -116,10 +112,10 @@ namespace Engine.Effects
             this.SpecularColor = light.SpecularColor;
             this.Intensity = light.Intensity;
             this.Radius = light.Radius;
+            this.CastShadow = light.CastShadow ? 1 : 0;
 
-            this.Pad1 = 1000;
-            this.Pad2 = 2000;
-            this.Pad3 = 3000;
+            var perspectiveMatrix = light.GetProjection();
+            this.PerspectiveValues = new Vector2(perspectiveMatrix[2, 2], perspectiveMatrix[3, 2]);
         }
 
         /// <summary>
@@ -177,6 +173,10 @@ namespace Engine.Effects
         /// </summary>
         public float Radius;
         /// <summary>
+        /// The light casts shadow
+        /// </summary>
+        public float CastShadow;
+        /// <summary>
         /// Padding
         /// </summary>
         public float Pad1;
@@ -184,10 +184,6 @@ namespace Engine.Effects
         /// Padding
         /// </summary>
         public float Pad2;
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public float Pad3;
 
         /// <summary>
         /// Constructor
@@ -203,10 +199,9 @@ namespace Engine.Effects
             this.Intensity = light.Intensity;
             this.Angle = light.AngleRadians;
             this.Radius = light.Radius;
-
+            this.CastShadow = light.CastShadow ? 1 : 0;
             this.Pad1 = 1000;
             this.Pad2 = 2000;
-            this.Pad3 = 3000;
         }
 
         /// <summary>

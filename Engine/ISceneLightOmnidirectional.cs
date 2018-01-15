@@ -19,5 +19,15 @@ namespace Engine
         /// Casts shadows
         /// </summary>
         bool CastShadow { get; }
+        /// <summary>
+        /// Shadow map index
+        /// </summary>
+        int ShadowMapIndex { get; set; }
+
+        /// <summary>
+        /// Gets the perspective projection matrix for shadow mapping
+        /// </summary>
+        /// <returns>Returns the perspective projection matrix</returns>
+        Matrix GetProjection();
     }
 }

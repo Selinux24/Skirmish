@@ -173,7 +173,7 @@ namespace Engine.Common
         {
             var desc = new RasterizerStateDescription2()
             {
-                CullMode = CullMode.Back,
+                CullMode = CullMode.None,
                 FillMode = FillMode.Solid,
                 IsFrontCounterClockwise = false,
                 IsAntialiasedLineEnabled = graphics.MultiSampled,

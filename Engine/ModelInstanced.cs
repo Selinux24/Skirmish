@@ -334,10 +334,9 @@ namespace Engine
                             context.EyePosition,
                             context.Lights,
                             context.ShadowMaps,
-                            context.ShadowMapLow.Texture,
-                            context.ShadowMapHigh.Texture,
-                            context.ShadowMapLow.FromLightViewProjectionArray[0],
-                            context.ShadowMapHigh.FromLightViewProjectionArray[0]);
+                            context.ShadowMapLow,
+                            context.ShadowMapHigh,
+                            context.ShadowMapCube);
                     }
                     else if (mode.HasFlag(DrawerModesEnum.Deferred))
                     {

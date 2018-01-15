@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using System;
+using SharpDX;
 
 namespace Engine
 {
@@ -80,6 +81,10 @@ namespace Engine
                 return Matrix.Scaling(this.Radius) * Matrix.Translation(this.Position);
             }
         }
+        /// <summary>
+        /// Shadow map index
+        /// </summary>
+        public int ShadowMapIndex { get; set; }
 
         /// <summary>
         /// Constructor
@@ -132,6 +137,15 @@ namespace Engine
             this.initialIntensity = intensity;
 
             this.ParentTransform = Matrix.Identity;
+        }
+
+        /// <summary>
+        /// Gets the perspective projection matrix
+        /// </summary>
+        /// <returns>Returns de perspective projection matrix for shadow mapping</returns>
+        public Matrix GetProjection()
+        {
+            return Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, this.Radius + 0.1f);
         }
 
         /// <summary>

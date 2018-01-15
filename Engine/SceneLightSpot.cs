@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Spot light
     /// </summary>
-    public class SceneLightSpot : SceneLight, ISceneLightOmnidirectional, ISceneLightDirectional
+    public class SceneLightSpot : SceneLight, ISceneLightDirectional
     {
         /// <summary>
         /// Initial transform
@@ -110,6 +110,10 @@ namespace Engine
                 return Matrix.Scaling(radius) * Matrix.Translation(center);
             }
         }
+        /// <summary>
+        /// Shadow map index
+        /// </summary>
+        public int ShadowMapIndex { get; set; }
 
         /// <summary>
         /// Constructor

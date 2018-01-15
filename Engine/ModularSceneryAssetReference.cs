@@ -27,6 +27,11 @@ namespace Engine
         [XmlAttribute("load_lights")]
         public bool LoadLights = true;
         /// <summary>
+        /// Lights cast shadows
+        /// </summary>
+        [XmlAttribute("cast_shadows")]
+        public bool CastShadows = true;
+        /// <summary>
         /// Position
         /// </summary>
         [XmlIgnore]
