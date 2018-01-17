@@ -1,4 +1,5 @@
-﻿namespace Engine.Content
+﻿
+namespace Engine.Content
 {
     /// <summary>
     /// Content description

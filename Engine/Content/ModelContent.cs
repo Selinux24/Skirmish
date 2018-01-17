@@ -2,6 +2,7 @@
 using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 namespace Engine.Content
@@ -618,22 +619,25 @@ namespace Engine.Content
         /// </summary>
         /// <param name="geometryNames">Geometry names</param>
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
-        public ModelContent Filter(string[] geometryNames)
+        public ModelContent Filter(IEnumerable<string> geometryNames)
         {
-            var geo = this.Geometry.FindAll(g => Array.Exists(geometryNames, i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)));
-
-            if (geo.Count > 0)
+            if (geometryNames != null && geometryNames.Count() > 0)
             {
-                var res = new ModelContent();
-                res.Images = this.Images;
-                res.Materials = this.Materials;
+                var geo = this.Geometry.FindAll(g => geometryNames.Count(i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)) > 0);
 
-                foreach (var g in geo)
+                if (geo.Count > 0)
                 {
-                    res.Geometry.Add(g.Key, g.Value);
-                }
+                    var res = new ModelContent();
+                    res.Images = this.Images;
+                    res.Materials = this.Materials;
 
-                return res;
+                    foreach (var g in geo)
+                    {
+                        res.Geometry.Add(g.Key, g.Value);
+                    }
+
+                    return res;
+                }
             }
 
             return null;
@@ -645,37 +649,123 @@ namespace Engine.Content
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
         public ModelContent FilterMask(string mask)
         {
-            var geo = this.Geometry.FindAll(g =>
-                g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
-                g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
+            return FilterMask(new[] { mask });
+        }
+        /// <summary>
+        /// Creates a new content filtering with the specified geometry name mask list
+        /// </summary>
+        /// <param name="masks">Name mask list</param>
+        /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
+        public ModelContent FilterMask(IEnumerable<string> masks)
+        {
+            ModelContent res = null;
 
-            if (geo.Count > 0)
+            if (masks != null && masks.Count() > 0)
             {
-                var res = new ModelContent();
-                res.Images = this.Images;
-                res.Materials = this.Materials;
-
-                foreach (var g in geo)
+                foreach (var mask in masks)
                 {
-                    res.Geometry.Add(g.Key, g.Value);
-                }
+                    var geo = this.Geometry.FindAll(g =>
+                        g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
+                        g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
 
-                var lights = this.Lights.FindAll(l => 
-                    l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
-                    l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
-
-                if (lights.Count > 0)
-                {
-                    foreach (var l in lights)
+                    if (geo.Count > 0)
                     {
-                        res.Lights.Add(l.Key, l.Value);
+                        if (res == null)
+                        {
+                            res = new ModelContent();
+                        }
+
+                        res.Images = this.Images;
+                        res.Materials = this.Materials;
+
+                        foreach (var g in geo)
+                        {
+                            res.Geometry.Add(g.Key, g.Value);
+                        }
+
+                        var lights = this.Lights.FindAll(l =>
+                            l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
+                            l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
+
+                        if (lights.Count > 0)
+                        {
+                            foreach (var l in lights)
+                            {
+                                res.Lights.Add(l.Key, l.Value);
+                            }
+                        }
                     }
                 }
-
-                return res;
             }
 
-            return null;
+            return res;
+        }
+        /// <summary>
+        /// Marks volume flag for all the geometry contained into the model
+        /// </summary>
+        /// <param name="isVolume">Flag value</param>
+        /// <returns>Returns the number of meshes setted</returns>
+        public int SetVolumeMark(bool isVolume)
+        {
+            int count = 0;
+
+            if (this.Geometry.Count > 0)
+            {
+                foreach (var g in this.Geometry)
+                {
+                    foreach (var s in g.Value.Values)
+                    {
+                        s.IsVolume = isVolume;
+                        count++;
+                    }
+                }
+            }
+
+            return count;
+        }
+        /// <summary>
+        /// Marks volume flag for all the geometry filtered by the specified mask
+        /// </summary>
+        /// <param name="isVolume">Flag value</param>
+        /// <param name="mask">Asset name flag</param>
+        /// <returns>Returns the number of meshes setted</returns>
+        public int SetVolumeMark(bool isVolume, string mask)
+        {
+            return SetVolumeMark(isVolume, new[] { mask });
+        }
+        /// <summary>
+        /// Marks volume flag for all the geometry filtered by the specified mask list
+        /// </summary>
+        /// <param name="isVolume">Flag value</param>
+        /// <param name="masks">Asset name flag list</param>
+        /// <returns>Returns the number of meshes setted</returns>
+        public int SetVolumeMark(bool isVolume, IEnumerable<string> masks)
+        {
+            int count = 0;
+
+            if (masks != null && masks.Count() > 0)
+            {
+                foreach (var mask in masks)
+                {
+                    var geo = this.Geometry.FindAll(g =>
+                        g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
+                        g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
+
+                    if (geo.Count > 0)
+                    {
+                        foreach (var g in geo)
+                        {
+                            foreach (var s in g.Value.Values)
+                            {
+                                s.IsVolume = isVolume;
+                                count++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return count;
         }
     }
 }

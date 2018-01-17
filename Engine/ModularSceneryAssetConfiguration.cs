@@ -40,12 +40,18 @@ namespace Engine
         [XmlArray("objects")]
         [XmlArrayItem("item", typeof(ModularSceneryObjectReference))]
         public ModularSceneryObjectReference[] Objects = null;
+        /// <summary>
+        /// Volume meshes masks
+        /// </summary>
+        [XmlArray("volumes")]
+        [XmlArrayItem("mask", typeof(string))]
+        public string[] Volumes = null;
 
         /// <summary>
         /// Gets the instance counter dictionary
         /// </summary>
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
-        public Dictionary<string, int> GetMapInstanceCounter()
+        public Dictionary<string, int> GetMapInstanceCounters()
         {
             Dictionary<string, int> res = new Dictionary<string, int>();
 
@@ -57,15 +63,15 @@ namespace Engine
 
                 if (asset != null)
                 {
-                    var assetInstanceCount = asset.GetInstanceCounter();
-                    foreach (var key in assetInstanceCount.Keys)
+                    var assetInstances = asset.GetInstanceCounters();
+                    foreach (var key in assetInstances.Keys)
                     {
                         if (!res.ContainsKey(key))
                         {
                             res.Add(key, 0);
                         }
 
-                        res[key] += assetInstanceCount[key];
+                        res[key] += assetInstances[key];
                     }
                 }
             }
@@ -76,7 +82,7 @@ namespace Engine
         /// Gets the instance counter dictionary
         /// </summary>
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
-        public Dictionary<string, int> GetObjectsInstanceCounter()
+        public Dictionary<string, int> GetObjectsInstanceCounters()
         {
             Dictionary<string, int> res = new Dictionary<string, int>();
 
@@ -91,6 +97,20 @@ namespace Engine
             }
 
             return res;
+        }
+        /// <summary>
+        /// Gets a list of masks to find volume meshes for the specified asset name
+        /// </summary>
+        /// <param name="assetName">Asset name</param>
+        /// <returns>Returns a list of masks to find volume meshes for the specified asset name</returns>
+        public IEnumerable<string> GetMasksForAsset(string assetName)
+        {
+            if (this.Volumes != null && this.Volumes.Length > 0)
+            {
+                return this.Volumes.Select(v => assetName + v);
+            }
+
+            return null;
         }
     }
 }

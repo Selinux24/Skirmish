@@ -139,31 +139,36 @@ namespace Engine
         private void InitializeAssets(ModelContent content, ModularSceneryAssetConfiguration assetsConfiguration)
         {
             // Get instance count for all single geometries from Map
-            var instanceCounter = assetsConfiguration.GetMapInstanceCounter();
+            var instances = assetsConfiguration.GetMapInstanceCounters();
 
             // Load all single geometries into single instanced model components
-            foreach (var assetName in instanceCounter.Keys)
+            foreach (var assetName in instances.Keys)
             {
-                var instances = instanceCounter[assetName];
-
-                var modelContent = content.FilterMask(assetName);
-                if (modelContent != null)
+                var count = instances[assetName];
+                if (count > 0)
                 {
-                    var model = this.Scene.AddComponent<ModelInstanced>(
-                        new ModelInstancedDescription()
-                        {
-                            Name = string.Format("{0}.{1}", this.Description.Name, assetName),
-                            CastShadow = this.Description.CastShadow,
-                            UseAnisotropicFiltering = this.Description.UseAnisotropic,
-                            Instances = instances,
-                            Content = new ContentDescription()
-                            {
-                                ModelContent = modelContent,
-                            }
-                        },
-                        SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding);
+                    var modelContent = content.FilterMask(assetName);
+                    if (modelContent != null)
+                    {
+                        var masks = assetsConfiguration.GetMasksForAsset(assetName);
+                        var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
 
-                    this.assets.Add(assetName, model);
+                        var model = this.Scene.AddComponent<ModelInstanced>(
+                            new ModelInstancedDescription()
+                            {
+                                Name = string.Format("{0}.{1}", this.Description.Name, assetName),
+                                CastShadow = this.Description.CastShadow,
+                                UseAnisotropicFiltering = this.Description.UseAnisotropic,
+                                Instances = count,
+                                Content = new ContentDescription()
+                                {
+                                    ModelContent = modelContent,
+                                }
+                            },
+                            SceneObjectUsageEnum.Ground | (hasVolumes ? SceneObjectUsageEnum.CoarsePathFinding : SceneObjectUsageEnum.FullPathFinding));
+
+                        this.assets.Add(assetName, model);
+                    }
                 }
             }
         }
@@ -232,78 +237,83 @@ namespace Engine
         private void InitializeObjects(ModelContent content, ModularSceneryAssetConfiguration assetsConfiguration)
         {
             // Get instance count for all single geometries from Map
-            var instanceCounter = assetsConfiguration.GetObjectsInstanceCounter();
+            var instances = assetsConfiguration.GetObjectsInstanceCounters();
 
             // Load all single geometries into single instanced model components
-            foreach (var assetName in instanceCounter.Keys)
+            foreach (var assetName in instances.Keys)
             {
-                var instances = instanceCounter[assetName];
-
-                var modelContent = content.FilterMask(assetName);
-                if (modelContent != null)
+                var count = instances[assetName];
+                if (count > 0)
                 {
-                    var model = this.Scene.AddComponent<ModelInstanced>(
-                        new ModelInstancedDescription()
-                        {
-                            Name = string.Format("{0}.{1}", this.Description.Name, assetName),
-                            CastShadow = this.Description.CastShadow,
-                            UseAnisotropicFiltering = this.Description.UseAnisotropic,
-                            Instances = instances,
-                            AlphaEnabled = this.Description.AlphaEnabled,
-                            Content = new ContentDescription()
-                            {
-                                ModelContent = modelContent,
-                            }
-                        },
-                        SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding);
-
-                    //Get the object list to process
-                    var objList = Array.FindAll(assetsConfiguration.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
-
-                    //Positioning
-                    model.Instance.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
-
-                    for (int i = 0; i < model.Instance.Count; i++)
+                    var modelContent = content.FilterMask(assetName);
+                    if (modelContent != null)
                     {
-                        if (objList[i].LoadLights)
-                        {
-                            var trn = model.Instance[i].Manipulator.LocalTransform;
+                        var masks = assetsConfiguration.GetMasksForAsset(assetName);
+                        var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
 
-                            var lights = model.Instance[i].Lights;
-                            if (lights != null && lights.Length > 0)
+                        var model = this.Scene.AddComponent<ModelInstanced>(
+                            new ModelInstancedDescription()
                             {
-                                var emitterDesc = objList[i].ParticleLight;
-
-                                foreach (var light in lights)
+                                Name = string.Format("{0}.{1}", this.Description.Name, assetName),
+                                CastShadow = this.Description.CastShadow,
+                                UseAnisotropicFiltering = this.Description.UseAnisotropic,
+                                Instances = count,
+                                AlphaEnabled = this.Description.AlphaEnabled,
+                                Content = new ContentDescription()
                                 {
-                                    light.CastShadow = objList[i].CastShadows;
+                                    ModelContent = modelContent,
+                                }
+                            },
+                            SceneObjectUsageEnum.None | (hasVolumes ? SceneObjectUsageEnum.CoarsePathFinding : SceneObjectUsageEnum.FullPathFinding));
 
-                                    if (emitterDesc != null)
+                        //Get the object list to process
+                        var objList = Array.FindAll(assetsConfiguration.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
+
+                        //Positioning
+                        model.Instance.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
+
+                        for (int i = 0; i < model.Instance.Count; i++)
+                        {
+                            if (objList[i].LoadLights)
+                            {
+                                var trn = model.Instance[i].Manipulator.LocalTransform;
+
+                                var lights = model.Instance[i].Lights;
+                                if (lights != null && lights.Length > 0)
+                                {
+                                    var emitterDesc = objList[i].ParticleLight;
+
+                                    foreach (var light in lights)
                                     {
-                                        var pointL = light as SceneLightPoint;
-                                        if (pointL != null)
+                                        light.CastShadow = objList[i].CastShadows;
+
+                                        if (emitterDesc != null)
                                         {
-                                            var pos = Vector3.TransformCoordinate(pointL.Position, trn);
-
-                                            var emitter = new ParticleEmitter(emitterDesc)
+                                            var pointL = light as SceneLightPoint;
+                                            if (pointL != null)
                                             {
-                                                Position = pos,
-                                            };
+                                                var pos = Vector3.TransformCoordinate(pointL.Position, trn);
 
-                                            this.particleManager.Instance.AddParticleSystem(
-                                                ParticleSystemTypes.CPU,
-                                                this.particleDescriptors[emitterDesc.Name],
-                                                emitter);
+                                                var emitter = new ParticleEmitter(emitterDesc)
+                                                {
+                                                    Position = pos,
+                                                };
+
+                                                this.particleManager.Instance.AddParticleSystem(
+                                                    ParticleSystemTypes.CPU,
+                                                    this.particleDescriptors[emitterDesc.Name],
+                                                    emitter);
+                                            }
                                         }
                                     }
-                                }
 
-                                this.Scene.Lights.AddRange(lights);
+                                    this.Scene.Lights.AddRange(lights);
+                                }
                             }
                         }
-                    }
 
-                    this.objects.Add(assetName, model);
+                        this.objects.Add(assetName, model);
+                    }
                 }
             }
         }

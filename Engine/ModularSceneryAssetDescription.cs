@@ -25,10 +25,10 @@ namespace Engine
         public ModularSceneryAssetReference[] Assets = null;
 
         /// <summary>
-        /// Gets the instance counters dictionary
+        /// Gets the instance count dictionary
         /// </summary>
         /// <returns>Returns a dictionary that contains the instance count by asset name</returns>
-        public Dictionary<string, int> GetInstanceCounter()
+        public Dictionary<string, int> GetInstanceCounters()
         {
             Dictionary<string, int> res = new Dictionary<string, int>();
 
@@ -36,7 +36,11 @@ namespace Engine
 
             foreach (var assetName in assets)
             {
-                res.Add(assetName, this.Assets.Count(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase)));
+                var count = this.Assets.Count(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
+                if (count > 0)
+                {
+                    res.Add(assetName, count);
+                }
             }
 
             return res;

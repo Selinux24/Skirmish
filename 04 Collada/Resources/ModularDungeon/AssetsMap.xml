@@ -1516,4 +1516,10 @@
       <rotation>rot270</rotation>
     </item>
   </objects>
+  <volumes>
+    <mask>volume</mask>
+    <mask>volumes</mask>
+    <mask>_volume</mask>
+    <mask>_volumes</mask>
+  </volumes>
 </ModularSceneryAssetConfiguration>
