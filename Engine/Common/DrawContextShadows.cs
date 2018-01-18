@@ -12,10 +12,6 @@ namespace Engine.Common
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// World matrix
-        /// </summary>
-        public Matrix World { get; set; }
-        /// <summary>
         /// View * projection matrix
         /// </summary>
         public Matrix ViewProjection { get; set; }

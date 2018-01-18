@@ -87,6 +87,7 @@ namespace Engine
 
             this.MaximumCount = -1;
         }
+
         /// <summary>
         /// Update
         /// </summary>
@@ -186,99 +187,66 @@ namespace Engine
 
             if (this.VisibleCount > 0)
             {
-                Drawer effect = null;
-                GetShadowMappingTechniqueDelegate techniqueFn = null;
+                IShadowMapDrawer effect = null;
 
                 if (context.ShadowMap is ShadowMap)
                 {
                     effect = DrawerPool.EffectShadowBasic;
-                    techniqueFn = DrawerPool.EffectShadowBasic.GetTechnique;
                 }
                 else if (context.ShadowMap is CubicShadowMap)
                 {
                     effect = DrawerPool.EffectShadowPoint;
-                    techniqueFn = DrawerPool.EffectShadowPoint.GetTechnique;
                 }
 
                 if (effect != null)
                 {
                     var graphics = this.Game.Graphics;
 
-                    if (context.ShadowMap is ShadowMap)
-                    {
-                        ((EffectShadowBasic)effect).UpdatePerFrame(
-                            context.World,
-                            context.ShadowMap.FromLightViewProjectionArray[0]);
-                    }
-                    else if (context.ShadowMap is CubicShadowMap)
-                    {
-                        ((EffectShadowPoint)effect).UpdatePerFrame(
-                            context.World,
-                            context.ShadowMap.FromLightViewProjectionArray);
-                    }
+                    effect.UpdatePerFrame(Matrix.Identity, context);
 
                     int maxCount = this.MaximumCount >= 0 ?
                     Math.Min(this.MaximumCount, this.Count) :
                     this.Count;
 
-                    //Render by level of detail
-                    for (int l = 1; l < (int)LevelOfDetailEnum.Minimum + 1; l *= 2)
+                    if (maxCount > 0)
                     {
-                        if (maxCount > 0)
+                        //Get instances
+                        var instances = this.instancesTmp;
+                        if (instances != null && instances.Length > 0)
                         {
-                            LevelOfDetailEnum lod = (LevelOfDetailEnum)l;
-
-                            //Get instances in this LOD
-                            var lodInstances = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
-                            if (lodInstances != null && lodInstances.Length > 0)
+                            //Render minimum LOD available
+                            var drawingData = GetFirstDrawingData(LevelOfDetailEnum.Minimum);
                             {
-                                var drawingData = this.GetDrawingData(lod);
-                                if (drawingData != null)
+                                var index = Array.IndexOf(this.instancesTmp, instances[0]);
+                                var length = Math.Min(maxCount, instances.Length);
+                                maxCount -= length;
+
+                                if (length > 0)
                                 {
-                                    var index = Array.IndexOf(this.instancesTmp, lodInstances[0]);
-                                    var length = Math.Min(maxCount, lodInstances.Length);
-                                    maxCount -= length;
-
-                                    if (length > 0)
+                                    foreach (string meshName in drawingData.Meshes.Keys)
                                     {
-                                        foreach (string meshName in drawingData.Meshes.Keys)
+                                        var dictionary = drawingData.Meshes[meshName];
+
+                                        foreach (string material in dictionary.Keys)
                                         {
-                                            var dictionary = drawingData.Meshes[meshName];
+                                            var mesh = dictionary[material];
 
-                                            foreach (string material in dictionary.Keys)
+                                            bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
+
+                                            var mat = drawingData.Materials[material];
+
+                                            effect.UpdatePerObject(0, mat, 0);
+
+                                            this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+
+                                            var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, mesh.Transparent);
+                                            this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+
+                                            for (int p = 0; p < technique.PassCount; p++)
                                             {
-                                                var mesh = dictionary[material];
+                                                graphics.EffectPassApply(technique, p, 0);
 
-                                                bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
-
-                                                var mat = drawingData.Materials[material];
-
-                                                if (context.ShadowMap is ShadowMap)
-                                                {
-                                                    ((EffectShadowBasic)effect).UpdatePerObject(
-                                                        mat.DiffuseTexture,
-                                                        0,
-                                                        0);
-                                                }
-                                                else if (context.ShadowMap is CubicShadowMap)
-                                                {
-                                                    ((EffectShadowPoint)effect).UpdatePerObject(
-                                                        mat.DiffuseTexture,
-                                                        0,
-                                                        0);
-                                                }
-
-                                                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
-
-                                                var technique = techniqueFn(mesh.VertextType, mesh.Instanced, mesh.Transparent);
-                                                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
-
-                                                for (int p = 0; p < technique.PassCount; p++)
-                                                {
-                                                    graphics.EffectPassApply(technique, p, 0);
-
-                                                    mesh.Draw(graphics, index, length);
-                                                }
+                                                mesh.Draw(graphics, index, length);
                                             }
                                         }
                                     }
@@ -307,45 +275,22 @@ namespace Engine
                 int count = 0;
                 int instanceCount = 0;
 
-                Drawer effect = null;
-                GetDrawingTechniqueDelegate techniqueFn = null;
+                IGeometryDrawer effect = null;
+
                 if (mode.HasFlag(DrawerModesEnum.Forward))
                 {
                     effect = DrawerPool.EffectDefaultBasic;
-                    techniqueFn = DrawerPool.EffectDefaultBasic.GetTechnique;
                 }
                 else if (mode.HasFlag(DrawerModesEnum.Deferred))
                 {
                     effect = DrawerPool.EffectDeferredBasic;
-                    techniqueFn = DrawerPool.EffectDeferredBasic.GetTechnique;
                 }
 
                 if (effect != null)
                 {
                     var graphics = this.Game.Graphics;
 
-                    #region Per frame update
-
-                    if (mode.HasFlag(DrawerModesEnum.Forward))
-                    {
-                        ((EffectDefaultBasic)effect).UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection,
-                            context.EyePosition,
-                            context.Lights,
-                            context.ShadowMaps,
-                            context.ShadowMapLow,
-                            context.ShadowMapHigh,
-                            context.ShadowMapCube);
-                    }
-                    else if (mode.HasFlag(DrawerModesEnum.Deferred))
-                    {
-                        ((EffectDeferredBasic)effect).UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection);
-                    }
-
-                    #endregion
+                    effect.UpdatePerFrameFull(Matrix.Identity, context);
 
                     int maxCount = this.MaximumCount >= 0 ?
                         Math.Min(this.MaximumCount, this.Count) :
@@ -394,38 +339,15 @@ namespace Engine
                                                 count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
                                                 count *= instanceCount;
 
-                                                #region Per object update
-
-                                                var mat = drawingData.Materials[material];
-
-                                                if (mode.HasFlag(DrawerModesEnum.Forward))
-                                                {
-                                                    ((EffectDefaultBasic)effect).UpdatePerObject(
-                                                        this.UseAnisotropicFiltering,
-                                                        mat.DiffuseTexture,
-                                                        mat.NormalMap,
-                                                        mat.SpecularTexture,
-                                                        mat.ResourceIndex,
-                                                        0,
-                                                        0);
-                                                }
-                                                else if (mode.HasFlag(DrawerModesEnum.Deferred))
-                                                {
-                                                    ((EffectDeferredBasic)effect).UpdatePerObject(
-                                                        this.UseAnisotropicFiltering,
-                                                        mat.DiffuseTexture,
-                                                        mat.NormalMap,
-                                                        mat.SpecularTexture,
-                                                        mat.ResourceIndex,
-                                                        0,
-                                                        0);
-                                                }
-
-                                                #endregion
+                                                effect.UpdatePerObject(
+                                                    0,
+                                                    drawingData.Materials[material],
+                                                    0,
+                                                    this.UseAnisotropicFiltering);
 
                                                 this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                                                var technique = techniqueFn(mesh.VertextType, mesh.Instanced);
+                                                var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced);
                                                 this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                                                 for (int p = 0; p < technique.PassCount; p++)
@@ -447,6 +369,7 @@ namespace Engine
                 Counters.PrimitivesPerFrame += count;
             }
         }
+
         /// <summary>
         /// Set instance positions
         /// </summary>
@@ -527,6 +450,7 @@ namespace Engine
 
             return res;
         }
+
         /// <summary>
         /// Performs culling test
         /// </summary>

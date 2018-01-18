@@ -8,7 +8,7 @@ namespace Engine.Effects
     /// <summary>
     /// Basic effect
     /// </summary>
-    public class EffectDefaultBasic : Drawer
+    public class EffectDefaultBasic : Drawer, IGeometryDrawer
     {
         /// <summary>
         /// Position color drawing technique
@@ -988,14 +988,14 @@ namespace Engine.Effects
         /// Update per frame data
         /// </summary>
         /// <param name="world">World</param>
-        /// <param name="viewProjection">View * projection</param>
-        public void UpdatePerFrame(
+        /// <param name="context">Context</param>
+        public void UpdatePerFrameBasic(
             Matrix world,
-            Matrix viewProjection)
+            DrawContext context)
         {
             this.UpdatePerFrame(
                 world,
-                viewProjection,
+                context.ViewProjection,
                 Vector3.Zero,
                 null,
                 ShadowMapFlags.None,
@@ -1003,6 +1003,63 @@ namespace Engine.Effects
                 null,
                 null);
         }
+        /// <summary>
+        /// Update per frame full data
+        /// </summary>
+        /// <param name="world">World</param>
+        /// <param name="context">Context</param>
+        public void UpdatePerFrameFull(
+            Matrix world,
+            DrawContext context)
+        {
+            UpdatePerFrame(
+                world,
+                context.ViewProjection,
+                context.EyePosition,
+                context.Lights,
+                context.ShadowMaps,
+                context.ShadowMapLow,
+                context.ShadowMapHigh,
+                context.ShadowMapCube);
+        }
+        /// <summary>
+        /// Update per model object data
+        /// </summary>
+        /// <param name="animationOffset">Animation index</param>
+        /// <param name="material">Material</param>
+        /// <param name="textureIndex">Texture index</param>
+        /// <param name="useAnisotropic">Use anisotropic filtering</param>
+        public void UpdatePerObject(
+            uint animationOffset,
+            MeshMaterial material,
+            uint textureIndex,
+            bool useAnisotropic)
+        {
+            if (material != null)
+            {
+                this.DiffuseMap = material.DiffuseTexture;
+                this.NormalMap = material.NormalMap;
+                this.SpecularMap = material.SpecularTexture;
+                this.UseColorDiffuse = material.DiffuseTexture != null;
+                this.UseColorSpecular = material.SpecularTexture != null;
+                this.MaterialIndex = material.ResourceIndex;
+            }
+            else
+            {
+                this.DiffuseMap = null;
+                this.NormalMap = null;
+                this.SpecularMap = null;
+                this.UseColorDiffuse = false;
+                this.UseColorSpecular = false;
+                this.MaterialIndex = 0;
+            }
+
+            this.TextureIndex = textureIndex;
+            this.Anisotropic = useAnisotropic;
+
+            this.AnimationOffset = animationOffset;
+        }
+
         /// <summary>
         /// Update per frame data
         /// </summary>
@@ -1014,7 +1071,7 @@ namespace Engine.Effects
         /// <param name="shadowMapLD">Low definition shadow map</param>
         /// <param name="shadowMapHD">High definition shadow map</param>
         /// <param name="shadowMapCubic">Cubic shadow map array</param>
-        public void UpdatePerFrame(
+        private void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
@@ -1102,37 +1159,6 @@ namespace Engine.Effects
             this.PointLights = bPointLights;
             this.SpotLights = bSpotLights;
             this.LightCount = lCount;
-        }
-        /// <summary>
-        /// Update per model object data
-        /// </summary>
-        /// <param name="useAnisotropic">Use anisotropic filtering</param>
-        /// <param name="diffuseMap">Diffuse map</param>
-        /// <param name="normalMap">Normal map</param>
-        /// <param name="specularMap">Specular map</param>
-        /// <param name="materialIndex">Material index</param>
-        /// <param name="textureIndex">Texture index</param>
-        /// <param name="animationOffset">Animation index</param>
-        public void UpdatePerObject(
-            bool useAnisotropic,
-            EngineShaderResourceView diffuseMap,
-            EngineShaderResourceView normalMap,
-            EngineShaderResourceView specularMap,
-            uint materialIndex,
-            uint textureIndex,
-            uint animationOffset)
-        {
-            this.Anisotropic = useAnisotropic;
-
-            this.DiffuseMap = diffuseMap;
-            this.NormalMap = normalMap;
-            this.SpecularMap = specularMap;
-            this.UseColorDiffuse = diffuseMap != null;
-            this.UseColorSpecular = specularMap != null;
-            this.MaterialIndex = materialIndex;
-            this.TextureIndex = textureIndex;
-
-            this.AnimationOffset = animationOffset;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Engine.Effects
     /// <summary>
     /// Basic effect
     /// </summary>
-    public class EffectShadowBasic : Drawer
+    public class EffectShadowBasic : Drawer, IShadowMapDrawer
     {
         #region Technique variables
 
@@ -370,7 +370,7 @@ namespace Engine.Effects
                     case VertexTypes.PositionNormalTextureTangentSkinned:
                         return instanced ? this.ShadowMapPositionNormalTextureTangentTransparentSkinnedInstanced : this.ShadowMapPositionNormalTextureTangentTransparentSkinned;
                     default:
-                        throw new EngineException(string.Format("Bad vertex type for effect: {0}", vertexType));
+                        throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Transparent: {2}", vertexType, instanced, transparent));
                 }
             }
             else
@@ -402,7 +402,7 @@ namespace Engine.Effects
                     case VertexTypes.PositionNormalTextureTangentSkinned:
                         return instanced ? this.ShadowMapPositionNormalTextureTangentSkinnedInstanced : this.ShadowMapPositionNormalTextureTangentSkinned;
                     default:
-                        throw new EngineException(string.Format("Bad vertex type for effect: {0}", vertexType));
+                        throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Transparent: {2}", vertexType, instanced, transparent));
                 }
             }
         }
@@ -423,28 +423,36 @@ namespace Engine.Effects
         /// Update per frame data
         /// </summary>
         /// <param name="world">World matrix</param>
-        /// <param name="viewProjection">View * projection matrix</param>
+        /// <param name="context">Context</param>
         public void UpdatePerFrame(
             Matrix world,
-            Matrix viewProjection)
+            DrawContextShadows context)
         {
-            this.WorldViewProjection = world * viewProjection;
+            this.WorldViewProjection = world * context.ShadowMap.FromLightViewProjectionArray[0];
         }
         /// <summary>
         /// Update per model object data
         /// </summary>
-        /// <param name="diffuseMap">Diffuse map</param>
-        /// <param name="textureIndex">Texture index</param>
         /// <param name="animationOffset">Animation index</param>
+        /// <param name="material">Material</param>
+        /// <param name="textureIndex">Texture index</param>
         public void UpdatePerObject(
-            EngineShaderResourceView diffuseMap,
-            uint textureIndex,
-            uint animationOffset)
+            uint animationOffset,
+            MeshMaterial material,
+            uint textureIndex)
         {
-            this.DiffuseMap = diffuseMap;
-            this.TextureIndex = textureIndex;
-
             this.AnimationOffset = animationOffset;
+
+            if (material != null)
+            {
+                this.DiffuseMap = material.DiffuseTexture;
+            }
+            else
+            {
+                this.diffuseMap = null;
+            }
+
+            this.TextureIndex = textureIndex;
         }
     }
 }

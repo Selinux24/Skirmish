@@ -7,7 +7,7 @@ namespace Engine.Effects
     /// <summary>
     /// Basic effect
     /// </summary>
-    public class EffectDeferredBasic : Drawer
+    public class EffectDeferredBasic : Drawer, IGeometryDrawer
     {
         /// <summary>
         /// Position color drawing technique
@@ -475,40 +475,56 @@ namespace Engine.Effects
         /// Update per frame data
         /// </summary>
         /// <param name="world">World Matrix</param>
-        /// <param name="viewProjection">View * projection</param>
-        public void UpdatePerFrame(
+        /// <param name="context">Context</param>
+        public void UpdatePerFrameBasic(
             Matrix world,
-            Matrix viewProjection)
+            DrawContext context)
         {
             this.World = world;
-            this.WorldViewProjection = world * viewProjection;
+            this.WorldViewProjection = world * context.ViewProjection;
+        }
+        /// <summary>
+        /// Update per frame full data
+        /// </summary>
+        /// <param name="world">World</param>
+        /// <param name="context">Context</param>
+        public void UpdatePerFrameFull(
+            Matrix world,
+            DrawContext context)
+        {
+            this.World = world;
+            this.WorldViewProjection = world * context.ViewProjection;
         }
         /// <summary>
         /// Update per model object data
         /// </summary>
-        /// <param name="useAnisotropic">Use anisotropic filtering</param>
-        /// <param name="diffuseMap">Diffuse map</param>
-        /// <param name="normalMap">Normal map</param>
-        /// <param name="specularMap">Specular map</param>
-        /// <param name="materialIndex">Material index</param>
-        /// <param name="textureIndex">Texture index</param>
         /// <param name="animationOffset">Animation index</param>
+        /// <param name="material">Material</param>
+        /// <param name="textureIndex">Texture index</param>
+        /// <param name="useAnisotropic">Use anisotropic filtering</param>
         public void UpdatePerObject(
-            bool useAnisotropic,
-            EngineShaderResourceView diffuseMap,
-            EngineShaderResourceView normalMap,
-            EngineShaderResourceView specularMap,
-            uint materialIndex,
+            uint animationOffset,
+            MeshMaterial material,
             uint textureIndex,
-            uint animationOffset)
+            bool useAnisotropic)
         {
-            this.Anisotropic = useAnisotropic;
+            if (material != null)
+            {
+                this.DiffuseMap = material.DiffuseTexture;
+                this.NormalMap = material.NormalMap;
+                this.SpecularMap = material.SpecularTexture;
+                this.MaterialIndex = material.ResourceIndex;
+            }
+            else
+            {
+                this.DiffuseMap = null;
+                this.NormalMap = null;
+                this.SpecularMap = null;
+                this.MaterialIndex = 0;
+            }
 
-            this.DiffuseMap = diffuseMap;
-            this.NormalMap = normalMap;
-            this.SpecularMap = specularMap;
-            this.MaterialIndex = materialIndex;
             this.TextureIndex = textureIndex;
+            this.Anisotropic = useAnisotropic;
 
             this.AnimationOffset = animationOffset;
         }

@@ -459,7 +459,6 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        /// <param name="world">World matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="totalTime">Total time</param>
@@ -475,7 +474,6 @@ namespace Engine.Effects
         /// <param name="textureCount">Texture count</param>
         /// <param name="textures">Texture</param>
         public void UpdatePerFrame(
-            Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             float totalTime,
@@ -497,8 +495,8 @@ namespace Engine.Effects
             uint textureCount,
             EngineShaderResourceView textures)
         {
-            this.World = world;
-            this.WorldViewProjection = world * viewProjection;
+            this.World = Matrix.Identity;
+            this.WorldViewProjection = viewProjection;
             this.EyePositionWorld = eyePositionWorld;
             this.TotalTime = totalTime;
             this.ElapsedTime = elapsedTime;

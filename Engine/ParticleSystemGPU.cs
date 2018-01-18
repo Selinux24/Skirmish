@@ -209,7 +209,6 @@ namespace Engine
                 #region Per frame update
 
                 effect.UpdatePerFrame(
-                    context.World,
                     context.ViewProjection,
                     context.EyePosition,
                     this.Emitter.TotalTime,

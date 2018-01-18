@@ -526,8 +526,8 @@ namespace Engine
         /// <param name="eyePosition">Eye position</param>
         public ISceneLightOmnidirectional[] GetOmnidirectionalShadowCastingLights(Vector3 eyePosition)
         {
-            return this.pointLights
-                .Where(l => l.Enabled && l.CastShadow)
+            return this.visibleLights
+                .Where(l => l.CastShadow && l is ISceneLightOmnidirectional)
                 .Select(l => (ISceneLightOmnidirectional)l)
                 .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
                 .ToArray();

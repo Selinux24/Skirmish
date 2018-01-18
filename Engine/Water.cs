@@ -81,7 +81,6 @@ namespace Engine
                     var dwContext = context as DrawContext;
 
                     effect.UpdatePerFrame(
-                        dwContext.World,
                         dwContext.ViewProjection,
                         dwContext.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
                         dwContext.Lights,

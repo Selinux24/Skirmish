@@ -21,10 +21,6 @@ namespace Engine.Common
         /// </summary>
         public GameTime GameTime { get; set; }
         /// <summary>
-        /// World matrix
-        /// </summary>
-        public Matrix World { get; set; }
-        /// <summary>
         /// View * projection matrix
         /// </summary>
         public Matrix ViewProjection { get; set; }

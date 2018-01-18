@@ -872,7 +872,6 @@ namespace Engine
             #region Per frame update
 
             effect.UpdatePerFrame(
-                context.World,
                 context.ViewProjection,
                 context.EyePosition,
                 context.Lights,
@@ -916,7 +915,6 @@ namespace Engine
             #region Per frame update
 
             effect.UpdatePerFrame(
-                context.World,
                 context.ViewProjection,
                 context.EyePosition,
                 this.WindDirection,

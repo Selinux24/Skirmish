@@ -16,10 +16,6 @@ namespace Engine.Common
         /// </summary>
         public GameTime GameTime;
         /// <summary>
-        /// World matrix
-        /// </summary>
-        public Matrix World;
-        /// <summary>
         /// View matrix
         /// </summary>
         public Matrix View;

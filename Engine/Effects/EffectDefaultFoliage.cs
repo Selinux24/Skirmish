@@ -723,7 +723,6 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="lights">Scene ligths</param>
@@ -745,7 +744,6 @@ namespace Engine.Effects
         /// <param name="normalMaps">Normal maps</param>
         /// <param name="materialIndex">Material index</param>
         public void UpdatePerFrame(
-            Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             SceneLights lights,
@@ -767,8 +765,8 @@ namespace Engine.Effects
             EngineShaderResourceView texture,
             EngineShaderResourceView normalMaps)
         {
-            this.World = world;
-            this.WorldViewProjection = world * viewProjection;
+            this.World = Matrix.Identity;
+            this.WorldViewProjection = viewProjection;
             this.EyePositionWorld = eyePositionWorld;
 
             this.StartRadius = startRadius;

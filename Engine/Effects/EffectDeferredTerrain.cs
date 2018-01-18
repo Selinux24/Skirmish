@@ -394,16 +394,14 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="textureResolution">Texture resolution</param>
         public void UpdatePerFrame(
-            Matrix world,
             Matrix viewProjection,
             float textureResolution)
         {
-            this.World = world;
-            this.WorldViewProjection = world * viewProjection;
+            this.World = Matrix.Identity;
+            this.WorldViewProjection = viewProjection;
             this.TextureResolution = textureResolution;
         }
         /// <summary>

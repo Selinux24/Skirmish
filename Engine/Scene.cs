@@ -139,20 +139,6 @@ namespace Engine
         protected bool UpdateGlobalResources { get; set; }
 
         /// <summary>
-        /// Gets the scen world matrix
-        /// </summary>
-        public Matrix World
-        {
-            get
-            {
-                return this.world;
-            }
-            set
-            {
-                this.world = value;
-            }
-        }
-        /// <summary>
         /// Camera
         /// </summary>
         public Camera Camera

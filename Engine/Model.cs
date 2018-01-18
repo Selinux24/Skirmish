@@ -176,6 +176,7 @@ namespace Engine
                 this.Lights = drawData.Lights;
             }
         }
+
         /// <summary>
         /// Update
         /// </summary>
@@ -206,8 +207,6 @@ namespace Engine
                     this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
                 }
             }
-
-            this.SetLOD(context.EyePosition, context.Frustum);
         }
         /// <summary>
         /// Draw shadows
@@ -222,18 +221,15 @@ namespace Engine
 
                 instanceCount++;
 
-                Drawer effect = null;
-                GetShadowMappingTechniqueDelegate techniqueFn = null;
+                IShadowMapDrawer effect = null;
 
                 if (context.ShadowMap is ShadowMap)
                 {
                     effect = DrawerPool.EffectShadowBasic;
-                    techniqueFn = DrawerPool.EffectShadowBasic.GetTechnique;
                 }
                 else if (context.ShadowMap is CubicShadowMap)
                 {
                     effect = DrawerPool.EffectShadowPoint;
-                    techniqueFn = DrawerPool.EffectShadowPoint.GetTechnique;
                 }
 
                 if (effect != null)
@@ -244,20 +240,9 @@ namespace Engine
                     {
                         var dictionary = this.DrawingData.Meshes[meshName];
 
-                        var localTransform = this.GetTransformByName(meshName) * context.World;
+                        var localTransform = this.GetTransformByName(meshName);
 
-                        if (context.ShadowMap is ShadowMap)
-                        {
-                            ((EffectShadowBasic)effect).UpdatePerFrame(
-                                localTransform,
-                                context.ShadowMap.FromLightViewProjectionArray[0]);
-                        }
-                        else if (context.ShadowMap is CubicShadowMap)
-                        {
-                            ((EffectShadowPoint)effect).UpdatePerFrame(
-                                localTransform,
-                                context.ShadowMap.FromLightViewProjectionArray);
-                        }
+                        effect.UpdatePerFrame(localTransform, context);
 
                         foreach (string material in dictionary.Keys)
                         {
@@ -266,24 +251,11 @@ namespace Engine
 
                             var mat = this.DrawingData.Materials[material];
 
-                            if (context.ShadowMap is ShadowMap)
-                            {
-                                ((EffectShadowBasic)effect).UpdatePerObject(
-                                    mat.DiffuseTexture,
-                                    this.TextureIndex,
-                                    this.AnimationIndex);
-                            }
-                            else if (context.ShadowMap is CubicShadowMap)
-                            {
-                                ((EffectShadowPoint)effect).UpdatePerObject(
-                                    mat.DiffuseTexture,
-                                    this.TextureIndex,
-                                    this.AnimationIndex);
-                            }
+                            effect.UpdatePerObject(this.AnimationIndex, mat, this.TextureIndex);
 
                             this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                            var technique = techniqueFn(mesh.VertextType, mesh.Instanced, mesh.Transparent);
+                            var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, mesh.Transparent);
                             this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                             count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
@@ -314,17 +286,15 @@ namespace Engine
 
                 var mode = context.DrawerMode;
 
-                Drawer effect = null;
-                GetDrawingTechniqueDelegate techniqueFn = null;
+                IGeometryDrawer effect = null;
+
                 if (mode.HasFlag(DrawerModesEnum.Forward))
                 {
                     effect = DrawerPool.EffectDefaultBasic;
-                    techniqueFn = DrawerPool.EffectDefaultBasic.GetTechnique;
                 }
                 else if (mode.HasFlag(DrawerModesEnum.Deferred))
                 {
                     effect = DrawerPool.EffectDeferredBasic;
-                    techniqueFn = DrawerPool.EffectDeferredBasic.GetTechnique;
                 }
 
                 if (effect != null)
@@ -335,30 +305,9 @@ namespace Engine
                     {
                         var dictionary = this.DrawingData.Meshes[meshName];
 
-                        var localTransform = this.GetTransformByName(meshName) * context.World;
+                        var localTransform = this.GetTransformByName(meshName);
 
-                        #region Per frame update
-
-                        if (mode.HasFlag(DrawerModesEnum.Forward))
-                        {
-                            ((EffectDefaultBasic)effect).UpdatePerFrame(
-                                localTransform,
-                                context.ViewProjection,
-                                context.EyePosition,
-                                context.Lights,
-                                context.ShadowMaps,
-                                context.ShadowMapLow,
-                                context.ShadowMapHigh,
-                                context.ShadowMapCube);
-                        }
-                        else if (mode.HasFlag(DrawerModesEnum.Deferred))
-                        {
-                            ((EffectDeferredBasic)effect).UpdatePerFrame(
-                                localTransform,
-                                context.ViewProjection);
-                        }
-
-                        #endregion
+                        effect.UpdatePerFrameFull(localTransform, context);
 
                         foreach (string material in dictionary.Keys)
                         {
@@ -374,38 +323,15 @@ namespace Engine
                                 continue;
                             }
 
-                            #region Per object update
-
-                            var mat = this.DrawingData.Materials[material];
-
-                            if (mode.HasFlag(DrawerModesEnum.Forward))
-                            {
-                                ((EffectDefaultBasic)effect).UpdatePerObject(
-                                    this.UseAnisotropicFiltering,
-                                    mat.DiffuseTexture,
-                                    mat.NormalMap,
-                                    mat.SpecularTexture,
-                                    mat.ResourceIndex,
-                                    this.TextureIndex,
-                                    this.AnimationIndex);
-                            }
-                            else if (mode.HasFlag(DrawerModesEnum.Deferred))
-                            {
-                                ((EffectDeferredBasic)effect).UpdatePerObject(
-                                    this.UseAnisotropicFiltering,
-                                    mat.DiffuseTexture,
-                                    mat.NormalMap,
-                                    mat.SpecularTexture,
-                                    mat.ResourceIndex,
-                                    this.TextureIndex,
-                                    this.AnimationIndex);
-                            }
-
-                            #endregion
+                            effect.UpdatePerObject(
+                                this.AnimationIndex,
+                                this.DrawingData.Materials[material],
+                                this.TextureIndex,
+                                this.UseAnisotropicFiltering);
 
                             this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                            var technique = techniqueFn(mesh.VertextType, mesh.Instanced);
+                            var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced);
                             this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                             count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
@@ -424,6 +350,7 @@ namespace Engine
                 Counters.PrimitivesPerFrame += count;
             }
         }
+
         /// <summary>
         /// Performs culling test
         /// </summary>
@@ -453,7 +380,11 @@ namespace Engine
 
             if (!cull)
             {
-                distance = Vector3.DistanceSquared(this.Manipulator.Position, frustum.GetCameraParams().Position);
+                var eyePosition = frustum.GetCameraParams().Position;
+
+                distance = Vector3.DistanceSquared(this.Manipulator.Position, eyePosition);
+
+                this.SetLOD(eyePosition);
             }
 
             return cull;
@@ -487,7 +418,11 @@ namespace Engine
 
             if (!cull)
             {
-                distance = Vector3.DistanceSquared(this.Manipulator.Position, box.GetCenter());
+                var eyePosition = box.GetCenter();
+
+                distance = Vector3.DistanceSquared(this.Manipulator.Position, eyePosition);
+
+                this.SetLOD(eyePosition);
             }
 
             return cull;
@@ -522,6 +457,8 @@ namespace Engine
             if (!cull)
             {
                 distance = Vector3.DistanceSquared(this.Manipulator.Position, sphere.Center);
+
+                this.SetLOD(sphere.Center);
             }
 
             return cull;
@@ -530,36 +467,28 @@ namespace Engine
         /// Set level of detail values
         /// </summary>
         /// <param name="origin">Origin point</param>
-        /// <param name="frustum">Camera frustum</param>
-        private void SetLOD(Vector3 origin, BoundingFrustum frustum)
+        private void SetLOD(Vector3 origin)
         {
             var position = Vector3.TransformCoordinate(this.coarseBoundingSphere.Center, this.Manipulator.LocalTransform);
             var radius = this.coarseBoundingSphere.Radius * this.Manipulator.AveragingScale;
             var bsph = new BoundingSphere(position, radius);
 
-            if (frustum.Contains(bsph) != ContainmentType.Disjoint)
+            var dist = Vector3.Distance(position, origin) - radius;
+            if (dist < GameEnvironment.LODDistanceHigh)
             {
-                var dist = Vector3.Distance(position, origin) - radius;
-                if (dist < GameEnvironment.LODDistanceHigh)
-                {
-                    this.LevelOfDetail = LevelOfDetailEnum.High;
-                }
-                else if (dist < GameEnvironment.LODDistanceMedium)
-                {
-                    this.LevelOfDetail = LevelOfDetailEnum.Medium;
-                }
-                else if (dist < GameEnvironment.LODDistanceLow)
-                {
-                    this.LevelOfDetail = LevelOfDetailEnum.Low;
-                }
-                else if (dist < GameEnvironment.LODDistanceMinimum)
-                {
-                    this.LevelOfDetail = LevelOfDetailEnum.Minimum;
-                }
-                else
-                {
-                    this.levelOfDetail = LevelOfDetailEnum.None;
-                }
+                this.LevelOfDetail = LevelOfDetailEnum.High;
+            }
+            else if (dist < GameEnvironment.LODDistanceMedium)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Medium;
+            }
+            else if (dist < GameEnvironment.LODDistanceLow)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Low;
+            }
+            else if (dist < GameEnvironment.LODDistanceMinimum)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Minimum;
             }
             else
             {

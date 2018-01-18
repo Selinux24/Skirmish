@@ -848,7 +848,6 @@ namespace Engine
             var effect = DrawerPool.EffectDefaultTerrain;
 
             effect.UpdatePerFrame(
-                context.World,
                 context.ViewProjection,
                 this.textureResolution,
                 context.EyePosition,
@@ -889,7 +888,6 @@ namespace Engine
             var effect = DrawerPool.EffectDeferredTerrain;
 
             effect.UpdatePerFrame(
-                context.World,
                 context.ViewProjection,
                 this.textureResolution);
 
@@ -922,7 +920,7 @@ namespace Engine
         {
             var effect = DrawerPool.EffectShadowTerrain;
 
-            effect.UpdatePerFrame(context.World, context.ViewProjection);
+            effect.UpdatePerFrame(context.ViewProjection);
 
             return effect.TerrainShadowMap;
         }

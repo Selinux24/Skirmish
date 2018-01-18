@@ -100,7 +100,6 @@ namespace Engine
             this.drawContext = new DrawContext()
             {
                 DrawerMode = DrawerModesEnum.Forward | DrawerModesEnum.OpaqueOnly,
-                World = Matrix.Identity,
                 ViewProjection = view * proj,
                 EyePosition = eyePos,
                 EyeTarget = target,

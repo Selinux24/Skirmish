@@ -99,8 +99,8 @@ namespace Engine
                     Counters.InstancesPerFrame += this.dictionary.Count;
                     Counters.PrimitivesPerFrame += this.drawCount / 2;
 
-                    effect.UpdatePerFrame(context.World, context.ViewProjection);
-                    effect.UpdatePerObject(false, null, null, null, 0, 0, 0);
+                    effect.UpdatePerFrameBasic(Matrix.Identity, context);
+                    effect.UpdatePerObject(0, null, 0, false);
 
                     var technique = effect.GetTechnique(VertexTypes.PositionColor, false);
                     this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.LineList);

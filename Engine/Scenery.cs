@@ -95,9 +95,8 @@ namespace Engine
             /// </summary>
             /// <param name="context">Drawing context</param>
             /// <param name="sceneryEffect">Scenery effect</param>
-            /// <param name="techniqueFn">Function for technique</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawSceneryShadows(DrawContextShadows context, Drawer sceneryEffect, GetShadowMappingTechniqueDelegate techniqueFn, BufferManager bufferManager)
+            public void DrawSceneryShadows(DrawContextShadows context, IShadowMapDrawer sceneryEffect, BufferManager bufferManager)
             {
                 var graphics = this.Game.Graphics;
 
@@ -109,28 +108,11 @@ namespace Engine
                     {
                         var mesh = dictionary[material];
 
-                        var technique = techniqueFn(mesh.VertextType, mesh.Instanced, mesh.Transparent);
-
-                        #region Per object update
+                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, mesh.Transparent);
 
                         var mat = this.DrawingData.Materials[material];
 
-                        if (context.ShadowMap is ShadowMap)
-                        {
-                            ((EffectShadowBasic)sceneryEffect).UpdatePerObject(
-                                mat.DiffuseTexture,
-                                0,
-                                0);
-                        }
-                        else if (context.ShadowMap is CubicShadowMap)
-                        {
-                            ((EffectShadowPoint)sceneryEffect).UpdatePerObject(
-                                mat.DiffuseTexture,
-                                0,
-                                0);
-                        }
-
-                        #endregion
+                        sceneryEffect.UpdatePerObject(0, mat, 0);
 
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
@@ -151,7 +133,7 @@ namespace Engine
             /// <param name="sceneryEffect">Scenery effect</param>
             /// <param name="techniqueFn">Function for technique</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawScenery(DrawContext context, Drawer sceneryEffect, GetDrawingTechniqueDelegate techniqueFn, BufferManager bufferManager)
+            public void DrawScenery(DrawContext context, IGeometryDrawer sceneryEffect, BufferManager bufferManager)
             {
                 var mode = context.DrawerMode;
                 var graphics = this.Game.Graphics;
@@ -165,36 +147,13 @@ namespace Engine
                     {
                         var mesh = dictionary[material];
 
-                        var technique = techniqueFn(mesh.VertextType, mesh.Instanced);
+                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced);
 
-                        #region Per object update
-
-                        var mat = this.DrawingData.Materials[material];
-
-                        if (mode.HasFlag(DrawerModesEnum.Forward))
-                        {
-                            ((EffectDefaultBasic)sceneryEffect).UpdatePerObject(
-                                true,
-                                mat.DiffuseTexture,
-                                mat.NormalMap,
-                                mat.SpecularTexture,
-                                mat.ResourceIndex,
-                                0,
-                                0);
-                        }
-                        else if (mode.HasFlag(DrawerModesEnum.Deferred))
-                        {
-                            ((EffectDeferredBasic)sceneryEffect).UpdatePerObject(
-                                true,
-                                mat.DiffuseTexture,
-                                mat.NormalMap,
-                                mat.SpecularTexture,
-                                mat.ResourceIndex,
-                                0,
-                                0);
-                        }
-
-                        #endregion
+                        sceneryEffect.UpdatePerObject(
+                            0,
+                            this.DrawingData.Materials[material],
+                            0,
+                            true);
 
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
@@ -358,6 +317,7 @@ namespace Engine
 
             #endregion
         }
+
         /// <summary>
         /// Dispose of created resources
         /// </summary>
@@ -384,35 +344,26 @@ namespace Engine
             {
                 var graphics = this.Game.Graphics;
 
-                Drawer sceneryEffect = null;
-                GetShadowMappingTechniqueDelegate techniqueFn = null;
+                IShadowMapDrawer sceneryEffect = null;
 
                 if (context.ShadowMap is ShadowMap)
                 {
                     sceneryEffect = DrawerPool.EffectShadowBasic;
-                    techniqueFn = DrawerPool.EffectShadowBasic.GetTechnique;
-
-                    DrawerPool.EffectShadowBasic.UpdatePerFrame(
-                        context.World,
-                        context.ShadowMap.FromLightViewProjectionArray[0]);
                 }
                 else if (context.ShadowMap is CubicShadowMap)
                 {
                     sceneryEffect = DrawerPool.EffectShadowPoint;
-                    techniqueFn = DrawerPool.EffectShadowPoint.GetTechnique;
-
-                    DrawerPool.EffectShadowPoint.UpdatePerFrame(
-                        context.World,
-                        context.ShadowMap.FromLightViewProjectionArray);
                 }
 
                 if (sceneryEffect != null)
                 {
+                    sceneryEffect.UpdatePerFrame(Matrix.Identity, context);
+
                     graphics.SetBlendDefault();
 
                     foreach (var node in nodes)
                     {
-                        this.patchDictionary[node.Id].DrawSceneryShadows(context, sceneryEffect, techniqueFn, this.BufferManager);
+                        this.patchDictionary[node.Id].DrawSceneryShadows(context, sceneryEffect, this.BufferManager);
                     }
                 }
             }
@@ -431,56 +382,32 @@ namespace Engine
                 var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
                 if (nodes != null && nodes.Length > 0)
                 {
-                    Drawer sceneryEffect = null;
-                    GetDrawingTechniqueDelegate techniqueFn = null;
+                    IGeometryDrawer sceneryEffect = null;
 
                     if (mode.HasFlag(DrawerModesEnum.Forward))
                     {
                         sceneryEffect = DrawerPool.EffectDefaultBasic;
-                        techniqueFn = DrawerPool.EffectDefaultBasic.GetTechnique;
-
-                        #region Per frame update
-
-                        var dwContext = context as DrawContext;
-
-                        DrawerPool.EffectDefaultBasic.UpdatePerFrame(
-                            dwContext.World,
-                            dwContext.ViewProjection,
-                            dwContext.EyePosition,
-                            dwContext.Lights,
-                            dwContext.ShadowMaps,
-                            dwContext.ShadowMapLow,
-                            dwContext.ShadowMapHigh,
-                            dwContext.ShadowMapCube);
-
-                        #endregion
                     }
                     else if (mode.HasFlag(DrawerModesEnum.Deferred))
                     {
                         sceneryEffect = DrawerPool.EffectDeferredBasic;
-                        techniqueFn = DrawerPool.EffectDeferredBasic.GetTechnique;
-
-                        #region Per frame update
-
-                        DrawerPool.EffectDeferredBasic.UpdatePerFrame(
-                            context.World,
-                            context.ViewProjection);
-
-                        #endregion
                     }
 
                     if (sceneryEffect != null)
                     {
+                        sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
+
                         graphics.SetBlendDefault();
 
                         foreach (var node in nodes)
                         {
-                            this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, techniqueFn, this.BufferManager);
+                            this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, this.BufferManager);
                         }
                     }
                 }
             }
         }
+
         /// <summary>
         /// Performs culling test
         /// </summary>

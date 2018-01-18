@@ -153,8 +153,6 @@ namespace Engine
                     this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
                 }
             }
-
-            this.SetLOD(context.EyePosition, context.Frustum);
         }
 
         /// <summary>
@@ -438,7 +436,11 @@ namespace Engine
 
             if (!cull)
             {
-                distance = Vector3.DistanceSquared(this.Manipulator.Position, frustum.GetCameraParams().Position);
+                var eyePosition = frustum.GetCameraParams().Position;
+
+                distance = Vector3.DistanceSquared(this.Manipulator.Position, eyePosition);
+
+                this.SetLOD(eyePosition);
             }
 
             return cull;
@@ -472,7 +474,11 @@ namespace Engine
 
             if (!cull)
             {
-                distance = Vector3.DistanceSquared(this.Manipulator.Position, box.GetCenter());
+                var eyePosition = box.GetCenter();
+
+                distance = Vector3.DistanceSquared(this.Manipulator.Position, eyePosition);
+
+                this.SetLOD(eyePosition);
             }
 
             return cull;
@@ -507,6 +513,8 @@ namespace Engine
             if (!cull)
             {
                 distance = Vector3.DistanceSquared(this.Manipulator.Position, sphere.Center);
+
+                this.SetLOD(sphere.Center);
             }
 
             return cull;
@@ -515,36 +523,28 @@ namespace Engine
         /// Set level of detail values
         /// </summary>
         /// <param name="origin">Origin point</param>
-        /// <param name="frustum">Camera frustum</param>
-        private void SetLOD(Vector3 origin, BoundingFrustum frustum)
+        private void SetLOD(Vector3 origin)
         {
             var position = Vector3.TransformCoordinate(this.coarseBoundingSphere.Center, this.Manipulator.LocalTransform);
             var radius = this.coarseBoundingSphere.Radius * this.Manipulator.AveragingScale;
             var bsph = new BoundingSphere(position, radius);
 
-            if (frustum.Contains(bsph) != ContainmentType.Disjoint)
+            var dist = Vector3.Distance(position, origin) - radius;
+            if (dist < GameEnvironment.LODDistanceHigh)
             {
-                var dist = Vector3.Distance(position, origin) - radius;
-                if (dist < GameEnvironment.LODDistanceHigh)
-                {
-                    this.LevelOfDetail = LevelOfDetailEnum.High;
-                }
-                else if (dist < GameEnvironment.LODDistanceMedium)
-                {
-                    this.LevelOfDetail = LevelOfDetailEnum.Medium;
-                }
-                else if (dist < GameEnvironment.LODDistanceLow)
-                {
-                    this.LevelOfDetail = LevelOfDetailEnum.Low;
-                }
-                else if (dist < GameEnvironment.LODDistanceMinimum)
-                {
-                    this.LevelOfDetail = LevelOfDetailEnum.Minimum;
-                }
-                else
-                {
-                    this.levelOfDetail = LevelOfDetailEnum.None;
-                }
+                this.LevelOfDetail = LevelOfDetailEnum.High;
+            }
+            else if (dist < GameEnvironment.LODDistanceMedium)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Medium;
+            }
+            else if (dist < GameEnvironment.LODDistanceLow)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Low;
+            }
+            else if (dist < GameEnvironment.LODDistanceMinimum)
+            {
+                this.LevelOfDetail = LevelOfDetailEnum.Minimum;
             }
             else
             {

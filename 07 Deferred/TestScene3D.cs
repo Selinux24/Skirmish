@@ -929,7 +929,7 @@ namespace Deferred
                 this.Lights.DirectionalLights.Length,
                 this.Lights.PointLights.Length,
                 this.Lights.SpotLights.Length,
-                this.Lights.DirectionalShadowCastingLights.Length);
+                this.Lights.GetDirectionalShadowCastingLights().Length);
 
             if (Counters.Statistics.Length == 0)
             {

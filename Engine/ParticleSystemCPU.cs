@@ -191,7 +191,6 @@ namespace Engine
                     }
 
                     effect.UpdatePerFrame(
-                        context.World,
                         context.ViewProjection,
                         context.EyePosition,
                         this.Emitter.TotalTime,

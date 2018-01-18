@@ -1,8 +1,6 @@
 ﻿#if DEBUG
 using System.Diagnostics;
 #endif
-using SharpDX;
-using System;
 using System.Collections.Generic;
 
 namespace Engine
@@ -12,37 +10,8 @@ namespace Engine
     /// <summary>
     /// Forward renderer class
     /// </summary>
-    public class SceneRendererForward : ISceneRenderer
+    public class SceneRendererForward : SceneRendererBase
     {
-        /// <summary>
-        /// Shadow map size
-        /// </summary>
-        private const int ShadowMapSize = 1024 * 4;
-        /// <summary>
-        /// Cubic shadow map size
-        /// </summary>
-        private const int CubicShadowMapSize = 1024;
-        /// <summary>
-        /// Maximum number of cubic shadow maps
-        /// </summary>
-        private const int MaxCubicShadows = 8;
-        /// <summary>
-        /// Cull index for low definition shadows
-        /// </summary>
-        private const int CullIndexShadowLowIndex = 0;
-        /// <summary>
-        /// Cull index for high definition shadows
-        /// </summary>
-        private const int CullIndexShadowHighIndex = 1;
-        /// <summary>
-        /// Cull index for cubic shadow mapping
-        /// </summary>
-        private const int CullIndexShadowCubicIndex = 2;
-        /// <summary>
-        /// Cull index for drawing
-        /// </summary>
-        private const int CullIndexDrawIndex = 3;
-
         /// <summary>
         /// Validates the renderer against the current device configuration
         /// </summary>
@@ -54,176 +23,20 @@ namespace Engine
         }
 
         /// <summary>
-        /// High definition shadow mapper
-        /// </summary>
-        private IShadowMap shadowMapperHigh = null;
-        /// <summary>
-        /// Low definition shadow mapper
-        /// </summary>
-        private IShadowMap shadowMapperLow = null;
-        /// <summary>
-        /// Cube shadow mapper for point lights
-        /// </summary>
-        private IShadowMap[] shadowMapperCube = null;
-        /// <summary>
-        /// Cull manager
-        /// </summary>
-        private SceneCullManager cullManager = null;
-
-        /// <summary>
-        /// Game
-        /// </summary>
-        protected Game Game;
-        /// <summary>
-        /// Renderer width
-        /// </summary>
-        protected int Width;
-        /// <summary>
-        /// Renderer height
-        /// </summary>
-        protected int Height;
-        /// <summary>
-        /// Update context
-        /// </summary>
-        protected UpdateContext UpdateContext = null;
-        /// <summary>
-        /// Draw context
-        /// </summary>
-        protected DrawContext DrawContext = null;
-        /// <summary>
-        /// Context for shadow map drawing
-        /// </summary>
-        protected DrawContextShadows DrawShadowsContext = null;
-        /// <summary>
-        /// Low definition shadow map
-        /// </summary>
-        protected EngineShaderResourceView ShadowMapLow
-        {
-            get
-            {
-                if (this.shadowMapperLow != null)
-                {
-                    return this.shadowMapperLow.Texture;
-                }
-
-                return null;
-            }
-        }
-        /// <summary>
-        /// High definition shadow map
-        /// </summary>
-        protected EngineShaderResourceView ShadowMapHigh
-        {
-            get
-            {
-                if (this.shadowMapperHigh != null)
-                {
-                    return this.shadowMapperHigh.Texture;
-                }
-
-                return null;
-            }
-        }
-        /// <summary>
-        /// Gets or sets whether the renderer was updated
-        /// </summary>
-        protected bool Updated { get; set; }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        public SceneRendererForward(Game game)
-        {
-            this.Game = game;
-
-            this.shadowMapperLow = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
-            this.shadowMapperHigh = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
-            this.shadowMapperCube = new CubicShadowMap[MaxCubicShadows];
-            for (int i = 0; i < MaxCubicShadows; i++)
-            {
-                this.shadowMapperCube[i] = new CubicShadowMap(game, CubicShadowMapSize, CubicShadowMapSize);
-            }
-
-            this.cullManager = new SceneCullManager();
-
-            this.UpdateContext = new UpdateContext()
-            {
-                Name = "Primary",
-            };
-
-            this.DrawContext = new DrawContext()
-            {
-                Name = "Primary",
-                DrawerMode = DrawerModesEnum.Forward,
-            };
-
-            this.DrawShadowsContext = new DrawContextShadows()
-            {
-                Name = "Shadow mapping",
-            };
-        }
-        /// <summary>
-        /// Dispose objects
-        /// </summary>
-        public virtual void Dispose()
-        {
-            Helper.Dispose(this.shadowMapperLow);
-            Helper.Dispose(this.shadowMapperHigh);
-            Helper.Dispose(this.shadowMapperCube);
-        }
-        /// <summary>
-        /// Resizes buffers
-        /// </summary>
-        public virtual void Resize()
+        public SceneRendererForward(Game game) : base(game)
         {
 
         }
-        /// <summary>
-        /// Updates scene components
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        public virtual void Update(GameTime gameTime, Scene scene)
-        {
-#if DEBUG
-            Stopwatch swTotal = Stopwatch.StartNew();
-#endif
-            Matrix viewProj = scene.Camera.View * scene.Camera.Projection;
 
-            this.UpdateContext.GameTime = gameTime;
-            this.UpdateContext.World = scene.World;
-            this.UpdateContext.View = scene.Camera.View;
-            this.UpdateContext.Projection = scene.Camera.Projection;
-            this.UpdateContext.NearPlaneDistance = scene.Camera.NearPlaneDistance;
-            this.UpdateContext.FarPlaneDistance = scene.Camera.FarPlaneDistance;
-            this.UpdateContext.ViewProjection = viewProj;
-            this.UpdateContext.Frustum = new BoundingFrustum(viewProj);
-            this.UpdateContext.EyePosition = scene.Camera.Position;
-            this.UpdateContext.EyeDirection = scene.Camera.Direction;
-            this.UpdateContext.Lights = scene.Lights;
-
-            //Cull lights
-            scene.Lights.Cull(this.UpdateContext.Frustum, this.UpdateContext.EyePosition);
-
-            //Update active components
-            scene.GetComponents<IUpdatable>(c => c.Active)
-                .ForEach(c => c.Update(this.UpdateContext));
-
-            this.Updated = true;
-#if DEBUG
-            swTotal.Stop();
-#endif
-#if DEBUG
-            Counters.SetStatistics("Scene.Update", string.Format("Update = {0:000000}", swTotal.ElapsedTicks));
-#endif
-        }
         /// <summary>
         /// Draws scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="scene">Scene</param>
-        public virtual void Draw(GameTime gameTime, Scene scene)
+        public override void Draw(GameTime gameTime, Scene scene)
         {
             if (this.Updated)
             {
@@ -252,7 +65,6 @@ namespace Engine
 #endif
                     //Initialize context data from update context
                     this.DrawContext.GameTime = gameTime;
-                    this.DrawContext.World = this.UpdateContext.World;
                     this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
                     this.DrawContext.Frustum = this.UpdateContext.Frustum;
                     this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
@@ -260,9 +72,9 @@ namespace Engine
                     //Initialize context data from scene
                     this.DrawContext.Lights = scene.Lights;
                     this.DrawContext.ShadowMaps = 0;
-                    this.DrawContext.ShadowMapLow = this.shadowMapperLow;
-                    this.DrawContext.ShadowMapHigh = this.shadowMapperHigh;
-                    this.DrawContext.ShadowMapCube = this.shadowMapperCube;
+                    this.DrawContext.ShadowMapLow = this.ShadowMapperLow;
+                    this.DrawContext.ShadowMapHigh = this.ShadowMapperHigh;
+                    this.DrawContext.ShadowMapCube = this.ShadowMapperCube;
 
 #if DEBUG
                     swStartup.Stop();
@@ -404,290 +216,7 @@ namespace Engine
 #endif
             }
         }
-        /// <summary>
-        /// Draw directional shadow maps
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        /// <returns>Returns drawn map flag</returns>
-        private ShadowMapFlags DoShadowMapping(GameTime gameTime, Scene scene)
-        {
-            ShadowMapFlags flags = ShadowMapFlags.None;
 
-            var shadowCastingLights = scene.Lights.GetDirectionalShadowCastingLights();
-            if (shadowCastingLights.Length > 0)
-            {
-                var graphics = this.Game.Graphics;
-
-#if DEBUG
-                Stopwatch swShadowsPreparation = Stopwatch.StartNew();
-#endif
-                Vector3 lightPosition;
-                Vector3 lightDirection;
-                if (scene.Lights.GetDirectionalLightShadowParams(
-                    shadowCastingLights[0],
-                    out lightPosition,
-                    out lightDirection))
-                {
-                    #region Preparation
-
-                    this.DrawShadowsContext.World = this.UpdateContext.World;
-                    this.DrawShadowsContext.ViewProjection = this.UpdateContext.ViewProjection;
-                    this.DrawShadowsContext.EyePosition = this.DrawContext.EyePosition;
-
-#if DEBUG
-                    swShadowsPreparation.Stop();
-#endif
-                    #endregion
-
-                    #region Shadow map
-
-                    //Draw components if drop shadow (opaque)
-                    var shadowObjs = scene.GetComponents(c => c.CastShadow == true);
-                    if (shadowObjs.Count > 0)
-                    {
-                        #region Cull
-
-#if DEBUG
-                        Stopwatch swCull = Stopwatch.StartNew();
-#endif
-                        var toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
-
-                        var sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
-
-                        var doLowShadows = this.cullManager.Cull(sph, CullIndexShadowLowIndex, toCullShadowObjs);
-#if DEBUG
-                        swCull.Stop();
-#endif
-                        #endregion
-
-                        if (doLowShadows)
-                        {
-                            flags |= ShadowMapFlags.LowDefinition;
-                            this.DrawShadowsContext.ShadowMap = this.shadowMapperLow;
-
-                            #region Draw
-
-#if DEBUG
-                            Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                            var fromLightVP = SceneLights.GetFromLightViewProjection(
-                                lightPosition,
-                                this.DrawContext.EyePosition,
-                                scene.Lights.ShadowLDDistance);
-
-                            this.shadowMapperLow.FromLightViewProjectionArray = new[] { fromLightVP };
-                            this.shadowMapperLow.Bind(graphics);
-
-                            this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowLowIndex, shadowObjs);
-#if DEBUG
-                            swDraw.Stop();
-#endif
-                            #endregion
-                        }
-
-                        #region Cull
-#if DEBUG
-                        swCull = Stopwatch.StartNew();
-#endif
-                        toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
-
-                        sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
-
-                        var doHighShadows = this.cullManager.Cull(sph, CullIndexShadowHighIndex, toCullShadowObjs);
-#if DEBUG
-                        swCull.Stop();
-#endif
-                        #endregion
-
-                        if (doHighShadows)
-                        {
-                            flags |= ShadowMapFlags.HighDefinition;
-                            this.DrawShadowsContext.ShadowMap = this.shadowMapperHigh;
-
-                            #region Draw
-#if DEBUG
-                            Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                            var fromLightVP = SceneLights.GetFromLightViewProjection(
-                                lightPosition,
-                                this.DrawContext.EyePosition,
-                                scene.Lights.ShadowHDDistance);
-
-                            this.shadowMapperHigh.FromLightViewProjectionArray = new[] { fromLightVP };
-                            this.shadowMapperHigh.Bind(graphics);
-
-                            this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowHighIndex, shadowObjs);
-#if DEBUG
-                            swDraw.Stop();
-#endif
-
-                            #endregion
-                        }
-                    }
-
-                    #endregion
-                }
-            }
-
-            return flags;
-        }
-        /// <summary>
-        /// Draw omnidirectional shadow maps
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        /// <returns>Returns drawn map flag</returns>
-        private ShadowMapFlags DoCubicShadowMapping(GameTime gameTime, Scene scene)
-        {
-            ShadowMapFlags flags = ShadowMapFlags.None;
-
-            var shadowCastingLights = scene.Lights.GetOmnidirectionalShadowCastingLights(scene.Camera.Position);
-            if (shadowCastingLights.Length > 0)
-            {
-                var graphics = this.Game.Graphics;
-
-#if DEBUG
-                Stopwatch swShadowsPreparation = Stopwatch.StartNew();
-#endif
-                #region Preparation
-
-                this.DrawShadowsContext.World = this.UpdateContext.World;
-
-#if DEBUG
-                swShadowsPreparation.Stop();
-#endif
-                #endregion
-
-                #region Shadow map
-
-                //Draw components if drop shadow (opaque)
-                var shadowObjs = scene.GetComponents(c => c.CastShadow == true);
-                if (shadowObjs.Count > 0)
-                {
-                    for (int c = 0; c < Math.Min(MaxCubicShadows, shadowCastingLights.Length); c++)
-                    {
-                        var light = shadowCastingLights[c];
-                        light.ShadowMapIndex = c;
-
-                        var shadowMapper = this.shadowMapperCube[c];
-
-                        #region Cull
-#if DEBUG
-                        Stopwatch swCull = Stopwatch.StartNew();
-#endif
-                        var toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll(s => s.Get<ICullable>());
-
-                        var sph = new BoundingSphere(light.Position, light.Radius);
-
-                        var doShadows = this.cullManager.Cull(sph, CullIndexShadowCubicIndex, toCullShadowObjs);
-#if DEBUG
-                        swCull.Stop();
-#endif
-                        #endregion
-
-                        if (doShadows)
-                        {
-                            flags |= ShadowMapFlags.CubeMap;
-                            this.DrawShadowsContext.ShadowMap = shadowMapper;
-
-                            #region Draw
-#if DEBUG
-                            Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                            var vpArray = SceneLights.GetFromOmniLightViewProjection(light);
-
-                            shadowMapper.FromLightViewProjectionArray = vpArray;
-                            shadowMapper.Bind(graphics);
-
-                            this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowCubicIndex, shadowObjs);
-#if DEBUG
-                            swDraw.Stop();
-#endif
-                            #endregion
-                        }
-                    }
-                }
-
-                #endregion
-            }
-
-            return flags;
-        }
-
-        /// <summary>
-        /// Gets renderer resources
-        /// </summary>
-        /// <param name="result">Resource type</param>
-        /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
-        public virtual EngineShaderResourceView GetResource(SceneRendererResultEnum result)
-        {
-            if (result == SceneRendererResultEnum.ShadowMapStatic) return this.ShadowMapLow;
-            if (result == SceneRendererResultEnum.ShadowMapDynamic) return this.ShadowMapHigh;
-            return null;
-        }
-
-        /// <summary>
-        /// Draw components for shadow mapping
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="context">Context</param>
-        /// <param name="index">Cull results index</param>
-        /// <param name="components">Components</param>
-        private void DrawShadowComponents(GameTime gameTime, DrawContextShadows context, int index, IEnumerable<SceneObject> components)
-        {
-            var graphics = this.Game.Graphics;
-
-            var objects = components.FindAll(c =>
-            {
-                if (!c.Is<Drawable>()) return false;
-
-                var cull = c.Get<ICullable>();
-
-                return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
-            });
-            if (objects.Count > 0)
-            {
-                objects.Sort((c1, c2) =>
-                {
-                    int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
-                    if (res == 0)
-                    {
-                        var cull1 = c1.Get<ICullable>();
-                        var cull2 = c2.Get<ICullable>();
-
-                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance.Value : float.MaxValue;
-                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance.Value : float.MaxValue;
-
-                        res = -d1.CompareTo(d2);
-                    }
-
-                    if (res == 0)
-                    {
-                        res = c1.Order.CompareTo(c2.Order);
-                    }
-
-                    return res;
-                });
-
-                objects.ForEach((c) =>
-                {
-                    graphics.SetRasterizerShadowMapping();
-                    graphics.SetDepthStencilShadowMapping();
-
-                    if (c.AlphaEnabled)
-                    {
-                        graphics.SetBlendTransparent();
-                    }
-                    else
-                    {
-                        graphics.SetBlendDefault();
-                    }
-
-                    c.Get<IDrawable>().DrawShadows(context);
-                });
-            }
-        }
         /// <summary>
         /// Draw components
         /// </summary>

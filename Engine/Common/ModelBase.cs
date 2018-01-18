@@ -240,5 +240,24 @@ namespace Engine.Common
 
             return null;
         }
+        /// <summary>
+        /// Gets the first drawing data avaliable for the specified level of detail, from the specified one
+        /// </summary>
+        /// <param name="lod">First level of detail</param>
+        /// <returns>Returns the first available level of detail drawing data</returns>
+        internal DrawingData GetFirstDrawingData(LevelOfDetailEnum lod)
+        {
+            while (lod > LevelOfDetailEnum.None)
+            {
+                if (this.meshesByLOD.ContainsKey(lod))
+                {
+                    return this.meshesByLOD[lod];
+                }
+
+                lod = (LevelOfDetailEnum)((int)lod / 2);
+            }
+
+            return null;
+        }
     }
 }

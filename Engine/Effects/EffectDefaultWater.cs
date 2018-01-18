@@ -317,7 +317,6 @@ namespace Engine.Effects
         /// <param name="geometryIterations">Geometry iterations</param>
         /// <param name="colorIterations">Color iterations</param>
         public void UpdatePerFrame(
-            Matrix world,
             Matrix viewProjection,
             Vector3 eyePosition,
             SceneLights lights,
@@ -332,8 +331,8 @@ namespace Engine.Effects
             int geometryIterations = 4,
             int colorIterations = 6)
         {
-            this.World = world;
-            this.WorldViewProjection = world * viewProjection;
+            this.World = Matrix.Identity;
+            this.WorldViewProjection = viewProjection;
             this.EyePositionWorld = eyePosition;
             this.BaseColor = baseColor.RGB();
             this.WaterColor = waterColor.RGB();

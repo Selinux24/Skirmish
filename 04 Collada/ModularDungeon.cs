@@ -16,7 +16,7 @@ namespace Collada
 
         private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> fps = null;
-        private SceneObject<TextDrawer> picks = null;
+        private SceneObject<TextDrawer> info = null;
         private SceneObject<Sprite> backPannel = null;
 
         private Player agent = null;
@@ -67,15 +67,15 @@ namespace Collada
             this.fps.Instance.Text = null;
             this.fps.Instance.Position = new Vector2(0, 24);
 
-            this.picks = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
-            this.picks.Instance.Text = null;
-            this.picks.Instance.Position = new Vector2(0, 48);
+            this.info = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.info.Instance.Text = null;
+            this.info.Instance.Position = new Vector2(0, 48);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.picks.Instance.Top + this.picks.Instance.Height + 3,
+                Height = this.info.Instance.Top + this.info.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
@@ -248,6 +248,7 @@ namespace Collada
             this.UpdateCamera(gameTime);
 
             this.fps.Instance.Text = this.Game.RuntimeText;
+            this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
         }
         private void UpdateCamera(GameTime gameTime)
         {

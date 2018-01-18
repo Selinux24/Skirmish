@@ -51,13 +51,10 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
-        public void UpdatePerFrame(
-            Matrix world,
-            Matrix viewProjection)
+        public void UpdatePerFrame(Matrix viewProjection)
         {
-            this.WorldViewProjection = world * viewProjection;
+            this.WorldViewProjection = viewProjection;
         }
     }
 }

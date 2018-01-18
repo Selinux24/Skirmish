@@ -200,6 +200,7 @@
     <Compile Include="Common\ManipulatorController.cs" />
     <Compile Include="Common\ModelBaseDescription.cs" />
     <Compile Include="Common\EngineBuffer.cs" />
+    <Compile Include="Common\SceneRendererBase.cs" />
     <Compile Include="Common\ShaderIncludeManager.cs" />
     <Compile Include="Common\TimerTick.cs" />
     <Compile Include="Common\UpdateContext.cs" />
@@ -218,6 +219,8 @@
     <Compile Include="Effects\EffectDeferredTerrain.cs" />
     <Compile Include="Effects\EffectShadowTerrain.cs" />
     <Compile Include="Effects\EffectDefaultSkyScattering.cs" />
+    <Compile Include="Effects\IGeometryDrawer.cs" />
+    <Compile Include="Effects\IShadowMapDrawer.cs" />
     <Compile Include="FoliageMap.cs" />
     <Compile Include="FontMapStyleEnum.cs" />
     <Compile Include="GroundGardener.cs" />

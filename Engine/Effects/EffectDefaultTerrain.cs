@@ -818,7 +818,6 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="textureResolution">Texture resolution</param>
@@ -829,7 +828,6 @@ namespace Engine.Effects
         /// <param name="fromLightViewProjectionLD">From light View * Projection transform for low definition shadows</param>
         /// <param name="fromLightViewProjectionHD">From light View * Projection transform for high definition shadows</param>
         public void UpdatePerFrame(
-            Matrix world,
             Matrix viewProjection,
             float textureResolution,
             Vector3 eyePositionWorld,
@@ -840,8 +838,8 @@ namespace Engine.Effects
             Matrix fromLightViewProjectionLD,
             Matrix fromLightViewProjectionHD)
         {
-            this.World = world;
-            this.WorldViewProjection = world * viewProjection;
+            this.World = Matrix.Identity;
+            this.WorldViewProjection = viewProjection;
             this.TextureResolution = textureResolution;
 
             var globalAmbient = 0f;

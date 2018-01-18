@@ -275,7 +275,6 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="windDirection">Wind direction</param>
@@ -284,7 +283,6 @@ namespace Engine.Effects
         /// <param name="delta">Delta</param>
         /// <param name="randomTexture">Random texture</param>
         public void UpdatePerFrame(
-            Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             Vector3 windDirection,
@@ -293,7 +291,7 @@ namespace Engine.Effects
             Vector3 delta,
             EngineShaderResourceView randomTexture)
         {
-            this.WorldViewProjection = world * viewProjection;
+            this.WorldViewProjection = viewProjection;
             this.EyePositionWorld = eyePositionWorld;
 
             this.WindDirection = windDirection;

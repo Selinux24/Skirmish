@@ -603,22 +603,20 @@ namespace Engine.Effects
         /// <summary>
         /// Updates per frame variables
         /// </summary>
-        /// <param name="world">World matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="colorMap">Color map texture</param>
         /// <param name="normalMap">Normal map texture</param>
         /// <param name="depthMap">Depth map texture</param>
         public void UpdatePerFrame(
-            Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             EngineShaderResourceView colorMap,
             EngineShaderResourceView normalMap,
             EngineShaderResourceView depthMap)
         {
-            this.World = world;
-            this.WorldViewProjection = world * viewProjection;
+            this.World = Matrix.Identity;
+            this.WorldViewProjection = viewProjection;
             this.EyePositionWorld = eyePositionWorld;
 
             this.TG1Map = colorMap;
@@ -694,7 +692,6 @@ namespace Engine.Effects
         /// <summary>
         /// Updates composer variables
         /// </summary>
-        /// <param name="world">World matrix</param>
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="globalAmbient">Global ambient</param>
@@ -704,7 +701,6 @@ namespace Engine.Effects
         /// <param name="depthMap">Depth map texture</param>
         /// <param name="lightMap">Light map</param>
         public void UpdateComposer(
-            Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             float globalAmbient,
@@ -714,7 +710,7 @@ namespace Engine.Effects
             EngineShaderResourceView depthMap,
             EngineShaderResourceView lightMap)
         {
-            this.WorldViewProjection = world * viewProjection;
+            this.WorldViewProjection = viewProjection;
             this.EyePositionWorld = eyePositionWorld;
 
             this.GlobalAmbient = globalAmbient;

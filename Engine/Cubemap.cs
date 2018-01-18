@@ -65,7 +65,7 @@ namespace Engine
         {
             this.Manipulator.Update(context.GameTime);
 
-            this.local = this.Manipulator.LocalTransform * context.World;
+            this.local = this.Manipulator.LocalTransform;
         }
         /// <summary>
         /// Draw
