@@ -1,4 +1,7 @@
-﻿using SharpDX;
+﻿#if DEBUG
+using System.Diagnostics;
+#endif
+using SharpDX;
 using System.Collections.Generic;
 
 namespace Engine.Common

@@ -150,6 +150,13 @@
     <Content Include="Resources\d_road_asphalt_stripes_specular.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Resources\Rat\Rat_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rat\Rat.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Resources\Soldier\soldier0.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -181,6 +188,11 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
     <Content Include="Resources\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>
+      </SubType>
+    </Content>
+    <Content Include="Resources\Rat\Rat.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>
       </SubType>

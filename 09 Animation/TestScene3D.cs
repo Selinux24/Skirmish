@@ -27,6 +27,9 @@ namespace Animation
         private Color soldierLinesColor = new Color(Color.Red.ToColor3(), 1f);
         private bool showSoldierDEBUG = false;
 
+        private SceneObject<Model> rat = null;
+        private Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
+
         private Random rnd = new Random();
 
         public TestScene3D(Game game)
@@ -39,15 +42,17 @@ namespace Animation
         {
             base.Initialize();
 
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 500;
+            this.InitializeSoldier();
+            this.InitializeRat();
+            this.InitializeFloor();
 
-            GameEnvironment.Background = Color.CornflowerBlue;
+            this.InitializeUI();
+            this.InitializeEnvironment();
 
-            this.Lights.KeyLight.CastShadow = true;
-
-            #region Texts
-
+            this.InitializeDebug();
+        }
+        private void InitializeUI()
+        {
             this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
             this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
             this.animText = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsageEnum.UI, layerHUD);
@@ -69,13 +74,75 @@ namespace Animation
             };
 
             this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
+        }
+        private void InitializeFloor()
+        {
+            float l = 15f;
+            float h = 0f;
 
-            #endregion
+            VertexData[] vertices = new VertexData[]
+            {
+                    new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
+                    new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
+                    new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
+                    new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
+            };
 
-            #region Models
+            uint[] indices = new uint[]
+            {
+                    0, 1, 2,
+                    1, 3, 2,
+            };
 
-            #region Soldier
+            MaterialContent mat = MaterialContent.Default;
+            mat.DiffuseTexture = "resources/d_road_asphalt_stripes_diffuse.dds";
+            mat.NormalMapTexture = "resources/d_road_asphalt_stripes_normal.dds";
+            mat.SpecularTexture = "resources/d_road_asphalt_stripes_specular.dds";
 
+            var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
+
+            var desc = new ModelDescription()
+            {
+                Static = true,
+                CastShadow = true,
+                DeferredEnabled = true,
+                DepthEnabled = true,
+                AlphaEnabled = false,
+                UseAnisotropicFiltering = true,
+                Content = new ContentDescription()
+                {
+                    ModelContent = content,
+                }
+            };
+
+            this.floor = this.AddComponent<Model>(desc);
+        }
+        private void InitializeRat()
+        {
+            this.rat = this.AddComponent<Model>(
+                new ModelDescription()
+                {
+                    TextureIndex = 0,
+                    CastShadow = true,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Rat",
+                        ModelContentFilename = "rat.xml",
+                    }
+                });
+
+            this.rat.Transform.SetPosition(2, 0, 0, true);
+
+            AnimationPath p0 = new AnimationPath();
+            p0.AddLoop("walk");
+
+            this.ratPaths.Add("walk", new AnimationPlan(p0));
+
+            this.rat.Instance.AnimationController.AddPath(this.ratPaths["walk"]);
+        }
+        private void InitializeSoldier()
+        {
             this.soldier = this.AddComponent<Model>(
                 new ModelDescription()
                 {
@@ -89,101 +156,56 @@ namespace Animation
                     }
                 });
 
-            #endregion
+            this.soldier.Transform.SetPosition(0, 0, 0, true);
 
-            #region Floor
+            this.soldier.Instance.AnimationController.PathEnding += AnimationController_PathEnding;
 
-            {
-                float l = 15f;
-                float h = 0f;
+            AnimationPath p0 = new AnimationPath();
+            p0.Add("idle1");
+            p0.AddRepeat("idle2", 5);
+            p0.Add("idle1");
+            p0.Add("stand");
+            p0.Add("idle1");
+            p0.AddRepeat("walk", 5);
+            p0.AddRepeat("run", 10);
+            p0.AddRepeat("walk", 1);
+            p0.AddRepeat("idle2", 5);
+            p0.Add("idle1");
 
-                VertexData[] vertices = new VertexData[]
-                {
-                    new VertexData{ Position = new Vector3(-l, h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                    new VertexData{ Position = new Vector3(-l, h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 1.0f) },
-                    new VertexData{ Position = new Vector3(+l, h, -l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 0.0f) },
-                    new VertexData{ Position = new Vector3(+l, h, +l), Normal = Vector3.Up, Texture = new Vector2(1.0f, 1.0f) },
-                };
+            AnimationPath p1 = new AnimationPath();
+            p1.Add("idle1");
 
-                uint[] indices = new uint[]
-                {
-                    0, 1, 2,
-                    1, 3, 2,
-                };
+            AnimationPath p2 = new AnimationPath();
+            p2.AddRepeat("idle2", 2);
 
-                MaterialContent mat = MaterialContent.Default;
-                mat.DiffuseTexture = "resources/d_road_asphalt_stripes_diffuse.dds";
-                mat.NormalMapTexture = "resources/d_road_asphalt_stripes_normal.dds";
-                mat.SpecularTexture = "resources/d_road_asphalt_stripes_specular.dds";
+            AnimationPath p3 = new AnimationPath();
+            p3.AddRepeat("stand", 5);
 
-                var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
+            this.soldierPaths.Add("complex", new AnimationPlan(p0));
+            this.soldierPaths.Add("idle1", new AnimationPlan(p1));
+            this.soldierPaths.Add("idle2", new AnimationPlan(p2));
+            this.soldierPaths.Add("stand", new AnimationPlan(p3));
 
-                var desc = new ModelDescription()
-                {
-                    Static = true,
-                    CastShadow = true,
-                    DeferredEnabled = true,
-                    DepthEnabled = true,
-                    AlphaEnabled = false,
-                    UseAnisotropicFiltering = true,
-                    Content = new ContentDescription()
-                    {
-                        ModelContent = content,
-                    }
-                };
+            this.soldier.Instance.AnimationController.AddPath(this.soldierPaths["complex"]);
+        }
+        private void InitializeEnvironment()
+        {
+            GameEnvironment.Background = Color.CornflowerBlue;
 
-                this.floor = this.AddComponent<Model>(desc);
-            }
+            this.Lights.KeyLight.CastShadow = true;
 
-            #endregion
+            var bbox = this.soldier.Instance.GetBoundingBox();
+            float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
 
-            #region Debug
-
+            this.Camera.NearPlaneDistance = 0.1f;
+            this.Camera.FarPlaneDistance = 500;
+            this.Camera.Goto(0, playerHeight, -12f);
+            this.Camera.LookTo(0, playerHeight * 0.6f, 0);
+        }
+        private void InitializeDebug()
+        {
             this.soldierTris = this.AddComponent<TriangleListDrawer>(new TriangleListDrawerDescription() { Count = 5000, Color = soldierTrisColor });
             this.soldierLines = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { Count = 1000, Color = soldierLinesColor });
-
-            #endregion
-
-            {
-                this.soldier.Transform.SetPosition(0, 0, 0, true);
-
-                this.soldier.Instance.AnimationController.PathEnding += AnimationController_PathEnding;
-
-                AnimationPath p0 = new AnimationPath();
-                p0.Add("idle1");
-                p0.AddRepeat("stand", 5);
-                p0.Add("idle2");
-                p0.Add("stand");
-                p0.AddRepeat("walk", 5);
-                p0.AddRepeat("run", 5);
-                p0.Add("stand");
-                p0.Add("idle1");
-
-                AnimationPath p1 = new AnimationPath();
-                p1.AddRepeat("idle1", 2);
-
-                AnimationPath p2 = new AnimationPath();
-                p2.Add("idle2");
-
-                AnimationPath p3 = new AnimationPath();
-                p3.AddLoop("stand");
-
-                this.soldierPaths.Add("complex", new AnimationPlan(p0));
-                this.soldierPaths.Add("idle1", new AnimationPlan(p1));
-                this.soldierPaths.Add("idle2", new AnimationPlan(p2));
-                this.soldierPaths.Add("stand", new AnimationPlan(p3));
-
-                this.soldier.Instance.AnimationController.AddPath(this.soldierPaths["complex"]);
-
-                var bbox = this.soldier.Instance.GetBoundingBox();
-
-                float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
-
-                this.Camera.Goto(0, playerHeight, -12f);
-                this.Camera.LookTo(0, playerHeight * 0.6f, 0);
-            }
-
-            #endregion
         }
 
         public override void Update(GameTime gameTime)
@@ -308,12 +330,18 @@ namespace Animation
             {
                 this.soldier.Instance.AnimationController.TimeDelta -= 0.1f;
                 this.soldier.Instance.AnimationController.TimeDelta = Math.Max(0, this.soldier.Instance.AnimationController.TimeDelta);
+
+                this.rat.Instance.AnimationController.TimeDelta -= 0.1f;
+                this.rat.Instance.AnimationController.TimeDelta = Math.Max(0, this.rat.Instance.AnimationController.TimeDelta);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
                 this.soldier.Instance.AnimationController.TimeDelta += 0.1f;
                 this.soldier.Instance.AnimationController.TimeDelta = Math.Min(5, this.soldier.Instance.AnimationController.TimeDelta);
+
+                this.rat.Instance.AnimationController.TimeDelta += 0.1f;
+                this.rat.Instance.AnimationController.TimeDelta = Math.Min(5, this.rat.Instance.AnimationController.TimeDelta);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Up))
@@ -321,21 +349,25 @@ namespace Animation
                 if (this.Game.Input.KeyPressed(Keys.ShiftKey))
                 {
                     this.soldier.Instance.AnimationController.Start(0);
+                    this.rat.Instance.AnimationController.Start(0);
                 }
                 else
                 {
                     this.soldier.Instance.AnimationController.Resume();
+                    this.rat.Instance.AnimationController.Resume();
                 }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Down))
             {
                 this.soldier.Instance.AnimationController.Pause();
+                this.rat.Instance.AnimationController.Pause();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 this.soldier.Instance.AnimationController.ContinuePath(this.soldierPaths["stand"]);
+                this.rat.Instance.AnimationController.ContinuePath(this.ratPaths["walk"]);
             }
         }
 

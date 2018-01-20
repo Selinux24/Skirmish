@@ -33,9 +33,9 @@ namespace Engine.Content
             }
 
             return Load(
-                contentFolder, content.ModelFileName, 
-                transform, content.UseControllerTransform, 
-                content.VolumeMeshes, 
+                contentFolder, content.ModelFileName,
+                transform, content.UseControllerTransform,
+                content.VolumeMeshes,
                 content.Animation);
         }
         /// <summary>
@@ -793,7 +793,7 @@ namespace Engine.Content
             {
                 Dictionary<string, Matrix> ibmList;
                 Weight[] wgList;
-                ProcessVertexWeights(skin, out ibmList, out wgList);
+                ProcessVertexWeights(name, skin, out ibmList, out wgList);
 
                 res.InverseBindMatrix = ibmList;
                 res.Weights = wgList;
@@ -821,13 +821,14 @@ namespace Engine.Content
         /// <summary>
         /// Process vertext weight information
         /// </summary>
+        /// <param name="name">Armature name</param>
         /// <param name="skin">Skin information</param>
         /// <param name="inverseBindMatrixList">Inverse bind matrix list result</param>
         /// <param name="weightList">Weight list result</param>
-        private static void ProcessVertexWeights(Skin skin, out Dictionary<string, Matrix> inverseBindMatrixList, out Weight[] weightList)
+        private static void ProcessVertexWeights(string name, Skin skin, out Dictionary<string, Matrix> inverseBindMatrixList, out Weight[] weightList)
         {
-            Dictionary<string, Matrix> ibmList = new Dictionary<string, Matrix>();
-            List<Weight> wgList = new List<Weight>();
+            var ibmList = new Dictionary<string, Matrix>();
+            var wgList = new List<Weight>();
 
             int jointsOffset = -1;
             int bindsOffset = -1;
@@ -837,21 +838,21 @@ namespace Engine.Content
             Matrix[] mats = null;
             float[] weights = null;
 
-            Input jointsInput = skin.VertexWeights[EnumSemantics.Joint];
+            var jointsInput = skin.VertexWeights[EnumSemantics.Joint];
             if (jointsInput != null)
             {
                 jointsOffset = jointsInput.Offset;
                 bindsOffset = jointsInput.Offset;
 
                 //Joint names
-                Input jInput = skin.Joints[EnumSemantics.Joint];
+                var jInput = skin.Joints[EnumSemantics.Joint];
                 if (jInput != null)
                 {
                     joints = skin[jInput.Source].ReadNames();
                 }
 
                 //Inverse bind matrix for each joint
-                Input mInput = skin.Joints[EnumSemantics.InverseBindMatrix];
+                var mInput = skin.Joints[EnumSemantics.InverseBindMatrix];
                 if (mInput != null)
                 {
                     mats = skin[mInput.Source].ReadMatrix();
@@ -863,7 +864,7 @@ namespace Engine.Content
             }
 
             //Weights
-            Input weightsInput = skin.VertexWeights[EnumSemantics.Weight];
+            var weightsInput = skin.VertexWeights[EnumSemantics.Weight];
             if (weightsInput != null)
             {
                 weightsOffset = weightsInput.Offset;
@@ -880,20 +881,28 @@ namespace Engine.Content
 
                 for (int v = 0; v < n; v++)
                 {
-                    Weight wg = new Weight()
-                    {
-                        VertexIndex = i,
-                    };
+                    string jointName = null;
+                    float weightValue = 0;
 
                     if (jointsOffset >= 0)
                     {
-                        wg.Joint = joints[skin.VertexWeights.V[index + jointsOffset]];
+                        jointName = name + "_" + joints[skin.VertexWeights.V[index + jointsOffset]];
                     }
 
-                    if (weightsOffset >= 0) wg.WeightValue = weights[skin.VertexWeights.V[index + weightsOffset]];
-
-                    if (wg.WeightValue != 0.0f)
+                    if (weightsOffset >= 0)
                     {
+                        weightValue = weights[skin.VertexWeights.V[index + weightsOffset]];
+                    }
+
+                    if (weightValue != 0.0f)
+                    {
+                        var wg = new Weight()
+                        {
+                            VertexIndex = i,
+                            Joint = jointName,
+                            WeightValue = weightValue,
+                        };
+
                         wgList.Add(wg);
                     }
 
@@ -905,7 +914,7 @@ namespace Engine.Content
             {
                 for (int i = 0; i < joints.Length; i++)
                 {
-                    ibmList.Add(joints[i], mats[i]);
+                    ibmList.Add(name + "_" + joints[i], mats[i]);
                 }
             }
 
@@ -1049,14 +1058,15 @@ namespace Engine.Content
         /// <summary>
         /// Process skeleton
         /// </summary>
+        /// <param name="skeletonName">Skeleton name</param>
         /// <param name="parent">Parent joint</param>
         /// <param name="node">Armature node</param>
         /// <returns>Return skeleton joint hierarchy</returns>
-        private static Joint ProcessJoints(Joint parent, Node node)
+        private static Joint ProcessJoints(string skeletonName, Joint parent, Node node)
         {
             Matrix localTransform = node.ReadMatrix();
 
-            Joint jt = new Joint(node.SId, parent, localTransform, Matrix.Identity);
+            Joint jt = new Joint(skeletonName + "_" + node.SId, parent, localTransform, Matrix.Identity);
 
             Skeleton.UpdateToWorldTransform(jt);
 
@@ -1066,7 +1076,7 @@ namespace Engine.Content
 
                 foreach (Node child in node.Nodes)
                 {
-                    childs.Add(ProcessJoints(jt, child));
+                    childs.Add(ProcessJoints(skeletonName, jt, child));
                 }
 
                 jt.Childs = childs.ToArray();
@@ -1474,7 +1484,7 @@ namespace Engine.Content
 
                 if (node.Nodes != null && node.Nodes.Length > 0)
                 {
-                    Joint root = ProcessJoints(null, node.Nodes[0]);
+                    Joint root = ProcessJoints(node.Id, null, node.Nodes[0]);
 
                     skeleton = new Skeleton(root);
                 }

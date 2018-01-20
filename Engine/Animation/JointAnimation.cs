@@ -79,53 +79,62 @@ namespace Engine.Animation
         /// <param name="scale">Gets the interpolated scale</param>
         public void Interpolate(float time, out Vector3 translation, out Quaternion rotation, out Vector3 scale)
         {
-            var deltaTime = 0.0f;
-            if (this.Duration > 0.0f)
+            if (this.Keyframes == null)
             {
-                deltaTime = time % this.Duration;
-            }
-
-            var currFrame = 0;
-            while (currFrame < this.Keyframes.Length - 1)
-            {
-                if (deltaTime < this.Keyframes[currFrame + 1].Time)
-                {
-                    break;
-                }
-                currFrame++;
-            }
-
-            if (currFrame >= this.Keyframes.Length)
-            {
-                currFrame = 0;
-            }
-
-            var nextFrame = (currFrame + 1) % this.Keyframes.Length;
-
-            var currKey = this.Keyframes[currFrame];
-            var nextKey = this.Keyframes[nextFrame];
-
-            var diffTime = nextKey.Time - currKey.Time;
-            if (diffTime < 0.0)
-            {
-                diffTime += this.Duration;
-            }
-
-            if (diffTime > 0.0)
-            {
-                //Interpolate
-                var factor = (float)((deltaTime - currKey.Time) / diffTime);
-
-                translation = currKey.Translation + (nextKey.Translation - currKey.Translation) * factor;
-                rotation = Quaternion.Slerp(currKey.Rotation, nextKey.Rotation, factor);
-                scale = currKey.Scale + (nextKey.Scale - currKey.Scale) * factor;
+                translation = Vector3.Zero;
+                rotation = Quaternion.Identity;
+                scale = Vector3.One;
             }
             else
             {
-                //Use current frame
-                translation = currKey.Translation;
-                rotation = currKey.Rotation;
-                scale = currKey.Scale;
+                var deltaTime = 0.0f;
+                if (this.Duration > 0.0f)
+                {
+                    deltaTime = time % this.Duration;
+                }
+
+                var currFrame = 0;
+                while (currFrame < this.Keyframes.Length - 1)
+                {
+                    if (deltaTime < this.Keyframes[currFrame + 1].Time)
+                    {
+                        break;
+                    }
+                    currFrame++;
+                }
+
+                if (currFrame >= this.Keyframes.Length)
+                {
+                    currFrame = 0;
+                }
+
+                var nextFrame = (currFrame + 1) % this.Keyframes.Length;
+
+                var currKey = this.Keyframes[currFrame];
+                var nextKey = this.Keyframes[nextFrame];
+
+                var diffTime = nextKey.Time - currKey.Time;
+                if (diffTime < 0.0)
+                {
+                    diffTime += this.Duration;
+                }
+
+                if (diffTime > 0.0)
+                {
+                    //Interpolate
+                    var factor = (float)((deltaTime - currKey.Time) / diffTime);
+
+                    translation = currKey.Translation + (nextKey.Translation - currKey.Translation) * factor;
+                    rotation = Quaternion.Slerp(currKey.Rotation, nextKey.Rotation, factor);
+                    scale = currKey.Scale + (nextKey.Scale - currKey.Scale) * factor;
+                }
+                else
+                {
+                    //Use current frame
+                    translation = currKey.Translation;
+                    rotation = currKey.Rotation;
+                    scale = currKey.Scale;
+                }
             }
         }
         /// <summary>

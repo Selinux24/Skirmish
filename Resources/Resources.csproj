@@ -105,6 +105,7 @@
     <None Include="Blender\Buildings\Obelisk\normal.dds" />
     <None Include="Blender\Buildings\Obelisk\specular.dds" />
     <None Include="Blender\Buildings\Garage\concrete.jpg" />
+    <None Include="Blender\Characters\Rat\Rat.blend" />
     <None Include="Blender\Foliage\Foliage.blend" />
     <None Include="Blender\Furniture\Lamps\concrete.jpg" />
     <None Include="Blender\Buildings\Dungeon\BaseMap.png" />
@@ -119,6 +120,7 @@
     <None Include="Blender\Foliage\grass_v0.dds" />
     <None Include="Blender\Foliage\grass_v1.dds" />
     <None Include="Blender\Foliage\grass_v2.dds" />
+    <None Include="Blender\Characters\Rat\Rat_d.png" />
     <Content Include="Blender\Scenery\Clif\dirt_2048x2048.jpg" />
     <Content Include="Blender\Scenery\Ground\buildings.png" />
     <None Include="Blender\Scenery\ModularDungeon\Assets.blend" />
@@ -193,6 +195,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Buildings\Helipod\helipod.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\Rat\Rat_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Characters\Soldier\soldier_anim2.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Furniture\Lamps\Readme.txt" />
@@ -495,6 +503,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Blender\Weapons\Dn_Weapons.blend" />
+    <Content Include="Collada\Characters\Rat\Rat.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Collada\Tests\AniCube\aniCube.dae" />
     <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_diffuse.dds" />
     <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_normal.dds" />
