@@ -261,7 +261,7 @@ namespace Engine.PathFinding.AStar
                 Nodes = result.ToArray(),
             };
         }
-     
+
         /// <summary>
         /// Gets the node collection of the grid
         /// </summary>

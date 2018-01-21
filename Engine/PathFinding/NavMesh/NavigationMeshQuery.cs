@@ -354,7 +354,18 @@ namespace Engine.PathFinding.NavMesh
         /// <returns>Returns true if the specified position is walkable</returns>
         public bool IsWalkable(Vector3 position, out Vector3? nearest)
         {
-            var pt = this.FindNearestPoly(position, Vector3.Zero);
+            return IsWalkable(position, Vector3.Zero, out nearest);
+        }
+        /// <summary>
+        /// Gets wether the specified position is walkable
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="extents">Extents</param>
+        /// <param name="nearest">Gets the nearest position</param>
+        /// <returns>Returns true if the specified position is walkable</returns>
+        public bool IsWalkable(Vector3 position, Vector3 extents, out Vector3? nearest)
+        {
+            var pt = this.FindNearestPoly(position, extents);
 
             if (pt.Polygon != PolyId.Null)
             {
@@ -382,15 +393,15 @@ namespace Engine.PathFinding.NavMesh
             resultPath = null;
 
             var startPt = this.FindNearestPoly(from, Vector3.Zero);
-            var endPt = this.FindNearestPoly(to, Vector3.Zero);
-
             if (startPt.Polygon == PathPoint.Null.Polygon)
             {
-                startPt = this.FindNearestPoly(from, new Vector3(0, from.Y, 0));
+                startPt = this.FindNearestPoly(from, new Vector3(0.5f, 0.25f, 0.5f));
             }
+
+            var endPt = this.FindNearestPoly(to, Vector3.Zero);
             if (endPt.Polygon == PathPoint.Null.Polygon)
             {
-                endPt = this.FindNearestPoly(to, new Vector3(0, to.Y, 0));
+                endPt = this.FindNearestPoly(to, new Vector3(0.5f, 0.25f, 0.5f));
             }
 
             PolygonPath path;

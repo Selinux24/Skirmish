@@ -140,7 +140,7 @@ namespace Engine
         /// Gets bounding sphere
         /// </summary>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere()
+        public virtual BoundingSphere GetBoundingSphere()
         {
             return this.groundPickingQuadtree != null ?
                 BoundingSphere.FromBox(this.groundPickingQuadtree.BoundingBox) :
@@ -150,7 +150,7 @@ namespace Engine
         /// Gets bounding box
         /// </summary>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox()
+        public virtual BoundingBox GetBoundingBox()
         {
             return this.groundPickingQuadtree != null ?
                 this.groundPickingQuadtree.BoundingBox :

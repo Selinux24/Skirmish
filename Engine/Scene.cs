@@ -1381,50 +1381,37 @@ namespace Engine
         /// <returns>Returns true if final position found</returns>
         public virtual bool Walk(AgentType agent, Vector3 prevPosition, Vector3 newPosition, out Vector3 finalPosition)
         {
-            finalPosition = Vector3.Zero;
-
-            if (prevPosition == newPosition)
+            if (prevPosition != newPosition)
             {
-                finalPosition = newPosition;
-                return true;
-            }
+                finalPosition = Vector3.Zero;
 
-            //Adjust agent height
-            var position = newPosition;
-            position.Y -= (agent.Height * 0.5f);
-
-            Vector3 walkerPos;
-            Triangle t;
-            float d;
-            if (this.FindNearestGroundPosition(position, out walkerPos, out t, out d))
-            {
-                Vector3? nearest;
-                if (this.IsWalkable(agent, walkerPos, out nearest))
+                Vector3 walkerPos;
+                Triangle t;
+                float d;
+                if (this.FindNearestGroundPosition(newPosition - new Vector3(0, agent.Height, 0), out walkerPos, out t, out d))
                 {
-                    finalPosition = walkerPos;
-                    finalPosition.Y += agent.Height;
-
-                    var moveP = newPosition - prevPosition;
-                    var moveV = finalPosition - prevPosition;
-                    if (moveV.LengthSquared() > moveP.LengthSquared())
+                    Vector3? nearest;
+                    if (this.IsWalkable(agent, walkerPos, out nearest))
                     {
-                        finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
-                    }
+                        finalPosition = walkerPos;
+                        finalPosition.Y += agent.Height;
 
-                    return true;
-                }
-                else
-                {
-                    //Not walkable but nearest position found
-                    if (nearest.HasValue)
-                    {
-                        //Adjust height
-                        var p = nearest.Value;
-                        p.Y = prevPosition.Y;
-
-                        if (this.FindNearestGroundPosition(p, out walkerPos, out t, out d))
+                        var moveP = newPosition - prevPosition;
+                        var moveV = finalPosition - prevPosition;
+                        if (moveV.LengthSquared() > moveP.LengthSquared())
                         {
-                            finalPosition = walkerPos;
+                            finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+                        }
+
+                        return true;
+                    }
+                    else
+                    {
+                        //Not walkable but nearest position found
+                        if (nearest.HasValue)
+                        {
+                            //Adjust height
+                            finalPosition = nearest.Value;
                             finalPosition.Y += agent.Height;
 
                             var moveP = newPosition - prevPosition;
@@ -1438,9 +1425,14 @@ namespace Engine
                         }
                     }
                 }
+                return false;
             }
+            else
+            {
+                finalPosition = prevPosition;
 
-            return false;
+                return true;
+            }
         }
     }
 }

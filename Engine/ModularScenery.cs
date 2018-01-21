@@ -336,6 +336,61 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets bounding sphere
+        /// </summary>
+        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
+        public override BoundingSphere GetBoundingSphere()
+        {
+            var res = new BoundingSphere();
+
+            foreach (var item in this.objects.Keys)
+            {
+                for (int i = 0; i < this.objects[item].Instance.Count; i++)
+                {
+                    var bsph = this.objects[item].Instance[i].GetBoundingSphere();
+
+                    if (res == new BoundingSphere())
+                    {
+                        res = bsph;
+                    }
+                    else
+                    {
+                        res = BoundingSphere.Merge(res, bsph);
+                    }
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets bounding box
+        /// </summary>
+        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
+        public override BoundingBox GetBoundingBox()
+        {
+            var res = new BoundingBox();
+
+            foreach (var item in this.objects.Keys)
+            {
+                for (int i = 0; i < this.objects[item].Instance.Count; i++)
+                {
+                    var bbox = this.objects[item].Instance[i].GetBoundingBox();
+
+                    if (res == new BoundingBox())
+                    {
+                        res = bbox;
+                    }
+                    else
+                    {
+                        res = BoundingBox.Merge(res, bbox);
+                    }
+                }
+            }
+
+            return res;
+        }
+
+        /// <summary>
         /// Gets the ground volume
         /// </summary>
         /// <param name="full"></param>
@@ -374,6 +429,30 @@ namespace Engine
             }
 
             return res;
+        }
+
+        /// <summary>
+        /// Gets a position array of the specified asset instances
+        /// </summary>
+        /// <param name="assetName">Asset name</param>
+        /// <returns>Returns a position array of the specified asset instances</returns>
+        public Vector3[] GetAssetPositionsByName(string assetName)
+        {
+            List<Vector3> res = new List<Vector3>();
+
+            var assets = this.objects
+                .Where(o => string.Equals(o.Key, assetName, StringComparison.OrdinalIgnoreCase))
+                .Select(o => o.Value);
+
+            foreach (var item in assets)
+            {
+                for (int i = 0; i < item.Count; i++)
+                {
+                    res.Add(item.Instance[i].Manipulator.Position);
+                }
+            }
+
+            return res.ToArray();
         }
     }
 }

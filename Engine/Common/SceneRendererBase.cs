@@ -255,7 +255,7 @@ namespace Engine.Common
                     #region Shadow map
 
                     //Draw components if drop shadow (opaque)
-                    var shadowObjs = scene.GetComponents(c => c.CastShadow == true);
+                    var shadowObjs = scene.GetComponents(c => c.Visible == true && c.CastShadow == true);
                     if (shadowObjs.Count > 0)
                     {
                         #region Cull
@@ -341,7 +341,7 @@ namespace Engine.Common
                 var graphics = this.Game.Graphics;
 
                 //Draw components if drop shadow (opaque)
-                var shadowObjs = scene.GetComponents(c => c.CastShadow == true);
+                var shadowObjs = scene.GetComponents(c => c.Visible == true && c.CastShadow == true);
                 if (shadowObjs.Count > 0)
                 {
                     int assigned = 0;

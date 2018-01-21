@@ -194,7 +194,10 @@ namespace Engine.PathFinding.NavMesh
         {
             using (var query = new NavigationMeshQuery(this.agentTypeData[agent].NavigationMesh, 2048))
             {
-                return query.IsWalkable(position, out nearest);
+                var nmAgent = agent as NavigationMeshAgentType;
+                Vector3 extents = nmAgent != null ? nmAgent.MaxClimb * Vector3.One : Vector3.One;
+
+                return query.IsWalkable(position, extents, out nearest);
             }
         }
 
