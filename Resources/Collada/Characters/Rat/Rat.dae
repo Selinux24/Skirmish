@@ -5,8 +5,8 @@
       <author>Blender User</author>
       <authoring_tool>Blender 2.79.0 commit date:2017-09-11, commit time:10:43, hash:5bd8ac9</authoring_tool>
     </contributor>
-    <created>2018-01-20T11:44:39</created>
-    <modified>2018-01-20T11:44:39</modified>
+    <created>2018-01-22T23:48:37</created>
+    <modified>2018-01-22T23:48:37</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>
@@ -31,7 +31,7 @@
         <technique sid="common">
           <phong>
             <emission>
-              <color sid="emission">1 1 1 1</color>
+              <color sid="emission">0.05 0.05 0.05 1</color>
             </emission>
             <ambient>
               <color sid="ambient">0 0 0 1</color>

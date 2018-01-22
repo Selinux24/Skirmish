@@ -239,6 +239,10 @@ namespace Collada
             this.Camera.Mode = CameraModes.Free;
             this.Camera.Position = new Vector3(-8, 5.5f, -26);
             this.Camera.Interest = new Vector3(-6, 5.5f, -26);
+
+
+            //this.Camera.Position = new Vector3(53, 1.5f, -12);
+            //this.Camera.Interest = new Vector3(53, 1.5f, -30);
         }
 
         public override void Initialized()

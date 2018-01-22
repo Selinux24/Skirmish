@@ -188,6 +188,9 @@
     <None Include="Blender\Scenery\ModularDungeon\jewels_d.png" />
     <None Include="Blender\Scenery\ModularDungeon\treasure_d.jpg" />
     <None Include="Blender\Weapons\golden_f.jpg" />
+    <None Include="Blender\Scenery\ModularDungeon\brick_d.png" />
+    <None Include="Blender\Scenery\ModularDungeon\brick_n.png" />
+    <None Include="Blender\Scenery\ModularDungeon\oil_d.jpg" />
     <Content Include="Collada\Buildings\Dungeon\BaseMap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -264,6 +267,12 @@
     <Content Include="Collada\Scenery\ModularDungeon\bark_n.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\brick_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\brick_n.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Collada\Scenery\ModularDungeon\bronze_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -298,6 +307,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\metal_rust_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\oil_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\rag_d.png">
