@@ -134,7 +134,7 @@ namespace Terrain
 
             this.Lights.Add(new SceneLightPoint(
                 "Blue point",
-                false,
+                true,
                 Color.Blue,
                 Color.Blue,
                 true,
@@ -143,7 +143,7 @@ namespace Terrain
                 5f));
             this.Lights.Add(new SceneLightPoint(
                 "Red point",
-                false,
+                true,
                 Color.Red,
                 Color.Red,
                 true,
