@@ -252,6 +252,7 @@
     <Compile Include="ModelPart.cs" />
     <Compile Include="ModularSceneryAssetConfiguration.cs" />
     <Compile Include="ModularSceneryAssetDescription.cs" />
+    <Compile Include="ModularSceneryAssetDescriptionConnection.cs" />
     <Compile Include="ModularSceneryObjectReference.cs" />
     <Compile Include="ModularSceneryAssetReference.cs" />
     <Compile Include="ModularSceneryAssetTypeEnum.cs" />

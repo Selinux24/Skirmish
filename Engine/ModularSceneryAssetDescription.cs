@@ -23,6 +23,12 @@ namespace Engine
         [XmlArray("references")]
         [XmlArrayItem("asset", typeof(ModularSceneryAssetReference))]
         public ModularSceneryAssetReference[] Assets = null;
+        /// <summary>
+        /// Connections list
+        /// </summary>
+        [XmlArray("connections")]
+        [XmlArrayItem("connection", typeof(ModularSceneryAssetDescriptionConnection))]
+        public ModularSceneryAssetDescriptionConnection[] Connections = null;
 
         /// <summary>
         /// Gets the instance count dictionary

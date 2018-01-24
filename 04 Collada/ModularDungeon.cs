@@ -261,7 +261,7 @@ namespace Collada
             {
                 Random rndBoxes = new Random(1);
 
-                var dict = this.scenery.Instance.GetObjectVolumes();
+                var dict = this.scenery.Instance.GetMapVolumes();
 
                 foreach (var item in dict.Values)
                 {

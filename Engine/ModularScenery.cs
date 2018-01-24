@@ -30,6 +30,15 @@ namespace Engine
         /// Particle descriptors dictionary
         /// </summary>
         private Dictionary<string, ParticleSystemDescription> particleDescriptors = new Dictionary<string, ParticleSystemDescription>();
+        /// <summary>
+        /// Asset map
+        /// </summary>
+        private List<AssetMap> assetMap = new List<AssetMap>();
+
+        /// <summary>
+        /// Gets the assets description
+        /// </summary>
+        protected virtual ModularSceneryAssetConfiguration AssetConfiguration { get; set; }
 
         /// <summary>
         /// Gets the description
@@ -78,24 +87,22 @@ namespace Engine
                 content = description.Content.ModelContent;
             }
 
-            ModularSceneryAssetConfiguration assetsConfiguration = null;
-
             if (description.AssetsConfiguration != null)
             {
-                assetsConfiguration = description.AssetsConfiguration;
+                this.AssetConfiguration = description.AssetsConfiguration;
             }
             else if (!string.IsNullOrWhiteSpace(description.AssetsConfigurationFile))
             {
-                assetsConfiguration = Helper.DeserializeFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.Content.ContentFolder, description.AssetsConfigurationFile));
+                this.AssetConfiguration = Helper.DeserializeFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.Content.ContentFolder, description.AssetsConfigurationFile));
             }
 
-            this.InitializeParticles(assetsConfiguration);
+            this.InitializeParticles();
 
-            this.InitializeAssets(content, assetsConfiguration);
+            this.InitializeAssets(content);
+            this.InitializeObjects(content);
 
-            this.ParseAssetsMap(assetsConfiguration);
-
-            this.InitializeObjects(content, assetsConfiguration);
+            this.ParseAssetsMap();
+            this.BuildAssetsMap();
         }
         /// <summary>
         /// Dispose of created resources
@@ -108,10 +115,9 @@ namespace Engine
         /// <summary>
         /// Initialize the particle system and the particle descriptions
         /// </summary>
-        /// <param name="assetsConfiguration"></param>
-        private void InitializeParticles(ModularSceneryAssetConfiguration assetsConfiguration)
+        private void InitializeParticles()
         {
-            if (assetsConfiguration.ParticleSystems != null && assetsConfiguration.ParticleSystems.Length > 0)
+            if (this.AssetConfiguration.ParticleSystems != null && this.AssetConfiguration.ParticleSystems.Length > 0)
             {
                 this.particleManager = this.Scene.AddComponent<ParticleManager>(
                     new ParticleManagerDescription()
@@ -121,7 +127,7 @@ namespace Engine
                     SceneObjectUsageEnum.None,
                     98);
 
-                foreach (var item in assetsConfiguration.ParticleSystems)
+                foreach (var item in this.AssetConfiguration.ParticleSystems)
                 {
                     item.ContentPath = item.ContentPath ?? this.Description.Content.ContentFolder;
 
@@ -135,11 +141,10 @@ namespace Engine
         /// Initialize all assets into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
-        /// <param name="assetsConfiguration">Assets configuration</param>
-        private void InitializeAssets(ModelContent content, ModularSceneryAssetConfiguration assetsConfiguration)
+        private void InitializeAssets(ModelContent content)
         {
             // Get instance count for all single geometries from Map
-            var instances = assetsConfiguration.GetMapInstanceCounters();
+            var instances = this.AssetConfiguration.GetMapInstanceCounters();
 
             // Load all single geometries into single instanced model components
             foreach (var assetName in instances.Keys)
@@ -150,7 +155,7 @@ namespace Engine
                     var modelContent = content.FilterMask(assetName);
                     if (modelContent != null)
                     {
-                        var masks = assetsConfiguration.GetMasksForAsset(assetName);
+                        var masks = this.AssetConfiguration.GetMasksForAsset(assetName);
                         var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
 
                         var model = this.Scene.AddComponent<ModelInstanced>(
@@ -173,71 +178,13 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Parse the assets map to set the assets transforms
-        /// </summary>
-        /// <param name="assetsConfiguration">Assets configuration</param>
-        private void ParseAssetsMap(ModularSceneryAssetConfiguration assetsConfiguration)
-        {
-            var transforms = new Dictionary<string, List<Matrix>>();
-
-            // Paser map for instance positioning
-            foreach (var item in assetsConfiguration.Map)
-            {
-                var asset = Array.Find(assetsConfiguration.Assets, a => a.Name == item.AssetName);
-
-                var complexAssetTransform = item.GetTransform();
-                var complexAssetRotation = item.Rotation;
-
-                var assetTransforms = asset.GetInstanceTransforms();
-
-                foreach (var basicAsset in assetTransforms.Keys)
-                {
-                    //Get basic asset type
-                    var basicAssetType = Array.Find(asset.Assets, a => a.AssetName == basicAsset).Type;
-
-                    if (!transforms.ContainsKey(basicAsset))
-                    {
-                        transforms.Add(basicAsset, new List<Matrix>());
-                    }
-
-                    var trnList = new List<Matrix>();
-                    Array.ForEach(assetTransforms[basicAsset], t =>
-                    {
-                        var basicTrn = t;
-
-                        if (assetsConfiguration.MaintainTextureDirection)
-                        {
-                            if (basicAssetType == ModularSceneryAssetTypeEnum.Floor ||
-                                basicAssetType == ModularSceneryAssetTypeEnum.Ceiling ||
-                                basicAssetType == ModularSceneryAssetTypeEnum.TrapFloor ||
-                                basicAssetType == ModularSceneryAssetTypeEnum.TrapCeiling)
-                            {
-                                //Invert complex asset rotation
-                                basicTrn = Matrix.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
-                            }
-                        }
-
-                        trnList.Add(basicTrn * complexAssetTransform);
-                    });
-
-                    transforms[basicAsset].AddRange(trnList);
-                }
-            }
-
-            foreach (var assetName in transforms.Keys)
-            {
-                this.assets[assetName].Instance.SetTransforms(transforms[assetName].ToArray());
-            }
-        }
-        /// <summary>
         /// Initialize all objects into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
-        /// <param name="assetsConfiguration">Assets configuration</param>
-        private void InitializeObjects(ModelContent content, ModularSceneryAssetConfiguration assetsConfiguration)
+        private void InitializeObjects(ModelContent content)
         {
             // Get instance count for all single geometries from Map
-            var instances = assetsConfiguration.GetObjectsInstanceCounters();
+            var instances = this.AssetConfiguration.GetObjectsInstanceCounters();
 
             // Load all single geometries into single instanced model components
             foreach (var assetName in instances.Keys)
@@ -248,7 +195,7 @@ namespace Engine
                     var modelContent = content.FilterMask(assetName);
                     if (modelContent != null)
                     {
-                        var masks = assetsConfiguration.GetMasksForAsset(assetName);
+                        var masks = this.AssetConfiguration.GetMasksForAsset(assetName);
                         var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
 
                         var model = this.Scene.AddComponent<ModelInstanced>(
@@ -267,7 +214,7 @@ namespace Engine
                             SceneObjectUsageEnum.None | (hasVolumes ? SceneObjectUsageEnum.CoarsePathFinding : SceneObjectUsageEnum.FullPathFinding));
 
                         //Get the object list to process
-                        var objList = Array.FindAll(assetsConfiguration.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
+                        var objList = Array.FindAll(this.AssetConfiguration.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
 
                         //Positioning
                         model.Instance.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
@@ -313,6 +260,143 @@ namespace Engine
                         }
 
                         this.objects.Add(assetName, model);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Parse the assets map to set the assets transforms
+        /// </summary>
+        private void ParseAssetsMap()
+        {
+            var transforms = new Dictionary<string, List<Matrix>>();
+
+            // Paser map for instance positioning
+            foreach (var item in this.AssetConfiguration.Map)
+            {
+                var assetIndex = Array.FindIndex(this.AssetConfiguration.Assets, a => a.Name == item.AssetName);
+                if (assetIndex < 0)
+                {
+                    throw new EngineException(string.Format("Modular Scenery asset not found: {0}", item.AssetName));
+                }
+
+                var complexAssetTransform = item.GetTransform();
+                var complexAssetRotation = item.Rotation;
+
+                AssetMap aMap = new AssetMap()
+                {
+                    Index = assetIndex,
+                    Name = item.AssetName,
+                    Transform = complexAssetTransform,
+                    Assets = new Dictionary<string, List<int>>(),
+                };
+                this.assetMap.Add(aMap);
+
+                var asset = this.AssetConfiguration.Assets[assetIndex];
+                var assetTransforms = asset.GetInstanceTransforms();
+
+                foreach (var basicAsset in assetTransforms.Keys)
+                {
+                    if (!transforms.ContainsKey(basicAsset))
+                    {
+                        transforms.Add(basicAsset, new List<Matrix>());
+                    }
+
+                    if (!aMap.Assets.ContainsKey(basicAsset))
+                    {
+                        aMap.Assets.Add(basicAsset, new List<int>());
+                    }
+
+                    //Get basic asset type
+                    var basicAssetType = Array.Find(asset.Assets, a => a.AssetName == basicAsset).Type;
+
+                    Array.ForEach(assetTransforms[basicAsset], t =>
+                    {
+                        var basicTrn = t;
+
+                        if (this.AssetConfiguration.MaintainTextureDirection)
+                        {
+                            if (basicAssetType == ModularSceneryAssetTypeEnum.Floor ||
+                                basicAssetType == ModularSceneryAssetTypeEnum.Ceiling ||
+                                basicAssetType == ModularSceneryAssetTypeEnum.TrapFloor ||
+                                basicAssetType == ModularSceneryAssetTypeEnum.TrapCeiling)
+                            {
+                                //Invert complex asset rotation
+                                basicTrn = Matrix.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
+                            }
+                        }
+
+                        aMap.Assets[basicAsset].Add(transforms[basicAsset].Count);
+                        transforms[basicAsset].Add(basicTrn * complexAssetTransform);
+                    });
+                }
+            }
+
+            foreach (var assetName in transforms.Keys)
+            {
+                this.assets[assetName].Instance.SetTransforms(transforms[assetName].ToArray());
+            }
+        }
+        /// <summary>
+        /// Builds the asset map
+        /// </summary>
+        private void BuildAssetsMap()
+        {
+            //Fill per complex asset bounding boxex
+            for (int i = 0; i < this.assetMap.Count; i++)
+            {
+                var item = this.assetMap[i];
+
+                BoundingBox bbox = new BoundingBox();
+
+                foreach (var assetName in item.Assets.Keys)
+                {
+                    foreach (int assetIndex in item.Assets[assetName])
+                    {
+                        var aBbox = this.assets[assetName].Instance[assetIndex].GetBoundingBox();
+
+                        if (bbox == new BoundingBox())
+                        {
+                            bbox = aBbox;
+                        }
+                        else
+                        {
+                            bbox = BoundingBox.Merge(bbox, aBbox);
+                        }
+                    }
+                }
+
+                item.Volume = bbox;
+            }
+
+            //Find connections
+            for (int s = 0; s < this.assetMap.Count; s++)
+            {
+                for (int t = s + 1; t < this.assetMap.Count; t++)
+                {
+                    var source = this.assetMap[s];
+                    var target = this.assetMap[t];
+
+                    if (source.Volume.Contains(target.Volume) != ContainmentType.Disjoint)
+                    {
+                        //Find if contacted volumes has portals between them
+                        var sourceConf = Array.Find(this.AssetConfiguration.Assets, (a => a.Name == source.Name));
+                        if (sourceConf.Connections != null && sourceConf.Connections.Length > 0)
+                        {
+                            var targetConf = Array.Find(this.AssetConfiguration.Assets, (a => a.Name == target.Name));
+                            if (targetConf.Connections != null && targetConf.Connections.Length > 0)
+                            {
+                                //Transform connection positions and directions
+                                var sourcePositions = sourceConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, source.Transform));
+                                var targetPositions = targetConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, target.Transform));
+
+                                if (sourcePositions.Count(p1 => targetPositions.Contains(p1)) > 0)
+                                {
+                                    source.Connections.Add(t);
+                                    target.Connections.Add(s);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -411,6 +495,48 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets all complex map asset volumes
+        /// </summary>
+        /// <returns>Returns a dictionary of complex asset volumes by asset name</returns>
+        public Dictionary<string, List<BoundingBox>> GetMapVolumes()
+        {
+            var res = new Dictionary<string, List<BoundingBox>>();
+
+            for (int i = 0; i < this.assetMap.Count; i++)
+            {
+                var item = this.assetMap[i];
+
+                if (!res.ContainsKey(item.Name))
+                {
+                    res.Add(item.Name, new List<BoundingBox>());
+                }
+
+                res[item.Name].Add(item.Volume);
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets all individual map asset volumes
+        /// </summary>
+        /// <returns>Returns a dictionary of individual asset volumes by asset name</returns>
+        public Dictionary<string, List<BoundingBox>> GetMapAssetsVolumes()
+        {
+            var res = new Dictionary<string, List<BoundingBox>>();
+
+            foreach (var item in this.assets.Keys)
+            {
+                res.Add(item, new List<BoundingBox>());
+
+                for (int i = 0; i < this.assets[item].Instance.Count; i++)
+                {
+                    res[item].Add(this.assets[item].Instance[i].GetBoundingBox());
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
         /// Gets all objects volumes
         /// </summary>
         /// <returns>Returns a dictionary of object volumes by object name</returns>
@@ -453,6 +579,59 @@ namespace Engine
             }
 
             return res.ToArray();
+        }
+
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
+        public override bool Cull(BoundingFrustum frustum, out float? distance)
+        {
+            //TODO: Use asset map instead of default.
+            return base.Cull(frustum, out distance);
+        }
+
+        /// <summary>
+        /// Asset map item
+        /// </summary>
+        class AssetMap
+        {
+            /// <summary>
+            /// Map index
+            /// </summary>
+            public int Index;
+            /// <summary>
+            /// Complex asset name
+            /// </summary>
+            public string Name;
+            /// <summary>
+            /// Complex asset volume
+            /// </summary>
+            public BoundingBox Volume;
+            /// <summary>
+            /// Complex asset transform
+            /// </summary>
+            public Matrix Transform;
+            /// <summary>
+            /// Individual asset indices
+            /// </summary>
+            public Dictionary<string, List<int>> Assets = new Dictionary<string, List<int>>();
+            /// <summary>
+            /// Connections with other complex assets
+            /// </summary>
+            public List<int> Connections = new List<int>();
+
+            /// <summary>
+            /// Gets the instance text representation
+            /// </summary>
+            /// <returns>Returns the instance text representation</returns>
+            public override string ToString()
+            {
+                return string.Format("{0}; Index: {1}; Connections: {2};", this.Name, this.Index, this.Connections.Count);
+            }
         }
     }
 }
