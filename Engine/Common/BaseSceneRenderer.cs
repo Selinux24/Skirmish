@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <summary>
     /// Base scene renderer
     /// </summary>
-    public abstract class SceneRendererBase : ISceneRenderer
+    public abstract class BaseSceneRenderer : ISceneRenderer
     {
         /// <summary>
         /// Shadow map size
@@ -120,7 +120,7 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        public SceneRendererBase(Game game)
+        public BaseSceneRenderer(Game game)
         {
             this.Game = game;
 

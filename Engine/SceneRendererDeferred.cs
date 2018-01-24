@@ -13,7 +13,7 @@ namespace Engine
     /// <summary>
     /// Deferred renderer class
     /// </summary>
-    public class SceneRendererDeferred : SceneRendererBase
+    public class SceneRendererDeferred : BaseSceneRenderer
     {
         /// <summary>
         /// Validates the renderer against the current device configuration

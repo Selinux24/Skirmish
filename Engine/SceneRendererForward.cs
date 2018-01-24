@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Forward renderer class
     /// </summary>
-    public class SceneRendererForward : SceneRendererBase
+    public class SceneRendererForward : BaseSceneRenderer
     {
         /// <summary>
         /// Validates the renderer against the current device configuration

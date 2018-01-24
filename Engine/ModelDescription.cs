@@ -7,7 +7,7 @@ namespace Engine
     /// <summary>
     /// Model description
     /// </summary>
-    public class ModelDescription : ModelBaseDescription
+    public class ModelDescription : BaseModelDescription
     {
         /// <summary>
         /// Creates a model description from the specified xml file

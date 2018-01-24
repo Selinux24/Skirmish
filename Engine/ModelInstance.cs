@@ -20,7 +20,7 @@ namespace Engine
         /// <summary>
         /// Model
         /// </summary>
-        private ModelBase model = null;
+        private BaseModel model = null;
         /// <summary>
         /// Update point cache flag
         /// </summary>
@@ -113,7 +113,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="model">Model</param>
-        public ModelInstance(ModelBase model)
+        public ModelInstance(BaseModel model)
         {
             this.Id = ++InstanceId;
             this.model = model;

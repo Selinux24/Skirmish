@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <summary>
     /// Model basic implementation
     /// </summary>
-    public abstract class ModelBase : Drawable, UseMaterials, UseSkinningData
+    public abstract class BaseModel : Drawable, UseMaterials, UseSkinningData
     {
         /// <summary>
         /// Meshes by level of detail dictionary
@@ -87,7 +87,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Object description</param>
-        public ModelBase(Scene scene, ModelBaseDescription description)
+        public BaseModel(Scene scene, BaseModelDescription description)
             : base(scene, description)
         {
             var desc = new DrawingDataDescription()

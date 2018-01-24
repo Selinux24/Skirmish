@@ -6,7 +6,7 @@ namespace Engine.Common
     /// <summary>
     /// Model base description
     /// </summary>
-    public abstract class ModelBaseDescription : SceneObjectDescription
+    public abstract class BaseModelDescription : SceneObjectDescription
     {
         /// <summary>
         /// Optimize geometry
@@ -44,7 +44,7 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        public ModelBaseDescription()
+        public BaseModelDescription()
             : base()
         {
             this.Instanced = false;

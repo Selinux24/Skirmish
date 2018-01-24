@@ -198,9 +198,9 @@
     <Compile Include="Common\IndexBufferShapeEnum.cs" />
     <Compile Include="Common\Intersection.cs" />
     <Compile Include="Common\ManipulatorController.cs" />
-    <Compile Include="Common\ModelBaseDescription.cs" />
+    <Compile Include="Common\BaseModelDescription.cs" />
     <Compile Include="Common\EngineBuffer.cs" />
-    <Compile Include="Common\SceneRendererBase.cs" />
+    <Compile Include="Common\BaseSceneRenderer.cs" />
     <Compile Include="Common\ShaderIncludeManager.cs" />
     <Compile Include="Common\TimerTick.cs" />
     <Compile Include="Common\UpdateContext.cs" />
@@ -587,7 +587,7 @@
     <Compile Include="Animation\Joint.cs" />
     <Compile Include="Common\Mesh.cs" />
     <Compile Include="Common\MeshMaterial.cs" />
-    <Compile Include="Common\ModelBase.cs" />
+    <Compile Include="Common\BaseModel.cs" />
     <Compile Include="Animation\SkinningData.cs" />
     <Compile Include="Common\VertexPosition.cs" />
     <Compile Include="Triangle.cs" />

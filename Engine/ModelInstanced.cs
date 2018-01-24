@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// Instaced model
     /// </summary>
-    public class ModelInstanced : ModelBase, IComposed
+    public class ModelInstanced : BaseModel, IComposed
     {
         /// <summary>
         /// Instancing data per instance

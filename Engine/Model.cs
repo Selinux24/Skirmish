@@ -12,7 +12,7 @@ namespace Engine
     /// <summary>
     /// Basic Model
     /// </summary>
-    public class Model : ModelBase, ITransformable3D, IRayPickable<Triangle>, ICullable
+    public class Model : BaseModel, ITransformable3D, IRayPickable<Triangle>, ICullable
     {
         /// <summary>
         /// Update point cache flag

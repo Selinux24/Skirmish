@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Instanced model description
     /// </summary>
-    public class ModelInstancedDescription : ModelBaseDescription
+    public class ModelInstancedDescription : BaseModelDescription
     {
         /// <summary>
         /// Constructor
