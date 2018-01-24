@@ -341,10 +341,10 @@ namespace Engine
             /// <param name="terrainTechnique">Technique for drawing</param>
             public void Draw(DrawContext context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique)
             {
-                this.visibleNodesHigh = Array.FindAll(this.NodesHigh, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                this.visibleNodesMedium = Array.FindAll(this.NodesMedium, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                this.visibleNodesLow = Array.FindAll(this.NodesLow, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                this.visibleNodesMinimum = Array.FindAll(this.NodesMinimum, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                this.visibleNodesHigh = Array.FindAll(this.NodesHigh, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                this.visibleNodesMedium = Array.FindAll(this.NodesMedium, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                this.visibleNodesLow = Array.FindAll(this.NodesLow, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                this.visibleNodesMinimum = Array.FindAll(this.NodesMinimum, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
 
                 var mode = context.DrawerMode;
                 this.DrawNodeList(mode, bufferManager, terrainTechnique, this.visibleNodesHigh);

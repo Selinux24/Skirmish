@@ -206,7 +206,7 @@ namespace Engine
                     //Initialize context data from update context
                     this.DrawContext.GameTime = gameTime;
                     this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
-                    this.DrawContext.Frustum = this.UpdateContext.Frustum;
+                    this.DrawContext.CameraVolume = this.UpdateContext.CameraVolume;
                     this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
                     this.DrawContext.EyeTarget = this.UpdateContext.EyeDirection;
                     //Initialize context data from scene
@@ -247,17 +247,28 @@ namespace Engine
 #if DEBUG
                         Stopwatch swCull = Stopwatch.StartNew();
 #endif
+                        var toCullDeferred = deferredEnabledComponents.FindAll(s => s.Is<ICullable>()).ConvertAll(s => s.Get<ICullable>());
+
                         bool draw = false;
                         if (scene.PerformFrustumCulling)
                         {
-                            var toCullDeferred = deferredEnabledComponents.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
 
                             //Frustum culling
-                            draw = this.cullManager.Cull(this.DrawContext.Frustum, CullIndexDrawIndex, toCullDeferred);
+                            draw = this.cullManager.Cull(this.DrawContext.CameraVolume, CullIndexDrawIndex, toCullDeferred);
                         }
                         else
                         {
                             draw = true;
+                        }
+
+                        if (draw)
+                        {
+                            var groundVolume = scene.GetSceneVolume();
+                            if (groundVolume != null)
+                            {
+                                //Ground culling
+                                draw = this.cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullDeferred);
+                            }
                         }
 #if DEBUG
                         swCull.Stop();
@@ -367,17 +378,27 @@ namespace Engine
 #if DEBUG
                         Stopwatch swCull = Stopwatch.StartNew();
 #endif
+                        var toCullNotDeferred = deferredDisabledComponents.FindAll(s => s.Is<ICullable>()).ConvertAll(s => s.Get<ICullable>());
+
                         bool draw = false;
                         if (scene.PerformFrustumCulling)
                         {
-                            var toCullNotDeferred = deferredDisabledComponents.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
-
                             //Frustum culling
-                            draw = this.cullManager.Cull(this.DrawContext.Frustum, CullIndexDrawIndex, toCullNotDeferred);
+                            draw = this.cullManager.Cull(this.DrawContext.CameraVolume, CullIndexDrawIndex, toCullNotDeferred);
                         }
                         else
                         {
                             draw = true;
+                        }
+
+                        if (draw)
+                        {
+                            var groundVolume = scene.GetSceneVolume();
+                            if (groundVolume != null)
+                            {
+                                //Ground culling
+                                draw = this.cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullNotDeferred);
+                            }
                         }
 #if DEBUG
                         swCull.Stop();
@@ -888,8 +909,8 @@ namespace Engine
                         var cull1 = c1.Get<ICullable>();
                         var cull2 = c2.Get<ICullable>();
 
-                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance.Value : float.MaxValue;
-                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance.Value : float.MaxValue;
+                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
+                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
 
                         res = -d1.CompareTo(d2);
                     }
@@ -948,8 +969,8 @@ namespace Engine
                         var cull1 = c1.Get<ICullable>();
                         var cull2 = c2.Get<ICullable>();
 
-                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance.Value : float.MaxValue;
-                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance.Value : float.MaxValue;
+                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
+                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
 
                         res = -d1.CompareTo(d2);
                     }

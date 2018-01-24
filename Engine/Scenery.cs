@@ -411,38 +411,14 @@ namespace Engine
         /// <summary>
         /// Performs culling test
         /// </summary>
-        /// <param name="frustum">Frustum</param>
+        /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public override bool Cull(BoundingFrustum frustum, out float? distance)
+        public override bool Cull(ICullingVolume volume, out float distance)
         {
-            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref frustum);
+            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(volume);
 
-            return this.CullNodes(frustum.GetCameraParams().Position, out distance);
-        }
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="box">Box</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the box</returns>
-        public override bool Cull(BoundingBox box, out float? distance)
-        {
-            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref box);
-
-            return this.CullNodes(box.GetCenter(), out distance);
-        }
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the sphere</returns>
-        public override bool Cull(BoundingSphere sphere, out float? distance)
-        {
-            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(ref sphere);
-
-            return this.CullNodes(sphere.Center, out distance);
+            return this.CullNodes(volume.Position, out distance);
         }
         /// <summary>
         /// Node culling
@@ -450,9 +426,9 @@ namespace Engine
         /// <param name="pov">Point of view</param>
         /// <param name="distance">Returns the distance to the nearest visible node</param>
         /// <returns>Returns true if the object is culled</returns>
-        private bool CullNodes(Vector3 pov, out float? distance)
+        private bool CullNodes(Vector3 pov, out float distance)
         {
-            distance = null;
+            distance = float.MaxValue;
 
             if (this.visibleNodes != null && this.visibleNodes.Length > 0)
             {

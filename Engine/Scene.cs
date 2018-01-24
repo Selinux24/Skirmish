@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
@@ -1150,6 +1151,24 @@ namespace Engine
         public BoundingBox GetBoundingBox()
         {
             return this.boundingBox;
+        }
+
+        /// <summary>
+        /// Gets the scene volume for culling tests
+        /// </summary>
+        /// <returns>Returns the scene volume</returns>
+        public ICullingVolume GetSceneVolume()
+        {
+            var ground = this.components
+                .Where(c => c.Usage.HasFlag(SceneObjectUsageEnum.Ground) && c.Is<Ground>())
+                .Select(c => c.Get<Ground>())
+                .FirstOrDefault();
+            if (ground != null)
+            {
+                return ground.GetCullingVolume();
+            }
+
+            return null;
         }
 
         /// <summary>

@@ -410,9 +410,9 @@ namespace Engine
         /// <summary>
         /// Cull test
         /// </summary>
-        /// <param name="frustum">Viewing frustum</param>
+        /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        public void Cull(BoundingFrustum frustum, Vector3 viewerPosition)
+        public void Cull(ICullingVolume volume, Vector3 viewerPosition)
         {
             this.visibleLights.Clear();
 
@@ -424,7 +424,7 @@ namespace Engine
 
             var pLights = this.pointLights.FindAll(l =>
             {
-                if (l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
+                if (l.Enabled == true && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
                 {
                     float d = Vector3.Distance(viewerPosition, l.Position);
 
@@ -451,7 +451,7 @@ namespace Engine
 
             var sLights = this.spotLights.FindAll(l =>
             {
-                if (l.Enabled == true && frustum.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
+                if (l.Enabled == true && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
                 {
                     float d = Vector3.Distance(viewerPosition, l.Position);
 

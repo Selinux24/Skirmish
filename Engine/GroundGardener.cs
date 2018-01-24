@@ -641,7 +641,7 @@ namespace Engine
 
             this.foliageSphere.Center = context.EyePosition;
 
-            this.visibleNodes = this.GetFoliageNodes(context.Frustum, this.foliageSphere);
+            this.visibleNodes = this.GetFoliageNodes(context.CameraVolume, this.foliageSphere);
 
             if (this.visibleNodes != null && this.visibleNodes.Length > 0)
             {
@@ -955,15 +955,15 @@ namespace Engine
         /// <summary>
         /// Gets the node list suitable for foliage planting
         /// </summary>
-        /// <param name="frustum">Camera frustum</param>
+        /// <param name="volume">Culling volume</param>
         /// <param name="sph">Foliagle bounding sphere</param>
         /// <returns>Returns a node list</returns>
-        private QuadTreeNode[] GetFoliageNodes(BoundingFrustum frustum, BoundingSphere sph)
+        private QuadTreeNode[] GetFoliageNodes(ICullingVolume volume, BoundingSphere sph)
         {
             var visibleNodes = this.foliageQuadtree.GetNodesInVolume(ref sph);
             if (visibleNodes != null && visibleNodes.Length > 0)
             {
-                return Array.FindAll(visibleNodes, n => frustum.Contains(ref n.BoundingBox) != ContainmentType.Disjoint);
+                return Array.FindAll(visibleNodes, n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint);
             }
 
             return null;

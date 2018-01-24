@@ -33,7 +33,7 @@ namespace Engine
         /// <summary>
         /// Asset map
         /// </summary>
-        private List<AssetMap> assetMap = new List<AssetMap>();
+        private AssetMap assetMap = null;
 
         /// <summary>
         /// Gets the assets description
@@ -102,7 +102,6 @@ namespace Engine
             this.InitializeObjects(content);
 
             this.ParseAssetsMap();
-            this.BuildAssetsMap();
         }
         /// <summary>
         /// Dispose of created resources
@@ -269,6 +268,8 @@ namespace Engine
         /// </summary>
         private void ParseAssetsMap()
         {
+            this.assetMap = new AssetMap();
+
             var transforms = new Dictionary<string, List<Matrix>>();
 
             // Paser map for instance positioning
@@ -283,7 +284,7 @@ namespace Engine
                 var complexAssetTransform = item.GetTransform();
                 var complexAssetRotation = item.Rotation;
 
-                AssetMap aMap = new AssetMap()
+                AssetMapItem aMap = new AssetMapItem()
                 {
                     Index = assetIndex,
                     Name = item.AssetName,
@@ -336,70 +337,8 @@ namespace Engine
             {
                 this.assets[assetName].Instance.SetTransforms(transforms[assetName].ToArray());
             }
-        }
-        /// <summary>
-        /// Builds the asset map
-        /// </summary>
-        private void BuildAssetsMap()
-        {
-            //Fill per complex asset bounding boxex
-            for (int i = 0; i < this.assetMap.Count; i++)
-            {
-                var item = this.assetMap[i];
 
-                BoundingBox bbox = new BoundingBox();
-
-                foreach (var assetName in item.Assets.Keys)
-                {
-                    foreach (int assetIndex in item.Assets[assetName])
-                    {
-                        var aBbox = this.assets[assetName].Instance[assetIndex].GetBoundingBox();
-
-                        if (bbox == new BoundingBox())
-                        {
-                            bbox = aBbox;
-                        }
-                        else
-                        {
-                            bbox = BoundingBox.Merge(bbox, aBbox);
-                        }
-                    }
-                }
-
-                item.Volume = bbox;
-            }
-
-            //Find connections
-            for (int s = 0; s < this.assetMap.Count; s++)
-            {
-                for (int t = s + 1; t < this.assetMap.Count; t++)
-                {
-                    var source = this.assetMap[s];
-                    var target = this.assetMap[t];
-
-                    if (source.Volume.Contains(target.Volume) != ContainmentType.Disjoint)
-                    {
-                        //Find if contacted volumes has portals between them
-                        var sourceConf = Array.Find(this.AssetConfiguration.Assets, (a => a.Name == source.Name));
-                        if (sourceConf.Connections != null && sourceConf.Connections.Length > 0)
-                        {
-                            var targetConf = Array.Find(this.AssetConfiguration.Assets, (a => a.Name == target.Name));
-                            if (targetConf.Connections != null && targetConf.Connections.Length > 0)
-                            {
-                                //Transform connection positions and directions
-                                var sourcePositions = sourceConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, source.Transform));
-                                var targetPositions = targetConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, target.Transform));
-
-                                if (sourcePositions.Count(p1 => targetPositions.Contains(p1)) > 0)
-                                {
-                                    source.Connections.Add(t);
-                                    target.Connections.Add(s);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            this.assetMap.Build(this.AssetConfiguration, this.assets);
         }
 
         /// <summary>
@@ -408,7 +347,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-
+            this.assetMap.Update(context.CameraVolume);
         }
         /// <summary>
         /// Objects drawing
@@ -500,21 +439,7 @@ namespace Engine
         /// <returns>Returns a dictionary of complex asset volumes by asset name</returns>
         public Dictionary<string, List<BoundingBox>> GetMapVolumes()
         {
-            var res = new Dictionary<string, List<BoundingBox>>();
-
-            for (int i = 0; i < this.assetMap.Count; i++)
-            {
-                var item = this.assetMap[i];
-
-                if (!res.ContainsKey(item.Name))
-                {
-                    res.Add(item.Name, new List<BoundingBox>());
-                }
-
-                res[item.Name].Add(item.Volume);
-            }
-
-            return res;
+            return this.assetMap.GetMapVolumes();
         }
         /// <summary>
         /// Gets all individual map asset volumes
@@ -582,22 +507,232 @@ namespace Engine
         }
 
         /// <summary>
-        /// Performs culling test
+        /// Gets the culling volume for scene culling tests
         /// </summary>
-        /// <param name="frustum">Frustum</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the frustum</returns>
-        /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
-        public override bool Cull(BoundingFrustum frustum, out float? distance)
+        /// <returns>Return the culling volume</returns>
+        public override ICullingVolume GetCullingVolume()
         {
-            //TODO: Use asset map instead of default.
-            return base.Cull(frustum, out distance);
+            return this.assetMap;
+        }
+
+        /// <summary>
+        /// Asset map
+        /// </summary>
+        class AssetMap : ICullingVolume
+        {
+            /// <summary>
+            /// Asset map
+            /// </summary>
+            private List<AssetMapItem> assetMap = new List<AssetMapItem>();
+
+            private List<BoundingBox> visibleBoxes = new List<BoundingBox>();
+
+            /// <summary>
+            /// Position
+            /// </summary>
+            public Vector3 Position
+            {
+                get
+                {
+                    return Vector3.Zero;
+                }
+            }
+
+            /// <summary>
+            /// Gets if the current volume contains the bounding frustum
+            /// </summary>
+            /// <param name="frustum">Bounding frustum</param>
+            /// <returns>Returns the containment type</returns>
+            public ContainmentType Contains(BoundingFrustum frustum)
+            {
+                for (int i = 0; i < this.visibleBoxes.Count; i++)
+                {
+                    var res = frustum.Contains(this.visibleBoxes[i]);
+
+                    if (res != ContainmentType.Disjoint) return res;
+                }
+
+                return ContainmentType.Disjoint;
+            }
+            /// <summary>
+            /// Gets if the current volume contains the bounding box
+            /// </summary>
+            /// <param name="bbox">Bounding box</param>
+            /// <returns>Returns the containment type</returns>
+            public ContainmentType Contains(BoundingBox bbox)
+            {
+                for (int i = 0; i < this.visibleBoxes.Count; i++)
+                {
+                    var res = this.visibleBoxes[i].Contains(bbox);
+
+                    if (res != ContainmentType.Disjoint) return res;
+                }
+
+                return ContainmentType.Disjoint;
+            }
+            /// <summary>
+            /// Gets if the current volume contains the bounding sphere
+            /// </summary>
+            /// <param name="sph">Bounding sphere</param>
+            /// <returns>Returns the containment type</returns>
+            public ContainmentType Contains(BoundingSphere sph)
+            {
+                for (int i = 0; i < this.visibleBoxes.Count; i++)
+                {
+                    var res = this.visibleBoxes[i].Contains(sph);
+
+                    if (res != ContainmentType.Disjoint) return res;
+                }
+
+                return ContainmentType.Disjoint;
+            }
+
+            /// <summary>
+            /// Adds a new item to collection
+            /// </summary>
+            /// <param name="item">Item</param>
+            public void Add(AssetMapItem item)
+            {
+                this.assetMap.Add(item);
+            }
+            /// <summary>
+            /// Builds the asset map
+            /// </summary>
+            public void Build(ModularSceneryAssetConfiguration assetConfiguration, Dictionary<string, SceneObject<ModelInstanced>> assets)
+            {
+                //Fill per complex asset bounding boxex
+                for (int i = 0; i < this.assetMap.Count; i++)
+                {
+                    var item = this.assetMap[i];
+
+                    BoundingBox bbox = new BoundingBox();
+
+                    foreach (var assetName in item.Assets.Keys)
+                    {
+                        foreach (int assetIndex in item.Assets[assetName])
+                        {
+                            var aBbox = assets[assetName].Instance[assetIndex].GetBoundingBox();
+
+                            if (bbox == new BoundingBox())
+                            {
+                                bbox = aBbox;
+                            }
+                            else
+                            {
+                                bbox = BoundingBox.Merge(bbox, aBbox);
+                            }
+                        }
+                    }
+
+                    item.Volume = bbox;
+                }
+
+                //Find connections
+                for (int s = 0; s < this.assetMap.Count; s++)
+                {
+                    for (int t = s + 1; t < this.assetMap.Count; t++)
+                    {
+                        var source = this.assetMap[s];
+                        var target = this.assetMap[t];
+
+                        if (source.Volume.Contains(target.Volume) != ContainmentType.Disjoint)
+                        {
+                            //Find if contacted volumes has portals between them
+                            var sourceConf = Array.Find(assetConfiguration.Assets, (a => a.Name == source.Name));
+                            if (sourceConf.Connections != null && sourceConf.Connections.Length > 0)
+                            {
+                                var targetConf = Array.Find(assetConfiguration.Assets, (a => a.Name == target.Name));
+                                if (targetConf.Connections != null && targetConf.Connections.Length > 0)
+                                {
+                                    //Transform connection positions and directions
+                                    var sourcePositions = sourceConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, source.Transform));
+                                    var targetPositions = targetConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, target.Transform));
+
+                                    if (sourcePositions.Count(p1 => targetPositions.Contains(p1)) > 0)
+                                    {
+                                        source.Connections.Add(t);
+                                        target.Connections.Add(s);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            /// <summary>
+            /// Gets all complex map asset volumes
+            /// </summary>
+            /// <returns>Returns a dictionary of complex asset volumes by asset name</returns>
+            public Dictionary<string, List<BoundingBox>> GetMapVolumes()
+            {
+                var res = new Dictionary<string, List<BoundingBox>>();
+
+                for (int i = 0; i < this.assetMap.Count; i++)
+                {
+                    var item = this.assetMap[i];
+
+                    if (!res.ContainsKey(item.Name))
+                    {
+                        res.Add(item.Name, new List<BoundingBox>());
+                    }
+
+                    res[item.Name].Add(item.Volume);
+                }
+
+                return res;
+            }
+
+            /// <summary>
+            /// Updates internal visible volume collection
+            /// </summary>
+            /// <param name="camera">Camera volume</param>
+            public void Update(CullingVolumeCamera camera)
+            {
+                //Find current box
+                var itemIndex = this.assetMap.FindIndex(b => b.Volume.Contains(camera.Position) != ContainmentType.Disjoint);
+                if (itemIndex >= 0)
+                {
+                    this.visibleBoxes.Clear();
+                    this.visibleBoxes.Add(this.assetMap[itemIndex].Volume);
+
+                    List<int> visited = new List<int>();
+                    visited.Add(itemIndex);
+
+                    foreach (var conIndex in this.assetMap[itemIndex].Connections)
+                    {
+                        UpdateItem(camera, conIndex, visited);
+                    }
+                }
+            }
+            /// <summary>
+            /// Updates internal visible volume collection recursive
+            /// </summary>
+            /// <param name="camera">Camera volume</param>
+            /// <param name="itemIndex">Item index</param>
+            /// <param name="visited">Visited list</param>
+            private void UpdateItem(CullingVolumeCamera camera, int itemIndex, List<int> visited)
+            {
+                visited.Add(itemIndex);
+
+                if (camera.Contains(this.assetMap[itemIndex].Volume) != ContainmentType.Disjoint)
+                {
+                    this.visibleBoxes.Add(this.assetMap[itemIndex].Volume);
+
+                    foreach (var conIndex in this.assetMap[itemIndex].Connections)
+                    {
+                        if (!visited.Contains(conIndex))
+                        {
+                            UpdateItem(camera, conIndex, visited);
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
         /// Asset map item
         /// </summary>
-        class AssetMap
+        class AssetMapItem
         {
             /// <summary>
             /// Map index

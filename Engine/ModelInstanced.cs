@@ -454,17 +454,17 @@ namespace Engine
         /// <summary>
         /// Performs culling test
         /// </summary>
-        /// <param name="frustum">Frustum</param>
+        /// <param name="volume">Culling volume</param>
         /// <param name="distance">If any instance is inside the volume, returns zero</param>
         /// <returns>Returns true if all of the instances were outside of the frustum</returns>
-        public override bool Cull(BoundingFrustum frustum, out float? distance)
+        public override bool Cull(ICullingVolume volume, out float distance)
         {
             if (this.instancesTmp != null && this.instancesTmp.Length > 0)
             {
                 var item = this.instancesTmp.FirstOrDefault(i =>
                 {
-                    float? iDistance;
-                    return !i.Cull(frustum, out iDistance);
+                    float iDistance;
+                    return !i.Cull(volume, out iDistance);
                 });
 
                 if (item != null)
@@ -474,59 +474,7 @@ namespace Engine
                 }
             }
 
-            distance = null;
-            return true;
-        }
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="distance">If any instance is inside the volume, returns zero</param>
-        /// <returns>Returns true if all of the instances were outside of the sphere</returns>
-        public override bool Cull(BoundingSphere sphere, out float? distance)
-        {
-            if (this.instancesTmp != null && this.instancesTmp.Length > 0)
-            {
-                var item = this.instancesTmp.FirstOrDefault(i =>
-                {
-                    float? iDistance;
-                    return !i.Cull(sphere, out iDistance);
-                });
-
-                if (item != null)
-                {
-                    distance = 0;
-                    return false;
-                }
-            }
-
-            distance = null;
-            return true;
-        }
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="box">Box</param>
-        /// <param name="distance">If any instance is inside the volume, returns zero</param>
-        /// <returns>Returns true if all of the instances were outside of the box</returns>
-        public override bool Cull(BoundingBox box, out float? distance)
-        {
-            if (this.instancesTmp != null && this.instancesTmp.Length > 0)
-            {
-                var item = this.instancesTmp.FirstOrDefault(i =>
-                {
-                    float? iDistance;
-                    return !i.Cull(box, out iDistance);
-                });
-
-                if (item != null)
-                {
-                    distance = 0;
-                    return false;
-                }
-            }
-
-            distance = null;
+            distance = float.MaxValue;
             return true;
         }
     }

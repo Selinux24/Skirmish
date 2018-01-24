@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Engine
@@ -103,23 +102,25 @@ namespace Engine
             });
         }
         /// <summary>
-        /// Performs frustum culling with the active emitters
+        /// Performs culling with the active emitters
         /// </summary>
-        /// <param name="frustum">Frustum</param>
+        /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the at least one of the internal emitters is visible, returns the distance to the item</param>
         /// <returns>Returns true if all emitters were culled</returns>
-        public override bool Cull(BoundingFrustum frustum, out float? distance)
+        public override bool Cull(ICullingVolume volume, out float distance)
         {
             bool cull = true;
             distance = float.MaxValue;
 
+            float minDistance = float.MaxValue;
             this.particleSystems.ForEach(p =>
             {
-                float? d;
-                var c = p.Emitter.Cull(frustum, out d);
+                float d;
+                var c = p.Emitter.Cull(volume, out d);
                 if (!c)
                 {
                     cull = false;
+                    minDistance = Math.Min(d, minDistance);
                 }
 
                 p.Emitter.Visible = !c;
@@ -127,7 +128,7 @@ namespace Engine
 
             if (!cull)
             {
-                distance = float.MaxValue;
+                distance = minDistance;
             }
 
             return cull;

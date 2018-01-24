@@ -25,9 +25,9 @@ namespace Engine.Common
         /// </summary>
         public Matrix ViewProjection { get; set; }
         /// <summary>
-        /// Bounding frustum
+        /// Camera culling volume
         /// </summary>
-        public BoundingFrustum Frustum { get; set; }
+        public CullingVolumeCamera CameraVolume { get; set; }
         /// <summary>
         /// Eye position
         /// </summary>

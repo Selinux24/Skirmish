@@ -178,15 +178,15 @@ namespace Engine
         /// <summary>
         /// Performs culling test
         /// </summary>
-        /// <param name="frustum">Frustum</param>
+        /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
         /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
-        public override bool Cull(BoundingFrustum frustum, out float? distance)
+        public override bool Cull(ICullingVolume volume, out float distance)
         {
-            this.drawContext.Lights.Cull(frustum, this.drawContext.EyePosition);
+            this.drawContext.Lights.Cull(volume, this.drawContext.EyePosition);
 
-            return base.Cull(frustum, out distance);
+            return base.Cull(volume, out distance);
         }
     }
 }

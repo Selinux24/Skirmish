@@ -779,17 +779,17 @@ namespace Engine.Collections.Generic
         }
 
         /// <summary>
-        /// Gets the leaf nodes contained into the specified frustum
+        /// Gets the leaf nodes contained into the specified volume
         /// </summary>
-        /// <param name="frustum">Bounding frustum</param>
-        /// <returns>Returns the leaf nodes contained into the frustum</returns>
-        public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingFrustum frustum)
+        /// <param name="volume">Volume</param>
+        /// <returns>Returns the leaf nodes contained into the volume</returns>
+        public PickingQuadTreeNode<T>[] GetNodesInVolume(ICullingVolume volume)
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
             if (this.Children == null)
             {
-                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
+                if (volume.Contains(this.BoundingBox) != ContainmentType.Disjoint)
                 {
                     nodes.Add(this);
                 }
@@ -798,67 +798,7 @@ namespace Engine.Collections.Generic
             {
                 for (int i = 0; i < this.Children.Length; i++)
                 {
-                    var childNodes = this.Children[i].GetNodesInVolume(ref frustum);
-                    if (childNodes.Length > 0)
-                    {
-                        nodes.AddRange(childNodes);
-                    }
-                }
-            }
-
-            return nodes.ToArray();
-        }
-        /// <summary>
-        /// Gets the leaf nodes contained into the specified bounding box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        /// <returns>Returns the leaf nodes contained into the bounding box</returns>
-        public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingBox bbox)
-        {
-            List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
-
-            if (this.Children == null)
-            {
-                if (bbox.Contains(this.BoundingBox) != ContainmentType.Disjoint)
-                {
-                    nodes.Add(this);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < this.Children.Length; i++)
-                {
-                    var childNodes = this.Children[i].GetNodesInVolume(ref bbox);
-                    if (childNodes.Length > 0)
-                    {
-                        nodes.AddRange(childNodes);
-                    }
-                }
-            }
-
-            return nodes.ToArray();
-        }
-        /// <summary>
-        /// Gets the leaf nodes contained into the specified bounding sphere
-        /// </summary>
-        /// <param name="sphere">Bounding sphere</param>
-        /// <returns>Returns the leaf nodes contained into the bounding sphere</returns>
-        public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingSphere sphere)
-        {
-            List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
-
-            if (this.Children == null)
-            {
-                if (sphere.Contains(ref this.BoundingBox) != ContainmentType.Disjoint)
-                {
-                    nodes.Add(this);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < this.Children.Length; i++)
-                {
-                    var childNodes = this.Children[i].GetNodesInVolume(ref sphere);
+                    var childNodes = this.Children[i].GetNodesInVolume(volume);
                     if (childNodes.Length > 0)
                     {
                         nodes.AddRange(childNodes);

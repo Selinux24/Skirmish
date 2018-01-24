@@ -118,60 +118,22 @@ namespace Engine.Collections.Generic
             return this.Root.GetBoundingBoxes(maxDepth);
         }
         /// <summary>
-        /// Gets the nodes contained into the specified frustum
+        /// Gets the nodes contained into the specified volume
         /// </summary>
-        /// <param name="frustum">Bounding frustum</param>
-        /// <returns>Returns the nodes contained into the frustum</returns>
-        public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingFrustum frustum)
+        /// <param name="volume">Volume</param>
+        /// <returns>Returns the nodes contained into the volume</returns>
+        public PickingQuadTreeNode<T>[] GetNodesInVolume(ICullingVolume volume)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.GetNodesInVolume(ref frustum);
+                return this.Root.GetNodesInVolume(volume);
             }
             finally
             {
                 w.Stop();
 
                 Counters.AddVolumeFrustumTest((float)w.Elapsed.TotalSeconds);
-            }
-        }
-        /// <summary>
-        /// Gets the nodes contained into the specified bounding box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        /// <returns>Returns the nodes contained into the bounding box</returns>
-        public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingBox bbox)
-        {
-            Stopwatch w = Stopwatch.StartNew();
-            try
-            {
-                return this.Root.GetNodesInVolume(ref bbox);
-            }
-            finally
-            {
-                w.Stop();
-
-                Counters.AddVolumeBoxTest((float)w.Elapsed.TotalSeconds);
-            }
-        }
-        /// <summary>
-        /// Gets the nodes contained into the specified bounding sphere
-        /// </summary>
-        /// <param name="sphere">Bounding sphere</param>
-        /// <returns>Returns the nodes contained into the bounding sphere</returns>
-        public PickingQuadTreeNode<T>[] GetNodesInVolume(ref BoundingSphere sphere)
-        {
-            Stopwatch w = Stopwatch.StartNew();
-            try
-            {
-                return this.Root.GetNodesInVolume(ref sphere);
-            }
-            finally
-            {
-                w.Stop();
-
-                Counters.AddVolumeSphereTest((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>

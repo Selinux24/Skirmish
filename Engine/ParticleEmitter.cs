@@ -167,7 +167,7 @@ namespace Engine
             var tmp = currentBoundingBox;
 
             currentBoundingBox = new BoundingBox(
-                this.boundingBox.Minimum + this.Position, 
+                this.boundingBox.Minimum + this.Position,
                 this.boundingBox.Maximum + this.Position);
 
             if (tmp != null)
@@ -191,59 +191,19 @@ namespace Engine
         /// <summary>
         /// Performs a culling test against the specified frustum
         /// </summary>
-        /// <param name="frustum">Frustum</param>
+        /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the emitter is outside of the frustum</returns>
-        public bool Cull(BoundingFrustum frustum, out float? distance)
+        public bool Cull(ICullingVolume volume, out float distance)
         {
-            distance = null;
+            distance = float.MaxValue;
 
             var bbox = this.GetBoundingBox();
 
-            var inside = frustum.Contains(ref bbox) != ContainmentType.Disjoint;
+            var inside = volume.Contains(bbox) != ContainmentType.Disjoint;
             if (inside)
             {
-                distance = Vector3.DistanceSquared(frustum.GetCameraParams().Position, this.Position);
-            }
-
-            return !inside;
-        }
-        /// <summary>
-        /// Performs a culling test against the specified box
-        /// </summary>
-        /// <param name="box">box</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the emitter is outside of the box</returns>
-        public bool Cull(BoundingBox box, out float? distance)
-        {
-            distance = null;
-
-            var bbox = this.GetBoundingBox();
-
-            var inside = box.Contains(ref bbox) != ContainmentType.Disjoint;
-            if (inside)
-            {
-                distance = Vector3.DistanceSquared(box.GetCenter(), this.Position);
-            }
-
-            return !inside;
-        }
-        /// <summary>
-        /// Performs a culling test against the specified sphere
-        /// </summary>
-        /// <param name="sphere">sphere</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the emitter is outside of the sphere</returns>
-        public bool Cull(BoundingSphere sphere, out float? distance)
-        {
-            distance = null;
-
-            var bbox = this.GetBoundingBox();
-
-            var inside = sphere.Contains(ref bbox) != ContainmentType.Disjoint;
-            if (inside)
-            {
-                distance = Vector3.DistanceSquared(sphere.Center, this.Position);
+                distance = Vector3.DistanceSquared(volume.Position, this.Position);
             }
 
             return !inside;

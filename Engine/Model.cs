@@ -354,23 +354,23 @@ namespace Engine
         /// <summary>
         /// Performs culling test
         /// </summary>
-        /// <param name="frustum">Frustum</param>
+        /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public override bool Cull(BoundingFrustum frustum, out float? distance)
+        public override bool Cull(ICullingVolume volume, out float distance)
         {
             bool cull = false;
-            distance = null;
+            distance = float.MaxValue;
 
             if (this.hasVolumes)
             {
                 if (this.SphericVolume)
                 {
-                    cull = frustum.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
+                    cull = volume.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
                 }
                 else
                 {
-                    cull = frustum.Contains(this.GetBoundingBox()) == ContainmentType.Disjoint;
+                    cull = volume.Contains(this.GetBoundingBox()) == ContainmentType.Disjoint;
                 }
             }
             else
@@ -380,85 +380,11 @@ namespace Engine
 
             if (!cull)
             {
-                var eyePosition = frustum.GetCameraParams().Position;
+                var eyePosition = volume.Position;
 
                 distance = Vector3.DistanceSquared(this.Manipulator.Position, eyePosition);
 
                 this.SetLOD(eyePosition);
-            }
-
-            return cull;
-        }
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="box">Box</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the box</returns>
-        public override bool Cull(BoundingBox box, out float? distance)
-        {
-            bool cull = false;
-            distance = null;
-
-            if (this.hasVolumes)
-            {
-                if (this.SphericVolume)
-                {
-                    cull = this.GetBoundingBox().Contains(ref box) == ContainmentType.Disjoint;
-                }
-                else
-                {
-                    cull = this.GetBoundingBox().Contains(ref box) == ContainmentType.Disjoint;
-                }
-            }
-            else
-            {
-                cull = false;
-            }
-
-            if (!cull)
-            {
-                var eyePosition = box.GetCenter();
-
-                distance = Vector3.DistanceSquared(this.Manipulator.Position, eyePosition);
-
-                this.SetLOD(eyePosition);
-            }
-
-            return cull;
-        }
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the sphere</returns>
-        public override bool Cull(BoundingSphere sphere, out float? distance)
-        {
-            bool cull = false;
-            distance = null;
-
-            if (this.hasVolumes)
-            {
-                if (this.SphericVolume)
-                {
-                    cull = this.GetBoundingSphere().Contains(ref sphere) == ContainmentType.Disjoint;
-                }
-                else
-                {
-                    cull = this.GetBoundingBox().Contains(ref sphere) == ContainmentType.Disjoint;
-                }
-            }
-            else
-            {
-                cull = false;
-            }
-
-            if (!cull)
-            {
-                distance = Vector3.DistanceSquared(this.Manipulator.Position, sphere.Center);
-
-                this.SetLOD(sphere.Center);
             }
 
             return cull;

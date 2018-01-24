@@ -196,13 +196,13 @@ namespace Engine.Common
             this.UpdateContext.NearPlaneDistance = scene.Camera.NearPlaneDistance;
             this.UpdateContext.FarPlaneDistance = scene.Camera.FarPlaneDistance;
             this.UpdateContext.ViewProjection = viewProj;
-            this.UpdateContext.Frustum = new BoundingFrustum(viewProj);
             this.UpdateContext.EyePosition = scene.Camera.Position;
             this.UpdateContext.EyeDirection = scene.Camera.Direction;
             this.UpdateContext.Lights = scene.Lights;
+            this.UpdateContext.CameraVolume = new CullingVolumeCamera(viewProj);
 
             //Cull lights
-            scene.Lights.Cull(this.UpdateContext.Frustum, this.UpdateContext.EyePosition);
+            scene.Lights.Cull(this.UpdateContext.CameraVolume, this.UpdateContext.EyePosition);
 
             //Update active components
             scene.GetComponents<IUpdatable>(c => c.Active)
@@ -262,7 +262,7 @@ namespace Engine.Common
 
                         var toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
 
-                        var sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
+                        var sph = new CullingVolumeSphere(this.DrawContext.EyePosition, scene.Lights.ShadowLDDistance);
 
                         var doLowShadows = this.cullManager.Cull(sph, CullIndexShadowLowIndex, toCullShadowObjs);
 
@@ -292,7 +292,7 @@ namespace Engine.Common
 
                         toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll<ICullable>(s => s.Get<ICullable>());
 
-                        sph = new BoundingSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
+                        sph = new CullingVolumeSphere(this.DrawContext.EyePosition, scene.Lights.ShadowHDDistance);
 
                         var doHighShadows = this.cullManager.Cull(sph, CullIndexShadowHighIndex, toCullShadowObjs);
 
@@ -359,7 +359,7 @@ namespace Engine.Common
 
                         var toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll(s => s.Get<ICullable>());
 
-                        var sph = new BoundingSphere(light.Position, light.Radius);
+                        var sph = new CullingVolumeSphere(light.Position, light.Radius);
 
                         var doShadows = this.cullManager.Cull(sph, CullIndexShadowCubicIndex, toCullShadowObjs);
 
@@ -420,8 +420,8 @@ namespace Engine.Common
                         var cull1 = c1.Get<ICullable>();
                         var cull2 = c2.Get<ICullable>();
 
-                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance.Value : float.MaxValue;
-                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance.Value : float.MaxValue;
+                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
+                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
 
                         res = -d1.CompareTo(d2);
                     }

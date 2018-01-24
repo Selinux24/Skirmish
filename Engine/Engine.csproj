@@ -209,6 +209,9 @@
     <Compile Include="Common\VertexCPUParticle.cs" />
     <Compile Include="Content\ContentDescription.cs" />
     <Compile Include="CubicShadowMap.cs" />
+    <Compile Include="CullingVolumeCamera.cs" />
+    <Compile Include="CullingVolumeAABB.cs" />
+    <Compile Include="CullingVolumeSphere.cs" />
     <Compile Include="Effects\EffectDefaultFoliage.cs" />
     <Compile Include="Effects\EffectDefaultClouds.cs" />
     <Compile Include="Effects\EffectDefaultWater.cs" />
@@ -237,6 +240,7 @@
     <Compile Include="IComposed.cs" />
     <Compile Include="IControllable.cs" />
     <Compile Include="ICullable.cs" />
+    <Compile Include="ICullingVolume.cs" />
     <Compile Include="IDrawable.cs" />
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />

@@ -175,5 +175,14 @@ namespace Engine
 
             return res.ToArray();
         }
+
+        /// <summary>
+        /// Gets the culling volume for scene culling tests
+        /// </summary>
+        /// <returns>Return the culling volume</returns>
+        public virtual ICullingVolume GetCullingVolume()
+        {
+            return null;
+        }
     }
 }
