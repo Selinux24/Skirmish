@@ -38,6 +38,8 @@ namespace Collada
         private float nextTime = 3;
         private Vector3[] ratHoles = null;
 
+        private SceneObject<ModelInstanced> human = null;
+
         private SceneObject<LineListDrawer> bboxesDrawer = null;
         private SceneObject<LineListDrawer> ratDrawer = null;
         private SceneObject<TriangleListDrawer> graphDrawer = null;
@@ -56,6 +58,7 @@ namespace Collada
             this.InitializeUI();
             this.InitializeModularScenery();
             this.InitializeRat();
+            this.InitializeHuman();
             this.InitializeEnvironment();
             this.InitializeDebug();
             this.InitializeCamera();
@@ -183,8 +186,8 @@ namespace Collada
                 MaxClimb = 0.25f,
                 MaxSlope = 50f,
                 Radius = 0.1f,
-                Velocity = 1f,
-                VelocitySlow = 0.5f,
+                Velocity = 3f,
+                VelocitySlow = 1f,
             };
 
             this.rat.Transform.SetScale(0.5f, true);
@@ -198,6 +201,35 @@ namespace Collada
             this.ratPaths.Add("walk", new AnimationPlan(p0));
 
             this.rat.Instance.AnimationController.AddPath(this.ratPaths["walk"]);
+            this.rat.Instance.AnimationController.TimeDelta = 1.5f;
+        }
+        private void InitializeHuman()
+        {
+            this.human = this.AddComponent<ModelInstanced>(
+                new ModelInstancedDescription()
+                {
+                    CastShadow = true,
+                    Instances = 2,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/ModularDungeon/Characters/Human2",
+                        ModelContentFilename = "Human2.xml",
+                    }
+                });
+
+            AnimationPath p0 = new AnimationPath();
+            p0.AddLoop("stand");
+
+            for (int i = 0; i < this.human.Count; i++)
+            {
+                this.human.Instance[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29, true);
+                this.human.Instance[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0, true);
+
+                this.human.Instance[i].AnimationController.AddPath(new AnimationPlan(p0));
+                this.human.Instance[i].AnimationController.Start(i * 1f);
+                this.human.Instance[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
+            }
         }
         private void InitializeDebug()
         {
