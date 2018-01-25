@@ -44,7 +44,7 @@ namespace Collada
         private int currentGraph = 0;
 
         public ModularDungeon(Game game)
-            : base(game)
+            : base(game, SceneModesEnum.DeferredLightning)
         {
 
         }
