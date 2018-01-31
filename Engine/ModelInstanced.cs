@@ -299,63 +299,65 @@ namespace Engine
                     //Render by level of detail
                     for (int l = 1; l < (int)LevelOfDetailEnum.Minimum + 1; l *= 2)
                     {
-                        if (maxCount > 0)
+                        if (maxCount <= 0)
                         {
-                            LevelOfDetailEnum lod = (LevelOfDetailEnum)l;
+                            break;
+                        }
 
-                            //Get instances in this LOD
-                            var lodInstances = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
-                            if (lodInstances != null && lodInstances.Length > 0)
+                        LevelOfDetailEnum lod = (LevelOfDetailEnum)l;
+
+                        //Get instances in this LOD
+                        var lodInstances = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
+                        if (lodInstances != null && lodInstances.Length > 0)
+                        {
+                            var drawingData = this.GetDrawingData(lod);
+                            if (drawingData != null)
                             {
-                                var drawingData = this.GetDrawingData(lod);
-                                if (drawingData != null)
+                                var index = Array.IndexOf(this.instancesTmp, lodInstances[0]);
+                                var length = Math.Min(maxCount, lodInstances.Length);
+                                maxCount -= length;
+
+                                if (length > 0)
                                 {
-                                    var index = Array.IndexOf(this.instancesTmp, lodInstances[0]);
-                                    var length = Math.Min(maxCount, lodInstances.Length);
-                                    maxCount -= length;
+                                    instanceCount += length;
 
-                                    if (length > 0)
+                                    foreach (string meshName in drawingData.Meshes.Keys)
                                     {
-                                        instanceCount += length;
+                                        var dictionary = drawingData.Meshes[meshName];
 
-                                        foreach (string meshName in drawingData.Meshes.Keys)
+                                        foreach (string material in dictionary.Keys)
                                         {
-                                            var dictionary = drawingData.Meshes[meshName];
+                                            var mesh = dictionary[material];
 
-                                            foreach (string material in dictionary.Keys)
+                                            bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
+                                            if (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && transparent)
                                             {
-                                                var mesh = dictionary[material];
+                                                continue;
+                                            }
+                                            if (mode.HasFlag(DrawerModesEnum.TransparentOnly) && !transparent)
+                                            {
+                                                continue;
+                                            }
 
-                                                bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
-                                                if (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && transparent)
-                                                {
-                                                    continue;
-                                                }
-                                                if (mode.HasFlag(DrawerModesEnum.TransparentOnly) && !transparent)
-                                                {
-                                                    continue;
-                                                }
+                                            count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+                                            count *= instanceCount;
 
-                                                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
-                                                count *= instanceCount;
+                                            effect.UpdatePerObject(
+                                                0,
+                                                drawingData.Materials[material],
+                                                0,
+                                                this.UseAnisotropicFiltering);
 
-                                                effect.UpdatePerObject(
-                                                    0,
-                                                    drawingData.Materials[material],
-                                                    0,
-                                                    this.UseAnisotropicFiltering);
+                                            this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                                                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+                                            var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced);
+                                            this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
-                                                var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced);
-                                                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+                                            for (int p = 0; p < technique.PassCount; p++)
+                                            {
+                                                graphics.EffectPassApply(technique, p, 0);
 
-                                                for (int p = 0; p < technique.PassCount; p++)
-                                                {
-                                                    graphics.EffectPassApply(technique, p, 0);
-
-                                                    mesh.Draw(graphics, index, length);
-                                                }
+                                                mesh.Draw(graphics, index, length);
                                             }
                                         }
                                     }

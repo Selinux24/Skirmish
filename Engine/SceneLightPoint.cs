@@ -159,9 +159,9 @@ namespace Engine
             return Line3D.CreateWiredSphere(this.BoundingSphere, sliceCount, stackCount);
         }
         /// <summary>
-        /// Gets the text representation of the light
+        /// Clones current light
         /// </summary>
-        /// <returns>Returns the text representation of the light</returns>
+        /// <returns>Returns a new instante with same data</returns>
         public override SceneLight Clone()
         {
             var l = new SceneLightPoint()

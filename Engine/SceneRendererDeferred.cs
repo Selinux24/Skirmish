@@ -631,6 +631,7 @@ namespace Engine
 #endif
             var effect = DrawerPool.EffectDeferredComposer;
 
+            var hemisphericLight = context.Lights.GetVisibleHemisphericLight();
             var directionalLights = context.Lights.GetVisibleDirectionalLights();
             var spotLights = context.Lights.GetVisibleSpotLights();
             var pointLights = context.Lights.GetVisiblePointLights();
@@ -829,13 +830,9 @@ namespace Engine
 
                 effect.UpdateComposer(
                     this.ViewProjection,
-                    context.EyePosition,
-                    context.Lights.GlobalAmbientLight,
-                    context.Lights.FogStart,
-                    context.Lights.FogRange,
-                    context.Lights.FogColor,
                     this.GeometryMap[2],
-                    this.LightMap[0]);
+                    this.LightMap[0],
+                    context);
 
                 this.lightDrawer.BindResult(graphics);
 

@@ -33,12 +33,12 @@ cbuffer cbPerSpotLight : register(b4)
 }
 cbuffer cbCombineLights : register(b5)
 {
-	float gGlobalAmbient;
+	HemisphericLight gHemiLight;
+	float4 gFogColor;
 	float gFogStart;
 	float gFogRange;
+	float gGlobalAmbient;
 	float PAD51;
-	float PAD52;
-	float4 gFogColor;
 }
 
 Texture2D gTG1Map : register(t0);
@@ -214,16 +214,16 @@ float4 PSCombineLights(PSLightInput input) : SV_TARGET
 	if (doLighting == 0)
 	{
 		float4 color = tg1;
+		float3 normal = tg2.xyz;
 		float3 position = tg3.xyz;
 		float materialIndex = tg3.w;
 		float4 light = lmap;
 
+		float4 lAmbient = CalcAmbient(gHemiLight.AmbientDown, gHemiLight.AmbientUp, normal);
+
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
-		float4 emissive = k.Emissive;
-		float4 ambient = k.Ambient * gGlobalAmbient;
-
-		color = (emissive + ambient + light) * (color);
+		color = LightEquation2(k, lAmbient, gGlobalAmbient, light, color);
 
 		if (gFogRange > 0)
 		{

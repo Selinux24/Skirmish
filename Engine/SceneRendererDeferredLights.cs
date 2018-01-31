@@ -48,9 +48,9 @@ namespace Engine
         /// </summary>
         private Buffer lightGeometryIndexBuffer;
         /// <summary>
-        /// Input layout for directional lights
+        /// Input layout for directional and hemispheric lights
         /// </summary>
-        private InputLayout dirLightInputLayout;
+        private InputLayout globalLightInputLayout;
         /// <summary>
         /// Input layout for point lights
         /// </summary>
@@ -105,7 +105,7 @@ namespace Engine
         {
             this.Graphics = graphics;
 
-            this.dirLightInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.GetSignature(), VertexPosition.Input(BufferSlot));
+            this.globalLightInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.GetSignature(), VertexPosition.Input(BufferSlot));
             this.pointLightInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredPointLight.GetSignature(), VertexPosition.Input(BufferSlot));
             this.spotLightInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredSpotLight.GetSignature(), VertexPosition.Input(BufferSlot));
             this.combineLightsInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredCombineLights.GetSignature(), VertexPosition.Input(BufferSlot));
@@ -131,7 +131,7 @@ namespace Engine
             Helper.Dispose(this.lightGeometryVertexBuffer);
             Helper.Dispose(this.lightGeometryIndexBuffer);
 
-            Helper.Dispose(this.dirLightInputLayout);
+            Helper.Dispose(this.globalLightInputLayout);
             Helper.Dispose(this.pointLightInputLayout);
             Helper.Dispose(this.spotLightInputLayout);
             Helper.Dispose(this.combineLightsInputLayout);
@@ -270,12 +270,21 @@ namespace Engine
             graphics.IASetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
         }
         /// <summary>
+        /// Binds the hemispheric light input layout to the input assembler
+        /// </summary>
+        /// <param name="graphics">Graphics device</param>
+        public void BindHemispheric(Graphics graphics)
+        {
+            graphics.IAInputLayout = this.globalLightInputLayout;
+            Counters.IAInputLayoutSets++;
+        }
+        /// <summary>
         /// Binds the directional light input layout to the input assembler
         /// </summary>
         /// <param name="graphics">Graphics device</param>
         public void BindDirectional(Graphics graphics)
         {
-            graphics.IAInputLayout = this.dirLightInputLayout;
+            graphics.IAInputLayout = this.globalLightInputLayout;
             Counters.IAInputLayoutSets++;
         }
         /// <summary>

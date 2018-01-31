@@ -30,12 +30,14 @@ cbuffer cbPSPerFrame : register(b3)
 	float gPSFogStart;
 	float gPSFogRange;
 	float2 PAD_33;
+	HemisphericLight gPSHemiLight;
 	DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
 };
-Texture2D gPSShadowMapLD : register(t1);
-Texture2D gPSShadowMapHD : register(t2);
+Texture2D gPSShadowMapLD : register(t7);
+Texture2D gPSShadowMapHD : register(t8);
+TextureCubeArray<float> gPSShadowMapCubic : register(t9);
 
 cbuffer cbPSPerObject : register(b4)
 {
@@ -78,6 +80,7 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 	ComputeLightsInput lInput;
 
 	lInput.Ga = gPSGlobalAmbient;
+	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
 	lInput.pointLights = gPSPointLights;
 	lInput.spotLights = gPSSpotLights;
@@ -98,6 +101,7 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 	lInput.shadows = gPSShadows;
 	lInput.shadowMapLD = gPSShadowMapLD;
 	lInput.shadowMapHD = gPSShadowMapHD;
+	lInput.shadowCubic = gPSShadowMapCubic;
 	lInput.lod = gLOD;
 
 	return ComputeLights(lInput);
@@ -117,6 +121,7 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 	ComputeLightsInput lInput;
 
 	lInput.Ga = gPSGlobalAmbient;
+	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
 	lInput.pointLights = gPSPointLights;
 	lInput.spotLights = gPSSpotLights;
@@ -137,6 +142,7 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 	lInput.shadows = gPSShadows;
 	lInput.shadowMapLD = gPSShadowMapLD;
 	lInput.shadowMapHD = gPSShadowMapHD;
+	lInput.shadowCubic = gPSShadowMapCubic;
 	lInput.lod = gLOD;
 
 	return ComputeLights(lInput);
@@ -156,6 +162,7 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 	ComputeLightsInput lInput;
 
 	lInput.Ga = gPSGlobalAmbient;
+	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
 	lInput.pointLights = gPSPointLights;
 	lInput.spotLights = gPSSpotLights;
@@ -176,6 +183,7 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 	lInput.shadows = gPSShadows;
 	lInput.shadowMapLD = gPSShadowMapLD;
 	lInput.shadowMapHD = gPSShadowMapHD;
+	lInput.shadowCubic = gPSShadowMapCubic;
 	lInput.lod = gLOD;
 
 	return ComputeLights(lInput);

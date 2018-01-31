@@ -198,14 +198,8 @@ namespace Instancing
 
                 {
                     var sp = new AnimationPath();
-                    sp.AddLoop("stand");
-                    this.animations.Add("soldier_stand", new AnimationPlan(sp));
-                }
-
-                {
-                    var sp = new AnimationPath();
                     sp.AddLoop("idle1");
-                    this.animations.Add("soldier_idle", new AnimationPlan(sp));
+                    this.animations.Add("soldier_idle1", new AnimationPlan(sp));
                 }
 
                 {
@@ -214,7 +208,7 @@ namespace Instancing
                     this.animations.Add("soldier_idle2", new AnimationPlan(sp));
                 }
 
-                string[] anim = new[] { "soldier_stand", "soldier_idle", "soldier_idle2" };
+                string[] anim = new[] { "soldier_idle1", "soldier_idle2" };
 
                 Random rnd = new Random(1);
                 float l = 5;
@@ -231,10 +225,10 @@ namespace Instancing
 
                     this.troops.Instance[i].Manipulator.SetPosition(iPos, true);
                     this.troops.Instance[i].Manipulator.SetRotation(iPos.Z, 0, 0, true);
-                    this.troops.Instance[i].TextureIndex = (uint)(i % 2);
+                    this.troops.Instance[i].TextureIndex = (uint)(i % 3);
 
                     this.troops.Instance[i].AnimationController.TimeDelta = 0.4f + (0.1f * (i % 2));
-                    this.troops.Instance[i].AnimationController.AddPath(this.animations[anim[i % 3]]);
+                    this.troops.Instance[i].AnimationController.AddPath(this.animations[anim[i % anim.Length]]);
                     this.troops.Instance[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
 
                     x++;

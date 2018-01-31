@@ -23,8 +23,12 @@ namespace Collada
         private SceneObject<TextDrawer> info = null;
         private SceneObject<Sprite> backPannel = null;
 
+        private Color ambientDown = new Color(127, 127, 127, 255);
+        private Color ambientUp = new Color(137, 116, 104, 255);
+
         private Player agent = null;
         //private Player2 agent = null;
+        private Color agentTorchLight = new Color(255, 249, 224, 255);
 
         private SceneLightPoint torch = null;
 
@@ -67,19 +71,17 @@ namespace Collada
         }
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.Black;
-
+            this.Lights.GlobalAmbientLight = 0.08f;
+            this.Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", this.ambientDown, this.ambientUp, true);
             this.Lights.KeyLight.Enabled = false;
             this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = false;
-            this.Lights.FillLight.Direction = Vector3.Down;
-            this.Lights.FillLight.Brightness *= 0.25f;
 
-            this.Lights.BaseFogColor = Color.Black;
+            this.Lights.BaseFogColor = GameEnvironment.Background = Color.Black;
             this.Lights.FogRange = 10f;
-            this.Lights.FogStart = maxDistance - 20f;
+            this.Lights.FogStart = maxDistance - 15f;
 
-            this.torch = new SceneLightPoint("player_torch", true, Color.Yellow, Color.Red, true, Vector3.Zero, 5f, 10f);
+            this.torch = new SceneLightPoint("player_torch", true, this.agentTorchLight, this.agentTorchLight, true, Vector3.Zero, 10f, 25f);
             this.Lights.Add(this.torch);
 
             this.PathFinderDescription = new PathFinderDescription()
@@ -439,9 +441,9 @@ namespace Collada
 
             if (this.torch.Enabled)
             {
-                this.torch.Position = 
-                    this.Camera.Position + 
-                    (this.Camera.Direction * 0.5f) + 
+                this.torch.Position =
+                    this.Camera.Position +
+                    (this.Camera.Direction * 0.5f) +
                     (this.Camera.Left * 0.2f);
             }
         }

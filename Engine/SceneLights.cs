@@ -27,13 +27,17 @@ namespace Engine
 
             return new SceneLights()
             {
-                GlobalAmbientLight = 0.1f,
+                GlobalAmbientLight = 0.02f,
                 DirectionalLights = lights,
             };
         }
 
         #endregion
 
+        /// <summary>
+        /// Hemispheric ambient light
+        /// </summary>
+        private SceneLightHemispheric hemisphericLigth = null;
         /// <summary>
         /// Directional lights
         /// </summary>
@@ -51,6 +55,20 @@ namespace Engine
         /// </summary>
         private List<SceneLight> visibleLights = new List<SceneLight>();
 
+        /// <summary>
+        /// Gets or sets the hemispheric ambient light
+        /// </summary>
+        public SceneLightHemispheric HemisphericLigth
+        {
+            get
+            {
+                return this.hemisphericLigth;
+            }
+            set
+            {
+                this.hemisphericLigth = value;
+            }
+        }
         /// <summary>
         /// Gets or sets directional lights
         /// </summary>
@@ -304,6 +322,15 @@ namespace Engine
                 new Tuple<float, Color4>(MathUtil.Pi * 2.00f, Color.Black),
             });
         }
+
+        /// <summary>
+        /// Sets the hemispheric ambient light
+        /// </summary>
+        /// <param name="hemiLight">Hemispheric light</param>
+        public void SetAmbient(SceneLightHemispheric hemiLight)
+        {
+            this.hemisphericLigth = hemiLight;
+        }
         /// <summary>
         /// Adds the specified new light to colection
         /// </summary>
@@ -475,6 +502,14 @@ namespace Engine
 
                 this.visibleLights.AddRange(sLights);
             }
+        }
+        /// <summary>
+        /// Gets the visible hemispheric light
+        /// </summary>
+        /// <returns>Returns the visible hemispheric light</returns>
+        public SceneLightHemispheric GetVisibleHemisphericLight()
+        {
+            return this.hemisphericLigth != null && this.hemisphericLigth.Enabled ? this.hemisphericLigth : null;
         }
         /// <summary>
         /// Gets the visible directional lights

@@ -132,6 +132,10 @@ namespace Engine.Effects
         protected readonly EngineEffectTechnique InstancingPositionNormalTextureTangentSkinned = null;
 
         /// <summary>
+        /// Hemispheric light effect variable
+        /// </summary>
+        private EngineEffectVariable hemiLight = null;
+        /// <summary>
         /// Directional lights effect variable
         /// </summary>
         private EngineEffectVariable dirLights = null;
@@ -314,6 +318,20 @@ namespace Engine.Effects
         /// </summary>
         private EngineSamplerState samplerAnisotropic = null;
 
+        /// <summary>
+        /// Hemispheric lights
+        /// </summary>
+        protected BufferHemisphericLight HemiLight
+        {
+            get
+            {
+                return this.hemiLight.GetValue<BufferHemisphericLight>();
+            }
+            set
+            {
+                this.hemiLight.SetValue(value);
+            }
+        }
         /// <summary>
         /// Directional lights
         /// </summary>
@@ -874,6 +892,7 @@ namespace Engine.Effects
             this.fromLightViewProjectionHD = this.Effect.GetVariableMatrix("gPSLightViewProjectionHD");
             this.eyePositionWorld = this.Effect.GetVariableVector("gPSEyePositionWorld");
             this.globalAmbient = this.Effect.GetVariableScalar("gPSGlobalAmbient");
+            this.hemiLight = this.Effect.GetVariable("gPSHemiLight");
             this.dirLights = this.Effect.GetVariable("gPSDirLights");
             this.pointLights = this.Effect.GetVariable("gPSPointLights");
             this.spotLights = this.Effect.GetVariable("gPSSpotLights");
@@ -1085,6 +1104,7 @@ namespace Engine.Effects
             this.WorldViewProjection = world * viewProjection;
 
             var globalAmbient = 0f;
+            var bHemiLight = BufferHemisphericLight.Default;
             var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
             var bPointLights = new BufferPointLight[BufferPointLight.MAX];
             var bSpotLights = new BufferSpotLight[BufferSpotLight.MAX];
@@ -1095,6 +1115,12 @@ namespace Engine.Effects
                 this.EyePositionWorld = eyePositionWorld;
 
                 globalAmbient = lights.GlobalAmbientLight;
+
+                var hemiLight = lights.GetVisibleHemisphericLight();
+                if (hemiLight != null)
+                {
+                    bHemiLight = new BufferHemisphericLight(hemiLight);
+                }
 
                 var dirLights = lights.GetVisibleDirectionalLights();
                 for (int i = 0; i < Math.Min(dirLights.Length, BufferDirectionalLight.MAX); i++)
@@ -1155,6 +1181,7 @@ namespace Engine.Effects
             }
 
             this.GlobalAmbient = globalAmbient;
+            this.HemiLight = bHemiLight;
             this.DirLights = bDirLights;
             this.PointLights = bPointLights;
             this.SpotLights = bSpotLights;

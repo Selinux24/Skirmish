@@ -193,6 +193,12 @@ namespace Animation
             GameEnvironment.Background = Color.CornflowerBlue;
 
             this.Lights.KeyLight.CastShadow = true;
+            this.Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));
+            this.Lights.KeyLight.Enabled = true;
+            this.Lights.BackLight.Enabled = false;
+            this.Lights.FillLight.Enabled = false;
+            this.Lights.GlobalAmbientLight = 0.25f;
+            this.Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             var bbox = this.soldier.Instance.GetBoundingBox();
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;

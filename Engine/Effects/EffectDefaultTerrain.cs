@@ -24,6 +24,10 @@ namespace Engine.Effects
         public readonly EngineEffectTechnique TerrainFullForward = null;
 
         /// <summary>
+        /// Hemispheric light effect variable
+        /// </summary>
+        private EngineEffectVariable hemiLight = null;
+        /// <summary>
         /// Directional lights effect variable
         /// </summary>
         private EngineEffectVariable dirLights = null;
@@ -120,6 +124,10 @@ namespace Engine.Effects
         /// </summary>
         private EngineEffectVariableTexture shadowMapHD = null;
         /// <summary>
+        /// Cubic shadows map effect variable
+        /// </summary>
+        private EngineEffectVariableTexture shadowMapCubic = null;
+        /// <summary>
         /// Color texture array effect variable
         /// </summary>
         private EngineEffectVariableTexture colorTextures = null;
@@ -181,6 +189,10 @@ namespace Engine.Effects
         /// </summary>
         private EngineShaderResourceView currentShadowMapHD = null;
         /// <summary>
+        /// Current cubic shadow map
+        /// </summary>
+        private EngineShaderResourceView currentShadowMapCubic = null;
+        /// <summary>
         /// Current color texure array
         /// </summary>
         private EngineShaderResourceView currentColorTextures = null;
@@ -210,6 +222,20 @@ namespace Engine.Effects
         /// </summary>
         private EngineSamplerState samplerAnisotropic = null;
 
+        /// <summary>
+        /// Hemispheric lights
+        /// </summary>
+        protected BufferHemisphericLight HemiLight
+        {
+            get
+            {
+                return this.hemiLight.GetValue<BufferHemisphericLight>();
+            }
+            set
+            {
+                this.hemiLight.SetValue(value);
+            }
+        }
         /// <summary>
         /// Directional lights
         /// </summary>
@@ -593,6 +619,27 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Cubic shadow map
+        /// </summary>
+        protected EngineShaderResourceView ShadowMapCubic
+        {
+            get
+            {
+                return this.shadowMapCubic.GetResource();
+            }
+            set
+            {
+                if (this.currentShadowMapCubic != value)
+                {
+                    this.shadowMapCubic.SetResource(value);
+
+                    this.currentShadowMapCubic = value;
+
+                    Counters.TextureUpdates++;
+                }
+            }
+        }
+        /// <summary>
         /// Color textures for alpha map
         /// </summary>
         protected EngineShaderResourceView ColorTextures
@@ -755,11 +802,13 @@ namespace Engine.Effects
             this.fogColor = this.Effect.GetVariableVector("gPSFogColor");
             this.fogStart = this.Effect.GetVariableScalar("gPSFogStart");
             this.fogRange = this.Effect.GetVariableScalar("gPSFogRange");
+            this.hemiLight = this.Effect.GetVariable("gPSHemiLight");
             this.dirLights = this.Effect.GetVariable("gPSDirLights");
             this.pointLights = this.Effect.GetVariable("gPSPointLights");
             this.spotLights = this.Effect.GetVariable("gPSSpotLights");
             this.shadowMapLD = this.Effect.GetVariableTexture("gPSShadowMapLD");
             this.shadowMapHD = this.Effect.GetVariableTexture("gPSShadowMapHD");
+            this.shadowMapCubic = this.Effect.GetVariableTexture("gPSShadowMapCubic");
 
             //Per object
             this.parameters = this.Effect.GetVariableVector("gPSParams");
@@ -818,41 +867,36 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        /// <param name="viewProjection">View * projection</param>
-        /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="textureResolution">Texture resolution</param>
-        /// <param name="lights">Scene ligths</param>
-        /// <param name="shadowMaps">Shadow map flags</param>
-        /// <param name="shadowMapLD">Low definition shadow map texture</param>
-        /// <param name="shadowMapHD">High definition shadow map texture</param>
-        /// <param name="fromLightViewProjectionLD">From light View * Projection transform for low definition shadows</param>
-        /// <param name="fromLightViewProjectionHD">From light View * Projection transform for high definition shadows</param>
+        /// <param name="context">Drawing context</param>
         public void UpdatePerFrame(
-            Matrix viewProjection,
             float textureResolution,
-            Vector3 eyePositionWorld,
-            SceneLights lights,
-            ShadowMapFlags shadowMaps,
-            EngineShaderResourceView shadowMapLD,
-            EngineShaderResourceView shadowMapHD,
-            Matrix fromLightViewProjectionLD,
-            Matrix fromLightViewProjectionHD)
+            DrawContext context)
         {
             this.World = Matrix.Identity;
-            this.WorldViewProjection = viewProjection;
+            this.WorldViewProjection = context.ViewProjection;
             this.TextureResolution = textureResolution;
 
             var globalAmbient = 0f;
+            var bHemiLight = BufferHemisphericLight.Default;
             var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
             var bPointLights = new BufferPointLight[BufferPointLight.MAX];
             var bSpotLights = new BufferSpotLight[BufferSpotLight.MAX];
             var lCount = new[] { 0, 0, 0 };
 
+            var lights = context.Lights;
+
             if (lights != null)
             {
-                this.EyePositionWorld = eyePositionWorld;
+                this.EyePositionWorld = context.EyePosition;
 
                 globalAmbient = lights.GlobalAmbientLight;
+
+                var hemiLight = lights.GetVisibleHemisphericLight();
+                if (hemiLight != null)
+                {
+                    bHemiLight = new BufferHemisphericLight(hemiLight);
+                }
 
                 var dirLights = lights.GetVisibleDirectionalLights();
                 for (int i = 0; i < Math.Min(dirLights.Length, BufferDirectionalLight.MAX); i++)
@@ -880,11 +924,21 @@ namespace Engine.Effects
                 this.FogRange = lights.FogRange;
                 this.FogColor = lights.FogColor;
 
-                this.FromLightViewProjectionLD = fromLightViewProjectionLD;
-                this.FromLightViewProjectionHD = fromLightViewProjectionHD;
-                this.ShadowMapLD = shadowMapLD;
-                this.ShadowMapHD = shadowMapHD;
-                this.ShadowMaps = (uint)shadowMaps;
+                this.ShadowMaps = (uint)context.ShadowMaps;
+                if (context.ShadowMapLow != null)
+                {
+                    this.FromLightViewProjectionLD = context.ShadowMapLow.FromLightViewProjectionArray[0];
+                    this.ShadowMapLD = context.ShadowMapLow.Texture;
+                }
+                if (context.ShadowMapHigh != null)
+                {
+                    this.FromLightViewProjectionHD = context.ShadowMapHigh.FromLightViewProjectionArray[0];
+                    this.ShadowMapHD = context.ShadowMapHigh.Texture;
+                }
+                if (context.ShadowMapCube != null && context.ShadowMapCube.Length > 0)
+                {
+                    this.ShadowMapCubic = context.ShadowMapCube[0].Texture;
+                }
             }
             else
             {
@@ -894,14 +948,16 @@ namespace Engine.Effects
                 this.FogRange = 0;
                 this.FogColor = Color.Transparent;
 
-                this.FromLightViewProjectionLD = Matrix.Identity;
-                this.FromLightViewProjectionHD = Matrix.Identity;
-                this.ShadowMapLD = null;
-                this.ShadowMapHD = null;
                 this.ShadowMaps = 0;
+                this.ShadowMapLD = null;
+                this.FromLightViewProjectionLD = Matrix.Identity;
+                this.ShadowMapHD = null;
+                this.FromLightViewProjectionHD = Matrix.Identity;
+                this.ShadowMapCubic = null;
             }
 
             this.GlobalAmbient = globalAmbient;
+            this.HemiLight = bHemiLight;
             this.DirLights = bDirLights;
             this.PointLights = bPointLights;
             this.SpotLights = bSpotLights;

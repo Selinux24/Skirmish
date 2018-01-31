@@ -5,6 +5,11 @@ static const int MAX_LIGHTS_DIRECTIONAL = 3;
 static const int MAX_LIGHTS_POINT = 16;
 static const int MAX_LIGHTS_SPOT = 16;
 
+struct HemisphericLight
+{
+	float4 AmbientDown;
+	float4 AmbientUp;
+};
 struct DirectionalLight
 {
     float4 Diffuse;
@@ -144,6 +149,14 @@ inline float4 SpecularBlinnPhongPass(float4 lSpecular, float lShininess, float3 
     return pow(max(0, dot(reflect(V, N), -L)), lShininess) * lSpecular;
 }
 
+inline float4 CalcAmbient(float4 ambientDown, float4 ambientUp, float3 normal)
+{
+	// Convert from [-1, 1] to [0, 1]
+	float up = normal.y * 0.5 + 0.5;
+
+	// Calculate the ambient value
+	return float4(ambientDown.rgb + up * ambientUp.rgb, 1);
+}
 inline float CalcSphericAttenuation(float intensity, float radius, float distance)
 {
     float attenuation = 0.0f;
@@ -166,6 +179,25 @@ inline float CalcSpotCone(float3 lightDirection, float spotAngle, float3 L)
     float maxCos = (minCos + 1.0f) * 0.5f;
     float cosAngle = dot(lightDirection, -L);
     return smoothstep(minCos, maxCos, cosAngle);
+}
+
+inline float4 LightEquation(Material k, float4 lAmbient, float globalAmbient, float4 lDiffuse, float4 pDiffuse, float4 lSpecular, float4 pSpecular, float dist)
+{
+	float4 emissive = k.Emissive;
+	float4 ambient = lAmbient * globalAmbient;
+
+	float4 diffuse = k.Diffuse * lDiffuse;
+	float4 specular = k.Specular * lSpecular * pSpecular * dist;
+
+	return (emissive + ambient + diffuse + specular) * pDiffuse;
+}
+
+inline float4 LightEquation2(Material k, float4 lAmbient, float globalAmbient, float4 light, float4 pDiffuse)
+{
+	float4 emissive = k.Emissive;
+	float4 ambient = lAmbient * globalAmbient;
+
+	return (emissive + ambient + light) * pDiffuse;
 }
 
 struct ComputeLightsOutput
@@ -431,11 +463,12 @@ inline ComputeLightsOutput ComputeSpotLight(ComputeSpotLightsInput input)
 
 struct ComputeLightsInput
 {
-    float4 Ga;
     DirectionalLight dirLights[MAX_LIGHTS_DIRECTIONAL];
     PointLight pointLights[MAX_LIGHTS_POINT];
     SpotLight spotLights[MAX_LIGHTS_SPOT];
-    uint dirLightsCount;
+	HemisphericLight hemiLight;
+	float Ga;
+	uint dirLightsCount;
     uint pointLightsCount;
     uint spotLightsCount;
     float3 lod;
@@ -462,6 +495,8 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
     float4 lSpecular = 0;
 
     float3 V = normalize(input.ePosition - input.pPosition);
+
+	float4 lAmbient = CalcAmbient(input.hemiLight.AmbientDown, input.hemiLight.AmbientUp, input.pNormal);
 
     uint i = 0;
 
@@ -523,19 +558,13 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
         lSpecular += (cSpecular * attenuation);
     }
 
-    float4 emissive = input.k.Emissive;
-    float4 ambient = input.k.Ambient * input.Ga;
-
-    float4 diffuse = input.k.Diffuse * lDiffuse;
-    float4 specular = input.k.Specular * lSpecular * input.pColorSpecular * dist;
-
-    float4 color = (emissive + ambient + diffuse + specular) * input.pColorDiffuse;
-
-    return saturate(color);
+	return LightEquation(input.k, lAmbient, input.Ga, lDiffuse, input.pColorDiffuse, lSpecular, input.pColorSpecular, dist);
 }
 inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 {
     float4 lDiffuse = 0;
+
+	float4 lAmbient = CalcAmbient(input.hemiLight.AmbientDown, input.hemiLight.AmbientUp, input.pNormal);
 
     uint i = 0;
 
@@ -591,19 +620,14 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
         lDiffuse += (cDiffuse * attenuation);
     }
 
-    float4 emissive = input.k.Emissive;
-    float4 ambient = input.k.Ambient * input.Ga;
-
-    float4 diffuse = input.k.Diffuse * lDiffuse;
-
-    float4 color = (emissive + ambient + diffuse) * input.pColorDiffuse;
-
-    return saturate(color);
+	return LightEquation(input.k, lAmbient, input.Ga, lDiffuse, input.pColorDiffuse, 0, 0, 0);
 }
 inline float4 ComputeLightsLOD3(ComputeLightsInput input)
 {
     float4 lDiffuse = 0;
 
+	float4 lAmbient = CalcAmbient(input.hemiLight.AmbientDown, input.hemiLight.AmbientUp, input.pNormal);
+
     uint i = 0;
 
     for (i = 0; i < input.dirLightsCount; i++)
@@ -622,19 +646,14 @@ inline float4 ComputeLightsLOD3(ComputeLightsInput input)
         lDiffuse += (cDiffuse * cShadowFactor);
     }
 
-    float4 emissive = input.k.Emissive;
-    float4 ambient = input.k.Ambient * input.Ga;
-
-    float4 diffuse = input.k.Diffuse * lDiffuse;
-
-    float4 color = (emissive + ambient + diffuse) * input.pColorDiffuse;
-
-    return saturate(color);
+	return LightEquation(input.k, lAmbient, input.Ga, lDiffuse, input.pColorDiffuse, 0, 0, 0);
 }
 inline float4 ComputeLightsLOD4(ComputeLightsInput input)
 {
     float4 lDiffuse = 0;
 
+	float4 lAmbient = CalcAmbient(input.hemiLight.AmbientDown, input.hemiLight.AmbientUp, input.pNormal);
+
     uint i = 0;
 
     for (i = 0; i < input.dirLightsCount; i++)
@@ -653,14 +672,7 @@ inline float4 ComputeLightsLOD4(ComputeLightsInput input)
         lDiffuse += (cDiffuse * cShadowFactor);
     }
 
-    float4 emissive = input.k.Emissive;
-    float4 ambient = input.k.Ambient * input.Ga;
-
-    float4 diffuse = input.k.Diffuse * lDiffuse;
-
-    float4 color = (emissive + ambient + diffuse) * input.pColorDiffuse;
-
-    return saturate(color);
+	return LightEquation(input.k, lAmbient, input.Ga, lDiffuse, input.pColorDiffuse, 0, 0, 0);
 }
 inline float4 ComputeLights(ComputeLightsInput input)
 {
@@ -696,6 +708,6 @@ inline float4 ComputeLights(ComputeLightsInput input)
             color = ComputeLightsLOD4(input);
         }
 
-        return float4(lerp(color.rgb, input.fogColor.rgb, fog), color.a);
+		return float4(lerp(color.rgb, input.fogColor.rgb, fog), color.a);
     }
 }

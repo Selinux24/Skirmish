@@ -32,6 +32,7 @@ cbuffer cbPerFrame : register(b1)
     uint gPAD11;
     float gTotalTime;
     float3 gDelta;
+	HemisphericLight gPSHemiLight;
     DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
     PointLight gPointLights[MAX_LIGHTS_POINT];
     SpotLight gSpotLights[MAX_LIGHTS_SPOT];
@@ -40,6 +41,7 @@ Texture2DArray gTextureArray : register(t2);
 Texture2DArray gNormalMapArray : register(t3);
 Texture2D gShadowMapLD : register(t4);
 Texture2D gShadowMapHD : register(t5);
+TextureCubeArray<float> gPSShadowMapCubic : register(t6);
 
 GSVertexBillboard VSFoliage(VSVertexBillboard input)
 {
@@ -257,7 +259,8 @@ float4 PSFoliage(PSVertexBillboard input) : SV_Target
     ComputeLightsInput lInput;
 
     lInput.Ga = 0;
-    lInput.dirLights = gDirLights;
+	lInput.hemiLight = gPSHemiLight;
+	lInput.dirLights = gDirLights;
     lInput.pointLights = gPointLights;
     lInput.spotLights = gSpotLights;
     lInput.dirLightsCount = gLightCount.x;
@@ -277,7 +280,8 @@ float4 PSFoliage(PSVertexBillboard input) : SV_Target
     lInput.shadows = gShadows;
     lInput.shadowMapLD = gShadowMapLD;
     lInput.shadowMapHD = gShadowMapHD;
-    lInput.lod = gLOD;
+	lInput.shadowCubic = gPSShadowMapCubic;
+	lInput.lod = gLOD;
 
     return ComputeLights(lInput);
 }

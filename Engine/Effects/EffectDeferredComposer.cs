@@ -59,6 +59,10 @@ namespace Engine.Effects
         /// </summary>
         private EngineEffectVariableScalar globalAmbient;
         /// <summary>
+        /// Hemispheric light effect variable
+        /// </summary>
+        private EngineEffectVariable hemisphericLight = null;
+        /// <summary>
         /// Directional light effect variable
         /// </summary>
         private EngineEffectVariable directionalLight = null;
@@ -242,6 +246,20 @@ namespace Engine.Effects
             set
             {
                 this.globalAmbient.Set(value);
+            }
+        }
+        /// <summary>
+        /// Hemispheric lights
+        /// </summary>
+        protected BufferHemisphericLight HemisphericLight
+        {
+            get
+            {
+                return this.hemisphericLight.GetValue<BufferHemisphericLight>();
+            }
+            set
+            {
+                this.hemisphericLight.SetValue(value);
             }
         }
         /// <summary>
@@ -564,6 +582,7 @@ namespace Engine.Effects
             this.directionalLight = this.Effect.GetVariable("gDirLight");
             this.pointLight = this.Effect.GetVariable("gPointLight");
             this.spotLight = this.Effect.GetVariable("gSpotLight");
+            this.hemisphericLight = this.Effect.GetVariable("gHemiLight");
             this.fogStart = this.Effect.GetVariableScalar("gFogStart");
             this.fogRange = this.Effect.GetVariableScalar("gFogRange");
             this.fogColor = this.Effect.GetVariableVector("gFogColor");
@@ -693,30 +712,36 @@ namespace Engine.Effects
         /// Updates composer variables
         /// </summary>
         /// <param name="viewProjection">View * projection matrix</param>
-        /// <param name="eyePositionWorld">Eye position in world coordinates</param>
-        /// <param name="globalAmbient">Global ambient</param>
-        /// <param name="fogStart">Fog start</param>
-        /// <param name="fogRange">Fog range</param>
-        /// <param name="fogColor">Fog color</param>
         /// <param name="depthMap">Depth map texture</param>
         /// <param name="lightMap">Light map</param>
+        /// <param name="context">Drawing context</param>
         public void UpdateComposer(
             Matrix viewProjection,
-            Vector3 eyePositionWorld,
-            float globalAmbient,
-            float fogStart,
-            float fogRange,
-            Color4 fogColor,
             EngineShaderResourceView depthMap,
-            EngineShaderResourceView lightMap)
+            EngineShaderResourceView lightMap,
+            DrawContext context)
         {
             this.WorldViewProjection = viewProjection;
-            this.EyePositionWorld = eyePositionWorld;
+            this.EyePositionWorld = context.EyePosition;
 
-            this.GlobalAmbient = globalAmbient;
-            this.FogStart = fogStart;
-            this.FogRange = fogRange;
-            this.FogColor = fogColor;
+            var lights = context.Lights;
+            if (lights != null)
+            {
+                var ambientLight = lights.GetVisibleHemisphericLight();
+                if (ambientLight != null)
+                {
+                    this.HemisphericLight = new BufferHemisphericLight(ambientLight);
+                }
+                else
+                {
+                    this.HemisphericLight = BufferHemisphericLight.Default;
+                }
+
+                this.GlobalAmbient = lights.GlobalAmbientLight;
+                this.FogStart = lights.FogStart;
+                this.FogRange = lights.FogRange;
+                this.FogColor = lights.FogColor;
+            }
 
             this.TG3Map = depthMap;
             this.LightMap = lightMap;

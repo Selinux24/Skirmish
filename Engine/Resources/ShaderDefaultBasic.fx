@@ -42,6 +42,7 @@ cbuffer cbPSPerFrame : register(b3)
 	float gPSFogStart;
 	float gPSFogRange;
     float2 gPSightPerspectiveValues;
+	HemisphericLight gPSHemiLight;
 	DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
@@ -251,6 +252,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	ComputeLightsInput lInput;
 
 	lInput.Ga = gPSGlobalAmbient;
+	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
 	lInput.pointLights = gPSPointLights;
 	lInput.spotLights = gPSSpotLights;
@@ -508,6 +510,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	ComputeLightsInput lInput;
 
 	lInput.Ga = gPSGlobalAmbient;
+	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
 	lInput.pointLights = gPSPointLights;
 	lInput.spotLights = gPSSpotLights;
@@ -657,6 +660,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	ComputeLightsInput lInput;
 
 	lInput.Ga = gPSGlobalAmbient;
+	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
 	lInput.pointLights = gPSPointLights;
 	lInput.spotLights = gPSSpotLights;

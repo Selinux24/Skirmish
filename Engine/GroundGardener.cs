@@ -872,14 +872,7 @@ namespace Engine
             #region Per frame update
 
             effect.UpdatePerFrame(
-                context.ViewProjection,
-                context.EyePosition,
-                context.Lights,
-                context.ShadowMaps,
-                context.ShadowMapLow.Texture,
-                context.ShadowMapHigh.Texture,
-                context.ShadowMapLow.FromLightViewProjectionArray[0],
-                context.ShadowMapHigh.FromLightViewProjectionArray[0],
+                context,
                 this.WindDirection,
                 this.WindStrength * channelData.WindEffect,
                 this.windTime * channelData.WindEffect,

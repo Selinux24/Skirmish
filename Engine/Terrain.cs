@@ -848,15 +848,8 @@ namespace Engine
             var effect = DrawerPool.EffectDefaultTerrain;
 
             effect.UpdatePerFrame(
-                context.ViewProjection,
                 this.textureResolution,
-                context.EyePosition,
-                context.Lights,
-                context.ShadowMaps,
-                context.ShadowMapLow.Texture,
-                context.ShadowMapHigh.Texture,
-                context.ShadowMapLow.FromLightViewProjectionArray[0],
-                context.ShadowMapHigh.FromLightViewProjectionArray[0]);
+                context);
 
             effect.UpdatePerObject(
                 this.useAnisotropic,
