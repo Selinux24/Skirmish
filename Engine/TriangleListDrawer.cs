@@ -98,6 +98,11 @@ namespace Engine
 
                     var graphics = this.Game.Graphics;
 
+                    if (this.Description.AlphaEnabled)
+                    {
+                        graphics.SetBlendDefaultAlpha();
+                    }
+
                     for (int p = 0; p < technique.PassCount; p++)
                     {
                         graphics.EffectPassApply(technique, p, 0);

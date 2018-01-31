@@ -26,6 +26,8 @@ namespace Collada
         private Player agent = null;
         //private Player2 agent = null;
 
+        private SceneLightPoint torch = null;
+
         private SceneObject<ModularScenery> scenery = null;
         private BoundingBox sceneryBBOX = new BoundingBox();
 
@@ -69,13 +71,16 @@ namespace Collada
 
             this.Lights.KeyLight.Enabled = false;
             this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = true;
+            this.Lights.FillLight.Enabled = false;
             this.Lights.FillLight.Direction = Vector3.Down;
             this.Lights.FillLight.Brightness *= 0.25f;
 
             this.Lights.BaseFogColor = Color.Black;
             this.Lights.FogRange = 10f;
             this.Lights.FogStart = maxDistance - 20f;
+
+            this.torch = new SceneLightPoint("player_torch", true, Color.Yellow, Color.Red, true, Vector3.Zero, 5f, 10f);
+            this.Lights.Add(this.torch);
 
             this.PathFinderDescription = new PathFinderDescription()
             {
@@ -246,7 +251,7 @@ namespace Collada
             {
                 Name = "DEBUG++ Bounding volumes",
                 AlphaEnabled = true,
-                Color = new Color4(1.0f, 0.0f, 0.0f, 0.55f),
+                Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
                 Count = 10000,
             };
             this.bboxesDrawer = this.AddComponent<LineListDrawer>(bboxesDrawerDesc);
@@ -256,7 +261,7 @@ namespace Collada
             {
                 Name = "DEBUG++ Rat",
                 AlphaEnabled = true,
-                Color = new Color4(0.0f, 1.0f, 1.0f, 0.55f),
+                Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
                 Count = 10000,
             };
             this.ratDrawer = this.AddComponent<LineListDrawer>(ratDrawerDesc);
@@ -271,7 +276,6 @@ namespace Collada
             this.Camera.Mode = CameraModes.Free;
             this.Camera.Position = new Vector3(-8, 5.5f, -26);
             this.Camera.Interest = new Vector3(-6, 5.5f, -26);
-
 
             //this.Camera.Position = new Vector3(53, 1.5f, -12);
             //this.Camera.Interest = new Vector3(53, 1.5f, -30);
@@ -297,7 +301,10 @@ namespace Collada
 
                 foreach (var item in dict.Values)
                 {
-                    this.bboxesDrawer.Instance.SetLines(rndBoxes.NextColor(), Line3D.CreateWiredBox(item.ToArray()));
+                    var color = rndBoxes.NextColor().ToColor4();
+                    color.Alpha = 0.40f;
+
+                    this.bboxesDrawer.Instance.SetLines(color, Line3D.CreateWiredBox(item.ToArray()));
                 }
             }
         }
@@ -310,7 +317,7 @@ namespace Collada
                 Color[] regions = new Color[nodes.Length];
                 for (int i = 0; i < nodes.Length; i++)
                 {
-                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.55f);
+                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.25f);
                 }
 
                 this.graphDrawer.Instance.Clear();
@@ -372,6 +379,11 @@ namespace Collada
                 this.ratController.Clear();
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.L))
+            {
+                this.torch.Enabled = !this.torch.Enabled;
+            }
+
             this.UpdateRat(gameTime);
 
             this.UpdateCamera(gameTime);
@@ -423,6 +435,14 @@ namespace Collada
             else
             {
                 this.Camera.Goto(prevPos);
+            }
+
+            if (this.torch.Enabled)
+            {
+                this.torch.Position = 
+                    this.Camera.Position + 
+                    (this.Camera.Direction * 0.5f) + 
+                    (this.Camera.Left * 0.2f);
             }
         }
         private void UpdateRat(GameTime gameTime)
