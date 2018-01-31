@@ -551,15 +551,6 @@ namespace Engine
 
             #endregion
 
-            //Depth Stencil States
-            this.CreateDepthStencilStates();
-
-            //Rasterizer States
-            this.CreateRasterizerStates();
-
-            //Blend States
-            this.CreateBlendStates();
-
             #region Set Defaults
 
             this.SetDefaultViewport();
@@ -579,59 +570,6 @@ namespace Engine
                     this.Resized(this, new EventArgs());
                 }
             }
-        }
-        /// <summary>
-        /// Creates the default depth stencil states
-        /// </summary>
-        private void CreateDepthStencilStates()
-        {
-            //Z-buffer enabled for write depth-stencil state
-            this.depthStencilzBufferEnabled = EngineDepthStencilState.ZBufferEnabled(this);
-
-            //Z-buffer disabled for write depth-stencil state
-            this.depthStencilzBufferDisabled = EngineDepthStencilState.ZBufferDisabled(this);
-
-            //Z-buffer enabled for read depth-stencil state
-            this.depthStencilRDzBufferEnabled = EngineDepthStencilState.RDzBufferEnabled(this);
-
-            //Z-buffer disabled for read depth-stencil state
-            this.depthStencilRDzBufferDisabled = EngineDepthStencilState.RDzBufferDisabled(this);
-
-            //No depth, no stencil state
-            this.depthStencilNone = EngineDepthStencilState.None(this);
-
-            //Shadow mapping state
-            this.depthStencilShadowMapping = EngineDepthStencilState.ShadowMapping(this);
-        }
-        /// <summary>
-        /// Creates the default rasterizer states
-        /// </summary>
-        private void CreateRasterizerStates()
-        {
-            //Default rasterizer state
-            this.rasterizerDefault = EngineRasterizerState.Default(this);
-
-            //Wireframe rasterizer state
-            this.rasterizerWireframe = EngineRasterizerState.Wireframe(this);
-
-            //No cull rasterizer state
-            this.rasterizerNoCull = EngineRasterizerState.NoCull(this);
-
-            //Counter clockwise cull rasterizer state
-            this.rasterizerCullFrontFace = EngineRasterizerState.CullFrontFace(this);
-
-            //Shadow mapping state
-            this.rasterizerShadowMapping = EngineRasterizerState.ShadowMapping(this);
-        }
-        /// <summary>
-        /// Creates the blend states
-        /// </summary>
-        private void CreateBlendStates()
-        {
-            this.blendDefault = EngineBlendState.Default(this);
-            this.blendDefaultAlpha = EngineBlendState.DefaultAlpha(this);
-            this.blendTransparent = EngineBlendState.Transparent(this);
-            this.blendAdditive = EngineBlendState.Additive(this);
         }
 
 #if DEBUG
@@ -850,6 +788,11 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilZEnabled()
         {
+            if (this.depthStencilzBufferEnabled == null)
+            {
+                this.depthStencilzBufferEnabled = EngineDepthStencilState.ZBufferEnabled(this);
+            }
+
             this.SetDepthStencilState(this.depthStencilzBufferEnabled);
         }
         /// <summary>
@@ -857,6 +800,11 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilZDisabled()
         {
+            if (this.depthStencilzBufferDisabled == null)
+            {
+                this.depthStencilzBufferDisabled = EngineDepthStencilState.ZBufferDisabled(this);
+            }
+
             this.SetDepthStencilState(this.depthStencilzBufferDisabled);
         }
         /// <summary>
@@ -864,6 +812,11 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilRDZEnabled()
         {
+            if (this.depthStencilRDzBufferEnabled == null)
+            {
+                this.depthStencilRDzBufferEnabled = EngineDepthStencilState.RDzBufferEnabled(this);
+            }
+
             this.SetDepthStencilState(this.depthStencilRDzBufferEnabled);
         }
         /// <summary>
@@ -871,6 +824,11 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilRDZDisabled()
         {
+            if (this.depthStencilRDzBufferDisabled == null)
+            {
+                this.depthStencilRDzBufferDisabled = EngineDepthStencilState.RDzBufferDisabled(this);
+            }
+
             this.SetDepthStencilState(this.depthStencilRDzBufferDisabled);
         }
         /// <summary>
@@ -878,6 +836,11 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilNone()
         {
+            if (this.depthStencilNone == null)
+            {
+                this.depthStencilNone = EngineDepthStencilState.None(this);
+            }
+
             this.SetDepthStencilState(this.depthStencilNone);
         }
         /// <summary>
@@ -885,6 +848,11 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilShadowMapping()
         {
+            if (this.depthStencilShadowMapping == null)
+            {
+                this.depthStencilShadowMapping = EngineDepthStencilState.ShadowMapping(this);
+            }
+
             this.SetDepthStencilState(this.depthStencilShadowMapping);
         }
         /// <summary>
@@ -892,6 +860,11 @@ namespace Engine
         /// </summary>
         public void SetBlendDefault()
         {
+            if (this.blendDefault == null)
+            {
+                this.blendDefault = EngineBlendState.Default(this);
+            }
+
             this.SetBlendState(this.blendDefault);
         }
         /// <summary>
@@ -899,6 +872,11 @@ namespace Engine
         /// </summary>
         public void SetBlendDefaultAlpha()
         {
+            if (this.blendDefaultAlpha == null)
+            {
+                this.blendDefaultAlpha = EngineBlendState.DefaultAlpha(this);
+            }
+
             this.SetBlendState(this.blendDefaultAlpha);
         }
         /// <summary>
@@ -906,6 +884,11 @@ namespace Engine
         /// </summary>
         public void SetBlendTransparent()
         {
+            if (this.blendTransparent == null)
+            {
+                this.blendTransparent = EngineBlendState.Transparent(this);
+            }
+
             this.SetBlendState(this.blendTransparent);
         }
         /// <summary>
@@ -913,6 +896,11 @@ namespace Engine
         /// </summary>
         public void SetBlendAdditive()
         {
+            if (this.blendAdditive == null)
+            {
+                this.blendAdditive = EngineBlendState.Additive(this);
+            }
+
             this.SetBlendState(this.blendAdditive);
         }
         /// <summary>
@@ -920,6 +908,11 @@ namespace Engine
         /// </summary>
         public void SetRasterizerDefault()
         {
+            if (this.rasterizerDefault == null)
+            {
+                this.rasterizerDefault = EngineRasterizerState.Default(this);
+            }
+
             this.SetRasterizerState(this.rasterizerDefault);
         }
         /// <summary>
@@ -927,6 +920,11 @@ namespace Engine
         /// </summary>
         public void SetRasterizerWireframe()
         {
+            if (this.rasterizerWireframe == null)
+            {
+                this.rasterizerWireframe = EngineRasterizerState.Wireframe(this);
+            }
+
             this.SetRasterizerState(this.rasterizerWireframe);
         }
         /// <summary>
@@ -934,6 +932,11 @@ namespace Engine
         /// </summary>
         public void SetRasterizerCullNone()
         {
+            if (this.rasterizerNoCull == null)
+            {
+                this.rasterizerNoCull = EngineRasterizerState.NoCull(this);
+            }
+
             this.SetRasterizerState(this.rasterizerNoCull);
         }
         /// <summary>
@@ -941,6 +944,11 @@ namespace Engine
         /// </summary>
         public void SetRasterizerCullFrontFace()
         {
+            if (this.rasterizerCullFrontFace == null)
+            {
+                this.rasterizerCullFrontFace = EngineRasterizerState.CullFrontFace(this);
+            }
+
             this.SetRasterizerState(this.rasterizerCullFrontFace);
         }
         /// <summary>
@@ -948,6 +956,11 @@ namespace Engine
         /// </summary>
         public void SetRasterizerShadowMapping()
         {
+            if (this.rasterizerShadowMapping == null)
+            {
+                this.rasterizerShadowMapping = EngineRasterizerState.ShadowMapping(this);
+            }
+
             this.SetRasterizerState(this.rasterizerShadowMapping);
         }
         /// <summary>
