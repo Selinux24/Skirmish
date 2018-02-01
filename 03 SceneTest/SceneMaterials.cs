@@ -121,8 +121,7 @@ namespace SceneTest
             MaterialContent mat = new MaterialContent()
             {
                 EmissionColor = new Color4(0f, 0f, 0f, 0f),
-
-                AmbientColor = new Color4(0.8f, 0.8f, 0.8f, 1f),
+                AmbientColor = new Color4(0.02f, 0.02f, 0.02f, 1f),
 
                 DiffuseColor = new Color4(0.8f, 0.8f, 0.8f, 1f),
                 DiffuseTexture = "SceneMaterials/floor.png",
@@ -151,11 +150,12 @@ namespace SceneTest
         }
         private SceneObject<Model> InitializeSphere(string name, MaterialContent material)
         {
-            Vector3[] v = null;
-            Vector3[] n = null;
-            Vector2[] uv = null;
-            uint[] ix = null;
-            GeometryUtil.CreateSphere(radius, (uint)stacks, (uint)stacks, out v, out n, out uv, out ix);
+            GeometryUtil.CreateSphere(
+                radius, stacks, stacks, 
+                out Vector3[] v, 
+                out Vector3[] n, 
+                out Vector2[] uv, 
+                out uint[] ix);
 
             VertexData[] vertices = new VertexData[v.Length];
             for (int i = 0; i < v.Length; i++)
@@ -189,7 +189,7 @@ namespace SceneTest
             return new MaterialContent()
             {
                 EmissionColor = new Color4(0f, 0f, 0f, 0f),
-                AmbientColor = new Color4(0.8f, 0.8f, 0.8f, 1f),
+                AmbientColor = new Color4(0.02f, 0.02f, 0.02f, 1f),
 
                 DiffuseColor = diffuse,
                 DiffuseTexture = "SceneMaterials/white.png",

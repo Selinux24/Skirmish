@@ -71,7 +71,6 @@ namespace Collada
         }
         private void InitializeEnvironment()
         {
-            this.Lights.GlobalAmbientLight = 0.08f;
             this.Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", this.ambientDown, this.ambientUp, true);
             this.Lights.KeyLight.Enabled = false;
             this.Lights.BackLight.Enabled = false;
@@ -429,8 +428,7 @@ namespace Collada
                     this.Game.Input.MouseYDelta);
             }
 
-            Vector3 walkerPos;
-            if (this.Walk(this.agent, prevPos, this.Camera.Position, out walkerPos))
+            if (this.Walk(this.agent, prevPos, this.Camera.Position, out Vector3 walkerPos))
             {
                 this.Camera.Goto(walkerPos);
             }
@@ -472,13 +470,9 @@ namespace Collada
                 var from = this.ratHoles[iFrom] + rnd.NextVector3(new Vector3(-1, 0, -1), new Vector3(1, 0, 1));
                 var to = this.ratHoles[iTo] + rnd.NextVector3(new Vector3(-1, 0, -1), new Vector3(1, 0, 1));
 
-                Triangle fromT;
-                float fromD;
-                if (this.FindNearestGroundPosition(from, out from, out fromT, out fromD))
+                if (this.FindNearestGroundPosition(from, out from, out Triangle fromT, out float fromD))
                 {
-                    Triangle toT;
-                    float toD;
-                    if (this.FindNearestGroundPosition(to, out to, out toT, out toD))
+                    if (this.FindNearestGroundPosition(to, out to, out Triangle toT, out float toD))
                     {
                         var path = this.FindPath(this.ratAgentType, from, to);
                         if (path != null && path.ReturnPath.Count > 0)

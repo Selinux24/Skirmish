@@ -2,7 +2,7 @@
 
 namespace Collada
 {
-    class Player2 : Agent
+    public class Player2 : Agent
     {
         public float Velocity;
         public float VelocitySlow;

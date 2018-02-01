@@ -32,10 +32,6 @@ namespace Engine.Effects
         /// </summary>
         private EngineEffectVariable spotLights = null;
         /// <summary>
-        /// Global ambient light effect variable;
-        /// </summary>
-        private EngineEffectVariableScalar globalAmbient;
-        /// <summary>
         /// Light count effect variable
         /// </summary>
         private EngineEffectVariableVector lightCount = null;
@@ -215,20 +211,6 @@ namespace Engine.Effects
             set
             {
                 this.spotLights.SetValue(value, BufferSpotLight.MAX);
-            }
-        }
-        /// <summary>
-        /// Global almbient light intensity
-        /// </summary>
-        protected float GlobalAmbient
-        {
-            get
-            {
-                return this.globalAmbient.GetFloat();
-            }
-            set
-            {
-                this.globalAmbient.Set(value);
             }
         }
         /// <summary>
@@ -641,7 +623,6 @@ namespace Engine.Effects
             this.dirLights = this.Effect.GetVariable("gDirLights");
             this.pointLights = this.Effect.GetVariable("gPointLights");
             this.spotLights = this.Effect.GetVariable("gSpotLights");
-            this.globalAmbient = this.Effect.GetVariableScalar("gGlobalAmbient");
             this.lightCount = this.Effect.GetVariableVector("gLightCount");
             this.eyePositionWorld = this.Effect.GetVariableVector("gEyePositionWorld");
             this.fogStart = this.Effect.GetVariableScalar("gFogStart");
@@ -719,7 +700,6 @@ namespace Engine.Effects
 
             this.MaterialIndex = materialIndex;
 
-            var globalAmbient = 0f;
             var bHemiLight = BufferHemisphericLight.Default;
             var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
             var bPointLights = new BufferPointLight[BufferPointLight.MAX];
@@ -729,8 +709,6 @@ namespace Engine.Effects
             var lights = context.Lights;
             if (lights != null)
             {
-                globalAmbient = lights.GlobalAmbientLight;
-
                 var hemiLight = lights.GetVisibleHemisphericLight();
                 if (hemiLight != null)
                 {
@@ -793,7 +771,6 @@ namespace Engine.Effects
                 this.ShadowMapCubic = null;
             }
 
-            this.GlobalAmbient = globalAmbient;
             this.HemiLight = bHemiLight;
             this.DirLights = bDirLights;
             this.PointLights = bPointLights;

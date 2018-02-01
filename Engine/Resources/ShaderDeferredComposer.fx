@@ -37,8 +37,8 @@ cbuffer cbCombineLights : register(b5)
 	float4 gFogColor;
 	float gFogStart;
 	float gFogRange;
-	float gGlobalAmbient;
 	float PAD51;
+	float PAD52;
 }
 
 Texture2D gTG1Map : register(t0);
@@ -223,7 +223,7 @@ float4 PSCombineLights(PSLightInput input) : SV_TARGET
 
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
-		color = LightEquation2(k, lAmbient, gGlobalAmbient, light, color);
+		color = LightEquation2(k, lAmbient, light, color);
 
 		if (gFogRange > 0)
 		{

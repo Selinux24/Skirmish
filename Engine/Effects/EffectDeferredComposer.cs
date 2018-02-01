@@ -55,10 +55,6 @@ namespace Engine.Effects
         /// </summary>
         private EngineEffectVariableVector eyePositionWorld = null;
         /// <summary>
-        /// Global ambient light effect variable;
-        /// </summary>
-        private EngineEffectVariableScalar globalAmbient;
-        /// <summary>
         /// Hemispheric light effect variable
         /// </summary>
         private EngineEffectVariable hemisphericLight = null;
@@ -232,20 +228,6 @@ namespace Engine.Effects
             set
             {
                 this.eyePositionWorld.Set(value);
-            }
-        }
-        /// <summary>
-        /// Global almbient light intensity
-        /// </summary>
-        protected float GlobalAmbient
-        {
-            get
-            {
-                return this.globalAmbient.GetFloat();
-            }
-            set
-            {
-                this.globalAmbient.Set(value);
             }
         }
         /// <summary>
@@ -578,7 +560,6 @@ namespace Engine.Effects
             this.lightViewProjectionLD = this.Effect.GetVariableMatrix("gLightViewProjectionLD");
             this.lightViewProjectionHD = this.Effect.GetVariableMatrix("gLightViewProjectionHD");
             this.eyePositionWorld = this.Effect.GetVariableVector("gEyePositionWorld");
-            this.globalAmbient = this.Effect.GetVariableScalar("gGlobalAmbient");
             this.directionalLight = this.Effect.GetVariable("gDirLight");
             this.pointLight = this.Effect.GetVariable("gPointLight");
             this.spotLight = this.Effect.GetVariable("gSpotLight");
@@ -737,7 +718,6 @@ namespace Engine.Effects
                     this.HemisphericLight = BufferHemisphericLight.Default;
                 }
 
-                this.GlobalAmbient = lights.GlobalAmbientLight;
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;
                 this.FogColor = lights.FogColor;

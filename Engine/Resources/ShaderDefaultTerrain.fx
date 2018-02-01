@@ -20,20 +20,21 @@ cbuffer cbVSPerFrame : register(b1)
 
 cbuffer cbPSPerFrame : register(b3)
 {
-	float4x4 gPSLightViewProjectionLD;
-	float4x4 gPSLightViewProjectionHD;
-	float3 gPSEyePositionWorld;
-	float gPSGlobalAmbient;
-	uint3 gPSLightCount;
-	uint gPSShadows;
-	float4 gPSFogColor;
-	float gPSFogStart;
-	float gPSFogRange;
-	float2 PAD_33;
 	HemisphericLight gPSHemiLight;
 	DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
+	uint3 gPSLightCount;
+	uint gPSShadows;
+	float4x4 gPSLightViewProjectionLD;
+	float4x4 gPSLightViewProjectionHD;
+	float4 gPSFogColor;
+	float gPSFogStart;
+	float gPSFogRange;
+	float PAD31;
+	float PAD32;
+	float3 gPSEyePositionWorld;
+	float PAD33;
 };
 Texture2D gPSShadowMapLD : register(t7);
 Texture2D gPSShadowMapHD : register(t8);
@@ -79,7 +80,6 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 
 	ComputeLightsInput lInput;
 
-	lInput.Ga = gPSGlobalAmbient;
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
 	lInput.pointLights = gPSPointLights;
@@ -120,7 +120,6 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 
 	ComputeLightsInput lInput;
 
-	lInput.Ga = gPSGlobalAmbient;
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
 	lInput.pointLights = gPSPointLights;
@@ -161,7 +160,6 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 
 	ComputeLightsInput lInput;
 
-	lInput.Ga = gPSGlobalAmbient;
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
 	lInput.pointLights = gPSPointLights;

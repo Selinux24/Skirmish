@@ -27,7 +27,6 @@ namespace Engine
 
             return new SceneLights()
             {
-                GlobalAmbientLight = 0.02f,
                 DirectionalLights = lights,
             };
         }
@@ -156,10 +155,6 @@ namespace Engine
                 return this.DirectionalLights.Length > 2 ? this.DirectionalLights[2] : null;
             }
         }
-        /// <summary>
-        /// Global ambient light
-        /// </summary>
-        public float GlobalAmbientLight { get; set; }
         /// <summary>
         /// Fog start value
         /// </summary>
@@ -577,7 +572,6 @@ namespace Engine
             if (timeOfDay.Updated)
             {
                 float b = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
-                float ga = Math.Min(b, 0.5f);
                 this.Intensity = Math.Min(b, 1f);
 
                 Vector3 keyDir = timeOfDay.LightDirection;
@@ -590,8 +584,6 @@ namespace Engine
                 {
                     this.SunColor = this.GetSunColor(timeOfDay);
                 }
-
-                this.GlobalAmbientLight = ga;
 
                 var keyLight = this.KeyLight;
                 if (keyLight != null)
@@ -666,20 +658,16 @@ namespace Engine
             lightPosition = Vector3.Zero;
             lightDirection = Vector3.Zero;
 
-            if (light is SceneLightDirectional)
+            if (light is SceneLightDirectional lightDir)
             {
-                var lightDir = (SceneLightDirectional)light;
-
                 // Calc light position outside the scene volume
                 lightPosition = lightDir.GetPosition(this.FarLightsDistance);
                 lightDirection = lightDir.Direction;
 
                 return true;
             }
-            else if (light is SceneLightSpot)
+            else if (light is SceneLightSpot lightSpot)
             {
-                var lightSpot = (SceneLightSpot)light;
-
                 lightPosition = lightSpot.Position;
                 lightDirection = lightSpot.Direction;
 

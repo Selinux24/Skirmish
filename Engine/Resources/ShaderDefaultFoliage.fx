@@ -11,31 +11,31 @@ Texture1D gTextureRandom : register(t1);
 
 cbuffer cbPerFrame : register(b1)
 {
-    float4x4 gWorld;
-    float4x4 gWorldViewProjection;
+	float4x4 gWorld;
+	float4x4 gWorldViewProjection;
+	HemisphericLight gPSHemiLight;
+	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
+	PointLight gPointLights[MAX_LIGHTS_POINT];
+	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
+	uint3 gLightCount;
+	uint gShadows;
     float4x4 gLightViewProjectionLD;
     float4x4 gLightViewProjectionHD;
-    float3 gEyePositionWorld;
-    float gGlobalAmbient;
-    uint3 gLightCount;
-    uint gShadows;
-    float4 gFogColor;
-    float gFogStart;
-    float gFogRange;
-    float gStartRadius;
-    float gEndRadius;
-    float3 gWindDirection;
-    float gWindStrength;
+	float4 gFogColor;
+	float gFogStart;
+	float gFogRange;
+	float gStartRadius;
+	float gEndRadius;
+	float3 gWindDirection;
+	float gWindStrength;
+	float3 gDelta;
+	float gTotalTime;
+	float3 gEyePositionWorld;
+	float PAD11;
     uint gMaterialIndex;
     uint gTextureCount;
     uint gNormalMapCount;
-    uint gPAD11;
-    float gTotalTime;
-    float3 gDelta;
-	HemisphericLight gPSHemiLight;
-    DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
-    PointLight gPointLights[MAX_LIGHTS_POINT];
-    SpotLight gSpotLights[MAX_LIGHTS_SPOT];
+    uint PAD12;
 };
 Texture2DArray gTextureArray : register(t2);
 Texture2DArray gNormalMapArray : register(t3);
@@ -258,7 +258,6 @@ float4 PSFoliage(PSVertexBillboard input) : SV_Target
 
     ComputeLightsInput lInput;
 
-    lInput.Ga = 0;
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gDirLights;
     lInput.pointLights = gPointLights;

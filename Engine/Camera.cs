@@ -31,13 +31,12 @@ namespace Engine
         /// <returns>Returns the new camera</returns>
         public static Camera CreateFree(Vector3 position, Vector3 interest)
         {
-            Camera cam = new Camera();
-
-            cam.mode = CameraModes.Free;
-            cam.position = position;
-            cam.interest = interest;
-
-            return cam;
+            return new Camera
+            {
+                mode = CameraModes.Free,
+                position = position,
+                interest = interest
+            };
         }
         /// <summary>
         /// Creates 2D camera
@@ -50,10 +49,11 @@ namespace Engine
         /// <returns>Returns new 2D camera</returns>
         public static Camera CreateOrtho(Vector3 position, Vector3 interest, Vector3 up, int width, int height)
         {
-            Camera camera = new Camera();
-
-            camera.Position = position;
-            camera.Interest = interest;
+            Camera camera = new Camera
+            {
+                Position = position,
+                Interest = interest
+            };
 
             camera.SetLens(width, height);
 

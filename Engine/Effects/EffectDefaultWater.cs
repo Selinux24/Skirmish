@@ -353,7 +353,7 @@ namespace Engine.Effects
 
                 lCount = Math.Min(dirLights.Length, BufferDirectionalLight.MAX);
 
-                this.Ambient = lights.GlobalAmbientLight;
+                this.Ambient = lights.Intensity;
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;
