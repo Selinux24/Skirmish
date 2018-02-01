@@ -56,7 +56,7 @@ namespace Engine.Common
         /// <summary>
         /// Cube shadow map
         /// </summary>
-        public IShadowMap[] ShadowMapCube { get; set; }
+        public IShadowMap ShadowMapCube { get; set; }
 
         /// <summary>
         /// Constructor

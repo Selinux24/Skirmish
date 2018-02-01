@@ -65,7 +65,8 @@ namespace Engine
         /// Binds the shadow map data to graphics
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public void Bind(Graphics graphics)
+        /// <param name="index">Array index</param>
+        public void Bind(Graphics graphics, int index)
         {
             //Set shadow mapper viewport
             graphics.SetViewport(this.Viewport);

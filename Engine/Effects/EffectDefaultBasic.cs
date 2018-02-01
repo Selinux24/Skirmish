@@ -1079,7 +1079,7 @@ namespace Engine.Effects
             ShadowMapFlags shadowMaps,
             IShadowMap shadowMapLD,
             IShadowMap shadowMapHD,
-            IShadowMap[] shadowMapCubic)
+            IShadowMap shadowMapCubic)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
@@ -1137,9 +1137,9 @@ namespace Engine.Effects
                     this.FromLightViewProjectionHD = shadowMapHD.FromLightViewProjectionArray[0];
                     this.ShadowMapHD = shadowMapHD.Texture;
                 }
-                if (shadowMapCubic != null && shadowMapCubic.Length > 0)
+                if (shadowMapCubic != null)
                 {
-                    this.ShadowMapCubic = shadowMapCubic[0].Texture;
+                    this.ShadowMapCubic = shadowMapCubic.Texture;
                 }
             }
             else

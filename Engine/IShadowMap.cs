@@ -22,6 +22,7 @@ namespace Engine
         /// Binds the shadow map data to graphics
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        void Bind(Graphics graphics);
+        /// <param name="index">Array index</param>
+        void Bind(Graphics graphics, int index);
     }
 }

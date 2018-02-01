@@ -913,9 +913,9 @@ namespace Engine.Effects
                     this.FromLightViewProjectionHD = context.ShadowMapHigh.FromLightViewProjectionArray[0];
                     this.ShadowMapHD = context.ShadowMapHigh.Texture;
                 }
-                if (context.ShadowMapCube != null && context.ShadowMapCube.Length > 0)
+                if (context.ShadowMapCube != null)
                 {
-                    this.ShadowMapCubic = context.ShadowMapCube[0].Texture;
+                    this.ShadowMapCubic = context.ShadowMapCube.Texture;
                 }
             }
             else

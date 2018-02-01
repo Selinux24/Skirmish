@@ -160,6 +160,22 @@ namespace Engine.Effects
         /// Perspective values
         /// </summary>
         public Vector2 PerspectiveValues;
+        /// <summary>
+        /// Shadow map index
+        /// </summary>
+        public uint MapIndex;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public uint Pad1;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public uint Pad2;
+        /// <summary>
+        /// Padding
+        /// </summary>
+        public uint Pad3;
 
         /// <summary>
         /// Constructor
@@ -173,9 +189,14 @@ namespace Engine.Effects
             this.Intensity = light.Intensity;
             this.Radius = light.Radius;
             this.CastShadow = light.CastShadow ? 1 : 0;
+            this.MapIndex = light.ShadowMapIndex;
 
             var perspectiveMatrix = light.GetProjection();
             this.PerspectiveValues = new Vector2(perspectiveMatrix[2, 2], perspectiveMatrix[3, 2]);
+
+            this.Pad1 = 1000;
+            this.Pad2 = 2000;
+            this.Pad3 = 3000;
         }
 
         /// <summary>

@@ -84,7 +84,7 @@ namespace Engine
         /// <summary>
         /// Shadow map index
         /// </summary>
-        public int ShadowMapIndex { get; set; }
+        public uint ShadowMapIndex { get; set; }
 
         /// <summary>
         /// Constructor

@@ -693,7 +693,7 @@ namespace Engine
                     if (light.CastShadow)
                     {
                         flags = context.ShadowMaps;
-                        shadowMap = context.ShadowMapCube[light.ShadowMapIndex];
+                        shadowMap = context.ShadowMapCube;
                     }
 
                     //Draw Pass

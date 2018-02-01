@@ -17,11 +17,11 @@ namespace Engine
         /// <summary>
         /// Viewport
         /// </summary>
-        protected Viewport[] Viewport { get; set; }
+        protected Viewport[] Viewports { get; set; }
         /// <summary>
         /// Depth map
         /// </summary>
-        protected EngineDepthStencilView DepthMap { get; set; }
+        protected EngineDepthStencilView[] DepthMap { get; set; }
 
         /// <summary>
         /// Cube deph map texture
@@ -38,15 +38,16 @@ namespace Engine
         /// <param name="game">Game instance</param>
         /// <param name="width">With</param>
         /// <param name="height">Height</param>
-        public CubicShadowMap(Game game, int width, int height)
+        /// <param name="arraySize">Array size</param>
+        public CubicShadowMap(Game game, int width, int height, int arraySize)
         {
             this.Game = game;
 
-            this.Viewport = Helper.CreateArray(6, new Viewport(0, 0, width, height, 0, 1.0f));
+            this.Viewports = Helper.CreateArray(6, new Viewport(0, 0, width, height, 0, 1.0f));
 
-            EngineDepthStencilView dsv;
+            EngineDepthStencilView[] dsv;
             EngineShaderResourceView srv;
-            game.Graphics.CreateCubicShadowMapTextures(width, height, out dsv, out srv);
+            game.Graphics.CreateCubicShadowMapTextures(width, height, arraySize, out dsv, out srv);
             this.DepthMap = dsv;
             this.Texture = srv;
 
@@ -65,15 +66,16 @@ namespace Engine
         /// Binds the shadow map data to graphics
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public void Bind(Graphics graphics)
+        /// <param name="index">Array index</param>
+        public void Bind(Graphics graphics, int index)
         {
             //Set shadow mapper viewport
-            graphics.SetViewports(this.Viewport);
+            graphics.SetViewports(this.Viewports);
 
             //Set shadow map depth map without render target
             graphics.SetRenderTargets(
                 null, false, Color.Transparent,
-                this.DepthMap, true, false,
+                this.DepthMap[index], true, false,
                 true);
         }
     }

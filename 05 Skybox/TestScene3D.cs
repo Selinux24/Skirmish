@@ -280,7 +280,7 @@ namespace Skybox
 
                 this.torchLights[i] = new SceneLightPoint(
                     string.Format("Torch {0}", i),
-                    false,
+                    true,
                     color,
                     color,
                     true,

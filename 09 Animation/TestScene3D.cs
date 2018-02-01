@@ -197,7 +197,6 @@ namespace Animation
             this.Lights.KeyLight.Enabled = true;
             this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = false;
-            this.Lights.GlobalAmbientLight = 0.25f;
             this.Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
             var bbox = this.soldier.Instance.GetBoundingBox();

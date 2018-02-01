@@ -48,7 +48,7 @@ Texture2D gLightMap : register(t3);
 Texture2D gMaterialPalette : register(t4);
 Texture2D<float> gShadowMapLD : register(t5);
 Texture2D<float> gShadowMapHD : register(t6);
-TextureCube<float> gShadowMapCubic : register(t7);
+TextureCubeArray<float> gShadowMapCubic : register(t7);
 
 struct PSLightInput
 {

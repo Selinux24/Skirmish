@@ -2159,6 +2159,9 @@ namespace Engine
         /// <summary>
         /// Creates a cubic texture for shadow mapping
         /// </summary>
+        /// <param name="width">Face width</param>
+        /// <param name="height">Face height</param>
+        /// <param name="dsv">Resulting Depth Stencil View</param>
         /// <param name="srv">Resulting Shader Resource View</param>
         internal void CreateCubicShadowMapTextures(int width, int height, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
         {
@@ -2203,6 +2206,68 @@ namespace Engine
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0,
+                    },
+                };
+                srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
+            }
+        }
+        /// <summary>
+        /// Creates a cubic texture array for shadow mapping
+        /// </summary>
+        /// <param name="width">Face width</param>
+        /// <param name="height">Face height</param>
+        /// <param name="arraySize">Array size</param>
+        /// <param name="dsv">Resulting Depth Stencil View array</param>
+        /// <param name="srv">Resulting Shader Resource View</param>
+        internal void CreateCubicShadowMapTextures(int width, int height, int arraySize, out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv)
+        {
+            var depthMap = new Texture2D1(
+                this.device,
+                new Texture2DDescription1()
+                {
+                    Width = width,
+                    Height = height,
+                    ArraySize = 6 * arraySize,
+                    BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
+                    Usage = ResourceUsage.Default,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    Format = Format.R24G8_Typeless,
+                    MipLevels = 1,
+                    OptionFlags = ResourceOptionFlags.TextureCube,
+                    SampleDescription = new SampleDescription(1, 0),
+                    TextureLayout = TextureLayout.Undefined,
+                });
+
+            using (depthMap)
+            {
+                dsv = new EngineDepthStencilView[arraySize];
+                for (int i = 0; i < arraySize; i++)
+                {
+                    var dsDescription = new DepthStencilViewDescription
+                    {
+                        Flags = DepthStencilViewFlags.None,
+                        Format = Format.D24_UNorm_S8_UInt,
+                        Dimension = DepthStencilViewDimension.Texture2DArray,
+                        Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                        {
+                            ArraySize = 6,
+                            FirstArraySlice = i * 6,
+                            MipSlice = 0,
+                        },
+                    };
+                    dsv[i] = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
+                }
+
+                var rvDescription = new ShaderResourceViewDescription1
+                {
+                    Format = Format.R24_UNorm_X8_Typeless,
+                    Dimension = ShaderResourceViewDimension.TextureCubeArray,
+                    TextureCubeArray = new ShaderResourceViewDescription.TextureCubeArrayResource()
+                    {
+                        MipLevels = 1,
+                        MostDetailedMip = 0,
+                        CubeCount = arraySize,
+                        First2DArrayFace = 0,
                     },
                 };
                 srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));

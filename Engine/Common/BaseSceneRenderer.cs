@@ -51,7 +51,7 @@ namespace Engine.Common
         /// <summary>
         /// Cube shadow mapper for point lights
         /// </summary>
-        protected IShadowMap[] ShadowMapperCube { get; private set; }
+        protected IShadowMap ShadowMapperCube { get; private set; }
 
         /// <summary>
         /// Game
@@ -126,11 +126,7 @@ namespace Engine.Common
 
             this.ShadowMapperLow = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
             this.ShadowMapperHigh = new ShadowMap(game, ShadowMapSize, ShadowMapSize);
-            this.ShadowMapperCube = new CubicShadowMap[MaxCubicShadows];
-            for (int i = 0; i < MaxCubicShadows; i++)
-            {
-                this.ShadowMapperCube[i] = new CubicShadowMap(game, CubicShadowMapSize, CubicShadowMapSize);
-            }
+            this.ShadowMapperCube = new CubicShadowMap(game, CubicShadowMapSize, CubicShadowMapSize, MaxCubicShadows);
 
             this.cullManager = new SceneCullManager();
 
@@ -281,7 +277,7 @@ namespace Engine.Common
                                 scene.Lights.ShadowLDDistance);
 
                             this.ShadowMapperLow.FromLightViewProjectionArray = new[] { fromLightVP };
-                            this.ShadowMapperLow.Bind(graphics);
+                            this.ShadowMapperLow.Bind(graphics, 0);
 
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowLowIndex, shadowObjs);
 
@@ -311,7 +307,7 @@ namespace Engine.Common
                                 scene.Lights.ShadowHDDistance);
 
                             this.ShadowMapperHigh.FromLightViewProjectionArray = new[] { fromLightVP };
-                            this.ShadowMapperHigh.Bind(graphics);
+                            this.ShadowMapperHigh.Bind(graphics, 0);
 
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowHighIndex, shadowObjs);
 
@@ -344,7 +340,7 @@ namespace Engine.Common
                 var shadowObjs = scene.GetComponents(c => c.Visible == true && c.CastShadow == true);
                 if (shadowObjs.Count > 0)
                 {
-                    int assigned = 0;
+                    uint assigned = 0;
 
                     for (int l = 0; l < shadowCastingLights.Length; l++)
                     {
@@ -368,7 +364,7 @@ namespace Engine.Common
                         if (doShadows)
                         {
                             light.ShadowMapIndex = assigned;
-                            var shadowMapper = this.ShadowMapperCube[assigned];
+                            var shadowMapper = this.ShadowMapperCube;
                             assigned++;
 
                             flags |= ShadowMapFlags.CubeMap;
@@ -379,7 +375,7 @@ namespace Engine.Common
                             var vpArray = SceneLights.GetFromOmniLightViewProjection(light);
 
                             shadowMapper.FromLightViewProjectionArray = vpArray;
-                            shadowMapper.Bind(graphics);
+                            shadowMapper.Bind(graphics, l);
 
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, CullIndexShadowCubicIndex, shadowObjs);
 

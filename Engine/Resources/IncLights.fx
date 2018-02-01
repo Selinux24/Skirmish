@@ -24,8 +24,10 @@ struct PointLight
     float3 Position;
     float Intensity;
     float Radius;
-    float CastShadow;
-    float2 PerspectiveValues;
+	float CastShadow;
+	float2 PerspectiveValues;
+	uint MapIndex;
+	uint3 Pad;
 };
 struct SpotLight
 {
@@ -191,7 +193,6 @@ inline float4 LightEquation(Material k, float4 lAmbient, float4 lDiffuse, float4
 
 	return (emissive + ambient + diffuse + specular) * pDiffuse;
 }
-
 inline float4 LightEquation2(Material k, float4 lAmbient, float4 light, float4 pDiffuse)
 {
 	float4 emissive = k.Emissive;
@@ -324,7 +325,7 @@ struct ComputePointLightsInput
     float3 pPosition;
     float3 pNormal;
     float3 ePosition;
-    TextureCube<float> shadowCubic;
+    TextureCubeArray<float> shadowCubic;
 };
 
 inline ComputeLightsOutput ComputePointLightLOD1(ComputePointLightsInput input, float dist)
@@ -340,7 +341,7 @@ inline ComputeLightsOutput ComputePointLightLOD1(ComputePointLightsInput input, 
     {
         float3 toPixel = input.pPosition - input.pointLight.Position;
         float depth = PointShadowPCFDepth(toPixel, input.pointLight.PerspectiveValues);
-        cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, toPixel, depth));
+        cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, float4(toPixel, input.pointLight.MapIndex), depth));
     }
 
     float attenuation = CalcSphericAttenuation(input.pointLight.Intensity, input.pointLight.Radius, D);
@@ -364,7 +365,7 @@ inline ComputeLightsOutput ComputePointLightLOD2(ComputePointLightsInput input)
     {
         float3 toPixel = input.pPosition - input.pointLight.Position;
         float depth = PointShadowPCFDepth(toPixel, input.pointLight.PerspectiveValues);
-        cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, toPixel, depth));
+        cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, float4(toPixel, input.pointLight.MapIndex), depth));
     }
 
     float attenuation = CalcSphericAttenuation(input.pointLight.Intensity, input.pointLight.Radius, D);
@@ -517,7 +518,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
         lSpecular += (cSpecular * cShadowFactor);
     }
 
-    for (i = 0; i < input.pointLightsCount; i++)
+	for (i = 0; i < input.pointLightsCount; i++)
     {
         float3 P = input.pointLights[i].Position - input.pPosition;
         float D = length(P);
@@ -529,7 +530,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
         {
             float3 toPixel = input.pPosition - input.pointLights[i].Position;
             float depth = PointShadowPCFDepth(toPixel, input.pointLights[i].PerspectiveValues);
-            cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, float4(toPixel, i), depth));
+            cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, float4(toPixel, input.pointLights[i].MapIndex), depth));
         }
 
         float attenuation = CalcSphericAttenuation(input.pointLights[i].Intensity, input.pointLights[i].Radius, D);
@@ -595,7 +596,7 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
         {
             float3 toPixel = input.pPosition - input.pointLights[i].Position;
             float depth = PointShadowPCFDepth(toPixel, input.pointLights[i].PerspectiveValues);
-            cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, float4(toPixel, i), depth));
+            cShadowFactor = max(minShadowFactor, input.shadowCubic.SampleCmpLevelZero(PCFSampler, float4(toPixel, input.pointLights[i].MapIndex), depth));
         }
 
         float attenuation = CalcSphericAttenuation(input.pointLights[i].Intensity, input.pointLights[i].Radius, D);
