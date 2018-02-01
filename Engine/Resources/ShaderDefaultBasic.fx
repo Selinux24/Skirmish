@@ -47,8 +47,8 @@ cbuffer cbPSPerFrame : register(b3)
 	float3 gPSEyePositionWorld;
 	float PAD31;
 };
-Texture2D gPSShadowMapLD : register(t2);
-Texture2D gPSShadowMapHD : register(t3);
+Texture2D<float> gPSShadowMapLD : register(t2);
+Texture2D<float> gPSShadowMapHD : register(t3);
 TextureCubeArray<float> gPSShadowMapCubic : register(t4);
 
 cbuffer cbPSPerObject : register(b4)

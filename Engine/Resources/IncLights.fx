@@ -71,7 +71,7 @@ float PointShadowPCFDepth(float3 toPixel, float2 perspectiveValues)
     return (perspectiveValues.x * z + perspectiveValues.y) / z;
 }
 
-inline float CalcShadowFactor(uint shadows, float4 lightPositionLD, float4 lightPositionHD, Texture2D shadowMapLD, Texture2D shadowMapHD)
+inline float CalcShadowFactor(uint shadows, float4 lightPositionLD, float4 lightPositionHD, Texture2D<float> shadowMapLD, Texture2D<float> shadowMapHD)
 {
     uint samples = 16;
     float factor = 0.8f;
@@ -217,8 +217,8 @@ struct ComputeDirectionalLightsInput
     float4 sLightPositionLD;
     float4 sLightPositionHD;
     uint shadows;
-    Texture2D shadowMapLD;
-    Texture2D shadowMapHD;
+    Texture2D<float> shadowMapLD;
+    Texture2D<float> shadowMapHD;
 };
 
 inline ComputeLightsOutput ComputeDirectionalLightLOD1(ComputeDirectionalLightsInput input, float dist)
@@ -464,10 +464,10 @@ inline ComputeLightsOutput ComputeSpotLight(ComputeSpotLightsInput input)
 struct ComputeLightsInput
 {
 	Material k;
+	HemisphericLight hemiLight;
 	DirectionalLight dirLights[MAX_LIGHTS_DIRECTIONAL];
     PointLight pointLights[MAX_LIGHTS_POINT];
     SpotLight spotLights[MAX_LIGHTS_SPOT];
-	HemisphericLight hemiLight;
 	uint dirLightsCount;
     uint pointLightsCount;
     uint spotLightsCount;
@@ -481,9 +481,9 @@ struct ComputeLightsInput
     float4 pColorSpecular;
     float3 ePosition;
     uint shadows;
-    Texture2D shadowMapLD;
+    Texture2D<float> shadowMapLD;
 	float4 sLightPositionLD;
-	Texture2D shadowMapHD;
+	Texture2D<float> shadowMapHD;
 	float4 sLightPositionHD;
 	TextureCubeArray<float> shadowCubic;
 };

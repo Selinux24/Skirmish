@@ -44,11 +44,11 @@ cbuffer cbCombineLights : register(b5)
 Texture2D gTG1Map : register(t0);
 Texture2D gTG2Map : register(t1);
 Texture2D gTG3Map : register(t2);
-Texture2D gShadowMapLD : register(t3);
-Texture2D gShadowMapHD : register(t4);
-TextureCube<float> gShadowMapCubic : register(t5);
-Texture2D gLightMap : register(t6);
-Texture2D gMaterialPalette : register(t7);
+Texture2D gLightMap : register(t3);
+Texture2D gMaterialPalette : register(t4);
+Texture2D<float> gShadowMapLD : register(t5);
+Texture2D<float> gShadowMapHD : register(t6);
+TextureCube<float> gShadowMapCubic : register(t7);
 
 struct PSLightInput
 {

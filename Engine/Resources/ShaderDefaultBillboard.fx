@@ -35,8 +35,8 @@ cbuffer cbPerFrame : register(b1)
 };
 Texture2DArray gTextureArray : register(t2);
 Texture2DArray gNormalMapArray : register(t3);
-Texture2D gShadowMapLD : register(t4);
-Texture2D gShadowMapHD : register(t5);
+Texture2D<float> gShadowMapLD : register(t4);
+Texture2D<float> gShadowMapHD : register(t5);
 TextureCubeArray<float> gPSShadowMapCubic : register(t6);
 
 GSVertexBillboard VSBillboard(VSVertexBillboard input)
