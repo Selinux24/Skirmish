@@ -212,10 +212,8 @@ namespace Engine
                     //Initialize context data from scene
                     this.DrawContext.Lights = scene.Lights;
                     //Initialize context data from shadow mapping
-                    this.DrawContext.ShadowMaps = 0;
-                    this.DrawContext.ShadowMapLow = this.ShadowMapperLow;
-                    this.DrawContext.ShadowMapHigh = this.ShadowMapperHigh;
-                    this.DrawContext.ShadowMapCube = this.ShadowMapperCube;
+                    this.DrawContext.ShadowMapDirectional = this.ShadowMapperDirectional;
+                    this.DrawContext.ShadowMapOmnidirectional = this.ShadowMapperOmnidirectional;
 
 #if DEBUG
                     swStartup.Stop();
@@ -224,18 +222,8 @@ namespace Engine
 #endif
                     #endregion
 
-                    #region Shadow mapping
-
-                    ShadowMapFlags flags = ShadowMapFlags.None;
-
-                    flags |= DoShadowMapping(gameTime, scene);
-
-                    flags |= DoCubicShadowMapping(gameTime, scene);
-
-                    //Set shadow map flags to drawing context
-                    this.DrawContext.ShadowMaps = flags;
-
-                    #endregion
+                    //Shadow mapping
+                    DoShadowMapping(gameTime, scene);
 
                     #region Deferred rendering
 
@@ -664,9 +652,7 @@ namespace Engine
                 {
                     effect.UpdatePerLight(
                         directionalLights[i],
-                        context.ShadowMaps,
-                        context.ShadowMapLow,
-                        context.ShadowMapHigh);
+                        context.ShadowMapDirectional);
 
                     this.lightDrawer.DrawDirectional(graphics, effect);
                 }
@@ -686,23 +672,12 @@ namespace Engine
 
                 for (int i = 0; i < pointLights.Length; i++)
                 {
-                    var light = pointLights[i];
-
-                    ShadowMapFlags flags = ShadowMapFlags.None;
-                    IShadowMap shadowMap = null;
-                    if (light.CastShadow)
-                    {
-                        flags = context.ShadowMaps;
-                        shadowMap = context.ShadowMapCube;
-                    }
-
                     //Draw Pass
                     effect.UpdatePerLight(
-                        light,
-                        light.Local,
+                        pointLights[i],
+                        pointLights[i].Local,
                         context.ViewProjection,
-                        flags,
-                        shadowMap);
+                        context.ShadowMapOmnidirectional);
 
                     this.lightDrawer.DrawPoint(graphics, effect);
                 }

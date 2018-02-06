@@ -1,4 +1,6 @@
-﻿
+﻿using System;
+using System.Runtime.InteropServices;
+
 namespace Engine.Common
 {
     using SharpDX;
@@ -60,12 +62,12 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetValue<T>(T value) where T : struct, IBufferData
         {
-            using (var ds = DataStream.Create<T>(new T[] { value }, true, false))
-            {
-                ds.Position = 0;
+            int sizeInBytes = default(T).GetStride();
 
-                this.variable.SetRawValue(ds, default(T).GetStride());
-            }
+            IntPtr ptr = Marshal.AllocHGlobal(sizeInBytes);
+            Utilities.Write(ptr, ref value);
+            this.variable.SetRawValue(ptr, 0, sizeInBytes);
+            Marshal.FreeHGlobal(ptr);
         }
         /// <summary>
         /// Sets a array of values of the specified type from the variable
@@ -75,12 +77,12 @@ namespace Engine.Common
         /// <param name="length">Length</param>
         public void SetValue<T>(T[] value, int length) where T : struct, IBufferData
         {
-            using (var ds = DataStream.Create<T>(value, true, false))
-            {
-                ds.Position = 0;
+            int sizeInBytes = default(T).GetStride() * length;
 
-                this.variable.SetRawValue(ds, default(T).GetStride() * length);
-            }
+            IntPtr ptr = Marshal.AllocHGlobal(sizeInBytes);
+            Utilities.Write(ptr, value, 0, length);
+            this.variable.SetRawValue(ptr, 0, sizeInBytes);
+            Marshal.FreeHGlobal(ptr);
         }
     }
 }

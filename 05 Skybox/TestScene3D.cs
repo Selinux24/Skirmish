@@ -241,13 +241,17 @@ namespace Skybox
             #region Positioning and lights
 
             this.Lights.DirectionalLights[0].Enabled = true;
+            this.Lights.DirectionalLights[0].CastShadow = true;
+
             this.Lights.DirectionalLights[1].Enabled = true;
+
             this.Lights.DirectionalLights[2].Enabled = false;
+
             this.directionalLightCount = this.Lights.DirectionalLights.Length;
 
             this.movingFireLight = new SceneLightPoint(
                 "Moving fire light",
-                true,
+                false,
                 Color.Orange,
                 Color.Orange,
                 true,
@@ -280,7 +284,7 @@ namespace Skybox
 
                 this.torchLights[i] = new SceneLightPoint(
                     string.Format("Torch {0}", i),
-                    true,
+                    false,
                     color,
                     color,
                     true,

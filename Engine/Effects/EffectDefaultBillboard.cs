@@ -52,10 +52,6 @@ namespace Engine.Effects
         /// </summary>
         private EngineEffectVariableVector fogColor = null;
         /// <summary>
-        /// Shadow maps flag effect variable
-        /// </summary>
-        private EngineEffectVariableScalar shadowMaps = null;
-        /// <summary>
         /// Start radius
         /// </summary>
         private EngineEffectVariableScalar startRadius = null;
@@ -71,14 +67,6 @@ namespace Engine.Effects
         /// World view projection effect variable
         /// </summary>
         private EngineEffectVariableMatrix worldViewProjection = null;
-        /// <summary>
-        /// Low defintion map from light View * Projection transform
-        /// </summary>
-        private EngineEffectVariableMatrix fromLightViewProjectionLD = null;
-        /// <summary>
-        /// High definition map from light View * Projection transform
-        /// </summary>
-        private EngineEffectVariableMatrix fromLightViewProjectionHD = null;
         /// <summary>
         /// Material index effect variable
         /// </summary>
@@ -100,18 +88,6 @@ namespace Engine.Effects
         /// </summary>
         private EngineEffectVariableTexture normalMaps = null;
         /// <summary>
-        /// Low definition shadow map effect variable
-        /// </summary>
-        private EngineEffectVariableTexture shadowMapLD = null;
-        /// <summary>
-        /// High definition shadow map effect variable
-        /// </summary>
-        private EngineEffectVariableTexture shadowMapHD = null;
-        /// <summary>
-        /// Cubic shadows map effect variable
-        /// </summary>
-        private EngineEffectVariableTexture shadowMapCubic = null;
-        /// <summary>
         /// Random texture effect variable
         /// </summary>
         private EngineEffectVariableTexture textureRandom = null;
@@ -127,6 +103,14 @@ namespace Engine.Effects
         /// Level of detail ranges effect variable
         /// </summary>
         private EngineEffectVariableVector lod = null;
+        /// <summary>
+        /// Directional shadow map effect variable
+        /// </summary>
+        private EngineEffectVariableTexture shadowMapDirectional = null;
+        /// <summary>
+        /// Omnidirectional shadows map effect variable
+        /// </summary>
+        private EngineEffectVariableTexture shadowMapOmnidirectional = null;
 
         /// <summary>
         /// Current texture array
@@ -137,18 +121,6 @@ namespace Engine.Effects
         /// </summary>
         private EngineShaderResourceView currentNormalMaps = null;
         /// <summary>
-        /// Current low definition shadow map
-        /// </summary>
-        private EngineShaderResourceView currentShadowMapLD = null;
-        /// <summary>
-        /// Current high definition shadow map
-        /// </summary>
-        private EngineShaderResourceView currentShadowMapHD = null;
-        /// <summary>
-        /// Current cubic shadow map
-        /// </summary>
-        private EngineShaderResourceView currentShadowMapCubic = null;
-        /// <summary>
         /// Current random texture
         /// </summary>
         private EngineShaderResourceView currentTextureRandom = null;
@@ -156,6 +128,14 @@ namespace Engine.Effects
         /// Current material palette
         /// </summary>
         private EngineShaderResourceView currentMaterialPalette = null;
+        /// <summary>
+        /// Current directional shadow map
+        /// </summary>
+        private EngineShaderResourceView currentShadowMapDirectional = null;
+        /// <summary>
+        /// Current omnidirectional shadow map
+        /// </summary>
+        private EngineShaderResourceView currentShadowMapOmnidirectional = null;
 
         /// <summary>
         /// Hemispheric lights
@@ -288,20 +268,6 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Shadow maps flag
-        /// </summary>
-        protected uint ShadowMaps
-        {
-            get
-            {
-                return this.shadowMaps.GetUInt();
-            }
-            set
-            {
-                this.shadowMaps.Set(value);
-            }
-        }
-        /// <summary>
         /// Start radius
         /// </summary>
         protected float StartRadius
@@ -355,34 +321,6 @@ namespace Engine.Effects
             set
             {
                 this.worldViewProjection.SetMatrix(value);
-            }
-        }
-        /// <summary>
-        /// Low definition map from light View * Projection transform
-        /// </summary>
-        protected Matrix FromLightViewProjectionLD
-        {
-            get
-            {
-                return this.fromLightViewProjectionLD.GetMatrix();
-            }
-            set
-            {
-                this.fromLightViewProjectionLD.SetMatrix(value);
-            }
-        }
-        /// <summary>
-        /// High definition map from light View * Projection transform
-        /// </summary>
-        protected Matrix FromLightViewProjectionHD
-        {
-            get
-            {
-                return this.fromLightViewProjectionHD.GetMatrix();
-            }
-            set
-            {
-                this.fromLightViewProjectionHD.SetMatrix(value);
             }
         }
         /// <summary>
@@ -470,69 +408,6 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Low definition shadow map
-        /// </summary>
-        protected EngineShaderResourceView ShadowMapLD
-        {
-            get
-            {
-                return this.shadowMapLD.GetResource();
-            }
-            set
-            {
-                if (this.currentShadowMapLD != value)
-                {
-                    this.shadowMapLD.SetResource(value);
-
-                    this.currentShadowMapLD = value;
-
-                    Counters.TextureUpdates++;
-                }
-            }
-        }
-        /// <summary>
-        /// High definition shadow map
-        /// </summary>
-        protected EngineShaderResourceView ShadowMapHD
-        {
-            get
-            {
-                return this.shadowMapHD.GetResource();
-            }
-            set
-            {
-                if (this.currentShadowMapHD != value)
-                {
-                    this.shadowMapHD.SetResource(value);
-
-                    this.currentShadowMapHD = value;
-
-                    Counters.TextureUpdates++;
-                }
-            }
-        }
-        /// <summary>
-        /// Cubic shadow map
-        /// </summary>
-        protected EngineShaderResourceView ShadowMapCubic
-        {
-            get
-            {
-                return this.shadowMapCubic.GetResource();
-            }
-            set
-            {
-                if (this.currentShadowMapCubic != value)
-                {
-                    this.shadowMapCubic.SetResource(value);
-
-                    this.currentShadowMapCubic = value;
-
-                    Counters.TextureUpdates++;
-                }
-            }
-        }
-        /// <summary>
         /// Random texture
         /// </summary>
         protected EngineShaderResourceView TextureRandom
@@ -602,6 +477,48 @@ namespace Engine.Effects
                 this.lod.Set(value);
             }
         }
+        /// <summary>
+        /// Directional shadow map
+        /// </summary>
+        protected EngineShaderResourceView ShadowMapDirectional
+        {
+            get
+            {
+                return this.shadowMapDirectional.GetResource();
+            }
+            set
+            {
+                if (this.currentShadowMapDirectional != value)
+                {
+                    this.shadowMapDirectional.SetResource(value);
+
+                    this.currentShadowMapDirectional = value;
+
+                    Counters.TextureUpdates++;
+                }
+            }
+        }
+        /// <summary>
+        /// Omnidirectional shadow map
+        /// </summary>
+        protected EngineShaderResourceView ShadowMapOmnidirectional
+        {
+            get
+            {
+                return this.shadowMapOmnidirectional.GetResource();
+            }
+            set
+            {
+                if (this.currentShadowMapOmnidirectional != value)
+                {
+                    this.shadowMapOmnidirectional.SetResource(value);
+
+                    this.currentShadowMapOmnidirectional = value;
+
+                    Counters.TextureUpdates++;
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -616,8 +533,6 @@ namespace Engine.Effects
 
             this.world = this.Effect.GetVariableMatrix("gWorld");
             this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.fromLightViewProjectionLD = this.Effect.GetVariableMatrix("gLightViewProjectionLD");
-            this.fromLightViewProjectionHD = this.Effect.GetVariableMatrix("gLightViewProjectionHD");
             this.materialIndex = this.Effect.GetVariableScalar("gMaterialIndex");
             this.hemiLight = this.Effect.GetVariable("gPSHemiLight");
             this.dirLights = this.Effect.GetVariable("gDirLights");
@@ -628,20 +543,18 @@ namespace Engine.Effects
             this.fogStart = this.Effect.GetVariableScalar("gFogStart");
             this.fogRange = this.Effect.GetVariableScalar("gFogRange");
             this.fogColor = this.Effect.GetVariableVector("gFogColor");
-            this.shadowMaps = this.Effect.GetVariableScalar("gShadows");
             this.startRadius = this.Effect.GetVariableScalar("gStartRadius");
             this.endRadius = this.Effect.GetVariableScalar("gEndRadius");
             this.textureCount = this.Effect.GetVariableScalar("gTextureCount");
             this.normalMapCount = this.Effect.GetVariableScalar("gNormalMapCount");
             this.textures = this.Effect.GetVariableTexture("gTextureArray");
             this.normalMaps = this.Effect.GetVariableTexture("gNormalMapArray");
-            this.shadowMapLD = this.Effect.GetVariableTexture("gShadowMapLD");
-            this.shadowMapHD = this.Effect.GetVariableTexture("gShadowMapHD");
-            this.shadowMapCubic = this.Effect.GetVariableTexture("gPSShadowMapCubic");
             this.textureRandom = this.Effect.GetVariableTexture("gTextureRandom");
             this.materialPaletteWidth = this.Effect.GetVariableScalar("gMaterialPaletteWidth");
             this.materialPalette = this.Effect.GetVariableTexture("gMaterialPalette");
             this.lod = this.Effect.GetVariableVector("gLOD");
+            this.shadowMapDirectional = this.Effect.GetVariableTexture("gShadowMapDir");
+            this.shadowMapOmnidirectional = this.Effect.GetVariableTexture("gShadowMapOmni");
         }
 
         /// <summary>
@@ -741,20 +654,13 @@ namespace Engine.Effects
                 this.FogRange = lights.FogRange;
                 this.FogColor = lights.FogColor;
 
-                this.ShadowMaps = (uint)context.ShadowMaps;
-                if (context.ShadowMapLow != null)
+                if (context.ShadowMapDirectional != null)
                 {
-                    this.FromLightViewProjectionLD = context.ShadowMapLow.FromLightViewProjectionArray[0];
-                    this.ShadowMapLD = context.ShadowMapLow.Texture;
+                    this.ShadowMapDirectional = context.ShadowMapDirectional.Texture;
                 }
-                if (context.ShadowMapHigh != null)
+                if (context.ShadowMapOmnidirectional != null)
                 {
-                    this.FromLightViewProjectionHD = context.ShadowMapHigh.FromLightViewProjectionArray[0];
-                    this.ShadowMapHD = context.ShadowMapHigh.Texture;
-                }
-                if (context.ShadowMapCube != null)
-                {
-                    this.ShadowMapCubic = context.ShadowMapCube.Texture;
+                    this.ShadowMapOmnidirectional = context.ShadowMapOmnidirectional.Texture;
                 }
             }
             else
@@ -763,12 +669,8 @@ namespace Engine.Effects
                 this.FogRange = 0;
                 this.FogColor = Color.Transparent;
 
-                this.ShadowMaps = 0;
-                this.ShadowMapLD = null;
-                this.FromLightViewProjectionLD = Matrix.Identity;
-                this.ShadowMapHD = null;
-                this.FromLightViewProjectionHD = Matrix.Identity;
-                this.ShadowMapCubic = null;
+                this.ShadowMapDirectional = null;
+                this.ShadowMapOmnidirectional = null;
             }
 
             this.HemiLight = bHemiLight;

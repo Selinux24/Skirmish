@@ -16,12 +16,6 @@ cbuffer cbPerFrame : register(b1)
 cbuffer cbPerDirLight : register(b2)
 {
 	DirectionalLight gDirLight;
-	float4x4 gLightViewProjectionLD;
-	float4x4 gLightViewProjectionHD;
-	uint gShadows;
-	uint PAD21;
-	uint PAD22;
-	uint PAD23;
 }
 cbuffer cbPerPointLight : register(b3)
 {
@@ -46,9 +40,8 @@ Texture2D gTG2Map : register(t1);
 Texture2D gTG3Map : register(t2);
 Texture2D gLightMap : register(t3);
 Texture2D gMaterialPalette : register(t4);
-Texture2D<float> gShadowMapLD : register(t5);
-Texture2D<float> gShadowMapHD : register(t6);
-TextureCubeArray<float> gShadowMapCubic : register(t7);
+Texture2DArray<float> gShadowMapDir : register(t5);
+TextureCubeArray<float> gShadowMapOmni : register(t6);
 
 struct PSLightInput
 {
@@ -97,22 +90,15 @@ float4 PSDirectionalLight(PSLightInput input) : SV_TARGET
 	{
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
-		float4 lightPositionLD = mul(float4(position, 1), gLightViewProjectionLD);
-		float4 lightPositionHD = mul(float4(position, 1), gLightViewProjectionHD);
-
 		ComputeDirectionalLightsInput linput;
 
 		linput.dirLight = gDirLight;
+		linput.lod = gLOD;
 		linput.shininess = k.Shininess;
 		linput.pPosition = position;
 		linput.pNormal = normal;
 		linput.ePosition = gEyePositionWorld;
-		linput.sLightPositionLD = lightPositionLD;
-		linput.sLightPositionHD = lightPositionHD;
-		linput.shadows = gShadows;
-		linput.shadowMapLD = gShadowMapLD;
-		linput.shadowMapHD = gShadowMapHD;
-		linput.lod = gLOD;
+		linput.shadowMap = gShadowMapDir;
 
 		ComputeLightsOutput loutput = ComputeDirectionalLight(linput);
 
@@ -150,7 +136,7 @@ float4 PSPointLight(PSLightInput input) : SV_TARGET
 		linput.pNormal = normal;
 		linput.ePosition = gEyePositionWorld;
 		linput.lod = gLOD;
-        linput.shadowCubic = gShadowMapCubic;
+        linput.shadowMapOmni = gShadowMapOmni;
 
 		ComputeLightsOutput loutput = ComputePointLight(linput);
 

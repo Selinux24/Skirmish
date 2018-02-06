@@ -13,16 +13,14 @@ namespace Engine
         /// </summary>
         None = 0,
         /// <summary>
-        /// Low definition shadow map
+        /// Directional shadow map
         /// </summary>
-        LowDefinition = 1,
+        One = 1,
         /// <summary>
-        /// High definition shadow map
+        /// Omnidirectional shadow map
         /// </summary>
-        HighDefinition = 2,
-        /// <summary>
-        /// Cube shadow map
-        /// </summary>
-        CubeMap = 4,
+        Two = 2,
+
+        Three = 4,
     }
 }

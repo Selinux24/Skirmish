@@ -34,7 +34,7 @@ namespace Terrain
         private NavigationMeshAgentType walkerAgentType = null;
 
         private bool useDebugTex = false;
-        private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapDynamic;
+        private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapDirectional;
         private SceneObject<SpriteTexture> shadowMapDrawer = null;
         private EngineShaderResourceView debugTex = null;
         private int graphIndex = -1;
@@ -758,8 +758,8 @@ namespace Terrain
 
             this.gardener.Instance.SetWind(this.windDirection, this.windStrength);
 
-            this.Lights.ShadowLDDistance = 100f;
-            this.Lights.ShadowHDDistance = 25f;
+            //this.Lights.ShadowLDDistance = 100f;
+            //this.Lights.ShadowHDDistance = 25f;
         }
         public override void Initialized()
         {
@@ -1321,7 +1321,7 @@ namespace Terrain
             if (this.Game.Input.KeyJustReleased(Keys.F7))
             {
                 this.shadowMapDrawer.Visible = !this.shadowMapDrawer.Visible;
-                this.shadowResult = SceneRendererResultEnum.ShadowMapStatic;
+                this.shadowResult = SceneRendererResultEnum.ShadowMapDirectional;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F8))
@@ -1377,11 +1377,11 @@ namespace Terrain
 
             if (this.Game.Input.KeyJustReleased(Keys.Up))
             {
-                this.shadowResult = SceneRendererResultEnum.ShadowMapStatic;
+                this.shadowResult = SceneRendererResultEnum.ShadowMapDirectional;
             }
             if (this.Game.Input.KeyJustReleased(Keys.Down))
             {
-                this.shadowResult = SceneRendererResultEnum.ShadowMapDynamic;
+                this.shadowResult = SceneRendererResultEnum.ShadowMapDirectional;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))

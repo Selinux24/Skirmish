@@ -42,21 +42,13 @@ namespace Engine.Common
         public SceneLights Lights { get; set; }
 
         /// <summary>
-        /// Shadow maps
+        /// Directional shadow map
         /// </summary>
-        public ShadowMapFlags ShadowMaps { get; set; }
+        public IShadowMap ShadowMapDirectional { get; set; }
         /// <summary>
-        /// Low definition shadow map
+        /// Omnidirectional shadow map
         /// </summary>
-        public IShadowMap ShadowMapLow { get; set; }
-        /// <summary>
-        /// High definition shadow map
-        /// </summary>
-        public IShadowMap ShadowMapHigh { get; set; }
-        /// <summary>
-        /// Cube shadow map
-        /// </summary>
-        public IShadowMap ShadowMapCube { get; set; }
+        public IShadowMap ShadowMapOmnidirectional { get; set; }
 
         /// <summary>
         /// Constructor

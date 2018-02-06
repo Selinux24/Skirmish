@@ -345,8 +345,12 @@ namespace Deferred
             #region Lights
 
             this.Lights.KeyLight.Enabled = true;
-            this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = false;
+            this.Lights.BackLight.Enabled = true;
+            this.Lights.FillLight.Enabled = true;
+
+            this.Lights.KeyLight.CastShadow = true;
+            this.Lights.BackLight.CastShadow = true;
+            this.Lights.FillLight.CastShadow = false;
 
             this.pointOffset = this.Lights.PointLights.Length;
             this.spotOffset = this.Lights.SpotLights.Length;
@@ -565,6 +569,8 @@ namespace Deferred
             base.Update(gameTime);
 
             Ray cursorRay = this.GetPickingRay();
+
+            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
             #region Cursor picking and positioning
 
@@ -828,15 +834,39 @@ namespace Deferred
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                var shadowMap = this.Renderer.GetResource(SceneRendererResultEnum.ShadowMapStatic);
+                var shadowMap = this.Renderer.GetResource(SceneRendererResultEnum.ShadowMapDirectional);
 
                 if (shadowMap != null)
                 {
                     //Shadow map
-                    this.bufferDrawer.Instance.Texture = shadowMap;
-                    this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.Red;
-                    this.bufferDrawer.Visible = true;
-                    this.help.Instance.Text = "Shadow map";
+                    if (!this.help.Instance.Text.StartsWith("Shadow map"))
+                    {
+                        this.bufferDrawer.Instance.Texture = shadowMap;
+                        this.bufferDrawer.Instance.TextureIndex = 0;
+                        this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.Red;
+                        this.bufferDrawer.Visible = true;
+                    }
+                    else
+                    {
+                        int tIndex = this.bufferDrawer.Instance.TextureIndex;
+                        if (!shift)
+                        {
+                            tIndex++;
+                            tIndex %= 6;
+                        }
+                        else
+                        {
+                            tIndex--;
+                            if (tIndex < 0)
+                            {
+                                tIndex = 5;
+                            }
+                        }
+
+                        this.bufferDrawer.Instance.TextureIndex = tIndex;
+                    }
+
+                    this.help.Instance.Text = string.Format("Shadow map {0}", this.bufferDrawer.Instance.TextureIndex);
                 }
                 else
                 {

@@ -18,9 +18,7 @@ cbuffer cbPerFrame : register(b1)
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
 	uint3 gLightCount;
-	uint gShadows;
-    float4x4 gLightViewProjectionLD;
-    float4x4 gLightViewProjectionHD;
+	uint PAD11;
 	float4 gFogColor;
 	float gFogStart;
 	float gFogRange;
@@ -31,17 +29,16 @@ cbuffer cbPerFrame : register(b1)
 	float3 gDelta;
 	float gTotalTime;
 	float3 gEyePositionWorld;
-	float PAD11;
+	float PAD12;
     uint gMaterialIndex;
     uint gTextureCount;
     uint gNormalMapCount;
-    uint PAD12;
+    uint PAD13;
 };
 Texture2DArray gTextureArray : register(t2);
 Texture2DArray gNormalMapArray : register(t3);
-Texture2D<float> gShadowMapLD : register(t4);
-Texture2D<float> gShadowMapHD : register(t5);
-TextureCubeArray<float> gPSShadowMapCubic : register(t6);
+Texture2DArray<float> gShadowMapDir : register(t4);
+TextureCubeArray<float> gShadowMapOmni : register(t5);
 
 GSVertexBillboard VSFoliage(VSVertexBillboard input)
 {
@@ -253,10 +250,16 @@ float4 PSFoliage(PSVertexBillboard input) : SV_Target
 
     Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gMaterialPaletteWidth);
 
-    float4 lightPositionLD = mul(float4(input.positionWorld, 1), gLightViewProjectionLD);
-    float4 lightPositionHD = mul(float4(input.positionWorld, 1), gLightViewProjectionHD);
-
     ComputeLightsInput lInput;
+
+	lInput.k = material;
+	lInput.pPosition = input.positionWorld;
+	lInput.pNormal = normalWorld;
+	lInput.pColorDiffuse = textureColor;
+	lInput.pColorSpecular = 1;
+
+	lInput.ePosition = gEyePositionWorld;
+	lInput.lod = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gDirLights;
@@ -265,22 +268,13 @@ float4 PSFoliage(PSVertexBillboard input) : SV_Target
     lInput.dirLightsCount = gLightCount.x;
     lInput.pointLightsCount = gLightCount.y;
     lInput.spotLightsCount = gLightCount.z;
-    lInput.fogStart = gFogStart;
-    lInput.fogRange = gFogRange;
-    lInput.fogColor = gFogColor;
-    lInput.k = material;
-    lInput.pPosition = input.positionWorld;
-    lInput.pNormal = normalWorld;
-    lInput.pColorDiffuse = textureColor;
-    lInput.pColorSpecular = 1;
-    lInput.ePosition = gEyePositionWorld;
-    lInput.sLightPositionLD = lightPositionLD;
-    lInput.sLightPositionHD = lightPositionHD;
-    lInput.shadows = gShadows;
-    lInput.shadowMapLD = gShadowMapLD;
-    lInput.shadowMapHD = gShadowMapHD;
-	lInput.shadowCubic = gPSShadowMapCubic;
-	lInput.lod = gLOD;
+
+	lInput.shadowMapDir = gShadowMapDir;
+	lInput.shadowMapOmni = gShadowMapOmni;
+
+	lInput.fogStart = gFogStart;
+	lInput.fogRange = gFogRange;
+	lInput.fogColor = gFogColor;
 
     return ComputeLights(lInput);
 }

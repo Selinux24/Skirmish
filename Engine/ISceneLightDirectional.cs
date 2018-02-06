@@ -15,5 +15,17 @@ namespace Engine
         /// Casts shadows
         /// </summary>
         bool CastShadow { get; }
+        /// <summary>
+        /// Shadow map index
+        /// </summary>
+        uint ShadowMapIndex { get; set; }
+        /// <summary>
+        /// Shadow map index
+        /// </summary>
+        uint ShadowMapCount { get; set; }
+        /// <summary>
+        /// From light view * projection matrix array
+        /// </summary>
+        Matrix[] FromLightVP { get; set; }
     }
 }

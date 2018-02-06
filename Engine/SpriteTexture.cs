@@ -45,6 +45,10 @@ namespace Engine
         /// </summary>
         public EngineShaderResourceView Texture { get; set; }
         /// <summary>
+        /// Texture index
+        /// </summary>
+        public int TextureIndex { get; set; }
+        /// <summary>
         /// Drawing channels
         /// </summary>
         public SpriteTextureChannelsEnum Channels
@@ -145,7 +149,7 @@ namespace Engine
                     this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
 
                     effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-                    effect.UpdatePerObject(Color.White, this.Texture, 0);
+                    effect.UpdatePerObject(Color.White, this.Texture, this.TextureIndex);
 
                     var graphics = this.Game.Graphics;
 

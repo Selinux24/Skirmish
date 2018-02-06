@@ -37,19 +37,16 @@ cbuffer cbPSPerFrame : register(b3)
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
 	uint3 gPSLightCount;
-	uint gPSShadows;
-	float4x4 gPSLightViewProjectionLD;
-	float4x4 gPSLightViewProjectionHD;
-	float2 gPSightPerspectiveValues;
+	uint PAD31;
+	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
-	float4 gPSFogColor;
+	float2 PAD32;
 	float3 gPSEyePositionWorld;
-	float PAD31;
+	float PAD33;
 };
-Texture2D<float> gPSShadowMapLD : register(t2);
-Texture2D<float> gPSShadowMapHD : register(t3);
-TextureCubeArray<float> gPSShadowMapCubic : register(t4);
+Texture2DArray<float> gPSShadowMapDir : register(t2);
+TextureCubeArray<float> gPSShadowMapOmni : register(t3);
 
 cbuffer cbPSPerObject : register(b4)
 {
@@ -246,10 +243,16 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 {
 	Material material = GetMaterialData(gMaterialPalette, gPSMaterialIndex, gMaterialPaletteWidth);
 
-	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
-	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
-
 	ComputeLightsInput lInput;
+
+	lInput.k = material;
+	lInput.pPosition = input.positionWorld;
+	lInput.pNormal = input.normalWorld;
+	lInput.pColorDiffuse = input.color;
+	lInput.pColorSpecular = 1;
+
+	lInput.ePosition = gPSEyePositionWorld;
+	lInput.lod = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
@@ -258,22 +261,13 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
-	lInput.lod = gLOD;
+
+	lInput.shadowMapDir = gPSShadowMapDir;
+    lInput.shadowMapOmni = gPSShadowMapOmni;
+
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
 	lInput.fogColor = gPSFogColor;
-	lInput.k = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = input.normalWorld;
-	lInput.pColorDiffuse = input.color;
-	lInput.pColorSpecular = 1;
-	lInput.ePosition = gPSEyePositionWorld;
-	lInput.sLightPositionLD = lightPositionLD;
-	lInput.sLightPositionHD = lightPositionHD;
-	lInput.shadows = gPSShadows;
-	lInput.shadowMapLD = gPSShadowMapLD;
-	lInput.shadowMapHD = gPSShadowMapHD;
-    lInput.shadowCubic = gPSShadowMapCubic;
 
 	return ComputeLights(lInput);
 }
@@ -503,10 +497,16 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
         specularMap = gPSSpecularMapArray.Sample(SamplerSpecular, float3(input.tex, input.textureIndex));
     }
 
-	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
-	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
-
 	ComputeLightsInput lInput;
+
+	lInput.k = material;
+	lInput.pPosition = input.positionWorld;
+	lInput.pNormal = input.normalWorld;
+	lInput.pColorDiffuse = diffuseMap;
+	lInput.pColorSpecular = specularMap;
+
+	lInput.ePosition = gPSEyePositionWorld;
+	lInput.lod = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
@@ -515,22 +515,13 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
-	lInput.lod = gLOD;
+
+	lInput.shadowMapDir = gPSShadowMapDir;
+	lInput.shadowMapOmni = gPSShadowMapOmni;
+
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
 	lInput.fogColor = gPSFogColor;
-	lInput.k = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = input.normalWorld;
-	lInput.pColorDiffuse = diffuseMap;
-	lInput.pColorSpecular = specularMap;
-	lInput.ePosition = gPSEyePositionWorld;
-	lInput.sLightPositionLD = lightPositionLD;
-	lInput.sLightPositionHD = lightPositionHD;
-	lInput.shadows = gPSShadows;
-	lInput.shadowMapLD = gPSShadowMapLD;
-	lInput.shadowMapHD = gPSShadowMapHD;
-    lInput.shadowCubic = gPSShadowMapCubic;
 
 	return ComputeLights(lInput);
 }
@@ -652,10 +643,16 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
     float3 normalMap = gPSNormalMapArray.Sample(SamplerNormal, float3(input.tex, input.textureIndex)).rgb;
     float3 normalWorld = NormalSampleToWorldSpace(normalMap, input.normalWorld, input.tangentWorld);
 
-	float4 lightPositionLD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionLD);
-	float4 lightPositionHD = mul(float4(input.positionWorld, 1), gPSLightViewProjectionHD);
-
 	ComputeLightsInput lInput;
+
+	lInput.k = material;
+	lInput.pPosition = input.positionWorld;
+	lInput.pNormal = normalWorld;
+	lInput.pColorDiffuse = diffuseMap;
+	lInput.pColorSpecular = specularMap;
+
+	lInput.ePosition = gPSEyePositionWorld;
+	lInput.lod = gLOD;
 
 	lInput.hemiLight = gPSHemiLight;
 	lInput.dirLights = gPSDirLights;
@@ -664,22 +661,13 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	lInput.dirLightsCount = gPSLightCount.x;
 	lInput.pointLightsCount = gPSLightCount.y;
 	lInput.spotLightsCount = gPSLightCount.z;
-	lInput.lod = gLOD;
+
+	lInput.shadowMapDir = gPSShadowMapDir;
+	lInput.shadowMapOmni = gPSShadowMapOmni;
+
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
 	lInput.fogColor = gPSFogColor;
-	lInput.k = material;
-	lInput.pPosition = input.positionWorld;
-	lInput.pNormal = normalWorld;
-	lInput.pColorDiffuse = diffuseMap;
-	lInput.pColorSpecular = specularMap;
-	lInput.ePosition = gPSEyePositionWorld;
-	lInput.sLightPositionLD = lightPositionLD;
-	lInput.sLightPositionHD = lightPositionHD;
-	lInput.shadows = gPSShadows;
-	lInput.shadowMapLD = gPSShadowMapLD;
-	lInput.shadowMapHD = gPSShadowMapHD;
-    lInput.shadowCubic = gPSShadowMapCubic;
 
 	return ComputeLights(lInput);
 }

@@ -21,7 +21,7 @@ namespace Engine
         /// <summary>
         /// Depth map
         /// </summary>
-        protected EngineDepthStencilView DepthMap { get; set; }
+        protected EngineDepthStencilView[] DepthMap { get; set; }
 
         /// <summary>
         /// Deph map texture
@@ -38,19 +38,20 @@ namespace Engine
         /// <param name="game">Game</param>
         /// <param name="width">With</param>
         /// <param name="height">Height</param>
-        public ShadowMap(Game game, int width, int height)
+        /// <param name="arraySize">Array size</param>
+        public ShadowMap(Game game, int width, int height, int arraySize)
         {
             this.Game = game;
 
             this.Viewport = new Viewport(0, 0, width, height, 0, 1.0f);
 
-            EngineDepthStencilView dsv;
+            EngineDepthStencilView[] dsv;
             EngineShaderResourceView srv;
-            game.Graphics.CreateShadowMapTextures(width, height, out dsv, out srv);
+            game.Graphics.CreateShadowMapTextures(width, height, arraySize, out dsv, out srv);
             this.DepthMap = dsv;
             this.Texture = srv;
 
-            this.FromLightViewProjectionArray = new[] { Matrix.Identity };
+            this.FromLightViewProjectionArray = Helper.CreateArray(arraySize, Matrix.Identity);
         }
         /// <summary>
         /// Release of resources
@@ -74,7 +75,7 @@ namespace Engine
             //Set shadow map depth map without render target
             graphics.SetRenderTargets(
                 null, false, Color.Transparent,
-                this.DepthMap, true, false,
+                this.DepthMap[index], true, false,
                 true);
         }
     }

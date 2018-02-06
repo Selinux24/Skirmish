@@ -71,10 +71,8 @@ namespace Engine
                     this.DrawContext.EyeTarget = this.UpdateContext.EyeDirection;
                     //Initialize context data from scene
                     this.DrawContext.Lights = scene.Lights;
-                    this.DrawContext.ShadowMaps = 0;
-                    this.DrawContext.ShadowMapLow = this.ShadowMapperLow;
-                    this.DrawContext.ShadowMapHigh = this.ShadowMapperHigh;
-                    this.DrawContext.ShadowMapCube = this.ShadowMapperCube;
+                    this.DrawContext.ShadowMapDirectional = this.ShadowMapperDirectional;
+                    this.DrawContext.ShadowMapOmnidirectional = this.ShadowMapperOmnidirectional;
 
 #if DEBUG
                     swStartup.Stop();
@@ -83,22 +81,8 @@ namespace Engine
 #endif
                     #endregion
 
-                    #region Shadow mapping
-
-                    ShadowMapFlags flags = ShadowMapFlags.None;
-
-                    flags |= DoShadowMapping(gameTime, scene);
-
-                    flags |= DoCubicShadowMapping(gameTime, scene);
-
-                    //Set shadow map flags to drawing context
-                    this.DrawContext.ShadowMaps = flags;
-
-                    #endregion
-
-                    #region Render
-
-                    #region Forward rendering
+                    //Shadow mapping
+                    DoShadowMapping(gameTime, scene);
 
                     #region Preparation
 #if DEBUG
@@ -115,6 +99,7 @@ namespace Engine
 #endif
                     #endregion
 
+                    //Forward rendering
                     if (visibleComponents.Count > 0)
                     {
                         #region Cull
@@ -137,7 +122,7 @@ namespace Engine
                         if (draw)
                         {
                             var groundVolume = scene.GetSceneVolume();
-                            if(groundVolume!= null)
+                            if (groundVolume != null)
                             {
                                 //Ground culling
                                 draw = this.cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullVisible);
@@ -169,10 +154,6 @@ namespace Engine
 
                         #endregion
                     }
-
-                    #endregion
-
-                    #endregion
                 }
 #if DEBUG
                 swTotal.Stop();

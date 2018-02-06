@@ -102,6 +102,18 @@ namespace Engine
                 this.Direction = Matrix.RotationQuaternion(rotation).Down;
             }
         }
+        /// <summary>
+        /// First shadow map index
+        /// </summary>
+        public uint ShadowMapIndex { get; set; }
+        /// <summary>
+        /// Shadow map count
+        /// </summary>
+        public uint ShadowMapCount { get; set; }
+        /// <summary>
+        /// From light view * projection matrix array
+        /// </summary>
+        public Matrix[] FromLightVP { get; set; }
 
         /// <summary>
         /// Constructor
@@ -111,6 +123,8 @@ namespace Engine
         {
             this.Direction = Vector3.Zero;
             this.BaseBrightness = this.Brightness = 1f;
+            this.ShadowMapIndex = 0;
+            this.ShadowMapCount = 0;
         }
         /// <summary>
         /// Constructor

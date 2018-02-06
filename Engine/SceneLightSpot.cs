@@ -113,7 +113,15 @@ namespace Engine
         /// <summary>
         /// Shadow map index
         /// </summary>
-        public int ShadowMapIndex { get; set; }
+        public uint ShadowMapIndex { get; set; }
+        /// <summary>
+        /// Shadow map count
+        /// </summary>
+        public uint ShadowMapCount { get; set; }
+        /// <summary>
+        /// From light view * projection matrix array
+        /// </summary>
+        public Matrix[] FromLightVP { get; set; }
 
         /// <summary>
         /// Constructor
