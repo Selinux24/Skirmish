@@ -287,16 +287,14 @@ namespace Engine.Effects
             this.baseColor = this.Effect.GetVariableVector("gPSBaseColor");
             this.waterColor = this.Effect.GetVariableVector("gPSWaterColor");
             this.waveParams = this.Effect.GetVariableVector("gPSWaveParams");
+            this.ambient = this.Effect.GetVariableScalar("gPSAmbient");
+            this.fogRange = this.Effect.GetVariableScalar("gPSFogRange");
+            this.fogStart = this.Effect.GetVariableScalar("gPSFogStart");
+            this.fogColor = this.Effect.GetVariableVector("gPSFogColor");
             this.totalTime = this.Effect.GetVariableScalar("gPSTotalTime");
             this.iterParams = this.Effect.GetVariableVector("gPSIters");
-            this.ambient = this.Effect.GetVariableScalar("gPSAmbient");
-
-            this.dirLights = this.Effect.GetVariable("gPSDirLights");
             this.lightCount = this.Effect.GetVariableScalar("gPSLightCount");
-
-            this.fogStart = this.Effect.GetVariableScalar("gPSFogStart");
-            this.fogRange = this.Effect.GetVariableScalar("gPSFogRange");
-            this.fogColor = this.Effect.GetVariableVector("gPSFogColor");
+            this.dirLights = this.Effect.GetVariable("gPSDirLights");
         }
 
         /// <summary>
