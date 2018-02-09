@@ -2406,7 +2406,19 @@
       <position>13.80 0 1</position>
       <rotation>0 0.9107101 0 0.4130462</rotation>
     </item>
-
+    <item asset_name="Dn_Barrel">
+      <position>14 0 4</position>
+    </item>
+    <item asset_name="Dn_Barrel">
+      <position>10 0 4</position>
+      <scale>0.75</scale>
+    </item>
+    <item asset_name="Dn_Barrel">
+      <position>11 0 4.25</position>
+      <scale>0.75</scale>
+      <rotation>rot90</rotation>
+    </item>
+    
     <item asset_name="Dn_Candle_1" cast_shadows="false">
       <position>0.5 4 -26.8</position>
       <scale>0.4</scale>
