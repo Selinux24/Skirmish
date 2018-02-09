@@ -278,8 +278,8 @@ namespace Collada
             this.Camera.Position = new Vector3(-8, 5.5f, -26);
             this.Camera.Interest = new Vector3(-6, 5.5f, -26);
 
-            //this.Camera.Position = new Vector3(53, 1.5f, -12);
-            //this.Camera.Interest = new Vector3(53, 1.5f, -30);
+            //this.Camera.Position = new Vector3(100, 1.5f, 100);
+            //this.Camera.Interest = new Vector3(100, 1.5f, 101);
         }
 
         public override void Initialized()
