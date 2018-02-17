@@ -1,8 +1,14 @@
 ﻿
 namespace Engine.PathFinding.NavMesh2
 {
+    /// <summary>
+    /// Compact span
+    /// </summary>
     public struct CompactSpan
     {
+        /// <summary>
+        /// Default compact span
+        /// </summary>
         public CompactSpan Default
         {
             get
@@ -31,5 +37,14 @@ namespace Engine.PathFinding.NavMesh2
         /// The height of the span.  (Measured from #y.)
         /// </summary>
         public uint h;
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("Lower Extent {0}; Region {1}; Connection {2}; Height {3};", this.y, this.reg, this.con, this.h);
+        }
     }
 }

@@ -28,5 +28,14 @@ namespace Engine.PathFinding.NavMesh2
         /// The next span higher up in column.
         /// </summary>
         public Span next;
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("Min {0} Max {1} Area: {2}; Next Span {3};", this.smin, this.smax, this.area, this.next != null);
+        }
     }
 }

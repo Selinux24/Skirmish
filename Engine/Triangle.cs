@@ -365,6 +365,23 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="p1x">Point 1 x coordinate</param>
+        /// <param name="p1y">Point 1 y coordinate</param>
+        /// <param name="p1z">Point 1 z coordinate</param>
+        /// <param name="p2x">Point 2 x coordinate</param>
+        /// <param name="p2y">Point 2 y coordinate</param>
+        /// <param name="p2z">Point 2 z coordinate</param>
+        /// <param name="p3x">Point 3 x coordinate</param>
+        /// <param name="p3y">Point 3 y coordinate</param>
+        /// <param name="p3z">Point 3 z coordinate</param>
+        public Triangle(float p1x, float p1y, float p1z, float p2x, float p2y, float p2z, float p3x, float p3y, float p3z)
+            : this(new Vector3(p1x, p1y, p1z), new Vector3(p2x, p2y, p2z), new Vector3(p3x, p3y, p3z))
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="point1">Point 1</param>
         /// <param name="point2">Point 2</param>
         /// <param name="point3">Point 3</param>

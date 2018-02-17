@@ -95,23 +95,13 @@ namespace Collada
             };
 
             /*
-            this.agent = new Player2()
-            {
-                Name = "Player",
-                Height = 1.5f,
-                MaxClimb = 0.8f,
-                MaxSlope = 45f,
-                Radius = 0.5f,
-                Velocity = 4f,
-                VelocitySlow = 1f,
-            };
-
             var nmsettings = Engine.PathFinding.NavMesh2.BuildSettings.Default;
             nmsettings.Agents = new[] { this.agent };
+            nmsettings.TileSize = 48;
 
             this.PathFinderDescription = new PathFinderDescription()
             {
-                Settings = nmsettings
+                Settings = nmsettings,
             };
             */
         }
@@ -169,6 +159,19 @@ namespace Collada
                 Velocity = 4f,
                 VelocitySlow = 1f,
             };
+
+            /*
+            this.agent = new Player2()
+            {
+                Name = "Player",
+                Height = 1.5f,
+                MaxClimb = 0.8f,
+                MaxSlope = 45f,
+                Radius = 0.5f,
+                Velocity = 4f,
+                VelocitySlow = 1f,
+            };
+            */
         }
         private void InitializeRat()
         {
@@ -368,7 +371,7 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.G))
             {
-                this.UpdateGraphNodes(this.currentGraph == 0 ? this.agent : this.ratAgentType);
+                //this.UpdateGraphNodes(this.currentGraph == 0 ? this.agent : this.ratAgentType);
                 this.currentGraph++;
                 this.currentGraph %= 2;
             }

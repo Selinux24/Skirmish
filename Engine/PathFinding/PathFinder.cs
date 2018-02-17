@@ -40,6 +40,14 @@ namespace Engine.PathFinding
         /// <returns>Returns the generated graph for path finding over a triangle mesh</returns>
         public static IGraph Build(PathFinderSettings settings, Triangle[] triangles)
         {
+            //DEBUG WIP NavMesh2
+            triangles = NavMesh2.InputGeometry.DebugTris();
+            //triangles = new[]
+            //{
+            //    new Triangle(-100, 0, -100, -100, 0, 100, 100, 0, 100),
+            //    new Triangle(-100, 0, -100, 100, 0, 100, 100, 0, -100),
+            //};
+
             if (settings is GridGenerationSettings)
             {
                 return Grid.Build(triangles, (GridGenerationSettings)settings);
@@ -50,12 +58,7 @@ namespace Engine.PathFinding
             }
             else if (settings is NavMesh2.BuildSettings)
             {
-                //DEBUG WIP NavMesh2
-                var tris = NavMesh2.InputGeometry.DebugTris();
-                var g = new NavMesh2.InputGeometry(tris);
-                //var g = new NavMesh2.InputGeometry(triangles);
-                var s = (NavMesh2.BuildSettings)settings;
-                var n = NavMesh2.NavMesh.Build(s, g);
+                var n = NavMesh2.NavMesh.Build(triangles, (NavMesh2.BuildSettings)settings);
 
                 return null;
             }

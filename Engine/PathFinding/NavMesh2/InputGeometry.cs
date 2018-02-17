@@ -12,6 +12,9 @@ namespace Engine.PathFinding.NavMesh2
         public const int MaxVolumes = 256;
         public const int MaxOffmeshConnections = 256;
 
+        private BoundsItemComparerX xComparer = new BoundsItemComparerX();
+        private BoundsItemComparerY yComparer = new BoundsItemComparerY();
+
         private ChunkyTriMesh m_chunkyMesh;
         private ConvexVolume[] m_volumes;
         private int m_volumeCount;
@@ -22,7 +25,7 @@ namespace Engine.PathFinding.NavMesh2
         private byte[] m_offMeshConAreas;
         private short[] m_offMeshConFlags;
         private int[] m_offMeshConId;
-        int m_offMeshConCount;
+        private int m_offMeshConCount;
 
         public BoundingBox BoundingBox;
         public IEnumerable<Triangle> Triangles;
@@ -47,6 +50,28 @@ namespace Engine.PathFinding.NavMesh2
             this.BoundingBox = GeometryUtil.CreateBoundingBox(triangles);
 
             CreateChunkyTriMesh(triangles.ToArray(), 256, out m_chunkyMesh);
+
+            //TODO: Remove this validation
+            foreach (var node in m_chunkyMesh.nodes)
+            {
+                if (node.i >= 0)
+                {
+                    var nBbox = new BoundingBox(
+                        new Vector3(node.bmin.X, float.MinValue, node.bmin.Y),
+                        new Vector3(node.bmax.X, float.MaxValue, node.bmax.Y));
+
+                    var tris = m_chunkyMesh.GetTriangles(node);
+                    foreach (var tri in tris)
+                    {
+                        var bbox = BoundingBox.FromPoints(tri.GetVertices());
+
+                        if (bbox.Contains(nBbox) == ContainmentType.Disjoint)
+                        {
+                            throw new Exception("Bad ChunkyTriMesh partition");
+                        }
+                    }
+                }
+            }
         }
 
         public ChunkyTriMesh GetChunkyMesh()
@@ -71,6 +96,8 @@ namespace Engine.PathFinding.NavMesh2
             int ntris = tris.Count();
             int nchunks = (ntris + trisPerChunk - 1) / trisPerChunk;
 
+            cm.triangles = tris;
+
             cm.nodes = new ChunkyTriMeshNode[nchunks * 4];
 
             cm.tris = new int[ntris];
@@ -81,23 +108,14 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < ntris; i++)
             {
-                items[i].i = i;
-
                 var t = tris[i];
 
                 // Calc triangle XZ bounds.
-                items[i].bmin.X = items[i].bmax.X = t.Point1.X;
-                items[i].bmin.Y = items[i].bmax.Y = t.Point1.Z;
+                var bbox = BoundingBox.FromPoints(t.GetVertices());
 
-                for (int j = 1; j < 3; ++j)
-                {
-                    Vector3 v = t[j];
-                    if (v.X < items[i].bmin.X) items[i].bmin.X = v.X;
-                    if (v.Z < items[i].bmin.Y) items[i].bmin.Y = v.Z;
-
-                    if (v.X > items[i].bmax.X) items[i].bmax.X = v.X;
-                    if (v.Z > items[i].bmax.Y) items[i].bmax.Y = v.Z;
-                }
+                items[i].i = i;
+                items[i].bmin = new Vector2(bbox.Minimum.X, bbox.Minimum.Z);
+                items[i].bmax = new Vector2(bbox.Maximum.X, bbox.Maximum.Z);
             }
 
             int curNode = 0;
@@ -128,7 +146,7 @@ namespace Engine.PathFinding.NavMesh2
             return true;
         }
 
-        internal static Triangle[] DebugTris()
+        public static Triangle[] DebugTris()
         {
             List<float> numbers = new List<float>();
 
@@ -206,26 +224,12 @@ namespace Engine.PathFinding.NavMesh2
                 if (axis == 0)
                 {
                     // Sort along x-axis
-                    QuickSort(items, imin, inum, (a, b) =>
-                    {
-                        if (a.bmin.X < b.bmin.X) return -1;
-                        if (a.bmin.X > b.bmin.X) return 1;
-                        if (a.i < b.i) return -1;
-                        if (a.i > b.i) return 1;
-                        return 0;
-                    });
+                    Array.Sort(items, imin, inum, xComparer);
                 }
                 else if (axis == 1)
                 {
                     // Sort along y-axis
-                    QuickSort(items, imin, inum, (a, b) =>
-                    {
-                        if (a.bmin.Y < b.bmin.Y) return -1;
-                        if (a.bmin.Y > b.bmin.Y) return 1;
-                        if (a.i < b.i) return -1;
-                        if (a.i > b.i) return 1;
-                        return 0;
-                    });
+                    Array.Sort(items, imin, inum, yComparer);
                 }
 
                 int isplit = imin + inum / 2;
@@ -282,11 +286,11 @@ namespace Engine.PathFinding.NavMesh2
             int right = end;
             while (left <= right)
             {
-                while (comparison.Invoke(arr[left], pivot) < 0)
+                while (comparison(arr[left], pivot) < 0)
                 {
                     left++;
                 }
-                while (comparison.Invoke(arr[right], pivot) > 0)
+                while (comparison(arr[right], pivot) > 0)
                 {
                     right--;
                 }
@@ -324,12 +328,12 @@ namespace Engine.PathFinding.NavMesh2
 
             while (i <= j)
             {
-                while (comparison.Invoke(elements[i], pivot) < 0)
+                while (comparison(elements[i], pivot) < 0)
                 {
                     i++;
                 }
 
-                while (comparison.Invoke(elements[j], pivot) > 0)
+                while (comparison(elements[j], pivot) > 0)
                 {
                     j--;
                 }

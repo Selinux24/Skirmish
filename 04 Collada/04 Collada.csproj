@@ -170,6 +170,7 @@
   <ItemGroup>
     <Compile Include="DungeonWall.cs" />
     <Compile Include="ModularDungeon.cs" />
+    <Compile Include="NavmeshTest.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Player2.cs" />
     <Compile Include="Program.cs" />

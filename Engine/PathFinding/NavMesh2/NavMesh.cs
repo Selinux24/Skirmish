@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.NavMesh2
 {
@@ -17,7 +18,12 @@ namespace Engine.PathFinding.NavMesh2
             h = (int)((b.Maximum.Z - b.Minimum.Z) / cellSize + 0.5f);
         }
 
-        public static NavMesh Build(BuildSettings settings, InputGeometry geometry)
+        public static NavMesh Build(Triangle[] triangles, BuildSettings settings)
+        {
+            return Build(new InputGeometry(triangles), settings);
+        }
+
+        public static NavMesh Build(InputGeometry geometry, BuildSettings settings)
         {
             var agent = settings.Agents[0];
 
@@ -175,9 +181,11 @@ namespace Engine.PathFinding.NavMesh2
             m_nextFree = null;
             for (int i = m_maxTiles - 1; i >= 0; --i)
             {
-                m_tiles[i] = new MeshTile();
-                m_tiles[i].Salt = 1;
-                m_tiles[i].Next = m_nextFree;
+                m_tiles[i] = new MeshTile
+                {
+                    Salt = 1,
+                    Next = m_nextFree
+                };
                 m_nextFree = m_tiles[i];
             }
 
@@ -217,30 +225,37 @@ namespace Engine.PathFinding.NavMesh2
             tcfg.BoundingBox.Maximum.X += tcfg.BorderSize * tcfg.CellSize;
             tcfg.BoundingBox.Maximum.Z += tcfg.BorderSize * tcfg.CellSize;
 
-            RasterizationContext rc = new RasterizationContext();
+            var rc = new RasterizationContext
+            {
+                // Allocate voxel heightfield where we rasterize our input data to.
+                solid = new Heightfield
+                {
+                    width = tcfg.Width,
+                    height = tcfg.Height,
+                    boundingBox = tcfg.BoundingBox,
+                    cs = tcfg.CellSize,
+                    ch = tcfg.CellHeight,
+                    spans = new Span[tcfg.Width * tcfg.Height],
+                },
 
-            // Allocate voxel heightfield where we rasterize our input data to.
-            rc.solid = CreateHeightfield(tcfg.Width, tcfg.Height, tcfg.BoundingBox, tcfg.CellSize, tcfg.CellHeight);
-
-            // Allocate array that can hold triangle flags.
-            // If you have multiple meshes you need to process, allocate
-            // and array which can hold the max number of triangles you need to process.
-            rc.triareas = new byte[chunkyMesh.maxTrisPerChunk];
+                // Allocate array that can hold triangle flags.
+                // If you have multiple meshes you need to process, allocate
+                // and array which can hold the max number of triangles you need to process.
+                triareas = new byte[chunkyMesh.maxTrisPerChunk]
+            };
 
             Vector2 tbmin = new Vector2(tcfg.BoundingBox.Minimum.X, tcfg.BoundingBox.Minimum.Z);
             Vector2 tbmax = new Vector2(tcfg.BoundingBox.Maximum.X, tcfg.BoundingBox.Maximum.Z);
 
-            List<int> cid = new List<int>();
-            GetChunksOverlappingRect(chunkyMesh, tbmin, tbmax, cid);
-            int ncid = cid.Count;
-            if (ncid == 0)
+            var cid = GetChunksOverlappingRect(chunkyMesh, tbmin, tbmax);
+            if (cid.Count() == 0)
             {
                 return 0; // empty
             }
 
-            for (int i = 0; i < ncid; i++)
+            foreach (var id in cid)
             {
-                var tris = chunkyMesh.GetTriangles(geometry.Triangles, cid[i]);
+                var tris = chunkyMesh.GetTriangles(id);
 
                 MarkWalkableTriangles(tcfg.WalkableSlopeAngle, tris, rc.triareas);
 
@@ -718,7 +733,7 @@ namespace Engine.PathFinding.NavMesh2
 
                 byte newId = ri.layerId;
 
-                for (;;)
+                for (; ; )
                 {
                     byte oldId = 0xff;
 
@@ -1046,9 +1061,8 @@ namespace Engine.PathFinding.NavMesh2
                     byte previousArea = AreaNull;
 
                     Span ps = null;
-                    Span s = solid.spans[x + y * w];
 
-                    while (s != null)
+                    for (Span s = solid.spans[x + y * w]; s != null; ps = s, s = s.next)
                     {
                         bool walkable = s.area != AreaNull;
 
@@ -1064,9 +1078,6 @@ namespace Engine.PathFinding.NavMesh2
                         // Copy walkable flag so that it cannot propagate past multiple non-walkable objects.
                         previousWalkable = walkable;
                         previousArea = s.area;
-
-                        ps = s;
-                        s = s.next;
                     }
                 }
             }
@@ -1082,9 +1093,7 @@ namespace Engine.PathFinding.NavMesh2
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    Span s = solid.spans[x + y * w];
-
-                    while (s != null)
+                    for (Span s = solid.spans[x + y * w]; s != null; s = s.next)
                     {
                         // Skip non walkable spans.
                         if (s.area == AreaNull)
@@ -1104,9 +1113,9 @@ namespace Engine.PathFinding.NavMesh2
 
                         for (int dir = 0; dir < 4; ++dir)
                         {
+                            // Skip neighbours which are out of bounds.
                             int dx = x + GetDirOffsetX(dir);
                             int dy = y + GetDirOffsetY(dir);
-                            // Skip neighbours which are out of bounds.
                             if (dx < 0 || dy < 0 || dx >= w || dy >= h)
                             {
                                 minh = Math.Min(minh, -walkableClimb - bot);
@@ -1159,8 +1168,6 @@ namespace Engine.PathFinding.NavMesh2
                             // If the difference between all neighbours is too large, we are at steep slope, mark the span as ledge.
                             s.area = AreaNull;
                         }
-
-                        s = s.next;
                     }
                 }
             }
@@ -1176,9 +1183,7 @@ namespace Engine.PathFinding.NavMesh2
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    Span s = solid.spans[x + y * w];
-
-                    while (s != null)
+                    for (Span s = solid.spans[x + y * w]; s != null; s = s.next)
                     {
                         int bot = (int)(s.smax);
                         int top = s.next != null ? (int)(s.next.smin) : int.MaxValue;
@@ -1187,8 +1192,6 @@ namespace Engine.PathFinding.NavMesh2
                         {
                             s.area = AreaNull;
                         }
-
-                        s = s.next;
                     }
                 }
             }
@@ -1408,7 +1411,7 @@ namespace Engine.PathFinding.NavMesh2
         {
             int w = hf.width;
             int h = hf.height;
-            float by = b.Maximum.Y - b.Minimum.Y;
+            float by = b.GetY();
 
             // Calculate the bounding box of the triangle.
             var t = BoundingBox.FromPoints(tri.GetVertices());
@@ -1420,75 +1423,71 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Calculate the footprint of the triangle on the grid's y-axis
-            int y0 = (int)((t.Minimum.Y - b.Minimum.Y) * ics);
-            int y1 = (int)((t.Maximum.Y - b.Minimum.Y) * ics);
+            int y0 = (int)((t.Minimum.Z - b.Minimum.Z) * ics);
+            int y1 = (int)((t.Maximum.Z - b.Minimum.Z) * ics);
             y0 = MathUtil.Clamp(y0, 0, h - 1);
             y1 = MathUtil.Clamp(y1, 0, h - 1);
 
             // Clip the triangle into all grid cells it touches.
-            Vector3[] inb = new Vector3[7];
-            Vector3[] inrow = new Vector3[7];
-            Vector3[] p1 = new Vector3[7];
-            Vector3[] p2 = new Vector3[7];
-
-            inb[0] = tri.Point1;
-            inb[1] = tri.Point2;
-            inb[2] = tri.Point3;
-            int nvrow = 0;
-            int nvIn = 3;
+            List<Vector3> inb = new List<Vector3>(tri.GetVertices());
+            List<Vector3> zp1 = new List<Vector3>();
+            List<Vector3> zp2 = new List<Vector3>();
+            List<Vector3> xp1 = new List<Vector3>();
+            List<Vector3> xp2 = new List<Vector3>();
 
             for (int y = y0; y <= y1; ++y)
             {
                 // Clip polygon to row. Store the remaining polygon as well
-                float cz = b.Minimum.Y + y * cs;
-                DividePoly(inb, nvIn, ref inrow, ref nvrow, ref p1, ref nvIn, cz + cs, 2);
-                Helper.Swap(ref inb, ref p1);
-                if (nvrow < 3) continue;
+                zp1.Clear();
+                zp2.Clear();
+                float cz = b.Minimum.Z + y * cs;
+                DividePoly(inb, zp1, zp2, cz + cs, 2);
+                Helper.Swap(ref inb, ref zp2);
+                if (zp1.Count < 3) continue;
 
                 // find the horizontal bounds in the row
-                float minX = inrow[0].X;
-                float maxX = inrow[0].X;
-                for (int i = 1; i < nvrow; i++)
+                float minX = zp1[0].X;
+                float maxX = zp1[0].X;
+                for (int i = 1; i < zp1.Count; i++)
                 {
-                    if (minX > inrow[i].X) minX = inrow[i].X;
-                    if (maxX < inrow[i].X) maxX = inrow[i].X;
+                    minX = Math.Min(minX, zp1[i].X);
+                    maxX = Math.Max(maxX, zp1[i].X);
                 }
-                int x0 = (int)((minX - b.Minimum.X) * ics);
-                int x1 = (int)((maxX - b.Minimum.X) * ics);
-                x0 = MathUtil.Clamp(x0, 0, w - 1);
-                x1 = MathUtil.Clamp(x1, 0, w - 1);
-
-                int nv = 0;
-                int nv2 = nvrow;
+                minX -= b.Minimum.X;
+                maxX -= b.Minimum.X;
+                int x0 = MathUtil.Clamp((int)(minX * ics), 0, w - 1);
+                int x1 = MathUtil.Clamp((int)(maxX * ics), 0, w - 1);
 
                 for (int x = x0; x <= x1; ++x)
                 {
                     // Clip polygon to column. store the remaining polygon as well
+                    xp1.Clear();
+                    xp2.Clear();
                     float cx = b.Minimum.X + x * cs;
-                    DividePoly(inrow, nv2, ref p1, ref nv, ref p2, ref nv2, cx + cs, 0);
-                    Helper.Swap(ref inrow, ref p2);
-                    if (nv < 3) continue;
+                    DividePoly(zp1, xp1, xp2, cx + cs, 0);
+                    Helper.Swap(ref zp1, ref xp2);
+                    if (xp1.Count < 3) continue;
 
                     // Calculate min and max of the span.
-                    float sminY = p1[0].Y;
-                    float smaxY = p1[0].Y;
-                    for (int i = 1; i < nv; ++i)
+                    float minY = xp1[0].Y;
+                    float maxY = xp1[0].Y;
+                    for (int i = 1; i < xp1.Count; ++i)
                     {
-                        sminY = Math.Min(sminY, p1[i].Y);
-                        smaxY = Math.Min(smaxY, p1[i].Y);
+                        minY = Math.Min(minY, xp1[i].Y);
+                        maxY = Math.Max(maxY, xp1[i].Y);
                     }
-                    sminY -= b.Minimum.Y;
-                    smaxY -= b.Minimum.Y;
+                    minY -= b.Minimum.Y;
+                    maxY -= b.Minimum.Y;
                     // Skip the span if it is outside the heightfield bbox
-                    if (smaxY < 0.0f) continue;
-                    if (sminY > by) continue;
+                    if (maxY < 0.0f) continue;
+                    if (minY > by) continue;
                     // Clamp the span to the heightfield bbox.
-                    if (sminY < 0.0f) sminY = 0;
-                    if (smaxY > by) smaxY = by;
+                    if (minY < 0.0f) minY = 0;
+                    if (maxY > by) maxY = by;
 
                     // Snap the span to the heightfield height grid.
-                    ushort ismin = (ushort)MathUtil.Clamp((int)Math.Floor(sminY * ich), 0, Span.SpanMaxHeight);
-                    ushort ismax = (ushort)MathUtil.Clamp((int)Math.Ceiling(smaxY * ich), ismin + 1, Span.SpanMaxHeight);
+                    ushort ismin = (ushort)MathUtil.Clamp((int)Math.Floor(minY * ich), 0, Span.SpanMaxHeight);
+                    ushort ismax = (ushort)MathUtil.Clamp((int)Math.Ceiling(maxY * ich), ismin + 1, Span.SpanMaxHeight);
 
                     if (!AddSpan(hf, x, y, ismin, ismax, area, flagMergeThr))
                     {
@@ -1504,16 +1503,17 @@ namespace Engine.PathFinding.NavMesh2
         {
             int idx = x + y * hf.width;
 
-            Span s = new Span();
-            s.smin = smin;
-            s.smax = smax;
-            s.area = area;
-            s.next = null;
+            Span s = new Span
+            {
+                smin = smin,
+                smax = smax,
+                area = area,
+                next = null
+            };
 
             // Empty cell, add the first span.
-            if (hf.spans == null)
+            if (hf.spans[idx] == null)
             {
-                hf.spans = new Span[hf.width * hf.height];
                 hf.spans[idx] = s;
                 return true;
             }
@@ -1538,13 +1538,19 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     // Merge spans.
                     if (cur.smin < s.smin)
+                    {
                         s.smin = cur.smin;
+                    }
                     if (cur.smax > s.smax)
+                    {
                         s.smax = cur.smax;
+                    }
 
                     // Merge flags.
                     if (Math.Abs((int)s.smax - (int)cur.smax) <= flagMergeThr)
+                    {
                         s.area = Math.Max(s.area, cur.area);
+                    }
 
                     // Remove current span.
                     Span next = cur.next;
@@ -1587,41 +1593,40 @@ namespace Engine.PathFinding.NavMesh2
         }
 
         private static void DividePoly(
-            Vector3[] inn, int nin,
-            ref Vector3[] out1, ref int nout1,
-            ref Vector3[] out2, ref int nout2,
+            List<Vector3> inPoly,
+            List<Vector3> outPoly1,
+            List<Vector3> outPoly2,
             float x, int axis)
         {
-            float[] d = new float[12];
-            for (int i = 0; i < nin; i++)
+            float[] d = new float[inPoly.Count];
+            for (int i = 0; i < inPoly.Count; i++)
             {
-                d[i] = x - inn[i][axis];
+                d[i] = x - inPoly[i][axis];
             }
 
-            int m = 0;
-            int n = 0;
-            for (int i = 0, j = nin - 1; i < nin; j = i, i++)
+            for (int i = 0, j = inPoly.Count - 1; i < inPoly.Count; j = i, i++)
             {
                 bool ina = d[j] >= 0;
                 bool inb = d[i] >= 0;
                 if (ina != inb)
                 {
                     float s = d[j] / (d[j] - d[i]);
-                    out1[m].X = inn[j].X + (inn[i].X - inn[j].X) * s;
-                    out1[m].Y = inn[j].Y + (inn[i].Y - inn[j].Y) * s;
-                    out1[m].Z = inn[j].Z + (inn[i].Z - inn[j].Z) * s;
-
-                    out2[n++] = out1[m++];
+                    Vector3 v;
+                    v.X = inPoly[j].X + (inPoly[i].X - inPoly[j].X) * s;
+                    v.Y = inPoly[j].Y + (inPoly[i].Y - inPoly[j].Y) * s;
+                    v.Z = inPoly[j].Z + (inPoly[i].Z - inPoly[j].Z) * s;
+                    outPoly1.Add(v);
+                    outPoly2.Add(v);
 
                     // add the i'th point to the right polygon. Do NOT add points that are on the dividing line
                     // since these were already added above
                     if (d[i] > 0)
                     {
-                        out1[m++] = inn[i];
+                        outPoly1.Add(inPoly[i]);
                     }
                     else if (d[i] < 0)
                     {
-                        out2[n++] = inn[i];
+                        outPoly2.Add(inPoly[i]);
                     }
                 }
                 else // same side
@@ -1629,35 +1634,39 @@ namespace Engine.PathFinding.NavMesh2
                     // add the i'th point to the right polygon. Addition is done even for points on the dividing line
                     if (d[i] >= 0)
                     {
-                        out1[m++] = inn[i];
+                        outPoly1.Add(inPoly[i]);
 
-                        if (d[i] != 0) continue;
+                        if (d[i] != 0)
+                        {
+                            continue;
+                        }
                     }
 
-                    out1[n++] = inn[i];
+                    outPoly1.Add(inPoly[i]);
                 }
             }
-
-            nout1 = m;
-            nout2 = n;
         }
 
-        private static void MarkWalkableTriangles(float walkableSlopeAngle, Triangle[] tris, byte[] areas)
+        private static int MarkWalkableTriangles(float walkableSlopeAngle, Triangle[] tris, byte[] areas)
         {
             float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
 
-            Vector3 norm;
+            int count = 0;
 
             for (int i = 0; i < tris.Length; i++)
             {
                 var tri = tris[i];
-                norm = tri.Normal;
+                Vector3 norm = tri.Normal;
+
                 // Check if the face is walkable.
                 if (norm.Y > walkableThr)
                 {
                     areas[i] = WalkableArea;
+                    count++;
                 }
             }
+
+            return count;
         }
 
         private static CompactHeightfield BuildCompactHeightfield(int walkableHeight, int walkableClimb, Heightfield hf)
@@ -1815,8 +1824,10 @@ namespace Engine.PathFinding.NavMesh2
             return spanCount;
         }
 
-        private static void GetChunksOverlappingRect(ChunkyTriMesh cm, Vector2 bmin, Vector2 bmax, List<int> ids)
+        private static IEnumerable<int> GetChunksOverlappingRect(ChunkyTriMesh cm, Vector2 bmin, Vector2 bmax)
         {
+            List<int> ids = new List<int>();
+
             // Traverse tree
             int i = 0;
             while (i < cm.nnodes)
@@ -1840,6 +1851,8 @@ namespace Engine.PathFinding.NavMesh2
                     i += escapeIndex;
                 }
             }
+
+            return ids;
         }
 
         private static bool CheckOverlapRect(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax)
@@ -1848,20 +1861,6 @@ namespace Engine.PathFinding.NavMesh2
             overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
             overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
             return overlap;
-        }
-
-        private static Heightfield CreateHeightfield(int width, int height, BoundingBox boundingBox, float cellSize, float cellHeight)
-        {
-            Heightfield hf = new Heightfield();
-
-            hf.width = width;
-            hf.height = height;
-            hf.boundingBox = boundingBox;
-            hf.cs = cellSize;
-            hf.ch = cellHeight;
-            hf.spans = new Span[hf.width * hf.height];
-
-            return hf;
         }
 
         private static int CalcLayerBufferSize(int gridWidth, int gridHeight)

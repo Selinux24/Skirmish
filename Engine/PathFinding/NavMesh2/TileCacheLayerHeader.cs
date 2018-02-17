@@ -61,5 +61,14 @@ namespace Engine.PathFinding.NavMesh2
         /// Maxy usable sub-region.
         /// </summary>
         public byte maxy;
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("tx {0:000}; ty {0:000}; tlayer {0:000}", this.tx, this.ty, this.tlayer);
+        }
     };
 }
