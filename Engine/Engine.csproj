@@ -625,6 +625,9 @@
     <None Include="app.config" />
     <None Include="Engine.snk" />
     <None Include="packages.config" />
+    <Content Include="PathFinding\NavMesh2\DEBUGTris.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Resources\ShaderDefaultClouds.fxo" />
     <None Include="Resources\ShaderDefaultFoliage.fxo" />
     <None Include="Resources\ShaderDefaultWater.fxo" />
@@ -673,9 +676,6 @@
     <None Include="Resources\ShaderShadowFoliage.fx" />
     <None Include="Resources\ShaderDefaultWater.fx" />
     <None Include="Resources\IncMaterials.fx" />
-    <Content Include="PathFinding\NavMesh2\DEBUGTris.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="Resources\ShaderShadowPoints.fx" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

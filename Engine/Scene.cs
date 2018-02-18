@@ -1220,7 +1220,7 @@ namespace Engine
         /// Gets the objects triangle list for navigation graph construction
         /// </summary>
         /// <returns>Returns a triangle list</returns>
-        protected Triangle[] GetTrianglesForNavigationGraph()
+        protected virtual Triangle[] GetTrianglesForNavigationGraph()
         {
             List<Triangle> tris = new List<Triangle>();
 

@@ -104,6 +104,19 @@ namespace Engine
             return array;
         }
         /// <summary>
+        /// Initializes the specified array with value
+        /// </summary>
+        /// <typeparam name="T">Type of array</typeparam>
+        /// <param name="arr">Array</param>
+        /// <param name="value">Value to set to all array elements</param>
+        public static void InitializeArray<T>(this T[] arr, T value)
+        {
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = value;
+            }
+        }
+        /// <summary>
         /// Merge two arrays
         /// </summary>
         /// <typeparam name="T">Type of array</typeparam>

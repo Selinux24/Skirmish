@@ -3,6 +3,8 @@ namespace Engine.PathFinding.NavMesh2
 {
     struct RasterizationContext
     {
+        public const int MaxLayers = 32;
+
         public Heightfield solid;
         public byte[] triareas;
         public HeightfieldLayerSet lset;

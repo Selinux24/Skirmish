@@ -2,6 +2,7 @@
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -9,6 +10,54 @@ namespace Engine.PathFinding.NavMesh2
 {
     public class InputGeometry
     {
+        public static Triangle[] DebugTris()
+        {
+            List<Vector3> points = new List<Vector3>();
+            List<Int3> indices = new List<Int3>();
+
+            using (StreamReader rd = new StreamReader(@"./PathFinding/Navmesh2/DEBUGTris.obj"))
+            {
+                while (!rd.EndOfStream)
+                {
+                    string strLine = rd.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(strLine))
+                    {
+                        if (strLine.StartsWith("v", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var numbers = strLine.Split(" ".ToArray(), StringSplitOptions.None);
+
+                            points.Add(new Vector3(
+                                float.Parse(numbers[1], NumberStyles.Float, CultureInfo.InvariantCulture),
+                                float.Parse(numbers[2], NumberStyles.Float, CultureInfo.InvariantCulture),
+                                float.Parse(numbers[3], NumberStyles.Float, CultureInfo.InvariantCulture)));
+                        }
+
+                        if (strLine.StartsWith("f", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var numbers = strLine.Split(" ".ToArray(), StringSplitOptions.None);
+
+                            indices.Add(new Int3(
+                                int.Parse(numbers[1], NumberStyles.Integer, CultureInfo.InvariantCulture),
+                                int.Parse(numbers[2], NumberStyles.Integer, CultureInfo.InvariantCulture),
+                                int.Parse(numbers[3], NumberStyles.Integer, CultureInfo.InvariantCulture)));
+                        }
+                    }
+                }
+            }
+
+            Triangle[] res = new Triangle[indices.Count];
+
+            for (int i = 0; i < indices.Count; i++)
+            {
+                res[i] = new Triangle(
+                    points[indices[i].X - 1],
+                    points[indices[i].Y - 1],
+                    points[indices[i].Z - 1]);
+            }
+
+            return res;
+        }
+
         public const int MaxVolumes = 256;
         public const int MaxOffmeshConnections = 256;
 
@@ -27,8 +76,7 @@ namespace Engine.PathFinding.NavMesh2
         private int[] m_offMeshConId;
         private int m_offMeshConCount;
 
-        public BoundingBox BoundingBox;
-        public IEnumerable<Triangle> Triangles;
+        public readonly BoundingBox BoundingBox;
 
         public InputGeometry()
         {
@@ -46,32 +94,9 @@ namespace Engine.PathFinding.NavMesh2
 
         public InputGeometry(IEnumerable<Triangle> triangles) : this()
         {
-            this.Triangles = triangles;
             this.BoundingBox = GeometryUtil.CreateBoundingBox(triangles);
 
             CreateChunkyTriMesh(triangles.ToArray(), 256, out m_chunkyMesh);
-
-            //TODO: Remove this validation
-            foreach (var node in m_chunkyMesh.nodes)
-            {
-                if (node.i >= 0)
-                {
-                    var nBbox = new BoundingBox(
-                        new Vector3(node.bmin.X, float.MinValue, node.bmin.Y),
-                        new Vector3(node.bmax.X, float.MaxValue, node.bmax.Y));
-
-                    var tris = m_chunkyMesh.GetTriangles(node);
-                    foreach (var tri in tris)
-                    {
-                        var bbox = BoundingBox.FromPoints(tri.GetVertices());
-
-                        if (bbox.Contains(nBbox) == ContainmentType.Disjoint)
-                        {
-                            throw new Exception("Bad ChunkyTriMesh partition");
-                        }
-                    }
-                }
-            }
         }
 
         public ChunkyTriMesh GetChunkyMesh()
@@ -146,36 +171,6 @@ namespace Engine.PathFinding.NavMesh2
             return true;
         }
 
-        public static Triangle[] DebugTris()
-        {
-            List<float> numbers = new List<float>();
-
-            using (StreamReader rd = new StreamReader(@"./PathFinding/Navmesh2/DEBUGTris.txt"))
-            {
-                while (!rd.EndOfStream)
-                {
-                    string strNumber = rd.ReadLine();
-                    if (!string.IsNullOrWhiteSpace(strNumber))
-                    {
-                        numbers.Add(float.Parse(strNumber, System.Globalization.CultureInfo.InvariantCulture));
-                    }
-                }
-            }
-
-            List<Triangle> res = new List<Triangle>();
-
-            for (int i = 0; i < numbers.Count / 9; i++)
-            {
-                var p1 = new Vector3(numbers[i * 9 + 0], numbers[i * 9 + 1], numbers[i * 9 + 2]);
-                var p2 = new Vector3(numbers[i * 9 + 3], numbers[i * 9 + 4], numbers[i * 9 + 5]);
-                var p3 = new Vector3(numbers[i * 9 + 6], numbers[i * 9 + 7], numbers[i * 9 + 8]);
-
-                res.Add(new Triangle(p1, p2, p3));
-            }
-
-            return res.ToArray();
-        }
-
         private void Subdivide(
             BoundsItem[] items, int imin, int imax, int trisPerChunk,
             ref int curNode, ChunkyTriMeshNode[] nodes, int maxNodes,
@@ -191,16 +186,18 @@ namespace Engine.PathFinding.NavMesh2
 
             int iNode = curNode++;
 
+            Vector2 bmin;
+            Vector2 bmax;
+            CalcExtends(items, imin, imax, out bmin, out bmax);
+
+            nodes[iNode].bmin = bmin;
+            nodes[iNode].bmax = bmax;
+
             if (inum <= trisPerChunk)
             {
                 // Leaf
-                Vector2 bmin;
-                Vector2 bmax;
-                CalcExtends(items, imin, imax, out bmin, out bmax);
 
                 // Copy triangles.
-                nodes[iNode].bmin = bmin;
-                nodes[iNode].bmax = bmax;
                 nodes[iNode].i = curTri;
                 nodes[iNode].n = inum;
 
@@ -213,12 +210,6 @@ namespace Engine.PathFinding.NavMesh2
             else
             {
                 // Split
-                Vector2 bmin;
-                Vector2 bmax;
-                CalcExtends(items, imin, imax, out bmin, out bmax);
-
-                nodes[iNode].bmin = bmin;
-                nodes[iNode].bmax = bmax;
 
                 int axis = LongestAxis(bmax.X - bmin.X, bmax.Y - bmin.Y);
                 if (axis == 0)
@@ -273,92 +264,6 @@ namespace Engine.PathFinding.NavMesh2
 
                 if (items[i].bmax.X > bmax.X) bmax.X = items[i].bmax.X;
                 if (items[i].bmax.Y > bmax.Y) bmax.Y = items[i].bmax.Y;
-            }
-        }
-
-
-        private static void QuickSort<T>(T[] arr, int begin, int end, Comparison<T> comparison)
-        {
-            end = arr.Length <= end ? arr.Length - 1 : end;
-
-            T pivot = arr[(begin + (end - begin) / 2)];
-            int left = begin;
-            int right = end;
-            while (left <= right)
-            {
-                while (comparison(arr[left], pivot) < 0)
-                {
-                    left++;
-                }
-                while (comparison(arr[right], pivot) > 0)
-                {
-                    right--;
-                }
-                if (left <= right)
-                {
-                    Swap(arr, left, right);
-                    left++;
-                    right--;
-                }
-            }
-            if (begin < right)
-            {
-                QuickSort(arr, begin, left - 1, comparison);
-            }
-            if (end > left)
-            {
-                QuickSort(arr, right + 1, end, comparison);
-            }
-        }
-
-        static void Swap<T>(T[] items, int x, int y)
-        {
-            T temp = items[x];
-            items[x] = items[y];
-            items[y] = temp;
-        }
-
-        public static void Quicksort<T>(T[] elements, int start, int end, Comparison<T> comparison)
-        {
-            end = elements.Length <= end ? elements.Length - 1 : end;
-
-            int i = start;
-            int j = end;
-            T pivot = elements[(start + end) / 2];
-
-            while (i <= j)
-            {
-                while (comparison(elements[i], pivot) < 0)
-                {
-                    i++;
-                }
-
-                while (comparison(elements[j], pivot) > 0)
-                {
-                    j--;
-                }
-
-                if (i <= j)
-                {
-                    // Swap
-                    T tmp = elements[i];
-                    elements[i] = elements[j];
-                    elements[j] = tmp;
-
-                    i++;
-                    j--;
-                }
-            }
-
-            // Recursive calls
-            if (start < j)
-            {
-                Quicksort(elements, start, j, comparison);
-            }
-
-            if (i < end)
-            {
-                Quicksort(elements, i, end, comparison);
             }
         }
     }

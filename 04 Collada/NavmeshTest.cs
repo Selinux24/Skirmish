@@ -27,12 +27,8 @@ namespace Collada
         private Color4 colorNodeBox = new Color4(0.0f, 1.0f, 1.0f, 0.50f);
 
         private InputGeometry inputGeometry = null;
-        private int inputGeometryIndex = 0;
+        private int inputGeometryIndex = -1;
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="game">Game</param>
         public NavmeshTest(Game game) : base(game)
         {
 
@@ -47,7 +43,7 @@ namespace Collada
             this.agent = new Player2()
             {
                 Name = "Player",
-                Height = 1.5f,
+                Height = 2f,
                 MaxClimb = 0.8f,
                 MaxSlope = 45f,
                 Radius = 0.5f,
@@ -55,14 +51,14 @@ namespace Collada
                 VelocitySlow = 1f,
             };
 
-            //var nmsettings = Engine.PathFinding.NavMesh2.BuildSettings.Default;
-            //nmsettings.Agents = new[] { this.agent };
-            //nmsettings.TileSize = 48;
+            var nmsettings = BuildSettings.Default;
+            nmsettings.Agents = new[] { this.agent };
+            nmsettings.TileSize = 48;
 
-            //this.PathFinderDescription = new PathFinderDescription()
-            //{
-            //    Settings = nmsettings,
-            //};
+            this.PathFinderDescription = new PathFinderDescription()
+            {
+                Settings = nmsettings,
+            };
 
             var dungeonDrawerDesc = new TriangleListDrawerDescription()
             {
@@ -96,11 +92,22 @@ namespace Collada
 
             this.inputGeometry = new InputGeometry(triangles);
         }
+        protected override Triangle[] GetTrianglesForNavigationGraph()
+        {
+            return this.inputGeometry.GetChunkyMesh().triangles;
+        }
         public override void Initialized()
         {
             base.Initialized();
 
             this.UpdateGraphNodes(this.agent);
+
+            var bbox = inputGeometry.BoundingBox;
+            var center = bbox.GetCenter();
+            float maxD = Math.Max(Math.Max(bbox.GetX(), bbox.GetY()), bbox.GetZ());
+
+            this.Camera.Interest = center;
+            this.Camera.Position = center + new Vector3(-1, 1, -1) * maxD * 0.75f;
         }
         public override void Update(GameTime gameTime)
         {
@@ -117,9 +124,14 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
-                this.UpdateInputGeometryNodes(inputGeometryIndex);
-
-                inputGeometryIndex = shift ? inputGeometryIndex - 1 : inputGeometryIndex + 1;
+                if (shift)
+                {
+                    this.UpdateInputGeometryNodes(--inputGeometryIndex);
+                }
+                else
+                {
+                    this.UpdateInputGeometryNodes(++inputGeometryIndex);
+                }
             }
         }
         private void UpdateCamera(GameTime gameTime)
@@ -161,32 +173,53 @@ namespace Collada
             this.dungeonTriDrawer.Instance.Clear(colorNodeBox);
             this.dungeonTriDrawer.Instance.Clear(colorNodeTri);
 
+            Random rnd = new Random(1);
+
             var chunkyMesh = this.inputGeometry.GetChunkyMesh();
 
             if (index >= 0)
             {
-                var node = chunkyMesh.nodes[index];
+                if (index == 0)
+                {
+                    for (int i = 0; i < chunkyMesh.nnodes; i++)
+                    {
+                        var node = chunkyMesh.nodes[i];
+                        if (node.i >= 0)
+                        {
+                            var color = rnd.NextColor().ToColor4();
+                            color.Alpha = colorNodeTri.Alpha;
+                            this.dungeonTriDrawer.Instance.Clear(color);
+                        }
+                    }
+                }
+
+                var curNode = chunkyMesh.nodes[index];
 
                 var bbox = new BoundingBox(
-                    new Vector3(node.bmin.X, inputGeometry.BoundingBox.Minimum.Y, node.bmin.Y),
-                    new Vector3(node.bmax.X, inputGeometry.BoundingBox.Maximum.Y, node.bmax.Y));
+                    new Vector3(curNode.bmin.X, inputGeometry.BoundingBox.Minimum.Y, curNode.bmin.Y),
+                    new Vector3(curNode.bmax.X, inputGeometry.BoundingBox.Maximum.Y, curNode.bmax.Y));
 
                 this.dungeonTriDrawer.Instance.SetLines(colorNodeBox, Line3D.CreateWiredBox(bbox));
 
-                if (node.i >= 0)
+                if (curNode.i >= 0)
                 {
-                    var triangles = chunkyMesh.GetTriangles(node);
+                    var triangles = chunkyMesh.GetTriangles(curNode);
 
                     this.dungeonTriDrawer.Instance.SetTriangles(colorNodeTri, triangles);
                 }
             }
             else
             {
-                Random rnd = new Random(1);
-
                 for (int i = 0; i < chunkyMesh.nnodes; i++)
                 {
                     var node = chunkyMesh.nodes[i];
+
+                    var bbox = new BoundingBox(
+                        new Vector3(node.bmin.X, inputGeometry.BoundingBox.Minimum.Y, node.bmin.Y),
+                        new Vector3(node.bmax.X, inputGeometry.BoundingBox.Maximum.Y, node.bmax.Y));
+
+                    this.dungeonTriDrawer.Instance.AddLines(colorNodeBox, Line3D.CreateWiredBox(bbox));
+
                     if (node.i >= 0)
                     {
                         var triangles = chunkyMesh.GetTriangles(node);

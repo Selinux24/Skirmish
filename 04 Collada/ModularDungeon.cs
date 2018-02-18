@@ -371,7 +371,7 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.G))
             {
-                //this.UpdateGraphNodes(this.currentGraph == 0 ? this.agent : this.ratAgentType);
+                this.UpdateGraphNodes(this.currentGraph == 0 ? this.agent : this.ratAgentType);
                 this.currentGraph++;
                 this.currentGraph %= 2;
             }

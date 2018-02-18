@@ -46,6 +46,10 @@ namespace Engine.PathFinding.NavMesh2
         {
             if (a.bmin.X < b.bmin.X) return -1;
             if (a.bmin.X > b.bmin.X) return 1;
+            if (a.bmax.X < b.bmax.X) return -1;
+            if (a.bmax.X > b.bmax.X) return 1;
+            if (a.i < b.i) return -1;
+            if (a.i > b.i) return 1;
             return 0;
         }
     }
@@ -65,6 +69,10 @@ namespace Engine.PathFinding.NavMesh2
         {
             if (a.bmin.Y < b.bmin.Y) return -1;
             if (a.bmin.Y > b.bmin.Y) return 1;
+            if (a.bmax.Y < b.bmax.Y) return -1;
+            if (a.bmax.Y > b.bmax.Y) return 1;
+            if (a.i < b.i) return -1;
+            if (a.i > b.i) return 1;
             return 0;
         }
     }

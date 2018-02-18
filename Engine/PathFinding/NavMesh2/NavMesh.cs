@@ -241,7 +241,9 @@ namespace Engine.PathFinding.NavMesh2
                 // Allocate array that can hold triangle flags.
                 // If you have multiple meshes you need to process, allocate
                 // and array which can hold the max number of triangles you need to process.
-                triareas = new byte[chunkyMesh.maxTrisPerChunk]
+                triareas = new byte[chunkyMesh.maxTrisPerChunk],
+
+                tiles = new TileCacheData[RasterizationContext.MaxLayers],
             };
 
             Vector2 tbmin = new Vector2(tcfg.BoundingBox.Minimum.X, tcfg.BoundingBox.Minimum.Z);
@@ -256,6 +258,8 @@ namespace Engine.PathFinding.NavMesh2
             foreach (var id in cid)
             {
                 var tris = chunkyMesh.GetTriangles(id);
+
+                Helper.InitializeArray<byte>(rc.triareas, 0);
 
                 MarkWalkableTriangles(tcfg.WalkableSlopeAngle, tris, rc.triareas);
 
@@ -272,12 +276,10 @@ namespace Engine.PathFinding.NavMesh2
             {
                 FilterLowHangingWalkableObstacles(tcfg.WalkableClimb, rc.solid);
             }
-
             if (settings.FilterLedgeSpans)
             {
                 FilterLedgeSpans(tcfg.WalkableHeight, tcfg.WalkableClimb, rc.solid);
             }
-
             if (settings.FilterWalkableLowHeightSpans)
             {
                 FilterWalkableLowHeightSpans(tcfg.WalkableHeight, rc.solid);
@@ -301,7 +303,6 @@ namespace Engine.PathFinding.NavMesh2
                     vols[i].area, rc.chf);
             }
 
-            //TODO: Here we are! - The layer set is always empty
             BuildHeightfieldLayers(rc.chf, tcfg.BorderSize, tcfg.WalkableHeight, out rc.lset);
 
             FastLZCompressor comp;
@@ -332,10 +333,11 @@ namespace Engine.PathFinding.NavMesh2
                 header.hmin = layer.hmin;
                 header.hmax = layer.hmax;
 
+                // TODO: Here we go!
                 if (!BuildTileCacheLayer(
-                    comp,
-                    header, layer.heights, layer.areas, layer.cons,
-                    tile.Data, tile.DataSize))
+                    ref comp, ref header,
+                    layer.heights, layer.areas, layer.cons,
+                    ref tile.Data, ref tile.DataSize))
                 {
                     return 0;
                 }
@@ -433,7 +435,10 @@ namespace Engine.PathFinding.NavMesh2
             return c;
         }
 
-        private static bool BuildTileCacheLayer(FastLZCompressor comp, TileCacheLayerHeader header, byte[] heights, byte[] areas, byte[] cons, byte[] data, int dataSize)
+        private static bool BuildTileCacheLayer(
+            ref FastLZCompressor comp, ref TileCacheLayerHeader header,
+            byte[] heights, byte[] areas, byte[] cons,
+            ref byte[] data, ref int dataSize)
         {
             throw new NotImplementedException();
         }
@@ -445,17 +450,17 @@ namespace Engine.PathFinding.NavMesh2
             int w = chf.width;
             int h = chf.height;
 
-            byte[] srcReg = new byte[chf.spanCount];
+            byte[] srcReg = Helper.CreateArray<byte>(chf.spanCount, 0xff);
 
             int nsweeps = chf.width;
-            LayerSweepSpan[] sweeps = new LayerSweepSpan[nsweeps];
+            LayerSweepSpan[] sweeps = Helper.CreateArray<LayerSweepSpan>(nsweeps, new LayerSweepSpan());
 
             // Partition walkable area into monotone regions.
-            int[] prevCount = new int[256];
             byte regId = 0;
 
             for (int y = borderSize; y < h - borderSize; ++y)
             {
+                int[] prevCount = Helper.CreateArray<int>(256, 0);
                 byte sweepId = 0;
 
                 for (int x = borderSize; x < w - borderSize; ++x)
@@ -555,14 +560,7 @@ namespace Engine.PathFinding.NavMesh2
 
             // Allocate and init layer regions.
             int nregs = regId;
-            LayerRegion[] regs = new LayerRegion[nregs];
-
-            for (int i = 0; i < nregs; ++i)
-            {
-                regs[i].layerId = 0xff;
-                regs[i].ymin = 0xffff;
-                regs[i].ymax = 0;
-            }
+            LayerRegion[] regs = Helper.CreateArray<LayerRegion>(nregs, () => (LayerRegion.Default));
 
             // Find region neighbours and overlapping regions.
             for (int y = 0; y < h; ++y)
@@ -610,7 +608,6 @@ namespace Engine.PathFinding.NavMesh2
                                 }
                             }
                         }
-
                     }
 
                     // Update overlapping regions.
@@ -628,6 +625,9 @@ namespace Engine.PathFinding.NavMesh2
                                 {
                                     throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                                 }
+
+                                regs[lregs[i]] = ri;
+                                regs[lregs[j]] = rj;
                             }
                         }
                     }
@@ -714,8 +714,12 @@ namespace Engine.PathFinding.NavMesh2
                             root.ymin = Math.Min(root.ymin, regn.ymin);
                             root.ymax = Math.Max(root.ymax, regn.ymax);
                         }
+
+                        regs[nei] = regn;
                     }
                 }
+
+                regs[i] = root;
 
                 layerId++;
             }
@@ -726,6 +730,7 @@ namespace Engine.PathFinding.NavMesh2
             for (int i = 0; i < nregs; ++i)
             {
                 LayerRegion ri = regs[i];
+
                 if (!ri.isBase)
                 {
                     continue;
@@ -805,6 +810,7 @@ namespace Engine.PathFinding.NavMesh2
                     for (int j = 0; j < nregs; ++j)
                     {
                         LayerRegion rj = regs[j];
+
                         if (rj.layerId == oldId)
                         {
                             rj.isBase = false;
@@ -822,9 +828,13 @@ namespace Engine.PathFinding.NavMesh2
                             // Update height bounds.
                             ri.ymin = Math.Min(ri.ymin, rj.ymin);
                             ri.ymax = Math.Max(ri.ymax, rj.ymax);
+
+                            regs[j] = rj;
                         }
                     }
                 }
+
+                regs[i] = ri;
             }
 
             // Compact layerIds
@@ -839,7 +849,7 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < 256; i++)
             {
-                if (remap[i] == 0)
+                if (remap[i] != 0)
                 {
                     remap[i] = layerId++;
                 }
@@ -868,15 +878,16 @@ namespace Engine.PathFinding.NavMesh2
             // Build contracted bbox for layers.
             Vector3 bmin = chf.boundingBox.Minimum;
             Vector3 bmax = chf.boundingBox.Maximum;
-            bmin[0] += borderSize * chf.cs;
-            bmin[2] += borderSize * chf.cs;
-            bmax[0] -= borderSize * chf.cs;
-            bmax[2] -= borderSize * chf.cs;
+            bmin.X += borderSize * chf.cs;
+            bmin.Z += borderSize * chf.cs;
+            bmax.X -= borderSize * chf.cs;
+            bmax.Z -= borderSize * chf.cs;
 
-            lset = new HeightfieldLayerSet();
-
-            lset.nlayers = layerId;
-            lset.layers = new HeightfieldLayer[lset.nlayers];
+            lset = new HeightfieldLayerSet
+            {
+                nlayers = layerId,
+                layers = new HeightfieldLayer[layerId],
+            };
 
             // Store layers.
             for (int i = 0; i < lset.nlayers; ++i)
@@ -887,9 +898,9 @@ namespace Engine.PathFinding.NavMesh2
 
                 int gridSize = lw * lh;
 
-                layer.heights = new byte[gridSize];
-                layer.areas = new byte[gridSize];
-                layer.cons = new byte[gridSize];
+                layer.heights = Helper.CreateArray<byte>(gridSize, 0xff);
+                layer.areas = Helper.CreateArray<byte>(gridSize, 0x00);
+                layer.cons = Helper.CreateArray<byte>(gridSize, 0x00);
 
                 // Find layer height bounds.
                 int hmin = 0, hmax = 0;
@@ -1005,6 +1016,8 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     layer.miny = layer.maxy = 0;
                 }
+
+                lset.layers[i] = layer;
             }
 
             return true;
@@ -1203,7 +1216,7 @@ namespace Engine.PathFinding.NavMesh2
             int h = chf.height;
 
             // Init distance.
-            byte[] dist = new byte[chf.spanCount];
+            byte[] dist = Helper.CreateArray<byte>(chf.spanCount, 0xff);
 
             // Mark boundary cells.
             for (int y = 0; y < h; ++y)
@@ -1523,7 +1536,7 @@ namespace Engine.PathFinding.NavMesh2
             // Insert and merge spans.
             while (cur != null)
             {
-                if (cur.smin > cur.smax)
+                if (cur.smin > s.smax)
                 {
                     // Current span is further than the new span, break.
                     break;
@@ -1642,7 +1655,7 @@ namespace Engine.PathFinding.NavMesh2
                         }
                     }
 
-                    outPoly1.Add(inPoly[i]);
+                    outPoly2.Add(inPoly[i]);
                 }
             }
         }
@@ -1740,7 +1753,7 @@ namespace Engine.PathFinding.NavMesh2
 
                         for (int dir = 0; dir < 4; dir++)
                         {
-                            SetCon(s, dir, NotConnected);
+                            SetCon(ref s, dir, NotConnected);
                             int nx = x + GetDirOffsetX(dir);
                             int ny = y + GetDirOffsetY(dir);
                             // First check that the neighbour cell is in bounds.
@@ -1770,11 +1783,13 @@ namespace Engine.PathFinding.NavMesh2
                                         continue;
                                     }
 
-                                    SetCon(s, dir, lidx);
+                                    SetCon(ref s, dir, lidx);
                                     break;
                                 }
                             }
                         }
+
+                        chf.spans[i] = s;
                     }
                 }
             }
@@ -1787,7 +1802,7 @@ namespace Engine.PathFinding.NavMesh2
             return chf;
         }
 
-        private static void SetCon(CompactSpan s, int dir, int i)
+        private static void SetCon(ref CompactSpan s, int dir, int i)
         {
             uint shift = (uint)dir * 6;
             uint con = s.con;

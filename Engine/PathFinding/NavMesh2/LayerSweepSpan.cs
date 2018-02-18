@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.PathFinding.NavMesh2
 {
-    public class LayerSweepSpan
+    public struct LayerSweepSpan
     {
         /// <summary>
         /// Number samples
@@ -15,5 +15,14 @@ namespace Engine.PathFinding.NavMesh2
         /// Neighbour id
         /// </summary>
         public byte nei;
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("Samples {0}; Region {1}; Neighbour {2};", ns, id, nei);
+        }
     }
 }

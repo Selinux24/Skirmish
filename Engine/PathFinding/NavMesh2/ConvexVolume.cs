@@ -11,5 +11,16 @@ namespace Engine.PathFinding.NavMesh2
         public float hmax;
         public int nverts;
         public byte area;
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("Area {0}; Min {1} Max {2} Verts {3} -> {4}",
+                area, hmin, hmax, nverts,
+                verts != null ? string.Join(" ", verts) : "");
+        }
     }
 }

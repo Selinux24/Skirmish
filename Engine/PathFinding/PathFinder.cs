@@ -41,7 +41,7 @@ namespace Engine.PathFinding
         public static IGraph Build(PathFinderSettings settings, Triangle[] triangles)
         {
             //DEBUG WIP NavMesh2
-            triangles = NavMesh2.InputGeometry.DebugTris();
+            //triangles = NavMesh2.InputGeometry.DebugTris();
             //triangles = new[]
             //{
             //    new Triangle(-100, 0, -100, -100, 0, 100, 100, 0, 100),
