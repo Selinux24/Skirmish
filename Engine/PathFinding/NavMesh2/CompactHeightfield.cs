@@ -63,6 +63,6 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Array containing area id data. [Size: spanCount] 
         /// </summary>
-        public byte[] areas;
+        public TileCacheAreas[] areas;
     }
 }

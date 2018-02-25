@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh2
         public float hmin;
         public float hmax;
         public int nverts;
-        public byte area;
+        public TileCacheAreas area;
 
         /// <summary>
         /// Gets the text representation of the instance

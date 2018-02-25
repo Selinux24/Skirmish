@@ -19,7 +19,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Area ids. [Size: Same as #heights]
         /// </summary>
-        public byte[] areas;
+        public TileCacheAreas[] areas;
         /// <summary>
         /// Packed neighbor connection information. [Size: Same as #heights]
         /// </summary>

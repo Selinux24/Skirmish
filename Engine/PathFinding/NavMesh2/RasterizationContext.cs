@@ -6,7 +6,7 @@ namespace Engine.PathFinding.NavMesh2
         public const int MaxLayers = 32;
 
         public Heightfield solid;
-        public byte[] triareas;
+        public TileCacheAreas[] triareas;
         public HeightfieldLayerSet lset;
         public CompactHeightfield chf;
         public TileCacheData[] tiles;

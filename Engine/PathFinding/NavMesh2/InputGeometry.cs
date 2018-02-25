@@ -71,9 +71,9 @@ namespace Engine.PathFinding.NavMesh2
         private float[] m_offMeshConVerts;
         private float[] m_offMeshConRads;
         private byte[] m_offMeshConDirs;
-        private byte[] m_offMeshConAreas;
-        private short[] m_offMeshConFlags;
-        private int[] m_offMeshConId;
+        private SamplePolyAreas[] m_offMeshConAreas;
+        private SamplePolyFlags[] m_offMeshConFlags;
+        private uint[] m_offMeshConId;
         private int m_offMeshConCount;
 
         public readonly BoundingBox BoundingBox;
@@ -86,12 +86,11 @@ namespace Engine.PathFinding.NavMesh2
             m_offMeshConVerts = new float[MaxOffmeshConnections * 3 * 2];
             m_offMeshConRads = new float[MaxOffmeshConnections];
             m_offMeshConDirs = new byte[MaxOffmeshConnections];
-            m_offMeshConAreas = new byte[MaxOffmeshConnections];
-            m_offMeshConFlags = new short[MaxOffmeshConnections];
-            m_offMeshConId = new int[MaxOffmeshConnections];
+            m_offMeshConAreas = new SamplePolyAreas[MaxOffmeshConnections];
+            m_offMeshConFlags = new SamplePolyFlags[MaxOffmeshConnections];
+            m_offMeshConId = new uint[MaxOffmeshConnections];
             m_offMeshConCount = 0;
         }
-
         public InputGeometry(IEnumerable<Triangle> triangles) : this()
         {
             this.BoundingBox = GeometryUtil.CreateBoundingBox(triangles);
@@ -103,15 +102,41 @@ namespace Engine.PathFinding.NavMesh2
         {
             return m_chunkyMesh;
         }
-
         public ConvexVolume[] GetConvexVolumes()
         {
             return m_volumes;
         }
-
         public int GetConvexVolumeCount()
         {
             return m_volumeCount;
+        }
+        public int GetOffMeshConnectionCount()
+        {
+            return m_offMeshConCount;
+        }
+        public uint[] GetOffMeshConnectionId()
+        {
+            return m_offMeshConId;
+        }
+        public SamplePolyFlags[] GetOffMeshConnectionFlags()
+        {
+            return m_offMeshConFlags;
+        }
+        public SamplePolyAreas[] GetOffMeshConnectionAreas()
+        {
+            return m_offMeshConAreas;
+        }
+        public byte[] GetOffMeshConnectionDirs()
+        {
+            return m_offMeshConDirs;
+        }
+        public float[] GetOffMeshConnectionRads()
+        {
+            return m_offMeshConRads;
+        }
+        public float[] GetOffMeshConnectionVerts()
+        {
+            return m_offMeshConVerts;
         }
 
         private bool CreateChunkyTriMesh(Triangle[] tris, int trisPerChunk, out ChunkyTriMesh cm)
@@ -170,7 +195,6 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-
         private void Subdivide(
             BoundsItem[] items, int imin, int imax, int trisPerChunk,
             ref int curNode, ChunkyTriMeshNode[] nodes, int maxNodes,
@@ -243,12 +267,10 @@ namespace Engine.PathFinding.NavMesh2
                 nodes[iNode].i = -iescape;
             }
         }
-
         private int LongestAxis(float x, float y)
         {
             return y > x ? 1 : 0;
         }
-
         private void CalcExtends(BoundsItem[] items, int imin, int imax, out Vector2 bmin, out Vector2 bmax)
         {
             bmin.X = items[imin].bmin.X;

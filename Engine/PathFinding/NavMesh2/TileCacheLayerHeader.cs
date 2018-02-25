@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Engine.PathFinding.NavMesh2
 {
+    [StructLayout(LayoutKind.Sequential)]
     public struct TileCacheLayerHeader
     {
         public const int TileCacheMagic = 'D' << 24 | 'T' << 16 | 'L' << 8 | 'R';
@@ -68,7 +69,18 @@ namespace Engine.PathFinding.NavMesh2
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("tx {0:000}; ty {0:000}; tlayer {0:000}", this.tx, this.ty, this.tlayer);
+            if (this.magic == 0 && this.version == 0)
+            {
+                return "Empty;";
+            }
+
+            if (this.magic != TileCacheMagic)
+            {
+                return "Invalid;";
+            }
+
+            return string.Format("tx {0:000}; ty {1:000}; tlayer {2:000};", 
+                this.tx, this.ty, this.tlayer);
         }
     };
 }

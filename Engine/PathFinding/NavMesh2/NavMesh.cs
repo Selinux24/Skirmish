@@ -7,22 +7,13 @@ namespace Engine.PathFinding.NavMesh2
 {
     public class NavMesh
     {
-        const int ExpectedLayersPerTile = 4;
-        const byte WalkableArea = 63;
-        const byte AreaNull = 0;
-        const int NotConnected = 0x3f;
-
-        private static void CalcGridSize(BoundingBox b, float cellSize, out int w, out int h)
-        {
-            w = (int)((b.Maximum.X - b.Minimum.X) / cellSize + 0.5f);
-            h = (int)((b.Maximum.Z - b.Minimum.Z) / cellSize + 0.5f);
-        }
+        public const int ExpectedLayersPerTile = 4;
+        public const int NotConnected = 0x3f;
 
         public static NavMesh Build(Triangle[] triangles, BuildSettings settings)
         {
             return Build(new InputGeometry(triangles), settings);
         }
-
         public static NavMesh Build(InputGeometry geometry, BuildSettings settings)
         {
             var agent = settings.Agents[0];
@@ -80,9 +71,10 @@ namespace Engine.PathFinding.NavMesh2
                 MaxTiles = tw * th * ExpectedLayersPerTile,
                 MaxObstacles = 128,
             };
+            var tmproc = new TileCacheMeshProcess(geometry);
 
-            var tc = new TileCache();
-            tc.Init(tcparams);
+            var tileCache = new TileCache();
+            tileCache.Init(tcparams, tmproc);
 
             int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th * ExpectedLayersPerTile), 2), 14);
             if (tileBits > 14) tileBits = 14;
@@ -105,8 +97,6 @@ namespace Engine.PathFinding.NavMesh2
             var nmQuery = new NavMeshQuery();
             nmQuery.Init(nm, settings.MaxNodes);
 
-            var tileCache = new TileCache();
-
             int m_cacheLayerCount = 0;
             int m_cacheCompressedSize = 0;
             int m_cacheRawSize = 0;
@@ -121,10 +111,10 @@ namespace Engine.PathFinding.NavMesh2
 
                     for (int i = 0; i < ntiles; ++i)
                     {
-                        tileCache.AddTile(tiles[i], 1);
+                        tileCache.AddTile(tiles[i], TileFlags.FreeData);
 
                         m_cacheLayerCount++;
-                        m_cacheCompressedSize += tiles[i].DataSize;
+                        m_cacheCompressedSize += 0;// tiles[i].DataSize;
                         m_cacheRawSize += layerBufferSize;
                     }
                 }
@@ -142,65 +132,11 @@ namespace Engine.PathFinding.NavMesh2
             return nm;
         }
 
-        private Vector3 m_orig;
-        private float m_tileWidth;
-        private float m_tileHeight;
-        private int m_maxTiles;
-        private int m_tileLutSize;
-        private int m_tileLutMask;
-        private MeshTile[] m_tiles;
-        private MeshTile[] m_posLookup;
-        private MeshTile m_nextFree = null;
-        private uint m_tileBits;
-        private uint m_polyBits;
-        private uint m_saltBits;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public NavMesh()
+        private static void CalcGridSize(BoundingBox b, float cellSize, out int w, out int h)
         {
-
+            w = (int)((b.Maximum.X - b.Minimum.X) / cellSize + 0.5f);
+            h = (int)((b.Maximum.Z - b.Minimum.Z) / cellSize + 0.5f);
         }
-
-        public void Init(NavMeshParams nmparams)
-        {
-            m_orig = nmparams.Origin;
-            m_tileWidth = nmparams.TileWidth;
-            m_tileHeight = nmparams.TileHeight;
-
-            // Init tiles
-            m_maxTiles = nmparams.MaxTiles;
-            m_tileLutSize = Helper.NextPowerOfTwo(nmparams.MaxTiles / 4);
-            if (m_tileLutSize == 0) m_tileLutSize = 1;
-            m_tileLutMask = m_tileLutSize - 1;
-
-            m_tiles = new MeshTile[m_maxTiles];
-            m_posLookup = new MeshTile[m_tileLutSize];
-
-            m_nextFree = null;
-            for (int i = m_maxTiles - 1; i >= 0; --i)
-            {
-                m_tiles[i] = new MeshTile
-                {
-                    Salt = 1,
-                    Next = m_nextFree
-                };
-                m_nextFree = m_tiles[i];
-            }
-
-            // Init ID generator values.
-            m_tileBits = (uint)Math.Log(Helper.NextPowerOfTwo(nmparams.MaxTiles), 2);
-            m_polyBits = (uint)Math.Log(Helper.NextPowerOfTwo(nmparams.MaxPolys), 2);
-            // Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
-            m_saltBits = Math.Min(31, 32 - m_tileBits - m_polyBits);
-
-            if (m_saltBits < 10)
-            {
-                throw new EngineException("DT_INVALID_PARAM");
-            }
-        }
-
         private static int RasterizeTileLayers(int tx, int ty, BuildSettings settings, Config cfg, InputGeometry geometry, out TileCacheData[] tiles)
         {
             tiles = new TileCacheData[TileCache.MaxLayers];
@@ -241,7 +177,7 @@ namespace Engine.PathFinding.NavMesh2
                 // Allocate array that can hold triangle flags.
                 // If you have multiple meshes you need to process, allocate
                 // and array which can hold the max number of triangles you need to process.
-                triareas = new byte[chunkyMesh.maxTrisPerChunk],
+                triareas = new TileCacheAreas[chunkyMesh.maxTrisPerChunk],
 
                 tiles = new TileCacheData[RasterizationContext.MaxLayers],
             };
@@ -259,7 +195,7 @@ namespace Engine.PathFinding.NavMesh2
             {
                 var tris = chunkyMesh.GetTriangles(id);
 
-                Helper.InitializeArray<byte>(rc.triareas, 0);
+                Helper.InitializeArray<TileCacheAreas>(rc.triareas, TileCacheAreas.NullArea);
 
                 MarkWalkableTriangles(tcfg.WalkableSlopeAngle, tris, rc.triareas);
 
@@ -305,42 +241,45 @@ namespace Engine.PathFinding.NavMesh2
 
             BuildHeightfieldLayers(rc.chf, tcfg.BorderSize, tcfg.WalkableHeight, out rc.lset);
 
-            FastLZCompressor comp;
             rc.ntiles = 0;
             for (int i = 0; i < Math.Min(rc.lset.nlayers, TileCache.MaxLayers); i++)
             {
-                TileCacheData tile = rc.tiles[rc.ntiles++];
                 HeightfieldLayer layer = rc.lset.layers[i];
 
+                TileCacheData tile = rc.tiles[rc.ntiles];
+
                 // Store header
-                TileCacheLayerHeader header;
-                header.magic = TileCacheLayerHeader.TileCacheMagic;
-                header.version = TileCacheLayerHeader.TileCacheVersion;
-
-                // Tile layer location in the navmesh.
-                header.tx = tx;
-                header.ty = ty;
-                header.tlayer = i;
-                header.b = layer.boundingBox;
-
-                // Tile info.
-                header.width = layer.width;
-                header.height = layer.height;
-                header.minx = layer.minx;
-                header.maxx = layer.maxx;
-                header.miny = layer.miny;
-                header.maxy = layer.maxy;
-                header.hmin = layer.hmin;
-                header.hmax = layer.hmax;
-
-                // TODO: Here we go!
-                if (!BuildTileCacheLayer(
-                    ref comp, ref header,
-                    layer.heights, layer.areas, layer.cons,
-                    ref tile.Data, ref tile.DataSize))
+                tile.Header = new TileCacheLayerHeader
                 {
-                    return 0;
-                }
+                    magic = TileCacheLayerHeader.TileCacheMagic,
+                    version = TileCacheLayerHeader.TileCacheVersion,
+
+                    // Tile layer location in the navmesh.
+                    tx = tx,
+                    ty = ty,
+                    tlayer = i,
+                    b = layer.boundingBox,
+
+                    // Tile info.
+                    width = layer.width,
+                    height = layer.height,
+                    minx = layer.minx,
+                    maxx = layer.maxx,
+                    miny = layer.miny,
+                    maxy = layer.maxy,
+                    hmin = layer.hmin,
+                    hmax = layer.hmax
+                };
+
+                // Store data
+                tile.Data = new TileCacheLayerData()
+                {
+                    heights = layer.heights,
+                    areas = layer.areas,
+                    cons = layer.cons,
+                };
+
+                rc.tiles[rc.ntiles++] = tile;
             }
 
             // Transfer ownsership of tile data from build context to the caller.
@@ -348,14 +287,12 @@ namespace Engine.PathFinding.NavMesh2
             for (int i = 0; i < Math.Min(rc.ntiles, TileCache.MaxLayers); i++)
             {
                 tiles[n++] = rc.tiles[i];
-                rc.tiles[i].Data = null;
-                rc.tiles[i].DataSize = 0;
+                rc.tiles[i].Data = TileCacheLayerData.Empty;
             }
 
             return n;
         }
-
-        private static void MarkConvexPolyArea(Vector3[] verts, int nverts, float hmin, float hmax, byte areaId, CompactHeightfield chf)
+        private static void MarkConvexPolyArea(Vector3[] verts, int nverts, float hmin, float hmax, TileCacheAreas areaId, CompactHeightfield chf)
         {
             Vector3 bmin = verts[0];
             Vector3 bmax = verts[0];
@@ -395,7 +332,7 @@ namespace Engine.PathFinding.NavMesh2
                     for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
                     {
                         CompactSpan s = chf.spans[i];
-                        if (chf.areas[i] == AreaNull)
+                        if (chf.areas[i] == (byte)TileCacheAreas.NullArea)
                         {
                             continue;
                         }
@@ -416,7 +353,6 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
         }
-
         private static bool PointInPoly(int nvert, Vector3[] verts, Vector3 p)
         {
             bool c = false;
@@ -434,18 +370,9 @@ namespace Engine.PathFinding.NavMesh2
 
             return c;
         }
-
-        private static bool BuildTileCacheLayer(
-            ref FastLZCompressor comp, ref TileCacheLayerHeader header,
-            byte[] heights, byte[] areas, byte[] cons,
-            ref byte[] data, ref int dataSize)
-        {
-            throw new NotImplementedException();
-        }
-
         private static bool BuildHeightfieldLayers(CompactHeightfield chf, int borderSize, int walkableHeight, out HeightfieldLayerSet lset)
         {
-            lset = null;
+            lset = new HeightfieldLayerSet();
 
             int w = chf.width;
             int h = chf.height;
@@ -470,7 +397,7 @@ namespace Engine.PathFinding.NavMesh2
                     for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
                     {
                         CompactSpan s = chf.spans[i];
-                        if (chf.areas[i] == AreaNull) continue;
+                        if (chf.areas[i] == (byte)TileCacheAreas.NullArea) continue;
 
                         byte sid = 0xff;
 
@@ -480,7 +407,7 @@ namespace Engine.PathFinding.NavMesh2
                             int ax = x + GetDirOffsetX(0);
                             int ay = y + GetDirOffsetY(0);
                             int ai = (int)chf.cells[ax + ay * w].index + GetCon(s, 0);
-                            if (chf.areas[ai] != AreaNull && srcReg[ai] != 0xff)
+                            if (chf.areas[ai] != (byte)TileCacheAreas.NullArea && srcReg[ai] != 0xff)
                             {
                                 sid = srcReg[ai];
                             }
@@ -883,11 +810,8 @@ namespace Engine.PathFinding.NavMesh2
             bmax.X -= borderSize * chf.cs;
             bmax.Z -= borderSize * chf.cs;
 
-            lset = new HeightfieldLayerSet
-            {
-                nlayers = layerId,
-                layers = new HeightfieldLayer[layerId],
-            };
+            lset.nlayers = layerId;
+            lset.layers = new HeightfieldLayer[layerId];
 
             // Store layers.
             for (int i = 0; i < lset.nlayers; ++i)
@@ -899,7 +823,7 @@ namespace Engine.PathFinding.NavMesh2
                 int gridSize = lw * lh;
 
                 layer.heights = Helper.CreateArray<byte>(gridSize, 0xff);
-                layer.areas = Helper.CreateArray<byte>(gridSize, 0x00);
+                layer.areas = Helper.CreateArray(gridSize, TileCacheAreas.NullArea);
                 layer.cons = Helper.CreateArray<byte>(gridSize, 0x00);
 
                 // Find layer height bounds.
@@ -978,7 +902,7 @@ namespace Engine.PathFinding.NavMesh2
                                     int ai = (int)chf.cells[ax + ay * w].index + GetCon(s, dir);
                                     byte alid = (byte)(srcReg[ai] != 0xff ? regs[srcReg[ai]].layerId : 0xff);
                                     // Portal mask
-                                    if (chf.areas[ai] != AreaNull && lid != alid)
+                                    if (chf.areas[ai] != (byte)TileCacheAreas.NullArea && lid != alid)
                                     {
                                         portal |= (byte)(1 << dir);
 
@@ -990,7 +914,7 @@ namespace Engine.PathFinding.NavMesh2
                                         }
                                     }
                                     // Valid connection mask
-                                    if (chf.areas[ai] != AreaNull && lid == alid)
+                                    if (chf.areas[ai] != (byte)TileCacheAreas.NullArea && lid == alid)
                                     {
                                         int nx = ax - borderSize;
                                         int ny = ay - borderSize;
@@ -1022,12 +946,10 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-
         private static bool OverlapRange(ushort amin, ushort amax, ushort bmin, ushort bmax)
         {
             return (amin > bmax || amax < bmin) ? false : true;
         }
-
         private static bool Contains(byte[] a, byte an, byte v)
         {
             int n = (int)an;
@@ -1042,7 +964,6 @@ namespace Engine.PathFinding.NavMesh2
 
             return false;
         }
-
         private static bool AddUnique(byte[] a, ref byte an, int anMax, byte v)
         {
             if (Contains(a, an, v))
@@ -1060,7 +981,6 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-
         private static void FilterLowHangingWalkableObstacles(int walkableClimb, Heightfield solid)
         {
             int w = solid.width;
@@ -1071,13 +991,13 @@ namespace Engine.PathFinding.NavMesh2
                 for (int x = 0; x < w; x++)
                 {
                     bool previousWalkable = false;
-                    byte previousArea = AreaNull;
+                    TileCacheAreas previousArea = TileCacheAreas.NullArea;
 
                     Span ps = null;
 
                     for (Span s = solid.spans[x + y * w]; s != null; ps = s, s = s.next)
                     {
-                        bool walkable = s.area != AreaNull;
+                        bool walkable = s.area != (byte)TileCacheAreas.NullArea;
 
                         // If current span is not walkable, but there is walkable span just below it, mark the span above it walkable too.
                         if (!walkable && previousWalkable)
@@ -1095,7 +1015,6 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
         }
-
         private static void FilterLedgeSpans(int walkableHeight, int walkableClimb, Heightfield solid)
         {
             int w = solid.width;
@@ -1109,7 +1028,7 @@ namespace Engine.PathFinding.NavMesh2
                     for (Span s = solid.spans[x + y * w]; s != null; s = s.next)
                     {
                         // Skip non walkable spans.
-                        if (s.area == AreaNull)
+                        if (s.area == (byte)TileCacheAreas.NullArea)
                         {
                             continue;
                         }
@@ -1174,18 +1093,17 @@ namespace Engine.PathFinding.NavMesh2
                         if (minh < -walkableClimb)
                         {
                             // The current span is close to a ledge if the drop to any neighbour span is less than the walkableClimb.
-                            s.area = AreaNull;
+                            s.area = (byte)TileCacheAreas.NullArea;
                         }
                         else if ((asmax - asmin) > walkableClimb)
                         {
                             // If the difference between all neighbours is too large, we are at steep slope, mark the span as ledge.
-                            s.area = AreaNull;
+                            s.area = (byte)TileCacheAreas.NullArea;
                         }
                     }
                 }
             }
         }
-
         private static void FilterWalkableLowHeightSpans(int walkableHeight, Heightfield solid)
         {
             int w = solid.width;
@@ -1203,13 +1121,12 @@ namespace Engine.PathFinding.NavMesh2
 
                         if ((top - bot) <= walkableHeight)
                         {
-                            s.area = AreaNull;
+                            s.area = (byte)TileCacheAreas.NullArea;
                         }
                     }
                 }
             }
         }
-
         private static bool ErodeWalkableArea(int radius, CompactHeightfield chf)
         {
             int w = chf.width;
@@ -1226,7 +1143,7 @@ namespace Engine.PathFinding.NavMesh2
                     CompactCell c = chf.cells[x + y * w];
                     for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
                     {
-                        if (chf.areas[i] == AreaNull)
+                        if (chf.areas[i] == (byte)TileCacheAreas.NullArea)
                         {
                             dist[i] = 0;
                         }
@@ -1241,7 +1158,7 @@ namespace Engine.PathFinding.NavMesh2
                                     int nx = x + GetDirOffsetX(dir);
                                     int ny = y + GetDirOffsetY(dir);
                                     int nidx = (int)chf.cells[nx + ny * w].index + GetCon(s, dir);
-                                    if (chf.areas[nidx] != AreaNull)
+                                    if (chf.areas[nidx] != (byte)TileCacheAreas.NullArea)
                                     {
                                         nc++;
                                     }
@@ -1249,7 +1166,9 @@ namespace Engine.PathFinding.NavMesh2
                             }
                             // At least one missing neighbour.
                             if (nc != 4)
+                            {
                                 dist[i] = 0;
+                            }
                         }
                     }
                 }
@@ -1266,7 +1185,6 @@ namespace Engine.PathFinding.NavMesh2
                     for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
                     {
                         CompactSpan s = chf.spans[i];
-
                         if (GetCon(s, 0) != NotConnected)
                         {
                             // (-1,0)
@@ -1276,7 +1194,9 @@ namespace Engine.PathFinding.NavMesh2
                             CompactSpan asp = chf.spans[ai];
                             nd = (byte)Math.Min((int)dist[ai] + 2, 255);
                             if (nd < dist[i])
+                            {
                                 dist[i] = nd;
+                            }
 
                             // (-1,-1)
                             if (GetCon(asp, 3) != NotConnected)
@@ -1286,7 +1206,9 @@ namespace Engine.PathFinding.NavMesh2
                                 int aai = (int)chf.cells[aax + aay * w].index + GetCon(asp, 3);
                                 nd = (byte)Math.Min((int)dist[aai] + 3, 255);
                                 if (nd < dist[i])
+                                {
                                     dist[i] = nd;
+                                }
                             }
                         }
                         if (GetCon(s, 3) != NotConnected)
@@ -1298,8 +1220,9 @@ namespace Engine.PathFinding.NavMesh2
                             CompactSpan asp = chf.spans[ai];
                             nd = (byte)Math.Min((int)dist[ai] + 2, 255);
                             if (nd < dist[i])
-
+                            {
                                 dist[i] = nd;
+                            }
 
                             // (1,-1)
                             if (GetCon(asp, 2) != NotConnected)
@@ -1309,8 +1232,9 @@ namespace Engine.PathFinding.NavMesh2
                                 int aai = (int)chf.cells[aax + aay * w].index + GetCon(asp, 2);
                                 nd = (byte)Math.Min((int)dist[aai] + 3, 255);
                                 if (nd < dist[i])
-
+                                {
                                     dist[i] = nd;
+                                }
                             }
                         }
                     }
@@ -1326,7 +1250,6 @@ namespace Engine.PathFinding.NavMesh2
                     for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
                     {
                         CompactSpan s = chf.spans[i];
-
                         if (GetCon(s, 2) != NotConnected)
                         {
                             // (1,0)
@@ -1336,8 +1259,9 @@ namespace Engine.PathFinding.NavMesh2
                             CompactSpan asp = chf.spans[ai];
                             nd = (byte)Math.Min((int)dist[ai] + 2, 255);
                             if (nd < dist[i])
-
+                            {
                                 dist[i] = nd;
+                            }
 
                             // (1,1)
                             if (GetCon(asp, 1) != NotConnected)
@@ -1347,8 +1271,9 @@ namespace Engine.PathFinding.NavMesh2
                                 int aai = (int)chf.cells[aax + aay * w].index + GetCon(asp, 1);
                                 nd = (byte)Math.Min((int)dist[aai] + 3, 255);
                                 if (nd < dist[i])
-
+                                {
                                     dist[i] = nd;
+                                }
                             }
                         }
                         if (GetCon(s, 1) != NotConnected)
@@ -1360,8 +1285,9 @@ namespace Engine.PathFinding.NavMesh2
                             CompactSpan asp = chf.spans[ai];
                             nd = (byte)Math.Min((int)dist[ai] + 2, 255);
                             if (nd < dist[i])
-
+                            {
                                 dist[i] = nd;
+                            }
 
                             // (-1,1)
                             if (GetCon(asp, 0) != NotConnected)
@@ -1371,8 +1297,9 @@ namespace Engine.PathFinding.NavMesh2
                                 int aai = (int)chf.cells[aax + aay * w].index + GetCon(asp, 0);
                                 nd = (byte)Math.Min((int)dist[aai] + 3, 255);
                                 if (nd < dist[i])
-
+                                {
                                     dist[i] = nd;
+                                }
                             }
                         }
                     }
@@ -1381,28 +1308,28 @@ namespace Engine.PathFinding.NavMesh2
 
             byte thr = (byte)(radius * 2);
             for (int i = 0; i < chf.spanCount; ++i)
+            {
                 if (dist[i] < thr)
-                    chf.areas[i] = AreaNull;
-
+                {
+                    chf.areas[i] = (byte)TileCacheAreas.NullArea;
+                }
+            }
 
             dist = null;
 
             return true;
         }
-
         private static int GetDirOffsetX(int dir)
         {
             int[] offset = new[] { -1, 0, 1, 0, };
             return offset[dir & 0x03];
         }
-
         private static int GetDirOffsetY(int dir)
         {
             int[] offset = new[] { 0, 1, 0, -1 };
             return offset[dir & 0x03];
         }
-
-        private static bool RasterizeTriangles(Heightfield solid, int flagMergeThr, Triangle[] tris, byte[] areas)
+        private static bool RasterizeTriangles(Heightfield solid, int flagMergeThr, Triangle[] tris, TileCacheAreas[] areas)
         {
             float ics = 1.0f / solid.cs;
             float ich = 1.0f / solid.ch;
@@ -1419,8 +1346,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-
-        private static bool RasterizeTri(Triangle tri, byte area, Heightfield hf, BoundingBox b, float cs, float ics, float ich, int flagMergeThr)
+        private static bool RasterizeTri(Triangle tri, TileCacheAreas area, Heightfield hf, BoundingBox b, float cs, float ics, float ich, int flagMergeThr)
         {
             int w = hf.width;
             int h = hf.height;
@@ -1511,8 +1437,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-
-        private static bool AddSpan(Heightfield hf, int x, int y, ushort smin, ushort smax, byte area, int flagMergeThr)
+        private static bool AddSpan(Heightfield hf, int x, int y, ushort smin, ushort smax, TileCacheAreas area, int flagMergeThr)
         {
             int idx = x + y * hf.width;
 
@@ -1562,7 +1487,7 @@ namespace Engine.PathFinding.NavMesh2
                     // Merge flags.
                     if (Math.Abs((int)s.smax - (int)cur.smax) <= flagMergeThr)
                     {
-                        s.area = Math.Max(s.area, cur.area);
+                        s.area = (TileCacheAreas)Math.Max((byte)s.area, (byte)cur.area);
                     }
 
                     // Remove current span.
@@ -1595,7 +1520,6 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-
         private static void FreeSpan(Heightfield hf, Span cur)
         {
             if (cur == null) return;
@@ -1604,7 +1528,6 @@ namespace Engine.PathFinding.NavMesh2
             cur.next = hf.freelist;
             hf.freelist = cur;
         }
-
         private static void DividePoly(
             List<Vector3> inPoly,
             List<Vector3> outPoly1,
@@ -1659,8 +1582,7 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
         }
-
-        private static int MarkWalkableTriangles(float walkableSlopeAngle, Triangle[] tris, byte[] areas)
+        private static int MarkWalkableTriangles(float walkableSlopeAngle, Triangle[] tris, TileCacheAreas[] areas)
         {
             float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
 
@@ -1674,14 +1596,13 @@ namespace Engine.PathFinding.NavMesh2
                 // Check if the face is walkable.
                 if (norm.Y > walkableThr)
                 {
-                    areas[i] = WalkableArea;
+                    areas[i] = TileCacheAreas.WalkableArea;
                     count++;
                 }
             }
 
             return count;
         }
-
         private static CompactHeightfield BuildCompactHeightfield(int walkableHeight, int walkableClimb, Heightfield hf)
         {
             CompactHeightfield chf = new CompactHeightfield();
@@ -1703,7 +1624,7 @@ namespace Engine.PathFinding.NavMesh2
             chf.ch = hf.ch;
             chf.cells = new CompactCell[w * h];
             chf.spans = new CompactSpan[spanCount];
-            chf.areas = new byte[spanCount];
+            chf.areas = new TileCacheAreas[spanCount];
 
             // Fill in cells and spans.
             int idx = 0;
@@ -1721,7 +1642,7 @@ namespace Engine.PathFinding.NavMesh2
                     c.count = 0;
                     while (s != null)
                     {
-                        if (s.area != AreaNull)
+                        if (s.area != (byte)TileCacheAreas.NullArea)
                         {
                             int bot = (int)s.smax;
                             int top = s.next != null ? (int)s.next.smin : int.MaxValue;
@@ -1801,20 +1722,17 @@ namespace Engine.PathFinding.NavMesh2
 
             return chf;
         }
-
         private static void SetCon(ref CompactSpan s, int dir, int i)
         {
             uint shift = (uint)dir * 6;
             uint con = s.con;
             s.con = (uint)(((int)con & ~(0x3f << (int)shift)) | ((i & 0x3f) << (int)shift));
         }
-
         private static int GetCon(CompactSpan s, int dir)
         {
             uint shift = (uint)dir * 6;
             return ((int)s.con >> (int)shift) & 0x3f;
         }
-
         private static int GetHeightFieldSpanCount(Heightfield hf)
         {
             int w = hf.width;
@@ -1828,7 +1746,7 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     for (Span s = hf.spans[x + y * w]; s != null; s = s.next)
                     {
-                        if (s.area != AreaNull)
+                        if (s.area != (byte)TileCacheAreas.NullArea)
                         {
                             spanCount++;
                         }
@@ -1838,7 +1756,6 @@ namespace Engine.PathFinding.NavMesh2
 
             return spanCount;
         }
-
         private static IEnumerable<int> GetChunksOverlappingRect(ChunkyTriMesh cm, Vector2 bmin, Vector2 bmax)
         {
             List<int> ids = new List<int>();
@@ -1869,7 +1786,6 @@ namespace Engine.PathFinding.NavMesh2
 
             return ids;
         }
-
         private static bool CheckOverlapRect(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax)
         {
             bool overlap = true;
@@ -1877,13 +1793,251 @@ namespace Engine.PathFinding.NavMesh2
             overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
             return overlap;
         }
-
         private static int CalcLayerBufferSize(int gridWidth, int gridHeight)
         {
             int headerSize = Helper.Align4(TileCacheLayerHeader.Size);
             int gridSize = gridWidth * gridHeight;
 
             return headerSize + gridSize * 4;
+        }
+
+        private Vector3 m_orig;
+        private float m_tileWidth;
+        private float m_tileHeight;
+        private int m_maxTiles;
+        private int m_tileLutSize;
+        private int m_tileLutMask;
+        private MeshTile[] m_tiles;
+        private MeshTile[] m_posLookup;
+        private MeshTile m_nextFree = null;
+        private uint m_tileBits;
+        private uint m_polyBits;
+        private uint m_saltBits;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public NavMesh()
+        {
+
+        }
+
+        public void Init(NavMeshParams nmparams)
+        {
+            m_orig = nmparams.Origin;
+            m_tileWidth = nmparams.TileWidth;
+            m_tileHeight = nmparams.TileHeight;
+
+            // Init tiles
+            m_maxTiles = nmparams.MaxTiles;
+            m_tileLutSize = Helper.NextPowerOfTwo(nmparams.MaxTiles / 4);
+            if (m_tileLutSize == 0) m_tileLutSize = 1;
+            m_tileLutMask = m_tileLutSize - 1;
+
+            m_tiles = new MeshTile[m_maxTiles];
+            m_posLookup = new MeshTile[m_tileLutSize];
+
+            m_nextFree = null;
+            for (int i = m_maxTiles - 1; i >= 0; --i)
+            {
+                m_tiles[i] = new MeshTile
+                {
+                    salt = 1,
+                    next = m_nextFree
+                };
+                m_nextFree = m_tiles[i];
+            }
+
+            // Init ID generator values.
+            m_tileBits = (uint)Math.Log(Helper.NextPowerOfTwo(nmparams.MaxTiles), 2);
+            m_polyBits = (uint)Math.Log(Helper.NextPowerOfTwo(nmparams.MaxPolys), 2);
+            // Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
+            m_saltBits = Math.Min(31, 32 - m_tileBits - m_polyBits);
+
+            if (m_saltBits < 10)
+            {
+                throw new EngineException("DT_INVALID_PARAM");
+            }
+        }
+        public MeshTile GetTileRefAt(int x, int y, int layer)
+        {
+            // Find tile based on hash.
+            int h = TileCache.ComputeTileHash(x, y, m_tileLutMask);
+            MeshTile tile = m_posLookup[h];
+            while (tile != null)
+            {
+                if (tile.header.x == x &&
+                    tile.header.y == y &&
+                    tile.header.layer == layer)
+                {
+                    return tile;
+                }
+                tile = tile.next;
+            }
+            return null;
+        }
+        public bool AddTile(byte[] data, int dataSize, TileFlags flags, int lastRef, int result)
+        {
+            throw new NotImplementedException();
+            /*
+            // Make sure the data is in right format.
+            MeshHeader header = data;
+            if (header.magic != DT_NAVMESH_MAGIC)
+            {
+                return false;
+            }
+            if (header.version != DT_NAVMESH_VERSION)
+            {
+                return false;
+            }
+
+            // Make sure the location is free.
+            if (getTileAt(header.x, header.y, header.layer))
+            {
+                return false;
+            }
+
+            // Allocate a tile.
+            MeshTile tile = null;
+            if (lastRef == 0)
+            {
+                if (m_nextFree != null)
+                {
+                    tile = m_nextFree;
+                    m_nextFree = tile.next;
+                    tile.next = null;
+                }
+            }
+            else
+            {
+                // Try to relocate the tile to specific index with same salt.
+                int tileIndex = (int)decodePolyIdTile(lastRef);
+                if (tileIndex >= m_maxTiles)
+                {
+                    return false;
+                }
+                // Try to find the specific tile id from the free list.
+                MeshTile target = m_tiles[tileIndex];
+                MeshTile prev = null;
+                tile = m_nextFree;
+                while (tile != null && tile != target)
+                {
+                    prev = tile;
+                    tile = tile.next;
+                }
+                // Could not find the correct location.
+                if (tile != target)
+                {
+                    return false;
+                }
+                // Remove from freelist
+                if (prev == null)
+                {
+                    m_nextFree = tile.next;
+                }
+                else
+                {
+                    prev.next = tile.next;
+                }
+
+                // Restore salt.
+                tile.salt = decodePolyIdSalt(lastRef);
+            }
+
+            // Make sure we could allocate a tile.
+            if (tile == null)
+            {
+                return false;
+            }
+
+            // Insert tile into the position lut.
+            int h = TileCache.ComputeTileHash(header.x, header.y, m_tileLutMask);
+            tile.next = m_posLookup[h];
+            m_posLookup[h] = tile;
+
+            // Patch header pointers.
+            int headerSize = Helper.Align4(sizeof(MeshHeader));
+            int vertsSize = Helper.Align4(sizeof(float) * 3 * header.vertCount);
+            int polysSize = Helper.Align4(sizeof(Poly) * header.polyCount);
+            int linksSize = Helper.Align4(sizeof(Link) * (header.maxLinkCount));
+            int detailMeshesSize = Helper.Align4(sizeof(PolyDetail) * header.detailMeshCount);
+            int detailVertsSize = Helper.Align4(sizeof(float) * 3 * header.detailVertCount);
+            int detailTrisSize = Helper.Align4(sizeof(byte) * 4 * header.detailTriCount);
+            int bvtreeSize = Helper.Align4(sizeof(BVNode) * header.bvNodeCount);
+            int offMeshLinksSize = Helper.Align4(sizeof(OffMeshConnection) * header.offMeshConCount);
+
+            unsigned char* d = data + headerSize;
+            tile->verts = dtGetThenAdvanceBufferPointer<float>(d, vertsSize);
+            tile->polys = dtGetThenAdvanceBufferPointer<dtPoly>(d, polysSize);
+            tile->links = dtGetThenAdvanceBufferPointer<dtLink>(d, linksSize);
+            tile->detailMeshes = dtGetThenAdvanceBufferPointer<dtPolyDetail>(d, detailMeshesSize);
+            tile->detailVerts = dtGetThenAdvanceBufferPointer<float>(d, detailVertsSize);
+            tile->detailTris = dtGetThenAdvanceBufferPointer < unsigned char> (d, detailTrisSize);
+            tile->bvTree = dtGetThenAdvanceBufferPointer<dtBVNode>(d, bvtreeSize);
+            tile->offMeshCons = dtGetThenAdvanceBufferPointer<dtOffMeshConnection>(d, offMeshLinksSize);
+
+            // If there are no items in the bvtree, reset the tree pointer.
+            if (!bvtreeSize)
+                tile->bvTree = 0;
+
+            // Build links freelist
+            tile->linksFreeList = 0;
+            tile->links[header->maxLinkCount - 1].next = DT_NULL_LINK;
+            for (int i = 0; i < header->maxLinkCount - 1; ++i)
+                tile->links[i].next = i + 1;
+
+            // Init tile.
+            tile->header = header;
+            tile->data = data;
+            tile->dataSize = dataSize;
+            tile->flags = flags;
+
+            connectIntLinks(tile);
+
+            // Base off-mesh connections to their starting polygons and connect connections inside the tile.
+            baseOffMeshLinks(tile);
+            connectExtOffMeshLinks(tile, tile, -1);
+
+            // Create connections with neighbour tiles.
+            static const int MAX_NEIS = 32;
+            dtMeshTile* neis[MAX_NEIS];
+            int nneis;
+
+            // Connect with layers in current tile.
+            nneis = getTilesAt(header->x, header->y, neis, MAX_NEIS);
+            for (int j = 0; j < nneis; ++j)
+            {
+                if (neis[j] == tile)
+                    continue;
+
+                connectExtLinks(tile, neis[j], -1);
+                connectExtLinks(neis[j], tile, -1);
+                connectExtOffMeshLinks(tile, neis[j], -1);
+                connectExtOffMeshLinks(neis[j], tile, -1);
+            }
+
+            // Connect with neighbour tiles.
+            for (int i = 0; i < 8; ++i)
+            {
+                nneis = getNeighbourTilesAt(header->x, header->y, i, neis, MAX_NEIS);
+                for (int j = 0; j < nneis; ++j)
+                {
+                    connectExtLinks(tile, neis[j], i);
+                    connectExtLinks(neis[j], tile, dtOppositeTile(i));
+                    connectExtOffMeshLinks(tile, neis[j], i);
+                    connectExtOffMeshLinks(neis[j], tile, dtOppositeTile(i));
+                }
+            }
+
+            if (result)
+                *result = getTileRef(tile);
+
+            return DT_SUCCESS;
+            */
+        }
+        public void RemoveTile(MeshTile v1, int v2, int v3)
+        {
+            throw new NotImplementedException();
         }
     }
 }
