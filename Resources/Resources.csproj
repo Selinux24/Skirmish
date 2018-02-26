@@ -193,6 +193,8 @@
     <None Include="Blender\Scenery\ModularDungeon\brick_n.png" />
     <None Include="Blender\Scenery\ModularDungeon\oil_d.jpg" />
     <None Include="Blender\Scenery\ModularDungeon\marble_d.png" />
+    <None Include="Blender\Scenery\ModularDungeon\stuff_map.png" />
+    <None Include="Blender\Scenery\ModularDungeon\wood_d.jpg" />
     <Content Include="Collada\Buildings\Dungeon\BaseMap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -326,6 +328,9 @@
     <Content Include="Collada\Scenery\ModularDungeon\rock_n.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\stuff_map.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Collada\Scenery\ModularDungeon\torch.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -336,6 +341,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\wall_n.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\wood_d.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Vehicles\CapitalShip\booster.bmp">

@@ -2725,6 +2725,28 @@
       <rotation>rot270</rotation>
     </item>
 
+    <item asset_name="Dn_Lab_1">
+      <position>36 0 -22.25</position>
+      <rotation>rot270</rotation>
+    </item>
+    <item asset_name="Dn_Lab_1_Stuff">
+      <position>36 0 -22.25</position>
+      <rotation>rot270</rotation>
+    </item>
+    <item asset_name="Dn_Candle_1" cast_shadows="true">
+      <position>35.5 1.15 -22.5</position>
+      <scale>0.4</scale>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
+    <item asset_name="Dn_Candle_1" cast_shadows="true">
+      <position>36.5 1.15 -22.5</position>
+      <scale>0.4</scale>
+      <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
+        <velocity>0 0 0</velocity>
+      </particleLight>
+    </item>
   </objects>
   <volumes>
     <mask>volume</mask>
