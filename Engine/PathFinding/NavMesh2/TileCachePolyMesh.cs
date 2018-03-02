@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Engine.PathFinding.NavMesh2
 {
     public struct TileCachePolyMesh
@@ -15,11 +16,11 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Vertices of the mesh, 3 elements per vertex.
         /// </summary>
-        public int[][] verts;
+        public Trianglei[] verts;
         /// <summary>
         /// Polygons of the mesh, nvp*2 elements per polygon.
         /// </summary>
-        public int[][] polys;
+        public Polygoni[] polys;
         /// <summary>
         /// Per polygon flags.
         /// </summary>

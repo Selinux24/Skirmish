@@ -224,27 +224,27 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     if (ob.type == ObstacleType.Cylinder)
                     {
-                        MarkCylinderArea(
-                            bc.layer, tile.Header.b.Minimum, m_params.CellSize, m_params.CellHeight,
+                        MarkCylinderArea(ref bc.layer,
+                            tile.Header.b.Minimum, m_params.CellSize, m_params.CellHeight,
                             ob.cylinder.pos, ob.cylinder.radius, ob.cylinder.height, 0);
                     }
                     else if (ob.type == ObstacleType.Box)
                     {
-                        MarkBoxArea(
-                            bc.layer, tile.Header.b.Minimum, m_params.CellSize, m_params.CellHeight,
+                        MarkBoxArea(ref bc.layer,
+                            tile.Header.b.Minimum, m_params.CellSize, m_params.CellHeight,
                             ob.box.bmin, ob.box.bmax, 0);
                     }
                     else if (ob.type == ObstacleType.OrientedBox)
                     {
-                        MarkBoxArea(
-                            bc.layer, tile.Header.b.Minimum, m_params.CellSize, m_params.CellHeight,
+                        MarkBoxArea(ref bc.layer,
+                            tile.Header.b.Minimum, m_params.CellSize, m_params.CellHeight,
                             ob.orientedBox.center, ob.orientedBox.halfExtents, ob.orientedBox.rotAux, 0);
                     }
                 }
             }
 
             // Build navmesh
-            if (!BuildTileCacheRegions(bc.layer, walkableClimbVx))
+            if (!BuildTileCacheRegions(ref bc.layer, walkableClimbVx))
             {
                 return false;
             }
@@ -332,7 +332,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private bool MarkBoxArea(TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 center, Vector3 halfExtents, Vector2 rotAux, TileCacheAreas areaId)
+        private bool MarkBoxArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 center, Vector3 halfExtents, Vector2 rotAux, TileCacheAreas areaId)
         {
             int w = layer.header.width;
             int h = layer.header.height;
@@ -390,7 +390,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private bool MarkBoxArea(TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 bmin, Vector3 bmax, TileCacheAreas areaId)
+        private bool MarkBoxArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 bmin, Vector3 bmax, TileCacheAreas areaId)
         {
             int w = layer.header.width;
             int h = layer.header.height;
@@ -429,7 +429,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private bool MarkCylinderArea(TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 pos, float radius, float height, TileCacheAreas areaId)
+        private bool MarkCylinderArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 pos, float radius, float height, TileCacheAreas areaId)
         {
             Vector3 bmin = new Vector3();
             Vector3 bmax = new Vector3();
@@ -487,7 +487,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private bool BuildTileCacheRegions(TileCacheLayer layer, int walkableClimb)
+        private bool BuildTileCacheRegions(ref TileCacheLayer layer, int walkableClimb)
         {
             int w = layer.header.width;
             int h = layer.header.height;
@@ -765,16 +765,19 @@ namespace Engine.PathFinding.NavMesh2
             int w = layer.header.width;
             int h = layer.header.height;
 
-            lcset.nconts = layer.regCount;
-            lcset.conts = new TileCacheContour[lcset.nconts];
+            lcset = new TileCacheContourSet
+            {
+                nconts = layer.regCount,
+                conts = new TileCacheContour[layer.regCount],
+            };
 
             // Allocate temp buffer for contour tracing.
             int maxTempVerts = (w + h) * 2 * 2; // Twice around the layer.
 
-            int[][] tempVerts = new int[maxTempVerts][];
-            uint[] tempPoly = new uint[maxTempVerts];
+            var tempVerts = new Trianglei[maxTempVerts];
+            var tempPoly = new Polygoni(maxTempVerts);
 
-            TempContour temp = new TempContour(tempVerts, maxTempVerts, tempPoly, maxTempVerts);
+            var temp = new TempContour(tempVerts, maxTempVerts, tempPoly, maxTempVerts);
 
             // Find contours.
             for (int y = 0; y < h; ++y)
@@ -788,7 +791,7 @@ namespace Engine.PathFinding.NavMesh2
                         continue;
                     }
 
-                    TileCacheContour cont = lcset.conts[ri];
+                    var cont = lcset.conts[ri];
 
                     if (cont.nverts > 0)
                     {
@@ -811,33 +814,39 @@ namespace Engine.PathFinding.NavMesh2
                     cont.nverts = temp.nverts;
                     if (cont.nverts > 0)
                     {
-                        cont.verts = new int[temp.nverts][];
+                        cont.verts = new Trianglei[temp.nverts];
 
                         for (int i = 0, j = temp.nverts - 1; i < temp.nverts; j = i++)
                         {
-                            int[] dst = cont.verts[j];
-                            int[] v = temp.verts[j];
-                            int[] vn = temp.verts[i];
-                            int nei = vn[3]; // The neighbour reg is stored at segment vertex of a segment. 
+                            var v = temp.verts[j];
+                            var vn = temp.verts[i];
+                            int nei = vn.R; // The neighbour reg is stored at segment vertex of a segment. 
                             bool shouldRemove = false;
-                            int lh = GetCornerHeight(layer, v[0], v[1], v[2], walkableClimb, ref shouldRemove);
+                            int lh = GetCornerHeight(layer, v.X, v.Y, v.Z, walkableClimb, ref shouldRemove);
 
-                            dst[0] = v[0];
-                            dst[1] = lh;
-                            dst[2] = v[2];
+                            var dst = new Trianglei()
+                            {
+                                X = v.X,
+                                Y = lh,
+                                Z = v.Z,
+                            };
 
                             // Store portal direction and remove status to the fourth component.
-                            dst[3] = 0x0f;
+                            dst.R = 0x0f;
                             if (nei != 0xff && nei >= 0xf8)
                             {
-                                dst[3] = nei - 0xf8;
+                                dst.R = nei - 0xf8;
                             }
                             if (shouldRemove)
                             {
-                                dst[3] |= 0x80;
+                                dst.R |= 0x80;
                             }
+
+                            cont.verts[j] = dst;
                         }
                     }
+
+                    lcset.conts[ri] = cont;
                 }
             }
 
@@ -976,8 +985,8 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Remove last vertex if it is duplicate of the first one.
-            int[] pa = cont.verts[(cont.nverts - 1) * 4];
-            int[] pb = cont.verts[0];
+            var pa = cont.verts[cont.nverts - 1];
+            var pb = cont.verts[0];
             if (pa[0] == pb[0] && pa[2] == pb[2])
             {
                 cont.nverts--;
@@ -1025,8 +1034,8 @@ namespace Engine.PathFinding.NavMesh2
             // Try to merge with existing segments.
             if (cont.nverts > 1)
             {
-                int[] pa = cont.verts[cont.nverts - 2];
-                int[] pb = cont.verts[cont.nverts - 1];
+                var pa = cont.verts[cont.nverts - 2];
+                var pb = cont.verts[cont.nverts - 1];
                 if (pb[3] == r)
                 {
                     if (pa[0] == pb[0] && (int)pb[0] == x)
@@ -1052,11 +1061,7 @@ namespace Engine.PathFinding.NavMesh2
                 return false;
             }
 
-            int[] v = cont.verts[cont.nverts];
-            v[0] = x;
-            v[1] = y;
-            v[2] = z;
-            v[3] = r;
+            cont.verts[cont.nverts] = new Trianglei(x, y, z, r);
             cont.nverts++;
 
             return true;
@@ -1069,11 +1074,11 @@ namespace Engine.PathFinding.NavMesh2
             {
                 int j = (i + 1) % cont.nverts;
                 // Check for start of a wall segment.
-                int ra = cont.verts[j][3];
-                int rb = cont.verts[i][3];
+                int ra = cont.verts[j].R;
+                int rb = cont.verts[i].R;
                 if (ra != rb)
                 {
-                    cont.poly[cont.npoly++] = (uint)i;
+                    cont.poly[cont.npoly++] = i;
                 }
             }
             if (cont.npoly < 2)
@@ -1081,16 +1086,16 @@ namespace Engine.PathFinding.NavMesh2
                 // If there is no transitions at all,
                 // create some initial points for the simplification process. 
                 // Find lower-left and upper-right vertices of the contour.
-                int llx = cont.verts[0][0];
-                int llz = cont.verts[0][2];
+                int llx = cont.verts[0].X;
+                int llz = cont.verts[0].Z;
                 int lli = 0;
-                int urx = cont.verts[0][0];
-                int urz = cont.verts[0][2];
+                int urx = cont.verts[0].X;
+                int urz = cont.verts[0].Z;
                 int uri = 0;
                 for (int i = 1; i < cont.nverts; ++i)
                 {
-                    int x = cont.verts[i][0];
-                    int z = cont.verts[i][2];
+                    int x = cont.verts[i].X;
+                    int z = cont.verts[i].Z;
                     if (x < llx || (x == llx && z < llz))
                     {
                         llx = x;
@@ -1105,8 +1110,8 @@ namespace Engine.PathFinding.NavMesh2
                     }
                 }
                 cont.npoly = 0;
-                cont.poly[cont.npoly++] = (uint)lli;
-                cont.poly[cont.npoly++] = (uint)uri;
+                cont.poly[cont.npoly++] = lli;
+                cont.poly[cont.npoly++] = uri;
             }
 
             // Add points until all raw points are within
@@ -1115,13 +1120,13 @@ namespace Engine.PathFinding.NavMesh2
             {
                 int ii = (i + 1) % cont.npoly;
 
-                int ai = (int)cont.poly[i];
-                int ax = (int)cont.verts[ai][0];
-                int az = (int)cont.verts[ai][2];
+                int ai = cont.poly[i];
+                int ax = cont.verts[ai].X;
+                int az = cont.verts[ai].Z;
 
-                int bi = (int)cont.poly[ii];
-                int bx = (int)cont.verts[bi][0];
-                int bz = (int)cont.verts[bi][2];
+                int bi = cont.poly[ii];
+                int bx = cont.verts[bi].X;
+                int bz = cont.verts[bi].Z;
 
                 // Find maximum deviation from the segment.
                 float maxd = 0;
@@ -1147,7 +1152,7 @@ namespace Engine.PathFinding.NavMesh2
                 // Tessellate only outer edges or edges between areas.
                 while (ci != endi)
                 {
-                    float d = DistancePtSeg(cont.verts[ci][0], cont.verts[ci][2], ax, az, bx, bz);
+                    float d = DistancePtSeg(cont.verts[ci].X, cont.verts[ci].Z, ax, az, bx, bz);
                     if (d > maxd)
                     {
                         maxd = d;
@@ -1165,11 +1170,11 @@ namespace Engine.PathFinding.NavMesh2
                     {
                         cont.poly[j] = cont.poly[j - 1];
                     }
-                    cont.poly[i + 1] = (uint)maxi;
+                    cont.poly[i + 1] = maxi;
                 }
                 else
                 {
-                    ++i;
+                    i++;
                 }
             }
 
@@ -1187,13 +1192,14 @@ namespace Engine.PathFinding.NavMesh2
             for (int i = 0; i < cont.npoly; ++i)
             {
                 int j = (start + i) % cont.npoly;
-                int[] src = cont.verts[cont.poly[j]];
-                int[] dst = cont.verts[cont.nverts];
-                dst[0] = src[0];
-                dst[1] = src[1];
-                dst[2] = src[2];
-                dst[3] = src[3];
-                cont.nverts++;
+                var src = cont.verts[cont.poly[j]];
+                cont.verts[cont.nverts++] = new Trianglei()
+                {
+                    X = src.X,
+                    Y = src.Y,
+                    Z = src.Z,
+                    R = src.R,
+                };
             }
         }
         private float DistancePtSeg(int x, int z, int px, int pz, int qx, int qz)
@@ -1239,30 +1245,28 @@ namespace Engine.PathFinding.NavMesh2
 
             // TODO: warn about too many vertices?
 
-            mesh.nvp = VertsPerPolygon;
+            mesh = new TileCachePolyMesh
+            {
+                nvp = VertsPerPolygon,
+                verts = Helper.CreateArray(maxVertices, () => new Trianglei()),
+                polys = new Polygoni[maxTris],
+                areas = new SamplePolyAreas[maxTris],
+                flags = new SamplePolyFlags[maxTris],
+                nverts = 0,
+                npolys = 0
+            };
 
             byte[] vflags = new byte[maxVertices];
 
-            mesh.verts = new int[maxVertices][];
-            mesh.polys = new int[maxTris][];
-            mesh.areas = new SamplePolyAreas[maxTris];
-            mesh.flags = new SamplePolyFlags[maxTris];
-            mesh.nverts = 0;
-            mesh.npolys = 0;
-
-            int[] firstVert = new int[VertexBucketCount2];
+            var firstVert = new Polygoni(VertexBucketCount2);
             for (int i = 0; i < VertexBucketCount2; ++i)
             {
                 firstVert[i] = NullIdx;
             }
 
-            int[] nextVert = new int[maxVertices];
-
-            int[][] indices = new int[maxVertsPerCont][];
-
-            int[][] tris = new int[maxVertsPerCont][];
-
-            int[][] polys = new int[maxVertsPerCont][];
+            var nextVert = new Polygoni(maxVertices);
+            var indices = new int[maxVertsPerCont];
+            var polys = new Polygoni[maxVertsPerCont];
 
             for (int i = 0; i < lcset.nconts; ++i)
             {
@@ -1277,10 +1281,10 @@ namespace Engine.PathFinding.NavMesh2
                 // Triangulate contour
                 for (int j = 0; j < cont.nverts; ++j)
                 {
-                    indices[j] = new[] { j };
+                    indices[j] = j;
                 }
 
-                int ntris = Triangulate(cont.nverts, cont.verts, out indices[0], out tris[0]);
+                int ntris = Triangulate(cont.nverts, cont.verts, ref indices, out Trianglei[] tris);
                 if (ntris <= 0)
                 {
                     // TODO: issue warning!
@@ -1290,26 +1294,27 @@ namespace Engine.PathFinding.NavMesh2
                 // Add and merge vertices.
                 for (int j = 0; j < cont.nverts; ++j)
                 {
-                    int[] v = cont.verts[j];
-                    indices[j][0] = AddVertex(v[0], v[1], v[2], mesh.verts, firstVert, nextVert, mesh.nverts);
+                    var v = cont.verts[j];
+                    indices[j] = AddVertex(v.X, v.Y, v.Z, mesh.verts, firstVert, nextVert, ref mesh.nverts);
                     if ((v[3] & 0x80) != 0)
                     {
                         // This vertex should be removed.
-                        vflags[indices[j][0]] = 1;
+                        vflags[indices[j]] = 1;
                     }
                 }
 
                 // Build initial polygons.
                 int npolys = 0;
-                polys = new int[maxVertsPerCont][];
+                polys = new Polygoni[maxVertsPerCont];
                 for (int j = 0; j < ntris; ++j)
                 {
-                    int[] t = tris[j];
-                    if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])
+                    var t = tris[j];
+                    if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                     {
-                        polys[npolys][0] = indices[t[0]][0];
-                        polys[npolys][1] = indices[t[1]][0];
-                        polys[npolys][2] = indices[t[2]][0];
+                        polys[npolys] = new Polygoni(VertsPerPolygon);
+                        polys[npolys][0] = indices[t[0]];
+                        polys[npolys][1] = indices[t[1]];
+                        polys[npolys][2] = indices[t[2]];
                         npolys++;
                     }
                 }
@@ -1330,12 +1335,11 @@ namespace Engine.PathFinding.NavMesh2
 
                         for (int j = 0; j < npolys - 1; ++j)
                         {
-                            int[] pj = polys[j];
+                            var pj = polys[j];
                             for (int k = j + 1; k < npolys; ++k)
                             {
-                                int[] pk = polys[k];
-                                int ea, eb;
-                                int v = GetPolyMergeValue(pj, pk, mesh.verts, out ea, out eb);
+                                var pk = polys[k];
+                                int v = GetPolyMergeValue(pj, pk, mesh.verts, out int ea, out int eb);
                                 if (v > bestMergeVal)
                                 {
                                     bestMergeVal = v;
@@ -1350,10 +1354,8 @@ namespace Engine.PathFinding.NavMesh2
                         if (bestMergeVal > 0)
                         {
                             // Found best, merge.
-                            int[] pa = polys[bestPa];
-                            int[] pb = polys[bestPb];
-                            pa = MergePolys(pa, pb, bestEa, bestEb);
-                            //memcpy(pb, &polys[(npolys - 1) * MAX_VERTS_PER_POLY], sizeof(unsigned short) * MAX_VERTS_PER_POLY);
+                            polys[bestPa] = MergePolys(polys[bestPa], polys[bestPb], bestEa, bestEb);
+                            polys[bestPb] = polys[npolys - 1].Copy();
                             npolys--;
                         }
                         else
@@ -1367,12 +1369,13 @@ namespace Engine.PathFinding.NavMesh2
                 // Store polygons.
                 for (int j = 0; j < npolys; ++j)
                 {
-                    int[] p = mesh.polys[mesh.npolys * 2];
-                    int[] q = polys[j];
+                    var p = new Polygoni(VertsPerPolygon * 2);
+                    var q = polys[j];
                     for (int k = 0; k < VertsPerPolygon; ++k)
                     {
                         p[k] = q[k];
                     }
+                    mesh.polys[mesh.npolys] = p;
                     mesh.areas[mesh.npolys] = (SamplePolyAreas)(uint)cont.area;
                     mesh.npolys++;
                     if (mesh.npolys > maxTris)
@@ -1414,11 +1417,9 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private static int Triangulate(int n, int[][] verts, out int[] indices, out int[] tris)
+        private static int Triangulate(int n, Trianglei[] verts, ref int[] indices, out Trianglei[] tris)
         {
             int ntris = 0;
-            indices = null;
-            tris = null;
 
             // The last bit of the index is used to indicate if the vertex can be removed.
             for (int i = 0; i < n; i++)
@@ -1431,6 +1432,8 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
 
+            List<Trianglei> dst = new List<Trianglei>();
+
             while (n > 3)
             {
                 int minLen = -1;
@@ -1440,11 +1443,11 @@ namespace Engine.PathFinding.NavMesh2
                     int i1x = Next(ix, n);
                     if ((indices[i1x] & 0x8000) != 0)
                     {
-                        int[] p0 = verts[(indices[ix] & 0x7fff)];
-                        int[] p2 = verts[(indices[Next(i1x, n)] & 0x7fff)];
+                        var p0 = verts[(indices[ix] & 0x7fff)];
+                        var p2 = verts[(indices[Next(i1x, n)] & 0x7fff)];
 
-                        int dx = p2[0] - p0[0];
-                        int dz = p2[2] - p0[2];
+                        int dx = p2.X - p0.X;
+                        int dz = p2.Z - p0.Z;
                         int len = dx * dx + dz * dz;
                         if (minLen < 0 || len < minLen)
                         {
@@ -1457,6 +1460,7 @@ namespace Engine.PathFinding.NavMesh2
                 if (mini == -1)
                 {
                     // Should not happen.
+                    tris = null;
                     return -ntris;
                 }
 
@@ -1464,10 +1468,12 @@ namespace Engine.PathFinding.NavMesh2
                 int i1 = Next(i, n);
                 int i2 = Next(i1, n);
 
-
-                //dst++ = indices[i] & 0x7fff;
-                //dst++ = indices[i1] & 0x7fff;
-                //dst++ = indices[i2] & 0x7fff;
+                dst.Add(new Trianglei()
+                {
+                    X = indices[i] & 0x7fff,
+                    Y = indices[i1] & 0x7fff,
+                    Z = indices[i2] & 0x7fff
+                });
                 ntris++;
 
                 // Removes P[i1] by copying P[i+1]...P[n-1] left one index.
@@ -1498,11 +1504,15 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Append the remaining triangle.
-            //dst++ = indices[0] & 0x7fff;
-            //dst++ = indices[1] & 0x7fff;
-            //dst++ = indices[2] & 0x7fff;
+            dst.Add(new Trianglei
+            {
+                X = indices[0] & 0x7fff,
+                Y = indices[1] & 0x7fff,
+                Z = indices[2] & 0x7fff,
+            });
             ntris++;
 
+            tris = dst.ToArray();
             return ntris;
         }
         private static int Prev(int i, int n)
@@ -1513,16 +1523,16 @@ namespace Engine.PathFinding.NavMesh2
         {
             return i + 1 < n ? i + 1 : 0;
         }
-        private static bool Diagonal(int i, int j, int n, int[][] verts, int[] indices)
+        private static bool Diagonal(int i, int j, int n, Trianglei[] verts, int[] indices)
         {
             return InCone(i, j, n, verts, indices) && Diagonalie(i, j, n, verts, indices);
         }
-        private static bool InCone(int i, int j, int n, int[][] verts, int[] indices)
+        private static bool InCone(int i, int j, int n, Trianglei[] verts, int[] indices)
         {
-            int[] pi = verts[(indices[i] & 0x7fff)];
-            int[] pj = verts[(indices[j] & 0x7fff)];
-            int[] pi1 = verts[(indices[Next(i, n)] & 0x7fff)];
-            int[] pin1 = verts[(indices[Prev(i, n)] & 0x7fff)];
+            var pi = verts[(indices[i] & 0x7fff)];
+            var pj = verts[(indices[j] & 0x7fff)];
+            var pi1 = verts[(indices[Next(i, n)] & 0x7fff)];
+            var pin1 = verts[(indices[Prev(i, n)] & 0x7fff)];
 
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
             if (LeftOn(pin1, pi, pi1))
@@ -1533,22 +1543,22 @@ namespace Engine.PathFinding.NavMesh2
             // else P[i] is reflex.
             return !(LeftOn(pi, pj, pi1) && LeftOn(pj, pi, pin1));
         }
-        private static bool LeftOn(int[] a, int[] b, int[] c)
+        private static bool LeftOn(Trianglei a, Trianglei b, Trianglei c)
         {
             return Area2(a, b, c) <= 0;
         }
-        private static int Area2(int[] a, int[] b, int[] c)
+        private static int Area2(Trianglei a, Trianglei b, Trianglei c)
         {
-            return (b[0] - a[0]) * (c[2] - a[2]) - (c[0] - a[0]) * (b[2] - a[2]);
+            return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z);
         }
-        private static bool Left(int[] a, int[] b, int[] c)
+        private static bool Left(Trianglei a, Trianglei b, Trianglei c)
         {
             return Area2(a, b, c) < 0;
         }
-        private static bool Diagonalie(int i, int j, int n, int[][] verts, int[] indices)
+        private static bool Diagonalie(int i, int j, int n, Trianglei[] verts, int[] indices)
         {
-            int[] d0 = verts[(indices[i] & 0x7fff)];
-            int[] d1 = verts[(indices[j] & 0x7fff)];
+            var d0 = verts[(indices[i] & 0x7fff)];
+            var d1 = verts[(indices[j] & 0x7fff)];
 
             // For each edge (k,k+1) of P
             for (int k = 0; k < n; k++)
@@ -1557,8 +1567,8 @@ namespace Engine.PathFinding.NavMesh2
                 // Skip edges incident to i or j
                 if (!((k == i) || (k1 == i) || (k == j) || (k1 == j)))
                 {
-                    int[] p0 = verts[(indices[k] & 0x7fff)];
-                    int[] p1 = verts[(indices[k1] & 0x7fff)];
+                    var p0 = verts[(indices[k] & 0x7fff)];
+                    var p1 = verts[(indices[k1] & 0x7fff)];
 
                     if (Vequal(d0, p0) || Vequal(d1, p0) || Vequal(d0, p1) || Vequal(d1, p1))
                         continue;
@@ -1569,9 +1579,9 @@ namespace Engine.PathFinding.NavMesh2
             }
             return true;
         }
-        private static bool Vequal(int[] a, int[] b)
+        private static bool Vequal(Trianglei a, Trianglei b)
         {
-            return a[0] == b[0] && a[2] == b[2];
+            return a.X == b.X && a.Z == b.Z;
         }
         /// <summary>
         /// Returns true iff segments ab and cd intersect, properly or improperly.
@@ -1581,7 +1591,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <param name="c"></param>
         /// <param name="d"></param>
         /// <returns></returns>
-        private static bool Intersect(int[] a, int[] b, int[] c, int[] d)
+        private static bool Intersect(Trianglei a, Trianglei b, Trianglei c, Trianglei d)
         {
             if (IntersectProp(a, b, c, d))
                 return true;
@@ -1601,7 +1611,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <param name="c"></param>
         /// <param name="d"></param>
         /// <returns></returns>
-        private static bool IntersectProp(int[] a, int[] b, int[] c, int[] d)
+        private static bool IntersectProp(Trianglei a, Trianglei b, Trianglei c, Trianglei d)
         {
             // Eliminate improper cases.
             if (Collinear(a, b, c) || Collinear(a, b, d) ||
@@ -1610,7 +1620,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return Xorb(Left(a, b, c), Left(a, b, d)) && Xorb(Left(c, d, a), Left(c, d, b));
         }
-        private static bool Collinear(int[] a, int[] b, int[] c)
+        private static bool Collinear(Trianglei a, Trianglei b, Trianglei c)
         {
             return Area2(a, b, c) == 0;
         }
@@ -1634,25 +1644,25 @@ namespace Engine.PathFinding.NavMesh2
         /// <param name="b"></param>
         /// <param name="c"></param>
         /// <returns></returns>
-        private static bool Between(int[] a, int[] b, int[] c)
+        private static bool Between(Trianglei a, Trianglei b, Trianglei c)
         {
             if (!Collinear(a, b, c))
                 return false;
             // If ab not vertical, check betweenness on x; else on y.
-            if (a[0] != b[0])
-                return ((a[0] <= c[0]) && (c[0] <= b[0])) || ((a[0] >= c[0]) && (c[0] >= b[0]));
+            if (a.X != b.X)
+                return ((a.X <= c.X) && (c.X <= b.X)) || ((a.X >= c.X) && (c.X >= b.X));
             else
-                return ((a[2] <= c[2]) && (c[2] <= b[2])) || ((a[2] >= c[2]) && (c[2] >= b[2]));
+                return ((a.Z <= c.Z) && (c.Z <= b.Z)) || ((a.Z >= c.Z) && (c.Z >= b.Z));
         }
-        private static int AddVertex(int x, int y, int z, int[][] verts, int[] firstVert, int[] nextVert, int nv)
+        private static int AddVertex(int x, int y, int z, Trianglei[] verts, Polygoni firstVert, Polygoni nextVert, ref int nv)
         {
             int bucket = ComputeVertexHash2(x, 0, z);
             int i = firstVert[bucket];
 
             while (i != NullIdx)
             {
-                int[] vx = verts[i];
-                if (vx[0] == x && vx[2] == z && (Math.Abs(vx[1] - y) <= 2))
+                var vx = verts[i];
+                if (vx.X == x && vx.Z == z && (Math.Abs(vx.Y - y) <= 2))
                 {
                     return i;
                 }
@@ -1661,7 +1671,7 @@ namespace Engine.PathFinding.NavMesh2
 
             // Could not find, create new.
             i = nv; nv++;
-            int[] v = verts[i];
+            var v = verts[i];
             v[0] = x;
             v[1] = y;
             v[2] = z;
@@ -1678,7 +1688,7 @@ namespace Engine.PathFinding.NavMesh2
             uint n = (uint)(h1 * x + h2 * y + h3 * z);
             return (int)(n & (VertexBucketCount2 - 1));
         }
-        private static int GetPolyMergeValue(int[] pa, int[] pb, int[][] verts, out int ea, out int eb)
+        private static int GetPolyMergeValue(Polygoni pa, Polygoni pb, Trianglei[] verts, out int ea, out int eb)
         {
             ea = -1;
             eb = -1;
@@ -1751,7 +1761,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return dx * dx + dy * dy;
         }
-        private static int CountPolyVerts(int[] p)
+        private static int CountPolyVerts(Polygoni p)
         {
             for (int i = 0; i < VertsPerPolygon; ++i)
             {
@@ -1763,13 +1773,13 @@ namespace Engine.PathFinding.NavMesh2
 
             return VertsPerPolygon;
         }
-        private static bool Uleft(int[] a, int[] b, int[] c)
+        private static bool Uleft(Trianglei a, Trianglei b, Trianglei c)
         {
-            return (b[0] - a[0]) * (c[2] - a[2]) - (c[0] - a[0]) * (b[2] - a[2]) < 0;
+            return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z) < 0;
         }
-        private static int[] MergePolys(int[] pa, int[] pb, int ea, int eb)
+        private static Polygoni MergePolys(Polygoni pa, Polygoni pb, int ea, int eb)
         {
-            int[] tmp = new int[VertsPerPolygon * 2];
+            var tmp = new Polygoni(VertsPerPolygon);
 
             int na = CountPolyVerts(pa);
             int nb = CountPolyVerts(pb);
@@ -1797,7 +1807,7 @@ namespace Engine.PathFinding.NavMesh2
             int numRemainingEdges = 0;
             for (int i = 0; i < mesh.npolys; ++i)
             {
-                int[] p = mesh.polys[i * VertsPerPolygon * 2];
+                var p = mesh.polys[i * VertsPerPolygon * 2];
                 int nv = CountPolyVerts(p);
                 int numRemoved = 0;
                 int numVerts = 0;
@@ -1839,7 +1849,7 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < mesh.npolys; ++i)
             {
-                int[] p = mesh.polys[i * VertsPerPolygon * 2];
+                var p = mesh.polys[i * VertsPerPolygon * 2];
                 int nv = CountPolyVerts(p);
 
                 // Collect edges which touches the removed vertex.
@@ -1903,7 +1913,7 @@ namespace Engine.PathFinding.NavMesh2
             int numRemovedVerts = 0;
             for (int i = 0; i < mesh.npolys; ++i)
             {
-                int[] p = mesh.polys[i * VertsPerPolygon * 2];
+                var p = mesh.polys[i * VertsPerPolygon * 2];
                 int nv = CountPolyVerts(p);
                 for (int j = 0; j < nv; ++j)
                 {
@@ -1913,7 +1923,7 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             int nedges = 0;
-            int[][] edges = new int[MaxRemEdges * 3][];
+            List<int>[] edges = new List<int>[MaxRemEdges * 3];
             int nhole = 0;
             int[] hole = new int[MaxRemEdges];
             int nharea = 0;
@@ -1921,11 +1931,13 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < mesh.npolys; ++i)
             {
-                int[] p = mesh.polys[i * VertsPerPolygon * 2];
+                var p = mesh.polys[i * VertsPerPolygon * 2];
                 int nv = CountPolyVerts(p);
                 bool hasRem = false;
                 for (int j = 0; j < nv; ++j)
+                {
                     if (p[j] == rem) hasRem = true;
+                }
                 if (hasRem)
                 {
                     // Collect edges which does not touch the removed vertex.
@@ -1937,7 +1949,7 @@ namespace Engine.PathFinding.NavMesh2
                             {
                                 return false;
                             }
-                            int[] e = edges[nedges];
+                            var e = edges[nedges];
                             e[0] = p[k];
                             e[1] = p[j];
                             e[2] = (int)mesh.areas[i];
@@ -1945,7 +1957,7 @@ namespace Engine.PathFinding.NavMesh2
                         }
                     }
                     // Remove the polygon.
-                    int[] p2 = mesh.polys[(mesh.npolys - 1) * VertsPerPolygon * 2];
+                    var p2 = mesh.polys[(mesh.npolys - 1) * VertsPerPolygon * 2];
                     //memcpy(p, p2, sizeof(unsigned short) * MAX_VERTS_PER_POLY);
                     //memset(p + MAX_VERTS_PER_POLY, 0xff, sizeof(unsigned short) * MAX_VERTS_PER_POLY);
                     mesh.areas[i] = mesh.areas[mesh.npolys - 1];
@@ -1966,7 +1978,7 @@ namespace Engine.PathFinding.NavMesh2
             // Adjust indices to match the removed vertex layout.
             for (int i = 0; i < mesh.npolys; ++i)
             {
-                int[] p = mesh.polys[i * VertsPerPolygon * 2];
+                var p = mesh.polys[i * VertsPerPolygon * 2];
                 int nv = CountPolyVerts(p);
                 for (int j = 0; j < nv; ++j)
                 {
@@ -2040,23 +2052,22 @@ namespace Engine.PathFinding.NavMesh2
             }
 
 
-            int[][] tris = new int[MaxRemEdges][];
-            int[][] tverts = new int[MaxRemEdges][];
-            int[] tpoly = new int[MaxRemEdges];
+            var tverts = new Trianglei[MaxRemEdges];
+            var tpoly = new int[MaxRemEdges];
 
             // Generate temp vertex array for triangulation.
             for (int i = 0; i < nhole; ++i)
             {
                 int pi = hole[i];
-                tverts[i][0] = mesh.verts[pi][0];
-                tverts[i][1] = mesh.verts[pi][1];
-                tverts[i][2] = mesh.verts[pi][2];
-                tverts[i][3] = 0;
+                tverts[i].X = mesh.verts[pi].X;
+                tverts[i].Y = mesh.verts[pi].Y;
+                tverts[i].Z = mesh.verts[pi].Z;
+                tverts[i].R = 0;
                 tpoly[i] = i;
             }
 
             // Triangulate the hole.
-            int ntris = Triangulate(nhole, tverts, out tpoly, out tris[0]);
+            int ntris = Triangulate(nhole, tverts, ref tpoly, out Trianglei[] tris);
             if (ntris < 0)
             {
                 // TODO: issue warning!
@@ -2068,14 +2079,14 @@ namespace Engine.PathFinding.NavMesh2
                 return false;
             }
 
-            int[][] polys = new int[MaxRemEdges][];
+            Polygoni[] polys = new Polygoni[MaxRemEdges];
             int[] pareas = new int[MaxRemEdges];
 
             // Build initial polygons.
             int npolys = 0;
             for (int j = 0; j < ntris; ++j)
             {
-                int[] t = tris[j];
+                var t = tris[j];
                 if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])
                 {
                     polys[npolys][0] = hole[t[0]];
@@ -2102,10 +2113,10 @@ namespace Engine.PathFinding.NavMesh2
 
                     for (int j = 0; j < npolys - 1; ++j)
                     {
-                        int[] pj = polys[j];
+                        var pj = polys[j];
                         for (int k = j + 1; k < npolys; ++k)
                         {
-                            int[] pk = polys[k];
+                            var pk = polys[k];
                             int ea, eb;
                             int v = GetPolyMergeValue(pj, pk, mesh.verts, out ea, out eb);
                             if (v > bestMergeVal)
@@ -2122,8 +2133,8 @@ namespace Engine.PathFinding.NavMesh2
                     if (bestMergeVal > 0)
                     {
                         // Found best, merge.
-                        int[] pa = polys[bestPa];
-                        int[] pb = polys[bestPb];
+                        var pa = polys[bestPa];
+                        var pb = polys[bestPb];
                         pa = MergePolys(pa, pb, bestEa, bestEb);
                         //memcpy(pb, &polys[(npolys - 1) * MAX_VERTS_PER_POLY], sizeof(unsigned short) * MAX_VERTS_PER_POLY);
                         pareas[bestPb] = pareas[npolys - 1];
@@ -2141,7 +2152,7 @@ namespace Engine.PathFinding.NavMesh2
             for (int i = 0; i < npolys; ++i)
             {
                 if (mesh.npolys >= maxTris) break;
-                int[] p = mesh.polys[mesh.npolys * 2];
+                var p = mesh.polys[mesh.npolys * 2];
                 //memset(p, 0xff, sizeof(unsigned short) * MAX_VERTS_PER_POLY * 2);
                 for (int j = 0; j < VertsPerPolygon; ++j)
                 {
@@ -2169,7 +2180,7 @@ namespace Engine.PathFinding.NavMesh2
             arr[an] = v;
             an++;
         }
-        private static bool BuildMeshAdjacency(int[][] polys, int npolys, int[][] verts, int nverts, TileCacheContourSet lcset)
+        private static bool BuildMeshAdjacency(Polygoni[] polys, int npolys, Trianglei[] verts, int nverts, TileCacheContourSet lcset)
         {
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
@@ -2188,7 +2199,7 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < npolys; ++i)
             {
-                int[] t = polys[i * VertsPerPolygon * 2];
+                var t = polys[i];
                 for (int j = 0; j < VertsPerPolygon; ++j)
                 {
                     if (t[j] == NullIdx) break;
@@ -2196,13 +2207,19 @@ namespace Engine.PathFinding.NavMesh2
                     int v1 = (j + 1 >= VertsPerPolygon || t[j + 1] == NullIdx) ? t[0] : t[j + 1];
                     if (v0 < v1)
                     {
-                        Edge edge = edges[edgeCount];
+                        Edge edge = new Edge()
+                        {
+                            vert = new int[2],
+                            polyEdge = new int[2],
+                            poly = new int[2],
+                        };
                         edge.vert[0] = v0;
                         edge.vert[1] = v1;
                         edge.poly[0] = i;
                         edge.polyEdge[0] = j;
                         edge.poly[1] = i;
                         edge.polyEdge[1] = 0xff;
+                        edges[edgeCount] = edge;
                         // Insert edge
                         nextEdge[edgeCount] = firstEdge[v0];
                         firstEdge[v0] = edgeCount;
@@ -2213,7 +2230,7 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < npolys; ++i)
             {
-                int[] t = polys[i * VertsPerPolygon * 2];
+                var t = polys[i];
                 for (int j = 0; j < VertsPerPolygon; ++j)
                 {
                     if (t[j] == NullIdx) break;
@@ -2236,13 +2253,19 @@ namespace Engine.PathFinding.NavMesh2
                         if (!found)
                         {
                             // Matching edge not found, it is an open edge, add it.
-                            Edge edge = edges[edgeCount];
+                            Edge edge = new Edge()
+                            {
+                                vert = new int[2],
+                                polyEdge = new int[2],
+                                poly = new int[2],
+                            };
                             edge.vert[0] = v1;
                             edge.vert[1] = v0;
                             edge.poly[0] = i;
                             edge.polyEdge[0] = j;
                             edge.poly[1] = i;
                             edge.polyEdge[1] = 0xff;
+                            edges[edgeCount] = edge;
                             // Insert edge
                             nextEdge[edgeCount] = firstEdge[v1];
                             firstEdge[v1] = edgeCount;
@@ -2263,9 +2286,9 @@ namespace Engine.PathFinding.NavMesh2
 
                 for (int j = 0, k = cont.nverts - 1; j < cont.nverts; k = j++)
                 {
-                    int[] va = cont.verts[k];
-                    int[] vb = cont.verts[j];
-                    int dir = va[3] & 0xf;
+                    var va = cont.verts[k];
+                    var vb = cont.verts[j];
+                    int dir = va.R & 0xf;
                     if (dir == 0xf)
                     {
                         continue;
@@ -2274,9 +2297,9 @@ namespace Engine.PathFinding.NavMesh2
                     if (dir == 0 || dir == 2)
                     {
                         // Find matching vertical edge
-                        int x = va[0];
-                        int zmin = va[2];
-                        int zmax = vb[2];
+                        int x = va.X;
+                        int zmin = va.Z;
+                        int zmax = vb.Z;
                         if (zmin > zmax)
                         {
                             Helper.Swap(ref zmin, ref zmax);
@@ -2290,12 +2313,12 @@ namespace Engine.PathFinding.NavMesh2
                             {
                                 continue;
                             }
-                            int[] eva = verts[e.vert[0]];
-                            int[] evb = verts[e.vert[1]];
-                            if (eva[0] == x && evb[0] == x)
+                            var eva = verts[e.vert[0]];
+                            var evb = verts[e.vert[1]];
+                            if (eva.X == x && evb.X == x)
                             {
-                                int ezmin = eva[2];
-                                int ezmax = evb[2];
+                                int ezmin = eva.Z;
+                                int ezmax = evb.Z;
                                 if (ezmin > ezmax)
                                 {
                                     Helper.Swap(ref ezmin, ref ezmax);
@@ -2311,9 +2334,9 @@ namespace Engine.PathFinding.NavMesh2
                     else
                     {
                         // Find matching vertical edge
-                        int z = va[2];
-                        int xmin = va[0];
-                        int xmax = vb[0];
+                        int z = va.Z;
+                        int xmin = va.X;
+                        int xmax = vb.X;
                         if (xmin > xmax)
                         {
                             Helper.Swap(ref xmin, ref xmax);
@@ -2326,12 +2349,12 @@ namespace Engine.PathFinding.NavMesh2
                             {
                                 continue;
                             }
-                            int[] eva = verts[e.vert[0]];
-                            int[] evb = verts[e.vert[1]];
-                            if (eva[2] == z && evb[2] == z)
+                            var eva = verts[e.vert[0]];
+                            var evb = verts[e.vert[1]];
+                            if (eva.Z == z && evb.Z == z)
                             {
-                                int exmin = eva[0];
-                                int exmax = evb[0];
+                                int exmin = eva.X;
+                                int exmax = evb.X;
                                 if (exmin > exmax)
                                 {
                                     Helper.Swap(ref exmin, ref exmax);
@@ -2354,14 +2377,14 @@ namespace Engine.PathFinding.NavMesh2
                 Edge e = edges[i];
                 if (e.poly[0] != e.poly[1])
                 {
-                    int[] p0 = polys[e.poly[0]];
-                    int[] p1 = polys[e.poly[1]];
+                    var p0 = polys[e.poly[0]];
+                    var p1 = polys[e.poly[1]];
                     p0[e.polyEdge[0]] = e.poly[1];
                     p1[e.polyEdge[1]] = e.poly[0];
                 }
                 else if (e.polyEdge[1] != 0xff)
                 {
-                    int[] p0 = polys[e.poly[0]];
+                    var p0 = polys[e.poly[0]];
                     p0[e.polyEdge[0]] = 0x8000 | e.polyEdge[1];
                 }
             }

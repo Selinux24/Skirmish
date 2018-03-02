@@ -9,11 +9,11 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Minimum bounds of the node's AABB. [(x, y, z)]
         /// </summary>
-        public Vector3i bmin;
+        public Trianglei bmin;
         /// <summary>
         /// Maximum bounds of the node's AABB. [(x, y, z)]
         /// </summary>
-        public Vector3i bmax;
+        public Trianglei bmax;
         /// <summary>
         /// The node's index. (Negative for escape sequence.)
         /// </summary>

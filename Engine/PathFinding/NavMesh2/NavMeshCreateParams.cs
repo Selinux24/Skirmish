@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.NavMesh2
 {
@@ -15,7 +16,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The polygon mesh vertices. [(x, y, z) * #vertCount] [Unit: vx]
         /// </summary>
-        public int[][] verts;
+        public Trianglei[] verts;
         /// <summary>
         /// The number vertices in the polygon mesh. [Limit: >= 3]
         /// </summary>
@@ -23,7 +24,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The polygon data. [Size: #polyCount * 2 * #nvp]
         /// </summary>
-        public int[][] polys;
+        public Polygoni[] polys;
         /// <summary>
         /// The user defined flags assigned to each polygon. [Size: #polyCount]
         /// </summary>

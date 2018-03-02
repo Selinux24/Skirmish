@@ -1,16 +1,17 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Engine.PathFinding.NavMesh2
 {
     public class TempContour
     {
-        public int[][] verts;
+        public Trianglei[] verts;
         public int nverts;
         public int cverts;
-        public uint[] poly;
+        public Polygoni poly;
         public int npoly;
         public int cpoly;
 
-        public TempContour(int[][] vbuf, int nvbuf, uint[] pbuf, int npbuf)
+        public TempContour(Trianglei[] vbuf, int nvbuf, Polygoni pbuf, int npbuf)
         {
             verts = vbuf;
             nverts = 0;

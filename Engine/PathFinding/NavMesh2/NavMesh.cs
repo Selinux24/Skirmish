@@ -21,9 +21,7 @@ namespace Engine.PathFinding.NavMesh2
             var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
 
             // Init cache
-            int gw;
-            int gh;
-            CalcGridSize(bbox, settings.CellSize, out gw, out gh);
+            CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
             int ts = (int)settings.TileSize;
             int tw = (gw + ts - 1) / ts;
             int th = (gh + ts - 1) / ts;
@@ -106,15 +104,17 @@ namespace Engine.PathFinding.NavMesh2
             {
                 for (int x = 0; x < tw; x++)
                 {
-                    TileCacheData[] tiles;
-                    int ntiles = RasterizeTileLayers(x, y, settings, cfg, geometry, out tiles);
+                    int ntiles = RasterizeTileLayers(
+                        x, y, settings, cfg,
+                        geometry,
+                        out TileCacheData[] tiles);
 
                     for (int i = 0; i < ntiles; ++i)
                     {
                         tileCache.AddTile(tiles[i], TileFlags.FreeData);
 
                         m_cacheLayerCount++;
-                        m_cacheCompressedSize += 0;// tiles[i].DataSize;
+                        m_cacheCompressedSize += 0;//tiles[i].DataSize;
                         m_cacheRawSize += layerBufferSize;
                     }
                 }
