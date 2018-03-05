@@ -1,13 +1,8 @@
 ﻿using Engine;
 using Engine.PathFinding;
-using Engine.PathFinding.NavMesh;
 using Engine.PathFinding.NavMesh2;
 using SharpDX;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Collada
 {
@@ -231,7 +226,6 @@ namespace Collada
                 }
             }
         }
-
         private void UpdateGraphNodes(AgentType agent)
         {
             var nodes = this.GetNodes(agent);
@@ -241,16 +235,16 @@ namespace Collada
                 Color[] regions = new Color[nodes.Length];
                 for (int i = 0; i < nodes.Length; i++)
                 {
-                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.25f);
+                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.75f);
                 }
 
                 this.graphDrawer.Instance.Clear();
 
                 for (int i = 0; i < nodes.Length; i++)
                 {
-                    var node = (NavigationMeshNode)nodes[i];
+                    var node = (GraphNode)nodes[i];
                     var color = regions[node.RegionId];
-                    var poly = node.Poly;
+                    var poly = node.Polygon;
                     var tris = poly.Triangulate();
 
                     this.graphDrawer.Instance.AddTriangles(color, tris);

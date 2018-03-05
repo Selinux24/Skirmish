@@ -2943,7 +2943,17 @@ namespace Engine.PathFinding.NavMesh2
 
         public IGraphNode[] GetNodes(AgentType agent)
         {
-            return null;
+            List<GraphNode> nodes = new List<GraphNode>();
+
+            GraphNode.Id = 0;
+
+            for (int i = 0; i < m_tiles.Length; i++)
+            {
+                nodes.AddRange(GraphNode.Build(m_tiles[i]));
+                GraphNode.Id++;
+            }
+
+            return nodes.ToArray();
         }
         public Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
@@ -2953,6 +2963,61 @@ namespace Engine.PathFinding.NavMesh2
         {
             nearest = null;
             return false;
+        }
+    }
+
+    public class GraphNode : IGraphNode
+    {
+        public static int Id = 0;
+
+        public static GraphNode[] Build(MeshTile tile)
+        {
+            List<GraphNode> nodes = new List<GraphNode>();
+
+            if (tile.header.magic == Constants.Magic)
+            {
+                for (int i = 0; i < tile.polys.Length; i++)
+                {
+                    var poly = tile.polys[i];
+                    var p = new Polygon(poly.vertCount);
+
+                    for (int n = 0; n < poly.vertCount; n++)
+                    {
+                        p[n] = tile.verts[poly.verts[n]];
+                    }
+
+                    nodes.Add(new GraphNode()
+                    {
+                        Polygon = p,
+                        RegionId = Id,
+                        TotalCost = 1,
+                    });
+                }
+            }
+
+            return nodes.ToArray();
+        }
+
+        public Polygon Polygon;
+
+        public Vector3 Center
+        {
+            get { return Polygon.Center; }
+        }
+
+        public int RegionId { get; set; }
+
+        public float TotalCost { get; set; }
+
+        public bool Contains(Vector3 point, out float distance)
+        {
+            distance = float.MaxValue;
+            return Polygon.Contains(point);
+        }
+
+        public Vector3[] GetPoints()
+        {
+            return Polygon.Points;
         }
     }
 }
