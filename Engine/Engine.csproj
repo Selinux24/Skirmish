@@ -275,6 +275,7 @@
     <Compile Include="PathFinding\IAgent.cs" />
     <Compile Include="PathFinding\NavMesh2\Agent.cs" />
     <Compile Include="PathFinding\NavMesh2\BoundsItem.cs" />
+    <Compile Include="PathFinding\NavMesh2\BVItem.cs" />
     <Compile Include="PathFinding\NavMesh2\BVNode.cs" />
     <Compile Include="PathFinding\NavMesh2\ChunkyTriMesh.cs" />
     <Compile Include="PathFinding\NavMesh2\ChunkyTriMeshNode.cs" />
@@ -283,6 +284,7 @@
     <Compile Include="PathFinding\NavMesh2\CompactSpan.cs" />
     <Compile Include="PathFinding\NavMesh2\CompressedTile.cs" />
     <Compile Include="PathFinding\NavMesh2\Config.cs" />
+    <Compile Include="PathFinding\NavMesh2\Constants.cs" />
     <Compile Include="PathFinding\NavMesh2\ConvexVolume.cs" />
     <Compile Include="PathFinding\NavMesh2\Edge.cs" />
     <Compile Include="PathFinding\NavMesh2\Heightfield.cs" />
@@ -293,6 +295,7 @@
     <Compile Include="PathFinding\NavMesh2\LayerRegion.cs" />
     <Compile Include="PathFinding\NavMesh2\LayerSweepSpan.cs" />
     <Compile Include="PathFinding\NavMesh2\Link.cs" />
+    <Compile Include="PathFinding\NavMesh2\MeshData.cs" />
     <Compile Include="PathFinding\NavMesh2\MeshHeader.cs" />
     <Compile Include="PathFinding\NavMesh2\MeshTile.cs" />
     <Compile Include="PathFinding\NavMesh2\NavMeshCreateParams.cs" />
@@ -308,6 +311,7 @@
     <Compile Include="PathFinding\NavMesh2\Poly.cs" />
     <Compile Include="PathFinding\NavMesh2\PolyDetail.cs" />
     <Compile Include="PathFinding\NavMesh2\Polygoni.cs" />
+    <Compile Include="PathFinding\NavMesh2\PolyTypes.cs" />
     <Compile Include="PathFinding\NavMesh2\RasterizationContext.cs" />
     <Compile Include="PathFinding\NavMesh2\BuildSettings.cs" />
     <Compile Include="PathFinding\NavMesh2\SamplePartitionTypeEnum.cs" />
@@ -346,7 +350,7 @@
     <Compile Include="PathFinding\NavMesh\Crowds\PathResolveQueue.cs" />
     <Compile Include="PathFinding\NavMesh\FindPathOptions.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\LocalBoundary.cs" />
-    <Compile Include="PathFinding\NavMesh2\NavMesh.cs" />
+    <Compile Include="PathFinding\NavMesh2\NavigationMesh2.cs" />
     <Compile Include="PathFinding\NavMesh\NavigationMeshQueryFilter.cs" />
     <Compile Include="PathFinding\NavMesh\PolygonPath.cs" />
     <Compile Include="PathFinding\NavMesh\PolyId.cs" />

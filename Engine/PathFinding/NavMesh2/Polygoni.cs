@@ -21,7 +21,7 @@ namespace Engine.PathFinding.NavMesh2
 
         public Polygoni(int capacity)
         {
-            this.Vertices = Helper.CreateArray(capacity, TileCache.NullIdx);
+            this.Vertices = Helper.CreateArray(capacity, Constants.NullIdx);
         }
 
         public Polygoni Copy()

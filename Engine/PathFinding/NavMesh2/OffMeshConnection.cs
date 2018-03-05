@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.PathFinding.NavMesh2
 {
     /// <summary>
@@ -10,7 +11,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The endpoints of the connection. [(ax, ay, az, bx, by, bz)]
         /// </summary>
-        public float[] pos = new float[6];
+        public Vector3[] pos = new Vector3[2];
         /// <summary>
         /// The radius of the endpoints. [Limit: >= 0]
         /// </summary>
@@ -18,7 +19,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The polygon reference of the connection within the tile.
         /// </summary>
-        public uint poly;
+        public int poly;
         /// <summary>
         /// Link flags. 
         /// </summary>
@@ -29,7 +30,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// End point side.
         /// </summary>
-        public uint side;
+        public int side;
         /// <summary>
         /// The id of the offmesh connection. (User assigned when the navigation mesh is built.)
         /// </summary>

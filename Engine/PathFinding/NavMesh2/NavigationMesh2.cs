@@ -5,16 +5,13 @@ using System.Linq;
 
 namespace Engine.PathFinding.NavMesh2
 {
-    public class NavMesh
+    public class NavigationMesh2 : IGraph
     {
-        public const int ExpectedLayersPerTile = 4;
-        public const int NotConnected = 0x3f;
-
-        public static NavMesh Build(Triangle[] triangles, BuildSettings settings)
+        public static NavigationMesh2 Build(Triangle[] triangles, BuildSettings settings)
         {
             return Build(new InputGeometry(triangles), settings);
         }
-        public static NavMesh Build(InputGeometry geometry, BuildSettings settings)
+        public static NavigationMesh2 Build(InputGeometry geometry, BuildSettings settings)
         {
             var agent = settings.Agents[0];
 
@@ -66,7 +63,7 @@ namespace Engine.PathFinding.NavMesh2
                 WalkableRadius = agent.Radius,
                 WalkableClimb = agent.MaxClimb,
                 MaxSimplificationError = settings.EdgeMaxError,
-                MaxTiles = tw * th * ExpectedLayersPerTile,
+                MaxTiles = tw * th * Constants.ExpectedLayersPerTile,
                 MaxObstacles = 128,
             };
             var tmproc = new TileCacheMeshProcess(geometry);
@@ -74,7 +71,7 @@ namespace Engine.PathFinding.NavMesh2
             var tileCache = new TileCache();
             tileCache.Init(tcparams, tmproc);
 
-            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th * ExpectedLayersPerTile), 2), 14);
+            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th * Constants.ExpectedLayersPerTile), 2), 14);
             if (tileBits > 14) tileBits = 14;
             int polyBits = 22 - tileBits;
             int maxTiles = 1 << tileBits;
@@ -89,7 +86,7 @@ namespace Engine.PathFinding.NavMesh2
                 MaxPolys = maxPolysPerTile,
             };
 
-            var nm = new NavMesh();
+            var nm = new NavigationMesh2();
             nm.Init(nmparams);
 
             var nmQuery = new NavMeshQuery();
@@ -402,7 +399,7 @@ namespace Engine.PathFinding.NavMesh2
                         byte sid = 0xff;
 
                         // -x
-                        if (GetCon(s, 0) != NotConnected)
+                        if (GetCon(s, 0) != Constants.NotConnected)
                         {
                             int ax = x + GetDirOffsetX(0);
                             int ay = y + GetDirOffsetY(0);
@@ -421,7 +418,7 @@ namespace Engine.PathFinding.NavMesh2
                         }
 
                         // -y
-                        if (GetCon(s, 3) != NotConnected)
+                        if (GetCon(s, 3) != Constants.NotConnected)
                         {
                             int ax = x + GetDirOffsetX(3);
                             int ay = y + GetDirOffsetY(3);
@@ -520,7 +517,7 @@ namespace Engine.PathFinding.NavMesh2
                         // Update neighbours
                         for (int dir = 0; dir < 4; ++dir)
                         {
-                            if (GetCon(s, dir) != NotConnected)
+                            if (GetCon(s, dir) != Constants.NotConnected)
                             {
                                 int ax = x + GetDirOffsetX(dir);
                                 int ay = y + GetDirOffsetY(dir);
@@ -895,7 +892,7 @@ namespace Engine.PathFinding.NavMesh2
                             byte con = 0;
                             for (int dir = 0; dir < 4; ++dir)
                             {
-                                if (GetCon(s, dir) != NotConnected)
+                                if (GetCon(s, dir) != Constants.NotConnected)
                                 {
                                     int ax = cx + GetDirOffsetX(dir);
                                     int ay = cy + GetDirOffsetY(dir);
@@ -1153,7 +1150,7 @@ namespace Engine.PathFinding.NavMesh2
                             int nc = 0;
                             for (int dir = 0; dir < 4; ++dir)
                             {
-                                if (GetCon(s, dir) != NotConnected)
+                                if (GetCon(s, dir) != Constants.NotConnected)
                                 {
                                     int nx = x + GetDirOffsetX(dir);
                                     int ny = y + GetDirOffsetY(dir);
@@ -1185,7 +1182,7 @@ namespace Engine.PathFinding.NavMesh2
                     for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
                     {
                         CompactSpan s = chf.spans[i];
-                        if (GetCon(s, 0) != NotConnected)
+                        if (GetCon(s, 0) != Constants.NotConnected)
                         {
                             // (-1,0)
                             int ax = x + GetDirOffsetX(0);
@@ -1199,7 +1196,7 @@ namespace Engine.PathFinding.NavMesh2
                             }
 
                             // (-1,-1)
-                            if (GetCon(asp, 3) != NotConnected)
+                            if (GetCon(asp, 3) != Constants.NotConnected)
                             {
                                 int aax = ax + GetDirOffsetX(3);
                                 int aay = ay + GetDirOffsetY(3);
@@ -1211,7 +1208,7 @@ namespace Engine.PathFinding.NavMesh2
                                 }
                             }
                         }
-                        if (GetCon(s, 3) != NotConnected)
+                        if (GetCon(s, 3) != Constants.NotConnected)
                         {
                             // (0,-1)
                             int ax = x + GetDirOffsetX(3);
@@ -1225,7 +1222,7 @@ namespace Engine.PathFinding.NavMesh2
                             }
 
                             // (1,-1)
-                            if (GetCon(asp, 2) != NotConnected)
+                            if (GetCon(asp, 2) != Constants.NotConnected)
                             {
                                 int aax = ax + GetDirOffsetX(2);
                                 int aay = ay + GetDirOffsetY(2);
@@ -1250,7 +1247,7 @@ namespace Engine.PathFinding.NavMesh2
                     for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
                     {
                         CompactSpan s = chf.spans[i];
-                        if (GetCon(s, 2) != NotConnected)
+                        if (GetCon(s, 2) != Constants.NotConnected)
                         {
                             // (1,0)
                             int ax = x + GetDirOffsetX(2);
@@ -1264,7 +1261,7 @@ namespace Engine.PathFinding.NavMesh2
                             }
 
                             // (1,1)
-                            if (GetCon(asp, 1) != NotConnected)
+                            if (GetCon(asp, 1) != Constants.NotConnected)
                             {
                                 int aax = ax + GetDirOffsetX(1);
                                 int aay = ay + GetDirOffsetY(1);
@@ -1276,7 +1273,7 @@ namespace Engine.PathFinding.NavMesh2
                                 }
                             }
                         }
-                        if (GetCon(s, 1) != NotConnected)
+                        if (GetCon(s, 1) != Constants.NotConnected)
                         {
                             // (0,1)
                             int ax = x + GetDirOffsetX(1);
@@ -1290,7 +1287,7 @@ namespace Engine.PathFinding.NavMesh2
                             }
 
                             // (-1,1)
-                            if (GetCon(asp, 0) != NotConnected)
+                            if (GetCon(asp, 0) != Constants.NotConnected)
                             {
                                 int aax = ax + GetDirOffsetX(0);
                                 int aay = ay + GetDirOffsetY(0);
@@ -1661,7 +1658,7 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Find neighbour connections.
-            int maxLayers = NotConnected - 1;
+            int maxLayers = Constants.NotConnected - 1;
             int tooHighNeighbour = 0;
             for (int y = 0; y < h; ++y)
             {
@@ -1674,7 +1671,7 @@ namespace Engine.PathFinding.NavMesh2
 
                         for (int dir = 0; dir < 4; dir++)
                         {
-                            SetCon(ref s, dir, NotConnected);
+                            SetCon(ref s, dir, Constants.NotConnected);
                             int nx = x + GetDirOffsetX(dir);
                             int ny = y + GetDirOffsetY(dir);
                             // First check that the neighbour cell is in bounds.
@@ -1810,14 +1807,14 @@ namespace Engine.PathFinding.NavMesh2
         private MeshTile[] m_tiles;
         private MeshTile[] m_posLookup;
         private MeshTile m_nextFree = null;
-        private uint m_tileBits;
-        private uint m_polyBits;
-        private uint m_saltBits;
+        private int m_tileBits;
+        private int m_polyBits;
+        private int m_saltBits;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public NavMesh()
+        public NavigationMesh2()
         {
 
         }
@@ -1849,8 +1846,8 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Init ID generator values.
-            m_tileBits = (uint)Math.Log(Helper.NextPowerOfTwo(nmparams.MaxTiles), 2);
-            m_polyBits = (uint)Math.Log(Helper.NextPowerOfTwo(nmparams.MaxPolys), 2);
+            m_tileBits = (int)Math.Log(Helper.NextPowerOfTwo(nmparams.MaxTiles), 2);
+            m_polyBits = (int)Math.Log(Helper.NextPowerOfTwo(nmparams.MaxPolys), 2);
             // Only allow 31 salt bits, since the salt mask is calculated using 32bit uint and it will overflow.
             m_saltBits = Math.Min(31, 32 - m_tileBits - m_polyBits);
 
@@ -1876,23 +1873,23 @@ namespace Engine.PathFinding.NavMesh2
             }
             return null;
         }
-        public bool AddTile(byte[] data, int dataSize, TileFlags flags, int lastRef, int result)
+        public bool AddTile(MeshData data, TileFlags flags, ref int lastRef, out int result)
         {
-            throw new NotImplementedException();
-            /*
+            result = -1;
+
             // Make sure the data is in right format.
-            MeshHeader header = data;
-            if (header.magic != DT_NAVMESH_MAGIC)
+            MeshHeader header = data.header;
+            if (header.magic != Constants.Magic)
             {
                 return false;
             }
-            if (header.version != DT_NAVMESH_VERSION)
+            if (header.version != Constants.Version)
             {
                 return false;
             }
 
             // Make sure the location is free.
-            if (getTileAt(header.x, header.y, header.layer))
+            if (GetTileAt(header.x, header.y, header.layer) != null)
             {
                 return false;
             }
@@ -1911,7 +1908,7 @@ namespace Engine.PathFinding.NavMesh2
             else
             {
                 // Try to relocate the tile to specific index with same salt.
-                int tileIndex = (int)decodePolyIdTile(lastRef);
+                int tileIndex = DecodePolyIdTile(lastRef);
                 if (tileIndex >= m_maxTiles)
                 {
                     return false;
@@ -1941,7 +1938,7 @@ namespace Engine.PathFinding.NavMesh2
                 }
 
                 // Restore salt.
-                tile.salt = decodePolyIdSalt(lastRef);
+                tile.salt = DecodePolyIdSalt(lastRef);
             }
 
             // Make sure we could allocate a tile.
@@ -1955,89 +1952,1007 @@ namespace Engine.PathFinding.NavMesh2
             tile.next = m_posLookup[h];
             m_posLookup[h] = tile;
 
-            // Patch header pointers.
-            int headerSize = Helper.Align4(sizeof(MeshHeader));
-            int vertsSize = Helper.Align4(sizeof(float) * 3 * header.vertCount);
-            int polysSize = Helper.Align4(sizeof(Poly) * header.polyCount);
-            int linksSize = Helper.Align4(sizeof(Link) * (header.maxLinkCount));
-            int detailMeshesSize = Helper.Align4(sizeof(PolyDetail) * header.detailMeshCount);
-            int detailVertsSize = Helper.Align4(sizeof(float) * 3 * header.detailVertCount);
-            int detailTrisSize = Helper.Align4(sizeof(byte) * 4 * header.detailTriCount);
-            int bvtreeSize = Helper.Align4(sizeof(BVNode) * header.bvNodeCount);
-            int offMeshLinksSize = Helper.Align4(sizeof(OffMeshConnection) * header.offMeshConCount);
-
-            unsigned char* d = data + headerSize;
-            tile->verts = dtGetThenAdvanceBufferPointer<float>(d, vertsSize);
-            tile->polys = dtGetThenAdvanceBufferPointer<dtPoly>(d, polysSize);
-            tile->links = dtGetThenAdvanceBufferPointer<dtLink>(d, linksSize);
-            tile->detailMeshes = dtGetThenAdvanceBufferPointer<dtPolyDetail>(d, detailMeshesSize);
-            tile->detailVerts = dtGetThenAdvanceBufferPointer<float>(d, detailVertsSize);
-            tile->detailTris = dtGetThenAdvanceBufferPointer < unsigned char> (d, detailTrisSize);
-            tile->bvTree = dtGetThenAdvanceBufferPointer<dtBVNode>(d, bvtreeSize);
-            tile->offMeshCons = dtGetThenAdvanceBufferPointer<dtOffMeshConnection>(d, offMeshLinksSize);
+            tile.Patch(header);
 
             // If there are no items in the bvtree, reset the tree pointer.
-            if (!bvtreeSize)
-                tile->bvTree = 0;
+            if (data.navBvtree == null)
+            {
+                tile.bvTree = null;
+            }
 
             // Build links freelist
-            tile->linksFreeList = 0;
-            tile->links[header->maxLinkCount - 1].next = DT_NULL_LINK;
-            for (int i = 0; i < header->maxLinkCount - 1; ++i)
-                tile->links[i].next = i + 1;
+            tile.linksFreeList = 0;
+            tile.links[header.maxLinkCount - 1].next = Constants.DT_NULL_LINK;
+            for (int i = 0; i < header.maxLinkCount - 1; ++i)
+            {
+                tile.links[i].next = i + 1;
+            }
 
             // Init tile.
-            tile->header = header;
-            tile->data = data;
-            tile->dataSize = dataSize;
-            tile->flags = flags;
+            tile.header = header;
+            tile.SetData(data);
+            tile.flags = flags;
 
-            connectIntLinks(tile);
+            ConnectIntLinks(tile);
 
             // Base off-mesh connections to their starting polygons and connect connections inside the tile.
-            baseOffMeshLinks(tile);
-            connectExtOffMeshLinks(tile, tile, -1);
+            BaseOffMeshLinks(tile);
+            ConnectExtOffMeshLinks(tile, tile, -1);
 
             // Create connections with neighbour tiles.
-            static const int MAX_NEIS = 32;
-            dtMeshTile* neis[MAX_NEIS];
+            int MAX_NEIS = 32;
+            MeshTile[] neis = new MeshTile[MAX_NEIS];
             int nneis;
 
             // Connect with layers in current tile.
-            nneis = getTilesAt(header->x, header->y, neis, MAX_NEIS);
+            nneis = GetTilesAt(header.x, header.y, neis, MAX_NEIS);
             for (int j = 0; j < nneis; ++j)
             {
                 if (neis[j] == tile)
+                {
                     continue;
+                }
 
-                connectExtLinks(tile, neis[j], -1);
-                connectExtLinks(neis[j], tile, -1);
-                connectExtOffMeshLinks(tile, neis[j], -1);
-                connectExtOffMeshLinks(neis[j], tile, -1);
+                ConnectExtLinks(tile, neis[j], -1);
+                ConnectExtLinks(neis[j], tile, -1);
+                ConnectExtOffMeshLinks(tile, neis[j], -1);
+                ConnectExtOffMeshLinks(neis[j], tile, -1);
             }
 
             // Connect with neighbour tiles.
             for (int i = 0; i < 8; ++i)
             {
-                nneis = getNeighbourTilesAt(header->x, header->y, i, neis, MAX_NEIS);
+                nneis = GetNeighbourTilesAt(header.x, header.y, i, neis, MAX_NEIS);
                 for (int j = 0; j < nneis; ++j)
                 {
-                    connectExtLinks(tile, neis[j], i);
-                    connectExtLinks(neis[j], tile, dtOppositeTile(i));
-                    connectExtOffMeshLinks(tile, neis[j], i);
-                    connectExtOffMeshLinks(neis[j], tile, dtOppositeTile(i));
+                    ConnectExtLinks(tile, neis[j], i);
+                    ConnectExtLinks(neis[j], tile, OppositeTile(i));
+                    ConnectExtOffMeshLinks(tile, neis[j], i);
+                    ConnectExtOffMeshLinks(neis[j], tile, OppositeTile(i));
                 }
             }
 
-            if (result)
-                *result = getTileRef(tile);
+            result = GetTileRef(tile);
 
-            return DT_SUCCESS;
-            */
+            return true;
         }
-        public void RemoveTile(MeshTile v1, int v2, int v3)
+        private MeshTile GetTileAt(int x, int y, int layer)
         {
-            throw new NotImplementedException();
+            // Find tile based on hash.
+            int h = ComputeTileHash(x, y, m_tileLutMask);
+            MeshTile tile = m_posLookup[h];
+            while (tile != null)
+            {
+                if (tile.header.x == x &&
+                    tile.header.y == y &&
+                    tile.header.layer == layer)
+                {
+                    return tile;
+                }
+                tile = tile.next;
+            }
+            return null;
+        }
+        private int GetTilesAt(int x, int y, MeshTile[] tiles, int maxTiles)
+        {
+            int n = 0;
+
+            // Find tile based on hash.
+            int h = ComputeTileHash(x, y, m_tileLutMask);
+            MeshTile tile = m_posLookup[h];
+            while (tile != null)
+            {
+                if (tile.header.x == x &&
+                    tile.header.y == y)
+                {
+                    if (n < maxTiles)
+
+                        tiles[n++] = tile;
+                }
+                tile = tile.next;
+            }
+
+            return n;
+        }
+        private int GetNeighbourTilesAt(int x, int y, int side, MeshTile[] tiles, int maxTiles)
+        {
+
+            int nx = x, ny = y;
+            switch (side)
+            {
+                case 0: nx++; break;
+                case 1: nx++; ny++; break;
+                case 2: ny++; break;
+                case 3: nx--; ny++; break;
+                case 4: nx--; break;
+                case 5: nx--; ny--; break;
+                case 6: ny--; break;
+                case 7: nx++; ny--; break;
+            };
+
+            return GetTilesAt(nx, ny, tiles, maxTiles);
+        }
+        private int ComputeTileHash(int x, int y, int mask)
+        {
+            uint h1 = 0x8da6b343; // Large multiplicative constants;
+            uint h2 = 0xd8163841; // here arbitrarily chosen primes
+            uint n = (uint)(h1 * x + h2 * y);
+            return (int)(n & mask);
+        }
+        private int DecodePolyIdTile(int r)
+        {
+            int tileMask = (1 << m_tileBits) - 1;
+            return ((r >> m_polyBits) & tileMask);
+        }
+        private int DecodePolyIdSalt(int r)
+        {
+            int saltMask = (1 << m_saltBits) - 1;
+            return ((r >> (m_polyBits + m_tileBits)) & saltMask);
+        }
+        private int EncodePolyId(int salt, int it, int ip)
+        {
+            return (salt << (m_polyBits + m_tileBits)) | (it << m_polyBits) | ip;
+        }
+        private void ConnectIntLinks(MeshTile tile)
+        {
+            if (tile == null) return;
+
+            int bse = GetPolyRefBase(tile);
+
+            for (int i = 0; i < tile.header.polyCount; ++i)
+            {
+                var poly = tile.polys[i];
+                poly.firstLink = Constants.DT_NULL_LINK;
+
+                if (poly.Type == PolyTypes.OffmeshConnection)
+                {
+                    continue;
+                }
+
+                // Build edge links backwards so that the links will be
+                // in the linked list from lowest index to highest.
+                for (int j = poly.vertCount - 1; j >= 0; --j)
+                {
+                    // Skip hard and non-internal edges.
+                    if (poly.neis[j] == 0 || (poly.neis[j] & Constants.DT_EXT_LINK) != 0) continue;
+
+                    int idx = AllocLink(tile);
+                    if (idx != Constants.DT_NULL_LINK)
+                    {
+                        var link = new Link
+                        {
+                            nref = (bse | (poly.neis[j] - 1)),
+                            edge = j,
+                            side = 0xff,
+                            bmin = 0,
+                            bmax = 0,
+                            // Add to linked list.
+                            next = poly.firstLink,
+                        };
+                        poly.firstLink = idx;
+                        tile.links[idx] = link;
+                    }
+                }
+            }
+        }
+        private int GetPolyRefBase(MeshTile tile)
+        {
+            if (tile == null) return 0;
+            int it = Array.IndexOf(m_tiles, tile);
+            return EncodePolyId(tile.salt, it, 0);
+        }
+        private int AllocLink(MeshTile tile)
+        {
+            if (tile.linksFreeList == Constants.DT_NULL_LINK)
+            {
+                return Constants.DT_NULL_LINK;
+            }
+            int link = tile.linksFreeList;
+            tile.linksFreeList = tile.links[link].next;
+            return link;
+        }
+        private void BaseOffMeshLinks(MeshTile tile)
+        {
+            if (tile == null) return;
+
+            int bse = GetPolyRefBase(tile);
+
+            // Base off-mesh connection start points.
+            for (int i = 0; i < tile.header.offMeshConCount; ++i)
+            {
+                var con = tile.offMeshCons[i];
+                var poly = tile.polys[con.poly];
+
+                Vector3 halfExtents = new Vector3(new float[] { con.rad, tile.header.walkableClimb, con.rad });
+
+                // Find polygon to connect to.
+                Vector3 p = con.pos[0]; // First vertex
+                Vector3 nearestPt = new Vector3();
+                int r = FindNearestPolyInTile(tile, p, halfExtents, nearestPt);
+                if (r == 0) continue;
+                // findNearestPoly may return too optimistic results, further check to make sure. 
+                if (Math.Sqrt(nearestPt[0] - p[0]) + Math.Sqrt(nearestPt[2] - p[2]) > Math.Sqrt(con.rad))
+                {
+                    continue;
+                }
+                // Make sure the location is on current mesh.
+                var v = tile.verts[poly.verts[0]];
+                v = nearestPt;
+
+                // Link off-mesh connection to target poly.
+                int idx = AllocLink(tile);
+                if (idx != Constants.DT_NULL_LINK)
+                {
+                    var link = new Link
+                    {
+                        nref = r,
+                        edge = 0,
+                        side = 0xff,
+                        bmin = 0,
+                        bmax = 0,
+                        // Add to linked list.
+                        next = poly.firstLink
+                    };
+                    tile.links[idx] = link;
+                    poly.firstLink = idx;
+                }
+
+                // Start end-point is always connect back to off-mesh connection. 
+                int tidx = AllocLink(tile);
+                if (tidx != Constants.DT_NULL_LINK)
+                {
+                    var landPolyIdx = DecodePolyIdPoly(r);
+                    var landPoly = tile.polys[landPolyIdx];
+                    var link = new Link
+                    {
+                        nref = (bse | (con.poly)),
+                        edge = 0xff,
+                        side = 0xff,
+                        bmin = 0,
+                        bmax = 0,
+                        // Add to linked list.
+                        next = landPoly.firstLink
+                    };
+                    tile.links[tidx] = link;
+                    landPoly.firstLink = tidx;
+                }
+            }
+        }
+        private int FindNearestPolyInTile(MeshTile tile, Vector3 center, Vector3 halfExtents, Vector3 nearestPt)
+        {
+            Vector3 bmin = Vector3.Subtract(center, halfExtents);
+            Vector3 bmax = Vector3.Add(center, halfExtents);
+
+            // Get nearby polygons from proximity grid.
+            int[] polys = new int[128];
+            int polyCount = QueryPolygonsInTile(tile, bmin, bmax, polys, 128);
+
+            // Find nearest polygon amongst the nearby polygons.
+            int nearest = 0;
+            float nearestDistanceSqr = float.MaxValue;
+            for (int i = 0; i < polyCount; ++i)
+            {
+                int r = polys[i];
+                float d;
+                ClosestPointOnPoly(r, center, out Vector3 closestPtPoly, out bool posOverPoly);
+
+                // If a point is directly over a polygon and closer than
+                // climb height, favor that instead of straight line nearest point.
+                Vector3 diff = Vector3.Subtract(center, closestPtPoly);
+                if (posOverPoly)
+                {
+                    d = Math.Abs(diff[1]) - tile.header.walkableClimb;
+                    d = d > 0 ? d * d : 0;
+                }
+                else
+                {
+                    d = diff.LengthSquared();
+                }
+
+                if (d < nearestDistanceSqr)
+                {
+                    nearestPt = closestPtPoly;
+                    nearestDistanceSqr = d;
+                    nearest = r;
+                }
+            }
+
+            return nearest;
+        }
+        private int QueryPolygonsInTile(MeshTile tile, Vector3 qmin, Vector3 qmax, int[] polys, int maxPolys)
+        {
+            if (tile.bvTree != null)
+            {
+                int nodeIndex = 0;
+                int endIndex = tile.header.bvNodeCount;
+                Vector3 tbmin = tile.header.bmin;
+                Vector3 tbmax = tile.header.bmax;
+                float qfac = tile.header.bvQuantFactor;
+
+                // Calculate quantized box
+                Vector3i bmin = new Vector3i();
+                Vector3i bmax = new Vector3i();
+                // dtClamp query box to world box.
+                float minx = MathUtil.Clamp(qmin.X, tbmin.X, tbmax.X) - tbmin.X;
+                float miny = MathUtil.Clamp(qmin.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
+                float minz = MathUtil.Clamp(qmin.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
+                float maxx = MathUtil.Clamp(qmax.X, tbmin.X, tbmax.X) - tbmin.X;
+                float maxy = MathUtil.Clamp(qmax.Y, tbmin.Y, tbmax.Y) - tbmin.Y;
+                float maxz = MathUtil.Clamp(qmax.Z, tbmin.Z, tbmax.Z) - tbmin.Z;
+                // Quantize
+                bmin.X = (int)(qfac * minx) & 0xfffe;
+                bmin.Y = (int)(qfac * miny) & 0xfffe;
+                bmin.Z = (int)(qfac * minz) & 0xfffe;
+                bmax.X = (int)(qfac * maxx + 1) | 1;
+                bmax.Y = (int)(qfac * maxy + 1) | 1;
+                bmax.Z = (int)(qfac * maxz + 1) | 1;
+
+                // Traverse tree
+                int bse = GetPolyRefBase(tile);
+                int n = 0;
+                while (nodeIndex < endIndex)
+                {
+                    var node = tile.bvTree[nodeIndex];
+                    var end = tile.bvTree[endIndex];
+
+                    bool overlap = OverlapQuantBounds(bmin, bmax, node.bmin, node.bmax);
+                    bool isLeafNode = node.i >= 0;
+
+                    if (isLeafNode && overlap)
+                    {
+                        if (n < maxPolys)
+                            polys[n++] = bse | node.i;
+                    }
+
+                    if (overlap || isLeafNode)
+                        nodeIndex++;
+                    else
+                    {
+                        int escapeIndex = -node.i;
+                        nodeIndex += escapeIndex;
+                    }
+                }
+
+                return n;
+            }
+            else
+            {
+                Vector3 bmin = new Vector3();
+                Vector3 bmax = new Vector3();
+                int n = 0;
+                int bse = GetPolyRefBase(tile);
+                for (int i = 0; i < tile.header.polyCount; ++i)
+                {
+                    Poly p = tile.polys[i];
+                    // Do not return off-mesh connection polygons.
+                    if (p.Type == PolyTypes.OffmeshConnection)
+                        continue;
+                    // Calc polygon bounds.
+                    Vector3 v = tile.verts[p.verts[0]];
+                    bmin = v;
+                    bmax = v;
+                    for (int j = 1; j < p.vertCount; ++j)
+                    {
+                        v = tile.verts[p.verts[j]];
+                        bmin = Vector3.Min(bmin, v);
+                        bmax = Vector3.Max(bmax, v);
+                    }
+                    if (OverlapBounds(qmin, qmax, bmin, bmax))
+                    {
+                        if (n < maxPolys)
+
+                            polys[n++] = bse | i;
+                    }
+                }
+                return n;
+            }
+        }
+        private bool OverlapQuantBounds(Vector3i amin, Vector3i amax, Vector3i bmin, Vector3i bmax)
+        {
+            bool overlap = true;
+            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
+            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
+            overlap = (amin.Z > bmax.Z || amax.Z < bmin.Z) ? false : overlap;
+            return overlap;
+        }
+        private bool OverlapBounds(Vector3 amin, Vector3 amax, Vector3 bmin, Vector3 bmax)
+        {
+            bool overlap = true;
+            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
+            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
+            overlap = (amin.Z > bmax.Z || amax.Z < bmin.Z) ? false : overlap;
+            return overlap;
+        }
+        private void ClosestPointOnPoly(int r, Vector3 pos, out Vector3 closest, out bool posOverPoly)
+        {
+            GetTileAndPolyByRefUnsafe(r, out MeshTile tile, out Poly poly);
+
+            // Off-mesh connections don't have detail polygons.
+            if (poly.Type == PolyTypes.OffmeshConnection)
+            {
+                Vector3 v0 = tile.verts[poly.verts[0]];
+                Vector3 v1 = tile.verts[poly.verts[1]];
+                float d0 = Vector3.Distance(pos, v0);
+                float d1 = Vector3.Distance(pos, v1);
+                float u = d0 / (d0 + d1);
+                closest = Vector3.Lerp(v0, v1, u);
+                posOverPoly = false;
+                return;
+            }
+
+            int ip = Array.IndexOf(tile.polys, poly);
+            PolyDetail pd = tile.detailMeshes[ip];
+
+            // Clamp point to be inside the polygon.
+            Vector3[] verts = new Vector3[Constants.VertsPerPolygon];
+            float[] edged = new float[Constants.VertsPerPolygon];
+            float[] edget = new float[Constants.VertsPerPolygon];
+            int nv = poly.vertCount;
+            for (int i = 0; i < nv; ++i)
+            {
+                verts[i] = tile.verts[poly.verts[i]];
+            }
+
+            closest = pos;
+            if (!DistancePtPolyEdgesSqr(pos, verts, nv, out edged, out edget))
+            {
+                // Point is outside the polygon, dtClamp to nearest edge.
+                float dmin = edged[0];
+                int imin = 0;
+                for (int i = 1; i < nv; ++i)
+                {
+                    if (edged[i] < dmin)
+                    {
+                        dmin = edged[i];
+                        imin = i;
+                    }
+                }
+                var va = verts[imin];
+                var vb = verts[((imin + 1) % nv)];
+                closest = Vector3.Lerp(va, vb, edget[imin]);
+
+                posOverPoly = false;
+            }
+            else
+            {
+                posOverPoly = true;
+            }
+
+            // Find height at the location.
+            for (int j = 0; j < pd.triCount; ++j)
+            {
+                Trianglei t = tile.detailTris[(pd.triBase + j)];
+                Vector3[] v = new Vector3[3];
+                for (int k = 0; k < 3; ++k)
+                {
+                    if (t[k] < poly.vertCount)
+                        v[k] = tile.verts[poly.verts[t[k]]];
+                    else
+                        v[k] = tile.detailVerts[(pd.vertBase + (t[k] - poly.vertCount))];
+                }
+                if (ClosestHeightPointTriangle(closest, v[0], v[1], v[2], out float h))
+                {
+                    closest[1] = h;
+                    break;
+                }
+            }
+        }
+        private void GetTileAndPolyByRefUnsafe(int r, out MeshTile tile, out Poly poly)
+        {
+            DecodePolyId(r, out int salt, out int it, out int ip);
+            tile = m_tiles[it];
+            poly = m_tiles[it].polys[ip];
+        }
+        private void DecodePolyId(int r, out int salt, out int it, out int ip)
+        {
+            int saltMask = (1 << m_saltBits) - 1;
+            int tileMask = (1 << m_tileBits) - 1;
+            int polyMask = (1 << m_polyBits) - 1;
+            salt = ((r >> (m_polyBits + m_tileBits)) & saltMask);
+            it = ((r >> m_polyBits) & tileMask);
+            ip = (r & polyMask);
+        }
+        private bool DistancePtPolyEdgesSqr(Vector3 pt, Vector3[] verts, int nverts, out float[] ed, out float[] et)
+        {
+            ed = new float[nverts];
+            et = new float[nverts];
+
+            // TODO: Replace pnpoly with triArea2D tests?
+            int i, j;
+            bool c = false;
+            for (i = 0, j = nverts - 1; i < nverts; j = i++)
+            {
+                var vi = verts[i];
+                var vj = verts[j];
+                if (((vi[2] > pt[2]) != (vj[2] > pt[2])) && (pt[0] < (vj[0] - vi[0]) * (pt[2] - vi[2]) / (vj[2] - vi[2]) + vi[0]))
+                {
+                    c = !c;
+                }
+                ed[j] = DistancePtSegSqr2D(pt, vj, vi, out et[j]);
+            }
+            return c;
+        }
+        private float DistancePtSegSqr2D(Vector3 pt, Vector3 p, Vector3 q, out float t)
+        {
+            float pqx = q[0] - p[0];
+            float pqz = q[2] - p[2];
+            float dx = pt[0] - p[0];
+            float dz = pt[2] - p[2];
+            float d = pqx * pqx + pqz * pqz;
+            t = pqx * dx + pqz * dz;
+            if (d > 0) t /= d;
+            if (t < 0) t = 0;
+            else if (t > 1) t = 1;
+            dx = p[0] + t * pqx - pt[0];
+            dz = p[2] + t * pqz - pt[2];
+            return dx * dx + dz * dz;
+        }
+        private bool ClosestHeightPointTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out float h)
+        {
+            h = float.MaxValue;
+
+            Vector3 v0 = Vector3.Subtract(c, a);
+            Vector3 v1 = Vector3.Subtract(b, a);
+            Vector3 v2 = Vector3.Subtract(p, a);
+
+            float dot00 = Vector3.Dot(v0, v0);
+            float dot01 = Vector3.Dot(v0, v1);
+            float dot02 = Vector3.Dot(v0, v2);
+            float dot11 = Vector3.Dot(v1, v1);
+            float dot12 = Vector3.Dot(v1, v2);
+
+            // Compute barycentric coordinates
+            float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+            float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+            float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+
+            // The (sloppy) epsilon is needed to allow to get height of points which
+            // are interpolated along the edges of the triangles.
+            float EPS = 1e-4f;
+
+            // If point lies inside the triangle, return interpolated ycoord.
+            if (u >= -EPS && v >= -EPS && (u + v) <= 1 + EPS)
+            {
+                h = a[1] + v0[1] * u + v1[1] * v;
+                return true;
+            }
+
+            return false;
+        }
+        private void ConnectExtOffMeshLinks(MeshTile tile, MeshTile target, int side)
+        {
+            if (tile == null) return;
+
+            // Connect off-mesh links.
+            // We are interested on links which land from target tile to this tile.
+            int oppositeSide = (side == -1) ? 0xff : OppositeTile(side);
+
+            for (int i = 0; i < target.header.offMeshConCount; ++i)
+            {
+                var targetCon = target.offMeshCons[i];
+                if (targetCon.side != oppositeSide)
+                {
+                    continue;
+                }
+
+                var targetPoly = target.polys[targetCon.poly];
+                // Skip off-mesh connections which start location could not be connected at all.
+                if (targetPoly.firstLink == Constants.DT_NULL_LINK)
+                {
+                    continue;
+                }
+
+                Vector3 halfExtents = new Vector3(new float[] { targetCon.rad, target.header.walkableClimb, targetCon.rad });
+
+                // Find polygon to connect to.
+                Vector3 p = targetCon.pos[1];
+                Vector3 nearestPt = new Vector3();
+                int r = FindNearestPolyInTile(tile, p, halfExtents, nearestPt);
+                if (r == 0)
+                {
+                    continue;
+                }
+                // findNearestPoly may return too optimistic results, further check to make sure. 
+                if (Math.Sqrt(nearestPt[0] - p[0]) + Math.Sqrt(nearestPt[2] - p[2]) > Math.Sqrt(targetCon.rad))
+                {
+                    continue;
+                }
+                // Make sure the location is on current mesh.
+                target.verts[targetPoly.verts[1]] = nearestPt;
+
+                // Link off-mesh connection to target poly.
+                int idx = AllocLink(target);
+                if (idx != Constants.DT_NULL_LINK)
+                {
+                    var link = new Link
+                    {
+                        nref = r,
+                        edge = 1,
+                        side = oppositeSide,
+                        bmin = 0,
+                        bmax = 0,
+                        // Add to linked list.
+                        next = targetPoly.firstLink
+                    };
+                    target.links[idx] = link;
+                    targetPoly.firstLink = idx;
+                }
+
+                // Link target poly to off-mesh connection.
+                if ((targetCon.flags & Constants.DT_OFFMESH_CON_BIDIR) != 0)
+                {
+                    int tidx = AllocLink(tile);
+                    if (tidx != Constants.DT_NULL_LINK)
+                    {
+                        var landPolyIdx = DecodePolyIdPoly(r);
+                        var landPoly = tile.polys[landPolyIdx];
+                        var link = new Link
+                        {
+                            nref = (GetPolyRefBase(target) | (targetCon.poly)),
+                            edge = 0xff,
+                            side = (side == -1 ? 0xff : side),
+                            bmin = 0,
+                            bmax = 0,
+                            // Add to linked list.
+                            next = landPoly.firstLink
+                        };
+                        tile.links[tidx] = link;
+                        landPoly.firstLink = tidx;
+                    }
+                }
+            }
+        }
+        private void ConnectExtLinks(MeshTile tile, MeshTile target, int side)
+        {
+            if (tile == null) return;
+
+            // Connect border links.
+            for (int i = 0; i < tile.header.polyCount; ++i)
+            {
+                var poly = tile.polys[i];
+
+                // Create new links.
+                //		unsigned short m = DT_EXT_LINK | (unsigned short)side;
+
+                int nv = poly.vertCount;
+                for (int j = 0; j < nv; ++j)
+                {
+                    // Skip non-portal edges.
+                    if ((poly.neis[j] & Constants.DT_EXT_LINK) == 0)
+                    {
+                        continue;
+                    }
+
+                    int dir = (int)(poly.neis[j] & 0xff);
+                    if (side != -1 && dir != side)
+                    {
+                        continue;
+                    }
+
+                    // Create new links
+                    var va = tile.verts[poly.verts[j]];
+                    var vb = tile.verts[poly.verts[(j + 1) % nv]];
+                    int nnei = FindConnectingPolys(va, vb, target, OppositeTile(dir), out int[] nei, out float[] neia, 4);
+                    for (int k = 0; k < nnei; ++k)
+                    {
+                        int idx = AllocLink(tile);
+                        if (idx != Constants.DT_NULL_LINK)
+                        {
+                            var link = new Link
+                            {
+                                nref = nei[k],
+                                edge = j,
+                                side = dir,
+                                next = poly.firstLink
+                            };
+                            poly.firstLink = idx;
+
+                            // Compress portal limits to a byte value.
+                            if (dir == 0 || dir == 4)
+                            {
+                                float tmin = (neia[k * 2 + 0] - va[2]) / (vb[2] - va[2]);
+                                float tmax = (neia[k * 2 + 1] - va[2]) / (vb[2] - va[2]);
+                                if (tmin > tmax) Helper.Swap(ref tmin, ref tmax);
+                                link.bmin = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f);
+                                link.bmax = (int)(MathUtil.Clamp(tmax, 0.0f, 1.0f) * 255.0f);
+                            }
+                            else if (dir == 2 || dir == 6)
+                            {
+                                float tmin = (neia[k * 2 + 0] - va[0]) / (vb[0] - va[0]);
+                                float tmax = (neia[k * 2 + 1] - va[0]) / (vb[0] - va[0]);
+                                if (tmin > tmax) Helper.Swap(ref tmin, ref tmax);
+                                link.bmin = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f);
+                                link.bmax = (int)(MathUtil.Clamp(tmax, 0.0f, 1.0f) * 255.0f);
+                            }
+                            tile.links[idx] = link;
+                        }
+                    }
+                }
+            }
+        }
+        private int OppositeTile(int side)
+        {
+            return (side + 4) & 0x7;
+        }
+        private int DecodePolyIdPoly(int r)
+        {
+            int polyMask = (1 << m_polyBits) - 1;
+            return (r & polyMask);
+        }
+        private int FindConnectingPolys(Vector3 va, Vector3 vb, MeshTile tile, int side, out int[] con, out float[] conarea, int maxcon)
+        {
+            con = new int[maxcon];
+            conarea = new float[maxcon * 2];
+
+            if (tile == null) return 0;
+
+            CalcSlabEndPoints(va, vb, out Vector2 amin, out Vector2 amax, side);
+            float apos = GetSlabCoord(va, side);
+
+            // Remove links pointing to 'side' and compact the links array. 
+            int m = Constants.DT_EXT_LINK | side;
+            int n = 0;
+
+            int bse = GetPolyRefBase(tile);
+
+            for (int i = 0; i < tile.header.polyCount; ++i)
+            {
+                Poly poly = tile.polys[i];
+                int nv = poly.vertCount;
+                for (int j = 0; j < nv; ++j)
+                {
+                    // Skip edges which do not point to the right side.
+                    if (poly.neis[j] != m) continue;
+
+                    Vector3 vc = tile.verts[poly.verts[j]];
+                    Vector3 vd = tile.verts[poly.verts[(j + 1) % nv]];
+                    float bpos = GetSlabCoord(vc, side);
+
+                    // Segments are not close enough.
+                    if (Math.Abs(apos - bpos) > 0.01f)
+                        continue;
+
+                    // Check if the segments touch.
+                    CalcSlabEndPoints(vc, vd, out Vector2 bmin, out Vector2 bmax, side);
+
+                    if (!OverlapSlabs(amin, amax, bmin, bmax, 0.01f, tile.header.walkableClimb)) continue;
+
+                    // Add return value.
+                    if (n < maxcon)
+                    {
+                        conarea[n * 2 + 0] = Math.Max(amin[0], bmin[0]);
+                        conarea[n * 2 + 1] = Math.Min(amax[0], bmax[0]);
+                        con[n] = bse | i;
+                        n++;
+                    }
+                    break;
+                }
+            }
+            return n;
+        }
+        private static void CalcSlabEndPoints(Vector3 va, Vector3 vb, out Vector2 bmin, out Vector2 bmax, int side)
+        {
+            bmin = new Vector2();
+            bmax = new Vector2();
+
+            if (side == 0 || side == 4)
+            {
+                if (va[2] < vb[2])
+                {
+                    bmin[0] = va[2];
+                    bmin[1] = va[1];
+                    bmax[0] = vb[2];
+                    bmax[1] = vb[1];
+                }
+                else
+                {
+                    bmin[0] = vb[2];
+                    bmin[1] = vb[1];
+                    bmax[0] = va[2];
+                    bmax[1] = va[1];
+                }
+            }
+            else if (side == 2 || side == 6)
+            {
+                if (va[0] < vb[0])
+                {
+                    bmin[0] = va[0];
+                    bmin[1] = va[1];
+                    bmax[0] = vb[0];
+                    bmax[1] = vb[1];
+                }
+                else
+                {
+                    bmin[0] = vb[0];
+                    bmin[1] = vb[1];
+                    bmax[0] = va[0];
+                    bmax[1] = va[1];
+                }
+            }
+        }
+        private static float GetSlabCoord(Vector3 va, int side)
+        {
+            if (side == 0 || side == 4)
+                return va[0];
+            else if (side == 2 || side == 6)
+                return va[2];
+            return 0;
+        }
+        private static bool OverlapSlabs(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax, float px, float py)
+        {
+            // Check for horizontal overlap.
+            // The segment is shrunken a little so that slabs which touch
+            // at end points are not connected.
+            float minx = Math.Max(amin[0] + px, bmin[0] + px);
+            float maxx = Math.Min(amax[0] - px, bmax[0] - px);
+            if (minx > maxx)
+                return false;
+
+            // Check vertical overlap.
+            float ad = (amax[1] - amin[1]) / (amax[0] - amin[0]);
+            float ak = amin[1] - ad * amin[0];
+            float bd = (bmax[1] - bmin[1]) / (bmax[0] - bmin[0]);
+            float bk = bmin[1] - bd * bmin[0];
+            float aminy = ad * minx + ak;
+            float amaxy = ad * maxx + ak;
+            float bminy = bd * minx + bk;
+            float bmaxy = bd * maxx + bk;
+            float dmin = bminy - aminy;
+            float dmax = bmaxy - amaxy;
+
+            // Crossing segments always overlap.
+            if (dmin * dmax < 0)
+                return true;
+
+            // Check for overlap at endpoints.
+            float thr = (float)Math.Sqrt(py * 2);
+            if (dmin * dmin <= thr || dmax * dmax <= thr)
+                return true;
+
+            return false;
+        }
+        private int GetTileRef(MeshTile tile)
+        {
+            if (tile == null) return 0;
+            int it = Array.IndexOf(m_tiles, tile);
+            return EncodePolyId(tile.salt, it, 0);
+        }
+        public bool RemoveTile(MeshTile tile, MeshData data, int dataSize)
+        {
+            if (tile == null)
+            {
+                return false;
+            }
+
+            // Remove tile from hash lookup.
+            int h = ComputeTileHash(tile.header.x, tile.header.y, m_tileLutMask);
+            MeshTile prev = null;
+            MeshTile cur = m_posLookup[h];
+            while (cur != null)
+            {
+                if (cur == tile)
+                {
+                    if (prev != null)
+                        prev.next = cur.next;
+                    else
+                        m_posLookup[h] = cur.next;
+                    break;
+                }
+                prev = cur;
+                cur = cur.next;
+            }
+
+            // Remove connections to neighbour tiles.
+            int MAX_NEIS = 32;
+            MeshTile[] neis = new MeshTile[MAX_NEIS];
+            int nneis;
+
+            // Disconnect from other layers in current tile.
+            nneis = GetTilesAt(tile.header.x, tile.header.y, neis, MAX_NEIS);
+            for (int j = 0; j < nneis; ++j)
+            {
+                if (neis[j] == tile) continue;
+                UnconnectLinks(neis[j], tile);
+            }
+
+            // Disconnect from neighbour tiles.
+            for (int i = 0; i < 8; ++i)
+            {
+                nneis = GetNeighbourTilesAt(tile.header.x, tile.header.y, i, neis, MAX_NEIS);
+                for (int j = 0; j < nneis; ++j)
+                    UnconnectLinks(neis[j], tile);
+            }
+
+            // Reset tile.
+            if ((tile.flags & TileFlags.FreeData) != 0)
+            {
+                // Owns data
+                tile.data = null;
+                tile.dataSize = 0;
+                data = null;
+                dataSize = 0;
+            }
+            else
+            {
+                data = tile.data;
+                dataSize = tile.dataSize;
+            }
+
+            tile.header = new MeshHeader();
+            tile.flags = 0;
+            tile.linksFreeList = 0;
+            tile.polys = null;
+            tile.verts = null;
+            tile.links = null;
+            tile.detailMeshes = null;
+            tile.detailVerts = null;
+            tile.detailTris = null;
+            tile.bvTree = null;
+            tile.offMeshCons = null;
+
+            // Update salt, salt should never be zero.
+            tile.salt = (tile.salt + 1) & ((1 << m_saltBits) - 1);
+            if (tile.salt == 0)
+                tile.salt++;
+
+            // Add to free list.
+            tile.next = m_nextFree;
+            m_nextFree = tile;
+
+            return true;
+        }
+        private void UnconnectLinks(MeshTile tile, MeshTile target)
+        {
+            if (tile == null || target == null) return;
+
+            int targetNum = DecodePolyIdTile(GetTileRef(target));
+
+            for (int i = 0; i < tile.header.polyCount; ++i)
+            {
+                Poly poly = tile.polys[i];
+                int j = poly.firstLink;
+                int pj = Constants.DT_NULL_LINK;
+                while (j != Constants.DT_NULL_LINK)
+                {
+                    if (DecodePolyIdTile((int)tile.links[j].nref) == targetNum)
+                    {
+                        // Remove link.
+                        int nj = tile.links[j].next;
+                        if (pj == Constants.DT_NULL_LINK)
+                            poly.firstLink = nj;
+                        else
+                            tile.links[pj].next = nj;
+                        FreeLink(tile, j);
+                        j = nj;
+                    }
+                    else
+                    {
+                        // Advance
+                        pj = j;
+                        j = tile.links[j].next;
+                    }
+                }
+            }
+        }
+        private void FreeLink(MeshTile tile, int link)
+        {
+            tile.links[link].next = tile.linksFreeList;
+            tile.linksFreeList = link;
+        }
+
+
+        public IGraphNode[] GetNodes(AgentType agent)
+        {
+            return null;
+        }
+        public Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to)
+        {
+            return null;
+        }
+        public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
+        {
+            nearest = null;
+            return false;
         }
     }
 }

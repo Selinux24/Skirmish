@@ -68,9 +68,9 @@ namespace Engine.PathFinding.NavMesh2
         private ConvexVolume[] m_volumes;
         private int m_volumeCount;
 
-        private float[] m_offMeshConVerts;
+        private Vector3[] m_offMeshConVerts;
         private float[] m_offMeshConRads;
-        private byte[] m_offMeshConDirs;
+        private uint[] m_offMeshConDirs;
         private SamplePolyAreas[] m_offMeshConAreas;
         private SamplePolyFlags[] m_offMeshConFlags;
         private uint[] m_offMeshConId;
@@ -83,9 +83,9 @@ namespace Engine.PathFinding.NavMesh2
             m_volumes = new ConvexVolume[MaxVolumes];
             m_volumeCount = 0;
 
-            m_offMeshConVerts = new float[MaxOffmeshConnections * 3 * 2];
+            m_offMeshConVerts = new Vector3[MaxOffmeshConnections * 2];
             m_offMeshConRads = new float[MaxOffmeshConnections];
-            m_offMeshConDirs = new byte[MaxOffmeshConnections];
+            m_offMeshConDirs = new uint[MaxOffmeshConnections];
             m_offMeshConAreas = new SamplePolyAreas[MaxOffmeshConnections];
             m_offMeshConFlags = new SamplePolyFlags[MaxOffmeshConnections];
             m_offMeshConId = new uint[MaxOffmeshConnections];
@@ -126,7 +126,7 @@ namespace Engine.PathFinding.NavMesh2
         {
             return m_offMeshConAreas;
         }
-        public byte[] GetOffMeshConnectionDirs()
+        public uint[] GetOffMeshConnectionDirs()
         {
             return m_offMeshConDirs;
         }
@@ -134,7 +134,7 @@ namespace Engine.PathFinding.NavMesh2
         {
             return m_offMeshConRads;
         }
-        public float[] GetOffMeshConnectionVerts()
+        public Vector3[] GetOffMeshConnectionVerts()
         {
             return m_offMeshConVerts;
         }

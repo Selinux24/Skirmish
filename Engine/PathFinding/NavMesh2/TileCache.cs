@@ -10,8 +10,6 @@ namespace Engine.PathFinding.NavMesh2
     public class TileCache
     {
         public const int MaxLayers = 32;
-        public const int VertsPerPolygon = 6;
-        public const int NullIdx = 0xffff;
         public const int VertexBucketCount2 = (1 << 8);
         public const int MaxRemEdges = 48;
 
@@ -162,7 +160,7 @@ namespace Engine.PathFinding.NavMesh2
             return null;
         }
 
-        public bool BuildNavMeshTilesAt(int tx, int ty, NavMesh navmesh)
+        public bool BuildNavMeshTilesAt(int tx, int ty, NavigationMesh2 navmesh)
         {
             int MAX_TILES = 32;
             CompressedTile[] tiles = new CompressedTile[MAX_TILES];
@@ -200,7 +198,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return n;
         }
-        private bool BuildNavMeshTile(CompressedTile tile, NavMesh navmesh)
+        private bool BuildNavMeshTile(CompressedTile tile, NavigationMesh2 navmesh)
         {
             NavMeshTileBuildContext bc = new NavMeshTileBuildContext();
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
@@ -214,7 +212,8 @@ namespace Engine.PathFinding.NavMesh2
             // Rasterize obstacles.
             for (int i = 0; i < m_params.MaxObstacles; ++i)
             {
-                TileCacheObstacle ob = m_obstacles[i];
+                var ob = m_obstacles[i];
+
                 if (ob.state == ObstacleState.Empty || ob.state == ObstacleState.Removing)
                 {
                     continue;
@@ -263,11 +262,11 @@ namespace Engine.PathFinding.NavMesh2
             if (bc.lmesh.npolys == 0)
             {
                 // Remove existing tile.
-                navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.tx, tile.Header.ty, tile.Header.tlayer), 0, 0);
+                navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.tx, tile.Header.ty, tile.Header.tlayer), null, 0);
                 return true;
             }
 
-            NavMeshCreateParams param = new NavMeshCreateParams
+            var param = new NavMeshCreateParams
             {
                 verts = bc.lmesh.verts,
                 vertCount = bc.lmesh.nverts,
@@ -275,7 +274,7 @@ namespace Engine.PathFinding.NavMesh2
                 polyAreas = bc.lmesh.areas,
                 polyFlags = bc.lmesh.flags,
                 polyCount = bc.lmesh.npolys,
-                nvp = VertsPerPolygon,
+                nvp = Constants.VertsPerPolygon,
                 walkableHeight = m_params.WalkableHeight,
                 walkableRadius = m_params.WalkableRadius,
                 walkableClimb = m_params.WalkableClimb,
@@ -294,21 +293,20 @@ namespace Engine.PathFinding.NavMesh2
                 m_tmproc.Process(param, bc.lmesh.areas, bc.lmesh.flags);
             }
 
-            byte[] navData = null;
-            int navDataSize = 0;
-            if (!CreateNavMeshData(param, out navData, out navDataSize))
+            if (!CreateNavMeshData(param, out MeshData navData))
             {
                 return false;
             }
 
             // Remove existing tile.
-            navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.tx, tile.Header.ty, tile.Header.tlayer), 0, 0);
+            navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.tx, tile.Header.ty, tile.Header.tlayer), null, 0);
 
             // Add new tile, or leave the location empty.
             if (navData != null)
             {
                 // Let the navmesh own the data.
-                if (!navmesh.AddTile(navData, navDataSize, TileFlags.FreeData, 0, 0))
+                int lastRef = 0;
+                if (!navmesh.AddTile(navData, TileFlags.FreeData, ref lastRef, out int result))
                 {
                     navData = null;
 
@@ -601,7 +599,7 @@ namespace Engine.PathFinding.NavMesh2
 
             // Allocate and init layer regions.
             int nregs = regId;
-            LayerMonotoneRegion[] regs = new LayerMonotoneRegion[nregs];
+            LayerMonotoneRegion[] regs = Helper.CreateArray(nregs, LayerMonotoneRegion.CreateEmpty());
 
             for (int i = 0; i < nregs; ++i)
             {
@@ -1247,7 +1245,7 @@ namespace Engine.PathFinding.NavMesh2
 
             mesh = new TileCachePolyMesh
             {
-                nvp = VertsPerPolygon,
+                nvp = Constants.VertsPerPolygon,
                 verts = Helper.CreateArray(maxVertices, () => new Trianglei()),
                 polys = new Polygoni[maxTris],
                 areas = new SamplePolyAreas[maxTris],
@@ -1261,7 +1259,7 @@ namespace Engine.PathFinding.NavMesh2
             var firstVert = new Polygoni(VertexBucketCount2);
             for (int i = 0; i < VertexBucketCount2; ++i)
             {
-                firstVert[i] = NullIdx;
+                firstVert[i] = Constants.NullIdx;
             }
 
             var nextVert = new Polygoni(maxVertices);
@@ -1311,7 +1309,7 @@ namespace Engine.PathFinding.NavMesh2
                     var t = tris[j];
                     if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                     {
-                        polys[npolys] = new Polygoni(VertsPerPolygon);
+                        polys[npolys] = new Polygoni(Constants.VertsPerPolygon);
                         polys[npolys][0] = indices[t[0]];
                         polys[npolys][1] = indices[t[1]];
                         polys[npolys][2] = indices[t[2]];
@@ -1324,7 +1322,7 @@ namespace Engine.PathFinding.NavMesh2
                 }
 
                 // Merge polygons.
-                int maxVertsPerPoly = VertsPerPolygon;
+                int maxVertsPerPoly = Constants.VertsPerPolygon;
                 if (maxVertsPerPoly > 3)
                 {
                     for (; ; )
@@ -1369,9 +1367,9 @@ namespace Engine.PathFinding.NavMesh2
                 // Store polygons.
                 for (int j = 0; j < npolys; ++j)
                 {
-                    var p = new Polygoni(VertsPerPolygon * 2);
+                    var p = new Polygoni(Constants.VertsPerPolygon * 2);
                     var q = polys[j];
-                    for (int k = 0; k < VertsPerPolygon; ++k)
+                    for (int k = 0; k < Constants.VertsPerPolygon; ++k)
                     {
                         p[k] = q[k];
                     }
@@ -1659,7 +1657,7 @@ namespace Engine.PathFinding.NavMesh2
             int bucket = ComputeVertexHash2(x, 0, z);
             int i = firstVert[bucket];
 
-            while (i != NullIdx)
+            while (i != Constants.NullIdx)
             {
                 var vx = verts[i];
                 if (vx.X == x && vx.Z == z && (Math.Abs(vx.Y - y) <= 2))
@@ -1671,10 +1669,11 @@ namespace Engine.PathFinding.NavMesh2
 
             // Could not find, create new.
             i = nv; nv++;
-            var v = verts[i];
+            var v = new Trianglei();
             v[0] = x;
             v[1] = y;
             v[2] = z;
+            verts[i] = v;
             nextVert[i] = firstVert[bucket];
             firstVert[bucket] = i;
 
@@ -1697,7 +1696,7 @@ namespace Engine.PathFinding.NavMesh2
             int nb = CountPolyVerts(pb);
 
             // If the merged polygon would be too big, do not merge.
-            if (na + nb - 2 > VertsPerPolygon)
+            if (na + nb - 2 > Constants.VertsPerPolygon)
             {
                 return -1;
             }
@@ -1763,15 +1762,15 @@ namespace Engine.PathFinding.NavMesh2
         }
         private static int CountPolyVerts(Polygoni p)
         {
-            for (int i = 0; i < VertsPerPolygon; ++i)
+            for (int i = 0; i < Constants.VertsPerPolygon; ++i)
             {
-                if (p[i] == NullIdx)
+                if (p[i] == Constants.NullIdx)
                 {
                     return i;
                 }
             }
 
-            return VertsPerPolygon;
+            return Constants.VertsPerPolygon;
         }
         private static bool Uleft(Trianglei a, Trianglei b, Trianglei c)
         {
@@ -1779,7 +1778,7 @@ namespace Engine.PathFinding.NavMesh2
         }
         private static Polygoni MergePolys(Polygoni pa, Polygoni pb, int ea, int eb)
         {
-            var tmp = new Polygoni(VertsPerPolygon);
+            var tmp = new Polygoni(Constants.VertsPerPolygon);
 
             int na = CountPolyVerts(pa);
             int nb = CountPolyVerts(pb);
@@ -1807,7 +1806,7 @@ namespace Engine.PathFinding.NavMesh2
             int numRemainingEdges = 0;
             for (int i = 0; i < mesh.npolys; ++i)
             {
-                var p = mesh.polys[i * VertsPerPolygon * 2];
+                var p = mesh.polys[i * Constants.VertsPerPolygon * 2];
                 int nv = CountPolyVerts(p);
                 int numRemoved = 0;
                 int numVerts = 0;
@@ -1849,7 +1848,7 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < mesh.npolys; ++i)
             {
-                var p = mesh.polys[i * VertsPerPolygon * 2];
+                var p = mesh.polys[i * Constants.VertsPerPolygon * 2];
                 int nv = CountPolyVerts(p);
 
                 // Collect edges which touches the removed vertex.
@@ -1913,7 +1912,7 @@ namespace Engine.PathFinding.NavMesh2
             int numRemovedVerts = 0;
             for (int i = 0; i < mesh.npolys; ++i)
             {
-                var p = mesh.polys[i * VertsPerPolygon * 2];
+                var p = mesh.polys[i * Constants.VertsPerPolygon * 2];
                 int nv = CountPolyVerts(p);
                 for (int j = 0; j < nv; ++j)
                 {
@@ -1931,7 +1930,7 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < mesh.npolys; ++i)
             {
-                var p = mesh.polys[i * VertsPerPolygon * 2];
+                var p = mesh.polys[i * Constants.VertsPerPolygon * 2];
                 int nv = CountPolyVerts(p);
                 bool hasRem = false;
                 for (int j = 0; j < nv; ++j)
@@ -1957,7 +1956,7 @@ namespace Engine.PathFinding.NavMesh2
                         }
                     }
                     // Remove the polygon.
-                    var p2 = mesh.polys[(mesh.npolys - 1) * VertsPerPolygon * 2];
+                    var p2 = mesh.polys[(mesh.npolys - 1) * Constants.VertsPerPolygon * 2];
                     //memcpy(p, p2, sizeof(unsigned short) * MAX_VERTS_PER_POLY);
                     //memset(p + MAX_VERTS_PER_POLY, 0xff, sizeof(unsigned short) * MAX_VERTS_PER_POLY);
                     mesh.areas[i] = mesh.areas[mesh.npolys - 1];
@@ -1978,7 +1977,7 @@ namespace Engine.PathFinding.NavMesh2
             // Adjust indices to match the removed vertex layout.
             for (int i = 0; i < mesh.npolys; ++i)
             {
-                var p = mesh.polys[i * VertsPerPolygon * 2];
+                var p = mesh.polys[i * Constants.VertsPerPolygon * 2];
                 int nv = CountPolyVerts(p);
                 for (int j = 0; j < nv; ++j)
                 {
@@ -2102,7 +2101,7 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Merge polygons.
-            int maxVertsPerPoly = VertsPerPolygon;
+            int maxVertsPerPoly = Constants.VertsPerPolygon;
             if (maxVertsPerPoly > 3)
             {
                 for (; ; )
@@ -2154,7 +2153,7 @@ namespace Engine.PathFinding.NavMesh2
                 if (mesh.npolys >= maxTris) break;
                 var p = mesh.polys[mesh.npolys * 2];
                 //memset(p, 0xff, sizeof(unsigned short) * MAX_VERTS_PER_POLY * 2);
-                for (int j = 0; j < VertsPerPolygon; ++j)
+                for (int j = 0; j < Constants.VertsPerPolygon; ++j)
                 {
                     p[j] = polys[i][j];
                 }
@@ -2185,8 +2184,8 @@ namespace Engine.PathFinding.NavMesh2
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
 
-            int maxEdgeCount = npolys * VertsPerPolygon;
-            int[] firstEdge = new int[nverts + maxEdgeCount];
+            int maxEdgeCount = npolys * Constants.VertsPerPolygon;
+            int[] firstEdge = new int[nverts];
             int[] nextEdge = new int[maxEdgeCount];
             int edgeCount = 0;
 
@@ -2194,17 +2193,21 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < nverts; i++)
             {
-                firstEdge[i] = NullIdx;
+                firstEdge[i] = Constants.NullIdx;
+            }
+            for (int i = 0; i < maxEdgeCount; i++)
+            {
+                nextEdge[i] = Constants.NullIdx;
             }
 
             for (int i = 0; i < npolys; ++i)
             {
                 var t = polys[i];
-                for (int j = 0; j < VertsPerPolygon; ++j)
+                for (int j = 0; j < Constants.VertsPerPolygon; ++j)
                 {
-                    if (t[j] == NullIdx) break;
+                    if (t[j] == Constants.NullIdx) break;
                     int v0 = t[j];
-                    int v1 = (j + 1 >= VertsPerPolygon || t[j + 1] == NullIdx) ? t[0] : t[j + 1];
+                    int v1 = (j + 1 >= Constants.VertsPerPolygon || t[j + 1] == Constants.NullIdx) ? t[0] : t[j + 1];
                     if (v0 < v1)
                     {
                         Edge edge = new Edge()
@@ -2231,15 +2234,15 @@ namespace Engine.PathFinding.NavMesh2
             for (int i = 0; i < npolys; ++i)
             {
                 var t = polys[i];
-                for (int j = 0; j < VertsPerPolygon; ++j)
+                for (int j = 0; j < Constants.VertsPerPolygon; ++j)
                 {
-                    if (t[j] == NullIdx) break;
+                    if (t[j] == Constants.NullIdx) break;
                     int v0 = t[j];
-                    int v1 = (j + 1 >= VertsPerPolygon || t[j + 1] == NullIdx) ? t[0] : t[j + 1];
+                    int v1 = (j + 1 >= Constants.VertsPerPolygon || t[j + 1] == Constants.NullIdx) ? t[0] : t[j + 1];
                     if (v0 > v1)
                     {
                         bool found = false;
-                        for (int e = firstEdge[v1]; e != NullIdx; e = nextEdge[e])
+                        for (int e = firstEdge[v1]; e != Constants.NullIdx; e = nextEdge[e])
                         {
                             Edge edge = edges[e];
                             if (edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
@@ -2379,13 +2382,13 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     var p0 = polys[e.poly[0]];
                     var p1 = polys[e.poly[1]];
-                    p0[e.polyEdge[0]] = e.poly[1];
-                    p1[e.polyEdge[1]] = e.poly[0];
+                    p0[Constants.VertsPerPolygon + e.polyEdge[0]] = e.poly[1];
+                    p1[Constants.VertsPerPolygon + e.polyEdge[1]] = e.poly[0];
                 }
                 else if (e.polyEdge[1] != 0xff)
                 {
                     var p0 = polys[e.poly[0]];
-                    p0[e.polyEdge[0]] = 0x8000 | e.polyEdge[1];
+                    p0[Constants.VertsPerPolygon + e.polyEdge[0]] = 0x8000 | e.polyEdge[1];
                 }
             }
 
@@ -2397,11 +2400,565 @@ namespace Engine.PathFinding.NavMesh2
         }
 
 
-
-
-        private bool CreateNavMeshData(NavMeshCreateParams param, out byte[] navData, out int navDataSize)
+        private bool CreateNavMeshData(NavMeshCreateParams param, out MeshData outData)
         {
-            throw new NotImplementedException();
+            outData = null;
+
+            if (param.nvp > Constants.VertsPerPolygon)
+                return false;
+            if (param.vertCount >= 0xffff)
+                return false;
+            if (param.vertCount == 0 || param.verts == null)
+                return false;
+            if (param.polyCount == 0 || param.polys == null)
+                return false;
+
+            int nvp = param.nvp;
+
+            // Classify off-mesh connection points. We store only the connections
+            // whose start point is inside the tile.
+            int[] offMeshConClass = null;
+            int storedOffMeshConCount = 0;
+            int offMeshConLinkCount = 0;
+
+            if (param.offMeshConCount > 0)
+            {
+                offMeshConClass = new int[param.offMeshConCount * 2];
+
+                // Find tight heigh bounds, used for culling out off-mesh start locations.
+                float hmin = float.MaxValue;
+                float hmax = float.MinValue;
+
+                if (param.detailVerts != null && param.detailVertsCount > 0)
+                {
+                    for (int i = 0; i < param.detailVertsCount; ++i)
+                    {
+                        var h = param.detailVerts[i].Y;
+                        hmin = Math.Min(hmin, h);
+                        hmax = Math.Max(hmax, h);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < param.vertCount; ++i)
+                    {
+                        var iv = param.verts[i];
+                        float h = param.bmin[1] + iv[1] * param.ch;
+                        hmin = Math.Min(hmin, h);
+                        hmax = Math.Max(hmax, h);
+                    }
+                }
+                hmin -= param.walkableClimb;
+                hmax += param.walkableClimb;
+                Vector3 bmin = param.bmin;
+                Vector3 bmax = param.bmax;
+                bmin.Y = hmin;
+                bmax.Y = hmax;
+
+                for (int i = 0; i < param.offMeshConCount; ++i)
+                {
+                    var p0 = param.offMeshConVerts[(i + 0)];
+                    var p1 = param.offMeshConVerts[(i + 1)];
+                    offMeshConClass[i + 0] = ClassifyOffMeshPoint(p0, bmin, bmax);
+                    offMeshConClass[i + 1] = ClassifyOffMeshPoint(p1, bmin, bmax);
+
+                    // Zero out off-mesh start positions which are not even potentially touching the mesh.
+                    if (offMeshConClass[i * 2 + 0] == 0xff)
+                    {
+                        if (p0[1] < bmin[1] || p0[1] > bmax[1])
+                        {
+                            offMeshConClass[i * 2 + 0] = 0;
+                        }
+                    }
+
+                    // Cound how many links should be allocated for off-mesh connections.
+                    if (offMeshConClass[i * 2 + 0] == 0xff)
+                        offMeshConLinkCount++;
+                    if (offMeshConClass[i * 2 + 1] == 0xff)
+                        offMeshConLinkCount++;
+                    if (offMeshConClass[i * 2 + 0] == 0xff)
+                        storedOffMeshConCount++;
+                }
+            }
+
+            // Off-mesh connectionss are stored as polygons, adjust values.
+            int totPolyCount = param.polyCount + storedOffMeshConCount;
+            int totVertCount = param.vertCount + storedOffMeshConCount * 2;
+
+            // Find portal edges which are at tile borders.
+            int edgeCount = 0;
+            int portalCount = 0;
+            for (int i = 0; i < param.polyCount; ++i)
+            {
+                var p = param.polys[i];
+                for (int j = 0; j < nvp; ++j)
+                {
+                    if (p[j] == Constants.NullIdx) break;
+                    edgeCount++;
+
+                    if ((p[nvp + j] & 0x8000) != 0)
+                    {
+                        var dir = p[nvp + j] & 0xf;
+                        if (dir != 0xf)
+                            portalCount++;
+                    }
+                }
+            }
+
+            int maxLinkCount = edgeCount + portalCount * 2 + offMeshConLinkCount * 2;
+
+            // Find unique detail vertices.
+            int uniqueDetailVertCount = 0;
+            int detailTriCount = 0;
+            if (param.detailMeshes != null)
+            {
+                // Has detail mesh, count unique detail vertex count and use input detail tri count.
+                detailTriCount = param.detailTriCount;
+                for (int i = 0; i < param.polyCount; ++i)
+                {
+                    var p = param.polys[i];
+                    var ndv = param.detailMeshes[i].Y;
+                    int nv = 0;
+                    for (int j = 0; j < nvp; ++j)
+                    {
+                        if (p[j] == Constants.NullIdx) break;
+                        nv++;
+                    }
+                    ndv -= nv;
+                    uniqueDetailVertCount += ndv;
+                }
+            }
+            else
+            {
+                // No input detail mesh, build detail mesh from nav polys.
+                uniqueDetailVertCount = 0; // No extra detail verts.
+                detailTriCount = 0;
+                for (int i = 0; i < param.polyCount; ++i)
+                {
+                    var p = param.polys[i];
+                    int nv = 0;
+                    for (int j = 0; j < nvp; ++j)
+                    {
+                        if (p[j] == Constants.NullIdx) break;
+                        nv++;
+                    }
+                    detailTriCount += nv - 2;
+                }
+            }
+
+            MeshData data = new MeshData
+            {
+                // Store header
+                header = new MeshHeader
+                {
+                    magic = Constants.Magic,
+                    version = Constants.Version,
+                    x = param.tileX,
+                    y = param.tileY,
+                    layer = param.tileLayer,
+                    userId = param.userId,
+                    polyCount = totPolyCount,
+                    vertCount = totVertCount,
+                    maxLinkCount = maxLinkCount,
+                    bmin = param.bmin,
+                    bmax = param.bmax,
+                    detailMeshCount = param.polyCount,
+                    detailVertCount = uniqueDetailVertCount,
+                    detailTriCount = detailTriCount,
+                    bvQuantFactor = 1.0f / param.cs,
+                    offMeshBase = param.polyCount,
+                    walkableHeight = param.walkableHeight,
+                    walkableRadius = param.walkableRadius,
+                    walkableClimb = param.walkableClimb,
+                    offMeshConCount = storedOffMeshConCount,
+                    bvNodeCount = param.buildBvTree ? param.polyCount * 2 : 0
+                }
+            };
+
+            int offMeshVertsBase = param.vertCount;
+            int offMeshPolyBase = param.polyCount;
+
+            // Store vertices
+            // Mesh vertices
+            for (int i = 0; i < param.vertCount; ++i)
+            {
+                var iv = param.verts[i];
+                var v = new Vector3
+                {
+                    X = param.bmin.X + iv.X * param.cs,
+                    Y = param.bmin.Y + iv.Y * param.ch,
+                    Z = param.bmin.Z + iv.Z * param.cs
+                };
+                data.navVerts.Add(v);
+            }
+            // Off-mesh link vertices.
+            int n = 0;
+            for (int i = 0; i < param.offMeshConCount; ++i)
+            {
+                // Only store connections which start from this tile.
+                if (offMeshConClass[i * 2 + 0] == 0xff)
+                {
+                    var linkv = param.offMeshConVerts[i * 2];
+                    var v = data.navVerts[(offMeshVertsBase + n * 2) * 3];
+                    v[0] = linkv[0];
+                    v[3] = linkv[3];
+                    n++;
+                }
+            }
+
+            // Store polygons
+            // Mesh polys
+            int srcIndex = 0;
+            for (int i = 0; i < param.polyCount; ++i)
+            {
+                var src = param.polys[srcIndex];
+
+                Poly p = new Poly
+                {
+                    vertCount = 0,
+                    flags = param.polyFlags[i]
+                };
+                p.Area = param.polyAreas[i];
+                p.Type = PolyTypes.Ground;
+                for (int j = 0; j < nvp; ++j)
+                {
+                    if (src[j] == Constants.NullIdx) break;
+                    p.verts[j] = src[j];
+                    if ((src[nvp + j] & 0x8000) != 0)
+                    {
+                        // Border or portal edge.
+                        var dir = src[nvp + j] & 0xf;
+                        if (dir == 0xf) // Border
+                            p.neis[j] = 0;
+                        else if (dir == 0) // Portal x-
+                            p.neis[j] = Constants.DT_EXT_LINK | 4;
+                        else if (dir == 1) // Portal z+
+                            p.neis[j] = Constants.DT_EXT_LINK | 2;
+                        else if (dir == 2) // Portal x+
+                            p.neis[j] = Constants.DT_EXT_LINK | 0;
+                        else if (dir == 3) // Portal z-
+                            p.neis[j] = Constants.DT_EXT_LINK | 6;
+                    }
+                    else
+                    {
+                        // Normal connection
+                        p.neis[j] = src[nvp + j] + 1;
+                    }
+
+                    p.vertCount++;
+                }
+                data.navPolys.Add(p);
+                srcIndex++;
+            }
+            // Off-mesh connection vertices.
+            n = 0;
+            for (int i = 0; i < param.offMeshConCount; ++i)
+            {
+                // Only store connections which start from this tile.
+                if (offMeshConClass[i * 2 + 0] == 0xff)
+                {
+                    Poly p = data.navPolys[offMeshPolyBase + n];
+                    p.vertCount = 2;
+                    p.verts[0] = (offMeshVertsBase + n * 2 + 0);
+                    p.verts[1] = (offMeshVertsBase + n * 2 + 1);
+                    p.flags = param.offMeshConFlags[i];
+                    p.Area = param.offMeshConAreas[i];
+                    p.Type = PolyTypes.OffmeshConnection;
+                    n++;
+                }
+            }
+
+            // Store detail meshes and vertices.
+            // The nav polygon vertices are stored as the first vertices on each mesh.
+            // We compress the mesh data by skipping them and using the navmesh coordinates.
+            if (param.detailMeshes != null)
+            {
+                for (int i = 0; i < param.polyCount; ++i)
+                {
+                    int vb = param.detailMeshes[i][0];
+                    int ndv = param.detailMeshes[i][1];
+                    int nv = data.navPolys[i].vertCount;
+                    PolyDetail dtl = new PolyDetail
+                    {
+                        vertBase = data.navDVerts.Count,
+                        vertCount = (ndv - nv),
+                        triBase = param.detailMeshes[i][2],
+                        triCount = param.detailMeshes[i][3]
+                    };
+                    // Copy vertices except the first 'nv' verts which are equal to nav poly verts.
+                    if (ndv - nv != 0)
+                    {
+                        data.navDVerts.Add(param.detailVerts[(vb + nv)]);
+                    }
+                    data.navDMeshes.Add(dtl);
+                }
+                // Store triangles.
+                data.navDTris.AddRange(param.detailTris);
+            }
+            else
+            {
+                // Create dummy detail mesh by triangulating polys.
+                int tbase = 0;
+                for (int i = 0; i < param.polyCount; ++i)
+                {
+                    int nv = data.navPolys[i].vertCount;
+                    PolyDetail dtl = new PolyDetail
+                    {
+                        vertBase = 0,
+                        vertCount = 0,
+                        triBase = tbase,
+                        triCount = (nv - 2)
+                    };
+                    // Triangulate polygon (local indices).
+                    for (int j = 2; j < nv; ++j)
+                    {
+                        var t = new Trianglei
+                        {
+                            X = 0,
+                            Y = (j - 1),
+                            Z = j,
+                            // Bit for each edge that belongs to poly boundary.
+                            R = (1 << 2)
+                        };
+                        if (j == 2) t.R |= (1 << 0);
+                        if (j == nv - 1) t.R |= (1 << 4);
+                        tbase++;
+
+                        data.navDTris.Add(t);
+                    }
+                    data.navDMeshes.Add(dtl);
+                }
+            }
+
+            // Store and create BVtree.
+            if (param.buildBvTree)
+            {
+                CreateBVTree(param, ref data.navBvtree);
+            }
+
+            // Store Off-Mesh connections.
+            n = 0;
+            for (int i = 0; i < param.offMeshConCount; ++i)
+            {
+                // Only store connections which start from this tile.
+                if (offMeshConClass[i * 2 + 0] == 0xff)
+                {
+                    var con = new OffMeshConnection
+                    {
+                        poly = offMeshPolyBase + n,
+                        rad = param.offMeshConRad[i],
+                        flags = param.offMeshConDir[i] != 0 ? (uint)Constants.DT_OFFMESH_CON_BIDIR : 0,
+                        side = offMeshConClass[i * 2 + 1]
+                    };
+
+                    // Copy connection end-points.
+                    var endPts1 = param.offMeshConVerts[i + 0];
+                    var endPts2 = param.offMeshConVerts[i + 1];
+                    con.pos[0] = endPts1;
+                    con.pos[1] = endPts2;
+                    if (param.offMeshConUserID != null)
+                    {
+                        con.userId = param.offMeshConUserID[i];
+                    }
+                    data.offMeshCons.Add(con);
+                    n++;
+                }
+            }
+
+            offMeshConClass = null;
+
+            outData = data;
+
+            return true;
+        }
+        private int ClassifyOffMeshPoint(Vector3 pt, Vector3 bmin, Vector3 bmax)
+        {
+            int XP = 1 << 0;
+            int ZP = 1 << 1;
+            int XM = 1 << 2;
+            int ZM = 1 << 3;
+
+            int outcode = 0;
+            outcode |= (pt[0] >= bmax[0]) ? XP : 0;
+            outcode |= (pt[2] >= bmax[2]) ? ZP : 0;
+            outcode |= (pt[0] < bmin[0]) ? XM : 0;
+            outcode |= (pt[2] < bmin[2]) ? ZM : 0;
+
+            if (XP != 0) return 0;
+            if ((XP | ZP) != 0) return 1;
+            if (ZP != 0) return 2;
+            if ((XM | ZP) != 0) return 3;
+            if (XM != 0) return 4;
+            if ((XM | ZM) != 0) return 5;
+            if (ZM != 0) return 6;
+            if ((XP | ZM) != 0) return 7;
+
+            return 0xff;
+        }
+        private int CreateBVTree(NavMeshCreateParams param, ref List<BVNode> nodes)
+        {
+            // Build tree
+            float quantFactor = 1 / param.cs;
+            BVItem[] items = new BVItem[param.polyCount];
+            for (int i = 0; i < param.polyCount; i++)
+            {
+                BVItem it = items[i];
+                it.i = i;
+                // Calc polygon bounds. Use detail meshes if available.
+                if (param.detailMeshes != null)
+                {
+                    int vb = param.detailMeshes[i][0];
+                    int ndv = param.detailMeshes[i][1];
+                    Vector3 bmin;
+                    Vector3 bmax;
+
+                    var dv = param.detailVerts[vb];
+                    bmin = dv;
+                    bmax = dv;
+
+                    for (int j = 1; j < ndv; j++)
+                    {
+                        Vector3.Min(bmin, param.detailVerts[j]);
+                        Vector3.Max(bmax, param.detailVerts[j]);
+                    }
+
+                    // BV-tree uses cs for all dimensions
+                    it.bmin.X = MathUtil.Clamp((int)((bmin[0] - param.bmin[0]) * quantFactor), 0, 0xffff);
+                    it.bmin.Y = MathUtil.Clamp((int)((bmin[1] - param.bmin[1]) * quantFactor), 0, 0xffff);
+                    it.bmin.Z = MathUtil.Clamp((int)((bmin[2] - param.bmin[2]) * quantFactor), 0, 0xffff);
+
+                    it.bmax.X = MathUtil.Clamp((int)((bmax[0] - param.bmin[0]) * quantFactor), 0, 0xffff);
+                    it.bmax.Y = MathUtil.Clamp((int)((bmax[1] - param.bmin[1]) * quantFactor), 0, 0xffff);
+                    it.bmax.Z = MathUtil.Clamp((int)((bmax[2] - param.bmin[2]) * quantFactor), 0, 0xffff);
+                }
+                else
+                {
+                    var p = param.polys[i];
+                    it.bmin.X = it.bmax.X = param.verts[p[0]].X;
+                    it.bmin.Y = it.bmax.Y = param.verts[p[0]].Y;
+                    it.bmin.Z = it.bmax.Z = param.verts[p[0]].Z;
+
+                    for (int j = 1; j < param.nvp; ++j)
+                    {
+                        if (p[j] == Constants.NullIdx) break;
+                        var x = param.verts[p[j]].X;
+                        var y = param.verts[p[j]].Y;
+                        var z = param.verts[p[j]].Z;
+
+                        if (x < it.bmin.X) it.bmin.X = x;
+                        if (y < it.bmin.Y) it.bmin.Y = y;
+                        if (z < it.bmin.Z) it.bmin.Z = z;
+
+                        if (x > it.bmax.X) it.bmax.X = x;
+                        if (y > it.bmax.Y) it.bmax.Y = y;
+                        if (z > it.bmax.Z) it.bmax.Z = z;
+                    }
+                    // Remap y
+                    it.bmin.Y = (int)Math.Floor(it.bmin.Y * param.ch / param.cs);
+                    it.bmax.Y = (int)Math.Ceiling(it.bmax.Y * param.ch / param.cs);
+                }
+            }
+
+            int curNode = 0;
+            Subdivide(items, param.polyCount, 0, param.polyCount, ref curNode, ref nodes);
+
+            items = null;
+
+            return curNode;
+        }
+        private void Subdivide(BVItem[] items, int nitems, int imin, int imax, ref int curNode, ref List<BVNode> nodes)
+        {
+            int inum = imax - imin;
+            int icur = curNode;
+
+            BVNode node = nodes[curNode++];
+
+            if (inum == 1)
+            {
+                // Leaf
+                node.bmin.X = items[imin].bmin.X;
+                node.bmin.Y = items[imin].bmin.Y;
+                node.bmin.Z = items[imin].bmin.Z;
+
+                node.bmax.X = items[imin].bmax.X;
+                node.bmax.Y = items[imin].bmax.Y;
+                node.bmax.Z = items[imin].bmax.Z;
+
+                node.i = items[imin].i;
+            }
+            else
+            {
+                // Split
+                CalcExtends(items, nitems, imin, imax, ref node.bmin, ref node.bmax);
+
+                int axis = LongestAxis(node.bmax.X - node.bmin.X,
+                                       node.bmax.Y - node.bmin.Y,
+                                       node.bmax.Z - node.bmin.Z);
+
+                if (axis == 0)
+                {
+                    // Sort along x-axis
+                    Array.Sort(items, imin, inum, BVItem.XComparer);
+                }
+                else if (axis == 1)
+                {
+                    // Sort along y-axis
+                    Array.Sort(items, imin, inum, BVItem.YComparer);
+                }
+                else
+                {
+                    // Sort along z-axis
+                    Array.Sort(items, imin, inum, BVItem.ZComparer);
+                }
+
+                int isplit = imin + inum / 2;
+
+                // Left
+                Subdivide(items, nitems, imin, isplit, ref curNode, ref nodes);
+                // Right
+                Subdivide(items, nitems, isplit, imax, ref curNode, ref nodes);
+
+                int iescape = curNode - icur;
+                // Negative index means escape.
+                node.i = -iescape;
+            }
+        }
+        private void CalcExtends(BVItem[] items, int nitems, int imin, int imax, ref Vector3i bmin, ref Vector3i bmax)
+        {
+            bmin.X = items[imin].bmin.X;
+            bmin.Y = items[imin].bmin.Y;
+            bmin.Z = items[imin].bmin.Z;
+
+            bmax.X = items[imin].bmax.X;
+            bmax.Y = items[imin].bmax.Y;
+            bmax.Z = items[imin].bmax.Z;
+
+            for (int i = imin + 1; i < imax; ++i)
+            {
+                BVItem it = items[i];
+                if (it.bmin.X < bmin.X) bmin.X = it.bmin.X;
+                if (it.bmin.Y < bmin.Y) bmin.Y = it.bmin.Y;
+                if (it.bmin.Z < bmin.Z) bmin.Z = it.bmin.Z;
+
+                if (it.bmax.X > bmax.X) bmax.X = it.bmax.X;
+                if (it.bmax.Y > bmax.Y) bmax.Y = it.bmax.Y;
+                if (it.bmax.Z > bmax.Z) bmax.Z = it.bmax.Z;
+            }
+        }
+        private int LongestAxis(int x, int y, int z)
+        {
+            int axis = 0;
+            int maxVal = x;
+            if (y > maxVal)
+            {
+                axis = 1;
+                maxVal = y;
+            }
+            if (z > maxVal)
+            {
+                axis = 2;
+            }
+            return axis;
         }
     }
 }

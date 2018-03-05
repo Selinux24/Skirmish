@@ -6,12 +6,12 @@ namespace Engine.PathFinding.NavMesh2
         const int NodeParentBits = 24;
         const int NodeStateBits = 2;
 
-        private NavMesh m_nav = null;
+        private NavigationMesh2 m_nav = null;
         private NodePool m_nodePool = null;
         private NodePool m_tinyNodePool = null;
         private NodeQueue m_openList = null;
 
-        public void Init(NavMesh nav, int maxNodes)
+        public void Init(NavigationMesh2 nav, int maxNodes)
         {
             if (maxNodes > ushort.MaxValue || maxNodes > (1 << NodeParentBits) - 1)
             {

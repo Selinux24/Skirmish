@@ -9,11 +9,11 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Neighbour reference. (The neighbor that is linked to.)
         /// </summary>
-        public uint nref;
+        public int nref;
         /// <summary>
         /// Index of the next link.
         /// </summary>
-        public uint next;
+        public int next;
         /// <summary>
         /// Index of the polygon edge that owns this link.
         /// </summary>
@@ -30,5 +30,11 @@ namespace Engine.PathFinding.NavMesh2
         /// If a boundary link, defines the maximum sub-edge area.
         /// </summary>
         public int bmax;
+
+        public override string ToString()
+        {
+            return string.Format("Ref {0}; Next {1}; Edge {2}; Side {3}; BMin {4}; BMax {5};",
+                nref, next, edge, side, bmin, bmax);
+        }
     }
 }

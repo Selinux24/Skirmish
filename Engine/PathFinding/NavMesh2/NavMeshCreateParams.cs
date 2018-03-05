@@ -51,11 +51,11 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The height detail sub-mesh data. [Size: 4 * #polyCount]
         /// </summary>
-        public uint[] detailMeshes;
+        public Trianglei[] detailMeshes;
         /// <summary>
         /// The detail mesh vertices. [Size: 3 * #detailVertsCount] [Unit: wu]
         /// </summary>
-        public float[] detailVerts;
+        public Vector3[] detailVerts;
         /// <summary>
         /// The number of vertices in the detail mesh.
         /// </summary>
@@ -63,7 +63,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The detail mesh triangles. [Size: 4 * #detailTriCount]
         /// </summary>
-        public byte[] detailTris;
+        public Trianglei[] detailTris;
         /// <summary>
         /// The number of triangles in the detail mesh.
         /// </summary>
@@ -80,7 +80,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Off-mesh connection vertices. [(ax, ay, az, bx, by, bz) * #offMeshConCount] [Unit: wu]
         /// </summary>
-        public float[] offMeshConVerts;
+        public Vector3[] offMeshConVerts;
         /// <summary>
         /// Off-mesh connection radii. [Size: #offMeshConCount] [Unit: wu]
         /// </summary>
@@ -98,7 +98,7 @@ namespace Engine.PathFinding.NavMesh2
         /// 0 = Travel only from endpoint A to endpoint B.<br/>
         /// #DT_OFFMESH_CON_BIDIR = Bidirectional travel.
         /// </summary>
-        public byte[] offMeshConDir;
+        public uint[] offMeshConDir;
         /// <summary>
         /// The user defined ids of the off-mesh connection. [Size: #offMeshConCount]
         /// </summary>
