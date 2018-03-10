@@ -30,8 +30,8 @@ namespace Engine.PathFinding.NavMesh2
 
         public byte[] layers;
         public byte[] neis;
-        public ushort ymin;
-        public ushort ymax;
+        public int ymin;
+        public int ymax;
         /// <summary>
         /// Layer ID
         /// </summary>

@@ -31,11 +31,11 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The maximum distance value of any span within the field.         
         /// </summary>
-        public ushort maxDistance;
+        public int maxDistance;
         /// <summary>
         /// The maximum region id of any span within the field. 
         /// </summary>
-        public ushort maxRegions;
+        public int maxRegions;
         /// <summary>
         /// The minimum bounds in world space. [(x, y, z)]
         /// </summary>
@@ -59,7 +59,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Array containing border distance data. [Size: spanCount]      
         /// </summary>
-        public ushort[] dist;
+        public int[] dist;
         /// <summary>
         /// Array containing area id data. [Size: spanCount] 
         /// </summary>

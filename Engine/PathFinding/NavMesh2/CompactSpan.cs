@@ -24,19 +24,19 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The lower extent of the span. (Measured from the heightfield's base.)
         /// </summary>
-        public ushort y;
+        public int y;
         /// <summary>
         /// The id of the region the span belongs to. (Or zero if not in a region.)
         /// </summary>
-        public ushort reg;
+        public int reg;
         /// <summary>
         /// Packed neighbor connection data.
         /// </summary>
-        public uint con;
+        public int con;
         /// <summary>
         /// The height of the span.  (Measured from #y.)
         /// </summary>
-        public uint h;
+        public int h;
 
         /// <summary>
         /// Gets the text representation of the instance

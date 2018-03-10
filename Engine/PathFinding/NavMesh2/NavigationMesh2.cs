@@ -7,11 +7,11 @@ namespace Engine.PathFinding.NavMesh2
 {
     public class NavigationMesh2 : IGraph
     {
-        public static NavigationMesh2 Build(Triangle[] triangles, BuildSettings settings)
+        public static NavigationMesh2 BuildTiled(Triangle[] triangles, BuildSettings settings)
         {
-            return Build(new InputGeometry(triangles), settings);
+            return BuildTiled(new InputGeometry(triangles), settings);
         }
-        public static NavigationMesh2 Build(InputGeometry geometry, BuildSettings settings)
+        public static NavigationMesh2 BuildTiled(InputGeometry geometry, BuildSettings settings)
         {
             var agent = settings.Agents[0];
 
@@ -128,6 +128,1222 @@ namespace Engine.PathFinding.NavMesh2
 
             return nm;
         }
+        public static NavigationMesh2 BuildSolo(Triangle[] triangles, BuildSettings settings)
+        {
+            return BuildSolo(new InputGeometry(triangles), settings);
+        }
+        public static NavigationMesh2 BuildSolo(InputGeometry geometry, BuildSettings settings)
+        {
+            var agent = settings.Agents[0];
+
+            var ntris = geometry.GetChunkyMesh().ntris;
+            var tris = geometry.GetChunkyMesh().triangles;
+
+            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
+
+            // Init cache
+            CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
+            int ts = (int)settings.TileSize;
+            int tw = (gw + ts - 1) / ts;
+            int th = (gh + ts - 1) / ts;
+
+            // Generation params.
+            var walkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight);
+            var walkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight);
+            var walkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize);
+            var tileSize = (int)settings.TileSize;
+            var borderSize = walkableRadius + 3;
+            var cfg = new Config()
+            {
+                CellSize = settings.CellSize,
+                CellHeight = settings.CellHeight,
+                WalkableSlopeAngle = agent.MaxSlope,
+                WalkableHeight = walkableHeight,
+                WalkableClimb = walkableClimb,
+                WalkableRadius = walkableRadius,
+                MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize),
+                MaxSimplificationError = settings.EdgeMaxError,
+                MinRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize),
+                MergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize),
+                MaxVertsPerPoly = settings.VertsPerPoly,
+                TileSize = tileSize,
+                BorderSize = borderSize,
+                Width = tileSize + borderSize * 2,
+                Height = tileSize + borderSize * 2,
+                DetailSampleDist = settings.DetailSampleDist < 0.9f ? 0 : settings.CellSize * settings.DetailSampleDist,
+                DetailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError,
+                BoundingBox = bbox,
+            };
+
+            var solid = new Heightfield
+            {
+                width = cfg.Width,
+                height = cfg.Height,
+                boundingBox = cfg.BoundingBox,
+                cs = cfg.CellSize,
+                ch = cfg.CellHeight,
+                spans = new Span[cfg.Width * cfg.Height],
+            };
+
+            var triareas = new TileCacheAreas[ntris];
+
+            MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris, triareas);
+            if (!RasterizeTriangles(solid, cfg.WalkableClimb, tris, triareas))
+            {
+                return null;
+            }
+
+            if (settings.FilterLowHangingObstacles)
+            {
+                FilterLowHangingWalkableObstacles(cfg.WalkableClimb, solid);
+            }
+            if (settings.FilterLedgeSpans)
+            {
+                FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb, solid);
+            }
+            if (settings.FilterWalkableLowHeightSpans)
+            {
+                FilterWalkableLowHeightSpans(cfg.WalkableHeight, solid);
+            }
+
+            var chf = BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, solid);
+
+            // Erode the walkable area by agent radius.
+            if (!ErodeWalkableArea(cfg.WalkableRadius, chf))
+            {
+                throw new EngineException("buildNavigation: Could not erode.");
+            }
+
+            // (Optional) Mark areas.
+            ConvexVolume[] vols = geometry.GetConvexVolumes();
+            for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
+            {
+                MarkConvexPolyArea(
+                    vols[i].verts, vols[i].nverts,
+                    vols[i].hmin, vols[i].hmax,
+                    vols[i].area, chf);
+            }
+
+            if (settings.PartitionType == SamplePartitionTypeEnum.Watershed)
+            {
+                // Prepare for region partitioning, by calculating distance field along the walkable surface.
+                if (!BuildDistanceField(chf))
+                {
+                    throw new EngineException("buildNavigation: Could not build distance field.");
+                }
+
+                // Partition the walkable surface into simple regions without holes.
+                if (!BuildRegions(chf, 0, cfg.MinRegionArea, cfg.MergeRegionArea))
+                {
+                    throw new EngineException("buildNavigation: Could not build watershed regions.");
+                }
+            }
+            else if (settings.PartitionType == SamplePartitionTypeEnum.Monotone)
+            {
+                // Partition the walkable surface into simple regions without holes.
+                // Monotone partitioning does not need distancefield.
+                if (!BuildRegionsMonotone(chf, 0, cfg.MinRegionArea, cfg.MergeRegionArea))
+                {
+                    throw new EngineException("buildNavigation: Could not build monotone regions.");
+                }
+            }
+            else // SAMPLE_PARTITION_LAYERS
+            {
+                // Partition the walkable surface into simple regions without holes.
+                if (!BuildLayerRegions(chf, 0, cfg.MinRegionArea))
+                {
+                    throw new EngineException("buildNavigation: Could not build layer regions.");
+                }
+            }
+
+            if (!BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlags.RC_CONTOUR_TESS_AREA_EDGES, out ContourSet cset))
+            {
+                throw new EngineException("buildNavigation: Could not create contours.");
+            }
+
+            if (!BuildPolyMesh(cset, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
+            {
+                throw new EngineException("buildNavigation: Could not triangulate contours.");
+            }
+
+            if (!BuildPolyMeshDetail(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError, out PolyMeshDetail dmesh))
+            {
+                throw new EngineException("buildNavigation: Could not build detail mesh.");
+            }
+
+            if (cfg.MaxVertsPerPoly <= Constants.VertsPerPolygon)
+            {
+                // Update poly flags from areas.
+                for (int i = 0; i < pmesh.npolys; ++i)
+                {
+                    if ((uint)pmesh.areas[i] == (uint)TileCacheAreas.WalkableArea)
+                        pmesh.areas[i] = SamplePolyAreas.SAMPLE_POLYAREA_GROUND;
+
+                    if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GROUND ||
+                        pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GRASS ||
+                        pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_ROAD)
+                    {
+                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK;
+                    }
+                    else if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_WATER)
+                    {
+                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_SWIM;
+                    }
+                    else if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_DOOR)
+                    {
+                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK | SamplePolyFlags.SAMPLE_POLYFLAGS_DOOR;
+                    }
+                }
+
+                var param = new NavMeshCreateParams
+                {
+                    verts = pmesh.verts,
+                    vertCount = pmesh.nverts,
+                    polys = pmesh.polys,
+                    polyAreas = pmesh.areas,
+                    polyFlags = pmesh.flags,
+                    polyCount = pmesh.npolys,
+                    nvp = pmesh.nvp,
+                    detailMeshes = dmesh.meshes,
+                    detailVerts = dmesh.verts,
+                    detailVertsCount = dmesh.nverts,
+                    detailTris = dmesh.tris,
+                    detailTriCount = dmesh.ntris,
+                    offMeshConVerts = geometry.GetOffMeshConnectionVerts(),
+                    offMeshConRad = geometry.GetOffMeshConnectionRads(),
+                    offMeshConDir = geometry.GetOffMeshConnectionDirs(),
+                    offMeshConAreas = geometry.GetOffMeshConnectionAreas(),
+                    offMeshConFlags = geometry.GetOffMeshConnectionFlags(),
+                    offMeshConUserID = geometry.GetOffMeshConnectionId(),
+                    offMeshConCount = geometry.GetOffMeshConnectionCount(),
+                    walkableHeight = agent.Height,
+                    walkableRadius = agent.Radius,
+                    walkableClimb = agent.MaxClimb,
+                    bmin = pmesh.bmin,
+                    bmax = pmesh.bmax,
+                    cs = cfg.CellSize,
+                    ch = cfg.CellHeight,
+                    buildBvTree = true
+                };
+
+                if (!CreateNavMeshData(param, out MeshData navData))
+                {
+                    throw new EngineException("Could not build Detour navmesh.");
+                }
+
+                var nm = new NavigationMesh2();
+                nm.Init(navData, TileFlags.FreeData);
+
+                var mmQuery = new NavMeshQuery();
+                mmQuery.Init(nm, settings.MaxNodes);
+                return nm;
+            }
+
+            return null;
+        }
+
+        private static bool BuildDistanceField(CompactHeightfield chf)
+        {
+            if (chf.dist != null)
+            {
+                chf.dist = null;
+            }
+
+            int[] src = new int[chf.spanCount];
+            int[] dst = new int[chf.spanCount];
+
+            {
+                CalculateDistanceField(chf, src, out int maxDist);
+                chf.maxDistance = maxDist;
+            }
+
+            {
+                // Blur
+                if (BoxBlur(chf, 1, src, dst) != src)
+                {
+                    Helper.Swap(ref src, ref dst);
+                }
+
+                // Store distance.
+                chf.dist = src;
+            }
+
+            dst = null;
+
+            return true;
+        }
+        private static void CalculateDistanceField(CompactHeightfield chf, int[] src, out int maxDist)
+        {
+            int w = chf.width;
+            int h = chf.height;
+
+            // Init distance and points.
+            for (int i = 0; i < chf.spanCount; ++i)
+            {
+                src[i] = 0xffff;
+            }
+
+            // Mark boundary cells.
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        var s = chf.spans[i];
+                        var area = chf.areas[i];
+
+                        int nc = 0;
+                        for (int dir = 0; dir < 4; ++dir)
+                        {
+                            if (GetCon(s, dir) != Constants.NotConnected)
+                            {
+                                int ax = x + GetDirOffsetX(dir);
+                                int ay = y + GetDirOffsetY(dir);
+                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
+                                if (area == chf.areas[ai])
+                                {
+                                    nc++;
+                                }
+                            }
+                        }
+                        if (nc != 4)
+                        {
+                            src[i] = 0;
+                        }
+                    }
+                }
+            }
+
+            // Pass 1
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        var s = chf.spans[i];
+
+                        if (GetCon(s, 0) != Constants.NotConnected)
+                        {
+                            // (-1,0)
+                            int ax = x + GetDirOffsetX(0);
+                            int ay = y + GetDirOffsetY(0);
+                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 0);
+                            var a = chf.spans[ai];
+                            if (src[ai] + 2 < src[i])
+                            {
+                                src[i] = src[ai] + 2;
+                            }
+
+                            // (-1,-1)
+                            if (GetCon(a, 3) != Constants.NotConnected)
+                            {
+                                int aax = ax + GetDirOffsetX(3);
+                                int aay = ay + GetDirOffsetY(3);
+                                int aai = chf.cells[aax + aay * w].index + GetCon(a, 3);
+                                if (src[aai] + 3 < src[i])
+                                {
+                                    src[i] = src[aai] + 3;
+                                }
+                            }
+                        }
+                        if (GetCon(s, 3) != Constants.NotConnected)
+                        {
+                            // (0,-1)
+                            int ax = x + GetDirOffsetX(3);
+                            int ay = y + GetDirOffsetY(3);
+                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 3);
+                            var a = chf.spans[ai];
+                            if (src[ai] + 2 < src[i])
+                            {
+                                src[i] = src[ai] + 2;
+                            }
+
+                            // (1,-1)
+                            if (GetCon(a, 2) != Constants.NotConnected)
+                            {
+                                int aax = ax + GetDirOffsetX(2);
+                                int aay = ay + GetDirOffsetY(2);
+                                int aai = chf.cells[aax + aay * w].index + GetCon(a, 2);
+                                if (src[aai] + 3 < src[i])
+                                {
+                                    src[i] = src[aai] + 3;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Pass 2
+            for (int y = h - 1; y >= 0; --y)
+            {
+                for (int x = w - 1; x >= 0; --x)
+                {
+                    var c = chf.cells[x + y * w];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        var s = chf.spans[i];
+
+                        if (GetCon(s, 2) != Constants.NotConnected)
+                        {
+                            // (1,0)
+                            int ax = x + GetDirOffsetX(2);
+                            int ay = y + GetDirOffsetY(2);
+                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 2);
+                            var a = chf.spans[ai];
+                            if (src[ai] + 2 < src[i])
+                            {
+                                src[i] = src[ai] + 2;
+                            }
+
+                            // (1,1)
+                            if (GetCon(a, 1) != Constants.NotConnected)
+                            {
+                                int aax = ax + GetDirOffsetX(1);
+                                int aay = ay + GetDirOffsetY(1);
+                                int aai = chf.cells[aax + aay * w].index + GetCon(a, 1);
+                                if (src[aai] + 3 < src[i])
+                                {
+                                    src[i] = src[aai] + 3;
+                                }
+                            }
+                        }
+                        if (GetCon(s, 1) != Constants.NotConnected)
+                        {
+                            // (0,1)
+                            int ax = x + GetDirOffsetX(1);
+                            int ay = y + GetDirOffsetY(1);
+                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 1);
+                            var a = chf.spans[ai];
+                            if (src[ai] + 2 < src[i])
+                            {
+                                src[i] = src[ai] + 2;
+                            }
+
+                            // (-1,1)
+                            if (GetCon(a, 0) != Constants.NotConnected)
+                            {
+                                int aax = ax + GetDirOffsetX(0);
+                                int aay = ay + GetDirOffsetY(0);
+                                int aai = chf.cells[aax + aay * w].index + GetCon(a, 0);
+                                if (src[aai] + 3 < src[i])
+                                {
+                                    src[i] = src[aai] + 3;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            maxDist = 0;
+            for (int i = 0; i < chf.spanCount; ++i)
+            {
+                maxDist = Math.Max(src[i], maxDist);
+            }
+        }
+        private static int[] BoxBlur(CompactHeightfield chf, int thr, int[] src, int[] dst)
+        {
+            int w = chf.width;
+            int h = chf.height;
+
+            thr *= 2;
+
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        var s = chf.spans[i];
+                        var cd = src[i];
+                        if (cd <= thr)
+                        {
+                            dst[i] = cd;
+                            continue;
+                        }
+
+                        int d = cd;
+                        for (int dir = 0; dir < 4; ++dir)
+                        {
+                            if (GetCon(s, dir) != Constants.NotConnected)
+                            {
+                                int ax = x + GetDirOffsetX(dir);
+                                int ay = y + GetDirOffsetY(dir);
+                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
+                                d += src[ai];
+
+                                var a = chf.spans[ai];
+                                int dir2 = (dir + 1) & 0x3;
+                                if (GetCon(a, dir2) != Constants.NotConnected)
+                                {
+                                    int ax2 = ax + GetDirOffsetX(dir2);
+                                    int ay2 = ay + GetDirOffsetY(dir2);
+                                    int ai2 = chf.cells[ax2 + ay2 * w].index + GetCon(a, dir2);
+                                    d += src[ai2];
+                                }
+                                else
+                                {
+                                    d += cd;
+                                }
+                            }
+                            else
+                            {
+                                d += cd * 2;
+                            }
+                        }
+                        dst[i] = ((d + 5) / 9);
+                    }
+                }
+            }
+
+            return dst;
+        }
+        private static bool BuildRegions(CompactHeightfield chf, int borderSize, int minRegionArea, int mergeRegionArea)
+        {
+            int w = chf.width;
+            int h = chf.height;
+
+            int LOG_NB_STACKS = 3;
+            int NB_STACKS = 1 << LOG_NB_STACKS;
+            List<List<int>> lvlStacks = new List<List<int>>();
+            for (int i = 0; i < NB_STACKS; ++i)
+            {
+                lvlStacks[i] = new List<int>();
+            }
+
+            List<int> stack = new List<int>();
+            List<int> visited = new List<int>();
+
+            int[] srcReg = new int[chf.spanCount];
+            int[] srcDist = new int[chf.spanCount];
+            int[] dstReg = new int[chf.spanCount];
+            int[] dstDist = new int[chf.spanCount];
+
+            int regionId = 1;
+            int level = (chf.maxDistance + 1) & ~1;
+
+            // TODO: Figure better formula, expandIters defines how much the 
+            // watershed "overflows" and simplifies the regions. Tying it to
+            // agent radius was usually good indication how greedy it could be.
+            //	const int expandIters = 4 + walkableRadius * 2;
+            const int expandIters = 8;
+
+            if (borderSize > 0)
+            {
+                // Make sure border will not overflow.
+                int bw = Math.Min(w, borderSize);
+                int bh = Math.Min(h, borderSize);
+
+                // Paint regions
+                PaintRectRegion(0, bw, 0, h, (regionId | Constants.RC_BORDER_REG), chf, srcReg); regionId++;
+                PaintRectRegion(w - bw, w, 0, h, (regionId | Constants.RC_BORDER_REG), chf, srcReg); regionId++;
+                PaintRectRegion(0, w, 0, bh, (regionId | Constants.RC_BORDER_REG), chf, srcReg); regionId++;
+                PaintRectRegion(0, w, h - bh, h, (regionId | Constants.RC_BORDER_REG), chf, srcReg); regionId++;
+
+                chf.borderSize = borderSize;
+            }
+
+            int sId = -1;
+            while (level > 0)
+            {
+                level = level >= 2 ? level - 2 : 0;
+                sId = (sId + 1) & (NB_STACKS - 1);
+
+                if (sId == 0)
+                {
+                    SortCellsByLevel(level, chf, srcReg, NB_STACKS, lvlStacks, 1);
+                }
+                else
+                {
+                    AppendStacks(lvlStacks[sId - 1], lvlStacks[sId], srcReg); // copy left overs from last level
+                }
+
+                {
+                    // Expand current regions until no empty connected cells found.
+                    if (ExpandRegions(expandIters, level, chf, srcReg, srcDist, dstReg, dstDist, lvlStacks[sId], false) != srcReg)
+                    {
+                        Helper.Swap(ref srcReg, ref dstReg);
+                        Helper.Swap(ref srcDist, ref dstDist);
+                    }
+                }
+
+                {
+                    // Mark new regions with IDs.
+                    for (int j = 0; j < lvlStacks[sId].Count; j += 3)
+                    {
+                        int x = lvlStacks[sId][j];
+                        int y = lvlStacks[sId][j + 1];
+                        int i = lvlStacks[sId][j + 2];
+                        if (i >= 0 && srcReg[i] == 0)
+                        {
+                            if (FloodRegion(x, y, i, level, regionId, chf, srcReg, srcDist, stack))
+                            {
+                                if (regionId == 0xFFFF)
+                                {
+                                    throw new EngineException("rcBuildRegions: Region ID overflow");
+                                }
+
+                                regionId++;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Expand current regions until no empty connected cells found.
+            if (ExpandRegions(expandIters * 8, 0, chf, srcReg, srcDist, dstReg, dstDist, stack, true) != srcReg)
+            {
+                Helper.Swap(ref srcReg, ref dstReg);
+                Helper.Swap(ref srcDist, ref dstDist);
+            }
+
+            {
+                // Merge regions and filter out smalle regions.
+                chf.maxRegions = regionId;
+                if (!MergeAndFilterRegions(minRegionArea, mergeRegionArea, ref chf.maxRegions, chf, srcReg, out int[] overlaps))
+                {
+                    return false;
+                }
+
+                // If overlapping regions were found during merging, split those regions.
+                if (overlaps.Length > 0)
+                {
+                    throw new EngineException(string.Format("rcBuildRegions: {0} overlapping regions", overlaps.Length));
+                }
+            }
+
+            // Write the result out.
+            for (int i = 0; i < chf.spanCount; ++i)
+            {
+                chf.spans[i].reg = srcReg[i];
+            }
+
+            return true;
+        }
+        private static void PaintRectRegion(int minx, int maxx, int miny, int maxy, int regId, CompactHeightfield chf, int[] srcReg)
+        {
+            int w = chf.width;
+            for (int y = miny; y < maxy; ++y)
+            {
+                for (int x = minx; x < maxx; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        if (chf.areas[i] != TileCacheAreas.NullArea)
+                        {
+                            srcReg[i] = regId;
+                        }
+                    }
+                }
+            }
+        }
+        private static void SortCellsByLevel(int startLevel, CompactHeightfield chf, int[] srcReg, int nbStacks, List<List<int>> stacks, int loglevelsPerStack) // the levels per stack (2 in our case) as a bit shift
+        {
+            int w = chf.width;
+            int h = chf.height;
+            startLevel = startLevel >> loglevelsPerStack;
+
+            for (int j = 0; j < nbStacks; ++j)
+            {
+                stacks[j].Clear();
+            }
+
+            // put all cells in the level range into the appropriate stacks
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        if (chf.areas[i] == TileCacheAreas.NullArea || srcReg[i] != 0)
+                        {
+                            continue;
+                        }
+
+                        int level = chf.dist[i] >> loglevelsPerStack;
+                        int sId = startLevel - level;
+                        if (sId >= nbStacks)
+                        {
+                            continue;
+                        }
+                        if (sId < 0)
+                        {
+                            sId = 0;
+                        }
+
+                        stacks[sId].Add(x);
+                        stacks[sId].Add(y);
+                        stacks[sId].Add(i);
+                    }
+                }
+            }
+        }
+        private static void AppendStacks(List<int> srcStack, List<int> dstStack, int[] srcReg)
+        {
+            for (int j = 0; j < srcStack.Count; j += 3)
+            {
+                int i = srcStack[j + 2];
+                if ((i < 0) || (srcReg[i] != 0))
+                {
+                    continue;
+                }
+                dstStack.Add(srcStack[j]);
+                dstStack.Add(srcStack[j + 1]);
+                dstStack.Add(srcStack[j + 2]);
+            }
+        }
+        private static int[] ExpandRegions(int maxIter, int level, CompactHeightfield chf, int[] srcReg, int[] srcDist, int[] dstReg, int[] dstDist, List<int> stack, bool fillStack)
+        {
+            int w = chf.width;
+            int h = chf.height;
+
+            if (fillStack)
+            {
+                // Find cells revealed by the raised level.
+                stack.Clear();
+                for (int y = 0; y < h; ++y)
+                {
+                    for (int x = 0; x < w; ++x)
+                    {
+                        var c = chf.cells[x + y * w];
+                        for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                        {
+                            if (chf.dist[i] >= level && srcReg[i] == 0 && chf.areas[i] != TileCacheAreas.NullArea)
+                            {
+                                stack.Add(x);
+                                stack.Add(y);
+                                stack.Add(i);
+                            }
+                        }
+                    }
+                }
+            }
+            else // use cells in the input stack
+            {
+                // mark all cells which already have a region
+                for (int j = 0; j < stack.Count; j += 3)
+                {
+                    int i = stack[j + 2];
+                    if (srcReg[i] != 0)
+                    {
+                        stack[j + 2] = -1;
+                    }
+                }
+            }
+
+            int iter = 0;
+            while (stack.Count > 0)
+            {
+                int failed = 0;
+
+                Array.Copy(srcReg, dstReg, chf.spanCount);
+                Array.Copy(srcDist, dstDist, chf.spanCount);
+
+                for (int j = 0; j < stack.Count; j += 3)
+                {
+                    int x = stack[j + 0];
+                    int y = stack[j + 1];
+                    int i = stack[j + 2];
+                    if (i < 0)
+                    {
+                        failed++;
+                        continue;
+                    }
+
+                    int r = srcReg[i];
+                    int d2 = int.MaxValue;
+                    var area = chf.areas[i];
+                    var s = chf.spans[i];
+                    for (int dir = 0; dir < 4; ++dir)
+                    {
+                        if (GetCon(s, dir) == Constants.NotConnected) continue;
+                        int ax = x + GetDirOffsetX(dir);
+                        int ay = y + GetDirOffsetY(dir);
+                        int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
+                        if (chf.areas[ai] != area) continue;
+                        if (srcReg[ai] > 0 && (srcReg[ai] & Constants.RC_BORDER_REG) == 0)
+                        {
+                            if (srcDist[ai] + 2 < d2)
+                            {
+                                r = srcReg[ai];
+                                d2 = srcDist[ai] + 2;
+                            }
+                        }
+                    }
+                    if (r != 0)
+                    {
+                        stack[j + 2] = -1; // mark as used
+                        dstReg[i] = r;
+                        dstDist[i] = d2;
+                    }
+                    else
+                    {
+                        failed++;
+                    }
+                }
+
+                // rcSwap source and dest.
+                Helper.Swap(ref srcReg, ref dstReg);
+                Helper.Swap(ref srcDist, ref dstDist);
+
+                if (failed * 3 == stack.Count)
+                {
+                    break;
+                }
+
+                if (level > 0)
+                {
+                    ++iter;
+                    if (iter >= maxIter)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return srcReg;
+        }
+        private static bool FloodRegion(int x, int y, int i, int level, int r, CompactHeightfield chf, int[] srcReg, int[] srcDist, List<int> stack)
+        {
+            int w = chf.width;
+
+            var area = chf.areas[i];
+
+            // Flood fill mark region.
+            stack.Clear();
+            stack.Add(x);
+            stack.Add(y);
+            stack.Add(i);
+            srcReg[i] = r;
+            srcDist[i] = 0;
+
+            int lev = level >= 2 ? level - 2 : 0;
+            int count = 0;
+
+            while (stack.Count > 0)
+            {
+                int ci = stack[0]; stack.RemoveAt(0);
+                int cy = stack[0]; stack.RemoveAt(0);
+                int cx = stack[0]; stack.RemoveAt(0);
+
+                var cs = chf.spans[ci];
+
+                // Check if any of the neighbours already have a valid region set.
+                int ar = 0;
+                for (int dir = 0; dir < 4; ++dir)
+                {
+                    // 8 connected
+                    if (GetCon(cs, dir) != Constants.NotConnected)
+                    {
+                        int ax = cx + GetDirOffsetX(dir);
+                        int ay = cy + GetDirOffsetY(dir);
+                        int ai = chf.cells[ax + ay * w].index + GetCon(cs, dir);
+                        if (chf.areas[ai] != area)
+                        {
+                            continue;
+                        }
+                        int nr = srcReg[ai];
+                        if ((nr & Constants.RC_BORDER_REG) != 0) // Do not take borders into account.
+                        {
+                            continue;
+                        }
+                        if (nr != 0 && nr != r)
+                        {
+                            ar = nr;
+                            break;
+                        }
+
+                        var a = chf.spans[ai];
+
+                        int dir2 = (dir + 1) & 0x3;
+                        if (GetCon(a, dir2) != Constants.NotConnected)
+                        {
+                            int ax2 = ax + GetDirOffsetX(dir2);
+                            int ay2 = ay + GetDirOffsetY(dir2);
+                            int ai2 = chf.cells[ax2 + ay2 * w].index + GetCon(a, dir2);
+                            if (chf.areas[ai2] != area)
+                            {
+                                continue;
+                            }
+                            int nr2 = srcReg[ai2];
+                            if (nr2 != 0 && nr2 != r)
+                            {
+                                ar = nr2;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (ar != 0)
+                {
+                    srcReg[ci] = 0;
+                    continue;
+                }
+
+                count++;
+
+                // Expand neighbours.
+                for (int dir = 0; dir < 4; ++dir)
+                {
+                    if (GetCon(cs, dir) != Constants.NotConnected)
+                    {
+                        int ax = cx + GetDirOffsetX(dir);
+                        int ay = cy + GetDirOffsetY(dir);
+                        int ai = chf.cells[ax + ay * w].index + GetCon(cs, dir);
+                        if (chf.areas[ai] != area)
+                        {
+                            continue;
+                        }
+                        if (chf.dist[ai] >= lev && srcReg[ai] == 0)
+                        {
+                            srcReg[ai] = r;
+                            srcDist[ai] = 0;
+                            stack.Add(ax);
+                            stack.Add(ay);
+                            stack.Add(ai);
+                        }
+                    }
+                }
+            }
+
+            return count > 0;
+        }
+        private static bool MergeAndFilterRegions(int minRegionArea, int mergeRegionSize, ref int maxRegionId, CompactHeightfield chf, int[] srcReg, out int[] overlaps)
+        {
+            int w = chf.width;
+            int h = chf.height;
+
+            int nreg = maxRegionId + 1;
+            Region[] regions = new Region[nreg];
+
+            // Construct regions
+            for (int i = 0; i < nreg; ++i)
+            {
+                regions[i] = new Region(i);
+            }
+
+            // Find edge of a region and find connections around the contour.
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        int r = srcReg[i];
+                        if (r == 0 || r >= nreg)
+                        {
+                            continue;
+                        }
+
+                        var reg = regions[r];
+                        reg.spanCount++;
+
+                        // Update floors.
+                        for (int j = (int)c.index; j < ni; ++j)
+                        {
+                            if (i == j) continue;
+                            int floorId = srcReg[j];
+                            if (floorId == 0 || floorId >= nreg)
+                            {
+                                continue;
+                            }
+                            if (floorId == r)
+                            {
+                                reg.overlap = true;
+                            }
+                            AddUniqueFloorRegion(reg, floorId);
+                        }
+
+                        // Have found contour
+                        if (reg.connections.Count > 0)
+                            continue;
+
+                        reg.areaType = chf.areas[i];
+
+                        // Check if this cell is next to a border.
+                        int ndir = -1;
+                        for (int dir = 0; dir < 4; ++dir)
+                        {
+                            if (IsSolidEdge(chf, srcReg, x, y, i, dir))
+                            {
+                                ndir = dir;
+                                break;
+                            }
+                        }
+
+                        if (ndir != -1)
+                        {
+                            // The cell is at border.
+                            // Walk around the contour to find all the neighbours.
+                            WalkContour(x, y, i, ndir, chf, srcReg, reg.connections);
+                        }
+                    }
+                }
+            }
+
+            // Remove too small regions.
+            List<int> stack = new List<int>();
+            List<int> trace = new List<int>();
+            for (int i = 0; i < nreg; ++i)
+            {
+                var reg = regions[i];
+                if (reg.id == 0 || (reg.id & Constants.RC_BORDER_REG) != 0)
+                {
+                    continue;
+                }
+                if (reg.spanCount == 0)
+                {
+                    continue;
+                }
+                if (reg.visited)
+                {
+                    continue;
+                }
+
+                // Count the total size of all the connected regions.
+                // Also keep track of the regions connects to a tile border.
+                bool connectsToBorder = false;
+                int spanCount = 0;
+                stack.Clear();
+                trace.Clear();
+
+                reg.visited = true;
+                stack.Add(i);
+
+                while (stack.Count > 0)
+                {
+                    // Pop
+                    int ri = stack[0]; stack.RemoveAt(0);
+
+                    var creg = regions[ri];
+
+                    spanCount += creg.spanCount;
+                    trace.Add(ri);
+
+                    for (int j = 0; j < creg.connections.Count; ++j)
+                    {
+                        if ((creg.connections[j] & Constants.RC_BORDER_REG) != 0)
+                        {
+                            connectsToBorder = true;
+                            continue;
+                        }
+                        var neireg = regions[creg.connections[j]];
+                        if (neireg.visited)
+                        {
+                            continue;
+                        }
+                        if (neireg.id == 0 || (neireg.id & Constants.RC_BORDER_REG) != 0)
+                        {
+                            continue;
+                        }
+                        // Visit
+                        stack.Add(neireg.id);
+                        neireg.visited = true;
+                    }
+                }
+
+                // If the accumulated regions size is too small, remove it.
+                // Do not remove areas which connect to tile borders
+                // as their size cannot be estimated correctly and removing them
+                // can potentially remove necessary areas.
+                if (spanCount < minRegionArea && !connectsToBorder)
+                {
+                    // Kill all visited regions.
+                    for (int j = 0; j < trace.Count; ++j)
+                    {
+                        regions[trace[j]].spanCount = 0;
+                        regions[trace[j]].id = 0;
+                    }
+                }
+            }
+
+            // Merge too small regions to neighbour regions.
+            int mergeCount = 0;
+            do
+            {
+                mergeCount = 0;
+                for (int i = 0; i < nreg; ++i)
+                {
+                    var reg = regions[i];
+                    if (reg.id == 0 || (reg.id & Constants.RC_BORDER_REG) != 0)
+                    {
+                        continue;
+                    }
+                    if (reg.overlap)
+                    {
+                        continue;
+                    }
+                    if (reg.spanCount == 0)
+                    {
+                        continue;
+                    }
+
+                    // Check to see if the region should be merged.
+                    if (reg.spanCount > mergeRegionSize && IsRegionConnectedToBorder(reg))
+                    {
+                        continue;
+                    }
+
+                    // Small region with more than 1 connection.
+                    // Or region which is not connected to a border at all.
+                    // Find smallest neighbour region that connects to this one.
+                    int smallest = int.MaxValue;
+                    int mergeId = reg.id;
+                    for (int j = 0; j < reg.connections.Count; ++j)
+                    {
+                        if ((reg.connections[j] & Constants.RC_BORDER_REG) != 0)
+                        {
+                            continue;
+                        }
+
+                        var mreg = regions[reg.connections[j]];
+                        if (mreg.id == 0 || (mreg.id & Constants.RC_BORDER_REG) != 0 || mreg.overlap)
+                        {
+                            continue;
+                        }
+
+                        if (mreg.spanCount < smallest &&
+                            CanMergeWithRegion(reg, mreg) &&
+                            CanMergeWithRegion(mreg, reg))
+                        {
+                            smallest = mreg.spanCount;
+                            mergeId = mreg.id;
+                        }
+                    }
+                    // Found new id.
+                    if (mergeId != reg.id)
+                    {
+                        int oldId = reg.id;
+                        var target = regions[mergeId];
+
+                        // Merge neighbours.
+                        if (MergeRegions(target, reg))
+                        {
+                            // Fixup regions pointing to current region.
+                            for (int j = 0; j < nreg; ++j)
+                            {
+                                if (regions[j].id == 0 || (regions[j].id & Constants.RC_BORDER_REG) != 0)
+                                {
+                                    continue;
+                                }
+
+                                // If another region was already merged into current region
+                                // change the nid of the previous region too.
+                                if (regions[j].id == oldId)
+                                {
+                                    regions[j].id = mergeId;
+                                }
+
+                                // Replace the current region with the new one if the
+                                // current regions is neighbour.
+                                ReplaceNeighbour(regions[j], oldId, mergeId);
+                            }
+
+                            mergeCount++;
+                        }
+                    }
+                }
+            }
+            while (mergeCount > 0);
+
+            // Compress region Ids.
+            for (int i = 0; i < nreg; ++i)
+            {
+                regions[i].remap = false;
+                if (regions[i].id == 0)
+                {
+                    // Skip nil regions.
+                    continue;
+                }
+                if ((regions[i].id & Constants.RC_BORDER_REG) != 0)
+                {
+                    // Skip external regions.
+                    continue;
+                }
+                regions[i].remap = true;
+            }
+
+            int regIdGen = 0;
+            for (int i = 0; i < nreg; ++i)
+            {
+                if (!regions[i].remap)
+                {
+                    continue;
+                }
+                int oldId = regions[i].id;
+                int newId = ++regIdGen;
+                for (int j = i; j < nreg; ++j)
+                {
+                    if (regions[j].id == oldId)
+                    {
+                        regions[j].id = newId;
+                        regions[j].remap = false;
+                    }
+                }
+            }
+            maxRegionId = regIdGen;
+
+            // Remap regions.
+            for (int i = 0; i < chf.spanCount; ++i)
+            {
+                if ((srcReg[i] & Constants.RC_BORDER_REG) == 0)
+                {
+                    srcReg[i] = regions[srcReg[i]].id;
+                }
+            }
+
+            // Return regions that we found to be overlapping.
+            List<int> lOverlaps = new List<int>();
+            for (int i = 0; i < nreg; ++i)
+            {
+                if (regions[i].overlap)
+                {
+                    lOverlaps.Add(regions[i].id);
+                }
+            }
+            overlaps = lOverlaps.ToArray();
+
+            for (int i = 0; i < nreg; ++i)
+            {
+                regions[i] = null;
+            }
+
+            regions = null;
+
+            return true;
+        }
+        private static void ReplaceNeighbour(Region reg, int oldId, int newId)
+        {
+            bool neiChanged = false;
+            for (int i = 0; i < reg.connections.Count; ++i)
+            {
+                if (reg.connections[i] == oldId)
+                {
+                    reg.connections[i] = newId;
+                    neiChanged = true;
+                }
+            }
+            for (int i = 0; i < reg.floors.Count; ++i)
+            {
+                if (reg.floors[i] == oldId)
+                {
+                    reg.floors[i] = newId;
+                }
+            }
+            if (neiChanged)
+            {
+                RemoveAdjacentNeighbours(reg);
+            }
+        }
 
         private static void CalcGridSize(BoundingBox b, float cellSize, out int w, out int h)
         {
@@ -136,7 +1352,7 @@ namespace Engine.PathFinding.NavMesh2
         }
         private static int RasterizeTileLayers(int tx, int ty, BuildSettings settings, Config cfg, InputGeometry geometry, out TileCacheData[] tiles)
         {
-            tiles = new TileCacheData[TileCache.MaxLayers];
+            tiles = new TileCacheData[Constants.MaxLayers];
 
             ChunkyTriMesh chunkyMesh = geometry.GetChunkyMesh();
 
@@ -239,7 +1455,7 @@ namespace Engine.PathFinding.NavMesh2
             BuildHeightfieldLayers(rc.chf, tcfg.BorderSize, tcfg.WalkableHeight, out rc.lset);
 
             rc.ntiles = 0;
-            for (int i = 0; i < Math.Min(rc.lset.nlayers, TileCache.MaxLayers); i++)
+            for (int i = 0; i < Math.Min(rc.lset.nlayers, Constants.MaxLayers); i++)
             {
                 HeightfieldLayer layer = rc.lset.layers[i];
 
@@ -281,7 +1497,7 @@ namespace Engine.PathFinding.NavMesh2
 
             // Transfer ownsership of tile data from build context to the caller.
             int n = 0;
-            for (int i = 0; i < Math.Min(rc.ntiles, TileCache.MaxLayers); i++)
+            for (int i = 0; i < Math.Min(rc.ntiles, Constants.MaxLayers); i++)
             {
                 tiles[n++] = rc.tiles[i];
                 rc.tiles[i].Data = TileCacheLayerData.Empty;
@@ -326,22 +1542,22 @@ namespace Engine.PathFinding.NavMesh2
                 for (int x = minx; x <= maxx; ++x)
                 {
                     CompactCell c = chf.cells[x + z * chf.width];
-                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
                     {
                         CompactSpan s = chf.spans[i];
-                        if (chf.areas[i] == (byte)TileCacheAreas.NullArea)
+                        if (chf.areas[i] == TileCacheAreas.NullArea)
                         {
                             continue;
                         }
 
-                        if ((int)s.y >= miny && (int)s.y <= maxy)
+                        if (s.y >= miny && s.y <= maxy)
                         {
                             Vector3 p = new Vector3();
                             p[0] = chf.boundingBox.Minimum[0] + (x + 0.5f) * chf.cs;
                             p[1] = 0;
                             p[2] = chf.boundingBox.Minimum[2] + (z + 0.5f) * chf.cs;
 
-                            if (PointInPoly(nverts, verts, p))
+                            if (PolyUtils.PointInPoly(nverts, verts, p))
                             {
                                 chf.areas[i] = areaId;
                             }
@@ -349,23 +1565,6 @@ namespace Engine.PathFinding.NavMesh2
                     }
                 }
             }
-        }
-        private static bool PointInPoly(int nvert, Vector3[] verts, Vector3 p)
-        {
-            bool c = false;
-
-            for (int i = 0, j = nvert - 1; i < nvert; j = i++)
-            {
-                Vector3 vi = verts[i];
-                Vector3 vj = verts[j];
-                if (((vi[2] > p[2]) != (vj[2] > p[2])) &&
-                    (p[0] < (vj[0] - vi[0]) * (p[2] - vi[2]) / (vj[2] - vi[2]) + vi[0]))
-                {
-                    c = !c;
-                }
-            }
-
-            return c;
         }
         private static bool BuildHeightfieldLayers(CompactHeightfield chf, int borderSize, int walkableHeight, out HeightfieldLayerSet lset)
         {
@@ -649,7 +1848,7 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Merge non-overlapping regions that are close in height.
-            ushort mergeHeight = (ushort)(walkableHeight * 4);
+            int mergeHeight = walkableHeight * 4;
 
             for (int i = 0; i < nregs; ++i)
             {
@@ -943,13 +2142,13 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private static bool OverlapRange(ushort amin, ushort amax, ushort bmin, ushort bmax)
+        private static bool OverlapRange(int amin, int amax, int bmin, int bmax)
         {
             return (amin > bmax || amax < bmin) ? false : true;
         }
         private static bool Contains(byte[] a, byte an, byte v)
         {
-            int n = (int)an;
+            int n = an;
 
             for (int i = 0; i < n; ++i)
             {
@@ -968,7 +2167,7 @@ namespace Engine.PathFinding.NavMesh2
                 return true;
             }
 
-            if ((int)an >= anMax)
+            if (an >= anMax)
             {
                 return false;
             }
@@ -1316,6 +2515,11 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
+        private static int GetDirForOffset(int x, int y)
+        {
+            int[] dirs = { 3, 0, -1, 2, 1 };
+            return dirs[((y + 1) << 1) + x];
+        }
         private static int GetDirOffsetX(int dir)
         {
             int[] offset = new[] { -1, 0, 1, 0, };
@@ -1377,7 +2581,7 @@ namespace Engine.PathFinding.NavMesh2
                 zp1.Clear();
                 zp2.Clear();
                 float cz = b.Minimum.Z + y * cs;
-                DividePoly(inb, zp1, zp2, cz + cs, 2);
+                PolyUtils.DividePoly(inb, zp1, zp2, cz + cs, 2);
                 Helper.Swap(ref inb, ref zp2);
                 if (zp1.Count < 3) continue;
 
@@ -1400,7 +2604,7 @@ namespace Engine.PathFinding.NavMesh2
                     xp1.Clear();
                     xp2.Clear();
                     float cx = b.Minimum.X + x * cs;
-                    DividePoly(zp1, xp1, xp2, cx + cs, 0);
+                    PolyUtils.DividePoly(zp1, xp1, xp2, cx + cs, 0);
                     Helper.Swap(ref zp1, ref xp2);
                     if (xp1.Count < 3) continue;
 
@@ -1525,60 +2729,6 @@ namespace Engine.PathFinding.NavMesh2
             cur.next = hf.freelist;
             hf.freelist = cur;
         }
-        private static void DividePoly(
-            List<Vector3> inPoly,
-            List<Vector3> outPoly1,
-            List<Vector3> outPoly2,
-            float x, int axis)
-        {
-            float[] d = new float[inPoly.Count];
-            for (int i = 0; i < inPoly.Count; i++)
-            {
-                d[i] = x - inPoly[i][axis];
-            }
-
-            for (int i = 0, j = inPoly.Count - 1; i < inPoly.Count; j = i, i++)
-            {
-                bool ina = d[j] >= 0;
-                bool inb = d[i] >= 0;
-                if (ina != inb)
-                {
-                    float s = d[j] / (d[j] - d[i]);
-                    Vector3 v;
-                    v.X = inPoly[j].X + (inPoly[i].X - inPoly[j].X) * s;
-                    v.Y = inPoly[j].Y + (inPoly[i].Y - inPoly[j].Y) * s;
-                    v.Z = inPoly[j].Z + (inPoly[i].Z - inPoly[j].Z) * s;
-                    outPoly1.Add(v);
-                    outPoly2.Add(v);
-
-                    // add the i'th point to the right polygon. Do NOT add points that are on the dividing line
-                    // since these were already added above
-                    if (d[i] > 0)
-                    {
-                        outPoly1.Add(inPoly[i]);
-                    }
-                    else if (d[i] < 0)
-                    {
-                        outPoly2.Add(inPoly[i]);
-                    }
-                }
-                else // same side
-                {
-                    // add the i'th point to the right polygon. Addition is done even for points on the dividing line
-                    if (d[i] >= 0)
-                    {
-                        outPoly1.Add(inPoly[i]);
-
-                        if (d[i] != 0)
-                        {
-                            continue;
-                        }
-                    }
-
-                    outPoly2.Add(inPoly[i]);
-                }
-            }
-        }
         private static int MarkWalkableTriangles(float walkableSlopeAngle, Triangle[] tris, TileCacheAreas[] areas)
         {
             float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
@@ -1629,22 +2779,28 @@ namespace Engine.PathFinding.NavMesh2
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    Span s = hf.spans[x + y * w];
+                    var s = hf.spans[x + y * w];
 
                     // If there are no spans at this cell, just leave the data to index=0, count=0.
-                    if (s == null) continue;
+                    if (s == null)
+                    {
+                        continue;
+                    }
 
-                    CompactCell c = new CompactCell();
-                    c.index = (uint)idx;
-                    c.count = 0;
+                    var c = new CompactCell
+                    {
+                        index = idx,
+                        count = 0
+                    };
+
                     while (s != null)
                     {
                         if (s.area != (byte)TileCacheAreas.NullArea)
                         {
                             int bot = (int)s.smax;
                             int top = s.next != null ? (int)s.next.smin : int.MaxValue;
-                            chf.spans[idx].y = (ushort)MathUtil.Clamp(bot, 0, 0xffff);
-                            chf.spans[idx].h = (byte)MathUtil.Clamp(top - bot, 0, 0xff);
+                            chf.spans[idx].y = MathUtil.Clamp(bot, 0, 0xffff);
+                            chf.spans[idx].h = MathUtil.Clamp(top - bot, 0, 0xff);
                             chf.areas[idx] = s.area;
                             idx++;
                             c.count++;
@@ -1664,10 +2820,11 @@ namespace Engine.PathFinding.NavMesh2
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    CompactCell c = chf.cells[x + y * w];
-                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; i++)
+                    var c = chf.cells[x + y * w];
+
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; i++)
                     {
-                        CompactSpan s = chf.spans[i];
+                        var s = chf.spans[i];
 
                         for (int dir = 0; dir < 4; dir++)
                         {
@@ -1682,19 +2839,21 @@ namespace Engine.PathFinding.NavMesh2
 
                             // Iterate over all neighbour spans and check if any of the is
                             // accessible from current cell.
-                            CompactCell nc = chf.cells[nx + ny * w];
-                            for (int k = (int)nc.index, nk = (int)(nc.index + nc.count); k < nk; ++k)
+                            var nc = chf.cells[nx + ny * w];
+
+                            for (int k = nc.index, nk = (nc.index + nc.count); k < nk; ++k)
                             {
-                                CompactSpan ns = chf.spans[k];
+                                var ns = chf.spans[k];
+
                                 int bot = Math.Max(s.y, ns.y);
-                                int top = (int)Math.Min(s.y + s.h, ns.y + ns.h);
+                                int top = Math.Min(s.y + s.h, ns.y + ns.h);
 
                                 // Check that the gap between the spans is walkable,
                                 // and that the climb height between the gaps is not too high.
-                                if ((top - bot) >= walkableHeight && Math.Abs((int)ns.y - (int)s.y) <= walkableClimb)
+                                if ((top - bot) >= walkableHeight && Math.Abs(ns.y - s.y) <= walkableClimb)
                                 {
                                     // Mark direction as walkable.
-                                    int lidx = k - (int)nc.index;
+                                    int lidx = k - nc.index;
                                     if (lidx < 0 || lidx > maxLayers)
                                     {
                                         tooHighNeighbour = Math.Max(tooHighNeighbour, lidx);
@@ -1721,14 +2880,14 @@ namespace Engine.PathFinding.NavMesh2
         }
         private static void SetCon(ref CompactSpan s, int dir, int i)
         {
-            uint shift = (uint)dir * 6;
-            uint con = s.con;
-            s.con = (uint)(((int)con & ~(0x3f << (int)shift)) | ((i & 0x3f) << (int)shift));
+            int shift = dir * 6;
+            int con = s.con;
+            s.con = (con & ~(0x3f << shift)) | ((i & 0x3f) << shift);
         }
         private static int GetCon(CompactSpan s, int dir)
         {
-            uint shift = (uint)dir * 6;
-            return ((int)s.con >> (int)shift) & 0x3f;
+            int shift = dir * 6;
+            return (s.con >> shift) & 0x3f;
         }
         private static int GetHeightFieldSpanCount(Heightfield hf)
         {
@@ -1743,7 +2902,7 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     for (Span s = hf.spans[x + y * w]; s != null; s = s.next)
                     {
-                        if (s.area != (byte)TileCacheAreas.NullArea)
+                        if (s.area != TileCacheAreas.NullArea)
                         {
                             spanCount++;
                         }
@@ -1762,7 +2921,7 @@ namespace Engine.PathFinding.NavMesh2
             while (i < cm.nnodes)
             {
                 ChunkyTriMeshNode node = cm.nodes[i];
-                bool overlap = CheckOverlapRect(bmin, bmax, node.bmin, node.bmax);
+                bool overlap = PolyUtils.CheckOverlapRect(bmin, bmax, node.bmin, node.bmax);
                 bool isLeafNode = node.i >= 0;
 
                 if (isLeafNode && overlap)
@@ -1783,19 +2942,3630 @@ namespace Engine.PathFinding.NavMesh2
 
             return ids;
         }
-        private static bool CheckOverlapRect(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax)
-        {
-            bool overlap = true;
-            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
-            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
-            return overlap;
-        }
         private static int CalcLayerBufferSize(int gridWidth, int gridHeight)
         {
             int headerSize = Helper.Align4(TileCacheLayerHeader.Size);
             int gridSize = gridWidth * gridHeight;
 
             return headerSize + gridSize * 4;
+        }
+        private static void AddUniqueFloorRegion(Region reg, int n)
+        {
+            for (int i = 0; i < reg.floors.Count; ++i)
+            {
+                if (reg.floors[i] == n)
+                {
+                    return;
+                }
+            }
+            reg.floors.Add(n);
+        }
+        private static bool IsSolidEdge(CompactHeightfield chf, int[] srcReg, int x, int y, int i, int dir)
+        {
+            var s = chf.spans[i];
+            int r = 0;
+            if (GetCon(s, dir) != Constants.NotConnected)
+            {
+                int ax = x + GetDirOffsetX(dir);
+                int ay = y + GetDirOffsetY(dir);
+                int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
+                r = srcReg[ai];
+            }
+            if (r == srcReg[i])
+            {
+                return false;
+            }
+            return true;
+        }
+        private static void WalkContour(int x, int y, int i, int dir, CompactHeightfield chf, int[] srcReg, List<int> cont)
+        {
+            int startDir = dir;
+            int starti = i;
+
+            var ss = chf.spans[i];
+            int curReg = 0;
+            if (GetCon(ss, dir) != Constants.NotConnected)
+            {
+                int ax = x + GetDirOffsetX(dir);
+                int ay = y + GetDirOffsetY(dir);
+                int ai = chf.cells[ax + ay * chf.width].index + GetCon(ss, dir);
+                curReg = srcReg[ai];
+            }
+            cont.Add(curReg);
+
+            int iter = 0;
+            while (++iter < 40000)
+            {
+                var s = chf.spans[i];
+
+                if (IsSolidEdge(chf, srcReg, x, y, i, dir))
+                {
+                    // Choose the edge corner
+                    int r = 0;
+                    if (GetCon(s, dir) != Constants.NotConnected)
+                    {
+                        int ax = x + GetDirOffsetX(dir);
+                        int ay = y + GetDirOffsetY(dir);
+                        int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
+                        r = srcReg[ai];
+                    }
+                    if (r != curReg)
+                    {
+                        curReg = r;
+                        cont.Add(curReg);
+                    }
+
+                    dir = (dir + 1) & 0x3;  // Rotate CW
+                }
+                else
+                {
+                    int ni = -1;
+                    int nx = x + GetDirOffsetX(dir);
+                    int ny = y + GetDirOffsetY(dir);
+                    if (GetCon(s, dir) != Constants.NotConnected)
+                    {
+                        var nc = chf.cells[nx + ny * chf.width];
+                        ni = nc.index + GetCon(s, dir);
+                    }
+                    if (ni == -1)
+                    {
+                        // Should not happen.
+                        return;
+                    }
+                    x = nx;
+                    y = ny;
+                    i = ni;
+                    dir = (dir + 3) & 0x3;  // Rotate CCW
+                }
+
+                if (starti == i && startDir == dir)
+                {
+                    break;
+                }
+            }
+
+            // Remove adjacent duplicates.
+            if (cont.Count > 1)
+            {
+                for (int j = 0; j < cont.Count;)
+                {
+                    int nj = (j + 1) % cont.Count;
+                    if (cont[j] == cont[nj])
+                    {
+                        for (int k = j; k < cont.Count - 1; ++k)
+                        {
+                            cont[k] = cont[k + 1];
+                        }
+                        cont.RemoveAt(0);
+                    }
+                    else
+                    {
+                        ++j;
+                    }
+                }
+            }
+        }
+        private static bool IsRegionConnectedToBorder(Region reg)
+        {
+            // Region is connected to border if
+            // one of the neighbours is null id.
+            for (int i = 0; i < reg.connections.Count; ++i)
+            {
+                if (reg.connections[i] == 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        private static bool CanMergeWithRegion(Region rega, Region regb)
+        {
+            if (rega.areaType != regb.areaType)
+            {
+                return false;
+            }
+            int n = 0;
+            for (int i = 0; i < rega.connections.Count; ++i)
+            {
+                if (rega.connections[i] == regb.id)
+                {
+                    n++;
+                }
+            }
+            if (n > 1)
+            {
+                return false;
+            }
+            for (int i = 0; i < rega.floors.Count; ++i)
+            {
+                if (rega.floors[i] == regb.id)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        private static bool MergeRegions(Region rega, Region regb)
+        {
+            int aid = rega.id;
+            int bid = regb.id;
+
+            // Duplicate current neighbourhood.
+            List<int> acon = new List<int>(rega.connections);
+            List<int> bcon = regb.connections;
+
+            // Find insertion point on A.
+            int insa = -1;
+            for (int i = 0; i < acon.Count; ++i)
+            {
+                if (acon[i] == bid)
+                {
+                    insa = i;
+                    break;
+                }
+            }
+            if (insa == -1)
+            {
+                return false;
+            }
+
+            // Find insertion point on B.
+            int insb = -1;
+            for (int i = 0; i < bcon.Count; ++i)
+            {
+                if (bcon[i] == aid)
+                {
+                    insb = i;
+                    break;
+                }
+            }
+            if (insb == -1)
+            {
+                return false;
+            }
+
+            // Merge neighbours.
+            rega.connections.Clear();
+            for (int i = 0, ni = acon.Count; i < ni - 1; ++i)
+            {
+                rega.connections.Add(acon[(insa + 1 + i) % ni]);
+            }
+
+            for (int i = 0, ni = bcon.Count; i < ni - 1; ++i)
+            {
+                rega.connections.Add(bcon[(insb + 1 + i) % ni]);
+            }
+
+            RemoveAdjacentNeighbours(rega);
+
+            for (int j = 0; j < regb.floors.Count; ++j)
+            {
+                AddUniqueFloorRegion(rega, regb.floors[j]);
+            }
+            rega.spanCount += regb.spanCount;
+            regb.spanCount = 0;
+            regb.connections.Clear();
+
+            return true;
+        }
+        private static void RemoveAdjacentNeighbours(Region reg)
+        {
+            // Remove adjacent duplicates.
+            for (int i = 0; i < reg.connections.Count && reg.connections.Count > 1;)
+            {
+                int ni = (i + 1) % reg.connections.Count;
+                if (reg.connections[i] == reg.connections[ni])
+                {
+                    // Remove duplicate
+                    for (int j = i; j < reg.connections.Count - 1; ++j)
+                    {
+                        reg.connections[j] = reg.connections[j + 1];
+                    }
+                    reg.connections.RemoveAt(reg.connections.Count - 1);
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+        }
+        private static bool BuildRegionsMonotone(CompactHeightfield chf, int borderSize, int minRegionArea, int mergeRegionArea)
+        {
+            int w = chf.width;
+            int h = chf.height;
+            int id = 1;
+
+            int[] srcReg = new int[chf.spanCount];
+
+            int nsweeps = Math.Max(chf.width, chf.height);
+            SweepSpan[] sweeps = new SweepSpan[nsweeps];
+
+            // Mark border regions.
+            if (borderSize > 0)
+            {
+                // Make sure border will not overflow.
+                int bw = Math.Min(w, borderSize);
+                int bh = Math.Min(h, borderSize);
+                // Paint regions
+                PaintRectRegion(0, bw, 0, h, id | Constants.RC_BORDER_REG, chf, srcReg); id++;
+                PaintRectRegion(w - bw, w, 0, h, id | Constants.RC_BORDER_REG, chf, srcReg); id++;
+                PaintRectRegion(0, w, 0, bh, id | Constants.RC_BORDER_REG, chf, srcReg); id++;
+                PaintRectRegion(0, w, h - bh, h, id | Constants.RC_BORDER_REG, chf, srcReg); id++;
+
+                chf.borderSize = borderSize;
+            }
+
+            List<int> prev = new List<int>();
+
+            // Sweep one line at a time.
+            for (int y = borderSize; y < h - borderSize; ++y)
+            {
+                // Collect spans from this row.
+                prev.Clear();
+                int rid = 1;
+
+                for (int x = borderSize; x < w - borderSize; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        var s = chf.spans[i];
+                        if (chf.areas[i] == TileCacheAreas.NullArea)
+                        {
+                            continue;
+                        }
+
+                        // -x
+                        int previd = 0;
+                        if (GetCon(s, 0) != Constants.NotConnected)
+                        {
+                            int ax = x + GetDirOffsetX(0);
+                            int ay = y + GetDirOffsetY(0);
+                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 0);
+                            if ((srcReg[ai] & Constants.RC_BORDER_REG) == 0 && chf.areas[i] == chf.areas[ai])
+                            {
+                                previd = srcReg[ai];
+                            }
+                        }
+
+                        if (previd == 0)
+                        {
+                            previd = rid++;
+                            sweeps[previd].rid = previd;
+                            sweeps[previd].ns = 0;
+                            sweeps[previd].nei = 0;
+                        }
+
+                        // -y
+                        if (GetCon(s, 3) != Constants.NotConnected)
+                        {
+                            int ax = x + GetDirOffsetX(3);
+                            int ay = y + GetDirOffsetY(3);
+                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 3);
+                            if (srcReg[ai] != 0 && (srcReg[ai] & Constants.RC_BORDER_REG) == 0 && chf.areas[i] == chf.areas[ai])
+                            {
+                                int nr = srcReg[ai];
+                                if (sweeps[previd].nei == 0 || sweeps[previd].nei == nr)
+                                {
+                                    sweeps[previd].nei = nr;
+                                    sweeps[previd].ns++;
+                                    prev[nr]++;
+                                }
+                                else
+                                {
+                                    sweeps[previd].nei = Constants.RC_NULL_NEI;
+                                }
+                            }
+                        }
+
+                        srcReg[i] = previd;
+                    }
+                }
+
+                // Create unique ID.
+                for (int i = 1; i < rid; ++i)
+                {
+                    if (sweeps[i].nei != Constants.RC_NULL_NEI &&
+                        sweeps[i].nei != 0 &&
+                        prev[sweeps[i].nei] == sweeps[i].ns)
+                    {
+                        sweeps[i].id = sweeps[i].nei;
+                    }
+                    else
+                    {
+                        sweeps[i].id = id++;
+                    }
+                }
+
+                // Remap IDs
+                for (int x = borderSize; x < w - borderSize; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        if (srcReg[i] > 0 && srcReg[i] < rid)
+                        {
+                            srcReg[i] = sweeps[srcReg[i]].id;
+                        }
+                    }
+                }
+            }
+
+            {
+                // Merge regions and filter out small regions.
+                chf.maxRegions = id;
+                if (!MergeAndFilterRegions(minRegionArea, mergeRegionArea, ref chf.maxRegions, chf, srcReg, out int[] overlaps))
+                {
+                    return false;
+                }
+
+                // Monotone partitioning does not generate overlapping regions.
+            }
+
+            // Store the result out.
+            for (int i = 0; i < chf.spanCount; ++i)
+            {
+                chf.spans[i].reg = srcReg[i];
+            }
+
+            return true;
+        }
+        private static bool BuildLayerRegions(CompactHeightfield chf, int borderSize, int minRegionArea)
+        {
+            int w = chf.width;
+            int h = chf.height;
+            int id = 1;
+
+            int[] srcReg = new int[chf.spanCount];
+
+            int nsweeps = Math.Max(chf.width, chf.height);
+            SweepSpan[] sweeps = new SweepSpan[nsweeps];
+
+            // Mark border regions.
+            if (borderSize > 0)
+            {
+                // Make sure border will not overflow.
+                int bw = Math.Min(w, borderSize);
+                int bh = Math.Min(h, borderSize);
+                // Paint regions
+                PaintRectRegion(0, bw, 0, h, id | Constants.RC_BORDER_REG, chf, srcReg); id++;
+                PaintRectRegion(w - bw, w, 0, h, id | Constants.RC_BORDER_REG, chf, srcReg); id++;
+                PaintRectRegion(0, w, 0, bh, id | Constants.RC_BORDER_REG, chf, srcReg); id++;
+                PaintRectRegion(0, w, h - bh, h, id | Constants.RC_BORDER_REG, chf, srcReg); id++;
+
+                chf.borderSize = borderSize;
+            }
+
+            List<int> prev = new List<int>(256);
+
+            // Sweep one line at a time.
+            for (int y = borderSize; y < h - borderSize; ++y)
+            {
+                // Collect spans from this row.
+                prev.Clear();
+                int rid = 1;
+
+                for (int x = borderSize; x < w - borderSize; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        var s = chf.spans[i];
+                        if (chf.areas[i] == TileCacheAreas.NullArea)
+                        {
+                            continue;
+                        }
+
+                        // -x
+                        int previd = 0;
+                        if (GetCon(s, 0) != Constants.NotConnected)
+                        {
+                            int ax = x + GetDirOffsetX(0);
+                            int ay = y + GetDirOffsetY(0);
+                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 0);
+                            if ((srcReg[ai] & Constants.RC_BORDER_REG) == 0 && chf.areas[i] == chf.areas[ai])
+                            {
+                                previd = srcReg[ai];
+                            }
+                        }
+
+                        if (previd == 0)
+                        {
+                            previd = rid++;
+                            sweeps[previd].rid = previd;
+                            sweeps[previd].ns = 0;
+                            sweeps[previd].nei = 0;
+                        }
+
+                        // -y
+                        if (GetCon(s, 3) != Constants.NotConnected)
+                        {
+                            int ax = x + GetDirOffsetX(3);
+                            int ay = y + GetDirOffsetY(3);
+                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 3);
+                            if (srcReg[ai] != 0 && (srcReg[ai] & Constants.RC_BORDER_REG) == 0 && chf.areas[i] == chf.areas[ai])
+                            {
+                                int nr = srcReg[ai];
+                                if (sweeps[previd].nei == 0 || sweeps[previd].nei == nr)
+                                {
+                                    sweeps[previd].nei = nr;
+                                    sweeps[previd].ns++;
+                                    prev[nr]++;
+                                }
+                                else
+                                {
+                                    sweeps[previd].nei = Constants.RC_NULL_NEI;
+                                }
+                            }
+                        }
+
+                        srcReg[i] = previd;
+                    }
+                }
+
+                // Create unique ID.
+                for (int i = 1; i < rid; ++i)
+                {
+                    if (sweeps[i].nei != Constants.RC_NULL_NEI &&
+                        sweeps[i].nei != 0 &&
+                        prev[sweeps[i].nei] == sweeps[i].ns)
+                    {
+                        sweeps[i].id = sweeps[i].nei;
+                    }
+                    else
+                    {
+                        sweeps[i].id = id++;
+                    }
+                }
+
+                // Remap IDs
+                for (int x = borderSize; x < w - borderSize; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        if (srcReg[i] > 0 && srcReg[i] < rid)
+                        {
+                            srcReg[i] = sweeps[srcReg[i]].id;
+                        }
+                    }
+                }
+            }
+
+            {
+                // Merge monotone regions to layers and remove small regions.
+                chf.maxRegions = id;
+                if (!MergeAndFilterLayerRegions(minRegionArea, ref chf.maxRegions, chf, srcReg, out int[] overlaps))
+                {
+                    return false;
+                }
+            }
+
+            // Store the result out.
+            for (int i = 0; i < chf.spanCount; ++i)
+            {
+                chf.spans[i].reg = srcReg[i];
+            }
+
+            return true;
+        }
+        private static bool MergeAndFilterLayerRegions(int minRegionArea, ref int maxRegionId, CompactHeightfield chf, int[] srcReg, out int[] overlaps)
+        {
+            overlaps = null;
+
+            int w = chf.width;
+            int h = chf.height;
+
+            int nreg = maxRegionId + 1;
+            Region[] regions = new Region[nreg];
+
+            // Construct regions
+            for (int i = 0; i < nreg; ++i)
+            {
+                regions[i] = new Region(i);
+            }
+
+            // Find region neighbours and overlapping regions.
+            List<int> lregs = new List<int>(32);
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+
+                    lregs.Clear();
+
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        var s = chf.spans[i];
+                        int ri = srcReg[i];
+                        if (ri == 0 || ri >= nreg)
+                        {
+                            continue;
+                        }
+                        var reg = regions[ri];
+
+                        reg.spanCount++;
+
+                        reg.ymin = Math.Min(reg.ymin, s.y);
+                        reg.ymax = Math.Max(reg.ymax, s.y);
+
+                        // Collect all region layers.
+                        lregs.Add(ri);
+
+                        // Update neighbours
+                        for (int dir = 0; dir < 4; ++dir)
+                        {
+                            if (GetCon(s, dir) != Constants.NotConnected)
+                            {
+                                int ax = x + GetDirOffsetX(dir);
+                                int ay = y + GetDirOffsetY(dir);
+                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
+                                int rai = srcReg[ai];
+                                if (rai > 0 && rai < nreg && rai != ri)
+                                {
+                                    AddUniqueConnection(reg, rai);
+                                }
+                                if ((rai & Constants.RC_BORDER_REG) != 0)
+                                {
+                                    reg.connectsToBorder = true;
+                                }
+                            }
+                        }
+                    }
+
+                    // Update overlapping regions.
+                    for (int i = 0; i < lregs.Count - 1; ++i)
+                    {
+                        for (int j = i + 1; j < lregs.Count; ++j)
+                        {
+                            if (lregs[i] != lregs[j])
+                            {
+                                var ri = regions[lregs[i]];
+                                var rj = regions[lregs[j]];
+                                AddUniqueFloorRegion(ri, lregs[j]);
+                                AddUniqueFloorRegion(rj, lregs[i]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Create 2D layers from regions.
+            int layerId = 1;
+
+            for (int i = 0; i < nreg; ++i)
+            {
+                regions[i].id = 0;
+            }
+
+            // Merge montone regions to create non-overlapping areas.
+            List<int> stack = new List<int>(32);
+            for (int i = 1; i < nreg; ++i)
+            {
+                var root = regions[i];
+                // Skip already visited.
+                if (root.id != 0)
+                {
+                    continue;
+                }
+
+                // Start search.
+                root.id = layerId;
+
+                stack.Clear();
+                stack.Add(i);
+
+                while (stack.Count > 0)
+                {
+                    // Pop front
+                    var reg = regions[stack[0]];
+                    for (int j = 0; j < stack.Count - 1; ++j)
+                    {
+                        stack[j] = stack[j + 1];
+                    }
+                    stack.Clear();
+
+                    int ncons = reg.connections.Count;
+                    for (int j = 0; j < ncons; ++j)
+                    {
+                        int nei = reg.connections[j];
+                        var regn = regions[nei];
+                        // Skip already visited.
+                        if (regn.id != 0)
+                        {
+                            continue;
+                        }
+                        // Skip if the neighbour is overlapping root region.
+                        bool overlap = false;
+                        for (int k = 0; k < root.floors.Count; k++)
+                        {
+                            if (root.floors[k] == nei)
+                            {
+                                overlap = true;
+                                break;
+                            }
+                        }
+                        if (overlap)
+                        {
+                            continue;
+                        }
+
+                        // Deepen
+                        stack.Add(nei);
+
+                        // Mark layer id
+                        regn.id = layerId;
+                        // Merge current layers to root.
+                        for (int k = 0; k < regn.floors.Count; ++k)
+                        {
+                            AddUniqueFloorRegion(root, regn.floors[k]);
+                        }
+                        root.ymin = Math.Min(root.ymin, regn.ymin);
+                        root.ymax = Math.Max(root.ymax, regn.ymax);
+                        root.spanCount += regn.spanCount;
+                        regn.spanCount = 0;
+                        root.connectsToBorder = root.connectsToBorder || regn.connectsToBorder;
+                    }
+                }
+
+                layerId++;
+            }
+
+            // Remove small regions
+            for (int i = 0; i < nreg; ++i)
+            {
+                if (regions[i].spanCount > 0 && regions[i].spanCount < minRegionArea && !regions[i].connectsToBorder)
+                {
+                    int reg = regions[i].id;
+                    for (int j = 0; j < nreg; ++j)
+                    {
+                        if (regions[j].id == reg)
+                        {
+                            regions[j].id = 0;
+                        }
+                    }
+                }
+            }
+
+            // Compress region Ids.
+            for (int i = 0; i < nreg; ++i)
+            {
+                regions[i].remap = false;
+                if (regions[i].id == 0)
+                {
+                    // Skip nil regions.
+                    continue;
+                }
+                if ((regions[i].id & Constants.RC_BORDER_REG) != 0)
+                {
+                    // Skip external regions.
+                    continue;
+                }
+                regions[i].remap = true;
+            }
+
+            int regIdGen = 0;
+            for (int i = 0; i < nreg; ++i)
+            {
+                if (!regions[i].remap)
+                {
+                    continue;
+                }
+                int oldId = regions[i].id;
+                int newId = ++regIdGen;
+                for (int j = i; j < nreg; ++j)
+                {
+                    if (regions[j].id == oldId)
+                    {
+                        regions[j].id = newId;
+                        regions[j].remap = false;
+                    }
+                }
+            }
+            maxRegionId = regIdGen;
+
+            // Remap regions.
+            for (int i = 0; i < chf.spanCount; ++i)
+            {
+                if ((srcReg[i] & Constants.RC_BORDER_REG) == 0)
+                {
+                    srcReg[i] = regions[srcReg[i]].id;
+                }
+            }
+
+            for (int i = 0; i < nreg; ++i)
+            {
+                regions[i] = null;
+            }
+
+            regions = null;
+
+            return true;
+        }
+        private static void AddUniqueConnection(Region reg, int n)
+        {
+            for (int i = 0; i < reg.connections.Count; ++i)
+            {
+                if (reg.connections[i] == n)
+                {
+                    return;
+                }
+            }
+
+            reg.connections.Add(n);
+        }
+        private static void WalkContour(int x, int y, int i, CompactHeightfield chf, int[] flags, out List<Trianglei> points)
+        {
+            points = new List<Trianglei>();
+
+            // Choose the first non-connected edge
+            int dir = 0;
+            while ((flags[i] & (1 << dir)) == 0)
+            {
+                dir++;
+            }
+
+            int startDir = dir;
+            int starti = i;
+
+            var area = chf.areas[i];
+
+            int iter = 0;
+            while (++iter < 40000)
+            {
+                if ((flags[i] & (1 << dir)) != 0)
+                {
+                    // Choose the edge corner
+                    bool isAreaBorder = false;
+                    int px = x;
+                    int py = GetCornerHeight(x, y, i, dir, chf, out bool isBorderVertex);
+                    int pz = y;
+                    switch (dir)
+                    {
+                        case 0: pz++; break;
+                        case 1: px++; pz++; break;
+                        case 2: px++; break;
+                    }
+                    int r = 0;
+                    var s = chf.spans[i];
+                    if (GetCon(s, dir) != Constants.NotConnected)
+                    {
+                        int ax = x + GetDirOffsetX(dir);
+                        int ay = y + GetDirOffsetY(dir);
+                        int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
+                        r = chf.spans[ai].reg;
+                        if (area != chf.areas[ai])
+                        {
+                            isAreaBorder = true;
+                        }
+                    }
+                    if (isBorderVertex)
+                    {
+                        r |= Constants.RC_BORDER_VERTEX;
+                    }
+                    if (isAreaBorder)
+                    {
+                        r |= Constants.RC_AREA_BORDER;
+                    }
+                    points.Add(new Trianglei(px, py, pz, r));
+
+                    flags[i] &= ~(1 << dir); // Remove visited edges
+                    dir = (dir + 1) & 0x3;  // Rotate CW
+                }
+                else
+                {
+                    int ni = -1;
+                    int nx = x + GetDirOffsetX(dir);
+                    int ny = y + GetDirOffsetY(dir);
+                    var s = chf.spans[i];
+                    if (GetCon(s, dir) != Constants.NotConnected)
+                    {
+                        var nc = chf.cells[nx + ny * chf.width];
+                        ni = nc.index + GetCon(s, dir);
+                    }
+                    if (ni == -1)
+                    {
+                        // Should not happen.
+                        return;
+                    }
+                    x = nx;
+                    y = ny;
+                    i = ni;
+                    dir = (dir + 3) & 0x3;  // Rotate CCW
+                }
+
+                if (starti == i && startDir == dir)
+                {
+                    break;
+                }
+            }
+        }
+        private static int GetCornerHeight(int x, int y, int i, int dir, CompactHeightfield chf, out bool isBorderVertex)
+        {
+            isBorderVertex = false;
+
+            var s = chf.spans[i];
+            int ch = s.y;
+            int dirp = (dir + 1) & 0x3;
+
+            int[] regs = { 0, 0, 0, 0 };
+
+            // Combine region and area codes in order to prevent
+            // border vertices which are in between two areas to be removed.
+            regs[0] = chf.spans[i].reg | ((int)chf.areas[i] << 16);
+
+            if (GetCon(s, dir) != Constants.NotConnected)
+            {
+                int ax = x + GetDirOffsetX(dir);
+                int ay = y + GetDirOffsetY(dir);
+                int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
+                var a = chf.spans[ai];
+                ch = Math.Max(ch, a.y);
+                regs[1] = chf.spans[ai].reg | ((int)chf.areas[ai] << 16);
+                if (GetCon(a, dirp) != Constants.NotConnected)
+                {
+                    int ax2 = ax + GetDirOffsetX(dirp);
+                    int ay2 = ay + GetDirOffsetY(dirp);
+                    int ai2 = chf.cells[ax2 + ay2 * chf.width].index + GetCon(a, dirp);
+                    var as2 = chf.spans[ai2];
+                    ch = Math.Max(ch, as2.y);
+                    regs[2] = chf.spans[ai2].reg | ((int)chf.areas[ai2] << 16);
+                }
+            }
+            if (GetCon(s, dirp) != Constants.NotConnected)
+            {
+                int ax = x + GetDirOffsetX(dirp);
+                int ay = y + GetDirOffsetY(dirp);
+                int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dirp);
+                var a = chf.spans[ai];
+                ch = Math.Max(ch, a.y);
+                regs[3] = chf.spans[ai].reg | ((int)chf.areas[ai] << 16);
+                if (GetCon(a, dir) != Constants.NotConnected)
+                {
+                    int ax2 = ax + GetDirOffsetX(dir);
+                    int ay2 = ay + GetDirOffsetY(dir);
+                    int ai2 = chf.cells[ax2 + ay2 * chf.width].index + GetCon(a, dir);
+                    var as2 = chf.spans[ai2];
+                    ch = Math.Max(ch, as2.y);
+                    regs[2] = chf.spans[ai2].reg | ((int)chf.areas[ai2] << 16);
+                }
+            }
+
+            // Check if the vertex is special edge vertex, these vertices will be removed later.
+            for (int j = 0; j < 4; ++j)
+            {
+                int a = j;
+                int b = (j + 1) & 0x3;
+                int c = (j + 2) & 0x3;
+                int d = (j + 3) & 0x3;
+
+                // The vertex is a border vertex there are two same exterior cells in a row,
+                // followed by two interior cells and none of the regions are out of bounds.
+                bool twoSameExts = (regs[a] & regs[b] & Constants.RC_BORDER_REG) != 0 && regs[a] == regs[b];
+                bool twoInts = ((regs[c] | regs[d]) & Constants.RC_BORDER_REG) == 0;
+                bool intsSameArea = (regs[c] >> 16) == (regs[d] >> 16);
+                bool noZeros = regs[a] != 0 && regs[b] != 0 && regs[c] != 0 && regs[d] != 0;
+                if (twoSameExts && twoInts && intsSameArea && noZeros)
+                {
+                    isBorderVertex = true;
+                    break;
+                }
+            }
+
+            return ch;
+        }
+        private static bool BuildContours(CompactHeightfield chf, float maxError, int maxEdgeLen, BuildContoursFlags buildFlags, out ContourSet cset)
+        {
+            int w = chf.width;
+            int h = chf.height;
+            int borderSize = chf.borderSize;
+
+            cset = new ContourSet();
+            cset.bmin = chf.boundingBox.Minimum;
+            cset.bmax = chf.boundingBox.Maximum;
+            if (borderSize > 0)
+            {
+                // If the heightfield was build with bordersize, remove the offset.
+                float pad = borderSize * chf.cs;
+                cset.bmin[0] += pad;
+                cset.bmin[2] += pad;
+                cset.bmax[0] -= pad;
+                cset.bmax[2] -= pad;
+            }
+            cset.cs = chf.cs;
+            cset.ch = chf.ch;
+            cset.width = chf.width - chf.borderSize * 2;
+            cset.height = chf.height - chf.borderSize * 2;
+            cset.borderSize = chf.borderSize;
+            cset.maxError = maxError;
+
+            int maxContours = Math.Max(chf.maxRegions, 8);
+            cset.conts = new Contour[maxContours];
+            cset.nconts = 0;
+
+            int[] flags = new int[chf.spanCount];
+
+            // Mark boundaries.
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        int res = 0;
+                        var s = chf.spans[i];
+                        if (chf.spans[i].reg == 0 || (chf.spans[i].reg & Constants.RC_BORDER_REG) != 0)
+                        {
+                            flags[i] = 0;
+                            continue;
+                        }
+                        for (int dir = 0; dir < 4; ++dir)
+                        {
+                            int r = 0;
+                            if (GetCon(s, dir) != Constants.NotConnected)
+                            {
+                                int ax = x + GetDirOffsetX(dir);
+                                int ay = y + GetDirOffsetY(dir);
+                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
+                                r = chf.spans[ai].reg;
+                            }
+                            if (r == chf.spans[i].reg)
+                            {
+                                res |= (1 << dir);
+                            }
+                        }
+                        flags[i] = res ^ 0xf; // Inverse, mark non connected edges.
+                    }
+                }
+            }
+
+            List<Trianglei> verts = new List<Trianglei>();
+            List<Trianglei> simplified = new List<Trianglei>();
+
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        if (flags[i] == 0 || flags[i] == 0xf)
+                        {
+                            flags[i] = 0;
+                            continue;
+                        }
+                        int reg = chf.spans[i].reg;
+                        if (reg == 0 || (reg & Constants.RC_BORDER_REG) != 0)
+                        {
+                            continue;
+                        }
+                        var area = chf.areas[i];
+
+                        verts.Clear();
+                        simplified.Clear();
+
+                        WalkContour(x, y, i, chf, flags, out verts);
+
+                        SimplifyContour(verts, simplified, maxError, maxEdgeLen, buildFlags);
+                        RemoveDegenerateSegments(simplified);
+
+
+                        // Store region->contour remap info.
+                        // Create contour.
+                        if (simplified.Count / 4 >= 3)
+                        {
+                            if (cset.nconts >= maxContours)
+                            {
+                                // Allocate more contours.
+                                // This happens when a region has holes.
+                                int oldMax = maxContours;
+                                maxContours *= 2;
+                                Contour[] newConts = new Contour[maxContours];
+                                for (int j = 0; j < cset.nconts; ++j)
+                                {
+                                    newConts[j] = cset.conts[j];
+                                    // Reset source pointers to prevent data deletion.
+                                    cset.conts[j].verts = null;
+                                    cset.conts[j].rverts = null;
+                                }
+                                cset.conts = null;
+                                cset.conts = newConts;
+                            }
+
+                            var cont = cset.conts[cset.nconts++];
+
+                            cont.nverts = simplified.Count;
+                            cont.verts = new Trianglei[cont.nverts];
+                            Array.Copy(simplified.ToArray(), cont.verts, cont.nverts);
+                            if (borderSize > 0)
+                            {
+                                // If the heightfield was build with bordersize, remove the offset.
+                                for (int j = 0; j < cont.nverts; ++j)
+                                {
+                                    var v = cont.verts[j];
+                                    v[0] -= borderSize;
+                                    v[2] -= borderSize;
+                                }
+                            }
+
+                            cont.nrverts = verts.Count;
+                            cont.rverts = new Trianglei[cont.nrverts];
+                            if (borderSize > 0)
+                            {
+                                // If the heightfield was build with bordersize, remove the offset.
+                                for (int j = 0; j < cont.nrverts; ++j)
+                                {
+                                    var v = cont.rverts[j];
+                                    v[0] -= borderSize;
+                                    v[2] -= borderSize;
+                                }
+                            }
+
+                            cont.reg = reg;
+                            cont.area = area;
+                        }
+                    }
+                }
+            }
+
+            // Merge holes if needed.
+            if (cset.nconts > 0)
+            {
+                // Calculate winding of all polygons.
+                int[] winding = new int[cset.nconts];
+                int nholes = 0;
+                for (int i = 0; i < cset.nconts; ++i)
+                {
+                    var cont = cset.conts[i];
+                    // If the contour is wound backwards, it is a hole.
+                    winding[i] = CalcAreaOfPolygon2D(cont.verts, cont.nverts) < 0 ? -1 : 1;
+                    if (winding[i] < 0)
+                    {
+                        nholes++;
+                    }
+                }
+
+                if (nholes > 0)
+                {
+                    // Collect outline contour and holes contours per region.
+                    // We assume that there is one outline and multiple holes.
+                    int nregions = chf.maxRegions + 1;
+                    ContourRegion[] regions = new ContourRegion[nregions];
+                    ContourHole[] holes = new ContourHole[cset.nconts];
+
+                    for (int i = 0; i < cset.nconts; ++i)
+                    {
+                        var cont = cset.conts[i];
+                        // Positively would contours are outlines, negative holes.
+                        if (winding[i] > 0)
+                        {
+                            if (regions[cont.reg].outline != null)
+                            {
+                                //ctx->log(RC_LOG_ERROR, "rcBuildContours: Multiple outlines for region %d.", cont.reg);
+                            }
+                            regions[cont.reg].outline = cont;
+                        }
+                        else
+                        {
+                            regions[cont.reg].nholes++;
+                        }
+                    }
+                    int index = 0;
+                    for (int i = 0; i < nregions; i++)
+                    {
+                        if (regions[i].nholes > 0)
+                        {
+                            regions[i].holes = new[] { holes[index] };
+                            index += regions[i].nholes;
+                            regions[i].nholes = 0;
+                        }
+                    }
+                    for (int i = 0; i < cset.nconts; ++i)
+                    {
+                        var cont = cset.conts[i];
+                        var reg = regions[cont.reg];
+                        if (winding[i] < 0)
+                        {
+                            reg.holes[reg.nholes++].contour = cont;
+                        }
+                    }
+
+                    // Finally merge each regions holes into the outline.
+                    for (int i = 0; i < nregions; i++)
+                    {
+                        var reg = regions[i];
+                        if (reg.nholes == 0)
+                        {
+                            continue;
+                        }
+
+                        if (reg.outline != null)
+                        {
+                            MergeRegionHoles(reg);
+                        }
+                        else
+                        {
+                            // The region does not have an outline.
+                            // This can happen if the contour becaomes selfoverlapping because of
+                            // too aggressive simplification settings.
+                            //ctx->log(RC_LOG_ERROR, "rcBuildContours: Bad outline for region %d, contour simplification is likely too aggressive.", i);
+                        }
+                    }
+                }
+
+            }
+
+            return true;
+        }
+        private static void SimplifyContour(List<Trianglei> points, List<Trianglei> simplified, float maxError, int maxEdgeLen, BuildContoursFlags buildFlags)
+        {
+            // Add initial points.
+            bool hasConnections = false;
+            for (int i = 0; i < points.Count; i++)
+            {
+                if ((points[i][3] & Constants.RC_CONTOUR_REG_MASK) != 0)
+                {
+                    hasConnections = true;
+                    break;
+                }
+            }
+
+            if (hasConnections)
+            {
+                // The contour has some portals to other regions.
+                // Add a new point to every location where the region changes.
+                for (int i = 0, ni = points.Count; i < ni; ++i)
+                {
+                    int ii = (i + 1) % ni;
+                    bool differentRegs = (points[i][3] & Constants.RC_CONTOUR_REG_MASK) != (points[ii][3] & Constants.RC_CONTOUR_REG_MASK);
+                    bool areaBorders = (points[i][3] & Constants.RC_AREA_BORDER) != (points[ii][3] & Constants.RC_AREA_BORDER);
+                    if (differentRegs || areaBorders)
+                    {
+                        simplified.Add(new Trianglei(points[i][0], points[i][1], points[i][2], i));
+                    }
+                }
+            }
+
+            if (simplified.Count == 0)
+            {
+                // If there is no connections at all,
+                // create some initial points for the simplification process.
+                // Find lower-left and upper-right vertices of the contour.
+                int llx = points[0][0];
+                int lly = points[0][1];
+                int llz = points[0][2];
+                int lli = 0;
+                int urx = points[0][0];
+                int ury = points[0][1];
+                int urz = points[0][2];
+                int uri = 0;
+                for (int i = 0; i < points.Count; i++)
+                {
+                    int x = points[i][0];
+                    int y = points[i][1];
+                    int z = points[i][2];
+                    if (x < llx || (x == llx && z < llz))
+                    {
+                        llx = x;
+                        lly = y;
+                        llz = z;
+                        lli = i;
+                    }
+                    if (x > urx || (x == urx && z > urz))
+                    {
+                        urx = x;
+                        ury = y;
+                        urz = z;
+                        uri = i;
+                    }
+                }
+                simplified.Add(new Trianglei(llx, lly, llz, lli));
+                simplified.Add(new Trianglei(urx, ury, urz, uri));
+            }
+
+            // Add points until all raw points are within
+            // error tolerance to the simplified shape.
+            int pn = points.Count;
+            for (int i = 0; i < simplified.Count;)
+            {
+                int ii = (i + 1) % (simplified.Count);
+
+                int ax = simplified[i][0];
+                int az = simplified[i][2];
+                int ai = simplified[i][3];
+
+                int bx = simplified[ii][0];
+                int bz = simplified[ii][2];
+                int bi = simplified[ii][3];
+
+                // Find maximum deviation from the segment.
+                float maxd = 0;
+                int maxi = -1;
+                int ci, cinc, endi;
+
+                // Traverse the segment in lexilogical order so that the
+                // max deviation is calculated similarly when traversing
+                // opposite segments.
+                if (bx > ax || (bx == ax && bz > az))
+                {
+                    cinc = 1;
+                    ci = (ai + cinc) % pn;
+                    endi = bi;
+                }
+                else
+                {
+                    cinc = pn - 1;
+                    ci = (bi + cinc) % pn;
+                    endi = ai;
+                    Helper.Swap(ref ax, ref bx);
+                    Helper.Swap(ref az, ref bz);
+                }
+
+                // Tessellate only outer edges or edges between areas.
+                if ((points[ci][3] & Constants.RC_CONTOUR_REG_MASK) == 0 ||
+                    (points[ci][3] & Constants.RC_AREA_BORDER) != 0)
+                {
+                    while (ci != endi)
+                    {
+                        float d = PolyUtils.DistancePtSeg(points[ci][0], points[ci][2], ax, az, bx, bz);
+                        if (d > maxd)
+                        {
+                            maxd = d;
+                            maxi = ci;
+                        }
+                        ci = (ci + cinc) % pn;
+                    }
+                }
+
+                // If the max deviation is larger than accepted error,
+                // add new point, else continue to next segment.
+                if (maxi != -1 && maxd > (maxError * maxError))
+                {
+                    // Add space for the new point.
+                    simplified.Clear();
+                    int n = simplified.Count;
+                    for (int j = n - 1; j > i; --j)
+                    {
+                        simplified[j][0] = simplified[(j - 1)][0];
+                        simplified[j][1] = simplified[(j - 1)][1];
+                        simplified[j][2] = simplified[(j - 1)][2];
+                        simplified[j][3] = simplified[(j - 1)][3];
+                    }
+                    // Add the point.
+                    simplified[(i + 1)][0] = points[maxi][0];
+                    simplified[(i + 1)][1] = points[maxi][1];
+                    simplified[(i + 1)][2] = points[maxi][2];
+                    simplified[(i + 1)][3] = maxi;
+                }
+                else
+                {
+                    ++i;
+                }
+            }
+
+            // Split too long edges.
+            if (maxEdgeLen > 0 && (buildFlags & (BuildContoursFlags.RC_CONTOUR_TESS_WALL_EDGES | BuildContoursFlags.RC_CONTOUR_TESS_AREA_EDGES)) != 0)
+            {
+                for (int i = 0; i < simplified.Count;)
+                {
+                    int ii = (i + 1) % (simplified.Count);
+
+                    int ax = simplified[i][0];
+                    int az = simplified[i][2];
+                    int ai = simplified[i][3];
+
+                    int bx = simplified[ii][0];
+                    int bz = simplified[ii][2];
+                    int bi = simplified[ii][3];
+
+                    // Find maximum deviation from the segment.
+                    int maxi = -1;
+                    int ci = (ai + 1) % pn;
+
+                    // Tessellate only outer edges or edges between areas.
+                    bool tess = false;
+                    // Wall edges.
+                    if ((buildFlags & BuildContoursFlags.RC_CONTOUR_TESS_WALL_EDGES) != 0 &&
+                        (points[ci][3] & Constants.RC_CONTOUR_REG_MASK) == 0)
+                    {
+                        tess = true;
+                    }
+                    // Edges between areas.
+                    if ((buildFlags & BuildContoursFlags.RC_CONTOUR_TESS_AREA_EDGES) != 0 &&
+                        (points[ci][3] & Constants.RC_AREA_BORDER) != 0)
+                    {
+                        tess = true;
+                    }
+
+                    if (tess)
+                    {
+                        int dx = bx - ax;
+                        int dz = bz - az;
+                        if (dx * dx + dz * dz > maxEdgeLen * maxEdgeLen)
+                        {
+                            // Round based on the segments in lexilogical order so that the
+                            // max tesselation is consistent regardles in which direction
+                            // segments are traversed.
+                            int n = bi < ai ? (bi + pn - ai) : (bi - ai);
+                            if (n > 1)
+                            {
+                                if (bx > ax || (bx == ax && bz > az))
+                                {
+                                    maxi = (ai + n / 2) % pn;
+                                }
+                                else
+                                {
+                                    maxi = (ai + (n + 1) / 2) % pn;
+                                }
+                            }
+                        }
+                    }
+
+                    // If the max deviation is larger than accepted error,
+                    // add new point, else continue to next segment.
+                    if (maxi != -1)
+                    {
+                        // Add space for the new point.
+                        simplified.Clear();
+                        int n = simplified.Count;
+                        for (int j = n - 1; j > i; --j)
+                        {
+                            simplified[j][0] = simplified[(j - 1)][0];
+                            simplified[j][1] = simplified[(j - 1)][1];
+                            simplified[j][2] = simplified[(j - 1)][2];
+                            simplified[j][3] = simplified[(j - 1)][3];
+                        }
+                        // Add the point.
+                        simplified[(i + 1)][0] = points[maxi][0];
+                        simplified[(i + 1)][1] = points[maxi][1];
+                        simplified[(i + 1)][2] = points[maxi][2];
+                        simplified[(i + 1)][3] = maxi;
+                    }
+                    else
+                    {
+                        ++i;
+                    }
+                }
+            }
+
+            for (int i = 0; i < simplified.Count; ++i)
+            {
+                // The edge vertex flag is take from the current raw point,
+                // and the neighbour region is take from the next raw point.
+                int ai = (simplified[i][3] + 1) % pn;
+                int bi = simplified[i][3];
+                simplified[i][3] = (points[ai][3] & (Constants.RC_CONTOUR_REG_MASK | Constants.RC_AREA_BORDER)) | (points[bi][3] & Constants.RC_BORDER_VERTEX);
+            }
+        }
+        private static int CalcAreaOfPolygon2D(Trianglei[] verts, int nverts)
+        {
+            int area = 0;
+            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
+            {
+                var vi = verts[i];
+                var vj = verts[j];
+                area += vi.X * vj.Z - vj.X * vi.Z;
+            }
+            return (area + 1) / 2;
+        }
+        private static void RemoveDegenerateSegments(List<Trianglei> simplified)
+        {
+            // Remove adjacent vertices which are equal on xz-plane,
+            // or else the triangulator will get confused.
+            int npts = simplified.Count;
+            for (int i = 0; i < npts; ++i)
+            {
+                int ni = PolyUtils.Next(i, npts);
+
+                if (simplified[i] == simplified[ni])
+                {
+                    // Degenerate segment, remove.
+                    for (int j = i; j < simplified.Count - 1; ++j)
+                    {
+                        simplified[j] = simplified[(j + 1)];
+                    }
+                    simplified.Clear();
+                    npts--;
+                }
+            }
+        }
+        private static void MergeRegionHoles(ContourRegion region)
+        {
+            // Sort holes from left to right.
+            for (int i = 0; i < region.nholes; i++)
+            {
+                FindLeftMostVertex(region.holes[i].contour, ref region.holes[i].minx, ref region.holes[i].minz, ref region.holes[i].leftmost);
+            }
+
+            Array.Sort(region.holes, (va, vb) =>
+            {
+                var a = va;
+                var b = vb;
+                if (a.minx == b.minx)
+                {
+                    if (a.minz < b.minz) return -1;
+                    if (a.minz > b.minz) return 1;
+                }
+                else
+                {
+                    if (a.minx < b.minx) return -1;
+                    if (a.minx > b.minx) return 1;
+                }
+                return 0;
+            });
+
+            int maxVerts = region.outline.nverts;
+            for (int i = 0; i < region.nholes; i++)
+            {
+                maxVerts += region.holes[i].contour.nverts;
+            }
+
+            PotentialDiagonal[] diags = new PotentialDiagonal[maxVerts];
+
+            var outline = region.outline;
+
+            // Merge holes into the outline one by one.
+            for (int i = 0; i < region.nholes; i++)
+            {
+                var hole = region.holes[i].contour;
+
+                int index = -1;
+                int bestVertex = region.holes[i].leftmost;
+                for (int iter = 0; iter < hole.nverts; iter++)
+                {
+                    // Find potential diagonals.
+                    // The 'best' vertex must be in the cone described by 3 cosequtive vertices of the outline.
+                    // ..o j-1
+                    //   |
+                    //   |   * best
+                    //   |
+                    // j o-----o j+1
+                    //         :
+                    int ndiags = 0;
+                    var corner = hole.verts[bestVertex];
+                    for (int j = 0; j < outline.nverts; j++)
+                    {
+                        if (PolyUtils.InCone(j, outline.nverts, outline.verts, corner))
+                        {
+                            int dx = outline.verts[j][0] - corner[0];
+                            int dz = outline.verts[j][2] - corner[2];
+                            diags[ndiags].vert = j;
+                            diags[ndiags].dist = dx * dx + dz * dz;
+                            ndiags++;
+                        }
+                    }
+                    // Sort potential diagonals by distance, we want to make the connection as short as possible.
+                    Array.Sort(diags, (va, vb) =>
+                    {
+                        var a = va;
+                        var b = vb;
+                        if (a.dist < b.dist) return -1;
+                        if (a.dist > b.dist) return 1;
+                        return 0;
+                    });
+
+                    // Find a diagonal that is not intersecting the outline not the remaining holes.
+                    index = -1;
+                    for (int j = 0; j < ndiags; j++)
+                    {
+                        var pt = outline.verts[diags[j].vert];
+                        bool intersect = IntersectSegCountour(pt, corner, diags[i].vert, outline.nverts, outline.verts);
+                        for (int k = i; k < region.nholes && !intersect; k++)
+                        {
+                            intersect |= IntersectSegCountour(pt, corner, -1, region.holes[k].contour.nverts, region.holes[k].contour.verts);
+                        }
+                        if (!intersect)
+                        {
+                            index = diags[j].vert;
+                            break;
+                        }
+                    }
+                    // If found non-intersecting diagonal, stop looking.
+                    if (index != -1)
+                    {
+                        break;
+                    }
+                    // All the potential diagonals for the current vertex were intersecting, try next vertex.
+                    bestVertex = (bestVertex + 1) % hole.nverts;
+                }
+
+                if (index == -1)
+                {
+                    //ctx->log(RC_LOG_WARNING, "mergeHoles: Failed to find merge points for %p and %p.", region.outline, hole);
+                    continue;
+                }
+                if (!MergeContours(region.outline, hole, index, bestVertex))
+                {
+                    //ctx->log(RC_LOG_WARNING, "mergeHoles: Failed to merge contours %p and %p.", region.outline, hole);
+                    continue;
+                }
+            }
+        }
+        private static void FindLeftMostVertex(Contour contour, ref int minx, ref int minz, ref int leftmost)
+        {
+            minx = contour.verts[0].X;
+            minz = contour.verts[0].Z;
+            leftmost = 0;
+            for (int i = 1; i < contour.nverts; i++)
+            {
+                int x = contour.verts[i].X;
+                int z = contour.verts[i].Z;
+                if (x < minx || (x == minx && z < minz))
+                {
+                    minx = x;
+                    minz = z;
+                    leftmost = i;
+                }
+            }
+        }
+        private static bool IntersectSegCountour(Trianglei d0, Trianglei d1, int i, int n, Trianglei[] verts)
+        {
+            // For each edge (k,k+1) of P
+            for (int k = 0; k < n; k++)
+            {
+                int k1 = PolyUtils.Next(k, n);
+                // Skip edges incident to i.
+                if (i == k || i == k1)
+                {
+                    continue;
+                }
+                var p0 = verts[k];
+                var p1 = verts[k1];
+                if (d0 == p0 || d1 == p0 || d0 == p1 || d1 == p1)
+                {
+                    continue;
+                }
+
+                if (PolyUtils.Intersect(d0, d1, p0, p1))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        private static bool MergeContours(Contour ca, Contour cb, int ia, int ib)
+        {
+            int maxVerts = ca.nverts + cb.nverts + 2;
+            Trianglei[] verts = new Trianglei[maxVerts];
+
+            int nv = 0;
+
+            // Copy contour A.
+            for (int i = 0; i <= ca.nverts; ++i)
+            {
+                var dst = verts[nv];
+                var src = ca.verts[((ia + i) % ca.nverts)];
+                dst[0] = src[0];
+                dst[1] = src[1];
+                dst[2] = src[2];
+                dst[3] = src[3];
+                nv++;
+            }
+
+            // Copy contour B
+            for (int i = 0; i <= cb.nverts; ++i)
+            {
+                var dst = verts[nv];
+                var src = cb.verts[((ib + i) % cb.nverts)];
+                dst[0] = src[0];
+                dst[1] = src[1];
+                dst[2] = src[2];
+                dst[3] = src[3];
+                nv++;
+            }
+
+            ca.verts = verts;
+            ca.nverts = nv;
+
+            cb.verts = null;
+            cb.nverts = 0;
+
+            return true;
+        }
+        private static bool BuildPolyMesh(ContourSet cset, int nvp, out PolyMesh mesh)
+        {
+            mesh = new PolyMesh
+            {
+                bmin = cset.bmin,
+                bmax = cset.bmax,
+                cs = cset.cs,
+                ch = cset.ch,
+                borderSize = cset.borderSize,
+                maxEdgeError = cset.maxError
+            };
+
+            int maxVertices = 0;
+            int maxTris = 0;
+            int maxVertsPerCont = 0;
+            for (int i = 0; i < cset.nconts; ++i)
+            {
+                // Skip null contours.
+                if (cset.conts[i].nverts < 3) continue;
+                maxVertices += cset.conts[i].nverts;
+                maxTris += cset.conts[i].nverts - 2;
+                maxVertsPerCont = Math.Max(maxVertsPerCont, cset.conts[i].nverts);
+            }
+
+            if (maxVertices >= 0xfffe)
+            {
+                throw new EngineException(string.Format("rcBuildPolyMesh: Too many vertices {0}.", maxVertices));
+            }
+
+            int[] vflags = new int[maxVertices];
+
+            mesh.verts = new Trianglei[maxVertices];
+            mesh.polys = new Polygoni[maxTris * 2];
+            mesh.regs = new int[maxTris];
+            mesh.areas = new SamplePolyAreas[maxTris];
+
+            mesh.nverts = 0;
+            mesh.npolys = 0;
+            mesh.nvp = nvp;
+            mesh.maxpolys = maxTris;
+
+            Polygoni nextVert = new Polygoni(maxVertices);
+
+            Polygoni firstVert = new Polygoni(Constants.VERTEX_BUCKET_COUNT);
+            for (int i = 0; i < Constants.VERTEX_BUCKET_COUNT; ++i)
+            {
+                firstVert[i] = -1;
+            }
+
+            int[] indices = new int[maxVertsPerCont];
+            Polygoni[] polys = new Polygoni[(maxVertsPerCont + 1)];
+            Polygoni tmpPoly = new Polygoni(maxVertsPerCont);
+
+            for (int i = 0; i < cset.nconts; ++i)
+            {
+                var cont = cset.conts[i];
+
+                // Skip null contours.
+                if (cont.nverts < 3)
+                {
+                    continue;
+                }
+
+                // Triangulate contour
+                for (int j = 0; j < cont.nverts; ++j)
+                {
+                    indices[j] = j;
+                }
+
+                int ntris = PolyUtils.Triangulate(cont.nverts, cont.verts, ref indices, out Trianglei[] tris);
+                if (ntris <= 0)
+                {
+                    // Bad triangulation, should not happen.
+                    /*			printf("\tconst float bmin[3] = {%ff,%ff,%ff};\n", cset.bmin[0], cset.bmin[1], cset.bmin[2]);
+                                printf("\tconst float cs = %ff;\n", cset.cs);
+                                printf("\tconst float ch = %ff;\n", cset.ch);
+                                printf("\tconst int verts[] = {\n");
+                                for (int k = 0; k < cont.nverts; ++k)
+                                {
+                                    const int* v = &cont.verts[k*4];
+                                    printf("\t\t%d,%d,%d,%d,\n", v[0], v[1], v[2], v[3]);
+                                }
+                                printf("\t};\n\tconst int nverts = sizeof(verts)/(sizeof(int)*4);\n");*/
+                    //ctx->log(RC_LOG_WARNING, "rcBuildPolyMesh: Bad triangulation Contour %d.", i);
+                    ntris = -ntris;
+                }
+
+                // Add and merge vertices.
+                for (int j = 0; j < cont.nverts; ++j)
+                {
+                    var v = cont.verts[j];
+                    indices[j] = PolyUtils.AddVertex(v.X, v.Y, v.Z, mesh.verts, firstVert, nextVert, ref mesh.nverts);
+                    if ((v[3] & Constants.RC_BORDER_VERTEX) != 0)
+                    {
+                        // This vertex should be removed.
+                        vflags[indices[j]] = 1;
+                    }
+                }
+
+                // Build initial polygons.
+                int npolys = 0;
+                for (int j = 0; j < ntris; ++j)
+                {
+                    var t = tris[j];
+                    if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])
+                    {
+                        polys[npolys][0] = indices[t[0]];
+                        polys[npolys][1] = indices[t[1]];
+                        polys[npolys][2] = indices[t[2]];
+                        npolys++;
+                    }
+                }
+                if (npolys == 0)
+                {
+                    continue;
+                }
+
+                // Merge polygons.
+                if (nvp > 3)
+                {
+                    for (; ; )
+                    {
+                        // Find best polygons to merge.
+                        int bestMergeVal = 0;
+                        int bestPa = 0, bestPb = 0, bestEa = 0, bestEb = 0;
+
+                        for (int j = 0; j < npolys - 1; ++j)
+                        {
+                            var pj = polys[j];
+                            for (int k = j + 1; k < npolys; ++k)
+                            {
+                                var pk = polys[k];
+                                int v = PolyUtils.GetPolyMergeValue(pj, pk, mesh.verts, out int ea, out int eb);
+                                if (v > bestMergeVal)
+                                {
+                                    bestMergeVal = v;
+                                    bestPa = j;
+                                    bestPb = k;
+                                    bestEa = ea;
+                                    bestEb = eb;
+                                }
+                            }
+                        }
+
+                        if (bestMergeVal > 0)
+                        {
+                            // Found best, merge.
+                            var pa = polys[bestPa];
+                            var pb = polys[bestPb];
+                            PolyUtils.MergePolyVerts(pa, pb, bestEa, bestEb, tmpPoly, nvp);
+                            var lastPoly = polys[(npolys - 1)];
+                            if (pb != lastPoly)
+                            {
+                                lastPoly = pb.Copy();
+                            }
+                            npolys--;
+                        }
+                        else
+                        {
+                            // Could not merge any polygons, stop.
+                            break;
+                        }
+                    }
+                }
+
+                // Store polygons.
+                for (int j = 0; j < npolys; ++j)
+                {
+                    var p = mesh.polys[mesh.npolys * 2];
+                    var q = polys[j * nvp];
+                    for (int k = 0; k < nvp; ++k)
+                    {
+                        p[k] = q[k];
+                    }
+                    mesh.regs[mesh.npolys] = cont.reg;
+                    mesh.areas[mesh.npolys] = (SamplePolyAreas)(int)cont.area;
+                    mesh.npolys++;
+                    if (mesh.npolys > maxTris)
+                    {
+                        throw new EngineException(string.Format("rcBuildPolyMesh: Too many polygons {0} (max:{1}).", mesh.npolys, maxTris));
+                    }
+                }
+            }
+
+            // Remove edge vertices.
+            for (int i = 0; i < mesh.nverts; ++i)
+            {
+                if (vflags[i] != 0)
+                {
+                    if (!CanRemoveVertex(mesh, i))
+                        continue;
+                    if (!RemoveVertex(mesh, i, maxTris))
+                    {
+                        // Failed to remove vertex
+                        throw new EngineException(string.Format("rcBuildPolyMesh: Failed to remove edge vertex {0}.", i));
+                    }
+                    // Remove vertex
+                    // Note: mesh.nverts is already decremented inside removeVertex()!
+                    // Fixup vertex flags
+                    for (int j = i; j < mesh.nverts; ++j)
+                    {
+                        vflags[j] = vflags[j + 1];
+                    }
+                    --i;
+                }
+            }
+
+            // Calculate adjacency.
+            if (!PolyUtils.BuildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, nvp))
+            {
+                throw new EngineException("rcBuildPolyMesh: Adjacency failed.");
+            }
+
+            // Find portal edges
+            if (mesh.borderSize > 0)
+            {
+                int w = cset.width;
+                int h = cset.height;
+                for (int i = 0; i < mesh.npolys; ++i)
+                {
+                    var p = mesh.polys[i * 2];
+                    for (int j = 0; j < nvp; ++j)
+                    {
+                        if (p[j] == Constants.RC_MESH_NULL_IDX)
+                        {
+                            break;
+                        }
+                        // Skip connected edges.
+                        if (p[nvp + j] != Constants.RC_MESH_NULL_IDX)
+                        {
+                            continue;
+                        }
+                        int nj = j + 1;
+                        if (nj >= nvp || p[nj] == Constants.RC_MESH_NULL_IDX)
+                        {
+                            nj = 0;
+                        }
+                        var va = mesh.verts[p[j]];
+                        var vb = mesh.verts[p[nj]];
+
+                        if (va[0] == 0 && vb[0] == 0)
+                        {
+                            p[nvp + j] = 0x8000 | 0;
+                        }
+                        else if (va[2] == h && vb[2] == h)
+                        {
+                            p[nvp + j] = 0x8000 | 1;
+                        }
+                        else if (va[0] == w && vb[0] == w)
+                        {
+                            p[nvp + j] = 0x8000 | 2;
+                        }
+                        else if (va[2] == 0 && vb[2] == 0)
+                        {
+                            p[nvp + j] = 0x8000 | 3;
+                        }
+                    }
+                }
+            }
+
+            // Just allocate the mesh flags array. The user is resposible to fill it.
+            mesh.flags = new SamplePolyFlags[mesh.npolys];
+
+            if (mesh.nverts > 0xffff)
+            {
+                //ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: The resulting mesh has too many vertices %d (max %d). Data can be corrupted.", mesh.nverts, 0xffff);
+            }
+            if (mesh.npolys > 0xffff)
+            {
+                //ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: The resulting mesh has too many polygons %d (max %d). Data can be corrupted.", mesh.npolys, 0xffff);
+            }
+
+            return true;
+        }
+        private static bool BuildPolyMeshDetail(PolyMesh mesh, CompactHeightfield chf, float sampleDist, float sampleMaxError, out PolyMeshDetail dmesh)
+        {
+            dmesh = null;
+
+            if (mesh.nverts == 0 || mesh.npolys == 0)
+            {
+                return true;
+            }
+
+            int nvp = mesh.nvp;
+            float cs = mesh.cs;
+            float ch = mesh.ch;
+            Vector3 orig = mesh.bmin;
+            int borderSize = mesh.borderSize;
+            int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.maxEdgeError));
+
+            List<Trianglei> edges = new List<Trianglei>(64);
+            List<Trianglei> tris = new List<Trianglei>(512);
+            List<int> arr = new List<int>(512);
+            List<Trianglei> samples = new List<Trianglei>(512);
+            Vector3[] verts = new Vector3[256];
+            HeightPatch hp = null;
+            int nPolyVerts = 0;
+            int maxhw = 0, maxhh = 0;
+
+            Trianglei[] bounds = new Trianglei[mesh.npolys];
+            Vector3[] poly = new Vector3[nvp];
+
+            // Find max size for a polygon area.
+            for (int i = 0; i < mesh.npolys; ++i)
+            {
+                var p = mesh.polys[i];
+                int xmin = bounds[i][0];
+                int xmax = bounds[i][1];
+                int ymin = bounds[i][2];
+                int ymax = bounds[i][3];
+                xmin = chf.width;
+                xmax = 0;
+                ymin = chf.height;
+                ymax = 0;
+                for (int j = 0; j < nvp; ++j)
+                {
+                    if (p[j] == Constants.RC_MESH_NULL_IDX) break;
+                    var v = mesh.verts[p[j]];
+                    xmin = Math.Min(xmin, v.X);
+                    xmax = Math.Max(xmax, v.X);
+                    ymin = Math.Min(ymin, v.Z);
+                    ymax = Math.Max(ymax, v.Z);
+                    nPolyVerts++;
+                }
+                xmin = Math.Max(0, xmin - 1);
+                xmax = Math.Min(chf.width, xmax + 1);
+                ymin = Math.Max(0, ymin - 1);
+                ymax = Math.Min(chf.height, ymax + 1);
+                if (xmin >= xmax || ymin >= ymax) continue;
+                maxhw = Math.Max(maxhw, xmax - xmin);
+                maxhh = Math.Max(maxhh, ymax - ymin);
+            }
+
+            hp.data = new int[maxhw * maxhh];
+
+            dmesh.nmeshes = mesh.npolys;
+            dmesh.nverts = 0;
+            dmesh.ntris = 0;
+            dmesh.meshes = new Trianglei[dmesh.nmeshes];
+
+            int vcap = nPolyVerts + nPolyVerts / 2;
+            int tcap = vcap * 2;
+
+            dmesh.nverts = 0;
+            dmesh.verts = new Vector3[vcap];
+            dmesh.ntris = 0;
+            dmesh.tris = new Trianglei[tcap];
+
+            for (int i = 0; i < mesh.npolys; ++i)
+            {
+                var p = mesh.polys[i];
+
+                // Store polygon vertices for processing.
+                int npoly = 0;
+                for (int j = 0; j < nvp; ++j)
+                {
+                    if (p[j] == Constants.RC_MESH_NULL_IDX) break;
+                    var v = mesh.verts[p[j]];
+                    poly[j][0] = v[0] * cs;
+                    poly[j][1] = v[1] * ch;
+                    poly[j][2] = v[2] * cs;
+                    npoly++;
+                }
+
+                // Get the height data from the area of the polygon.
+                hp.xmin = bounds[i][0];
+                hp.ymin = bounds[i][2];
+                hp.width = bounds[i][1] - bounds[i][0];
+                hp.height = bounds[i][3] - bounds[i][2];
+                GetHeightData(chf, p, npoly, mesh.verts, borderSize, hp, arr, mesh.regs[i]);
+
+                // Build detail mesh.
+                int nverts = 0;
+                if (!BuildPolyDetail(
+                    poly, npoly,
+                    sampleDist, sampleMaxError,
+                    heightSearchRadius, chf, hp,
+                    verts, nverts, tris,
+                    edges, samples))
+                {
+                    return false;
+                }
+
+                // Move detail verts to world space.
+                for (int j = 0; j < nverts; ++j)
+                {
+                    verts[j][0] += orig[0];
+                    verts[j][1] += orig[1] + chf.ch; // Is this offset necessary?
+                    verts[j][2] += orig[2];
+                }
+                // Offset poly too, will be used to flag checking.
+                for (int j = 0; j < npoly; ++j)
+                {
+                    poly[j][0] += orig[0];
+                    poly[j][1] += orig[1];
+                    poly[j][2] += orig[2];
+                }
+
+                // Store detail submesh.
+                int ntris = tris.Count;
+
+                dmesh.meshes[i][0] = dmesh.nverts;
+                dmesh.meshes[i][1] = nverts;
+                dmesh.meshes[i][2] = dmesh.ntris;
+                dmesh.meshes[i][3] = ntris;
+
+                // Store vertices, allocate more memory if necessary.
+                if (dmesh.nverts + nverts > vcap)
+                {
+                    while (dmesh.nverts + nverts > vcap)
+                        vcap += 256;
+
+                    Vector3[] newv = new Vector3[vcap];
+                    if (dmesh.nverts != 0)
+                    {
+                        Array.Copy(dmesh.verts, newv, dmesh.nverts);
+                    }
+                    dmesh.verts = newv;
+                }
+                for (int j = 0; j < nverts; ++j)
+                {
+                    dmesh.verts[dmesh.nverts][0] = verts[j][0];
+                    dmesh.verts[dmesh.nverts][1] = verts[j][1];
+                    dmesh.verts[dmesh.nverts][2] = verts[j][2];
+                    dmesh.nverts++;
+                }
+
+                // Store triangles, allocate more memory if necessary.
+                if (dmesh.ntris + ntris > tcap)
+                {
+                    while (dmesh.ntris + ntris > tcap)
+                    {
+                        tcap += 256;
+                    }
+                    Trianglei[] newt = new Trianglei[tcap];
+                    if (dmesh.ntris != 0)
+                    {
+                        Array.Copy(dmesh.tris, newt, dmesh.ntris);
+                    }
+                    dmesh.tris = newt;
+                }
+                for (int j = 0; j < ntris; ++j)
+                {
+                    var t = tris[j];
+                    dmesh.tris[dmesh.ntris][0] = t[0];
+                    dmesh.tris[dmesh.ntris][1] = t[1];
+                    dmesh.tris[dmesh.ntris][2] = t[2];
+                    dmesh.tris[dmesh.ntris][3] = PolyUtils.GetTriFlags(verts[t[0]], verts[t[1]], verts[t[2]], poly, npoly);
+                    dmesh.ntris++;
+                }
+            }
+
+            return true;
+        }
+        private static void GetHeightData(CompactHeightfield chf, Polygoni poly, int npoly, Trianglei[] verts, int bs, HeightPatch hp, List<int> queue, int region)
+        {
+            // Note: Reads to the compact heightfield are offset by border size (bs)
+            // since border size offset is already removed from the polymesh vertices.
+
+            queue.Clear();
+            // Set all heights to RC_UNSET_HEIGHT.
+            hp.data = Helper.CreateArray<int>(hp.width * hp.height, 0xff);
+
+            bool empty = true;
+
+            // We cannot sample from this poly if it was created from polys
+            // of different regions. If it was then it could potentially be overlapping
+            // with polys of that region and the heights sampled here could be wrong.
+            if (region != Constants.RC_MULTIPLE_REGS)
+            {
+                // Copy the height from the same region, and mark region borders
+                // as seed points to fill the rest.
+                for (int hy = 0; hy < hp.height; hy++)
+                {
+                    int y = hp.ymin + hy + bs;
+                    for (int hx = 0; hx < hp.width; hx++)
+                    {
+                        int x = hp.xmin + hx + bs;
+                        var c = chf.cells[x + y * chf.width];
+                        for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                        {
+                            var s = chf.spans[i];
+                            if (s.reg == region)
+                            {
+                                // Store height
+                                hp.data[hx + hy * hp.width] = s.y;
+                                empty = false;
+
+                                // If any of the neighbours is not in same region,
+                                // add the current location as flood fill start
+                                bool border = false;
+                                for (int dir = 0; dir < 4; ++dir)
+                                {
+                                    if (GetCon(s, dir) != Constants.NotConnected)
+                                    {
+                                        int ax = x + GetDirOffsetX(dir);
+                                        int ay = y + GetDirOffsetY(dir);
+                                        int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
+                                        var a = chf.spans[ai];
+                                        if (a.reg != region)
+                                        {
+                                            border = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                if (border)
+                                {
+                                    Push3(queue, x, y, i);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // if the polygon does not contain any points from the current region (rare, but happens)
+            // or if it could potentially be overlapping polygons of the same region,
+            // then use the center as the seed point.
+            if (empty)
+            {
+                SeedArrayWithPolyCenter(chf, poly, npoly, verts, bs, hp, queue);
+            }
+
+            int RETRACT_SIZE = 256;
+            int head = 0;
+
+            // We assume the seed is centered in the polygon, so a BFS to collect
+            // height data will ensure we do not move onto overlapping polygons and
+            // sample wrong heights.
+            while (head * 3 < queue.Count)
+            {
+                int cx = queue[head * 3 + 0];
+                int cy = queue[head * 3 + 1];
+                int ci = queue[head * 3 + 2];
+                head++;
+                if (head >= RETRACT_SIZE)
+                {
+                    head = 0;
+                    if (queue.Count > RETRACT_SIZE * 3)
+                    {
+                        //memmove(&queue[0], &queue[RETRACT_SIZE * 3], sizeof(int) * (queue.size() - RETRACT_SIZE * 3));
+                    }
+                    //queue.resize(queue.size() - RETRACT_SIZE * 3);
+                }
+
+                var cs = chf.spans[ci];
+                for (int dir = 0; dir < 4; ++dir)
+                {
+                    if (GetCon(cs, dir) == Constants.NotConnected) continue;
+
+                    int ax = cx + GetDirOffsetX(dir);
+                    int ay = cy + GetDirOffsetY(dir);
+                    int hx = ax - hp.xmin - bs;
+                    int hy = ay - hp.ymin - bs;
+
+                    if (hx >= hp.width || hy >= hp.height)
+                    {
+                        continue;
+                    }
+
+                    if (hp.data[hx + hy * hp.width] != Constants.RC_UNSET_HEIGHT)
+                    {
+                        continue;
+                    }
+
+                    int ai = chf.cells[ax + ay * chf.width].index + GetCon(cs, dir);
+                    var a = chf.spans[ai];
+
+                    hp.data[hx + hy * hp.width] = a.y;
+
+                    Push3(queue, ax, ay, ai);
+                }
+            }
+        }
+        private static void Push3(List<int> queue, int v1, int v2, int v3)
+        {
+            queue.Add(v1);
+            queue.Add(v2);
+            queue.Add(v3);
+        }
+        private static void SeedArrayWithPolyCenter(CompactHeightfield chf, Polygoni poly, int npoly, Trianglei[] verts, int bs, HeightPatch hp, List<int> array)
+        {
+            // Note: Reads to the compact heightfield are offset by border size (bs)
+            // since border size offset is already removed from the polymesh vertices.
+
+            int[] offset =
+            {
+                0,0, -1,-1, 0,-1, 1,-1, 1,0, 1,1, 0,1, -1,1, -1,0,
+            };
+
+            // Find cell closest to a poly vertex
+            int startCellX = 0, startCellY = 0, startSpanIndex = -1;
+            int dmin = Constants.RC_UNSET_HEIGHT;
+            for (int j = 0; j < npoly && dmin > 0; ++j)
+            {
+                for (int k = 0; k < 9 && dmin > 0; ++k)
+                {
+                    int ax = verts[poly[j]][0] + offset[k * 2 + 0];
+                    int ay = verts[poly[j]][1];
+                    int az = verts[poly[j]][2] + offset[k * 2 + 1];
+                    if (ax < hp.xmin || ax >= hp.xmin + hp.width ||
+                        az < hp.ymin || az >= hp.ymin + hp.height)
+                    {
+                        continue;
+                    }
+
+                    var c = chf.cells[(ax + bs) + (az + bs) * chf.width];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni && dmin > 0; ++i)
+                    {
+                        var s = chf.spans[i];
+                        int d = Math.Abs(ay - s.y);
+                        if (d < dmin)
+                        {
+                            startCellX = ax;
+                            startCellY = az;
+                            startSpanIndex = i;
+                            dmin = d;
+                        }
+                    }
+                }
+            }
+
+            // Find center of the polygon
+            int pcx = 0, pcy = 0;
+            for (int j = 0; j < npoly; ++j)
+            {
+                pcx += verts[poly[j]][0];
+                pcy += verts[poly[j]][2];
+            }
+            pcx /= npoly;
+            pcy /= npoly;
+
+            // Use seeds array as a stack for DFS
+            array.Clear();
+            array.Add(startCellX);
+            array.Add(startCellY);
+            array.Add(startSpanIndex);
+
+            int[] dirs = { 0, 1, 2, 3 };
+            hp.data = Helper.CreateArray(hp.width * hp.height, 0);
+            // DFS to move to the center. Note that we need a DFS here and can not just move
+            // directly towards the center without recording intermediate nodes, even though the polygons
+            // are convex. In very rare we can get stuck due to contour simplification if we do not
+            // record nodes.
+            int cx = -1, cy = -1, ci = -1;
+            while (true)
+            {
+                if (array.Count < 3)
+                {
+                    //ctx->log(RC_LOG_WARNING, "Walk towards polygon center failed to reach center");
+                    break;
+                }
+
+                ci = array[array.Count - 1]; array.RemoveAt(array.Count - 1);
+                cy = array[array.Count - 1]; array.RemoveAt(array.Count - 1);
+                cx = array[array.Count - 1]; array.RemoveAt(array.Count - 1);
+
+                if (cx == pcx && cy == pcy)
+                {
+                    break;
+                }
+
+                // If we are already at the correct X-position, prefer direction
+                // directly towards the center in the Y-axis; otherwise prefer
+                // direction in the X-axis
+                int directDir;
+                if (cx == pcx)
+                {
+                    directDir = GetDirForOffset(0, pcy > cy ? 1 : -1);
+                }
+                else
+                {
+                    directDir = GetDirForOffset(pcx > cx ? 1 : -1, 0);
+                }
+
+                // Push the direct dir last so we start with this on next iteration
+                Helper.Swap(ref dirs[directDir], ref dirs[3]);
+
+                var cs = chf.spans[ci];
+                for (int i = 0; i < 4; i++)
+                {
+                    int dir = dirs[i];
+                    if (GetCon(cs, dir) == Constants.NotConnected)
+                    {
+                        continue;
+                    }
+
+                    int newX = cx + GetDirOffsetX(dir);
+                    int newY = cy + GetDirOffsetY(dir);
+
+                    int hpx = newX - hp.xmin;
+                    int hpy = newY - hp.ymin;
+                    if (hpx < 0 || hpx >= hp.width || hpy < 0 || hpy >= hp.height)
+                    {
+                        continue;
+                    }
+
+                    if (hp.data[hpx + hpy * hp.width] != 0)
+                    {
+                        continue;
+                    }
+
+                    hp.data[hpx + hpy * hp.width] = 1;
+                    array.Add(newX);
+                    array.Add(newY);
+                    array.Add(chf.cells[(newX + bs) + (newY + bs) * chf.width].index + GetCon(cs, dir));
+                }
+
+                Helper.Swap(ref dirs[directDir], ref dirs[3]);
+            }
+
+            array.Clear();
+            // getHeightData seeds are given in coordinates with borders
+            array.Add(cx + bs);
+            array.Add(cy + bs);
+            array.Add(ci);
+
+            hp.data = Helper.CreateArray(hp.width * hp.height, 0xff);
+            var chs = chf.spans[ci];
+            hp.data[cx - hp.xmin + (cy - hp.ymin) * hp.width] = chs.y;
+        }
+        private static bool BuildPolyDetail(Vector3[] inp, int ninp, float sampleDist, float sampleMaxError, int heightSearchRadius, CompactHeightfield chf, HeightPatch hp, Vector3[] verts, int nverts, List<Trianglei> tris, List<Trianglei> edges, List<Trianglei> samples)
+        {
+            int MAX_VERTS = 127;
+            int MAX_TRIS = 255;    // Max tris for delaunay is 2n-2-k (n=num verts, k=num hull verts).
+            int MAX_VERTS_PER_EDGE = 32;
+            Vector3[] edge = new Vector3[(MAX_VERTS_PER_EDGE + 1)];
+            int[] hull = new int[MAX_VERTS];
+            int nhull = 0;
+
+            nverts = ninp;
+
+            for (int i = 0; i < ninp; ++i)
+            {
+                verts[i] = inp[i];
+            }
+
+            edges.Clear();
+
+            float cs = chf.cs;
+            float ics = 1.0f / cs;
+
+            // Calculate minimum extents of the polygon based on input data.
+            float minExtent = PolyUtils.PolyMinExtent(verts, nverts);
+
+            // Tessellate outlines.
+            // This is done in separate pass in order to ensure
+            // seamless height values across the ply boundaries.
+            if (sampleDist > 0)
+            {
+                for (int i = 0, j = ninp - 1; i < ninp; j = i++)
+                {
+                    var vj = inp[j];
+                    var vi = inp[i];
+                    bool swapped = false;
+                    // Make sure the segments are always handled in same order
+                    // using lexological sort or else there will be seams.
+                    if (Math.Abs(vj[0] - vi[0]) < 1e-6f)
+                    {
+                        if (vj[2] > vi[2])
+                        {
+                            Helper.Swap(ref vj, ref vi);
+                            swapped = true;
+                        }
+                    }
+                    else
+                    {
+                        if (vj[0] > vi[0])
+                        {
+                            Helper.Swap(ref vj, ref vi);
+                            swapped = true;
+                        }
+                    }
+                    // Create samples along the edge.
+                    float dx = vi[0] - vj[0];
+                    float dy = vi[1] - vj[1];
+                    float dz = vi[2] - vj[2];
+                    float d = (float)Math.Sqrt(dx * dx + dz * dz);
+                    int nn = 1 + (int)Math.Floor(d / sampleDist);
+                    if (nn >= MAX_VERTS_PER_EDGE) nn = MAX_VERTS_PER_EDGE - 1;
+                    if (nverts + nn >= MAX_VERTS)
+                    {
+                        nn = MAX_VERTS - 1 - nverts;
+                    }
+
+                    for (int k = 0; k <= nn; ++k)
+                    {
+                        float u = (float)k / (float)nn;
+                        var pos = edge[k];
+                        pos[0] = vj[0] + dx * u;
+                        pos[1] = vj[1] + dy * u;
+                        pos[2] = vj[2] + dz * u;
+                        pos[1] = GetHeight(pos[0], pos[1], pos[2], cs, ics, chf.ch, heightSearchRadius, hp) * chf.ch;
+                    }
+                    // Simplify samples.
+                    int[] idx = { 0, nn };
+                    int nidx = 2;
+                    for (int k = 0; k < nidx - 1;)
+                    {
+                        int a = idx[k];
+                        int b = idx[k + 1];
+                        var va = edge[a];
+                        var vb = edge[b];
+                        // Find maximum deviation along the segment.
+                        float maxd = 0;
+                        int maxi = -1;
+                        for (int m = a + 1; m < b; ++m)
+                        {
+                            float dev = PolyUtils.DistancePtSeg(edge[m], va, vb);
+                            if (dev > maxd)
+                            {
+                                maxd = dev;
+                                maxi = m;
+                            }
+                        }
+                        // If the max deviation is larger than accepted error,
+                        // add new point, else continue to next segment.
+                        if (maxi != -1 && maxd > Math.Sqrt(sampleMaxError))
+                        {
+                            for (int m = nidx; m > k; --m)
+                            {
+                                idx[m] = idx[m - 1];
+                            }
+                            idx[k + 1] = maxi;
+                            nidx++;
+                        }
+                        else
+                        {
+                            ++k;
+                        }
+                    }
+
+                    hull[nhull++] = j;
+                    // Add new vertices.
+                    if (swapped)
+                    {
+                        for (int k = nidx - 2; k > 0; --k)
+                        {
+                            verts[nverts] = edge[idx[k]];
+                            hull[nhull++] = nverts;
+                            nverts++;
+                        }
+                    }
+                    else
+                    {
+                        for (int k = 1; k < nidx - 1; ++k)
+                        {
+                            verts[nverts] = edge[idx[k]];
+                            hull[nhull++] = nverts;
+                            nverts++;
+                        }
+                    }
+                }
+            }
+
+            // If the polygon minimum extent is small (sliver or small triangle), do not try to add internal points.
+            if (minExtent < sampleDist * 2)
+            {
+                PolyUtils.TriangulateHull(nverts, verts, nhull, hull, tris);
+                return true;
+            }
+
+            // Tessellate the base mesh.
+            // We're using the triangulateHull instead of delaunayHull as it tends to
+            // create a bit better triangulation for long thin triangles when there
+            // are no internal points.
+            PolyUtils.TriangulateHull(nverts, verts, nhull, hull, tris);
+
+            if (tris.Count == 0)
+            {
+                // Could not triangulate the poly, make sure there is some valid data there.
+                //ctx->log(RC_LOG_WARNING, "buildPolyDetail: Could not triangulate polygon (%d verts).", nverts);
+                return true;
+            }
+
+            if (sampleDist > 0)
+            {
+                // Create sample locations in a grid.
+                Vector3 bmin, bmax;
+                bmin = inp[0];
+                bmax = inp[0];
+                for (int i = 1; i < ninp; ++i)
+                {
+                    Vector3.Min(bmin, inp[i]);
+                    Vector3.Max(bmax, inp[i]);
+                }
+                int x0 = (int)Math.Floor(bmin[0] / sampleDist);
+                int x1 = (int)Math.Ceiling(bmax[0] / sampleDist);
+                int z0 = (int)Math.Floor(bmin[2] / sampleDist);
+                int z1 = (int)Math.Ceiling(bmax[2] / sampleDist);
+                samples.Clear();
+                for (int z = z0; z < z1; ++z)
+                {
+                    for (int x = x0; x < x1; ++x)
+                    {
+                        Vector3 pt = new Vector3();
+                        pt[0] = x * sampleDist;
+                        pt[1] = (bmax[1] + bmin[1]) * 0.5f;
+                        pt[2] = z * sampleDist;
+                        // Make sure the samples are not too close to the edges.
+                        if (PolyUtils.DistToPoly(ninp, inp, pt) > -sampleDist / 2) continue;
+                        samples.Add(
+                            new Trianglei(
+                                x,
+                                GetHeight(pt[0], pt[1], pt[2], cs, ics, chf.ch, heightSearchRadius, hp),
+                                z,
+                                0)); // Not added
+                    }
+                }
+
+                // Add the samples starting from the one that has the most
+                // error. The procedure stops when all samples are added
+                // or when the max error is within treshold.
+                int nsamples = samples.Count;
+                for (int iter = 0; iter < nsamples; ++iter)
+                {
+                    if (nverts >= MAX_VERTS)
+                    {
+                        break;
+                    }
+
+                    // Find sample with most error.
+                    Vector3 bestpt = new Vector3();
+                    float bestd = 0;
+                    int besti = -1;
+                    for (int i = 0; i < nsamples; ++i)
+                    {
+                        var s = samples[i];
+                        if (s[3] != 0) continue; // skip added.
+                        Vector3 pt = new Vector3();
+                        // The sample location is jittered to get rid of some bad triangulations
+                        // which are cause by symmetrical data from the grid structure.
+                        pt[0] = s[0] * sampleDist + PolyUtils.GetJitterX(i) * cs * 0.1f;
+                        pt[1] = s[1] * chf.ch;
+                        pt[2] = s[2] * sampleDist + PolyUtils.GetJitterY(i) * cs * 0.1f;
+                        float d = PolyUtils.DistToTriMesh(pt, verts, nverts, tris.ToArray(), tris.Count / 4);
+                        if (d < 0) continue; // did not hit the mesh.
+                        if (d > bestd)
+                        {
+                            bestd = d;
+                            besti = i;
+                            bestpt = pt;
+                        }
+                    }
+                    // If the max error is within accepted threshold, stop tesselating.
+                    if (bestd <= sampleMaxError || besti == -1)
+                        break;
+                    // Mark sample as added.
+                    samples[besti][3] = 1;
+                    // Add the new sample point.
+                    verts[nverts] = bestpt;
+                    nverts++;
+
+                    // Create new triangulation.
+                    // TODO: Incremental add instead of full rebuild.
+                    edges.Clear();
+                    tris.Clear();
+                    PolyUtils.DelaunayHull(nverts, verts, nhull, hull, tris, edges);
+                }
+            }
+
+            int ntris = tris.Count;
+            if (ntris > MAX_TRIS)
+            {
+                tris.RemoveRange(MAX_TRIS, ntris - MAX_TRIS);
+                //ctx->log(RC_LOG_ERROR, "rcBuildPolyMeshDetail: Shrinking triangle count from %d to max %d.", ntris, MAX_TRIS);
+            }
+
+            return true;
+        }
+        private static int GetHeight(float fx, float fy, float fz, float cs, float ics, float ch, int radius, HeightPatch hp)
+        {
+            int ix = (int)Math.Floor(fx * ics + 0.01f);
+            int iz = (int)Math.Floor(fz * ics + 0.01f);
+            ix = MathUtil.Clamp(ix - hp.xmin, 0, hp.width - 1);
+            iz = MathUtil.Clamp(iz - hp.ymin, 0, hp.height - 1);
+            int h = hp.data[ix + iz * hp.width];
+            if (h == Constants.RC_UNSET_HEIGHT)
+            {
+                // Special case when data might be bad.
+                // Walk adjacent cells in a spiral up to 'radius', and look
+                // for a pixel which has a valid height.
+                int x = 1, z = 0, dx = 1, dz = 0;
+                int maxSize = radius * 2 + 1;
+                int maxIter = maxSize * maxSize - 1;
+
+                int nextRingIterStart = 8;
+                int nextRingIters = 16;
+
+                float dmin = float.MaxValue;
+                for (int i = 0; i < maxIter; i++)
+                {
+                    int nx = ix + x;
+                    int nz = iz + z;
+
+                    if (nx >= 0 && nz >= 0 && nx < hp.width && nz < hp.height)
+                    {
+                        int nh = hp.data[nx + nz * hp.width];
+                        if (nh != Constants.RC_UNSET_HEIGHT)
+                        {
+                            float d = Math.Abs(nh * ch - fy);
+                            if (d < dmin)
+                            {
+                                h = nh;
+                                dmin = d;
+                            }
+                        }
+                    }
+
+                    // We are searching in a grid which looks approximately like this:
+                    //  __________
+                    // |2 ______ 2|
+                    // | |1 __ 1| |
+                    // | | |__| | |
+                    // | |______| |
+                    // |__________|
+                    // We want to find the best height as close to the center cell as possible. This means that
+                    // if we find a height in one of the neighbor cells to the center, we don't want to
+                    // expand further out than the 8 neighbors - we want to limit our search to the closest
+                    // of these "rings", but the best height in the ring.
+                    // For example, the center is just 1 cell. We checked that at the entrance to the function.
+                    // The next "ring" contains 8 cells (marked 1 above). Those are all the neighbors to the center cell.
+                    // The next one again contains 16 cells (marked 2). In general each ring has 8 additional cells, which
+                    // can be thought of as adding 2 cells around the "center" of each side when we expand the ring.
+                    // Here we detect if we are about to enter the next ring, and if we are and we have found
+                    // a height, we abort the search.
+                    if (i + 1 == nextRingIterStart)
+                    {
+                        if (h != Constants.RC_UNSET_HEIGHT)
+                        {
+                            break;
+                        }
+
+                        nextRingIterStart += nextRingIters;
+                        nextRingIters += 8;
+                    }
+
+                    if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
+                    {
+                        int tmp = dx;
+                        dx = -dz;
+                        dz = tmp;
+                    }
+                    x += dx;
+                    z += dz;
+                }
+            }
+            return h;
+        }
+        private static bool CanRemoveVertex(PolyMesh mesh, int rem)
+        {
+            int nvp = mesh.nvp;
+
+            // Count number of polygons to remove.
+            int numRemovedVerts = 0;
+            int numTouchedVerts = 0;
+            int numRemainingEdges = 0;
+            for (int i = 0; i < mesh.npolys; ++i)
+            {
+                var p = mesh.polys[i];
+                int nv = PolyUtils.CountPolyVerts(p);
+                int numRemoved = 0;
+                int numVerts = 0;
+                for (int j = 0; j < nv; ++j)
+                {
+                    if (p[j] == rem)
+                    {
+                        numTouchedVerts++;
+                        numRemoved++;
+                    }
+                    numVerts++;
+                }
+                if (numRemoved != 0)
+                {
+                    numRemovedVerts += numRemoved;
+                    numRemainingEdges += numVerts - (numRemoved + 1);
+                }
+            }
+
+            // There would be too few edges remaining to create a polygon.
+            // This can happen for example when a tip of a triangle is marked
+            // as deletion, but there are no other polys that share the vertex.
+            // In this case, the vertex should not be removed.
+            if (numRemainingEdges <= 2)
+            {
+                return false;
+            }
+
+            // Find edges which share the removed vertex.
+            int maxEdges = numTouchedVerts * 2;
+            int nedges = 0;
+            Trianglei[] edges = new Trianglei[maxEdges];
+
+            for (int i = 0; i < mesh.npolys; ++i)
+            {
+                var p = mesh.polys[i];
+                int nv = PolyUtils.CountPolyVerts(p);
+
+                // Collect edges which touches the removed vertex.
+                for (int j = 0, k = nv - 1; j < nv; k = j++)
+                {
+                    if (p[j] == rem || p[k] == rem)
+                    {
+                        // Arrange edge so that a=rem.
+                        int a = p[j], b = p[k];
+                        if (b == rem)
+                        {
+                            Helper.Swap(ref a, ref b);
+                        }
+
+                        // Check if the edge exists
+                        bool exists = false;
+                        for (int m = 0; m < nedges; ++m)
+                        {
+                            var e = edges[m];
+                            if (e[1] == b)
+                            {
+                                // Exists, increment vertex share count.
+                                e[2]++;
+                                exists = true;
+                            }
+                        }
+                        // Add new edge.
+                        if (!exists)
+                        {
+                            var e = new Trianglei();
+                            e[0] = a;
+                            e[1] = b;
+                            e[2] = 1;
+                            edges[nedges] = e;
+                            nedges++;
+                        }
+                    }
+                }
+            }
+
+            // There should be no more than 2 open edges.
+            // This catches the case that two non-adjacent polygons
+            // share the removed vertex. In that case, do not remove the vertex.
+            int numOpenEdges = 0;
+            for (int i = 0; i < nedges; ++i)
+            {
+                if (edges[i][2] < 2)
+                {
+                    numOpenEdges++;
+                }
+            }
+            if (numOpenEdges > 2)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool RemoveVertex(PolyMesh mesh, int rem, int maxTris)
+        {
+            int nvp = mesh.nvp;
+
+            // Count number of polygons to remove.
+            int numRemovedVerts = 0;
+            for (int i = 0; i < mesh.npolys; ++i)
+            {
+                var p = mesh.polys[i];
+                int nv = PolyUtils.CountPolyVerts(p);
+                for (int j = 0; j < nv; ++j)
+                {
+                    if (p[j] == rem)
+                    {
+                        numRemovedVerts++;
+                    }
+                }
+            }
+
+            int nedges = 0;
+            Trianglei[] edges = new Trianglei[numRemovedVerts];
+
+            int nhole = 0;
+            int[] hole = new int[numRemovedVerts * nvp];
+
+            int nhreg = 0;
+            int[] hreg = new int[numRemovedVerts * nvp];
+
+            int nharea = 0;
+            SamplePolyAreas[] harea = new SamplePolyAreas[numRemovedVerts * nvp];
+
+            for (int i = 0; i < mesh.npolys; ++i)
+            {
+                var p = mesh.polys[i];
+                int nv = PolyUtils.CountPolyVerts(p);
+                bool hasRem = false;
+                for (int j = 0; j < nv; ++j)
+                {
+                    if (p[j] == rem) hasRem = true;
+                }
+                if (hasRem)
+                {
+                    // Collect edges which does not touch the removed vertex.
+                    for (int j = 0, k = nv - 1; j < nv; k = j++)
+                    {
+                        if (p[j] != rem && p[k] != rem)
+                        {
+                            var e = edges[nedges];
+                            e[0] = p[k];
+                            e[1] = p[j];
+                            e[2] = mesh.regs[i];
+                            e[3] = (int)mesh.areas[i];
+                            nedges++;
+                        }
+                    }
+                    // Remove the polygon.
+                    var p2 = mesh.polys[(mesh.npolys - 1)];
+                    if (p != p2)
+                    {
+                        p2 = p;
+                    }
+                    //memset(p + nvp, 0xff, sizeof(unsigned short) * nvp);
+                    mesh.regs[i] = mesh.regs[mesh.npolys - 1];
+                    mesh.areas[i] = mesh.areas[mesh.npolys - 1];
+                    mesh.npolys--;
+                    --i;
+                }
+            }
+
+            // Remove vertex.
+            for (int i = (int)rem; i < mesh.nverts - 1; ++i)
+            {
+                mesh.verts[i][0] = mesh.verts[(i + 1)][0];
+                mesh.verts[i][1] = mesh.verts[(i + 1)][1];
+                mesh.verts[i][2] = mesh.verts[(i + 1)][2];
+            }
+            mesh.nverts--;
+
+            // Adjust indices to match the removed vertex layout.
+            for (int i = 0; i < mesh.npolys; ++i)
+            {
+                var p = mesh.polys[i];
+                int nv = PolyUtils.CountPolyVerts(p);
+                for (int j = 0; j < nv; ++j)
+                {
+                    if (p[j] > rem) p[j]--;
+                }
+            }
+            for (int i = 0; i < nedges; ++i)
+            {
+                if (edges[i][0] > rem) edges[i][0]--;
+                if (edges[i][1] > rem) edges[i][1]--;
+            }
+
+            if (nedges == 0)
+            {
+                return true;
+            }
+
+            // Start with one vertex, keep appending connected
+            // segments to the start and end of the hole.
+            PolyUtils.PushBack(edges[0][0], hole, nhole);
+            PolyUtils.PushBack(edges[0][2], hreg, nhreg);
+            PolyUtils.PushBack((SamplePolyAreas)edges[0][3], harea, nharea);
+
+            while (nedges != 0)
+            {
+                bool match = false;
+
+                for (int i = 0; i < nedges; ++i)
+                {
+                    int ea = edges[i][0];
+                    int eb = edges[i][1];
+                    int r = edges[i][2];
+                    SamplePolyAreas a = (SamplePolyAreas)edges[i][3];
+                    bool add = false;
+                    if (hole[0] == eb)
+                    {
+                        // The segment matches the beginning of the hole boundary.
+                        PolyUtils.PushFront(ea, hole, nhole);
+                        PolyUtils.PushFront(r, hreg, nhreg);
+                        PolyUtils.PushFront(a, harea, nharea);
+                        add = true;
+                    }
+                    else if (hole[nhole - 1] == ea)
+                    {
+                        // The segment matches the end of the hole boundary.
+                        PolyUtils.PushBack(eb, hole, nhole);
+                        PolyUtils.PushBack(r, hreg, nhreg);
+                        PolyUtils.PushBack(a, harea, nharea);
+                        add = true;
+                    }
+                    if (add)
+                    {
+                        // The edge segment was added, remove it.
+                        edges[i * 4 + 0] = edges[(nedges - 1) * 4 + 0];
+                        edges[i * 4 + 1] = edges[(nedges - 1) * 4 + 1];
+                        edges[i * 4 + 2] = edges[(nedges - 1) * 4 + 2];
+                        edges[i * 4 + 3] = edges[(nedges - 1) * 4 + 3];
+                        --nedges;
+                        match = true;
+                        --i;
+                    }
+                }
+
+                if (!match)
+                    break;
+            }
+
+            Trianglei[] tris = new Trianglei[nhole];
+            Trianglei[] tverts = new Trianglei[nhole];
+            int[] thole = new int[nhole];
+
+            // Generate temp vertex array for triangulation.
+            for (int i = 0; i < nhole; ++i)
+            {
+                int pi = hole[i];
+                tverts[i][0] = mesh.verts[pi][0];
+                tverts[i][1] = mesh.verts[pi][1];
+                tverts[i][2] = mesh.verts[pi][2];
+                tverts[i][3] = 0;
+                thole[i] = i;
+            }
+
+            // Triangulate the hole.
+            int ntris = PolyUtils.Triangulate(nhole, tverts, ref thole, out tris);
+            if (ntris < 0)
+            {
+                ntris = -ntris;
+                //ctx->log(RC_LOG_WARNING, "removeVertex: triangulate() returned bad results.");
+            }
+
+            // Merge the hole triangles back to polygons.
+            Polygoni[] polys = new Polygoni[(ntris + 1)];
+            int[] pregs = new int[ntris];
+            SamplePolyAreas[] pareas = new SamplePolyAreas[ntris];
+
+            var tmpPoly = polys[ntris];
+
+            // Build initial polygons.
+            int npolys = 0;
+            for (int j = 0; j < ntris; ++j)
+            {
+                var t = tris[j];
+                if (t[0] != t[1] && t[0] != t[2] && t[1] != t[2])
+                {
+                    polys[npolys][0] = hole[t[0]];
+                    polys[npolys][1] = hole[t[1]];
+                    polys[npolys][2] = hole[t[2]];
+
+                    // If this polygon covers multiple region types then
+                    // mark it as such
+                    if (hreg[t[0]] != hreg[t[1]] || hreg[t[1]] != hreg[t[2]])
+                    {
+                        pregs[npolys] = Constants.RC_MULTIPLE_REGS;
+                    }
+                    else
+                    {
+                        pregs[npolys] = hreg[t[0]];
+                    }
+
+                    pareas[npolys] = harea[t[0]];
+                    npolys++;
+                }
+            }
+            if (npolys == 0)
+            {
+                return true;
+            }
+
+            // Merge polygons.
+            if (nvp > 3)
+            {
+                for (; ; )
+                {
+                    // Find best polygons to merge.
+                    int bestMergeVal = 0;
+                    int bestPa = 0, bestPb = 0, bestEa = 0, bestEb = 0;
+
+                    for (int j = 0; j < npolys - 1; ++j)
+                    {
+                        var pj = polys[j];
+                        for (int k = j + 1; k < npolys; ++k)
+                        {
+                            var pk = polys[k];
+                            int v = PolyUtils.GetPolyMergeValue(pj, pk, mesh.verts, out int ea, out int eb);
+                            if (v > bestMergeVal)
+                            {
+                                bestMergeVal = v;
+                                bestPa = j;
+                                bestPb = k;
+                                bestEa = ea;
+                                bestEb = eb;
+                            }
+                        }
+                    }
+
+                    if (bestMergeVal > 0)
+                    {
+                        // Found best, merge.
+                        var pa = polys[bestPa];
+                        var pb = polys[bestPb];
+                        PolyUtils.MergePolyVerts(pa, pb, bestEa, bestEb, tmpPoly, nvp);
+                        if (pregs[bestPa] != pregs[bestPb])
+                        {
+                            pregs[bestPa] = Constants.RC_MULTIPLE_REGS;
+                        }
+
+                        var last = polys[(npolys - 1)];
+                        if (pb != last)
+                        {
+                            pb = last;
+                        }
+                        pregs[bestPb] = pregs[npolys - 1];
+                        pareas[bestPb] = pareas[npolys - 1];
+                        npolys--;
+                    }
+                    else
+                    {
+                        // Could not merge any polygons, stop.
+                        break;
+                    }
+                }
+            }
+
+            // Store polygons.
+            for (int i = 0; i < npolys; ++i)
+            {
+                if (mesh.npolys >= maxTris) break;
+                var p = mesh.polys[mesh.npolys];
+                for (int j = 0; j < nvp; ++j)
+                {
+                    p[j] = polys[i][j];
+                }
+                mesh.regs[mesh.npolys] = pregs[i];
+                mesh.areas[mesh.npolys] = pareas[i];
+                mesh.npolys++;
+                if (mesh.npolys > maxTris)
+                {
+                    //ctx->log(RC_LOG_ERROR, "removeVertex: Too many polygons %d (max:%d).", mesh.npolys, maxTris);
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool CreateNavMeshData(NavMeshCreateParams param, out MeshData outData)
+        {
+            outData = null;
+
+            if (param.nvp > Constants.VertsPerPolygon)
+                return false;
+            if (param.vertCount >= 0xffff)
+                return false;
+            if (param.vertCount == 0 || param.verts == null)
+                return false;
+            if (param.polyCount == 0 || param.polys == null)
+                return false;
+
+            int nvp = param.nvp;
+
+            // Classify off-mesh connection points. We store only the connections
+            // whose start point is inside the tile.
+            int[] offMeshConClass = null;
+            int storedOffMeshConCount = 0;
+            int offMeshConLinkCount = 0;
+
+            if (param.offMeshConCount > 0)
+            {
+                offMeshConClass = new int[param.offMeshConCount * 2];
+
+                // Find tight heigh bounds, used for culling out off-mesh start locations.
+                float hmin = float.MaxValue;
+                float hmax = float.MinValue;
+
+                if (param.detailVerts != null && param.detailVertsCount > 0)
+                {
+                    for (int i = 0; i < param.detailVertsCount; ++i)
+                    {
+                        var h = param.detailVerts[i].Y;
+                        hmin = Math.Min(hmin, h);
+                        hmax = Math.Max(hmax, h);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < param.vertCount; ++i)
+                    {
+                        var iv = param.verts[i];
+                        float h = param.bmin[1] + iv[1] * param.ch;
+                        hmin = Math.Min(hmin, h);
+                        hmax = Math.Max(hmax, h);
+                    }
+                }
+                hmin -= param.walkableClimb;
+                hmax += param.walkableClimb;
+                Vector3 bmin = param.bmin;
+                Vector3 bmax = param.bmax;
+                bmin.Y = hmin;
+                bmax.Y = hmax;
+
+                for (int i = 0; i < param.offMeshConCount; ++i)
+                {
+                    var p0 = param.offMeshConVerts[(i + 0)];
+                    var p1 = param.offMeshConVerts[(i + 1)];
+                    offMeshConClass[i + 0] = PolyUtils.ClassifyOffMeshPoint(p0, bmin, bmax);
+                    offMeshConClass[i + 1] = PolyUtils.ClassifyOffMeshPoint(p1, bmin, bmax);
+
+                    // Zero out off-mesh start positions which are not even potentially touching the mesh.
+                    if (offMeshConClass[i * 2 + 0] == 0xff)
+                    {
+                        if (p0[1] < bmin[1] || p0[1] > bmax[1])
+                        {
+                            offMeshConClass[i * 2 + 0] = 0;
+                        }
+                    }
+
+                    // Cound how many links should be allocated for off-mesh connections.
+                    if (offMeshConClass[i * 2 + 0] == 0xff)
+                        offMeshConLinkCount++;
+                    if (offMeshConClass[i * 2 + 1] == 0xff)
+                        offMeshConLinkCount++;
+                    if (offMeshConClass[i * 2 + 0] == 0xff)
+                        storedOffMeshConCount++;
+                }
+            }
+
+            // Off-mesh connectionss are stored as polygons, adjust values.
+            int totPolyCount = param.polyCount + storedOffMeshConCount;
+            int totVertCount = param.vertCount + storedOffMeshConCount * 2;
+
+            // Find portal edges which are at tile borders.
+            int edgeCount = 0;
+            int portalCount = 0;
+            for (int i = 0; i < param.polyCount; ++i)
+            {
+                var p = param.polys[i];
+                for (int j = 0; j < nvp; ++j)
+                {
+                    if (p[j] == Constants.NullIdx) break;
+                    edgeCount++;
+
+                    if ((p[nvp + j] & 0x8000) != 0)
+                    {
+                        var dir = p[nvp + j] & 0xf;
+                        if (dir != 0xf)
+                            portalCount++;
+                    }
+                }
+            }
+
+            int maxLinkCount = edgeCount + portalCount * 2 + offMeshConLinkCount * 2;
+
+            // Find unique detail vertices.
+            int uniqueDetailVertCount = 0;
+            int detailTriCount = 0;
+            if (param.detailMeshes != null)
+            {
+                // Has detail mesh, count unique detail vertex count and use input detail tri count.
+                detailTriCount = param.detailTriCount;
+                for (int i = 0; i < param.polyCount; ++i)
+                {
+                    var p = param.polys[i];
+                    var ndv = param.detailMeshes[i].Y;
+                    int nv = 0;
+                    for (int j = 0; j < nvp; ++j)
+                    {
+                        if (p[j] == Constants.NullIdx) break;
+                        nv++;
+                    }
+                    ndv -= nv;
+                    uniqueDetailVertCount += ndv;
+                }
+            }
+            else
+            {
+                // No input detail mesh, build detail mesh from nav polys.
+                uniqueDetailVertCount = 0; // No extra detail verts.
+                detailTriCount = 0;
+                for (int i = 0; i < param.polyCount; ++i)
+                {
+                    var p = param.polys[i];
+                    int nv = 0;
+                    for (int j = 0; j < nvp; ++j)
+                    {
+                        if (p[j] == Constants.NullIdx) break;
+                        nv++;
+                    }
+                    detailTriCount += nv - 2;
+                }
+            }
+
+            MeshData data = new MeshData
+            {
+                // Store header
+                header = new MeshHeader
+                {
+                    magic = Constants.Magic,
+                    version = Constants.Version,
+                    x = param.tileX,
+                    y = param.tileY,
+                    layer = param.tileLayer,
+                    userId = param.userId,
+                    polyCount = totPolyCount,
+                    vertCount = totVertCount,
+                    maxLinkCount = maxLinkCount,
+                    bmin = param.bmin,
+                    bmax = param.bmax,
+                    detailMeshCount = param.polyCount,
+                    detailVertCount = uniqueDetailVertCount,
+                    detailTriCount = detailTriCount,
+                    bvQuantFactor = 1.0f / param.cs,
+                    offMeshBase = param.polyCount,
+                    walkableHeight = param.walkableHeight,
+                    walkableRadius = param.walkableRadius,
+                    walkableClimb = param.walkableClimb,
+                    offMeshConCount = storedOffMeshConCount,
+                    bvNodeCount = param.buildBvTree ? param.polyCount * 2 : 0
+                }
+            };
+
+            int offMeshVertsBase = param.vertCount;
+            int offMeshPolyBase = param.polyCount;
+
+            // Store vertices
+            // Mesh vertices
+            for (int i = 0; i < param.vertCount; ++i)
+            {
+                var iv = param.verts[i];
+                var v = new Vector3
+                {
+                    X = param.bmin.X + iv.X * param.cs,
+                    Y = param.bmin.Y + iv.Y * param.ch,
+                    Z = param.bmin.Z + iv.Z * param.cs
+                };
+                data.navVerts.Add(v);
+            }
+            // Off-mesh link vertices.
+            int n = 0;
+            for (int i = 0; i < param.offMeshConCount; ++i)
+            {
+                // Only store connections which start from this tile.
+                if (offMeshConClass[i * 2 + 0] == 0xff)
+                {
+                    var linkv = param.offMeshConVerts[i * 2];
+                    var v = data.navVerts[(offMeshVertsBase + n * 2) * 3];
+                    v[0] = linkv[0];
+                    v[3] = linkv[3];
+                    n++;
+                }
+            }
+
+            // Store polygons
+            // Mesh polys
+            int srcIndex = 0;
+            for (int i = 0; i < param.polyCount; ++i)
+            {
+                var src = param.polys[srcIndex];
+
+                Poly p = new Poly
+                {
+                    vertCount = 0,
+                    flags = param.polyFlags[i]
+                };
+                p.Area = param.polyAreas[i];
+                p.Type = PolyTypes.Ground;
+                for (int j = 0; j < nvp; ++j)
+                {
+                    if (src[j] == Constants.NullIdx) break;
+                    p.verts[j] = src[j];
+                    if ((src[nvp + j] & 0x8000) != 0)
+                    {
+                        // Border or portal edge.
+                        var dir = src[nvp + j] & 0xf;
+                        if (dir == 0xf) // Border
+                            p.neis[j] = 0;
+                        else if (dir == 0) // Portal x-
+                            p.neis[j] = Constants.DT_EXT_LINK | 4;
+                        else if (dir == 1) // Portal z+
+                            p.neis[j] = Constants.DT_EXT_LINK | 2;
+                        else if (dir == 2) // Portal x+
+                            p.neis[j] = Constants.DT_EXT_LINK | 0;
+                        else if (dir == 3) // Portal z-
+                            p.neis[j] = Constants.DT_EXT_LINK | 6;
+                    }
+                    else
+                    {
+                        // Normal connection
+                        p.neis[j] = src[nvp + j] + 1;
+                    }
+
+                    p.vertCount++;
+                }
+                data.navPolys.Add(p);
+                srcIndex++;
+            }
+            // Off-mesh connection vertices.
+            n = 0;
+            for (int i = 0; i < param.offMeshConCount; ++i)
+            {
+                // Only store connections which start from this tile.
+                if (offMeshConClass[i * 2 + 0] == 0xff)
+                {
+                    Poly p = data.navPolys[offMeshPolyBase + n];
+                    p.vertCount = 2;
+                    p.verts[0] = (offMeshVertsBase + n * 2 + 0);
+                    p.verts[1] = (offMeshVertsBase + n * 2 + 1);
+                    p.flags = param.offMeshConFlags[i];
+                    p.Area = param.offMeshConAreas[i];
+                    p.Type = PolyTypes.OffmeshConnection;
+                    n++;
+                }
+            }
+
+            // Store detail meshes and vertices.
+            // The nav polygon vertices are stored as the first vertices on each mesh.
+            // We compress the mesh data by skipping them and using the navmesh coordinates.
+            if (param.detailMeshes != null)
+            {
+                for (int i = 0; i < param.polyCount; ++i)
+                {
+                    int vb = param.detailMeshes[i][0];
+                    int ndv = param.detailMeshes[i][1];
+                    int nv = data.navPolys[i].vertCount;
+                    PolyDetail dtl = new PolyDetail
+                    {
+                        vertBase = data.navDVerts.Count,
+                        vertCount = (ndv - nv),
+                        triBase = param.detailMeshes[i][2],
+                        triCount = param.detailMeshes[i][3]
+                    };
+                    // Copy vertices except the first 'nv' verts which are equal to nav poly verts.
+                    if (ndv - nv != 0)
+                    {
+                        data.navDVerts.Add(param.detailVerts[(vb + nv)]);
+                    }
+                    data.navDMeshes.Add(dtl);
+                }
+                // Store triangles.
+                data.navDTris.AddRange(param.detailTris);
+            }
+            else
+            {
+                // Create dummy detail mesh by triangulating polys.
+                int tbase = 0;
+                for (int i = 0; i < param.polyCount; ++i)
+                {
+                    int nv = data.navPolys[i].vertCount;
+                    PolyDetail dtl = new PolyDetail
+                    {
+                        vertBase = 0,
+                        vertCount = 0,
+                        triBase = tbase,
+                        triCount = (nv - 2)
+                    };
+                    // Triangulate polygon (local indices).
+                    for (int j = 2; j < nv; ++j)
+                    {
+                        var t = new Trianglei
+                        {
+                            X = 0,
+                            Y = (j - 1),
+                            Z = j,
+                            // Bit for each edge that belongs to poly boundary.
+                            R = (1 << 2)
+                        };
+                        if (j == 2) t.R |= (1 << 0);
+                        if (j == nv - 1) t.R |= (1 << 4);
+                        tbase++;
+
+                        data.navDTris.Add(t);
+                    }
+                    data.navDMeshes.Add(dtl);
+                }
+            }
+
+            // Store and create BVtree.
+            if (param.buildBvTree)
+            {
+                CreateBVTree(param, ref data.navBvtree);
+            }
+
+            // Store Off-Mesh connections.
+            n = 0;
+            for (int i = 0; i < param.offMeshConCount; ++i)
+            {
+                // Only store connections which start from this tile.
+                if (offMeshConClass[i * 2 + 0] == 0xff)
+                {
+                    var con = new OffMeshConnection
+                    {
+                        poly = offMeshPolyBase + n,
+                        rad = param.offMeshConRad[i],
+                        flags = param.offMeshConDir[i] != 0 ? (uint)Constants.DT_OFFMESH_CON_BIDIR : 0,
+                        side = offMeshConClass[i * 2 + 1]
+                    };
+
+                    // Copy connection end-points.
+                    var endPts1 = param.offMeshConVerts[i + 0];
+                    var endPts2 = param.offMeshConVerts[i + 1];
+                    con.pos[0] = endPts1;
+                    con.pos[1] = endPts2;
+                    if (param.offMeshConUserID != null)
+                    {
+                        con.userId = param.offMeshConUserID[i];
+                    }
+                    data.offMeshCons.Add(con);
+                    n++;
+                }
+            }
+
+            offMeshConClass = null;
+
+            outData = data;
+
+            return true;
+        }
+        public static int CreateBVTree(NavMeshCreateParams param, ref List<BVNode> nodes)
+        {
+            // Build tree
+            float quantFactor = 1 / param.cs;
+            BVItem[] items = new BVItem[param.polyCount];
+            for (int i = 0; i < param.polyCount; i++)
+            {
+                BVItem it = items[i];
+                it.i = i;
+                // Calc polygon bounds. Use detail meshes if available.
+                if (param.detailMeshes != null)
+                {
+                    int vb = param.detailMeshes[i][0];
+                    int ndv = param.detailMeshes[i][1];
+                    Vector3 bmin;
+                    Vector3 bmax;
+
+                    var dv = param.detailVerts[vb];
+                    bmin = dv;
+                    bmax = dv;
+
+                    for (int j = 1; j < ndv; j++)
+                    {
+                        Vector3.Min(bmin, param.detailVerts[j]);
+                        Vector3.Max(bmax, param.detailVerts[j]);
+                    }
+
+                    // BV-tree uses cs for all dimensions
+                    it.bmin.X = MathUtil.Clamp((int)((bmin[0] - param.bmin[0]) * quantFactor), 0, 0xffff);
+                    it.bmin.Y = MathUtil.Clamp((int)((bmin[1] - param.bmin[1]) * quantFactor), 0, 0xffff);
+                    it.bmin.Z = MathUtil.Clamp((int)((bmin[2] - param.bmin[2]) * quantFactor), 0, 0xffff);
+
+                    it.bmax.X = MathUtil.Clamp((int)((bmax[0] - param.bmin[0]) * quantFactor), 0, 0xffff);
+                    it.bmax.Y = MathUtil.Clamp((int)((bmax[1] - param.bmin[1]) * quantFactor), 0, 0xffff);
+                    it.bmax.Z = MathUtil.Clamp((int)((bmax[2] - param.bmin[2]) * quantFactor), 0, 0xffff);
+                }
+                else
+                {
+                    var p = param.polys[i];
+                    it.bmin.X = it.bmax.X = param.verts[p[0]].X;
+                    it.bmin.Y = it.bmax.Y = param.verts[p[0]].Y;
+                    it.bmin.Z = it.bmax.Z = param.verts[p[0]].Z;
+
+                    for (int j = 1; j < param.nvp; ++j)
+                    {
+                        if (p[j] == Constants.NullIdx) break;
+                        var x = param.verts[p[j]].X;
+                        var y = param.verts[p[j]].Y;
+                        var z = param.verts[p[j]].Z;
+
+                        if (x < it.bmin.X) it.bmin.X = x;
+                        if (y < it.bmin.Y) it.bmin.Y = y;
+                        if (z < it.bmin.Z) it.bmin.Z = z;
+
+                        if (x > it.bmax.X) it.bmax.X = x;
+                        if (y > it.bmax.Y) it.bmax.Y = y;
+                        if (z > it.bmax.Z) it.bmax.Z = z;
+                    }
+                    // Remap y
+                    it.bmin.Y = (int)Math.Floor(it.bmin.Y * param.ch / param.cs);
+                    it.bmax.Y = (int)Math.Ceiling(it.bmax.Y * param.ch / param.cs);
+                }
+            }
+
+            int curNode = 0;
+            Subdivide(items, param.polyCount, 0, param.polyCount, ref curNode, ref nodes);
+
+            items = null;
+
+            return curNode;
+        }
+        private static void Subdivide(BVItem[] items, int nitems, int imin, int imax, ref int curNode, ref List<BVNode> nodes)
+        {
+            int inum = imax - imin;
+            int icur = curNode;
+
+            BVNode node = nodes[curNode++];
+
+            if (inum == 1)
+            {
+                // Leaf
+                node.bmin.X = items[imin].bmin.X;
+                node.bmin.Y = items[imin].bmin.Y;
+                node.bmin.Z = items[imin].bmin.Z;
+
+                node.bmax.X = items[imin].bmax.X;
+                node.bmax.Y = items[imin].bmax.Y;
+                node.bmax.Z = items[imin].bmax.Z;
+
+                node.i = items[imin].i;
+            }
+            else
+            {
+                // Split
+                CalcExtends(items, nitems, imin, imax, ref node.bmin, ref node.bmax);
+
+                int axis = LongestAxis(node.bmax.X - node.bmin.X,
+                                       node.bmax.Y - node.bmin.Y,
+                                       node.bmax.Z - node.bmin.Z);
+
+                if (axis == 0)
+                {
+                    // Sort along x-axis
+                    Array.Sort(items, imin, inum, BVItem.XComparer);
+                }
+                else if (axis == 1)
+                {
+                    // Sort along y-axis
+                    Array.Sort(items, imin, inum, BVItem.YComparer);
+                }
+                else
+                {
+                    // Sort along z-axis
+                    Array.Sort(items, imin, inum, BVItem.ZComparer);
+                }
+
+                int isplit = imin + inum / 2;
+
+                // Left
+                Subdivide(items, nitems, imin, isplit, ref curNode, ref nodes);
+                // Right
+                Subdivide(items, nitems, isplit, imax, ref curNode, ref nodes);
+
+                int iescape = curNode - icur;
+                // Negative index means escape.
+                node.i = -iescape;
+            }
+        }
+        private static void CalcExtends(BVItem[] items, int nitems, int imin, int imax, ref Vector3i bmin, ref Vector3i bmax)
+        {
+            bmin.X = items[imin].bmin.X;
+            bmin.Y = items[imin].bmin.Y;
+            bmin.Z = items[imin].bmin.Z;
+
+            bmax.X = items[imin].bmax.X;
+            bmax.Y = items[imin].bmax.Y;
+            bmax.Z = items[imin].bmax.Z;
+
+            for (int i = imin + 1; i < imax; ++i)
+            {
+                BVItem it = items[i];
+                if (it.bmin.X < bmin.X) bmin.X = it.bmin.X;
+                if (it.bmin.Y < bmin.Y) bmin.Y = it.bmin.Y;
+                if (it.bmin.Z < bmin.Z) bmin.Z = it.bmin.Z;
+
+                if (it.bmax.X > bmax.X) bmax.X = it.bmax.X;
+                if (it.bmax.Y > bmax.Y) bmax.Y = it.bmax.Y;
+                if (it.bmax.Z > bmax.Z) bmax.Z = it.bmax.Z;
+            }
+        }
+        private static int LongestAxis(int x, int y, int z)
+        {
+            int axis = 0;
+            int maxVal = x;
+            if (y > maxVal)
+            {
+                axis = 1;
+                maxVal = y;
+            }
+            if (z > maxVal)
+            {
+                axis = 2;
+            }
+            return axis;
         }
 
         private Vector3 m_orig;
@@ -1855,6 +6625,31 @@ namespace Engine.PathFinding.NavMesh2
             {
                 throw new EngineException("DT_INVALID_PARAM");
             }
+        }
+        public bool Init(MeshData data, TileFlags flags)
+        {
+            // Make sure the data is in right format.
+            MeshHeader header = data.header;
+            if (header.magic != Constants.Magic)
+            {
+                return false;
+            }
+            if (header.version != Constants.Version)
+            {
+                return false;
+            }
+
+            NavMeshParams param = new NavMeshParams();
+            param.Origin = header.bmin;
+            param.TileWidth = header.bmax[0] - header.bmin[0];
+            param.TileHeight = header.bmax[2] - header.bmin[2];
+            param.MaxTiles = 1;
+            param.MaxPolys = header.polyCount;
+
+            Init(param);
+
+            int lastRef = 0;
+            return AddTile(data, flags, ref lastRef, out int result);
         }
         public MeshTile GetTileRefAt(int x, int y, int layer)
         {
@@ -2939,7 +7734,6 @@ namespace Engine.PathFinding.NavMesh2
             tile.links[link].next = tile.linksFreeList;
             tile.linksFreeList = link;
         }
-
 
         public IGraphNode[] GetNodes(AgentType agent)
         {

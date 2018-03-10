@@ -59,7 +59,7 @@ namespace Engine.PathFinding
             }
             else if (settings is BuildSettings)
             {
-                return NavigationMesh2.Build(triangles, (BuildSettings)settings);
+                return NavigationMesh2.BuildTiled(triangles, (BuildSettings)settings);
             }
             else
             {

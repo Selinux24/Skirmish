@@ -9,10 +9,6 @@ namespace Engine.PathFinding.NavMesh2
     /// </summary>
     public class TileCache
     {
-        public const int MaxLayers = 32;
-        public const int VertexBucketCount2 = (1 << 8);
-        public const int MaxRemEdges = 48;
-
         public static int ComputeTileHash(int x, int y, int mask)
         {
             uint h1 = 0x8da6b343; // Large multiplicative constants;
@@ -293,7 +289,7 @@ namespace Engine.PathFinding.NavMesh2
                 m_tmproc.Process(param, bc.lmesh.areas, bc.lmesh.flags);
             }
 
-            if (!CreateNavMeshData(param, out MeshData navData))
+            if (!NavigationMesh2.CreateNavMeshData(param, out MeshData navData))
             {
                 return false;
             }
@@ -1256,8 +1252,8 @@ namespace Engine.PathFinding.NavMesh2
 
             byte[] vflags = new byte[maxVertices];
 
-            var firstVert = new Polygoni(VertexBucketCount2);
-            for (int i = 0; i < VertexBucketCount2; ++i)
+            var firstVert = new Polygoni(Constants.VertexBucketCount2);
+            for (int i = 0; i < Constants.VertexBucketCount2; ++i)
             {
                 firstVert[i] = Constants.NullIdx;
             }
@@ -1282,7 +1278,7 @@ namespace Engine.PathFinding.NavMesh2
                     indices[j] = j;
                 }
 
-                int ntris = Triangulate(cont.nverts, cont.verts, ref indices, out Trianglei[] tris);
+                int ntris = PolyUtils.Triangulate(cont.nverts, cont.verts, ref indices, out Trianglei[] tris);
                 if (ntris <= 0)
                 {
                     // TODO: issue warning!
@@ -1293,7 +1289,7 @@ namespace Engine.PathFinding.NavMesh2
                 for (int j = 0; j < cont.nverts; ++j)
                 {
                     var v = cont.verts[j];
-                    indices[j] = AddVertex(v.X, v.Y, v.Z, mesh.verts, firstVert, nextVert, ref mesh.nverts);
+                    indices[j] = PolyUtils.AddVertex(v.X, v.Y, v.Z, mesh.verts, firstVert, nextVert, ref mesh.nverts);
                     if ((v[3] & 0x80) != 0)
                     {
                         // This vertex should be removed.
@@ -1337,7 +1333,7 @@ namespace Engine.PathFinding.NavMesh2
                             for (int k = j + 1; k < npolys; ++k)
                             {
                                 var pk = polys[k];
-                                int v = GetPolyMergeValue(pj, pk, mesh.verts, out int ea, out int eb);
+                                int v = PolyUtils.GetPolyMergeValue(pj, pk, mesh.verts, out int ea, out int eb);
                                 if (v > bestMergeVal)
                                 {
                                     bestMergeVal = v;
@@ -1408,380 +1404,19 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Calculate adjacency.
-            if (!BuildMeshAdjacency(mesh.polys, mesh.npolys, mesh.verts, mesh.nverts, lcset))
+            if (!PolyUtils.BuildMeshAdjacency(mesh.polys, mesh.npolys, mesh.verts, mesh.nverts, lcset))
             {
                 return false;
             }
 
             return true;
-        }
-        private static int Triangulate(int n, Trianglei[] verts, ref int[] indices, out Trianglei[] tris)
-        {
-            int ntris = 0;
-
-            // The last bit of the index is used to indicate if the vertex can be removed.
-            for (int i = 0; i < n; i++)
-            {
-                int i1 = Next(i, n);
-                int i2 = Next(i1, n);
-                if (Diagonal(i, i2, n, verts, indices))
-                {
-                    indices[i1] |= 0x8000;
-                }
-            }
-
-            List<Trianglei> dst = new List<Trianglei>();
-
-            while (n > 3)
-            {
-                int minLen = -1;
-                int mini = -1;
-                for (int ix = 0; ix < n; ix++)
-                {
-                    int i1x = Next(ix, n);
-                    if ((indices[i1x] & 0x8000) != 0)
-                    {
-                        var p0 = verts[(indices[ix] & 0x7fff)];
-                        var p2 = verts[(indices[Next(i1x, n)] & 0x7fff)];
-
-                        int dx = p2.X - p0.X;
-                        int dz = p2.Z - p0.Z;
-                        int len = dx * dx + dz * dz;
-                        if (minLen < 0 || len < minLen)
-                        {
-                            minLen = len;
-                            mini = ix;
-                        }
-                    }
-                }
-
-                if (mini == -1)
-                {
-                    // Should not happen.
-                    tris = null;
-                    return -ntris;
-                }
-
-                int i = mini;
-                int i1 = Next(i, n);
-                int i2 = Next(i1, n);
-
-                dst.Add(new Trianglei()
-                {
-                    X = indices[i] & 0x7fff,
-                    Y = indices[i1] & 0x7fff,
-                    Z = indices[i2] & 0x7fff
-                });
-                ntris++;
-
-                // Removes P[i1] by copying P[i+1]...P[n-1] left one index.
-                n--;
-                for (int k = i1; k < n; k++)
-                    indices[k] = indices[k + 1];
-
-                if (i1 >= n) i1 = 0;
-                i = Prev(i1, n);
-                // Update diagonal flags.
-                if (Diagonal(Prev(i, n), i1, n, verts, indices))
-                {
-                    indices[i] |= 0x8000;
-                }
-                else
-                {
-                    indices[i] &= 0x7fff;
-                }
-
-                if (Diagonal(i, Next(i1, n), n, verts, indices))
-                {
-                    indices[i1] |= 0x8000;
-                }
-                else
-                {
-                    indices[i1] &= 0x7fff;
-                }
-            }
-
-            // Append the remaining triangle.
-            dst.Add(new Trianglei
-            {
-                X = indices[0] & 0x7fff,
-                Y = indices[1] & 0x7fff,
-                Z = indices[2] & 0x7fff,
-            });
-            ntris++;
-
-            tris = dst.ToArray();
-            return ntris;
-        }
-        private static int Prev(int i, int n)
-        {
-            return i - 1 >= 0 ? i - 1 : n - 1;
-        }
-        private static int Next(int i, int n)
-        {
-            return i + 1 < n ? i + 1 : 0;
-        }
-        private static bool Diagonal(int i, int j, int n, Trianglei[] verts, int[] indices)
-        {
-            return InCone(i, j, n, verts, indices) && Diagonalie(i, j, n, verts, indices);
-        }
-        private static bool InCone(int i, int j, int n, Trianglei[] verts, int[] indices)
-        {
-            var pi = verts[(indices[i] & 0x7fff)];
-            var pj = verts[(indices[j] & 0x7fff)];
-            var pi1 = verts[(indices[Next(i, n)] & 0x7fff)];
-            var pin1 = verts[(indices[Prev(i, n)] & 0x7fff)];
-
-            // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
-            if (LeftOn(pin1, pi, pi1))
-            {
-                return Left(pi, pj, pin1) && Left(pj, pi, pi1);
-            }
-            // Assume (i-1,i,i+1) not collinear.
-            // else P[i] is reflex.
-            return !(LeftOn(pi, pj, pi1) && LeftOn(pj, pi, pin1));
-        }
-        private static bool LeftOn(Trianglei a, Trianglei b, Trianglei c)
-        {
-            return Area2(a, b, c) <= 0;
-        }
-        private static int Area2(Trianglei a, Trianglei b, Trianglei c)
-        {
-            return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z);
-        }
-        private static bool Left(Trianglei a, Trianglei b, Trianglei c)
-        {
-            return Area2(a, b, c) < 0;
-        }
-        private static bool Diagonalie(int i, int j, int n, Trianglei[] verts, int[] indices)
-        {
-            var d0 = verts[(indices[i] & 0x7fff)];
-            var d1 = verts[(indices[j] & 0x7fff)];
-
-            // For each edge (k,k+1) of P
-            for (int k = 0; k < n; k++)
-            {
-                int k1 = Next(k, n);
-                // Skip edges incident to i or j
-                if (!((k == i) || (k1 == i) || (k == j) || (k1 == j)))
-                {
-                    var p0 = verts[(indices[k] & 0x7fff)];
-                    var p1 = verts[(indices[k1] & 0x7fff)];
-
-                    if (Vequal(d0, p0) || Vequal(d1, p0) || Vequal(d0, p1) || Vequal(d1, p1))
-                        continue;
-
-                    if (Intersect(d0, d1, p0, p1))
-                        return false;
-                }
-            }
-            return true;
-        }
-        private static bool Vequal(Trianglei a, Trianglei b)
-        {
-            return a.X == b.X && a.Z == b.Z;
-        }
-        /// <summary>
-        /// Returns true iff segments ab and cd intersect, properly or improperly.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="c"></param>
-        /// <param name="d"></param>
-        /// <returns></returns>
-        private static bool Intersect(Trianglei a, Trianglei b, Trianglei c, Trianglei d)
-        {
-            if (IntersectProp(a, b, c, d))
-                return true;
-            else if (Between(a, b, c) || Between(a, b, d) ||
-                     Between(c, d, a) || Between(c, d, b))
-                return true;
-            else
-                return false;
-        }
-        /// <summary>
-        /// Returns true iff ab properly intersects cd: they share 
-        /// a point interior to both segments.
-        /// The properness of the intersection is ensured by using strict leftness.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="c"></param>
-        /// <param name="d"></param>
-        /// <returns></returns>
-        private static bool IntersectProp(Trianglei a, Trianglei b, Trianglei c, Trianglei d)
-        {
-            // Eliminate improper cases.
-            if (Collinear(a, b, c) || Collinear(a, b, d) ||
-                Collinear(c, d, a) || Collinear(c, d, b))
-                return false;
-
-            return Xorb(Left(a, b, c), Left(a, b, d)) && Xorb(Left(c, d, a), Left(c, d, b));
-        }
-        private static bool Collinear(Trianglei a, Trianglei b, Trianglei c)
-        {
-            return Area2(a, b, c) == 0;
-        }
-        /// <summary>
-        /// Exclusive or: true iff exactly one argument is true.
-        /// The arguments are negated to ensure that they are 0/1 values.
-        /// Then the bitwise Xor operator may apply.
-        /// (This idea is due to Michael Baldwin.)
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        private static bool Xorb(bool x, bool y)
-        {
-            return !x ^ !y;
-        }
-        /// <summary>
-        /// Returns T iff (a,b,c) are collinear and point c lies on the closed segement ab.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="c"></param>
-        /// <returns></returns>
-        private static bool Between(Trianglei a, Trianglei b, Trianglei c)
-        {
-            if (!Collinear(a, b, c))
-                return false;
-            // If ab not vertical, check betweenness on x; else on y.
-            if (a.X != b.X)
-                return ((a.X <= c.X) && (c.X <= b.X)) || ((a.X >= c.X) && (c.X >= b.X));
-            else
-                return ((a.Z <= c.Z) && (c.Z <= b.Z)) || ((a.Z >= c.Z) && (c.Z >= b.Z));
-        }
-        private static int AddVertex(int x, int y, int z, Trianglei[] verts, Polygoni firstVert, Polygoni nextVert, ref int nv)
-        {
-            int bucket = ComputeVertexHash2(x, 0, z);
-            int i = firstVert[bucket];
-
-            while (i != Constants.NullIdx)
-            {
-                var vx = verts[i];
-                if (vx.X == x && vx.Z == z && (Math.Abs(vx.Y - y) <= 2))
-                {
-                    return i;
-                }
-                i = nextVert[i]; // next
-            }
-
-            // Could not find, create new.
-            i = nv; nv++;
-            var v = new Trianglei();
-            v[0] = x;
-            v[1] = y;
-            v[2] = z;
-            verts[i] = v;
-            nextVert[i] = firstVert[bucket];
-            firstVert[bucket] = i;
-
-            return i;
-        }
-        private static int ComputeVertexHash2(int x, int y, int z)
-        {
-            uint h1 = 0x8da6b343; // Large multiplicative constants;
-            uint h2 = 0xd8163841; // here arbitrarily chosen primes
-            uint h3 = 0xcb1ab31f;
-            uint n = (uint)(h1 * x + h2 * y + h3 * z);
-            return (int)(n & (VertexBucketCount2 - 1));
-        }
-        private static int GetPolyMergeValue(Polygoni pa, Polygoni pb, Trianglei[] verts, out int ea, out int eb)
-        {
-            ea = -1;
-            eb = -1;
-
-            int na = CountPolyVerts(pa);
-            int nb = CountPolyVerts(pb);
-
-            // If the merged polygon would be too big, do not merge.
-            if (na + nb - 2 > Constants.VertsPerPolygon)
-            {
-                return -1;
-            }
-
-            // Check if the polygons share an edge.
-            for (int i = 0; i < na; ++i)
-            {
-                int va0 = pa[i];
-                int va1 = pa[(i + 1) % na];
-                if (va0 > va1)
-                {
-                    Helper.Swap(ref va0, ref va1);
-                }
-                for (int j = 0; j < nb; ++j)
-                {
-                    int vb0 = pb[j];
-                    int vb1 = pb[(j + 1) % nb];
-                    if (vb0 > vb1)
-                    {
-                        Helper.Swap(ref vb0, ref vb1);
-                    }
-                    if (va0 == vb0 && va1 == vb1)
-                    {
-                        ea = i;
-                        eb = j;
-                        break;
-                    }
-                }
-            }
-
-            // No common edge, cannot merge.
-            if (ea == -1 || eb == -1)
-            {
-                return -1;
-            }
-
-            // Check to see if the merged polygon would be convex.
-            int va, vb, vc;
-
-            va = pa[(ea + na - 1) % na];
-            vb = pa[ea];
-            vc = pb[(eb + 2) % nb];
-            if (!Uleft(verts[va], verts[vb], verts[vc]))
-            {
-                return -1;
-            }
-
-            va = pb[(eb + nb - 1) % nb];
-            vb = pb[eb];
-            vc = pa[(ea + 2) % na];
-            if (!Uleft(verts[va], verts[vb], verts[vc]))
-            {
-                return -1;
-            }
-
-            va = pa[ea];
-            vb = pa[(ea + 1) % na];
-
-            int dx = verts[va][0] - verts[vb][0];
-            int dy = verts[va][2] - verts[vb][2];
-
-            return dx * dx + dy * dy;
-        }
-        private static int CountPolyVerts(Polygoni p)
-        {
-            for (int i = 0; i < Constants.VertsPerPolygon; ++i)
-            {
-                if (p[i] == Constants.NullIdx)
-                {
-                    return i;
-                }
-            }
-
-            return Constants.VertsPerPolygon;
-        }
-        private static bool Uleft(Trianglei a, Trianglei b, Trianglei c)
-        {
-            return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z) < 0;
         }
         private static Polygoni MergePolys(Polygoni pa, Polygoni pb, int ea, int eb)
         {
             var tmp = new Polygoni(Constants.VertsPerPolygon);
 
-            int na = CountPolyVerts(pa);
-            int nb = CountPolyVerts(pb);
+            int na = PolyUtils.CountPolyVerts(pa);
+            int nb = PolyUtils.CountPolyVerts(pb);
 
             // Merge polygons.
             int n = 0;
@@ -1807,7 +1442,7 @@ namespace Engine.PathFinding.NavMesh2
             for (int i = 0; i < mesh.npolys; ++i)
             {
                 var p = mesh.polys[i * Constants.VertsPerPolygon * 2];
-                int nv = CountPolyVerts(p);
+                int nv = PolyUtils.CountPolyVerts(p);
                 int numRemoved = 0;
                 int numVerts = 0;
                 for (int j = 0; j < nv; ++j)
@@ -1837,19 +1472,19 @@ namespace Engine.PathFinding.NavMesh2
 
             // Check that there is enough memory for the test.
             int maxEdges = numTouchedVerts * 2;
-            if (maxEdges > MaxRemEdges)
+            if (maxEdges > Constants.MaxRemEdges)
             {
                 return false;
             }
 
             // Find edges which share the removed vertex.
-            int[][] edges = new int[MaxRemEdges][];
+            int[][] edges = new int[Constants.MaxRemEdges][];
             int nedges = 0;
 
             for (int i = 0; i < mesh.npolys; ++i)
             {
                 var p = mesh.polys[i * Constants.VertsPerPolygon * 2];
-                int nv = CountPolyVerts(p);
+                int nv = PolyUtils.CountPolyVerts(p);
 
                 // Collect edges which touches the removed vertex.
                 for (int j = 0, k = nv - 1; j < nv; k = j++)
@@ -1913,7 +1548,7 @@ namespace Engine.PathFinding.NavMesh2
             for (int i = 0; i < mesh.npolys; ++i)
             {
                 var p = mesh.polys[i * Constants.VertsPerPolygon * 2];
-                int nv = CountPolyVerts(p);
+                int nv = PolyUtils.CountPolyVerts(p);
                 for (int j = 0; j < nv; ++j)
                 {
                     if (p[j] == rem)
@@ -1922,16 +1557,16 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             int nedges = 0;
-            List<int>[] edges = new List<int>[MaxRemEdges * 3];
+            List<int>[] edges = new List<int>[Constants.MaxRemEdges * 3];
             int nhole = 0;
-            int[] hole = new int[MaxRemEdges];
+            int[] hole = new int[Constants.MaxRemEdges];
             int nharea = 0;
-            int[] harea = new int[MaxRemEdges];
+            int[] harea = new int[Constants.MaxRemEdges];
 
             for (int i = 0; i < mesh.npolys; ++i)
             {
                 var p = mesh.polys[i * Constants.VertsPerPolygon * 2];
-                int nv = CountPolyVerts(p);
+                int nv = PolyUtils.CountPolyVerts(p);
                 bool hasRem = false;
                 for (int j = 0; j < nv; ++j)
                 {
@@ -1944,7 +1579,7 @@ namespace Engine.PathFinding.NavMesh2
                     {
                         if (p[j] != rem && p[k] != rem)
                         {
-                            if (nedges >= MaxRemEdges)
+                            if (nedges >= Constants.MaxRemEdges)
                             {
                                 return false;
                             }
@@ -1978,7 +1613,7 @@ namespace Engine.PathFinding.NavMesh2
             for (int i = 0; i < mesh.npolys; ++i)
             {
                 var p = mesh.polys[i * Constants.VertsPerPolygon * 2];
-                int nv = CountPolyVerts(p);
+                int nv = PolyUtils.CountPolyVerts(p);
                 for (int j = 0; j < nv; ++j)
                 {
                     if (p[j] > rem) p[j]--;
@@ -1997,8 +1632,8 @@ namespace Engine.PathFinding.NavMesh2
 
             // Start with one vertex, keep appending connected
             // segments to the start and end of the hole.
-            PushBack(edges[0][0], hole, nhole);
-            PushBack(edges[2][0], harea, nharea);
+            PolyUtils.PushBack(edges[0][0], hole, nhole);
+            PolyUtils.PushBack(edges[2][0], harea, nharea);
 
             while (nedges != 0)
             {
@@ -2013,23 +1648,23 @@ namespace Engine.PathFinding.NavMesh2
                     if (hole[0] == eb)
                     {
                         // The segment matches the beginning of the hole boundary.
-                        if (nhole >= MaxRemEdges)
+                        if (nhole >= Constants.MaxRemEdges)
                         {
                             return false;
                         }
-                        PushFront(ea, hole, nhole);
-                        PushFront(a, harea, nharea);
+                        PolyUtils.PushFront(ea, hole, nhole);
+                        PolyUtils.PushFront(a, harea, nharea);
                         add = true;
                     }
                     else if (hole[nhole - 1] == ea)
                     {
                         // The segment matches the end of the hole boundary.
-                        if (nhole >= MaxRemEdges)
+                        if (nhole >= Constants.MaxRemEdges)
                         {
                             return false;
                         }
-                        PushBack(eb, hole, nhole);
-                        PushBack(a, harea, nharea);
+                        PolyUtils.PushBack(eb, hole, nhole);
+                        PolyUtils.PushBack(a, harea, nharea);
                         add = true;
                     }
                     if (add)
@@ -2051,8 +1686,8 @@ namespace Engine.PathFinding.NavMesh2
             }
 
 
-            var tverts = new Trianglei[MaxRemEdges];
-            var tpoly = new int[MaxRemEdges];
+            var tverts = new Trianglei[Constants.MaxRemEdges];
+            var tpoly = new int[Constants.MaxRemEdges];
 
             // Generate temp vertex array for triangulation.
             for (int i = 0; i < nhole; ++i)
@@ -2066,20 +1701,20 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Triangulate the hole.
-            int ntris = Triangulate(nhole, tverts, ref tpoly, out Trianglei[] tris);
+            int ntris = PolyUtils.Triangulate(nhole, tverts, ref tpoly, out Trianglei[] tris);
             if (ntris < 0)
             {
                 // TODO: issue warning!
                 ntris = -ntris;
             }
 
-            if (ntris > MaxRemEdges)
+            if (ntris > Constants.MaxRemEdges)
             {
                 return false;
             }
 
-            Polygoni[] polys = new Polygoni[MaxRemEdges];
-            int[] pareas = new int[MaxRemEdges];
+            Polygoni[] polys = new Polygoni[Constants.MaxRemEdges];
+            int[] pareas = new int[Constants.MaxRemEdges];
 
             // Build initial polygons.
             int npolys = 0;
@@ -2116,8 +1751,7 @@ namespace Engine.PathFinding.NavMesh2
                         for (int k = j + 1; k < npolys; ++k)
                         {
                             var pk = polys[k];
-                            int ea, eb;
-                            int v = GetPolyMergeValue(pj, pk, mesh.verts, out ea, out eb);
+                            int v = PolyUtils.GetPolyMergeValue(pj, pk, mesh.verts, out int ea, out int eb);
                             if (v > bestMergeVal)
                             {
                                 bestMergeVal = v;
@@ -2166,799 +1800,6 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             return true;
-        }
-        private static void PushFront(int v, int[] arr, int an)
-        {
-            an++;
-            for (int i = an - 1; i > 0; --i)
-                arr[i] = arr[i - 1];
-            arr[0] = v;
-        }
-        private static void PushBack(int v, int[] arr, int an)
-        {
-            arr[an] = v;
-            an++;
-        }
-        private static bool BuildMeshAdjacency(Polygoni[] polys, int npolys, Trianglei[] verts, int nverts, TileCacheContourSet lcset)
-        {
-            // Based on code by Eric Lengyel from:
-            // http://www.terathon.com/code/edges.php
-
-            int maxEdgeCount = npolys * Constants.VertsPerPolygon;
-            int[] firstEdge = new int[nverts];
-            int[] nextEdge = new int[maxEdgeCount];
-            int edgeCount = 0;
-
-            Edge[] edges = new Edge[maxEdgeCount];
-
-            for (int i = 0; i < nverts; i++)
-            {
-                firstEdge[i] = Constants.NullIdx;
-            }
-            for (int i = 0; i < maxEdgeCount; i++)
-            {
-                nextEdge[i] = Constants.NullIdx;
-            }
-
-            for (int i = 0; i < npolys; ++i)
-            {
-                var t = polys[i];
-                for (int j = 0; j < Constants.VertsPerPolygon; ++j)
-                {
-                    if (t[j] == Constants.NullIdx) break;
-                    int v0 = t[j];
-                    int v1 = (j + 1 >= Constants.VertsPerPolygon || t[j + 1] == Constants.NullIdx) ? t[0] : t[j + 1];
-                    if (v0 < v1)
-                    {
-                        Edge edge = new Edge()
-                        {
-                            vert = new int[2],
-                            polyEdge = new int[2],
-                            poly = new int[2],
-                        };
-                        edge.vert[0] = v0;
-                        edge.vert[1] = v1;
-                        edge.poly[0] = i;
-                        edge.polyEdge[0] = j;
-                        edge.poly[1] = i;
-                        edge.polyEdge[1] = 0xff;
-                        edges[edgeCount] = edge;
-                        // Insert edge
-                        nextEdge[edgeCount] = firstEdge[v0];
-                        firstEdge[v0] = edgeCount;
-                        edgeCount++;
-                    }
-                }
-            }
-
-            for (int i = 0; i < npolys; ++i)
-            {
-                var t = polys[i];
-                for (int j = 0; j < Constants.VertsPerPolygon; ++j)
-                {
-                    if (t[j] == Constants.NullIdx) break;
-                    int v0 = t[j];
-                    int v1 = (j + 1 >= Constants.VertsPerPolygon || t[j + 1] == Constants.NullIdx) ? t[0] : t[j + 1];
-                    if (v0 > v1)
-                    {
-                        bool found = false;
-                        for (int e = firstEdge[v1]; e != Constants.NullIdx; e = nextEdge[e])
-                        {
-                            Edge edge = edges[e];
-                            if (edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
-                            {
-                                edge.poly[1] = i;
-                                edge.polyEdge[1] = j;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (!found)
-                        {
-                            // Matching edge not found, it is an open edge, add it.
-                            Edge edge = new Edge()
-                            {
-                                vert = new int[2],
-                                polyEdge = new int[2],
-                                poly = new int[2],
-                            };
-                            edge.vert[0] = v1;
-                            edge.vert[1] = v0;
-                            edge.poly[0] = i;
-                            edge.polyEdge[0] = j;
-                            edge.poly[1] = i;
-                            edge.polyEdge[1] = 0xff;
-                            edges[edgeCount] = edge;
-                            // Insert edge
-                            nextEdge[edgeCount] = firstEdge[v1];
-                            firstEdge[v1] = edgeCount;
-                            edgeCount++;
-                        }
-                    }
-                }
-            }
-
-            // Mark portal edges.
-            for (int i = 0; i < lcset.nconts; ++i)
-            {
-                TileCacheContour cont = lcset.conts[i];
-                if (cont.nverts < 3)
-                {
-                    continue;
-                }
-
-                for (int j = 0, k = cont.nverts - 1; j < cont.nverts; k = j++)
-                {
-                    var va = cont.verts[k];
-                    var vb = cont.verts[j];
-                    int dir = va.R & 0xf;
-                    if (dir == 0xf)
-                    {
-                        continue;
-                    }
-
-                    if (dir == 0 || dir == 2)
-                    {
-                        // Find matching vertical edge
-                        int x = va.X;
-                        int zmin = va.Z;
-                        int zmax = vb.Z;
-                        if (zmin > zmax)
-                        {
-                            Helper.Swap(ref zmin, ref zmax);
-                        }
-
-                        for (int m = 0; m < edgeCount; ++m)
-                        {
-                            Edge e = edges[m];
-                            // Skip connected edges.
-                            if (e.poly[0] != e.poly[1])
-                            {
-                                continue;
-                            }
-                            var eva = verts[e.vert[0]];
-                            var evb = verts[e.vert[1]];
-                            if (eva.X == x && evb.X == x)
-                            {
-                                int ezmin = eva.Z;
-                                int ezmax = evb.Z;
-                                if (ezmin > ezmax)
-                                {
-                                    Helper.Swap(ref ezmin, ref ezmax);
-                                }
-                                if (OverlapRangeExl(zmin, zmax, ezmin, ezmax))
-                                {
-                                    // Reuse the other polyedge to store dir.
-                                    e.polyEdge[1] = dir;
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Find matching vertical edge
-                        int z = va.Z;
-                        int xmin = va.X;
-                        int xmax = vb.X;
-                        if (xmin > xmax)
-                        {
-                            Helper.Swap(ref xmin, ref xmax);
-                        }
-                        for (int m = 0; m < edgeCount; ++m)
-                        {
-                            Edge e = edges[m];
-                            // Skip connected edges.
-                            if (e.poly[0] != e.poly[1])
-                            {
-                                continue;
-                            }
-                            var eva = verts[e.vert[0]];
-                            var evb = verts[e.vert[1]];
-                            if (eva.Z == z && evb.Z == z)
-                            {
-                                int exmin = eva.X;
-                                int exmax = evb.X;
-                                if (exmin > exmax)
-                                {
-                                    Helper.Swap(ref exmin, ref exmax);
-                                }
-                                if (OverlapRangeExl(xmin, xmax, exmin, exmax))
-                                {
-                                    // Reuse the other polyedge to store dir.
-                                    e.polyEdge[1] = dir;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            // Store adjacency
-            for (int i = 0; i < edgeCount; ++i)
-            {
-                Edge e = edges[i];
-                if (e.poly[0] != e.poly[1])
-                {
-                    var p0 = polys[e.poly[0]];
-                    var p1 = polys[e.poly[1]];
-                    p0[Constants.VertsPerPolygon + e.polyEdge[0]] = e.poly[1];
-                    p1[Constants.VertsPerPolygon + e.polyEdge[1]] = e.poly[0];
-                }
-                else if (e.polyEdge[1] != 0xff)
-                {
-                    var p0 = polys[e.poly[0]];
-                    p0[Constants.VertsPerPolygon + e.polyEdge[0]] = 0x8000 | e.polyEdge[1];
-                }
-            }
-
-            return true;
-        }
-        private static bool OverlapRangeExl(int amin, int amax, int bmin, int bmax)
-        {
-            return (amin >= bmax || amax <= bmin) ? false : true;
-        }
-
-
-        private bool CreateNavMeshData(NavMeshCreateParams param, out MeshData outData)
-        {
-            outData = null;
-
-            if (param.nvp > Constants.VertsPerPolygon)
-                return false;
-            if (param.vertCount >= 0xffff)
-                return false;
-            if (param.vertCount == 0 || param.verts == null)
-                return false;
-            if (param.polyCount == 0 || param.polys == null)
-                return false;
-
-            int nvp = param.nvp;
-
-            // Classify off-mesh connection points. We store only the connections
-            // whose start point is inside the tile.
-            int[] offMeshConClass = null;
-            int storedOffMeshConCount = 0;
-            int offMeshConLinkCount = 0;
-
-            if (param.offMeshConCount > 0)
-            {
-                offMeshConClass = new int[param.offMeshConCount * 2];
-
-                // Find tight heigh bounds, used for culling out off-mesh start locations.
-                float hmin = float.MaxValue;
-                float hmax = float.MinValue;
-
-                if (param.detailVerts != null && param.detailVertsCount > 0)
-                {
-                    for (int i = 0; i < param.detailVertsCount; ++i)
-                    {
-                        var h = param.detailVerts[i].Y;
-                        hmin = Math.Min(hmin, h);
-                        hmax = Math.Max(hmax, h);
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < param.vertCount; ++i)
-                    {
-                        var iv = param.verts[i];
-                        float h = param.bmin[1] + iv[1] * param.ch;
-                        hmin = Math.Min(hmin, h);
-                        hmax = Math.Max(hmax, h);
-                    }
-                }
-                hmin -= param.walkableClimb;
-                hmax += param.walkableClimb;
-                Vector3 bmin = param.bmin;
-                Vector3 bmax = param.bmax;
-                bmin.Y = hmin;
-                bmax.Y = hmax;
-
-                for (int i = 0; i < param.offMeshConCount; ++i)
-                {
-                    var p0 = param.offMeshConVerts[(i + 0)];
-                    var p1 = param.offMeshConVerts[(i + 1)];
-                    offMeshConClass[i + 0] = ClassifyOffMeshPoint(p0, bmin, bmax);
-                    offMeshConClass[i + 1] = ClassifyOffMeshPoint(p1, bmin, bmax);
-
-                    // Zero out off-mesh start positions which are not even potentially touching the mesh.
-                    if (offMeshConClass[i * 2 + 0] == 0xff)
-                    {
-                        if (p0[1] < bmin[1] || p0[1] > bmax[1])
-                        {
-                            offMeshConClass[i * 2 + 0] = 0;
-                        }
-                    }
-
-                    // Cound how many links should be allocated for off-mesh connections.
-                    if (offMeshConClass[i * 2 + 0] == 0xff)
-                        offMeshConLinkCount++;
-                    if (offMeshConClass[i * 2 + 1] == 0xff)
-                        offMeshConLinkCount++;
-                    if (offMeshConClass[i * 2 + 0] == 0xff)
-                        storedOffMeshConCount++;
-                }
-            }
-
-            // Off-mesh connectionss are stored as polygons, adjust values.
-            int totPolyCount = param.polyCount + storedOffMeshConCount;
-            int totVertCount = param.vertCount + storedOffMeshConCount * 2;
-
-            // Find portal edges which are at tile borders.
-            int edgeCount = 0;
-            int portalCount = 0;
-            for (int i = 0; i < param.polyCount; ++i)
-            {
-                var p = param.polys[i];
-                for (int j = 0; j < nvp; ++j)
-                {
-                    if (p[j] == Constants.NullIdx) break;
-                    edgeCount++;
-
-                    if ((p[nvp + j] & 0x8000) != 0)
-                    {
-                        var dir = p[nvp + j] & 0xf;
-                        if (dir != 0xf)
-                            portalCount++;
-                    }
-                }
-            }
-
-            int maxLinkCount = edgeCount + portalCount * 2 + offMeshConLinkCount * 2;
-
-            // Find unique detail vertices.
-            int uniqueDetailVertCount = 0;
-            int detailTriCount = 0;
-            if (param.detailMeshes != null)
-            {
-                // Has detail mesh, count unique detail vertex count and use input detail tri count.
-                detailTriCount = param.detailTriCount;
-                for (int i = 0; i < param.polyCount; ++i)
-                {
-                    var p = param.polys[i];
-                    var ndv = param.detailMeshes[i].Y;
-                    int nv = 0;
-                    for (int j = 0; j < nvp; ++j)
-                    {
-                        if (p[j] == Constants.NullIdx) break;
-                        nv++;
-                    }
-                    ndv -= nv;
-                    uniqueDetailVertCount += ndv;
-                }
-            }
-            else
-            {
-                // No input detail mesh, build detail mesh from nav polys.
-                uniqueDetailVertCount = 0; // No extra detail verts.
-                detailTriCount = 0;
-                for (int i = 0; i < param.polyCount; ++i)
-                {
-                    var p = param.polys[i];
-                    int nv = 0;
-                    for (int j = 0; j < nvp; ++j)
-                    {
-                        if (p[j] == Constants.NullIdx) break;
-                        nv++;
-                    }
-                    detailTriCount += nv - 2;
-                }
-            }
-
-            MeshData data = new MeshData
-            {
-                // Store header
-                header = new MeshHeader
-                {
-                    magic = Constants.Magic,
-                    version = Constants.Version,
-                    x = param.tileX,
-                    y = param.tileY,
-                    layer = param.tileLayer,
-                    userId = param.userId,
-                    polyCount = totPolyCount,
-                    vertCount = totVertCount,
-                    maxLinkCount = maxLinkCount,
-                    bmin = param.bmin,
-                    bmax = param.bmax,
-                    detailMeshCount = param.polyCount,
-                    detailVertCount = uniqueDetailVertCount,
-                    detailTriCount = detailTriCount,
-                    bvQuantFactor = 1.0f / param.cs,
-                    offMeshBase = param.polyCount,
-                    walkableHeight = param.walkableHeight,
-                    walkableRadius = param.walkableRadius,
-                    walkableClimb = param.walkableClimb,
-                    offMeshConCount = storedOffMeshConCount,
-                    bvNodeCount = param.buildBvTree ? param.polyCount * 2 : 0
-                }
-            };
-
-            int offMeshVertsBase = param.vertCount;
-            int offMeshPolyBase = param.polyCount;
-
-            // Store vertices
-            // Mesh vertices
-            for (int i = 0; i < param.vertCount; ++i)
-            {
-                var iv = param.verts[i];
-                var v = new Vector3
-                {
-                    X = param.bmin.X + iv.X * param.cs,
-                    Y = param.bmin.Y + iv.Y * param.ch,
-                    Z = param.bmin.Z + iv.Z * param.cs
-                };
-                data.navVerts.Add(v);
-            }
-            // Off-mesh link vertices.
-            int n = 0;
-            for (int i = 0; i < param.offMeshConCount; ++i)
-            {
-                // Only store connections which start from this tile.
-                if (offMeshConClass[i * 2 + 0] == 0xff)
-                {
-                    var linkv = param.offMeshConVerts[i * 2];
-                    var v = data.navVerts[(offMeshVertsBase + n * 2) * 3];
-                    v[0] = linkv[0];
-                    v[3] = linkv[3];
-                    n++;
-                }
-            }
-
-            // Store polygons
-            // Mesh polys
-            int srcIndex = 0;
-            for (int i = 0; i < param.polyCount; ++i)
-            {
-                var src = param.polys[srcIndex];
-
-                Poly p = new Poly
-                {
-                    vertCount = 0,
-                    flags = param.polyFlags[i]
-                };
-                p.Area = param.polyAreas[i];
-                p.Type = PolyTypes.Ground;
-                for (int j = 0; j < nvp; ++j)
-                {
-                    if (src[j] == Constants.NullIdx) break;
-                    p.verts[j] = src[j];
-                    if ((src[nvp + j] & 0x8000) != 0)
-                    {
-                        // Border or portal edge.
-                        var dir = src[nvp + j] & 0xf;
-                        if (dir == 0xf) // Border
-                            p.neis[j] = 0;
-                        else if (dir == 0) // Portal x-
-                            p.neis[j] = Constants.DT_EXT_LINK | 4;
-                        else if (dir == 1) // Portal z+
-                            p.neis[j] = Constants.DT_EXT_LINK | 2;
-                        else if (dir == 2) // Portal x+
-                            p.neis[j] = Constants.DT_EXT_LINK | 0;
-                        else if (dir == 3) // Portal z-
-                            p.neis[j] = Constants.DT_EXT_LINK | 6;
-                    }
-                    else
-                    {
-                        // Normal connection
-                        p.neis[j] = src[nvp + j] + 1;
-                    }
-
-                    p.vertCount++;
-                }
-                data.navPolys.Add(p);
-                srcIndex++;
-            }
-            // Off-mesh connection vertices.
-            n = 0;
-            for (int i = 0; i < param.offMeshConCount; ++i)
-            {
-                // Only store connections which start from this tile.
-                if (offMeshConClass[i * 2 + 0] == 0xff)
-                {
-                    Poly p = data.navPolys[offMeshPolyBase + n];
-                    p.vertCount = 2;
-                    p.verts[0] = (offMeshVertsBase + n * 2 + 0);
-                    p.verts[1] = (offMeshVertsBase + n * 2 + 1);
-                    p.flags = param.offMeshConFlags[i];
-                    p.Area = param.offMeshConAreas[i];
-                    p.Type = PolyTypes.OffmeshConnection;
-                    n++;
-                }
-            }
-
-            // Store detail meshes and vertices.
-            // The nav polygon vertices are stored as the first vertices on each mesh.
-            // We compress the mesh data by skipping them and using the navmesh coordinates.
-            if (param.detailMeshes != null)
-            {
-                for (int i = 0; i < param.polyCount; ++i)
-                {
-                    int vb = param.detailMeshes[i][0];
-                    int ndv = param.detailMeshes[i][1];
-                    int nv = data.navPolys[i].vertCount;
-                    PolyDetail dtl = new PolyDetail
-                    {
-                        vertBase = data.navDVerts.Count,
-                        vertCount = (ndv - nv),
-                        triBase = param.detailMeshes[i][2],
-                        triCount = param.detailMeshes[i][3]
-                    };
-                    // Copy vertices except the first 'nv' verts which are equal to nav poly verts.
-                    if (ndv - nv != 0)
-                    {
-                        data.navDVerts.Add(param.detailVerts[(vb + nv)]);
-                    }
-                    data.navDMeshes.Add(dtl);
-                }
-                // Store triangles.
-                data.navDTris.AddRange(param.detailTris);
-            }
-            else
-            {
-                // Create dummy detail mesh by triangulating polys.
-                int tbase = 0;
-                for (int i = 0; i < param.polyCount; ++i)
-                {
-                    int nv = data.navPolys[i].vertCount;
-                    PolyDetail dtl = new PolyDetail
-                    {
-                        vertBase = 0,
-                        vertCount = 0,
-                        triBase = tbase,
-                        triCount = (nv - 2)
-                    };
-                    // Triangulate polygon (local indices).
-                    for (int j = 2; j < nv; ++j)
-                    {
-                        var t = new Trianglei
-                        {
-                            X = 0,
-                            Y = (j - 1),
-                            Z = j,
-                            // Bit for each edge that belongs to poly boundary.
-                            R = (1 << 2)
-                        };
-                        if (j == 2) t.R |= (1 << 0);
-                        if (j == nv - 1) t.R |= (1 << 4);
-                        tbase++;
-
-                        data.navDTris.Add(t);
-                    }
-                    data.navDMeshes.Add(dtl);
-                }
-            }
-
-            // Store and create BVtree.
-            if (param.buildBvTree)
-            {
-                CreateBVTree(param, ref data.navBvtree);
-            }
-
-            // Store Off-Mesh connections.
-            n = 0;
-            for (int i = 0; i < param.offMeshConCount; ++i)
-            {
-                // Only store connections which start from this tile.
-                if (offMeshConClass[i * 2 + 0] == 0xff)
-                {
-                    var con = new OffMeshConnection
-                    {
-                        poly = offMeshPolyBase + n,
-                        rad = param.offMeshConRad[i],
-                        flags = param.offMeshConDir[i] != 0 ? (uint)Constants.DT_OFFMESH_CON_BIDIR : 0,
-                        side = offMeshConClass[i * 2 + 1]
-                    };
-
-                    // Copy connection end-points.
-                    var endPts1 = param.offMeshConVerts[i + 0];
-                    var endPts2 = param.offMeshConVerts[i + 1];
-                    con.pos[0] = endPts1;
-                    con.pos[1] = endPts2;
-                    if (param.offMeshConUserID != null)
-                    {
-                        con.userId = param.offMeshConUserID[i];
-                    }
-                    data.offMeshCons.Add(con);
-                    n++;
-                }
-            }
-
-            offMeshConClass = null;
-
-            outData = data;
-
-            return true;
-        }
-        private int ClassifyOffMeshPoint(Vector3 pt, Vector3 bmin, Vector3 bmax)
-        {
-            int XP = 1 << 0;
-            int ZP = 1 << 1;
-            int XM = 1 << 2;
-            int ZM = 1 << 3;
-
-            int outcode = 0;
-            outcode |= (pt[0] >= bmax[0]) ? XP : 0;
-            outcode |= (pt[2] >= bmax[2]) ? ZP : 0;
-            outcode |= (pt[0] < bmin[0]) ? XM : 0;
-            outcode |= (pt[2] < bmin[2]) ? ZM : 0;
-
-            if (XP != 0) return 0;
-            if ((XP | ZP) != 0) return 1;
-            if (ZP != 0) return 2;
-            if ((XM | ZP) != 0) return 3;
-            if (XM != 0) return 4;
-            if ((XM | ZM) != 0) return 5;
-            if (ZM != 0) return 6;
-            if ((XP | ZM) != 0) return 7;
-
-            return 0xff;
-        }
-        private int CreateBVTree(NavMeshCreateParams param, ref List<BVNode> nodes)
-        {
-            // Build tree
-            float quantFactor = 1 / param.cs;
-            BVItem[] items = new BVItem[param.polyCount];
-            for (int i = 0; i < param.polyCount; i++)
-            {
-                BVItem it = items[i];
-                it.i = i;
-                // Calc polygon bounds. Use detail meshes if available.
-                if (param.detailMeshes != null)
-                {
-                    int vb = param.detailMeshes[i][0];
-                    int ndv = param.detailMeshes[i][1];
-                    Vector3 bmin;
-                    Vector3 bmax;
-
-                    var dv = param.detailVerts[vb];
-                    bmin = dv;
-                    bmax = dv;
-
-                    for (int j = 1; j < ndv; j++)
-                    {
-                        Vector3.Min(bmin, param.detailVerts[j]);
-                        Vector3.Max(bmax, param.detailVerts[j]);
-                    }
-
-                    // BV-tree uses cs for all dimensions
-                    it.bmin.X = MathUtil.Clamp((int)((bmin[0] - param.bmin[0]) * quantFactor), 0, 0xffff);
-                    it.bmin.Y = MathUtil.Clamp((int)((bmin[1] - param.bmin[1]) * quantFactor), 0, 0xffff);
-                    it.bmin.Z = MathUtil.Clamp((int)((bmin[2] - param.bmin[2]) * quantFactor), 0, 0xffff);
-
-                    it.bmax.X = MathUtil.Clamp((int)((bmax[0] - param.bmin[0]) * quantFactor), 0, 0xffff);
-                    it.bmax.Y = MathUtil.Clamp((int)((bmax[1] - param.bmin[1]) * quantFactor), 0, 0xffff);
-                    it.bmax.Z = MathUtil.Clamp((int)((bmax[2] - param.bmin[2]) * quantFactor), 0, 0xffff);
-                }
-                else
-                {
-                    var p = param.polys[i];
-                    it.bmin.X = it.bmax.X = param.verts[p[0]].X;
-                    it.bmin.Y = it.bmax.Y = param.verts[p[0]].Y;
-                    it.bmin.Z = it.bmax.Z = param.verts[p[0]].Z;
-
-                    for (int j = 1; j < param.nvp; ++j)
-                    {
-                        if (p[j] == Constants.NullIdx) break;
-                        var x = param.verts[p[j]].X;
-                        var y = param.verts[p[j]].Y;
-                        var z = param.verts[p[j]].Z;
-
-                        if (x < it.bmin.X) it.bmin.X = x;
-                        if (y < it.bmin.Y) it.bmin.Y = y;
-                        if (z < it.bmin.Z) it.bmin.Z = z;
-
-                        if (x > it.bmax.X) it.bmax.X = x;
-                        if (y > it.bmax.Y) it.bmax.Y = y;
-                        if (z > it.bmax.Z) it.bmax.Z = z;
-                    }
-                    // Remap y
-                    it.bmin.Y = (int)Math.Floor(it.bmin.Y * param.ch / param.cs);
-                    it.bmax.Y = (int)Math.Ceiling(it.bmax.Y * param.ch / param.cs);
-                }
-            }
-
-            int curNode = 0;
-            Subdivide(items, param.polyCount, 0, param.polyCount, ref curNode, ref nodes);
-
-            items = null;
-
-            return curNode;
-        }
-        private void Subdivide(BVItem[] items, int nitems, int imin, int imax, ref int curNode, ref List<BVNode> nodes)
-        {
-            int inum = imax - imin;
-            int icur = curNode;
-
-            BVNode node = nodes[curNode++];
-
-            if (inum == 1)
-            {
-                // Leaf
-                node.bmin.X = items[imin].bmin.X;
-                node.bmin.Y = items[imin].bmin.Y;
-                node.bmin.Z = items[imin].bmin.Z;
-
-                node.bmax.X = items[imin].bmax.X;
-                node.bmax.Y = items[imin].bmax.Y;
-                node.bmax.Z = items[imin].bmax.Z;
-
-                node.i = items[imin].i;
-            }
-            else
-            {
-                // Split
-                CalcExtends(items, nitems, imin, imax, ref node.bmin, ref node.bmax);
-
-                int axis = LongestAxis(node.bmax.X - node.bmin.X,
-                                       node.bmax.Y - node.bmin.Y,
-                                       node.bmax.Z - node.bmin.Z);
-
-                if (axis == 0)
-                {
-                    // Sort along x-axis
-                    Array.Sort(items, imin, inum, BVItem.XComparer);
-                }
-                else if (axis == 1)
-                {
-                    // Sort along y-axis
-                    Array.Sort(items, imin, inum, BVItem.YComparer);
-                }
-                else
-                {
-                    // Sort along z-axis
-                    Array.Sort(items, imin, inum, BVItem.ZComparer);
-                }
-
-                int isplit = imin + inum / 2;
-
-                // Left
-                Subdivide(items, nitems, imin, isplit, ref curNode, ref nodes);
-                // Right
-                Subdivide(items, nitems, isplit, imax, ref curNode, ref nodes);
-
-                int iescape = curNode - icur;
-                // Negative index means escape.
-                node.i = -iescape;
-            }
-        }
-        private void CalcExtends(BVItem[] items, int nitems, int imin, int imax, ref Vector3i bmin, ref Vector3i bmax)
-        {
-            bmin.X = items[imin].bmin.X;
-            bmin.Y = items[imin].bmin.Y;
-            bmin.Z = items[imin].bmin.Z;
-
-            bmax.X = items[imin].bmax.X;
-            bmax.Y = items[imin].bmax.Y;
-            bmax.Z = items[imin].bmax.Z;
-
-            for (int i = imin + 1; i < imax; ++i)
-            {
-                BVItem it = items[i];
-                if (it.bmin.X < bmin.X) bmin.X = it.bmin.X;
-                if (it.bmin.Y < bmin.Y) bmin.Y = it.bmin.Y;
-                if (it.bmin.Z < bmin.Z) bmin.Z = it.bmin.Z;
-
-                if (it.bmax.X > bmax.X) bmax.X = it.bmax.X;
-                if (it.bmax.Y > bmax.Y) bmax.Y = it.bmax.Y;
-                if (it.bmax.Z > bmax.Z) bmax.Z = it.bmax.Z;
-            }
-        }
-        private int LongestAxis(int x, int y, int z)
-        {
-            int axis = 0;
-            int maxVal = x;
-            if (y > maxVal)
-            {
-                axis = 1;
-                maxVal = y;
-            }
-            if (z > maxVal)
-            {
-                axis = 2;
-            }
-            return axis;
         }
     }
 }

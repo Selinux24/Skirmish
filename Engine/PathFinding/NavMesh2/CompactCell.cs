@@ -24,11 +24,11 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Index to the first span in the column.
         /// </summary>
-        public uint index;
+        public int index;
         /// <summary>
         /// Number of spans in the column.
         /// </summary>
-        public uint count;
+        public int count;
 
         /// <summary>
         /// Gets the text representation of the instance

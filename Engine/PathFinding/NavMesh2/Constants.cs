@@ -11,6 +11,10 @@ namespace Engine.PathFinding.NavMesh2
     /// </summary>
     public static class Constants
     {
+        public const int MaxLayers = 32;
+        public const int VertexBucketCount2 = (1 << 8);
+        public const int MaxRemEdges = 48;
+
         public const int ExpectedLayersPerTile = 4;
         public const int NotConnected = 0x3f;
         /// <summary>
@@ -22,6 +26,7 @@ namespace Engine.PathFinding.NavMesh2
         /// </summary>
         public const int Version = 7;
         public const int VertsPerPolygon = 6;
+        public const int DT_VERTS_PER_POLYGON = 6;
         public const int NullIdx = 0xffff;
 
         /// <summary>
@@ -37,5 +42,16 @@ namespace Engine.PathFinding.NavMesh2
         /// A flag that indicates that an off-mesh connection can be traversed in both directions. (Is bidirectional.)
         /// </summary>
         public const int DT_OFFMESH_CON_BIDIR = 1;
+
+        public const int RC_BORDER_REG = 0x8000;
+
+        public const int RC_NULL_NEI = 0xffff;
+        public const int RC_CONTOUR_REG_MASK = 0xffff;
+        public const int RC_AREA_BORDER = 0x20000;
+        public const int RC_BORDER_VERTEX = 0x10000;
+        public const int RC_MESH_NULL_IDX = 0xffff;
+        public const int VERTEX_BUCKET_COUNT = (1 << 12);
+        public const int RC_MULTIPLE_REGS = 0;
+        public const int RC_UNSET_HEIGHT = 0xffff;
     }
 }
