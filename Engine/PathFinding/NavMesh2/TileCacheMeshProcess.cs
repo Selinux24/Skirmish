@@ -15,7 +15,7 @@ namespace Engine.PathFinding.NavMesh2
             // Update poly flags from areas.
             for (int i = 0; i < param.polyCount; ++i)
             {
-                if ((uint)polyAreas[i] == (uint)TileCacheAreas.WalkableArea)
+                if ((int)polyAreas[i] == (int)TileCacheAreas.WalkableArea)
                 {
                     polyAreas[i] = SamplePolyAreas.SAMPLE_POLYAREA_GROUND;
                 }

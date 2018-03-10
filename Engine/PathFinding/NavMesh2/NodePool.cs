@@ -8,8 +8,8 @@ namespace Engine.PathFinding.NavMesh2
         public int m_nodeCount;
 
         public Node[] m_nodes;
-        public ushort[] m_first;
-        public ushort[] m_next;
+        public int[] m_first;
+        public int[] m_next;
         public int m_hashSize;
 
         public NodePool(int maxNodes, int hashSize)
@@ -18,8 +18,8 @@ namespace Engine.PathFinding.NavMesh2
             m_hashSize = hashSize;
 
             m_nodes = new Node[m_maxNodes];
-            m_next = new ushort[m_maxNodes];
-            m_first = new ushort[m_hashSize];
+            m_next = new int[m_maxNodes];
+            m_first = new int[m_hashSize];
             m_nodeCount = 0;
         }
 
@@ -33,7 +33,7 @@ namespace Engine.PathFinding.NavMesh2
         public void Clear()
         {
             Helper.Dispose(m_first);
-            m_first = new ushort[m_hashSize];
+            m_first = new int[m_hashSize];
             m_nodeCount = 0;
         }
 

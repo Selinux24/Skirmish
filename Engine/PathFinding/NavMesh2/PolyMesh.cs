@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The mesh vertices. [Form: (x, y, z) * #nverts]
         /// </summary>
-        public Trianglei[] verts;
+        public Int3[] verts;
         /// <summary>
         /// Polygon and neighbor data. [Length: #maxpolys * 2 * #nvp]
         /// </summary>

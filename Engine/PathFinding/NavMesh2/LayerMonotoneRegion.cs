@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh2
             return new LayerMonotoneRegion()
             {
                 area = 0,
-                neis = new byte[DT_LAYER_MAX_NEIS],
+                neis = new int[DT_LAYER_MAX_NEIS],
                 nneis = 0,
                 regId = 0,
                 areaId = TileCacheAreas.NullArea,
@@ -18,9 +18,9 @@ namespace Engine.PathFinding.NavMesh2
         }
 
         public int area;
-        public byte[] neis;
-        public byte nneis;
-        public byte regId;
+        public int[] neis;
+        public int nneis;
+        public int regId;
         public TileCacheAreas areaId;
     }
 }

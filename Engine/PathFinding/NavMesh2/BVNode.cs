@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.PathFinding.NavMesh2
 {
     /// <summary>
@@ -9,11 +10,11 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Minimum bounds of the node's AABB. [(x, y, z)]
         /// </summary>
-        public Vector3i bmin;
+        public Int3 bmin;
         /// <summary>
         /// Maximum bounds of the node's AABB. [(x, y, z)]
         /// </summary>
-        public Vector3i bmax;
+        public Int3 bmax;
         /// <summary>
         /// The node's index. (Negative for escape sequence.)
         /// </summary>

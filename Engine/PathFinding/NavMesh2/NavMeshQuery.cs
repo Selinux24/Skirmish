@@ -13,7 +13,7 @@ namespace Engine.PathFinding.NavMesh2
 
         public void Init(NavigationMesh2 nav, int maxNodes)
         {
-            if (maxNodes > ushort.MaxValue || maxNodes > (1 << NodeParentBits) - 1)
+            if (maxNodes > int.MaxValue || maxNodes > (1 << NodeParentBits) - 1)
             {
                 throw new EngineException("DT_INVALID_PARAM");
             }

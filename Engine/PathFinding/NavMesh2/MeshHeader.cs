@@ -30,7 +30,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The user defined id of the tile.
         /// </summary>
-        public uint userId;
+        public int userId;
         /// <summary>
         /// The number of polygons in the tile.
         /// </summary>

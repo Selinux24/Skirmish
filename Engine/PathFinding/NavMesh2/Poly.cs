@@ -29,34 +29,9 @@ namespace Engine.PathFinding.NavMesh2
         /// </summary>
         public int vertCount;
 
-        /// <summary>
-        /// The bit packed area id and polygon type.
-        /// </summary>
-        private uint areaAndtype;
+        public SamplePolyAreas Area { get; set; }
 
-        public SamplePolyAreas Area
-        {
-            get
-            {
-                return (SamplePolyAreas)(areaAndtype & 0x3f);
-            }
-            set
-            {
-                areaAndtype = (areaAndtype & 0xc0) | ((uint)value & 0x3f);
-            }
-        }
-
-        public PolyTypes Type
-        {
-            get
-            {
-                return (PolyTypes)(areaAndtype >> 6);
-            }
-            set
-            {
-                areaAndtype = (areaAndtype & 0x3f) | ((uint)value << 6);
-            }
-        }
+        public PolyTypes Type { get; set; }
 
         public override string ToString()
         {

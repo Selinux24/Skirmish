@@ -7,12 +7,12 @@ namespace Engine.PathFinding.NavMesh2
         public const int MaxTouchedTiles = 8;
 
         public CompressedTile[] touched;
-        public uint[] pending;
+        public int[] pending;
         public int Salt;
         public ObstacleType type;
         public ObstacleState state;
-        public byte ntouched;
-        public byte npending;
+        public int ntouched;
+        public int npending;
         public TileCacheObstacle Next;
 
         public ObstacleCylinder cylinder;

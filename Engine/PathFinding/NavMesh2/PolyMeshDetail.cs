@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The sub-mesh data. [Size: 4*#nmeshes] 
         /// </summary>
-        public Trianglei[] meshes;
+        public Int4[] meshes;
         /// <summary>
         /// The mesh vertices. [Size: 3*#nverts] 
         /// </summary>
@@ -18,7 +18,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The mesh triangles. [Size: 4*#ntris] 
         /// </summary>
-        public Trianglei[] tris;
+        public Int4[] tris;
         /// <summary>
         /// The number of sub-meshes defined by #meshes.
         /// </summary>

@@ -7,10 +7,10 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Region count.
         /// </summary>
-        public byte regCount;
-        public byte[] heights;
+        public int regCount;
+        public int[] heights;
         public TileCacheAreas[] areas;
-        public byte[] cons;
-        public byte[] regs;
+        public int[] cons;
+        public int[] regs;
     }
 }

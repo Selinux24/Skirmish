@@ -6,15 +6,15 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Number samples
         /// </summary>
-        public ushort ns;
+        public int ns;
         /// <summary>
         /// Region id
         /// </summary>
-        public byte id;
+        public int id;
         /// <summary>
         /// Neighbour id
         /// </summary>
-        public byte nei;
+        public int nei;
 
         /// <summary>
         /// Gets the text representation of the instance

@@ -15,11 +15,11 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The lower limit of the span
         /// </summary>
-        public uint smin;
+        public int smin;
         /// <summary>
         /// The upper limit of the span
         /// </summary>
-        public uint smax;
+        public int smax;
         /// <summary>
         /// The area id assigned to the span.
         /// </summary>

@@ -10,7 +10,7 @@ namespace Engine.PathFinding.NavMesh2
         public List<Poly> navPolys = new List<Poly>();
         public List<PolyDetail> navDMeshes = new List<PolyDetail>();
         public List<Vector3> navDVerts = new List<Vector3>();
-        public List<Trianglei> navDTris = new List<Trianglei>();
+        public List<Int4> navDTris = new List<Int4>();
         public List<BVNode> navBvtree = new List<BVNode>();
         public List<OffMeshConnection> offMeshCons = new List<OffMeshConnection>();
     }

@@ -19,18 +19,18 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Index to parent node.
         /// </summary>
-        public uint pidx;
+        public int pidx;
         /// <summary>
         /// Extra state information. A polyRef can have multiple nodes with different extra info. see DT_MAX_STATES_PER_NODE
         /// </summary>
-        public uint state;
+        public int state;
         /// <summary>
         /// Node flags. A combination of dtNodeFlags.
         /// </summary>
-        public uint flags;
+        public int flags;
         /// <summary>
         /// Polygon ref the node corresponds to.
         /// </summary>
-        public uint id;
+        public int id;
     }
 }

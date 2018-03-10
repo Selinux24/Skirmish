@@ -12,10 +12,10 @@ namespace Engine.PathFinding.NavMesh2
             {
                 return new LayerRegion()
                 {
-                    layers = new byte[63],
+                    layers = new int[63],
                     nlayers = 0,
 
-                    neis = new byte[MaxNeighbors],
+                    neis = new int[MaxNeighbors],
                     nneis = 0,
 
                     ymin = 0xffff,
@@ -28,22 +28,22 @@ namespace Engine.PathFinding.NavMesh2
             }
         }
 
-        public byte[] layers;
-        public byte[] neis;
+        public int[] layers;
+        public int[] neis;
         public int ymin;
         public int ymax;
         /// <summary>
         /// Layer ID
         /// </summary>
-        public byte layerId;
+        public int layerId;
         /// <summary>
         /// Layer count
         /// </summary>
-        public byte nlayers;
+        public int nlayers;
         /// <summary>
         ///  Neighbour count
         /// </summary>
-        public byte nneis;
+        public int nneis;
         /// <summary>
         /// Flag indicating if the region is the base of merged regions.
         /// </summary>

@@ -16,7 +16,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The polygon mesh vertices. [(x, y, z) * #vertCount] [Unit: vx]
         /// </summary>
-        public Trianglei[] verts;
+        public Int3[] verts;
         /// <summary>
         /// The number vertices in the polygon mesh. [Limit: >= 3]
         /// </summary>
@@ -51,7 +51,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The height detail sub-mesh data. [Size: 4 * #polyCount]
         /// </summary>
-        public Trianglei[] detailMeshes;
+        public Int4[] detailMeshes;
         /// <summary>
         /// The detail mesh vertices. [Size: 3 * #detailVertsCount] [Unit: wu]
         /// </summary>
@@ -63,7 +63,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The detail mesh triangles. [Size: 4 * #detailTriCount]
         /// </summary>
-        public Trianglei[] detailTris;
+        public Int4[] detailTris;
         /// <summary>
         /// The number of triangles in the detail mesh.
         /// </summary>
@@ -98,11 +98,11 @@ namespace Engine.PathFinding.NavMesh2
         /// 0 = Travel only from endpoint A to endpoint B.<br/>
         /// #DT_OFFMESH_CON_BIDIR = Bidirectional travel.
         /// </summary>
-        public uint[] offMeshConDir;
+        public int[] offMeshConDir;
         /// <summary>
         /// The user defined ids of the off-mesh connection. [Size: #offMeshConCount]
         /// </summary>
-        public uint[] offMeshConUserID;
+        public int[] offMeshConUserID;
         /// <summary>
         /// The number of off-mesh connections. [Limit: >= 0]
         /// </summary>
@@ -117,7 +117,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The user defined id of the tile.
         /// </summary>
-        public uint userId;
+        public int userId;
         /// <summary>
         /// The tile's x-grid location within the multi-tile destination mesh. (Along the x-axis.)
         /// </summary>

@@ -17,9 +17,9 @@ namespace Engine.PathFinding.NavMesh2
             }
         }
 
-        public byte[] heights;
+        public int[] heights;
         public TileCacheAreas[] areas;
-        public byte[] cons;
+        public int[] cons;
 
         /// <summary>
         /// Gets the text representation of the instance

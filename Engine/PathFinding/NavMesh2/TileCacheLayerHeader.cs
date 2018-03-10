@@ -33,35 +33,35 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Height min range
         /// </summary>
-        public ushort hmin;
+        public int hmin;
         /// <summary>
         /// Height max range
         /// </summary>
-        public ushort hmax;
+        public int hmax;
         /// <summary>
         /// Width of the layer.
         /// </summary>
-        public byte width;
+        public int width;
         /// <summary>
         /// Height of the layer.
         /// </summary>
-        public byte height;
+        public int height;
         /// <summary>
         /// Minx usable sub-region.
         /// </summary>
-        public byte minx;
+        public int minx;
         /// <summary>
         /// Maxx usable sub-region.
         /// </summary>
-        public byte maxx;
+        public int maxx;
         /// <summary>
         /// Miny usable sub-region.
         /// </summary>
-        public byte miny;
+        public int miny;
         /// <summary>
         /// Maxy usable sub-region.
         /// </summary>
-        public byte maxy;
+        public int maxy;
 
         /// <summary>
         /// Gets the text representation of the instance

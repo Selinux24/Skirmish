@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.NavMesh2
 {
@@ -8,8 +9,8 @@ namespace Engine.PathFinding.NavMesh2
         public static readonly CompareY YComparer = new CompareY();
         public static readonly CompareZ ZComparer = new CompareZ();
 
-        public Vector3i bmin;
-        public Vector3i bmax;
+        public Int3 bmin;
+        public Int3 bmax;
         public int i;
 
         /// <summary>

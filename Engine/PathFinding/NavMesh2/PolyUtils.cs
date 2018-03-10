@@ -9,7 +9,38 @@ namespace Engine.PathFinding.NavMesh2
 {
     static class PolyUtils
     {
-        public static int Triangulate(int n, Trianglei[] verts, ref int[] indices, out Trianglei[] tris)
+        public static int ComputeTileHash(int x, int y, int mask)
+        {
+            uint h1 = 0x8da6b343; // Large multiplicative constants;
+            uint h2 = 0xd8163841; // here arbitrarily chosen primes
+            uint n = (uint)(h1 * x + h2 * y);
+            return (int)(n & mask);
+        }
+        public static int ComputeVertexHash2(int x, int y, int z)
+        {
+            uint h1 = 0x8da6b343; // Large multiplicative constants;
+            uint h2 = 0xd8163841; // here arbitrarily chosen primes
+            uint h3 = 0xcb1ab31f;
+            uint n = (uint)(h1 * x + h2 * y + h3 * z);
+            return (int)(n & (Constants.VertexBucketCount2 - 1));
+        }
+        public static int GetDirForOffset(int x, int y)
+        {
+            int[] dirs = { 3, 0, -1, 2, 1 };
+            return dirs[((y + 1) << 1) + x];
+        }
+        public static int GetDirOffsetX(int dir)
+        {
+            int[] offset = new[] { -1, 0, 1, 0, };
+            return offset[dir & 0x03];
+        }
+        public static int GetDirOffsetY(int dir)
+        {
+            int[] offset = new[] { 0, 1, 0, -1 };
+            return offset[dir & 0x03];
+        }
+
+        public static int Triangulate(int n, Int4[] verts, ref int[] indices, out Int3[] tris)
         {
             int ntris = 0;
 
@@ -24,7 +55,7 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
 
-            List<Trianglei> dst = new List<Trianglei>();
+            List<Int3> dst = new List<Int3>();
 
             while (n > 3)
             {
@@ -60,7 +91,7 @@ namespace Engine.PathFinding.NavMesh2
                 int i1 = Next(i, n);
                 int i2 = Next(i1, n);
 
-                dst.Add(new Trianglei()
+                dst.Add(new Int3()
                 {
                     X = indices[i] & 0x7fff,
                     Y = indices[i1] & 0x7fff,
@@ -71,7 +102,9 @@ namespace Engine.PathFinding.NavMesh2
                 // Removes P[i1] by copying P[i+1]...P[n-1] left one index.
                 n--;
                 for (int k = i1; k < n; k++)
+                {
                     indices[k] = indices[k + 1];
+                }
 
                 if (i1 >= n) i1 = 0;
                 i = Prev(i1, n);
@@ -96,7 +129,7 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Append the remaining triangle.
-            dst.Add(new Trianglei
+            dst.Add(new Int3
             {
                 X = indices[0] & 0x7fff,
                 Y = indices[1] & 0x7fff,
@@ -105,6 +138,7 @@ namespace Engine.PathFinding.NavMesh2
             ntris++;
 
             tris = dst.ToArray();
+
             return ntris;
         }
         public static int Prev(int i, int n)
@@ -115,11 +149,11 @@ namespace Engine.PathFinding.NavMesh2
         {
             return i + 1 < n ? i + 1 : 0;
         }
-        public static bool Diagonal(int i, int j, int n, Trianglei[] verts, int[] indices)
+        public static bool Diagonal(int i, int j, int n, Int4[] verts, int[] indices)
         {
             return InCone(i, j, n, verts, indices) && Diagonalie(i, j, n, verts, indices);
         }
-        public static bool InCone(int i, int n, Trianglei[] verts, Trianglei pj)
+        public static bool InCone(int i, int n, Int4[] verts, Int4 pj)
         {
             var pi = verts[i];
             var pi1 = verts[Next(i, n)];
@@ -134,7 +168,7 @@ namespace Engine.PathFinding.NavMesh2
             // else P[i] is reflex.
             return !(LeftOn(pi, pj, pi1) && LeftOn(pj, pi, pin1));
         }
-        public static bool InCone(int i, int j, int n, Trianglei[] verts, int[] indices)
+        public static bool InCone(int i, int j, int n, Int4[] verts, int[] indices)
         {
             var pi = verts[(indices[i] & 0x7fff)];
             var pj = verts[(indices[j] & 0x7fff)];
@@ -150,19 +184,19 @@ namespace Engine.PathFinding.NavMesh2
             // else P[i] is reflex.
             return !(LeftOn(pi, pj, pi1) && LeftOn(pj, pi, pin1));
         }
-        public static bool LeftOn(Trianglei a, Trianglei b, Trianglei c)
+        public static bool LeftOn(Int4 a, Int4 b, Int4 c)
         {
             return Area2(a, b, c) <= 0;
         }
-        public static int Area2(Trianglei a, Trianglei b, Trianglei c)
+        public static int Area2(Int4 a, Int4 b, Int4 c)
         {
             return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z);
         }
-        public static bool Left(Trianglei a, Trianglei b, Trianglei c)
+        public static bool Left(Int4 a, Int4 b, Int4 c)
         {
             return Area2(a, b, c) < 0;
         }
-        public static bool Diagonalie(int i, int j, int n, Trianglei[] verts, int[] indices)
+        public static bool Diagonalie(int i, int j, int n, Int4[] verts, int[] indices)
         {
             var d0 = verts[(indices[i] & 0x7fff)];
             var d1 = verts[(indices[j] & 0x7fff)];
@@ -186,7 +220,7 @@ namespace Engine.PathFinding.NavMesh2
             }
             return true;
         }
-        public static bool Vequal(Trianglei a, Trianglei b)
+        public static bool Vequal(Int4 a, Int4 b)
         {
             return a.X == b.X && a.Z == b.Z;
         }
@@ -198,7 +232,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <param name="c"></param>
         /// <param name="d"></param>
         /// <returns></returns>
-        public static bool Intersect(Trianglei a, Trianglei b, Trianglei c, Trianglei d)
+        public static bool Intersect(Int4 a, Int4 b, Int4 c, Int4 d)
         {
             if (IntersectProp(a, b, c, d))
                 return true;
@@ -218,7 +252,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <param name="c"></param>
         /// <param name="d"></param>
         /// <returns></returns>
-        public static bool IntersectProp(Trianglei a, Trianglei b, Trianglei c, Trianglei d)
+        public static bool IntersectProp(Int4 a, Int4 b, Int4 c, Int4 d)
         {
             // Eliminate improper cases.
             if (Collinear(a, b, c) || Collinear(a, b, d) ||
@@ -227,7 +261,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return Xorb(Left(a, b, c), Left(a, b, d)) && Xorb(Left(c, d, a), Left(c, d, b));
         }
-        public static bool Collinear(Trianglei a, Trianglei b, Trianglei c)
+        public static bool Collinear(Int4 a, Int4 b, Int4 c)
         {
             return Area2(a, b, c) == 0;
         }
@@ -251,7 +285,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <param name="b"></param>
         /// <param name="c"></param>
         /// <returns></returns>
-        public static bool Between(Trianglei a, Trianglei b, Trianglei c)
+        public static bool Between(Int4 a, Int4 b, Int4 c)
         {
             if (!Collinear(a, b, c))
             {
@@ -268,7 +302,7 @@ namespace Engine.PathFinding.NavMesh2
                 return ((a.Z <= c.Z) && (c.Z <= b.Z)) || ((a.Z >= c.Z) && (c.Z >= b.Z));
             }
         }
-        public static int AddVertex(int x, int y, int z, Trianglei[] verts, Polygoni firstVert, Polygoni nextVert, ref int nv)
+        public static int AddVertex(int x, int y, int z, Int3[] verts, Polygoni firstVert, Polygoni nextVert, ref int nv)
         {
             int bucket = ComputeVertexHash2(x, 0, z);
             int i = firstVert[bucket];
@@ -285,7 +319,7 @@ namespace Engine.PathFinding.NavMesh2
 
             // Could not find, create new.
             i = nv; nv++;
-            var v = new Trianglei();
+            var v = new Int3();
             v[0] = x;
             v[1] = y;
             v[2] = z;
@@ -295,15 +329,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return i;
         }
-        public static int ComputeVertexHash2(int x, int y, int z)
-        {
-            uint h1 = 0x8da6b343; // Large multiplicative constants;
-            uint h2 = 0xd8163841; // here arbitrarily chosen primes
-            uint h3 = 0xcb1ab31f;
-            uint n = (uint)(h1 * x + h2 * y + h3 * z);
-            return (int)(n & (Constants.VertexBucketCount2 - 1));
-        }
-        public static int GetPolyMergeValue(Polygoni pa, Polygoni pb, Trianglei[] verts, out int ea, out int eb)
+        public static int GetPolyMergeValue(Polygoni pa, Polygoni pb, Int3[] verts, out int ea, out int eb)
         {
             ea = -1;
             eb = -1;
@@ -388,11 +414,33 @@ namespace Engine.PathFinding.NavMesh2
 
             return Constants.VertsPerPolygon;
         }
-        public static bool Uleft(Trianglei a, Trianglei b, Trianglei c)
+        public static Polygoni MergePolys(Polygoni pa, Polygoni pb, int ea, int eb)
+        {
+            var tmp = new Polygoni(Constants.VertsPerPolygon);
+
+            int na = CountPolyVerts(pa);
+            int nb = CountPolyVerts(pb);
+
+            // Merge polygons.
+            int n = 0;
+            // Add pa
+            for (int i = 0; i < na - 1; ++i)
+            {
+                tmp[n++] = pa[(ea + 1 + i) % na];
+            }
+            // Add pb
+            for (int i = 0; i < nb - 1; ++i)
+            {
+                tmp[n++] = pb[(eb + 1 + i) % nb];
+            }
+
+            return tmp;
+        }
+        public static bool Uleft(Int3 a, Int3 b, Int3 c)
         {
             return (b.X - a.X) * (c.Z - a.Z) - (c.X - a.X) * (b.Z - a.Z) < 0;
         }
-        public static bool BuildMeshAdjacency(Polygoni[] polys, int npolys, Trianglei[] verts, int nverts, TileCacheContourSet lcset)
+        public static bool BuildMeshAdjacency(Polygoni[] polys, int npolys, Int3[] verts, int nverts, TileCacheContourSet lcset)
         {
             // Based on code by Eric Lengyel from:
             // http://www.terathon.com/code/edges.php
@@ -504,7 +552,7 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     var va = cont.verts[k];
                     var vb = cont.verts[j];
-                    int dir = va.R & 0xf;
+                    int dir = va.W & 0xf;
                     if (dir == 0xf)
                     {
                         continue;
@@ -845,14 +893,14 @@ namespace Engine.PathFinding.NavMesh2
             }
             return c ? -dmin : dmin;
         }
-        public static float DistToTriMesh(Vector3 p, Vector3[] verts, int nverts, Trianglei[] tris, int ntris)
+        public static float DistToTriMesh(Vector3 p, Vector3[] verts, int nverts, Int4[] tris, int ntris)
         {
             float dmin = float.MaxValue;
             for (int i = 0; i < ntris; ++i)
             {
-                var va = verts[tris[i][0]];
-                var vb = verts[tris[i][1]];
-                var vc = verts[tris[i][2]];
+                var va = verts[tris[i].X];
+                var vb = verts[tris[i].Y];
+                var vc = verts[tris[i].Z];
                 float d = DistPtTri(p, va, vb, vc);
                 if (d < dmin)
                 {
@@ -884,7 +932,7 @@ namespace Engine.PathFinding.NavMesh2
         {
             return (((i * 0xd8163841) & 0xffff) / 65535.0f * 2.0f) - 1.0f;
         }
-        public static void TriangulateHull(int nverts, Vector3[] verts, int nhull, int[] hull, List<Trianglei> tris)
+        public static void TriangulateHull(int nverts, Vector3[] verts, int nhull, int[] hull, List<Int4> tris)
         {
             int start = 0, left = 1, right = nhull - 1;
 
@@ -912,12 +960,12 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Add first triangle
-            tris.Add(new Trianglei()
+            tris.Add(new Int4()
             {
                 X = hull[start],
                 Y = hull[left],
                 Z = hull[right],
-                R = 0,
+                W = 0,
             });
 
             // Triangulate the polygon by moving left or right,
@@ -944,36 +992,36 @@ namespace Engine.PathFinding.NavMesh2
 
                 if (dleft < dright)
                 {
-                    tris.Add(new Trianglei()
+                    tris.Add(new Int4()
                     {
                         X = hull[left],
                         Y = hull[nleft],
                         Z = hull[right],
-                        R = 0,
+                        W = 0,
                     });
 
                     left = nleft;
                 }
                 else
                 {
-                    tris.Add(new Trianglei()
+                    tris.Add(new Int4()
                     {
                         X = hull[left],
                         Y = hull[nright],
                         Z = hull[right],
-                        R = 0,
+                        W = 0,
                     });
 
                     right = nright;
                 }
             }
         }
-        public static void DelaunayHull(int npts, Vector3[] pts, int nhull, int[] hull, List<Trianglei> tris, List<Trianglei> edges)
+        public static void DelaunayHull(int npts, Vector3[] pts, int nhull, int[] hull, List<Int4> tris, List<Int3> edges)
         {
             int nfaces = 0;
             int nedges = 0;
             int maxEdges = npts * 10;
-            edges = new List<Trianglei>(maxEdges * 4);
+            edges = new List<Int3>(maxEdges * 4);
 
             for (int i = 0, j = nhull - 1; i < nhull; j = i++)
             {
@@ -995,10 +1043,10 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // Create tris
-            tris = new List<Trianglei>(nfaces);
+            tris = new List<Int4>(nfaces);
             for (int i = 0; i < nfaces; ++i)
             {
-                tris[i] = new Trianglei(-1, -1, -1, -1);
+                tris[i] = new Int4(-1, -1, -1, -1);
             }
 
             for (int i = 0; i < nedges; ++i)
@@ -1054,7 +1102,7 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
         }
-        public static int AddEdge(Trianglei[] edges, int nedges, int maxEdges, int s, int t, int l, int r)
+        public static int AddEdge(Int3[] edges, int nedges, int maxEdges, int s, int t, int l, int r)
         {
             if (nedges >= maxEdges)
             {
@@ -1078,7 +1126,7 @@ namespace Engine.PathFinding.NavMesh2
                 return (int)EdgeValues.EV_UNDEF;
             }
         }
-        public static int FindEdge(Trianglei[] edges, int nedges, int s, int t)
+        public static int FindEdge(Int3[] edges, int nedges, int s, int t)
         {
             for (int i = 0; i < nedges; i++)
             {
@@ -1110,7 +1158,7 @@ namespace Engine.PathFinding.NavMesh2
 
             tmp = pa;
         }
-        public static void CompleteFacet(Vector3[] pts, int npts, Trianglei[] edges, int nedges, int maxEdges, int nfaces, int e)
+        public static void CompleteFacet(Vector3[] pts, int npts, Int3[] edges, int nedges, int maxEdges, int nfaces, int e)
         {
             float EPS = float.Epsilon;
 
@@ -1266,7 +1314,7 @@ namespace Engine.PathFinding.NavMesh2
         {
             return (float)Math.Sqrt(VDistSq2(p, q));
         }
-        public static void UpdateLeftFace(Trianglei e, int s, int t, int f)
+        public static void UpdateLeftFace(Int3 e, int s, int t, int f)
         {
             if (e[0] == s && e[1] == t && e[2] == (int)EdgeValues.EV_UNDEF)
             {
@@ -1277,7 +1325,7 @@ namespace Engine.PathFinding.NavMesh2
                 e[3] = f;
             }
         }
-        public static bool OverlapEdges(Vector3[] pts, Trianglei[] edges, int nedges, int s1, int t1)
+        public static bool OverlapEdges(Vector3[] pts, Int3[] edges, int nedges, int s1, int t1)
         {
             for (int i = 0; i < nedges; ++i)
             {

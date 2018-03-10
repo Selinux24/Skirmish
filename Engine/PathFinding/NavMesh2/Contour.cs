@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.PathFinding.NavMesh2
 {
     /// <summary>
@@ -9,7 +10,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Simplified contour vertex and connection data. [Size: 4 * #nverts]
         /// </summary>
-        public Trianglei[] verts;
+        public Int4[] verts;
         /// <summary>
         /// The number of vertices in the simplified contour. 
         /// </summary>
@@ -17,7 +18,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Raw contour vertex and connection data. [Size: 4 * #nrverts]
         /// </summary>
-        public Trianglei[] rverts;
+        public Int4[] rverts;
         /// <summary>
         /// The number of vertices in the raw contour. 
         /// </summary>

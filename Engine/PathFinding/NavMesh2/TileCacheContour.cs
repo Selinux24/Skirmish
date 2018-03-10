@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using SharpDX;
 
 namespace Engine.PathFinding.NavMesh2
 {
     public struct TileCacheContour
     {
         public int nverts;
-        public Trianglei[] verts;
+        public Int4[] verts;
         public int reg;
         public TileCacheAreas area;
     }

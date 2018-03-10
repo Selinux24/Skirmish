@@ -45,7 +45,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The detail mesh's triangles. [(vertA, vertB, vertC) * dtMeshHeader::detailTriCount]
         /// </summary>
-        public Trianglei[] detailTris;
+        public Int4[] detailTris;
 
         /// <summary>
         /// The tile bounding volume nodes. [Size: dtMeshHeader::bvNodeCount]
@@ -84,7 +84,7 @@ namespace Engine.PathFinding.NavMesh2
             links = new Link[header.maxLinkCount];
             detailMeshes = new PolyDetail[header.detailMeshCount];
             detailVerts = new Vector3[header.detailVertCount];
-            detailTris = new Trianglei[header.detailTriCount];
+            detailTris = new Int4[header.detailTriCount];
             bvTree = new BVNode[header.bvNodeCount];
             offMeshCons = new OffMeshConnection[header.offMeshConCount];
         }

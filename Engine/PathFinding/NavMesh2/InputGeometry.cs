@@ -70,10 +70,10 @@ namespace Engine.PathFinding.NavMesh2
 
         private Vector3[] m_offMeshConVerts;
         private float[] m_offMeshConRads;
-        private uint[] m_offMeshConDirs;
+        private int[] m_offMeshConDirs;
         private SamplePolyAreas[] m_offMeshConAreas;
         private SamplePolyFlags[] m_offMeshConFlags;
-        private uint[] m_offMeshConId;
+        private int[] m_offMeshConId;
         private int m_offMeshConCount;
 
         public readonly BoundingBox BoundingBox;
@@ -85,10 +85,10 @@ namespace Engine.PathFinding.NavMesh2
 
             m_offMeshConVerts = new Vector3[MaxOffmeshConnections * 2];
             m_offMeshConRads = new float[MaxOffmeshConnections];
-            m_offMeshConDirs = new uint[MaxOffmeshConnections];
+            m_offMeshConDirs = new int[MaxOffmeshConnections];
             m_offMeshConAreas = new SamplePolyAreas[MaxOffmeshConnections];
             m_offMeshConFlags = new SamplePolyFlags[MaxOffmeshConnections];
-            m_offMeshConId = new uint[MaxOffmeshConnections];
+            m_offMeshConId = new int[MaxOffmeshConnections];
             m_offMeshConCount = 0;
         }
         public InputGeometry(IEnumerable<Triangle> triangles) : this()
@@ -114,7 +114,7 @@ namespace Engine.PathFinding.NavMesh2
         {
             return m_offMeshConCount;
         }
-        public uint[] GetOffMeshConnectionId()
+        public int[] GetOffMeshConnectionId()
         {
             return m_offMeshConId;
         }
@@ -126,7 +126,7 @@ namespace Engine.PathFinding.NavMesh2
         {
             return m_offMeshConAreas;
         }
-        public uint[] GetOffMeshConnectionDirs()
+        public int[] GetOffMeshConnectionDirs()
         {
             return m_offMeshConDirs;
         }

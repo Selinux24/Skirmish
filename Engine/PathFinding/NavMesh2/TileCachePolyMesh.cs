@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using SharpDX;
 
 namespace Engine.PathFinding.NavMesh2
 {
@@ -16,7 +16,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Vertices of the mesh, 3 elements per vertex.
         /// </summary>
-        public Trianglei[] verts;
+        public Int3[] verts;
         /// <summary>
         /// Polygons of the mesh, nvp*2 elements per polygon.
         /// </summary>

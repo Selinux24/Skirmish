@@ -15,7 +15,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The heightfield. [Size: width * height]
         /// </summary>
-        public byte[] heights;
+        public int[] heights;
         /// <summary>
         /// Area ids. [Size: Same as #heights]
         /// </summary>
@@ -23,7 +23,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Packed neighbor connection information. [Size: Same as #heights]
         /// </summary>
-        public byte[] cons;
+        public int[] cons;
         /// <summary>
         /// Bounding box
         /// </summary>
@@ -31,34 +31,34 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Height min range
         /// </summary>
-        public ushort hmin;
+        public int hmin;
         /// <summary>
         /// Height max range
         /// </summary>
-        public ushort hmax;
+        public int hmax;
         /// <summary>
         /// Width of the layer.
         /// </summary>
-        public byte width;
+        public int width;
         /// <summary>
         /// Height of the layer.
         /// </summary>
-        public byte height;
+        public int height;
         /// <summary>
         /// Minx usable sub-region.
         /// </summary>
-        public byte minx;
+        public int minx;
         /// <summary>
         /// Maxx usable sub-region.
         /// </summary>
-        public byte maxx;
+        public int maxx;
         /// <summary>
         /// Miny usable sub-region.
         /// </summary>
-        public byte miny;
+        public int miny;
         /// <summary>
         /// Maxy usable sub-region.
         /// </summary>
-        public byte maxy;
+        public int maxy;
     }
 }

@@ -26,7 +26,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <remarks>
         /// These are not the connection's user defined flags. Those are assigned via the connection's dtPoly definition. These are link flags used for internal purposes.
         /// </remarks>
-        public uint flags;
+        public int flags;
         /// <summary>
         /// End point side.
         /// </summary>
@@ -34,6 +34,6 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// The id of the offmesh connection. (User assigned when the navigation mesh is built.)
         /// </summary>
-        public uint userId;
+        public int userId;
     };
 }

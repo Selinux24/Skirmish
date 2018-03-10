@@ -346,7 +346,6 @@
     <Compile Include="PathFinding\NavMesh2\TileCacheParams.cs" />
     <Compile Include="PathFinding\NavMesh2\TileCachePolyMesh.cs" />
     <Compile Include="PathFinding\NavMesh2\TileFlags.cs" />
-    <Compile Include="PathFinding\NavMesh2\Trianglei.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\Agent.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\AgentAnimation.cs" />
     <Compile Include="PathFinding\NavMesh\Crowds\AgentParams.cs" />
