@@ -5,7 +5,7 @@ namespace Engine.PathFinding.NavMesh2
     /// <summary>
     /// Bounding volume node.
     /// </summary>
-    public struct BVNode
+    public class BVNode
     {
         /// <summary>
         /// Minimum bounds of the node's AABB. [(x, y, z)]

@@ -21,8 +21,8 @@ namespace Engine.PathFinding.NavMesh2
         public bool overlap;
         public bool connectsToBorder;
         public int ymin, ymax;
-        public List<int> connections;
-        public List<int> floors;
+        public List<int> connections = new List<int>();
+        public List<int> floors = new List<int>();
 
         public Region(int i)
         {

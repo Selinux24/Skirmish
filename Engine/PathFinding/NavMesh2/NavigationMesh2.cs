@@ -7,11 +7,22 @@ namespace Engine.PathFinding.NavMesh2
 {
     public class NavigationMesh2 : IGraph
     {
-        public static NavigationMesh2 BuildTiled(Triangle[] triangles, BuildSettings settings)
+        public static NavigationMesh2 Build(Triangle[] triangles, BuildSettings settings)
         {
-            return BuildTiled(new InputGeometry(triangles), settings);
+            return Build(new InputGeometry(triangles), settings);
         }
-        public static NavigationMesh2 BuildTiled(InputGeometry geometry, BuildSettings settings)
+        public static NavigationMesh2 Build(InputGeometry geometry, BuildSettings settings)
+        {
+            if (settings.BuildTiles)
+            {
+                return BuildTiled(geometry, settings);
+            }
+            else
+            {
+                return BuildSolo(geometry, settings);
+            }
+        }
+        private static NavigationMesh2 BuildTiled(InputGeometry geometry, BuildSettings settings)
         {
             var agent = settings.Agents[0];
 
@@ -125,51 +136,33 @@ namespace Engine.PathFinding.NavMesh2
 
             return nm;
         }
-        public static NavigationMesh2 BuildSolo(Triangle[] triangles, BuildSettings settings)
-        {
-            return BuildSolo(new InputGeometry(triangles), settings);
-        }
-        public static NavigationMesh2 BuildSolo(InputGeometry geometry, BuildSettings settings)
+        private static NavigationMesh2 BuildSolo(InputGeometry geometry, BuildSettings settings)
         {
             var agent = settings.Agents[0];
 
-            var ntris = geometry.GetChunkyMesh().ntris;
-            var tris = geometry.GetChunkyMesh().triangles;
-
             var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
 
-            // Init cache
-            CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
-            int ts = (int)settings.TileSize;
-            int tw = (gw + ts - 1) / ts;
-            int th = (gh + ts - 1) / ts;
+            CalcGridSize(bbox, settings.CellSize, out int width, out int height);
 
             // Generation params.
-            var walkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight);
-            var walkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight);
-            var walkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize);
-            var tileSize = (int)settings.TileSize;
-            var borderSize = walkableRadius + 3;
             var cfg = new Config()
             {
                 CellSize = settings.CellSize,
                 CellHeight = settings.CellHeight,
                 WalkableSlopeAngle = agent.MaxSlope,
-                WalkableHeight = walkableHeight,
-                WalkableClimb = walkableClimb,
-                WalkableRadius = walkableRadius,
+                WalkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight),
+                WalkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight),
+                WalkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize),
                 MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize),
                 MaxSimplificationError = settings.EdgeMaxError,
                 MinRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize),
                 MergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize),
                 MaxVertsPerPoly = settings.VertsPerPoly,
-                TileSize = tileSize,
-                BorderSize = borderSize,
-                Width = tileSize + borderSize * 2,
-                Height = tileSize + borderSize * 2,
                 DetailSampleDist = settings.DetailSampleDist < 0.9f ? 0 : settings.CellSize * settings.DetailSampleDist,
                 DetailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError,
                 BoundingBox = bbox,
+                Width = width,
+                Height = height,
             };
 
             var solid = new Heightfield
@@ -182,6 +175,8 @@ namespace Engine.PathFinding.NavMesh2
                 spans = new Span[cfg.Width * cfg.Height],
             };
 
+            var ntris = geometry.GetChunkyMesh().ntris;
+            var tris = geometry.GetChunkyMesh().triangles;
             var triareas = new TileCacheAreas[ntris];
 
             MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris, triareas);
@@ -212,7 +207,7 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             // (Optional) Mark areas.
-            ConvexVolume[] vols = geometry.GetConvexVolumes();
+            var vols = geometry.GetConvexVolumes();
             for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
             {
                 MarkConvexPolyArea(
@@ -244,7 +239,7 @@ namespace Engine.PathFinding.NavMesh2
                     throw new EngineException("buildNavigation: Could not build monotone regions.");
                 }
             }
-            else // SAMPLE_PARTITION_LAYERS
+            else if (settings.PartitionType == SamplePartitionTypeEnum.Layers)
             {
                 // Partition the walkable surface into simple regions without holes.
                 if (!BuildLayerRegions(chf, 0, cfg.MinRegionArea))
@@ -3199,13 +3194,11 @@ namespace Engine.PathFinding.NavMesh2
                 chf.borderSize = borderSize;
             }
 
-            List<int> prev = new List<int>();
-
             // Sweep one line at a time.
             for (int y = borderSize; y < h - borderSize; ++y)
             {
                 // Collect spans from this row.
-                prev.Clear();
+                int[] prev = new int[id + 1];
                 int rid = 1;
 
                 for (int x = borderSize; x < w - borderSize; ++x)
@@ -3325,7 +3318,7 @@ namespace Engine.PathFinding.NavMesh2
             int[] srcReg = new int[chf.spanCount];
 
             int nsweeps = Math.Max(chf.width, chf.height);
-            SweepSpan[] sweeps = new SweepSpan[nsweeps];
+            SweepSpan[] sweeps = Helper.CreateArray(nsweeps, new SweepSpan());
 
             // Mark border regions.
             if (borderSize > 0)
@@ -3959,60 +3952,54 @@ namespace Engine.PathFinding.NavMesh2
                         SimplifyContour(verts, simplified, maxError, maxEdgeLen, buildFlags);
                         RemoveDegenerateSegments(simplified);
 
-
                         // Store region->contour remap info.
                         // Create contour.
-                        if (simplified.Count / 4 >= 3)
+                        if (simplified.Count >= 3)
                         {
                             if (cset.nconts >= maxContours)
                             {
                                 // Allocate more contours.
                                 // This happens when a region has holes.
-                                int oldMax = maxContours;
-                                maxContours *= 2;
-                                Contour[] newConts = new Contour[maxContours];
+                                Contour[] newConts = new Contour[maxContours * 2];
                                 for (int j = 0; j < cset.nconts; ++j)
                                 {
                                     newConts[j] = cset.conts[j];
-                                    // Reset source pointers to prevent data deletion.
-                                    cset.conts[j].verts = null;
-                                    cset.conts[j].rverts = null;
                                 }
-                                cset.conts = null;
                                 cset.conts = newConts;
                             }
 
-                            var cont = cset.conts[cset.nconts++];
+                            var cont = new Contour
+                            {
+                                nverts = simplified.Count,
+                                verts = simplified.ToArray(),
+                                nrverts = verts.Count,
+                                rverts = verts.ToArray(),
+                                reg = reg,
+                                area = area
+                            };
 
-                            cont.nverts = simplified.Count;
-                            cont.verts = new Int4[cont.nverts];
-                            Array.Copy(simplified.ToArray(), cont.verts, cont.nverts);
                             if (borderSize > 0)
                             {
                                 // If the heightfield was build with bordersize, remove the offset.
                                 for (int j = 0; j < cont.nverts; ++j)
                                 {
                                     var v = cont.verts[j];
-                                    v[0] -= borderSize;
-                                    v[2] -= borderSize;
+                                    v.X -= borderSize;
+                                    v.Z -= borderSize;
+                                    cont.verts[j] = v;
                                 }
-                            }
 
-                            cont.nrverts = verts.Count;
-                            cont.rverts = new Int4[cont.nrverts];
-                            if (borderSize > 0)
-                            {
                                 // If the heightfield was build with bordersize, remove the offset.
                                 for (int j = 0; j < cont.nrverts; ++j)
                                 {
                                     var v = cont.rverts[j];
-                                    v[0] -= borderSize;
-                                    v[2] -= borderSize;
+                                    v.X -= borderSize;
+                                    v.Z -= borderSize;
+                                    cont.rverts[j] = v;
                                 }
                             }
 
-                            cont.reg = reg;
-                            cont.area = area;
+                            cset.conts[cset.nconts++] = cont;
                         }
                     }
                 }
@@ -4040,8 +4027,8 @@ namespace Engine.PathFinding.NavMesh2
                     // Collect outline contour and holes contours per region.
                     // We assume that there is one outline and multiple holes.
                     int nregions = chf.maxRegions + 1;
-                    ContourRegion[] regions = new ContourRegion[nregions];
-                    ContourHole[] holes = new ContourHole[cset.nconts];
+                    var regions = new ContourRegion[nregions];
+                    var holes = new ContourHole[cset.nconts];
 
                     for (int i = 0; i < cset.nconts; ++i)
                     {
@@ -4231,15 +4218,8 @@ namespace Engine.PathFinding.NavMesh2
                 // add new point, else continue to next segment.
                 if (maxi != -1 && maxd > (maxError * maxError))
                 {
-                    // Add space for the new point.
-                    simplified.Clear();
-                    int n = simplified.Count;
-                    for (int j = n - 1; j > i; --j)
-                    {
-                        simplified[j] = simplified[(j - 1)];
-                    }
                     // Add the point.
-                    simplified[(i + 1)] = new Int4(points[maxi].X, points[maxi].Y, points[maxi].Z, maxi);
+                    simplified.Insert(i + 1, new Int4(points[maxi].X, points[maxi].Y, points[maxi].Z, maxi));
                 }
                 else
                 {
@@ -4309,15 +4289,8 @@ namespace Engine.PathFinding.NavMesh2
                     // add new point, else continue to next segment.
                     if (maxi != -1)
                     {
-                        // Add space for the new point.
-                        simplified.Clear();
-                        int n = simplified.Count;
-                        for (int j = n - 1; j > i; --j)
-                        {
-                            simplified[j] = simplified[(j - 1)];
-                        }
                         // Add the point.
-                        simplified[(i + 1)] = new Int4(points[maxi].X, points[maxi].Y, points[maxi].Z, maxi);
+                        simplified.Insert(i + 1, new Int4(points[maxi].X, points[maxi].Y, points[maxi].Z, maxi));
                     }
                     else
                     {
@@ -4594,7 +4567,7 @@ namespace Engine.PathFinding.NavMesh2
             int[] vflags = new int[maxVertices];
 
             mesh.verts = new Int3[maxVertices];
-            mesh.polys = new Polygoni[maxTris * 2];
+            mesh.polys = new Polygoni[maxTris];
             mesh.regs = new int[maxTris];
             mesh.areas = new SamplePolyAreas[maxTris];
 
@@ -4603,16 +4576,9 @@ namespace Engine.PathFinding.NavMesh2
             mesh.nvp = nvp;
             mesh.maxpolys = maxTris;
 
-            Polygoni nextVert = new Polygoni(maxVertices);
-
-            Polygoni firstVert = new Polygoni(Constants.VERTEX_BUCKET_COUNT);
-            for (int i = 0; i < Constants.VERTEX_BUCKET_COUNT; ++i)
-            {
-                firstVert[i] = -1;
-            }
-
+            int[] nextVert = Helper.CreateArray(maxVertices, 0);
+            int[] firstVert = Helper.CreateArray(Constants.VERTEX_BUCKET_COUNT, Constants.NullIdx);
             int[] indices = new int[maxVertsPerCont];
-            Polygoni[] polys = new Polygoni[(maxVertsPerCont + 1)];
             Polygoni tmpPoly = new Polygoni(maxVertsPerCont);
 
             for (int i = 0; i < cset.nconts; ++i)
@@ -4663,11 +4629,13 @@ namespace Engine.PathFinding.NavMesh2
 
                 // Build initial polygons.
                 int npolys = 0;
+                Polygoni[] polys = new Polygoni[maxVertsPerCont];
                 for (int j = 0; j < ntris; ++j)
                 {
                     var t = tris[j];
                     if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                     {
+                        polys[npolys] = new Polygoni(Constants.VertsPerPolygon);
                         polys[npolys][0] = indices[t.X];
                         polys[npolys][1] = indices[t.Y];
                         polys[npolys][2] = indices[t.Z];
@@ -4709,14 +4677,8 @@ namespace Engine.PathFinding.NavMesh2
                         if (bestMergeVal > 0)
                         {
                             // Found best, merge.
-                            var pa = polys[bestPa];
-                            var pb = polys[bestPb];
-                            PolyUtils.MergePolyVerts(pa, pb, bestEa, bestEb, tmpPoly, nvp);
-                            var lastPoly = polys[(npolys - 1)];
-                            if (pb != lastPoly)
-                            {
-                                lastPoly = pb.Copy();
-                            }
+                            polys[bestPa] = PolyUtils.MergePolys(polys[bestPa], polys[bestPb], bestEa, bestEb);
+                            polys[bestPb] = polys[npolys - 1].Copy();
                             npolys--;
                         }
                         else
@@ -4730,12 +4692,13 @@ namespace Engine.PathFinding.NavMesh2
                 // Store polygons.
                 for (int j = 0; j < npolys; ++j)
                 {
-                    var p = mesh.polys[mesh.npolys * 2];
-                    var q = polys[j * nvp];
+                    var p = new Polygoni(nvp * 2); //Polygon with adjacency
+                    var q = polys[j];
                     for (int k = 0; k < nvp; ++k)
                     {
                         p[k] = q[k];
                     }
+                    mesh.polys[mesh.npolys] = p;
                     mesh.regs[mesh.npolys] = cont.reg;
                     mesh.areas[mesh.npolys] = (SamplePolyAreas)(int)cont.area;
                     mesh.npolys++;
@@ -4752,11 +4715,13 @@ namespace Engine.PathFinding.NavMesh2
                 if (vflags[i] != 0)
                 {
                     if (!CanRemoveVertex(mesh, i))
+                    {
                         continue;
+                    }
                     if (!RemoveVertex(mesh, i, maxTris))
                     {
                         // Failed to remove vertex
-                        throw new EngineException(string.Format("rcBuildPolyMesh: Failed to remove edge vertex {0}.", i));
+                        throw new EngineException(string.Format("Failed to remove edge vertex {0}.", i));
                     }
                     // Remove vertex
                     // Note: mesh.nverts is already decremented inside removeVertex()!
@@ -4772,7 +4737,7 @@ namespace Engine.PathFinding.NavMesh2
             // Calculate adjacency.
             if (!PolyUtils.BuildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, nvp))
             {
-                throw new EngineException("rcBuildPolyMesh: Adjacency failed.");
+                throw new EngineException("Adjacency failed.");
             }
 
             // Find portal edges
@@ -4827,11 +4792,11 @@ namespace Engine.PathFinding.NavMesh2
 
             if (mesh.nverts > 0xffff)
             {
-                //ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: The resulting mesh has too many vertices %d (max %d). Data can be corrupted.", mesh.nverts, 0xffff);
+                throw new EngineException(string.Format("The resulting mesh has too many vertices {0} (max {1}). Data can be corrupted.", mesh.nverts, 0xffff));
             }
             if (mesh.npolys > 0xffff)
             {
-                //ctx->log(RC_LOG_ERROR, "rcBuildPolyMesh: The resulting mesh has too many polygons %d (max %d). Data can be corrupted.", mesh.npolys, 0xffff);
+                throw new EngineException(string.Format("The resulting mesh has too many polygons {0} (max {1}). Data can be corrupted.", mesh.npolys, 0xffff));
             }
 
             return true;
@@ -4852,30 +4817,23 @@ namespace Engine.PathFinding.NavMesh2
             int borderSize = mesh.borderSize;
             int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.maxEdgeError));
 
-            List<Int3> edges = new List<Int3>(64);
-            List<Int4> tris = new List<Int4>(512);
             List<int> arr = new List<int>(512);
-            List<Int4> samples = new List<Int4>(512);
             Vector3[] verts = new Vector3[256];
-            HeightPatch hp = null;
+            HeightPatch hp = new HeightPatch();
             int nPolyVerts = 0;
             int maxhw = 0, maxhh = 0;
 
-            Int3[] bounds = new Int3[mesh.npolys];
+            Int4[] bounds = new Int4[mesh.npolys];
             Vector3[] poly = new Vector3[nvp];
 
             // Find max size for a polygon area.
             for (int i = 0; i < mesh.npolys; ++i)
             {
                 var p = mesh.polys[i];
-                int xmin = bounds[i][0];
-                int xmax = bounds[i][1];
-                int ymin = bounds[i][2];
-                int ymax = bounds[i][3];
-                xmin = chf.width;
-                xmax = 0;
-                ymin = chf.height;
-                ymax = 0;
+                int xmin = chf.width;
+                int xmax = 0;
+                int ymin = chf.height;
+                int ymax = 0;
                 for (int j = 0; j < nvp; ++j)
                 {
                     if (p[j] == Constants.RC_MESH_NULL_IDX) break;
@@ -4890,6 +4848,7 @@ namespace Engine.PathFinding.NavMesh2
                 xmax = Math.Min(chf.width, xmax + 1);
                 ymin = Math.Max(0, ymin - 1);
                 ymax = Math.Min(chf.height, ymax + 1);
+                bounds[i] = new Int4(xmin, xmax, ymin, ymax);
                 if (xmin >= xmax || ymin >= ymax) continue;
                 maxhw = Math.Max(maxhw, xmax - xmin);
                 maxhh = Math.Max(maxhh, ymax - ymin);
@@ -4897,18 +4856,18 @@ namespace Engine.PathFinding.NavMesh2
 
             hp.data = new int[maxhw * maxhh];
 
-            dmesh.nmeshes = mesh.npolys;
-            dmesh.nverts = 0;
-            dmesh.ntris = 0;
-            dmesh.meshes = new Int4[dmesh.nmeshes];
-
             int vcap = nPolyVerts + nPolyVerts / 2;
             int tcap = vcap * 2;
 
-            dmesh.nverts = 0;
-            dmesh.verts = new Vector3[vcap];
-            dmesh.ntris = 0;
-            dmesh.tris = new Int4[tcap];
+            dmesh = new PolyMeshDetail
+            {
+                nmeshes = mesh.npolys,
+                meshes = new Int4[mesh.npolys],
+                ntris = 0,
+                tris = new Int4[tcap],
+                nverts = 0,
+                verts = new Vector3[vcap]
+            };
 
             for (int i = 0; i < mesh.npolys; ++i)
             {
@@ -4920,27 +4879,25 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     if (p[j] == Constants.RC_MESH_NULL_IDX) break;
                     var v = mesh.verts[p[j]];
-                    poly[j][0] = v[0] * cs;
-                    poly[j][1] = v[1] * ch;
-                    poly[j][2] = v[2] * cs;
+                    poly[j].X = v.X * cs;
+                    poly[j].Y = v.Y * ch;
+                    poly[j].Z = v.Z * cs;
                     npoly++;
                 }
 
                 // Get the height data from the area of the polygon.
-                hp.xmin = bounds[i][0];
-                hp.ymin = bounds[i][2];
-                hp.width = bounds[i][1] - bounds[i][0];
-                hp.height = bounds[i][3] - bounds[i][2];
+                hp.xmin = bounds[i].X;
+                hp.ymin = bounds[i].Z;
+                hp.width = bounds[i].Y - bounds[i].X;
+                hp.height = bounds[i].W - bounds[i].Z;
                 GetHeightData(chf, p, npoly, mesh.verts, borderSize, hp, arr, mesh.regs[i]);
 
                 // Build detail mesh.
-                int nverts = 0;
                 if (!BuildPolyDetail(
                     poly, npoly,
                     sampleDist, sampleMaxError,
                     heightSearchRadius, chf, hp,
-                    verts, nverts, tris,
-                    edges, samples))
+                    verts, out int nverts, out Int4[] tris))
                 {
                     return false;
                 }
@@ -4948,31 +4905,33 @@ namespace Engine.PathFinding.NavMesh2
                 // Move detail verts to world space.
                 for (int j = 0; j < nverts; ++j)
                 {
-                    verts[j][0] += orig[0];
-                    verts[j][1] += orig[1] + chf.ch; // Is this offset necessary?
-                    verts[j][2] += orig[2];
+                    verts[j].X += orig.X;
+                    verts[j].Y += orig.Y + chf.ch; // Is this offset necessary?
+                    verts[j].Z += orig.Z;
                 }
                 // Offset poly too, will be used to flag checking.
                 for (int j = 0; j < npoly; ++j)
                 {
-                    poly[j][0] += orig[0];
-                    poly[j][1] += orig[1];
-                    poly[j][2] += orig[2];
+                    poly[j].X += orig.X;
+                    poly[j].Y += orig.Y;
+                    poly[j].Z += orig.Z;
                 }
 
                 // Store detail submesh.
-                int ntris = tris.Count;
+                int ntris = tris.Length;
 
-                dmesh.meshes[i][0] = dmesh.nverts;
-                dmesh.meshes[i][1] = nverts;
-                dmesh.meshes[i][2] = dmesh.ntris;
-                dmesh.meshes[i][3] = ntris;
+                dmesh.meshes[i].X = dmesh.nverts;
+                dmesh.meshes[i].Y = nverts;
+                dmesh.meshes[i].Z = dmesh.ntris;
+                dmesh.meshes[i].W = ntris;
 
                 // Store vertices, allocate more memory if necessary.
                 if (dmesh.nverts + nverts > vcap)
                 {
                     while (dmesh.nverts + nverts > vcap)
+                    {
                         vcap += 256;
+                    }
 
                     Vector3[] newv = new Vector3[vcap];
                     if (dmesh.nverts != 0)
@@ -4983,9 +4942,9 @@ namespace Engine.PathFinding.NavMesh2
                 }
                 for (int j = 0; j < nverts; ++j)
                 {
-                    dmesh.verts[dmesh.nverts][0] = verts[j][0];
-                    dmesh.verts[dmesh.nverts][1] = verts[j][1];
-                    dmesh.verts[dmesh.nverts][2] = verts[j][2];
+                    dmesh.verts[dmesh.nverts].X = verts[j].X;
+                    dmesh.verts[dmesh.nverts].Y = verts[j].Y;
+                    dmesh.verts[dmesh.nverts].Z = verts[j].Z;
                     dmesh.nverts++;
                 }
 
@@ -5006,10 +4965,10 @@ namespace Engine.PathFinding.NavMesh2
                 for (int j = 0; j < ntris; ++j)
                 {
                     var t = tris[j];
-                    dmesh.tris[dmesh.ntris][0] = t[0];
-                    dmesh.tris[dmesh.ntris][1] = t[1];
-                    dmesh.tris[dmesh.ntris][2] = t[2];
-                    dmesh.tris[dmesh.ntris][3] = PolyUtils.GetTriFlags(verts[t[0]], verts[t[1]], verts[t[2]], poly, npoly);
+                    dmesh.tris[dmesh.ntris].X = t.X;
+                    dmesh.tris[dmesh.ntris].Y = t.Y;
+                    dmesh.tris[dmesh.ntris].Z = t.Z;
+                    dmesh.tris[dmesh.ntris].W = PolyUtils.GetTriFlags(verts[t.X], verts[t.Y], verts[t.Z], poly, npoly);
                     dmesh.ntris++;
                 }
             }
@@ -5023,7 +4982,7 @@ namespace Engine.PathFinding.NavMesh2
 
             queue.Clear();
             // Set all heights to RC_UNSET_HEIGHT.
-            hp.data = Helper.CreateArray<int>(hp.width * hp.height, 0xff);
+            hp.data = Helper.CreateArray(hp.width * hp.height, Constants.RC_UNSET_HEIGHT);
 
             bool empty = true;
 
@@ -5104,9 +5063,9 @@ namespace Engine.PathFinding.NavMesh2
                     head = 0;
                     if (queue.Count > RETRACT_SIZE * 3)
                     {
-                        //memmove(&queue[0], &queue[RETRACT_SIZE * 3], sizeof(int) * (queue.size() - RETRACT_SIZE * 3));
+                        queue.RemoveRange(0, RETRACT_SIZE * 3);
                     }
-                    //queue.resize(queue.size() - RETRACT_SIZE * 3);
+                    queue.Clear();
                 }
 
                 var cs = chf.spans[ci];
@@ -5119,7 +5078,7 @@ namespace Engine.PathFinding.NavMesh2
                     int hx = ax - hp.xmin - bs;
                     int hy = ay - hp.ymin - bs;
 
-                    if (hx >= hp.width || hy >= hp.height)
+                    if (hx < 0 || hy < 0 || hx >= hp.width || hy >= hp.height)
                     {
                         continue;
                     }
@@ -5285,8 +5244,15 @@ namespace Engine.PathFinding.NavMesh2
             var chs = chf.spans[ci];
             hp.data[cx - hp.xmin + (cy - hp.ymin) * hp.width] = chs.y;
         }
-        private static bool BuildPolyDetail(Vector3[] inp, int ninp, float sampleDist, float sampleMaxError, int heightSearchRadius, CompactHeightfield chf, HeightPatch hp, Vector3[] verts, int nverts, List<Int4> tris, List<Int3> edges, List<Int4> samples)
+        private static bool BuildPolyDetail(Vector3[] inp, int ninp, float sampleDist, float sampleMaxError, int heightSearchRadius, CompactHeightfield chf, HeightPatch hp, Vector3[] verts, out int nverts, out Int4[] outTris)
         {
+            nverts = 0;
+            outTris = null;
+
+            List<Int4> edges = new List<Int4>();
+            List<Int4> samples = new List<Int4>();
+            List<Int4> tris = new List<Int4>();
+
             int MAX_VERTS = 127;
             int MAX_TRIS = 255;    // Max tris for delaunay is 2n-2-k (n=num verts, k=num hull verts).
             int MAX_VERTS_PER_EDGE = 32;
@@ -5338,9 +5304,9 @@ namespace Engine.PathFinding.NavMesh2
                         }
                     }
                     // Create samples along the edge.
-                    float dx = vi[0] - vj[0];
-                    float dy = vi[1] - vj[1];
-                    float dz = vi[2] - vj[2];
+                    float dx = vi.X - vj.X;
+                    float dy = vi.Y - vj.Y;
+                    float dz = vi.Z - vj.Z;
                     float d = (float)Math.Sqrt(dx * dx + dz * dz);
                     int nn = 1 + (int)Math.Floor(d / sampleDist);
                     if (nn >= MAX_VERTS_PER_EDGE) nn = MAX_VERTS_PER_EDGE - 1;
@@ -5351,15 +5317,20 @@ namespace Engine.PathFinding.NavMesh2
 
                     for (int k = 0; k <= nn; ++k)
                     {
-                        float u = (float)k / (float)nn;
-                        var pos = edge[k];
-                        pos[0] = vj[0] + dx * u;
-                        pos[1] = vj[1] + dy * u;
-                        pos[2] = vj[2] + dz * u;
-                        pos[1] = GetHeight(pos[0], pos[1], pos[2], cs, ics, chf.ch, heightSearchRadius, hp) * chf.ch;
+                        float u = ((float)k / (float)nn);
+                        Vector3 pos = new Vector3
+                        {
+                            X = vj.X + dx * u,
+                            Y = vj.Y + dy * u,
+                            Z = vj.Z + dz * u
+                        };
+                        pos.Y = GetHeight(pos.X, pos.Y, pos.Z, cs, ics, chf.ch, heightSearchRadius, hp) * chf.ch;
+                        edge[k] = pos;
                     }
                     // Simplify samples.
-                    int[] idx = { 0, nn };
+                    int[] idx = new int[MAX_VERTS_PER_EDGE];
+                    idx[0] = 0;
+                    idx[1] = nn;
                     int nidx = 2;
                     for (int k = 0; k < nidx - 1;)
                     {
@@ -5381,7 +5352,7 @@ namespace Engine.PathFinding.NavMesh2
                         }
                         // If the max deviation is larger than accepted error,
                         // add new point, else continue to next segment.
-                        if (maxi != -1 && maxd > Math.Sqrt(sampleMaxError))
+                        if (maxi != -1 && maxd > (sampleMaxError * sampleMaxError))
                         {
                             for (int m = nidx; m > k; --m)
                             {
@@ -5423,6 +5394,9 @@ namespace Engine.PathFinding.NavMesh2
             if (minExtent < sampleDist * 2)
             {
                 PolyUtils.TriangulateHull(nverts, verts, nhull, hull, tris);
+
+                outTris = tris.ToArray();
+
                 return true;
             }
 
@@ -5436,6 +5410,9 @@ namespace Engine.PathFinding.NavMesh2
             {
                 // Could not triangulate the poly, make sure there is some valid data there.
                 //ctx->log(RC_LOG_WARNING, "buildPolyDetail: Could not triangulate polygon (%d verts).", nverts);
+
+                outTris = tris.ToArray();
+
                 return true;
             }
 
@@ -5447,28 +5424,30 @@ namespace Engine.PathFinding.NavMesh2
                 bmax = inp[0];
                 for (int i = 1; i < ninp; ++i)
                 {
-                    Vector3.Min(bmin, inp[i]);
-                    Vector3.Max(bmax, inp[i]);
+                    bmin = Vector3.Min(bmin, inp[i]);
+                    bmax = Vector3.Max(bmax, inp[i]);
                 }
-                int x0 = (int)Math.Floor(bmin[0] / sampleDist);
-                int x1 = (int)Math.Ceiling(bmax[0] / sampleDist);
-                int z0 = (int)Math.Floor(bmin[2] / sampleDist);
-                int z1 = (int)Math.Ceiling(bmax[2] / sampleDist);
+                int x0 = (int)Math.Floor(bmin.X / sampleDist);
+                int x1 = (int)Math.Ceiling(bmax.X / sampleDist);
+                int z0 = (int)Math.Floor(bmin.Z / sampleDist);
+                int z1 = (int)Math.Ceiling(bmax.Z / sampleDist);
                 samples.Clear();
                 for (int z = z0; z < z1; ++z)
                 {
                     for (int x = x0; x < x1; ++x)
                     {
-                        Vector3 pt = new Vector3();
-                        pt[0] = x * sampleDist;
-                        pt[1] = (bmax[1] + bmin[1]) * 0.5f;
-                        pt[2] = z * sampleDist;
+                        Vector3 pt = new Vector3
+                        {
+                            X = x * sampleDist,
+                            Y = (bmax.Y + bmin.Y) * 0.5f,
+                            Z = z * sampleDist
+                        };
                         // Make sure the samples are not too close to the edges.
                         if (PolyUtils.DistToPoly(ninp, inp, pt) > -sampleDist / 2) continue;
                         samples.Add(
                             new Int4(
                                 x,
-                                GetHeight(pt[0], pt[1], pt[2], cs, ics, chf.ch, heightSearchRadius, hp),
+                                GetHeight(pt.X, pt.Y, pt.Z, cs, ics, chf.ch, heightSearchRadius, hp),
                                 z,
                                 0)); // Not added
                     }
@@ -5492,14 +5471,16 @@ namespace Engine.PathFinding.NavMesh2
                     for (int i = 0; i < nsamples; ++i)
                     {
                         var s = samples[i];
-                        if (s[3] != 0) continue; // skip added.
-                        Vector3 pt = new Vector3();
+                        if (s.W != 0) continue; // skip added.
                         // The sample location is jittered to get rid of some bad triangulations
                         // which are cause by symmetrical data from the grid structure.
-                        pt[0] = s[0] * sampleDist + PolyUtils.GetJitterX(i) * cs * 0.1f;
-                        pt[1] = s[1] * chf.ch;
-                        pt[2] = s[2] * sampleDist + PolyUtils.GetJitterY(i) * cs * 0.1f;
-                        float d = PolyUtils.DistToTriMesh(pt, verts, nverts, tris.ToArray(), tris.Count / 4);
+                        Vector3 pt = new Vector3
+                        {
+                            X = s.X * sampleDist + PolyUtils.GetJitterX(i) * cs * 0.1f,
+                            Y = s.Y * chf.ch,
+                            Z = s.Z * sampleDist + PolyUtils.GetJitterY(i) * cs * 0.1f
+                        };
+                        float d = PolyUtils.DistToTriMesh(pt, verts, nverts, tris.ToArray(), tris.Count);
                         if (d < 0) continue; // did not hit the mesh.
                         if (d > bestd)
                         {
@@ -5535,6 +5516,8 @@ namespace Engine.PathFinding.NavMesh2
                 tris.RemoveRange(MAX_TRIS, ntris - MAX_TRIS);
                 //ctx->log(RC_LOG_ERROR, "rcBuildPolyMeshDetail: Shrinking triangle count from %d to max %d.", ntris, MAX_TRIS);
             }
+
+            outTris = tris.ToArray();
 
             return true;
         }
@@ -5948,18 +5931,12 @@ namespace Engine.PathFinding.NavMesh2
                     if (bestMergeVal > 0)
                     {
                         // Found best, merge.
-                        var pa = polys[bestPa];
-                        var pb = polys[bestPb];
-                        pa = PolyUtils.MergePolys(pa, pb, bestEa, bestEb);
+                        polys[bestPa] = PolyUtils.MergePolys(polys[bestPa], polys[bestPb], bestEa, bestEb);
                         if (pregs[bestPa] != pregs[bestPb])
                         {
                             pregs[bestPa] = Constants.RC_MULTIPLE_REGS;
                         }
-                        var last = polys[(npolys - 1)];
-                        if (pb != last)
-                        {
-                            pb = last;
-                        }
+                        polys[bestPb] = polys[(npolys - 1)];
                         pregs[bestPb] = pregs[npolys - 1];
                         pareas[bestPb] = pareas[npolys - 1];
                         npolys--;
@@ -6379,27 +6356,23 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     int vb = param.detailMeshes[i][0];
                     int ndv = param.detailMeshes[i][1];
-                    Vector3 bmin;
-                    Vector3 bmax;
-
-                    var dv = param.detailVerts[vb];
-                    bmin = dv;
-                    bmax = dv;
+                    Vector3 bmin = param.detailVerts[vb];
+                    Vector3 bmax = param.detailVerts[vb];
 
                     for (int j = 1; j < ndv; j++)
                     {
-                        Vector3.Min(bmin, param.detailVerts[j]);
-                        Vector3.Max(bmax, param.detailVerts[j]);
+                        bmin = Vector3.Min(bmin, param.detailVerts[vb + j]);
+                        bmax = Vector3.Max(bmax, param.detailVerts[vb + j]);
                     }
 
                     // BV-tree uses cs for all dimensions
-                    it.bmin.X = MathUtil.Clamp((int)((bmin[0] - param.bmin[0]) * quantFactor), 0, 0xffff);
-                    it.bmin.Y = MathUtil.Clamp((int)((bmin[1] - param.bmin[1]) * quantFactor), 0, 0xffff);
-                    it.bmin.Z = MathUtil.Clamp((int)((bmin[2] - param.bmin[2]) * quantFactor), 0, 0xffff);
+                    it.bmin.X = MathUtil.Clamp((int)((bmin.X - param.bmin.X) * quantFactor), 0, 0xffff);
+                    it.bmin.Y = MathUtil.Clamp((int)((bmin.Y - param.bmin.Y) * quantFactor), 0, 0xffff);
+                    it.bmin.Z = MathUtil.Clamp((int)((bmin.Z - param.bmin.Z) * quantFactor), 0, 0xffff);
 
-                    it.bmax.X = MathUtil.Clamp((int)((bmax[0] - param.bmin[0]) * quantFactor), 0, 0xffff);
-                    it.bmax.Y = MathUtil.Clamp((int)((bmax[1] - param.bmin[1]) * quantFactor), 0, 0xffff);
-                    it.bmax.Z = MathUtil.Clamp((int)((bmax[2] - param.bmin[2]) * quantFactor), 0, 0xffff);
+                    it.bmax.X = MathUtil.Clamp((int)((bmax.X - param.bmin.X) * quantFactor), 0, 0xffff);
+                    it.bmax.Y = MathUtil.Clamp((int)((bmax.Y - param.bmin.Y) * quantFactor), 0, 0xffff);
+                    it.bmax.Z = MathUtil.Clamp((int)((bmax.Z - param.bmin.Z) * quantFactor), 0, 0xffff);
                 }
                 else
                 {
@@ -6427,6 +6400,7 @@ namespace Engine.PathFinding.NavMesh2
                     it.bmin.Y = (int)Math.Floor(it.bmin.Y * param.ch / param.cs);
                     it.bmax.Y = (int)Math.Ceiling(it.bmax.Y * param.ch / param.cs);
                 }
+                items[i] = it;
             }
 
             int curNode = 0;
@@ -6441,7 +6415,9 @@ namespace Engine.PathFinding.NavMesh2
             int inum = imax - imin;
             int icur = curNode;
 
-            BVNode node = nodes[curNode++];
+            BVNode node = new BVNode();
+            nodes.Add(node);
+            curNode++;
 
             if (inum == 1)
             {

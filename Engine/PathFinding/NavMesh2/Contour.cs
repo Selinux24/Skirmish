@@ -31,5 +31,16 @@ namespace Engine.PathFinding.NavMesh2
         /// The area id of the contour.
         /// </summary>
         public TileCacheAreas area;
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format(
+                "Region Id: {0}; Area: {1}; Simplified Verts: {2}; Raw Verts: {3};",
+                this.reg, this.area, this.nverts, this.nrverts);
+        }
     };
 }

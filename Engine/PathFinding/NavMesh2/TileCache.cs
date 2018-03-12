@@ -1211,20 +1211,13 @@ namespace Engine.PathFinding.NavMesh2
             };
 
             int[] vflags = new int[maxVertices];
-
-            var firstVert = new Polygoni(Constants.VertexBucketCount2);
-            for (int i = 0; i < Constants.VertexBucketCount2; ++i)
-            {
-                firstVert[i] = Constants.NullIdx;
-            }
-
-            var nextVert = new Polygoni(maxVertices);
-            var indices = new int[maxVertsPerCont];
-            var polys = new Polygoni[maxVertsPerCont];
+            int[] firstVert = Helper.CreateArray(Constants.VertexBucketCount2, Constants.NullIdx);
+            int[] nextVert = Helper.CreateArray(maxVertices, 0);
+            int[] indices = new int[maxVertsPerCont];
 
             for (int i = 0; i < lcset.nconts; ++i)
             {
-                TileCacheContour cont = lcset.conts[i];
+                var cont = lcset.conts[i];
 
                 // Skip null contours.
                 if (cont.nverts < 3)
@@ -1250,7 +1243,7 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     var v = cont.verts[j];
                     indices[j] = PolyUtils.AddVertex(v.X, v.Y, v.Z, mesh.verts, firstVert, nextVert, ref mesh.nverts);
-                    if ((v[3] & 0x80) != 0)
+                    if ((v.W & 0x80) != 0)
                     {
                         // This vertex should be removed.
                         vflags[indices[j]] = 1;
@@ -1259,7 +1252,7 @@ namespace Engine.PathFinding.NavMesh2
 
                 // Build initial polygons.
                 int npolys = 0;
-                polys = new Polygoni[maxVertsPerCont];
+                Polygoni[] polys = new Polygoni[maxVertsPerCont];
                 for (int j = 0; j < ntris; ++j)
                 {
                     var t = tris[j];
@@ -1323,7 +1316,7 @@ namespace Engine.PathFinding.NavMesh2
                 // Store polygons.
                 for (int j = 0; j < npolys; ++j)
                 {
-                    var p = new Polygoni(Constants.VertsPerPolygon * 2);
+                    var p = new Polygoni(Constants.VertsPerPolygon * 2);//Polygon with adjacency
                     var q = polys[j];
                     for (int k = 0; k < Constants.VertsPerPolygon; ++k)
                     {
@@ -1334,11 +1327,10 @@ namespace Engine.PathFinding.NavMesh2
                     mesh.npolys++;
                     if (mesh.npolys > maxTris)
                     {
-                        return false;
+                        throw new EngineException(string.Format("rcBuildPolyMesh: Too many polygons {0} (max:{1}).", mesh.npolys, maxTris));
                     }
                 }
             }
-
 
             // Remove edge vertices.
             for (int i = 0; i < mesh.nverts; ++i)
@@ -1351,10 +1343,12 @@ namespace Engine.PathFinding.NavMesh2
                     }
                     if (!RemoveVertex(mesh, i, maxTris))
                     {
-                        return false;
+                        // Failed to remove vertex
+                        throw new EngineException(string.Format("Failed to remove edge vertex {0}.", i));
                     }
                     // Remove vertex
                     // Note: mesh.nverts is already decremented inside removeVertex()!
+                    // Fixup vertex flags
                     for (int j = i; j < mesh.nverts; ++j)
                     {
                         vflags[j] = vflags[j + 1];
@@ -1366,7 +1360,7 @@ namespace Engine.PathFinding.NavMesh2
             // Calculate adjacency.
             if (!PolyUtils.BuildMeshAdjacency(mesh.polys, mesh.npolys, mesh.verts, mesh.nverts, lcset))
             {
-                return false;
+                throw new EngineException("Adjacency failed.");
             }
 
             return true;
@@ -1707,16 +1701,8 @@ namespace Engine.PathFinding.NavMesh2
                     if (bestMergeVal > 0)
                     {
                         // Found best, merge.
-                        var pa = polys[bestPa];
-                        var pb = polys[bestPb];
-                        pa = PolyUtils.MergePolys(pa, pb, bestEa, bestEb);
-
-                        var last = polys[(npolys - 1)];
-                        if (pb != last)
-                        {
-                            pb = last;
-                        }
-
+                        polys[bestPa] = PolyUtils.MergePolys(polys[bestPa], polys[bestPb], bestEa, bestEb);
+                        polys[bestPb] = polys[npolys - 1];
                         pareas[bestPb] = pareas[npolys - 1];
                         npolys--;
                     }

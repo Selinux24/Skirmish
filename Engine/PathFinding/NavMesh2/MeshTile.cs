@@ -91,14 +91,14 @@ namespace Engine.PathFinding.NavMesh2
 
         public void SetData(MeshData data)
         {
-            if (data.navVerts.Count > 0) Array.Copy(data.navVerts.ToArray(), verts, data.navVerts.Count);
-            if (data.navPolys.Count > 0) Array.Copy(data.navPolys.ToArray(), polys, data.navPolys.Count);
+            if (data.navVerts.Count > 0) verts = data.navVerts.ToArray();
+            if (data.navPolys.Count > 0) polys = data.navPolys.ToArray();
 
-            if (data.navDMeshes.Count > 0) Array.Copy(data.navDMeshes.ToArray(), detailMeshes, data.navDMeshes.Count);
-            if (data.navDVerts.Count > 0) Array.Copy(data.navDVerts.ToArray(), detailVerts, data.navDVerts.Count);
-            if (data.navDTris.Count > 0) Array.Copy(data.navDTris.ToArray(), detailTris, data.navDTris.Count);
-            if (data.navBvtree.Count > 0) Array.Copy(data.navBvtree.ToArray(), bvTree, data.navBvtree.Count);
-            if (data.offMeshCons.Count > 0) Array.Copy(data.offMeshCons.ToArray(), offMeshCons, data.offMeshCons.Count);
+            if (data.navDMeshes.Count > 0) detailMeshes = data.navDMeshes.ToArray();
+            if (data.navDVerts.Count > 0) detailVerts = data.navDVerts.ToArray();
+            if (data.navDTris.Count > 0) detailTris = data.navDTris.ToArray();
+            if (data.navBvtree.Count > 0) bvTree = data.navBvtree.ToArray();
+            if (data.offMeshCons.Count > 0) offMeshCons = data.offMeshCons.ToArray();
         }
     }
 }

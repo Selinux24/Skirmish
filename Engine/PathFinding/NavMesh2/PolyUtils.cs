@@ -302,7 +302,7 @@ namespace Engine.PathFinding.NavMesh2
                 return ((a.Z <= c.Z) && (c.Z <= b.Z)) || ((a.Z >= c.Z) && (c.Z >= b.Z));
             }
         }
-        public static int AddVertex(int x, int y, int z, Int3[] verts, Polygoni firstVert, Polygoni nextVert, ref int nv)
+        public static int AddVertex(int x, int y, int z, Int3[] verts, int[] firstVert, int[] nextVert, ref int nv)
         {
             int bucket = ComputeVertexHash2(x, 0, z);
             int i = firstVert[bucket];
@@ -319,11 +319,7 @@ namespace Engine.PathFinding.NavMesh2
 
             // Could not find, create new.
             i = nv; nv++;
-            var v = new Int3();
-            v[0] = x;
-            v[1] = y;
-            v[2] = z;
-            verts[i] = v;
+            verts[i] = new Int3(x, y, z);
             nextVert[i] = firstVert[bucket];
             firstVert[bucket] = i;
 
@@ -416,10 +412,10 @@ namespace Engine.PathFinding.NavMesh2
         }
         public static Polygoni MergePolys(Polygoni pa, Polygoni pb, int ea, int eb)
         {
-            var tmp = new Polygoni(Constants.VertsPerPolygon);
-
             int na = CountPolyVerts(pa);
             int nb = CountPolyVerts(pb);
+
+            var tmp = new Polygoni(Math.Max(Constants.VertsPerPolygon, na - 1 + nb - 1));
 
             // Merge polygons.
             int n = 0;
@@ -1016,16 +1012,16 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
         }
-        public static void DelaunayHull(int npts, Vector3[] pts, int nhull, int[] hull, List<Int4> tris, List<Int3> edges)
+        public static void DelaunayHull(int npts, Vector3[] pts, int nhull, int[] hull, List<Int4> outTris, List<Int4> outEdges)
         {
             int nfaces = 0;
             int nedges = 0;
             int maxEdges = npts * 10;
-            edges = new List<Int3>(maxEdges * 4);
+            Int4[] edges = new Int4[maxEdges];
 
             for (int i = 0, j = nhull - 1; i < nhull; j = i++)
             {
-                AddEdge(edges.ToArray(), nedges, maxEdges, hull[j], hull[i], (int)EdgeValues.EV_HULL, (int)EdgeValues.EV_UNDEF);
+                AddEdge(ref edges, ref nedges, maxEdges, hull[j], hull[i], (int)EdgeValues.EV_HULL, (int)EdgeValues.EV_UNDEF);
             }
 
             int currentEdge = 0;
@@ -1033,76 +1029,77 @@ namespace Engine.PathFinding.NavMesh2
             {
                 if (edges[currentEdge][2] == (int)EdgeValues.EV_UNDEF)
                 {
-                    CompleteFacet(pts, npts, edges.ToArray(), nedges, maxEdges, nfaces, currentEdge);
+                    CompleteFacet(pts, npts, ref edges, ref nedges, maxEdges, ref nfaces, currentEdge);
                 }
                 if (edges[currentEdge][3] == (int)EdgeValues.EV_UNDEF)
                 {
-                    CompleteFacet(pts, npts, edges.ToArray(), nedges, maxEdges, nfaces, currentEdge);
+                    CompleteFacet(pts, npts, ref edges, ref nedges, maxEdges, ref nfaces, currentEdge);
                 }
                 currentEdge++;
             }
 
             // Create tris
-            tris = new List<Int4>(nfaces);
-            for (int i = 0; i < nfaces; ++i)
-            {
-                tris[i] = new Int4(-1, -1, -1, -1);
-            }
+            Int4[] tris = Helper.CreateArray(nfaces, new Int4(-1, -1, -1, -1));
 
             for (int i = 0; i < nedges; ++i)
             {
-                var e = edges[i * 4];
-                if (e[3] >= 0)
+                var e = edges[i];
+                if (e.W >= 0)
                 {
                     // Left face
                     var t = tris[e[3]];
-                    if (t[0] == -1)
+                    if (t.X == -1)
                     {
-                        t[0] = e[0];
-                        t[1] = e[1];
+                        t.X = e[0];
+                        t.Y = e[1];
                     }
-                    else if (t[0] == e[1])
+                    else if (t.X == e[1])
                     {
-                        t[2] = e[0];
+                        t.Z = e[0];
                     }
-                    else if (t[1] == e[0])
+                    else if (t.Y == e[0])
                     {
-                        t[2] = e[1];
+                        t.Z = e[1];
                     }
+                    tris[e[3]] = t;
                 }
                 if (e[2] >= 0)
                 {
                     // Right
                     var t = tris[e[2]];
-                    if (t[0] == -1)
+                    if (t.X == -1)
                     {
-                        t[0] = e[1];
-                        t[1] = e[0];
+                        t.X = e[1];
+                        t.Y = e[0];
                     }
-                    else if (t[0] == e[0])
+                    else if (t.X == e[0])
                     {
-                        t[2] = e[1];
+                        t.Z = e[1];
                     }
-                    else if (t[1] == e[1])
+                    else if (t.Y == e[1])
                     {
-                        t[2] = e[0];
+                        t.Z = e[0];
                     }
+                    tris[e[2]] = t;
                 }
             }
 
-            for (int i = 0; i < tris.Count; ++i)
+            for (int i = 0; i < tris.Length; ++i)
             {
                 var t = tris[i];
-                if (t[0] == -1 || t[1] == -1 || t[2] == -1)
+                if (t.X == -1 || t.Y == -1 || t.Z == -1)
                 {
                     //ctx->log(RC_LOG_WARNING, "delaunayHull: Removing dangling face %d [%d,%d,%d].", i, t[0], t[1], t[2]);
-                    t = tris[tris.Count - 1];
-                    tris.RemoveAt(tris.Count - 1);
-                    --i;
+                    tris[i] = tris[tris.Length - 1];
+                    Array.Resize(ref tris, tris.Length - 1);
+                    i--;
                 }
             }
+
+            outTris.AddRange(tris);
+            outEdges.AddRange(edges);
         }
-        public static int AddEdge(Int3[] edges, int nedges, int maxEdges, int s, int t, int l, int r)
+        public static int AddEdge(ref Int4[] edges, ref int nedges, int maxEdges, int s, int t, int l, int r)
         {
             if (nedges >= maxEdges)
             {
@@ -1114,11 +1111,7 @@ namespace Engine.PathFinding.NavMesh2
             int e = FindEdge(edges, nedges, s, t);
             if (e == (int)EdgeValues.EV_UNDEF)
             {
-                var edge = edges[nedges];
-                edge[0] = s;
-                edge[1] = t;
-                edge[2] = (int)l;
-                edge[3] = (int)r;
+                edges[nedges] = new Int4(s, t, l, r);
                 return nedges++;
             }
             else
@@ -1126,39 +1119,19 @@ namespace Engine.PathFinding.NavMesh2
                 return (int)EdgeValues.EV_UNDEF;
             }
         }
-        public static int FindEdge(Int3[] edges, int nedges, int s, int t)
+        public static int FindEdge(Int4[] edges, int nedges, int s, int t)
         {
             for (int i = 0; i < nedges; i++)
             {
                 var e = edges[i];
-                if ((e[0] == s && e[1] == t) || (e[0] == t && e[1] == s))
+                if ((e.X == s && e.Y == t) || (e.X == t && e.Y == s))
                 {
                     return i;
                 }
             }
             return (int)EdgeValues.EV_UNDEF;
         }
-        public static void MergePolyVerts(Polygoni pa, Polygoni pb, int ea, int eb, Polygoni tmp, int nvp)
-        {
-            int na = CountPolyVerts(pa);
-            int nb = CountPolyVerts(pb);
-
-            // Merge polygons.
-            int n = 0;
-            // Add pa
-            for (int i = 0; i < na - 1; ++i)
-            {
-                tmp[n++] = pa[(ea + 1 + i) % na];
-            }
-            // Add pb
-            for (int i = 0; i < nb - 1; ++i)
-            {
-                tmp[n++] = pb[(eb + 1 + i) % nb];
-            }
-
-            tmp = pa;
-        }
-        public static void CompleteFacet(Vector3[] pts, int npts, Int3[] edges, int nedges, int maxEdges, int nfaces, int e)
+        public static void CompleteFacet(Vector3[] pts, int npts, ref Int4[] edges, ref int nedges, int maxEdges, ref int nfaces, int e)
         {
             float EPS = float.Epsilon;
 
@@ -1234,35 +1207,35 @@ namespace Engine.PathFinding.NavMesh2
             if (pt < npts)
             {
                 // Update face information of edge being completed.
-                UpdateLeftFace(edges[e], s, t, nfaces);
+                UpdateLeftFace(ref edges[e], s, t, nfaces);
 
                 // Add new edge or update face info of old edge.
                 e = FindEdge(edges, nedges, pt, s);
                 if (e == (int)EdgeValues.EV_UNDEF)
                 {
-                    AddEdge(edges, nedges, maxEdges, pt, s, nfaces, (int)EdgeValues.EV_UNDEF);
+                    AddEdge(ref edges, ref nedges, maxEdges, pt, s, nfaces, (int)EdgeValues.EV_UNDEF);
                 }
                 else
                 {
-                    UpdateLeftFace(edges[e], pt, s, nfaces);
+                    UpdateLeftFace(ref edges[e], pt, s, nfaces);
                 }
 
                 // Add new edge or update face info of old edge.
                 e = FindEdge(edges, nedges, t, pt);
                 if (e == (int)EdgeValues.EV_UNDEF)
                 {
-                    AddEdge(edges, nedges, maxEdges, t, pt, nfaces, (int)EdgeValues.EV_UNDEF);
+                    AddEdge(ref edges, ref nedges, maxEdges, t, pt, nfaces, (int)EdgeValues.EV_UNDEF);
                 }
                 else
                 {
-                    UpdateLeftFace(edges[e], t, pt, nfaces);
+                    UpdateLeftFace(ref edges[e], t, pt, nfaces);
                 }
 
                 nfaces++;
             }
             else
             {
-                UpdateLeftFace(edges[e], s, t, (int)EdgeValues.EV_HULL);
+                UpdateLeftFace(ref edges[e], s, t, (int)EdgeValues.EV_HULL);
             }
         }
         public static float VCross2(Vector3 p1, Vector3 p2, Vector3 p3)
@@ -1314,7 +1287,7 @@ namespace Engine.PathFinding.NavMesh2
         {
             return (float)Math.Sqrt(VDistSq2(p, q));
         }
-        public static void UpdateLeftFace(Int3 e, int s, int t, int f)
+        public static void UpdateLeftFace(ref Int4 e, int s, int t, int f)
         {
             if (e[0] == s && e[1] == t && e[2] == (int)EdgeValues.EV_UNDEF)
             {
@@ -1325,12 +1298,12 @@ namespace Engine.PathFinding.NavMesh2
                 e[3] = f;
             }
         }
-        public static bool OverlapEdges(Vector3[] pts, Int3[] edges, int nedges, int s1, int t1)
+        public static bool OverlapEdges(Vector3[] pts, Int4[] edges, int nedges, int s1, int t1)
         {
             for (int i = 0; i < nedges; ++i)
             {
-                int s0 = edges[i][0];
-                int t0 = edges[i][1];
+                int s0 = edges[i].X;
+                int t0 = edges[i].Y;
                 // Same or connected edges do not overlap.
                 if (s0 == s1 || s0 == t1 || t0 == s1 || t0 == t1)
                 {
@@ -1410,7 +1383,7 @@ namespace Engine.PathFinding.NavMesh2
         public static int GetEdgeFlags(Vector3 va, Vector3 vb, Vector3[] vpoly, int npoly)
         {
             // Return true if edge (va,vb) is part of the polygon.
-            float thrSqr = (float)Math.Sqrt(0.001f);
+            float thrSqr = 0.001f * 0.001f;
             for (int i = 0, j = npoly - 1; i < npoly; j = i++)
             {
                 if (DistancePtSeg2d(va, vpoly[j], vpoly[i]) < thrSqr &&

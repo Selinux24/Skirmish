@@ -48,7 +48,9 @@ namespace Collada
 
             var nmsettings = BuildSettings.Default;
             nmsettings.Agents = new[] { this.agent };
-            nmsettings.TileSize = 48;
+            nmsettings.TileSize = 32;
+            nmsettings.BuildTiles = false;
+            nmsettings.PartitionType = SamplePartitionTypeEnum.Monotone;
 
             this.PathFinderDescription = new PathFinderDescription()
             {
@@ -102,7 +104,7 @@ namespace Collada
             float maxD = Math.Max(Math.Max(bbox.GetX(), bbox.GetY()), bbox.GetZ());
 
             this.Camera.Interest = center;
-            this.Camera.Position = center + new Vector3(-1, 1, -1) * maxD * 0.75f;
+            this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
         }
         public override void Update(GameTime gameTime)
         {

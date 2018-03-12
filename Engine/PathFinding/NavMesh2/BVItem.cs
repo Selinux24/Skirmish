@@ -14,6 +14,15 @@ namespace Engine.PathFinding.NavMesh2
         public int i;
 
         /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("Region Id: {0}; BMin: {1}; BMax: {2};", this.i, this.bmin, this.bmax);
+        }
+
+        /// <summary>
         /// An <see cref="IComparer{T}"/> implementation that only compares two <see cref="BoundingVolumeTreeNode"/>s on the X axis.
         /// </summary>
         public class CompareX : IComparer<BVItem>
@@ -28,6 +37,10 @@ namespace Engine.PathFinding.NavMesh2
             {
                 if (x.bmin.X < y.bmin.X) return -1;
                 if (x.bmin.X > y.bmin.X) return 1;
+                if (x.bmax.X < y.bmax.X) return -1;
+                if (x.bmax.X > y.bmax.X) return 1;
+                if (x.i < y.i) return -1;
+                if (x.i > y.i) return 1;
                 return 0;
             }
         }
@@ -46,6 +59,10 @@ namespace Engine.PathFinding.NavMesh2
             {
                 if (x.bmin.Y < y.bmin.Y) return -1;
                 if (x.bmin.Y > y.bmin.Y) return 1;
+                if (x.bmax.Y < y.bmax.Y) return -1;
+                if (x.bmax.Y > y.bmax.Y) return 1;
+                if (x.i < y.i) return -1;
+                if (x.i > y.i) return 1;
                 return 0;
             }
         }
@@ -64,6 +81,10 @@ namespace Engine.PathFinding.NavMesh2
             {
                 if (x.bmin.Z < y.bmin.Z) return -1;
                 if (x.bmin.Z > y.bmin.Z) return 1;
+                if (x.bmax.Z < y.bmax.Z) return -1;
+                if (x.bmax.Z > y.bmax.Z) return 1;
+                if (x.i < y.i) return -1;
+                if (x.i > y.i) return 1;
                 return 0;
             }
         }
