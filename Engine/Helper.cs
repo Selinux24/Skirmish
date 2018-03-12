@@ -222,6 +222,19 @@ namespace Engine
             return res;
         }
         /// <summary>
+        /// Removes the last item of the list
+        /// </summary>
+        /// <typeparam name="T">List type</typeparam>
+        /// <param name="list">The list</param>
+        /// <returns>Returns the removed item</returns>
+        public static T Pop<T>(this List<T> list)
+        {
+            int index = list.Count - 1;
+            T value = list[index];
+            list.RemoveAt(index);
+            return value;
+        }
+        /// <summary>
         /// Gets the internal items of the KeyCollection into a list
         /// </summary>
         /// <typeparam name="TKey">Key type</typeparam>

@@ -2,7 +2,7 @@
 
 namespace Engine.PathFinding.NavMesh2
 {
-    public struct CompactHeightfield
+    public class CompactHeightfield
     {
         /// <summary>
         /// The width of the heightfield. (Along the x-axis in cell units.)

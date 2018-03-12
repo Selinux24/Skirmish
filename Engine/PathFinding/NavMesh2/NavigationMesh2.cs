@@ -344,13 +344,11 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             int[] src = new int[chf.spanCount];
-            int[] dst = new int[chf.spanCount];
-
             {
-                CalculateDistanceField(chf, src, out int maxDist);
-                chf.maxDistance = maxDist;
+                CalculateDistanceField(chf, src, out chf.maxDistance);
             }
 
+            int[] dst = new int[chf.spanCount];
             {
                 // Blur
                 if (BoxBlur(chf, 1, src, dst) != src)
@@ -608,7 +606,7 @@ namespace Engine.PathFinding.NavMesh2
             List<List<int>> lvlStacks = new List<List<int>>();
             for (int i = 0; i < NB_STACKS; ++i)
             {
-                lvlStacks[i] = new List<int>();
+                lvlStacks.Add(new List<int>());
             }
 
             List<int> stack = new List<int>();
@@ -924,9 +922,9 @@ namespace Engine.PathFinding.NavMesh2
 
             while (stack.Count > 0)
             {
-                int ci = stack[0]; stack.RemoveAt(0);
-                int cy = stack[0]; stack.RemoveAt(0);
-                int cx = stack[0]; stack.RemoveAt(0);
+                int ci = stack.Pop();
+                int cy = stack.Pop();
+                int cx = stack.Pop();
 
                 var cs = chf.spans[ci];
 
@@ -1116,7 +1114,7 @@ namespace Engine.PathFinding.NavMesh2
                 while (stack.Count > 0)
                 {
                     // Pop
-                    int ri = stack[0]; stack.RemoveAt(0);
+                    int ri = stack.Pop();
 
                     var creg = regions[ri];
 
@@ -3335,13 +3333,11 @@ namespace Engine.PathFinding.NavMesh2
                 chf.borderSize = borderSize;
             }
 
-            List<int> prev = new List<int>(256);
-
             // Sweep one line at a time.
             for (int y = borderSize; y < h - borderSize; ++y)
             {
                 // Collect spans from this row.
-                prev.Clear();
+                int[] prev = new int[256];
                 int rid = 1;
 
                 for (int x = borderSize; x < w - borderSize; ++x)
@@ -5176,9 +5172,9 @@ namespace Engine.PathFinding.NavMesh2
                     break;
                 }
 
-                ci = array[array.Count - 1]; array.RemoveAt(array.Count - 1);
-                cy = array[array.Count - 1]; array.RemoveAt(array.Count - 1);
-                cx = array[array.Count - 1]; array.RemoveAt(array.Count - 1);
+                ci = array.Pop();
+                cy = array.Pop();
+                cx = array.Pop();
 
                 if (cx == pcx && cy == pcy)
                 {

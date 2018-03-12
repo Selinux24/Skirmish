@@ -773,12 +773,12 @@ namespace Engine.PathFinding.NavMesh2
         }
         public static float DistancePtSeg(Vector3 pt, Vector3 p, Vector3 q)
         {
-            float pqx = q[0] - p[0];
-            float pqy = q[1] - p[1];
-            float pqz = q[2] - p[2];
-            float dx = pt[0] - p[0];
-            float dy = pt[1] - p[1];
-            float dz = pt[2] - p[2];
+            float pqx = q.X - p.X;
+            float pqy = q.Y - p.Y;
+            float pqz = q.Z - p.Z;
+            float dx = pt.X - p.X;
+            float dy = pt.Y - p.Y;
+            float dz = pt.Z - p.Z;
             float d = pqx * pqx + pqy * pqy + pqz * pqz;
             float t = pqx * dx + pqy * dy + pqz * dz;
             if (d > 0)
@@ -794,9 +794,9 @@ namespace Engine.PathFinding.NavMesh2
                 t = 1;
             }
 
-            dx = p[0] + t * pqx - pt[0];
-            dy = p[1] + t * pqy - pt[1];
-            dz = p[2] + t * pqz - pt[2];
+            dx = p.X + t * pqx - pt.X;
+            dy = p.Y + t * pqy - pt.Y;
+            dz = p.Z + t * pqz - pt.Z;
 
             return dx * dx + dy * dy + dz * dz;
         }

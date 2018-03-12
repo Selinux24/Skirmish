@@ -24,6 +24,8 @@ namespace Collada
         private InputGeometry inputGeometry = null;
         private int inputGeometryIndex = -1;
 
+        private BuildSettings nmsettings = BuildSettings.Default;
+
         public NavmeshTest(Game game) : base(game)
         {
 
@@ -46,11 +48,9 @@ namespace Collada
                 VelocitySlow = 1f,
             };
 
-            var nmsettings = BuildSettings.Default;
             nmsettings.Agents = new[] { this.agent };
             nmsettings.TileSize = 32;
             nmsettings.BuildTiles = false;
-            nmsettings.PartitionType = SamplePartitionTypeEnum.Monotone;
 
             this.PathFinderDescription = new PathFinderDescription()
             {
@@ -129,6 +129,16 @@ namespace Collada
                 {
                     this.UpdateInputGeometryNodes(++inputGeometryIndex);
                 }
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Add))
+            {
+                int ppType = (int)nmsettings.PartitionType;
+                ppType++;
+                nmsettings.PartitionType = (SamplePartitionTypeEnum)(ppType % 3);
+
+                this.UpdateNavigationGraph();
+                this.UpdateGraphNodes(this.agent);
             }
         }
         private void UpdateCamera(GameTime gameTime)
