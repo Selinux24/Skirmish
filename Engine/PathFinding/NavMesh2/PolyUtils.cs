@@ -1451,5 +1451,169 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
         }
+        public static void CalcSlabEndPoints(Vector3 va, Vector3 vb, out Vector2 bmin, out Vector2 bmax, int side)
+        {
+            bmin = new Vector2();
+            bmax = new Vector2();
+
+            if (side == 0 || side == 4)
+            {
+                if (va[2] < vb[2])
+                {
+                    bmin[0] = va[2];
+                    bmin[1] = va[1];
+                    bmax[0] = vb[2];
+                    bmax[1] = vb[1];
+                }
+                else
+                {
+                    bmin[0] = vb[2];
+                    bmin[1] = vb[1];
+                    bmax[0] = va[2];
+                    bmax[1] = va[1];
+                }
+            }
+            else if (side == 2 || side == 6)
+            {
+                if (va[0] < vb[0])
+                {
+                    bmin[0] = va[0];
+                    bmin[1] = va[1];
+                    bmax[0] = vb[0];
+                    bmax[1] = vb[1];
+                }
+                else
+                {
+                    bmin[0] = vb[0];
+                    bmin[1] = vb[1];
+                    bmax[0] = va[0];
+                    bmax[1] = va[1];
+                }
+            }
+        }
+        public static float GetSlabCoord(Vector3 va, int side)
+        {
+            if (side == 0 || side == 4)
+                return va[0];
+            else if (side == 2 || side == 6)
+                return va[2];
+            return 0;
+        }
+        public static bool OverlapSlabs(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax, float px, float py)
+        {
+            // Check for horizontal overlap.
+            // The segment is shrunken a little so that slabs which touch
+            // at end points are not connected.
+            float minx = Math.Max(amin[0] + px, bmin[0] + px);
+            float maxx = Math.Min(amax[0] - px, bmax[0] - px);
+            if (minx > maxx)
+                return false;
+
+            // Check vertical overlap.
+            float ad = (amax[1] - amin[1]) / (amax[0] - amin[0]);
+            float ak = amin[1] - ad * amin[0];
+            float bd = (bmax[1] - bmin[1]) / (bmax[0] - bmin[0]);
+            float bk = bmin[1] - bd * bmin[0];
+            float aminy = ad * minx + ak;
+            float amaxy = ad * maxx + ak;
+            float bminy = bd * minx + bk;
+            float bmaxy = bd * maxx + bk;
+            float dmin = bminy - aminy;
+            float dmax = bmaxy - amaxy;
+
+            // Crossing segments always overlap.
+            if (dmin * dmax < 0)
+                return true;
+
+            // Check for overlap at endpoints.
+            float thr = (float)Math.Sqrt(py * 2);
+            if (dmin * dmin <= thr || dmax * dmax <= thr)
+                return true;
+
+            return false;
+        }
+        public static int CalcAreaOfPolygon2D(Int4[] verts, int nverts)
+        {
+            int area = 0;
+            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
+            {
+                var vi = verts[i];
+                var vj = verts[j];
+                area += vi.X * vj.Z - vj.X * vi.Z;
+            }
+            return (area + 1) / 2;
+        }
+        public static bool OverlapRange(int amin, int amax, int bmin, int bmax)
+        {
+            return (amin > bmax || amax < bmin) ? false : true;
+        }
+        public static bool Contains(int[] a, int an, int v)
+        {
+            int n = an;
+
+            for (int i = 0; i < n; ++i)
+            {
+                if (a[i] == v)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        public static bool AddUnique(int[] a, ref int an, int anMax, int v)
+        {
+            if (Contains(a, an, v))
+            {
+                return true;
+            }
+
+            if (an >= anMax)
+            {
+                return false;
+            }
+
+            a[an] = v;
+            an++;
+
+            return true;
+        }
+        public static void Push3(List<int> queue, int v1, int v2, int v3)
+        {
+            queue.Add(v1);
+            queue.Add(v2);
+            queue.Add(v3);
+        }
+        public static int LongestAxis(int x, int y, int z)
+        {
+            int axis = 0;
+            int maxVal = x;
+            if (y > maxVal)
+            {
+                axis = 1;
+                maxVal = y;
+            }
+            if (z > maxVal)
+            {
+                axis = 2;
+            }
+            return axis;
+        }
+        public static bool OverlapQuantBounds(Int3 amin, Int3 amax, Int3 bmin, Int3 bmax)
+        {
+            bool overlap = true;
+            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
+            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
+            overlap = (amin.Z > bmax.Z || amax.Z < bmin.Z) ? false : overlap;
+            return overlap;
+        }
+        public static bool OverlapBounds(Vector3 amin, Vector3 amax, Vector3 bmin, Vector3 bmax)
+        {
+            bool overlap = true;
+            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
+            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
+            overlap = (amin.Z > bmax.Z || amax.Z < bmin.Z) ? false : overlap;
+            return overlap;
+        }
     }
 }

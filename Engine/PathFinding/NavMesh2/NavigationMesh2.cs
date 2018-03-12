@@ -13,16 +13,24 @@ namespace Engine.PathFinding.NavMesh2
         }
         public static NavigationMesh2 Build(InputGeometry geometry, BuildSettings settings)
         {
-            if (settings.BuildTiles)
-            {
-                return BuildTiled(geometry, settings);
-            }
-            else
+            if (settings.BuildMode == BuildModesEnum.Solo)
             {
                 return BuildSolo(geometry, settings);
             }
+            else if (settings.BuildMode == BuildModesEnum.Tiled)
+            {
+                return BuildTiled(geometry, settings);
+            }
+            else if (settings.BuildMode == BuildModesEnum.TempObstacles)
+            {
+                return BuildTempObstacles(geometry, settings);
+            }
+            else
+            {
+                throw new EngineException("Bad build mode for NavigationMesh2.");
+            }
         }
-        private static NavigationMesh2 BuildTiled(InputGeometry geometry, BuildSettings settings)
+        private static NavigationMesh2 BuildTempObstacles(InputGeometry geometry, BuildSettings settings)
         {
             var agent = settings.Agents[0];
 
@@ -198,7 +206,10 @@ namespace Engine.PathFinding.NavMesh2
                 FilterWalkableLowHeightSpans(cfg.WalkableHeight, solid);
             }
 
-            var chf = BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, solid);
+            if (!BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, solid, out CompactHeightfield chf))
+            {
+                throw new EngineException("buildNavigation: Could not build compact height field.");
+            }
 
             // Erode the walkable area by agent radius.
             if (!ErodeWalkableArea(cfg.WalkableRadius, chf))
@@ -334,6 +345,43 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             return null;
+        }
+        private static NavigationMesh2 BuildTiled(InputGeometry geometry, BuildSettings settings)
+        {
+            var agent = settings.Agents[0];
+
+            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
+
+            // Init cache
+            CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
+            int ts = (int)settings.TileSize;
+            int tw = (gw + ts - 1) / ts;
+            int th = (gh + ts - 1) / ts;
+
+            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th * Constants.ExpectedLayersPerTile), 2), 14);
+            if (tileBits > 14) tileBits = 14;
+            int polyBits = 22 - tileBits;
+            int maxTiles = 1 << tileBits;
+            int maxPolysPerTile = 1 << polyBits;
+
+            var nmparams = new NavMeshParams()
+            {
+                Origin = bbox.Minimum,
+                TileWidth = settings.TileSize * settings.CellSize,
+                TileHeight = settings.TileSize * settings.CellSize,
+                MaxTiles = maxTiles,
+                MaxPolys = maxPolysPerTile,
+            };
+
+            var nm = new NavigationMesh2();
+            nm.Init(nmparams);
+
+            var nmQuery = new NavMeshQuery();
+            nmQuery.Init(nm, settings.MaxNodes);
+
+            BuildAllTiles(geometry, settings, agent, nm);
+
+            return nm;
         }
 
         private static bool BuildDistanceField(CompactHeightfield chf)
@@ -1400,7 +1448,7 @@ namespace Engine.PathFinding.NavMesh2
             {
                 var tris = chunkyMesh.GetTriangles(id);
 
-                Helper.InitializeArray<TileCacheAreas>(rc.triareas, TileCacheAreas.NullArea);
+                Helper.InitializeArray(rc.triareas, TileCacheAreas.NullArea);
 
                 MarkWalkableTriangles(tcfg.WalkableSlopeAngle, tris, rc.triareas);
 
@@ -1426,7 +1474,10 @@ namespace Engine.PathFinding.NavMesh2
                 FilterWalkableLowHeightSpans(tcfg.WalkableHeight, rc.solid);
             }
 
-            rc.chf = BuildCompactHeightfield(tcfg.WalkableHeight, tcfg.WalkableClimb, rc.solid);
+            if (!BuildCompactHeightfield(tcfg.WalkableHeight, tcfg.WalkableClimb, rc.solid, out rc.chf))
+            {
+                throw new EngineException("buildNavigation: Could not build compact height field.");
+            }
 
             // Erode the walkable area by agent radius.
             if (!ErodeWalkableArea(tcfg.WalkableRadius, rc.chf))
@@ -1568,7 +1619,7 @@ namespace Engine.PathFinding.NavMesh2
             int[] srcReg = Helper.CreateArray(chf.spanCount, 0xff);
 
             int nsweeps = chf.width;
-            LayerSweepSpan[] sweeps = Helper.CreateArray<LayerSweepSpan>(nsweeps, new LayerSweepSpan());
+            LayerSweepSpan[] sweeps = Helper.CreateArray(nsweeps, new LayerSweepSpan());
 
             // Partition walkable area into monotone regions.
             int regId = 0;
@@ -1580,11 +1631,11 @@ namespace Engine.PathFinding.NavMesh2
 
                 for (int x = borderSize; x < w - borderSize; ++x)
                 {
-                    CompactCell c = chf.cells[x + y * w];
+                    var c = chf.cells[x + y * w];
 
                     for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
                     {
-                        CompactSpan s = chf.spans[i];
+                        var s = chf.spans[i];
                         if (chf.areas[i] == TileCacheAreas.NullArea) continue;
 
                         int sid = 0xff;
@@ -1662,7 +1713,7 @@ namespace Engine.PathFinding.NavMesh2
                 // Remap local sweep ids to region ids.
                 for (int x = borderSize; x < w - borderSize; ++x)
                 {
-                    CompactCell c = chf.cells[x + y * w];
+                    var c = chf.cells[x + y * w];
                     for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
                     {
                         if (srcReg[i] != 0xff)
@@ -1675,21 +1726,21 @@ namespace Engine.PathFinding.NavMesh2
 
             // Allocate and init layer regions.
             int nregs = regId;
-            LayerRegion[] regs = Helper.CreateArray<LayerRegion>(nregs, () => (LayerRegion.Default));
+            LayerRegion[] regs = Helper.CreateArray(nregs, () => (LayerRegion.Default));
 
             // Find region neighbours and overlapping regions.
             for (int y = 0; y < h; ++y)
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    CompactCell c = chf.cells[x + y * w];
+                    var c = chf.cells[x + y * w];
 
                     int[] lregs = new int[LayerRegion.MaxLayers];
                     int nlregs = 0;
 
                     for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
                     {
-                        CompactSpan s = chf.spans[i];
+                        var s = chf.spans[i];
                         int ri = srcReg[i];
                         if (ri == 0xff)
                         {
@@ -1719,7 +1770,7 @@ namespace Engine.PathFinding.NavMesh2
                                     // Don't check return value -- if we cannot add the neighbor
                                     // it will just cause a few more regions to be created, which
                                     // is fine.
-                                    AddUnique(regs[ri].neis, ref regs[ri].nneis, LayerRegion.MaxNeighbors, rai);
+                                    PolyUtils.AddUnique(regs[ri].neis, ref regs[ri].nneis, LayerRegion.MaxNeighbors, rai);
                                 }
                             }
                         }
@@ -1732,11 +1783,11 @@ namespace Engine.PathFinding.NavMesh2
                         {
                             if (lregs[i] != lregs[j])
                             {
-                                LayerRegion ri = regs[lregs[i]];
-                                LayerRegion rj = regs[lregs[j]];
+                                var ri = regs[lregs[i]];
+                                var rj = regs[lregs[j]];
 
-                                if (!AddUnique(ri.layers, ref ri.nlayers, LayerRegion.MaxLayers, lregs[j]) ||
-                                    !AddUnique(rj.layers, ref rj.nlayers, LayerRegion.MaxLayers, lregs[i]))
+                                if (!PolyUtils.AddUnique(ri.layers, ref ri.nlayers, LayerRegion.MaxLayers, lregs[j]) ||
+                                    !PolyUtils.AddUnique(rj.layers, ref rj.nlayers, LayerRegion.MaxLayers, lregs[i]))
                                 {
                                     throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                                 }
@@ -1758,7 +1809,7 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < nregs; ++i)
             {
-                LayerRegion root = regs[i];
+                var root = regs[i];
 
                 // Skip already visited.
                 if (root.layerId != 0xff)
@@ -1776,7 +1827,7 @@ namespace Engine.PathFinding.NavMesh2
                 while (nstack != 0)
                 {
                     // Pop front
-                    LayerRegion reg = regs[stack[0]];
+                    var reg = regs[stack[0]];
                     nstack--;
                     for (int j = 0; j < nstack; ++j)
                     {
@@ -1787,7 +1838,7 @@ namespace Engine.PathFinding.NavMesh2
                     for (int j = 0; j < nneis; ++j)
                     {
                         int nei = reg.neis[j];
-                        LayerRegion regn = regs[nei];
+                        var regn = regs[nei];
 
                         // Skip already visited.
                         if (regn.layerId != 0xff)
@@ -1796,7 +1847,7 @@ namespace Engine.PathFinding.NavMesh2
                         }
 
                         // Skip if the neighbour is overlapping root region.
-                        if (Contains(root.layers, root.nlayers, nei))
+                        if (PolyUtils.Contains(root.layers, root.nlayers, nei))
                         {
                             continue;
                         }
@@ -1820,7 +1871,7 @@ namespace Engine.PathFinding.NavMesh2
                             // Merge current layers to root.
                             for (int k = 0; k < regn.nlayers; ++k)
                             {
-                                if (!AddUnique(root.layers, ref root.nlayers, LayerRegion.MaxLayers, regn.layers[k]))
+                                if (!PolyUtils.AddUnique(root.layers, ref root.nlayers, LayerRegion.MaxLayers, regn.layers[k]))
                                 {
                                     throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                                 }
@@ -1844,7 +1895,7 @@ namespace Engine.PathFinding.NavMesh2
 
             for (int i = 0; i < nregs; ++i)
             {
-                LayerRegion ri = regs[i];
+                var ri = regs[i];
 
                 if (!ri.isBase)
                 {
@@ -1864,14 +1915,14 @@ namespace Engine.PathFinding.NavMesh2
                             continue;
                         }
 
-                        LayerRegion rj = regs[j];
+                        var rj = regs[j];
                         if (!rj.isBase)
                         {
                             continue;
                         }
 
                         // Skip if the regions are not close to each other.
-                        if (!OverlapRange(ri.ymin, (ri.ymax + mergeHeight), rj.ymin, (rj.ymax + mergeHeight)))
+                        if (!PolyUtils.OverlapRange(ri.ymin, (ri.ymax + mergeHeight), rj.ymin, (rj.ymax + mergeHeight)))
                         {
                             continue;
                         }
@@ -1897,7 +1948,7 @@ namespace Engine.PathFinding.NavMesh2
 
                             // Check if region 'k' is overlapping region 'ri'
                             // Index to 'regs' is the same as region id.
-                            if (Contains(ri.layers, ri.nlayers, k))
+                            if (PolyUtils.Contains(ri.layers, ri.nlayers, k))
                             {
                                 overlap = true;
                                 break;
@@ -1924,7 +1975,7 @@ namespace Engine.PathFinding.NavMesh2
                     // Merge
                     for (int j = 0; j < nregs; ++j)
                     {
-                        LayerRegion rj = regs[j];
+                        var rj = regs[j];
 
                         if (rj.layerId == oldId)
                         {
@@ -1934,7 +1985,7 @@ namespace Engine.PathFinding.NavMesh2
                             // Add overlaid layers from 'rj' to 'ri'.
                             for (int k = 0; k < rj.nlayers; ++k)
                             {
-                                if (!AddUnique(ri.layers, ref ri.nlayers, LayerRegion.MaxLayers, rj.layers[k]))
+                                if (!PolyUtils.AddUnique(ri.layers, ref ri.nlayers, LayerRegion.MaxLayers, rj.layers[k]))
                                 {
                                     throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                                 }
@@ -2006,7 +2057,7 @@ namespace Engine.PathFinding.NavMesh2
             {
                 int curId = i;
 
-                HeightfieldLayer layer = lset.layers[i];
+                var layer = lset.layers[i];
 
                 int gridSize = lw * lh;
 
@@ -2050,10 +2101,10 @@ namespace Engine.PathFinding.NavMesh2
                     {
                         int cx = borderSize + x;
                         int cy = borderSize + y;
-                        CompactCell c = chf.cells[cx + cy * w];
+                        var c = chf.cells[cx + cy * w];
                         for (int j = (int)c.index, nj = (int)(c.index + c.count); j < nj; ++j)
                         {
-                            CompactSpan s = chf.spans[j];
+                            var s = chf.spans[j];
                             // Skip unassigned regions.
                             if (srcReg[j] == 0xff)
                             {
@@ -2095,7 +2146,7 @@ namespace Engine.PathFinding.NavMesh2
                                         portal |= (1 << dir);
 
                                         // Update height so that it matches on both sides of the portal.
-                                        CompactSpan ass = chf.spans[ai];
+                                        var ass = chf.spans[ai];
                                         if (ass.y > hmin)
                                         {
                                             layer.heights[idx] = Math.Max(layer.heights[idx], (ass.y - hmin));
@@ -2131,41 +2182,6 @@ namespace Engine.PathFinding.NavMesh2
 
                 lset.layers[i] = layer;
             }
-
-            return true;
-        }
-        private static bool OverlapRange(int amin, int amax, int bmin, int bmax)
-        {
-            return (amin > bmax || amax < bmin) ? false : true;
-        }
-        private static bool Contains(int[] a, int an, int v)
-        {
-            int n = an;
-
-            for (int i = 0; i < n; ++i)
-            {
-                if (a[i] == v)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        private static bool AddUnique(int[] a, ref int an, int anMax, int v)
-        {
-            if (Contains(a, an, v))
-            {
-                return true;
-            }
-
-            if (an >= anMax)
-            {
-                return false;
-            }
-
-            a[an] = v;
-            an++;
 
             return true;
         }
@@ -2727,28 +2743,30 @@ namespace Engine.PathFinding.NavMesh2
 
             return count;
         }
-        private static CompactHeightfield BuildCompactHeightfield(int walkableHeight, int walkableClimb, Heightfield hf)
+        private static bool BuildCompactHeightfield(int walkableHeight, int walkableClimb, Heightfield hf, out CompactHeightfield chf)
         {
-            CompactHeightfield chf = new CompactHeightfield();
-
             int w = hf.width;
             int h = hf.height;
             int spanCount = GetHeightFieldSpanCount(hf);
+            var bbox = hf.boundingBox;
+            bbox.Maximum.Y += walkableHeight * hf.ch;
 
             // Fill in header.
-            chf.width = w;
-            chf.height = h;
-            chf.spanCount = spanCount;
-            chf.walkableHeight = walkableHeight;
-            chf.walkableClimb = walkableClimb;
-            chf.maxRegions = 0;
-            chf.boundingBox = hf.boundingBox;
-            chf.boundingBox.Maximum.Y += walkableHeight * hf.ch;
-            chf.cs = hf.cs;
-            chf.ch = hf.ch;
-            chf.cells = new CompactCell[w * h];
-            chf.spans = new CompactSpan[spanCount];
-            chf.areas = new TileCacheAreas[spanCount];
+            chf = new CompactHeightfield
+            {
+                width = w,
+                height = h,
+                spanCount = spanCount,
+                walkableHeight = walkableHeight,
+                walkableClimb = walkableClimb,
+                maxRegions = 0,
+                boundingBox = bbox,
+                cs = hf.cs,
+                ch = hf.ch,
+                cells = new CompactCell[w * h],
+                spans = new CompactSpan[spanCount],
+                areas = new TileCacheAreas[spanCount]
+            };
 
             // Fill in cells and spans.
             int idx = 0;
@@ -2853,7 +2871,7 @@ namespace Engine.PathFinding.NavMesh2
                 throw new EngineException(string.Format("Heightfield has too many layers {0} (max: {1})", tooHighNeighbour, maxLayers));
             }
 
-            return chf;
+            return true;
         }
         private static void SetCon(ref CompactSpan s, int dir, int i)
         {
@@ -4011,7 +4029,7 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     var cont = cset.conts[i];
                     // If the contour is wound backwards, it is a hole.
-                    winding[i] = CalcAreaOfPolygon2D(cont.verts, cont.nverts) < 0 ? -1 : 1;
+                    winding[i] = PolyUtils.CalcAreaOfPolygon2D(cont.verts, cont.nverts) < 0 ? -1 : 1;
                     if (winding[i] < 0)
                     {
                         nholes++;
@@ -4305,17 +4323,6 @@ namespace Engine.PathFinding.NavMesh2
                 sv.W = (points[ai].W & (Constants.RC_CONTOUR_REG_MASK | Constants.RC_AREA_BORDER)) | (points[bi].W & Constants.RC_BORDER_VERTEX);
                 simplified[i] = sv;
             }
-        }
-        private static int CalcAreaOfPolygon2D(Int4[] verts, int nverts)
-        {
-            int area = 0;
-            for (int i = 0, j = nverts - 1; i < nverts; j = i++)
-            {
-                var vi = verts[i];
-                var vj = verts[j];
-                area += vi.X * vj.Z - vj.X * vi.Z;
-            }
-            return (area + 1) / 2;
         }
         private static void RemoveDegenerateSegments(List<Int4> simplified)
         {
@@ -5025,7 +5032,7 @@ namespace Engine.PathFinding.NavMesh2
                                 }
                                 if (border)
                                 {
-                                    Push3(queue, x, y, i);
+                                    PolyUtils.Push3(queue, x, y, i);
                                 }
                                 break;
                             }
@@ -5089,15 +5096,9 @@ namespace Engine.PathFinding.NavMesh2
 
                     hp.data[hx + hy * hp.width] = a.y;
 
-                    Push3(queue, ax, ay, ai);
+                    PolyUtils.Push3(queue, ax, ay, ai);
                 }
             }
-        }
-        private static void Push3(List<int> queue, int v1, int v2, int v3)
-        {
-            queue.Add(v1);
-            queue.Add(v2);
-            queue.Add(v3);
         }
         private static void SeedArrayWithPolyCenter(CompactHeightfield chf, Polygoni poly, int npoly, Int3[] verts, int bs, HeightPatch hp, List<int> array)
         {
@@ -5967,6 +5968,333 @@ namespace Engine.PathFinding.NavMesh2
             return true;
         }
 
+        private static void BuildAllTiles(InputGeometry geom, BuildSettings settings, Agent agent, NavigationMesh2 navMesh)
+        {
+            var bbox = geom.BoundingBox;
+            CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
+            int ts = (int)settings.TileSize;
+            int tw = (gw + ts - 1) / ts;
+            int th = (gh + ts - 1) / ts;
+            float tcs = settings.TileSize * settings.CellSize;
+
+            for (int y = 0; y < th; ++y)
+            {
+                for (int x = 0; x < tw; ++x)
+                {
+                    BoundingBox lastBuiltBbox = new BoundingBox();
+
+                    lastBuiltBbox.Minimum.X = bbox.Minimum.X + x * tcs;
+                    lastBuiltBbox.Minimum.Y = bbox.Minimum.Y;
+                    lastBuiltBbox.Minimum.Z = bbox.Minimum.Z + y * tcs;
+
+                    lastBuiltBbox.Maximum.X = bbox.Minimum.X + (x + 1) * tcs;
+                    lastBuiltBbox.Maximum.Y = bbox.Maximum.Y;
+                    lastBuiltBbox.Maximum.Z = bbox.Minimum.Z + (y + 1) * tcs;
+
+                    MeshData data = BuildTileMesh(x, y, lastBuiltBbox, geom, settings, agent);
+                    if (data != null)
+                    {
+                        // Remove any previous data (navmesh owns and deletes the data).
+                        navMesh.RemoveTile(navMesh.GetTileRefAt(x, y, 0), data, 0);
+                        // Let the navmesh own the data.
+                        navMesh.AddTile(data, TileFlags.FreeData, 0, out int result);
+                    }
+                }
+            }
+        }
+        private static MeshData BuildTileMesh(int tx, int ty, BoundingBox bbox, InputGeometry geometry, BuildSettings settings, Agent agent)
+        {
+            var chunkyMesh = geometry.GetChunkyMesh();
+
+            int walkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize);
+            int tileSize = (int)settings.TileSize;
+            int borderSize = walkableRadius + 3;
+
+            // Expand the heighfield bounding box by border size to find the extents of geometry we need to build this tile.
+            //
+            // This is done in order to make sure that the navmesh tiles connect correctly at the borders,
+            // and the obstacles close to the border work correctly with the dilation process.
+            // No polygons (or contours) will be created on the border area.
+            //
+            // IMPORTANT!
+            //
+            //   :''''''''':
+            //   : +-----+ :
+            //   : |     | :
+            //   : |     |<--- tile to build
+            //   : |     | :  
+            //   : +-----+ :<-- geometry needed
+            //   :.........:
+            //
+            // You should use this bounding box to query your input geometry.
+            //
+            // For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
+            // you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
+            // or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
+            bbox.Minimum.X -= borderSize * settings.CellSize;
+            bbox.Minimum.Z -= borderSize * settings.CellSize;
+            bbox.Maximum.X += borderSize * settings.CellSize;
+            bbox.Maximum.Z += borderSize * settings.CellSize;
+
+            // Init build configuration from GUI
+            Config cfg = new Config
+            {
+                CellSize = settings.CellSize,
+                CellHeight = settings.CellHeight,
+                WalkableSlopeAngle = agent.MaxSlope,
+                WalkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight),
+                WalkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight),
+                WalkableRadius = walkableRadius,
+                MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize),
+                MaxSimplificationError = settings.EdgeMaxError,
+                MinRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize),     // Note: area = size*size
+                MergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize), // Note: area = size*size
+                MaxVertsPerPoly = settings.VertsPerPoly,
+                TileSize = tileSize,
+                BorderSize = borderSize, // Reserve enough padding.
+                Width = tileSize + borderSize * 2,
+                Height = tileSize + borderSize * 2,
+                DetailSampleDist = settings.DetailSampleDist < 0.9f ? 0 : settings.CellSize * settings.DetailSampleDist,
+                DetailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError,
+                BoundingBox = bbox,
+            };
+
+            // Allocate voxel heightfield where we rasterize our input data to.
+            var solid = new Heightfield
+            {
+                width = cfg.Width,
+                height = cfg.Height,
+                boundingBox = cfg.BoundingBox,
+                cs = cfg.CellSize,
+                ch = cfg.CellHeight,
+                spans = new Span[cfg.Width * cfg.Height],
+            };
+
+            // Allocate array that can hold triangle flags.
+            // If you have multiple meshes you need to process, allocate
+            // and array which can hold the max number of triangles you need to process.
+            TileCacheAreas[] triareas = new TileCacheAreas[chunkyMesh.maxTrisPerChunk];
+
+            Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
+            Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
+            var cid = GetChunksOverlappingRect(chunkyMesh, tbmin, tbmax);
+            if (cid.Count() == 0)
+            {
+                return null; // empty
+            }
+
+            foreach (var id in cid)
+            {
+                var tris = chunkyMesh.GetTriangles(id);
+
+                Helper.InitializeArray(triareas, TileCacheAreas.NullArea);
+
+                MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris, triareas);
+
+                if (!RasterizeTriangles(solid, cfg.WalkableClimb, tris, triareas))
+                {
+                    return null;
+                }
+            }
+
+            // Once all geometry is rasterized, we do initial pass of filtering to
+            // remove unwanted overhangs caused by the conservative rasterization
+            // as well as filter spans where the character cannot possibly stand.
+            if (settings.FilterLowHangingObstacles)
+            {
+                FilterLowHangingWalkableObstacles(cfg.WalkableClimb, solid);
+            }
+            if (settings.FilterLedgeSpans)
+            {
+                FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb, solid);
+            }
+            if (settings.FilterWalkableLowHeightSpans)
+            {
+                FilterWalkableLowHeightSpans(cfg.WalkableHeight, solid);
+            }
+
+            // Compact the heightfield so that it is faster to handle from now on.
+            // This will result more cache coherent data as well as the neighbours
+            // between walkable cells will be calculated.
+            if (!BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, solid, out CompactHeightfield chf))
+            {
+                return null;
+            }
+
+            // Erode the walkable area by agent radius.
+            if (!ErodeWalkableArea(cfg.WalkableRadius, chf))
+            {
+                return null;
+            }
+
+            // (Optional) Mark areas.
+            ConvexVolume[] vols = geometry.GetConvexVolumes();
+            for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
+            {
+                MarkConvexPolyArea(
+                    vols[i].verts, vols[i].nverts,
+                    vols[i].hmin, vols[i].hmax,
+                    vols[i].area, chf);
+            }
+
+            // Partition the heightfield so that we can use simple algorithm later to triangulate the walkable areas.
+            // There are 3 martitioning methods, each with some pros and cons:
+            // 1) Watershed partitioning
+            //   - the classic Recast partitioning
+            //   - creates the nicest tessellation
+            //   - usually slowest
+            //   - partitions the heightfield into nice regions without holes or overlaps
+            //   - the are some corner cases where this method creates produces holes and overlaps
+            //      - holes may appear when a small obstacles is close to large open area (triangulation can handle this)
+            //      - overlaps may occur if you have narrow spiral corridors (i.e stairs), this make triangulation to fail
+            //   * generally the best choice if you precompute the nacmesh, use this if you have large open areas
+            // 2) Monotone partioning
+            //   - fastest
+            //   - partitions the heightfield into regions without holes and overlaps (guaranteed)
+            //   - creates long thin polygons, which sometimes causes paths with detours
+            //   * use this if you want fast navmesh generation
+            // 3) Layer partitoining
+            //   - quite fast
+            //   - partitions the heighfield into non-overlapping regions
+            //   - relies on the triangulation code to cope with holes (thus slower than monotone partitioning)
+            //   - produces better triangles than monotone partitioning
+            //   - does not have the corner cases of watershed partitioning
+            //   - can be slow and create a bit ugly tessellation (still better than monotone)
+            //     if you have large open areas with small obstacles (not a problem if you use tiles)
+            //   * good choice to use for tiled navmesh with medium and small sized tiles
+
+            if (settings.PartitionType == SamplePartitionTypeEnum.Watershed)
+            {
+                // Prepare for region partitioning, by calculating distance field along the walkable surface.
+                if (!BuildDistanceField(chf))
+                {
+                    return null;
+                }
+
+                // Partition the walkable surface into simple regions without holes.
+                if (!BuildRegions(chf, 0, cfg.MinRegionArea, cfg.MergeRegionArea))
+                {
+                    return null;
+                }
+            }
+            else if (settings.PartitionType == SamplePartitionTypeEnum.Monotone)
+            {
+                // Partition the walkable surface into simple regions without holes.
+                // Monotone partitioning does not need distancefield.
+                if (!BuildRegionsMonotone(chf, 0, cfg.MinRegionArea, cfg.MergeRegionArea))
+                {
+                    return null;
+                }
+            }
+            else if (settings.PartitionType == SamplePartitionTypeEnum.Layers)
+            {
+                // Partition the walkable surface into simple regions without holes.
+                if (!BuildLayerRegions(chf, 0, cfg.MinRegionArea))
+                {
+                    return null;
+                }
+            }
+
+            // Create contours.
+            if (!BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlags.RC_CONTOUR_TESS_AREA_EDGES, out ContourSet cset))
+            {
+                return null;
+            }
+
+            if (cset.nconts == 0)
+            {
+                return null;
+            }
+
+            // Build polygon navmesh from the contours.
+            if (!BuildPolyMesh(cset, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
+            {
+                return null;
+            }
+
+            // Build detail mesh.
+            if (!BuildPolyMeshDetail(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError, out PolyMeshDetail dmesh))
+            {
+                return null;
+            }
+
+            if (cfg.MaxVertsPerPoly <= Constants.VertsPerPolygon)
+            {
+                if (pmesh.nverts >= 0xffff)
+                {
+                    // The vertex indices are ushorts, and cannot point to more than 0xffff vertices.
+                    return null;
+                }
+
+                // Update poly flags from areas.
+                for (int i = 0; i < pmesh.npolys; ++i)
+                {
+                    if ((int)pmesh.areas[i] == (int)TileCacheAreas.WalkableArea)
+                    {
+                        pmesh.areas[i] = SamplePolyAreas.SAMPLE_POLYAREA_GROUND;
+                    }
+
+                    if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GROUND ||
+                        pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GRASS ||
+                        pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_ROAD)
+                    {
+                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK;
+                    }
+                    else if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_WATER)
+                    {
+                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_SWIM;
+                    }
+                    else if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_DOOR)
+                    {
+                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK | SamplePolyFlags.SAMPLE_POLYFLAGS_DOOR;
+                    }
+                }
+
+                var param = new NavMeshCreateParams
+                {
+                    verts = pmesh.verts,
+                    vertCount = pmesh.nverts,
+                    polys = pmesh.polys,
+                    polyAreas = pmesh.areas,
+                    polyFlags = pmesh.flags,
+                    polyCount = pmesh.npolys,
+                    nvp = pmesh.nvp,
+                    detailMeshes = dmesh.meshes,
+                    detailVerts = dmesh.verts,
+                    detailVertsCount = dmesh.nverts,
+                    detailTris = dmesh.tris,
+                    detailTriCount = dmesh.ntris,
+                    offMeshConVerts = geometry.GetOffMeshConnectionVerts(),
+                    offMeshConRad = geometry.GetOffMeshConnectionRads(),
+                    offMeshConDir = geometry.GetOffMeshConnectionDirs(),
+                    offMeshConAreas = geometry.GetOffMeshConnectionAreas(),
+                    offMeshConFlags = geometry.GetOffMeshConnectionFlags(),
+                    offMeshConUserID = geometry.GetOffMeshConnectionId(),
+                    offMeshConCount = geometry.GetOffMeshConnectionCount(),
+                    walkableHeight = agent.Height,
+                    walkableRadius = agent.Radius,
+                    walkableClimb = agent.MaxClimb,
+                    tileX = tx,
+                    tileY = ty,
+                    tileLayer = 0,
+                    bmin = pmesh.bmin,
+                    bmax = pmesh.bmax,
+                    cs = cfg.CellSize,
+                    ch = cfg.CellHeight,
+                    buildBvTree = true
+                };
+
+                if (!CreateNavMeshData(param, out MeshData navData))
+                {
+                    return null;
+                }
+
+                return navData;
+            }
+
+            return null;
+        }
+
         public static bool CreateNavMeshData(NavMeshCreateParams param, out MeshData outData)
         {
             outData = null;
@@ -6433,9 +6761,10 @@ namespace Engine.PathFinding.NavMesh2
                 // Split
                 CalcExtends(items, nitems, imin, imax, ref node.bmin, ref node.bmax);
 
-                int axis = LongestAxis(node.bmax.X - node.bmin.X,
-                                       node.bmax.Y - node.bmin.Y,
-                                       node.bmax.Z - node.bmin.Z);
+                int axis = PolyUtils.LongestAxis(
+                    node.bmax.X - node.bmin.X,
+                    node.bmax.Y - node.bmin.Y,
+                    node.bmax.Z - node.bmin.Z);
 
                 if (axis == 0)
                 {
@@ -6486,21 +6815,6 @@ namespace Engine.PathFinding.NavMesh2
                 if (it.bmax.Y > bmax.Y) bmax.Y = it.bmax.Y;
                 if (it.bmax.Z > bmax.Z) bmax.Z = it.bmax.Z;
             }
-        }
-        private static int LongestAxis(int x, int y, int z)
-        {
-            int axis = 0;
-            int maxVal = x;
-            if (y > maxVal)
-            {
-                axis = 1;
-                maxVal = y;
-            }
-            if (z > maxVal)
-            {
-                axis = 2;
-            }
-            return axis;
         }
 
         private Vector3 m_orig;
@@ -6583,8 +6897,7 @@ namespace Engine.PathFinding.NavMesh2
 
             Init(param);
 
-            int lastRef = 0;
-            return AddTile(data, flags, ref lastRef, out int result);
+            return AddTile(data, flags, 0, out int result);
         }
         public MeshTile GetTileRefAt(int x, int y, int layer)
         {
@@ -6603,7 +6916,7 @@ namespace Engine.PathFinding.NavMesh2
             }
             return null;
         }
-        public bool AddTile(MeshData data, TileFlags flags, ref int lastRef, out int result)
+        public bool AddTile(MeshData data, TileFlags flags, int lastRef, out int result)
         {
             result = -1;
 
@@ -6786,7 +7099,6 @@ namespace Engine.PathFinding.NavMesh2
         }
         private int GetNeighbourTilesAt(int x, int y, int side, MeshTile[] tiles, int maxTiles)
         {
-
             int nx = x, ny = y;
             switch (side)
             {
@@ -7018,7 +7330,7 @@ namespace Engine.PathFinding.NavMesh2
                     var node = tile.bvTree[nodeIndex];
                     var end = tile.bvTree[endIndex];
 
-                    bool overlap = OverlapQuantBounds(bmin, bmax, node.bmin, node.bmax);
+                    bool overlap = PolyUtils.OverlapQuantBounds(bmin, bmax, node.bmin, node.bmax);
                     bool isLeafNode = node.i >= 0;
 
                     if (isLeafNode && overlap)
@@ -7060,7 +7372,7 @@ namespace Engine.PathFinding.NavMesh2
                         bmin = Vector3.Min(bmin, v);
                         bmax = Vector3.Max(bmax, v);
                     }
-                    if (OverlapBounds(qmin, qmax, bmin, bmax))
+                    if (PolyUtils.OverlapBounds(qmin, qmax, bmin, bmax))
                     {
                         if (n < maxPolys)
 
@@ -7069,22 +7381,6 @@ namespace Engine.PathFinding.NavMesh2
                 }
                 return n;
             }
-        }
-        private bool OverlapQuantBounds(Int3 amin, Int3 amax, Int3 bmin, Int3 bmax)
-        {
-            bool overlap = true;
-            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
-            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
-            overlap = (amin.Z > bmax.Z || amax.Z < bmin.Z) ? false : overlap;
-            return overlap;
-        }
-        private bool OverlapBounds(Vector3 amin, Vector3 amax, Vector3 bmin, Vector3 bmax)
-        {
-            bool overlap = true;
-            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
-            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
-            overlap = (amin.Z > bmax.Z || amax.Z < bmin.Z) ? false : overlap;
-            return overlap;
         }
         private void ClosestPointOnPoly(int r, Vector3 pos, out Vector3 closest, out bool posOverPoly)
         {
@@ -7104,7 +7400,7 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             int ip = Array.IndexOf(tile.polys, poly);
-            PolyDetail pd = tile.detailMeshes[ip];
+            var pd = tile.detailMeshes[ip];
 
             // Clamp point to be inside the polygon.
             Vector3[] verts = new Vector3[Constants.VertsPerPolygon];
@@ -7413,8 +7709,8 @@ namespace Engine.PathFinding.NavMesh2
 
             if (tile == null) return 0;
 
-            CalcSlabEndPoints(va, vb, out Vector2 amin, out Vector2 amax, side);
-            float apos = GetSlabCoord(va, side);
+            PolyUtils.CalcSlabEndPoints(va, vb, out Vector2 amin, out Vector2 amax, side);
+            float apos = PolyUtils.GetSlabCoord(va, side);
 
             // Remove links pointing to 'side' and compact the links array. 
             int m = Constants.DT_EXT_LINK | side;
@@ -7433,16 +7729,16 @@ namespace Engine.PathFinding.NavMesh2
 
                     Vector3 vc = tile.verts[poly.verts[j]];
                     Vector3 vd = tile.verts[poly.verts[(j + 1) % nv]];
-                    float bpos = GetSlabCoord(vc, side);
+                    float bpos = PolyUtils.GetSlabCoord(vc, side);
 
                     // Segments are not close enough.
                     if (Math.Abs(apos - bpos) > 0.01f)
                         continue;
 
                     // Check if the segments touch.
-                    CalcSlabEndPoints(vc, vd, out Vector2 bmin, out Vector2 bmax, side);
+                    PolyUtils.CalcSlabEndPoints(vc, vd, out Vector2 bmin, out Vector2 bmax, side);
 
-                    if (!OverlapSlabs(amin, amax, bmin, bmax, 0.01f, tile.header.walkableClimb)) continue;
+                    if (!PolyUtils.OverlapSlabs(amin, amax, bmin, bmax, 0.01f, tile.header.walkableClimb)) continue;
 
                     // Add return value.
                     if (n < maxcon)
@@ -7456,87 +7752,6 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
             return n;
-        }
-        private static void CalcSlabEndPoints(Vector3 va, Vector3 vb, out Vector2 bmin, out Vector2 bmax, int side)
-        {
-            bmin = new Vector2();
-            bmax = new Vector2();
-
-            if (side == 0 || side == 4)
-            {
-                if (va[2] < vb[2])
-                {
-                    bmin[0] = va[2];
-                    bmin[1] = va[1];
-                    bmax[0] = vb[2];
-                    bmax[1] = vb[1];
-                }
-                else
-                {
-                    bmin[0] = vb[2];
-                    bmin[1] = vb[1];
-                    bmax[0] = va[2];
-                    bmax[1] = va[1];
-                }
-            }
-            else if (side == 2 || side == 6)
-            {
-                if (va[0] < vb[0])
-                {
-                    bmin[0] = va[0];
-                    bmin[1] = va[1];
-                    bmax[0] = vb[0];
-                    bmax[1] = vb[1];
-                }
-                else
-                {
-                    bmin[0] = vb[0];
-                    bmin[1] = vb[1];
-                    bmax[0] = va[0];
-                    bmax[1] = va[1];
-                }
-            }
-        }
-        private static float GetSlabCoord(Vector3 va, int side)
-        {
-            if (side == 0 || side == 4)
-                return va[0];
-            else if (side == 2 || side == 6)
-                return va[2];
-            return 0;
-        }
-        private static bool OverlapSlabs(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax, float px, float py)
-        {
-            // Check for horizontal overlap.
-            // The segment is shrunken a little so that slabs which touch
-            // at end points are not connected.
-            float minx = Math.Max(amin[0] + px, bmin[0] + px);
-            float maxx = Math.Min(amax[0] - px, bmax[0] - px);
-            if (minx > maxx)
-                return false;
-
-            // Check vertical overlap.
-            float ad = (amax[1] - amin[1]) / (amax[0] - amin[0]);
-            float ak = amin[1] - ad * amin[0];
-            float bd = (bmax[1] - bmin[1]) / (bmax[0] - bmin[0]);
-            float bk = bmin[1] - bd * bmin[0];
-            float aminy = ad * minx + ak;
-            float amaxy = ad * maxx + ak;
-            float bminy = bd * minx + bk;
-            float bmaxy = bd * maxx + bk;
-            float dmin = bminy - aminy;
-            float dmax = bmaxy - amaxy;
-
-            // Crossing segments always overlap.
-            if (dmin * dmax < 0)
-                return true;
-
-            // Check for overlap at endpoints.
-            float thr = (float)Math.Sqrt(py * 2);
-            if (dmin * dmin <= thr || dmax * dmax <= thr)
-                return true;
-
-            return false;
         }
         private int GetTileRef(MeshTile tile)
         {

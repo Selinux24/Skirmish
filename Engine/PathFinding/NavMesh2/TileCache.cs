@@ -293,8 +293,7 @@ namespace Engine.PathFinding.NavMesh2
             if (navData != null)
             {
                 // Let the navmesh own the data.
-                int lastRef = 0;
-                if (!navmesh.AddTile(navData, TileFlags.FreeData, ref lastRef, out int result))
+                if (!navmesh.AddTile(navData, TileFlags.FreeData, 0, out int result))
                 {
                     navData = null;
 
@@ -304,7 +303,8 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private bool DecompressTileCacheLayer(TileCacheLayerHeader header, TileCacheLayerData data, int dataSize, out TileCacheLayer layer)
+
+        private static bool DecompressTileCacheLayer(TileCacheLayerHeader header, TileCacheLayerData data, int dataSize, out TileCacheLayer layer)
         {
             layer = new TileCacheLayer()
             {
@@ -318,7 +318,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private bool MarkBoxArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 center, Vector3 halfExtents, Vector2 rotAux, TileCacheAreas areaId)
+        private static bool MarkBoxArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 center, Vector3 halfExtents, Vector2 rotAux, TileCacheAreas areaId)
         {
             int w = layer.header.width;
             int h = layer.header.height;
@@ -376,7 +376,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private bool MarkBoxArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 bmin, Vector3 bmax, TileCacheAreas areaId)
+        private static bool MarkBoxArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 bmin, Vector3 bmax, TileCacheAreas areaId)
         {
             int w = layer.header.width;
             int h = layer.header.height;
@@ -415,7 +415,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private bool MarkCylinderArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 pos, float radius, float height, TileCacheAreas areaId)
+        private static bool MarkCylinderArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 pos, float radius, float height, TileCacheAreas areaId)
         {
             Vector3 bmin = new Vector3();
             Vector3 bmax = new Vector3();
@@ -473,7 +473,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private bool BuildTileCacheRegions(ref TileCacheLayer layer, int walkableClimb)
+        private static bool BuildTileCacheRegions(ref TileCacheLayer layer, int walkableClimb)
         {
             int w = layer.header.width;
             int h = layer.header.height;
@@ -705,7 +705,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private bool IsConnected(TileCacheLayer layer, int ia, int ib, int walkableClimb)
+        private static bool IsConnected(TileCacheLayer layer, int ia, int ib, int walkableClimb)
         {
             if (layer.areas[ia] != layer.areas[ib])
             {
@@ -717,7 +717,7 @@ namespace Engine.PathFinding.NavMesh2
             }
             return true;
         }
-        private void AddUniqueLast(ref int[] a, ref int an, int v)
+        private static void AddUniqueLast(ref int[] a, ref int an, int v)
         {
             int n = an;
             if (n > 0 && a[n - 1] == v)
@@ -727,7 +727,7 @@ namespace Engine.PathFinding.NavMesh2
             a[an] = v;
             an++;
         }
-        private bool CanMerge(int oldRegId, int newRegId, LayerMonotoneRegion[] regs, int nregs)
+        private static bool CanMerge(int oldRegId, int newRegId, LayerMonotoneRegion[] regs, int nregs)
         {
             int count = 0;
             for (int i = 0; i < nregs; ++i)
@@ -748,7 +748,7 @@ namespace Engine.PathFinding.NavMesh2
             }
             return count == 1;
         }
-        private bool BuildTileCacheContours(TileCacheLayer layer, int walkableClimb, float maxError, out TileCacheContourSet lcset)
+        private static bool BuildTileCacheContours(TileCacheLayer layer, int walkableClimb, float maxError, out TileCacheContourSet lcset)
         {
             int w = layer.header.width;
             int h = layer.header.height;
@@ -840,7 +840,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private int GetCornerHeight(TileCacheLayer layer, int x, int y, int z, int walkableClimb, ref bool shouldRemove)
+        private static int GetCornerHeight(TileCacheLayer layer, int x, int y, int z, int walkableClimb, ref bool shouldRemove)
         {
             int w = layer.header.width;
             int h = layer.header.height;
@@ -894,7 +894,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return height;
         }
-        private bool WalkContour(TileCacheLayer layer, int x, int y, TempContour cont)
+        private static bool WalkContour(TileCacheLayer layer, int x, int y, TempContour cont)
         {
             int w = layer.header.width;
             int h = layer.header.height;
@@ -982,7 +982,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return true;
         }
-        private int GetNeighbourReg(TileCacheLayer layer, int ax, int ay, int dir)
+        private static int GetNeighbourReg(TileCacheLayer layer, int ax, int ay, int dir)
         {
             int w = layer.header.width;
             int ia = ax + ay * w;
@@ -1182,7 +1182,6 @@ namespace Engine.PathFinding.NavMesh2
                 };
             }
         }
-
         private static bool BuildTileCachePolyMesh(TileCacheContourSet lcset, out TileCachePolyMesh mesh)
         {
             int maxVertices = 0;

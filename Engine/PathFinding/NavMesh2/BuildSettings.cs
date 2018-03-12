@@ -33,7 +33,7 @@ namespace Engine.PathFinding.NavMesh2
                         Agent.Default,
                     },
 
-                    BuildTiles = true,
+                    BuildMode = BuildModesEnum.Solo,
                     TileSize = 32,
                     MaxNodes = 2048,
 
@@ -58,7 +58,7 @@ namespace Engine.PathFinding.NavMesh2
         public SamplePartitionTypeEnum PartitionType;
         public Agent[] Agents;
 
-        public bool BuildTiles;
+        public BuildModesEnum BuildMode = BuildModesEnum.Solo;
         public float TileSize;
         public int MaxNodes;
 
@@ -67,5 +67,12 @@ namespace Engine.PathFinding.NavMesh2
         public bool FilterWalkableLowHeightSpans;
 
         public BoundingBox? NavmeshBounds;
+    }
+
+    public enum BuildModesEnum
+    {
+        Solo,
+        Tiled,
+        TempObstacles,
     }
 }
