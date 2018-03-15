@@ -93,5 +93,15 @@ namespace Engine.PathFinding.NavMesh2
         /// The bounding volume quantization factor.
         /// </summary>
         public float bvQuantFactor;
+
+
+        public override string ToString()
+        {
+            return string.Format("{0}.{1}.{2}; Id: {3}; Bbox: {4}{5}; Polys: {6}; Vertices: {7}; DMeshes: {8}; DTriangles: {9}; DVertices: {10}",
+                x, y, layer, userId, 
+                bmin, bmax,
+                polyCount, vertCount, 
+                detailMeshCount, detailTriCount, detailVertCount);
+        }
     };
 }

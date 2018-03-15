@@ -1,5 +1,5 @@
-﻿
-using SharpDX;
+﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.NavMesh2
 {
@@ -32,7 +32,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Linked list of span pools.
         /// </summary>
-        public SpanPool[] pools;
+        public List<SpanPool> pools = new List<SpanPool>();
         /// <summary>
         /// The next free span.
         /// </summary>

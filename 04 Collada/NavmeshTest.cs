@@ -49,7 +49,8 @@ namespace Collada
 
             nmsettings.Agents = new[] { this.agent };
             nmsettings.TileSize = 32;
-            nmsettings.BuildMode = BuildModesEnum.TempObstacles;
+            nmsettings.BuildMode = BuildModesEnum.Tiled;
+            nmsettings.PartitionType = SamplePartitionTypeEnum.Layers;
 
             this.PathFinderDescription = new PathFinderDescription()
             {

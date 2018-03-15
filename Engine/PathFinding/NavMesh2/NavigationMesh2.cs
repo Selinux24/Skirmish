@@ -259,7 +259,7 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
 
-            if (!BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlags.RC_CONTOUR_TESS_AREA_EDGES, out ContourSet cset))
+            if (!BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlags.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
             {
                 throw new EngineException("buildNavigation: Could not create contours.");
             }
@@ -2635,13 +2635,11 @@ namespace Engine.PathFinding.NavMesh2
         {
             int idx = x + y * hf.width;
 
-            Span s = new Span
-            {
-                smin = smin,
-                smax = smax,
-                area = area,
-                next = null
-            };
+            Span s = AllocSpan(hf);
+            s.smin = smin;
+            s.smax = smax;
+            s.area = area;
+            s.next = null;
 
             // Empty cell, add the first span.
             if (hf.spans[idx] == null)
@@ -2713,6 +2711,37 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             return true;
+        }
+        private static Span AllocSpan(Heightfield hf)
+        {
+            // If running out of memory, allocate new page and update the freelist.
+            if (hf.freelist == null || hf.freelist.next == null)
+            {
+                // Create new page.
+                // Allocate memory for the new pool.
+                SpanPool pool = new SpanPool
+                {
+                    // Add the pool into the list of pools.
+                    next = hf.pools.Count > 0 ? hf.pools.Last() : null
+                };
+                hf.pools.Add(pool);
+                // Add new items to the free list.
+                Span freelist = hf.freelist;
+                int itIndex = Constants.RC_SPANS_PER_POOL;
+                do
+                {
+                    var it = pool.items[--itIndex];
+                    it.next = freelist;
+                    freelist = it;
+                }
+                while (itIndex > 0);
+                hf.freelist = pool.items[itIndex];
+            }
+
+            // Pop item from in front of the free list.
+            Span s = hf.freelist;
+            hf.freelist = hf.freelist.next;
+            return s;
         }
         private static void FreeSpan(Heightfield hf, Span cur)
         {
@@ -4041,8 +4070,8 @@ namespace Engine.PathFinding.NavMesh2
                     // Collect outline contour and holes contours per region.
                     // We assume that there is one outline and multiple holes.
                     int nregions = chf.maxRegions + 1;
-                    var regions = new ContourRegion[nregions];
-                    var holes = new ContourHole[cset.nconts];
+                    var regions = Helper.CreateArray(nregions, () => { return new ContourRegion(); });
+                    var holes = Helper.CreateArray(cset.nconts, () => { return new ContourHole(); });
 
                     for (int i = 0; i < cset.nconts; ++i)
                     {
@@ -4376,7 +4405,11 @@ namespace Engine.PathFinding.NavMesh2
                 maxVerts += region.holes[i].contour.nverts;
             }
 
-            PotentialDiagonal[] diags = new PotentialDiagonal[maxVerts];
+            PotentialDiagonal[] diags = Helper.CreateArray(maxVerts, new PotentialDiagonal()
+            {
+                dist = int.MinValue,
+                vert = int.MinValue,
+            });
 
             var outline = region.outline;
 
@@ -4403,22 +4436,15 @@ namespace Engine.PathFinding.NavMesh2
                     {
                         if (PolyUtils.InCone(j, outline.nverts, outline.verts, corner))
                         {
-                            int dx = outline.verts[j][0] - corner[0];
-                            int dz = outline.verts[j][2] - corner[2];
+                            int dx = outline.verts[j].X - corner.X;
+                            int dz = outline.verts[j].Z - corner.Z;
                             diags[ndiags].vert = j;
                             diags[ndiags].dist = dx * dx + dz * dz;
                             ndiags++;
                         }
                     }
                     // Sort potential diagonals by distance, we want to make the connection as short as possible.
-                    Array.Sort(diags, (va, vb) =>
-                    {
-                        var a = va;
-                        var b = vb;
-                        if (a.dist < b.dist) return -1;
-                        if (a.dist > b.dist) return 1;
-                        return 0;
-                    });
+                    Array.Sort(diags, 0, ndiags, PotentialDiagonal.DefaultComparer);
 
                     // Find a diagonal that is not intersecting the outline not the remaining holes.
                     index = -1;
@@ -4509,25 +4535,13 @@ namespace Engine.PathFinding.NavMesh2
             // Copy contour A.
             for (int i = 0; i <= ca.nverts; ++i)
             {
-                var dst = verts[nv];
-                var src = ca.verts[((ia + i) % ca.nverts)];
-                dst[0] = src[0];
-                dst[1] = src[1];
-                dst[2] = src[2];
-                dst[3] = src[3];
-                nv++;
+                verts[nv++] = ca.verts[((ia + i) % ca.nverts)];
             }
 
             // Copy contour B
             for (int i = 0; i <= cb.nverts; ++i)
             {
-                var dst = verts[nv];
-                var src = cb.verts[((ib + i) % cb.nverts)];
-                dst[0] = src[0];
-                dst[1] = src[1];
-                dst[2] = src[2];
-                dst[3] = src[3];
-                nv++;
+                verts[nv++] = cb.verts[((ib + i) % cb.nverts)];
             }
 
             ca.verts = verts;
@@ -4750,7 +4764,7 @@ namespace Engine.PathFinding.NavMesh2
                 int h = cset.height;
                 for (int i = 0; i < mesh.npolys; ++i)
                 {
-                    var p = mesh.polys[i * 2];
+                    var p = mesh.polys[i];
                     for (int j = 0; j < nvp; ++j)
                     {
                         if (p[j] == Constants.RC_MESH_NULL_IDX)
@@ -4770,19 +4784,19 @@ namespace Engine.PathFinding.NavMesh2
                         var va = mesh.verts[p[j]];
                         var vb = mesh.verts[p[nj]];
 
-                        if (va[0] == 0 && vb[0] == 0)
+                        if (va.X == 0 && vb.X == 0)
                         {
                             p[nvp + j] = 0x8000 | 0;
                         }
-                        else if (va[2] == h && vb[2] == h)
+                        else if (va.Z == h && vb.Z == h)
                         {
                             p[nvp + j] = 0x8000 | 1;
                         }
-                        else if (va[0] == w && vb[0] == w)
+                        else if (va.X == w && vb.X == w)
                         {
                             p[nvp + j] = 0x8000 | 2;
                         }
-                        else if (va[2] == 0 && vb[2] == 0)
+                        else if (va.Z == 0 && vb.Z == 0)
                         {
                             p[nvp + j] = 0x8000 | 3;
                         }
@@ -6172,7 +6186,7 @@ namespace Engine.PathFinding.NavMesh2
                 }
 
                 // Partition the walkable surface into simple regions without holes.
-                if (!BuildRegions(chf, 0, cfg.MinRegionArea, cfg.MergeRegionArea))
+                if (!BuildRegions(chf, cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
                 {
                     return null;
                 }
@@ -6181,7 +6195,7 @@ namespace Engine.PathFinding.NavMesh2
             {
                 // Partition the walkable surface into simple regions without holes.
                 // Monotone partitioning does not need distancefield.
-                if (!BuildRegionsMonotone(chf, 0, cfg.MinRegionArea, cfg.MergeRegionArea))
+                if (!BuildRegionsMonotone(chf, cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
                 {
                     return null;
                 }
@@ -6189,14 +6203,14 @@ namespace Engine.PathFinding.NavMesh2
             else if (settings.PartitionType == SamplePartitionTypeEnum.Layers)
             {
                 // Partition the walkable surface into simple regions without holes.
-                if (!BuildLayerRegions(chf, 0, cfg.MinRegionArea))
+                if (!BuildLayerRegions(chf, cfg.BorderSize, cfg.MinRegionArea))
                 {
                     return null;
                 }
             }
 
             // Create contours.
-            if (!BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlags.RC_CONTOUR_TESS_AREA_EDGES, out ContourSet cset))
+            if (!BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlags.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
             {
                 return null;
             }

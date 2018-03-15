@@ -53,5 +53,9 @@ namespace Engine.PathFinding.NavMesh2
         public const int VERTEX_BUCKET_COUNT = (1 << 12);
         public const int RC_MULTIPLE_REGS = 0;
         public const int RC_UNSET_HEIGHT = 0xffff;
+        /// <summary>
+        /// The number of spans allocated per span spool.
+        /// </summary>
+        public const int RC_SPANS_PER_POOL = 2048;
     }
 }

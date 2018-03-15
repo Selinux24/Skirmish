@@ -19,5 +19,14 @@ namespace Engine.PathFinding.NavMesh2
         /// Array of spans in the pool.
         /// </summary>
         public Span[] items;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SpanPool()
+        {
+            this.next = null;
+            this.items = Helper.CreateArray(Constants.RC_SPANS_PER_POOL, () => { return new Span(); });
+        }
     }
 }

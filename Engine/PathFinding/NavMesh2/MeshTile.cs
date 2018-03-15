@@ -100,5 +100,12 @@ namespace Engine.PathFinding.NavMesh2
             if (data.navBvtree.Count > 0) bvTree = data.navBvtree.ToArray();
             if (data.offMeshCons.Count > 0) offMeshCons = data.offMeshCons.ToArray();
         }
+
+
+        public override string ToString()
+        {
+            return string.Format("Salt: {0}; Links: {1}; Flags: {2}; Header: {3}; Data: {4}",
+                salt, linksFreeList, flags, header, data);
+        }
     }
 }
