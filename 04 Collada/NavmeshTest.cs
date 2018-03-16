@@ -268,8 +268,7 @@ namespace Collada
                 {
                     var node = (GraphNode)nodes[i];
                     var color = regions[node.RegionId];
-                    var poly = node.Polygon;
-                    var tris = poly.Triangulate();
+                    var tris = node.Triangles;
 
                     this.graphDrawer.Instance.AddTriangles(color, tris);
                 }

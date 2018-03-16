@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6597,7 +6598,8 @@ namespace Engine.PathFinding.NavMesh2
                     // Copy vertices except the first 'nv' verts which are equal to nav poly verts.
                     if (ndv - nv != 0)
                     {
-                        data.navDVerts.Add(param.detailVerts[(vb + nv)]);
+                        var verts = param.detailVerts.Skip(vb + nv).Take(ndv - nv);
+                        data.navDVerts.AddRange(verts);
                     }
                     data.navDMeshes.Add(dtl);
                 }
@@ -6834,15 +6836,16 @@ namespace Engine.PathFinding.NavMesh2
         private Vector3 m_orig;
         private float m_tileWidth;
         private float m_tileHeight;
-        private int m_maxTiles;
         private int m_tileLutSize;
         private int m_tileLutMask;
-        private MeshTile[] m_tiles;
         private MeshTile[] m_posLookup;
         private MeshTile m_nextFree = null;
         private int m_tileBits;
         private int m_polyBits;
         private int m_saltBits;
+
+        public int MaxTiles { get; set; }
+        public MeshTile[] Tiles { get; set; }
 
         /// <summary>
         /// Constructor
@@ -6859,23 +6862,23 @@ namespace Engine.PathFinding.NavMesh2
             m_tileHeight = nmparams.TileHeight;
 
             // Init tiles
-            m_maxTiles = nmparams.MaxTiles;
+            MaxTiles = nmparams.MaxTiles;
             m_tileLutSize = Helper.NextPowerOfTwo(nmparams.MaxTiles / 4);
             if (m_tileLutSize == 0) m_tileLutSize = 1;
             m_tileLutMask = m_tileLutSize - 1;
 
-            m_tiles = new MeshTile[m_maxTiles];
+            Tiles = new MeshTile[MaxTiles];
             m_posLookup = new MeshTile[m_tileLutSize];
 
             m_nextFree = null;
-            for (int i = m_maxTiles - 1; i >= 0; --i)
+            for (int i = MaxTiles - 1; i >= 0; --i)
             {
-                m_tiles[i] = new MeshTile
+                Tiles[i] = new MeshTile
                 {
                     salt = 1,
                     next = m_nextFree
                 };
-                m_nextFree = m_tiles[i];
+                m_nextFree = Tiles[i];
             }
 
             // Init ID generator values.
@@ -6966,12 +6969,12 @@ namespace Engine.PathFinding.NavMesh2
             {
                 // Try to relocate the tile to specific index with same salt.
                 int tileIndex = DecodePolyIdTile(lastRef);
-                if (tileIndex >= m_maxTiles)
+                if (tileIndex >= MaxTiles)
                 {
                     return false;
                 }
                 // Try to find the specific tile id from the free list.
-                MeshTile target = m_tiles[tileIndex];
+                MeshTile target = Tiles[tileIndex];
                 MeshTile prev = null;
                 tile = m_nextFree;
                 while (tile != null && tile != target)
@@ -7128,7 +7131,7 @@ namespace Engine.PathFinding.NavMesh2
 
             return GetTilesAt(nx, ny, tiles, maxTiles);
         }
-        private int DecodePolyIdTile(int r)
+        internal int DecodePolyIdTile(int r)
         {
             int tileMask = (1 << m_tileBits) - 1;
             return ((r >> m_polyBits) & tileMask);
@@ -7184,10 +7187,10 @@ namespace Engine.PathFinding.NavMesh2
                 }
             }
         }
-        private int GetPolyRefBase(MeshTile tile)
+        internal int GetPolyRefBase(MeshTile tile)
         {
             if (tile == null) return 0;
-            int it = Array.IndexOf(m_tiles, tile);
+            int it = Array.IndexOf(Tiles, tile);
             return EncodePolyId(tile.salt, it, 0);
         }
         private int AllocLink(MeshTile tile)
@@ -7477,8 +7480,8 @@ namespace Engine.PathFinding.NavMesh2
         private void GetTileAndPolyByRefUnsafe(int r, out MeshTile tile, out Poly poly)
         {
             DecodePolyId(r, out int salt, out int it, out int ip);
-            tile = m_tiles[it];
-            poly = m_tiles[it].polys[ip];
+            tile = Tiles[it];
+            poly = Tiles[it].polys[ip];
         }
         private void DecodePolyId(int r, out int salt, out int it, out int ip)
         {
@@ -7770,7 +7773,7 @@ namespace Engine.PathFinding.NavMesh2
         private int GetTileRef(MeshTile tile)
         {
             if (tile == null) return 0;
-            int it = Array.IndexOf(m_tiles, tile);
+            int it = Array.IndexOf(Tiles, tile);
             return EncodePolyId(tile.salt, it, 0);
         }
         public bool RemoveTile(MeshTile tile, MeshData data, int dataSize)
@@ -7902,11 +7905,7 @@ namespace Engine.PathFinding.NavMesh2
 
             GraphNode.Id = 0;
 
-            for (int i = 0; i < m_tiles.Length; i++)
-            {
-                nodes.AddRange(GraphNode.Build(m_tiles[i]));
-                GraphNode.Id++;
-            }
+            nodes.AddRange(GraphNode.Build(this));
 
             return nodes.ToArray();
         }
@@ -7925,25 +7924,46 @@ namespace Engine.PathFinding.NavMesh2
     {
         public static int Id = 0;
 
-        public static GraphNode[] Build(MeshTile tile)
+        public static GraphNode[] Build(NavigationMesh2 mesh)
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
-            if (tile.header.magic == Constants.Magic)
+            for (int i = 0; i < mesh.MaxTiles; ++i)
             {
-                for (int i = 0; i < tile.polys.Length; i++)
-                {
-                    var poly = tile.polys[i];
-                    var p = new Polygon(poly.vertCount);
+                var tile = mesh.Tiles[i];
+                if (tile.header.magic != Constants.Magic) continue;
 
-                    for (int n = 0; n < poly.vertCount; n++)
+                for (int t = 0; t < tile.header.polyCount; t++)
+                {
+                    var p = tile.polys[t];
+                    if (p.Type == PolyTypes.OffmeshConnection) continue;
+
+                    var pd = tile.detailMeshes[t];
+
+                    List<Triangle> tris = new List<Triangle>();
+
+                    for (int j = 0; j < pd.triCount; ++j)
                     {
-                        p[n] = tile.verts[poly.verts[n]];
+                        var dt = tile.detailTris[(pd.triBase + j)];
+                        Vector3[] triVerts = new Vector3[3];
+                        for (int k = 0; k < 3; ++k)
+                        {
+                            if (dt[k] < p.vertCount)
+                            {
+                                triVerts[k] = tile.verts[p.verts[dt[k]]];
+                            }
+                            else
+                            {
+                                triVerts[k] = tile.detailVerts[(pd.vertBase + dt[k] - p.vertCount)];
+                            }
+                        }
+
+                        tris.Add(new Triangle(triVerts[0], triVerts[1], triVerts[2]));
                     }
 
                     nodes.Add(new GraphNode()
                     {
-                        Polygon = p,
+                        Triangles = tris.ToArray(),
                         RegionId = Id,
                         TotalCost = 1,
                     });
@@ -7953,11 +7973,21 @@ namespace Engine.PathFinding.NavMesh2
             return nodes.ToArray();
         }
 
-        public Polygon Polygon;
+        public Triangle[] Triangles;
 
         public Vector3 Center
         {
-            get { return Polygon.Center; }
+            get
+            {
+                Vector3 center = Vector3.Zero;
+
+                foreach (var tri in Triangles)
+                {
+                    center += tri.Center;
+                }
+
+                return center / Math.Max(1, Triangles.Length);
+            }
         }
 
         public int RegionId { get; set; }
@@ -7967,12 +7997,34 @@ namespace Engine.PathFinding.NavMesh2
         public bool Contains(Vector3 point, out float distance)
         {
             distance = float.MaxValue;
-            return Polygon.Contains(point);
+            foreach (var tri in Triangles)
+            {
+                if (Intersection.PointInPoly(point, tri.GetVertices()))
+                {
+                    float d = Intersection.PointToTriangle(point, tri.Point1, tri.Point2, tri.Point3);
+                    if (d == 0)
+                    {
+                        distance = 0;
+                        return true;
+                    }
+
+                    distance = Math.Min(distance, d);
+                }
+            }
+
+            return false;
         }
 
         public Vector3[] GetPoints()
         {
-            return Polygon.Points;
+            List<Vector3> vList = new List<Vector3>();
+
+            foreach (var tri in Triangles)
+            {
+                vList.AddRange(tri.GetVertices());
+            }
+
+            return vList.ToArray();
         }
     }
 }
