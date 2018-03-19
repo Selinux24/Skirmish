@@ -11,7 +11,14 @@ namespace Collada
     /// </summary>
     class NavmeshTest : Scene
     {
+        private const int layerHUD = 99;
+
         private Player2 agent = null;
+
+        private SceneObject<TextDrawer> title = null;
+        private SceneObject<TextDrawer> help = null;
+        private SceneObject<TextDrawer> debug = null;
+        private SceneObject<Sprite> backPannel = null;
 
         private SceneObject<TriangleListDrawer> dungeonDrawer = null;
         private SceneObject<LineListDrawer> dungeonTriDrawer = null;
@@ -36,6 +43,38 @@ namespace Collada
 
             this.Camera.FarPlaneDistance *= 2;
 
+            var triangles = InputGeometry.DebugTris();
+
+            this.InitializeText();
+            this.InitializeNavmesh(triangles);
+            this.InitializeDebug(triangles);
+        }
+        private void InitializeText()
+        {
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
+            this.title.Instance.Text = "Navigation Mesh Test Scene";
+            this.title.Instance.Position = Vector2.Zero;
+
+            this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.help.Instance.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse)";
+            this.help.Instance.Position = new Vector2(0, 24);
+
+            this.debug = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.debug.Instance.Text = null;
+            this.debug.Instance.Position = new Vector2(0, 48);
+
+            var spDesc = new SpriteDescription()
+            {
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.debug.Instance.Top + this.debug.Instance.Height + 3,
+                Color = new Color4(0, 0, 0, 0.75f),
+            };
+
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
+        }
+        private void InitializeNavmesh(Triangle[] triangles)
+        {
             this.agent = new Player2()
             {
                 Name = "Player",
@@ -57,6 +96,10 @@ namespace Collada
                 Settings = nmsettings,
             };
 
+            this.inputGeometry = new InputGeometry(triangles);
+        }
+        private void InitializeDebug(Triangle[] triangles)
+        {
             var dungeonDrawerDesc = new TriangleListDrawerDescription()
             {
                 Name = "Dungeon",
@@ -74,8 +117,6 @@ namespace Collada
             };
             this.dungeonTriDrawer = this.AddComponent<LineListDrawer>(dungeonTriDrawerDesc);
 
-            var triangles = InputGeometry.DebugTris();
-
             this.dungeonDrawer.Instance.SetTriangles(color, triangles);
             this.dungeonTriDrawer.Instance.SetTriangles(colorTri, triangles);
 
@@ -86,13 +127,12 @@ namespace Collada
                 Count = 20000,
             };
             this.graphDrawer = this.AddComponent<TriangleListDrawer>(graphDrawerDesc);
-
-            this.inputGeometry = new InputGeometry(triangles);
         }
         protected override Triangle[] GetTrianglesForNavigationGraph()
         {
             return this.inputGeometry.GetChunkyMesh().triangles;
         }
+
         public override void Initialized()
         {
             base.Initialized();
@@ -106,11 +146,10 @@ namespace Collada
             this.Camera.Interest = center;
             this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
         }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
@@ -119,39 +158,7 @@ namespace Collada
 
             this.UpdateCamera(gameTime);
 
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
-            {
-                if (shift)
-                {
-                    this.UpdateInputGeometryNodes(--inputGeometryIndex);
-                }
-                else
-                {
-                    this.UpdateInputGeometryNodes(++inputGeometryIndex);
-                }
-            }
-
-            bool updateGraph = false;
-
-            if (this.Game.Input.KeyJustReleased(Keys.Add))
-            {
-                int ppType = (int)nmsettings.PartitionType + 1;
-                nmsettings.PartitionType = (SamplePartitionTypeEnum)(ppType % 3);
-                updateGraph = true;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
-            {
-                int ppType = (int)nmsettings.PartitionType - 1;
-                nmsettings.PartitionType = (SamplePartitionTypeEnum)(ppType % 3);
-                updateGraph = true;
-            }
-
-            if (updateGraph)
-            {
-                this.UpdateNavigationGraph();
-                this.UpdateGraphNodes(this.agent);
-            }
+            this.UpdateGraph(gameTime);
         }
         private void UpdateCamera(GameTime gameTime)
         {
@@ -185,6 +192,75 @@ namespace Collada
                     this.Game.GameTime,
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
+            }
+        }
+        private void UpdateGraph(GameTime gameTime)
+        {
+            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                if (shift)
+                {
+                    this.UpdateInputGeometryNodes(--inputGeometryIndex);
+                }
+                else
+                {
+                    this.UpdateInputGeometryNodes(++inputGeometryIndex);
+                }
+            }
+
+            bool updateGraph = false;
+
+            if (this.Game.Input.KeyJustReleased(Keys.B))
+            {
+                if (!shift)
+                {
+                    nmsettings.BuildMode = (BuildModesEnum)Helper.Next((int)nmsettings.BuildMode, 3);
+                }
+                else
+                {
+                    nmsettings.BuildMode = (BuildModesEnum)Helper.Prev((int)nmsettings.BuildMode, 3);
+                }
+                updateGraph = true;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.P))
+            {
+                if (!shift)
+                {
+                    nmsettings.PartitionType = (SamplePartitionTypeEnum)Helper.Next((int)nmsettings.PartitionType, 3);
+                }
+                else
+                {
+                    nmsettings.PartitionType = (SamplePartitionTypeEnum)Helper.Prev((int)nmsettings.PartitionType, 3);
+                }
+                updateGraph = true;
+            }
+
+            if (updateGraph)
+            {
+                this.UpdateNavigationGraph();
+                this.UpdateGraphNodes(this.agent);
+            }
+
+            this.debug.Instance.Text = string.Format("Build Mode: {0}; Partition Type: {1};", nmsettings.BuildMode, nmsettings.PartitionType);
+        }
+        private void UpdateGraphNodes(AgentType agent)
+        {
+            var nodes = this.GetNodes(agent);
+            if (nodes != null && nodes.Length > 0)
+            {
+                this.graphDrawer.Instance.Clear();
+
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    var node = (GraphNode)nodes[i];
+                    var color = node.Color;
+                    var tris = node.Triangles;
+
+                    this.graphDrawer.Instance.AddTriangles(color, tris);
+                }
             }
         }
         private void UpdateInputGeometryNodes(int index)
@@ -247,30 +323,6 @@ namespace Collada
                         color.Alpha = colorNodeTri.Alpha;
                         this.dungeonTriDrawer.Instance.SetTriangles(color, triangles);
                     }
-                }
-            }
-        }
-        private void UpdateGraphNodes(AgentType agent)
-        {
-            var nodes = this.GetNodes(agent);
-            if (nodes != null && nodes.Length > 0)
-            {
-                Random clrRnd = new Random(24);
-                Color[] regions = new Color[nodes.Length];
-                for (int i = 0; i < nodes.Length; i++)
-                {
-                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.75f);
-                }
-
-                this.graphDrawer.Instance.Clear();
-
-                for (int i = 0; i < nodes.Length; i++)
-                {
-                    var node = (GraphNode)nodes[i];
-                    var color = regions[node.RegionId];
-                    var tris = node.Triangles;
-
-                    this.graphDrawer.Instance.AddTriangles(color, tris);
                 }
             }
         }

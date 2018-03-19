@@ -47,8 +47,8 @@ namespace Engine.PathFinding.NavMesh2
             // The last bit of the index is used to indicate if the vertex can be removed.
             for (int i = 0; i < n; i++)
             {
-                int i1 = Next(i, n);
-                int i2 = Next(i1, n);
+                int i1 = Helper.Next(i, n);
+                int i2 = Helper.Next(i1, n);
                 if (Diagonal(i, i2, n, verts, indices))
                 {
                     indices[i1] |= 0x8000;
@@ -63,11 +63,11 @@ namespace Engine.PathFinding.NavMesh2
                 int mini = -1;
                 for (int ix = 0; ix < n; ix++)
                 {
-                    int i1x = Next(ix, n);
+                    int i1x = Helper.Next(ix, n);
                     if ((indices[i1x] & 0x8000) != 0)
                     {
                         var p0 = verts[(indices[ix] & 0x7fff)];
-                        var p2 = verts[(indices[Next(i1x, n)] & 0x7fff)];
+                        var p2 = verts[(indices[Helper.Next(i1x, n)] & 0x7fff)];
 
                         int dx = p2.X - p0.X;
                         int dz = p2.Z - p0.Z;
@@ -88,8 +88,8 @@ namespace Engine.PathFinding.NavMesh2
                 }
 
                 int i = mini;
-                int i1 = Next(i, n);
-                int i2 = Next(i1, n);
+                int i1 = Helper.Next(i, n);
+                int i2 = Helper.Next(i1, n);
 
                 dst.Add(new Int3()
                 {
@@ -107,9 +107,9 @@ namespace Engine.PathFinding.NavMesh2
                 }
 
                 if (i1 >= n) i1 = 0;
-                i = Prev(i1, n);
+                i = Helper.Prev(i1, n);
                 // Update diagonal flags.
-                if (Diagonal(Prev(i, n), i1, n, verts, indices))
+                if (Diagonal(Helper.Prev(i, n), i1, n, verts, indices))
                 {
                     indices[i] |= 0x8000;
                 }
@@ -118,7 +118,7 @@ namespace Engine.PathFinding.NavMesh2
                     indices[i] &= 0x7fff;
                 }
 
-                if (Diagonal(i, Next(i1, n), n, verts, indices))
+                if (Diagonal(i, Helper.Next(i1, n), n, verts, indices))
                 {
                     indices[i1] |= 0x8000;
                 }
@@ -141,14 +141,6 @@ namespace Engine.PathFinding.NavMesh2
 
             return ntris;
         }
-        public static int Prev(int i, int n)
-        {
-            return i - 1 >= 0 ? i - 1 : n - 1;
-        }
-        public static int Next(int i, int n)
-        {
-            return i + 1 < n ? i + 1 : 0;
-        }
         public static bool Diagonal(int i, int j, int n, Int4[] verts, int[] indices)
         {
             return InCone(i, j, n, verts, indices) && Diagonalie(i, j, n, verts, indices);
@@ -156,8 +148,8 @@ namespace Engine.PathFinding.NavMesh2
         public static bool InCone(int i, int n, Int4[] verts, Int4 pj)
         {
             var pi = verts[i];
-            var pi1 = verts[Next(i, n)];
-            var pin1 = verts[Prev(i, n)];
+            var pi1 = verts[Helper.Next(i, n)];
+            var pin1 = verts[Helper.Prev(i, n)];
 
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
             if (LeftOn(pin1, pi, pi1))
@@ -172,8 +164,8 @@ namespace Engine.PathFinding.NavMesh2
         {
             var pi = verts[(indices[i] & 0x7fff)];
             var pj = verts[(indices[j] & 0x7fff)];
-            var pi1 = verts[(indices[Next(i, n)] & 0x7fff)];
-            var pin1 = verts[(indices[Prev(i, n)] & 0x7fff)];
+            var pi1 = verts[(indices[Helper.Next(i, n)] & 0x7fff)];
+            var pin1 = verts[(indices[Helper.Prev(i, n)] & 0x7fff)];
 
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
             if (LeftOn(pin1, pi, pi1))
@@ -204,7 +196,7 @@ namespace Engine.PathFinding.NavMesh2
             // For each edge (k,k+1) of P
             for (int k = 0; k < n; k++)
             {
-                int k1 = Next(k, n);
+                int k1 = Helper.Next(k, n);
                 // Skip edges incident to i or j
                 if (!((k == i) || (k1 == i) || (k == j) || (k1 == j)))
                 {
@@ -937,8 +929,8 @@ namespace Engine.PathFinding.NavMesh2
             float dmin = 0;
             for (int i = 0; i < nhull; i++)
             {
-                int pi = Prev(i, nhull);
-                int ni = Next(i, nhull);
+                int pi = Helper.Prev(i, nhull);
+                int ni = Helper.Next(i, nhull);
                 var pv = verts[hull[pi]];
                 var cv = verts[hull[i]];
                 var nv = verts[hull[ni]];
@@ -968,11 +960,11 @@ namespace Engine.PathFinding.NavMesh2
             // depending on which triangle has shorter perimeter.
             // This heuristic was chose emprically, since it seems
             // handle tesselated straight edges well.
-            while (Next(left, nhull) != right)
+            while (Helper.Next(left, nhull) != right)
             {
                 // Check to see if se should advance left or right.
-                int nleft = Next(left, nhull);
-                int nright = Prev(right, nhull);
+                int nleft = Helper.Next(left, nhull);
+                int nright = Helper.Prev(right, nhull);
 
                 var cvleft = verts[hull[left]];
                 var nvleft = verts[hull[nleft]];

@@ -4361,7 +4361,7 @@ namespace Engine.PathFinding.NavMesh2
             int npts = simplified.Count;
             for (int i = 0; i < npts; ++i)
             {
-                int ni = PolyUtils.Next(i, npts);
+                int ni = Helper.Next(i, npts);
 
                 if (simplified[i] == simplified[ni])
                 {
@@ -4506,7 +4506,7 @@ namespace Engine.PathFinding.NavMesh2
             // For each edge (k,k+1) of P
             for (int k = 0; k < n; k++)
             {
-                int k1 = PolyUtils.Next(k, n);
+                int k1 = Helper.Next(k, n);
                 // Skip edges incident to i.
                 if (i == k || i == k1)
                 {
@@ -7903,8 +7903,6 @@ namespace Engine.PathFinding.NavMesh2
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
-            GraphNode.Id = 0;
-
             nodes.AddRange(GraphNode.Build(this));
 
             return nodes.ToArray();
@@ -7922,8 +7920,6 @@ namespace Engine.PathFinding.NavMesh2
 
     public class GraphNode : IGraphNode
     {
-        public static int Id = 0;
-
         public static GraphNode[] Build(NavigationMesh2 mesh)
         {
             List<GraphNode> nodes = new List<GraphNode>();
@@ -7937,6 +7933,11 @@ namespace Engine.PathFinding.NavMesh2
                 {
                     var p = tile.polys[t];
                     if (p.Type == PolyTypes.OffmeshConnection) continue;
+
+                    var bse = mesh.GetPolyRefBase(tile);
+
+                    int tileNum = mesh.DecodePolyIdTile(bse);
+                    var tileColor = Helper.IntToCol(tileNum, 128);
 
                     var pd = tile.detailMeshes[t];
 
@@ -7964,8 +7965,8 @@ namespace Engine.PathFinding.NavMesh2
                     nodes.Add(new GraphNode()
                     {
                         Triangles = tris.ToArray(),
-                        RegionId = Id,
                         TotalCost = 1,
+                        Color = tileColor,
                     });
                 }
             }
@@ -7990,7 +7991,7 @@ namespace Engine.PathFinding.NavMesh2
             }
         }
 
-        public int RegionId { get; set; }
+        public Color4 Color { get; set; }
 
         public float TotalCost { get; set; }
 
