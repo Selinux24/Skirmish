@@ -1,9 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.NavMesh2
 {
     /// <summary>
     /// Defines the location of detail sub-mesh data within a dtMeshTile.
     /// </summary>
+    [Serializable]
     public struct PolyDetail
     {
         /// <summary>

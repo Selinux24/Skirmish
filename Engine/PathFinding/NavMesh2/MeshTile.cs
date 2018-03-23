@@ -91,6 +91,8 @@ namespace Engine.PathFinding.NavMesh2
 
         public void SetData(MeshData data)
         {
+            this.data = data;
+
             if (data.navVerts.Count > 0) verts = data.navVerts.ToArray();
             if (data.navPolys.Count > 0) polys = data.navPolys.ToArray();
 

@@ -1,9 +1,11 @@
-﻿
-using System;
+﻿using System;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Engine.PathFinding.NavMesh2
 {
-    public class Polygoni
+    [Serializable]
+    public class Polygoni : ISerializable
     {
         private int[] Vertices = null;
 
@@ -19,9 +21,25 @@ namespace Engine.PathFinding.NavMesh2
             }
         }
 
+        public Polygoni() : this(10)
+        {
+
+        }
+
         public Polygoni(int capacity)
         {
             this.Vertices = Helper.CreateArray(capacity, Constants.NullIdx);
+        }
+
+        protected Polygoni(SerializationInfo info, StreamingContext context)
+        {
+            Vertices = (int[])info.GetValue("Vertices", typeof(int[]));
+        }
+
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("Vertices", Vertices);
         }
 
         public Polygoni Copy()

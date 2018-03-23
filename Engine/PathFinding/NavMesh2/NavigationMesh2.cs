@@ -2,6 +2,7 @@
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Engine.PathFinding.NavMesh2
@@ -6833,6 +6834,66 @@ namespace Engine.PathFinding.NavMesh2
             }
         }
 
+        public static void SaveFile(string path, NavigationMesh2 mesh)
+        {
+            List<byte> buffer = new List<byte>();
+
+            NavMeshSetHeader header = new NavMeshSetHeader
+            {
+                magic = Constants.Magic,
+                version = Constants.Version,
+                numTiles = 0,
+                param = mesh.m_params,
+            };
+
+            List<NavMeshTileHeader> tileHeaders = new List<NavMeshTileHeader>();
+
+            // Store header and tiles.
+            for (int i = 0; i < mesh.MaxTiles; ++i)
+            {
+                var tile = mesh.Tiles[i];
+                if (tile == null || tile.header.magic != Constants.Magic || tile.data == null) continue;
+
+                header.numTiles++;
+                tileHeaders.Add(new NavMeshTileHeader
+                {
+                    tile = tile.data,
+                    dataSize = tile.dataSize
+                });
+            }
+
+            header.numTiles = tileHeaders.Count;
+
+            NavMeshFile file = new NavMeshFile()
+            {
+                header = header,
+                tileHeaders = tileHeaders.ToArray(),
+            };
+
+            File.WriteAllBytes(path, file.Compress());
+        }
+        public static NavigationMesh2 LoadFile(string path)
+        {
+            byte[] buffer = File.ReadAllBytes(path);
+
+            var nmFile = buffer.Decompress<NavMeshFile>();
+
+            NavigationMesh2 mesh = new NavigationMesh2();
+
+            mesh.Init(nmFile.header.param);
+
+            // Read tiles.
+            for (int i = 0; i < nmFile.header.numTiles; ++i)
+            {
+                NavMeshTileHeader tileHeader = nmFile.tileHeaders[i];
+
+                mesh.AddTile(tileHeader.tile, TileFlags.FreeData, 0, out int result);
+            }
+
+            return mesh;
+        }
+
+        private NavMeshParams m_params;
         private Vector3 m_orig;
         private float m_tileWidth;
         private float m_tileHeight;
@@ -6857,6 +6918,7 @@ namespace Engine.PathFinding.NavMesh2
 
         public void Init(NavMeshParams nmparams)
         {
+            m_params = nmparams;
             m_orig = nmparams.Origin;
             m_tileWidth = nmparams.TileWidth;
             m_tileHeight = nmparams.TileHeight;
@@ -7915,6 +7977,30 @@ namespace Engine.PathFinding.NavMesh2
         {
             nearest = null;
             return false;
+        }
+        public void Save(string fileName)
+        {
+            SaveFile(fileName, this);
+        }
+        public void Load(string fileName)
+        {
+            var nm = LoadFile(fileName);
+            if (nm != null)
+            {
+                this.m_params = nm.m_params;
+                this.m_orig = nm.m_orig;
+                this.m_tileWidth = nm.m_tileWidth;
+                this.m_tileHeight = nm.m_tileHeight;
+                this.m_tileLutSize = nm.m_tileLutSize;
+                this.m_tileLutMask = nm.m_tileLutMask;
+                this.m_posLookup = nm.m_posLookup;
+                this.m_nextFree = nm.m_nextFree;
+                this.m_tileBits = nm.m_tileBits;
+                this.m_polyBits = nm.m_polyBits;
+                this.m_saltBits = nm.m_saltBits;
+                this.MaxTiles = nm.MaxTiles;
+                this.Tiles = nm.Tiles;
+            }
         }
     }
 

@@ -1,11 +1,15 @@
 ﻿using SharpDX;
+using System;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Engine.PathFinding.NavMesh2
 {
     /// <summary>
     /// Provides high level information related to a dtMeshTile object.
     /// </summary>
-    public struct MeshHeader
+    [Serializable]
+    public struct MeshHeader : ISerializable
     {
         /// <summary>
         /// Tile magic number. (Used to identify the data format.)
@@ -95,12 +99,63 @@ namespace Engine.PathFinding.NavMesh2
         public float bvQuantFactor;
 
 
+        public MeshHeader(SerializationInfo info, StreamingContext context)
+        {
+            magic = info.GetInt32("magic");
+            version = info.GetInt32("version");
+            x = info.GetInt32("x");
+            y = info.GetInt32("y");
+            layer = info.GetInt32("layer");
+            userId = info.GetInt32("userId");
+            polyCount = info.GetInt32("polyCount");
+            vertCount = info.GetInt32("vertCount");
+            maxLinkCount = info.GetInt32("maxLinkCount");
+            detailMeshCount = info.GetInt32("detailMeshCount");
+            detailVertCount = info.GetInt32("detailVertCount");
+            detailTriCount = info.GetInt32("detailTriCount");
+            bvNodeCount = info.GetInt32("bvNodeCount");
+            offMeshConCount = info.GetInt32("offMeshConCount");
+            offMeshBase = info.GetInt32("offMeshBase");
+            walkableHeight = info.GetSingle("walkableHeight");
+            walkableRadius = info.GetSingle("walkableRadius");
+            walkableClimb = info.GetSingle("walkableClimb");
+            bmin = info.GetVector3("bmin");
+            bmax = info.GetVector3("bmax");
+            bvQuantFactor = info.GetSingle("bvQuantFactor");
+        }
+
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("magic", magic);
+            info.AddValue("version", version);
+            info.AddValue("x", x);
+            info.AddValue("y", y);
+            info.AddValue("layer", layer);
+            info.AddValue("userId", userId);
+            info.AddValue("polyCount", polyCount);
+            info.AddValue("vertCount", vertCount);
+            info.AddValue("maxLinkCount", maxLinkCount);
+            info.AddValue("detailMeshCount", detailMeshCount);
+            info.AddValue("detailVertCount", detailVertCount);
+            info.AddValue("detailTriCount", detailTriCount);
+            info.AddValue("bvNodeCount", bvNodeCount);
+            info.AddValue("offMeshConCount", offMeshConCount);
+            info.AddValue("offMeshBase", offMeshBase);
+            info.AddValue("walkableHeight", walkableHeight);
+            info.AddValue("walkableRadius", walkableRadius);
+            info.AddValue("walkableClimb", walkableClimb);
+            info.AddVector3("bmin", bmin);
+            info.AddVector3("bmax", bmax);
+            info.AddValue("bvQuantFactor", bvQuantFactor);
+        }
+
         public override string ToString()
         {
             return string.Format("{0}.{1}.{2}; Id: {3}; Bbox: {4}{5}; Polys: {6}; Vertices: {7}; DMeshes: {8}; DTriangles: {9}; DVertices: {10}",
-                x, y, layer, userId, 
+                x, y, layer, userId,
                 bmin, bmax,
-                polyCount, vertCount, 
+                polyCount, vertCount,
                 detailMeshCount, detailTriCount, detailVertCount);
         }
     };

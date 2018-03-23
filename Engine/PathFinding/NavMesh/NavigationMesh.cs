@@ -201,6 +201,17 @@ namespace Engine.PathFinding.NavMesh
             }
         }
 
+        public void Save(string fileName)
+        {
+
+        }
+
+        public void Load(string fileName)
+        {
+
+        }
+
+
         internal Crowds.Crowd AddCrowd(bool adaptative, AgentType agent)
         {
             if (!this.agentTypeData.ContainsKey(agent))

@@ -2,6 +2,9 @@
 
 namespace Engine.PathFinding
 {
+    /// <summary>
+    /// Pathfinding graph interface
+    /// </summary>
     public interface IGraph
     {
         /// <summary>
@@ -26,5 +29,15 @@ namespace Engine.PathFinding
         /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
         bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest);
+        /// <summary>
+        /// Saves the graph to a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        void Save(string fileName);
+        /// <summary>
+        /// Loads the graph from a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        void Load(string fileName);
     }
 }

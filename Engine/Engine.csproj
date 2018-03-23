@@ -306,9 +306,12 @@
     <Compile Include="PathFinding\NavMesh2\MeshHeader.cs" />
     <Compile Include="PathFinding\NavMesh2\MeshTile.cs" />
     <Compile Include="PathFinding\NavMesh2\NavMeshCreateParams.cs" />
+    <Compile Include="PathFinding\NavMesh2\NavMeshFile.cs" />
     <Compile Include="PathFinding\NavMesh2\NavMeshParams.cs" />
     <Compile Include="PathFinding\NavMesh2\NavMeshQuery.cs" />
+    <Compile Include="PathFinding\NavMesh2\NavMeshSetHeader.cs" />
     <Compile Include="PathFinding\NavMesh2\NavMeshTileBuildContext.cs" />
+    <Compile Include="PathFinding\NavMesh2\NavMeshTileHeader.cs" />
     <Compile Include="PathFinding\NavMesh2\Node.cs" />
     <Compile Include="PathFinding\NavMesh2\NodePool.cs" />
     <Compile Include="PathFinding\NavMesh2\NodeQueue.cs" />
@@ -396,6 +399,7 @@
     <Compile Include="ModularScenery.cs" />
     <Compile Include="ModularSceneryDescription.cs" />
     <Compile Include="SegmentPath.cs" />
+    <Compile Include="SerializationHelper.cs" />
     <Compile Include="ShadowMapFlags.cs" />
     <Compile Include="SkyPlane.cs" />
     <Compile Include="SkyPlaneMode.cs" />

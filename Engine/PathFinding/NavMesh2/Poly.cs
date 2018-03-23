@@ -1,11 +1,11 @@
-﻿
-using System;
+﻿using System;
 
 namespace Engine.PathFinding.NavMesh2
 {
     /// <summary>
     /// Defines a polygon within a dtMeshTile object.
     /// </summary>
+    [Serializable]
     public class Poly
     {
         /// <summary>

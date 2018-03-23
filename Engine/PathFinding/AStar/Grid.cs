@@ -307,6 +307,16 @@ namespace Engine.PathFinding.AStar
             return false;
         }
 
+        public void Save(string fileName)
+        {
+
+        }
+
+        public void Load(string fileName)
+        {
+
+        }
+
         /// <summary>
         /// Gets text representation of instance
         /// </summary>

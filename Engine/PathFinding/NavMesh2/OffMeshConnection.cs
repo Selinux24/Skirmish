@@ -1,4 +1,7 @@
 ﻿using SharpDX;
+using System;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Engine.PathFinding.NavMesh2
 {
@@ -6,7 +9,8 @@ namespace Engine.PathFinding.NavMesh2
     /// Defines an navigation mesh off-mesh connection within a dtMeshTile object.
     /// An off-mesh connection is a user defined traversable connection made up to two vertices.
     /// </summary>
-    public class OffMeshConnection
+    [Serializable]
+    public class OffMeshConnection : ISerializable
     {
         /// <summary>
         /// The endpoints of the connection. [(ax, ay, az, bx, by, bz)]
@@ -35,5 +39,36 @@ namespace Engine.PathFinding.NavMesh2
         /// The id of the offmesh connection. (User assigned when the navigation mesh is built.)
         /// </summary>
         public int userId;
-    };
+
+        public OffMeshConnection()
+        {
+
+        }
+
+        protected OffMeshConnection(SerializationInfo info, StreamingContext context)
+        {
+            pos = new[]
+            {
+                info.GetVector3("pos0"),
+                info.GetVector3("pos1"),
+            };
+            rad = info.GetSingle("rad");
+            poly = info.GetInt32("poly");
+            flags = info.GetInt32("flags");
+            side = info.GetInt32("side");
+            userId = info.GetInt32("userId");
+        }
+
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddVector3("pos0", pos[0]);
+            info.AddVector3("pos1", pos[1]);
+            info.AddValue("rad", rad);
+            info.AddValue("poly", poly);
+            info.AddValue("flags", flags);
+            info.AddValue("side", side);
+            info.AddValue("userId", userId);
+        }
+    }
 }

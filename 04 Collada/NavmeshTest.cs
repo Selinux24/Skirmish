@@ -56,7 +56,7 @@ namespace Collada
             this.title.Instance.Position = Vector2.Zero;
 
             this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
-            this.help.Instance.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse)";
+            this.help.Instance.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse). F5: Save. F6: Load.";
             this.help.Instance.Position = new Vector2(0, 24);
 
             this.debug = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
@@ -208,6 +208,17 @@ namespace Collada
                 {
                     this.UpdateInputGeometryNodes(++inputGeometryIndex);
                 }
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                this.navigationGraph.Save(@"test.grf");
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            {
+                this.navigationGraph.Load(@"test.grf");
+                this.UpdateGraphNodes(this.agent);
             }
 
             bool updateGraph = false;
