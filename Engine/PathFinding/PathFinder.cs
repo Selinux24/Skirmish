@@ -4,7 +4,7 @@ namespace Engine.PathFinding
     using Engine.Common;
     using Engine.PathFinding.AStar;
     using Engine.PathFinding.NavMesh;
-    using Engine.PathFinding.NavMesh2;
+    using Engine.PathFinding.RecastNavigation;
 
     /// <summary>
     /// Path finder generation class
@@ -59,7 +59,7 @@ namespace Engine.PathFinding
             }
             else if (settings is BuildSettings)
             {
-                return NavigationMesh2.Build(triangles, (BuildSettings)settings);
+                return RecastNavigation.NavMesh.Build(triangles, (BuildSettings)settings);
             }
             else
             {

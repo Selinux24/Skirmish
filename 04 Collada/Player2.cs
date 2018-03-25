@@ -1,4 +1,4 @@
-﻿using Engine.PathFinding.NavMesh2;
+﻿using Engine.PathFinding.RecastNavigation;
 
 namespace Collada
 {

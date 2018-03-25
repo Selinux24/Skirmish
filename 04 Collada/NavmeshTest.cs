@@ -1,6 +1,6 @@
 ﻿using Engine;
 using Engine.PathFinding;
-using Engine.PathFinding.NavMesh2;
+using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
 
