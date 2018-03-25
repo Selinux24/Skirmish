@@ -280,6 +280,7 @@
     <Compile Include="PathFinding\NavMesh2\BVNode.cs" />
     <Compile Include="PathFinding\NavMesh2\ChunkyTriMesh.cs" />
     <Compile Include="PathFinding\NavMesh2\ChunkyTriMeshNode.cs" />
+    <Compile Include="PathFinding\NavMesh2\CollectPolysQuery.cs" />
     <Compile Include="PathFinding\NavMesh2\CompactCell.cs" />
     <Compile Include="PathFinding\NavMesh2\CompactHeightfield.cs" />
     <Compile Include="PathFinding\NavMesh2\CompactSpan.cs" />
@@ -293,6 +294,12 @@
     <Compile Include="PathFinding\NavMesh2\ConvexVolume.cs" />
     <Compile Include="PathFinding\NavMesh2\Edge.cs" />
     <Compile Include="PathFinding\NavMesh2\EdgeValues.cs" />
+    <Compile Include="PathFinding\NavMesh2\FindNearestPolyQuery.cs" />
+    <Compile Include="PathFinding\NavMesh2\FindPathOptions.cs" />
+    <Compile Include="PathFinding\NavMesh2\RaycastHit.cs" />
+    <Compile Include="PathFinding\NavMesh2\RaycastOptions.cs" />
+    <Compile Include="PathFinding\NavMesh2\SegInterval.cs" />
+    <Compile Include="PathFinding\NavMesh2\Status.cs" />
     <Compile Include="PathFinding\NavMesh2\Heightfield.cs" />
     <Compile Include="PathFinding\NavMesh2\HeightfieldLayer.cs" />
     <Compile Include="PathFinding\NavMesh2\HeightfieldLayerSet.cs" />
@@ -313,6 +320,7 @@
     <Compile Include="PathFinding\NavMesh2\NavMeshTileBuildContext.cs" />
     <Compile Include="PathFinding\NavMesh2\NavMeshTileHeader.cs" />
     <Compile Include="PathFinding\NavMesh2\Node.cs" />
+    <Compile Include="PathFinding\NavMesh2\NodeFlags.cs" />
     <Compile Include="PathFinding\NavMesh2\NodePool.cs" />
     <Compile Include="PathFinding\NavMesh2\NodeQueue.cs" />
     <Compile Include="PathFinding\NavMesh2\ObstacleState.cs" />
@@ -323,9 +331,12 @@
     <Compile Include="PathFinding\NavMesh2\Polygoni.cs" />
     <Compile Include="PathFinding\NavMesh2\PolyMesh.cs" />
     <Compile Include="PathFinding\NavMesh2\PolyMeshDetail.cs" />
+    <Compile Include="PathFinding\NavMesh2\PolyQuery.cs" />
     <Compile Include="PathFinding\NavMesh2\PolyTypes.cs" />
     <Compile Include="PathFinding\NavMesh2\PolyUtils.cs" />
     <Compile Include="PathFinding\NavMesh2\PotentialDiagonal.cs" />
+    <Compile Include="PathFinding\NavMesh2\QueryData.cs" />
+    <Compile Include="PathFinding\NavMesh2\QueryFilter.cs" />
     <Compile Include="PathFinding\NavMesh2\RasterizationContext.cs" />
     <Compile Include="PathFinding\NavMesh2\BuildSettings.cs" />
     <Compile Include="PathFinding\NavMesh2\Region.cs" />
@@ -334,6 +345,8 @@
     <Compile Include="PathFinding\NavMesh2\SamplePolyFlags.cs" />
     <Compile Include="PathFinding\NavMesh2\Span.cs" />
     <Compile Include="PathFinding\NavMesh2\SpanPool.cs" />
+    <Compile Include="PathFinding\NavMesh2\StraightPathFlags.cs" />
+    <Compile Include="PathFinding\NavMesh2\StraightPathOptions.cs" />
     <Compile Include="PathFinding\NavMesh2\SweepSpan.cs" />
     <Compile Include="PathFinding\NavMesh2\TempContour.cs" />
     <Compile Include="PathFinding\NavMesh2\TileCache.cs" />

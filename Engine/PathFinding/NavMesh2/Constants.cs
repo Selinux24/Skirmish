@@ -57,5 +57,23 @@ namespace Engine.PathFinding.NavMesh2
         /// The number of spans allocated per span spool.
         /// </summary>
         public const int RC_SPANS_PER_POOL = 2048;
+        public const int MAX_OFFMESH_CONNECTIONS = 256;
+        public const int MAX_VOLUMES = 256;
+        /// <summary>
+        /// The maximum number of user defined area ids.
+        /// </summary>
+        public const int DT_MAX_AREAS = 64;
+        /// <summary>
+        /// Search heuristic scale.
+        /// </summary>
+        public const float H_SCALE = 0.999f;
+        /// <summary>
+        /// Limit raycasting during any angle pahfinding
+        /// The limit is given as a multiple of the character radius
+        /// </summary>
+        public const float DT_RAY_CAST_LIMIT_PROPORTIONS = 50.0f;
+        public const int DT_NODE_PARENT_BITS = 24;
+        public const int DT_NODE_STATE_BITS = 2;
+        public const int DT_MAX_STATES_PER_NODE = 1 << DT_NODE_STATE_BITS;  // number of extra states per node. See dtNode::state
     }
 }

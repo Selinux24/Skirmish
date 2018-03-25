@@ -288,5 +288,47 @@ namespace Engine.PathFinding.NavMesh2
                 if (items[i].bmax.Y > bmax.Y) bmax.Y = items[i].bmax.Y;
             }
         }
+
+        public void AddOffMeshConnection(Vector3 spos, Vector3 epos, float rad, int bidir, SamplePolyAreas area, SamplePolyFlags flags)
+        {
+            if (m_offMeshConCount >= Constants.MAX_OFFMESH_CONNECTIONS) return;
+            m_offMeshConRads[m_offMeshConCount] = rad;
+            m_offMeshConDirs[m_offMeshConCount] = bidir;
+            m_offMeshConAreas[m_offMeshConCount] = area;
+            m_offMeshConFlags[m_offMeshConCount] = flags;
+            m_offMeshConId[m_offMeshConCount] = 1000 + m_offMeshConCount;
+            m_offMeshConVerts[m_offMeshConCount * 2] = spos;
+            m_offMeshConVerts[m_offMeshConCount * 2 + 1] = epos;
+            m_offMeshConCount++;
+        }
+        public void DeleteOffMeshConnection(int i)
+        {
+            m_offMeshConCount--;
+            m_offMeshConVerts[i] = m_offMeshConVerts[m_offMeshConCount * 2];
+            m_offMeshConVerts[i + 1] = m_offMeshConVerts[m_offMeshConCount * 2 + 1];
+            m_offMeshConRads[i] = m_offMeshConRads[m_offMeshConCount];
+            m_offMeshConDirs[i] = m_offMeshConDirs[m_offMeshConCount];
+            m_offMeshConAreas[i] = m_offMeshConAreas[m_offMeshConCount];
+            m_offMeshConFlags[i] = m_offMeshConFlags[m_offMeshConCount];
+        }
+
+        public void AddConvexVolume(Vector3[] verts, int nverts, float minh, float maxh, TileCacheAreas area)
+        {
+            if (m_volumeCount >= Constants.MAX_VOLUMES) return;
+
+            m_volumes[m_volumeCount++] = new ConvexVolume
+            {
+                verts = verts,
+                hmin = minh,
+                hmax = maxh,
+                nverts = nverts,
+                area = area
+            };
+        }
+        public void DeleteConvexVolume(int i)
+        {
+            m_volumeCount--;
+            m_volumes[i] = m_volumes[m_volumeCount];
+        }
     }
 }

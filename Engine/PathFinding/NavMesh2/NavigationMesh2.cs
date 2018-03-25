@@ -7155,7 +7155,7 @@ namespace Engine.PathFinding.NavMesh2
             }
             return null;
         }
-        private int GetTilesAt(int x, int y, MeshTile[] tiles, int maxTiles)
+        public int GetTilesAt(int x, int y, MeshTile[] tiles, int maxTiles)
         {
             int n = 0;
 
@@ -7492,7 +7492,7 @@ namespace Engine.PathFinding.NavMesh2
             }
 
             closest = pos;
-            if (!DistancePtPolyEdgesSqr(pos, verts, nv, out edged, out edget))
+            if (!PolyUtils.DistancePtPolyEdgesSqr(pos, verts, nv, out edged, out edget))
             {
                 // Point is outside the polygon, dtClamp to nearest edge.
                 float dmin = edged[0];
@@ -7532,14 +7532,47 @@ namespace Engine.PathFinding.NavMesh2
                         v[k] = tile.detailVerts[(pd.vertBase + (t[k] - poly.vertCount))];
                     }
                 }
-                if (ClosestHeightPointTriangle(closest, v[0], v[1], v[2], out float h))
+                if (PolyUtils.ClosestHeightPointTriangle(closest, v[0], v[1], v[2], out float h))
                 {
                     closest[1] = h;
                     break;
                 }
             }
         }
-        private void GetTileAndPolyByRefUnsafe(int r, out MeshTile tile, out Poly poly)
+        public MeshTile GetTileByRef(int r)
+        {
+            if (r == 0)
+            {
+                return null;
+            }
+            int tileIndex = DecodePolyIdTile(r);
+            int tileSalt = DecodePolyIdSalt(r);
+            if (tileIndex >= MaxTiles)
+            {
+                return null;
+            }
+            MeshTile tile = Tiles[tileIndex];
+            if (tile.salt != tileSalt)
+            {
+                return null;
+            }
+            return tile;
+        }
+        public bool GetTileAndPolyByRef(int r, out MeshTile tile, out Poly poly)
+        {
+            tile = null;
+            poly = null;
+
+            if (r == 0) return false;
+            DecodePolyId(r, out int salt, out int it, out int ip);
+            if (it >= MaxTiles) return false;
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Constants.Magic) return false;
+            if (ip >= Tiles[it].header.polyCount) return false;
+            tile = Tiles[it];
+            poly = Tiles[it].polys[ip];
+            return true;
+        }
+        public void GetTileAndPolyByRefUnsafe(int r, out MeshTile tile, out Poly poly)
         {
             DecodePolyId(r, out int salt, out int it, out int ip);
             tile = Tiles[it];
@@ -7553,73 +7586,6 @@ namespace Engine.PathFinding.NavMesh2
             salt = ((r >> (m_polyBits + m_tileBits)) & saltMask);
             it = ((r >> m_polyBits) & tileMask);
             ip = (r & polyMask);
-        }
-        private bool DistancePtPolyEdgesSqr(Vector3 pt, Vector3[] verts, int nverts, out float[] ed, out float[] et)
-        {
-            ed = new float[nverts];
-            et = new float[nverts];
-
-            // TODO: Replace pnpoly with triArea2D tests?
-            int i, j;
-            bool c = false;
-            for (i = 0, j = nverts - 1; i < nverts; j = i++)
-            {
-                var vi = verts[i];
-                var vj = verts[j];
-                if (((vi[2] > pt[2]) != (vj[2] > pt[2])) && (pt[0] < (vj[0] - vi[0]) * (pt[2] - vi[2]) / (vj[2] - vi[2]) + vi[0]))
-                {
-                    c = !c;
-                }
-                ed[j] = DistancePtSegSqr2D(pt, vj, vi, out et[j]);
-            }
-            return c;
-        }
-        private float DistancePtSegSqr2D(Vector3 pt, Vector3 p, Vector3 q, out float t)
-        {
-            float pqx = q[0] - p[0];
-            float pqz = q[2] - p[2];
-            float dx = pt[0] - p[0];
-            float dz = pt[2] - p[2];
-            float d = pqx * pqx + pqz * pqz;
-            t = pqx * dx + pqz * dz;
-            if (d > 0) t /= d;
-            if (t < 0) t = 0;
-            else if (t > 1) t = 1;
-            dx = p[0] + t * pqx - pt[0];
-            dz = p[2] + t * pqz - pt[2];
-            return dx * dx + dz * dz;
-        }
-        private bool ClosestHeightPointTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out float h)
-        {
-            h = float.MaxValue;
-
-            Vector3 v0 = Vector3.Subtract(c, a);
-            Vector3 v1 = Vector3.Subtract(b, a);
-            Vector3 v2 = Vector3.Subtract(p, a);
-
-            float dot00 = Vector3.Dot(v0, v0);
-            float dot01 = Vector3.Dot(v0, v1);
-            float dot02 = Vector3.Dot(v0, v2);
-            float dot11 = Vector3.Dot(v1, v1);
-            float dot12 = Vector3.Dot(v1, v2);
-
-            // Compute barycentric coordinates
-            float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-            float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-            float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-            // The (sloppy) epsilon is needed to allow to get height of points which
-            // are interpolated along the edges of the triangles.
-            float EPS = 1e-4f;
-
-            // If point lies inside the triangle, return interpolated ycoord.
-            if (u >= -EPS && v >= -EPS && (u + v) <= 1 + EPS)
-            {
-                h = a[1] + v0[1] * u + v1[1] * v;
-                return true;
-            }
-
-            return false;
         }
         private void ConnectExtOffMeshLinks(MeshTile tile, MeshTile target, int side)
         {
@@ -7959,6 +7925,23 @@ namespace Engine.PathFinding.NavMesh2
         {
             tile.links[link].next = tile.linksFreeList;
             tile.linksFreeList = link;
+        }
+        public void CalcTileLoc(Vector3 pos, out int tx, out int ty)
+        {
+            tx = (int)Math.Floor((pos.X - m_orig.X) / m_tileWidth);
+            ty = (int)Math.Floor((pos.Z - m_orig.Z) / m_tileHeight);
+        }
+        public bool IsValidPolyRef(int r)
+        {
+            if (r == 0) return false;
+
+            DecodePolyId(r, out int salt, out int it, out int ip);
+
+            if (it >= MaxTiles) return false;
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Constants.Magic) return false;
+            if (ip >= Tiles[it].header.polyCount) return false;
+
+            return true;
         }
 
         public IGraphNode[] GetNodes(AgentType agent)

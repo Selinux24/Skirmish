@@ -691,6 +691,33 @@ namespace Engine
             return new Vector2(vector.X, vector.Y);
         }
         /// <summary>
+        /// Returns xy components from Vector3
+        /// </summary>
+        /// <param name="vector">Vector3</param>
+        /// <returns>Returns xy components from Vector4</returns>
+        public static Vector2 XY(this Vector3 vector)
+        {
+            return new Vector2(vector.X, vector.Y);
+        }
+        /// <summary>
+        /// Returns xz components from Vector4
+        /// </summary>
+        /// <param name="vector">Vector4</param>
+        /// <returns>Returns xz components from Vector4</returns>
+        public static Vector2 XZ(this Vector4 vector)
+        {
+            return new Vector2(vector.X, vector.Z);
+        }
+        /// <summary>
+        /// Returns xz components from Vector3
+        /// </summary>
+        /// <param name="vector">Vector3</param>
+        /// <returns>Returns xz components from Vector4</returns>
+        public static Vector2 XZ(this Vector3 vector)
+        {
+            return new Vector2(vector.X, vector.Z);
+        }
+        /// <summary>
         /// Returns rgb components from Color4
         /// </summary>
         /// <param name="color">Color4</param>

@@ -27,7 +27,7 @@ namespace Engine.PathFinding.NavMesh2
         /// <summary>
         /// Node flags. A combination of dtNodeFlags.
         /// </summary>
-        public int flags;
+        public NodeFlags flags;
         /// <summary>
         /// Polygon ref the node corresponds to.
         /// </summary>
