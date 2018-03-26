@@ -315,12 +315,7 @@ namespace Engine.PathFinding.RecastNavigation
                     detailVertsCount = dmesh.nverts,
                     detailTris = dmesh.tris,
                     detailTriCount = dmesh.ntris,
-                    offMeshConVerts = geometry.GetOffMeshConnectionVerts(),
-                    offMeshConRad = geometry.GetOffMeshConnectionRads(),
-                    offMeshConDir = geometry.GetOffMeshConnectionDirs(),
-                    offMeshConAreas = geometry.GetOffMeshConnectionAreas(),
-                    offMeshConFlags = geometry.GetOffMeshConnectionFlags(),
-                    offMeshConUserID = geometry.GetOffMeshConnectionId(),
+                    offMeshCon = geometry.GetOffMeshConnection(),
                     offMeshConCount = geometry.GetOffMeshConnectionCount(),
                     walkableHeight = agent.Height,
                     walkableRadius = agent.Radius,
@@ -359,7 +354,7 @@ namespace Engine.PathFinding.RecastNavigation
             int tw = (gw + ts - 1) / ts;
             int th = (gh + ts - 1) / ts;
 
-            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th * Constants.ExpectedLayersPerTile), 2), 14);
+            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th), 2), 14);
             if (tileBits > 14) tileBits = 14;
             int polyBits = 22 - tileBits;
             int maxTiles = 1 << tileBits;
@@ -692,9 +687,13 @@ namespace Engine.PathFinding.RecastNavigation
                 if (cur == tile)
                 {
                     if (prev != null)
+                    {
                         prev.next = cur.next;
+                    }
                     else
+                    {
                         m_posLookup[h] = cur.next;
+                    }
                     break;
                 }
                 prev = cur;
@@ -1187,7 +1186,7 @@ namespace Engine.PathFinding.RecastNavigation
                 Vector3 halfExtents = new Vector3(new float[] { con.rad, tile.header.walkableClimb, con.rad });
 
                 // Find polygon to connect to.
-                Vector3 p = con.pos[0]; // First vertex
+                Vector3 p = con.start; // First vertex
                 Vector3 nearestPt = new Vector3();
                 int r = FindNearestPolyInTile(tile, p, halfExtents, nearestPt);
                 if (r == 0) continue;
@@ -1333,7 +1332,7 @@ namespace Engine.PathFinding.RecastNavigation
                 Vector3 halfExtents = new Vector3(new float[] { targetCon.rad, target.header.walkableClimb, targetCon.rad });
 
                 // Find polygon to connect to.
-                Vector3 p = targetCon.pos[1];
+                Vector3 p = targetCon.end;
                 Vector3 nearestPt = new Vector3();
                 int r = FindNearestPolyInTile(tile, p, halfExtents, nearestPt);
                 if (r == 0)
@@ -1460,8 +1459,7 @@ namespace Engine.PathFinding.RecastNavigation
                 int n = 0;
                 while (nodeIndex < endIndex)
                 {
-                    var node = tile.bvTree[nodeIndex];
-                    var end = tile.bvTree[endIndex];
+                    var node = nodeIndex < tile.bvTree.Length ? tile.bvTree[nodeIndex] : new BVNode();
 
                     bool overlap = PolyUtils.OverlapQuantBounds(bmin, bmax, node.bmin, node.bmax);
                     bool isLeafNode = node.i >= 0;
@@ -1469,11 +1467,15 @@ namespace Engine.PathFinding.RecastNavigation
                     if (isLeafNode && overlap)
                     {
                         if (n < maxPolys)
+                        {
                             polys[n++] = bse | node.i;
+                        }
                     }
 
                     if (overlap || isLeafNode)
+                    {
                         nodeIndex++;
+                    }
                     else
                     {
                         int escapeIndex = -node.i;
@@ -1494,7 +1496,9 @@ namespace Engine.PathFinding.RecastNavigation
                     Poly p = tile.polys[i];
                     // Do not return off-mesh connection polygons.
                     if (p.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
+                    {
                         continue;
+                    }
                     // Calc polygon bounds.
                     Vector3 v = tile.verts[p.verts[0]];
                     bmin = v;
@@ -1508,10 +1512,12 @@ namespace Engine.PathFinding.RecastNavigation
                     if (Recast.OverlapBounds(qmin, qmax, bmin, bmax))
                     {
                         if (n < maxPolys)
-
+                        {
                             polys[n++] = bse | i;
+                        }
                     }
                 }
+
                 return n;
             }
         }

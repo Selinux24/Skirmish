@@ -1336,25 +1336,25 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static int ClassifyOffMeshPoint(Vector3 pt, Vector3 bmin, Vector3 bmax)
         {
-            int XP = 1 << 0;
-            int ZP = 1 << 1;
-            int XM = 1 << 2;
-            int ZM = 1 << 3;
+            int xp = 1 << 0;
+            int zp = 1 << 1;
+            int xm = 1 << 2;
+            int zm = 1 << 3;
 
             int outcode = 0;
-            outcode |= (pt[0] >= bmax[0]) ? XP : 0;
-            outcode |= (pt[2] >= bmax[2]) ? ZP : 0;
-            outcode |= (pt[0] < bmin[0]) ? XM : 0;
-            outcode |= (pt[2] < bmin[2]) ? ZM : 0;
+            outcode |= (pt.X >= bmax.X) ? xp : 0;
+            outcode |= (pt.Z >= bmax.Z) ? zp : 0;
+            outcode |= (pt.X < bmin.X) ? xm : 0;
+            outcode |= (pt.Z < bmin.Z) ? zm : 0;
 
-            if (XP != 0) return 0;
-            if ((XP | ZP) != 0) return 1;
-            if (ZP != 0) return 2;
-            if ((XM | ZP) != 0) return 3;
-            if (XM != 0) return 4;
-            if ((XM | ZM) != 0) return 5;
-            if (ZM != 0) return 6;
-            if ((XP | ZM) != 0) return 7;
+            if (outcode == xp) return 0;
+            if (outcode == (xp | zp)) return 1;
+            if (outcode == zp) return 2;
+            if (outcode == (xm | zp)) return 3;
+            if (outcode == xm) return 4;
+            if (outcode == (xm | zm)) return 5;
+            if (outcode == zm) return 6;
+            if (outcode == (xp | zm)) return 7;
 
             return 0xff;
         }

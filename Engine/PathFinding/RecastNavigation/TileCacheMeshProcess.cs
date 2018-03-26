@@ -39,12 +39,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Pass in off-mesh connections.
             if (m_geom != null)
             {
-                param.offMeshConVerts = m_geom.GetOffMeshConnectionVerts();
-                param.offMeshConRad = m_geom.GetOffMeshConnectionRads();
-                param.offMeshConDir = m_geom.GetOffMeshConnectionDirs();
-                param.offMeshConAreas = m_geom.GetOffMeshConnectionAreas();
-                param.offMeshConFlags = m_geom.GetOffMeshConnectionFlags();
-                param.offMeshConUserID = m_geom.GetOffMeshConnectionId();
+                param.offMeshCon = m_geom.GetOffMeshConnection();
                 param.offMeshConCount = m_geom.GetOffMeshConnectionCount();
             }
         }

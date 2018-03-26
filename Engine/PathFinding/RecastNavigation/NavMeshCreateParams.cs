@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -78,31 +77,9 @@ namespace Engine.PathFinding.RecastNavigation
         // at least one of which resides within a navigation mesh polygon.
 
         /// <summary>
-        /// Off-mesh connection vertices. [(ax, ay, az, bx, by, bz) * #offMeshConCount] [Unit: wu]
+        /// Off-mesh connections
         /// </summary>
-        public Vector3[] offMeshConVerts;
-        /// <summary>
-        /// Off-mesh connection radii. [Size: #offMeshConCount] [Unit: wu]
-        /// </summary>
-        public float[] offMeshConRad;
-        /// <summary>
-        /// User defined flags assigned to the off-mesh connections. [Size: #offMeshConCount]
-        /// </summary>
-        public SamplePolyFlags[] offMeshConFlags;
-        /// <summary>
-        /// User defined area ids assigned to the off-mesh connections. [Size: #offMeshConCount]
-        /// </summary>
-        public SamplePolyAreas[] offMeshConAreas;
-        /// <summary>
-        /// The permitted travel direction of the off-mesh connections. [Size: #offMeshConCount]
-        /// 0 = Travel only from endpoint A to endpoint B.<br/>
-        /// #DT_OFFMESH_CON_BIDIR = Bidirectional travel.
-        /// </summary>
-        public int[] offMeshConDir;
-        /// <summary>
-        /// The user defined ids of the off-mesh connection. [Size: #offMeshConCount]
-        /// </summary>
-        public int[] offMeshConUserID;
+        public OffMeshConnectionDef[] offMeshCon;
         /// <summary>
         /// The number of off-mesh connections. [Limit: >= 0]
         /// </summary>

@@ -58,9 +58,6 @@ namespace Engine.PathFinding.RecastNavigation
             return res;
         }
 
-        public const int MaxVolumes = 256;
-        public const int MaxOffmeshConnections = 256;
-
         private BoundsItemComparerX xComparer = new BoundsItemComparerX();
         private BoundsItemComparerY yComparer = new BoundsItemComparerY();
 
@@ -68,27 +65,17 @@ namespace Engine.PathFinding.RecastNavigation
         private ConvexVolume[] m_volumes;
         private int m_volumeCount;
 
-        private Vector3[] m_offMeshConVerts;
-        private float[] m_offMeshConRads;
-        private int[] m_offMeshConDirs;
-        private SamplePolyAreas[] m_offMeshConAreas;
-        private SamplePolyFlags[] m_offMeshConFlags;
-        private int[] m_offMeshConId;
+        private OffMeshConnectionDef[] m_offMeshCons;
         private int m_offMeshConCount;
 
         public readonly BoundingBox BoundingBox;
 
         public InputGeometry()
         {
-            m_volumes = new ConvexVolume[MaxVolumes];
+            m_volumes = new ConvexVolume[Constants.MAX_VOLUMES];
             m_volumeCount = 0;
 
-            m_offMeshConVerts = new Vector3[MaxOffmeshConnections * 2];
-            m_offMeshConRads = new float[MaxOffmeshConnections];
-            m_offMeshConDirs = new int[MaxOffmeshConnections];
-            m_offMeshConAreas = new SamplePolyAreas[MaxOffmeshConnections];
-            m_offMeshConFlags = new SamplePolyFlags[MaxOffmeshConnections];
-            m_offMeshConId = new int[MaxOffmeshConnections];
+            m_offMeshCons = new OffMeshConnectionDef[Constants.MAX_OFFMESH_CONNECTIONS];
             m_offMeshConCount = 0;
         }
         public InputGeometry(IEnumerable<Triangle> triangles) : this()
@@ -114,29 +101,9 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return m_offMeshConCount;
         }
-        public int[] GetOffMeshConnectionId()
+        public OffMeshConnectionDef[] GetOffMeshConnection()
         {
-            return m_offMeshConId;
-        }
-        public SamplePolyFlags[] GetOffMeshConnectionFlags()
-        {
-            return m_offMeshConFlags;
-        }
-        public SamplePolyAreas[] GetOffMeshConnectionAreas()
-        {
-            return m_offMeshConAreas;
-        }
-        public int[] GetOffMeshConnectionDirs()
-        {
-            return m_offMeshConDirs;
-        }
-        public float[] GetOffMeshConnectionRads()
-        {
-            return m_offMeshConRads;
-        }
-        public Vector3[] GetOffMeshConnectionVerts()
-        {
-            return m_offMeshConVerts;
+            return m_offMeshCons;
         }
 
         private bool CreateChunkyTriMesh(Triangle[] tris, int trisPerChunk, out ChunkyTriMesh cm)
@@ -292,24 +259,22 @@ namespace Engine.PathFinding.RecastNavigation
         public void AddOffMeshConnection(Vector3 spos, Vector3 epos, float rad, int bidir, SamplePolyAreas area, SamplePolyFlags flags)
         {
             if (m_offMeshConCount >= Constants.MAX_OFFMESH_CONNECTIONS) return;
-            m_offMeshConRads[m_offMeshConCount] = rad;
-            m_offMeshConDirs[m_offMeshConCount] = bidir;
-            m_offMeshConAreas[m_offMeshConCount] = area;
-            m_offMeshConFlags[m_offMeshConCount] = flags;
-            m_offMeshConId[m_offMeshConCount] = 1000 + m_offMeshConCount;
-            m_offMeshConVerts[m_offMeshConCount * 2] = spos;
-            m_offMeshConVerts[m_offMeshConCount * 2 + 1] = epos;
+            m_offMeshCons[m_offMeshConCount] = new OffMeshConnectionDef
+            {
+                Radius = rad,
+                Direction = bidir,
+                Area = area,
+                Flags = flags,
+                Id = 1000 + m_offMeshConCount,
+                Start = spos,
+                End = epos,
+            };
             m_offMeshConCount++;
         }
         public void DeleteOffMeshConnection(int i)
         {
             m_offMeshConCount--;
-            m_offMeshConVerts[i] = m_offMeshConVerts[m_offMeshConCount * 2];
-            m_offMeshConVerts[i + 1] = m_offMeshConVerts[m_offMeshConCount * 2 + 1];
-            m_offMeshConRads[i] = m_offMeshConRads[m_offMeshConCount];
-            m_offMeshConDirs[i] = m_offMeshConDirs[m_offMeshConCount];
-            m_offMeshConAreas[i] = m_offMeshConAreas[m_offMeshConCount];
-            m_offMeshConFlags[i] = m_offMeshConFlags[m_offMeshConCount];
+            m_offMeshCons[i] = m_offMeshCons[m_offMeshConCount];
         }
 
         public void AddConvexVolume(Vector3[] verts, int nverts, float minh, float maxh, TileCacheAreas area)

@@ -297,6 +297,7 @@
     <Compile Include="PathFinding\RecastNavigation\FindNearestPolyQuery.cs" />
     <Compile Include="PathFinding\RecastNavigation\FindPathOptions.cs" />
     <Compile Include="PathFinding\RecastNavigation\NavMeshUtils.cs" />
+    <Compile Include="PathFinding\RecastNavigation\OffMeshConnectionDef.cs" />
     <Compile Include="PathFinding\RecastNavigation\RaycastHit.cs" />
     <Compile Include="PathFinding\RecastNavigation\RaycastOptions.cs" />
     <Compile Include="PathFinding\RecastNavigation\RecastUtils.cs" />

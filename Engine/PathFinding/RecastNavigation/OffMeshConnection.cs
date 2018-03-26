@@ -13,9 +13,13 @@ namespace Engine.PathFinding.RecastNavigation
     public class OffMeshConnection : ISerializable
     {
         /// <summary>
-        /// The endpoints of the connection. [(ax, ay, az, bx, by, bz)]
+        /// The start endpoint of the connection. [(ax, ay, az)]
         /// </summary>
-        public Vector3[] pos = new Vector3[2];
+        public Vector3 start;
+        /// <summary>
+        /// The end endpoint of the connection. [(bx, by, bz)]
+        /// </summary>
+        public Vector3 end;
         /// <summary>
         /// The radius of the endpoints. [Limit: >= 0]
         /// </summary>
@@ -47,11 +51,8 @@ namespace Engine.PathFinding.RecastNavigation
 
         protected OffMeshConnection(SerializationInfo info, StreamingContext context)
         {
-            pos = new[]
-            {
-                info.GetVector3("pos0"),
-                info.GetVector3("pos1"),
-            };
+            start = info.GetVector3("start");
+            end = info.GetVector3("end");
             rad = info.GetSingle("rad");
             poly = info.GetInt32("poly");
             flags = info.GetInt32("flags");
@@ -62,8 +63,8 @@ namespace Engine.PathFinding.RecastNavigation
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddVector3("pos0", pos[0]);
-            info.AddVector3("pos1", pos[1]);
+            info.AddVector3("start", start);
+            info.AddVector3("end", end);
             info.AddValue("rad", rad);
             info.AddValue("poly", poly);
             info.AddValue("flags", flags);

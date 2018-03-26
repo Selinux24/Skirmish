@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -36,17 +35,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// The tile's detail sub-meshes. [Size: dtMeshHeader::detailMeshCount]
         /// </summary>
         public PolyDetail[] detailMeshes;
-
         /// <summary>
         /// The detail mesh's unique vertices. [(x, y, z) * dtMeshHeader::detailVertCount]
         /// </summary>
         public Vector3[] detailVerts;
-
         /// <summary>
         /// The detail mesh's triangles. [(vertA, vertB, vertC) * dtMeshHeader::detailTriCount]
         /// </summary>
         public Int4[] detailTris;
-
         /// <summary>
         /// The tile bounding volume nodes. [Size: dtMeshHeader::bvNodeCount]
         /// (Will be null if bounding volumes are disabled.)
@@ -88,7 +84,10 @@ namespace Engine.PathFinding.RecastNavigation
             bvTree = new BVNode[header.bvNodeCount];
             offMeshCons = new OffMeshConnection[header.offMeshConCount];
         }
-
+        /// <summary>
+        /// Set mesh data
+        /// </summary>
+        /// <param name="data">Mesh data</param>
         public void SetData(MeshData data)
         {
             this.data = data;
@@ -103,7 +102,10 @@ namespace Engine.PathFinding.RecastNavigation
             if (data.offMeshCons.Count > 0) offMeshCons = data.offMeshCons.ToArray();
         }
 
-
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
             return string.Format("Salt: {0}; Links: {1}; Flags: {2}; Header: {3}; Data: {4}",
