@@ -105,12 +105,17 @@ namespace Engine.Common
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
                 var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
-
-                geo = LoaderCOLLADA.Load(description.Content.ContentFolder, contentDesc);
+                using (var loader = contentDesc.GetLoader())
+                {
+                    geo = loader.Load(description.Content.ContentFolder, contentDesc);
+                }
             }
             else if (description.Content.ModelContentDescription != null)
             {
-                geo = LoaderCOLLADA.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
+                using (var loader = description.Content.ModelContentDescription.GetLoader())
+                {
+                    geo = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
+                }
             }
             else if (description.Content.ModelContent != null)
             {

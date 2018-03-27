@@ -546,11 +546,6 @@ namespace Engine.PathFinding.RecastNavigation
             nearestRef = 0;
             nearestPt = Vector3.Zero;
 
-            if (nearestRef == 0)
-            {
-                return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
-            }
-
             var query = new FindNearestPolyQuery(this, center);
 
             Status status = QueryPolygons(center, halfExtents, filter, query);
@@ -577,8 +572,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (tile.bvTree != null)
             {
-                int iNode = 0;
-                int iEnd = tile.header.bvNodeCount;
+                int nodeIndex = 0;
+                int endIndex = tile.header.bvNodeCount;
                 var tbmin = tile.header.bmin;
                 var tbmax = tile.header.bmax;
                 float qfac = tile.header.bvQuantFactor;
@@ -603,9 +598,9 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Traverse tree
                 int bse = m_nav.GetPolyRefBase(tile);
-                while (iNode < iEnd)
+                while (nodeIndex < endIndex)
                 {
-                    var node = tile.bvTree[iNode];
+                    var node = nodeIndex < tile.bvTree.Length ? tile.bvTree[nodeIndex] : new BVNode();
 
                     bool overlap = PolyUtils.OverlapQuantBounds(bmin, bmax, node.bmin, node.bmax);
                     bool isLeafNode = node.i >= 0;
@@ -632,12 +627,12 @@ namespace Engine.PathFinding.RecastNavigation
 
                     if (overlap || isLeafNode)
                     {
-                        iNode++;
+                        nodeIndex++;
                     }
                     else
                     {
                         int escapeIndex = -node.i;
-                        iNode += escapeIndex;
+                        nodeIndex += escapeIndex;
                     }
                 }
             }

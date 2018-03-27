@@ -64,14 +64,19 @@ namespace Engine
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
                 var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
-
-                var t = LoaderCOLLADA.Load(description.Content.ContentFolder, contentDesc);
-                content = t[0];
+                using (var loader = contentDesc.GetLoader())
+                {
+                    var t = loader.Load(description.Content.ContentFolder, contentDesc);
+                    content = t[0];
+                }
             }
             else if (description.Content.ModelContentDescription != null)
             {
-                var t = LoaderCOLLADA.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
-                content = t[0];
+                using (var loader = description.Content.ModelContentDescription.GetLoader())
+                {
+                    var t = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
+                    content = t[0];
+                }
             }
             else if (description.Content.HeightmapDescription != null)
             {

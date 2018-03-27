@@ -208,6 +208,8 @@
     <Compile Include="Common\UseSkinningData.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
     <Compile Include="Content\ContentDescription.cs" />
+    <Compile Include="Content\ILoader.cs" />
+    <Compile Include="Content\LoaderOBJ.cs" />
     <Compile Include="CubicShadowMap.cs" />
     <Compile Include="CullingVolumeCamera.cs" />
     <Compile Include="CullingVolumeAABB.cs" />
@@ -688,9 +690,6 @@
     <None Include="app.config" />
     <None Include="Engine.snk" />
     <None Include="packages.config" />
-    <Content Include="PathFinding\RecastNavigation\DEBUGTris.obj">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <None Include="Resources\ShaderDefaultClouds.fxo" />
     <None Include="Resources\ShaderDefaultFoliage.fxo" />
     <None Include="Resources\ShaderDefaultWater.fxo" />

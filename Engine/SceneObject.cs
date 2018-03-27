@@ -218,32 +218,32 @@ namespace Engine
     /// Scene object usajes enumeration
     /// </summary>
     [Flags]
-    public enum SceneObjectUsageEnum : byte
+    public enum SceneObjectUsageEnum
     {
         /// <summary>
         /// None
         /// </summary>
-        None = 0x0,
+        None = 0,
         /// <summary>
         /// Full triangle list for path finding
         /// </summary>
-        FullPathFinding = 0x1,
+        FullPathFinding = 1,
         /// <summary>
         /// Coarse list for path finding
         /// </summary>
-        CoarsePathFinding = 0x2,
+        CoarsePathFinding = 2,
         /// <summary>
         /// Scene ground
         /// </summary>
-        Ground = 0x4,
+        Ground = 1,
         /// <summary>
         /// Scene agent
         /// </summary>
-        Agent = 0x8,
+        Agent = 8,
         /// <summary>
         /// User interface
         /// </summary>
-        UI = 0x16,
+        UI = 16,
     }
 
     /// <summary>

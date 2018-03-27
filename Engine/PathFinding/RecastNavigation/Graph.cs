@@ -8,7 +8,7 @@ using System.Security.Permissions;
 namespace Engine.PathFinding.RecastNavigation
 {
     [Serializable]
-    public class Graph : IGraph, ISerializable , IDisposable
+    public class Graph : IGraph, ISerializable, IDisposable
     {
         public const int MAX_POLYS = 256;
         public const int MAX_SMOOTH = 2048;
@@ -260,15 +260,25 @@ namespace Engine.PathFinding.RecastNavigation
 
         public Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
+            var filter = new QueryFilter()
+            {
+                m_includeFlags = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK,
+            };
+
             return CalcPath(
                 navMeshQDictionary[agent],
-                new QueryFilter(), new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
+                filter, new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
                 from, to);
         }
         public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
         {
+            var filter = new QueryFilter()
+            {
+                m_includeFlags = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK,
+            };
+
             var status = navMeshQDictionary[agent].FindNearestPoly(
-                position, new Vector3(2,4,2), new QueryFilter(), 
+                position, new Vector3(2, 4, 2), filter,
                 out int nRef, out Vector3 nPoint);
 
             if (!status.HasFlag(Status.DT_FAILURE))

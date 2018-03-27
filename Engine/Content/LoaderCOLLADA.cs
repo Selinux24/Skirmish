@@ -15,15 +15,30 @@ namespace Engine.Content
     /// <summary>
     /// Loader for collada
     /// </summary>
-    public static class LoaderCOLLADA
+    public class LoaderCOLLADA : ILoader, IDisposable
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public LoaderCOLLADA()
+        {
+
+        }
+        /// <summary>
+        /// Resource disposing
+        /// </summary>
+        public void Dispose()
+        {
+
+        }
+
         /// <summary>
         /// Load a collada model
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Conten description</param>
         /// <returns>Returns the loaded contents</returns>
-        public static ModelContent[] Load(string contentFolder, ModelContentDescription content)
+        public ModelContent[] Load(string contentFolder, ModelContentDescription content)
         {
             Matrix transform = Matrix.Identity;
 
@@ -48,7 +63,7 @@ namespace Engine.Content
         /// <param name="useControllerTransform">Use controller transform</param>
         /// <param name="transform">Transform</param>
         /// <returns>Returns the loaded contents</returns>
-        private static ModelContent[] Load(string contentFolder, string fileName, Matrix transform, bool useControllerTransform, string[] volumes, AnimationDescription animation)
+        private ModelContent[] Load(string contentFolder, string fileName, Matrix transform, bool useControllerTransform, string[] volumes, AnimationDescription animation)
         {
             MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList != null && modelList.Length > 0)
