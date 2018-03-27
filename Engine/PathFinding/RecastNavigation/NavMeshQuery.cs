@@ -84,7 +84,7 @@ namespace Engine.PathFinding.RecastNavigation
                 // Choose random tile using reservoi sampling.
                 float area = 1.0f; // Could be tile area too.
                 tsum += area;
-                float u = frand.NextFloat(float.MinValue, float.MaxValue);
+                float u = frand.NextFloat(0, 1);
                 if (u * tsum <= area)
                 {
                     tile = tl;
@@ -128,7 +128,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Choose random polygon weighted by area, using reservoi sampling.
                 areaSum += polyArea;
-                float u = frand.NextFloat(float.MinValue, float.MaxValue);
+                float u = frand.NextFloat(0, 1);
                 if (u * areaSum <= polyArea)
                 {
                     poly = p;
@@ -151,8 +151,8 @@ namespace Engine.PathFinding.RecastNavigation
                 verts[j] = v;
             }
 
-            float s = frand.NextFloat(float.MinValue, float.MaxValue);
-            float t = frand.NextFloat(float.MinValue, float.MaxValue);
+            float s = frand.NextFloat(0, 1);
+            float t = frand.NextFloat(0, 1);
 
             PolyUtils.RandomPointInConvexPoly(verts, poly.vertCount, out float[] areas, s, t, out Vector3 pt);
 
@@ -232,7 +232,7 @@ namespace Engine.PathFinding.RecastNavigation
                     }
                     // Choose random polygon weighted by area, using reservoi sampling.
                     areaSum += polyArea;
-                    float u = frand.NextFloat(float.MinValue, float.MaxValue);
+                    float u = frand.NextFloat(0, 1);
                     if (u * areaSum <= polyArea)
                     {
                         randomTile = bestTile;
@@ -344,8 +344,8 @@ namespace Engine.PathFinding.RecastNavigation
                 verts[j] = v;
             }
 
-            float s = frand.NextFloat(float.MinValue, float.MaxValue);
-            float t = frand.NextFloat(float.MinValue, float.MaxValue);
+            float s = frand.NextFloat(0, 1);
+            float t = frand.NextFloat(0, 1);
 
             PolyUtils.RandomPointInConvexPoly(verts, randomPoly.vertCount, out float[] areas, s, t, out Vector3 pt);
 
@@ -3274,5 +3274,16 @@ namespace Engine.PathFinding.RecastNavigation
 
             return false;
         }
+
+        /// <summary>
+        /// Gets the node pool.
+        /// </summary>
+        /// <returns>The node pool.</returns>
+        public NodePool GetNodePool() { return m_nodePool; }
+        /// <summary>
+        /// Gets the navigation mesh the query object is using.
+        /// </summary>
+        /// <returns>The navigation mesh the query object is using.</returns>
+        public NavMesh GetAttachedNavMesh() { return m_nav; }
     }
 }

@@ -1,9 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.NavMesh
 {
     /// <summary>
     /// Navigation mesh agent type
     /// </summary>
+    [Serializable]
     public class NavigationMeshAgentType : AgentType
     {
         /// <summary>

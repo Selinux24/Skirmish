@@ -3,152 +3,35 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    public class NavMesh : IGraph
+    [Serializable]
+    public class NavMesh : ISerializable
     {
-        public static NavMesh Build(Triangle[] triangles, BuildSettings settings)
-        {
-            return Build(new InputGeometry(triangles), settings);
-        }
-        public static NavMesh Build(InputGeometry geometry, BuildSettings settings)
+        public static NavMesh Build(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
             if (settings.BuildMode == BuildModesEnum.Solo)
             {
-                return BuildSolo(geometry, settings);
+                return BuildSolo(geometry, settings, agent);
             }
             else if (settings.BuildMode == BuildModesEnum.Tiled)
             {
-                return BuildTiled(geometry, settings);
+                return BuildTiled(geometry, settings, agent);
             }
             else if (settings.BuildMode == BuildModesEnum.TempObstacles)
             {
-                return BuildTempObstacles(geometry, settings);
+                return BuildTempObstacles(geometry, settings, agent);
             }
             else
             {
                 throw new EngineException("Bad build mode for NavigationMesh2.");
             }
         }
-        private static NavMesh BuildTempObstacles(InputGeometry geometry, BuildSettings settings)
+        private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var agent = settings.Agents[0];
-
-            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
-
-            // Init cache
-            Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
-            int ts = (int)settings.TileSize;
-            int tw = (gw + ts - 1) / ts;
-            int th = (gh + ts - 1) / ts;
-
-            // Generation params.
-            var walkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight);
-            var walkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight);
-            var walkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize);
-            var tileSize = (int)settings.TileSize;
-            var borderSize = walkableRadius + 3;
-            var cfg = new Config()
-            {
-                CellSize = settings.CellSize,
-                CellHeight = settings.CellHeight,
-                WalkableSlopeAngle = agent.MaxSlope,
-                WalkableHeight = walkableHeight,
-                WalkableClimb = walkableClimb,
-                WalkableRadius = walkableRadius,
-                MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize),
-                MaxSimplificationError = settings.EdgeMaxError,
-                MinRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize),
-                MergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize),
-                MaxVertsPerPoly = settings.VertsPerPoly,
-                TileSize = tileSize,
-                BorderSize = borderSize,
-                Width = tileSize + borderSize * 2,
-                Height = tileSize + borderSize * 2,
-                DetailSampleDist = settings.DetailSampleDist < 0.9f ? 0 : settings.CellSize * settings.DetailSampleDist,
-                DetailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError,
-                BoundingBox = bbox,
-            };
-
-            // Tile cache params.
-            var tcparams = new TileCacheParams()
-            {
-                Origin = bbox.Minimum,
-                CellSize = settings.CellSize,
-                CellHeight = settings.CellHeight,
-                Width = (int)settings.TileSize,
-                Height = (int)settings.TileSize,
-                WalkableHeight = agent.Height,
-                WalkableRadius = agent.Radius,
-                WalkableClimb = agent.MaxClimb,
-                MaxSimplificationError = settings.EdgeMaxError,
-                MaxTiles = tw * th * Constants.ExpectedLayersPerTile,
-                MaxObstacles = 128,
-            };
-            var tmproc = new TileCacheMeshProcess(geometry);
-
-            var tileCache = new TileCache();
-            tileCache.Init(tcparams, tmproc);
-
-            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th * Constants.ExpectedLayersPerTile), 2), 14);
-            if (tileBits > 14) tileBits = 14;
-            int polyBits = 22 - tileBits;
-            int maxTiles = 1 << tileBits;
-            int maxPolysPerTile = 1 << polyBits;
-
-            var nmparams = new NavMeshParams()
-            {
-                Origin = bbox.Minimum,
-                TileWidth = settings.TileSize * settings.CellSize,
-                TileHeight = settings.TileSize * settings.CellSize,
-                MaxTiles = maxTiles,
-                MaxPolys = maxPolysPerTile,
-            };
-
-            var nm = new NavMesh();
-            nm.Init(nmparams);
-
-            var nmQuery = new NavMeshQuery();
-            nmQuery.Init(nm, settings.MaxNodes);
-
-            int m_cacheLayerCount = 0;
-            int m_cacheCompressedSize = 0;
-            int m_cacheRawSize = 0;
-            int layerBufferSize = Recast.CalcLayerBufferSize(tcparams.Width, tcparams.Height);
-
-            for (int y = 0; y < th; y++)
-            {
-                for (int x = 0; x < tw; x++)
-                {
-                    int ntiles = Recast.RasterizeTileLayers(x, y, settings, cfg, geometry, out TileCacheData[] tiles);
-
-                    for (int i = 0; i < ntiles; ++i)
-                    {
-                        tileCache.AddTile(tiles[i], TileFlags.DT_TILE_FREE_DATA);
-
-                        m_cacheLayerCount++;
-                        m_cacheCompressedSize += 0;//tiles[i].DataSize;
-                        m_cacheRawSize += layerBufferSize;
-                    }
-                }
-            }
-
-            // Build initial meshes
-            for (int y = 0; y < th; y++)
-            {
-                for (int x = 0; x < tw; x++)
-                {
-                    tileCache.BuildNavMeshTilesAt(x, y, nm);
-                }
-            }
-
-            return nm;
-        }
-        private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings)
-        {
-            var agent = settings.Agents[0];
-
             var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
 
             Recast.CalcGridSize(bbox, settings.CellSize, out int width, out int height);
@@ -334,18 +217,13 @@ namespace Engine.PathFinding.RecastNavigation
 
                 var nm = new NavMesh();
                 nm.Init(navData, TileFlags.DT_TILE_FREE_DATA);
-
-                var mmQuery = new NavMeshQuery();
-                mmQuery.Init(nm, settings.MaxNodes);
                 return nm;
             }
 
             return null;
         }
-        private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings)
+        private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var agent = settings.Agents[0];
-
             var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
 
             // Init cache
@@ -372,18 +250,122 @@ namespace Engine.PathFinding.RecastNavigation
             var nm = new NavMesh();
             nm.Init(nmparams);
 
-            var nmQuery = new NavMeshQuery();
-            nmQuery.Init(nm, settings.MaxNodes);
-
             Recast.BuildAllTiles(geometry, settings, agent, nm);
+
+            return nm;
+        }
+        private static NavMesh BuildTempObstacles(InputGeometry geometry, BuildSettings settings, Agent agent)
+        {
+            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
+
+            // Init cache
+            Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
+            int ts = (int)settings.TileSize;
+            int tw = (gw + ts - 1) / ts;
+            int th = (gh + ts - 1) / ts;
+
+            // Generation params.
+            var walkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight);
+            var walkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight);
+            var walkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize);
+            var tileSize = (int)settings.TileSize;
+            var borderSize = walkableRadius + 3;
+            var cfg = new Config()
+            {
+                CellSize = settings.CellSize,
+                CellHeight = settings.CellHeight,
+                WalkableSlopeAngle = agent.MaxSlope,
+                WalkableHeight = walkableHeight,
+                WalkableClimb = walkableClimb,
+                WalkableRadius = walkableRadius,
+                MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize),
+                MaxSimplificationError = settings.EdgeMaxError,
+                MinRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize),
+                MergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize),
+                MaxVertsPerPoly = settings.VertsPerPoly,
+                TileSize = tileSize,
+                BorderSize = borderSize,
+                Width = tileSize + borderSize * 2,
+                Height = tileSize + borderSize * 2,
+                DetailSampleDist = settings.DetailSampleDist < 0.9f ? 0 : settings.CellSize * settings.DetailSampleDist,
+                DetailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError,
+                BoundingBox = bbox,
+            };
+
+            // Tile cache params.
+            var tcparams = new TileCacheParams()
+            {
+                Origin = bbox.Minimum,
+                CellSize = settings.CellSize,
+                CellHeight = settings.CellHeight,
+                Width = (int)settings.TileSize,
+                Height = (int)settings.TileSize,
+                WalkableHeight = agent.Height,
+                WalkableRadius = agent.Radius,
+                WalkableClimb = agent.MaxClimb,
+                MaxSimplificationError = settings.EdgeMaxError,
+                MaxTiles = tw * th * Constants.ExpectedLayersPerTile,
+                MaxObstacles = 128,
+            };
+            var tmproc = new TileCacheMeshProcess(geometry);
+
+            var tileCache = new TileCache();
+            tileCache.Init(tcparams, tmproc);
+
+            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th * Constants.ExpectedLayersPerTile), 2), 14);
+            if (tileBits > 14) tileBits = 14;
+            int polyBits = 22 - tileBits;
+            int maxTiles = 1 << tileBits;
+            int maxPolysPerTile = 1 << polyBits;
+
+            var nmparams = new NavMeshParams()
+            {
+                Origin = bbox.Minimum,
+                TileWidth = settings.TileSize * settings.CellSize,
+                TileHeight = settings.TileSize * settings.CellSize,
+                MaxTiles = maxTiles,
+                MaxPolys = maxPolysPerTile,
+            };
+
+            var nm = new NavMesh();
+            nm.Init(nmparams);
+
+            int m_cacheLayerCount = 0;
+            int m_cacheCompressedSize = 0;
+            int m_cacheRawSize = 0;
+            int layerBufferSize = Recast.CalcLayerBufferSize(tcparams.Width, tcparams.Height);
+
+            for (int y = 0; y < th; y++)
+            {
+                for (int x = 0; x < tw; x++)
+                {
+                    int ntiles = Recast.RasterizeTileLayers(x, y, settings, cfg, geometry, out TileCacheData[] tiles);
+
+                    for (int i = 0; i < ntiles; ++i)
+                    {
+                        tileCache.AddTile(tiles[i], TileFlags.DT_TILE_FREE_DATA);
+
+                        m_cacheLayerCount++;
+                        m_cacheCompressedSize += 0;//tiles[i].DataSize;
+                        m_cacheRawSize += layerBufferSize;
+                    }
+                }
+            }
+
+            // Build initial meshes
+            for (int y = 0; y < th; y++)
+            {
+                for (int x = 0; x < tw; x++)
+                {
+                    tileCache.BuildNavMeshTilesAt(x, y, nm);
+                }
+            }
 
             return nm;
         }
 
         public static void SaveFile(string path, NavMesh mesh)
         {
-            List<byte> buffer = new List<byte>();
-
             NavMeshSetHeader header = new NavMeshSetHeader
             {
                 magic = Constants.DT_NAVMESH_MAGIC,
@@ -460,6 +442,32 @@ namespace Engine.PathFinding.RecastNavigation
         public NavMesh()
         {
 
+        }
+
+        protected NavMesh(SerializationInfo info, StreamingContext context)
+        {
+            var param = info.GetValue<NavMeshParams>("params");
+
+            Init(param);
+
+            for (int i = 0; i < MaxTiles; i++)
+            {
+                var tile = info.GetValue<MeshData>(string.Format("tiles.{0}", i));
+                if (tile == null || tile.header.magic != Constants.DT_NAVMESH_MAGIC || tile == null) continue;
+                
+                AddTile(tile, TileFlags.DT_TILE_FREE_DATA, 0, out int res);
+            }
+        }
+
+        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue("params", m_params);
+
+            for (int i = 0; i < MaxTiles; i++)
+            {
+                info.AddValue(string.Format("tiles.{0}", i), Tiles[i].data);
+            }
         }
 
         public void Init(NavMeshParams nmparams)
@@ -1639,159 +1647,6 @@ namespace Engine.PathFinding.RecastNavigation
                     break;
                 }
             }
-        }
-
-        public IGraphNode[] GetNodes(AgentType agent)
-        {
-            List<GraphNode> nodes = new List<GraphNode>();
-
-            nodes.AddRange(GraphNode.Build(this));
-
-            return nodes.ToArray();
-        }
-        public Vector3[] FindPath(AgentType agent, Vector3 from, Vector3 to)
-        {
-            return null;
-        }
-        public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
-        {
-            nearest = null;
-            return false;
-        }
-        public void Save(string fileName)
-        {
-            SaveFile(fileName, this);
-        }
-        public void Load(string fileName)
-        {
-            var nm = LoadFile(fileName);
-            if (nm != null)
-            {
-                this.m_params = nm.m_params;
-                this.m_orig = nm.m_orig;
-                this.m_tileWidth = nm.m_tileWidth;
-                this.m_tileHeight = nm.m_tileHeight;
-                this.m_tileLutSize = nm.m_tileLutSize;
-                this.m_tileLutMask = nm.m_tileLutMask;
-                this.m_posLookup = nm.m_posLookup;
-                this.m_nextFree = nm.m_nextFree;
-                this.m_tileBits = nm.m_tileBits;
-                this.m_polyBits = nm.m_polyBits;
-                this.m_saltBits = nm.m_saltBits;
-                this.MaxTiles = nm.MaxTiles;
-                this.Tiles = nm.Tiles;
-            }
-        }
-    }
-
-    public class GraphNode : IGraphNode
-    {
-        public static GraphNode[] Build(NavMesh mesh)
-        {
-            List<GraphNode> nodes = new List<GraphNode>();
-
-            for (int i = 0; i < mesh.MaxTiles; ++i)
-            {
-                var tile = mesh.Tiles[i];
-                if (tile.header.magic != Constants.DT_NAVMESH_MAGIC) continue;
-
-                for (int t = 0; t < tile.header.polyCount; t++)
-                {
-                    var p = tile.polys[t];
-                    if (p.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION) continue;
-
-                    var bse = mesh.GetPolyRefBase(tile);
-
-                    int tileNum = mesh.DecodePolyIdTile(bse);
-                    var tileColor = Helper.IntToCol(tileNum, 128);
-
-                    var pd = tile.detailMeshes[t];
-
-                    List<Triangle> tris = new List<Triangle>();
-
-                    for (int j = 0; j < pd.triCount; ++j)
-                    {
-                        var dt = tile.detailTris[(pd.triBase + j)];
-                        Vector3[] triVerts = new Vector3[3];
-                        for (int k = 0; k < 3; ++k)
-                        {
-                            if (dt[k] < p.vertCount)
-                            {
-                                triVerts[k] = tile.verts[p.verts[dt[k]]];
-                            }
-                            else
-                            {
-                                triVerts[k] = tile.detailVerts[(pd.vertBase + dt[k] - p.vertCount)];
-                            }
-                        }
-
-                        tris.Add(new Triangle(triVerts[0], triVerts[1], triVerts[2]));
-                    }
-
-                    nodes.Add(new GraphNode()
-                    {
-                        Triangles = tris.ToArray(),
-                        TotalCost = 1,
-                        Color = tileColor,
-                    });
-                }
-            }
-
-            return nodes.ToArray();
-        }
-
-        public Triangle[] Triangles;
-
-        public Vector3 Center
-        {
-            get
-            {
-                Vector3 center = Vector3.Zero;
-
-                foreach (var tri in Triangles)
-                {
-                    center += tri.Center;
-                }
-
-                return center / Math.Max(1, Triangles.Length);
-            }
-        }
-
-        public Color4 Color { get; set; }
-
-        public float TotalCost { get; set; }
-
-        public bool Contains(Vector3 point, out float distance)
-        {
-            distance = float.MaxValue;
-            foreach (var tri in Triangles)
-            {
-                if (Intersection.PointInPoly(point, tri.GetVertices()))
-                {
-                    float d = Intersection.PointToTriangle(point, tri.Point1, tri.Point2, tri.Point3);
-                    if (d == 0)
-                    {
-                        distance = 0;
-                        return true;
-                    }
-
-                    distance = Math.Min(distance, d);
-                }
-            }
-
-            return false;
-        }
-
-        public Vector3[] GetPoints()
-        {
-            List<Vector3> vList = new List<Vector3>();
-
-            foreach (var tri in Triangles)
-            {
-                vList.AddRange(tri.GetVertices());
-            }
-
-            return vList.ToArray();
         }
     }
 }

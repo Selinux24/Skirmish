@@ -1816,5 +1816,13 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return ((amin + eps) > bmax || (amax - eps) < bmin) ? false : true;
         }
+        public static bool InRange(Vector3 v1, Vector3 v2, float r, float h)
+        {
+            float dx = v2.X - v1.X;
+            float dy = v2.Y - v1.Y;
+            float dz = v2.Z - v1.Z;
+
+            return (dx * dx + dz * dz) < r * r && Math.Abs(dy) < h;
+        }
     }
 }

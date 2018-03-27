@@ -1,9 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Agent description
     /// </summary>
+    [Serializable]
     public class Agent : AgentType
     {
         /// <summary>
@@ -36,5 +38,24 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets or sets the maximum slope inclination (degrees)
         /// </summary>
         public float MaxSlope { get; set; }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        public override bool Equals(object obj)
+        {
+            if (!base.Equals(obj)) return false;
+
+            if (obj is Agent other)
+            {
+                return
+                    other.Radius == this.Radius &&
+                    other.MaxClimb == this.MaxClimb &&
+                    other.MaxSlope == this.MaxSlope;
+            }
+
+            return false;
+        }
     }
 }

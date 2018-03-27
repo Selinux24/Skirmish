@@ -296,8 +296,11 @@
     <Compile Include="PathFinding\RecastNavigation\EdgeValues.cs" />
     <Compile Include="PathFinding\RecastNavigation\FindNearestPolyQuery.cs" />
     <Compile Include="PathFinding\RecastNavigation\FindPathOptions.cs" />
+    <Compile Include="PathFinding\RecastNavigation\Graph.cs" />
+    <Compile Include="PathFinding\RecastNavigation\GraphNode.cs" />
     <Compile Include="PathFinding\RecastNavigation\NavMeshUtils.cs" />
     <Compile Include="PathFinding\RecastNavigation\OffMeshConnectionDef.cs" />
+    <Compile Include="PathFinding\RecastNavigation\PathFindingMode.cs" />
     <Compile Include="PathFinding\RecastNavigation\RaycastHit.cs" />
     <Compile Include="PathFinding\RecastNavigation\RaycastOptions.cs" />
     <Compile Include="PathFinding\RecastNavigation\RecastUtils.cs" />
