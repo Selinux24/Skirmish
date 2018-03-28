@@ -1210,7 +1210,7 @@ namespace Engine.PathFinding.RecastNavigation
             };
 
             int[] vflags = new int[maxVertices];
-            int[] firstVert = Helper.CreateArray(Constants.VertexBucketCount2, Constants.NullIdx);
+            int[] firstVert = Helper.CreateArray(Constants.VertexBucketCount2, Constants.NULL_IDX);
             int[] nextVert = Helper.CreateArray(maxVertices, 0);
             int[] indices = new int[maxVertsPerCont];
 

@@ -324,7 +324,14 @@ namespace Engine
         /// <param name="obj">Object</param>
         public static void Dispose(Object obj)
         {
-            Dispose((IDisposable)obj);
+            if (obj is IDisposable)
+            {
+                Dispose((IDisposable)obj);
+            }
+            else
+            {
+                obj = null;
+            }
         }
         /// <summary>
         /// Dispose disposable object

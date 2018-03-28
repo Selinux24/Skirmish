@@ -42,9 +42,8 @@ namespace Collada
         {
             base.Initialize();
 
-            this.Camera.FarPlaneDistance *= 2;
-
             this.InitializeText();
+            this.InitializeAgent();
             this.InitializeNavmesh();
             this.InitializeDebug();
         }
@@ -72,20 +71,29 @@ namespace Collada
 
             this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
         }
-        private void InitializeNavmesh()
+        private void InitializeAgent()
         {
             this.agent = new Player2()
             {
                 Name = "Player",
-                Height = 2f,
-                MaxClimb = 0.8f,
-                MaxSlope = 45f,
-                Radius = 0.5f,
-                Velocity = 4f,
+                Height = 0.2f,
+                Radius = 0.1f,
+                MaxClimb = 0.5f,
+                MaxSlope = 50f,
+                Velocity = 3f,
                 VelocitySlow = 1f,
             };
 
+            this.Camera.NearPlaneDistance = 0.01f;
+            this.Camera.FarPlaneDistance *= 2;
+            this.Camera.MovementDelta = agent.Velocity;
+            this.Camera.SlowMovementDelta = agent.VelocitySlow;
+        }
+        private void InitializeNavmesh()
+        {
             nmsettings.Agents = new[] { this.agent };
+            nmsettings.CellSize = 0.15f;
+            nmsettings.CellHeight = 0.15f;
             nmsettings.TileSize = 32;
             nmsettings.BuildMode = BuildModesEnum.Tiled;
             nmsettings.PartitionType = SamplePartitionTypeEnum.Layers;
@@ -104,10 +112,12 @@ namespace Collada
                     Content = new ContentDescription()
                     {
                         ContentFolder = "Resources/NavmeshTest",
-                        ModelContentFilename = "dungeon.xml",
+                        ModelContentFilename = "modular_dungeon.xml",
                     }
                 }, 
                 SceneObjectUsageEnum.Ground);
+
+            this.SetGround(inputGeometry, true);
         }
         private void InitializeDebug()
         {
@@ -135,7 +145,7 @@ namespace Collada
             {
                 Name = "DEBUG++ Graph",
                 AlphaEnabled = true,
-                Count = 20000,
+                Count = 50000,
             };
             this.graphDrawer = this.AddComponent<TriangleListDrawer>(graphDrawerDesc);
         }
@@ -153,14 +163,8 @@ namespace Collada
             //this.Camera.Interest = center;
             //this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
 
-            var pos = new Vector3(19.3437824f, 19.3090019f, -80.3498535f);
-            if (this.FindNearestGroundPosition(pos, out Vector3 p, out Triangle t, out float d))
-            {
-                p += agent.Height;
-
-                this.Camera.Position = p;
-                this.Camera.Interest = p + Vector3.ForwardLH;
-            }
+            this.Camera.Position = new Vector3(-8, 4 + agent.Height, -26);
+            this.Camera.Interest = new Vector3(-6, 4 + agent.Height, -26);
         }
 
         public override void Update(GameTime gameTime)

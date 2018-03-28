@@ -176,6 +176,8 @@ namespace Engine
                             },
                             SceneObjectUsageEnum.Ground | (hasVolumes ? SceneObjectUsageEnum.CoarsePathFinding : SceneObjectUsageEnum.FullPathFinding));
 
+                        model.HasParent = true;
+
                         this.assets.Add(assetName, model);
                     }
                 }

@@ -71,14 +71,17 @@ namespace Engine.PathFinding.RecastNavigation
             /// to another span. (Has no neighbor.)
             /// </summary>
             public const int RC_NOT_CONNECTED = 0x3f;
+
+            public const int RC_NULL_NEI = 0xffff;
+            public const int RC_UNSET_HEIGHT = 0xffff;
         }
+
+        public const int NULL_IDX = 0xffff;
 
         public const int MaxLayers = 32;
         public const int VertexBucketCount2 = (1 << 8);
         public const int MaxRemEdges = 48;
-
         public const int ExpectedLayersPerTile = 4;
-        public const int NullIdx = 0xffff;
 
         /// <summary>
         /// The maximum number of vertices per navigation polygon.
@@ -123,6 +126,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public const float DT_RAY_CAST_LIMIT_PROPORTIONS = 50.0f;
 
+        public const int DT_NODE_PARENT_BITS = 24;
+        public const int DT_NODE_STATE_BITS = 2;
+        public const int DT_MAX_STATES_PER_NODE = 1 << DT_NODE_STATE_BITS;  // number of extra states per node. See dtNode::state
 
 
         public const int VERTEX_BUCKET_COUNT = (1 << 12);
@@ -132,11 +138,5 @@ namespace Engine.PathFinding.RecastNavigation
         /// Search heuristic scale.
         /// </summary>
         public const float H_SCALE = 0.999f;
-
-        public const int RC_NULL_NEI = 0xffff;
-        public const int RC_UNSET_HEIGHT = 0xffff;
-        public const int DT_NODE_PARENT_BITS = 24;
-        public const int DT_NODE_STATE_BITS = 2;
-        public const int DT_MAX_STATES_PER_NODE = 1 << DT_NODE_STATE_BITS;  // number of extra states per node. See dtNode::state
     }
 }

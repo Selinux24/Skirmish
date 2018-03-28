@@ -295,7 +295,7 @@ namespace Engine.PathFinding.RecastNavigation
             int bucket = ComputeVertexHash2(x, 0, z);
             int i = firstVert[bucket];
 
-            while (i != Constants.NullIdx)
+            while (i != Constants.NULL_IDX)
             {
                 var vx = verts[i];
                 if (vx.X == x && vx.Z == z && (Math.Abs(vx.Y - y) <= 2))
@@ -390,7 +390,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             for (int i = 0; i < Constants.DT_VERTS_PER_POLYGON; ++i)
             {
-                if (p[i] == Constants.NullIdx)
+                if (p[i] == Constants.NULL_IDX)
                 {
                     return i;
                 }
@@ -438,11 +438,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             for (int i = 0; i < nverts; i++)
             {
-                firstEdge[i] = Constants.NullIdx;
+                firstEdge[i] = Constants.NULL_IDX;
             }
             for (int i = 0; i < maxEdgeCount; i++)
             {
-                nextEdge[i] = Constants.NullIdx;
+                nextEdge[i] = Constants.NULL_IDX;
             }
 
             for (int i = 0; i < npolys; ++i)
@@ -450,9 +450,9 @@ namespace Engine.PathFinding.RecastNavigation
                 var t = polys[i];
                 for (int j = 0; j < Constants.DT_VERTS_PER_POLYGON; ++j)
                 {
-                    if (t[j] == Constants.NullIdx) break;
+                    if (t[j] == Constants.NULL_IDX) break;
                     int v0 = t[j];
-                    int v1 = (j + 1 >= Constants.DT_VERTS_PER_POLYGON || t[j + 1] == Constants.NullIdx) ? t[0] : t[j + 1];
+                    int v1 = (j + 1 >= Constants.DT_VERTS_PER_POLYGON || t[j + 1] == Constants.NULL_IDX) ? t[0] : t[j + 1];
                     if (v0 < v1)
                     {
                         Edge edge = new Edge()
@@ -481,13 +481,13 @@ namespace Engine.PathFinding.RecastNavigation
                 var t = polys[i];
                 for (int j = 0; j < Constants.DT_VERTS_PER_POLYGON; ++j)
                 {
-                    if (t[j] == Constants.NullIdx) break;
+                    if (t[j] == Constants.NULL_IDX) break;
                     int v0 = t[j];
-                    int v1 = (j + 1 >= Constants.DT_VERTS_PER_POLYGON || t[j + 1] == Constants.NullIdx) ? t[0] : t[j + 1];
+                    int v1 = (j + 1 >= Constants.DT_VERTS_PER_POLYGON || t[j + 1] == Constants.NULL_IDX) ? t[0] : t[j + 1];
                     if (v0 > v1)
                     {
                         bool found = false;
-                        for (int e = firstEdge[v1]; e != Constants.NullIdx; e = nextEdge[e])
+                        for (int e = firstEdge[v1]; e != Constants.NULL_IDX; e = nextEdge[e])
                         {
                             Edge edge = edges[e];
                             if (edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
@@ -652,11 +652,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             for (int i = 0; i < nverts; i++)
             {
-                firstEdge[i] = Constants.NullIdx;
+                firstEdge[i] = Constants.NULL_IDX;
             }
             for (int i = 0; i < maxEdgeCount; i++)
             {
-                nextEdge[i] = Constants.NullIdx;
+                nextEdge[i] = Constants.NULL_IDX;
             }
 
             for (int i = 0; i < npolys; ++i)
@@ -664,9 +664,9 @@ namespace Engine.PathFinding.RecastNavigation
                 var t = polys[i];
                 for (int j = 0; j < vertsPerPoly; ++j)
                 {
-                    if (t[j] == Constants.NullIdx) break;
+                    if (t[j] == Constants.NULL_IDX) break;
                     int v0 = t[j];
-                    int v1 = (j + 1 >= vertsPerPoly || t[j + 1] == Constants.NullIdx) ? t[0] : t[j + 1];
+                    int v1 = (j + 1 >= vertsPerPoly || t[j + 1] == Constants.NULL_IDX) ? t[0] : t[j + 1];
                     if (v0 < v1)
                     {
                         Edge edge = new Edge()
@@ -695,12 +695,12 @@ namespace Engine.PathFinding.RecastNavigation
                 var t = polys[i];
                 for (int j = 0; j < vertsPerPoly; ++j)
                 {
-                    if (t[j] == Constants.NullIdx) break;
+                    if (t[j] == Constants.NULL_IDX) break;
                     int v0 = t[j];
-                    int v1 = (j + 1 >= vertsPerPoly || t[j + 1] == Constants.NullIdx) ? t[0] : t[j + 1];
+                    int v1 = (j + 1 >= vertsPerPoly || t[j + 1] == Constants.NULL_IDX) ? t[0] : t[j + 1];
                     if (v0 > v1)
                     {
-                        for (int e = firstEdge[v1]; e != Constants.NullIdx; e = nextEdge[e])
+                        for (int e = firstEdge[v1]; e != Constants.NULL_IDX; e = nextEdge[e])
                         {
                             Edge edge = edges[e];
                             if (edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])

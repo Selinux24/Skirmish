@@ -2,62 +2,12 @@
 using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
 {
     public class InputGeometry
     {
-        public static Triangle[] DebugTris()
-        {
-            List<Vector3> points = new List<Vector3>();
-            List<Int3> indices = new List<Int3>();
-
-            using (StreamReader rd = new StreamReader(@"./PathFinding/RecastNavigation/DEBUGTris.obj"))
-            {
-                while (!rd.EndOfStream)
-                {
-                    string strLine = rd.ReadLine();
-                    if (!string.IsNullOrWhiteSpace(strLine))
-                    {
-                        if (strLine.StartsWith("v", StringComparison.OrdinalIgnoreCase))
-                        {
-                            var numbers = strLine.Split(" ".ToArray(), StringSplitOptions.None);
-
-                            points.Add(new Vector3(
-                                float.Parse(numbers[1], NumberStyles.Float, CultureInfo.InvariantCulture),
-                                float.Parse(numbers[2], NumberStyles.Float, CultureInfo.InvariantCulture),
-                                float.Parse(numbers[3], NumberStyles.Float, CultureInfo.InvariantCulture)));
-                        }
-
-                        if (strLine.StartsWith("f", StringComparison.OrdinalIgnoreCase))
-                        {
-                            var numbers = strLine.Split(" ".ToArray(), StringSplitOptions.None);
-
-                            indices.Add(new Int3(
-                                int.Parse(numbers[1], NumberStyles.Integer, CultureInfo.InvariantCulture),
-                                int.Parse(numbers[2], NumberStyles.Integer, CultureInfo.InvariantCulture),
-                                int.Parse(numbers[3], NumberStyles.Integer, CultureInfo.InvariantCulture)));
-                        }
-                    }
-                }
-            }
-
-            Triangle[] res = new Triangle[indices.Count];
-
-            for (int i = 0; i < indices.Count; i++)
-            {
-                res[i] = new Triangle(
-                    points[indices[i].X - 1],
-                    points[indices[i].Y - 1],
-                    points[indices[i].Z - 1]);
-            }
-
-            return res;
-        }
-
         private BoundsItemComparerX xComparer = new BoundsItemComparerX();
         private BoundsItemComparerY yComparer = new BoundsItemComparerY();
 

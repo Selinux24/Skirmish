@@ -19,8 +19,8 @@ namespace Engine.PathFinding.RecastNavigation
             m_hashSize = hashSize;
 
             m_nodes = new Node[m_maxNodes];
-            m_next = new int[m_maxNodes];
-            m_first = new int[m_hashSize];
+            m_next = Helper.CreateArray(m_maxNodes, Constants.NULL_IDX);
+            m_first = Helper.CreateArray(m_hashSize, Constants.NULL_IDX);
             m_nodeCount = 0;
         }
 
@@ -34,17 +34,16 @@ namespace Engine.PathFinding.RecastNavigation
         public void Clear()
         {
             Helper.Dispose(m_first);
-            m_first = new int[m_hashSize];
+            m_first = Helper.CreateArray(m_hashSize, Constants.NULL_IDX);
             m_nodeCount = 0;
         }
         public Node GetNode(int id, int state)
         {
             int bucket = PolyUtils.HashRef(id) & (m_hashSize - 1);
             int i = m_first[bucket];
-            Node node = null;
-            while (i != Constants.NullIdx)
+            while (i != Constants.NULL_IDX)
             {
-                if (m_nodes[i].id == id && m_nodes[i].state == state)
+                if (m_nodes[i] != null && m_nodes[i].id == id && m_nodes[i].state == state)
                 {
                     return m_nodes[i];
                 }
@@ -73,13 +72,13 @@ namespace Engine.PathFinding.RecastNavigation
             m_next[i] = m_first[bucket];
             m_first[bucket] = i;
 
-            return node;
+            return m_nodes[i];
         }
         public Node FindNode(int id, int state)
         {
             int bucket = PolyUtils.HashRef(id) & (m_hashSize - 1);
             int i = m_first[bucket];
-            while (i != Constants.NullIdx)
+            while (i != Constants.NULL_IDX)
             {
                 if (m_nodes[i].id == id && m_nodes[i].state == state)
                 {
@@ -96,7 +95,7 @@ namespace Engine.PathFinding.RecastNavigation
             int n = 0;
             int bucket = PolyUtils.HashRef(id) & (m_hashSize - 1);
             int i = m_first[bucket];
-            while (i != Constants.NullIdx)
+            while (i != Constants.NULL_IDX)
             {
                 if (m_nodes[i].id == id)
                 {

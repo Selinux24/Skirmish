@@ -148,7 +148,7 @@ namespace Engine.PathFinding.RecastNavigation
                 throw new EngineException("buildNavigation: Could not create contours.");
             }
 
-            if (!Recast.BuildPolyMesh(cset, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
+            if (!Recast.BuildPolyMesh(cset, 0, 0, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
             {
                 throw new EngineException("buildNavigation: Could not triangulate contours.");
             }
@@ -454,7 +454,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var tile = info.GetValue<MeshData>(string.Format("tiles.{0}", i));
                 if (tile == null || tile.header.magic != Constants.DT_NAVMESH_MAGIC || tile == null) continue;
-                
+
                 AddTile(tile, TileFlags.DT_TILE_FREE_DATA, 0, out int res);
             }
         }

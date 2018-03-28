@@ -68,6 +68,10 @@ namespace Engine
                 return 1;
             }
         }
+        /// <summary>
+        /// Gets or sets if the current object has a parent
+        /// </summary>
+        public bool HasParent { get; internal set; }
 
         /// <summary>
         /// Constructor
@@ -235,7 +239,7 @@ namespace Engine
         /// <summary>
         /// Scene ground
         /// </summary>
-        Ground = 1,
+        Ground = 4,
         /// <summary>
         /// Scene agent
         /// </summary>

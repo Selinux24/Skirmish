@@ -749,7 +749,7 @@ namespace Engine.PathFinding.RecastNavigation
             pathCount = 0;
 
             // Validate input
-            if (m_nav.IsValidPolyRef(startRef) || m_nav.IsValidPolyRef(endRef) || filter == null || maxPath <= 0)
+            if (!m_nav.IsValidPolyRef(startRef) || !m_nav.IsValidPolyRef(endRef) || filter == null || maxPath <= 0)
             {
                 return Status.DT_FAILURE;
             }
@@ -1567,9 +1567,9 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public Status FindStraightPath(Vector3 startPos, Vector3 endPos, int[] path, int pathSize, out Vector3[] straightPath, out StraightPathFlags[] straightPathFlags, out int[] straightPathRefs, out int straightPathCount, int maxStraightPath, StraightPathOptions options)
         {
-            straightPath = null;
-            straightPathFlags = null;
-            straightPathRefs = null;
+            straightPath = new Vector3[maxStraightPath];
+            straightPathFlags = new StraightPathFlags[maxStraightPath];
+            straightPathRefs = new int[maxStraightPath];
             straightPathCount = 0;
 
             if (maxStraightPath == 0)
@@ -1824,7 +1824,7 @@ namespace Engine.PathFinding.RecastNavigation
         public Status MoveAlongSurface(int startRef, Vector3 startPos, Vector3 endPos, QueryFilter filter, out Vector3 resultPos, out int[] visited, out int visitedCount, int maxVisitedSize)
         {
             resultPos = Vector3.Zero;
-            visited = null;
+            visited = new int[maxVisitedSize];
             visitedCount = 0;
 
             // Validate input

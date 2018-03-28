@@ -6,14 +6,14 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public class NodeQueue : IDisposable
     {
-        private List<Node> m_heap;
+        private Node[] m_heap;
         private int m_capacity;
         private int m_size;
 
         public NodeQueue(int n)
         {
             m_capacity = n;
-            m_heap = new List<Node>(m_capacity + 1);
+            m_heap = new Node[m_capacity + 1];
             m_size = 0;
         }
 

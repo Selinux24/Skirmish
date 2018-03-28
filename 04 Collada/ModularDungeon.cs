@@ -26,8 +26,8 @@ namespace Collada
         private Color ambientDown = new Color(127, 127, 127, 255);
         private Color ambientUp = new Color(137, 116, 104, 255);
 
-        private Player agent = null;
-        //private Player2 agent = null;
+        //private Player agent = null;
+        private Player2 agent = null;
         private Color agentTorchLight = new Color(255, 249, 224, 255);
 
         private SceneLightPoint torch = null;
@@ -37,7 +37,8 @@ namespace Collada
 
         private SceneObject<Model> rat = null;
         private BasicManipulatorController ratController = null;
-        private Player ratAgentType = null;
+        private Player2 ratAgentType = null;
+        //private Player ratAgentType = null;
         private Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
         private bool ratActive = false;
         private float ratTime = 5;
@@ -63,6 +64,7 @@ namespace Collada
 
             this.InitializeUI();
             this.InitializeModularScenery();
+            this.InitializePlayer();
             this.InitializeRat();
             this.InitializeHuman();
             this.InitializeEnvironment();
@@ -83,6 +85,7 @@ namespace Collada
             this.torch = new SceneLightPoint("player_torch", true, this.agentTorchLight, this.agentTorchLight, true, Vector3.Zero, 10f, 25f);
             this.Lights.Add(this.torch);
 
+            /*
             this.PathFinderDescription = new PathFinderDescription()
             {
                 Settings = new NavigationMeshGenerationSettings()
@@ -93,17 +96,20 @@ namespace Collada
                     ContourFlags = ContourBuildFlags.TessellateAreaEdges,
                 }
             };
+            */
 
-            /*
-            var nmsettings = Engine.PathFinding.NavMesh2.BuildSettings.Default;
-            nmsettings.Agents = new[] { this.agent };
-            nmsettings.TileSize = 48;
+            var nmsettings = Engine.PathFinding.RecastNavigation.BuildSettings.Default;
+            nmsettings.Agents = new[] { agent, ratAgentType };
+            nmsettings.CellSize = 0.15f;
+            nmsettings.CellHeight = 0.15f;
+            nmsettings.TileSize = 32;
+            nmsettings.BuildMode = Engine.PathFinding.RecastNavigation.BuildModesEnum.Tiled;
+            nmsettings.PartitionType = Engine.PathFinding.RecastNavigation.SamplePartitionTypeEnum.Layers;
 
             this.PathFinderDescription = new PathFinderDescription()
             {
                 Settings = nmsettings,
             };
-            */
         }
         private void InitializeUI()
         {
@@ -148,7 +154,10 @@ namespace Collada
             this.scenery = this.AddComponent<ModularScenery>(desc, SceneObjectUsageEnum.Ground);
 
             this.SetGround(this.scenery, true);
-
+        }
+        private void InitializePlayer()
+        {
+            /*
             this.agent = new Player()
             {
                 Name = "Player",
@@ -159,19 +168,18 @@ namespace Collada
                 Velocity = 4f,
                 VelocitySlow = 1f,
             };
+            */
 
-            /*
             this.agent = new Player2()
             {
                 Name = "Player",
                 Height = 1.5f,
-                MaxClimb = 0.8f,
+                Radius = 0.2f,
+                MaxClimb = 0.5f,
                 MaxSlope = 45f,
-                Radius = 0.5f,
                 Velocity = 4f,
                 VelocitySlow = 1f,
             };
-            */
         }
         private void InitializeRat()
         {
@@ -188,6 +196,7 @@ namespace Collada
                     }
                 });
 
+            /*
             this.ratAgentType = new Player()
             {
                 Name = "Rat",
@@ -195,6 +204,18 @@ namespace Collada
                 MaxClimb = 0.25f,
                 MaxSlope = 50f,
                 Radius = 0.1f,
+                Velocity = 3f,
+                VelocitySlow = 1f,
+            };
+            */
+
+            this.ratAgentType = new Player2()
+            {
+                Name = "Rat",
+                Height = 0.2f,
+                Radius = 0.1f,
+                MaxClimb = 0.2f,
+                MaxSlope = 50f,
                 Velocity = 3f,
                 VelocitySlow = 1f,
             };
@@ -246,7 +267,7 @@ namespace Collada
             {
                 Name = "DEBUG++ Graph",
                 AlphaEnabled = true,
-                Count = 10000,
+                Count = 50000,
             };
             this.graphDrawer = this.AddComponent<TriangleListDrawer>(graphDrawerDesc);
             this.graphDrawer.Visible = false;
@@ -314,6 +335,7 @@ namespace Collada
         }
         private void UpdateGraphNodes(AgentType agent)
         {
+            /*
             var nodes = this.GetNodes(agent);
             if (nodes != null && nodes.Length > 0)
             {
@@ -332,6 +354,22 @@ namespace Collada
                     var color = regions[node.RegionId];
                     var poly = node.Poly;
                     var tris = poly.Triangulate();
+
+                    this.graphDrawer.Instance.AddTriangles(color, tris);
+                }
+            }
+            */
+
+            var nodes = this.GetNodes(agent);
+            if (nodes != null && nodes.Length > 0)
+            {
+                this.graphDrawer.Instance.Clear();
+
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    var node = (Engine.PathFinding.RecastNavigation.GraphNode)nodes[i];
+                    var color = node.Color;
+                    var tris = node.Triangles;
 
                     this.graphDrawer.Instance.AddTriangles(color, tris);
                 }

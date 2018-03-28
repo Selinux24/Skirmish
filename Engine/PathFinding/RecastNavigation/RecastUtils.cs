@@ -271,10 +271,11 @@ namespace Engine.PathFinding.RecastNavigation
                     minX = Math.Min(minX, zp1[i].X);
                     maxX = Math.Max(maxX, zp1[i].X);
                 }
-                minX -= b.Minimum.X;
-                maxX -= b.Minimum.X;
-                int x0 = MathUtil.Clamp((int)(minX * ics), 0, w - 1);
-                int x1 = MathUtil.Clamp((int)(maxX * ics), 0, w - 1);
+                //TODO: Modular dungeon load -> floating point issue
+                int x0 = (int)((minX - b.Minimum.X) * ics);
+                int x1 = (int)((maxX - b.Minimum.X) * ics);
+                x0 = MathUtil.Clamp(x0, 0, w - 1);
+                x1 = MathUtil.Clamp(x1, 0, w - 1);
 
                 for (int x = x0; x <= x1; ++x)
                 {
@@ -1244,7 +1245,7 @@ namespace Engine.PathFinding.RecastNavigation
                                 }
                                 else
                                 {
-                                    sweeps[previd].nei = Constants.RC_NULL_NEI;
+                                    sweeps[previd].nei = Constants.Recast.RC_NULL_NEI;
                                 }
                             }
                         }
@@ -1256,7 +1257,7 @@ namespace Engine.PathFinding.RecastNavigation
                 // Create unique ID.
                 for (int i = 1; i < rid; ++i)
                 {
-                    if (sweeps[i].nei != Constants.RC_NULL_NEI &&
+                    if (sweeps[i].nei != Constants.Recast.RC_NULL_NEI &&
                         sweeps[i].nei != 0 &&
                         prev[sweeps[i].nei] == sweeps[i].ns)
                     {
@@ -1385,7 +1386,7 @@ namespace Engine.PathFinding.RecastNavigation
                                 }
                                 else
                                 {
-                                    sweeps[previd].nei = Constants.RC_NULL_NEI;
+                                    sweeps[previd].nei = Constants.Recast.RC_NULL_NEI;
                                 }
                             }
                         }
@@ -1397,7 +1398,7 @@ namespace Engine.PathFinding.RecastNavigation
                 // Create unique ID.
                 for (int i = 1; i < rid; ++i)
                 {
-                    if (sweeps[i].nei != Constants.RC_NULL_NEI &&
+                    if (sweeps[i].nei != Constants.Recast.RC_NULL_NEI &&
                         sweeps[i].nei != 0 &&
                         prev[sweeps[i].nei] == sweeps[i].ns)
                     {
@@ -1637,7 +1638,8 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         if (regions[i].nholes > 0)
                         {
-                            regions[i].holes = new[] { holes[index] };
+                            regions[i].holes = new ContourHole[regions[i].nholes];
+                            Array.Copy(holes, index, regions[i].holes, 0, regions[i].nholes);
                             index += regions[i].nholes;
                             regions[i].nholes = 0;
                         }
@@ -1679,7 +1681,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-        public static bool BuildPolyMesh(ContourSet cset, int nvp, out PolyMesh mesh)
+        public static bool BuildPolyMesh(ContourSet cset, int tx, int ty, int nvp, out PolyMesh mesh)
         {
             mesh = new PolyMesh
             {
@@ -1721,7 +1723,7 @@ namespace Engine.PathFinding.RecastNavigation
             mesh.maxpolys = maxTris;
 
             int[] nextVert = Helper.CreateArray(maxVertices, 0);
-            int[] firstVert = Helper.CreateArray(Constants.VERTEX_BUCKET_COUNT, Constants.NullIdx);
+            int[] firstVert = Helper.CreateArray(Constants.VERTEX_BUCKET_COUNT, Constants.NULL_IDX);
             int[] indices = new int[maxVertsPerCont];
             Polygoni tmpPoly = new Polygoni(maxVertsPerCont);
 
@@ -2263,7 +2265,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var p = param.polys[i];
                 for (int j = 0; j < nvp; ++j)
                 {
-                    if (p[j] == Constants.NullIdx)
+                    if (p[j] == Constants.NULL_IDX)
                     {
                         break;
                     }
@@ -2297,7 +2299,7 @@ namespace Engine.PathFinding.RecastNavigation
                     int nv = 0;
                     for (int j = 0; j < nvp; ++j)
                     {
-                        if (p[j] == Constants.NullIdx)
+                        if (p[j] == Constants.NULL_IDX)
                         {
                             break;
                         }
@@ -2318,7 +2320,7 @@ namespace Engine.PathFinding.RecastNavigation
                     int nv = 0;
                     for (int j = 0; j < nvp; ++j)
                     {
-                        if (p[j] == Constants.NullIdx)
+                        if (p[j] == Constants.NULL_IDX)
                         {
                             break;
                         }
@@ -2404,7 +2406,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 for (int j = 0; j < nvp; ++j)
                 {
-                    if (src[j] == Constants.NullIdx)
+                    if (src[j] == Constants.NULL_IDX)
                     {
                         break;
                     }
@@ -2615,7 +2617,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                     for (int j = 1; j < param.nvp; ++j)
                     {
-                        if (p[j] == Constants.NullIdx) break;
+                        if (p[j] == Constants.NULL_IDX) break;
                         var x = param.verts[p[j]].X;
                         var y = param.verts[p[j]].Y;
                         var z = param.verts[p[j]].Z;
@@ -5204,7 +5206,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             queue.Clear();
             // Set all heights to RC_UNSET_HEIGHT.
-            hp.data = Helper.CreateArray(hp.width * hp.height, Constants.RC_UNSET_HEIGHT);
+            hp.data = Helper.CreateArray(hp.width * hp.height, Constants.Recast.RC_UNSET_HEIGHT);
 
             bool empty = true;
 
@@ -5308,7 +5310,7 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
 
-                    if (hp.data[hx + hy * hp.width] != Constants.RC_UNSET_HEIGHT)
+                    if (hp.data[hx + hy * hp.width] != Constants.Recast.RC_UNSET_HEIGHT)
                     {
                         continue;
                     }
@@ -5334,7 +5336,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Find cell closest to a poly vertex
             int startCellX = 0, startCellY = 0, startSpanIndex = -1;
-            int dmin = Constants.RC_UNSET_HEIGHT;
+            int dmin = Constants.Recast.RC_UNSET_HEIGHT;
             for (int j = 0; j < npoly && dmin > 0; ++j)
             {
                 for (int k = 0; k < 9 && dmin > 0; ++k)
@@ -5747,7 +5749,7 @@ namespace Engine.PathFinding.RecastNavigation
             ix = MathUtil.Clamp(ix - hp.xmin, 0, hp.width - 1);
             iz = MathUtil.Clamp(iz - hp.ymin, 0, hp.height - 1);
             int h = hp.data[ix + iz * hp.width];
-            if (h == Constants.RC_UNSET_HEIGHT)
+            if (h == Constants.Recast.RC_UNSET_HEIGHT)
             {
                 // Special case when data might be bad.
                 // Walk adjacent cells in a spiral up to 'radius', and look
@@ -5768,7 +5770,7 @@ namespace Engine.PathFinding.RecastNavigation
                     if (nx >= 0 && nz >= 0 && nx < hp.width && nz < hp.height)
                     {
                         int nh = hp.data[nx + nz * hp.width];
-                        if (nh != Constants.RC_UNSET_HEIGHT)
+                        if (nh != Constants.Recast.RC_UNSET_HEIGHT)
                         {
                             float d = Math.Abs(nh * ch - fy);
                             if (d < dmin)
@@ -5798,7 +5800,7 @@ namespace Engine.PathFinding.RecastNavigation
                     // a height, we abort the search.
                     if (i + 1 == nextRingIterStart)
                     {
-                        if (h != Constants.RC_UNSET_HEIGHT)
+                        if (h != Constants.Recast.RC_UNSET_HEIGHT)
                         {
                             break;
                         }
@@ -6198,32 +6200,6 @@ namespace Engine.PathFinding.RecastNavigation
             int tileSize = (int)settings.TileSize;
             int borderSize = walkableRadius + 3;
 
-            // Expand the heighfield bounding box by border size to find the extents of geometry we need to build this tile.
-            //
-            // This is done in order to make sure that the navmesh tiles connect correctly at the borders,
-            // and the obstacles close to the border work correctly with the dilation process.
-            // No polygons (or contours) will be created on the border area.
-            //
-            // IMPORTANT!
-            //
-            //   :''''''''':
-            //   : +-----+ :
-            //   : |     | :
-            //   : |     |<--- tile to build
-            //   : |     | :  
-            //   : +-----+ :<-- geometry needed
-            //   :.........:
-            //
-            // You should use this bounding box to query your input geometry.
-            //
-            // For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
-            // you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
-            // or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
-            bbox.Minimum.X -= borderSize * settings.CellSize;
-            bbox.Minimum.Z -= borderSize * settings.CellSize;
-            bbox.Maximum.X += borderSize * settings.CellSize;
-            bbox.Maximum.Z += borderSize * settings.CellSize;
-
             // Init build configuration from GUI
             Config cfg = new Config
             {
@@ -6246,6 +6222,32 @@ namespace Engine.PathFinding.RecastNavigation
                 DetailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError,
                 BoundingBox = bbox,
             };
+
+            // Expand the heighfield bounding box by border size to find the extents of geometry we need to build this tile.
+            //
+            // This is done in order to make sure that the navmesh tiles connect correctly at the borders,
+            // and the obstacles close to the border work correctly with the dilation process.
+            // No polygons (or contours) will be created on the border area.
+            //
+            // IMPORTANT!
+            //
+            //   :''''''''':
+            //   : +-----+ :
+            //   : |     | :
+            //   : |     |<--- tile to build
+            //   : |     | :  
+            //   : +-----+ :<-- geometry needed
+            //   :.........:
+            //
+            // You should use this bounding box to query your input geometry.
+            //
+            // For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
+            // you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
+            // or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
+            cfg.BoundingBox.Minimum.X -= borderSize * settings.CellSize;
+            cfg.BoundingBox.Minimum.Z -= borderSize * settings.CellSize;
+            cfg.BoundingBox.Maximum.X += borderSize * settings.CellSize;
+            cfg.BoundingBox.Maximum.Z += borderSize * settings.CellSize;
 
             // Allocate voxel heightfield where we rasterize our input data to.
             var solid = new Heightfield
@@ -6283,6 +6285,8 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     return null;
                 }
+
+                int spanCount = GetHeightFieldSpanCount(solid);
             }
 
             // Once all geometry is rasterized, we do initial pass of filtering to
@@ -6395,7 +6399,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Build polygon navmesh from the contours.
-            if (!BuildPolyMesh(cset, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
+            if (!BuildPolyMesh(cset, tx, ty, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
             {
                 return null;
             }

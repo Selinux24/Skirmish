@@ -328,15 +328,15 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (m_toolMode == PathFindingMode.TOOLMODE_PATHFIND_FOLLOW)
             {
-                int m_nsmoothPath = 0;
                 Vector3[] m_smoothPath = null;
+                int m_nsmoothPath = 0;
                 int[] m_polys = null;
                 int m_npolys = 0;
 
                 if (m_startRef != 0 && m_endRef != 0)
                 {
-
-                    m_navQuery.FindPath(m_startRef, m_endRef, m_spos, m_epos, m_filter,
+                    m_navQuery.FindPath(
+                        m_startRef, m_endRef, m_spos, m_epos, m_filter,
                         out m_polys, out m_npolys, MAX_POLYS);
 
                     m_smoothPath = new Vector3[MAX_SMOOTH];
@@ -378,8 +378,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                             // Find movement delta.
                             Vector3 delta = Vector3.Subtract(steerPos, iterPos);
-                            //TODO: Length?
-                            float len = (float)Math.Sqrt(Vector3.Dot(delta, delta));
+                            float len = Vector3.Distance(delta, delta);
                             // If the steer target is end of path or off-mesh link, do not move past the location.
                             if ((endOfPath || offMeshConnection) && len < STEP_SIZE)
                             {
@@ -472,7 +471,12 @@ namespace Engine.PathFinding.RecastNavigation
                     m_nsmoothPath = 0;
                 }
 
-                return m_smoothPath;
+                if(m_nsmoothPath > 0)
+                {
+                    Vector3[] res = new Vector3[m_nsmoothPath];
+                    Array.Copy(m_smoothPath, res, m_nsmoothPath);
+                    return res;
+                }
             }
             else if (m_toolMode == PathFindingMode.TOOLMODE_PATHFIND_STRAIGHT)
             {
@@ -512,7 +516,12 @@ namespace Engine.PathFinding.RecastNavigation
                     m_nstraightPath = 0;
                 }
 
-                return m_straightPath;
+                if (m_nstraightPath > 0)
+                {
+                    Vector3[] res = new Vector3[m_nstraightPath];
+                    Array.Copy(m_straightPath, res, m_nstraightPath);
+                    return res;
+                }
             }
             else if (m_toolMode == PathFindingMode.TOOLMODE_PATHFIND_SLICED)
             {

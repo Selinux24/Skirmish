@@ -1224,7 +1224,11 @@ namespace Engine
         {
             List<Triangle> tris = new List<Triangle>();
 
-            var pfComponents = this.components.FindAll(c => c.Usage.HasFlag(SceneObjectUsageEnum.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsageEnum.CoarsePathFinding));
+            var pfComponents = this.components.FindAll(c =>
+            {
+                return !c.HasParent &&
+                    (c.Usage.HasFlag(SceneObjectUsageEnum.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsageEnum.CoarsePathFinding));
+            });
 
             for (int i = 0; i < pfComponents.Count; i++)
             {
