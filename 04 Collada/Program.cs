@@ -20,7 +20,7 @@ namespace Collada
                 cl.LockMouse = true;
 #endif
 
-                cl.AddScene<NavmeshTest>();
+                cl.AddScene<ModularDungeon>();
 
                 cl.Run();
             }

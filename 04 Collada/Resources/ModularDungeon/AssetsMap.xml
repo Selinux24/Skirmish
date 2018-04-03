@@ -314,7 +314,6 @@
       <references>
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>2 0 0</position>
-          <rotation>rot180</rotation>
         </asset>
         <asset asset_name="Dn_Stairs_1" type="Stairs">
           <position>0 0 0</position>

@@ -201,6 +201,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             float ics = 1.0f / solid.cs;
             float ich = 1.0f / solid.ch;
+
             if (!RasterizeTri(tri, area, solid, solid.boundingBox, solid.cs, ics, ich, flagMergeThr))
             {
                 return false;
@@ -221,6 +222,8 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     throw new EngineException("rcRasterizeTriangles: Out of memory.");
                 }
+
+                int spanCount = GetHeightFieldSpanCount(solid);
             }
 
             return true;
@@ -271,7 +274,6 @@ namespace Engine.PathFinding.RecastNavigation
                     minX = Math.Min(minX, zp1[i].X);
                     maxX = Math.Max(maxX, zp1[i].X);
                 }
-                //TODO: Modular dungeon load -> floating point issue
                 int x0 = (int)((minX - b.Minimum.X) * ics);
                 int x1 = (int)((maxX - b.Minimum.X) * ics);
                 x0 = MathUtil.Clamp(x0, 0, w - 1);

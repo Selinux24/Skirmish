@@ -1201,7 +1201,7 @@ namespace Engine
         /// <summary>
         /// Updates navigation graph
         /// </summary>
-        public void UpdateNavigationGraph()
+        public virtual void UpdateNavigationGraph()
         {
             if (this.PathFinderDescription != null && this.PathFinderDescription.Settings != null)
             {
@@ -1220,7 +1220,7 @@ namespace Engine
         /// Gets the objects triangle list for navigation graph construction
         /// </summary>
         /// <returns>Returns a triangle list</returns>
-        protected virtual Triangle[] GetTrianglesForNavigationGraph()
+        public virtual Triangle[] GetTrianglesForNavigationGraph()
         {
             List<Triangle> tris = new List<Triangle>();
 
@@ -1278,12 +1278,13 @@ namespace Engine
 
             return tris.ToArray();
         }
+
         /// <summary>
         /// Gets the path finder grid nodes
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <returns>Returns the path finder grid nodes</returns>
-        public IGraphNode[] GetNodes(AgentType agent)
+        public virtual IGraphNode[] GetNodes(AgentType agent)
         {
             IGraphNode[] nodes = null;
 
@@ -1303,7 +1304,7 @@ namespace Engine
         /// <param name="useGround">Use ground info</param>
         /// <param name="delta">Delta amount for path refinement</param>
         /// <returns>Return path if exists</returns>
-        public virtual PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = true, float delta = 0f)
+        public virtual PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = false, float delta = 0f)
         {
             List<Vector3> positions = new List<Vector3>();
             List<Vector3> normals = new List<Vector3>();
@@ -1314,7 +1315,7 @@ namespace Engine
                 if (delta == 0)
                 {
                     positions.AddRange(path);
-                    normals.AddRange(Helper.CreateArray(path.Length, new Vector3(0, 1, 0)));
+                    normals.AddRange(Helper.CreateArray(path.Length, Vector3.Up));
                 }
                 else
                 {
@@ -1357,19 +1358,16 @@ namespace Engine
                         normals.Add(Vector3.Up);
                     }
                 }
-            }
 
-            if (useGround)
-            {
-                for (int i = 0; i < positions.Count; i++)
+                if (useGround)
                 {
-                    Vector3 position;
-                    Triangle triangle;
-                    float distance;
-                    if (FindNearestGroundPosition(positions[i], out position, out triangle, out distance))
+                    for (int i = 0; i < positions.Count; i++)
                     {
-                        positions[i] = position;
-                        normals[i] = triangle.Normal;
+                        if (FindNearestGroundPosition(positions[i], out Vector3 position, out Triangle triangle, out float distance))
+                        {
+                            positions[i] = position;
+                            normals[i] = triangle.Normal;
+                        }
                     }
                 }
             }

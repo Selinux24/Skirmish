@@ -1,10 +1,30 @@
-﻿using Engine.PathFinding.NavMesh;
+﻿using Engine.PathFinding.RecastNavigation;
+using System;
 
 namespace Collada
 {
-    class Player : NavigationMeshAgentType
+    [Serializable]
+    public class Player : Agent
     {
-        public float Velocity;
-        public float VelocitySlow;
+        public float Velocity { get; set; }
+        public float VelocitySlow { get; set; }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+        public override bool Equals(object obj)
+        {
+            if (!base.Equals(obj)) return false;
+
+            if (obj is Player other)
+            {
+                return
+                    other.Velocity == this.Velocity &&
+                    other.VelocitySlow == this.VelocitySlow;
+            }
+
+            return false;
+        }
     }
 }

@@ -2,10 +2,11 @@
 using Engine.Animation;
 using Engine.Content;
 using Engine.PathFinding;
-using Engine.PathFinding.NavMesh;
+using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Collada
 {
@@ -26,8 +27,7 @@ namespace Collada
         private Color ambientDown = new Color(127, 127, 127, 255);
         private Color ambientUp = new Color(137, 116, 104, 255);
 
-        //private Player agent = null;
-        private Player2 agent = null;
+        private Player agent = null;
         private Color agentTorchLight = new Color(255, 249, 224, 255);
 
         private SceneLightPoint torch = null;
@@ -37,8 +37,7 @@ namespace Collada
 
         private SceneObject<Model> rat = null;
         private BasicManipulatorController ratController = null;
-        private Player2 ratAgentType = null;
-        //private Player ratAgentType = null;
+        private Player ratAgentType = null;
         private Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
         private bool ratActive = false;
         private float ratTime = 5;
@@ -85,26 +84,25 @@ namespace Collada
             this.torch = new SceneLightPoint("player_torch", true, this.agentTorchLight, this.agentTorchLight, true, Vector3.Zero, 10f, 25f);
             this.Lights.Add(this.torch);
 
-            /*
-            this.PathFinderDescription = new PathFinderDescription()
-            {
-                Settings = new NavigationMeshGenerationSettings()
-                {
-                    Agents = new[] { agent, ratAgentType },
-                    CellSize = 0.1f,
-                    CellHeight = 0.1f,
-                    ContourFlags = ContourBuildFlags.TessellateAreaEdges,
-                }
-            };
-            */
+            //Navigation settings
+            var nmsettings = BuildSettings.Default;
 
-            var nmsettings = Engine.PathFinding.RecastNavigation.BuildSettings.Default;
-            nmsettings.Agents = new[] { agent, ratAgentType };
-            nmsettings.CellSize = 0.15f;
+            //Rasterization
+            nmsettings.CellSize = 0.2f;
             nmsettings.CellHeight = 0.15f;
+
+            //Agents
+            nmsettings.Agents = new[] { agent, ratAgentType };
+
+            //Partitioning
+            nmsettings.PartitionType = SamplePartitionTypeEnum.Watershed;
+
+            //Polygonization
+            nmsettings.EdgeMaxError = 1.0f;
+
+            //Tiling
+            nmsettings.BuildMode = BuildModesEnum.Tiled;
             nmsettings.TileSize = 32;
-            nmsettings.BuildMode = Engine.PathFinding.RecastNavigation.BuildModesEnum.Tiled;
-            nmsettings.PartitionType = Engine.PathFinding.RecastNavigation.SamplePartitionTypeEnum.Layers;
 
             this.PathFinderDescription = new PathFinderDescription()
             {
@@ -157,25 +155,12 @@ namespace Collada
         }
         private void InitializePlayer()
         {
-            /*
             this.agent = new Player()
             {
                 Name = "Player",
                 Height = 1.5f,
-                MaxClimb = 0.8f,
-                MaxSlope = 45f,
-                Radius = 0.5f,
-                Velocity = 4f,
-                VelocitySlow = 1f,
-            };
-            */
-
-            this.agent = new Player2()
-            {
-                Name = "Player",
-                Height = 1.5f,
                 Radius = 0.2f,
-                MaxClimb = 0.5f,
+                MaxClimb = 1.0f,
                 MaxSlope = 45f,
                 Velocity = 4f,
                 VelocitySlow = 1f,
@@ -196,25 +181,12 @@ namespace Collada
                     }
                 });
 
-            /*
             this.ratAgentType = new Player()
             {
                 Name = "Rat",
                 Height = 0.2f,
-                MaxClimb = 0.25f,
-                MaxSlope = 50f,
                 Radius = 0.1f,
-                Velocity = 3f,
-                VelocitySlow = 1f,
-            };
-            */
-
-            this.ratAgentType = new Player2()
-            {
-                Name = "Rat",
-                Height = 0.2f,
-                Radius = 0.1f,
-                MaxClimb = 0.2f,
+                MaxClimb = 0.5f,
                 MaxSlope = 50f,
                 Velocity = 3f,
                 VelocitySlow = 1f,
@@ -301,9 +273,23 @@ namespace Collada
             this.Camera.Mode = CameraModes.Free;
             this.Camera.Position = new Vector3(-8, 5.5f, -26);
             this.Camera.Interest = new Vector3(-6, 5.5f, -26);
+        }
 
-            //this.Camera.Position = new Vector3(36, 1.5f, -20);
-            //this.Camera.Interest = new Vector3(36, 1.5f, -22);
+        public override void UpdateNavigationGraph()
+        {
+            string nmFile = "nm.graph";
+
+            if (File.Exists(nmFile))
+            {
+                this.navigationGraph = new Graph();
+                this.navigationGraph.Load(nmFile);
+            }
+            else
+            {
+                base.UpdateNavigationGraph();
+
+                this.navigationGraph.Save(nmFile);
+            }
         }
 
         public override void Initialized()
@@ -335,31 +321,6 @@ namespace Collada
         }
         private void UpdateGraphNodes(AgentType agent)
         {
-            /*
-            var nodes = this.GetNodes(agent);
-            if (nodes != null && nodes.Length > 0)
-            {
-                Random clrRnd = new Random(24);
-                Color[] regions = new Color[nodes.Length];
-                for (int i = 0; i < nodes.Length; i++)
-                {
-                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.25f);
-                }
-
-                this.graphDrawer.Instance.Clear();
-
-                for (int i = 0; i < nodes.Length; i++)
-                {
-                    var node = (NavigationMeshNode)nodes[i];
-                    var color = regions[node.RegionId];
-                    var poly = node.Poly;
-                    var tris = poly.Triangulate();
-
-                    this.graphDrawer.Instance.AddTriangles(color, tris);
-                }
-            }
-            */
-
             var nodes = this.GetNodes(agent);
             if (nodes != null && nodes.Length > 0)
             {
@@ -367,11 +328,13 @@ namespace Collada
 
                 for (int i = 0; i < nodes.Length; i++)
                 {
-                    var node = (Engine.PathFinding.RecastNavigation.GraphNode)nodes[i];
-                    var color = node.Color;
-                    var tris = node.Triangles;
+                    if (nodes[i] is GraphNode node)
+                    {
+                        var color = node.Color;
+                        var tris = node.Triangles;
 
-                    this.graphDrawer.Instance.AddTriangles(color, tris);
+                        this.graphDrawer.Instance.AddTriangles(color, tris);
+                    }
                 }
             }
         }
@@ -508,33 +471,27 @@ namespace Collada
                 var iTo = rnd.Next(0, this.ratHoles.Length);
                 if (iFrom == iTo) return;
 
-                var from = this.ratHoles[iFrom] + rnd.NextVector3(new Vector3(-1, 0, -1), new Vector3(1, 0, 1));
-                var to = this.ratHoles[iTo] + rnd.NextVector3(new Vector3(-1, 0, -1), new Vector3(1, 0, 1));
+                var from = this.ratHoles[iFrom];
+                var to = this.ratHoles[iTo];
 
-                if (this.FindNearestGroundPosition(from, out from, out Triangle fromT, out float fromD))
+                var path = this.FindPath(this.ratAgentType, from, to);
+                if (path != null && path.ReturnPath.Count > 0)
                 {
-                    if (this.FindNearestGroundPosition(to, out to, out Triangle toT, out float toD))
-                    {
-                        var path = this.FindPath(this.ratAgentType, from, to);
-                        if (path != null && path.ReturnPath.Count > 0)
-                        {
-                            path.ReturnPath.Insert(0, this.ratHoles[iFrom]);
-                            path.Normals.Insert(0, Vector3.Up);
+                    path.ReturnPath.Insert(0, this.ratHoles[iFrom]);
+                    path.Normals.Insert(0, Vector3.Up);
 
-                            path.ReturnPath.Add(this.ratHoles[iTo]);
-                            path.Normals.Add(Vector3.Up);
+                    path.ReturnPath.Add(this.ratHoles[iTo]);
+                    path.Normals.Add(Vector3.Up);
 
-                            this.ratDrawer.Instance.SetLines(Color.Red, Line3D.CreateLineList(path.ReturnPath.ToArray()));
+                    this.ratDrawer.Instance.SetLines(Color.Red, Line3D.CreateLineList(path.ReturnPath.ToArray()));
 
-                            this.ratController.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
-                            this.ratController.MaximumSpeed = this.ratAgentType.Velocity;
-                            this.rat.Visible = true;
-                            this.rat.Instance.AnimationController.Start(0);
+                    this.ratController.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
+                    this.ratController.MaximumSpeed = this.ratAgentType.Velocity;
+                    this.rat.Visible = true;
+                    this.rat.Instance.AnimationController.Start(0);
 
-                            this.ratActive = true;
-                            this.ratTime = this.nextTime;
-                        }
-                    }
+                    this.ratActive = true;
+                    this.ratTime = this.nextTime;
                 }
             }
 

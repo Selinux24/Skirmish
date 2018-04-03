@@ -1,6 +1,6 @@
 ﻿using Engine;
 using Engine.Content;
-using Engine.PathFinding.NavMesh;
+using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 
 namespace Collada
@@ -78,7 +78,7 @@ namespace Collada
 
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
             {
-                Settings = new NavigationMeshGenerationSettings()
+                Settings = new BuildSettings()
                 {
                     Agents = new[] { agent },
                 }

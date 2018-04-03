@@ -14,23 +14,16 @@ namespace Collada
     {
         private const int layerHUD = 99;
 
-        private Player2 agent = null;
+        private Player agent = null;
 
         private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> help = null;
         private SceneObject<TextDrawer> debug = null;
         private SceneObject<Sprite> backPannel = null;
 
-        private SceneObject<TriangleListDrawer> dungeonDrawer = null;
-        private SceneObject<LineListDrawer> dungeonTriDrawer = null;
         private SceneObject<TriangleListDrawer> graphDrawer = null;
-        private Color4 color = new Color4(0.5f, 0.5f, 0.5f, 1f);
-        private Color4 colorTri = new Color4(0.1f, 0.1f, 0.1f, 0.15f);
-        private Color4 colorNodeTri = new Color4(1.0f, 0.0f, 0.0f, 0.85f);
-        private Color4 colorNodeBox = new Color4(0.0f, 1.0f, 1.0f, 0.50f);
 
         private SceneObject<Model> inputGeometry = null;
-        private int inputGeometryIndex = -1;
         private BuildSettings nmsettings = BuildSettings.Default;
 
         public NavmeshTest(Game game) : base(game)
@@ -73,7 +66,7 @@ namespace Collada
         }
         private void InitializeAgent()
         {
-            this.agent = new Player2()
+            this.agent = new Player()
             {
                 Name = "Player",
                 Height = 0.2f,
@@ -91,12 +84,22 @@ namespace Collada
         }
         private void InitializeNavmesh()
         {
-            nmsettings.Agents = new[] { this.agent };
-            nmsettings.CellSize = 0.15f;
+            //Rasterization
+            nmsettings.CellSize = 0.20f;
             nmsettings.CellHeight = 0.15f;
-            nmsettings.TileSize = 32;
+
+            //Agents
+            nmsettings.Agents = new[] { this.agent };
+
+            //Partitioning
+            nmsettings.PartitionType = SamplePartitionTypeEnum.Watershed;
+
+            //Polygonization
+            nmsettings.EdgeMaxError = 1.0f;
+
+            //Tiling
             nmsettings.BuildMode = BuildModesEnum.Tiled;
-            nmsettings.PartitionType = SamplePartitionTypeEnum.Layers;
+            nmsettings.TileSize = 32;
 
             this.PathFinderDescription = new PathFinderDescription()
             {
@@ -121,26 +124,6 @@ namespace Collada
         }
         private void InitializeDebug()
         {
-            var dungeonDrawerDesc = new TriangleListDrawerDescription()
-            {
-                Name = "Dungeon",
-                AlphaEnabled = true,
-                DepthEnabled = true,
-                Count = 20000,
-            };
-            this.dungeonDrawer = this.AddComponent<TriangleListDrawer>(dungeonDrawerDesc);
-            var dungeonTriDrawerDesc = new LineListDrawerDescription()
-            {
-                Name = "DEBUG++ Triangles",
-                AlphaEnabled = true,
-                DepthEnabled = false,
-                Count = 100000,
-            };
-            this.dungeonTriDrawer = this.AddComponent<LineListDrawer>(dungeonTriDrawerDesc);
-
-            //this.dungeonDrawer.Instance.SetTriangles(color, triangles);
-            //this.dungeonTriDrawer.Instance.SetTriangles(colorTri, triangles);
-
             var graphDrawerDesc = new TriangleListDrawerDescription()
             {
                 Name = "DEBUG++ Graph",
@@ -229,18 +212,6 @@ namespace Collada
         {
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
-            {
-                if (shift)
-                {
-                    this.UpdateInputGeometryNodes(--inputGeometryIndex);
-                }
-                else
-                {
-                    this.UpdateInputGeometryNodes(++inputGeometryIndex);
-                }
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
                 this.navigationGraph.Save(@"test.grf");
@@ -304,69 +275,6 @@ namespace Collada
                     this.graphDrawer.Instance.AddTriangles(color, tris);
                 }
             }
-        }
-        private void UpdateInputGeometryNodes(int index)
-        {
-            //this.dungeonTriDrawer.Instance.Clear(colorNodeBox);
-            //this.dungeonTriDrawer.Instance.Clear(colorNodeTri);
-
-            //Random rnd = new Random(1);
-
-            //var chunkyMesh = this.inputGeometry.GetChunkyMesh();
-
-            //if (index >= 0)
-            //{
-            //    if (index == 0)
-            //    {
-            //        for (int i = 0; i < chunkyMesh.nnodes; i++)
-            //        {
-            //            var node = chunkyMesh.nodes[i];
-            //            if (node.i >= 0)
-            //            {
-            //                var color = rnd.NextColor().ToColor4();
-            //                color.Alpha = colorNodeTri.Alpha;
-            //                this.dungeonTriDrawer.Instance.Clear(color);
-            //            }
-            //        }
-            //    }
-
-            //    var curNode = chunkyMesh.nodes[index];
-
-            //    var bbox = new BoundingBox(
-            //        new Vector3(curNode.bmin.X, inputGeometry.BoundingBox.Minimum.Y, curNode.bmin.Y),
-            //        new Vector3(curNode.bmax.X, inputGeometry.BoundingBox.Maximum.Y, curNode.bmax.Y));
-
-            //    this.dungeonTriDrawer.Instance.SetLines(colorNodeBox, Line3D.CreateWiredBox(bbox));
-
-            //    if (curNode.i >= 0)
-            //    {
-            //        var triangles = chunkyMesh.GetTriangles(curNode);
-
-            //        this.dungeonTriDrawer.Instance.SetTriangles(colorNodeTri, triangles);
-            //    }
-            //}
-            //else
-            //{
-            //    for (int i = 0; i < chunkyMesh.nnodes; i++)
-            //    {
-            //        var node = chunkyMesh.nodes[i];
-
-            //        var bbox = new BoundingBox(
-            //            new Vector3(node.bmin.X, inputGeometry.BoundingBox.Minimum.Y, node.bmin.Y),
-            //            new Vector3(node.bmax.X, inputGeometry.BoundingBox.Maximum.Y, node.bmax.Y));
-
-            //        this.dungeonTriDrawer.Instance.AddLines(colorNodeBox, Line3D.CreateWiredBox(bbox));
-
-            //        if (node.i >= 0)
-            //        {
-            //            var triangles = chunkyMesh.GetTriangles(node);
-
-            //            var color = rnd.NextColor().ToColor4();
-            //            color.Alpha = colorNodeTri.Alpha;
-            //            this.dungeonTriDrawer.Instance.SetTriangles(color, triangles);
-            //        }
-            //    }
-            //}
         }
     }
 }

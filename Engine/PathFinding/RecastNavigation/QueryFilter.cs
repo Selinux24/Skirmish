@@ -25,7 +25,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public QueryFilter()
         {
-            m_areaCost = new float[Constants.DT_MAX_AREAS];
+            m_areaCost = Helper.CreateArray(Constants.DT_MAX_AREAS, 1.0f);
+
+            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_GROUND, 1.0f);
+            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_WATER, 10.0f);
+            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_ROAD, 1.0f);
+            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_DOOR, 1.0f);
+            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_GRASS, 2.0f);
+            SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_JUMP, 1.5f);
         }
 
         /// <summary>
@@ -68,13 +75,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="i">The id of the area.</param>
         /// <returns>The traversal cost of the area.</returns>
-        public float GetAreaCost(int i) { return m_areaCost[i]; }
+        public float GetAreaCost(SamplePolyAreas i) { return m_areaCost[(int)i]; }
         /// <summary>
         /// Sets the traversal cost of the area.
         /// </summary>
         /// <param name="i">The id of the area.</param>
         /// <param name="cost">The new cost of traversing the area.</param>
-        public void SetAreaCost(int i, float cost) { m_areaCost[i] = cost; }
+        public void SetAreaCost(SamplePolyAreas i, float cost) { m_areaCost[(int)i] = cost; }
 
         /// <summary>
         /// Returns the include flags for the filter.
