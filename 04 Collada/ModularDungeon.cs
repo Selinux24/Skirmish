@@ -7,6 +7,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Collada
 {
@@ -50,6 +51,10 @@ namespace Collada
         private SceneObject<LineListDrawer> ratDrawer = null;
         private SceneObject<TriangleListDrawer> graphDrawer = null;
         private int currentGraph = 0;
+
+        private string nmFile = "nm.graph";
+        private string ntFile = "nm.obj";
+        private bool taskRunning = false;
 
         public ModularDungeon(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
@@ -275,23 +280,6 @@ namespace Collada
             this.Camera.Interest = new Vector3(-6, 5.5f, -26);
         }
 
-        public override void UpdateNavigationGraph()
-        {
-            string nmFile = "nm.graph";
-
-            if (File.Exists(nmFile))
-            {
-                this.navigationGraph = new Graph();
-                this.navigationGraph.Load(nmFile);
-            }
-            else
-            {
-                base.UpdateNavigationGraph();
-
-                this.navigationGraph.Save(nmFile);
-            }
-        }
-
         public override void Initialized()
         {
             base.Initialized();
@@ -361,6 +349,41 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.F3))
             {
                 this.ratDrawer.Visible = !this.ratDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                //Refresh the navigatio mesh
+                if (File.Exists(nmFile))
+                {
+                    File.Delete(nmFile);
+                }
+
+                this.UpdateNavigationGraph();
+                this.UpdateGraphNodes(this.currentGraph == 0 ? this.agent : this.ratAgentType);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            {
+                //Save the navigation triangles to a file
+                var task = Task.Run(() =>
+                {
+                    if (!taskRunning)
+                    {
+                        taskRunning = true;
+
+                        if (File.Exists(ntFile))
+                        {
+                            File.Delete(ntFile);
+                        }
+
+                        var loader = new LoaderOBJ();
+                        var tris = this.GetTrianglesForNavigationGraph();
+                        loader.Save(tris, ntFile);
+
+                        taskRunning = false;
+                    }
+                });
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
@@ -500,6 +523,21 @@ namespace Collada
                 var bbox = this.rat.Instance.GetBoundingBox();
 
                 this.ratDrawer.Instance.SetLines(Color.White, Line3D.CreateWiredBox(bbox));
+            }
+        }
+
+        public override void UpdateNavigationGraph()
+        {
+            if (File.Exists(nmFile))
+            {
+                this.navigationGraph = new Graph();
+                this.navigationGraph.Load(nmFile);
+            }
+            else
+            {
+                base.UpdateNavigationGraph();
+
+                this.navigationGraph.Save(nmFile);
             }
         }
     }

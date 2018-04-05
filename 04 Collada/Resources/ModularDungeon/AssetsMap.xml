@@ -408,6 +408,7 @@
 
         <asset asset_name="Dn_Wall_1" type="Wall">
           <position>3 0 0</position>
+          <rotation>rot180</rotation>
         </asset>
       </references>
       <connections>
