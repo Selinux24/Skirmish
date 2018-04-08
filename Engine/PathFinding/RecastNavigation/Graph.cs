@@ -26,7 +26,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             Graph res = new Graph
             {
-                maxNodes = settings.MaxNodes,
+                settings = settings,
             };
 
             var geom = new InputGeometry(triangles);
@@ -459,13 +459,13 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
-        /// Maximum nodes
-        /// </summary>
-        private int maxNodes = 0;
-        /// <summary>
         /// Navigation mesh query dictionary (by agent type)
         /// </summary>
-        private Dictionary<AgentType, NavMeshQuery> navMeshQDictionary = new Dictionary<AgentType, NavMeshQuery>();
+        private Dictionary<Agent, NavMeshQuery> navMeshQDictionary = new Dictionary<Agent, NavMeshQuery>();
+        /// <summary>
+        /// Build settings
+        /// </summary>
+        private BuildSettings settings = null;
 
         /// <summary>
         /// Constructor
@@ -489,7 +489,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="context">Serialization context</param>
         protected Graph(SerializationInfo info, StreamingContext context)
         {
-            int maxNodes = info.GetInt32("maxNodes");
+            settings = info.GetValue<BuildSettings>("settings");
 
             int count = info.GetInt32("count");
             if (count > 0)
@@ -499,7 +499,7 @@ namespace Engine.PathFinding.RecastNavigation
                     var agent = info.GetValue<Agent>(string.Format("agent.{0}", i));
                     var nm = info.GetValue<NavMesh>(string.Format("navmesh.{0}", i));
                     var mmQuery = new NavMeshQuery();
-                    mmQuery.Init(nm, maxNodes);
+                    mmQuery.Init(nm, settings.MaxNodes);
 
                     navMeshQDictionary.Add(agent, mmQuery);
                 }
@@ -513,7 +513,7 @@ namespace Engine.PathFinding.RecastNavigation
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("maxNodes", maxNodes);
+            info.AddValue("settings", settings);
 
             info.AddValue("count", navMeshQDictionary.Keys.Count);
             int index = 0;
@@ -534,7 +534,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
-            nodes.AddRange(GraphNode.Build(navMeshQDictionary[agent].GetAttachedNavMesh()));
+            nodes.AddRange(GraphNode.Build(navMeshQDictionary[(Agent)agent].GetAttachedNavMesh()));
 
             return nodes.ToArray();
         }
@@ -553,7 +553,7 @@ namespace Engine.PathFinding.RecastNavigation
             };
 
             CalcPath(
-                navMeshQDictionary[agent],
+                navMeshQDictionary[(Agent)agent],
                 filter, new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
                 from, to, out Vector3[] result);
 
@@ -573,7 +573,7 @@ namespace Engine.PathFinding.RecastNavigation
                 m_includeFlags = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK,
             };
 
-            var status = navMeshQDictionary[agent].FindNearestPoly(
+            var status = navMeshQDictionary[(Agent)agent].FindNearestPoly(
                 position, new Vector3(2, 4, 2), filter,
                 out int nRef, out Vector3 nPoint);
 
@@ -609,6 +609,31 @@ namespace Engine.PathFinding.RecastNavigation
         public void Save(string fileName)
         {
             File.WriteAllBytes(fileName, this.Compress());
+        }
+
+        /// <summary>
+        /// Builds the tile in the specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="geom">Input geometry</param>
+        public void BuildTile(Vector3 position, InputGeometry geom)
+        {
+            foreach (var agent in navMeshQDictionary.Keys)
+            {
+                navMeshQDictionary[agent].GetAttachedNavMesh().BuildTile(position, geom, settings, agent);
+            }
+        }
+        /// <summary>
+        /// Removes the tile in the specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="geom">Input geometry</param>
+        public void RemoveTile(Vector3 position, InputGeometry geom)
+        {
+            foreach (var agent in navMeshQDictionary.Keys)
+            {
+                navMeshQDictionary[agent].GetAttachedNavMesh().RemoveTile(position, geom, settings);
+            }
         }
     }
 }

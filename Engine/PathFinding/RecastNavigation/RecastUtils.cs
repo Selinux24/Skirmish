@@ -6194,7 +6194,7 @@ namespace Engine.PathFinding.RecastNavigation
             return true;
         }
 
-        private static MeshData BuildTileMesh(int tx, int ty, BoundingBox bbox, InputGeometry geometry, BuildSettings settings, Agent agent)
+        public static MeshData BuildTileMesh(int tx, int ty, BoundingBox bbox, InputGeometry geometry, BuildSettings settings, Agent agent)
         {
             var chunkyMesh = geometry.GetChunkyMesh();
 

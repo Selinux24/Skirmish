@@ -1648,5 +1648,67 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
         }
+
+        public void BuildTile(Vector3 pos, InputGeometry geom, BuildSettings settings, Agent agent)
+        {
+            var bbox = geom.BoundingBox;
+
+            float ts = settings.TileSize * settings.CellSize;
+            int tx = (int)((pos.X - bbox.Minimum.X) / ts);
+            int ty = (int)((pos.Z - bbox.Minimum.Z) / ts);
+
+            BoundingBox lastBuiltBbox = new BoundingBox();
+
+            lastBuiltBbox.Minimum.X = bbox.Minimum.X + tx * ts;
+            lastBuiltBbox.Minimum.Y = bbox.Minimum.Y;
+            lastBuiltBbox.Minimum.Z = bbox.Minimum.Z + ty * ts;
+
+            lastBuiltBbox.Maximum.X = bbox.Minimum.X + (tx + 1) * ts;
+            lastBuiltBbox.Maximum.Y = bbox.Maximum.Y;
+            lastBuiltBbox.Maximum.Z = bbox.Minimum.Z + (ty + 1) * ts;
+
+            var data = Recast.BuildTileMesh(tx, ty, lastBuiltBbox, geom, settings, agent);
+
+            // Remove any previous data (navmesh owns and deletes the data).
+            RemoveTile(GetTileRefAt(tx, ty, 0), data, 0);
+
+            // Add tile, or leave the location empty.
+            if (data != null)
+            {
+                // Let the navmesh own the data.
+                if (!AddTile(data, TileFlags.DT_TILE_FREE_DATA, 0, out int res))
+                {
+                    data = null;
+                }
+            }
+        }
+        public void GetTilePos(Vector3 pos, InputGeometry geom, BuildSettings settings, out int tx, out int ty)
+        {
+            var bbox = geom.BoundingBox;
+
+            float ts = settings.TileSize * settings.CellSize;
+            tx = (int)((pos.X - bbox.Minimum.X) / ts);
+            ty = (int)((pos.Z - bbox.Minimum.Z) / ts);
+        }
+        public void RemoveTile(Vector3 pos, InputGeometry geom, BuildSettings settings)
+        {
+            var bbox = geom.BoundingBox;
+
+            float ts = settings.TileSize * settings.CellSize;
+            int tx = (int)((pos.X - bbox.Minimum.X) / ts);
+            int ty = (int)((pos.Z - bbox.Minimum.Z) / ts);
+
+            BoundingBox lastBuiltBbox = new BoundingBox();
+
+            lastBuiltBbox.Minimum.X = bbox.Minimum.X + tx * ts;
+            lastBuiltBbox.Minimum.Y = bbox.Minimum.Y;
+            lastBuiltBbox.Minimum.Z = bbox.Minimum.Z + ty * ts;
+
+            lastBuiltBbox.Maximum.X = bbox.Minimum.X + (tx + 1) * ts;
+            lastBuiltBbox.Maximum.Y = bbox.Maximum.Y;
+            lastBuiltBbox.Maximum.Z = bbox.Minimum.Z + (ty + 1) * ts;
+
+            RemoveTile(GetTileRefAt(tx, ty, 0), null, 0);
+        }
     }
 }

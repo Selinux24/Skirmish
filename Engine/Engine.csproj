@@ -278,6 +278,7 @@
     <Compile Include="PathFinding\RecastNavigation\Agent.cs" />
     <Compile Include="PathFinding\RecastNavigation\BoundsItem.cs" />
     <Compile Include="PathFinding\RecastNavigation\BuildContoursFlags.cs" />
+    <Compile Include="PathFinding\RecastNavigation\BuildModesEnum.cs" />
     <Compile Include="PathFinding\RecastNavigation\BVItem.cs" />
     <Compile Include="PathFinding\RecastNavigation\BVNode.cs" />
     <Compile Include="PathFinding\RecastNavigation\ChunkyTriMesh.cs" />
