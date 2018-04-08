@@ -288,13 +288,15 @@
     <Compile Include="PathFinding\RecastNavigation\CompactHeightfield.cs" />
     <Compile Include="PathFinding\RecastNavigation\CompactSpan.cs" />
     <Compile Include="PathFinding\RecastNavigation\CompressedTile.cs" />
+    <Compile Include="PathFinding\RecastNavigation\CompressedTileFlags.cs" />
     <Compile Include="PathFinding\RecastNavigation\Config.cs" />
-    <Compile Include="PathFinding\RecastNavigation\Constants.cs" />
     <Compile Include="PathFinding\RecastNavigation\Contour.cs" />
     <Compile Include="PathFinding\RecastNavigation\ContourHole.cs" />
     <Compile Include="PathFinding\RecastNavigation\ContourRegion.cs" />
     <Compile Include="PathFinding\RecastNavigation\ContourSet.cs" />
     <Compile Include="PathFinding\RecastNavigation\ConvexVolume.cs" />
+    <Compile Include="PathFinding\RecastNavigation\Detour.cs" />
+    <Compile Include="PathFinding\RecastNavigation\DetourTileCache.cs" />
     <Compile Include="PathFinding\RecastNavigation\Edge.cs" />
     <Compile Include="PathFinding\RecastNavigation\EdgeValues.cs" />
     <Compile Include="PathFinding\RecastNavigation\FindNearestPolyQuery.cs" />
@@ -302,6 +304,8 @@
     <Compile Include="PathFinding\RecastNavigation\Graph.cs" />
     <Compile Include="PathFinding\RecastNavigation\GraphNode.cs" />
     <Compile Include="PathFinding\RecastNavigation\NavMeshUtils.cs" />
+    <Compile Include="PathFinding\RecastNavigation\ObstacleRequest.cs" />
+    <Compile Include="PathFinding\RecastNavigation\ObstacleRequestAction.cs" />
     <Compile Include="PathFinding\RecastNavigation\OffMeshConnectionDef.cs" />
     <Compile Include="PathFinding\RecastNavigation\PathFindingMode.cs" />
     <Compile Include="PathFinding\RecastNavigation\RaycastHit.cs" />
@@ -342,7 +346,6 @@
     <Compile Include="PathFinding\RecastNavigation\PolyMeshDetail.cs" />
     <Compile Include="PathFinding\RecastNavigation\PolyQuery.cs" />
     <Compile Include="PathFinding\RecastNavigation\PolyTypes.cs" />
-    <Compile Include="PathFinding\RecastNavigation\PolyUtils.cs" />
     <Compile Include="PathFinding\RecastNavigation\PotentialDiagonal.cs" />
     <Compile Include="PathFinding\RecastNavigation\QueryData.cs" />
     <Compile Include="PathFinding\RecastNavigation\QueryFilter.cs" />

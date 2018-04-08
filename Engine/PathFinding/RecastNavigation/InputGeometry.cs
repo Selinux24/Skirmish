@@ -8,6 +8,9 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public class InputGeometry
     {
+        public const int MAX_VOLUMES = 256;
+        public const int MAX_OFFMESH_CONNECTIONS = 256;
+
         private BoundsItemComparerX xComparer = new BoundsItemComparerX();
         private BoundsItemComparerY yComparer = new BoundsItemComparerY();
 
@@ -22,10 +25,10 @@ namespace Engine.PathFinding.RecastNavigation
 
         public InputGeometry()
         {
-            m_volumes = new ConvexVolume[Constants.MAX_VOLUMES];
+            m_volumes = new ConvexVolume[MAX_VOLUMES];
             m_volumeCount = 0;
 
-            m_offMeshCons = new OffMeshConnectionDef[Constants.MAX_OFFMESH_CONNECTIONS];
+            m_offMeshCons = new OffMeshConnectionDef[MAX_OFFMESH_CONNECTIONS];
             m_offMeshConCount = 0;
         }
         public InputGeometry(IEnumerable<Triangle> triangles) : this()
@@ -208,7 +211,7 @@ namespace Engine.PathFinding.RecastNavigation
 
         public void AddOffMeshConnection(Vector3 spos, Vector3 epos, float rad, int bidir, SamplePolyAreas area, SamplePolyFlags flags)
         {
-            if (m_offMeshConCount >= Constants.MAX_OFFMESH_CONNECTIONS) return;
+            if (m_offMeshConCount >= MAX_OFFMESH_CONNECTIONS) return;
             m_offMeshCons[m_offMeshConCount] = new OffMeshConnectionDef
             {
                 Radius = rad,
@@ -229,7 +232,7 @@ namespace Engine.PathFinding.RecastNavigation
 
         public void AddConvexVolume(Vector3[] verts, int nverts, float minh, float maxh, TileCacheAreas area)
         {
-            if (m_volumeCount >= Constants.MAX_VOLUMES) return;
+            if (m_volumeCount >= MAX_VOLUMES) return;
 
             m_volumes[m_volumeCount++] = new ConvexVolume
             {

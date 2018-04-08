@@ -7,11 +7,6 @@ namespace Engine.PathFinding.RecastNavigation
     class SpanPool
     {
         /// <summary>
-        /// The number of spans allocated per span spool.
-        /// </summary>
-        public const int SpansPerPool = 2048;
-
-        /// <summary>
         /// The next span pool.
         /// </summary>
         public SpanPool next;
@@ -26,7 +21,7 @@ namespace Engine.PathFinding.RecastNavigation
         public SpanPool()
         {
             next = null;
-            items = Helper.CreateArray(Constants.Recast.RC_SPANS_PER_POOL, () =>
+            items = Helper.CreateArray(Recast.RC_SPANS_PER_POOL, () =>
             {
                 return new Span();
             });

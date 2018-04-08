@@ -135,7 +135,7 @@ namespace Engine.PathFinding.RecastNavigation
                             iterPos = result;
 
                             // Handle end of path and off-mesh links when close enough.
-                            if (endOfPath && PolyUtils.InRange(iterPos, steerPos, SLOP, 1.0f))
+                            if (endOfPath && InRange(iterPos, steerPos, SLOP, 1.0f))
                             {
                                 // Reached end of path.
                                 iterPos = targetPos;
@@ -145,7 +145,7 @@ namespace Engine.PathFinding.RecastNavigation
                                 }
                                 break;
                             }
-                            else if (offMeshConnection && PolyUtils.InRange(iterPos, steerPos, SLOP, 1.0f))
+                            else if (offMeshConnection && InRange(iterPos, steerPos, SLOP, 1.0f))
                             {
                                 // Reached off-mesh connection.
 
@@ -304,7 +304,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 // Stop at Off-Mesh link or when point is further than slop away.
                 if ((steerPathFlags[ns] & StraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
-                    !PolyUtils.InRange(steerPath[ns], startPos, minTargetDist, 1000.0f))
+                    !InRange(steerPath[ns], startPos, minTargetDist, 1000.0f))
                 {
                     break;
                 }
@@ -418,7 +418,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return npath;
             }
 
-            for (int k = poly.firstLink; k != Constants.DT_NULL_LINK; k = tile.links[k].next)
+            for (int k = poly.firstLink; k != Detour.DT_NULL_LINK; k = tile.links[k].next)
             {
                 var link = tile.links[k];
                 if (link.nref != 0)
@@ -456,6 +456,15 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             return npath;
+        }
+
+        private static bool InRange(Vector3 v1, Vector3 v2, float r, float h)
+        {
+            float dx = v2.X - v1.X;
+            float dy = v2.Y - v1.Y;
+            float dz = v2.Z - v1.Z;
+
+            return (dx * dx + dz * dz) < r * r && Math.Abs(dy) < h;
         }
 
         /// <summary>

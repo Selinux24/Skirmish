@@ -14,7 +14,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < mesh.MaxTiles; ++i)
             {
                 var tile = mesh.Tiles[i];
-                if (tile.header.magic != Constants.DT_NAVMESH_MAGIC) continue;
+                if (tile.header.magic != Detour.DT_NAVMESH_MAGIC) continue;
 
                 for (int t = 0; t < tile.header.polyCount; t++)
                 {

@@ -25,7 +25,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public QueryFilter()
         {
-            m_areaCost = Helper.CreateArray(Constants.DT_MAX_AREAS, 1.0f);
+            m_areaCost = Helper.CreateArray(Detour.DT_MAX_AREAS, 1.0f);
 
             SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_GROUND, 1.0f);
             SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_WATER, 10.0f);

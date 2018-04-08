@@ -19,8 +19,8 @@ namespace Engine.PathFinding.RecastNavigation
             m_hashSize = hashSize;
 
             m_nodes = new Node[m_maxNodes];
-            m_next = Helper.CreateArray(m_maxNodes, Constants.NULL_IDX);
-            m_first = Helper.CreateArray(m_hashSize, Constants.NULL_IDX);
+            m_next = Helper.CreateArray(m_maxNodes, Detour.DT_NULL_IDX);
+            m_first = Helper.CreateArray(m_hashSize, Detour.DT_NULL_IDX);
             m_nodeCount = 0;
         }
 
@@ -34,14 +34,14 @@ namespace Engine.PathFinding.RecastNavigation
         public void Clear()
         {
             Helper.Dispose(m_first);
-            m_first = Helper.CreateArray(m_hashSize, Constants.NULL_IDX);
+            m_first = Helper.CreateArray(m_hashSize, Detour.DT_NULL_IDX);
             m_nodeCount = 0;
         }
         public Node GetNode(int id, int state)
         {
-            int bucket = PolyUtils.HashRef(id) & (m_hashSize - 1);
+            int bucket = Detour.HashRef(id) & (m_hashSize - 1);
             int i = m_first[bucket];
-            while (i != Constants.NULL_IDX)
+            while (i != Detour.DT_NULL_IDX)
             {
                 if (m_nodes[i] != null && m_nodes[i].id == id && m_nodes[i].state == state)
                 {
@@ -76,9 +76,9 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public Node FindNode(int id, int state)
         {
-            int bucket = PolyUtils.HashRef(id) & (m_hashSize - 1);
+            int bucket = Detour.HashRef(id) & (m_hashSize - 1);
             int i = m_first[bucket];
-            while (i != Constants.NULL_IDX)
+            while (i != Detour.DT_NULL_IDX)
             {
                 if (m_nodes[i].id == id && m_nodes[i].state == state)
                 {
@@ -93,9 +93,9 @@ namespace Engine.PathFinding.RecastNavigation
             nodes = new Node[maxNodes];
 
             int n = 0;
-            int bucket = PolyUtils.HashRef(id) & (m_hashSize - 1);
+            int bucket = Detour.HashRef(id) & (m_hashSize - 1);
             int i = m_first[bucket];
-            while (i != Constants.NULL_IDX)
+            while (i != Detour.DT_NULL_IDX)
             {
                 if (m_nodes[i].id == id)
                 {

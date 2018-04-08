@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -8,6 +10,14 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     public class ChunkyTriMesh
     {
+        private static bool CheckOverlapRect(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax)
+        {
+            bool overlap = true;
+            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
+            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
+            return overlap;
+        }
+
         /// <summary>
         /// Triangle list
         /// </summary>
@@ -63,6 +73,43 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Gets the chunks overlapping the specified rectangle
+        /// </summary>
+        /// <param name="bmin">Bounding box minimum</param>
+        /// <param name="bmax">Bounding box maximum</param>
+        /// <returns>Returns a list of indices</returns>
+        public IEnumerable<int> GetChunksOverlappingRect(Vector2 bmin, Vector2 bmax)
+        {
+            List<int> ids = new List<int>();
+
+            // Traverse tree
+            int i = 0;
+            while (i < nnodes)
+            {
+                var node = nodes[i];
+                bool overlap = CheckOverlapRect(bmin, bmax, node.bmin, node.bmax);
+                bool isLeafNode = node.i >= 0;
+
+                if (isLeafNode && overlap)
+                {
+                    ids.Add(i);
+                }
+
+                if (overlap || isLeafNode)
+                {
+                    i++;
+                }
+                else
+                {
+                    int escapeIndex = -node.i;
+                    i += escapeIndex;
+                }
+            }
+
+            return ids;
         }
     }
 }

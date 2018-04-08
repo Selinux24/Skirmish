@@ -12,7 +12,7 @@ namespace Engine.PathFinding.RecastNavigation
         public int CompressedSize;
         public TileCacheLayerData Data;
         public int DataSize;
-        public TileFlags Flags;
+        public CompressedTileFlags Flags;
         public CompressedTile Next;
 
         /// <summary>

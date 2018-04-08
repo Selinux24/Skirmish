@@ -3,14 +3,14 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public enum ObstacleType
     {
-        Cylinder,
+        DT_OBSTACLE_CYLINDER,
         /// <summary>
         /// AABB
         /// </summary>
-        Box,
+        DT_OBSTACLE_BOX,
         /// <summary>
         /// OBB
         /// </summary>
-        OrientedBox,
+        DT_OBSTACLE_ORIENTED_BOX,
     }
 }

@@ -4,10 +4,8 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public class TileCacheObstacle
     {
-        public const int MaxTouchedTiles = 8;
-
-        public CompressedTile[] touched;
-        public int[] pending;
+        public CompressedTile[] touched = new CompressedTile[DetourTileCache.DT_MAX_TOUCHED_TILES];
+        public CompressedTile[] pending = new CompressedTile[DetourTileCache.DT_MAX_TOUCHED_TILES];
         public int Salt;
         public ObstacleType type;
         public ObstacleState state;

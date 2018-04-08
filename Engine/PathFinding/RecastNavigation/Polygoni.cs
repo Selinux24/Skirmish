@@ -28,7 +28,7 @@ namespace Engine.PathFinding.RecastNavigation
 
         public Polygoni(int capacity)
         {
-            this.Vertices = Helper.CreateArray(capacity, Constants.Recast.RC_MESH_NULL_IDX);
+            this.Vertices = Helper.CreateArray(capacity, Recast.RC_MESH_NULL_IDX);
         }
 
         protected Polygoni(SerializationInfo info, StreamingContext context)

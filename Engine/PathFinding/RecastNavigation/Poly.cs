@@ -3,7 +3,7 @@
 namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
-    /// Defines a polygon within a dtMeshTile object.
+    /// Defines a polygon within a MeshTile object.
     /// </summary>
     [Serializable]
     public class Poly
@@ -15,11 +15,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The indices of the polygon's vertices. The actual vertices are located in dtMeshTile::verts.
         /// </summary>
-        public Polygoni verts = new Polygoni(Constants.DT_VERTS_PER_POLYGON);
+        public Polygoni verts = new Polygoni(Detour.DT_VERTS_PER_POLYGON);
         /// <summary>
         /// Packed data representing neighbor polygons references and flags for each edge.
         /// </summary>
-        public int[] neis = new int[Constants.DT_VERTS_PER_POLYGON];
+        public int[] neis = new int[Detour.DT_VERTS_PER_POLYGON];
         /// <summary>
         /// The user defined polygon flags.
         /// </summary>
@@ -28,11 +28,19 @@ namespace Engine.PathFinding.RecastNavigation
         /// The number of vertices in the polygon.
         /// </summary>
         public int vertCount;
-
+        /// <summary>
+        /// Polygon area
+        /// </summary>
         public SamplePolyAreas Area { get; set; }
-
+        /// <summary>
+        /// Polygon type
+        /// </summary>
         public PolyTypes Type { get; set; }
 
+        /// <summary>
+        /// Gets the text representation of the polygon
+        /// </summary>
+        /// <returns>Returns the text representation of the polygon</returns>
         public override string ToString()
         {
             return string.Format("FirstLink {0}; Flags {1}; Area: {2}; Type: {3}; Verts {4}; VertCount: {5}; Neis: {6}",

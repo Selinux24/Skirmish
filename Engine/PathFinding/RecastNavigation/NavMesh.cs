@@ -1,8 +1,8 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
 
@@ -11,6 +11,12 @@ namespace Engine.PathFinding.RecastNavigation
     [Serializable]
     public class NavMesh : ISerializable
     {
+        public const int MAX_LAYERS = 32;
+        /// <summary>
+        /// This value specifies how many layers (or "floors") each navmesh tile is expected to have.
+        /// </summary>
+        public const int EXPECTED_LAYERS_PER_TILE = 4;
+
         public static NavMesh Build(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
             if (settings.BuildMode == BuildModesEnum.Solo)
@@ -57,15 +63,7 @@ namespace Engine.PathFinding.RecastNavigation
                 Height = height,
             };
 
-            var solid = new Heightfield
-            {
-                width = cfg.Width,
-                height = cfg.Height,
-                boundingBox = cfg.BoundingBox,
-                cs = cfg.CellSize,
-                ch = cfg.CellHeight,
-                spans = new Span[cfg.Width * cfg.Height],
-            };
+            var solid = Recast.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
             var ntris = geometry.GetChunkyMesh().ntris;
             var tris = geometry.GetChunkyMesh().triangles;
@@ -158,7 +156,7 @@ namespace Engine.PathFinding.RecastNavigation
                 throw new EngineException("buildNavigation: Could not build detail mesh.");
             }
 
-            if (cfg.MaxVertsPerPoly <= Constants.DT_VERTS_PER_POLYGON)
+            if (cfg.MaxVertsPerPoly <= Detour.DT_VERTS_PER_POLYGON)
             {
                 // Update poly flags from areas.
                 for (int i = 0; i < pmesh.npolys; ++i)
@@ -210,7 +208,7 @@ namespace Engine.PathFinding.RecastNavigation
                     buildBvTree = true
                 };
 
-                if (!Recast.CreateNavMeshData(param, out MeshData navData))
+                if (!Detour.CreateNavMeshData(param, out MeshData navData))
                 {
                     throw new EngineException("Could not build Detour navmesh.");
                 }
@@ -250,7 +248,7 @@ namespace Engine.PathFinding.RecastNavigation
             var nm = new NavMesh();
             nm.Init(nmparams);
 
-            Recast.BuildAllTiles(geometry, settings, agent, nm);
+            BuildAllTiles(geometry, settings, agent, nm);
 
             return nm;
         }
@@ -304,7 +302,7 @@ namespace Engine.PathFinding.RecastNavigation
                 WalkableRadius = agent.Radius,
                 WalkableClimb = agent.MaxClimb,
                 MaxSimplificationError = settings.EdgeMaxError,
-                MaxTiles = tw * th * Constants.ExpectedLayersPerTile,
+                MaxTiles = tw * th * EXPECTED_LAYERS_PER_TILE,
                 MaxObstacles = 128,
             };
             var tmproc = new TileCacheMeshProcess(geometry);
@@ -312,7 +310,7 @@ namespace Engine.PathFinding.RecastNavigation
             var tileCache = new TileCache();
             tileCache.Init(tcparams, tmproc);
 
-            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th * Constants.ExpectedLayersPerTile), 2), 14);
+            int tileBits = Math.Min((int)Math.Log(Helper.NextPowerOfTwo(tw * th * EXPECTED_LAYERS_PER_TILE), 2), 14);
             if (tileBits > 14) tileBits = 14;
             int polyBits = 22 - tileBits;
             int maxTiles = 1 << tileBits;
@@ -333,17 +331,17 @@ namespace Engine.PathFinding.RecastNavigation
             int m_cacheLayerCount = 0;
             int m_cacheCompressedSize = 0;
             int m_cacheRawSize = 0;
-            int layerBufferSize = Recast.CalcLayerBufferSize(tcparams.Width, tcparams.Height);
+            int layerBufferSize = CalcLayerBufferSize(tcparams.Width, tcparams.Height);
 
             for (int y = 0; y < th; y++)
             {
                 for (int x = 0; x < tw; x++)
                 {
-                    int ntiles = Recast.RasterizeTileLayers(x, y, settings, cfg, geometry, out TileCacheData[] tiles);
+                    int ntiles = RasterizeTileLayers(x, y, settings, cfg, geometry, out TileCacheData[] tiles);
 
                     for (int i = 0; i < ntiles; ++i)
                     {
-                        tileCache.AddTile(tiles[i], TileFlags.DT_TILE_FREE_DATA);
+                        tileCache.AddTile(tiles[i], CompressedTileFlags.DT_COMPRESSEDTILE_FREE_DATA);
 
                         m_cacheLayerCount++;
                         m_cacheCompressedSize += 0;//tiles[i].DataSize;
@@ -364,12 +362,491 @@ namespace Engine.PathFinding.RecastNavigation
             return nm;
         }
 
+        /*TEMP OBSTACLES SAMPLE*/
+        public static int RasterizeTileLayers(int tx, int ty, BuildSettings settings, Config cfg, InputGeometry geometry, out TileCacheData[] tiles)
+        {
+            tiles = new TileCacheData[MAX_LAYERS];
+
+            ChunkyTriMesh chunkyMesh = geometry.GetChunkyMesh();
+
+            // Tile bounds.
+            float tcs = cfg.TileSize * cfg.CellSize;
+
+            Config tcfg = cfg;
+
+            tcfg.BoundingBox.Minimum.X = cfg.BoundingBox.Minimum.X + tx * tcs;
+            tcfg.BoundingBox.Minimum.Y = cfg.BoundingBox.Minimum.Y;
+            tcfg.BoundingBox.Minimum.Z = cfg.BoundingBox.Minimum.Z + ty * tcs;
+
+            tcfg.BoundingBox.Maximum.X = cfg.BoundingBox.Minimum.X + (tx + 1) * tcs;
+            tcfg.BoundingBox.Maximum.Y = cfg.BoundingBox.Maximum.Y;
+            tcfg.BoundingBox.Maximum.Z = cfg.BoundingBox.Minimum.Z + (ty + 1) * tcs;
+
+            tcfg.BoundingBox.Minimum.X -= tcfg.BorderSize * tcfg.CellSize;
+            tcfg.BoundingBox.Minimum.Z -= tcfg.BorderSize * tcfg.CellSize;
+            tcfg.BoundingBox.Maximum.X += tcfg.BorderSize * tcfg.CellSize;
+            tcfg.BoundingBox.Maximum.Z += tcfg.BorderSize * tcfg.CellSize;
+
+            var solid = Recast.CreateHeightfield(tcfg.Width, tcfg.Height, tcfg.BoundingBox, tcfg.CellSize, tcfg.CellHeight);
+
+            var rc = new RasterizationContext
+            {
+                // Allocate voxel heightfield where we rasterize our input data to.
+                solid = solid,
+
+                // Allocate array that can hold triangle flags.
+                // If you have multiple meshes you need to process, allocate
+                // and array which can hold the max number of triangles you need to process.
+                triareas = new TileCacheAreas[chunkyMesh.maxTrisPerChunk],
+
+                tiles = new TileCacheData[RasterizationContext.MaxLayers],
+            };
+
+            Vector2 tbmin = new Vector2(tcfg.BoundingBox.Minimum.X, tcfg.BoundingBox.Minimum.Z);
+            Vector2 tbmax = new Vector2(tcfg.BoundingBox.Maximum.X, tcfg.BoundingBox.Maximum.Z);
+
+            var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
+            if (cid.Count() == 0)
+            {
+                return 0; // empty
+            }
+
+            foreach (var id in cid)
+            {
+                var tris = chunkyMesh.GetTriangles(id);
+
+                Helper.InitializeArray(rc.triareas, TileCacheAreas.RC_NULL_AREA);
+
+                Recast.MarkWalkableTriangles(tcfg.WalkableSlopeAngle, tris, rc.triareas);
+
+                if (!Recast.RasterizeTriangles(rc.solid, tcfg.WalkableClimb, tris, rc.triareas))
+                {
+                    return 0;
+                }
+            }
+
+            // Once all geometry is rasterized, we do initial pass of filtering to
+            // remove unwanted overhangs caused by the conservative rasterization
+            // as well as filter spans where the character cannot possibly stand.
+            if (settings.FilterLowHangingObstacles)
+            {
+                Recast.FilterLowHangingWalkableObstacles(tcfg.WalkableClimb, rc.solid);
+            }
+            if (settings.FilterLedgeSpans)
+            {
+                Recast.FilterLedgeSpans(tcfg.WalkableHeight, tcfg.WalkableClimb, rc.solid);
+            }
+            if (settings.FilterWalkableLowHeightSpans)
+            {
+                Recast.FilterWalkableLowHeightSpans(tcfg.WalkableHeight, rc.solid);
+            }
+
+            if (!Recast.BuildCompactHeightfield(tcfg.WalkableHeight, tcfg.WalkableClimb, rc.solid, out rc.chf))
+            {
+                throw new EngineException("buildNavigation: Could not build compact height field.");
+            }
+
+            // Erode the walkable area by agent radius.
+            if (!Recast.ErodeWalkableArea(tcfg.WalkableRadius, rc.chf))
+            {
+                throw new EngineException("buildNavigation: Could not erode.");
+            }
+
+            // (Optional) Mark areas.
+            ConvexVolume[] vols = geometry.GetConvexVolumes();
+            for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
+            {
+                Recast.MarkConvexPolyArea(
+                    vols[i].verts, vols[i].nverts,
+                    vols[i].hmin, vols[i].hmax,
+                    vols[i].area, rc.chf);
+            }
+
+            Recast.BuildHeightfieldLayers(rc.chf, tcfg.BorderSize, tcfg.WalkableHeight, out rc.lset);
+
+            rc.ntiles = 0;
+            for (int i = 0; i < Math.Min(rc.lset.nlayers, MAX_LAYERS); i++)
+            {
+                HeightfieldLayer layer = rc.lset.layers[i];
+
+                TileCacheData tile = rc.tiles[rc.ntiles];
+
+                // Store header
+                tile.Header = new TileCacheLayerHeader
+                {
+                    magic = TileCacheLayerHeader.TileCacheMagic,
+                    version = TileCacheLayerHeader.TileCacheVersion,
+
+                    // Tile layer location in the navmesh.
+                    tx = tx,
+                    ty = ty,
+                    tlayer = i,
+                    b = layer.boundingBox,
+
+                    // Tile info.
+                    width = layer.width,
+                    height = layer.height,
+                    minx = layer.minx,
+                    maxx = layer.maxx,
+                    miny = layer.miny,
+                    maxy = layer.maxy,
+                    hmin = layer.hmin,
+                    hmax = layer.hmax
+                };
+
+                // Store data
+                tile.Data = new TileCacheLayerData()
+                {
+                    heights = layer.heights,
+                    areas = layer.areas,
+                    cons = layer.cons,
+                };
+
+                rc.tiles[rc.ntiles++] = tile;
+            }
+
+            // Transfer ownsership of tile data from build context to the caller.
+            int n = 0;
+            for (int i = 0; i < Math.Min(rc.ntiles, MAX_LAYERS); i++)
+            {
+                tiles[n++] = rc.tiles[i];
+                rc.tiles[i].Data = TileCacheLayerData.Empty;
+            }
+
+            return n;
+        }
+        public static int CalcLayerBufferSize(int gridWidth, int gridHeight)
+        {
+            int headerSize = Helper.Align4(TileCacheLayerHeader.Size);
+            int gridSize = gridWidth * gridHeight;
+
+            return headerSize + gridSize * 4;
+        }
+        /*TILE MESH SAMPLE*/
+        public static bool BuildAllTiles(InputGeometry geom, BuildSettings settings, Agent agent, NavMesh navMesh)
+        {
+            var bbox = geom.BoundingBox;
+            Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
+            int ts = (int)settings.TileSize;
+            int tw = (gw + ts - 1) / ts;
+            int th = (gh + ts - 1) / ts;
+            float tcs = settings.TileSize * settings.CellSize;
+
+            for (int y = 0; y < th; ++y)
+            {
+                for (int x = 0; x < tw; ++x)
+                {
+                    BoundingBox lastBuiltBbox = new BoundingBox();
+
+                    lastBuiltBbox.Minimum.X = bbox.Minimum.X + x * tcs;
+                    lastBuiltBbox.Minimum.Y = bbox.Minimum.Y;
+                    lastBuiltBbox.Minimum.Z = bbox.Minimum.Z + y * tcs;
+
+                    lastBuiltBbox.Maximum.X = bbox.Minimum.X + (x + 1) * tcs;
+                    lastBuiltBbox.Maximum.Y = bbox.Maximum.Y;
+                    lastBuiltBbox.Maximum.Z = bbox.Minimum.Z + (y + 1) * tcs;
+
+                    MeshData data = BuildTileMesh(x, y, lastBuiltBbox, geom, settings, agent);
+                    if (data != null)
+                    {
+                        // Remove any previous data (navmesh owns and deletes the data).
+                        navMesh.RemoveTile(navMesh.GetTileRefAt(x, y, 0), data, 0);
+                        // Let the navmesh own the data.
+                        navMesh.AddTile(data, TileFlags.DT_TILE_FREE_DATA, 0, out int result);
+                    }
+                }
+            }
+
+            return true;
+        }
+        public static MeshData BuildTileMesh(int tx, int ty, BoundingBox bbox, InputGeometry geometry, BuildSettings settings, Agent agent)
+        {
+            var chunkyMesh = geometry.GetChunkyMesh();
+
+            int walkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize);
+            int tileSize = (int)settings.TileSize;
+            int borderSize = walkableRadius + 3;
+
+            // Init build configuration from GUI
+            Config cfg = new Config
+            {
+                CellSize = settings.CellSize,
+                CellHeight = settings.CellHeight,
+                WalkableSlopeAngle = agent.MaxSlope,
+                WalkableHeight = (int)Math.Ceiling(agent.Height / settings.CellHeight),
+                WalkableClimb = (int)Math.Floor(agent.MaxClimb / settings.CellHeight),
+                WalkableRadius = walkableRadius,
+                MaxEdgeLen = (int)(settings.EdgeMaxLength / settings.CellSize),
+                MaxSimplificationError = settings.EdgeMaxError,
+                MinRegionArea = (int)(settings.RegionMinSize * settings.RegionMinSize),     // Note: area = size*size
+                MergeRegionArea = (int)(settings.RegionMergeSize * settings.RegionMergeSize), // Note: area = size*size
+                MaxVertsPerPoly = settings.VertsPerPoly,
+                TileSize = tileSize,
+                BorderSize = borderSize, // Reserve enough padding.
+                Width = tileSize + borderSize * 2,
+                Height = tileSize + borderSize * 2,
+                DetailSampleDist = settings.DetailSampleDist < 0.9f ? 0 : settings.CellSize * settings.DetailSampleDist,
+                DetailSampleMaxError = settings.CellHeight * settings.DetailSampleMaxError,
+                BoundingBox = bbox,
+            };
+
+            // Expand the heighfield bounding box by border size to find the extents of geometry we need to build this tile.
+            //
+            // This is done in order to make sure that the navmesh tiles connect correctly at the borders,
+            // and the obstacles close to the border work correctly with the dilation process.
+            // No polygons (or contours) will be created on the border area.
+            //
+            // IMPORTANT!
+            //
+            //   :''''''''':
+            //   : +-----+ :
+            //   : |     | :
+            //   : |     |<--- tile to build
+            //   : |     | :  
+            //   : +-----+ :<-- geometry needed
+            //   :.........:
+            //
+            // You should use this bounding box to query your input geometry.
+            //
+            // For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
+            // you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
+            // or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
+            cfg.BoundingBox.Minimum.X -= borderSize * settings.CellSize;
+            cfg.BoundingBox.Minimum.Z -= borderSize * settings.CellSize;
+            cfg.BoundingBox.Maximum.X += borderSize * settings.CellSize;
+            cfg.BoundingBox.Maximum.Z += borderSize * settings.CellSize;
+
+            // Allocate voxel heightfield where we rasterize our input data to.
+            var solid = Recast.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
+
+            // Allocate array that can hold triangle flags.
+            // If you have multiple meshes you need to process, allocate
+            // and array which can hold the max number of triangles you need to process.
+            TileCacheAreas[] triareas = new TileCacheAreas[chunkyMesh.maxTrisPerChunk];
+
+            Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
+            Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
+            var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
+            if (cid.Count() == 0)
+            {
+                return null; // empty
+            }
+
+            foreach (var id in cid)
+            {
+                var tris = chunkyMesh.GetTriangles(id);
+
+                Helper.InitializeArray(triareas, TileCacheAreas.RC_NULL_AREA);
+
+                Recast.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris, triareas);
+
+                if (!Recast.RasterizeTriangles(solid, cfg.WalkableClimb, tris, triareas))
+                {
+                    return null;
+                }
+
+                int spanCount = Recast.GetHeightFieldSpanCount(solid);
+            }
+
+            // Once all geometry is rasterized, we do initial pass of filtering to
+            // remove unwanted overhangs caused by the conservative rasterization
+            // as well as filter spans where the character cannot possibly stand.
+            if (settings.FilterLowHangingObstacles)
+            {
+                Recast.FilterLowHangingWalkableObstacles(cfg.WalkableClimb, solid);
+            }
+            if (settings.FilterLedgeSpans)
+            {
+                Recast.FilterLedgeSpans(cfg.WalkableHeight, cfg.WalkableClimb, solid);
+            }
+            if (settings.FilterWalkableLowHeightSpans)
+            {
+                Recast.FilterWalkableLowHeightSpans(cfg.WalkableHeight, solid);
+            }
+
+            // Compact the heightfield so that it is faster to handle from now on.
+            // This will result more cache coherent data as well as the neighbours
+            // between walkable cells will be calculated.
+            if (!Recast.BuildCompactHeightfield(cfg.WalkableHeight, cfg.WalkableClimb, solid, out CompactHeightfield chf))
+            {
+                return null;
+            }
+
+            // Erode the walkable area by agent radius.
+            if (!Recast.ErodeWalkableArea(cfg.WalkableRadius, chf))
+            {
+                return null;
+            }
+
+            // (Optional) Mark areas.
+            ConvexVolume[] vols = geometry.GetConvexVolumes();
+            for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
+            {
+                Recast.MarkConvexPolyArea(
+                    vols[i].verts, vols[i].nverts,
+                    vols[i].hmin, vols[i].hmax,
+                    vols[i].area, chf);
+            }
+
+            // Partition the heightfield so that we can use simple algorithm later to triangulate the walkable areas.
+            // There are 3 martitioning methods, each with some pros and cons:
+            // 1) Watershed partitioning
+            //   - the classic Recast partitioning
+            //   - creates the nicest tessellation
+            //   - usually slowest
+            //   - partitions the heightfield into nice regions without holes or overlaps
+            //   - the are some corner cases where this method creates produces holes and overlaps
+            //      - holes may appear when a small obstacles is close to large open area (triangulation can handle this)
+            //      - overlaps may occur if you have narrow spiral corridors (i.e stairs), this make triangulation to fail
+            //   * generally the best choice if you precompute the nacmesh, use this if you have large open areas
+            // 2) Monotone partioning
+            //   - fastest
+            //   - partitions the heightfield into regions without holes and overlaps (guaranteed)
+            //   - creates long thin polygons, which sometimes causes paths with detours
+            //   * use this if you want fast navmesh generation
+            // 3) Layer partitoining
+            //   - quite fast
+            //   - partitions the heighfield into non-overlapping regions
+            //   - relies on the triangulation code to cope with holes (thus slower than monotone partitioning)
+            //   - produces better triangles than monotone partitioning
+            //   - does not have the corner cases of watershed partitioning
+            //   - can be slow and create a bit ugly tessellation (still better than monotone)
+            //     if you have large open areas with small obstacles (not a problem if you use tiles)
+            //   * good choice to use for tiled navmesh with medium and small sized tiles
+
+            if (settings.PartitionType == SamplePartitionTypeEnum.Watershed)
+            {
+                // Prepare for region partitioning, by calculating distance field along the walkable surface.
+                if (!Recast.BuildDistanceField(chf))
+                {
+                    return null;
+                }
+
+                // Partition the walkable surface into simple regions without holes.
+                if (!Recast.BuildRegions(chf, cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
+                {
+                    return null;
+                }
+            }
+            else if (settings.PartitionType == SamplePartitionTypeEnum.Monotone)
+            {
+                // Partition the walkable surface into simple regions without holes.
+                // Monotone partitioning does not need distancefield.
+                if (!Recast.BuildRegionsMonotone(chf, cfg.BorderSize, cfg.MinRegionArea, cfg.MergeRegionArea))
+                {
+                    return null;
+                }
+            }
+            else if (settings.PartitionType == SamplePartitionTypeEnum.Layers)
+            {
+                // Partition the walkable surface into simple regions without holes.
+                if (!Recast.BuildLayerRegions(chf, cfg.BorderSize, cfg.MinRegionArea))
+                {
+                    return null;
+                }
+            }
+
+            // Create contours.
+            if (!Recast.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlags.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
+            {
+                return null;
+            }
+
+            if (cset.nconts == 0)
+            {
+                return null;
+            }
+
+            // Build polygon navmesh from the contours.
+            if (!Recast.BuildPolyMesh(cset, tx, ty, cfg.MaxVertsPerPoly, out PolyMesh pmesh))
+            {
+                return null;
+            }
+
+            // Build detail mesh.
+            if (!Recast.BuildPolyMeshDetail(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError, out PolyMeshDetail dmesh))
+            {
+                return null;
+            }
+
+            if (cfg.MaxVertsPerPoly <= Detour.DT_VERTS_PER_POLYGON)
+            {
+                if (pmesh.nverts >= 0xffff)
+                {
+                    // The vertex indices are ushorts, and cannot point to more than 0xffff vertices.
+                    return null;
+                }
+
+                // Update poly flags from areas.
+                for (int i = 0; i < pmesh.npolys; ++i)
+                {
+                    if ((int)pmesh.areas[i] == (int)TileCacheAreas.RC_WALKABLE_AREA)
+                    {
+                        pmesh.areas[i] = SamplePolyAreas.SAMPLE_POLYAREA_GROUND;
+                    }
+
+                    if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GROUND ||
+                        pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GRASS ||
+                        pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_ROAD)
+                    {
+                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK;
+                    }
+                    else if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_WATER)
+                    {
+                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_SWIM;
+                    }
+                    else if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_DOOR)
+                    {
+                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK | SamplePolyFlags.SAMPLE_POLYFLAGS_DOOR;
+                    }
+                }
+
+                var param = new NavMeshCreateParams
+                {
+                    verts = pmesh.verts,
+                    vertCount = pmesh.nverts,
+                    polys = pmesh.polys,
+                    polyAreas = pmesh.areas,
+                    polyFlags = pmesh.flags,
+                    polyCount = pmesh.npolys,
+                    nvp = pmesh.nvp,
+                    detailMeshes = dmesh.meshes,
+                    detailVerts = dmesh.verts,
+                    detailVertsCount = dmesh.nverts,
+                    detailTris = dmesh.tris,
+                    detailTriCount = dmesh.ntris,
+                    offMeshCon = geometry.GetOffMeshConnection(),
+                    offMeshConCount = geometry.GetOffMeshConnectionCount(),
+                    walkableHeight = agent.Height,
+                    walkableRadius = agent.Radius,
+                    walkableClimb = agent.MaxClimb,
+                    tileX = tx,
+                    tileY = ty,
+                    tileLayer = 0,
+                    bmin = pmesh.bmin,
+                    bmax = pmesh.bmax,
+                    cs = cfg.CellSize,
+                    ch = cfg.CellHeight,
+                    buildBvTree = true
+                };
+
+                if (!Detour.CreateNavMeshData(param, out MeshData navData))
+                {
+                    return null;
+                }
+
+                return navData;
+            }
+
+            return null;
+        }
+
         public static void SaveFile(string path, NavMesh mesh)
         {
             NavMeshSetHeader header = new NavMeshSetHeader
             {
-                magic = Constants.DT_NAVMESH_MAGIC,
-                version = Constants.DT_NAVMESH_VERSION,
+                magic = Detour.DT_NAVMESH_MAGIC,
+                version = Detour.DT_NAVMESH_VERSION,
                 numTiles = 0,
                 param = mesh.m_params,
             };
@@ -380,7 +857,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < mesh.MaxTiles; ++i)
             {
                 var tile = mesh.Tiles[i];
-                if (tile == null || tile.header.magic != Constants.DT_NAVMESH_MAGIC || tile.data == null) continue;
+                if (tile == null || tile.header.magic != Detour.DT_NAVMESH_MAGIC || tile.data == null) continue;
 
                 header.numTiles++;
                 tileHeaders.Add(new NavMeshTileHeader
@@ -443,7 +920,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
 
         }
-
+        /// <summary>
+        /// Serialization constructor
+        /// </summary>
+        /// <param name="info">Serialization info</param>
+        /// <param name="context">Serialization context</param>
         protected NavMesh(SerializationInfo info, StreamingContext context)
         {
             var param = info.GetValue<NavMeshParams>("params");
@@ -453,7 +934,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < MaxTiles; i++)
             {
                 var tile = info.GetValue<MeshData>(string.Format("tiles.{0}", i));
-                if (tile == null || tile.header.magic != Constants.DT_NAVMESH_MAGIC || tile == null) continue;
+                if (tile == null || tile.header.magic != Detour.DT_NAVMESH_MAGIC || tile == null) continue;
 
                 AddTile(tile, TileFlags.DT_TILE_FREE_DATA, 0, out int res);
             }
@@ -512,11 +993,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
             // Make sure the data is in right format.
             MeshHeader header = data.header;
-            if (header.magic != Constants.DT_NAVMESH_MAGIC)
+            if (header.magic != Detour.DT_NAVMESH_MAGIC)
             {
                 return false;
             }
-            if (header.version != Constants.DT_NAVMESH_VERSION)
+            if (header.version != Detour.DT_NAVMESH_VERSION)
             {
                 return false;
             }
@@ -542,11 +1023,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Make sure the data is in right format.
             MeshHeader header = data.header;
-            if (header.magic != Constants.DT_NAVMESH_MAGIC)
+            if (header.magic != Detour.DT_NAVMESH_MAGIC)
             {
                 return false;
             }
-            if (header.version != Constants.DT_NAVMESH_VERSION)
+            if (header.version != Detour.DT_NAVMESH_VERSION)
             {
                 return false;
             }
@@ -611,7 +1092,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Insert tile into the position lut.
-            int h = NavMeshUtils.ComputeTileHash(header.x, header.y, m_tileLutMask);
+            int h = Detour.ComputeTileHash(header.x, header.y, m_tileLutMask);
             tile.next = m_posLookup[h];
             m_posLookup[h] = tile;
 
@@ -625,7 +1106,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Build links freelist
             tile.linksFreeList = 0;
-            tile.links[header.maxLinkCount - 1].next = Constants.DT_NULL_LINK;
+            tile.links[header.maxLinkCount - 1].next = Detour.DT_NULL_LINK;
             for (int i = 0; i < header.maxLinkCount - 1; ++i)
             {
                 tile.links[i].next = i + 1;
@@ -669,9 +1150,9 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int j = 0; j < nneis; ++j)
                 {
                     ConnectExtLinks(tile, neis[j], i);
-                    ConnectExtLinks(neis[j], tile, PolyUtils.OppositeTile(i));
+                    ConnectExtLinks(neis[j], tile, Detour.OppositeTile(i));
                     ConnectExtOffMeshLinks(tile, neis[j], i);
-                    ConnectExtOffMeshLinks(neis[j], tile, PolyUtils.OppositeTile(i));
+                    ConnectExtOffMeshLinks(neis[j], tile, Detour.OppositeTile(i));
                 }
             }
 
@@ -687,7 +1168,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Remove tile from hash lookup.
-            int h = NavMeshUtils.ComputeTileHash(tile.header.x, tile.header.y, m_tileLutMask);
+            int h = Detour.ComputeTileHash(tile.header.x, tile.header.y, m_tileLutMask);
             MeshTile prev = null;
             MeshTile cur = m_posLookup[h];
             while (cur != null)
@@ -775,7 +1256,7 @@ namespace Engine.PathFinding.RecastNavigation
         public MeshTile GetTileAt(int x, int y, int layer)
         {
             // Find tile based on hash.
-            int h = NavMeshUtils.ComputeTileHash(x, y, m_tileLutMask);
+            int h = Detour.ComputeTileHash(x, y, m_tileLutMask);
             MeshTile tile = m_posLookup[h];
             while (tile != null)
             {
@@ -794,7 +1275,7 @@ namespace Engine.PathFinding.RecastNavigation
             int n = 0;
 
             // Find tile based on hash.
-            int h = NavMeshUtils.ComputeTileHash(x, y, m_tileLutMask);
+            int h = Detour.ComputeTileHash(x, y, m_tileLutMask);
             MeshTile tile = m_posLookup[h];
             while (tile != null)
             {
@@ -813,7 +1294,7 @@ namespace Engine.PathFinding.RecastNavigation
         public MeshTile GetTileRefAt(int x, int y, int layer)
         {
             // Find tile based on hash.
-            int h = NavMeshUtils.ComputeTileHash(x, y, m_tileLutMask);
+            int h = Detour.ComputeTileHash(x, y, m_tileLutMask);
             MeshTile tile = m_posLookup[h];
             while (tile != null)
             {
@@ -852,6 +1333,14 @@ namespace Engine.PathFinding.RecastNavigation
             }
             return tile;
         }
+        public int GetMaxTiles()
+        {
+            return MaxTiles;
+        }
+        public MeshTile GetTile(int i)
+        {
+            return Tiles[i];
+        }
         public bool GetTileAndPolyByRef(int r, out MeshTile tile, out Poly poly)
         {
             tile = null;
@@ -860,7 +1349,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (r == 0) return false;
             DecodePolyId(r, out int salt, out int it, out int ip);
             if (it >= MaxTiles) return false;
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Constants.DT_NAVMESH_MAGIC) return false;
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC) return false;
             if (ip >= Tiles[it].header.polyCount) return false;
             tile = Tiles[it];
             poly = Tiles[it].polys[ip];
@@ -879,7 +1368,7 @@ namespace Engine.PathFinding.RecastNavigation
             DecodePolyId(r, out int salt, out int it, out int ip);
 
             if (it >= MaxTiles) return false;
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Constants.DT_NAVMESH_MAGIC) return false;
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC) return false;
             if (ip >= Tiles[it].header.polyCount) return false;
 
             return true;
@@ -906,7 +1395,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return false;
             }
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Constants.DT_NAVMESH_MAGIC)
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC)
             {
                 return false;
             }
@@ -927,7 +1416,7 @@ namespace Engine.PathFinding.RecastNavigation
             int idx0 = 0, idx1 = 1;
 
             // Find link that points to first vertex.
-            for (int i = poly.firstLink; i != Constants.DT_NULL_LINK; i = tile.links[i].next)
+            for (int i = poly.firstLink; i != Detour.DT_NULL_LINK; i = tile.links[i].next)
             {
                 if (tile.links[i].edge == 0)
                 {
@@ -958,7 +1447,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return null;
             }
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Constants.DT_NAVMESH_MAGIC)
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC)
             {
                 return null;
             }
@@ -984,7 +1473,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (r == 0) return false;
             DecodePolyId(r, out int salt, out int it, out int ip);
             if (it >= MaxTiles) return false;
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Constants.DT_NAVMESH_MAGIC) return false;
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC) return false;
             MeshTile tile = Tiles[it];
             if (ip >= tile.header.polyCount) return false;
             Poly poly = tile.polys[ip];
@@ -1001,7 +1490,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (r == 0) return false;
             DecodePolyId(r, out int salt, out int it, out int ip);
             if (it >= MaxTiles) return false;
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Constants.DT_NAVMESH_MAGIC) return false;
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC) return false;
             MeshTile tile = Tiles[it];
             if (ip >= tile.header.polyCount) return false;
             Poly poly = tile.polys[ip];
@@ -1015,7 +1504,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (r == 0) return false;
             DecodePolyId(r, out int salt, out int it, out int ip);
             if (it >= MaxTiles) return false;
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Constants.DT_NAVMESH_MAGIC) return false;
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC) return false;
             MeshTile tile = Tiles[it];
             if (ip >= tile.header.polyCount) return false;
             Poly poly = tile.polys[ip];
@@ -1031,7 +1520,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (r == 0) return false;
             DecodePolyId(r, out int salt, out int it, out int ip);
             if (it >= MaxTiles) return false;
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Constants.DT_NAVMESH_MAGIC) return false;
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC) return false;
             MeshTile tile = Tiles[it];
             if (ip >= tile.header.polyCount) return false;
             Poly poly = tile.polys[ip];
@@ -1040,6 +1529,9 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
+        //getTileStateSize
+        //storeTileState
+        //restoreTileState
         public int EncodePolyId(int salt, int it, int ip)
         {
             return (salt << (m_polyBits + m_tileBits)) | (it << m_polyBits) | ip;
@@ -1093,11 +1585,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (tile == null) return 0;
 
-            NavMeshUtils.CalcSlabEndPoints(va, vb, out Vector2 amin, out Vector2 amax, side);
-            float apos = NavMeshUtils.GetSlabCoord(va, side);
+            Detour.CalcSlabEndPoints(va, vb, out Vector2 amin, out Vector2 amax, side);
+            float apos = Detour.GetSlabCoord(va, side);
 
             // Remove links pointing to 'side' and compact the links array. 
-            int m = Constants.DT_EXT_LINK | side;
+            int m = Detour.DT_EXT_LINK | side;
             int n = 0;
 
             int bse = GetPolyRefBase(tile);
@@ -1113,16 +1605,16 @@ namespace Engine.PathFinding.RecastNavigation
 
                     Vector3 vc = tile.verts[poly.verts[j]];
                     Vector3 vd = tile.verts[poly.verts[(j + 1) % nv]];
-                    float bpos = NavMeshUtils.GetSlabCoord(vc, side);
+                    float bpos = Detour.GetSlabCoord(vc, side);
 
                     // Segments are not close enough.
                     if (Math.Abs(apos - bpos) > 0.01f)
                         continue;
 
                     // Check if the segments touch.
-                    NavMeshUtils.CalcSlabEndPoints(vc, vd, out Vector2 bmin, out Vector2 bmax, side);
+                    Detour.CalcSlabEndPoints(vc, vd, out Vector2 bmin, out Vector2 bmax, side);
 
-                    if (!NavMeshUtils.OverlapSlabs(amin, amax, bmin, bmax, 0.01f, tile.header.walkableClimb)) continue;
+                    if (!Detour.OverlapSlabs(amin, amax, bmin, bmax, 0.01f, tile.header.walkableClimb)) continue;
 
                     // Add return value.
                     if (n < maxcon)
@@ -1146,7 +1638,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < tile.header.polyCount; ++i)
             {
                 var poly = tile.polys[i];
-                poly.firstLink = Constants.DT_NULL_LINK;
+                poly.firstLink = Detour.DT_NULL_LINK;
 
                 if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                 {
@@ -1158,10 +1650,10 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int j = poly.vertCount - 1; j >= 0; --j)
                 {
                     // Skip hard and non-internal edges.
-                    if (poly.neis[j] == 0 || (poly.neis[j] & Constants.DT_EXT_LINK) != 0) continue;
+                    if (poly.neis[j] == 0 || (poly.neis[j] & Detour.DT_EXT_LINK) != 0) continue;
 
-                    int idx = NavMeshUtils.AllocLink(tile);
-                    if (idx != Constants.DT_NULL_LINK)
+                    int idx = Detour.AllocLink(tile);
+                    if (idx != Detour.DT_NULL_LINK)
                     {
                         var link = new Link
                         {
@@ -1208,8 +1700,8 @@ namespace Engine.PathFinding.RecastNavigation
                 v = nearestPt;
 
                 // Link off-mesh connection to target poly.
-                int idx = NavMeshUtils.AllocLink(tile);
-                if (idx != Constants.DT_NULL_LINK)
+                int idx = Detour.AllocLink(tile);
+                if (idx != Detour.DT_NULL_LINK)
                 {
                     var link = new Link
                     {
@@ -1226,8 +1718,8 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Start end-point is always connect back to off-mesh connection. 
-                int tidx = NavMeshUtils.AllocLink(tile);
-                if (tidx != Constants.DT_NULL_LINK)
+                int tidx = Detour.AllocLink(tile);
+                if (tidx != Detour.DT_NULL_LINK)
                 {
                     var landPolyIdx = DecodePolyIdPoly(r);
                     var landPoly = tile.polys[landPolyIdx];
@@ -1262,7 +1754,7 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int j = 0; j < nv; ++j)
                 {
                     // Skip non-portal edges.
-                    if ((poly.neis[j] & Constants.DT_EXT_LINK) == 0)
+                    if ((poly.neis[j] & Detour.DT_EXT_LINK) == 0)
                     {
                         continue;
                     }
@@ -1276,11 +1768,11 @@ namespace Engine.PathFinding.RecastNavigation
                     // Create new links
                     var va = tile.verts[poly.verts[j]];
                     var vb = tile.verts[poly.verts[(j + 1) % nv]];
-                    int nnei = FindConnectingPolys(va, vb, target, PolyUtils.OppositeTile(dir), out int[] nei, out float[] neia, 4);
+                    int nnei = FindConnectingPolys(va, vb, target, Detour.OppositeTile(dir), out int[] nei, out float[] neia, 4);
                     for (int k = 0; k < nnei; ++k)
                     {
-                        int idx = NavMeshUtils.AllocLink(tile);
-                        if (idx != Constants.DT_NULL_LINK)
+                        int idx = Detour.AllocLink(tile);
+                        if (idx != Detour.DT_NULL_LINK)
                         {
                             var link = new Link
                             {
@@ -1320,7 +1812,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Connect off-mesh links.
             // We are interested on links which land from target tile to this tile.
-            int oppositeSide = (side == -1) ? 0xff : PolyUtils.OppositeTile(side);
+            int oppositeSide = (side == -1) ? 0xff : Detour.OppositeTile(side);
 
             for (int i = 0; i < target.header.offMeshConCount; ++i)
             {
@@ -1332,7 +1824,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 var targetPoly = target.polys[targetCon.poly];
                 // Skip off-mesh connections which start location could not be connected at all.
-                if (targetPoly.firstLink == Constants.DT_NULL_LINK)
+                if (targetPoly.firstLink == Detour.DT_NULL_LINK)
                 {
                     continue;
                 }
@@ -1356,8 +1848,8 @@ namespace Engine.PathFinding.RecastNavigation
                 target.verts[targetPoly.verts[1]] = nearestPt;
 
                 // Link off-mesh connection to target poly.
-                int idx = NavMeshUtils.AllocLink(target);
-                if (idx != Constants.DT_NULL_LINK)
+                int idx = Detour.AllocLink(target);
+                if (idx != Detour.DT_NULL_LINK)
                 {
                     var link = new Link
                     {
@@ -1374,10 +1866,10 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Link target poly to off-mesh connection.
-                if ((targetCon.flags & Constants.DT_OFFMESH_CON_BIDIR) != 0)
+                if ((targetCon.flags & Detour.DT_OFFMESH_CON_BIDIR) != 0)
                 {
-                    int tidx = NavMeshUtils.AllocLink(tile);
-                    if (tidx != Constants.DT_NULL_LINK)
+                    int tidx = Detour.AllocLink(tile);
+                    if (tidx != Detour.DT_NULL_LINK)
                     {
                         var landPolyIdx = DecodePolyIdPoly(r);
                         var landPoly = tile.polys[landPolyIdx];
@@ -1407,14 +1899,14 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 Poly poly = tile.polys[i];
                 int j = poly.firstLink;
-                int pj = Constants.DT_NULL_LINK;
-                while (j != Constants.DT_NULL_LINK)
+                int pj = Detour.DT_NULL_LINK;
+                while (j != Detour.DT_NULL_LINK)
                 {
                     if (DecodePolyIdTile((int)tile.links[j].nref) == targetNum)
                     {
                         // Remove link.
                         int nj = tile.links[j].next;
-                        if (pj == Constants.DT_NULL_LINK)
+                        if (pj == Detour.DT_NULL_LINK)
                         {
                             poly.firstLink = nj;
                         }
@@ -1422,7 +1914,7 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             tile.links[pj].next = nj;
                         }
-                        NavMeshUtils.FreeLink(tile, j);
+                        Detour.FreeLink(tile, j);
                         j = nj;
                     }
                     else
@@ -1469,7 +1961,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     var node = nodeIndex < tile.bvTree.Length ? tile.bvTree[nodeIndex] : new BVNode();
 
-                    bool overlap = PolyUtils.OverlapQuantBounds(bmin, bmax, node.bmin, node.bmax);
+                    bool overlap = Detour.OverlapQuantBounds(bmin, bmax, node.bmin, node.bmax);
                     bool isLeafNode = node.i >= 0;
 
                     if (isLeafNode && overlap)
@@ -1591,9 +2083,9 @@ namespace Engine.PathFinding.RecastNavigation
             var pd = tile.detailMeshes[ip];
 
             // Clamp point to be inside the polygon.
-            Vector3[] verts = new Vector3[Constants.DT_VERTS_PER_POLYGON];
-            float[] edged = new float[Constants.DT_VERTS_PER_POLYGON];
-            float[] edget = new float[Constants.DT_VERTS_PER_POLYGON];
+            Vector3[] verts = new Vector3[Detour.DT_VERTS_PER_POLYGON];
+            float[] edged = new float[Detour.DT_VERTS_PER_POLYGON];
+            float[] edget = new float[Detour.DT_VERTS_PER_POLYGON];
             int nv = poly.vertCount;
             for (int i = 0; i < nv; ++i)
             {
@@ -1601,7 +2093,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             closest = pos;
-            if (!PolyUtils.DistancePtPolyEdgesSqr(pos, verts, nv, out edged, out edget))
+            if (!Detour.DistancePtPolyEdgesSqr(pos, verts, nv, out edged, out edget))
             {
                 // Point is outside the polygon, dtClamp to nearest edge.
                 float dmin = edged[0];
@@ -1641,14 +2133,15 @@ namespace Engine.PathFinding.RecastNavigation
                         v[k] = tile.detailVerts[(pd.vertBase + (t[k] - poly.vertCount))];
                     }
                 }
-                if (PolyUtils.ClosestHeightPointTriangle(closest, v[0], v[1], v[2], out float h))
+                if (Detour.ClosestHeightPointTriangle(closest, v[0], v[1], v[2], out float h))
                 {
-                    closest[1] = h;
+                    closest.Y = h;
                     break;
                 }
             }
         }
 
+        /*TILE MESH SAMPLE*/
         public void BuildTile(Vector3 pos, InputGeometry geom, BuildSettings settings, Agent agent)
         {
             var bbox = geom.BoundingBox;
@@ -1667,7 +2160,7 @@ namespace Engine.PathFinding.RecastNavigation
             lastBuiltBbox.Maximum.Y = bbox.Maximum.Y;
             lastBuiltBbox.Maximum.Z = bbox.Minimum.Z + (ty + 1) * ts;
 
-            var data = Recast.BuildTileMesh(tx, ty, lastBuiltBbox, geom, settings, agent);
+            var data = BuildTileMesh(tx, ty, lastBuiltBbox, geom, settings, agent);
 
             // Remove any previous data (navmesh owns and deletes the data).
             RemoveTile(GetTileRefAt(tx, ty, 0), data, 0);
