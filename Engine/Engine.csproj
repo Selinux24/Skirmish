@@ -310,7 +310,7 @@
     <Compile Include="PathFinding\RecastNavigation\PathFindingMode.cs" />
     <Compile Include="PathFinding\RecastNavigation\RaycastHit.cs" />
     <Compile Include="PathFinding\RecastNavigation\RaycastOptions.cs" />
-    <Compile Include="PathFinding\RecastNavigation\RecastUtils.cs" />
+    <Compile Include="PathFinding\RecastNavigation\Recast.cs" />
     <Compile Include="PathFinding\RecastNavigation\SegInterval.cs" />
     <Compile Include="PathFinding\RecastNavigation\Status.cs" />
     <Compile Include="PathFinding\RecastNavigation\Heightfield.cs" />
