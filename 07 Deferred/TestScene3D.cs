@@ -344,8 +344,8 @@ namespace Deferred
 
             #region Lights
 
-            this.Lights.KeyLight.Enabled = true;
-            this.Lights.BackLight.Enabled = true;
+            this.Lights.KeyLight.Enabled = false;
+            this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = true;
 
             this.Lights.KeyLight.CastShadow = true;

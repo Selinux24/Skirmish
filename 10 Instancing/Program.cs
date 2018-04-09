@@ -7,7 +7,7 @@ namespace Instancing
         static void Main()
         {
 #if DEBUG
-            using (Game cl = new Game("10 Instancing", false, 1600, 900, false, 0, 0))
+            using (Game cl = new Game("10 Instancing", false, 1600, 900, true, 0, 0))
 #else
             using (Game cl = new Game("10 Instancing", true, 0, 0, true, 0, 0))
 #endif

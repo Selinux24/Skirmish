@@ -7,7 +7,7 @@ namespace Heightmap
         static void Main()
         {
 #if DEBUG
-            using (Game cl = new Game("8 Heightmap", false, 800, 450, false, 0, 0))
+            using (Game cl = new Game("8 Heightmap", false, 1600, 900, true, 0, 0))
 #else
             using (Game cl = new Game("8 Heightmap", true, 0, 0, true, 0, 0))
 #endif

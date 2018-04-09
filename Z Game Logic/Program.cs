@@ -10,7 +10,7 @@ namespace GameLogic
         static void Main()
         {
 #if DEBUG
-            using (game = new Game("Game Logic", false, 1280, 720, true, 0, 4))
+            using (game = new Game("Game Logic", false, 1600, 900, true, 0, 0))
 #else
             using (game = new Game("Game Logic", true, 0, 0, true, 0, 0))
 #endif
