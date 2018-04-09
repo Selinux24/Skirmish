@@ -7,6 +7,8 @@ namespace Engine.PathFinding.RecastNavigation
 {
     static class Recast
     {
+        #region Constants
+
         /// <summary>
         /// Defines the number of bits allocated to rcSpan::smin and rcSpan::smax.
         /// </summary>
@@ -70,6 +72,8 @@ namespace Engine.PathFinding.RecastNavigation
         public const int RC_UNSET_HEIGHT = 0xffff;
 
         public const int VERTEX_BUCKET_COUNT = (1 << 12);
+
+        #endregion
 
         #region RECAST
 
@@ -323,6 +327,15 @@ namespace Engine.PathFinding.RecastNavigation
 
         #region RECASTAREA
 
+        /// <summary>
+        /// Basically, any spans that are closer to a boundary or obstruction than the specified radius are marked as unwalkable.
+        /// </summary>
+        /// <param name="radius">Radius</param>
+        /// <param name="chf">Compact height field</param>
+        /// <returns>Returns always true</returns>
+        /// <remarks>
+        /// This method is usually called immediately after the heightfield has been built.
+        /// </remarks>
         public static bool ErodeWalkableArea(int radius, CompactHeightfield chf)
         {
             int w = chf.width;
@@ -515,9 +528,139 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-        //insertSort
-        //rcMedianFilterWalkableArea
-        //rcMarkBoxArea
+
+        public static void InsertSort(TileCacheAreas[] a, int n)
+        {
+            int i, j;
+            for (i = 1; i < n; i++)
+            {
+                var value = a[i];
+                for (j = i - 1; j >= 0 && a[j] > value; j--)
+                {
+                    a[j + 1] = a[j];
+                }
+                a[j + 1] = value;
+            }
+        }
+        /// <summary>
+        /// This filter is usually applied after applying area id's using functions such as MarkBoxArea, MarkConvexPolyArea, and MarkCylinderArea.
+        /// </summary>
+        /// <param name="chf">Compact height field</param>
+        /// <returns>Returns always true</returns>
+        public static bool MedianFilterWalkableArea(CompactHeightfield chf)
+        {
+            int w = chf.width;
+            int h = chf.height;
+
+            // Init distance.
+            TileCacheAreas[] areas = Helper.CreateArray(chf.spanCount, (TileCacheAreas)0xff);
+
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    var c = chf.cells[x + y * w];
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    {
+                        var s = chf.spans[i];
+                        if (chf.areas[i] == TileCacheAreas.RC_NULL_AREA)
+                        {
+                            areas[i] = chf.areas[i];
+                            continue;
+                        }
+
+                        TileCacheAreas[] nei = new TileCacheAreas[9];
+                        for (int j = 0; j < 9; ++j)
+                        {
+                            nei[j] = chf.areas[i];
+                        }
+
+                        for (int dir = 0; dir < 4; ++dir)
+                        {
+                            if (GetCon(s, dir) != RC_NOT_CONNECTED)
+                            {
+                                int ax = x + GetDirOffsetX(dir);
+                                int ay = y + GetDirOffsetY(dir);
+                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
+                                if (chf.areas[ai] != TileCacheAreas.RC_NULL_AREA)
+                                {
+                                    nei[dir * 2 + 0] = chf.areas[ai];
+                                }
+
+                                var a = chf.spans[ai];
+                                int dir2 = (dir + 1) & 0x3;
+                                if (GetCon(a, dir2) != RC_NOT_CONNECTED)
+                                {
+                                    int ax2 = ax + GetDirOffsetX(dir2);
+                                    int ay2 = ay + GetDirOffsetY(dir2);
+                                    int ai2 = chf.cells[ax2 + ay2 * w].index + GetCon(a, dir2);
+                                    if (chf.areas[ai2] != TileCacheAreas.RC_NULL_AREA)
+                                    {
+                                        nei[dir * 2 + 1] = chf.areas[ai2];
+                                    }
+                                }
+                            }
+                        }
+                        InsertSort(nei, 9);
+                        areas[i] = nei[4];
+                    }
+                }
+            }
+
+            Array.Copy(areas, chf.areas, chf.spanCount);
+
+            areas = null;
+
+            return true;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="bmin"></param>
+        /// <param name="bmax"></param>
+        /// <param name="areaId"></param>
+        /// <param name="chf"></param>
+        /// <remarks>
+        /// The value of spacial parameters are in world units.
+        /// </remarks>
+        public static void MarkBoxArea(Vector3 bmin, Vector3 bmax, TileCacheAreas areaId, CompactHeightfield chf)
+        {
+            int minx = (int)((bmin.X - chf.boundingBox.Minimum.X) / chf.cs);
+            int miny = (int)((bmin.Y - chf.boundingBox.Minimum.Y) / chf.ch);
+            int minz = (int)((bmin.Z - chf.boundingBox.Minimum.Z) / chf.cs);
+            int maxx = (int)((bmax.X - chf.boundingBox.Minimum.X) / chf.cs);
+            int maxy = (int)((bmax.Y - chf.boundingBox.Minimum.Y) / chf.ch);
+            int maxz = (int)((bmax.Z - chf.boundingBox.Minimum.Z) / chf.cs);
+
+            if (maxx < 0) return;
+            if (minx >= chf.width) return;
+            if (maxz < 0) return;
+            if (minz >= chf.height) return;
+
+            if (minx < 0) minx = 0;
+            if (maxx >= chf.width) maxx = chf.width - 1;
+            if (minz < 0) minz = 0;
+            if (maxz >= chf.height) maxz = chf.height - 1;
+
+            for (int z = minz; z <= maxz; ++z)
+            {
+                for (int x = minx; x <= maxx; ++x)
+                {
+                    var c = chf.cells[x + z * chf.width];
+                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
+                    {
+                        var s = chf.spans[i];
+                        if ((int)s.y >= miny && (int)s.y <= maxy)
+                        {
+                            if (chf.areas[i] != TileCacheAreas.RC_NULL_AREA)
+                            {
+                                chf.areas[i] = areaId;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         /// <summary>
         /// Gets if the specified point is in the polygon
         /// </summary>
@@ -542,6 +685,19 @@ namespace Engine.PathFinding.RecastNavigation
 
             return c;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="verts"></param>
+        /// <param name="nverts"></param>
+        /// <param name="hmin"></param>
+        /// <param name="hmax"></param>
+        /// <param name="areaId"></param>
+        /// <param name="chf"></param>
+        /// <remarks>
+        /// The value of spacial parameters are in world units.
+        /// The y-values of the polygon vertices are ignored. So the polygon is effectively projected onto the xz-plane at hmin, then extruded to hmax.
+        /// </remarks>
         public static void MarkConvexPolyArea(Vector3[] verts, int nverts, float hmin, float hmax, TileCacheAreas areaId, CompactHeightfield chf)
         {
             Vector3 bmin = verts[0];
@@ -603,8 +759,160 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
         }
-        //rcOffsetPoly
-        //rcMarkCylinderArea
+
+        public static int OffsetPoly(Vector3[] verts, int nverts, float offset, out Vector3[] outVerts, int maxOutVerts)
+        {
+            outVerts = new Vector3[maxOutVerts];
+
+            float MITER_LIMIT = 1.20f;
+
+            int n = 0;
+
+            for (int i = 0; i < nverts; i++)
+            {
+                int a = (i + nverts - 1) % nverts;
+                int b = i;
+                int c = (i + 1) % nverts;
+                Vector3 va = verts[a];
+                Vector3 vb = verts[b];
+                Vector3 vc = verts[c];
+                float dx0 = vb.X - va.X;
+                float dy0 = vb.Z - va.Z;
+                float d0 = dx0 * dx0 + dy0 * dy0;
+                if (d0 > 1e-6f)
+                {
+                    d0 = 1.0f / (float)Math.Sqrt(d0);
+                    dx0 *= d0;
+                    dy0 *= d0;
+                }
+                float dx1 = vc.X - vb.X;
+                float dy1 = vc.Z - vb.Z;
+                float d1 = dx1 * dx1 + dy1 * dy1;
+                if (d1 > 1e-6f)
+                {
+                    d1 = 1.0f / (float)Math.Sqrt(d1);
+                    dx1 *= d1;
+                    dy1 *= d1;
+                }
+                float dlx0 = -dy0;
+                float dly0 = dx0;
+                float dlx1 = -dy1;
+                float dly1 = dx1;
+                float cross = dx1 * dy0 - dx0 * dy1;
+                float dmx = (dlx0 + dlx1) * 0.5f;
+                float dmy = (dly0 + dly1) * 0.5f;
+                float dmr2 = dmx * dmx + dmy * dmy;
+                bool bevel = dmr2 * MITER_LIMIT * MITER_LIMIT < 1.0f;
+                if (dmr2 > 1e-6f)
+                {
+                    float scale = 1.0f / dmr2;
+                    dmx *= scale;
+                    dmy *= scale;
+                }
+
+                if (bevel && cross < 0.0f)
+                {
+                    if (n + 2 >= maxOutVerts)
+                    {
+                        return 0;
+                    }
+                    float d = (1.0f - (dx0 * dx1 + dy0 * dy1)) * 0.5f;
+                    outVerts[n].X = vb.X + (-dlx0 + dx0 * d) * offset;
+                    outVerts[n].Y = vb.Y;
+                    outVerts[n].Z = vb.Z + (-dly0 + dy0 * d) * offset;
+                    n++;
+                    outVerts[n].X = vb.X + (-dlx1 - dx1 * d) * offset;
+                    outVerts[n].Y = vb.Y;
+                    outVerts[n].Z = vb.Z + (-dly1 - dy1 * d) * offset;
+                    n++;
+                }
+                else
+                {
+                    if (n + 1 >= maxOutVerts)
+                    {
+                        return 0;
+                    }
+                    outVerts[n].X = vb.X - dmx * offset;
+                    outVerts[n].Y = vb.Y;
+                    outVerts[n].Z = vb.Z - dmy * offset;
+                    n++;
+                }
+            }
+
+            return n;
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <param name="r"></param>
+        /// <param name="h"></param>
+        /// <param name="areaId"></param>
+        /// <param name="chf"></param>
+        /// <remarks>
+        /// The value of spacial parameters are in world units.
+        /// </remarks>
+        public static void MarkCylinderArea(Vector3 pos, float r, float h, TileCacheAreas areaId, CompactHeightfield chf)
+        {
+            Vector3 bmin = new Vector3();
+            Vector3 bmax = new Vector3();
+            bmin.X = pos.X - r;
+            bmin.Y = pos.Y;
+            bmin.Z = pos.Z - r;
+            bmax.X = pos.X + r;
+            bmax.Y = pos.Y + h;
+            bmax.Z = pos.Z + r;
+            float r2 = r * r;
+
+            int minx = (int)((bmin.X - chf.boundingBox.Minimum.X) / chf.cs);
+            int miny = (int)((bmin.Y - chf.boundingBox.Minimum.Y) / chf.ch);
+            int minz = (int)((bmin.Z - chf.boundingBox.Minimum.Z) / chf.cs);
+            int maxx = (int)((bmax.X - chf.boundingBox.Minimum.X) / chf.cs);
+            int maxy = (int)((bmax.Y - chf.boundingBox.Minimum.Y) / chf.ch);
+            int maxz = (int)((bmax.Z - chf.boundingBox.Minimum.Z) / chf.cs);
+
+            if (maxx < 0) return;
+            if (minx >= chf.width) return;
+            if (maxz < 0) return;
+            if (minz >= chf.height) return;
+
+            if (minx < 0) minx = 0;
+            if (maxx >= chf.width) maxx = chf.width - 1;
+            if (minz < 0) minz = 0;
+            if (maxz >= chf.height) maxz = chf.height - 1;
+
+
+            for (int z = minz; z <= maxz; ++z)
+            {
+                for (int x = minx; x <= maxx; ++x)
+                {
+                    var c = chf.cells[x + z * chf.width];
+                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
+                    {
+                        var s = chf.spans[i];
+
+                        if (chf.areas[i] == TileCacheAreas.RC_NULL_AREA)
+                        {
+                            continue;
+                        }
+
+                        if ((int)s.y >= miny && (int)s.y <= maxy)
+                        {
+                            float sx = chf.boundingBox.Minimum.X + (x + 0.5f) * chf.cs;
+                            float sz = chf.boundingBox.Minimum.Z + (z + 0.5f) * chf.cs;
+                            float dx = sx - pos.X;
+                            float dz = sz - pos.Z;
+
+                            if (dx * dx + dz * dz < r2)
+                            {
+                                chf.areas[i] = areaId;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
 
         #endregion
 
@@ -3346,8 +3654,48 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
         }
-        //compareHoles
-        //compareDiagDist
+        private static int CompareHoles(ContourHole va, ContourHole vb)
+        {
+            ContourHole a = va;
+            ContourHole b = vb;
+            if (a.minx == b.minx)
+            {
+                if (a.minz < b.minz)
+                {
+                    return -1;
+                }
+                if (a.minz > b.minz)
+                {
+                    return 1;
+                }
+            }
+            else
+            {
+                if (a.minx < b.minx)
+                {
+                    return -1;
+                }
+                if (a.minx > b.minx)
+                {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+        private static int CompareDiagDist(PotentialDiagonal va, PotentialDiagonal vb)
+        {
+            PotentialDiagonal a = va;
+            PotentialDiagonal b = vb;
+            if (a.dist < b.dist)
+            {
+                return -1;
+            }
+            if (a.dist > b.dist)
+            {
+                return 1;
+            }
+            return 0;
+        }
         private static void MergeRegionHoles(ContourRegion region)
         {
             // Sort holes from left to right.
@@ -4439,9 +4787,54 @@ namespace Engine.PathFinding.RecastNavigation
 
             return i;
         }
-        //diagonalieLoose
-        //inConeLoose
-        //diagonalLoose
+        public static bool DiagonalieLoose(int i, int j, int n, Int4[] verts, int[] indices)
+        {
+            Int4 d0 = verts[(indices[i] & 0x0fffffff)];
+            Int4 d1 = verts[(indices[j] & 0x0fffffff)];
+
+            // For each edge (k,k+1) of P
+            for (int k = 0; k < n; k++)
+            {
+                int k1 = Next(k, n);
+                // Skip edges incident to i or j
+                if (!((k == i) || (k1 == i) || (k == j) || (k1 == j)))
+                {
+                    Int4 p0 = verts[(indices[k] & 0x0fffffff)];
+                    Int4 p1 = verts[(indices[k1] & 0x0fffffff)];
+
+                    if (Vequal(d0, p0) || Vequal(d1, p0) || Vequal(d0, p1) || Vequal(d1, p1))
+                    {
+                        continue;
+                    }
+
+                    if (IntersectProp(d0, d1, p0, p1))
+                    {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        public static bool InConeLoose(int i, int j, int n, Int4[] verts, int[] indices)
+        {
+            Int4 pi = verts[(indices[i] & 0x0fffffff) * 4];
+            Int4 pj = verts[(indices[j] & 0x0fffffff) * 4];
+            Int4 pi1 = verts[(indices[Next(i, n)] & 0x0fffffff)];
+            Int4 pin1 = verts[(indices[Prev(i, n)] & 0x0fffffff)];
+
+            // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
+            if (LeftOn(pin1, pi, pi1))
+            {
+                return LeftOn(pi, pj, pin1) && LeftOn(pj, pi, pi1);
+            }
+            // Assume (i-1,i,i+1) not collinear.
+            // else P[i] is reflex.
+            return !(LeftOn(pi, pj, pi1) && LeftOn(pj, pi, pin1));
+        }
+        public static bool DiagonalLoose(int i, int j, int n, Int4[] verts, int[] indices)
+        {
+            return InConeLoose(i, j, n, verts, indices) && DiagonalieLoose(i, j, n, verts, indices);
+        }
         public static int Triangulate(int n, Int4[] verts, ref int[] indices, out Int3[] tris)
         {
             int ntris = 0;
@@ -5304,8 +5697,158 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-        //rcMergePolyMeshes
-        //rcCopyPolyMesh
+        public static bool MergePolyMeshes(PolyMesh[] meshes, int nmeshes, out PolyMesh mesh)
+        {
+            mesh = null;
+
+            if (nmeshes == 0 || meshes == null)
+            {
+                return true;
+            }
+
+            mesh = new PolyMesh
+            {
+                nvp = meshes[0].nvp,
+                cs = meshes[0].cs,
+                ch = meshes[0].ch,
+                bmin = meshes[0].bmin,
+                bmax = meshes[0].bmax
+            };
+
+            int maxVerts = 0;
+            int maxPolys = 0;
+            int maxVertsPerMesh = 0;
+            for (int i = 0; i < nmeshes; ++i)
+            {
+                mesh.bmin = Vector3.Min(mesh.bmin, meshes[i].bmin);
+                mesh.bmax = Vector3.Max(mesh.bmax, meshes[i].bmax);
+                maxVertsPerMesh = Math.Max(maxVertsPerMesh, meshes[i].nverts);
+                maxVerts += meshes[i].nverts;
+                maxPolys += meshes[i].npolys;
+            }
+
+            mesh.nverts = 0;
+            mesh.verts = new Int3[maxVerts];
+            mesh.npolys = 0;
+            mesh.polys = new Polygoni[maxPolys];
+            mesh.regs = new int[maxPolys];
+            mesh.areas = new SamplePolyAreas[maxPolys];
+            mesh.flags = new SamplePolyFlags[maxPolys];
+
+            int[] nextVert = Helper.CreateArray(maxVerts, 0);
+            int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, -1);
+            int[] vremap = Helper.CreateArray(maxVertsPerMesh, 0);
+
+            for (int i = 0; i < nmeshes; ++i)
+            {
+                var pmesh = meshes[i];
+
+                int ox = (int)Math.Floor((pmesh.bmin.X - mesh.bmin.X) / mesh.cs + 0.5f);
+                int oz = (int)Math.Floor((pmesh.bmin.X - mesh.bmin.Z) / mesh.cs + 0.5f);
+
+                bool isMinX = (ox == 0);
+                bool isMinZ = (oz == 0);
+                bool isMaxX = ((int)Math.Floor((mesh.bmax.X - pmesh.bmax.X) / mesh.cs + 0.5f)) == 0;
+                bool isMaxZ = ((int)Math.Floor((mesh.bmax.Z - pmesh.bmax.Z) / mesh.cs + 0.5f)) == 0;
+                bool isOnBorder = (isMinX || isMinZ || isMaxX || isMaxZ);
+
+                for (int j = 0; j < pmesh.nverts; ++j)
+                {
+                    var v = pmesh.verts[j];
+                    vremap[j] = AddVertex(v[0] + ox, v[1], v[2] + oz, mesh.verts, firstVert, nextVert, ref mesh.nverts);
+                }
+
+                for (int j = 0; j < pmesh.npolys; ++j)
+                {
+                    var tgt = mesh.polys[mesh.npolys];
+                    var src = pmesh.polys[j];
+                    mesh.regs[mesh.npolys] = pmesh.regs[j];
+                    mesh.areas[mesh.npolys] = pmesh.areas[j];
+                    mesh.flags[mesh.npolys] = pmesh.flags[j];
+                    mesh.npolys++;
+                    for (int k = 0; k < mesh.nvp; ++k)
+                    {
+                        if (src[k] == RC_MESH_NULL_IDX)
+                        {
+                            break;
+                        }
+                        tgt[k] = vremap[src[k]];
+                    }
+
+                    if (isOnBorder)
+                    {
+                        for (int k = mesh.nvp; k < mesh.nvp * 2; ++k)
+                        {
+                            if ((src[k] & 0x8000) != 0 && src[k] != 0xffff)
+                            {
+                                int dir = src[k] & 0xf;
+                                switch (dir)
+                                {
+                                    case 0: // Portal x-
+                                        if (isMinX) tgt[k] = src[k];
+                                        break;
+                                    case 1: // Portal z+
+                                        if (isMaxZ) tgt[k] = src[k];
+                                        break;
+                                    case 2: // Portal x+
+                                        if (isMaxX) tgt[k] = src[k];
+                                        break;
+                                    case 3: // Portal z-
+                                        if (isMinZ) tgt[k] = src[k];
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Calculate adjacency.
+            if (!BuildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, mesh.nvp))
+            {
+                throw new EngineException("rcMergePolyMeshes: Adjacency failed.");
+            }
+
+            if (mesh.nverts > 0xffff)
+            {
+                throw new EngineException(string.Format("rcMergePolyMeshes: The resulting mesh has too many vertices {0} (max {1}). Data can be corrupted.", mesh.nverts, 0xffff));
+            }
+            if (mesh.npolys > 0xffff)
+            {
+                throw new EngineException(string.Format("rcMergePolyMeshes: The resulting mesh has too many polygons {0} (max {1}). Data can be corrupted.", mesh.npolys, 0xffff));
+            }
+
+            return true;
+        }
+        public static bool CopyPolyMesh(PolyMesh src, out PolyMesh dst)
+        {
+            dst = new PolyMesh
+            {
+                nverts = src.nverts,
+                npolys = src.npolys,
+                maxpolys = src.npolys,
+                nvp = src.nvp,
+                bmin = src.bmin,
+                bmax = src.bmax,
+                cs = src.cs,
+                ch = src.ch,
+                borderSize = src.borderSize,
+                maxEdgeError = src.maxEdgeError,
+                verts = new Int3[src.nverts],
+                polys = new Polygoni[src.npolys],
+                regs = new int[src.npolys],
+                areas = new SamplePolyAreas[src.npolys],
+                flags = new SamplePolyFlags[src.npolys]
+            };
+
+            Array.Copy(src.verts, dst.verts, src.nverts);
+            Array.Copy(src.polys, dst.polys, src.npolys);
+            Array.Copy(src.regs, dst.regs, src.npolys);
+            Array.Copy(src.areas, dst.areas, src.npolys);
+            Array.Copy(src.flags, dst.flags, src.npolys);
+
+            return true;
+        }
 
         #endregion
 
@@ -6164,8 +6707,8 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         var s = samples[i];
                         if (s.W != 0) continue; // skip added.
-                        // The sample location is jittered to get rid of some bad triangulations
-                        // which are cause by symmetrical data from the grid structure.
+                                                // The sample location is jittered to get rid of some bad triangulations
+                                                // which are cause by symmetrical data from the grid structure.
                         Vector3 pt = new Vector3
                         {
                             X = s.X * sampleDist + GetJitterX(i) * cs * 0.1f,
@@ -6681,7 +7224,68 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-        //rcMergePolyMeshDetails
+        public static bool MergePolyMeshDetails(PolyMeshDetail[] meshes, int nmeshes, out PolyMeshDetail mesh)
+        {
+            mesh = new PolyMeshDetail();
+
+            int maxVerts = 0;
+            int maxTris = 0;
+            int maxMeshes = 0;
+
+            for (int i = 0; i < nmeshes; ++i)
+            {
+                if (meshes[i] == null)
+                {
+                    continue;
+                }
+                maxVerts += meshes[i].nverts;
+                maxTris += meshes[i].ntris;
+                maxMeshes += meshes[i].nmeshes;
+            }
+
+            mesh.nmeshes = 0;
+            mesh.meshes = new Int4[maxMeshes];
+            mesh.ntris = 0;
+            mesh.tris = new Int4[maxTris];
+            mesh.nverts = 0;
+            mesh.verts = new Vector3[maxVerts];
+
+            // Merge datas.
+            for (int i = 0; i < nmeshes; ++i)
+            {
+                var dm = meshes[i];
+                if (dm == null)
+                {
+                    continue;
+                }
+                for (int j = 0; j < dm.nmeshes; ++j)
+                {
+                    var src = dm.meshes[j];
+
+                    var dst = new Int4();
+                    dst[0] = mesh.nverts + src[0];
+                    dst[1] = src[1];
+                    dst[2] = mesh.ntris + src[2];
+                    dst[3] = src[3];
+
+                    mesh.meshes[mesh.nmeshes] = dst;
+                    mesh.nmeshes++;
+                }
+
+                for (int k = 0; k < dm.nverts; ++k)
+                {
+                    mesh.verts[mesh.nverts] = dm.verts[k];
+                    mesh.nverts++;
+                }
+                for (int k = 0; k < dm.ntris; ++k)
+                {
+                    mesh.tris[mesh.ntris] = dm.tris[k];
+                    mesh.ntris++;
+                }
+            }
+
+            return true;
+        }
 
         #endregion
 

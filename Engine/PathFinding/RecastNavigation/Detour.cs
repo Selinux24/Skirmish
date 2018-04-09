@@ -7,6 +7,8 @@ namespace Engine.PathFinding.RecastNavigation
 {
     static class Detour
     {
+        #region Constants
+
         /// <summary>
         /// The maximum number of vertices per navigation polygon.
         /// </summary>
@@ -67,6 +69,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public const float H_SCALE = 0.999f;
 
+        #endregion
+
         #region DETOURCOMMON
 
         /// <summary>
@@ -117,8 +121,89 @@ namespace Engine.PathFinding.RecastNavigation
             return overlap;
         }
 
-        //dtClosestPtPointTriangle
+        public static void ClosestPtPointTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out Vector3 closest)
+        {
+            // Check if P in vertex region outside A
+            Vector3 ab = Vector3.Subtract(b, a);
+            Vector3 ac = Vector3.Subtract(c, a);
+            Vector3 ap = Vector3.Subtract(p, a);
+            float d1 = Vector3.Dot(ab, ap);
+            float d2 = Vector3.Dot(ac, ap);
+            if (d1 <= 0.0f && d2 <= 0.0f)
+            {
+                // barycentric coordinates (1,0,0)
+                closest = a;
+                return;
+            }
 
+            // Check if P in vertex region outside B
+            Vector3 bp = Vector3.Subtract(p, b);
+            float d3 = Vector3.Dot(ab, bp);
+            float d4 = Vector3.Dot(ac, bp);
+            if (d3 >= 0.0f && d4 <= d3)
+            {
+                // barycentric coordinates (0,1,0)
+                closest = b;
+                return;
+            }
+
+            // Check if P in edge region of AB, if so return projection of P onto AB
+            float vc = d1 * d4 - d3 * d2;
+            if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f)
+            {
+                // barycentric coordinates (1-v,v,0)
+                float v = d1 / (d1 - d3);
+                closest.X = a.X + v * ab.X;
+                closest.Y = a.Y + v * ab.Y;
+                closest.Z = a.Z + v * ab.Z;
+                return;
+            }
+
+            // Check if P in vertex region outside C
+            Vector3 cp = Vector3.Subtract(p, c);
+            float d5 = Vector3.Dot(ab, cp);
+            float d6 = Vector3.Dot(ac, cp);
+            if (d6 >= 0.0f && d5 <= d6)
+            {
+                // barycentric coordinates (0,0,1)
+                closest = c;
+                return;
+            }
+
+            // Check if P in edge region of AC, if so return projection of P onto AC
+            float vb = d5 * d2 - d1 * d6;
+            if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f)
+            {
+                // barycentric coordinates (1-w,0,w)
+                float w = d2 / (d2 - d6);
+                closest.X = a.X + w * ac.X;
+                closest.Y = a.Y + w * ac.Y;
+                closest.Z = a.Z + w * ac.Z;
+                return;
+            }
+
+            // Check if P in edge region of BC, if so return projection of P onto BC
+            float va = d3 * d6 - d5 * d4;
+            if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f)
+            {
+                // barycentric coordinates (0,1-w,w)
+                float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+                closest.X = b.X + w * (c.X - b.X);
+                closest.Y = b.Y + w * (c.Y - b.Y);
+                closest.Z = b.Z + w * (c.Z - b.Z);
+                return;
+            }
+
+            // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
+            {
+                float denom = 1.0f / (va + vb + vc);
+                float v = vb * denom;
+                float w = vc * denom;
+                closest.X = a.X + ab.X * v + ac.X * w;
+                closest.Y = a.Y + ab.Y * v + ac.Y * w;
+                closest.Z = a.Z + ab.Z * v + ac.Z * w;
+            }
+        }
         /// <summary>
         /// Derives the y-axis height of the closest point on the triangle from the specified reference point.
         /// </summary>
@@ -301,7 +386,17 @@ namespace Engine.PathFinding.RecastNavigation
             return dx * dx + dz * dz;
         }
 
-        //dtCalcPolyCenter
+        public static void CalcPolyCenter(int[] idx, int nidx, Vector3[] verts, out Vector3 tc)
+        {
+            tc = Vector3.Zero;
+
+            for (int j = 0; j < nidx; ++j)
+            {
+                tc += verts[idx[j]];
+            }
+
+            tc *= 1.0f / nidx;
+        }
 
         public static bool OverlapPolyPoly2D(Vector3[] polya, int npolya, Vector3[] polyb, int npolyb)
         {
@@ -1035,8 +1130,6 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-        //dtNavMeshHeaderSwapEndian
-        //NavMeshDataSwapEndian
 
         #endregion
 

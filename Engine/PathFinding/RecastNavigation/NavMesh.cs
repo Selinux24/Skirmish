@@ -495,12 +495,7 @@ namespace Engine.PathFinding.RecastNavigation
                 };
 
                 // Store data
-                tile.Data = new TileCacheLayerData()
-                {
-                    heights = layer.heights,
-                    areas = layer.areas,
-                    cons = layer.cons,
-                };
+                DetourTileCache.BuildTileCacheLayer(layer.heights, layer.areas, layer.cons, ref tile.Data);
 
                 rc.tiles[rc.ntiles++] = tile;
             }

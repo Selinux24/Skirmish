@@ -5,6 +5,8 @@ namespace Engine.PathFinding.RecastNavigation
 {
     static class DetourTileCache
     {
+        #region Constants
+
         public const int VERTEX_BUCKET_COUNT2 = (1 << 8);
         public const int MAX_REQUESTS = 64;
         public const int MAX_UPDATE = 64;
@@ -18,10 +20,21 @@ namespace Engine.PathFinding.RecastNavigation
         public const int DT_TILECACHE_WALKABLE_AREA = 63;
         public const int DT_TILECACHE_NULL_IDX = 0xffff;
 
+        #endregion
+
         #region DETOURTILECACHEBUILDER
 
-        //dtBuildTileCacheLayer
-        //dtFreeTileCacheLayer
+        public static bool BuildTileCacheLayer(int[] heights, TileCacheAreas[] areas, int[] cons, ref TileCacheLayerData data)
+        {
+            data = new TileCacheLayerData()
+            {
+                heights = heights,
+                areas = areas,
+                cons = cons,
+            };
+
+            return true;
+        }
         public static bool DecompressTileCacheLayer(TileCacheLayerHeader header, TileCacheLayerData data, int dataSize, out TileCacheLayer layer)
         {
             layer = new TileCacheLayer()
@@ -697,7 +710,6 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-        //dtTileCacheHeaderSwapEndian
         public static int GetDirOffsetX(int dir)
         {
             int[] offset = new[] { -1, 0, 1, 0, };
