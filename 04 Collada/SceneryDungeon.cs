@@ -52,11 +52,9 @@ namespace Collada
             this.agent = new Player()
             {
                 Name = "Player",
-                Height = 0.75f,
-                MaxClimb = 0.5f,
+                Height = 0.5f,
                 Radius = 0.15f,
-                Velocity = 4f,
-                VelocitySlow = 1f,
+                MaxClimb = 0.225f,
             };
 
             this.dungeon = this.AddComponent<Scenery>(
@@ -97,7 +95,7 @@ namespace Collada
             this.Camera.SlowMovementDelta = this.agent.VelocitySlow;
             this.Camera.Mode = CameraModes.Free;
             this.Camera.Position = new Vector3(0, this.agent.Height, 0);
-            this.Camera.Interest = new Vector3(0, 1, 1);
+            this.Camera.Interest = new Vector3(0, this.agent.Height, 1);
         }
         private void InitializeEnvironment()
         {
@@ -114,7 +112,7 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                this.Game.SetScene<SceneStart>();
             }
 
             this.UpdateCamera(gameTime);

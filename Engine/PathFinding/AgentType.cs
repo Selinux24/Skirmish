@@ -17,6 +17,15 @@ namespace Engine.PathFinding
         /// </summary>
         public float Height { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public AgentType()
+        {
+            Name = "Player";
+            Height = 2.0f;
+        }
+
         public override int GetHashCode()
         {
             return (Name ?? "").GetHashCode();

@@ -39,6 +39,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public float MaxSlope { get; set; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Agent() : base()
+        {
+            Radius = 0.6f;
+            MaxClimb = 0.9f;
+            MaxSlope = 45.0f;
+        }
+
         public override int GetHashCode()
         {
             return base.GetHashCode();

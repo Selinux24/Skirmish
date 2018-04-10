@@ -16,81 +16,54 @@ namespace Engine.PathFinding.RecastNavigation
         {
             get
             {
-                return new BuildSettings()
-                {
-                    CellSize = 0.3f,
-                    CellHeight = 0.2f,
-                    EdgeMaxLength = 12.0f,
-                    EdgeMaxError = 1.3f,
-                    DetailSampleDist = 6.0f,
-                    DetailSampleMaxError = 1.0f,
-                    RegionMinSize = 8,
-                    RegionMergeSize = 20,
-                    VertsPerPoly = 6,
-                    PartitionType = SamplePartitionTypeEnum.Watershed,
-
-                    Agents = new Agent[]
-                    {
-                        Agent.Default,
-                    },
-
-                    BuildMode = BuildModesEnum.Solo,
-                    TileSize = 32,
-                    MaxNodes = 2048,
-
-                    FilterLowHangingObstacles = true,
-                    FilterLedgeSpans = true,
-                    FilterWalkableLowHeightSpans = true,
-
-                    NavmeshBounds = null,
-                };
+                return new BuildSettings();
             }
         }
 
         /// <summary>
         /// Cell size
         /// </summary>
-        public float CellSize;
+        public float CellSize = 0.3f;
         /// <summary>
         /// Cell height
         /// </summary>
-        public float CellHeight;
+        public float CellHeight = 0.2f;
         /// <summary>
         /// Edge maximum length
         /// </summary>
-        public float EdgeMaxLength;
+        public float EdgeMaxLength = 12.0f;
         /// <summary>
         /// Edge maximum error
         /// </summary>
-        public float EdgeMaxError;
+        public float EdgeMaxError = 1.3f;
         /// <summary>
         /// Detail sample distance
         /// </summary>
-        public float DetailSampleDist;
+        public float DetailSampleDist = 6.0f;
         /// <summary>
         /// Detail sample maximum error
         /// </summary>
-        public float DetailSampleMaxError;
+        public float DetailSampleMaxError = 1.0f;
         /// <summary>
         /// Region minimum size
         /// </summary>
-        public float RegionMinSize;
+        public float RegionMinSize = 8;
         /// <summary>
         /// Region merge size
         /// </summary>
-        public float RegionMergeSize;
+        public float RegionMergeSize = 20;
         /// <summary>
         /// Vertices per polygon
         /// </summary>
-        public int VertsPerPoly;
+        public int VertsPerPoly = 6;
         /// <summary>
         /// Partition type
         /// </summary>
-        public SamplePartitionTypeEnum PartitionType;
+        public SamplePartitionTypeEnum PartitionType = SamplePartitionTypeEnum.Watershed;
         /// <summary>
         /// Agents list
         /// </summary>
-        public Agent[] Agents;
+        public Agent[] Agents = new Agent[] { new Agent() };
 
         /// <summary>
         /// Navigation mesh building mode
@@ -99,30 +72,30 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Tile size (if tiled mode)
         /// </summary>
-        public float TileSize;
+        public float TileSize = 32;
         /// <summary>
         /// Maximum number of nodes
         /// </summary>
-        public int MaxNodes;
+        public int MaxNodes = 2048;
 
         /// <summary>
         /// Filter low hanging obstacles when generation
         /// </summary>
-        public bool FilterLowHangingObstacles;
+        public bool FilterLowHangingObstacles = true;
         /// <summary>
         /// Filter ledge spans when generation
         /// </summary>
-        public bool FilterLedgeSpans;
+        public bool FilterLedgeSpans = true;
         /// <summary>
         /// Filter walkable low hight spans when generation
         /// </summary>
-        public bool FilterWalkableLowHeightSpans;
+        public bool FilterWalkableLowHeightSpans = true;
 
         /// <summary>
         /// Navigation mesh bounds
         /// </summary>
         [NonSerialized]
-        public BoundingBox? NavmeshBounds;
+        public BoundingBox? NavmeshBounds = null;
         /// <summary>
         /// Serialization property
         /// </summary>

@@ -156,7 +156,7 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                this.Game.SetScene<SceneStart>();
             }
 
             this.UpdateCamera(gameTime);

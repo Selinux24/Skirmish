@@ -9,6 +9,12 @@ namespace Collada
         public float Velocity { get; set; }
         public float VelocitySlow { get; set; }
 
+        public Player() : base()
+        {
+            Velocity = 4f;
+            VelocitySlow = 1f;
+        }
+
         public override int GetHashCode()
         {
             return base.GetHashCode();

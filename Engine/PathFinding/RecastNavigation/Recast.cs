@@ -4769,7 +4769,7 @@ namespace Engine.PathFinding.RecastNavigation
             int bucket = ComputeVertexHash(x, 0, z);
             int i = firstVert[bucket];
 
-            while (i != RC_MESH_NULL_IDX)
+            while (i != -1)
             {
                 var v = verts[i];
                 if (v.X == x && (Math.Abs(v.Y - y) <= 2) && v.Z == z)
