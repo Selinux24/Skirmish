@@ -38,7 +38,7 @@ namespace Engine.Common
         /// <summary>
         /// Texture size
         /// </summary>
-        public const int TEXTURESIZE = 1024;
+        public const int TEXTURESIZE = 2048;
         /// <summary>
         /// Key codes
         /// </summary>
@@ -106,6 +106,8 @@ namespace Engine.Common
                     Style = style,
                 };
 
+                int delta = (int)Math.Sqrt(size) + 10;
+
                 using (var bmp = new Bitmap(TEXTURESIZE, TEXTURESIZE))
                 using (var gra = System.Drawing.Graphics.FromImage(bmp))
                 {
@@ -136,7 +138,7 @@ namespace Engine.Common
                                 s.Width = fnt.SizeInPoints;
                             }
 
-                            if (left + s.Width >= TEXTURESIZE)
+                            if (left + (int)s.Width + delta >= TEXTURESIZE)
                             {
                                 left = 0f;
                                 top += (int)s.Height + 1;
@@ -160,8 +162,7 @@ namespace Engine.Common
 
                             fMap.map.Add(c, chr);
 
-                            left += s.Width;
-                            left = (int)left;
+                            left += (int)s.Width + delta;
                         }
                     }
 
@@ -169,8 +170,14 @@ namespace Engine.Common
                     {
                         bmp.Save(mstr, ImageFormat.Png);
 
-                        fMap.Texture = game.ResourceManager.CreateResource(mstr.GetBuffer());
+                        var buffer = mstr.GetBuffer();
+
+                        File.WriteAllBytes(string.Format("{0}.{1}.{2}.png", font, size, style), buffer);
+
+                        fMap.Texture = game.ResourceManager.CreateResource(buffer);
                     }
+
+
                 }
 
                 gCache.Add(fMap);
@@ -211,6 +218,8 @@ namespace Engine.Common
         {
             size = Vector2.Zero;
 
+            int delta = (int)Math.Sqrt(Size) + 10;
+
             Vector2 pos = Vector2.Zero;
 
             List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
@@ -233,15 +242,12 @@ namespace Engine.Common
                 {
                     var chr = this.map[c];
 
-                    Vector3[] cv;
-                    Vector2[] cuv;
-                    uint[] ci;
                     GeometryUtil.CreateSprite(
                         pos,
                         chr.Width, chr.Height, 0, 0,
                         chr.X, (int)chr.Y,
                         TEXTURESIZE,
-                        out cv, out cuv, out ci);
+                        out Vector3[] cv, out Vector2[] cuv, out uint[] ci);
 
                     ci.ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
 

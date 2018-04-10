@@ -64,7 +64,7 @@ namespace Collada
             {
                 Name = "Title",
                 Font = "Viner Hand ITC",
-                FontSize = 72,
+                FontSize = 90,
                 Style = FontMapStyleEnum.Bold,
                 TextColor = Color.IndianRed,
                 ShadowColor = new Color4(Color.Brown.RGB(), 0.55f),
@@ -81,7 +81,7 @@ namespace Collada
                 Name = "Scene buttons",
 
                 Width = 200,
-                Height = 30,
+                Height = 36,
 
                 TwoStateButton = true,
 
@@ -96,8 +96,8 @@ namespace Collada
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = "Buxton Sketch",
-                    Style = FontMapStyleEnum.Bold,
-                    FontSize = 18,
+                    Style = FontMapStyleEnum.Regular,
+                    FontSize = 22,
                     TextColor = Color.Gold,
                 }
             };
@@ -115,7 +115,7 @@ namespace Collada
                 Name = "Exit button",
 
                 Width = 200,
-                Height = 30,
+                Height = 36,
 
                 TwoStateButton = true,
 
@@ -131,7 +131,7 @@ namespace Collada
                 {
                     Font = "Buxton Sketch",
                     Style = FontMapStyleEnum.Bold,
-                    FontSize = 18,
+                    FontSize = 22,
                     TextColor = Color.Gold,
                 }
             };
