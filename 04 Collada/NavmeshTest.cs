@@ -98,7 +98,7 @@ namespace Collada
             nmsettings.EdgeMaxError = 1.0f;
 
             //Tiling
-            nmsettings.BuildMode = BuildModesEnum.Tiled;
+            nmsettings.BuildMode = BuildModesEnum.Solo;
             nmsettings.TileSize = 32;
 
             this.PathFinderDescription = new PathFinderDescription()

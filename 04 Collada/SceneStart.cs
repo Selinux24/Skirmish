@@ -143,6 +143,9 @@ namespace Collada
         {
             base.Initialized();
 
+            this.Camera.Position = Vector3.BackwardLH * 8f;
+            this.Camera.Interest = Vector3.Zero;
+
             this.backGround.Transform.SetScale(1.5f, 1.25f, 1.5f);
 
             this.title.Instance.Text = "Collada Loader Test";
