@@ -29,6 +29,14 @@ namespace Collada
         {
             base.Initialize();
 
+#if DEBUG
+            this.Game.VisibleMouse = false;
+            this.Game.LockMouse = false;
+#else
+            this.Game.VisibleMouse = false;
+            this.Game.LockMouse = true;
+#endif
+
             this.InitializeText();
             this.InitializeDungeon();
             this.InitializeEmitter();

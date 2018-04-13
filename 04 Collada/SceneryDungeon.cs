@@ -27,6 +27,14 @@ namespace Collada
         {
             base.Initialize();
 
+#if DEBUG
+            this.Game.VisibleMouse = false;
+            this.Game.LockMouse = false;
+#else
+            this.Game.VisibleMouse = false;
+            this.Game.LockMouse = true;
+#endif
+
             this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
             this.title.Instance.Text = "Collada Dungeon Scene";
             this.title.Instance.Position = Vector2.Zero;
