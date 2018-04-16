@@ -3138,8 +3138,6 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     throw new EngineException("rcRasterizeTriangles: Out of memory.");
                 }
-
-                int spanCount = GetHeightFieldSpanCount(solid);
             }
 
             return true;

@@ -68,7 +68,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Navigation mesh building mode
         /// </summary>
-        public BuildModesEnum BuildMode = BuildModesEnum.Solo;
+        public BuildModesEnum BuildMode = BuildModesEnum.Tiled;
         /// <summary>
         /// Tile size (if tiled mode)
         /// </summary>

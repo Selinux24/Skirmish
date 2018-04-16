@@ -43,6 +43,10 @@ namespace Collada
             this.Game.LockMouse = true;
 #endif
 
+            this.Lights.KeyLight.CastShadow = false;
+            this.Lights.BackLight.Enabled = false;
+            this.Lights.FillLight.Enabled = false;
+
             this.InitializeText();
             this.InitializeAgent();
             this.InitializeNavmesh();
@@ -106,7 +110,7 @@ namespace Collada
             nmsettings.EdgeMaxError = 1.0f;
 
             //Tiling
-            nmsettings.BuildMode = BuildModesEnum.Solo;
+            nmsettings.BuildMode = BuildModesEnum.Tiled;
             nmsettings.TileSize = 32;
 
             this.PathFinderDescription = new PathFinderDescription()
@@ -125,7 +129,7 @@ namespace Collada
                         ContentFolder = "Resources/NavmeshTest",
                         ModelContentFilename = "modular_dungeon.xml",
                     }
-                }, 
+                },
                 SceneObjectUsageEnum.Ground);
 
             this.SetGround(inputGeometry, true);
@@ -151,11 +155,8 @@ namespace Collada
             var center = bbox.GetCenter();
             float maxD = Math.Max(Math.Max(bbox.GetX(), bbox.GetY()), bbox.GetZ());
 
-            //this.Camera.Interest = center;
-            //this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
-
-            this.Camera.Position = new Vector3(-8, 4 + agent.Height, -26);
-            this.Camera.Interest = new Vector3(-6, 4 + agent.Height, -26);
+            this.Camera.Interest = center;
+            this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
         }
 
         public override void Update(GameTime gameTime)
@@ -206,15 +207,6 @@ namespace Collada
                     this.Game.Input.MouseXDelta,
                     this.Game.Input.MouseYDelta);
             }
-
-            if (this.Walk(this.agent, prevPos, this.Camera.Position, out Vector3 walkerPos))
-            {
-                this.Camera.Goto(walkerPos);
-            }
-            else
-            {
-                this.Camera.Goto(prevPos);
-            }
         }
         private void UpdateGraph(GameTime gameTime)
         {
@@ -232,6 +224,22 @@ namespace Collada
             }
 
             bool updateGraph = false;
+            bool updateGraphDrawing = false;
+
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                var geom = new InputGeometry(this.GetTrianglesForNavigationGraph());
+
+                if (!shift)
+                {
+                    ((Graph)this.navigationGraph).BuildTile(this.Camera.Position, geom);
+                }
+                else
+                {
+                    ((Graph)this.navigationGraph).RemoveTile(this.Camera.Position, geom);
+                }
+                updateGraphDrawing = true;
+            }
 
             if (this.Game.Input.KeyJustReleased(Keys.B))
             {
@@ -244,6 +252,7 @@ namespace Collada
                     nmsettings.BuildMode = (BuildModesEnum)Helper.Prev((int)nmsettings.BuildMode, 3);
                 }
                 updateGraph = true;
+                updateGraphDrawing = true;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.P))
@@ -257,11 +266,16 @@ namespace Collada
                     nmsettings.PartitionType = (SamplePartitionTypeEnum)Helper.Prev((int)nmsettings.PartitionType, 3);
                 }
                 updateGraph = true;
+                updateGraphDrawing = true;
             }
 
             if (updateGraph)
             {
                 this.UpdateNavigationGraph();
+            }
+
+            if (updateGraphDrawing)
+            {
                 this.UpdateGraphNodes(this.agent);
             }
 

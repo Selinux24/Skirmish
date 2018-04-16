@@ -639,8 +639,6 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     return null;
                 }
-
-                int spanCount = Recast.GetHeightFieldSpanCount(solid);
             }
 
             // Once all geometry is rasterized, we do initial pass of filtering to
