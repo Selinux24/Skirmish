@@ -4,6 +4,7 @@ using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
+using System.Diagnostics;
 
 namespace Collada
 {
@@ -25,6 +26,8 @@ namespace Collada
 
         private SceneObject<Model> inputGeometry = null;
         private BuildSettings nmsettings = BuildSettings.Default;
+
+        private float? lastElapsedSeconds = null;
 
         public NavmeshTest(Game game) : base(game)
         {
@@ -59,7 +62,7 @@ namespace Collada
             this.title.Instance.Position = Vector2.Zero;
 
             this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
-            this.help.Instance.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse). F5: Save. F6: Load.";
+            this.help.Instance.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse). F5: Save. F6: Load. Space: Update current tile (SHIFT remove).";
             this.help.Instance.Position = new Vector2(0, 24);
 
             this.debug = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
@@ -159,6 +162,15 @@ namespace Collada
             this.Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
         }
 
+        public override void UpdateNavigationGraph()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            base.UpdateNavigationGraph();
+            sw.Stop();
+            lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
+        }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -230,6 +242,8 @@ namespace Collada
             {
                 var geom = new InputGeometry(this.GetTrianglesForNavigationGraph());
 
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
                 if (!shift)
                 {
                     ((Graph)this.navigationGraph).BuildTile(this.Camera.Position, geom);
@@ -238,6 +252,9 @@ namespace Collada
                 {
                     ((Graph)this.navigationGraph).RemoveTile(this.Camera.Position, geom);
                 }
+                sw.Stop();
+                lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
+
                 updateGraphDrawing = true;
             }
 
@@ -279,7 +296,7 @@ namespace Collada
                 this.UpdateGraphNodes(this.agent);
             }
 
-            this.debug.Instance.Text = string.Format("Build Mode: {0}; Partition Type: {1};", nmsettings.BuildMode, nmsettings.PartitionType);
+            this.debug.Instance.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
         }
         private void UpdateGraphNodes(AgentType agent)
         {
