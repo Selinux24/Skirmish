@@ -57,6 +57,8 @@ namespace Engine.Common
         /// Font size
         /// </summary>
         public float Size { get; private set; }
+
+        public int Delta { get; private set; }
         /// <summary>
         /// Font style
         /// </summary>
@@ -99,14 +101,15 @@ namespace Engine.Common
             var fMap = gCache.Find(f => f.Font == font && f.Size == size && f.Style == style);
             if (fMap == null)
             {
+                float delta = (float)Math.Sqrt(size) + (size / 40f);
+
                 fMap = new FontMap()
                 {
                     Font = font,
                     Size = size,
                     Style = style,
+                    Delta = (int)delta,
                 };
-
-                int delta = (int)Math.Sqrt(size) + 10;
 
                 using (var bmp = new Bitmap(TEXTURESIZE, TEXTURESIZE))
                 using (var gra = System.Drawing.Graphics.FromImage(bmp))
@@ -120,7 +123,7 @@ namespace Engine.Common
                     using (var fmt = StringFormat.GenericDefault)
                     using (var fnt = new Font(font, size, (FontStyle)style, GraphicsUnit.Pixel))
                     {
-                        float left = 0f;
+                        float left = fMap.Delta;
                         float top = 0f;
 
                         for (int i = 0; i < ValidKeys.Length; i++)
@@ -138,9 +141,9 @@ namespace Engine.Common
                                 s.Width = fnt.SizeInPoints;
                             }
 
-                            if (left + (int)s.Width + delta >= TEXTURESIZE)
+                            if (left + (int)s.Width + fMap.Delta + fMap.Delta >= TEXTURESIZE)
                             {
-                                left = 0f;
+                                left = fMap.Delta;
                                 top += (int)s.Height + 1;
                             }
 
@@ -162,7 +165,7 @@ namespace Engine.Common
 
                             fMap.map.Add(c, chr);
 
-                            left += (int)s.Width + delta;
+                            left += (int)s.Width + fMap.Delta + fMap.Delta;
                         }
                     }
 
@@ -172,12 +175,8 @@ namespace Engine.Common
 
                         var buffer = mstr.GetBuffer();
 
-                        File.WriteAllBytes(string.Format("{0}.{1}.{2}.png", font, size, style), buffer);
-
                         fMap.Texture = game.ResourceManager.CreateResource(buffer);
                     }
-
-
                 }
 
                 gCache.Add(fMap);
@@ -245,7 +244,7 @@ namespace Engine.Common
                     GeometryUtil.CreateSprite(
                         pos,
                         chr.Width, chr.Height, 0, 0,
-                        chr.X, (int)chr.Y,
+                        chr.X, chr.Y,
                         TEXTURESIZE,
                         out Vector3[] cv, out Vector2[] cuv, out uint[] ci);
 
