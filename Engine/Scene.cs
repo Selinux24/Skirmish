@@ -1226,7 +1226,9 @@ namespace Engine
 
             var pfComponents = this.components.FindAll(c =>
             {
-                return !c.HasParent &&
+                return
+                    c.HasParent == false &&
+                    c.Visible == true &&
                     (c.Usage.HasFlag(SceneObjectUsageEnum.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsageEnum.CoarsePathFinding));
             });
 
