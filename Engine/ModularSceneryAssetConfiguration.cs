@@ -12,6 +12,15 @@ namespace Engine
     public class ModularSceneryAssetConfiguration
     {
         /// <summary>
+        /// Objects auto identifier counter
+        /// </summary>
+        private static int ObjectsAutoId = 1;
+        /// <summary>
+        /// Objects base string for identification build
+        /// </summary>
+        private static string ObjectsAutoString = "__objauto__";
+
+        /// <summary>
         /// Complex assets configuration
         /// </summary>
         [XmlArray("assets")]
@@ -46,6 +55,20 @@ namespace Engine
         [XmlArray("volumes")]
         [XmlArrayItem("mask", typeof(string))]
         public string[] Volumes = null;
+
+        /// <summary>
+        /// Populate objects empty ids
+        /// </summary>
+        public void PopulateObjectIds()
+        {
+            foreach (var item in Objects)
+            {
+                if (string.IsNullOrEmpty(item.Id))
+                {
+                    item.Id = string.Format("{0}_{1}", ObjectsAutoString, ObjectsAutoId++);
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the instance counter dictionary
@@ -88,6 +111,11 @@ namespace Engine
 
             foreach (var item in this.Objects)
             {
+                if (string.IsNullOrEmpty(item.AssetName))
+                {
+                    continue;
+                }
+
                 if (!res.ContainsKey(item.AssetName))
                 {
                     res.Add(item.AssetName, 0);
@@ -111,6 +139,91 @@ namespace Engine
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Finds the asset reference by asset map id and asset id
+        /// </summary>
+        /// <param name="mapId">Asset map id</param>
+        /// <param name="id">Asset id</param>
+        /// <returns>Returns the asset reference</returns>
+        public ModularSceneryAssetReference FindAssetInstance(string mapId, string id)
+        {
+            var res = this.Assets
+                .Where(a => this.Map.Count(m =>
+                    string.Equals(m.Id, mapId, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(m.AssetName, a.Name, StringComparison.OrdinalIgnoreCase)) > 0)
+                .Select(a => a.Assets.Where(d => string.Equals(d.Id, id, StringComparison.OrdinalIgnoreCase)).FirstOrDefault())
+                .FirstOrDefault();
+
+            return res;
+        }
+        /// <summary>
+        /// Gets the first index of the asset in the current configuration
+        /// </summary>
+        /// <param name="assetName">Asset name</param>
+        /// <param name="assetMapId">Asset map id</param>
+        /// <param name="assetId">Asset id</param>
+        /// <returns>Returns the first index</returns>
+        public int GetMapInstanceIndex(string assetName, string assetMapId, string assetId)
+        {
+            int index = 0;
+
+            foreach (var item in this.Map)
+            {
+                var asset = this.Assets
+                    .Where(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase))
+                    .FirstOrDefault();
+
+                if (asset != null)
+                {
+                    foreach (var a in asset.Assets)
+                    {
+                        if (string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (string.Equals(item.Id, assetMapId, StringComparison.OrdinalIgnoreCase) &&
+                                string.Equals(a.Id, assetId, StringComparison.OrdinalIgnoreCase))
+                            {
+                                return index;
+                            }
+
+                            index++;
+                        }
+                    }
+                }
+            }
+
+            return -1;
+        }
+        /// <summary>
+        /// Gets the first index of the object in the current configuration
+        /// </summary>
+        /// <param name="assetName">Asset name</param>
+        /// <param name="objectId">Object id</param>
+        /// <returns>Returns the first index</returns>
+        public int GetObjectInstanceIndex(string assetName, string objectId)
+        {
+            int index = 0;
+
+            foreach (var item in this.Objects)
+            {
+                if (string.IsNullOrEmpty(item.AssetName))
+                {
+                    continue;
+                }
+
+                if (string.Equals(item.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (string.Equals(item.Id, objectId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return index;
+                    }
+
+                    index++;
+                }
+            }
+
+            return -1;
         }
     }
 }

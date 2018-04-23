@@ -50,7 +50,7 @@
           <rotation>rot270</rotation>
         </asset>
 
-        <asset asset_name="Dn_Door_1" type="Door">
+        <asset asset_name="Dn_Door_1" id="door" type="Wall">
           <position>-3 0 0</position>
         </asset>
 
@@ -156,7 +156,7 @@
           <position>2 0 1</position>
           <rotation>rot90</rotation>
         </asset>
-        <asset asset_name="Dn_Door_1" type="Door">
+        <asset asset_name="Dn_Door_1" type="Wall">
           <position>0 0 1</position>
           <rotation>rot90</rotation>
         </asset>
@@ -261,7 +261,7 @@
         <asset asset_name="Dn_Floor_1" type="Floor">
           <position>0 0 0</position>
         </asset>
-        <asset asset_name="Dn_Trap_1" type="TrapFloor">
+        <asset asset_name="Dn_Trap_1" type="Floor">
           <position>-2 0 0</position>
         </asset>
 
@@ -465,7 +465,7 @@
           <rotation>rot270</rotation>
         </asset>
 
-        <asset asset_name="Dn_Door_1" type="Exit">
+        <asset asset_name="Dn_Door_1" type="Wall">
           <position>-3 0 0</position>
         </asset>
         <asset asset_name="Dn_Wall_1" type="Wall">
@@ -2344,11 +2344,11 @@
       <position>18 -4 -32</position>
       <rotation>rot180</rotation>
     </item>
-    <item asset_name="EnteringCorridor1">
+    <item asset_name="EnteringCorridor1" id="exit">
       <position>12 -4 -32</position>
     </item>
     
-    <item asset_name="EnteringCorridor1">
+    <item asset_name="EnteringCorridor1" id="entrance">
       <position>-6 4 -26</position>
     </item>
     <item asset_name="LCross1">
@@ -2377,83 +2377,86 @@
     </item>
   </map>
   <objects>
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_map_id="entrance" asset_id="door" id="start" type="Entrance"></item>
+    <item asset_map_id="exit" asset_id="door" id="end" type="Exit"></item>
+
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>0 2 8.9</position>
       <rotation>rot90</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>-2.9 2 6</position>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>2.9 2 6</position>
       <rotation>rot180</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
 
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>0.9 2 -4</position>
       <rotation>rot180</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>0.9 2 -8</position>
       <rotation>rot180</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
 
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>-5 2 -0.9</position>
       <rotation>rot270</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>-12 2 -0.9</position>
       <rotation>rot270</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>5 2 -0.9</position>
       <rotation>rot270</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
 
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>-0.9 6 -19</position>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.001"></particleLight>
     </item>
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>0.9 6 -19</position>
       <rotation>rot180</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.001"></particleLight>
     </item>
 
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>36 2 0.9</position>
       <rotation>rot90</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
 
-    <item asset_name="Dn_Lamp">
+    <item asset_name="Dn_Lamp" type="Light">
       <position>12 3.25 2</position>
       <rotation>-0.06930859 0.7037019 -0.06930859 0.7037019</rotation>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
         <velocity>0 0 0</velocity>
       </particleLight>
     </item>
-    <item asset_name="Dn_Lamp">
+    <item asset_name="Dn_Lamp" type="Light">
       <position>31.2 0.5 -11.5</position>
       <rotation>0 0.9971888 0 0.07492971</rotation>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
@@ -2461,11 +2464,11 @@
       </particleLight>
     </item>
 
-    <item asset_name="Dn_Lamp" load_lights="false">
+    <item asset_name="Dn_Lamp" type="Light" load_lights="false">
       <position>34 0.02 -2.5</position>
       <rotation>0.12 1.9 0</rotation>
     </item>
-    <item asset_name="Dn_Lamp">
+    <item asset_name="Dn_Lamp" type="Light">
       <position>38 3.30 -6</position>
       <rotation>-0.06930859 0.7037019 -0.06930859 0.7037019</rotation>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
@@ -2486,92 +2489,92 @@
       <rotation>rot90</rotation>
     </item>
 
-    <item asset_name="Dn_Crate">
+    <item asset_name="Dn_Crate" type="Furniture">
       <position>-2.25 0 8.25 </position>
     </item>
-    <item asset_name="Dn_Crate">
+    <item asset_name="Dn_Crate" type="Furniture">
       <position>-1.25 0 8.25</position>
       <rotation>rot90</rotation>
     </item>
-    <item asset_name="Dn_Crate">
+    <item asset_name="Dn_Crate" type="Furniture">
       <position>-2.25 0 6</position>
     </item>
-    <item asset_name="Dn_Crate">
+    <item asset_name="Dn_Crate" type="Furniture">
       <position>-2.05 1 8.25</position>
       <rotation>0 0.5646425 0 0.8253356</rotation>
       <scale>0.5</scale>
     </item>
-    <item asset_name="Dn_Chest_2">
+    <item asset_name="Dn_Chest_2" type="Furniture">
       <position>2.1 0 4</position>
       <rotation>rot189</rotation>
     </item>
-    <item asset_name="Dn_Chest_1">
+    <item asset_name="Dn_Chest_1" type="Furniture">
       <position>2.5 0 6</position>
       <rotation>rot180</rotation>
     </item>
-    <item asset_name="Dn_Chest_1">
+    <item asset_name="Dn_Chest_1" type="Furniture">
       <position>2 0 8</position>
       <rotation>rot137</rotation>
     </item>
 
-    <item asset_name="Dn_Crate">
+    <item asset_name="Dn_Crate" type="Furniture">
       <position>13.90 0 -2.4</position>
       <rotation>0 0.1494381 0 0.9887711</rotation>
     </item>
-    <item asset_name="Dn_Crate">
+    <item asset_name="Dn_Crate" type="Furniture">
       <position>13.25 1 -2.4</position>
       <rotation>0 0.5646425 0 0.8253356</rotation>
     </item>
-    <item asset_name="Dn_Crate">
+    <item asset_name="Dn_Crate" type="Furniture">
       <position>12.80 0 -2.3</position>
       <rotation>0 0.1741081 0 0.9847265</rotation>
     </item>
-    <item asset_name="Dn_Crate">
+    <item asset_name="Dn_Crate" type="Furniture">
       <position>13.80 0 1</position>
       <rotation>0 0.9107101 0 0.4130462</rotation>
     </item>
-    <item asset_name="Dn_Barrel">
+    <item asset_name="Dn_Barrel" type="Furniture">
       <position>14 0 4</position>
     </item>
-    <item asset_name="Dn_Barrel">
+    <item asset_name="Dn_Barrel" type="Furniture">
       <position>10 0 4</position>
       <scale>0.75</scale>
     </item>
-    <item asset_name="Dn_Barrel">
+    <item asset_name="Dn_Barrel" type="Furniture">
       <position>11 0 4.25</position>
       <scale>0.75</scale>
       <rotation>rot90</rotation>
     </item>
     
-    <item asset_name="Dn_Candle_1" cast_shadows="false">
+    <item asset_name="Dn_Candle_1" type="Light" cast_shadows="false">
       <position>0.5 4 -26.8</position>
       <scale>0.4</scale>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
         <velocity>0 0 0</velocity>
       </particleLight>
     </item>
-    <item asset_name="Dn_Candle_1" cast_shadows="false">
+    <item asset_name="Dn_Candle_1" type="Light" cast_shadows="false">
       <position>-1.5 4 -26.8</position>
       <scale>0.4</scale>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
         <velocity>0 0 0</velocity>
       </particleLight>
     </item>
-    <item asset_name="Dn_Candle_1" load_lights="false" cast_shadows="false">
+    <item asset_name="Dn_Candle_1" type="Light" load_lights="false" cast_shadows="false">
       <position>-3.5 4 -26.8</position>
       <scale>0.4</scale>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
         <velocity>0 0 0</velocity>
       </particleLight>
     </item>
-    <item asset_name="Dn_Candle_1" cast_shadows="false">
+    <item asset_name="Dn_Candle_1" type="Light" cast_shadows="false">
       <position>-5.5 4 -26.8</position>
       <scale>0.4</scale>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
         <velocity>0 0 0</velocity>
       </particleLight>
     </item>
-    <item asset_name="Dn_Candle_1" cast_shadows="false">
+    <item asset_name="Dn_Candle_1" type="Light" cast_shadows="false">
       <position>-7.5 4 -26.8</position>
       <scale>0.4</scale>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
@@ -2600,11 +2603,11 @@
       <scale>0.5</scale>
     </item>
 
-    <item asset_name="Dn_Table_1">
+    <item asset_name="Dn_Table_1" type="Furniture">
       <position>36 0 -4.1</position>
       <rotation>0.1 0 0</rotation>
     </item>
-    <item asset_name="Dn_Candle_1" cast_shadows="false">
+    <item asset_name="Dn_Candle_1" type="Light" cast_shadows="false">
       <position>36 1 -4.5</position>
       <scale>0.4</scale>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
@@ -2618,15 +2621,15 @@
     <item asset_name="Dn_Floor_Gap_1">
       <position>18 0 -20</position>
     </item>
-    <item asset_name="Dn_Chest_2">
+    <item asset_name="Dn_Chest_2" type="Furniture">
       <position>18 0 -22</position>
       <rotation>rot270</rotation>
     </item>
-    <item asset_name="Dn_Treasure_1">
+    <item asset_name="Dn_Treasure_1" id="Treasure" type="Furniture">
       <position>18 0 -22</position>
       <rotation>rot270</rotation>
     </item>
-    <item asset_name="Dn_Jail_1">
+    <item asset_name="Dn_Jail_1" id="jail_door" type="Door">
       <position>18 0 -15</position>
       <rotation>rot270</rotation>
     </item>
@@ -2656,11 +2659,11 @@
       <position>17 0 -14</position>
     </item>
 
-    <item asset_name="Dn_Temple_Fire_1">
+    <item asset_name="Dn_Temple_Fire_1" type="Light">
       <position>53 0 -4</position>
       <particleLight name="torchFire" scale="1" infiniteDuration="true" emissionRate="0.001"></particleLight>
     </item>
-    <item asset_name="Dn_Temple_Fire_1">
+    <item asset_name="Dn_Temple_Fire_1" type="Light">
       <position>53 0 -38</position>
       <particleLight name="torchFire" scale="1" infiniteDuration="true" emissionRate="0.001"></particleLight>
     </item>
@@ -2668,31 +2671,31 @@
     <item asset_name="Dn_Floor_Gap_1">
       <position>34 0 -30</position>
     </item>
-    <item asset_name="Dn_Big_Lamp_1" cast_shadows="false">
+    <item asset_name="Dn_Big_Lamp_1" type="Light" cast_shadows="false">
       <position>34 6 -30</position>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
 
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>48 2 -9.1</position>
       <rotation>rot90</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>48 2 -14.9</position>
       <rotation>rot270</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
 
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>48 2 -27.1</position>
       <rotation>rot90</rotation>
       <scale>0.75</scale>
       <particleLight name="torchFire" scale="0.25" infiniteDuration="true" emissionRate="0.1"></particleLight>
     </item>
-    <item asset_name="Dn_Torch" cast_shadows="false">
+    <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
       <position>48 2 -32.9</position>
       <rotation>rot270</rotation>
       <scale>0.75</scale>
@@ -2716,31 +2719,31 @@
       <rotation>rot270</rotation>
     </item>
 
-    <item asset_name="Dn_Thomb_1">
+    <item asset_name="Dn_Thomb_1" type="Furniture">
       <position>34 0 -28</position>
       <rotation>rot270</rotation>
     </item>
-    <item asset_name="Dn_Thomb_1">
+    <item asset_name="Dn_Thomb_1" type="Furniture">
       <position>34 0 -32</position>
       <rotation>rot270</rotation>
     </item>
 
-    <item asset_name="Dn_Lab_1">
+    <item asset_name="Dn_Lab_1" type="Furniture">
       <position>36 0 -22.25</position>
       <rotation>rot270</rotation>
     </item>
-    <item asset_name="Dn_Lab_1_Stuff">
+    <item asset_name="Dn_Lab_1_Stuff" id="Potions" type="Furniture">
       <position>36 0 -22.25</position>
       <rotation>rot270</rotation>
     </item>
-    <item asset_name="Dn_Candle_1" cast_shadows="true">
+    <item asset_name="Dn_Candle_1" type="Light" cast_shadows="true">
       <position>35.5 1.15 -22.5</position>
       <scale>0.4</scale>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">
         <velocity>0 0 0</velocity>
       </particleLight>
     </item>
-    <item asset_name="Dn_Candle_1" cast_shadows="true">
+    <item asset_name="Dn_Candle_1" type="Light" cast_shadows="true">
       <position>36.5 1.15 -22.5</position>
       <scale>0.4</scale>
       <particleLight name="lampFire" scale="0.01" infiniteDuration="true" emissionRate="0.01">

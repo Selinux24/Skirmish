@@ -610,6 +610,7 @@ namespace Engine.PathFinding.RecastNavigation
             var file = buffer.Decompress<Graph>();
 
             navMeshQDictionary = file.navMeshQDictionary;
+            settings = file.settings;
         }
         /// <summary>
         /// Saves the graph to a file

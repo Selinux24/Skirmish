@@ -23,36 +23,8 @@ namespace Engine
         /// </summary>
         Wall,
         /// <summary>
-        /// Floor trap
-        /// </summary>
-        TrapFloor,
-        /// <summary>
-        /// Ceiling trap
-        /// </summary>
-        TrapCeiling,
-        /// <summary>
-        /// Wall trap
-        /// </summary>
-        TrapWall,
-        /// <summary>
-        /// Furniture
-        /// </summary>
-        Furniture,
-        /// <summary>
-        /// Light
-        /// </summary>
-        Light,
-        /// <summary>
-        /// Door
-        /// </summary>
-        Door,
-        /// <summary>
         /// Stairs
         /// </summary>
         Stairs,
-        /// <summary>
-        /// Dungeon exit
-        /// </summary>
-        Exit,
     }
 }

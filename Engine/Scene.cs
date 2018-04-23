@@ -1255,14 +1255,22 @@ namespace Engine
                 }
                 else
                 {
-                    var trnChilds = curr.Get<IComposed>().GetComponents<ITransformable3D>();
-                    foreach (var child in trnChilds)
+                    var currComposed = curr.Get<IComposed>();
+
+                    var trnChilds = currComposed.GetComponents<ITransformable3D>();
+                    if (trnChilds != null && trnChilds.Count() > 0)
                     {
-                        child.Manipulator.UpdateInternals(true);
+                        foreach (var child in trnChilds)
+                        {
+                            child.Manipulator.UpdateInternals(true);
+                        }
                     }
 
-                    var pickableChilds = curr.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
-                    volumes.AddRange(pickableChilds);
+                    var pickableChilds = currComposed.GetComponents<IRayPickable<Triangle>>();
+                    if (pickableChilds != null && pickableChilds.Count() > 0)
+                    {
+                        volumes.AddRange(pickableChilds);
+                    }
                 }
 
                 for (int p = 0; p < volumes.Count; p++)

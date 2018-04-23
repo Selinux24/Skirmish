@@ -101,7 +101,7 @@ namespace Engine
                     if (i.Active) i.Update(context);
                 });
 
-                this.instancesTmp = Array.FindAll(this.instances, i => i.LevelOfDetail != LevelOfDetailEnum.None);
+                this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && i.LevelOfDetail != LevelOfDetailEnum.None);
 
                 this.SortInstances(context.EyePosition);
             }
@@ -444,7 +444,7 @@ namespace Engine
 
             for (int i = 0; i < this.instanceCount; i++)
             {
-                if (this.instances[i] is T)
+                if (this.instances[i].Visible && this.instances[i] is T)
                 {
                     res.Add((T)(object)this.instances[i]);
                 }
@@ -465,8 +465,7 @@ namespace Engine
             {
                 var item = this.instancesTmp.FirstOrDefault(i =>
                 {
-                    float iDistance;
-                    return !i.Cull(volume, out iDistance);
+                    return i.Visible && !i.Cull(volume, out float iDistance);
                 });
 
                 if (item != null)

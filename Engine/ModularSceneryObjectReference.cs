@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Xml.Serialization;
 
 namespace Engine
@@ -7,12 +8,159 @@ namespace Engine
     /// Object reference
     /// </summary>
     [Serializable]
-    public class ModularSceneryObjectReference : ModularSceneryAssetReference
+    public class ModularSceneryObjectReference
     {
+        /// <summary>
+        /// Asset map id
+        /// </summary>
+        [XmlAttribute("asset_map_id")]
+        public string AssetMapId;
+        /// <summary>
+        /// Asset id
+        /// </summary>
+        [XmlAttribute("asset_id")]
+        public string AssetId;
+        /// <summary>
+        /// Item id
+        /// </summary>
+        [XmlAttribute("id")]
+        public string Id;
+        /// <summary>
+        /// Asset name
+        /// </summary>
+        [XmlAttribute("asset_name")]
+        public string AssetName;
+        /// <summary>
+        /// Item type
+        /// </summary>
+        [XmlAttribute("type")]
+        public ModularSceneryObjectTypeEnum Type = ModularSceneryObjectTypeEnum.None;
+
+        /// <summary>
+        /// Position
+        /// </summary>
+        [XmlIgnore]
+        public Vector3 Position = new Vector3(0, 0, 0);
+        /// <summary>
+        /// Position vector
+        /// </summary>
+        [XmlElement("position")]
+        public string PositionText
+        {
+            get
+            {
+                return string.Format("{0} {1} {2}", Position.X, Position.Y, Position.Z);
+            }
+            set
+            {
+                var floats = ModularSceneryExtents.Split(value);
+                if (floats.Length == 3)
+                {
+                    Position = new Vector3(floats);
+                }
+                else
+                {
+                    Position = ModularSceneryExtents.ReadReservedWordsForPosition(value);
+                }
+            }
+        }
+        /// <summary>
+        /// Rotation
+        /// </summary>
+        [XmlIgnore]
+        public Quaternion Rotation = new Quaternion(0, 0, 0, 1);
+        /// <summary>
+        /// Rotation quaternion
+        /// </summary>
+        [XmlElement("rotation")]
+        public string RotationText
+        {
+            get
+            {
+                return string.Format("{0} {1} {2} {3}", Rotation.X, Rotation.Y, Rotation.Z, Rotation.W);
+            }
+            set
+            {
+                var floats = ModularSceneryExtents.Split(value);
+                if (floats.Length == 4)
+                {
+                    Rotation = new Quaternion(floats);
+                }
+                else if (floats.Length == 3)
+                {
+                    Rotation = Quaternion.RotationYawPitchRoll(floats[0], floats[1], floats[2]);
+                }
+                else
+                {
+                    Rotation = ModularSceneryExtents.ReadReservedWordsForRotation(value);
+                }
+            }
+        }
+        /// <summary>
+        /// Scale
+        /// </summary>
+        [XmlIgnore]
+        public Vector3 Scale = new Vector3(1, 1, 1);
+        /// <summary>
+        /// Scale vector
+        /// </summary>
+        [XmlElement("scale")]
+        public string ScaleText
+        {
+            get
+            {
+                return string.Format("{0} {1} {2}", Scale.X, Scale.Y, Scale.Z);
+            }
+            set
+            {
+                var floats = ModularSceneryExtents.Split(value);
+                if (floats.Length == 3)
+                {
+                    Scale = new Vector3(floats);
+                }
+                else if (floats.Length == 1)
+                {
+                    Scale = new Vector3(floats[0]);
+                }
+                else
+                {
+                    Scale = ModularSceneryExtents.ReadReservedWordsForScale(value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Load model lights into scene
+        /// </summary>
+        [XmlAttribute("load_lights")]
+        public bool LoadLights = true;
+        /// <summary>
+        /// Lights cast shadows
+        /// </summary>
+        [XmlAttribute("cast_shadows")]
+        public bool CastShadows = true;
         /// <summary>
         /// Particle
         /// </summary>
         [XmlElement("particleLight", Type = typeof(ParticleEmitterDescription))]
         public ParticleEmitterDescription ParticleLight { get; set; }
+
+        /// <summary>
+        /// Gets the asset transform
+        /// </summary>
+        /// <returns>Returns a matrix with the reference transform</returns>
+        public Matrix GetTransform()
+        {
+            return ModularSceneryExtents.Transformation(this.Position, this.Rotation, this.Scale);
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns a string</returns>
+        public override string ToString()
+        {
+            return string.Format("Type: {0}; Id: {1}; AssetName: {2}; AssetMapId: {3}; AssetId: {4};", Type, Id, AssetName, AssetMapId, AssetId);
+        }
     }
 }
