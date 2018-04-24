@@ -5,6 +5,7 @@ using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -37,12 +38,8 @@ namespace Collada
 
         private BoundingBox sceneryBBOX = new BoundingBox();
 
-        private ModelInstance[] doors = null;
-        private ModelInstance[] entrances = null;
-        private ModelInstance[] exits = null;
         private float doorDistance = 3f;
         private SceneObject<TextDrawer> messages = null;
-        private bool showingMessage = false;
 
         private SceneObject<Model> rat = null;
         private BasicManipulatorController ratController = null;
@@ -310,13 +307,6 @@ namespace Collada
             //Rat holes
             this.ratHoles = this.scenery.Instance.GetObjectsPositionsByAssetName("Dn_Rat_Hole_1");
 
-            //Doors
-            this.doors = this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypeEnum.Door);
-            //Entrances
-            this.entrances = this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypeEnum.Entrance);
-            //Exits
-            this.exits = this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypeEnum.Exit);
-
             //Graph
             this.UpdateGraphNodes(this.agent);
             this.currentGraph++;
@@ -337,13 +327,17 @@ namespace Collada
             }
 
             //Doors
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypeEnum.Door), Color.LightYellow);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypeEnum.Entrance), Color.PaleVioletRed);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypeEnum.Exit), Color.ForestGreen);
+        }
+        private void UpdateBoundingBoxes(ModelInstance[] items, Color color)
+        {
+            foreach (var item in items)
             {
-                foreach (var door in doors)
-                {
-                    var bbox = door.GetBoundingBox();
+                var bbox = item.GetBoundingBox();
 
-                    this.bboxesDrawer.Instance.SetLines(Color.YellowGreen, Line3D.CreateWiredBox(bbox));
-                }
+                this.bboxesDrawer.Instance.SetLines(color, Line3D.CreateWiredBox(bbox));
             }
         }
         private void UpdateGraphNodes(AgentType agent)
@@ -570,76 +564,79 @@ namespace Collada
         {
             var playerPosition = this.Camera.Position;
 
-            if (InList(this.entrances, playerPosition, doorDistance, out ModelInstance selectedEntrance))
+            var sphere = new BoundingSphere(playerPosition, doorDistance);
+
+            var items = this.scenery.Instance.GetObjectsInVolume(sphere, true);
+            if (items != null && items.Length > 0)
             {
-                var msg = "The door locked when you closed it.\r\nYou must find an exit...";
-
-                PrepareMessage(true, msg);
-
-                return;
-            }
-
-            if (InList(this.exits, playerPosition, doorDistance, out ModelInstance selectedExit))
-            {
-                var msg = "Press space to exit...";
-
-                PrepareMessage(true, msg);
-
-                UpdateExit(gameTime, selectedExit);
-
-                return;
-            }
-
-            if (InList(this.doors, playerPosition, doorDistance, out ModelInstance selectedDoor))
-            {
-                var msg = string.Format("Press space to {0} the door...", selectedDoor.Visible ? "open" : "close");
-
-                PrepareMessage(true, msg);
-
-                UpdateDoor(gameTime, selectedDoor);
-
-                return;
-            }
-
-            PrepareMessage(false, null);
-        }
-
-        private bool InList(ModelInstance[] items, Vector3 position, float distance, out ModelInstance selected)
-        {
-            selected = null;
-
-            for (int i = 0; i < items.Length; i++)
-            {
-                if (Vector3.Distance(position, items[i].Manipulator.Position) < distance)
+                if (items[0].Object.Type == ModularSceneryObjectTypeEnum.Entrance)
                 {
-                    selected = items[i];
+                    var msg = "The door locked when you closed it.\r\nYou must find an exit...";
 
-                    return true;
+                    PrepareMessage(true, msg);
+
+                    return;
+                }
+
+                if (items[0].Object.Type == ModularSceneryObjectTypeEnum.Exit)
+                {
+                    var msg = "Press space to exit...";
+
+                    PrepareMessage(true, msg);
+
+                    UpdateExit(gameTime, items[0].Item);
+
+                    return;
+                }
+
+                if (items[0].Object.Type == ModularSceneryObjectTypeEnum.Door)
+                {
+                    var msg = string.Format("Press space to {0} the door...", items[0].Item.Visible ? "open" : "close");
+
+                    PrepareMessage(true, msg);
+
+                    UpdateDoor(gameTime, items[0].Item);
+
+                    return;
+                }
+
+                if (items[0].Object.Type == ModularSceneryObjectTypeEnum.Light)
+                {
+                    var lights = items[0].Item.Lights;
+
+                    if (lights != null && lights.Length > 0)
+                    {
+                        var msg = string.Format("Press space to {0} the light...", lights[0].Enabled ? "turn off" : "turn on");
+
+                        PrepareMessage(true, msg);
+
+                        UpdateLight(gameTime, lights);
+
+                        return;
+                    }
                 }
             }
 
-            return false;
+            PrepareMessage(false, null);
         }
         private void PrepareMessage(bool show, string text)
         {
             if (show)
             {
-                if (!showingMessage)
+                if (messages.Instance.Text != text)
                 {
                     messages.Instance.Text = text;
                     messages.Instance.CenterHorizontally();
                     messages.Instance.CenterVertically();
                     messages.Visible = true;
-                    showingMessage = true;
                 }
             }
             else
             {
-                if (showingMessage)
+                if (messages.Instance.Text != text)
                 {
                     messages.Instance.Text = text;
                     messages.Visible = false;
-                    showingMessage = false;
                 }
             }
         }
@@ -663,6 +660,22 @@ namespace Collada
                 var geom = new InputGeometry(this.GetTrianglesForNavigationGraph());
                 ((Graph)this.navigationGraph).BuildTile(item.Manipulator.Position, geom);
                 this.UpdateGraphNodes(this.currentGraph == 0 ? this.ratAgentType : this.agent);
+            }
+        }
+        private void UpdateLight(GameTime gameTime, SceneLight[] lights)
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                bool enabled = lights[0].Enabled;
+
+                for (int i = 0; i < lights.Length; i++)
+                {
+                    lights[i].Enabled = !enabled;
+                }
+
+                messages.Instance.Text = string.Format("Press space to {0} the light...", !enabled ? "turn off" : "turn on");
+                messages.Instance.CenterHorizontally();
+                messages.Instance.CenterVertically();
             }
         }
 

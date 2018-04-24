@@ -613,6 +613,72 @@ namespace Engine
 
             return objs.ToArray();
         }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, bool sortByDistance)
+        {
+            List<ModularSceneryItem> res = new List<ModularSceneryItem>();
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (bbox.Intersects(entities[i].Item.GetBoundingBox()))
+                {
+                    res.Add(entities[i]);
+                }
+            }
+
+            if (sortByDistance)
+            {
+                var center = bbox.GetCenter();
+
+                res.Sort((a, b) =>
+                {
+                    var aPos = Vector3.DistanceSquared(a.Item.Manipulator.Position, center);
+                    var bPos = Vector3.DistanceSquared(b.Item.Manipulator.Position, center);
+
+                    return aPos.CompareTo(bPos);
+                });
+            }
+
+            return res.ToArray();
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="sphere">Bounding sphere</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, bool sortByDistance)
+        {
+            List<ModularSceneryItem> res = new List<ModularSceneryItem>();
+
+            for (int i = 0; i < entities.Count; i++)
+            {
+                if (sphere.Intersects(entities[i].Item.GetBoundingSphere()))
+                {
+                    res.Add(entities[i]);
+                }
+            }
+
+            if (sortByDistance)
+            {
+                var center = sphere.Center;
+
+                res.Sort((a, b) =>
+                {
+                    var aPos = Vector3.DistanceSquared(a.Item.Manipulator.Position, center);
+                    var bPos = Vector3.DistanceSquared(b.Item.Manipulator.Position, center);
+
+                    return aPos.CompareTo(bPos);
+                });
+            }
+
+            return res.ToArray();
+        }
 
         /// <summary>
         /// Gets the culling volume for scene culling tests
