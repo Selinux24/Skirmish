@@ -45,7 +45,7 @@ namespace Engine
         }
 
         /// <summary>
-        /// Generate the resource view
+        /// Generates the resource view
         /// </summary>
         /// <param name="imageContent">Image content</param>
         /// <returns>Returns the created resource view</returns>
@@ -116,13 +116,22 @@ namespace Engine
             return view;
         }
         /// <summary>
-        /// Generate the resource view
+        /// Generates the resource view
         /// </summary>
         /// <param name="path">Path to file</param>
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateResource(string path)
         {
             return this.Get(path);
+        }
+        /// <summary>
+        /// Generates the resource view
+        /// </summary>
+        /// <param name="stream">Memory stream</param>
+        /// <returns>Returns the created resource view</returns>
+        public EngineShaderResourceView CreateResource(MemoryStream stream)
+        {
+            return this.Get(stream);
         }
         /// <summary>
         /// Creates a 2d texture of byte values

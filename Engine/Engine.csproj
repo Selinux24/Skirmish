@@ -256,6 +256,8 @@
     <Compile Include="BasicManipulatorController.cs" />
     <Compile Include="MaterialDescription.cs" />
     <Compile Include="ModelPart.cs" />
+    <Compile Include="ModularSceneryLevel.cs" />
+    <Compile Include="ModularSceneryLevels.cs" />
     <Compile Include="ModularSceneryAssetConfiguration.cs" />
     <Compile Include="ModularSceneryAssetDescription.cs" />
     <Compile Include="ModularSceneryAssetDescriptionConnection.cs" />

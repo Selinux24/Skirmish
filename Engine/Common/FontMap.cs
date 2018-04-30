@@ -171,11 +171,9 @@ namespace Engine.Common
 
                     using (var mstr = new MemoryStream())
                     {
-                        bmp.Save(mstr, ImageFormat.Png);
+                        bmp.Save(mstr, ImageFormat.Tiff);
 
-                        var buffer = mstr.GetBuffer();
-
-                        fMap.Texture = game.ResourceManager.CreateResource(buffer);
+                        fMap.Texture = game.ResourceManager.CreateResource(mstr);
                     }
                 }
 

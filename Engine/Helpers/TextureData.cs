@@ -103,10 +103,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(byte[] buffer)
         {
-            DDSHeader header;
-            DDSHeaderDX10? header10;
-            int offset;
-            if (DDSHeader.GetInfo(buffer, out header, out header10, out offset))
+            if (DDSHeader.GetInfo(buffer, out DDSHeader header, out DDSHeaderDX10? header10, out int offset))
             {
                 return new TextureData(header, header10, buffer, offset, 0);
             }
@@ -126,11 +123,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(string filename)
         {
-            DDSHeader header;
-            DDSHeaderDX10? header10;
-            int offset;
-            byte[] buffer;
-            if (DDSHeader.GetInfo(filename, out header, out header10, out offset, out buffer))
+            if (DDSHeader.GetInfo(filename, out DDSHeader header, out DDSHeaderDX10? header10, out int offset, out byte[] buffer))
             {
                 return new TextureData(header, header10, buffer, offset, 0);
             }
@@ -149,11 +142,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(MemoryStream stream)
         {
-            DDSHeader header;
-            DDSHeaderDX10? header10;
-            int offset;
-            byte[] buffer;
-            if (DDSHeader.GetInfo(stream, out header, out header10, out offset, out buffer))
+            if (DDSHeader.GetInfo(stream, out DDSHeader header, out DDSHeaderDX10? header10, out int offset, out byte[] buffer))
             {
                 return new TextureData(header, header10, buffer, offset, 0);
             }

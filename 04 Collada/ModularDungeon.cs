@@ -5,7 +5,6 @@ using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
@@ -35,8 +34,6 @@ namespace Collada
         private SceneLightPoint torch = null;
 
         private SceneObject<ModularScenery> scenery = null;
-
-        private BoundingBox sceneryBBOX = new BoundingBox();
 
         private float doorDistance = 3f;
         private SceneObject<TextDrawer> messages = null;
@@ -85,23 +82,12 @@ namespace Collada
             this.InitializeRat();
             this.InitializeHuman();
             this.InitializeEnvironment();
-            this.InitializeDebug();
+            this.InitializeLights();
             this.InitializeCamera();
+            this.InitializeDebug();
         }
         private void InitializeEnvironment()
         {
-            this.Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", this.ambientDown, this.ambientUp, true);
-            this.Lights.KeyLight.Enabled = false;
-            this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = false;
-
-            this.Lights.BaseFogColor = GameEnvironment.Background = Color.Black;
-            this.Lights.FogRange = 10f;
-            this.Lights.FogStart = maxDistance - 15f;
-
-            this.torch = new SceneLightPoint("player_torch", true, this.agentTorchLight, this.agentTorchLight, true, Vector3.Zero, 10f, 25f);
-            this.Lights.Add(this.torch);
-
             //Navigation settings
             var nmsettings = BuildSettings.Default;
 
@@ -126,6 +112,20 @@ namespace Collada
             {
                 Settings = nmsettings,
             };
+        }
+        private void InitializeLights()
+        {
+            this.Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", this.ambientDown, this.ambientUp, true);
+            this.Lights.KeyLight.Enabled = false;
+            this.Lights.BackLight.Enabled = false;
+            this.Lights.FillLight.Enabled = false;
+
+            this.Lights.BaseFogColor = GameEnvironment.Background = Color.Black;
+            this.Lights.FogRange = 10f;
+            this.Lights.FogStart = maxDistance - 15f;
+
+            this.torch = new SceneLightPoint("player_torch", true, this.agentTorchLight, this.agentTorchLight, true, Vector3.Zero, 10f, 25f);
+            this.Lights.Add(torch);
         }
         private void InitializeUI()
         {
@@ -170,6 +170,7 @@ namespace Collada
                     ModelContentFilename = "assets.xml",
                 },
                 AssetsConfigurationFile = "assetsmap.xml",
+                LevelsFile = "levels.xml",
             };
 
             this.scenery = this.AddComponent<ModularScenery>(desc, SceneObjectUsageEnum.Ground);
@@ -302,14 +303,18 @@ namespace Collada
         {
             base.Initialized();
 
-            this.sceneryBBOX = this.scenery.Instance.GetBoundingBox();
-
             //Rat holes
             this.ratHoles = this.scenery.Instance.GetObjectsPositionsByAssetName("Dn_Rat_Hole_1");
 
+            this.UpdateDebug();
+        }
+        private void UpdateDebug()
+        {
             //Graph
             this.UpdateGraphNodes(this.agent);
             this.currentGraph++;
+
+            this.bboxesDrawer.Instance.Clear();
 
             //Boxes
             {
@@ -369,6 +374,16 @@ namespace Collada
                 this.Game.SetScene<SceneStart>();
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.N))
+            {
+                this.ChangeToLevel("Lvl1");
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.M))
+            {
+                this.ChangeToLevel("Lvl2");
+            }
+
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
                 this.graphDrawer.Visible = !this.graphDrawer.Visible;
@@ -386,10 +401,12 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                //Refresh the navigatio mesh
-                if (File.Exists(nmFile))
+                var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
+
+                //Refresh the navigation mesh
+                if (File.Exists(fileName))
                 {
-                    File.Delete(nmFile);
+                    File.Delete(fileName);
                 }
 
                 this.UpdateNavigationGraph();
@@ -405,14 +422,16 @@ namespace Collada
                     {
                         taskRunning = true;
 
-                        if (File.Exists(ntFile))
+                        var fileName = this.scenery.Instance.CurrentLevel.Name + ntFile;
+
+                        if (File.Exists(fileName))
                         {
-                            File.Delete(ntFile);
+                            File.Delete(fileName);
                         }
 
                         var loader = new LoaderOBJ();
                         var tris = this.GetTrianglesForNavigationGraph();
-                        loader.Save(tris, ntFile);
+                        loader.Save(tris, fileName);
 
                         taskRunning = false;
                     }
@@ -452,7 +471,7 @@ namespace Collada
             this.UpdateEntities(gameTime);
 
             this.fps.Instance.Text = this.Game.RuntimeText;
-            this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
+            this.info.Instance.Text = string.Format("{0} {1}", this.GetRenderMode(), this.Camera.Position);
         }
         private void UpdateCamera(GameTime gameTime)
         {
@@ -644,7 +663,15 @@ namespace Collada
         {
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                this.Game.SetScene<SceneStart>();
+                // TODO: Set navigation between levels in levels file
+                if (this.scenery.Instance.CurrentLevel.Name == "Lvl1")
+                {
+                    this.ChangeToLevel("Lvl2");
+                }
+                else if (this.scenery.Instance.CurrentLevel.Name == "Lvl2")
+                {
+                    this.Game.SetScene<SceneStart>();
+                }
             }
         }
         private void UpdateDoor(GameTime gameTime, ModelInstance item)
@@ -679,18 +706,35 @@ namespace Collada
             }
         }
 
+        private void ChangeToLevel(string name)
+        {
+            this.Lights.ClearPointLights();
+            this.Lights.ClearSpotLights();
+            this.scenery.Instance.LoadLevel(name);
+            this.Lights.Add(this.torch);
+
+            this.UpdateNavigationGraph();
+            var pos = this.scenery.Instance.CurrentLevel.StartPosition;
+            var dir = this.scenery.Instance.CurrentLevel.LookingVector;
+            pos.Y += agent.Height;
+            this.Camera.Position = pos;
+            this.Camera.Interest = pos + dir;
+            this.UpdateDebug();
+        }
+
         public override void UpdateNavigationGraph()
         {
-            if (File.Exists(nmFile))
+            var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
+
+            if (File.Exists(fileName))
             {
                 this.navigationGraph = new Graph();
-                this.navigationGraph.Load(nmFile);
+                this.navigationGraph.Load(fileName);
             }
             else
             {
                 base.UpdateNavigationGraph();
-
-                this.navigationGraph.Save(nmFile);
+                this.navigationGraph.Save(fileName);
             }
         }
     }

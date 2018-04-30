@@ -43,6 +43,14 @@ namespace Engine
         /// Gets the assets description
         /// </summary>
         protected virtual ModularSceneryAssetConfiguration AssetConfiguration { get; set; }
+        /// <summary>
+        /// Gets the level list
+        /// </summary>
+        protected virtual ModularSceneryLevels Levels { get; set; }
+        /// <summary>
+        /// Current level
+        /// </summary>
+        public ModularSceneryLevel CurrentLevel { get; set; }
 
         /// <summary>
         /// Gets the description
@@ -63,39 +71,6 @@ namespace Engine
         public ModularScenery(Scene scene, ModularSceneryDescription description)
             : base(scene, description)
         {
-            ModelContent content = null;
-
-            if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
-            {
-                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
-                using (var loader = contentDesc.GetLoader())
-                {
-                    var t = loader.Load(description.Content.ContentFolder, contentDesc);
-                    content = t[0];
-                }
-            }
-            else if (description.Content.ModelContentDescription != null)
-            {
-                using (var loader = description.Content.ModelContentDescription.GetLoader())
-                {
-                    var t = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
-                    content = t[0];
-                }
-            }
-            else if (description.Content.HeightmapDescription != null)
-            {
-                content = ModelContent.FromHeightmap(
-                    description.Content.HeightmapDescription.ContentPath,
-                    description.Content.HeightmapDescription.HeightmapFileName,
-                    description.Content.HeightmapDescription.Textures.TexturesLR,
-                    description.Content.HeightmapDescription.CellSize,
-                    description.Content.HeightmapDescription.MaximumHeight);
-            }
-            else if (description.Content.ModelContent != null)
-            {
-                content = description.Content.ModelContent;
-            }
-
             if (description.AssetsConfiguration != null)
             {
                 this.AssetConfiguration = description.AssetsConfiguration;
@@ -105,14 +80,20 @@ namespace Engine
                 this.AssetConfiguration = Helper.DeserializeFromFile<ModularSceneryAssetConfiguration>(Path.Combine(description.Content.ContentFolder, description.AssetsConfigurationFile));
             }
 
+            if (description.Levels != null)
+            {
+                this.Levels = description.Levels;
+            }
+            else if (!string.IsNullOrWhiteSpace(description.LevelsFile))
+            {
+                this.Levels = Helper.DeserializeFromFile<ModularSceneryLevels>(Path.Combine(description.Content.ContentFolder, description.LevelsFile));
+            }
+
             this.InitializeParticles();
 
-            this.InitializeAssets(content);
-            this.InitializeObjects(content);
+            this.CurrentLevel = this.Levels.Levels[0];
 
-            this.ParseAssetsMap();
-
-            this.InitializeEntities();
+            this.LoadLevel(this.CurrentLevel);
         }
         /// <summary>
         /// Dispose of created resources
@@ -123,11 +104,97 @@ namespace Engine
         }
 
         /// <summary>
+        /// Loads the level by name
+        /// </summary>
+        /// <param name="levelName">Level name</param>
+        public void LoadLevel(string levelName)
+        {
+            //Removes previous level components from scene
+            this.Scene.RemoveComponents(this.assets.Select(a => a.Value));
+            this.Scene.RemoveComponents(this.objects.Select(o => o.Value));
+
+            //Clear internal lists and data
+            this.assets.Clear();
+            this.objects.Clear();
+            this.entities.Clear();
+            this.assetMap = null;
+            this.particleManager.Instance.Clear();
+
+            //Find the level
+            var level = this.Levels.Levels
+                .Where(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase))
+                .FirstOrDefault();
+            if (level != null)
+            {
+                this.CurrentLevel = level;
+
+                //Load the level
+                this.LoadLevel(level);
+            }
+        }
+
+        /// <summary>
+        /// Loads the model content
+        /// </summary>
+        /// <returns>Returns the model content</returns>
+        private ModelContent LoadModelContent()
+        {
+            ModelContent content = null;
+
+            if (!string.IsNullOrEmpty(Description.Content.ModelContentFilename))
+            {
+                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(Description.Content.ContentFolder, Description.Content.ModelContentFilename));
+                using (var loader = contentDesc.GetLoader())
+                {
+                    var t = loader.Load(Description.Content.ContentFolder, contentDesc);
+                    content = t[0];
+                }
+            }
+            else if (Description.Content.ModelContentDescription != null)
+            {
+                using (var loader = Description.Content.ModelContentDescription.GetLoader())
+                {
+                    var t = loader.Load(Description.Content.ContentFolder, Description.Content.ModelContentDescription);
+                    content = t[0];
+                }
+            }
+            else if (Description.Content.HeightmapDescription != null)
+            {
+                content = ModelContent.FromHeightmap(
+                    Description.Content.HeightmapDescription.ContentPath,
+                    Description.Content.HeightmapDescription.HeightmapFileName,
+                    Description.Content.HeightmapDescription.Textures.TexturesLR,
+                    Description.Content.HeightmapDescription.CellSize,
+                    Description.Content.HeightmapDescription.MaximumHeight);
+            }
+            else if (Description.Content.ModelContent != null)
+            {
+                content = Description.Content.ModelContent;
+            }
+
+            return content;
+        }
+        /// <summary>
+        /// Loads a level
+        /// </summary>
+        /// <param name="level">Level definition</param>
+        private void LoadLevel(ModularSceneryLevel level)
+        {
+            ModelContent content = LoadModelContent();
+
+            this.InitializeAssets(level, content);
+            this.InitializeObjects(level, content);
+
+            this.ParseAssetsMap(level);
+
+            this.InitializeEntities(level);
+        }
+        /// <summary>
         /// Initialize the particle system and the particle descriptions
         /// </summary>
         private void InitializeParticles()
         {
-            if (this.AssetConfiguration.ParticleSystems != null && this.AssetConfiguration.ParticleSystems.Length > 0)
+            if (this.Levels.ParticleSystems != null && this.Levels.ParticleSystems.Length > 0)
             {
                 this.particleManager = this.Scene.AddComponent<ParticleManager>(
                     new ParticleManagerDescription()
@@ -137,7 +204,7 @@ namespace Engine
                     SceneObjectUsageEnum.None,
                     98);
 
-                foreach (var item in this.AssetConfiguration.ParticleSystems)
+                foreach (var item in this.Levels.ParticleSystems)
                 {
                     item.ContentPath = item.ContentPath ?? this.Description.Content.ContentFolder;
 
@@ -151,10 +218,10 @@ namespace Engine
         /// Initialize all assets into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
-        private void InitializeAssets(ModelContent content)
+        private void InitializeAssets(ModularSceneryLevel level, ModelContent content)
         {
             // Get instance count for all single geometries from Map
-            var instances = this.AssetConfiguration.GetMapInstanceCounters();
+            var instances = level.GetMapInstanceCounters(this.AssetConfiguration.Assets);
 
             // Load all single geometries into single instanced model components
             foreach (var assetName in instances.Keys)
@@ -165,13 +232,13 @@ namespace Engine
                     var modelContent = content.FilterMask(assetName);
                     if (modelContent != null)
                     {
-                        var masks = this.AssetConfiguration.GetMasksForAsset(assetName);
+                        var masks = this.Levels.GetMasksForAsset(assetName);
                         var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
 
                         var model = this.Scene.AddComponent<ModelInstanced>(
                             new ModelInstancedDescription()
                             {
-                                Name = string.Format("{0}.{1}", this.Description.Name, assetName),
+                                Name = string.Format("{0}.{1}.{2}", this.Description.Name, assetName, level.Name),
                                 CastShadow = this.Description.CastShadow,
                                 UseAnisotropicFiltering = this.Description.UseAnisotropic,
                                 Instances = count,
@@ -193,13 +260,13 @@ namespace Engine
         /// Initialize all objects into asset dictionary 
         /// </summary>
         /// <param name="content">Assets model content</param>
-        private void InitializeObjects(ModelContent content)
+        private void InitializeObjects(ModularSceneryLevel level, ModelContent content)
         {
             // Set auto-identifiers
-            this.AssetConfiguration.PopulateObjectIds();
+            level.PopulateObjectIds();
 
             // Get instance count for all single geometries from Map
-            var instances = this.AssetConfiguration.GetObjectsInstanceCounters();
+            var instances = level.GetObjectsInstanceCounters();
 
             // Load all single geometries into single instanced model components
             foreach (var assetName in instances.Keys)
@@ -210,13 +277,13 @@ namespace Engine
                     var modelContent = content.FilterMask(assetName);
                     if (modelContent != null)
                     {
-                        var masks = this.AssetConfiguration.GetMasksForAsset(assetName);
+                        var masks = this.Levels.GetMasksForAsset(assetName);
                         var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
 
                         var model = this.Scene.AddComponent<ModelInstanced>(
                             new ModelInstancedDescription()
                             {
-                                Name = string.Format("{0}.{1}", this.Description.Name, assetName),
+                                Name = string.Format("{0}.{1}.{2}", this.Description.Name, assetName, level.Name),
                                 CastShadow = this.Description.CastShadow,
                                 UseAnisotropicFiltering = this.Description.UseAnisotropic,
                                 Instances = count,
@@ -229,7 +296,7 @@ namespace Engine
                             SceneObjectUsageEnum.None | (hasVolumes ? SceneObjectUsageEnum.CoarsePathFinding : SceneObjectUsageEnum.FullPathFinding));
 
                         //Get the object list to process
-                        var objList = Array.FindAll(this.AssetConfiguration.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
+                        var objList = Array.FindAll(level.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
 
                         //Positioning
                         model.Instance.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
@@ -281,9 +348,9 @@ namespace Engine
         /// <summary>
         /// Initialize scenery entities proxy list
         /// </summary>
-        private void InitializeEntities()
+        private void InitializeEntities(ModularSceneryLevel level)
         {
-            foreach (var obj in this.AssetConfiguration.Objects)
+            foreach (var obj in level.Objects)
             {
                 if (string.IsNullOrEmpty(obj.AssetName))
                 {
@@ -308,14 +375,14 @@ namespace Engine
         /// <summary>
         /// Parse the assets map to set the assets transforms
         /// </summary>
-        private void ParseAssetsMap()
+        private void ParseAssetsMap(ModularSceneryLevel level)
         {
             this.assetMap = new AssetMap();
 
             var transforms = new Dictionary<string, List<Matrix>>();
 
             // Paser map for instance positioning
-            foreach (var item in this.AssetConfiguration.Map)
+            foreach (var item in level.Map)
             {
                 var assetIndex = Array.FindIndex(this.AssetConfiguration.Assets, a => a.Name == item.AssetName);
                 if (assetIndex < 0)
@@ -390,11 +457,11 @@ namespace Engine
         private ModelInstance FindAssetInstance(string mapId, string id)
         {
             // Find the assetName by object asset_id
-            var res = this.AssetConfiguration.FindAssetInstance(mapId, id);
+            var res = this.CurrentLevel.FindAssetInstance(this.AssetConfiguration.Assets, mapId, id);
             if (res != null)
             {
                 // Look for all geometry references
-                int index = this.AssetConfiguration.GetMapInstanceIndex(res.AssetName, mapId, id);
+                int index = this.CurrentLevel.GetMapInstanceIndex(this.AssetConfiguration.Assets, res.AssetName, mapId, id);
                 if (index >= 0)
                 {
                     return this.assets[res.AssetName].Instance[index];
@@ -411,7 +478,7 @@ namespace Engine
         /// <returns>Returns the model instance</returns>
         private ModelInstance FindObjectInstance(string assetName, string id)
         {
-            var index = this.AssetConfiguration.GetObjectInstanceIndex(assetName, id);
+            var index = this.CurrentLevel.GetObjectInstanceIndex(assetName, id);
             if (index >= 0)
             {
                 return this.objects[assetName].Instance[index];

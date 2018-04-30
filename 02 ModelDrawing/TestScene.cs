@@ -205,6 +205,11 @@ namespace ModelDrawing
                 this.AddSystem();
             }
 
+            if (this.Game.Input.KeyJustPressed(Keys.Space))
+            {
+                this.pManager.Instance.Clear();
+            }
+
             if (this.pManagerLineDrawer.Visible)
             {
                 this.DrawVolumes();

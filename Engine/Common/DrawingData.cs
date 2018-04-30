@@ -38,6 +38,11 @@ namespace Engine.Common
         public SceneLight[] Lights = null;
 
         /// <summary>
+        /// Buffer manager
+        /// </summary>
+        protected BufferManager BufferManager = null;
+
+        /// <summary>
         /// Model initialization
         /// </summary>
         /// <param name="game">Game</param>
@@ -47,7 +52,7 @@ namespace Engine.Common
         /// <returns>Returns the generated drawing data objects</returns>
         public static DrawingData Build(Game game, BufferManager bufferManager, ModelContent modelContent, DrawingDataDescription description)
         {
-            DrawingData res = new DrawingData();
+            DrawingData res = new DrawingData(bufferManager);
 
             //Animation
             if (description.LoadAnimation)
@@ -410,9 +415,10 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
-        public DrawingData()
+        /// <param name="bufferManager">Buffer manager</param>
+        public DrawingData(BufferManager bufferManager)
         {
-
+            this.BufferManager = bufferManager;
         }
 
         /// <summary>
@@ -420,6 +426,16 @@ namespace Engine.Common
         /// </summary>
         public void Dispose()
         {
+            //Remove data from buffer manager
+            foreach (var dictionary in this.Meshes.Values)
+            {
+                foreach (var mesh in dictionary.Values)
+                {
+                    this.BufferManager.RemoveVertexData(mesh.VertexBuffer);
+                    this.BufferManager.RemoveIndexData(mesh.IndexBuffer);
+                }
+            }
+
             Helper.Dispose(this.Meshes);
             this.Meshes = null;
 

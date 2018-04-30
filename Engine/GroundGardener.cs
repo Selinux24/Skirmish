@@ -303,6 +303,10 @@ namespace Engine
             /// Game
             /// </summary>
             protected readonly Game Game = null;
+            /// <summary>
+            /// Buffer manager
+            /// </summary>
+            protected BufferManager BufferManager = null;
 
             /// <summary>
             /// Buffer id
@@ -330,6 +334,7 @@ namespace Engine
             public FoliageBuffer(Game game, BufferManager bufferManager, string name)
             {
                 this.Game = game;
+                this.BufferManager = bufferManager;
                 this.Id = ++ID;
                 this.Attached = false;
                 this.CurrentPatch = null;
@@ -340,7 +345,8 @@ namespace Engine
             /// </summary>
             public void Dispose()
             {
-
+                //Remove data from buffer manager
+                this.BufferManager.RemoveVertexData(this.VertexBuffer);
             }
 
             /// <summary>

@@ -201,6 +201,13 @@ namespace Engine
                 return null;
             }
         }
+        /// <summary>
+        /// Clear the particle systems
+        /// </summary>
+        public void Clear()
+        {
+            this.toDelete.AddRange(this.particleSystems);
+        }
 
         /// <summary>
         /// Gets the text representation of the particle manager

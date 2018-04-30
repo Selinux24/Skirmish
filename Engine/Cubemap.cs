@@ -54,7 +54,9 @@ namespace Engine
         /// </summary>
         public override void Dispose()
         {
-
+            //Remove data from buffer manager
+            this.BufferManager.RemoveVertexData(this.vertexBuffer);
+            this.BufferManager.RemoveIndexData(this.indexBuffer);
         }
 
         /// <summary>

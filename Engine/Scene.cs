@@ -243,6 +243,8 @@ namespace Engine
                 this.UpdateGlobalResources = false;
             }
 
+            this.BufferManager.UpdateBuffers();
+
             this.camera.Update(gameTime);
 
             this.TimeOfDay.Update(gameTime);
@@ -480,7 +482,7 @@ namespace Engine
             return component;
         }
         /// <summary>
-        /// Remove and dispose component
+        /// Removes and disposes the specified component
         /// </summary>
         /// <param name="component">Component</param>
         public void RemoveComponent(SceneObject component)
@@ -493,7 +495,24 @@ namespace Engine
             }
 
             component.Dispose();
-            component = null;
+        }
+        /// <summary>
+        /// Removes and disposes the specified component list
+        /// </summary>
+        /// <param name="components">List of components</param>
+        public void RemoveComponents(IEnumerable<SceneObject> components)
+        {
+            foreach (var component in components)
+            {
+                if (this.components.Contains(component))
+                {
+                    this.components.Remove(component);
+
+                    this.UpdateGlobalResources = true;
+                }
+
+                component.Dispose();
+            }
         }
         /// <summary>
         /// Gets full component collection

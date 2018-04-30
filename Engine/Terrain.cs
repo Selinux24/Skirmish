@@ -53,6 +53,10 @@ namespace Engine
             /// </summary>
             public Game Game = null;
             /// <summary>
+            /// Buffer manager
+            /// </summary>
+            public BufferManager BufferManager = null;
+            /// <summary>
             /// High resolution nodes
             /// </summary>
             public MapGridNode[] NodesHigh = new MapGridNode[9];
@@ -108,9 +112,10 @@ namespace Engine
             /// <param name="vertices">Vertices to map</param>
             /// <param name="trianglesPerNode">Triangles per terrain node</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public MapGrid(Game game, VertexData[] vertices, int trianglesPerNode, BufferManager bufferManager)
+            public MapGrid(Game game, BufferManager bufferManager, VertexData[] vertices, int trianglesPerNode)
             {
                 this.Game = game;
+                this.BufferManager = bufferManager;
 
                 //Populate collections
                 for (int i = 0; i < this.NodesHigh.Length; i++)
@@ -179,6 +184,17 @@ namespace Engine
             /// </summary>
             public void Dispose()
             {
+                //Remove data from buffer manager
+                foreach (var vb in this.dictVB.Values)
+                {
+                    this.BufferManager.RemoveVertexData(vb);
+                }
+                foreach (var ib in this.dictIB.Values)
+                {
+                    //Remove data from buffer manager
+                    this.BufferManager.RemoveIndexData(ib);
+                }
+
                 Helper.Dispose(this.dictVB);
                 Helper.Dispose(this.dictIB);
 
@@ -756,16 +772,14 @@ namespace Engine
             this.useAnisotropic = description.UseAnisotropic;
 
             //Get vertices and indices from heightmap
-            VertexData[] vertices;
-            uint[] indices;
-            this.BuildGeometry(out vertices, out indices);
+            this.BuildGeometry(out VertexData[] vertices, out uint[] indices);
 
             List<Triangle> tris = new List<Triangle>();
 
             for (int i = 0; i < indices.Length; i += 3)
             {
                 tris.Add(new Triangle(
-                    vertices[indices[i]].Position.Value,
+                    vertices[indices[i + 0]].Position.Value,
                     vertices[indices[i + 2]].Position.Value,
                     vertices[indices[i + 1]].Position.Value));
             }
@@ -780,7 +794,7 @@ namespace Engine
                 //Initialize map
                 int trianglesPerNode = this.heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
 
-                this.Map = new MapGrid(this.Game, vertices, trianglesPerNode, this.BufferManager);
+                this.Map = new MapGrid(this.Game, this.BufferManager, vertices, trianglesPerNode);
             }
         }
         /// <summary>
