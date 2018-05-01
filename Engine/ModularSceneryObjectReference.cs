@@ -34,7 +34,7 @@ namespace Engine
         /// Item type
         /// </summary>
         [XmlAttribute("type")]
-        public ModularSceneryObjectTypeEnum Type = ModularSceneryObjectTypeEnum.None;
+        public ModularSceneryObjectTypeEnum Type = ModularSceneryObjectTypeEnum.Default;
 
         /// <summary>
         /// Position

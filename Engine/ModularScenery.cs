@@ -688,13 +688,38 @@ namespace Engine
         /// <returns>Gets an array of objects into the specified volume</returns>
         public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, bool sortByDistance)
         {
+            return GetObjects(bbox, null, sortByDistance);
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="filter">Filter by entity type</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, ModularSceneryObjectTypeEnum filter, bool sortByDistance)
+        {
+            return GetObjects(bbox, filter, sortByDistance);
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="filter">Filter by entity type</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        private ModularSceneryItem[] GetObjects(BoundingBox bbox, ModularSceneryObjectTypeEnum? filter, bool sortByDistance)
+        {
             List<ModularSceneryItem> res = new List<ModularSceneryItem>();
 
             for (int i = 0; i < entities.Count; i++)
             {
-                if (bbox.Intersects(entities[i].Item.GetBoundingBox()))
+                if (!filter.HasValue || filter.Value.HasFlag(entities[i].Object.Type))
                 {
-                    res.Add(entities[i]);
+                    if (bbox.Intersects(entities[i].Item.GetBoundingBox()))
+                    {
+                        res.Add(entities[i]);
+                    }
                 }
             }
 
@@ -721,13 +746,38 @@ namespace Engine
         /// <returns>Gets an array of objects into the specified volume</returns>
         public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, bool sortByDistance)
         {
+            return GetObjects(sphere, null, sortByDistance);
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="sphere">Bounding sphere</param>
+        /// <param name="filter">Filter by entity type</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, ModularSceneryObjectTypeEnum filter, bool sortByDistance)
+        {
+            return GetObjects(sphere, filter, sortByDistance);
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="sphere">Bounding sphere</param>
+        /// <param name="filter">Filter by entity type</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        private ModularSceneryItem[] GetObjects(BoundingSphere sphere, ModularSceneryObjectTypeEnum? filter, bool sortByDistance)
+        {
             List<ModularSceneryItem> res = new List<ModularSceneryItem>();
 
             for (int i = 0; i < entities.Count; i++)
             {
-                if (sphere.Intersects(entities[i].Item.GetBoundingSphere()))
+                if (!filter.HasValue || filter.Value.HasFlag(entities[i].Object.Type))
                 {
-                    res.Add(entities[i]);
+                    if (sphere.Intersects(entities[i].Item.GetBoundingSphere()))
+                    {
+                        res.Add(entities[i]);
+                    }
                 }
             }
 

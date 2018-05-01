@@ -581,11 +581,14 @@ namespace Collada
         }
         private void UpdateEntities(GameTime gameTime)
         {
-            var playerPosition = this.Camera.Position;
+            var sphere = new BoundingSphere(this.Camera.Position, doorDistance);
 
-            var sphere = new BoundingSphere(playerPosition, doorDistance);
+            var objTypes = ModularSceneryObjectTypeEnum.Entrance |
+                ModularSceneryObjectTypeEnum.Exit |
+                ModularSceneryObjectTypeEnum.Door |
+                ModularSceneryObjectTypeEnum.Light;
 
-            var items = this.scenery.Instance.GetObjectsInVolume(sphere, true);
+            var items = this.scenery.Instance.GetObjectsInVolume(sphere, objTypes, true);
             if (items != null && items.Length > 0)
             {
                 if (items[0].Object.Type == ModularSceneryObjectTypeEnum.Entrance)
