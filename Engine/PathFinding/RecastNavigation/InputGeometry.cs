@@ -103,7 +103,7 @@ namespace Engine.PathFinding.RecastNavigation
             cm.maxTrisPerChunk = 0;
             for (int i = 0; i < cm.nnodes; ++i)
             {
-                ChunkyTriMeshNode node = cm.nodes[i];
+                var node = cm.nodes[i];
 
                 bool isLeaf = node.i >= 0;
                 if (!isLeaf) continue;

@@ -8,10 +8,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Counter describing modifications to the tile.
         /// </summary>
         public int Salt;
-        public TileCacheLayerData Compressed;
-        public int CompressedSize;
         public TileCacheLayerData Data;
-        public int DataSize;
         public CompressedTileFlags Flags;
         public CompressedTile Next;
 

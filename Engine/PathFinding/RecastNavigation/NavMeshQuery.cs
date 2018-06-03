@@ -3189,7 +3189,7 @@ namespace Engine.PathFinding.RecastNavigation
             Poly[] polys = new Poly[batchSize];
             int n = 0;
 
-            if (tile.bvTree != null)
+            if (tile.bvTree != null && tile.bvTree.Length > 0)
             {
                 int nodeIndex = 0;
                 int endIndex = tile.header.bvNodeCount;
@@ -3257,33 +3257,35 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                Vector3 bmin;
-                Vector3 bmax;
                 int bse = m_nav.GetPolyRefBase(tile);
                 for (int i = 0; i < tile.header.polyCount; ++i)
                 {
                     var p = tile.polys[i];
+
                     // Do not return off-mesh connection polygons.
                     if (p.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                     {
                         continue;
                     }
+
                     // Must pass filter
                     int r = bse | i;
                     if (!filter.PassFilter(r, tile, p))
                     {
                         continue;
                     }
+
                     // Calc polygon bounds.
                     var v = tile.verts[p.verts[0]];
-                    bmin = v;
-                    bmax = v;
+                    Vector3 bmin = v;
+                    Vector3 bmax = v;
                     for (int j = 1; j < p.vertCount; ++j)
                     {
                         v = tile.verts[p.verts[j]];
                         bmin = Vector3.Min(bmin, v);
-                        bmax = Vector3.Min(bmax, v);
+                        bmax = Vector3.Max(bmax, v);
                     }
+
                     if (Recast.OverlapBounds(qmin, qmax, bmin, bmax))
                     {
                         polyRefs[n] = r;

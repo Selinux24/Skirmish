@@ -19,22 +19,26 @@ namespace Engine.PathFinding.RecastNavigation
 
         public static NavMesh Build(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
+            NavMesh res = null;
+
             if (settings.BuildMode == BuildModesEnum.Solo)
             {
-                return BuildSolo(geometry, settings, agent);
+                res = BuildSolo(geometry, settings, agent);
             }
             else if (settings.BuildMode == BuildModesEnum.Tiled)
             {
-                return BuildTiled(geometry, settings, agent);
+                res = BuildTiled(geometry, settings, agent);
             }
             else if (settings.BuildMode == BuildModesEnum.TempObstacles)
             {
-                return BuildTempObstacles(geometry, settings, agent);
+                res = BuildTempObstacles(geometry, settings, agent);
             }
             else
             {
                 throw new EngineException("Bad build mode for NavigationMesh2.");
             }
+
+            return res;
         }
         private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
@@ -325,13 +329,13 @@ namespace Engine.PathFinding.RecastNavigation
                 MaxPolys = maxPolysPerTile,
             };
 
-            var nm = new NavMesh();
+            var nm = new NavMesh()
+            {
+                TileCache = tileCache,
+            };
             nm.Init(nmparams);
 
             int m_cacheLayerCount = 0;
-            int m_cacheCompressedSize = 0;
-            int m_cacheRawSize = 0;
-            int layerBufferSize = CalcLayerBufferSize(tcparams.Width, tcparams.Height);
 
             for (int y = 0; y < th; y++)
             {
@@ -341,11 +345,13 @@ namespace Engine.PathFinding.RecastNavigation
 
                     for (int i = 0; i < ntiles; ++i)
                     {
-                        tileCache.AddTile(tiles[i], CompressedTileFlags.DT_COMPRESSEDTILE_FREE_DATA);
+                        var tile = tileCache.AddTile(tiles[i], CompressedTileFlags.DT_COMPRESSEDTILE_FREE_DATA);
+                        if(tile == null)
+                        {
+                            continue;
+                        }
 
                         m_cacheLayerCount++;
-                        m_cacheCompressedSize += 0;//tiles[i].DataSize;
-                        m_cacheRawSize += layerBufferSize;
                     }
                 }
             }
@@ -453,7 +459,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // (Optional) Mark areas.
-            ConvexVolume[] vols = geometry.GetConvexVolumes();
+            var vols = geometry.GetConvexVolumes();
             for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
             {
                 Recast.MarkConvexPolyArea(
@@ -467,9 +473,9 @@ namespace Engine.PathFinding.RecastNavigation
             rc.ntiles = 0;
             for (int i = 0; i < Math.Min(rc.lset.nlayers, MAX_LAYERS); i++)
             {
-                HeightfieldLayer layer = rc.lset.layers[i];
+                var layer = rc.lset.layers[i];
 
-                TileCacheData tile = rc.tiles[rc.ntiles];
+                var tile = rc.tiles[rc.ntiles];
 
                 // Store header
                 tile.Header = new TileCacheLayerHeader
@@ -541,7 +547,7 @@ namespace Engine.PathFinding.RecastNavigation
                     lastBuiltBbox.Maximum.Y = bbox.Maximum.Y;
                     lastBuiltBbox.Maximum.Z = bbox.Minimum.Z + (y + 1) * tcs;
 
-                    MeshData data = BuildTileMesh(x, y, lastBuiltBbox, geom, settings, agent);
+                    var data = BuildTileMesh(x, y, lastBuiltBbox, geom, settings, agent);
                     if (data != null)
                     {
                         // Remove any previous data (navmesh owns and deletes the data).
@@ -672,7 +678,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // (Optional) Mark areas.
-            ConvexVolume[] vols = geometry.GetConvexVolumes();
+            var vols = geometry.GetConvexVolumes();
             for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
             {
                 Recast.MarkConvexPolyArea(
@@ -906,6 +912,8 @@ namespace Engine.PathFinding.RecastNavigation
         public int MaxTiles { get; set; }
         public MeshTile[] Tiles { get; set; }
 
+        public TileCache TileCache { get; set; }
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -995,12 +1003,14 @@ namespace Engine.PathFinding.RecastNavigation
                 return false;
             }
 
-            NavMeshParams param = new NavMeshParams();
-            param.Origin = header.bmin;
-            param.TileWidth = header.bmax[0] - header.bmin[0];
-            param.TileHeight = header.bmax[2] - header.bmin[2];
-            param.MaxTiles = 1;
-            param.MaxPolys = header.polyCount;
+            NavMeshParams param = new NavMeshParams
+            {
+                Origin = header.bmin,
+                TileWidth = header.bmax[0] - header.bmin[0],
+                TileHeight = header.bmax[2] - header.bmin[2],
+                MaxTiles = 1,
+                MaxPolys = header.polyCount
+            };
 
             Init(param);
 
@@ -1269,7 +1279,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Find tile based on hash.
             int h = Detour.ComputeTileHash(x, y, m_tileLutMask);
-            MeshTile tile = m_posLookup[h];
+            var tile = m_posLookup[h];
             while (tile != null)
             {
                 if (tile.header.x == x &&
@@ -1288,7 +1298,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             // Find tile based on hash.
             int h = Detour.ComputeTileHash(x, y, m_tileLutMask);
-            MeshTile tile = m_posLookup[h];
+            var tile = m_posLookup[h];
             while (tile != null)
             {
                 if (tile.header.x == x &&
@@ -1319,7 +1329,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return null;
             }
-            MeshTile tile = Tiles[tileIndex];
+            var tile = Tiles[tileIndex];
             if (tile.salt != tileSalt)
             {
                 return null;
@@ -1392,12 +1402,12 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return false;
             }
-            MeshTile tile = Tiles[it];
+            var tile = Tiles[it];
             if (ip >= tile.header.polyCount)
             {
                 return false;
             }
-            Poly poly = tile.polys[ip];
+            var poly = tile.polys[ip];
 
             // Make sure that the current poly is indeed off-mesh link.
             if (poly.Type != PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
@@ -1444,12 +1454,12 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return null;
             }
-            MeshTile tile = Tiles[it];
+            var tile = Tiles[it];
             if (ip >= tile.header.polyCount)
             {
                 return null;
             }
-            Poly poly = tile.polys[ip];
+            var poly = tile.polys[ip];
 
             // Make sure that the current poly is indeed off-mesh link.
             if (poly.Type != PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
@@ -1463,13 +1473,28 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public bool SetPolyFlags(int r, SamplePolyFlags flags)
         {
-            if (r == 0) return false;
+            if (r == 0)
+            {
+                return false;
+            }
+
             DecodePolyId(r, out int salt, out int it, out int ip);
-            if (it >= MaxTiles) return false;
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC) return false;
-            MeshTile tile = Tiles[it];
-            if (ip >= tile.header.polyCount) return false;
-            Poly poly = tile.polys[ip];
+            if (it >= MaxTiles)
+            {
+                return false;
+            }
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC)
+            {
+                return false;
+            }
+
+            var tile = Tiles[it];
+            if (ip >= tile.header.polyCount)
+            {
+                return false;
+            }
+
+            var poly = tile.polys[ip];
 
             // Change flags.
             poly.flags = flags;
@@ -1480,13 +1505,28 @@ namespace Engine.PathFinding.RecastNavigation
         {
             resultFlags = 0;
 
-            if (r == 0) return false;
+            if (r == 0)
+            {
+                return false;
+            }
+
             DecodePolyId(r, out int salt, out int it, out int ip);
-            if (it >= MaxTiles) return false;
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC) return false;
-            MeshTile tile = Tiles[it];
-            if (ip >= tile.header.polyCount) return false;
-            Poly poly = tile.polys[ip];
+            if (it >= MaxTiles)
+            {
+                return false;
+            }
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC)
+            {
+                return false;
+            }
+
+            var tile = Tiles[it];
+            if (ip >= tile.header.polyCount)
+            {
+                return false;
+            }
+
+            var poly = tile.polys[ip];
 
             resultFlags = poly.flags;
 
@@ -1494,13 +1534,28 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public bool SetPolyArea(int r, SamplePolyAreas area)
         {
-            if (r == 0) return false;
+            if (r == 0)
+            {
+                return false;
+            }
+
             DecodePolyId(r, out int salt, out int it, out int ip);
-            if (it >= MaxTiles) return false;
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC) return false;
-            MeshTile tile = Tiles[it];
-            if (ip >= tile.header.polyCount) return false;
-            Poly poly = tile.polys[ip];
+            if (it >= MaxTiles)
+            {
+                return false;
+            }
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC)
+            {
+                return false;
+            }
+
+            var tile = Tiles[it];
+            if (ip >= tile.header.polyCount)
+            {
+                return false;
+            }
+
+            var poly = tile.polys[ip];
 
             poly.Area = area;
 
@@ -1510,13 +1565,28 @@ namespace Engine.PathFinding.RecastNavigation
         {
             resultArea = 0;
 
-            if (r == 0) return false;
+            if (r == 0)
+            {
+                return false;
+            }
+
             DecodePolyId(r, out int salt, out int it, out int ip);
-            if (it >= MaxTiles) return false;
-            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC) return false;
-            MeshTile tile = Tiles[it];
-            if (ip >= tile.header.polyCount) return false;
-            Poly poly = tile.polys[ip];
+            if (it >= MaxTiles)
+            {
+                return false;
+            }
+            if (Tiles[it].salt != salt || Tiles[it].header.magic != Detour.DT_NAVMESH_MAGIC)
+            {
+                return false;
+            }
+
+            var tile = Tiles[it];
+            if (ip >= tile.header.polyCount)
+            {
+                return false;
+            }
+
+            var poly = tile.polys[ip];
 
             resultArea = poly.Area;
 
@@ -1890,7 +1960,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             for (int i = 0; i < tile.header.polyCount; ++i)
             {
-                Poly poly = tile.polys[i];
+                var poly = tile.polys[i];
                 int j = poly.firstLink;
                 int pj = Detour.DT_NULL_LINK;
                 while (j != Detour.DT_NULL_LINK)
@@ -1986,7 +2056,7 @@ namespace Engine.PathFinding.RecastNavigation
                 int bse = GetPolyRefBase(tile);
                 for (int i = 0; i < tile.header.polyCount; ++i)
                 {
-                    Poly p = tile.polys[i];
+                    var p = tile.polys[i];
                     // Do not return off-mesh connection polygons.
                     if (p.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                     {

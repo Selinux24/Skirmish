@@ -11,7 +11,7 @@ namespace Engine.PathFinding.RecastNavigation
         public ObstacleState state;
         public int ntouched;
         public int npending;
-        public TileCacheObstacle Next;
+        public int Next;
 
         public ObstacleCylinder cylinder;
         public ObstacleBox box;

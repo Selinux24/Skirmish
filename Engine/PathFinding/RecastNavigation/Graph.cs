@@ -475,6 +475,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// Build settings
         /// </summary>
         private BuildSettings settings = null;
+        /// <summary>
+        /// Obstacle indices
+        /// </summary>
+        private List<Tuple<Agent, int>[]> obstacleIndices = new List<Tuple<Agent, int>[]>();
 
         /// <summary>
         /// Constructor
@@ -577,6 +581,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns true if the specified position is walkable</returns>
         public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
         {
+            nearest = null;
+
             var filter = new QueryFilter()
             {
                 m_includeFlags = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK,
@@ -588,16 +594,15 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (!status.HasFlag(Status.DT_FAILURE))
             {
-                nearest = nPoint;
+                if (nRef != 0)
+                {
+                    nearest = nPoint;
 
-                return nPoint.X == position.X && nPoint.Z == position.Z;
+                    return nPoint.X == position.X && nPoint.Z == position.Z;
+                }
             }
-            else
-            {
-                nearest = null;
 
-                return false;
-            }
+            return false;
         }
         /// <summary>
         /// Loads the graph from a file
@@ -643,6 +648,103 @@ namespace Engine.PathFinding.RecastNavigation
             foreach (var agent in navMeshQDictionary.Keys)
             {
                 navMeshQDictionary[agent].GetAttachedNavMesh().RemoveTile(position, geom, settings);
+            }
+        }
+
+        public int AddObstacle(Vector3 position, float radius, float height)
+        {
+            List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
+
+            foreach (var agent in navMeshQDictionary.Keys)
+            {
+                var cache = navMeshQDictionary[agent].GetAttachedNavMesh().TileCache;
+                if (cache != null)
+                {
+                    cache.AddObstacle(position, radius, height, out int res);
+
+                    obstacles.Add(new Tuple<Agent, int>(agent, res));
+                }
+            }
+
+            if (obstacles.Count > 0)
+            {
+                obstacleIndices.Add(obstacles.ToArray());
+            }
+
+            return obstacleIndices.Count - 1;
+        }
+
+        public int AddObstacle(Vector3 position, Vector3 halfExtents, float yRotation)
+        {
+            List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
+
+            foreach (var agent in navMeshQDictionary.Keys)
+            {
+                var cache = navMeshQDictionary[agent].GetAttachedNavMesh().TileCache;
+                if (cache != null)
+                {
+                    cache.AddBoxObstacle(position, halfExtents, yRotation, out int res);
+
+                    obstacles.Add(new Tuple<Agent, int>(agent, res));
+                }
+            }
+
+            if (obstacles.Count > 0)
+            {
+                obstacleIndices.Add(obstacles.ToArray());
+            }
+
+            return obstacleIndices.Count - 1;
+        }
+
+        public int AddObstacle(BoundingBox bbox)
+        {
+            List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
+
+            foreach (var agent in navMeshQDictionary.Keys)
+            {
+                var cache = navMeshQDictionary[agent].GetAttachedNavMesh().TileCache;
+                if (cache != null)
+                {
+                    cache.AddBoxObstacle(bbox.Minimum, bbox.Maximum, out int res);
+
+                    obstacles.Add(new Tuple<Agent, int>(agent, res));
+                }
+            }
+
+            if (obstacles.Count > 0)
+            {
+                obstacleIndices.Add(obstacles.ToArray());
+            }
+
+            return obstacleIndices.Count - 1;
+        }
+
+        public void RemoveObstacle(int obstacle)
+        {
+            var obstacleList = obstacleIndices[obstacle];
+
+            foreach (var item in obstacleList)
+            {
+                var cache = navMeshQDictionary[item.Item1].GetAttachedNavMesh().TileCache;
+                if (cache != null)
+                {
+                    cache.RemoveObstacle(item.Item2);
+                }
+            }
+
+            obstacleIndices.Remove(obstacleList);
+        }
+
+        public void Update(GameTime gameTime)
+        {
+            foreach (var agent in navMeshQDictionary.Keys)
+            {
+                var nm = navMeshQDictionary[agent].GetAttachedNavMesh();
+                if (nm.TileCache != null)
+                {
+                    nm.TileCache.Update(gameTime.TotalMilliseconds, nm, out bool upToDate);
+                }
             }
         }
     }

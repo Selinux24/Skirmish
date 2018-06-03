@@ -11,7 +11,7 @@ namespace Engine.PathFinding.RecastNavigation
         private TileCacheParams m_params;
         private TileCacheMeshProcess m_tmproc;
         private TileCacheObstacle[] m_obstacles = null;
-        private TileCacheObstacle m_nextFreeObstacle = null;
+        private int m_nextFreeObstacle = -1;
         private int m_tileLutSize;
         private int m_tileLutMask;
         private CompressedTile[] m_tiles = null;
@@ -73,7 +73,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Alloc space for obstacles.
             m_obstacles = new TileCacheObstacle[tcparams.MaxObstacles];
-            m_nextFreeObstacle = null;
+            m_nextFreeObstacle = -1;
             for (int i = tcparams.MaxObstacles - 1; i >= 0; i--)
             {
                 m_obstacles[i] = new TileCacheObstacle
@@ -81,7 +81,7 @@ namespace Engine.PathFinding.RecastNavigation
                     Salt = 1,
                     Next = m_nextFreeObstacle
                 };
-                m_nextFreeObstacle = m_obstacles[i];
+                m_nextFreeObstacle = i;
             }
 
             // Init tiles
@@ -121,7 +121,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Find tile based on hash.
             int h = Detour.ComputeTileHash(tx, ty, m_tileLutMask);
-            CompressedTile tile = m_posLookup[h];
+            var tile = m_posLookup[h];
             while (tile != null)
             {
                 if (tile.Header.tx == tx && tile.Header.ty == ty)
@@ -141,7 +141,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             // Find tile based on hash.
             int h = Detour.ComputeTileHash(tx, ty, m_tileLutMask);
-            CompressedTile tile = m_posLookup[h];
+            var tile = m_posLookup[h];
             while (tile != null)
             {
                 if (tile.Header.tx == tx &&
@@ -177,7 +177,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return null;
             }
-            CompressedTile tile = m_tiles[tileIndex];
+            var tile = m_tiles[tileIndex];
             if (tile.Salt != tileSalt)
             {
                 return null;
@@ -189,7 +189,7 @@ namespace Engine.PathFinding.RecastNavigation
         public CompressedTile AddTile(TileCacheData data, CompressedTileFlags flags)
         {
             // Make sure the data is in right format.
-            TileCacheLayerHeader header = data.Header;
+            var header = data.Header;
             if (header.magic != TileCacheLayerHeader.TileCacheMagic)
             {
                 throw new EngineException("DT_WRONG_MAGIC");
@@ -220,12 +220,8 @@ namespace Engine.PathFinding.RecastNavigation
             m_posLookup[h] = tile;
 
             // Init tile.
-            int headerSize = Helper.Align4(TileCacheLayerHeader.Size);
             tile.Header = data.Header;
             tile.Data = data.Data;
-            tile.DataSize = 0;// data.DataSize;
-            tile.Compressed = data.Data; //tile.Data.CopyTo(tile.Compressed, headerSize);
-            tile.CompressedSize = tile.DataSize - headerSize;
             tile.Flags = flags;
 
             return tile;
@@ -278,19 +274,14 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 // Owns data
                 tile.Data = TileCacheLayerData.Empty;
-                tile.DataSize = 0;
             }
             else
             {
                 data = tile.Data;
-                dataSize = tile.DataSize;
             }
 
             tile.Header = new TileCacheLayerHeader();
             tile.Data = new TileCacheLayerData();
-            tile.DataSize = 0;
-            tile.Compressed = new TileCacheLayerData();
-            tile.CompressedSize = 0;
             tile.Flags = 0;
 
             // Update salt, salt should never be zero.
@@ -316,20 +307,20 @@ namespace Engine.PathFinding.RecastNavigation
                 return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
             }
 
-            TileCacheObstacle ob = null;
-            if (m_nextFreeObstacle != null)
+            int ob = -1;
+            if (m_nextFreeObstacle >= 0)
             {
                 ob = m_nextFreeObstacle;
-                m_nextFreeObstacle = ob.Next;
-                ob.Next = null;
+                m_nextFreeObstacle = m_obstacles[ob].Next;
+                m_obstacles[ob].Next = -1;
             }
-            if (ob == null)
+            if (ob == -1)
             {
                 return Status.DT_FAILURE;
             }
 
-            int salt = ob.Salt;
-            ob = new TileCacheObstacle
+            int salt = m_obstacles[ob].Salt;
+            m_obstacles[ob] = new TileCacheObstacle
             {
                 Salt = salt,
                 state = ObstacleState.DT_OBSTACLE_PROCESSING,
@@ -345,7 +336,7 @@ namespace Engine.PathFinding.RecastNavigation
             var req = new ObstacleRequest
             {
                 action = ObstacleRequestAction.REQUEST_ADD,
-                nref = GetObstacleRef(ob)
+                nref = GetObstacleRef(m_obstacles[ob]),
             };
             m_reqs[m_nreqs++] = req;
 
@@ -362,20 +353,20 @@ namespace Engine.PathFinding.RecastNavigation
                 return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
             }
 
-            TileCacheObstacle ob = null;
-            if (m_nextFreeObstacle != null)
+            int ob = -1;
+            if (m_nextFreeObstacle >= 0)
             {
                 ob = m_nextFreeObstacle;
-                m_nextFreeObstacle = ob.Next;
-                ob.Next = null;
+                m_nextFreeObstacle = m_obstacles[ob].Next;
+                m_obstacles[ob].Next = -1;
             }
-            if (ob == null)
+            if (ob == -1)
             {
                 return Status.DT_FAILURE;
             }
 
-            int salt = ob.Salt;
-            ob = new TileCacheObstacle
+            int salt = m_obstacles[ob].Salt;
+            m_obstacles[ob] = new TileCacheObstacle
             {
                 Salt = salt,
                 state = ObstacleState.DT_OBSTACLE_PROCESSING,
@@ -390,7 +381,7 @@ namespace Engine.PathFinding.RecastNavigation
             var req = new ObstacleRequest
             {
                 action = ObstacleRequestAction.REQUEST_ADD,
-                nref = GetObstacleRef(ob)
+                nref = GetObstacleRef(m_obstacles[ob])
             };
             m_reqs[m_nreqs++] = req;
 
@@ -407,20 +398,20 @@ namespace Engine.PathFinding.RecastNavigation
                 return Status.DT_FAILURE | Status.DT_BUFFER_TOO_SMALL;
             }
 
-            TileCacheObstacle ob = null;
-            if (m_nextFreeObstacle != null)
+            int ob = -1;
+            if (m_nextFreeObstacle >= 0)
             {
                 ob = m_nextFreeObstacle;
-                m_nextFreeObstacle = ob.Next;
-                ob.Next = null;
+                m_nextFreeObstacle = m_obstacles[ob].Next;
+                m_obstacles[ob].Next = -1;
             }
-            if (ob == null)
+            if (ob == -1)
             {
                 return Status.DT_FAILURE;
             }
 
-            int salt = ob.Salt;
-            ob = new TileCacheObstacle
+            int salt = m_obstacles[ob].Salt;
+            m_obstacles[ob] = new TileCacheObstacle
             {
                 Salt = salt,
                 state = ObstacleState.DT_OBSTACLE_PROCESSING,
@@ -434,13 +425,13 @@ namespace Engine.PathFinding.RecastNavigation
 
             float coshalf = (float)Math.Cos(0.5f * yRadians);
             float sinhalf = (float)Math.Sin(-0.5f * yRadians);
-            ob.orientedBox.rotAux.X = coshalf * sinhalf;
-            ob.orientedBox.rotAux.Y = coshalf * coshalf - 0.5f;
+            m_obstacles[ob].orientedBox.rotAux.X = coshalf * sinhalf;
+            m_obstacles[ob].orientedBox.rotAux.Y = coshalf * coshalf - 0.5f;
 
             var req = new ObstacleRequest
             {
                 action = ObstacleRequestAction.REQUEST_ADD,
-                nref = GetObstacleRef(ob)
+                nref = GetObstacleRef(m_obstacles[ob])
             };
             m_reqs[m_nreqs++] = req;
 
@@ -627,7 +618,7 @@ namespace Engine.PathFinding.RecastNavigation
                                 }
                                 // Return obstacle to free list.
                                 ob.Next = m_nextFreeObstacle;
-                                m_nextFreeObstacle = ob;
+                                m_nextFreeObstacle = i;
                             }
                         }
                     }
@@ -660,7 +651,7 @@ namespace Engine.PathFinding.RecastNavigation
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
 
             // Decompress tile layer data.
-            if (!DetourTileCache.DecompressTileCacheLayer(tile.Header, tile.Data, tile.DataSize, out bc.layer))
+            if (!DetourTileCache.DecompressTileCacheLayer(tile.Header, tile.Data, 0, out bc.layer))
             {
                 return false;
             }

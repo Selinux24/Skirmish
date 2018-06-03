@@ -243,15 +243,17 @@ namespace Engine
                 this.UpdateGlobalResources = false;
             }
 
-            this.BufferManager.UpdateBuffers();
+            this.BufferManager?.UpdateBuffers();
 
-            this.camera.Update(gameTime);
+            this.camera?.Update(gameTime);
 
-            this.TimeOfDay.Update(gameTime);
+            this.TimeOfDay?.Update(gameTime);
 
-            this.Lights.UpdateLights(this.TimeOfDay);
+            this.navigationGraph?.Update(gameTime);
 
-            this.Renderer.Update(gameTime, this);
+            this.Lights?.UpdateLights(this.TimeOfDay);
+
+            this.Renderer?.Update(gameTime, this);
 
             this.CapturedControl = this.capturedControl != null;
 
@@ -1431,17 +1433,19 @@ namespace Engine
         /// <returns>Returns true if final position found</returns>
         public virtual bool Walk(AgentType agent, Vector3 prevPosition, Vector3 newPosition, out Vector3 finalPosition)
         {
+            finalPosition = prevPosition;
+
             if (prevPosition != newPosition)
             {
-                finalPosition = Vector3.Zero;
+                bool found = this.FindNearestGroundPosition(
+                    newPosition - new Vector3(0, agent.Height, 0),
+                    out Vector3 walkerPos,
+                    out Triangle t,
+                    out float d);
 
-                Vector3 walkerPos;
-                Triangle t;
-                float d;
-                if (this.FindNearestGroundPosition(newPosition - new Vector3(0, agent.Height, 0), out walkerPos, out t, out d))
+                if (found)
                 {
-                    Vector3? nearest;
-                    if (this.IsWalkable(agent, walkerPos, out nearest))
+                    if (this.IsWalkable(agent, walkerPos, out Vector3? nearest))
                     {
                         finalPosition = walkerPos;
                         finalPosition.Y += agent.Height;
@@ -1475,14 +1479,9 @@ namespace Engine
                         }
                     }
                 }
-                return false;
             }
-            else
-            {
-                finalPosition = prevPosition;
 
-                return true;
-            }
+            return false;
         }
     }
 }

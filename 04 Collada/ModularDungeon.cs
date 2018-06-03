@@ -105,8 +105,8 @@ namespace Collada
             nmsettings.EdgeMaxError = 1.0f;
 
             //Tiling
-            nmsettings.BuildMode = BuildModesEnum.Tiled;
-            nmsettings.TileSize = 32;
+            nmsettings.BuildMode = BuildModesEnum.TempObstacles;
+            nmsettings.TileSize = 48;
 
             this.PathFinderDescription = new PathFinderDescription()
             {
@@ -438,6 +438,12 @@ namespace Collada
                 });
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.F8))
+            {
+                //Add obstacle
+                this.AddObstacle(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 1, 2);
+            }
+
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
                 this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
@@ -471,7 +477,7 @@ namespace Collada
             this.UpdateEntities(gameTime);
 
             this.fps.Instance.Text = this.Game.RuntimeText;
-            this.info.Instance.Text = string.Format("{0} {1}", this.GetRenderMode(), this.Camera.Position);
+            this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
         }
         private void UpdateCamera(GameTime gameTime)
         {
@@ -708,6 +714,12 @@ namespace Collada
                 messages.Instance.CenterVertically();
             }
         }
+        private void AddObstacle(Vector3 position, float radius, float height)
+        {
+            ((Graph)this.navigationGraph).AddObstacle(position, radius, height);
+
+            this.UpdateGraphNodes(this.currentGraph == 0 ? this.ratAgentType : this.agent);
+        }
 
         private void ChangeToLevel(string name)
         {
@@ -725,20 +737,20 @@ namespace Collada
             this.UpdateDebug();
         }
 
-        public override void UpdateNavigationGraph()
-        {
-            var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
+        //public override void UpdateNavigationGraph()
+        //{
+        //    var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
 
-            if (File.Exists(fileName))
-            {
-                this.navigationGraph = new Graph();
-                this.navigationGraph.Load(fileName);
-            }
-            else
-            {
-                base.UpdateNavigationGraph();
-                this.navigationGraph.Save(fileName);
-            }
-        }
+        //    if (File.Exists(fileName))
+        //    {
+        //        this.navigationGraph = new Graph();
+        //        this.navigationGraph.Load(fileName);
+        //    }
+        //    else
+        //    {
+        //        base.UpdateNavigationGraph();
+        //        this.navigationGraph.Save(fileName);
+        //    }
+        //}
     }
 }

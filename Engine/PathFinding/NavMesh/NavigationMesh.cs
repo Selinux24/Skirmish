@@ -200,17 +200,30 @@ namespace Engine.PathFinding.NavMesh
                 return query.IsWalkable(position, extents, out nearest);
             }
         }
-
+        /// <summary>
+        /// Saves the graph to a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
         public void Save(string fileName)
         {
 
         }
-
+        /// <summary>
+        /// Loads the graph from a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
         public void Load(string fileName)
         {
 
         }
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
+        {
 
+        }
 
         internal Crowds.Crowd AddCrowd(bool adaptative, AgentType agent)
         {

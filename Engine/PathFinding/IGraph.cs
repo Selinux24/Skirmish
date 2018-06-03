@@ -39,5 +39,10 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="fileName">File name</param>
         void Load(string fileName);
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        void Update(GameTime gameTime);
     }
 }

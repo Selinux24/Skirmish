@@ -306,13 +306,27 @@ namespace Engine.PathFinding.AStar
 
             return false;
         }
-
+        /// <summary>
+        /// Saves the graph to a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
         public void Save(string fileName)
         {
 
         }
-
+        /// <summary>
+        /// Loads the graph from a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
         public void Load(string fileName)
+        {
+
+        }
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
         {
 
         }
