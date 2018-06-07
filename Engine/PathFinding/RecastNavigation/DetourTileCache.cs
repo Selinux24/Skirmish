@@ -320,12 +320,17 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Allocate and init layer regions.
             int nregs = regId;
-            LayerMonotoneRegion[] regs = Helper.CreateArray(nregs, LayerMonotoneRegion.CreateEmpty());
-
-            for (int i = 0; i < nregs; ++i)
+            LayerMonotoneRegion[] regs = Helper.CreateArray(nregs, () =>
             {
-                regs[i].regId = 0xff;
-            }
+                return new LayerMonotoneRegion()
+                {
+                    area = 0,
+                    neis = new int[DT_LAYER_MAX_NEIS],
+                    nneis = 0,
+                    regId = 0xff,
+                    areaId = TileCacheAreas.RC_NULL_AREA,
+                };
+            });
 
             // Find region neighbours.
             for (int y = 0; y < h; ++y)

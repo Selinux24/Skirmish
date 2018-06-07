@@ -717,8 +717,6 @@ namespace Collada
         private void AddObstacle(Vector3 position, float radius, float height)
         {
             ((Graph)this.navigationGraph).AddObstacle(position, radius, height);
-
-            this.UpdateGraphNodes(this.currentGraph == 0 ? this.ratAgentType : this.agent);
         }
 
         private void ChangeToLevel(string name)

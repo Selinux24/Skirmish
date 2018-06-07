@@ -81,6 +81,8 @@ namespace Engine.Helpers
         {
             using (var factory = new ImagingFactory2())
             {
+                stream.Seek(0, SeekOrigin.Begin);
+
                 var bitmapDecoder = new BitmapDecoder(factory, stream, DecodeOptions.CacheOnLoad);
 
                 var formatConverter = new FormatConverter(factory);
@@ -220,12 +222,9 @@ namespace Engine.Helpers
         /// <param name="maxsize">Maximum size</param>
         private TextureData(DDSHeader header, DDSHeaderDX10? header10, byte[] bitData, int offset, int maxsize)
         {
-            int depth;
-            Format format;
-            ResourceDimension resDim;
-            int arraySize;
-            bool isCubeMap;
-            bool validFile = DDSHeader.ValidateTexture(header, header10, out depth, out format, out resDim, out arraySize, out isCubeMap);
+            bool validFile = DDSHeader.ValidateTexture(
+                header, header10,
+                out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap);
             if (validFile)
             {
                 this.Width = header.Width;
@@ -255,10 +254,7 @@ namespace Engine.Helpers
         /// <returns>Returns a databox</returns>
         public DataBox GetDataBox(int slice, int mip)
         {
-            int offset;
-            int size;
-            int stride;
-            this.GetDataOffset(slice, mip, out offset, out size, out stride);
+            this.GetDataOffset(slice, mip, out int offset, out int size, out int stride);
 
             var bytes = new byte[size];
             Array.Copy(data, offset, bytes, 0, bytes.Length);

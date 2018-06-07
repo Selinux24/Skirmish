@@ -335,8 +335,6 @@ namespace Engine.PathFinding.RecastNavigation
             };
             nm.Init(nmparams);
 
-            int m_cacheLayerCount = 0;
-
             for (int y = 0; y < th; y++)
             {
                 for (int x = 0; x < tw; x++)
@@ -350,8 +348,6 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             continue;
                         }
-
-                        m_cacheLayerCount++;
                     }
                 }
             }

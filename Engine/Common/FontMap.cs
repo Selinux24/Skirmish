@@ -48,6 +48,10 @@ namespace Engine.Common
         /// Map
         /// </summary>
         private Dictionary<char, FontMapChar> map = new Dictionary<char, FontMapChar>();
+        /// <summary>
+        /// Bitmap stream
+        /// </summary>
+        private MemoryStream bitmapStream = null;
 
         /// <summary>
         /// Font name
@@ -57,7 +61,9 @@ namespace Engine.Common
         /// Font size
         /// </summary>
         public float Size { get; private set; }
-
+        /// <summary>
+        /// Character margin delta
+        /// </summary>
         public int Delta { get; private set; }
         /// <summary>
         /// Font style
@@ -169,12 +175,9 @@ namespace Engine.Common
                         }
                     }
 
-                    using (var mstr = new MemoryStream())
-                    {
-                        bmp.Save(mstr, ImageFormat.Tiff);
-
-                        fMap.Texture = game.ResourceManager.CreateResource(mstr);
-                    }
+                    fMap.bitmapStream = new MemoryStream();
+                    bmp.Save(fMap.bitmapStream, ImageFormat.Tiff);
+                    fMap.Texture = game.ResourceManager.CreateResource(fMap.bitmapStream);
                 }
 
                 gCache.Add(fMap);
@@ -198,6 +201,7 @@ namespace Engine.Common
         {
             Helper.Dispose(this.Texture);
             Helper.Dispose(this.map);
+            Helper.Dispose(this.bitmapStream);
         }
 
         /// <summary>
