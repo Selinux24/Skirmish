@@ -4575,7 +4575,7 @@ namespace Engine.PathFinding.RecastNavigation
                         int cx = borderSize + x;
                         int cy = borderSize + y;
                         var c = chf.cells[cx + cy * w];
-                        for (int j = (int)c.index, nj = (int)(c.index + c.count); j < nj; ++j)
+                        for (int j = c.index, nj = (c.index + c.count); j < nj; ++j)
                         {
                             var s = chf.spans[j];
                             // Skip unassigned regions.

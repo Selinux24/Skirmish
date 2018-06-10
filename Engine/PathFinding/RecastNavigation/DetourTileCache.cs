@@ -59,7 +59,7 @@ namespace Engine.PathFinding.RecastNavigation
             bmax.X = pos.X + radius;
             bmax.Y = pos.Y + height;
             bmax.Z = pos.Z + radius;
-            float r2 = (float)Math.Sqrt(radius / cs + 0.5f);
+            float r2 = (float)Math.Pow(radius / cs + 0.5f, 2.0f);
 
             int w = layer.header.width;
             int h = layer.header.height;

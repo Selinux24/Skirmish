@@ -52,11 +52,15 @@ namespace Collada
         private SceneObject<LineListDrawer> bboxesDrawer = null;
         private SceneObject<LineListDrawer> ratDrawer = null;
         private SceneObject<TriangleListDrawer> graphDrawer = null;
+        private SceneObject<TriangleListDrawer> obstacleDrawer = null;
         private int currentGraph = 0;
 
         private string nmFile = "nm.graph";
         private string ntFile = "nm.obj";
         private bool taskRunning = false;
+
+        int lastObstacle = -1;
+        private Color obstacleColor = new Color(Color.Pink.ToColor3(), 0.5f);
 
         public ModularDungeon(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
@@ -287,6 +291,16 @@ namespace Collada
             };
             this.ratDrawer = this.AddComponent<LineListDrawer>(ratDrawerDesc);
             this.ratDrawer.Visible = false;
+
+            var obstacleDrawerDesc = new TriangleListDrawerDescription()
+            {
+                Name = "DEBUG++ Obstacles",
+                AlphaEnabled = true,
+                DepthEnabled = true,
+                Count = 1000,
+            };
+            this.obstacleDrawer = this.AddComponent<TriangleListDrawer>(obstacleDrawerDesc);
+            this.obstacleDrawer.Visible = true;
         }
         private void InitializeCamera()
         {
@@ -441,7 +455,16 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.F8))
             {
                 //Add obstacle
-                this.AddObstacle(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 1, 2);
+                lastObstacle = this.AddObstacle(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 1, 2);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F9))
+            {
+                if (lastObstacle >= 0)
+                {
+                    //Remove obstacle
+                    this.RemoveObstacle(lastObstacle);
+                }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
@@ -714,9 +737,22 @@ namespace Collada
                 messages.Instance.CenterVertically();
             }
         }
-        private void AddObstacle(Vector3 position, float radius, float height)
+        private int AddObstacle(Vector3 position, float radius, float height)
         {
-            ((Graph)this.navigationGraph).AddObstacle(position, radius, height);
+            var obstacle = Triangle.ComputeTriangleList(
+                SharpDX.Direct3D.PrimitiveTopology.TriangleList, 
+                new BoundingCylinder(position, radius, height), 
+                32);
+
+            this.obstacleDrawer.Instance.AddTriangles(obstacleColor, obstacle);
+
+            return ((Graph)this.navigationGraph).AddObstacle(position, radius, height);
+        }
+        private void RemoveObstacle(int obstacle)
+        {
+            this.obstacleDrawer.Instance.Clear(obstacleColor);
+
+            ((Graph)this.navigationGraph).RemoveObstacle(obstacle);
         }
 
         private void ChangeToLevel(string name)
