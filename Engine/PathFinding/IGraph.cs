@@ -29,6 +29,36 @@ namespace Engine.PathFinding
         /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
         bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest);
+
+        /// <summary>
+        /// Adds a cylinder obstacle
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="height">Height</param>
+        /// <returns>Returns the obstacle id</returns>
+        int AddObstacle(Vector3 position, float radius, float height);
+        /// <summary>
+        /// Adds a oriented bounding box obstacle
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="halfExtents">half extent vectors</param>
+        /// <param name="yRotation">Rotation in the y axis</param>
+        /// <returns>Returns the obstacle id</returns>
+        int AddObstacle(Vector3 position, Vector3 halfExtents, float yRotation);
+        /// <summary>
+        /// Adds a bounding box obstacle
+        /// </summary>
+        /// <param name="minimum">Minimum corner</param>
+        /// <param name="maximum">Maximum corner</param>
+        /// <returns>Returns the obstacle id</returns>
+        int AddObstacle(Vector3 minimum, Vector3 maximum);
+        /// <summary>
+        /// Removes an obstacle by obstacle id
+        /// </summary>
+        /// <param name="obstacle">Obstacle id</param>
+        void RemoveObstacle(int obstacle);
+
         /// <summary>
         /// Saves the graph to a file
         /// </summary>

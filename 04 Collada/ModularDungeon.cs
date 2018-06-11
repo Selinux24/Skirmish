@@ -455,7 +455,12 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.F8))
             {
                 //Add obstacle
-                lastObstacle = this.AddObstacle(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 1, 2);
+                var bc = new BoundingCylinder(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 1, 2);
+
+                var obstacle = Triangle.ComputeTriangleList(SharpDX.Direct3D.PrimitiveTopology.TriangleList, bc, 32);
+                this.obstacleDrawer.Instance.AddTriangles(obstacleColor, obstacle);
+
+                lastObstacle = this.AddObstacle(bc);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F9))
@@ -463,6 +468,8 @@ namespace Collada
                 if (lastObstacle >= 0)
                 {
                     //Remove obstacle
+                    this.obstacleDrawer.Instance.Clear(obstacleColor);
+
                     this.RemoveObstacle(lastObstacle);
                 }
             }
@@ -736,23 +743,6 @@ namespace Collada
                 messages.Instance.CenterHorizontally();
                 messages.Instance.CenterVertically();
             }
-        }
-        private int AddObstacle(Vector3 position, float radius, float height)
-        {
-            var obstacle = Triangle.ComputeTriangleList(
-                SharpDX.Direct3D.PrimitiveTopology.TriangleList, 
-                new BoundingCylinder(position, radius, height), 
-                32);
-
-            this.obstacleDrawer.Instance.AddTriangles(obstacleColor, obstacle);
-
-            return ((Graph)this.navigationGraph).AddObstacle(position, radius, height);
-        }
-        private void RemoveObstacle(int obstacle)
-        {
-            this.obstacleDrawer.Instance.Clear(obstacleColor);
-
-            ((Graph)this.navigationGraph).RemoveObstacle(obstacle);
         }
 
         private void ChangeToLevel(string name)

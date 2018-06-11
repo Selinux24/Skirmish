@@ -539,6 +539,31 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Builds the tile in the specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="geom">Input geometry</param>
+        public void BuildTile(Vector3 position, InputGeometry geom)
+        {
+            foreach (var agent in navMeshQDictionary.Keys)
+            {
+                navMeshQDictionary[agent].GetAttachedNavMesh().BuildTile(position, geom, settings, agent);
+            }
+        }
+        /// <summary>
+        /// Removes the tile in the specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="geom">Input geometry</param>
+        public void RemoveTile(Vector3 position, InputGeometry geom)
+        {
+            foreach (var agent in navMeshQDictionary.Keys)
+            {
+                navMeshQDictionary[agent].GetAttachedNavMesh().RemoveTile(position, geom, settings);
+            }
+        }
+
+        /// <summary>
         /// Gets the node collection of the graph for the specified agent type
         /// </summary>
         /// <param name="agent">Agent type</param>
@@ -604,53 +629,14 @@ namespace Engine.PathFinding.RecastNavigation
 
             return false;
         }
-        /// <summary>
-        /// Loads the graph from a file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        public void Load(string fileName)
-        {
-            byte[] buffer = File.ReadAllBytes(fileName);
-
-            var file = buffer.Decompress<Graph>();
-
-            navMeshQDictionary = file.navMeshQDictionary;
-            settings = file.settings;
-        }
-        /// <summary>
-        /// Saves the graph to a file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        public void Save(string fileName)
-        {
-            File.WriteAllBytes(fileName, this.Compress());
-        }
 
         /// <summary>
-        /// Builds the tile in the specified position
+        /// Adds a cylinder obstacle
         /// </summary>
         /// <param name="position">Position</param>
-        /// <param name="geom">Input geometry</param>
-        public void BuildTile(Vector3 position, InputGeometry geom)
-        {
-            foreach (var agent in navMeshQDictionary.Keys)
-            {
-                navMeshQDictionary[agent].GetAttachedNavMesh().BuildTile(position, geom, settings, agent);
-            }
-        }
-        /// <summary>
-        /// Removes the tile in the specified position
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="geom">Input geometry</param>
-        public void RemoveTile(Vector3 position, InputGeometry geom)
-        {
-            foreach (var agent in navMeshQDictionary.Keys)
-            {
-                navMeshQDictionary[agent].GetAttachedNavMesh().RemoveTile(position, geom, settings);
-            }
-        }
-
+        /// <param name="radius">Radius</param>
+        /// <param name="height">Height</param>
+        /// <returns>Returns the obstacle id</returns>
         public int AddObstacle(Vector3 position, float radius, float height)
         {
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
@@ -673,7 +659,13 @@ namespace Engine.PathFinding.RecastNavigation
 
             return obstacleIndices.Count - 1;
         }
-
+        /// <summary>
+        /// Adds a oriented bounding box obstacle
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="halfExtents">half extent vectors</param>
+        /// <param name="yRotation">Rotation in the y axis</param>
+        /// <returns>Returns the obstacle id</returns>
         public int AddObstacle(Vector3 position, Vector3 halfExtents, float yRotation)
         {
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
@@ -696,8 +688,13 @@ namespace Engine.PathFinding.RecastNavigation
 
             return obstacleIndices.Count - 1;
         }
-
-        public int AddObstacle(BoundingBox bbox)
+        /// <summary>
+        /// Adds a bounding box obstacle
+        /// </summary>
+        /// <param name="minimum">Minimum corner</param>
+        /// <param name="maximum">Maximum corner</param>
+        /// <returns>Returns the obstacle id</returns>
+        public int AddObstacle(Vector3 minimum, Vector3 maximum)
         {
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
 
@@ -706,7 +703,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var cache = navMeshQDictionary[agent].GetAttachedNavMesh().TileCache;
                 if (cache != null)
                 {
-                    cache.AddBoxObstacle(bbox.Minimum, bbox.Maximum, out int res);
+                    cache.AddBoxObstacle(minimum, maximum, out int res);
 
                     obstacles.Add(new Tuple<Agent, int>(agent, res));
                 }
@@ -719,7 +716,10 @@ namespace Engine.PathFinding.RecastNavigation
 
             return obstacleIndices.Count - 1;
         }
-
+        /// <summary>
+        /// Removes an obstacle by obstacle id
+        /// </summary>
+        /// <param name="obstacle">Obstacle id</param>
         public void RemoveObstacle(int obstacle)
         {
             var obstacleList = obstacleIndices[obstacle];
@@ -736,6 +736,31 @@ namespace Engine.PathFinding.RecastNavigation
             obstacleIndices.Remove(obstacleList);
         }
 
+        /// <summary>
+        /// Loads the graph from a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public void Load(string fileName)
+        {
+            byte[] buffer = File.ReadAllBytes(fileName);
+
+            var file = buffer.Decompress<Graph>();
+
+            navMeshQDictionary = file.navMeshQDictionary;
+            settings = file.settings;
+        }
+        /// <summary>
+        /// Saves the graph to a file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        public void Save(string fileName)
+        {
+            File.WriteAllBytes(fileName, this.Compress());
+        }
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
             foreach (var agent in navMeshQDictionary.Keys)

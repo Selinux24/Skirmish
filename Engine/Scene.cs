@@ -1483,5 +1483,43 @@ namespace Engine
 
             return false;
         }
+
+        /// <summary>
+        /// Adds cylinder obstacle
+        /// </summary>
+        /// <param name="cylinder">Cylinder</param>
+        /// <returns>Returns the obstacle Id</returns>
+        public virtual int AddObstacle(BoundingCylinder cylinder)
+        {
+            return this.navigationGraph.AddObstacle(cylinder.Position, cylinder.Radius, cylinder.Height);
+        }
+        /// <summary>
+        /// Adds AABB obstacle
+        /// </summary>
+        /// <param name="bbox">AABB</param>
+        /// <returns>Returns the obstacle Id</returns>
+        public virtual int AddObstacle(BoundingBox bbox)
+        {
+            return this.navigationGraph.AddObstacle(bbox.Minimum, bbox.Maximum);
+        }
+        /// <summary>
+        /// Adds OBB
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="halfExtents">Half extents</param>
+        /// <param name="yRotation">Rotation in the Y axis</param>
+        /// <returns>Returns the obstacle Id</returns>
+        public virtual int AddObstacle(Vector3 position, Vector3 halfExtents, float yRotation)
+        {
+            return this.navigationGraph.AddObstacle(position, halfExtents, yRotation);
+        }
+        /// <summary>
+        /// Removes obstable by id
+        /// </summary>
+        /// <param name="obstacle">Obstacle id</param>
+        public virtual void RemoveObstacle(int obstacle)
+        {
+            this.navigationGraph.RemoveObstacle(obstacle);
+        }
     }
 }

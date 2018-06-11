@@ -200,6 +200,48 @@ namespace Engine.PathFinding.NavMesh
                 return query.IsWalkable(position, extents, out nearest);
             }
         }
+
+        /// <summary>
+        /// Adds a cylinder obstacle
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="height">Height</param>
+        /// <returns>Returns the obstacle id</returns>
+        public int AddObstacle(Vector3 position, float radius, float height)
+        {
+            return -1;
+        }
+        /// <summary>
+        /// Adds a oriented bounding box obstacle
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="halfExtents">half extent vectors</param>
+        /// <param name="yRotation">Rotation in the y axis</param>
+        /// <returns>Returns the obstacle id</returns>
+        public int AddObstacle(Vector3 position, Vector3 halfExtents, float yRotation)
+        {
+            return -1;
+        }
+        /// <summary>
+        /// Adds a bounding box obstacle
+        /// </summary>
+        /// <param name="minimum">Minimum corner</param>
+        /// <param name="maximum">Maximum corner</param>
+        /// <returns>Returns the obstacle id</returns>
+        public int AddObstacle(Vector3 minimum, Vector3 maximum)
+        {
+            return -1;
+        }
+        /// <summary>
+        /// Removes an obstacle by obstacle id
+        /// </summary>
+        /// <param name="obstacle">Obstacle id</param>
+        public void RemoveObstacle(int obstacle)
+        {
+
+        }
+
         /// <summary>
         /// Saves the graph to a file
         /// </summary>
