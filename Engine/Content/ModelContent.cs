@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -370,7 +369,7 @@ namespace Engine.Content
         /// <returns>Returns new model content</returns>
         public static ModelContent GenerateTriangleList(VertexData[] vertices, uint[] indices, MaterialContent material = null)
         {
-            return Generate(PrimitiveTopology.TriangleList, vertices, indices, material);
+            return Generate(Topology.TriangleList, vertices, indices, material);
         }
         /// <summary>
         /// Generate model content from scratch
@@ -380,7 +379,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        private static ModelContent Generate(PrimitiveTopology topology, VertexData[] vertices, uint[] indices, MaterialContent material = null)
+        private static ModelContent Generate(Topology topology, VertexData[] vertices, uint[] indices, MaterialContent material = null)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -448,7 +447,7 @@ namespace Engine.Content
 
             SubMeshContent geo = new SubMeshContent()
             {
-                Topology = PrimitiveTopology.TriangleList,
+                Topology = Topology.TriangleList,
                 Material = materialName,
                 Vertices = vertices,
                 Indices = indices,

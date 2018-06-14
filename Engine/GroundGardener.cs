@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -814,7 +813,7 @@ namespace Engine
                                 this.BufferManager.SetInputAssembler(
                                     vegetationTechnique,
                                     buffer.VertexBuffer.Slot,
-                                    PrimitiveTopology.PointList);
+                                    Topology.PointList);
 
                                 buffer.DrawFoliageShadows(context, vegetationTechnique);
                             }
@@ -852,7 +851,7 @@ namespace Engine
                                     this.BufferManager.SetInputAssembler(
                                         vegetationTechnique,
                                         buffer.VertexBuffer.Slot,
-                                        PrimitiveTopology.PointList);
+                                        Topology.PointList);
 
                                     buffer.DrawFoliage(context, vegetationTechnique);
                                 }

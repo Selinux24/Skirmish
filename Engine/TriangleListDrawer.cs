@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -95,7 +94,7 @@ namespace Engine
                     effect.UpdatePerObject(0, null, 0, false);
 
                     var technique = effect.GetTechnique(VertexTypes.PositionColor, false);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
 
                     var graphics = this.Game.Graphics;
 

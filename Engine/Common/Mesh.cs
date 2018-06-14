@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 
@@ -68,7 +67,7 @@ namespace Engine.Common
         /// <summary>
         /// Topology
         /// </summary>
-        public PrimitiveTopology Topology { get; private set; }
+        public Topology Topology { get; private set; }
         /// <summary>
         /// Stride
         /// </summary>
@@ -97,7 +96,7 @@ namespace Engine.Common
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         /// <param name="instanced">Instanced</param>
-        public Mesh(string name, string material, bool isTransparent, PrimitiveTopology topology, IVertexData[] vertices, uint[] indices, bool instanced)
+        public Mesh(string name, string material, bool isTransparent, Topology topology, IVertexData[] vertices, uint[] indices, bool instanced)
         {
             var vFirst = vertices[0];
 

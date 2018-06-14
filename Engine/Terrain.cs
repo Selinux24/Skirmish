@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -384,7 +383,7 @@ namespace Engine
                     var gNode = nodeList[i];
                     if (gNode.IBDesc.Count > 0)
                     {
-                        bufferManager.SetInputAssembler(terrainTechnique, gNode.VBDesc.Slot, PrimitiveTopology.TriangleList);
+                        bufferManager.SetInputAssembler(terrainTechnique, gNode.VBDesc.Slot, Topology.TriangleList);
                         bufferManager.SetIndexBuffer(gNode.IBDesc.Slot);
 
                         if (!mode.HasFlag(DrawerModesEnum.ShadowMap))

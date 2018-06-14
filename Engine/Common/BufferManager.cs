@@ -668,7 +668,7 @@ namespace Engine.Common
         /// <param name="technique">Technique</param>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="topology">Topology</param>
-        public void SetInputAssembler(EngineEffectTechnique technique, int slot, PrimitiveTopology topology)
+        public void SetInputAssembler(EngineEffectTechnique technique, int slot, Topology topology)
         {
             //The technique defines the vertex type
             if (!inputLayouts.ContainsKey(technique))
@@ -682,7 +682,7 @@ namespace Engine.Common
             }
 
             this.game.Graphics.IAInputLayout = inputLayouts[technique];
-            this.game.Graphics.IAPrimitiveTopology = topology;
+            this.game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
         }
 
         /// <summary>

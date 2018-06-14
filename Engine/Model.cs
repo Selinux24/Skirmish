@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using PrimitiveTopology = SharpDX.Direct3D.PrimitiveTopology;
 
 namespace Engine
 {
@@ -711,7 +710,7 @@ namespace Engine
                 {
                     //Generate cylinder
                     var cylinder = BoundingCylinder.FromPoints(this.GetPoints());
-                    return Triangle.ComputeTriangleList(PrimitiveTopology.TriangleList, cylinder, 8);
+                    return Triangle.ComputeTriangleList(Topology.TriangleList, cylinder, 8);
                 }
             }
         }

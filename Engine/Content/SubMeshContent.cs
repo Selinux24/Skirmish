@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 
@@ -38,7 +37,7 @@ namespace Engine.Content
         /// <summary>
         /// Vertex Topology
         /// </summary>
-        public PrimitiveTopology Topology { get; set; }
+        public Topology Topology { get; set; }
         /// <summary>
         /// Vertex type
         /// </summary>
@@ -133,7 +132,7 @@ namespace Engine.Content
             else
             {
                 string material = meshArray[0].Material;
-                PrimitiveTopology topology = meshArray[0].Topology;
+                Topology topology = meshArray[0].Topology;
                 VertexTypes vertexType = meshArray[0].VertexType;
                 bool textured = meshArray[0].Textured;
                 bool transparent = meshArray[0].Transparent;
@@ -270,7 +269,7 @@ namespace Engine.Content
         /// <returns>Returns the triangle list</returns>
         public Triangle[] GetTriangles()
         {
-            if (this.Topology == PrimitiveTopology.TriangleList || this.Topology == PrimitiveTopology.TriangleListWithAdjacency)
+            if (this.Topology == Topology.TriangleList)
             {
                 List<Triangle> triangles = new List<Triangle>();
 

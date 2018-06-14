@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 
 namespace Engine
 {
@@ -255,7 +254,7 @@ namespace Engine
                     var effect = DrawerPool.EffectDefaultFont;
                     var technique = effect.FontDrawer;
 
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
 
                     if (this.ShadowColor != Color.Transparent)
                     {

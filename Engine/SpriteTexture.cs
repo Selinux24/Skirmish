@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 
 namespace Engine
 {
@@ -148,7 +147,7 @@ namespace Engine
                     Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
 
                     this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
 
                     effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
                     effect.UpdatePerObject(Color.White, this.Texture, this.TextureIndex);

@@ -545,7 +545,7 @@ namespace SceneTest
             var bbox = new BoundingBox(
                 -Vector3.One + Vector3.UnitY + (Vector3.UnitX * 20),
                 +Vector3.One + Vector3.UnitY + (Vector3.UnitX * 20));
-            var cubeTris = Triangle.ComputeTriangleList(SharpDX.Direct3D.PrimitiveTopology.TriangleList, bbox);
+            var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
 
             var desc = new TriangleListDrawerDescription()
             {

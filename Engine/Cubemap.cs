@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 
@@ -92,7 +91,7 @@ namespace Engine
                     }
 
                     this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
 
                     effect.UpdatePerFrame(this.local, context.ViewProjection);
                     effect.UpdatePerObject(this.cubeMapTexture);

@@ -1,6 +1,5 @@
 ﻿using Engine.Common;
 using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 
@@ -119,11 +118,11 @@ namespace Engine
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Vector3[] vertices)
+        public static Triangle[] ComputeTriangleList(Topology topology, Vector3[] vertices)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
-            if (topology == PrimitiveTopology.TriangleList || topology == PrimitiveTopology.TriangleListWithAdjacency)
+            if (topology == Topology.TriangleList)
             {
                 for (int i = 0; i < vertices.Length; i += 3)
                 {
@@ -135,7 +134,7 @@ namespace Engine
                     triangleList.Add(tri);
                 }
             }
-            else if (topology == PrimitiveTopology.TriangleStrip || topology == PrimitiveTopology.TriangleStripWithAdjacency)
+            else
             {
                 throw new NotImplementedException();
             }
@@ -149,11 +148,11 @@ namespace Engine
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Vector3[] vertices, uint[] indices)
+        public static Triangle[] ComputeTriangleList(Topology topology, Vector3[] vertices, uint[] indices)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
-            if (topology == PrimitiveTopology.TriangleList || topology == PrimitiveTopology.TriangleListWithAdjacency)
+            if (topology == Topology.TriangleList)
             {
                 for (int i = 0; i < indices.Length; i += 3)
                 {
@@ -178,11 +177,11 @@ namespace Engine
         /// <param name="topology">Topology</param>
         /// <param name="bbox">AABB</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, BoundingBox bbox)
+        public static Triangle[] ComputeTriangleList(Topology topology, BoundingBox bbox)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
-            if (topology == PrimitiveTopology.TriangleList || topology == PrimitiveTopology.TriangleListWithAdjacency)
+            if (topology == Topology.TriangleList)
             {
                 var v = new Vector3[24];
 
@@ -262,17 +261,62 @@ namespace Engine
             return triangleList.ToArray();
         }
         /// <summary>
+        /// Generate a triangle list from OBB
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="obb">OBB</param>
+        /// <returns>Returns the triangle list</returns>
+        public static Triangle[] ComputeTriangleList(Topology topology, OrientedBoundingBox obb)
+        {
+            List<Triangle> triangleList = new List<Triangle>();
+
+            if (topology == Topology.TriangleList)
+            {
+                Vector3[] v = obb.GetCorners();
+
+                // Fill in the front face index data
+                triangleList.Add(new Triangle(v[0], v[1], v[2]));
+                triangleList.Add(new Triangle(v[0], v[2], v[3]));
+
+                // Fill in the back face index data
+                triangleList.Add(new Triangle(v[4], v[5], v[6]));
+                triangleList.Add(new Triangle(v[4], v[6], v[7]));
+
+                // Fill in the top face index data
+                triangleList.Add(new Triangle(v[8], v[9], v[10]));
+                triangleList.Add(new Triangle(v[8], v[10], v[11]));
+
+                // Fill in the bottom face index data
+                triangleList.Add(new Triangle(v[12], v[13], v[14]));
+                triangleList.Add(new Triangle(v[12], v[14], v[15]));
+
+                // Fill in the left face index data
+                triangleList.Add(new Triangle(v[16], v[17], v[18]));
+                triangleList.Add(new Triangle(v[16], v[18], v[19]));
+
+                // Fill in the right face index data
+                triangleList.Add(new Triangle(v[20], v[21], v[22]));
+                triangleList.Add(new Triangle(v[20], v[22], v[23]));
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            return triangleList.ToArray();
+        }
+        /// <summary>
         /// Generate a triangle list from cylinder
         /// </summary>
         /// <param name="topology">Topology</param>
         /// <param name="cylinder">Cylinder</param>
         /// <param name="segments">Number of segments</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, BoundingCylinder cylinder, int segments)
+        public static Triangle[] ComputeTriangleList(Topology topology, BoundingCylinder cylinder, int segments)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
-            if (topology == PrimitiveTopology.TriangleList || topology == PrimitiveTopology.TriangleListWithAdjacency)
+            if (topology == Topology.TriangleList)
             {
                 List<Vector3> verts = new List<Vector3>();
 
@@ -320,9 +364,9 @@ namespace Engine
         /// <param name="topology">Topology</param>
         /// <param name="poly">Polygon</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(PrimitiveTopology topology, Polygon poly)
+        public static Triangle[] ComputeTriangleList(Topology topology, Polygon poly)
         {
-            if (topology == PrimitiveTopology.TriangleList || topology == PrimitiveTopology.TriangleListWithAdjacency)
+            if (topology == Topology.TriangleList)
             {
                 return poly.Triangulate();
             }

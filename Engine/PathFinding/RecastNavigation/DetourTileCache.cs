@@ -40,12 +40,30 @@ namespace Engine.PathFinding.RecastNavigation
             layer = new TileCacheLayer()
             {
                 header = header,
-                areas = data.areas,
-                heights = data.heights,
-                cons = data.cons,
-                regCount = 0,
+                areas = null,
+                heights = null,
+                cons = null,
                 regs = null,
+                regCount = 0,
             };
+
+            if (data.areas != null && data.areas.Length > 0)
+            {
+                layer.areas = new TileCacheAreas[data.areas.Length];
+                Array.Copy(data.areas, layer.areas, data.areas.Length);
+            }
+
+            if (data.heights != null && data.heights.Length > 0)
+            {
+                layer.heights = new int[data.heights.Length];
+                Array.Copy(data.heights, layer.heights, data.heights.Length);
+            }
+
+            if (data.cons != null && data.cons.Length > 0)
+            {
+                layer.cons = new int[data.cons.Length];
+                Array.Copy(data.cons, layer.cons, data.cons.Length);
+            }
 
             return true;
         }

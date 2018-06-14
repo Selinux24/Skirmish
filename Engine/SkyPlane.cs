@@ -1,7 +1,5 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -217,7 +215,7 @@ namespace Engine
                     var effect = DrawerPool.EffectDefaultClouds;
                     var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
 
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, PrimitiveTopology.TriangleList);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
 
                     effect.UpdatePerFrame(
                         this.rotation * Matrix.Translation(context.EyePosition),

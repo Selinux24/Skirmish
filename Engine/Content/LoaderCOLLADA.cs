@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -498,7 +497,7 @@ namespace Engine.Content
 
                 SubMeshContent meshInfo = new SubMeshContent()
                 {
-                    Topology = PrimitiveTopology.TriangleList,
+                    Topology = Topology.TriangleList,
                     Vertices = data,
                     Material = triangle.Material,
                     IsVolume = isVolume,
@@ -619,7 +618,7 @@ namespace Engine.Content
 
                 SubMeshContent meshInfo = new SubMeshContent()
                 {
-                    Topology = PrimitiveTopology.TriangleList,
+                    Topology = Topology.TriangleList,
                     Vertices = data,
                     Material = polyList.Material,
                     IsVolume = isVolume,
@@ -708,7 +707,7 @@ namespace Engine.Content
 
                 SubMeshContent meshInfo = new SubMeshContent()
                 {
-                    Topology = PrimitiveTopology.TriangleList,
+                    Topology = Topology.TriangleList,
                     Vertices = data,
                     Material = polygon.Material,
                     IsVolume = isVolume,

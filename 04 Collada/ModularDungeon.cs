@@ -59,7 +59,7 @@ namespace Collada
         private string ntFile = "nm.obj";
         private bool taskRunning = false;
 
-        int lastObstacle = -1;
+        Dictionary<int, object> obstacles = new Dictionary<int, object>();
         private Color obstacleColor = new Color(Color.Pink.ToColor3(), 0.5f);
 
         public ModularDungeon(Game game)
@@ -455,22 +455,27 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.F8))
             {
                 //Add obstacle
-                var bc = new BoundingCylinder(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 1, 2);
+                var bc1 = new BoundingCylinder(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 0.8f, 2);
+                var obstacle1 = Triangle.ComputeTriangleList(Topology.TriangleList, bc1, 32);
+                obstacles.Add(this.AddObstacle(bc1), bc1);
 
-                var obstacle = Triangle.ComputeTriangleList(SharpDX.Direct3D.PrimitiveTopology.TriangleList, bc, 32);
-                this.obstacleDrawer.Instance.AddTriangles(obstacleColor, obstacle);
+                var bc2 = new BoundingCylinder(new Vector3(-3.21798706f, 3.50000000f, -26.1250477f), 0.8f, 2);
+                var obstacle2 = Triangle.ComputeTriangleList(Topology.TriangleList, bc2, 32);
+                obstacles.Add(this.AddObstacle(bc2), bc2);
 
-                lastObstacle = this.AddObstacle(bc);
+                this.PaintObstacles();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F9))
             {
-                if (lastObstacle >= 0)
+                if (obstacles.Count > 0)
                 {
                     //Remove obstacle
-                    this.obstacleDrawer.Instance.Clear(obstacleColor);
+                    int obstacleIndex = obstacles.Keys.ToArray()[0];
+                    obstacles.Remove(obstacleIndex);
+                    this.RemoveObstacle(obstacleIndex);
 
-                    this.RemoveObstacle(lastObstacle);
+                    this.PaintObstacles();
                 }
             }
 
@@ -759,6 +764,36 @@ namespace Collada
             this.Camera.Position = pos;
             this.Camera.Interest = pos + dir;
             this.UpdateDebug();
+        }
+
+        private void PaintObstacles()
+        {
+            this.obstacleDrawer.Instance.Clear(obstacleColor);
+
+            foreach (var item in obstacles)
+            {
+                var obstacle = item.Value;
+
+                Triangle[] obstacleTris = null;
+
+                if (obstacle is BoundingCylinder)
+                {
+                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, (BoundingCylinder)obstacle, 32);
+                }
+                else if (obstacle is BoundingBox)
+                {
+                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, (BoundingBox)obstacle);
+                }
+                else if (obstacle is OrientedBoundingBox)
+                {
+                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, (OrientedBoundingBox)obstacle);
+                }
+
+                if (obstacleTris != null && obstacleTris.Length > 0)
+                {
+                    this.obstacleDrawer.Instance.AddTriangles(obstacleColor, obstacleTris);
+                }
+            }
         }
 
         //public override void UpdateNavigationGraph()

@@ -478,7 +478,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Obstacle indices
         /// </summary>
-        private List<Tuple<Agent, int>[]> obstacleIndices = new List<Tuple<Agent, int>[]>();
+        private List<Obstacle> obstacleIndices = new List<Obstacle>();
 
         /// <summary>
         /// Constructor
@@ -654,10 +654,17 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (obstacles.Count > 0)
             {
-                obstacleIndices.Add(obstacles.ToArray());
+                var o = new Obstacle()
+                {
+                    Indices = obstacles.ToArray()
+                };
+
+                obstacleIndices.Add(o);
+
+                return o.Id;
             }
 
-            return obstacleIndices.Count - 1;
+            return -1;
         }
         /// <summary>
         /// Adds a oriented bounding box obstacle
@@ -683,10 +690,17 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (obstacles.Count > 0)
             {
-                obstacleIndices.Add(obstacles.ToArray());
+                var o = new Obstacle()
+                {
+                    Indices = obstacles.ToArray()
+                };
+
+                obstacleIndices.Add(o);
+
+                return o.Id;
             }
 
-            return obstacleIndices.Count - 1;
+            return -1;
         }
         /// <summary>
         /// Adds a bounding box obstacle
@@ -711,29 +725,38 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (obstacles.Count > 0)
             {
-                obstacleIndices.Add(obstacles.ToArray());
+                var o = new Obstacle()
+                {
+                    Indices = obstacles.ToArray()
+                };
+
+                obstacleIndices.Add(o);
+
+                return o.Id;
             }
 
-            return obstacleIndices.Count - 1;
+            return -1;
         }
         /// <summary>
         /// Removes an obstacle by obstacle id
         /// </summary>
-        /// <param name="obstacle">Obstacle id</param>
-        public void RemoveObstacle(int obstacle)
+        /// <param name="obstacleId">Obstacle id</param>
+        public void RemoveObstacle(int obstacleId)
         {
-            var obstacleList = obstacleIndices[obstacle];
-
-            foreach (var item in obstacleList)
+            var obstacle = obstacleIndices.Find(o => o.Id == obstacleId);
+            if (obstacle != null)
             {
-                var cache = navMeshQDictionary[item.Item1].GetAttachedNavMesh().TileCache;
-                if (cache != null)
+                foreach (var item in obstacle.Indices)
                 {
-                    cache.RemoveObstacle(item.Item2);
+                    var cache = navMeshQDictionary[item.Item1].GetAttachedNavMesh().TileCache;
+                    if (cache != null)
+                    {
+                        cache.RemoveObstacle(item.Item2);
+                    }
                 }
-            }
 
-            obstacleIndices.Remove(obstacleList);
+                obstacleIndices.Remove(obstacle);
+            }
         }
 
         /// <summary>
@@ -771,6 +794,19 @@ namespace Engine.PathFinding.RecastNavigation
                     nm.TileCache.Update(gameTime.TotalMilliseconds, nm, out bool upToDate);
                 }
             }
+        }
+    }
+
+    class Obstacle
+    {
+        private static int ID = 0;
+
+        public readonly int Id;
+        public Tuple<Agent, int>[] Indices { get; set; }
+
+        public Obstacle()
+        {
+            this.Id = ++ID;
         }
     }
 }
