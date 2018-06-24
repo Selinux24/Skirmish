@@ -1235,8 +1235,43 @@ namespace Engine
                 this.boundingBox = GeometryUtil.CreateBoundingBox(gTriangles);
 
                 this.navigationGraph = PathFinder.Build(this.PathFinderDescription.Settings, gTriangles);
+                this.navigationGraph.Updating += GraphUpdating;
+                this.navigationGraph.Updated += GraphUpdated;
             }
         }
+        /// <summary>
+        /// Graph updating event
+        /// </summary>
+        /// <param name="sender">Sender graph</param>
+        /// <param name="e">Event args</param>
+        private void GraphUpdating(object sender, EventArgs e)
+        {
+            NavigationGraphUpdating();
+        }
+        /// <summary>
+        /// Graph updated event
+        /// </summary>
+        /// <param name="sender">Sender graph</param>
+        /// <param name="e">Event args</param>
+        private void GraphUpdated(object sender, EventArgs e)
+        {
+            NavigationGraphUpdated();
+        }
+        /// <summary>
+        /// Fires when graph is updating
+        /// </summary>
+        public virtual void NavigationGraphUpdating()
+        {
+
+        }
+        /// <summary>
+        /// Fires when graph is updated
+        /// </summary>
+        public virtual void NavigationGraphUpdated()
+        {
+
+        }
+
         /// <summary>
         /// Gets the objects triangle list for navigation graph construction
         /// </summary>

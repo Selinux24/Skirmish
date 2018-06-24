@@ -320,6 +320,13 @@ namespace Collada
             //Rat holes
             this.ratHoles = this.scenery.Instance.GetObjectsPositionsByAssetName("Dn_Rat_Hole_1");
 
+            //Human obstacles
+            for (int i = 0; i < this.human.Count; i++)
+            {
+                var pos = this.human.Instance[i].Manipulator.Position;
+                this.AddObstacle(new BoundingCylinder(pos, 0.8f, 1.5f));
+            }
+
             this.UpdateDebug();
         }
         private void UpdateDebug()
@@ -455,28 +462,17 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.F8))
             {
                 //Add obstacle
-                var bc1 = new BoundingCylinder(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 0.8f, 2);
-                var obstacle1 = Triangle.ComputeTriangleList(Topology.TriangleList, bc1, 32);
-                obstacles.Add(this.AddObstacle(bc1), bc1);
-
-                var bc2 = new BoundingCylinder(new Vector3(-3.21798706f, 3.50000000f, -26.1250477f), 0.8f, 2);
-                var obstacle2 = Triangle.ComputeTriangleList(Topology.TriangleList, bc2, 32);
-                obstacles.Add(this.AddObstacle(bc2), bc2);
+                this.AddTestObstacles();
 
                 this.PaintObstacles();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F9))
             {
-                if (obstacles.Count > 0)
-                {
-                    //Remove obstacle
-                    int obstacleIndex = obstacles.Keys.ToArray()[0];
-                    obstacles.Remove(obstacleIndex);
-                    this.RemoveObstacle(obstacleIndex);
+                //Remove obstacle
+                this.RemoveTestObstacles();
 
-                    this.PaintObstacles();
-                }
+                this.PaintObstacles();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
@@ -766,6 +762,35 @@ namespace Collada
             this.UpdateDebug();
         }
 
+        private void AddTestObstacles()
+        {
+            var bc1 = new BoundingCylinder(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 0.8f, 2);
+            var obstacle1 = Triangle.ComputeTriangleList(Topology.TriangleList, bc1, 32);
+            obstacles.Add(this.AddObstacle(bc1), bc1);
+
+            //var bc2 = new BoundingBox(
+            //    new Vector3(-3.71798706f, 4.0f, -26.6250477f),
+            //    new Vector3(-2.71798706f, 5.0f, -25.6250477f));
+            //var obstacle2 = Triangle.ComputeTriangleList(Topology.TriangleList, bc2);
+            //obstacles.Add(this.AddObstacle(bc2), bc2);
+
+            var r3 = MathUtil.PiOverFour;
+            var c3 = (new Vector3(-3.71798706f, 4.0f, -26.6250477f) + new Vector3(-2.71798706f, 5.0f, -25.6250477f)) * 0.5f;
+            var bc3 = new OrientedBoundingBox(-Vector3.One * 0.5f, Vector3.One * 0.5f);
+            bc3.Transform(Matrix.RotationY(r3) * Matrix.Translation(c3));
+
+            var obstacle3 = Triangle.ComputeTriangleList(Topology.TriangleList, bc3);
+            obstacles.Add(this.AddObstacle(bc3.Center, bc3.Extents, r3), bc3);
+        }
+        private void RemoveTestObstacles()
+        {
+            if (obstacles.Count > 0)
+            {
+                int obstacleIndex = obstacles.Keys.ToArray()[0];
+                obstacles.Remove(obstacleIndex);
+                this.RemoveObstacle(obstacleIndex);
+            }
+        }
         private void PaintObstacles()
         {
             this.obstacleDrawer.Instance.Clear(obstacleColor);
@@ -811,5 +836,11 @@ namespace Collada
         //        this.navigationGraph.Save(fileName);
         //    }
         //}
+        public override void NavigationGraphUpdated()
+        {
+            base.NavigationGraphUpdated();
+
+            this.UpdateGraphNodes(this.currentGraph == 0 ? this.agent : this.ratAgentType);
+        }
     }
 }

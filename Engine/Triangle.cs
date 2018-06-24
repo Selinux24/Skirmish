@@ -279,24 +279,24 @@ namespace Engine
                 triangleList.Add(new Triangle(v[0], v[2], v[3]));
 
                 // Fill in the back face index data
-                triangleList.Add(new Triangle(v[4], v[5], v[6]));
-                triangleList.Add(new Triangle(v[4], v[6], v[7]));
+                triangleList.Add(new Triangle(v[4], v[6], v[5]));
+                triangleList.Add(new Triangle(v[4], v[7], v[6]));
 
                 // Fill in the top face index data
-                triangleList.Add(new Triangle(v[8], v[9], v[10]));
-                triangleList.Add(new Triangle(v[8], v[10], v[11]));
+                triangleList.Add(new Triangle(v[0], v[3], v[7]));
+                triangleList.Add(new Triangle(v[0], v[7], v[4]));
 
                 // Fill in the bottom face index data
-                triangleList.Add(new Triangle(v[12], v[13], v[14]));
-                triangleList.Add(new Triangle(v[12], v[14], v[15]));
+                triangleList.Add(new Triangle(v[1], v[6], v[2]));
+                triangleList.Add(new Triangle(v[1], v[5], v[6]));
 
                 // Fill in the left face index data
-                triangleList.Add(new Triangle(v[16], v[17], v[18]));
-                triangleList.Add(new Triangle(v[16], v[18], v[19]));
+                triangleList.Add(new Triangle(v[3], v[2], v[6]));
+                triangleList.Add(new Triangle(v[3], v[6], v[7]));
 
                 // Fill in the right face index data
-                triangleList.Add(new Triangle(v[20], v[21], v[22]));
-                triangleList.Add(new Triangle(v[20], v[22], v[23]));
+                triangleList.Add(new Triangle(v[0], v[5], v[1]));
+                triangleList.Add(new Triangle(v[0], v[4], v[5]));
             }
             else
             {

@@ -17,6 +17,34 @@ namespace Engine.PathFinding.RecastNavigation
         public const int MAX_SMOOTH = 2048;
 
         /// <summary>
+        /// Obstacle
+        /// </summary>
+        class Obstacle
+        {
+            /// <summary>
+            /// Id counter
+            /// </summary>
+            private static int ID = 0;
+
+            /// <summary>
+            /// Obstacle id
+            /// </summary>
+            public readonly int Id;
+            /// <summary>
+            /// Index list per agent
+            /// </summary>
+            public Tuple<Agent, int>[] Indices { get; set; }
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public Obstacle()
+            {
+                this.Id = ++ID;
+            }
+        }
+
+        /// <summary>
         /// Builds a graph from a triangle array
         /// </summary>
         /// <param name="triangles">Triangle array</param>
@@ -468,6 +496,19 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// On graph updating event
+        /// </summary>
+        public event EventHandler Updating;
+        /// <summary>
+        /// On graph updated event
+        /// </summary>
+        public event EventHandler Updated;
+        /// <summary>
+        /// Updated flag
+        /// </summary>
+        private bool updated = true;
+
+        /// <summary>
         /// Navigation mesh query dictionary (by agent type)
         /// </summary>
         private Dictionary<Agent, NavMeshQuery> navMeshQDictionary = new Dictionary<Agent, NavMeshQuery>();
@@ -639,6 +680,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the obstacle id</returns>
         public int AddObstacle(Vector3 position, float radius, float height)
         {
+            this.updated = false;
+
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
 
             foreach (var agent in navMeshQDictionary.Keys)
@@ -675,6 +718,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the obstacle id</returns>
         public int AddObstacle(Vector3 position, Vector3 halfExtents, float yRotation)
         {
+            this.updated = false;
+
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
 
             foreach (var agent in navMeshQDictionary.Keys)
@@ -710,6 +755,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the obstacle id</returns>
         public int AddObstacle(Vector3 minimum, Vector3 maximum)
         {
+            this.updated = false;
+
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
 
             foreach (var agent in navMeshQDictionary.Keys)
@@ -743,6 +790,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="obstacleId">Obstacle id</param>
         public void RemoveObstacle(int obstacleId)
         {
+            this.updated = false;
+
             var obstacle = obstacleIndices.Find(o => o.Id == obstacleId);
             if (obstacle != null)
             {
@@ -791,22 +840,25 @@ namespace Engine.PathFinding.RecastNavigation
                 var nm = navMeshQDictionary[agent].GetAttachedNavMesh();
                 if (nm.TileCache != null)
                 {
-                    nm.TileCache.Update(gameTime.TotalMilliseconds, nm, out bool upToDate);
+                    var status = nm.TileCache.Update(gameTime.TotalMilliseconds, nm, out bool upToDate);
+                    if (status.HasFlag(Status.DT_SUCCESS))
+                    {
+                        if (updated != upToDate)
+                        {
+                            updated = upToDate;
+
+                            if (updated)
+                            {
+                                this.Updated?.Invoke(this, new EventArgs());
+                            }
+                            else
+                            {
+                                this.Updating?.Invoke(this, new EventArgs());
+                            }
+                        }
+                    }
                 }
             }
-        }
-    }
-
-    class Obstacle
-    {
-        private static int ID = 0;
-
-        public readonly int Id;
-        public Tuple<Agent, int>[] Indices { get; set; }
-
-        public Obstacle()
-        {
-            this.Id = ++ID;
         }
     }
 }

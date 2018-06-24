@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding
 {
@@ -74,5 +75,14 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="gameTime">Game time</param>
         void Update(GameTime gameTime);
+
+        /// <summary>
+        /// On graph updating event
+        /// </summary>
+        event EventHandler Updating;
+        /// <summary>
+        /// On graph updated event
+        /// </summary>
+        event EventHandler Updated;
     }
 }

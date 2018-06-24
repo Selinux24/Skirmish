@@ -40,6 +40,15 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <summary>
+        /// On graph updating event
+        /// </summary>
+        public event EventHandler Updating;
+        /// <summary>
+        /// On graph updated event
+        /// </summary>
+        public event EventHandler Updated;
+
+        /// <summary>
         /// Node side
         /// </summary>
         private float NodeSide = 0;

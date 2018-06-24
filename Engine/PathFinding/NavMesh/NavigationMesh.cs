@@ -155,6 +155,15 @@ namespace Engine.PathFinding.NavMesh
         }
 
         /// <summary>
+        /// On graph updating event
+        /// </summary>
+        public event EventHandler Updating;
+        /// <summary>
+        /// On graph updated event
+        /// </summary>
+        public event EventHandler Updated;
+
+        /// <summary>
         /// Gets the node list
         /// </summary>
         /// <param name="agent">Agent type</param>
