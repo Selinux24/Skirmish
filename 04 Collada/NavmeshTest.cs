@@ -240,17 +240,15 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                var geom = new InputGeometry(this.GetTrianglesForNavigationGraph());
-
                 Stopwatch sw = new Stopwatch();
                 sw.Start();
                 if (!shift)
                 {
-                    ((Graph)this.navigationGraph).BuildTile(this.Camera.Position, geom);
+                    ((Graph)this.navigationGraph).BuildTile(this.Camera.Position);
                 }
                 else
                 {
-                    ((Graph)this.navigationGraph).RemoveTile(this.Camera.Position, geom);
+                    ((Graph)this.navigationGraph).RemoveTile(this.Camera.Position);
                 }
                 sw.Stop();
                 lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;

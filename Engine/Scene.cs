@@ -1232,11 +1232,11 @@ namespace Engine
                     throw new ArgumentException("Scene must have one ground object for navigation graph processing");
                 }
 
-                this.boundingBox = GeometryUtil.CreateBoundingBox(gTriangles);
-
-                this.navigationGraph = PathFinder.Build(this.PathFinderDescription.Settings, gTriangles);
+                this.navigationGraph = PathFinder.Build(this.GetTrianglesForNavigationGraph, this.PathFinderDescription.Settings);
                 this.navigationGraph.Updating += GraphUpdating;
                 this.navigationGraph.Updated += GraphUpdated;
+
+                this.boundingBox = this.navigationGraph.BoundingBox;
             }
         }
         /// <summary>
@@ -1269,7 +1269,7 @@ namespace Engine
         /// </summary>
         public virtual void NavigationGraphUpdated()
         {
-
+            this.boundingBox = this.navigationGraph.BoundingBox;
         }
 
         /// <summary>

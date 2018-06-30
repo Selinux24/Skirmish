@@ -7,6 +7,8 @@ using System.Security.Permissions;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.Common;
+
     /// <summary>
     /// Navigation graph
     /// </summary>
@@ -42,33 +44,6 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 this.Id = ++ID;
             }
-        }
-
-        /// <summary>
-        /// Builds a graph from a triangle array
-        /// </summary>
-        /// <param name="triangles">Triangle array</param>
-        /// <param name="settings">Build settings</param>
-        /// <returns>Returns the new navigation graph</returns>
-        public static Graph Build(Triangle[] triangles, BuildSettings settings)
-        {
-            Graph res = new Graph
-            {
-                settings = settings,
-            };
-
-            var geom = new InputGeometry(triangles);
-
-            foreach (var agent in settings.Agents)
-            {
-                var nm = NavMesh.Build(geom, settings, agent);
-                var mmQuery = new NavMeshQuery();
-                mmQuery.Init(nm, settings.MaxNodes);
-
-                res.navMeshQDictionary.Add(agent, mmQuery);
-            }
-
-            return res;
         }
 
         /// <summary>
@@ -486,13 +461,13 @@ namespace Engine.PathFinding.RecastNavigation
             return npath;
         }
 
-        private static bool InRange(Vector3 v1, Vector3 v2, float r, float h)
+        private static bool InRange(Vector3 v1, Vector3 v2, float radius, float height)
         {
             float dx = v2.X - v1.X;
             float dy = v2.Y - v1.Y;
             float dz = v2.Z - v1.Z;
 
-            return (dx * dx + dz * dz) < r * r && Math.Abs(dy) < h;
+            return (dx * dx + dz * dz) < (radius * radius) && Math.Abs(dy) < height;
         }
 
         /// <summary>
@@ -520,6 +495,15 @@ namespace Engine.PathFinding.RecastNavigation
         /// Obstacle indices
         /// </summary>
         private List<Obstacle> obstacleIndices = new List<Obstacle>();
+
+        /// <summary>
+        /// Gets the geometry
+        /// </summary>
+        public Func<Triangle[]> GetGeometryFunction { get; set; }
+        /// <summary>
+        /// Gets the total bounding box
+        /// </summary>
+        public BoundingBox BoundingBox { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -580,12 +564,40 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
+        /// Builds the graph
+        /// </summary>
+        /// <param name="sourceFunction">Geometry source function</param>
+        /// <param name="settings">Settings</param>
+        /// <returns>Returns the new Graph</returns>
+        public void Build(Func<Triangle[]> sourceFunction, PathFinderSettings settings)
+        {
+            this.settings = settings as BuildSettings;
+            this.GetGeometryFunction = sourceFunction;
+
+            var triangles = sourceFunction();
+
+            this.BoundingBox = GeometryUtil.CreateBoundingBox(triangles);
+
+            var geom = new InputGeometry(triangles);
+
+            foreach (var agent in this.settings.Agents)
+            {
+                var nm = NavMesh.Build(geom, this.settings, agent);
+                var mmQuery = new NavMeshQuery();
+                mmQuery.Init(nm, this.settings.MaxNodes);
+
+                this.navMeshQDictionary.Add(agent, mmQuery);
+            }
+        }
+
+        /// <summary>
         /// Builds the tile in the specified position
         /// </summary>
         /// <param name="position">Position</param>
-        /// <param name="geom">Input geometry</param>
-        public void BuildTile(Vector3 position, InputGeometry geom)
+        public void BuildTile(Vector3 position)
         {
+            var geom = new InputGeometry(this.GetGeometryFunction());
+
             foreach (var agent in navMeshQDictionary.Keys)
             {
                 navMeshQDictionary[agent].GetAttachedNavMesh().BuildTile(position, geom, settings, agent);
@@ -595,13 +607,22 @@ namespace Engine.PathFinding.RecastNavigation
         /// Removes the tile in the specified position
         /// </summary>
         /// <param name="position">Position</param>
-        /// <param name="geom">Input geometry</param>
-        public void RemoveTile(Vector3 position, InputGeometry geom)
+        public void RemoveTile(Vector3 position)
         {
+            var geom = new InputGeometry(this.GetGeometryFunction());
+
             foreach (var agent in navMeshQDictionary.Keys)
             {
                 navMeshQDictionary[agent].GetAttachedNavMesh().RemoveTile(position, geom, settings);
             }
+        }
+        /// <summary>
+        /// Updates the graph at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        public void UpdateAt(Vector3 position)
+        {
+            this.BuildTile(position);
         }
 
         /// <summary>

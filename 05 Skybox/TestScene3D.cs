@@ -1,7 +1,7 @@
 ﻿using Engine;
 using Engine.Common;
 using Engine.Content;
-using Engine.PathFinding.NavMesh;
+using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -25,12 +25,13 @@ namespace Skybox
         private int bsphSlices = 20;
         private int bsphStacks = 10;
 
-        private NavigationMeshAgentType walker = new NavigationMeshAgentType()
+        private Agent walker = new Agent()
         {
-            Name = "agent",
-            Height = 1f,
-            Radius = 0.3f,
-            MaxClimb = 0.9f,
+            Name = "Walker",
+            Height = 1.2f,
+            Radius = 0.4f,
+            MaxClimb = 0.5f,
+            MaxSlope = 50,
         };
 
         private SceneObject<Cursor> cursor;
@@ -187,11 +188,9 @@ namespace Skybox
             MaterialContent mat = MaterialContent.Default;
             mat.EmissionColor = Color.Yellow;
 
-            Vector3[] v = null;
-            Vector3[] n = null;
-            Vector2[] uv = null;
-            uint[] ix = null;
-            GeometryUtil.CreateSphere(0.05f, (uint)32, (uint)32, out v, out n, out uv, out ix);
+            GeometryUtil.CreateSphere(
+                0.05f, 32, 32, 
+                out Vector3[] v, out Vector3[] n, out Vector2[] uv, out uint[] ix);
 
             VertexData[] vertices = new VertexData[v.Length];
             for (int i = 0; i < v.Length; i++)
@@ -271,9 +270,9 @@ namespace Skybox
                 if (i == 3) color = Color.LightBlue;
 
                 firePositions3D[i] = Vector3.Zero;
-                Triangle t;
-                float d;
-                this.FindTopGroundPosition(this.firePositions[i].X, this.firePositions[i].Y, out firePositions3D[i], out t, out d);
+                this.FindTopGroundPosition(
+                    this.firePositions[i].X, this.firePositions[i].Y, 
+                    out firePositions3D[i], out Triangle t, out float d);
 
                 this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
                 this.torchs.Instance[i].Manipulator.SetPosition(firePositions3D[i], true);
@@ -300,13 +299,21 @@ namespace Skybox
 
             #endregion
 
-            var nvSettings = NavigationMeshGenerationSettings.Default;
+            #region Navigation Mesh
+
+            var nvSettings = BuildSettings.Default;
+            nvSettings.TileSize = 32;
+            nvSettings.CellSize = 0.05f;
+            nvSettings.CellHeight = 0.2f;
+            nvSettings.PartitionType = SamplePartitionTypeEnum.Monotone;
             nvSettings.Agents[0] = this.walker;
 
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
             {
                 Settings = nvSettings,
             };
+
+            #endregion
         }
         private void InitializeCamera()
         {
@@ -522,21 +529,13 @@ namespace Skybox
             var nodes = this.GetNodes(this.walker);
             if (nodes != null && nodes.Length > 0)
             {
-                Random clrRnd = new Random(1);
-                Color[] regions = new Color[nodes.Length];
-                for (int i = 0; i < nodes.Length; i++)
-                {
-                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), alpha);
-                }
-
                 this.graphDrawer.Instance.Clear();
 
                 for (int i = 0; i < nodes.Length; i++)
                 {
-                    var node = (NavigationMeshNode)nodes[i];
-                    var color = regions[node.RegionId];
-                    var poly = node.Poly;
-                    var tris = poly.Triangulate();
+                    var node = (GraphNode)nodes[i];
+                    var color = node.Color;
+                    var tris = node.Triangles;
 
                     this.graphDrawer.Instance.AddTriangles(color, tris);
                 }

@@ -3,7 +3,7 @@ using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
-using Engine.PathFinding.NavMesh;
+using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace Terrain
         private float walkerVelocity = 8f;
         private SceneObject followTarget;
         private bool follow = false;
-        private NavigationMeshAgentType walkerAgentType = null;
+        private Agent walkerAgentType = null;
 
         private bool useDebugTex = false;
         private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapDirectional;
@@ -55,7 +55,7 @@ namespace Terrain
 
         private SceneObject<Model> tankP1 = null;
         private SceneObject<Model> tankP2 = null;
-        private NavigationMeshAgentType tankAgentType = null;
+        private Agent tankAgentType = null;
         private Vector3 tankLeftCat = Vector3.Zero;
         private Vector3 tankRightCat = Vector3.Zero;
 
@@ -336,7 +336,7 @@ namespace Terrain
 
             #region Walker
 
-            this.walkerAgentType = new NavigationMeshAgentType()
+            this.walkerAgentType = new Agent()
             {
                 Name = "Walker type",
                 Height = 1f,
@@ -375,7 +375,7 @@ namespace Terrain
             this.tankP2.Transform.SetScale(0.2f, true);
 
             var tankbbox = this.tankP1.Geometry.GetBoundingBox();
-            this.tankAgentType = new NavigationMeshAgentType()
+            this.tankAgentType = new Agent()
             {
                 Name = "Tank type",
                 Height = tankbbox.GetY(),
@@ -629,7 +629,7 @@ namespace Terrain
             this.AttachToGround(this.tree1, false);
             this.AttachToGround(this.tree2, false);
 
-            var navSettings = NavigationMeshGenerationSettings.Default;
+            var navSettings = BuildSettings.Default;
             navSettings.Agents = new[]
             {
                 walkerAgentType,
@@ -1846,13 +1846,6 @@ namespace Terrain
             var nodes = this.GetNodes(agent);
             if (nodes != null && nodes.Length > 0)
             {
-                Random clrRnd = new Random(1);
-                Color[] regions = new Color[nodes.Length];
-                for (int i = 0; i < nodes.Length; i++)
-                {
-                    regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.55f);
-                }
-
                 if (this.graphIndex <= -1)
                 {
                     this.graphIndex = -1;
@@ -1861,10 +1854,9 @@ namespace Terrain
 
                     for (int i = 0; i < nodes.Length; i++)
                     {
-                        var node = (NavigationMeshNode)nodes[i];
-                        var color = regions[node.RegionId];
-                        var poly = node.Poly;
-                        var tris = poly.Triangulate();
+                        var node = (GraphNode)nodes[i];
+                        var color = node.Color;
+                        var tris = node.Triangles;
 
                         this.terrainGraphDrawer.Instance.AddTriangles(color, tris);
                     }
@@ -1880,10 +1872,9 @@ namespace Terrain
                     {
                         this.terrainGraphDrawer.Instance.Clear();
 
-                        var node = (NavigationMeshNode)nodes[this.graphIndex];
-                        var color = regions[node.RegionId];
-                        var poly = node.Poly;
-                        var tris = poly.Triangulate();
+                        var node = (GraphNode)nodes[this.graphIndex];
+                        var color = node.Color;
+                        var tris = node.Triangles;
 
                         this.terrainGraphDrawer.Instance.SetTriangles(color, tris);
                     }

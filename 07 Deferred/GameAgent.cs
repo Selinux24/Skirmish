@@ -1,8 +1,6 @@
-﻿using System;
-using Engine;
+﻿using Engine;
 using Engine.Common;
 using Engine.PathFinding;
-using Engine.PathFinding.NavMesh;
 
 namespace Deferred
 {
@@ -14,7 +12,7 @@ namespace Deferred
         /// <summary>
         /// Agent type
         /// </summary>
-        public NavigationMeshAgentType AgentType { get; set; }
+        public AgentType AgentType { get; set; }
         /// <summary>
         /// Model
         /// </summary>
@@ -100,7 +98,7 @@ namespace Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        public GameAgent(NavigationMeshAgentType agentType, SceneObject model, T controller)
+        public GameAgent(AgentType agentType, SceneObject model, T controller)
         {
             this.model = model;
             this.controller = controller;

@@ -1,8 +1,7 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.Content;
-using Engine.PathFinding;
-using Engine.PathFinding.NavMesh;
+using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -32,7 +31,7 @@ namespace Deferred
         private SceneObject<TextDrawer> statistics = null;
         private SceneObject<Sprite> backPannel = null;
 
-        private NavigationMeshAgentType tankAgentType = null;
+        private Agent tankAgentType = null;
         private SceneObject<GameAgent<SteerManipulatorController>> tankAgent1 = null;
         private SceneObject<GameAgent<SteerManipulatorController>> tankAgent2 = null;
         private SceneObject<Model> helicopter = null;
@@ -59,7 +58,7 @@ namespace Deferred
 
         private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        private AgentCrowd crowd = null;
+        //private AgentCrowd crowd = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -192,7 +191,7 @@ namespace Deferred
                 };
 
                 var tankbbox = tank1.Instance.GetBoundingBox();
-                this.tankAgentType = new NavigationMeshAgentType()
+                this.tankAgentType = new Agent()
                 {
                     Height = tankbbox.GetY(),
                     Radius = tankbbox.GetX() * 0.5f,
@@ -414,10 +413,9 @@ namespace Deferred
 
                 for (int i = 0; i < nodes.Length; i++)
                 {
-                    var node = (NavigationMeshNode)nodes[i];
-                    var color = regions[node.PolyId];
-                    var poly = node.Poly;
-                    var tris = poly.Triangulate();
+                    var node = (GraphNode)nodes[i];
+                    var color = node.Color;
+                    var tris = node.Triangles;
 
                     this.terrainGraphDrawer.Instance.AddTriangles(color, tris);
                 }
@@ -427,7 +425,7 @@ namespace Deferred
 
             #endregion
 
-            var navSettings = NavigationMeshGenerationSettings.Default;
+            var navSettings = BuildSettings.Default;
             navSettings.Agents = new[] { this.tankAgentType };
 
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
@@ -548,9 +546,9 @@ namespace Deferred
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
 
-            this.crowd = new AgentCrowd(this, this.navigationGraph as NavigationMesh, this.tankAgentType);
-            crowd.AddAgent(this.tankAgent1.Instance);
-            crowd.AddAgent(this.tankAgent2.Instance);
+            //this.crowd = new AgentCrowd(this, this.navigationGraph as NavigationMesh, this.tankAgentType);
+            //crowd.AddAgent(this.tankAgent1.Instance);
+            //crowd.AddAgent(this.tankAgent2.Instance);
         }
         public override void Update(GameTime gameTime)
         {
@@ -595,7 +593,7 @@ namespace Deferred
                     //    this.tankAgent.Instance.FollowPath(p);
                     //}
 
-                    this.crowd.MoveTo(position, 1f);
+                    //this.crowd.MoveTo(position, 1f);
                 }
             }
 
@@ -942,7 +940,7 @@ namespace Deferred
 
             #endregion
 
-            this.crowd.Update(gameTime);
+            //this.crowd.Update(gameTime);
         }
         public override void Draw(GameTime gameTime)
         {

@@ -49,10 +49,18 @@ namespace Engine.PathFinding.AStar
         public event EventHandler Updated;
 
         /// <summary>
-        /// Node side
+        /// Build settings
         /// </summary>
-        private float NodeSide = 0;
-
+        public GridGenerationSettings BuildSettings { get; private set; }
+        /// <summary>
+        /// Gets the geometry
+        /// </summary>
+        public Func<Triangle[]> GetGeometryFunction { get; set; }
+       
+        /// <summary>
+        /// Gets the total bounding box
+        /// </summary>
+        public BoundingBox BoundingBox { get; protected set; }
         /// <summary>
         /// Graph node list
         /// </summary>
@@ -84,66 +92,49 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <summary>
-        /// Build node list from geometry
+        /// Builds the graph
         /// </summary>
-        /// <param name="vertices">Vertices</param>
-        /// <param name="indices">Indices</param>
-        /// <param name="settings">Generation settings</param>
-        /// <returns>Returns generated grid node list</returns>
-        public static Grid Build(VertexData[] vertices, uint[] indices, GridGenerationSettings settings)
+        /// <param name="sourceFunction">Geometry source function</param>
+        /// <param name="settings">Settings</param>
+        /// <returns>Returns the new Graph</returns>
+        public void Build(Func<Triangle[]> sourceFunction, PathFinderSettings settings)
         {
-            int tris = indices.Length / 3;
+            this.BuildSettings = settings as GridGenerationSettings;
+            this.GetGeometryFunction = sourceFunction;
 
-            Triangle[] triangles = new Triangle[tris];
+            var triangles = sourceFunction();
 
-            int index = 0;
-            for (int i = 0; i < tris; i++)
-            {
-                triangles[i] = new Triangle(
-                    vertices[indices[index++]].Position.Value,
-                    vertices[indices[index++]].Position.Value,
-                    vertices[indices[index++]].Position.Value);
-            }
+            this.BoundingBox = GeometryUtil.CreateBoundingBox(triangles);
 
-            return Build(triangles, settings);
-        }
-        /// <summary>
-        /// Build node list from triangles
-        /// </summary>
-        /// <param name="triangles">Triangles</param>
-        /// <param name="settings">Generation settings</param>
-        /// <returns>Returns generated grid node list</returns>
-        public static Grid Build(Triangle[] triangles, GridGenerationSettings settings)
-        {
             List<GridNode> result = new List<GridNode>();
-
-            BoundingBox bbox = BoundingBox.FromPoints(triangles[0].GetVertices());
-            Array.ForEach(triangles, tri => bbox = BoundingBox.Merge(bbox, BoundingBox.FromPoints(tri.GetVertices())));
 
             Dictionary<Vector2, GridCollisionInfo[]> dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
 
-            float fxSize = (bbox.Maximum.X - bbox.Minimum.X) / settings.NodeSize;
-            float fzSize = (bbox.Maximum.Z - bbox.Minimum.Z) / settings.NodeSize;
+            float fxSize = (this.BoundingBox.Maximum.X - this.BoundingBox.Minimum.X) / this.BuildSettings.NodeSize;
+            float fzSize = (this.BoundingBox.Maximum.Z - this.BoundingBox.Minimum.Z) / this.BuildSettings.NodeSize;
 
             int xSize = fxSize > (int)fxSize ? (int)fxSize + 1 : (int)fxSize;
             int zSize = fzSize > (int)fzSize ? (int)fzSize + 1 : (int)fzSize;
 
-            for (float x = bbox.Minimum.X; x < bbox.Maximum.X; x += settings.NodeSize)
+            for (float x = this.BoundingBox.Minimum.X; x < this.BoundingBox.Maximum.X; x += this.BuildSettings.NodeSize)
             {
-                for (float z = bbox.Minimum.Z; z < bbox.Maximum.Z; z += settings.NodeSize)
+                for (float z = this.BoundingBox.Minimum.Z; z < this.BoundingBox.Maximum.Z; z += this.BuildSettings.NodeSize)
                 {
                     GridCollisionInfo[] info = null;
 
                     Ray ray = new Ray()
                     {
-                        Position = new Vector3(x, bbox.Maximum.Y + 0.01f, z),
+                        Position = new Vector3(x, this.BoundingBox.Maximum.Y + 0.01f, z),
                         Direction = Vector3.Down,
                     };
 
-                    Vector3[] pickedPoints;
-                    Triangle[] pickedTriangles;
-                    float[] pickedDistances;
-                    if (Intersection.IntersectAll(ref ray, triangles, true, out pickedPoints, out pickedTriangles, out pickedDistances))
+                    bool intersects = Intersection.IntersectAll(
+                        ref ray, triangles, true,
+                        out Vector3[] pickedPoints,
+                        out Triangle[] pickedTriangles,
+                        out float[] pickedDistances);
+
+                    if (intersects)
                     {
                         info = new GridCollisionInfo[pickedPoints.Length];
 
@@ -228,7 +219,7 @@ namespace Engine.PathFinding.AStar
                         float fmax = Helper.Max(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
                         float diff = Math.Abs(fmax - fmin);
 
-                        if (diff <= settings.NodeSize)
+                        if (diff <= this.BuildSettings.NodeSize)
                         {
                             Vector3 va = (
                                 c0.Triangle.Normal +
@@ -264,11 +255,7 @@ namespace Engine.PathFinding.AStar
                 }
             }
 
-            return new Grid()
-            {
-                NodeSide = settings.NodeSize,
-                Nodes = result.ToArray(),
-            };
+            this.Nodes = result.ToArray();
         }
 
         /// <summary>
@@ -314,6 +301,15 @@ namespace Engine.PathFinding.AStar
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Updates the graph at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        public void UpdateAt(Vector3 position)
+        {
+
         }
 
         /// <summary>
@@ -388,7 +384,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns text representation</returns>
         public override string ToString()
         {
-            return string.Format("Nodes {0}; Side {1:0.00};", this.Nodes.Length, this.NodeSide);
+            return string.Format("Nodes {0}; Side {1:0.00};", this.Nodes.Length, this.BuildSettings.NodeSize);
         }
     }
 }

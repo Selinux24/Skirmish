@@ -54,13 +54,15 @@ namespace Collada
         private SceneObject<TriangleListDrawer> graphDrawer = null;
         private SceneObject<TriangleListDrawer> obstacleDrawer = null;
         private int currentGraph = 0;
+        private bool graphUpdateRequested = false;
+        private float graphUpdateSeconds = 0;
 
         private string nmFile = "nm.graph";
         private string ntFile = "nm.obj";
         private bool taskRunning = false;
 
-        Dictionary<int, object> obstacles = new Dictionary<int, object>();
-        private Color obstacleColor = new Color(Color.Pink.ToColor3(), 0.5f);
+        private Dictionary<int, object> obstacles = new Dictionary<int, object>();
+        private Color obstacleColor = new Color(Color.Pink.ToColor3(), 1f);
 
         public ModularDungeon(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
@@ -110,7 +112,7 @@ namespace Collada
 
             //Tiling
             nmsettings.BuildMode = BuildModesEnum.TempObstacles;
-            nmsettings.TileSize = 48;
+            nmsettings.TileSize = 16;
 
             this.PathFinderDescription = new PathFinderDescription()
             {
@@ -188,8 +190,8 @@ namespace Collada
                 Name = "Player",
                 Height = 1.5f,
                 Radius = 0.2f,
-                MaxClimb = 1.0f,
-                MaxSlope = 45f,
+                MaxClimb = 0.8f,
+                MaxSlope = 50f,
                 Velocity = 4f,
                 VelocitySlow = 1f,
             };
@@ -385,6 +387,11 @@ namespace Collada
                 }
             }
         }
+        private void RequestGraphUpdate(float seconds)
+        {
+            graphUpdateRequested = true;
+            graphUpdateSeconds = seconds;
+        }
 
         public override void Update(GameTime gameTime)
         {
@@ -431,7 +438,7 @@ namespace Collada
                 }
 
                 this.UpdateNavigationGraph();
-                this.UpdateGraphNodes(this.currentGraph == 0 ? this.ratAgentType : this.agent);
+                this.RequestGraphUpdate(0f);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
@@ -501,6 +508,8 @@ namespace Collada
                 this.torch.Enabled = !this.torch.Enabled;
             }
 
+            this.UpdateGraph(gameTime);
+
             this.UpdateRat(gameTime);
 
             this.UpdateCamera(gameTime);
@@ -561,6 +570,18 @@ namespace Collada
                     this.Camera.Position +
                     (this.Camera.Direction * 0.5f) +
                     (this.Camera.Left * 0.2f);
+            }
+        }
+        private void UpdateGraph(GameTime gameTime)
+        {
+            graphUpdateSeconds -= gameTime.ElapsedSeconds;
+
+            if (graphUpdateRequested && graphUpdateSeconds <= 0f)
+            {
+                graphUpdateRequested = false;
+                graphUpdateSeconds = 0;
+
+                this.UpdateGraphNodes(this.currentGraph == 0 ? this.ratAgentType : this.agent);
             }
         }
         private void UpdateRat(GameTime gameTime)
@@ -724,9 +745,8 @@ namespace Collada
                 messages.Instance.CenterHorizontally();
                 messages.Instance.CenterVertically();
 
-                var geom = new InputGeometry(this.GetTrianglesForNavigationGraph());
-                ((Graph)this.navigationGraph).BuildTile(item.Manipulator.Position, geom);
-                this.UpdateGraphNodes(this.currentGraph == 0 ? this.ratAgentType : this.agent);
+                this.navigationGraph.UpdateAt(item.Manipulator.Position);
+                this.RequestGraphUpdate(1);
             }
         }
         private void UpdateLight(GameTime gameTime, SceneLight[] lights)
@@ -840,7 +860,7 @@ namespace Collada
         {
             base.NavigationGraphUpdated();
 
-            this.UpdateGraphNodes(this.currentGraph == 0 ? this.agent : this.ratAgentType);
+            this.RequestGraphUpdate(1f);
         }
     }
 }

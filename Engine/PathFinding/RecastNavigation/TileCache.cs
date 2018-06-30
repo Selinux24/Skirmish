@@ -19,9 +19,9 @@ namespace Engine.PathFinding.RecastNavigation
         private CompressedTile m_nextFreeTile = null;
         private int m_tileBits;
         private int m_saltBits;
-        private ObstacleRequest[] m_reqs = new ObstacleRequest[DetourTileCache.MAX_REQUESTS];
+        private readonly ObstacleRequest[] m_reqs = new ObstacleRequest[DetourTileCache.MAX_REQUESTS];
         private int m_nreqs;
-        private CompressedTile[] m_update = new CompressedTile[DetourTileCache.MAX_UPDATE];
+        private readonly CompressedTile[] m_update = new CompressedTile[DetourTileCache.MAX_UPDATE];
         private int m_nupdate;
 
         /// <summary>

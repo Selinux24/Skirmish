@@ -9,6 +9,19 @@ namespace Engine.PathFinding
     public interface IGraph
     {
         /// <summary>
+        /// Gets the total bounding box
+        /// </summary>
+        BoundingBox BoundingBox { get; }
+
+        /// <summary>
+        /// Builds the graph
+        /// </summary>
+        /// <param name="sourceFunction">Geometry source function</param>
+        /// <param name="settings">Settings</param>
+        /// <returns>Returns the new Graph</returns>
+        void Build(Func<Triangle[]> sourceFunction, PathFinderSettings settings);
+
+        /// <summary>
         /// Gets the node collection of the graph for the specified agent type
         /// </summary>
         /// <param name="agent">Agent type</param>
@@ -30,6 +43,12 @@ namespace Engine.PathFinding
         /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
         bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest);
+
+        /// <summary>
+        /// Updates the graph at specified position
+        /// </summary>
+        /// <param name="position">Position</param>
+        void UpdateAt(Vector3 position);
 
         /// <summary>
         /// Adds a cylinder obstacle

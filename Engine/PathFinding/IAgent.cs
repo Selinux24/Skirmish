@@ -1,7 +1,6 @@
-﻿namespace Engine.PathFinding
+﻿
+namespace Engine.PathFinding
 {
-    using Engine.PathFinding.NavMesh;
-
     /// <summary>
     /// Agent interface
     /// </summary>
@@ -10,6 +9,6 @@
         /// <summary>
         /// Agent type
         /// </summary>
-        NavigationMeshAgentType AgentType { get; }
+        AgentType AgentType { get; }
     }
 }
