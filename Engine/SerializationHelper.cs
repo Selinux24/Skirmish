@@ -210,5 +210,30 @@ namespace Engine
 
             return new Int4(vX, vY, vZ, vW);
         }
+
+        /// <summary>
+        /// Adds a BoundingBox instance to a serialization info object
+        /// </summary>
+        /// <param name="info">Serialization info</param>
+        /// <param name="name">Name</param>
+        /// <param name="value">Value</param>
+        public static void AddBoundingBox(this SerializationInfo info, string name, BoundingBox value)
+        {
+            info.AddVector3(string.Format("{0}.Min", name), value.Minimum);
+            info.AddVector3(string.Format("{0}.Max", name), value.Maximum);
+        }
+        /// <summary>
+        /// Gets a BoundingBox instance from a serialization info object
+        /// </summary>
+        /// <param name="info">Serialization info</param>
+        /// <param name="name">Name</param>
+        /// <returns>Returns a BoundingBox instance</returns>
+        public static BoundingBox GetBoundingBox(this SerializationInfo info, string name)
+        {
+            var vMin = info.GetVector3(string.Format("{0}.Min", name));
+            var vMax = info.GetVector3(string.Format("{0}.Max", name));
+
+            return new BoundingBox(vMin, vMax);
+        }
     }
 }

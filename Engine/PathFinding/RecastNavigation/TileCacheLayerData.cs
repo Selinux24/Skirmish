@@ -1,7 +1,11 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
     public struct TileCacheLayerData
     {
         public static TileCacheLayerData Empty

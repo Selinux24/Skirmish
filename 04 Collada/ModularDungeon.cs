@@ -57,8 +57,8 @@ namespace Collada
         private bool graphUpdateRequested = false;
         private float graphUpdateSeconds = 0;
 
-        private string nmFile = "nm.graph";
-        private string ntFile = "nm.obj";
+        private readonly string nmFile = "nm.graph";
+        private readonly string ntFile = "nm.obj";
         private bool taskRunning = false;
 
         private Dictionary<int, object> obstacles = new Dictionary<int, object>();
@@ -841,21 +841,23 @@ namespace Collada
             }
         }
 
-        //public override void UpdateNavigationGraph()
-        //{
-        //    var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
+        public override void UpdateNavigationGraph()
+        {
+            var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
 
-        //    if (File.Exists(fileName))
-        //    {
-        //        this.navigationGraph = new Graph();
-        //        this.navigationGraph.Load(fileName);
-        //    }
-        //    else
-        //    {
-        //        base.UpdateNavigationGraph();
-        //        this.navigationGraph.Save(fileName);
-        //    }
-        //}
+            if (File.Exists(fileName))
+            {
+                var graph = new Graph();
+                graph.Load(fileName);
+
+                this.SetNavigationGraph(graph);
+            }
+            else
+            {
+                base.UpdateNavigationGraph();
+                this.navigationGraph.Save(fileName);
+            }
+        }
         public override void NavigationGraphUpdated()
         {
             base.NavigationGraphUpdated();

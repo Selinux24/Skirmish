@@ -21,6 +21,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Obstacle
         /// </summary>
+        [Serializable]
         class Obstacle
         {
             /// <summary>
@@ -484,26 +485,26 @@ namespace Engine.PathFinding.RecastNavigation
         private bool updated = true;
 
         /// <summary>
-        /// Navigation mesh query dictionary (by agent type)
-        /// </summary>
-        private Dictionary<Agent, NavMeshQuery> navMeshQDictionary = new Dictionary<Agent, NavMeshQuery>();
-        /// <summary>
         /// Build settings
         /// </summary>
         private BuildSettings settings = null;
+        /// <summary>
+        /// Navigation mesh query dictionary (by agent type)
+        /// </summary>
+        private Dictionary<Agent, NavMeshQuery> navMeshQDictionary = new Dictionary<Agent, NavMeshQuery>();
         /// <summary>
         /// Obstacle indices
         /// </summary>
         private List<Obstacle> obstacleIndices = new List<Obstacle>();
 
         /// <summary>
-        /// Gets the geometry
-        /// </summary>
-        public Func<Triangle[]> GetGeometryFunction { get; set; }
-        /// <summary>
         /// Gets the total bounding box
         /// </summary>
         public BoundingBox BoundingBox { get; protected set; }
+        /// <summary>
+        /// Gets the geometry
+        /// </summary>
+        public Func<Triangle[]> GetGeometryFunction { get; set; }
 
         /// <summary>
         /// Constructor
@@ -542,6 +543,8 @@ namespace Engine.PathFinding.RecastNavigation
                     navMeshQDictionary.Add(agent, mmQuery);
                 }
             }
+
+            BoundingBox = info.GetBoundingBox("BoundingBox");
         }
         /// <summary>
         /// Gets the object data for serialization
@@ -557,10 +560,14 @@ namespace Engine.PathFinding.RecastNavigation
             int index = 0;
             foreach (var agent in navMeshQDictionary.Keys)
             {
+                var mesh = navMeshQDictionary[agent].GetAttachedNavMesh();
+
                 info.AddValue(string.Format("agent.{0}", index), agent);
-                info.AddValue(string.Format("navmesh.{0}", index), navMeshQDictionary[agent].GetAttachedNavMesh());
+                info.AddValue(string.Format("navmesh.{0}", index), mesh);
                 index++;
             }
+
+            info.AddBoundingBox("BoundingBox", this.BoundingBox);
         }
 
         /// <summary>
@@ -588,6 +595,14 @@ namespace Engine.PathFinding.RecastNavigation
 
                 this.navMeshQDictionary.Add(agent, mmQuery);
             }
+        }
+        /// <summary>
+        /// Sets the geometry source function
+        /// </summary>
+        /// <param name="sourceFunction">Function</param>
+        public void SetGeometrySourceFunction(Func<Triangle[]> sourceFunction)
+        {
+            this.GetGeometryFunction = sourceFunction;
         }
 
         /// <summary>
@@ -837,10 +852,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
             byte[] buffer = File.ReadAllBytes(fileName);
 
-            var file = buffer.Decompress<Graph>();
+            var graph = buffer.Decompress<Graph>();
 
-            navMeshQDictionary = file.navMeshQDictionary;
-            settings = file.settings;
+            settings = graph.settings;
+            navMeshQDictionary = graph.navMeshQDictionary;
+            BoundingBox = graph.BoundingBox;
         }
         /// <summary>
         /// Saves the graph to a file
@@ -848,8 +864,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="fileName">File name</param>
         public void Save(string fileName)
         {
-            File.WriteAllBytes(fileName, this.Compress());
+            byte[] cmpBuffer = this.Compress();
+
+            File.WriteAllBytes(fileName, cmpBuffer);
         }
+
         /// <summary>
         /// Updates internal state
         /// </summary>

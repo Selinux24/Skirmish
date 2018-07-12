@@ -56,7 +56,7 @@ namespace Engine.PathFinding.AStar
         /// Gets the geometry
         /// </summary>
         public Func<Triangle[]> GetGeometryFunction { get; set; }
-       
+
         /// <summary>
         /// Gets the total bounding box
         /// </summary>
@@ -65,6 +65,24 @@ namespace Engine.PathFinding.AStar
         /// Graph node list
         /// </summary>
         public GridNode[] Nodes { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Grid()
+        {
+
+        }
+        /// <summary>
+        /// Resource dispose
+        /// </summary>
+        public void Dispose()
+        {
+            Helper.Dispose(this.BuildSettings);
+            Helper.Dispose(this.GetGeometryFunction);
+            Helper.Dispose(this.Nodes);
+        }
+
         /// <summary>
         /// Gets node wich contains specified point
         /// </summary>
@@ -77,8 +95,7 @@ namespace Engine.PathFinding.AStar
 
             for (int i = 0; i < this.Nodes.Length; i++)
             {
-                float distance;
-                if (this.Nodes[i].Contains(point, out distance))
+                if (this.Nodes[i].Contains(point, out float distance))
                 {
                     if (distance < minDistance)
                     {
@@ -256,6 +273,14 @@ namespace Engine.PathFinding.AStar
             }
 
             this.Nodes = result.ToArray();
+        }
+        /// <summary>
+        /// Sets the geometry source function
+        /// </summary>
+        /// <param name="sourceFunction">Function</param>
+        public void SetGeometrySourceFunction(Func<Triangle[]> sourceFunction)
+        {
+            this.GetGeometryFunction = sourceFunction;
         }
 
         /// <summary>

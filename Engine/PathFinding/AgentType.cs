@@ -26,10 +26,11 @@ namespace Engine.PathFinding
             Height = 2.0f;
         }
 
-        public override int GetHashCode()
-        {
-            return (Name ?? "").GetHashCode();
-        }
+        /// <summary>
+        /// Compares another object with this instance for equality.
+        /// </summary>
+        /// <param name="obj">An object.</param>
+        /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public override bool Equals(object obj)
         {
             if (obj == null) return false;
@@ -42,6 +43,14 @@ namespace Engine.PathFinding
             }
 
             return false;
+        }
+        /// <summary>
+        /// Calculates a hash code unique to the contents of this instance.
+        /// </summary>
+        /// <returns>A hash code.</returns>
+        public override int GetHashCode()
+        {
+            return (Name ?? "").GetHashCode();
         }
     }
 }

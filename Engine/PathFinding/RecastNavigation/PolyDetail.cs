@@ -25,6 +25,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int triCount;
 
+        /// <summary>
+        /// Gets the text representation of the polygon detail
+        /// </summary>
+        /// <returns>Returns the text representation of the polygon detail</returns>
         public override string ToString()
         {
             return string.Format("VertBase {0}; TriBase {1}; VertCount {2}; TriCount {3};",

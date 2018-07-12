@@ -44,11 +44,19 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int userId;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public OffMeshConnection()
         {
 
         }
 
+        /// <summary>
+        /// Serialization constructor
+        /// </summary>
+        /// <param name="info">Serialization info</param>
+        /// <param name="context">Serialization context</param>
         protected OffMeshConnection(SerializationInfo info, StreamingContext context)
         {
             start = info.GetVector3("start");
@@ -59,7 +67,11 @@ namespace Engine.PathFinding.RecastNavigation
             side = info.GetInt32("side");
             userId = info.GetInt32("userId");
         }
-
+        /// <summary>
+        /// Populates a SerializationInfo with the data needed to serialize the target object.
+        /// </summary>
+        /// <param name="info">The SerializationInfo to populate with data.</param>
+        /// <param name="context">The destination for this serialization.</param>
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -70,6 +82,18 @@ namespace Engine.PathFinding.RecastNavigation
             info.AddValue("flags", flags);
             info.AddValue("side", side);
             info.AddValue("userId", userId);
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("start: {0}; end: {1}; rad: {2}; poly: {3}; flags: {4}; side: {5}; userId: {6};",
+                start, end,
+                rad, poly,
+                flags, side, userId);
         }
     }
 }

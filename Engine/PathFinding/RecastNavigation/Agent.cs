@@ -49,10 +49,11 @@ namespace Engine.PathFinding.RecastNavigation
             MaxSlope = 45.0f;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        /// <summary>
+        /// Compares another object with this instance for equality.
+        /// </summary>
+        /// <param name="obj">An object.</param>
+        /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public override bool Equals(object obj)
         {
             if (!base.Equals(obj)) return false;
@@ -66,6 +67,14 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             return false;
+        }
+        /// <summary>
+        /// Calculates a hash code unique to the contents of this instance.
+        /// </summary>
+        /// <returns>A hash code.</returns>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

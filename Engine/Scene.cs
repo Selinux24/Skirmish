@@ -116,7 +116,7 @@ namespace Engine
         /// <summary>
         /// Graph used for pathfinding
         /// </summary>
-        protected IGraph navigationGraph = null;
+        protected IGraph navigationGraph { get; private set; }
 
         /// <summary>
         /// Game class
@@ -1220,6 +1220,32 @@ namespace Engine
         }
 
         /// <summary>
+        /// Sets a navigation graph
+        /// </summary>
+        /// <param name="graph">Navigation graph</param>
+        public virtual void SetNavigationGraph(IGraph graph)
+        {
+            if(this.navigationGraph != null)
+            {
+                this.navigationGraph.Updating -= GraphUpdating;
+                this.navigationGraph.Updated -= GraphUpdated;
+
+                Helper.Dispose(this.navigationGraph);
+
+                this.boundingBox = new BoundingBox();
+            }
+
+            if (graph != null)
+            {
+                this.navigationGraph = graph;
+                this.navigationGraph.SetGeometrySourceFunction(this.GetTrianglesForNavigationGraph);
+                this.navigationGraph.Updating += GraphUpdating;
+                this.navigationGraph.Updated += GraphUpdated;
+
+                this.boundingBox = this.navigationGraph.BoundingBox;
+            }
+        }
+        /// <summary>
         /// Updates navigation graph
         /// </summary>
         public virtual void UpdateNavigationGraph()
@@ -1232,11 +1258,9 @@ namespace Engine
                     throw new ArgumentException("Scene must have one ground object for navigation graph processing");
                 }
 
-                this.navigationGraph = PathFinder.Build(this.GetTrianglesForNavigationGraph, this.PathFinderDescription.Settings);
-                this.navigationGraph.Updating += GraphUpdating;
-                this.navigationGraph.Updated += GraphUpdated;
+                var graph = PathFinder.Build(this.GetTrianglesForNavigationGraph, this.PathFinderDescription.Settings);
 
-                this.boundingBox = this.navigationGraph.BoundingBox;
+                this.SetNavigationGraph(graph);
             }
         }
         /// <summary>

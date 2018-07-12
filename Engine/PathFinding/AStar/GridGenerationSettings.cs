@@ -1,7 +1,9 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.PathFinding.AStar
 {
+    [Serializable]
     public class GridGenerationSettings : PathFinderSettings
     {
         /// <summary>

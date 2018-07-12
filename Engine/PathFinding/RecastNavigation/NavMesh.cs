@@ -344,7 +344,7 @@ namespace Engine.PathFinding.RecastNavigation
                     for (int i = 0; i < ntiles; ++i)
                     {
                         var tile = tileCache.AddTile(tiles[i], CompressedTileFlags.DT_COMPRESSEDTILE_FREE_DATA);
-                        if(tile == null)
+                        if (tile == null)
                         {
                             continue;
                         }
@@ -514,10 +514,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static int CalcLayerBufferSize(int gridWidth, int gridHeight)
         {
-            int headerSize = Helper.Align4(TileCacheLayerHeader.Size);
-            int gridSize = gridWidth * gridHeight;
-
-            return headerSize + gridSize * 4;
+            return 0;
         }
         /*TILE MESH SAMPLE*/
         public static bool BuildAllTiles(InputGeometry geom, BuildSettings settings, Agent agent, NavMesh navMesh)
@@ -836,64 +833,6 @@ namespace Engine.PathFinding.RecastNavigation
             return null;
         }
 
-        public static void SaveFile(string path, NavMesh mesh)
-        {
-            NavMeshSetHeader header = new NavMeshSetHeader
-            {
-                magic = Detour.DT_NAVMESH_MAGIC,
-                version = Detour.DT_NAVMESH_VERSION,
-                numTiles = 0,
-                param = mesh.m_params,
-            };
-
-            List<NavMeshTileHeader> tileHeaders = new List<NavMeshTileHeader>();
-
-            // Store header and tiles.
-            for (int i = 0; i < mesh.MaxTiles; ++i)
-            {
-                var tile = mesh.Tiles[i];
-                if (tile == null || tile.header.magic != Detour.DT_NAVMESH_MAGIC || tile.data == null) continue;
-
-                header.numTiles++;
-                tileHeaders.Add(new NavMeshTileHeader
-                {
-                    tile = tile.data,
-                    dataSize = tile.dataSize
-                });
-            }
-
-            header.numTiles = tileHeaders.Count;
-
-            NavMeshFile file = new NavMeshFile()
-            {
-                header = header,
-                tileHeaders = tileHeaders.ToArray(),
-            };
-
-            File.WriteAllBytes(path, file.Compress());
-        }
-        public static NavMesh LoadFile(string path)
-        {
-            byte[] buffer = File.ReadAllBytes(path);
-
-            var nmFile = buffer.Decompress<NavMeshFile>();
-
-            NavMesh mesh = new NavMesh();
-
-            mesh.Init(nmFile.header.param);
-
-            // Read tiles.
-            for (int i = 0; i < nmFile.header.numTiles; ++i)
-            {
-                NavMeshTileHeader tileHeader = nmFile.tileHeaders[i];
-
-                mesh.AddTile(tileHeader.tile, TileFlags.DT_TILE_FREE_DATA, 0, out int result);
-            }
-
-            return mesh;
-        }
-
-        private NavMeshParams m_params;
         private Vector3 m_orig;
         private float m_tileWidth;
         private float m_tileHeight;
@@ -905,10 +844,10 @@ namespace Engine.PathFinding.RecastNavigation
         private int m_polyBits;
         private int m_saltBits;
 
+        private NavMeshParams m_params;
+        public TileCache TileCache { get; set; }
         public int MaxTiles { get; set; }
         public MeshTile[] Tiles { get; set; }
-
-        public TileCache TileCache { get; set; }
 
         /// <summary>
         /// Constructor
@@ -917,6 +856,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
 
         }
+
         /// <summary>
         /// Serialization constructor
         /// </summary>
@@ -924,27 +864,89 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="context">Serialization context</param>
         protected NavMesh(SerializationInfo info, StreamingContext context)
         {
-            var param = info.GetValue<NavMeshParams>("params");
+            RecastNavigationFileHeader header = info.GetValue<RecastNavigationFileHeader>("header");
 
-            Init(param);
+            this.Init(header.NavMeshParams);
 
-            for (int i = 0; i < MaxTiles; i++)
+            for (int i = 0; i < header.NavMeshTileCount; i++)
             {
-                var tile = info.GetValue<MeshData>(string.Format("tiles.{0}", i));
-                if (tile == null || tile.header.magic != Detour.DT_NAVMESH_MAGIC || tile == null) continue;
+                var tile = info.GetValue<MeshData>($"tileData.{i}");
+                if (tile == null || tile.header.magic != Detour.DT_NAVMESH_MAGIC) continue;
 
                 AddTile(tile, TileFlags.DT_TILE_FREE_DATA, 0, out int res);
             }
-        }
 
+            if (header.WithTileCache)
+            {
+                this.TileCache = new TileCache();
+                this.TileCache.Init(header.TileCacheParams, null);
+
+                for (int i = 0; i < header.TileCacheTileCount; i++)
+                {
+                    var tileHeader = info.GetValue<TileCacheLayerHeader>($"cacheTileHeader.{i}");
+                    var tileData = info.GetValue<TileCacheLayerData>($"cacheTileData.{i}");
+
+                    if (tileHeader != null)
+                    {
+                        var tile = new TileCacheData
+                        {
+                            Header = tileHeader,
+                            Data = tileData,
+                        };
+
+                        this.TileCache.AddTile(tile, CompressedTileFlags.DT_COMPRESSEDTILE_FREE_DATA);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Populates a SerializationInfo with the data needed to serialize the target object.
+        /// </summary>
+        /// <param name="info">The SerializationInfo to populate with data.</param>
+        /// <param name="context">The destination for this serialization.</param>
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("params", m_params);
-
-            for (int i = 0; i < MaxTiles; i++)
+            RecastNavigationFileHeader header = new RecastNavigationFileHeader
             {
-                info.AddValue(string.Format("tiles.{0}", i), Tiles[i].data);
+                Magic = RecastNavigationFileHeader.MAGIC,
+                Version = RecastNavigationFileHeader.VERSION,
+                NavMeshParams = this.GetParams(),
+                NavMeshTileCount = this.MaxTiles,
+
+                WithTileCache = this.TileCache != null,
+                TileCacheParams = this.TileCache != null ? this.TileCache.GetParams() : new TileCacheParams(),
+                TileCacheTileCount = this.TileCache != null ? this.TileCache.GetTileCount() : 0,
+            };
+
+            info.AddValue("header", header);
+
+            // Store navmesh tiles.
+            for (int i = 0; i < this.MaxTiles; ++i)
+            {
+                var tile = this.Tiles[i];
+
+                info.AddValue($"tileData.{i}", tile?.data);
+            }
+
+            if (this.TileCache != null)
+            {
+                // Store cache tiles.
+                for (int i = 0; i < this.TileCache.GetTileCount(); ++i)
+                {
+                    var tile = this.TileCache.GetTile(i);
+
+                    int tileRef = -1;
+                    if (tile != null)
+                    {
+                        tileRef = this.TileCache.GetTileRef(tile);
+                    }
+
+                    info.AddValue($"cacheTileRef.{i}", tileRef);
+
+                    info.AddValue($"cacheTileHeader.{i}", tile?.Header);
+                    info.AddValue($"cacheTileData.{i}", tile?.Data);
+                }
             }
         }
 

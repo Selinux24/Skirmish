@@ -1,5 +1,5 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -104,21 +104,37 @@ namespace Engine
                 && (value1.Continuity == value2.Continuity);
         }
 
+        /// <summary>
+        /// Compares another curve with this instance for equality.
+        /// </summary>
+        /// <param name="other">A curve</param>
+        /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public int CompareTo(Curve3DKey other)
         {
             return this.Position.CompareTo(other.Position);
         }
-
+        /// <summary>
+        /// Compares another curve with this instance for equality.
+        /// </summary>
+        /// <param name="other">A curve</param>
+        /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public bool Equals(Curve3DKey other)
         {
             return (this == other);
         }
-
+        /// <summary>
+        /// Compares another object with this instance for equality.
+        /// </summary>
+        /// <param name="obj">An object.</param>
+        /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public override bool Equals(object obj)
         {
             return (obj as Curve3DKey) != null && Equals((Curve3DKey)obj);
         }
-
+        /// <summary>
+        /// Calculates a hash code unique to the contents of this instance.
+        /// </summary>
+        /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
             return

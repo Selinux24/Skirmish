@@ -315,6 +315,7 @@
     <Compile Include="PathFinding\RecastNavigation\RaycastHit.cs" />
     <Compile Include="PathFinding\RecastNavigation\RaycastOptions.cs" />
     <Compile Include="PathFinding\RecastNavigation\Recast.cs" />
+    <Compile Include="PathFinding\RecastNavigation\RecastNavigationFileHeader.cs" />
     <Compile Include="PathFinding\RecastNavigation\SegInterval.cs" />
     <Compile Include="PathFinding\RecastNavigation\Status.cs" />
     <Compile Include="PathFinding\RecastNavigation\Heightfield.cs" />
@@ -330,12 +331,10 @@
     <Compile Include="PathFinding\RecastNavigation\MeshHeader.cs" />
     <Compile Include="PathFinding\RecastNavigation\MeshTile.cs" />
     <Compile Include="PathFinding\RecastNavigation\NavMeshCreateParams.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NavMeshFile.cs" />
     <Compile Include="PathFinding\RecastNavigation\NavMeshParams.cs" />
     <Compile Include="PathFinding\RecastNavigation\NavMeshQuery.cs" />
     <Compile Include="PathFinding\RecastNavigation\NavMeshSetHeader.cs" />
     <Compile Include="PathFinding\RecastNavigation\NavMeshTileBuildContext.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NavMeshTileHeader.cs" />
     <Compile Include="PathFinding\RecastNavigation\Node.cs" />
     <Compile Include="PathFinding\RecastNavigation\NodeFlags.cs" />
     <Compile Include="PathFinding\RecastNavigation\NodePool.cs" />

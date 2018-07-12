@@ -51,7 +51,6 @@ namespace Engine.PathFinding.RecastNavigation
         /// The number of sub-meshes in the detail mesh.
         /// </summary>
         public int detailMeshCount;
-
         /// <summary>
         /// The number of unique vertices in the detail mesh. (In addition to the polygon vertices.)
         /// </summary>
@@ -92,13 +91,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// The maximum bounds of the tile's AABB. [(x, y, z)]
         /// </summary>
         public Vector3 bmax;
-
         /// <summary>
         /// The bounding volume quantization factor.
         /// </summary>
         public float bvQuantFactor;
 
-
+        /// <summary>
+        /// Serialization constructor
+        /// </summary>
+        /// <param name="info">Serialization information</param>
+        /// <param name="context">Serializatio context</param>
         public MeshHeader(SerializationInfo info, StreamingContext context)
         {
             magic = info.GetInt32("magic");
@@ -123,7 +125,11 @@ namespace Engine.PathFinding.RecastNavigation
             bmax = info.GetVector3("bmax");
             bvQuantFactor = info.GetSingle("bvQuantFactor");
         }
-
+        /// <summary>
+        /// Populates a SerializationInfo with the data needed to serialize the target object.
+        /// </summary>
+        /// <param name="info">The SerializationInfo to populate with data.</param>
+        /// <param name="context">The destination for this serialization.</param>
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -150,6 +156,10 @@ namespace Engine.PathFinding.RecastNavigation
             info.AddValue("bvQuantFactor", bvQuantFactor);
         }
 
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
             return string.Format("{0}.{1}.{2}; Id: {3}; Bbox: {4}{5}; Polys: {6}; Vertices: {7}; DMeshes: {8}; DTriangles: {9}; DVertices: {10}",

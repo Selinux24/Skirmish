@@ -6,7 +6,7 @@ namespace Engine.PathFinding
     /// <summary>
     /// Pathfinding graph interface
     /// </summary>
-    public interface IGraph
+    public interface IGraph : IDisposable
     {
         /// <summary>
         /// Gets the total bounding box
@@ -20,6 +20,11 @@ namespace Engine.PathFinding
         /// <param name="settings">Settings</param>
         /// <returns>Returns the new Graph</returns>
         void Build(Func<Triangle[]> sourceFunction, PathFinderSettings settings);
+        /// <summary>
+        /// Sets the geometry source function
+        /// </summary>
+        /// <param name="sourceFunction">Function</param>
+        void SetGeometrySourceFunction(Func<Triangle[]> sourceFunction);
 
         /// <summary>
         /// Gets the node collection of the graph for the specified agent type

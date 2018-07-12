@@ -103,21 +103,37 @@ namespace Engine
                 && (value1.Continuity == value2.Continuity);
         }
 
+        /// <summary>
+        /// Compares another curve with this instance for equality.
+        /// </summary>
+        /// <param name="other">A curve</param>
+        /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public int CompareTo(CurveKey other)
         {
             return this.Position.CompareTo(other.Position);
         }
-
+        /// <summary>
+        /// Compares another curve with this instance for equality.
+        /// </summary>
+        /// <param name="other">A curve</param>
+        /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public bool Equals(CurveKey other)
         {
             return (this == other);
         }
-
+        /// <summary>
+        /// Compares another object with this instance for equality.
+        /// </summary>
+        /// <param name="obj">An object.</param>
+        /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public override bool Equals(object obj)
         {
             return (obj as CurveKey) != null && Equals((CurveKey)obj);
         }
-
+        /// <summary>
+        /// Calculates a hash code unique to the contents of this instance.
+        /// </summary>
+        /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
             return

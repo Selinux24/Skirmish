@@ -24,18 +24,30 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int i;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public BVNode()
         {
 
         }
 
+        /// <summary>
+        /// Serialization constructor
+        /// </summary>
+        /// <param name="info">Serialization information</param>
+        /// <param name="context">Serializatio context</param>
         protected BVNode(SerializationInfo info, StreamingContext context)
         {
             bmin = info.GetInt3("bmin");
             bmax = info.GetInt3("bmax");
             i = info.GetInt32("i");
         }
-
+        /// <summary>
+        /// Populates a SerializationInfo with the data needed to serialize the target object.
+        /// </summary>
+        /// <param name="info">The SerializationInfo to populate with data.</param>
+        /// <param name="context">The destination for this serialization.</param>
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -43,5 +55,14 @@ namespace Engine.PathFinding.RecastNavigation
             info.AddInt3("bmax", bmax);
             info.AddValue("i", i);
         }
-    };
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("bmin: {0}; bmax: {1}; i: {2};", bmin, bmax, i);
+        }
+    }
 }

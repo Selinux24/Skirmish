@@ -6,23 +6,58 @@ using System.Security.Permissions;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    /// <summary>
+    /// Mesh data
+    /// </summary>
     [Serializable]
     public class MeshData : ISerializable
     {
+        /// <summary>
+        /// Mesh header
+        /// </summary>
         public MeshHeader header;
+        /// <summary>
+        /// Navigation vertices
+        /// </summary>
         public List<Vector3> navVerts = new List<Vector3>();
+        /// <summary>
+        /// Navigation polygons
+        /// </summary>
         public List<Poly> navPolys = new List<Poly>();
+        /// <summary>
+        /// Navigation detail meshes
+        /// </summary>
         public List<PolyDetail> navDMeshes = new List<PolyDetail>();
+        /// <summary>
+        /// Navigation detail vertices
+        /// </summary>
         public List<Vector3> navDVerts = new List<Vector3>();
+        /// <summary>
+        /// Navigation detail triangles
+        /// </summary>
         public List<Int4> navDTris = new List<Int4>();
+        /// <summary>
+        /// Navigation BVTree
+        /// </summary>
         public List<BVNode> navBvtree = new List<BVNode>();
+        /// <summary>
+        /// Off-mesh connections
+        /// </summary>
         public List<OffMeshConnection> offMeshCons = new List<OffMeshConnection>();
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public MeshData()
         {
 
         }
 
+        /// <summary>
+        /// Serialization constructor
+        /// </summary>
+        /// <param name="info">Serialization information</param>
+        /// <param name="context">Serializatio context</param>
         protected MeshData(SerializationInfo info, StreamingContext context)
         {
             header = info.GetValue<MeshHeader>("header");
@@ -69,7 +104,11 @@ namespace Engine.PathFinding.RecastNavigation
                 offMeshCons.Add(info.GetValue<OffMeshConnection>(string.Format("offMeshCons.{0}", i)));
             }
         }
-
+        /// <summary>
+        /// Populates a SerializationInfo with the data needed to serialize the target object.
+        /// </summary>
+        /// <param name="info">The SerializationInfo to populate with data.</param>
+        /// <param name="context">The destination for this serialization.</param>
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
@@ -116,6 +155,15 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 info.AddValue(string.Format("offMeshCons.{0}", i), offMeshCons[i]);
             }
+        }
+
+        /// <summary>
+        /// Gets the text representation of the instance
+        /// </summary>
+        /// <returns>Returns the text representation of the instance</returns>
+        public override string ToString()
+        {
+            return string.Format("header: {0};", header);
         }
     }
 }
