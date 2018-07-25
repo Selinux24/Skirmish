@@ -190,11 +190,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
             // Make sure the data is in right format.
             var header = data.Header;
-            if (header.magic != TileCacheLayerHeader.TileCacheMagic)
+            if (header.magic != DetourTileCache.DT_TILECACHE_MAGIC)
             {
                 throw new EngineException("DT_WRONG_MAGIC");
             }
-            if (header.version != TileCacheLayerHeader.TileCacheVersion)
+            if (header.version != DetourTileCache.DT_TILECACHE_VERSION)
             {
                 throw new EngineException("DT_WRONG_VERSION");
             }

@@ -9,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// Navigation mesh parameters
     /// </summary>
     [Serializable]
-    public class NavMeshParams : ISerializable
+    public struct NavMeshParams : ISerializable
     {
         /// <summary>
         /// Origin
@@ -33,19 +33,11 @@ namespace Engine.PathFinding.RecastNavigation
         public int MaxPolys;
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        public NavMeshParams()
-        {
-
-        }
-
-        /// <summary>
         /// Serialization constructor
         /// </summary>
         /// <param name="info">Serialization information</param>
         /// <param name="context">Serializatio context</param>
-        protected NavMeshParams(SerializationInfo info, StreamingContext context)
+        internal NavMeshParams(SerializationInfo info, StreamingContext context)
         {
             Origin = info.GetVector3("Origin");
             TileWidth = info.GetSingle("TileWidth");

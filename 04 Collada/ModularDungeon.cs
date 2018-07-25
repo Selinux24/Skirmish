@@ -41,10 +41,10 @@ namespace Collada
         private SceneObject<Model> rat = null;
         private BasicManipulatorController ratController = null;
         private Player ratAgentType = null;
-        private Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
+        private Dictionary<string, AnimationPlan> ratPaths = null;
         private bool ratActive = false;
-        private float ratTime = 5;
-        private float nextTime = 3;
+        private float ratTime = 5f;
+        private float nextRatTime = 3f;
         private Vector3[] ratHoles = null;
 
         private SceneObject<ModelInstanced> human = null;
@@ -226,6 +226,7 @@ namespace Collada
             this.rat.Transform.SetPosition(0, 0, 0, true);
             this.rat.Visible = false;
 
+            this.ratPaths = new Dictionary<string, AnimationPlan>();
             this.ratController = new BasicManipulatorController();
 
             AnimationPath p0 = new AnimationPath();
@@ -594,7 +595,7 @@ namespace Collada
                 if (!this.ratController.HasPath)
                 {
                     this.ratActive = false;
-                    this.ratTime = this.nextTime;
+                    this.ratTime = this.nextRatTime;
                     this.rat.Visible = false;
                     this.ratController.Clear();
                 }
@@ -626,7 +627,7 @@ namespace Collada
                     this.rat.Instance.AnimationController.Start(0);
 
                     this.ratActive = true;
-                    this.ratTime = this.nextTime;
+                    this.ratTime = this.nextRatTime;
                 }
             }
 
@@ -862,7 +863,7 @@ namespace Collada
         {
             base.NavigationGraphUpdated();
 
-            this.RequestGraphUpdate(1f);
+            this.RequestGraphUpdate(0.2f);
         }
     }
 }

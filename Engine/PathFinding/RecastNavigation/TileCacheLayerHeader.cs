@@ -9,11 +9,8 @@ namespace Engine.PathFinding.RecastNavigation
     /// Tile cache header
     /// </summary>
     [Serializable]
-    public class TileCacheLayerHeader : ISerializable
+    public struct TileCacheLayerHeader : ISerializable
     {
-        public const int TileCacheMagic = 'D' << 24 | 'T' << 16 | 'L' << 8 | 'R';
-        public const int TileCacheVersion = 1;
-
         /// <summary>
         /// Data magic
         /// </summary>
@@ -72,19 +69,11 @@ namespace Engine.PathFinding.RecastNavigation
         public int maxy;
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        public TileCacheLayerHeader()
-        {
-
-        }
-
-        /// <summary>
         /// Serialization constructor
         /// </summary>
         /// <param name="info">Serialization info</param>
         /// <param name="context">Serialization context</param>
-        protected TileCacheLayerHeader(SerializationInfo info, StreamingContext context)
+        internal TileCacheLayerHeader(SerializationInfo info, StreamingContext context)
         {
             magic = info.GetInt32("magic");
             version = info.GetInt32("version");
@@ -136,7 +125,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return "Empty;";
             }
 
-            if (this.magic != TileCacheMagic)
+            if (this.magic != DetourTileCache.DT_TILECACHE_MAGIC)
             {
                 return "Invalid;";
             }

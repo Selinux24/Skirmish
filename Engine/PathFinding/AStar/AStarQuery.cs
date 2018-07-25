@@ -55,7 +55,7 @@ namespace Engine.PathFinding.AStar
                         //Update queue
                         if (Cache.Count >= 10) Cache.RemoveAt(0);
 
-                        //Add path to caché
+                        //Add path to cache
                         Cache.Add(new PathCache()
                         {
                             Path = path,

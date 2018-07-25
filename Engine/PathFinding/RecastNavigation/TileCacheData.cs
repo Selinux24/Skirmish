@@ -1,9 +1,20 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation
 {
+    /// <summary>
+    /// Tile cache data
+    /// </summary>
+    [Serializable]
     public struct TileCacheData
     {
+        /// <summary>
+        /// Header
+        /// </summary>
         public TileCacheLayerHeader Header;
+        /// <summary>
+        /// Data
+        /// </summary>
         public TileCacheLayerData Data;
 
         /// <summary>

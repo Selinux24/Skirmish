@@ -1,9 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace Engine.PathFinding.RecastNavigation
 {
@@ -12,8 +9,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Navigation graph
     /// </summary>
-    [Serializable]
-    public class Graph : IGraph, ISerializable, IDisposable
+    public class Graph : IGraph, IDisposable
     {
         public const int MAX_POLYS = 256;
         public const int MAX_SMOOTH = 2048;
@@ -485,26 +481,26 @@ namespace Engine.PathFinding.RecastNavigation
         private bool updated = true;
 
         /// <summary>
-        /// Build settings
-        /// </summary>
-        private BuildSettings settings = null;
-        /// <summary>
-        /// Navigation mesh query dictionary (by agent type)
-        /// </summary>
-        private Dictionary<Agent, NavMeshQuery> navMeshQDictionary = new Dictionary<Agent, NavMeshQuery>();
-        /// <summary>
         /// Obstacle indices
         /// </summary>
         private List<Obstacle> obstacleIndices = new List<Obstacle>();
 
         /// <summary>
+        /// Build settings
+        /// </summary>
+        public BuildSettings Settings { get; set; }
+        /// <summary>
         /// Gets the total bounding box
         /// </summary>
-        public BoundingBox BoundingBox { get; protected set; }
+        public BoundingBox BoundingBox { get; set; }
         /// <summary>
         /// Gets the geometry
         /// </summary>
         public Func<Triangle[]> GetGeometryFunction { get; set; }
+        /// <summary>
+        /// Navigation mesh query dictionary (by agent type)
+        /// </summary>
+        public Dictionary<Agent, NavMeshQuery> MeshQueryDictionary = new Dictionary<Agent, NavMeshQuery>();
 
         /// <summary>
         /// Constructor
@@ -518,56 +514,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(navMeshQDictionary);
-        }
-
-        /// <summary>
-        /// Serialization constructor
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="context">Serialization context</param>
-        protected Graph(SerializationInfo info, StreamingContext context)
-        {
-            settings = info.GetValue<BuildSettings>("settings");
-
-            int count = info.GetInt32("count");
-            if (count > 0)
-            {
-                for (int i = 0; i < count; i++)
-                {
-                    var agent = info.GetValue<Agent>(string.Format("agent.{0}", i));
-                    var nm = info.GetValue<NavMesh>(string.Format("navmesh.{0}", i));
-                    var mmQuery = new NavMeshQuery();
-                    mmQuery.Init(nm, settings.MaxNodes);
-
-                    navMeshQDictionary.Add(agent, mmQuery);
-                }
-            }
-
-            BoundingBox = info.GetBoundingBox("BoundingBox");
-        }
-        /// <summary>
-        /// Gets the object data for serialization
-        /// </summary>
-        /// <param name="info">Serialization info</param>
-        /// <param name="context">Serialization context</param>
-        [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
-        {
-            info.AddValue("settings", settings);
-
-            info.AddValue("count", navMeshQDictionary.Keys.Count);
-            int index = 0;
-            foreach (var agent in navMeshQDictionary.Keys)
-            {
-                var mesh = navMeshQDictionary[agent].GetAttachedNavMesh();
-
-                info.AddValue(string.Format("agent.{0}", index), agent);
-                info.AddValue(string.Format("navmesh.{0}", index), mesh);
-                index++;
-            }
-
-            info.AddBoundingBox("BoundingBox", this.BoundingBox);
+            Helper.Dispose(MeshQueryDictionary);
         }
 
         /// <summary>
@@ -578,7 +525,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the new Graph</returns>
         public void Build(Func<Triangle[]> sourceFunction, PathFinderSettings settings)
         {
-            this.settings = settings as BuildSettings;
+            this.Settings = settings as BuildSettings;
             this.GetGeometryFunction = sourceFunction;
 
             var triangles = sourceFunction();
@@ -587,13 +534,13 @@ namespace Engine.PathFinding.RecastNavigation
 
             var geom = new InputGeometry(triangles);
 
-            foreach (var agent in this.settings.Agents)
+            foreach (var agent in this.Settings.Agents)
             {
-                var nm = NavMesh.Build(geom, this.settings, agent);
+                var nm = NavMesh.Build(geom, this.Settings, agent);
                 var mmQuery = new NavMeshQuery();
-                mmQuery.Init(nm, this.settings.MaxNodes);
+                mmQuery.Init(nm, this.Settings.MaxNodes);
 
-                this.navMeshQDictionary.Add(agent, mmQuery);
+                this.MeshQueryDictionary.Add(agent, mmQuery);
             }
         }
         /// <summary>
@@ -613,9 +560,9 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var geom = new InputGeometry(this.GetGeometryFunction());
 
-            foreach (var agent in navMeshQDictionary.Keys)
+            foreach (var agent in MeshQueryDictionary.Keys)
             {
-                navMeshQDictionary[agent].GetAttachedNavMesh().BuildTile(position, geom, settings, agent);
+                MeshQueryDictionary[agent].GetAttachedNavMesh().BuildTile(position, geom, Settings, agent);
             }
         }
         /// <summary>
@@ -626,9 +573,9 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var geom = new InputGeometry(this.GetGeometryFunction());
 
-            foreach (var agent in navMeshQDictionary.Keys)
+            foreach (var agent in MeshQueryDictionary.Keys)
             {
-                navMeshQDictionary[agent].GetAttachedNavMesh().RemoveTile(position, geom, settings);
+                MeshQueryDictionary[agent].GetAttachedNavMesh().RemoveTile(position, geom, Settings);
             }
         }
         /// <summary>
@@ -649,7 +596,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             List<GraphNode> nodes = new List<GraphNode>();
 
-            nodes.AddRange(GraphNode.Build(navMeshQDictionary[(Agent)agent].GetAttachedNavMesh()));
+            nodes.AddRange(GraphNode.Build(MeshQueryDictionary[(Agent)agent].GetAttachedNavMesh()));
 
             return nodes.ToArray();
         }
@@ -668,7 +615,7 @@ namespace Engine.PathFinding.RecastNavigation
             };
 
             CalcPath(
-                navMeshQDictionary[(Agent)agent],
+                MeshQueryDictionary[(Agent)agent],
                 filter, new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
                 from, to, out Vector3[] result);
 
@@ -685,22 +632,30 @@ namespace Engine.PathFinding.RecastNavigation
         {
             nearest = null;
 
-            var filter = new QueryFilter()
+            //Find agent query
+            var query = MeshQueryDictionary[(Agent)agent];
+            if (query != null)
             {
-                m_includeFlags = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK,
-            };
-
-            var status = navMeshQDictionary[(Agent)agent].FindNearestPoly(
-                position, new Vector3(2, 4, 2), filter,
-                out int nRef, out Vector3 nPoint);
-
-            if (!status.HasFlag(Status.DT_FAILURE))
-            {
-                if (nRef != 0)
+                var filter = new QueryFilter()
                 {
-                    nearest = nPoint;
+                    m_includeFlags = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK,
+                };
 
-                    return nPoint.X == position.X && nPoint.Z == position.Z;
+                //Set extents based upon agent height
+                var agentExtents = new Vector3(agent.Height, agent.Height * 2, agent.Height);
+
+                var status = query.FindNearestPoly(
+                    position, agentExtents, filter,
+                    out int nRef, out Vector3 nPoint);
+
+                if (!status.HasFlag(Status.DT_FAILURE))
+                {
+                    if (nRef != 0)
+                    {
+                        nearest = nPoint;
+
+                        return nPoint.X == position.X && nPoint.Z == position.Z;
+                    }
                 }
             }
 
@@ -720,9 +675,9 @@ namespace Engine.PathFinding.RecastNavigation
 
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
 
-            foreach (var agent in navMeshQDictionary.Keys)
+            foreach (var agent in MeshQueryDictionary.Keys)
             {
-                var cache = navMeshQDictionary[agent].GetAttachedNavMesh().TileCache;
+                var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
                 if (cache != null)
                 {
                     cache.AddObstacle(position, radius, height, out int res);
@@ -758,9 +713,9 @@ namespace Engine.PathFinding.RecastNavigation
 
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
 
-            foreach (var agent in navMeshQDictionary.Keys)
+            foreach (var agent in MeshQueryDictionary.Keys)
             {
-                var cache = navMeshQDictionary[agent].GetAttachedNavMesh().TileCache;
+                var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
                 if (cache != null)
                 {
                     cache.AddBoxObstacle(position, halfExtents, yRotation, out int res);
@@ -795,9 +750,9 @@ namespace Engine.PathFinding.RecastNavigation
 
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
 
-            foreach (var agent in navMeshQDictionary.Keys)
+            foreach (var agent in MeshQueryDictionary.Keys)
             {
-                var cache = navMeshQDictionary[agent].GetAttachedNavMesh().TileCache;
+                var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
                 if (cache != null)
                 {
                     cache.AddBoxObstacle(minimum, maximum, out int res);
@@ -833,7 +788,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 foreach (var item in obstacle.Indices)
                 {
-                    var cache = navMeshQDictionary[item.Item1].GetAttachedNavMesh().TileCache;
+                    var cache = MeshQueryDictionary[item.Item1].GetAttachedNavMesh().TileCache;
                     if (cache != null)
                     {
                         cache.RemoveObstacle(item.Item2);
@@ -850,13 +805,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="fileName">File name</param>
         public void Load(string fileName)
         {
-            byte[] buffer = File.ReadAllBytes(fileName);
+            var graph = GraphFile.Load(fileName);
 
-            var graph = buffer.Decompress<Graph>();
-
-            settings = graph.settings;
-            navMeshQDictionary = graph.navMeshQDictionary;
+            Settings = graph.Settings;
             BoundingBox = graph.BoundingBox;
+
+            Helper.Dispose(MeshQueryDictionary);
+            MeshQueryDictionary = graph.MeshQueryDictionary;
         }
         /// <summary>
         /// Saves the graph to a file
@@ -864,9 +819,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="fileName">File name</param>
         public void Save(string fileName)
         {
-            byte[] cmpBuffer = this.Compress();
-
-            File.WriteAllBytes(fileName, cmpBuffer);
+            GraphFile.Save(fileName, this);
         }
 
         /// <summary>
@@ -875,9 +828,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            foreach (var agent in navMeshQDictionary.Keys)
+            foreach (var agent in MeshQueryDictionary.Keys)
             {
-                var nm = navMeshQDictionary[agent].GetAttachedNavMesh();
+                var nm = MeshQueryDictionary[agent].GetAttachedNavMesh();
                 if (nm.TileCache != null)
                 {
                     var status = nm.TileCache.Update(gameTime.TotalMilliseconds, nm, out bool upToDate);

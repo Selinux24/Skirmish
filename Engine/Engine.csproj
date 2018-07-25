@@ -306,6 +306,7 @@
     <Compile Include="PathFinding\RecastNavigation\FindNearestPolyQuery.cs" />
     <Compile Include="PathFinding\RecastNavigation\FindPathOptions.cs" />
     <Compile Include="PathFinding\RecastNavigation\Graph.cs" />
+    <Compile Include="PathFinding\RecastNavigation\GraphFile.cs" />
     <Compile Include="PathFinding\RecastNavigation\GraphNode.cs" />
     <Compile Include="PathFinding\RecastNavigation\NavMeshUtils.cs" />
     <Compile Include="PathFinding\RecastNavigation\ObstacleRequest.cs" />
@@ -315,7 +316,6 @@
     <Compile Include="PathFinding\RecastNavigation\RaycastHit.cs" />
     <Compile Include="PathFinding\RecastNavigation\RaycastOptions.cs" />
     <Compile Include="PathFinding\RecastNavigation\Recast.cs" />
-    <Compile Include="PathFinding\RecastNavigation\RecastNavigationFileHeader.cs" />
     <Compile Include="PathFinding\RecastNavigation\SegInterval.cs" />
     <Compile Include="PathFinding\RecastNavigation\Status.cs" />
     <Compile Include="PathFinding\RecastNavigation\Heightfield.cs" />

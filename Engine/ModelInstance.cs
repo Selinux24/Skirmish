@@ -29,7 +29,7 @@ namespace Engine
         /// </summary>
         private bool updateTriangles = true;
         /// <summary>
-        /// Points caché
+        /// Points cache
         /// </summary>
         private Vector3[] positionCache = null;
         /// <summary>
@@ -177,7 +177,7 @@ namespace Engine
         }
 
         /// <summary>
-        /// Invalidates the internal caché
+        /// Invalidates the internal cache
         /// </summary>
         public void InvalidateCache()
         {

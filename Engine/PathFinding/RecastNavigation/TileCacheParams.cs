@@ -9,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// Tile cache parameters
     /// </summary>
     [Serializable]
-    public class TileCacheParams : ISerializable
+    public struct TileCacheParams : ISerializable
     {
         /// <summary>
         /// Origin
@@ -57,19 +57,11 @@ namespace Engine.PathFinding.RecastNavigation
         public int MaxObstacles;
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        public TileCacheParams()
-        {
-
-        }
-
-        /// <summary>
         /// Serialization constructor
         /// </summary>
         /// <param name="info">Serialization information</param>
         /// <param name="context">Serializatio context</param>
-        protected TileCacheParams(SerializationInfo info, StreamingContext context)
+        internal TileCacheParams(SerializationInfo info, StreamingContext context)
         {
             Origin = info.GetVector3("Origin");
             CellSize = info.GetSingle("CellSize");
