@@ -5,7 +5,7 @@ using SharpDX;
 
 namespace Collada
 {
-    public class DungeonWall : Scene
+    public class SceneDungeonWall : Scene
     {
         private const int layerHUD = 99;
 
@@ -19,7 +19,7 @@ namespace Collada
 
         private SceneLightPoint pointLight = null;
 
-        public DungeonWall(Game game)
+        public SceneDungeonWall(Game game)
             : base(game)
         {
 
@@ -94,7 +94,7 @@ namespace Collada
                     UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
-                        ContentFolder = "Resources/DungeonWall",
+                        ContentFolder = "Resources/SceneDungeonWall",
                         ModelContentFilename = "wall.xml",
                     }
                 });

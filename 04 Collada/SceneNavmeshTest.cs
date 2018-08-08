@@ -11,7 +11,7 @@ namespace Collada
     /// <summary>
     /// Navigation mesh test scene
     /// </summary>
-    class NavmeshTest : Scene
+    class SceneNavmeshTest : Scene
     {
         private const int layerHUD = 99;
 
@@ -29,7 +29,7 @@ namespace Collada
 
         private float? lastElapsedSeconds = null;
 
-        public NavmeshTest(Game game) : base(game)
+        public SceneNavmeshTest(Game game) : base(game)
         {
 
         }
@@ -129,7 +129,7 @@ namespace Collada
                     UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
-                        ContentFolder = "Resources/NavmeshTest",
+                        ContentFolder = "Resources/SceneNavmeshTest",
                         ModelContentFilename = "modular_dungeon.xml",
                     }
                 },

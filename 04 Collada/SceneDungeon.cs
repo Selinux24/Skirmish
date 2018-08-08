@@ -5,7 +5,7 @@ using SharpDX;
 
 namespace Collada
 {
-    public class SceneryDungeon : Scene
+    public class SceneDungeon : Scene
     {
         private const int layerHUD = 99;
 
@@ -17,7 +17,7 @@ namespace Collada
         private SceneObject<Scenery> dungeon = null;
         private Player agent = null;
 
-        public SceneryDungeon(Game game)
+        public SceneDungeon(Game game)
             : base(game)
         {
 
@@ -75,7 +75,7 @@ namespace Collada
                     },
                     Content = new ContentDescription()
                     {
-                        ContentFolder = "Resources/SceneryDungeon",
+                        ContentFolder = "Resources/SceneDungeon",
                         ModelContentFilename = "Dungeon.xml",
                     },
                 });

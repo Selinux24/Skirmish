@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Collada
 {
-    public class ModularDungeon : Scene
+    public class SceneModularDungeon : Scene
     {
         private const int layerHUD = 99;
         private const int layerEffects = 98;
@@ -64,7 +64,7 @@ namespace Collada
         private Dictionary<int, object> obstacles = new Dictionary<int, object>();
         private Color obstacleColor = new Color(Color.Pink.ToColor3(), 1f);
 
-        public ModularDungeon(Game game)
+        public SceneModularDungeon(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
         {
 
@@ -172,7 +172,7 @@ namespace Collada
                 AlphaEnabled = true,
                 Content = new ContentDescription()
                 {
-                    ContentFolder = "Resources/ModularDungeon",
+                    ContentFolder = "Resources/SceneModularDungeon",
                     ModelContentFilename = "assets.xml",
                 },
                 AssetsConfigurationFile = "assetsmap.xml",
@@ -206,7 +206,7 @@ namespace Collada
                     UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
-                        ContentFolder = "Resources/ModularDungeon/Characters/Rat",
+                        ContentFolder = "Resources/SceneModularDungeon/Characters/Rat",
                         ModelContentFilename = "rat.xml",
                     }
                 });
@@ -246,7 +246,7 @@ namespace Collada
                     UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
-                        ContentFolder = "Resources/ModularDungeon/Characters/Human2",
+                        ContentFolder = "Resources/SceneModularDungeon/Characters/Human2",
                         ModelContentFilename = "Human2.xml",
                     }
                 });

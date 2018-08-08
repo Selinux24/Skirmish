@@ -182,19 +182,19 @@ namespace Collada
         {
             if (sender == this.sceneDungeonWallButton.Instance)
             {
-                this.Game.SetScene<DungeonWall>();
+                this.Game.SetScene<SceneDungeonWall>();
             }
             else if (sender == this.sceneNavMeshTestButton.Instance)
             {
-                this.Game.SetScene<NavmeshTest>();
+                this.Game.SetScene<SceneNavmeshTest>();
             }
             else if (sender == this.sceneDungeonButton.Instance)
             {
-                this.Game.SetScene<SceneryDungeon>();
+                this.Game.SetScene<SceneDungeon>();
             }
             else if (sender == this.sceneModularDungeonButton.Instance)
             {
-                this.Game.SetScene<ModularDungeon>();
+                this.Game.SetScene<SceneModularDungeon>();
             }
         }
         private void exitButtonClick(object sender, EventArgs e)
