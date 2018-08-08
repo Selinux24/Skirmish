@@ -15,10 +15,10 @@ namespace Engine.PathFinding.RecastNavigation
         public const int MAX_SMOOTH = 2048;
 
         /// <summary>
-        /// Obstacle
+        /// Graph item
         /// </summary>
         [Serializable]
-        class Obstacle
+        class GraphItem
         {
             /// <summary>
             /// Id counter
@@ -26,7 +26,7 @@ namespace Engine.PathFinding.RecastNavigation
             private static int ID = 0;
 
             /// <summary>
-            /// Obstacle id
+            /// Graph item id
             /// </summary>
             public readonly int Id;
             /// <summary>
@@ -37,7 +37,7 @@ namespace Engine.PathFinding.RecastNavigation
             /// <summary>
             /// Constructor
             /// </summary>
-            public Obstacle()
+            public GraphItem()
             {
                 this.Id = ++ID;
             }
@@ -481,9 +481,9 @@ namespace Engine.PathFinding.RecastNavigation
         private bool updated = true;
 
         /// <summary>
-        /// Obstacle indices
+        /// Item indices
         /// </summary>
-        private List<Obstacle> obstacleIndices = new List<Obstacle>();
+        private List<GraphItem> itemIndices = new List<GraphItem>();
 
         /// <summary>
         /// Build settings
@@ -528,11 +528,7 @@ namespace Engine.PathFinding.RecastNavigation
             this.Settings = settings as BuildSettings;
             this.GetGeometryFunction = sourceFunction;
 
-            var triangles = sourceFunction();
-
-            this.BoundingBox = GeometryUtil.CreateBoundingBox(triangles);
-
-            var geom = new InputGeometry(triangles);
+            var geom = new InputGeometry(sourceFunction);
 
             foreach (var agent in this.Settings.Agents)
             {
@@ -542,6 +538,8 @@ namespace Engine.PathFinding.RecastNavigation
 
                 this.MeshQueryDictionary.Add(agent, mmQuery);
             }
+
+            this.BoundingBox = geom.GetBoundingBox();
         }
         /// <summary>
         /// Sets the geometry source function
@@ -558,7 +556,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="position">Position</param>
         public void BuildTile(Vector3 position)
         {
-            var geom = new InputGeometry(this.GetGeometryFunction());
+            var geom = new InputGeometry(this.GetGeometryFunction);
 
             foreach (var agent in MeshQueryDictionary.Keys)
             {
@@ -571,7 +569,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="position">Position</param>
         public void RemoveTile(Vector3 position)
         {
-            var geom = new InputGeometry(this.GetGeometryFunction());
+            var geom = new InputGeometry(this.GetGeometryFunction);
 
             foreach (var agent in MeshQueryDictionary.Keys)
             {
@@ -688,12 +686,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (obstacles.Count > 0)
             {
-                var o = new Obstacle()
+                var o = new GraphItem()
                 {
                     Indices = obstacles.ToArray()
                 };
 
-                obstacleIndices.Add(o);
+                itemIndices.Add(o);
 
                 return o.Id;
             }
@@ -726,12 +724,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (obstacles.Count > 0)
             {
-                var o = new Obstacle()
+                var o = new GraphItem()
                 {
                     Indices = obstacles.ToArray()
                 };
 
-                obstacleIndices.Add(o);
+                itemIndices.Add(o);
 
                 return o.Id;
             }
@@ -763,12 +761,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (obstacles.Count > 0)
             {
-                var o = new Obstacle()
+                var o = new GraphItem()
                 {
                     Indices = obstacles.ToArray()
                 };
 
-                obstacleIndices.Add(o);
+                itemIndices.Add(o);
 
                 return o.Id;
             }
@@ -783,7 +781,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.updated = false;
 
-            var obstacle = obstacleIndices.Find(o => o.Id == obstacleId);
+            var obstacle = itemIndices.Find(o => o.Id == obstacleId);
             if (obstacle != null)
             {
                 foreach (var item in obstacle.Indices)
@@ -795,7 +793,68 @@ namespace Engine.PathFinding.RecastNavigation
                     }
                 }
 
-                obstacleIndices.Remove(obstacle);
+                itemIndices.Remove(obstacle);
+            }
+        }
+
+        /// <summary>
+        /// Adds a new off-mesh connection
+        /// </summary>
+        /// <param name="from">From point</param>
+        /// <param name="to">To point</param>
+        /// <returns>Returns the off-mesh connection id</returns>
+        public int AddOffmeshConnection(Vector3 from, Vector3 to)
+        {
+            this.updated = false;
+
+            List<Tuple<Agent, int>> offmeshConnections = new List<Tuple<Agent, int>>();
+
+            foreach (var agent in MeshQueryDictionary.Keys)
+            {
+                var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
+                if (cache != null)
+                {
+                    cache.AddOffmeshConnection(from, to, out int res);
+
+                    offmeshConnections.Add(new Tuple<Agent, int>(agent, res));
+                }
+            }
+
+            if (offmeshConnections.Count > 0)
+            {
+                var o = new GraphItem()
+                {
+                    Indices = offmeshConnections.ToArray()
+                };
+
+                itemIndices.Add(o);
+
+                return o.Id;
+            }
+
+            return -1;
+        }
+        /// <summary>
+        /// Removes an off-mesh connection by off-mesh connection id
+        /// </summary>
+        /// <param name="offmeshId">Off-mesh connection id</param>
+        public void RemoveOffmeshConnection(int offmeshId)
+        {
+            this.updated = false;
+
+            var offmeshConnection = itemIndices.Find(o => o.Id == offmeshId);
+            if (offmeshConnection != null)
+            {
+                foreach (var item in offmeshConnection.Indices)
+                {
+                    var cache = MeshQueryDictionary[item.Item1].GetAttachedNavMesh().TileCache;
+                    if (cache != null)
+                    {
+                        cache.RemoveOffmeshConnection(item.Item2);
+                    }
+                }
+
+                itemIndices.Remove(offmeshConnection);
             }
         }
 

@@ -53,6 +53,7 @@ namespace Collada
         private SceneObject<LineListDrawer> ratDrawer = null;
         private SceneObject<TriangleListDrawer> graphDrawer = null;
         private SceneObject<TriangleListDrawer> obstacleDrawer = null;
+        private SceneObject<LineListDrawer> connectionDrawer = null;
         private int currentGraph = 0;
         private bool graphUpdateRequested = false;
         private float graphUpdateSeconds = 0;
@@ -63,6 +64,9 @@ namespace Collada
 
         private Dictionary<int, object> obstacles = new Dictionary<int, object>();
         private Color obstacleColor = new Color(Color.Pink.ToColor3(), 1f);
+
+        private Dictionary<int, object> connections = new Dictionary<int, object>();
+        private Color connectionColor = new Color(Color.LightBlue.ToColor3(), 1f);
 
         public SceneModularDungeon(Game game)
             : base(game, SceneModesEnum.DeferredLightning)
@@ -304,6 +308,16 @@ namespace Collada
             };
             this.obstacleDrawer = this.AddComponent<TriangleListDrawer>(obstacleDrawerDesc);
             this.obstacleDrawer.Visible = true;
+
+            var connectionDrawerDesc = new LineListDrawerDescription()
+            {
+                Name = "DEBUG++ Connections",
+                AlphaEnabled = true,
+                Color = connectionColor,
+                Count = 1000,
+            };
+            this.connectionDrawer = this.AddComponent<LineListDrawer>(connectionDrawerDesc);
+            this.connectionDrawer.Visible = false;
         }
         private void InitializeCamera()
         {
@@ -786,21 +800,17 @@ namespace Collada
         private void AddTestObstacles()
         {
             var bc1 = new BoundingCylinder(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 0.8f, 2);
-            var obstacle1 = Triangle.ComputeTriangleList(Topology.TriangleList, bc1, 32);
             obstacles.Add(this.AddObstacle(bc1), bc1);
 
-            //var bc2 = new BoundingBox(
-            //    new Vector3(-3.71798706f, 4.0f, -26.6250477f),
-            //    new Vector3(-2.71798706f, 5.0f, -25.6250477f));
-            //var obstacle2 = Triangle.ComputeTriangleList(Topology.TriangleList, bc2);
-            //obstacles.Add(this.AddObstacle(bc2), bc2);
+            var bc2 = new BoundingBox(
+                new Vector3(-3.71798706f, 4.0f, -26.6250477f),
+                new Vector3(-2.71798706f, 5.0f, -25.6250477f));
+            obstacles.Add(this.AddObstacle(bc2), bc2);
 
             var r3 = MathUtil.PiOverFour;
             var c3 = (new Vector3(-3.71798706f, 4.0f, -26.6250477f) + new Vector3(-2.71798706f, 5.0f, -25.6250477f)) * 0.5f;
             var bc3 = new OrientedBoundingBox(-Vector3.One * 0.5f, Vector3.One * 0.5f);
             bc3.Transform(Matrix.RotationY(r3) * Matrix.Translation(c3));
-
-            var obstacle3 = Triangle.ComputeTriangleList(Topology.TriangleList, bc3);
             obstacles.Add(this.AddObstacle(bc3.Center, bc3.Extents, r3), bc3);
         }
         private void RemoveTestObstacles()
@@ -839,6 +849,38 @@ namespace Collada
                 {
                     this.obstacleDrawer.Instance.AddTriangles(obstacleColor, obstacleTris);
                 }
+            }
+        }
+
+        private void AddTestOffmeshConnections()
+        {
+            var points = new[]
+            {
+                new Vector3(7.28668118f, 9.99818039f, 2.47248268f),
+                new Vector3(-1.40706635f, -9.15527344e-05f, 3.06774902f)
+            };
+            connections.Add(this.AddOffmeshConnection(points[0], points[1]), points);
+        }
+        private void RemoveTestOffmeshConnections()
+        {
+            if (connections.Count > 0)
+            {
+                int conIndex = connections.Keys.ToArray()[0];
+                connections.Remove(conIndex);
+                this.RemoveOffmeshConnection(conIndex);
+            }
+        }
+        private void PaintOffmeshConnections()
+        {
+            this.connectionDrawer.Instance.Clear(connectionColor);
+
+            foreach (var item in connections)
+            {
+                var conn = (Vector3[])item.Value;
+
+                Line3D line = new Line3D(conn[0], conn[1]);
+
+                this.connectionDrawer.Instance.AddLines(connectionColor, line);
             }
         }
 

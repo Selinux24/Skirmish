@@ -37,7 +37,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
+            var bbox = settings.NavmeshBounds ?? geometry.GetBoundingBox();
 
             Recast.CalcGridSize(bbox, settings.CellSize, out int width, out int height);
 
@@ -221,7 +221,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
+            var bbox = settings.NavmeshBounds ?? geometry.GetBoundingBox();
 
             // Init cache
             Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
@@ -253,7 +253,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static NavMesh BuildTempObstacles(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
+            var bbox = settings.NavmeshBounds ?? geometry.GetBoundingBox();
 
             // Init cache
             Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
@@ -514,7 +514,7 @@ namespace Engine.PathFinding.RecastNavigation
         /*TILE MESH SAMPLE*/
         public static bool BuildAllTiles(InputGeometry geom, BuildSettings settings, Agent agent, NavMesh navMesh)
         {
-            var bbox = geom.BoundingBox;
+            var bbox = geom.GetBoundingBox();
             Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
             int ts = (int)settings.TileSize;
             int tw = (gw + ts - 1) / ts;
@@ -2107,7 +2107,7 @@ namespace Engine.PathFinding.RecastNavigation
         /*TILE MESH SAMPLE*/
         public void BuildTile(Vector3 pos, InputGeometry geom, BuildSettings settings, Agent agent)
         {
-            var bbox = geom.BoundingBox;
+            var bbox = geom.GetBoundingBox();
 
             float ts = settings.TileSize * settings.CellSize;
             int tx = (int)((pos.X - bbox.Minimum.X) / ts);
@@ -2140,7 +2140,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public void GetTilePos(Vector3 pos, InputGeometry geom, BuildSettings settings, out int tx, out int ty)
         {
-            var bbox = geom.BoundingBox;
+            var bbox = geom.GetBoundingBox();
 
             float ts = settings.TileSize * settings.CellSize;
             tx = (int)((pos.X - bbox.Minimum.X) / ts);
@@ -2148,7 +2148,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public void RemoveTile(Vector3 pos, InputGeometry geom, BuildSettings settings)
         {
-            var bbox = geom.BoundingBox;
+            var bbox = geom.GetBoundingBox();
 
             float ts = settings.TileSize * settings.CellSize;
             int tx = (int)((pos.X - bbox.Minimum.X) / ts);

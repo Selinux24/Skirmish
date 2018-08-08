@@ -379,6 +379,25 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <summary>
+        /// Adds a new off-mesh connection
+        /// </summary>
+        /// <param name="from">From point</param>
+        /// <param name="to">To point</param>
+        /// <returns>Returns the off-mesh connection id</returns>
+        public int AddOffmeshConnection(Vector3 from, Vector3 to)
+        {
+            return -1;
+        }
+        /// <summary>
+        /// Removes an off-mesh connection by off-mesh connection id
+        /// </summary>
+        /// <param name="offmeshId">Off-mesh connection id</param>
+        public void RemoveOffmeshConnection(int offmeshId)
+        {
+
+        }
+
+        /// <summary>
         /// Saves the graph to a file
         /// </summary>
         /// <param name="fileName">File name</param>

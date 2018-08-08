@@ -11,17 +11,19 @@ namespace Engine.PathFinding.RecastNavigation
         public const int MAX_VOLUMES = 256;
         public const int MAX_OFFMESH_CONNECTIONS = 256;
 
+        private Func<Triangle[]> getTrianglesFnc = null;
+
         private BoundsItemComparerX xComparer = new BoundsItemComparerX();
         private BoundsItemComparerY yComparer = new BoundsItemComparerY();
 
+        private BoundingBox m_boundingBox;
         private ChunkyTriMesh m_chunkyMesh;
+
         private ConvexVolume[] m_volumes;
         private int m_volumeCount;
 
         private OffMeshConnectionDef[] m_offMeshCons;
         private int m_offMeshConCount;
-
-        public readonly BoundingBox BoundingBox;
 
         public InputGeometry()
         {
@@ -31,15 +33,36 @@ namespace Engine.PathFinding.RecastNavigation
             m_offMeshCons = new OffMeshConnectionDef[MAX_OFFMESH_CONNECTIONS];
             m_offMeshConCount = 0;
         }
-        public InputGeometry(IEnumerable<Triangle> triangles) : this()
+        public InputGeometry(Func<Triangle[]> fnc) : this()
         {
-            this.BoundingBox = GeometryUtil.CreateBoundingBox(triangles);
-
-            CreateChunkyTriMesh(triangles.ToArray(), 256, out m_chunkyMesh);
+            getTrianglesFnc = fnc;
         }
 
+        private void Initialize()
+        {
+            var triangles = getTrianglesFnc();
+
+            m_boundingBox = GeometryUtil.CreateBoundingBox(triangles);
+
+            CreateChunkyTriMesh(triangles, 256, out m_chunkyMesh);
+        }
+
+        public BoundingBox GetBoundingBox()
+        {
+            if (this.m_chunkyMesh == null)
+            {
+                this.Initialize();
+            }
+
+            return m_boundingBox;
+        }
         public ChunkyTriMesh GetChunkyMesh()
         {
+            if (this.m_chunkyMesh == null)
+            {
+                this.Initialize();
+            }
+
             return m_chunkyMesh;
         }
         public ConvexVolume[] GetConvexVolumes()

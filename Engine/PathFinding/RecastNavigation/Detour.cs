@@ -790,12 +790,12 @@ namespace Engine.PathFinding.RecastNavigation
                         }
                     }
 
-                    // Cound how many links should be allocated for off-mesh connections.
+                    // Count how many links should be allocated for off-mesh connections.
                     if (offMeshConClass[i * 2] == 0xff)
                     {
                         offMeshConLinkCount++;
                     }
-                    if (offMeshConClass[i * 2 + 1] == 0xff)
+                    if (offMeshConClass[(i * 2) + 1] == 0xff)
                     {
                         offMeshConLinkCount++;
                     }
@@ -1011,7 +1011,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < param.offMeshConCount; ++i)
             {
                 // Only store connections which start from this tile.
-                if (offMeshConClass[i * 2 + 0] == 0xff)
+                if (offMeshConClass[i * 2] == 0xff)
                 {
                     Poly p = new Poly
                     {
@@ -1019,8 +1019,8 @@ namespace Engine.PathFinding.RecastNavigation
                         Area = param.offMeshCon[i].Area,
                         Type = PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION
                     };
-                    p.verts[0] = (offMeshVertsBase + n * 2 + 0);
-                    p.verts[1] = (offMeshVertsBase + n * 2 + 1);
+                    p.verts[0] = (offMeshVertsBase + (n * 2) + 0);
+                    p.verts[1] = (offMeshVertsBase + (n * 2) + 1);
                     p.vertCount = 2;
 
                     data.navPolys.Add(p);

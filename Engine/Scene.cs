@@ -1252,12 +1252,6 @@ namespace Engine
         {
             if (this.PathFinderDescription != null && this.PathFinderDescription.Settings != null)
             {
-                var gTriangles = this.GetTrianglesForNavigationGraph();
-                if (gTriangles == null || gTriangles.Length == 0)
-                {
-                    throw new ArgumentException("Scene must have one ground object for navigation graph processing");
-                }
-
                 var graph = PathFinder.Build(this.GetTrianglesForNavigationGraph, this.PathFinderDescription.Settings);
 
                 this.SetNavigationGraph(graph);
@@ -1579,6 +1573,17 @@ namespace Engine
         public virtual void RemoveObstacle(int obstacle)
         {
             this.navigationGraph.RemoveObstacle(obstacle);
+        }
+
+
+        public virtual int AddOffmeshConnection(Vector3 from, Vector3 to)
+        {
+            return this.navigationGraph.AddOffmeshConnection(from, to);
+        }
+
+        public virtual void RemoveOffmeshConnection(int offmeshConnection)
+        {
+            this.navigationGraph.RemoveOffmeshConnection(offmeshConnection);
         }
     }
 }

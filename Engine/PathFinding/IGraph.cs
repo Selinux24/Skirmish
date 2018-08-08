@@ -85,6 +85,19 @@ namespace Engine.PathFinding
         void RemoveObstacle(int obstacle);
 
         /// <summary>
+        /// Adds a new off-mesh connection
+        /// </summary>
+        /// <param name="from">From point</param>
+        /// <param name="to">To point</param>
+        /// <returns>Returns the off-mesh connection id</returns>
+        int AddOffmeshConnection(Vector3 from, Vector3 to);
+        /// <summary>
+        /// Removes an off-mesh connection by off-mesh connection id
+        /// </summary>
+        /// <param name="offmeshConnection">Off-mesh connection id</param>
+        void RemoveOffmeshConnection(int offmeshConnection);
+
+        /// <summary>
         /// Saves the graph to a file
         /// </summary>
         /// <param name="fileName">File name</param>

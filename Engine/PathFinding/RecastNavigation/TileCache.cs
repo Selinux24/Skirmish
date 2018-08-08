@@ -460,6 +460,17 @@ namespace Engine.PathFinding.RecastNavigation
             return Status.DT_SUCCESS;
         }
 
+        public Status AddOffmeshConnection(Vector3 from, Vector3 to, out int result)
+        {
+            result = -1;
+
+            return Status.DT_FAILURE;
+        }
+        public Status RemoveOffmeshConnection(int r)
+        {
+            return Status.DT_FAILURE;
+        }
+
         public Status QueryTiles(Vector3 bmin, Vector3 bmax, out CompressedTile[] results, out int resultCount, int maxResults)
         {
             results = new CompressedTile[maxResults];
