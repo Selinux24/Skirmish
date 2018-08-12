@@ -79,7 +79,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Off-mesh connections
         /// </summary>
-        public OffMeshConnectionDef[] offMeshCon;
+        public IGraphConnection[] offMeshCon;
         /// <summary>
         /// The number of off-mesh connections. [Limit: >= 0]
         /// </summary>

@@ -37,7 +37,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var bbox = settings.NavmeshBounds ?? geometry.GetBoundingBox();
+            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
 
             Recast.CalcGridSize(bbox, settings.CellSize, out int width, out int height);
 
@@ -64,8 +64,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             var solid = Recast.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
-            var ntris = geometry.GetChunkyMesh().ntris;
-            var tris = geometry.GetChunkyMesh().triangles;
+            var ntris = geometry.ChunkyMesh.ntris;
+            var tris = geometry.ChunkyMesh.triangles;
             var triareas = new TileCacheAreas[ntris];
 
             Recast.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris, triareas);
@@ -99,13 +99,13 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // (Optional) Mark areas.
-            var vols = geometry.GetConvexVolumes();
-            for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
+            var vols = geometry.GetAreas();
+            for (int i = 0; i < geometry.GetAreaCount(); ++i)
             {
                 Recast.MarkConvexPolyArea(
-                    vols[i].verts, vols[i].nverts,
-                    vols[i].hmin, vols[i].hmax,
-                    vols[i].area, chf);
+                    vols[i].Vertices, vols[i].VertexCount,
+                    vols[i].MinHeight, vols[i].MaxHeight,
+                    (TileCacheAreas)vols[i].AreaType, chf);
             }
 
             if (settings.PartitionType == SamplePartitionTypeEnum.Watershed)
@@ -195,8 +195,8 @@ namespace Engine.PathFinding.RecastNavigation
                     detailVertsCount = dmesh.nverts,
                     detailTris = dmesh.tris,
                     detailTriCount = dmesh.ntris,
-                    offMeshCon = geometry.GetOffMeshConnection(),
-                    offMeshConCount = geometry.GetOffMeshConnectionCount(),
+                    offMeshCon = geometry.GetConnections(),
+                    offMeshConCount = geometry.GetConnectionCount(),
                     walkableHeight = agent.Height,
                     walkableRadius = agent.Radius,
                     walkableClimb = agent.MaxClimb,
@@ -221,7 +221,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var bbox = settings.NavmeshBounds ?? geometry.GetBoundingBox();
+            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
 
             // Init cache
             Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
@@ -253,7 +253,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static NavMesh BuildTempObstacles(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var bbox = settings.NavmeshBounds ?? geometry.GetBoundingBox();
+            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
 
             // Init cache
             Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
@@ -334,7 +334,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < tw; x++)
                 {
-                    int ntiles = RasterizeTileLayers(x, y, settings, cfg, geometry, out TileCacheData[] tiles);
+                    int ntiles = RasterizeTileLayers(x, y, cfg, geometry, settings, out TileCacheData[] tiles);
 
                     for (int i = 0; i < ntiles; ++i)
                     {
@@ -360,11 +360,11 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /*TEMP OBSTACLES SAMPLE*/
-        public static int RasterizeTileLayers(int tx, int ty, BuildSettings settings, Config cfg, InputGeometry geometry, out TileCacheData[] tiles)
+        public static int RasterizeTileLayers(int tx, int ty, Config cfg, InputGeometry geometry, BuildSettings settings, out TileCacheData[] tiles)
         {
             tiles = new TileCacheData[MAX_LAYERS];
 
-            ChunkyTriMesh chunkyMesh = geometry.GetChunkyMesh();
+            ChunkyTriMesh chunkyMesh = geometry.ChunkyMesh;
 
             // Tile bounds.
             float tcs = cfg.TileSize * cfg.CellSize;
@@ -450,13 +450,13 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // (Optional) Mark areas.
-            var vols = geometry.GetConvexVolumes();
-            for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
+            var vols = geometry.GetAreas();
+            for (int i = 0; i < geometry.GetAreaCount(); ++i)
             {
                 Recast.MarkConvexPolyArea(
-                    vols[i].verts, vols[i].nverts,
-                    vols[i].hmin, vols[i].hmax,
-                    vols[i].area, rc.chf);
+                    vols[i].Vertices, vols[i].VertexCount,
+                    vols[i].MinHeight, vols[i].MaxHeight,
+                    (TileCacheAreas)vols[i].AreaType, rc.chf);
             }
 
             Recast.BuildHeightfieldLayers(rc.chf, tcfg.BorderSize, tcfg.WalkableHeight, out rc.lset);
@@ -514,7 +514,7 @@ namespace Engine.PathFinding.RecastNavigation
         /*TILE MESH SAMPLE*/
         public static bool BuildAllTiles(InputGeometry geom, BuildSettings settings, Agent agent, NavMesh navMesh)
         {
-            var bbox = geom.GetBoundingBox();
+            var bbox = geom.BoundingBox;
             Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
             int ts = (int)settings.TileSize;
             int tw = (gw + ts - 1) / ts;
@@ -550,7 +550,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static MeshData BuildTileMesh(int tx, int ty, BoundingBox bbox, InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var chunkyMesh = geometry.GetChunkyMesh();
+            var chunkyMesh = geometry.ChunkyMesh;
 
             int walkableRadius = (int)Math.Ceiling(agent.Radius / settings.CellSize);
             int tileSize = (int)settings.TileSize;
@@ -666,13 +666,13 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // (Optional) Mark areas.
-            var vols = geometry.GetConvexVolumes();
-            for (int i = 0; i < geometry.GetConvexVolumeCount(); ++i)
+            var vols = geometry.GetAreas();
+            for (int i = 0; i < geometry.GetAreaCount(); ++i)
             {
                 Recast.MarkConvexPolyArea(
-                    vols[i].verts, vols[i].nverts,
-                    vols[i].hmin, vols[i].hmax,
-                    vols[i].area, chf);
+                    vols[i].Vertices, vols[i].VertexCount,
+                    vols[i].MinHeight, vols[i].MaxHeight,
+                    (TileCacheAreas)vols[i].AreaType, chf);
             }
 
             // Partition the heightfield so that we can use simple algorithm later to triangulate the walkable areas.
@@ -802,8 +802,8 @@ namespace Engine.PathFinding.RecastNavigation
                     detailVertsCount = dmesh.nverts,
                     detailTris = dmesh.tris,
                     detailTriCount = dmesh.ntris,
-                    offMeshCon = geometry.GetOffMeshConnection(),
-                    offMeshConCount = geometry.GetOffMeshConnectionCount(),
+                    offMeshCon = geometry.GetConnections(),
+                    offMeshConCount = geometry.GetConnectionCount(),
                     walkableHeight = agent.Height,
                     walkableRadius = agent.Radius,
                     walkableClimb = agent.MaxClimb,
@@ -1319,7 +1319,7 @@ namespace Engine.PathFinding.RecastNavigation
             int idx0 = 0, idx1 = 1;
 
             // Find link that points to first vertex.
-            for (int i = poly.firstLink; i != Detour.DT_NULL_LINK; i = tile.links[i].next)
+            for (int i = poly.FirstLink; i != Detour.DT_NULL_LINK; i = tile.links[i].next)
             {
                 if (tile.links[i].edge == 0)
                 {
@@ -1332,8 +1332,8 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            startPos = tile.verts[poly.verts[idx0]];
-            endPos = tile.verts[poly.verts[idx1]];
+            startPos = tile.verts[poly.Verts[idx0]];
+            endPos = tile.verts[poly.Verts[idx1]];
 
             return true;
         }
@@ -1397,7 +1397,7 @@ namespace Engine.PathFinding.RecastNavigation
             var poly = tile.polys[ip];
 
             // Change flags.
-            poly.flags = flags;
+            poly.Flags = flags;
 
             return true;
         }
@@ -1428,7 +1428,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             var poly = tile.polys[ip];
 
-            resultFlags = poly.flags;
+            resultFlags = poly.Flags;
 
             return true;
         }
@@ -1560,14 +1560,14 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < tile.header.polyCount; ++i)
             {
                 Poly poly = tile.polys[i];
-                int nv = poly.vertCount;
+                int nv = poly.VertCount;
                 for (int j = 0; j < nv; ++j)
                 {
                     // Skip edges which do not point to the right side.
-                    if (poly.neis[j] != m) continue;
+                    if (poly.Neis[j] != m) continue;
 
-                    Vector3 vc = tile.verts[poly.verts[j]];
-                    Vector3 vd = tile.verts[poly.verts[(j + 1) % nv]];
+                    Vector3 vc = tile.verts[poly.Verts[j]];
+                    Vector3 vd = tile.verts[poly.Verts[(j + 1) % nv]];
                     float bpos = Detour.GetSlabCoord(vc, side);
 
                     // Segments are not close enough.
@@ -1601,7 +1601,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < tile.header.polyCount; ++i)
             {
                 var poly = tile.polys[i];
-                poly.firstLink = Detour.DT_NULL_LINK;
+                poly.FirstLink = Detour.DT_NULL_LINK;
 
                 if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                 {
@@ -1610,25 +1610,25 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Build edge links backwards so that the links will be
                 // in the linked list from lowest index to highest.
-                for (int j = poly.vertCount - 1; j >= 0; --j)
+                for (int j = poly.VertCount - 1; j >= 0; --j)
                 {
                     // Skip hard and non-internal edges.
-                    if (poly.neis[j] == 0 || (poly.neis[j] & Detour.DT_EXT_LINK) != 0) continue;
+                    if (poly.Neis[j] == 0 || (poly.Neis[j] & Detour.DT_EXT_LINK) != 0) continue;
 
                     int idx = Detour.AllocLink(tile);
                     if (idx != Detour.DT_NULL_LINK)
                     {
                         var link = new Link
                         {
-                            nref = (bse | (poly.neis[j] - 1)),
+                            nref = (bse | (poly.Neis[j] - 1)),
                             edge = j,
                             side = 0xff,
                             bmin = 0,
                             bmax = 0,
                             // Add to linked list.
-                            next = poly.firstLink,
+                            next = poly.FirstLink,
                         };
-                        poly.firstLink = idx;
+                        poly.FirstLink = idx;
                         tile.links[idx] = link;
                     }
                 }
@@ -1659,7 +1659,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
                 // Make sure the location is on current mesh.
-                var v = tile.verts[poly.verts[0]];
+                var v = tile.verts[poly.Verts[0]];
                 v = nearestPt;
 
                 // Link off-mesh connection to target poly.
@@ -1674,10 +1674,10 @@ namespace Engine.PathFinding.RecastNavigation
                         bmin = 0,
                         bmax = 0,
                         // Add to linked list.
-                        next = poly.firstLink
+                        next = poly.FirstLink
                     };
                     tile.links[idx] = link;
-                    poly.firstLink = idx;
+                    poly.FirstLink = idx;
                 }
 
                 // Start end-point is always connect back to off-mesh connection. 
@@ -1694,10 +1694,10 @@ namespace Engine.PathFinding.RecastNavigation
                         bmin = 0,
                         bmax = 0,
                         // Add to linked list.
-                        next = landPoly.firstLink
+                        next = landPoly.FirstLink
                     };
                     tile.links[tidx] = link;
-                    landPoly.firstLink = tidx;
+                    landPoly.FirstLink = tidx;
                 }
             }
         }
@@ -1713,24 +1713,24 @@ namespace Engine.PathFinding.RecastNavigation
                 // Create new links.
                 //		unsigned short m = DT_EXT_LINK | (unsigned short)side;
 
-                int nv = poly.vertCount;
+                int nv = poly.VertCount;
                 for (int j = 0; j < nv; ++j)
                 {
                     // Skip non-portal edges.
-                    if ((poly.neis[j] & Detour.DT_EXT_LINK) == 0)
+                    if ((poly.Neis[j] & Detour.DT_EXT_LINK) == 0)
                     {
                         continue;
                     }
 
-                    int dir = (int)(poly.neis[j] & 0xff);
+                    int dir = (int)(poly.Neis[j] & 0xff);
                     if (side != -1 && dir != side)
                     {
                         continue;
                     }
 
                     // Create new links
-                    var va = tile.verts[poly.verts[j]];
-                    var vb = tile.verts[poly.verts[(j + 1) % nv]];
+                    var va = tile.verts[poly.Verts[j]];
+                    var vb = tile.verts[poly.Verts[(j + 1) % nv]];
                     int nnei = FindConnectingPolys(va, vb, target, Detour.OppositeTile(dir), out int[] nei, out float[] neia, 4);
                     for (int k = 0; k < nnei; ++k)
                     {
@@ -1742,9 +1742,9 @@ namespace Engine.PathFinding.RecastNavigation
                                 nref = nei[k],
                                 edge = j,
                                 side = dir,
-                                next = poly.firstLink
+                                next = poly.FirstLink
                             };
-                            poly.firstLink = idx;
+                            poly.FirstLink = idx;
 
                             // Compress portal limits to an integer value.
                             if (dir == 0 || dir == 4)
@@ -1787,7 +1787,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 var targetPoly = target.polys[targetCon.poly];
                 // Skip off-mesh connections which start location could not be connected at all.
-                if (targetPoly.firstLink == Detour.DT_NULL_LINK)
+                if (targetPoly.FirstLink == Detour.DT_NULL_LINK)
                 {
                     continue;
                 }
@@ -1808,7 +1808,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
                 // Make sure the location is on current mesh.
-                target.verts[targetPoly.verts[1]] = nearestPt;
+                target.verts[targetPoly.Verts[1]] = nearestPt;
 
                 // Link off-mesh connection to target poly.
                 int idx = Detour.AllocLink(target);
@@ -1822,10 +1822,10 @@ namespace Engine.PathFinding.RecastNavigation
                         bmin = 0,
                         bmax = 0,
                         // Add to linked list.
-                        next = targetPoly.firstLink
+                        next = targetPoly.FirstLink
                     };
                     target.links[idx] = link;
-                    targetPoly.firstLink = idx;
+                    targetPoly.FirstLink = idx;
                 }
 
                 // Link target poly to off-mesh connection.
@@ -1844,10 +1844,10 @@ namespace Engine.PathFinding.RecastNavigation
                             bmin = 0,
                             bmax = 0,
                             // Add to linked list.
-                            next = landPoly.firstLink
+                            next = landPoly.FirstLink
                         };
                         tile.links[tidx] = link;
-                        landPoly.firstLink = tidx;
+                        landPoly.FirstLink = tidx;
                     }
                 }
             }
@@ -1861,7 +1861,7 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < tile.header.polyCount; ++i)
             {
                 var poly = tile.polys[i];
-                int j = poly.firstLink;
+                int j = poly.FirstLink;
                 int pj = Detour.DT_NULL_LINK;
                 while (j != Detour.DT_NULL_LINK)
                 {
@@ -1871,7 +1871,7 @@ namespace Engine.PathFinding.RecastNavigation
                         int nj = tile.links[j].next;
                         if (pj == Detour.DT_NULL_LINK)
                         {
-                            poly.firstLink = nj;
+                            poly.FirstLink = nj;
                         }
                         else
                         {
@@ -1963,12 +1963,12 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
                     // Calc polygon bounds.
-                    Vector3 v = tile.verts[p.verts[0]];
+                    Vector3 v = tile.verts[p.Verts[0]];
                     bmin = v;
                     bmax = v;
-                    for (int j = 1; j < p.vertCount; ++j)
+                    for (int j = 1; j < p.VertCount; ++j)
                     {
-                        v = tile.verts[p.verts[j]];
+                        v = tile.verts[p.Verts[j]];
                         bmin = Vector3.Min(bmin, v);
                         bmax = Vector3.Max(bmax, v);
                     }
@@ -2032,8 +2032,8 @@ namespace Engine.PathFinding.RecastNavigation
             // Off-mesh connections don't have detail polygons.
             if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
-                Vector3 v0 = tile.verts[poly.verts[0]];
-                Vector3 v1 = tile.verts[poly.verts[1]];
+                Vector3 v0 = tile.verts[poly.Verts[0]];
+                Vector3 v1 = tile.verts[poly.Verts[1]];
                 float d0 = Vector3.Distance(pos, v0);
                 float d1 = Vector3.Distance(pos, v1);
                 float u = d0 / (d0 + d1);
@@ -2049,10 +2049,10 @@ namespace Engine.PathFinding.RecastNavigation
             Vector3[] verts = new Vector3[Detour.DT_VERTS_PER_POLYGON];
             float[] edged = new float[Detour.DT_VERTS_PER_POLYGON];
             float[] edget = new float[Detour.DT_VERTS_PER_POLYGON];
-            int nv = poly.vertCount;
+            int nv = poly.VertCount;
             for (int i = 0; i < nv; ++i)
             {
-                verts[i] = tile.verts[poly.verts[i]];
+                verts[i] = tile.verts[poly.Verts[i]];
             }
 
             closest = pos;
@@ -2087,13 +2087,13 @@ namespace Engine.PathFinding.RecastNavigation
                 var v = new Vector3[3];
                 for (int k = 0; k < 3; ++k)
                 {
-                    if (t[k] < poly.vertCount)
+                    if (t[k] < poly.VertCount)
                     {
-                        v[k] = tile.verts[poly.verts[t[k]]];
+                        v[k] = tile.verts[poly.Verts[t[k]]];
                     }
                     else
                     {
-                        v[k] = tile.detailVerts[(pd.vertBase + (t[k] - poly.vertCount))];
+                        v[k] = tile.detailVerts[(pd.vertBase + (t[k] - poly.VertCount))];
                     }
                 }
                 if (Detour.ClosestHeightPointTriangle(closest, v[0], v[1], v[2], out float h))
@@ -2107,7 +2107,7 @@ namespace Engine.PathFinding.RecastNavigation
         /*TILE MESH SAMPLE*/
         public void BuildTile(Vector3 pos, InputGeometry geom, BuildSettings settings, Agent agent)
         {
-            var bbox = geom.GetBoundingBox();
+            var bbox = geom.BoundingBox;
 
             float ts = settings.TileSize * settings.CellSize;
             int tx = (int)((pos.X - bbox.Minimum.X) / ts);
@@ -2140,7 +2140,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public void GetTilePos(Vector3 pos, InputGeometry geom, BuildSettings settings, out int tx, out int ty)
         {
-            var bbox = geom.GetBoundingBox();
+            var bbox = geom.BoundingBox;
 
             float ts = settings.TileSize * settings.CellSize;
             tx = (int)((pos.X - bbox.Minimum.X) / ts);
@@ -2148,7 +2148,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public void RemoveTile(Vector3 pos, InputGeometry geom, BuildSettings settings)
         {
-            var bbox = geom.GetBoundingBox();
+            var bbox = geom.BoundingBox;
 
             float ts = settings.TileSize * settings.CellSize;
             int tx = (int)((pos.X - bbox.Minimum.X) / ts);

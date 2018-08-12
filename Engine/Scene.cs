@@ -89,17 +89,13 @@ namespace Engine
         }
 
         /// <summary>
-        /// Camera
-        /// </summary>
-        private Camera camera = null;
-        /// <summary>
         /// Scene world matrix
         /// </summary>
         private Matrix world = Matrix.Identity;
         /// <summary>
         /// Scene component list
         /// </summary>
-        private List<SceneObject> components = new List<SceneObject>();
+        private readonly List<SceneObject> components = new List<SceneObject>();
         /// <summary>
         /// Control captured with mouse
         /// </summary>
@@ -113,10 +109,6 @@ namespace Engine
         /// Scene bounding box
         /// </summary>
         private BoundingBox boundingBox;
-        /// <summary>
-        /// Graph used for pathfinding
-        /// </summary>
-        protected IGraph navigationGraph { get; private set; }
 
         /// <summary>
         /// Game class
@@ -138,21 +130,19 @@ namespace Engine
         /// Flag to update the scene global resources
         /// </summary>
         protected bool UpdateGlobalResources { get; set; }
+        /// <summary>
+        /// Path finder
+        /// </summary>
+        protected PathFinderDescription PathFinderDescription { get; set; }
+        /// <summary>
+        /// Graph used for pathfinding
+        /// </summary>
+        protected IGraph NavigationGraph { get; private set; }
 
         /// <summary>
         /// Camera
         /// </summary>
-        public Camera Camera
-        {
-            get
-            {
-                return this.camera;
-            }
-            protected set
-            {
-                this.camera = value;
-            }
-        }
+        public Camera Camera { get; protected set; }
         /// <summary>
         /// Time of day controller
         /// </summary>
@@ -173,10 +163,6 @@ namespace Engine
         /// Gets or sets if scene has to perform frustum culling with objects
         /// </summary>
         public bool PerformFrustumCulling { get; set; }
-        /// <summary>
-        /// Path finder
-        /// </summary>
-        public PathFinderDescription PathFinderDescription = new PathFinderDescription();
 
         /// <summary>
         /// Constructor
@@ -192,11 +178,11 @@ namespace Engine
 
             this.TimeOfDay = new TimeOfDay();
 
-            this.camera = Camera.CreateFree(
+            this.Camera = Camera.CreateFree(
                 new Vector3(0.0f, 0.0f, -10.0f),
                 Vector3.Zero);
 
-            this.camera.SetLens(
+            this.Camera.SetLens(
                 this.Game.Form.RenderWidth,
                 this.Game.Form.RenderHeight);
 
@@ -245,11 +231,11 @@ namespace Engine
 
             this.BufferManager?.UpdateBuffers();
 
-            this.camera?.Update(gameTime);
+            this.Camera?.Update(gameTime);
 
             this.TimeOfDay?.Update(gameTime);
 
-            this.navigationGraph?.Update(gameTime);
+            this.NavigationGraph?.Update(gameTime);
 
             this.Lights?.UpdateLights(this.TimeOfDay);
 
@@ -304,7 +290,7 @@ namespace Engine
         {
             Helper.Dispose(this.BufferManager);
             Helper.Dispose(this.Renderer);
-            Helper.Dispose(this.camera);
+            Helper.Dispose(this.Camera);
             Helper.Dispose(this.components);
         }
 
@@ -390,7 +376,7 @@ namespace Engine
             return Helper.UnprojectToScreen(
                 position,
                 this.Game.Graphics.Viewport,
-                this.camera.View * this.camera.Projection,
+                this.Camera.View * this.Camera.Projection,
                 out inside);
         }
 
@@ -718,9 +704,9 @@ namespace Engine
         {
             int mouseX = this.Game.Input.MouseX;
             int mouseY = this.Game.Input.MouseY;
-            Matrix worldViewProjection = this.world * this.camera.View * this.camera.Projection;
-            float nDistance = this.camera.NearPlaneDistance;
-            float fDistance = this.camera.FarPlaneDistance;
+            Matrix worldViewProjection = this.world * this.Camera.View * this.Camera.Projection;
+            float nDistance = this.Camera.NearPlaneDistance;
+            float fDistance = this.Camera.FarPlaneDistance;
             ViewportF viewport = this.Game.Graphics.Viewport;
 
             Vector3 nVector = new Vector3(mouseX, mouseY, nDistance);
@@ -1225,24 +1211,21 @@ namespace Engine
         /// <param name="graph">Navigation graph</param>
         public virtual void SetNavigationGraph(IGraph graph)
         {
-            if(this.navigationGraph != null)
+            if (this.NavigationGraph != null)
             {
-                this.navigationGraph.Updating -= GraphUpdating;
-                this.navigationGraph.Updated -= GraphUpdated;
+                this.NavigationGraph.Updating -= GraphUpdating;
+                this.NavigationGraph.Updated -= GraphUpdated;
 
-                Helper.Dispose(this.navigationGraph);
+                Helper.Dispose(this.NavigationGraph);
 
                 this.boundingBox = new BoundingBox();
             }
 
             if (graph != null)
             {
-                this.navigationGraph = graph;
-                this.navigationGraph.SetGeometrySourceFunction(this.GetTrianglesForNavigationGraph);
-                this.navigationGraph.Updating += GraphUpdating;
-                this.navigationGraph.Updated += GraphUpdated;
-
-                this.boundingBox = this.navigationGraph.BoundingBox;
+                this.NavigationGraph = graph;
+                this.NavigationGraph.Updating += GraphUpdating;
+                this.NavigationGraph.Updated += GraphUpdated;
             }
         }
         /// <summary>
@@ -1250,9 +1233,9 @@ namespace Engine
         /// </summary>
         public virtual void UpdateNavigationGraph()
         {
-            if (this.PathFinderDescription != null && this.PathFinderDescription.Settings != null)
+            if (this.PathFinderDescription != null)
             {
-                var graph = PathFinder.Build(this.GetTrianglesForNavigationGraph, this.PathFinderDescription.Settings);
+                var graph = this.PathFinderDescription.Build();
 
                 this.SetNavigationGraph(graph);
             }
@@ -1287,7 +1270,10 @@ namespace Engine
         /// </summary>
         public virtual void NavigationGraphUpdated()
         {
-            this.boundingBox = this.navigationGraph.BoundingBox;
+            if (this.PathFinderDescription != null)
+            {
+                this.boundingBox = this.PathFinderDescription.Input.BoundingBox;
+            }
         }
 
         /// <summary>
@@ -1372,9 +1358,9 @@ namespace Engine
         {
             IGraphNode[] nodes = null;
 
-            if (this.navigationGraph != null)
+            if (this.NavigationGraph != null)
             {
-                nodes = this.navigationGraph.GetNodes(agent);
+                nodes = this.NavigationGraph.GetNodes(agent);
             }
 
             return nodes;
@@ -1393,7 +1379,7 @@ namespace Engine
             List<Vector3> positions = new List<Vector3>();
             List<Vector3> normals = new List<Vector3>();
 
-            var path = this.navigationGraph.FindPath(agent, from, to);
+            var path = this.NavigationGraph.FindPath(agent, from, to);
             if (path != null && path.Length > 1)
             {
                 if (delta == 0)
@@ -1467,9 +1453,9 @@ namespace Engine
         /// <returns>Returns true if the specified position is walkable</returns>
         public virtual bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
         {
-            if (this.navigationGraph != null)
+            if (this.NavigationGraph != null)
             {
-                return this.navigationGraph.IsWalkable(agent, position, out nearest);
+                return this.NavigationGraph.IsWalkable(agent, position, out nearest);
             }
 
             nearest = position;
@@ -1544,7 +1530,7 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(BoundingCylinder cylinder)
         {
-            return this.navigationGraph.AddObstacle(cylinder.Position, cylinder.Radius, cylinder.Height);
+            return this.NavigationGraph.AddObstacle(cylinder.Position, cylinder.Radius, cylinder.Height);
         }
         /// <summary>
         /// Adds AABB obstacle
@@ -1553,7 +1539,7 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(BoundingBox bbox)
         {
-            return this.navigationGraph.AddObstacle(bbox.Minimum, bbox.Maximum);
+            return this.NavigationGraph.AddObstacle(bbox.Minimum, bbox.Maximum);
         }
         /// <summary>
         /// Adds OBB
@@ -1564,7 +1550,7 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(Vector3 position, Vector3 halfExtents, float yRotation)
         {
-            return this.navigationGraph.AddObstacle(position, halfExtents, yRotation);
+            return this.NavigationGraph.AddObstacle(position, halfExtents, yRotation);
         }
         /// <summary>
         /// Removes obstable by id
@@ -1572,18 +1558,26 @@ namespace Engine
         /// <param name="obstacle">Obstacle id</param>
         public virtual void RemoveObstacle(int obstacle)
         {
-            this.navigationGraph.RemoveObstacle(obstacle);
+            this.NavigationGraph.RemoveObstacle(obstacle);
         }
 
-
-        public virtual int AddOffmeshConnection(Vector3 from, Vector3 to)
+        /// <summary>
+        /// Adds a connection between points
+        /// </summary>
+        /// <param name="from">From point</param>
+        /// <param name="to">To point</param>
+        /// <returns>Returns the connection id</returns>
+        public virtual int AddConnection(Vector3 from, Vector3 to)
         {
-            return this.navigationGraph.AddOffmeshConnection(from, to);
+            return this.NavigationGraph.AddConnection(from, to);
         }
-
-        public virtual void RemoveOffmeshConnection(int offmeshConnection)
+        /// <summary>
+        /// Removes the conecction by id
+        /// </summary>
+        /// <param name="id"></param>
+        public virtual void RemoveConnection(int id)
         {
-            this.navigationGraph.RemoveOffmeshConnection(offmeshConnection);
+            this.NavigationGraph.RemoveConnection(id);
         }
     }
 }

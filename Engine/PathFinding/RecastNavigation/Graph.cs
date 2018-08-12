@@ -4,8 +4,6 @@ using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.Common;
-
     /// <summary>
     /// Navigation graph
     /// </summary>
@@ -418,7 +416,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return npath;
             }
 
-            for (int k = poly.firstLink; k != Detour.DT_NULL_LINK; k = tile.links[k].next)
+            for (int k = poly.FirstLink; k != Detour.DT_NULL_LINK; k = tile.links[k].next)
             {
                 var link = tile.links[k];
                 if (link.nref != 0)
@@ -486,17 +484,13 @@ namespace Engine.PathFinding.RecastNavigation
         private List<GraphItem> itemIndices = new List<GraphItem>();
 
         /// <summary>
+        /// Input geometry
+        /// </summary>
+        public InputGeometry Input { get; set; }
+        /// <summary>
         /// Build settings
         /// </summary>
         public BuildSettings Settings { get; set; }
-        /// <summary>
-        /// Gets the total bounding box
-        /// </summary>
-        public BoundingBox BoundingBox { get; set; }
-        /// <summary>
-        /// Gets the geometry
-        /// </summary>
-        public Func<Triangle[]> GetGeometryFunction { get; set; }
         /// <summary>
         /// Navigation mesh query dictionary (by agent type)
         /// </summary>
@@ -518,49 +512,14 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <summary>
-        /// Builds the graph
-        /// </summary>
-        /// <param name="sourceFunction">Geometry source function</param>
-        /// <param name="settings">Settings</param>
-        /// <returns>Returns the new Graph</returns>
-        public void Build(Func<Triangle[]> sourceFunction, PathFinderSettings settings)
-        {
-            this.Settings = settings as BuildSettings;
-            this.GetGeometryFunction = sourceFunction;
-
-            var geom = new InputGeometry(sourceFunction);
-
-            foreach (var agent in this.Settings.Agents)
-            {
-                var nm = NavMesh.Build(geom, this.Settings, agent);
-                var mmQuery = new NavMeshQuery();
-                mmQuery.Init(nm, this.Settings.MaxNodes);
-
-                this.MeshQueryDictionary.Add(agent, mmQuery);
-            }
-
-            this.BoundingBox = geom.GetBoundingBox();
-        }
-        /// <summary>
-        /// Sets the geometry source function
-        /// </summary>
-        /// <param name="sourceFunction">Function</param>
-        public void SetGeometrySourceFunction(Func<Triangle[]> sourceFunction)
-        {
-            this.GetGeometryFunction = sourceFunction;
-        }
-
-        /// <summary>
         /// Builds the tile in the specified position
         /// </summary>
         /// <param name="position">Position</param>
         public void BuildTile(Vector3 position)
         {
-            var geom = new InputGeometry(this.GetGeometryFunction);
-
             foreach (var agent in MeshQueryDictionary.Keys)
             {
-                MeshQueryDictionary[agent].GetAttachedNavMesh().BuildTile(position, geom, Settings, agent);
+                MeshQueryDictionary[agent].GetAttachedNavMesh().BuildTile(position, Input, Settings, agent);
             }
         }
         /// <summary>
@@ -569,11 +528,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="position">Position</param>
         public void RemoveTile(Vector3 position)
         {
-            var geom = new InputGeometry(this.GetGeometryFunction);
-
             foreach (var agent in MeshQueryDictionary.Keys)
             {
-                MeshQueryDictionary[agent].GetAttachedNavMesh().RemoveTile(position, geom, Settings);
+                MeshQueryDictionary[agent].GetAttachedNavMesh().RemoveTile(position, Input, Settings);
             }
         }
         /// <summary>
@@ -803,7 +760,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="from">From point</param>
         /// <param name="to">To point</param>
         /// <returns>Returns the off-mesh connection id</returns>
-        public int AddOffmeshConnection(Vector3 from, Vector3 to)
+        public int AddConnection(Vector3 from, Vector3 to)
         {
             this.updated = false;
 
@@ -838,7 +795,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// Removes an off-mesh connection by off-mesh connection id
         /// </summary>
         /// <param name="offmeshId">Off-mesh connection id</param>
-        public void RemoveOffmeshConnection(int offmeshId)
+        public void RemoveConnection(int offmeshId)
         {
             this.updated = false;
 
@@ -856,29 +813,6 @@ namespace Engine.PathFinding.RecastNavigation
 
                 itemIndices.Remove(offmeshConnection);
             }
-        }
-
-        /// <summary>
-        /// Loads the graph from a file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        public void Load(string fileName)
-        {
-            var graph = GraphFile.Load(fileName);
-
-            Settings = graph.Settings;
-            BoundingBox = graph.BoundingBox;
-
-            Helper.Dispose(MeshQueryDictionary);
-            MeshQueryDictionary = graph.MeshQueryDictionary;
-        }
-        /// <summary>
-        /// Saves the graph to a file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        public void Save(string fileName)
-        {
-            GraphFile.Save(fileName, this);
         }
 
         /// <summary>

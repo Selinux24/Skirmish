@@ -11,23 +11,23 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Index to first link in linked list. (Or #DT_NULL_LINK if there is no link.)
         /// </summary>
-        public int firstLink;
+        public int FirstLink;
         /// <summary>
         /// The indices of the polygon's vertices. The actual vertices are located in dtMeshTile::verts.
         /// </summary>
-        public Polygoni verts = new Polygoni(Detour.DT_VERTS_PER_POLYGON);
+        public Polygoni Verts = new Polygoni(Detour.DT_VERTS_PER_POLYGON);
         /// <summary>
         /// Packed data representing neighbor polygons references and flags for each edge.
         /// </summary>
-        public int[] neis = new int[Detour.DT_VERTS_PER_POLYGON];
+        public int[] Neis = new int[Detour.DT_VERTS_PER_POLYGON];
         /// <summary>
         /// The user defined polygon flags.
         /// </summary>
-        public SamplePolyFlags flags;
+        public SamplePolyFlags Flags;
         /// <summary>
         /// The number of vertices in the polygon.
         /// </summary>
-        public int vertCount;
+        public int VertCount;
         /// <summary>
         /// Polygon area
         /// </summary>
@@ -44,7 +44,7 @@ namespace Engine.PathFinding.RecastNavigation
         public override string ToString()
         {
             return string.Format("FirstLink {0}; Flags {1}; Area: {2}; Type: {3}; Verts {4}; VertCount: {5}; Neis: {6}",
-                firstLink, flags, Area, Type, verts, vertCount, neis?.Join(","));
+                FirstLink, Flags, Area, Type, Verts, VertCount, Neis?.Join(","));
         }
     }
 }

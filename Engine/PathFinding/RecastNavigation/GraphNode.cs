@@ -5,8 +5,16 @@ using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    /// <summary>
+    /// Graph node
+    /// </summary>
     public class GraphNode : IGraphNode
     {
+        /// <summary>
+        /// Gets a graph node list from a navigation mesh
+        /// </summary>
+        /// <param name="mesh">Navigation mesh</param>
+        /// <returns>Returns graph node</returns>
         public static GraphNode[] Build(NavMesh mesh)
         {
             List<GraphNode> nodes = new List<GraphNode>();
@@ -36,13 +44,13 @@ namespace Engine.PathFinding.RecastNavigation
                         Vector3[] triVerts = new Vector3[3];
                         for (int k = 0; k < 3; ++k)
                         {
-                            if (dt[k] < p.vertCount)
+                            if (dt[k] < p.VertCount)
                             {
-                                triVerts[k] = tile.verts[p.verts[dt[k]]];
+                                triVerts[k] = tile.verts[p.Verts[dt[k]]];
                             }
                             else
                             {
-                                triVerts[k] = tile.detailVerts[(pd.vertBase + dt[k] - p.vertCount)];
+                                triVerts[k] = tile.detailVerts[(pd.vertBase + dt[k] - p.VertCount)];
                             }
                         }
 
@@ -61,8 +69,13 @@ namespace Engine.PathFinding.RecastNavigation
             return nodes.ToArray();
         }
 
+        /// <summary>
+        /// Node triangle list
+        /// </summary>
         public Triangle[] Triangles;
-
+        /// <summary>
+        /// Center point
+        /// </summary>
         public Vector3 Center
         {
             get
@@ -77,11 +90,21 @@ namespace Engine.PathFinding.RecastNavigation
                 return center / Math.Max(1, Triangles.Length);
             }
         }
-
+        /// <summary>
+        /// Node color
+        /// </summary>
         public Color4 Color { get; set; }
-
+        /// <summary>
+        /// Total cost
+        /// </summary>
         public float TotalCost { get; set; }
 
+        /// <summary>
+        /// Gets if the node contains the specified node
+        /// </summary>
+        /// <param name="point">Point to test</param>
+        /// <param name="distance">Resulting distance to point</param>
+        /// <returns>Returns true if the current node contains the specified point</returns>
         public bool Contains(Vector3 point, out float distance)
         {
             distance = float.MaxValue;
@@ -102,7 +125,10 @@ namespace Engine.PathFinding.RecastNavigation
 
             return false;
         }
-
+        /// <summary>
+        /// Gets node points (triangle list)
+        /// </summary>
+        /// <returns>Returns the node point list</returns>
         public Vector3[] GetPoints()
         {
             List<Vector3> vList = new List<Vector3>();

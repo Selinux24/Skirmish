@@ -82,13 +82,14 @@ namespace Collada
 
             this.SetGround(this.dungeon, true);
 
-            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
+            var settings = new BuildSettings()
             {
-                Settings = new BuildSettings()
-                {
-                    Agents = new[] { agent },
-                }
+                Agents = new[] { agent },
             };
+
+            var input = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(settings, input);
 
             this.Lights.AddRange(this.dungeon.Instance.Lights);
 

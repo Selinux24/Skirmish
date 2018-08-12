@@ -952,8 +952,8 @@ namespace Engine.PathFinding.RecastNavigation
 
                 Poly p = new Poly
                 {
-                    vertCount = 0,
-                    flags = param.polyFlags[i],
+                    VertCount = 0,
+                    Flags = param.polyFlags[i],
                     Area = param.polyAreas[i],
                     Type = PolyTypes.DT_POLYTYPE_GROUND,
                 };
@@ -965,7 +965,7 @@ namespace Engine.PathFinding.RecastNavigation
                         break;
                     }
 
-                    p.verts[j] = src[j];
+                    p.Verts[j] = src[j];
 
                     if ((src[nvp + j] & 0x8000) != 0)
                     {
@@ -973,32 +973,32 @@ namespace Engine.PathFinding.RecastNavigation
                         var dir = src[nvp + j] & 0xf;
                         if (dir == 0xf) // Border
                         {
-                            p.neis[j] = 0;
+                            p.Neis[j] = 0;
                         }
                         else if (dir == 0) // Portal x-
                         {
-                            p.neis[j] = DT_EXT_LINK | 4;
+                            p.Neis[j] = DT_EXT_LINK | 4;
                         }
                         else if (dir == 1) // Portal z+
                         {
-                            p.neis[j] = DT_EXT_LINK | 2;
+                            p.Neis[j] = DT_EXT_LINK | 2;
                         }
                         else if (dir == 2) // Portal x+
                         {
-                            p.neis[j] = DT_EXT_LINK | 0;
+                            p.Neis[j] = DT_EXT_LINK | 0;
                         }
                         else if (dir == 3) // Portal z-
                         {
-                            p.neis[j] = DT_EXT_LINK | 6;
+                            p.Neis[j] = DT_EXT_LINK | 6;
                         }
                     }
                     else
                     {
                         // Normal connection
-                        p.neis[j] = src[nvp + j] + 1;
+                        p.Neis[j] = src[nvp + j] + 1;
                     }
 
-                    p.vertCount++;
+                    p.VertCount++;
                 }
 
                 data.navPolys.Add(p);
@@ -1015,13 +1015,13 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     Poly p = new Poly
                     {
-                        flags = param.offMeshCon[i].Flags,
-                        Area = param.offMeshCon[i].Area,
+                        Flags = (SamplePolyFlags)param.offMeshCon[i].FlagTypes,
+                        Area = (SamplePolyAreas)param.offMeshCon[i].AreaType,
                         Type = PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION
                     };
-                    p.verts[0] = (offMeshVertsBase + (n * 2) + 0);
-                    p.verts[1] = (offMeshVertsBase + (n * 2) + 1);
-                    p.vertCount = 2;
+                    p.Verts[0] = (offMeshVertsBase + (n * 2) + 0);
+                    p.Verts[1] = (offMeshVertsBase + (n * 2) + 1);
+                    p.VertCount = 2;
 
                     data.navPolys.Add(p);
                     n++;
@@ -1037,7 +1037,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     int vb = param.detailMeshes[i][0];
                     int ndv = param.detailMeshes[i][1];
-                    int nv = data.navPolys[i].vertCount;
+                    int nv = data.navPolys[i].VertCount;
                     PolyDetail dtl = new PolyDetail
                     {
                         vertBase = data.navDVerts.Count,
@@ -1062,7 +1062,7 @@ namespace Engine.PathFinding.RecastNavigation
                 int tbase = 0;
                 for (int i = 0; i < param.polyCount; ++i)
                 {
-                    int nv = data.navPolys[i].vertCount;
+                    int nv = data.navPolys[i].VertCount;
                     PolyDetail dtl = new PolyDetail
                     {
                         vertBase = 0,

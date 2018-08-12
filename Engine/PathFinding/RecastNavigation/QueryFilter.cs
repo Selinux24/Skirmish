@@ -44,7 +44,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns></returns>
         public virtual bool PassFilter(int r, MeshTile tile, Poly poly)
         {
-            return (poly.flags & m_includeFlags) != 0 && (poly.flags & m_excludeFlags) == 0;
+            return (poly.Flags & m_includeFlags) != 0 && (poly.Flags & m_excludeFlags) == 0;
         }
         /// <summary>
         /// Returns cost to move from the beginning to the end of a line segment that is fully contained within a polygon.

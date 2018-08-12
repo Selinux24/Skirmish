@@ -173,7 +173,7 @@ namespace Engine.PathFinding.RecastNavigation
                     m_nav.GetTileAndPolyByRefUnsafe(parentRef, out parentTile, out parentPoly);
                 }
 
-                for (int i = bestPoly.firstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
+                for (int i = bestPoly.FirstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
                 {
                     int neighbourRef = bestTile.links[i].nref;
 
@@ -741,7 +741,7 @@ namespace Engine.PathFinding.RecastNavigation
                     }
                 }
 
-                for (int i = bestPoly.firstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
+                for (int i = bestPoly.FirstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
                 {
                     int neighbourRef = bestTile.links[i].nref;
 
@@ -1186,7 +1186,7 @@ namespace Engine.PathFinding.RecastNavigation
                     status |= Status.DT_BUFFER_TOO_SMALL;
                 }
 
-                for (int i = bestPoly.firstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
+                for (int i = bestPoly.FirstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
                 {
                     Link link = bestTile.links[i];
                     int neighbourRef = link.nref;
@@ -1355,7 +1355,7 @@ namespace Engine.PathFinding.RecastNavigation
                     status |= Status.DT_BUFFER_TOO_SMALL;
                 }
 
-                for (int i = bestPoly.firstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
+                for (int i = bestPoly.FirstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
                 {
                     Link link = bestTile.links[i];
                     int neighbourRef = link.nref;
@@ -1639,7 +1639,7 @@ namespace Engine.PathFinding.RecastNavigation
                 int curRef = curNode.id;
                 m_nav.GetTileAndPolyByRefUnsafe(curRef, out MeshTile curTile, out Poly curPoly);
 
-                for (int i = curPoly.firstLink; i != Detour.DT_NULL_LINK; i = curTile.links[i].next)
+                for (int i = curPoly.FirstLink; i != Detour.DT_NULL_LINK; i = curTile.links[i].next)
                 {
                     Link link = curTile.links[i];
                     int neighbourRef = link.nref;
@@ -1697,10 +1697,10 @@ namespace Engine.PathFinding.RecastNavigation
                     // Check that the polygon does not collide with existing polygons.
 
                     // Collect vertices of the neighbour poly.
-                    int npa = neighbourPoly.vertCount;
+                    int npa = neighbourPoly.VertCount;
                     for (int k = 0; k < npa; ++k)
                     {
-                        pa[k] = neighbourTile.verts[neighbourPoly.verts[k]];
+                        pa[k] = neighbourTile.verts[neighbourPoly.Verts[k]];
                     }
 
                     bool overlap = false;
@@ -1710,7 +1710,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                         // Connected polys do not overlap.
                         bool connected = false;
-                        for (int k = curPoly.firstLink; k != Detour.DT_NULL_LINK; k = curTile.links[k].next)
+                        for (int k = curPoly.FirstLink; k != Detour.DT_NULL_LINK; k = curTile.links[k].next)
                         {
                             if (curTile.links[k].nref == pastRef)
                             {
@@ -1727,10 +1727,10 @@ namespace Engine.PathFinding.RecastNavigation
                         m_nav.GetTileAndPolyByRefUnsafe(pastRef, out MeshTile pastTile, out Poly pastPoly);
 
                         // Get vertices and test overlap
-                        int npb = pastPoly.vertCount;
+                        int npb = pastPoly.VertCount;
                         for (int k = 0; k < npb; ++k)
                         {
-                            pb[k] = pastTile.verts[pastPoly.verts[k]];
+                            pb[k] = pastTile.verts[pastPoly.Verts[k]];
                         }
 
                         if (Detour.OverlapPolyPoly2D(pa, npa, pb, npb))
@@ -1835,10 +1835,10 @@ namespace Engine.PathFinding.RecastNavigation
                 m_nav.GetTileAndPolyByRefUnsafe(curRef, out MeshTile curTile, out Poly curPoly);
 
                 // Collect vertices.
-                int nverts = curPoly.vertCount;
+                int nverts = curPoly.VertCount;
                 for (int i = 0; i < nverts; ++i)
                 {
-                    verts[i] = curTile.verts[curPoly.verts[i]];
+                    verts[i] = curTile.verts[curPoly.Verts[i]];
                 }
 
                 // If target is inside the poly, stop search.
@@ -1850,17 +1850,17 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Find wall edges and find nearest point inside the walls.
-                for (int i = 0, j = curPoly.vertCount - 1; i < curPoly.vertCount; j = i++)
+                for (int i = 0, j = curPoly.VertCount - 1; i < curPoly.VertCount; j = i++)
                 {
                     // Find links to neighbours.
                     int MAX_NEIS = 8;
                     int nneis = 0;
                     int[] neis = new int[MAX_NEIS];
 
-                    if ((curPoly.neis[j] & Detour.DT_EXT_LINK) != 0)
+                    if ((curPoly.Neis[j] & Detour.DT_EXT_LINK) != 0)
                     {
                         // Tile border.
-                        for (int k = curPoly.firstLink; k != Detour.DT_NULL_LINK; k = curTile.links[k].next)
+                        for (int k = curPoly.FirstLink; k != Detour.DT_NULL_LINK; k = curTile.links[k].next)
                         {
                             Link link = curTile.links[k];
                             if (link.edge == j)
@@ -1879,9 +1879,9 @@ namespace Engine.PathFinding.RecastNavigation
                             }
                         }
                     }
-                    else if (curPoly.neis[j] != 0)
+                    else if (curPoly.Neis[j] != 0)
                     {
-                        int idx = (curPoly.neis[j] - 1);
+                        int idx = (curPoly.Neis[j] - 1);
                         int r = m_nav.GetPolyRefBase(curTile) | idx;
                         if (filter.PassFilter(r, curTile, curTile.polys[idx]))
                         {
@@ -2067,9 +2067,9 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Collect vertices.
                 int nv = 0;
-                for (int i = 0; i < poly.vertCount; ++i)
+                for (int i = 0; i < poly.VertCount; ++i)
                 {
-                    verts[nv] = tile.verts[poly.verts[i]];
+                    verts[nv] = tile.verts[poly.Verts[i]];
                     nv++;
                 }
 
@@ -2116,7 +2116,7 @@ namespace Engine.PathFinding.RecastNavigation
                 // Follow neighbours.
                 int nextRef = 0;
 
-                for (int i = poly.firstLink; i != Detour.DT_NULL_LINK; i = tile.links[i].next)
+                for (int i = poly.FirstLink; i != Detour.DT_NULL_LINK; i = tile.links[i].next)
                 {
                     Link link = tile.links[i];
 
@@ -2158,8 +2158,8 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Check for partial edge links.
-                    int v0 = poly.verts[link.edge];
-                    int v1 = poly.verts[(link.edge + 1) % poly.vertCount];
+                    int v0 = poly.Verts[link.edge];
+                    int v1 = poly.Verts[(link.edge + 1) % poly.VertCount];
                     Vector3 left = tile.verts[v0];
                     Vector3 right = tile.verts[v1];
 
@@ -2319,14 +2319,14 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Hit test walls.
-                for (int i = 0, j = bestPoly.vertCount - 1; i < bestPoly.vertCount; j = i++)
+                for (int i = 0, j = bestPoly.VertCount - 1; i < bestPoly.VertCount; j = i++)
                 {
                     // Skip non-solid edges.
-                    if ((bestPoly.neis[j] & Detour.DT_EXT_LINK) != 0)
+                    if ((bestPoly.Neis[j] & Detour.DT_EXT_LINK) != 0)
                     {
                         // Tile border.
                         bool solid = true;
-                        for (int k = bestPoly.firstLink; k != Detour.DT_NULL_LINK; k = bestTile.links[k].next)
+                        for (int k = bestPoly.FirstLink; k != Detour.DT_NULL_LINK; k = bestTile.links[k].next)
                         {
                             Link link = bestTile.links[k];
                             if (link.edge == j)
@@ -2347,10 +2347,10 @@ namespace Engine.PathFinding.RecastNavigation
                             continue;
                         }
                     }
-                    else if (bestPoly.neis[j] != 0)
+                    else if (bestPoly.Neis[j] != 0)
                     {
                         // Internal edge
-                        int idx = bestPoly.neis[j] - 1;
+                        int idx = bestPoly.Neis[j] - 1;
                         int r = m_nav.GetPolyRefBase(bestTile) | idx;
                         if (filter.PassFilter(r, bestTile, bestTile.polys[idx]))
                         {
@@ -2359,8 +2359,8 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Calc distance to the edge.
-                    Vector3 vj = bestTile.verts[bestPoly.verts[j]];
-                    Vector3 vi = bestTile.verts[bestPoly.verts[i]];
+                    Vector3 vj = bestTile.verts[bestPoly.Verts[j]];
+                    Vector3 vi = bestTile.verts[bestPoly.Verts[i]];
                     float distSqr = Detour.DistancePtSegSqr2D(centerPos, vj, vi, out float tseg);
 
                     // Edge is too far, skip.
@@ -2375,7 +2375,7 @@ namespace Engine.PathFinding.RecastNavigation
                     hitPos = vj + (vi - vj) * tseg;
                 }
 
-                for (int i = bestPoly.firstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
+                for (int i = bestPoly.FirstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
                 {
                     Link link = bestTile.links[i];
                     int neighbourRef = link.nref;
@@ -2395,8 +2395,8 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Calc distance to the edge.
-                    Vector3 va = bestTile.verts[bestPoly.verts[link.edge]];
-                    Vector3 vb = bestTile.verts[bestPoly.verts[(link.edge + 1) % bestPoly.vertCount]];
+                    Vector3 va = bestTile.verts[bestPoly.Verts[link.edge]];
+                    Vector3 vb = bestTile.verts[bestPoly.Verts[(link.edge + 1) % bestPoly.VertCount]];
                     float distSqr = Detour.DistancePtSegSqr2D(centerPos, va, vb, out float tseg);
 
                     // If the circle is not touching the next polygon, skip it.
@@ -2494,14 +2494,14 @@ namespace Engine.PathFinding.RecastNavigation
 
             Status status = Status.DT_SUCCESS;
 
-            for (int i = 0, j = poly.vertCount - 1; i < poly.vertCount; j = i++)
+            for (int i = 0, j = poly.VertCount - 1; i < poly.VertCount; j = i++)
             {
                 // Skip non-solid edges.
                 nints = 0;
-                if ((poly.neis[j] & Detour.DT_EXT_LINK) != 0)
+                if ((poly.Neis[j] & Detour.DT_EXT_LINK) != 0)
                 {
                     // Tile border.
-                    for (int k = poly.firstLink; k != Detour.DT_NULL_LINK; k = tile.links[k].next)
+                    for (int k = poly.FirstLink; k != Detour.DT_NULL_LINK; k = tile.links[k].next)
                     {
                         Link link = tile.links[k];
                         if (link.edge == j)
@@ -2521,9 +2521,9 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     // Internal edge
                     int neiRef = 0;
-                    if (poly.neis[j] != 0)
+                    if (poly.Neis[j] != 0)
                     {
-                        int idx = (poly.neis[j] - 1);
+                        int idx = (poly.Neis[j] - 1);
                         neiRef = m_nav.GetPolyRefBase(tile) | idx;
                         if (!filter.PassFilter(neiRef, tile, tile.polys[idx]))
                         {
@@ -2539,8 +2539,8 @@ namespace Engine.PathFinding.RecastNavigation
 
                     if (n < maxSegments)
                     {
-                        segmentVerts[n + 0] = tile.verts[poly.verts[j]];
-                        segmentVerts[n + 1] = tile.verts[poly.verts[i]];
+                        segmentVerts[n + 0] = tile.verts[poly.Verts[j]];
+                        segmentVerts[n + 1] = tile.verts[poly.Verts[i]];
                         segmentRefs[n] = neiRef;
                         n++;
                     }
@@ -2557,8 +2557,8 @@ namespace Engine.PathFinding.RecastNavigation
                 SegInterval.InsertInterval(ref ints, ref nints, MAX_INTERVAL, 255, 256, 0);
 
                 // Store segments.
-                Vector3 vj = tile.verts[poly.verts[j]];
-                Vector3 vi = tile.verts[poly.verts[i]];
+                Vector3 vj = tile.verts[poly.Verts[j]];
+                Vector3 vi = tile.verts[poly.Verts[i]];
                 for (int k = 1; k < nints; ++k)
                 {
                     // Portal segment.
@@ -2666,11 +2666,11 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Calc area of the polygon.
                 float polyArea = 0.0f;
-                for (int j = 2; j < p.vertCount; ++j)
+                for (int j = 2; j < p.VertCount; ++j)
                 {
-                    var va = tile.verts[p.verts[0]];
-                    var vb = tile.verts[p.verts[j - 1]];
-                    var vc = tile.verts[p.verts[j]];
+                    var va = tile.verts[p.Verts[0]];
+                    var vb = tile.verts[p.Verts[j - 1]];
+                    var vc = tile.verts[p.Verts[j]];
                     polyArea += Detour.TriArea2D(va, vb, vc);
                 }
 
@@ -2690,19 +2690,19 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Randomly pick point on polygon.
-            var v = tile.verts[poly.verts[0]];
+            var v = tile.verts[poly.Verts[0]];
             Vector3[] verts = new Vector3[Detour.DT_VERTS_PER_POLYGON];
             verts[0] = v;
-            for (int j = 1; j < poly.vertCount; ++j)
+            for (int j = 1; j < poly.VertCount; ++j)
             {
-                v = tile.verts[poly.verts[j]];
+                v = tile.verts[poly.Verts[j]];
                 verts[j] = v;
             }
 
             float s = frand.NextFloat(0, 1);
             float t = frand.NextFloat(0, 1);
 
-            Detour.RandomPointInConvexPoly(verts, poly.vertCount, out float[] areas, s, t, out Vector3 pt);
+            Detour.RandomPointInConvexPoly(verts, poly.VertCount, out float[] areas, s, t, out Vector3 pt);
 
             Status status = GetPolyHeight(polyRef, pt, out float h);
             if (status.HasFlag(Status.DT_FAILURE))
@@ -2786,11 +2786,11 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     // Calc area of the polygon.
                     float polyArea = 0.0f;
-                    for (int j = 2; j < bestPoly.vertCount; ++j)
+                    for (int j = 2; j < bestPoly.VertCount; ++j)
                     {
-                        var va = bestTile.verts[bestPoly.verts[0]];
-                        var vb = bestTile.verts[bestPoly.verts[j - 1]];
-                        var vc = bestTile.verts[bestPoly.verts[j]];
+                        var va = bestTile.verts[bestPoly.Verts[0]];
+                        var vb = bestTile.verts[bestPoly.Verts[j - 1]];
+                        var vc = bestTile.verts[bestPoly.Verts[j]];
                         polyArea += Detour.TriArea2D(va, vb, vc);
                     }
                     // Choose random polygon weighted by area, using reservoi sampling.
@@ -2817,7 +2817,7 @@ namespace Engine.PathFinding.RecastNavigation
                     m_nav.GetTileAndPolyByRefUnsafe(parentRef, out parentTile, out parentPoly);
                 }
 
-                for (int i = bestPoly.firstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
+                for (int i = bestPoly.FirstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
                 {
                     Link link = bestTile.links[i];
                     int neighbourRef = link.nref;
@@ -2898,19 +2898,19 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Randomly pick point on polygon.
-            var v = randomTile.verts[randomPoly.verts[0]];
+            var v = randomTile.verts[randomPoly.Verts[0]];
             Vector3[] verts = new Vector3[Detour.DT_VERTS_PER_POLYGON];
             verts[0] = v;
-            for (int j = 1; j < randomPoly.vertCount; ++j)
+            for (int j = 1; j < randomPoly.VertCount; ++j)
             {
-                v = randomTile.verts[randomPoly.verts[j]];
+                v = randomTile.verts[randomPoly.Verts[j]];
                 verts[j] = v;
             }
 
             float s = frand.NextFloat(0, 1);
             float t = frand.NextFloat(0, 1);
 
-            Detour.RandomPointInConvexPoly(verts, randomPoly.vertCount, out float[] areas, s, t, out Vector3 pt);
+            Detour.RandomPointInConvexPoly(verts, randomPoly.VertCount, out float[] areas, s, t, out Vector3 pt);
 
             Status stat = GetPolyHeight(randomPolyRef, pt, out float h);
             if (stat.HasFlag(Status.DT_FAILURE))
@@ -2949,8 +2949,8 @@ namespace Engine.PathFinding.RecastNavigation
             // Off-mesh connections don't have detail polygons.
             if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
-                var v0 = tile.verts[poly.verts[0]];
-                var v1 = tile.verts[poly.verts[1]];
+                var v0 = tile.verts[poly.Verts[0]];
+                var v1 = tile.verts[poly.Verts[1]];
                 float d0 = Vector3.Distance(pos, v0);
                 float d1 = Vector3.Distance(pos, v1);
                 float u = d0 / (d0 + d1);
@@ -2965,10 +2965,10 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Clamp point to be inside the polygon.
             Vector3[] verts = new Vector3[Detour.DT_VERTS_PER_POLYGON];
-            int nv = poly.vertCount;
+            int nv = poly.VertCount;
             for (int i = 0; i < nv; ++i)
             {
-                verts[i] = tile.verts[poly.verts[i]];
+                verts[i] = tile.verts[poly.Verts[i]];
             }
 
             closest = pos;
@@ -3002,13 +3002,13 @@ namespace Engine.PathFinding.RecastNavigation
                 Vector3[] v = new Vector3[3];
                 for (int k = 0; k < 3; ++k)
                 {
-                    if (t[k] < poly.vertCount)
+                    if (t[k] < poly.VertCount)
                     {
-                        v[k] = tile.verts[poly.verts[t[k]]];
+                        v[k] = tile.verts[poly.Verts[t[k]]];
                     }
                     else
                     {
-                        v[k] = tile.detailVerts[(pd.vertBase + (t[k] - poly.vertCount))];
+                        v[k] = tile.detailVerts[(pd.vertBase + (t[k] - poly.VertCount))];
                     }
                 }
                 if (Detour.ClosestHeightPointTriangle(closest, v[0], v[1], v[2], out float h))
@@ -3039,9 +3039,9 @@ namespace Engine.PathFinding.RecastNavigation
             // Collect vertices.
             Vector3[] verts = new Vector3[Detour.DT_VERTS_PER_POLYGON];
             int nv = 0;
-            for (int i = 0; i < poly.vertCount; ++i)
+            for (int i = 0; i < poly.VertCount; ++i)
             {
-                verts[nv] = tile.verts[poly.verts[i]];
+                verts[nv] = tile.verts[poly.Verts[i]];
                 nv++;
             }
 
@@ -3089,8 +3089,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (poly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
-                var v0 = tile.verts[poly.verts[0]];
-                var v1 = tile.verts[poly.verts[1]];
+                var v0 = tile.verts[poly.Verts[0]];
+                var v1 = tile.verts[poly.Verts[1]];
                 float d0 = Recast.VDist2(pos, v0);
                 float d1 = Recast.VDist2(pos, v1);
                 float u = d0 / (d0 + d1);
@@ -3107,13 +3107,13 @@ namespace Engine.PathFinding.RecastNavigation
                     Vector3[] v = new Vector3[3];
                     for (int k = 0; k < 3; ++k)
                     {
-                        if (t[k] < poly.vertCount)
+                        if (t[k] < poly.VertCount)
                         {
-                            v[k] = tile.verts[poly.verts[t[k]]];
+                            v[k] = tile.verts[poly.Verts[t[k]]];
                         }
                         else
                         {
-                            v[k] = tile.detailVerts[(pd.vertBase + (t[k] - poly.vertCount))];
+                            v[k] = tile.detailVerts[(pd.vertBase + (t[k] - poly.VertCount))];
                         }
                     }
                     if (Detour.ClosestHeightPointTriangle(pos, v[0], v[1], v[2], out float h))
@@ -3276,12 +3276,12 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Calc polygon bounds.
-                    var v = tile.verts[p.verts[0]];
+                    var v = tile.verts[p.Verts[0]];
                     Vector3 bmin = v;
                     Vector3 bmax = v;
-                    for (int j = 1; j < p.vertCount; ++j)
+                    for (int j = 1; j < p.VertCount; ++j)
                     {
-                        v = tile.verts[p.verts[j]];
+                        v = tile.verts[p.Verts[j]];
                         bmin = Vector3.Min(bmin, v);
                         bmax = Vector3.Max(bmax, v);
                     }
@@ -3346,7 +3346,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Find the link that points to the 'to' polygon.
             Link? link = null;
-            for (int i = fromPoly.firstLink; i != Detour.DT_NULL_LINK; i = fromTile.links[i].next)
+            for (int i = fromPoly.FirstLink; i != Detour.DT_NULL_LINK; i = fromTile.links[i].next)
             {
                 if (fromTile.links[i].nref == to)
                 {
@@ -3363,13 +3363,13 @@ namespace Engine.PathFinding.RecastNavigation
             if (fromPoly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
                 // Find link that points to first vertex.
-                for (int i = fromPoly.firstLink; i != Detour.DT_NULL_LINK; i = fromTile.links[i].next)
+                for (int i = fromPoly.FirstLink; i != Detour.DT_NULL_LINK; i = fromTile.links[i].next)
                 {
                     if (fromTile.links[i].nref == to)
                     {
                         int v = fromTile.links[i].edge;
-                        left = fromTile.verts[fromPoly.verts[v]];
-                        right = fromTile.verts[fromPoly.verts[v]];
+                        left = fromTile.verts[fromPoly.Verts[v]];
+                        right = fromTile.verts[fromPoly.Verts[v]];
                         return Status.DT_SUCCESS;
                     }
                 }
@@ -3378,13 +3378,13 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (toPoly.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
-                for (int i = toPoly.firstLink; i != Detour.DT_NULL_LINK; i = toTile.links[i].next)
+                for (int i = toPoly.FirstLink; i != Detour.DT_NULL_LINK; i = toTile.links[i].next)
                 {
                     if (toTile.links[i].nref == from)
                     {
                         int v = toTile.links[i].edge;
-                        left = toTile.verts[toPoly.verts[v]];
-                        right = toTile.verts[toPoly.verts[v]];
+                        left = toTile.verts[toPoly.Verts[v]];
+                        right = toTile.verts[toPoly.Verts[v]];
                         return Status.DT_SUCCESS;
                     }
                 }
@@ -3392,8 +3392,8 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Find portal vertices.
-            int v0 = fromPoly.verts[link.Value.edge];
-            int v1 = fromPoly.verts[(link.Value.edge + 1) % (int)fromPoly.vertCount];
+            int v0 = fromPoly.Verts[link.Value.edge];
+            int v1 = fromPoly.Verts[(link.Value.edge + 1) % (int)fromPoly.VertCount];
             left = fromTile.verts[v0];
             right = fromTile.verts[v1];
 

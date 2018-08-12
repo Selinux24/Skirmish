@@ -118,10 +118,9 @@ namespace Collada
             nmsettings.BuildMode = BuildModesEnum.TempObstacles;
             nmsettings.TileSize = 16;
 
-            this.PathFinderDescription = new PathFinderDescription()
-            {
-                Settings = nmsettings,
-            };
+            var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
         }
         private void InitializeLights()
         {
@@ -760,7 +759,7 @@ namespace Collada
                 messages.Instance.CenterHorizontally();
                 messages.Instance.CenterVertically();
 
-                this.navigationGraph.UpdateAt(item.Manipulator.Position);
+                this.NavigationGraph.UpdateAt(item.Manipulator.Position);
                 this.RequestGraphUpdate(1);
             }
         }
@@ -859,7 +858,7 @@ namespace Collada
                 new Vector3(7.28668118f, 9.99818039f, 2.47248268f),
                 new Vector3(-1.40706635f, -9.15527344e-05f, 3.06774902f)
             };
-            connections.Add(this.AddOffmeshConnection(points[0], points[1]), points);
+            connections.Add(this.AddConnection(points[0], points[1]), points);
         }
         private void RemoveTestOffmeshConnections()
         {
@@ -867,7 +866,7 @@ namespace Collada
             {
                 int conIndex = connections.Keys.ToArray()[0];
                 connections.Remove(conIndex);
-                this.RemoveOffmeshConnection(conIndex);
+                this.RemoveConnection(conIndex);
             }
         }
         private void PaintOffmeshConnections()
@@ -890,15 +889,13 @@ namespace Collada
 
             if (File.Exists(fileName))
             {
-                var graph = new Graph();
-                graph.Load(fileName);
-
+                var graph = this.PathFinderDescription.Load(fileName);
                 this.SetNavigationGraph(graph);
             }
             else
             {
                 base.UpdateNavigationGraph();
-                this.navigationGraph.Save(fileName);
+                this.PathFinderDescription.Save(fileName, this.NavigationGraph);
             }
         }
         public override void NavigationGraphUpdated()

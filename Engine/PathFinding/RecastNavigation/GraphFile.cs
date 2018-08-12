@@ -149,7 +149,6 @@ namespace Engine.PathFinding.RecastNavigation
             return new GraphFile()
             {
                 Settings = graph.Settings,
-                BoundingBox = graph.BoundingBox,
                 Dictionary = meshFileDict,
             };
         }
@@ -175,7 +174,6 @@ namespace Engine.PathFinding.RecastNavigation
             return new Graph
             {
                 Settings = file.Settings,
-                BoundingBox = file.BoundingBox,
                 MeshQueryDictionary = meshQueryDict,
             };
         }

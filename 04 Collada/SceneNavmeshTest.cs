@@ -116,10 +116,9 @@ namespace Collada
             nmsettings.BuildMode = BuildModesEnum.Tiled;
             nmsettings.TileSize = 32;
 
-            this.PathFinderDescription = new PathFinderDescription()
-            {
-                Settings = nmsettings,
-            };
+            var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
 
             this.inputGeometry = this.AddComponent<Model>(
                 new ModelDescription()
@@ -226,13 +225,13 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                this.navigationGraph.Save(@"test.grf");
+                this.PathFinderDescription.Save(@"test.grf", this.NavigationGraph);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
-                this.navigationGraph.Load(@"test.grf");
-                this.UpdateGraphNodes(this.agent);
+                var graph = this.PathFinderDescription.Load(@"test.grf");
+                this.SetNavigationGraph(graph);
             }
 
             bool updateGraph = false;
@@ -244,11 +243,11 @@ namespace Collada
                 sw.Start();
                 if (!shift)
                 {
-                    ((Graph)this.navigationGraph).BuildTile(this.Camera.Position);
+                    ((Graph)this.NavigationGraph).BuildTile(this.Camera.Position);
                 }
                 else
                 {
-                    ((Graph)this.navigationGraph).RemoveTile(this.Camera.Position);
+                    ((Graph)this.NavigationGraph).RemoveTile(this.Camera.Position);
                 }
                 sw.Stop();
                 lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;

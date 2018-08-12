@@ -9,24 +9,6 @@ namespace Engine.PathFinding
     public interface IGraph : IDisposable
     {
         /// <summary>
-        /// Gets the total bounding box
-        /// </summary>
-        BoundingBox BoundingBox { get; }
-
-        /// <summary>
-        /// Builds the graph
-        /// </summary>
-        /// <param name="sourceFunction">Geometry source function</param>
-        /// <param name="settings">Settings</param>
-        /// <returns>Returns the new Graph</returns>
-        void Build(Func<Triangle[]> sourceFunction, PathFinderSettings settings);
-        /// <summary>
-        /// Sets the geometry source function
-        /// </summary>
-        /// <param name="sourceFunction">Function</param>
-        void SetGeometrySourceFunction(Func<Triangle[]> sourceFunction);
-
-        /// <summary>
         /// Gets the node collection of the graph for the specified agent type
         /// </summary>
         /// <param name="agent">Agent type</param>
@@ -85,28 +67,18 @@ namespace Engine.PathFinding
         void RemoveObstacle(int obstacle);
 
         /// <summary>
-        /// Adds a new off-mesh connection
+        /// Adds a new connection
         /// </summary>
         /// <param name="from">From point</param>
         /// <param name="to">To point</param>
-        /// <returns>Returns the off-mesh connection id</returns>
-        int AddOffmeshConnection(Vector3 from, Vector3 to);
+        /// <returns>Returns the connection id</returns>
+        int AddConnection(Vector3 from, Vector3 to);
         /// <summary>
-        /// Removes an off-mesh connection by off-mesh connection id
+        /// Removes a connection by id
         /// </summary>
-        /// <param name="offmeshConnection">Off-mesh connection id</param>
-        void RemoveOffmeshConnection(int offmeshConnection);
+        /// <param name="id">Connection id</param>
+        void RemoveConnection(int id);
 
-        /// <summary>
-        /// Saves the graph to a file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        void Save(string fileName);
-        /// <summary>
-        /// Loads the graph from a file
-        /// </summary>
-        /// <param name="fileName">File name</param>
-        void Load(string fileName);
         /// <summary>
         /// Updates internal state
         /// </summary>
