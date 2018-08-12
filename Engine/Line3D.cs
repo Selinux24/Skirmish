@@ -417,6 +417,77 @@ namespace Engine
 
             return lines.ToArray();
         }
+        public static Line3D[] CreateArc(Vector3 from, Vector3 to, float h, int points)
+        {
+            List<Line3D> lines = new List<Line3D>();
+
+            float pad = 0.05f;
+            float scale = (1.0f - pad * 2) / points;
+
+            Vector3 d = to - from;
+            float len = d.Length();
+
+            Helper.EvalArc(from, d, len * h, pad, out Vector3 prev);
+
+            for (int i = 1; i <= points; i++)
+            {
+                float u = pad + i * scale;
+                Helper.EvalArc(from, d, len * h, u, out Vector3 pt);
+
+                lines.Add(new Line3D(prev, pt));
+
+                prev = pt;
+            }
+
+            return lines.ToArray();
+        }
+        public static Line3D[] CreateCircle(Vector3 center, float r, int segments)
+        {
+            List<Line3D> lines = new List<Line3D>();
+
+            float[] dir = new float[segments * 2];
+
+            for (int i = 0; i < segments; ++i)
+            {
+                float a = i / (float)segments * MathUtil.TwoPi;
+                dir[i * 2 + 0] = (float)Math.Cos(a);
+                dir[i * 2 + 1] = (float)Math.Sin(a);
+            }
+
+            for (int i = 0, j = segments - 1; i < segments; j = i++)
+            {
+                Line3D line = new Line3D(
+                    new Vector3(center.X + dir[j * 2 + 0] * r, center.Y, center.Z + dir[j * 2 + 1] * r),
+                    new Vector3(center.X + dir[i * 2 + 0] * r, center.Y, center.Z + dir[i * 2 + 1] * r));
+
+                lines.Add(line);
+            }
+
+            return lines.ToArray();
+        }
+        public static Line3D[] CreateArrow(Vector3 p, Vector3 q, float s)
+        {
+            List<Line3D> lines = new List<Line3D>();
+
+            float eps = 0.001f;
+            if (Vector3.DistanceSquared(p, q) >= eps * eps)
+            {
+                Vector3 ax = Vector3.Zero;
+                Vector3 ay = Vector3.Up;
+                Vector3 az = Vector3.Zero;
+
+                az = Vector3.Normalize(q - p);
+                ax = Vector3.Cross(ay, az);
+                ay = Vector3.Normalize(Vector3.Cross(az, ax));
+
+                lines.Add(new Line3D(p, new Vector3(p.X + az.X * s + ax.X * s / 3, p.Y + az.Y * s + ax.Y * s / 3, p.Z + az.Z * s + ax.Z * s / 3)));
+
+                lines.Add(new Line3D(p, new Vector3(p.X + az.X * s - ax.X * s / 3, p.Y + az.Y * s - ax.Y * s / 3, p.Z + az.Z * s - ax.Z * s / 3)));
+            }
+
+            return lines.ToArray();
+        }
+
 
         private static Line3D[] CreateFromVertices(Vector3[] vertices, int[] indices)
         {

@@ -45,6 +45,13 @@ namespace Engine.PathFinding.RecastNavigation
 
             return graph;
         }
+        /// <summary>
+        /// Refresh
+        /// </summary>
+        public override void Refresh()
+        {
+            this.ChunkyMesh = ChunkyTriMesh.Build(this);
+        }
 
         /// <summary>
         /// Loads the graph from a file

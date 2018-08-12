@@ -1292,6 +1292,22 @@ namespace Engine
             result = u1 * v2 - v1 * u2;
         }
         /// <summary>
+        /// Eval arc
+        /// </summary>
+        /// <param name="v0">First point</param>
+        /// <param name="v1">Second point</param>
+        /// <param name="h">Height</param>
+        /// <param name="u">Evaluation time</param>
+        /// <param name="res">Resulting point</param>
+        public static void EvalArc(Vector3 v0, Vector3 v1, float h, float u, out Vector3 res)
+        {
+            res = new Vector3();
+
+            res[0] = v0.X + v1.X * u;
+            res[1] = v0.Y + v1.Y * u + h * (1 - (u * 2 - 1) * (u * 2 - 1));
+            res[2] = v0.Z + v1.Z * u;
+        }
+        /// <summary>
         /// Look at target
         /// </summary>
         /// <param name="eyePosition">Eye position</param>

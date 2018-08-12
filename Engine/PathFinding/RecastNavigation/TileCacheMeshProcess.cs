@@ -10,7 +10,7 @@ namespace Engine.PathFinding.RecastNavigation
             this.m_geom = geometry;
         }
 
-        public void Process(NavMeshCreateParams param, SamplePolyAreas[] polyAreas, SamplePolyFlags[] polyFlags)
+        public void Process(ref NavMeshCreateParams param, ref SamplePolyAreas[] polyAreas, ref SamplePolyFlags[] polyFlags)
         {
             // Update poly flags from areas.
             for (int i = 0; i < param.polyCount; ++i)

@@ -5,13 +5,25 @@ using System.Collections.Generic;
 
 namespace Engine.PathFinding.AStar
 {
+    /// <summary>
+    /// Grid input geometry
+    /// </summary>
     public class GridInput : PathFinderInput
     {
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="fnc">Get triangles function</param>
         public GridInput(Func<Triangle[]> fnc) : base(fnc)
         {
 
         }
 
+        /// <summary>
+        /// Creates a new graph
+        /// </summary>
+        /// <param name="settings">Settings</param>
+        /// <returns>Returns the new graph</returns>
         public override IGraph CreateGraph(PathFinderSettings settings)
         {
             var grid = new Grid
@@ -176,6 +188,13 @@ namespace Engine.PathFinding.AStar
             grid.Nodes = result.ToArray();
 
             return grid;
+        }
+        /// <summary>
+        /// Refresh
+        /// </summary>
+        public override void Refresh()
+        {
+
         }
 
         /// <summary>

@@ -743,12 +743,12 @@ namespace Engine.PathFinding.RecastNavigation
                 ch = m_params.CellHeight,
                 buildBvTree = false,
                 bmin = tile.Header.b.Minimum,
-                bmax = tile.Header.b.Maximum
+                bmax = tile.Header.b.Maximum,
             };
 
             if (m_tmproc != null)
             {
-                m_tmproc.Process(param, bc.lmesh.areas, bc.lmesh.flags);
+                m_tmproc.Process(ref param, ref bc.lmesh.areas, ref bc.lmesh.flags);
             }
 
             if (!Detour.CreateNavMeshData(param, out MeshData navData))

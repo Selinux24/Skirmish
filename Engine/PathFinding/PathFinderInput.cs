@@ -166,6 +166,10 @@ namespace Engine.PathFinding
         /// <param name="settings">Creation settings</param>
         /// <returns>Returns the new created graph</returns>
         public abstract IGraph CreateGraph(PathFinderSettings settings);
+        /// <summary>
+        /// Refresh
+        /// </summary>
+        public abstract void Refresh();
 
         /// <summary>
         /// Loads the graph from a file

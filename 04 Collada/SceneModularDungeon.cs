@@ -86,6 +86,7 @@ namespace Collada
             this.Game.LockMouse = true;
 #endif
 
+            this.InitializeDebug();
             this.InitializeUI();
             this.InitializeModularScenery();
             this.InitializePlayer();
@@ -94,7 +95,6 @@ namespace Collada
             this.InitializeEnvironment();
             this.InitializeLights();
             this.InitializeCamera();
-            this.InitializeDebug();
         }
         private void InitializeEnvironment()
         {
@@ -120,7 +120,17 @@ namespace Collada
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
+            nminput.AddConnection(
+                new Vector3(-8.98233700f, 4.76837158e-07f, 0.0375497341f),
+                new Vector3(-11.0952349f, -4.76837158e-07f, 0.00710105896f),
+                1,
+                1,
+                GraphConnectionAreaTypes.Jump,
+                GraphConnectionFlagTypes.All);
+
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
+
+            this.PaintConnections();
         }
         private void InitializeLights()
         {
@@ -759,7 +769,7 @@ namespace Collada
                 messages.Instance.CenterHorizontally();
                 messages.Instance.CenterVertically();
 
-                this.NavigationGraph.UpdateAt(item.Manipulator.Position);
+                this.UpdateGraph(item.Manipulator.Position);
                 this.RequestGraphUpdate(1);
             }
         }
@@ -851,35 +861,27 @@ namespace Collada
             }
         }
 
-        private void AddTestOffmeshConnections()
-        {
-            var points = new[]
-            {
-                new Vector3(7.28668118f, 9.99818039f, 2.47248268f),
-                new Vector3(-1.40706635f, -9.15527344e-05f, 3.06774902f)
-            };
-            connections.Add(this.AddConnection(points[0], points[1]), points);
-        }
-        private void RemoveTestOffmeshConnections()
-        {
-            if (connections.Count > 0)
-            {
-                int conIndex = connections.Keys.ToArray()[0];
-                connections.Remove(conIndex);
-                this.RemoveConnection(conIndex);
-            }
-        }
-        private void PaintOffmeshConnections()
+        private void PaintConnections()
         {
             this.connectionDrawer.Instance.Clear(connectionColor);
 
-            foreach (var item in connections)
+            var connections = this.PathFinderDescription.Input.GetConnections();
+
+            foreach (var conn in connections)
             {
-                var conn = (Vector3[])item.Value;
+                Line3D[] arclines = Line3D.CreateArc(conn.Start, conn.End, 0.25f, 8);
+                this.connectionDrawer.Instance.AddLines(connectionColor, arclines);
 
-                Line3D line = new Line3D(conn[0], conn[1]);
+                Line3D[] cirlinesF = Line3D.CreateCircle(conn.Start, conn.Radius, 32);
+                this.connectionDrawer.Instance.AddLines(connectionColor, cirlinesF);
 
-                this.connectionDrawer.Instance.AddLines(connectionColor, line);
+                if (conn.Direction == 1)
+                {
+                    Line3D[] cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
+                    this.connectionDrawer.Instance.AddLines(connectionColor, cirlinesT);
+                }
+
+                this.connectionDrawer.Visible = true;
             }
         }
 
@@ -887,12 +889,12 @@ namespace Collada
         {
             var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
 
-            if (File.Exists(fileName))
-            {
-                var graph = this.PathFinderDescription.Load(fileName);
-                this.SetNavigationGraph(graph);
-            }
-            else
+            //if (File.Exists(fileName))
+            //{
+            //    var graph = this.PathFinderDescription.Load(fileName);
+            //    this.SetNavigationGraph(graph);
+            //}
+            //else
             {
                 base.UpdateNavigationGraph();
                 this.PathFinderDescription.Save(fileName, this.NavigationGraph);

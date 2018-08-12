@@ -1579,5 +1579,16 @@ namespace Engine
         {
             this.NavigationGraph.RemoveConnection(id);
         }
+
+        /// <summary>
+        /// Updates the graph at position
+        /// </summary>
+        /// <param name="position">Position</param>
+        public virtual void UpdateGraph(Vector3 position)
+        {
+            this.PathFinderDescription.Input.Refresh();
+
+            this.NavigationGraph.UpdateAt(position);
+        }
     }
 }
