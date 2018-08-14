@@ -68,10 +68,12 @@ namespace Engine.PathFinding.RecastNavigation
         public static ChunkyTriMesh Build(InputGeometry input)
         {
             var triangles = input.GetTriangles();
-
-            if (CreateChunkyTriMesh(triangles, 256, out ChunkyTriMesh chunkyMesh))
+            if (triangles != null && triangles.Length > 0)
             {
-                return chunkyMesh;
+                if (CreateChunkyTriMesh(triangles, 256, out ChunkyTriMesh chunkyMesh))
+                {
+                    return chunkyMesh;
+                }
             }
 
             return null;

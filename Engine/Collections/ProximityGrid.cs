@@ -9,6 +9,18 @@ namespace Engine.Collections
 	/// <typeparam name="T">An equatable type.</typeparam>
     public class ProximityGrid<T>
     {
+        /// <summary>
+        /// Hash function for Vector2
+        /// </summary>
+        /// <param name="x">The x-coordinate</param>
+        /// <param name="y">The y-coordinate</param>
+        /// <param name="n">Total size of hash table</param>
+        /// <returns>A hash value</returns>
+        static int HashVector2(int x, int y, int n)
+        {
+            return ((x * 73856093) ^ (y * 19349663)) & (n - 1);
+        }
+
         private float cellSize;
         private float inverseCellSize;
         private ProximityGridItem<T>[] pool;
@@ -79,7 +91,7 @@ namespace Engine.Collections
                 {
                     if (this.poolHead < this.pool.Length)
                     {
-                        int h = Helper.HashVector2(x, y, this.buckets.Length);
+                        int h = HashVector2(x, y, this.buckets.Length);
                         int idx = this.poolHead;
                         this.poolHead++;
                         this.pool[idx].X = x;
@@ -136,7 +148,7 @@ namespace Engine.Collections
             {
                 for (int x = invMinX; x <= invMaxX; x++)
                 {
-                    int hash = Helper.HashVector2(x, y, this.buckets.Length);
+                    int hash = HashVector2(x, y, this.buckets.Length);
                     int idx = this.buckets[hash];
 
                     while (idx >= 0)
@@ -202,7 +214,7 @@ namespace Engine.Collections
         public int GetItemCountAtLocation(int x, int y)
         {
             int n = 0;
-            int h = Helper.HashVector2(x, y, this.buckets.Length);
+            int h = HashVector2(x, y, this.buckets.Length);
             int idx = buckets[h];
 
             while (idx >= 0)

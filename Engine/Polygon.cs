@@ -173,29 +173,6 @@ namespace Engine
             return result;
         }
         /// <summary>
-        /// Gets whether the specified polygon contains the point projected into it
-        /// </summary>
-        /// <param name="poly">Polygon</param>
-        /// <param name="point">Point</param>
-        /// <returns>Returns true if the polygon contains the point projected into it</returns>
-        public static bool PointInPoly(Polygon poly, Vector3 point)
-        {
-            bool c = false;
-
-            for (int i = 0, j = poly.Count - 1; i < poly.Count; j = i++)
-            {
-                Vector3 vi = poly[i];
-                Vector3 vj = poly[j];
-                if (((vi.Z > point.Z) != (vj.Z > point.Z)) &&
-                    (point.X < (vj.X - vi.X) * (point.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
-                {
-                    c = !c;
-                }
-            }
-
-            return c;
-        }
-        /// <summary>
         /// Clips a polygon to a plane using the Sutherland-Hodgman algorithm.
         /// </summary>
         /// <param name="inVertices">The input array of vertices.</param>
@@ -257,6 +234,21 @@ namespace Engine
             return op < 0;
         }
         /// <summary>
+        /// Gets the area of the triangle projected onto the XZ-plane.
+        /// </summary>
+        /// <param name="a">The first point.</param>
+        /// <param name="b">The second point.</param>
+        /// <param name="c">The third point.</param>
+        /// <param name="area">The calculated area.</param>
+        public static void Area2D(ref Vector3 a, ref Vector3 b, ref Vector3 c, out float area)
+        {
+            float abx = b.X - a.X;
+            float abz = b.Z - a.Z;
+            float acx = c.X - a.X;
+            float acz = c.Z - a.Z;
+            area = acx * abz - abx * acz;
+        }
+        /// <summary>
         /// Generate an accurate sample of random points in the convex polygon and pick a point.
         /// </summary>
         /// <param name="pts">The polygon's points data</param>
@@ -268,10 +260,9 @@ namespace Engine
             //Calculate triangle areas
             float[] areas = new float[pts.Length];
             float areaSum = 0.0f;
-            float area;
             for (int i = 2; i < pts.Length; i++)
             {
-                Helper.Area2D(ref pts[0], ref pts[i - 1], ref pts[i], out area);
+                Area2D(ref pts[0], ref pts[i - 1], ref pts[i], out float area);
                 areaSum += Math.Max(0.001f, area);
                 areas[i] = area;
             }

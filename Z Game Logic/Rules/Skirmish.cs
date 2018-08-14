@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Engine;
 
 namespace GameLogic.Rules
 {
@@ -9,20 +8,14 @@ namespace GameLogic.Rules
 
     public class Skirmish
     {
-        private List<Team> teams = new List<Team>();
-        private Dictionary<Team, bool> turnInfo = new Dictionary<Team, bool>();
-        private List<Melee> melees = new List<Melee>();
+        private readonly List<Team> teams = new List<Team>();
+        private readonly Dictionary<Team, bool> turnInfo = new Dictionary<Team, bool>();
+        private readonly List<Melee> melees = new List<Melee>();
 
         private int currentTurn = 0;
-        private Phase currentPhase = Phase.Movement;
         private int currentSoldier = 0;
-        public Phase CurrentPhase
-        {
-            get
-            {
-                return this.currentPhase;
-            }
-        }
+
+        public Phase CurrentPhase { get; private set; } = Phase.Movement;
         public Team CurrentTeam
         {
             get
@@ -81,7 +74,7 @@ namespace GameLogic.Rules
         {
             get
             {
-                return Array.FindAll(this.CurrentTeam.Soldiers, s => s.IdleForPhase(this.currentPhase));
+                return Array.FindAll(this.CurrentTeam.Soldiers, s => s.IdleForPhase(this.CurrentPhase));
             }
         }
         public Soldier[] AllSoldiers
@@ -137,7 +130,7 @@ namespace GameLogic.Rules
         public void Start()
         {
             this.currentTurn = 1;
-            this.currentPhase = 0;
+            this.CurrentPhase = 0;
 
             this.turnInfo.Clear();
             foreach (Team team in this.teams)
@@ -154,7 +147,7 @@ namespace GameLogic.Rules
                 t.Role != TeamRoleEnum.Neutral &&
                 Array.Exists(t.Soldiers, s => s.CurrentHealth != HealthStateEnum.Disabled)).ToArray();
 
-            string[] factions = activeTeams.Distinct((a) => { return a.Faction; }).ToArray();
+            string[] factions = activeTeams.Select((a) => { return a.Faction; }).Distinct().ToArray();
             if (factions.Length == 1)
             {
                 return new Victory()
@@ -185,12 +178,12 @@ namespace GameLogic.Rules
                     Soldier[] idles = this.IdleSoldiers;
                     if (idles.Length > 0)
                     {
-                        if (this.CurrentSoldier.IdleForPhase(this.currentPhase))
+                        if (this.CurrentSoldier.IdleForPhase(this.CurrentPhase))
                         {
                             this.NextSoldierIndex();
                         }
 
-                        while (!this.CurrentSoldier.IdleForPhase(this.currentPhase))
+                        while (!this.CurrentSoldier.IdleForPhase(this.CurrentPhase))
                         {
                             this.NextSoldierIndex();
                         }
@@ -253,7 +246,7 @@ namespace GameLogic.Rules
             Melee melee = this.GetMelee(this.CurrentSoldier);
 
             return ActionsManager.GetActions(
-                this.currentPhase,
+                this.CurrentPhase,
                 this.CurrentTeam,
                 this.CurrentSoldier,
                 melee != null,
@@ -280,7 +273,7 @@ namespace GameLogic.Rules
 
         public void NextPhase()
         {
-            if (this.currentPhase == Phase.End)
+            if (this.CurrentPhase == Phase.End)
             {
                 #region All phases done for this team. Select next team
 
@@ -307,7 +300,7 @@ namespace GameLogic.Rules
                         this.turnInfo.Add(team, true);
                     }
 
-                    this.currentPhase = 0;
+                    this.CurrentPhase = 0;
                     this.currentSoldier = 0;
 
                     #endregion
@@ -316,7 +309,7 @@ namespace GameLogic.Rules
                 {
                     #region Next team
 
-                    this.currentPhase = 0;
+                    this.CurrentPhase = 0;
                     this.currentSoldier = 0;
 
                     #endregion
@@ -328,7 +321,7 @@ namespace GameLogic.Rules
             {
                 #region Done with current phase, next phase
 
-                if (this.currentPhase == Phase.Melee)
+                if (this.CurrentPhase == Phase.Melee)
                 {
                     //Resolve melees
                     foreach (Melee melee in this.melees)
@@ -344,7 +337,7 @@ namespace GameLogic.Rules
                     this.melees.RemoveAll(m => m.Done == true);
                 }
 
-                this.currentPhase++;
+                this.CurrentPhase++;
                 this.currentSoldier = 0;
 
                 #endregion
@@ -366,7 +359,7 @@ namespace GameLogic.Rules
                 "Battle -> {0} teams. Turn {1} | Phase {2}. Melees {3}",
                 this.teams.Count,
                 this.currentTurn,
-                this.currentPhase,
+                this.CurrentPhase,
                 this.melees.Count);
         }
     }

@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Common
 {
@@ -194,7 +195,7 @@ namespace Engine.Common
                 {
                     if (this.Vertices[0].HasChannel(VertexDataChannels.Position))
                     {
-                        this.Vertices.ForEach(v =>
+                        this.Vertices.ToList().ForEach(v =>
                         {
                             positionList.Add(v.GetChannelValue<Vector3>(VertexDataChannels.Position));
                         });

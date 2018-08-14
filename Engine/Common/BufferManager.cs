@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Common
 {
@@ -399,7 +400,7 @@ namespace Engine.Common
         public BufferDescriptor Add<T>(string id, T[] vertexData, bool dynamic, int instances) where T : struct, IVertexData
         {
             List<IVertexData> verts = new List<IVertexData>();
-            vertexData.ForEach(v => verts.Add(v));
+            vertexData.ToList().ForEach(v => verts.Add(v));
 
             return this.Add(id, verts.ToArray(), dynamic, instances);
         }

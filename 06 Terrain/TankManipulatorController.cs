@@ -1,10 +1,5 @@
 ﻿using Engine;
 using SharpDX;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Terrain
 {
@@ -33,7 +28,7 @@ namespace Terrain
                     {
                         if (dToTarget < this.ArrivingRadius)
                         {
-                            var m = dToTarget.Map(0, this.ArrivingRadius, 0, maxSpeed);
+                            var m = Map(dToTarget, 0, this.ArrivingRadius, 0, maxSpeed);
                             desired = Vector3.Normalize(desired) * m;
                         }
                         else

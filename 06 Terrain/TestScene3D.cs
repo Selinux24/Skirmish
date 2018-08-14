@@ -19,13 +19,13 @@ namespace Terrain
         private const int MaxPickingTest = 1000;
         private const int MaxGridDrawer = 10000;
 
-        private int layerHud = 99;
-        private int layerGameHud = 50;
-        private int layerObjects = 0;
-        private int layerTerrain = 1;
-        private int layerEffects = 2;
+        private readonly int layerHud = 99;
+        private readonly int layerGameHud = 50;
+        private readonly int layerObjects = 0;
+        private readonly int layerTerrain = 1;
+        private readonly int layerEffects = 2;
 
-        private Random rnd = new Random();
+        private readonly Random rnd = new Random();
 
         private bool walkMode = false;
         private float walkerVelocity = 8f;
@@ -635,17 +635,12 @@ namespace Terrain
                 walkerAgentType,
                 tankAgentType,
             };
-            this.PathFinderDescription = new PathFinderDescription()
-            {
-                Settings = navSettings,
-            };
+            InputGeometry geom = new InputGeometry(GetTrianglesForNavigationGraph);
+            this.PathFinderDescription = new PathFinderDescription(navSettings, geom);
 
             //Helipod
             {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.FindTopGroundPosition(75, 75, out p, out t, out d))
+                if (this.FindTopGroundPosition(75, 75, out Vector3 p, out Triangle t, out float d))
                 {
                     this.helipod.Transform.SetPosition(p);
                 }
@@ -653,10 +648,7 @@ namespace Terrain
 
             //Garage
             {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.FindTopGroundPosition(-10, -40, out p, out t, out d))
+                if (this.FindTopGroundPosition(-10, -40, out Vector3 p, out Triangle t, out float d))
                 {
                     this.garage.Transform.SetPosition(p);
                     this.garage.Transform.SetRotation(MathUtil.PiOverFour + MathUtil.Pi, 0, 0);
@@ -670,10 +662,7 @@ namespace Terrain
                     int ox = i == 0 || i == 2 ? 1 : -1;
                     int oy = i == 0 || i == 1 ? 1 : -1;
 
-                    Vector3 obeliskPosition;
-                    Triangle obeliskTri;
-                    float obeliskDist;
-                    if (this.FindTopGroundPosition(ox * 50, oy * 50, out obeliskPosition, out obeliskTri, out obeliskDist))
+                    if (this.FindTopGroundPosition(ox * 50, oy * 50, out Vector3 obeliskPosition, out Triangle obeliskTri, out float obeliskDist))
                     {
                         var obeliskInstance = this.obelisk.GetComponent<ITransformable3D>(i);
 
@@ -689,10 +678,7 @@ namespace Terrain
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
 
-                    Vector3 rockPosition;
-                    Triangle rockTri;
-                    float rockDist;
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out Vector3 rockPosition, out Triangle rockTri, out float rockDist))
                     {
                         var scale = 1f;
                         if (i < 5)
@@ -723,10 +709,7 @@ namespace Terrain
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
 
-                    Vector3 treePosition;
-                    Triangle treeTri;
-                    float treeDist;
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out Vector3 treePosition, out Triangle treeTri, out float treeDist))
                     {
                         var treeInstance = this.tree1.GetComponent<ITransformable3D>(i);
 
@@ -740,10 +723,7 @@ namespace Terrain
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
 
-                    Vector3 treePosition;
-                    Triangle treeTri;
-                    float treeDist;
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out Vector3 treePosition, out Triangle treeTri, out float treeDist))
                     {
                         var treeInstance = this.tree2.GetComponent<ITransformable3D>(i);
 
@@ -976,10 +956,7 @@ namespace Terrain
             //Adjust check-points
             for (int i = 0; i < p1CheckPoints.Length; i++)
             {
-                Vector3 p1;
-                Triangle t1;
-                float d1;
-                if (this.FindNearestGroundPosition(p1CheckPoints[i], out p1, out t1, out d1))
+                if (this.FindNearestGroundPosition(p1CheckPoints[i], out Vector3 p1, out Triangle t1, out float d1))
                 {
                     p1CheckPoints[i] = p1;
                 }
@@ -987,10 +964,7 @@ namespace Terrain
 
             for (int i = 0; i < p2CheckPoints.Length; i++)
             {
-                Vector3 p2;
-                Triangle t2;
-                float d2;
-                if (this.FindNearestGroundPosition(p2CheckPoints[i], out p2, out t2, out d2))
+                if (this.FindNearestGroundPosition(p2CheckPoints[i], out Vector3 p2, out Triangle t2, out float d2))
                 {
                     p2CheckPoints[i] = p2;
                 }

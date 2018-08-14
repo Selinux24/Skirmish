@@ -425,24 +425,13 @@ namespace Deferred
 
             #endregion
 
-            var navSettings = BuildSettings.Default;
-            navSettings.Agents = new[] { this.tankAgentType };
-
-            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
-            {
-                Settings = navSettings,
-            };
-
             this.SetGround(this.terrain, true);
             this.AttachToGround(this.tree, false);
             this.AttachToGround(this.trees, false);
 
             #region Tree
             {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.FindTopGroundPosition(20, -20, out p, out t, out d))
+                if (this.FindTopGroundPosition(20, -20, out Vector3 p, out Triangle t, out float d))
                 {
                     this.tree.Transform.SetPosition(p);
                     this.tree.Transform.SetScale(0.5f);
@@ -454,10 +443,7 @@ namespace Deferred
             {
                 for (int i = 0; i < this.trees.Count; i++)
                 {
-                    Vector3 p;
-                    Triangle t;
-                    float d;
-                    if (this.FindTopGroundPosition((i * 10) - 35, 17, out p, out t, out d))
+                    if (this.FindTopGroundPosition((i * 10) - 35, 17, out Vector3 p, out Triangle t, out float d))
                     {
                         this.trees.Instance[i].Manipulator.SetScale(0.5f, true);
                         this.trees.Instance[i].Manipulator.SetPosition(p, true);
@@ -465,6 +451,13 @@ namespace Deferred
                 }
             }
             #endregion
+
+            var nvSettings = BuildSettings.Default;
+            nvSettings.Agents = new[] { this.tankAgentType };
+
+            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
         }
         public override void Initialized()
         {

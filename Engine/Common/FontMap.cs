@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 using System.IO;
+using System.Linq;
 
 namespace Engine.Common
 {
@@ -250,7 +251,7 @@ namespace Engine.Common
                         TEXTURESIZE,
                         out Vector3[] cv, out Vector2[] cuv, out uint[] ci);
 
-                    ci.ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
+                    ci.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
 
                     vertList.AddRange(VertexPositionTexture.Generate(cv, cuv));
 

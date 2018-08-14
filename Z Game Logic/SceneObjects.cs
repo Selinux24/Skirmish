@@ -175,13 +175,12 @@ namespace GameLogic
 
             this.SetGround(this.terrain, true);
 
-            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
+            GridInput input = new GridInput(GetTrianglesForNavigationGraph);
+            GridGenerationSettings settings = new GridGenerationSettings()
             {
-                Settings = new GridGenerationSettings()
-                {
-                    NodeSize = 5f,
-                },
+                NodeSize = 5f,
             };
+            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(settings, input);
 
             #region HUD
 

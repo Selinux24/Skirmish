@@ -64,7 +64,7 @@ namespace Engine
             foreach (var assetName in assets)
             {
                 var transforms = this.Assets
-                    .FindAll(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                    .Where(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
                     .Select(a => a.GetTransform()).ToArray();
 
                 res.Add(assetName, transforms);

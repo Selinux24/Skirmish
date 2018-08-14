@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Engine.Common
 {
@@ -177,7 +178,7 @@ namespace Engine.Common
             {
                 if (this.meshesByLOD.Keys.Count == 1)
                 {
-                    return this.meshesByLOD.Keys.ToArray()[0];
+                    return this.meshesByLOD.Keys.First();
                 }
                 else
                 {

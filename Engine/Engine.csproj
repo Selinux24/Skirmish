@@ -402,6 +402,7 @@
     <Compile Include="SegmentPath.cs" />
     <Compile Include="SerializationHelper.cs" />
     <Compile Include="ShadowMapFlags.cs" />
+    <Compile Include="SharpDXExtensions.cs" />
     <Compile Include="SkyPlane.cs" />
     <Compile Include="SkyPlaneMode.cs" />
     <Compile Include="SkyScattering.cs" />

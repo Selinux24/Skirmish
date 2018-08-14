@@ -7,6 +7,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Collada
@@ -826,7 +827,7 @@ namespace Collada
         {
             if (obstacles.Count > 0)
             {
-                int obstacleIndex = obstacles.Keys.ToArray()[0];
+                int obstacleIndex = obstacles.Keys.First();
                 obstacles.Remove(obstacleIndex);
                 this.RemoveObstacle(obstacleIndex);
             }

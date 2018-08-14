@@ -289,7 +289,7 @@ namespace Engine
         /// Increments rotation yaw (Y) to the left
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void YawLeft(GameTime gameTime, float a = Helper.RADIAN)
+        public void YawLeft(GameTime gameTime, float a = Helper.Radian)
         {
             this.Rotate(-a * gameTime.ElapsedSeconds, 0, 0);
         }
@@ -297,7 +297,7 @@ namespace Engine
         /// Increments rotation yaw (Y) to the right
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void YawRight(GameTime gameTime, float a = Helper.RADIAN)
+        public void YawRight(GameTime gameTime, float a = Helper.Radian)
         {
             this.Rotate(a * gameTime.ElapsedSeconds, 0, 0);
         }
@@ -305,7 +305,7 @@ namespace Engine
         /// Increments rotation pitch (X) up
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void PitchUp(GameTime gameTime, float a = Helper.RADIAN)
+        public void PitchUp(GameTime gameTime, float a = Helper.Radian)
         {
             this.Rotate(0, a * gameTime.ElapsedSeconds, 0);
         }
@@ -313,7 +313,7 @@ namespace Engine
         /// Increments rotation pitch (X) down
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void PitchDown(GameTime gameTime, float a = Helper.RADIAN)
+        public void PitchDown(GameTime gameTime, float a = Helper.Radian)
         {
             this.Rotate(0, -a * gameTime.ElapsedSeconds, 0);
         }
@@ -321,7 +321,7 @@ namespace Engine
         /// Increments rotation roll (Z) left
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void RollLeft(GameTime gameTime, float a = Helper.RADIAN)
+        public void RollLeft(GameTime gameTime, float a = Helper.Radian)
         {
             this.Rotate(0, 0, -a * gameTime.ElapsedSeconds);
         }
@@ -329,7 +329,7 @@ namespace Engine
         /// Increments rotation roll (Z) right
         /// </summary>
         /// <param name="a">Amount (radians)</param>
-        public void RollRight(GameTime gameTime, float a = Helper.RADIAN)
+        public void RollRight(GameTime gameTime, float a = Helper.Radian)
         {
             this.Rotate(0, 0, a * gameTime.ElapsedSeconds);
         }

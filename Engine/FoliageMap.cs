@@ -41,6 +41,20 @@ namespace Engine
 
             return new FoliageMap(colors);
         }
+        /// <summary>
+        /// Converts specified number relative to a total size and min/max magnitudes
+        /// </summary>
+        /// <param name="n">Number</param>
+        /// <param name="size">Total size</param>
+        /// <param name="min">Minimum</param>
+        /// <param name="max">Maximum</param>
+        /// <returns>Returns the relative value</returns>
+        public static float GetRelative(float n, float size, float min, float max)
+        {
+            float f = size / (max - min);
+
+            return (n + (max - min) - max) * f;
+        }
 
         /// <summary>
         /// Channle data
@@ -84,8 +98,8 @@ namespace Engine
         {
             if (this.m_Data != null)
             {
-                float pX = x.GetRelative(this.MaxX, 0, 1);
-                float pZ = y.GetRelative(this.MaxY, 0, 1);
+                float pX = GetRelative(x, this.MaxX, 0, 1);
+                float pZ = GetRelative(y, this.MaxY, 0, 1);
 
                 return this.m_Data[(int)pX, (int)pZ];
             }
@@ -118,8 +132,8 @@ namespace Engine
         {
             if (this.m_Data != null)
             {
-                float x = pos.X.GetRelative(this.MaxX, min.X, max.X);
-                float z = pos.Z.GetRelative(this.MaxY, min.Y, max.Y);
+                float x = GetRelative(pos.X, this.MaxX, min.X, max.X);
+                float z = GetRelative(pos.Z, this.MaxY, min.Y, max.Y);
 
                 return this.m_Data[(int)x, (int)z];
             }

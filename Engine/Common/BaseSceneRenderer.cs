@@ -3,6 +3,7 @@ using System.Diagnostics;
 #endif
 using SharpDX;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Common
 {
@@ -207,7 +208,7 @@ namespace Engine.Common
 
             //Update active components
             scene.GetComponents<IUpdatable>(c => c.Active)
-                .ForEach(c => c.Update(this.UpdateContext));
+                .ToList().ForEach(c => c.Update(this.UpdateContext));
 
             this.Updated = true;
 #if DEBUG
@@ -258,7 +259,7 @@ namespace Engine.Common
                     this.DrawShadowsContext.ViewProjection = this.UpdateContext.ViewProjection;
                     this.DrawShadowsContext.EyePosition = this.DrawContext.EyePosition;
 
-                    var toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll(s => s.Get<ICullable>());
+                    var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
 
                     uint assigned = 0;
 
@@ -336,7 +337,7 @@ namespace Engine.Common
                 var shadowObjs = scene.GetComponents(c => c.Visible == true && c.CastShadow == true);
                 if (shadowObjs.Count > 0)
                 {
-                    var toCullShadowObjs = shadowObjs.FindAll(s => s.Is<ICullable>()).ConvertAll(s => s.Get<ICullable>());
+                    var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
 
                     uint assigned = 0;
 
@@ -387,14 +388,14 @@ namespace Engine.Common
         {
             var graphics = this.Game.Graphics;
 
-            var objects = components.FindAll(c =>
+            var objects = components.Where(c =>
             {
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
 
                 return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
-            });
+            }).ToList();
             if (objects.Count > 0)
             {
                 objects.Sort((c1, c2) =>

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using SharpDX;
 using SharpDX.DXGI;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -228,14 +229,14 @@ namespace Engine
                     #region Deferred rendering
 
                     //Render to G-Buffer only opaque objects
-                    var deferredEnabledComponents = visibleComponents.FindAll(c => c.DeferredEnabled);
-                    if (deferredEnabledComponents.Count > 0)
+                    var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled);
+                    if (deferredEnabledComponents.Count() > 0)
                     {
                         #region Cull
 #if DEBUG
                         Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                        var toCullDeferred = deferredEnabledComponents.FindAll(s => s.Is<ICullable>()).ConvertAll(s => s.Get<ICullable>());
+                        var toCullDeferred = deferredEnabledComponents.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
 
                         bool draw = false;
                         if (scene.PerformFrustumCulling)
@@ -359,14 +360,14 @@ namespace Engine
                     #region Forward rendering
 
                     //Render to screen deferred disabled components
-                    var deferredDisabledComponents = visibleComponents.FindAll(c => !c.DeferredEnabled);
-                    if (deferredDisabledComponents.Count > 0)
+                    var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled);
+                    if (deferredDisabledComponents.Count() > 0)
                     {
                         #region Cull
 #if DEBUG
                         Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                        var toCullNotDeferred = deferredDisabledComponents.FindAll(s => s.Is<ICullable>()).ConvertAll(s => s.Get<ICullable>());
+                        var toCullNotDeferred = deferredDisabledComponents.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
 
                         bool draw = false;
                         if (scene.PerformFrustumCulling)
@@ -855,14 +856,14 @@ namespace Engine
             var graphics = this.Game.Graphics;
 
             //First opaques
-            var opaques = components.FindAll(c =>
+            var opaques = components.Where(c =>
             {
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
 
                 return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
-            });
+            }).ToList();
             if (opaques.Count > 0)
             {
                 context.DrawerMode = mode | DrawerModesEnum.OpaqueOnly;
@@ -919,7 +920,7 @@ namespace Engine
             }
 
             //Then transparents
-            var transparents = components.FindAll(c =>
+            var transparents = components.Where(c =>
             {
                 if (!c.AlphaEnabled) return false;
 
@@ -928,7 +929,7 @@ namespace Engine
                 var cull = c.Get<ICullable>();
 
                 return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
-            });
+            }).ToList();
             if (transparents.Count > 0)
             {
                 context.DrawerMode = mode | DrawerModesEnum.TransparentOnly;

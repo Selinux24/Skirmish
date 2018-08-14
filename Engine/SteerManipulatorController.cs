@@ -10,6 +10,20 @@ namespace Engine
     public class SteerManipulatorController : ManipulatorController
     {
         /// <summary>
+        /// Maps n into start and stop pairs
+        /// </summary>
+        /// <param name="n">Value to map</param>
+        /// <param name="start1">Start reference 1</param>
+        /// <param name="stop1">Stop reference 1</param>
+        /// <param name="start2">Start reference 2</param>
+        /// <param name="stop2">Stop reference 2</param>
+        /// <returns>Returns mapped value of n</returns>
+        public static float Map(float n, float start1, float stop1, float start2, float stop2)
+        {
+            return ((n - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+        }
+
+        /// <summary>
         /// Arriving radius
         /// </summary>
         public float ArrivingRadius = 10f;
@@ -45,7 +59,7 @@ namespace Engine
                     {
                         if (dToTarget < this.ArrivingRadius)
                         {
-                            var m = dToTarget.Map(0, this.ArrivingRadius, 0, maxSpeed);
+                            var m = Map(dToTarget, 0, this.ArrivingRadius, 0, maxSpeed);
                             desired = Vector3.Normalize(desired) * m;
                         }
                         else

@@ -595,13 +595,15 @@ namespace Engine.Content
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
         public ModelContent Filter(string geometryName)
         {
-            var geo = this.Geometry.FindAll(g => string.Equals(g.Key, geometryName + "-mesh", StringComparison.OrdinalIgnoreCase));
+            var geo = this.Geometry.Where(g => string.Equals(g.Key, geometryName + "-mesh", StringComparison.OrdinalIgnoreCase));
 
-            if (geo.Count > 0)
+            if (geo.Count() > 0)
             {
-                var res = new ModelContent();
-                res.Images = this.Images;
-                res.Materials = this.Materials;
+                var res = new ModelContent
+                {
+                    Images = this.Images,
+                    Materials = this.Materials,
+                };
 
                 foreach (var g in geo)
                 {
@@ -622,13 +624,15 @@ namespace Engine.Content
         {
             if (geometryNames != null && geometryNames.Count() > 0)
             {
-                var geo = this.Geometry.FindAll(g => geometryNames.Count(i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)) > 0);
+                var geo = this.Geometry.Where(g => geometryNames.Count(i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)) > 0);
 
-                if (geo.Count > 0)
+                if (geo.Count() > 0)
                 {
-                    var res = new ModelContent();
-                    res.Images = this.Images;
-                    res.Materials = this.Materials;
+                    var res = new ModelContent
+                    {
+                        Images = this.Images,
+                        Materials = this.Materials,
+                    };
 
                     foreach (var g in geo)
                     {
@@ -663,11 +667,11 @@ namespace Engine.Content
             {
                 foreach (var mask in masks)
                 {
-                    var geo = this.Geometry.FindAll(g =>
+                    var geo = this.Geometry.Where(g =>
                         g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                         g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
 
-                    if (geo.Count > 0)
+                    if (geo.Count() > 0)
                     {
                         if (res == null)
                         {
@@ -682,11 +686,11 @@ namespace Engine.Content
                             res.Geometry.Add(g.Key, g.Value);
                         }
 
-                        var lights = this.Lights.FindAll(l =>
+                        var lights = this.Lights.Where(l =>
                             l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                             l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
 
-                        if (lights.Count > 0)
+                        if (lights.Count() > 0)
                         {
                             foreach (var l in lights)
                             {
@@ -746,11 +750,11 @@ namespace Engine.Content
             {
                 foreach (var mask in masks)
                 {
-                    var geo = this.Geometry.FindAll(g =>
+                    var geo = this.Geometry.Where(g =>
                         g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                         g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
 
-                    if (geo.Count > 0)
+                    if (geo.Count() > 0)
                     {
                         foreach (var g in geo)
                         {

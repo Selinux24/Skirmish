@@ -2,6 +2,7 @@
 using System.Diagnostics;
 #endif
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -106,7 +107,7 @@ namespace Engine
 #if DEBUG
                         Stopwatch swCull = Stopwatch.StartNew();
 #endif
-                        var toCullVisible = visibleComponents.FindAll(s => s.Is<ICullable>()).ConvertAll(s => s.Get<ICullable>());
+                        var toCullVisible = visibleComponents.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
 
                         bool draw = false;
                         if (scene.PerformFrustumCulling)
@@ -222,14 +223,14 @@ namespace Engine
             var graphics = this.Game.Graphics;
 
             //First opaques
-            var opaques = components.FindAll(c =>
+            var opaques = components.Where(c =>
             {
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
 
                 return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
-            });
+            }).ToList();
             if (opaques.Count > 0)
             {
                 context.DrawerMode = mode | DrawerModesEnum.OpaqueOnly;
@@ -278,7 +279,7 @@ namespace Engine
             }
 
             //Then transparents
-            var transparents = components.FindAll(c =>
+            var transparents = components.Where(c =>
             {
                 if (!c.AlphaEnabled) return false;
 
@@ -287,7 +288,7 @@ namespace Engine
                 var cull = c.Get<ICullable>();
 
                 return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
-            });
+            }).ToList();
             if (transparents.Count > 0)
             {
                 context.DrawerMode = mode | DrawerModesEnum.TransparentOnly;

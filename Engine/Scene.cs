@@ -87,6 +87,22 @@ namespace Engine
 
             return false;
         }
+        /// <summary>
+        /// Gets first normal texture size for the specified pixel count
+        /// </summary>
+        /// <param name="pixelCount">Pixel count</param>
+        /// <returns>Returns the texture size</returns>
+        private static int GetTextureSize(int pixelCount)
+        {
+            int texWidth = (int)Math.Sqrt((float)pixelCount) + 1;
+            int texHeight = 1;
+            while (texHeight < texWidth)
+            {
+                texHeight = texHeight << 1;
+            }
+
+            return texHeight;
+        }
 
         /// <summary>
         /// Scene world matrix
@@ -635,7 +651,7 @@ namespace Engine
                 }
             }
 
-            int texWidth = Helper.GetTextureSize(values.Count);
+            int texWidth = GetTextureSize(values.Count);
 
             materialPalette = this.Game.ResourceManager.CreateGlobalResourceTexture2D("MaterialPalette", values.ToArray(), texWidth);
             materialPaletteWidth = (uint)texWidth;
@@ -690,7 +706,7 @@ namespace Engine
                 }
             }
 
-            int texWidth = Helper.GetTextureSize(values.Count);
+            int texWidth = GetTextureSize(values.Count);
 
             animationPalette = this.Game.ResourceManager.CreateGlobalResourceTexture2D("AnimationPalette", values.ToArray(), texWidth);
             animationPaletteWidth = (uint)texWidth;

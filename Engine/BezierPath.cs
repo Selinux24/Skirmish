@@ -1,29 +1,61 @@
+using SharpDX;
 using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Path of bezier curves
     /// </summary>
     public class BezierPath : IControllerPath
     {
-        private List<Vector3> originalControlPoints = new List<Vector3>();
-        private float? originalMinSqrDistance = null;
-        private float? originalMaxSqrDistance = null;
-        private float originalScale = 1f;
+        /// <summary>
+        /// Gets total segment's distance represented by a point list
+        /// </summary>
+        /// <param name="points">Point list</param>
+        /// <returns>Returns total segment's distance represented by a point list</returns>
+        public static float SegmentDistance(params Vector3[] points)
+        {
+            float length = 0;
 
+            Vector3 p0 = points[0];
+
+            for (int i = 1; i < points.Length; i++)
+            {
+                Vector3 p1 = points[i];
+
+                length += Vector3.Distance(p0, p1);
+
+                p0 = p1;
+            }
+
+            return length;
+        }
+
+        /// <summary>
+        /// Initial control points
+        /// </summary>
+        private readonly List<Vector3> initialControlPoints = new List<Vector3>();
+        /// <summary>
+        /// Initial minimum distance squared
+        /// </summary>
+        private float? initialMinSqrDistance = null;
+        /// <summary>
+        /// Initial maximum distance squared
+        /// </summary>
+        private float? initialMaxSqrDistance = null;
+        /// <summary>
+        /// Initial scale
+        /// </summary>
+        private float initialScale = 1f;
         /// <summary>
         /// Control points
         /// </summary>
-        private List<Vector3> controlPoints = new List<Vector3>();
+        private readonly List<Vector3> controlPoints = new List<Vector3>();
         /// <summary>
         /// Curve times dictionary
         /// </summary>
-        private Dictionary<int, float> curveTimes = new Dictionary<int, float>();
+        private readonly Dictionary<int, float> curveTimes = new Dictionary<int, float>();
 
         /// <summary>
         /// Control points
@@ -97,14 +129,14 @@ namespace Engine
         /// </remarks>
         public void SetControlPoints(Vector3[] points, float scale)
         {
-            this.originalControlPoints.Clear();
-            this.originalMinSqrDistance = null;
-            this.originalMaxSqrDistance = null;
-            this.originalScale = scale;
+            this.initialControlPoints.Clear();
+            this.initialMinSqrDistance = null;
+            this.initialMaxSqrDistance = null;
+            this.initialScale = scale;
 
             if (points.Length > 0)
             {
-                this.originalControlPoints.AddRange(points);
+                this.initialControlPoints.AddRange(points);
             }
 
             this.controlPoints.Clear();
@@ -207,8 +239,8 @@ namespace Engine
 
             this.SetControlPoints(sampledPoints, scale);
 
-            this.originalMinSqrDistance = minSqrDistance;
-            this.originalMaxSqrDistance = maxSqrDistance;
+            this.initialMinSqrDistance = minSqrDistance;
+            this.initialMaxSqrDistance = maxSqrDistance;
         }
         /// <summary>
         /// Updates curve internal information
@@ -239,7 +271,7 @@ namespace Engine
                     curvePoint.Add(this.CalculateBezierPoint(i, t));
                 }
 
-                float length = Helper.Distance(curvePoint.ToArray());
+                float length = SegmentDistance(curvePoint.ToArray());
 
                 this.Length += length;
 
@@ -253,19 +285,19 @@ namespace Engine
         /// <param name="point">Point</param>
         public void AddPoint(Vector3 point)
         {
-            this.originalControlPoints.Add(point);
+            this.initialControlPoints.Add(point);
 
-            if (this.originalMinSqrDistance.HasValue && this.originalMaxSqrDistance.HasValue)
+            if (this.initialMinSqrDistance.HasValue && this.initialMaxSqrDistance.HasValue)
             {
                 this.SetControlPoints(
-                    this.originalControlPoints.ToArray(),
-                    this.originalMinSqrDistance.Value,
-                    this.originalMaxSqrDistance.Value,
-                    this.originalScale);
+                    this.initialControlPoints.ToArray(),
+                    this.initialMinSqrDistance.Value,
+                    this.initialMaxSqrDistance.Value,
+                    this.initialScale);
             }
             else
             {
-                this.SetControlPoints(this.originalControlPoints.ToArray(), this.originalScale);
+                this.SetControlPoints(this.initialControlPoints.ToArray(), this.initialScale);
             }
         }
 

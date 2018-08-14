@@ -99,6 +99,22 @@ namespace Collada
         }
         private void InitializeNavmesh()
         {
+            this.inputGeometry = this.AddComponent<Model>(
+                new ModelDescription()
+                {
+                    TextureIndex = 0,
+                    CastShadow = true,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/SceneNavmeshTest",
+                        ModelContentFilename = "modular_dungeon.xml",
+                    }
+                },
+                SceneObjectUsageEnum.Ground);
+
+            this.SetGround(inputGeometry, true);
+
             //Rasterization
             nmsettings.CellSize = 0.20f;
             nmsettings.CellHeight = 0.15f;
@@ -119,22 +135,6 @@ namespace Collada
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
-
-            this.inputGeometry = this.AddComponent<Model>(
-                new ModelDescription()
-                {
-                    TextureIndex = 0,
-                    CastShadow = true,
-                    UseAnisotropicFiltering = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources/SceneNavmeshTest",
-                        ModelContentFilename = "modular_dungeon.xml",
-                    }
-                },
-                SceneObjectUsageEnum.Ground);
-
-            this.SetGround(inputGeometry, true);
         }
         private void InitializeDebug()
         {

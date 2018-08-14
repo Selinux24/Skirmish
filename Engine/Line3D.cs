@@ -427,12 +427,12 @@ namespace Engine
             Vector3 d = to - from;
             float len = d.Length();
 
-            Helper.EvalArc(from, d, len * h, pad, out Vector3 prev);
+            EvalArc(from, d, len * h, pad, out Vector3 prev);
 
             for (int i = 1; i <= points; i++)
             {
                 float u = pad + i * scale;
-                Helper.EvalArc(from, d, len * h, u, out Vector3 pt);
+                EvalArc(from, d, len * h, u, out Vector3 pt);
 
                 lines.Add(new Line3D(prev, pt));
 
@@ -488,7 +488,6 @@ namespace Engine
             return lines.ToArray();
         }
 
-
         private static Line3D[] CreateFromVertices(Vector3[] vertices, int[] indices)
         {
             List<Line3D> lines = new List<Line3D>();
@@ -505,6 +504,21 @@ namespace Engine
             }
 
             return lines.ToArray();
+        }
+        /// <summary>
+        /// Eval arc
+        /// </summary>
+        /// <param name="v0">First point</param>
+        /// <param name="v1">Second point</param>
+        /// <param name="h">Height</param>
+        /// <param name="u">Evaluation time</param>
+        /// <param name="res">Resulting point</param>
+        private static void EvalArc(Vector3 v0, Vector3 v1, float h, float u, out Vector3 res)
+        {
+            res = new Vector3(
+                v0.X + v1.X * u,
+                v0.Y + v1.Y * u + h * (1 - (u * 2 - 1) * (u * 2 - 1)),
+                v0.Z + v1.Z * u);
         }
 
         /// <summary>

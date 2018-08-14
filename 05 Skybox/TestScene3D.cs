@@ -13,7 +13,7 @@ namespace Skybox
         private const int layerHUD = 99;
         private const float alpha = 0.25f;
 
-        private Vector2[] firePositions = new[]
+        private readonly Vector2[] firePositions = new[]
         {
             new Vector2(+5, +5),
             new Vector2(-5, +5),
@@ -22,10 +22,10 @@ namespace Skybox
         };
         private Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
         private Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
-        private int bsphSlices = 20;
-        private int bsphStacks = 10;
+        private readonly int bsphSlices = 20;
+        private readonly int bsphStacks = 10;
 
-        private Agent walker = new Agent()
+        private readonly Agent walker = new Agent()
         {
             Name = "Walker",
             Height = 1.2f,
@@ -189,7 +189,7 @@ namespace Skybox
             mat.EmissionColor = Color.Yellow;
 
             GeometryUtil.CreateSphere(
-                0.05f, 32, 32, 
+                0.05f, 32, 32,
                 out Vector3[] v, out Vector3[] n, out Vector2[] uv, out uint[] ix);
 
             VertexData[] vertices = new VertexData[v.Length];
@@ -271,7 +271,7 @@ namespace Skybox
 
                 firePositions3D[i] = Vector3.Zero;
                 this.FindTopGroundPosition(
-                    this.firePositions[i].X, this.firePositions[i].Y, 
+                    this.firePositions[i].X, this.firePositions[i].Y,
                     out firePositions3D[i], out Triangle t, out float d);
 
                 this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
@@ -301,6 +301,8 @@ namespace Skybox
 
             #region Navigation Mesh
 
+            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
+
             var nvSettings = BuildSettings.Default;
             nvSettings.TileSize = 32;
             nvSettings.CellSize = 0.05f;
@@ -308,10 +310,7 @@ namespace Skybox
             nvSettings.PartitionType = SamplePartitionTypeEnum.Monotone;
             nvSettings.Agents[0] = this.walker;
 
-            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
-            {
-                Settings = nvSettings,
-            };
+            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
 
             #endregion
         }

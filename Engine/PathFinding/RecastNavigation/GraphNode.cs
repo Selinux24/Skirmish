@@ -32,7 +32,7 @@ namespace Engine.PathFinding.RecastNavigation
                     var bse = mesh.GetPolyRefBase(tile);
 
                     int tileNum = mesh.DecodePolyIdTile(bse);
-                    var tileColor = Helper.IntToCol(tileNum, 128);
+                    var tileColor = IntToCol(tileNum, 128);
 
                     var pd = tile.detailMeshes[t];
 
@@ -67,6 +67,34 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             return nodes.ToArray();
+        }
+        /// <summary>
+        /// Bitwise secret wisdoms
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static int Bit(int a, int b)
+        {
+            return (a & (1 << b)) >> b;
+        }
+        /// <summary>
+        /// Converts an integer value to Color4
+        /// </summary>
+        /// <param name="value">Integer value</param>
+        /// <param name="alpha">Alpha value from 0 to 255</param>
+        /// <returns>Returns the Color4 value</returns>
+        public static Color4 IntToCol(int value, int alpha)
+        {
+            int r = Bit(value, 0) + Bit(value, 3) * 2 + 1;
+            int g = Bit(value, 1) + Bit(value, 4) * 2 + 1;
+            int b = Bit(value, 2) + Bit(value, 5) * 2 + 1;
+
+            return new Color4(
+                1 - r * 63.0f / 255.0f,
+                1 - g * 63.0f / 255.0f,
+                1 - b * 63.0f / 255.0f,
+                alpha / 255.0f);
         }
 
         /// <summary>
@@ -108,18 +136,14 @@ namespace Engine.PathFinding.RecastNavigation
         public bool Contains(Vector3 point, out float distance)
         {
             distance = float.MaxValue;
+
             foreach (var tri in Triangles)
             {
-                if (Intersection.PointInPoly(point, tri.GetVertices()))
+                if (Intersection.PointInTriangle(point, tri.Point1, tri.Point2, tri.Point3, out float d))
                 {
-                    float d = Intersection.PointToTriangle(point, tri.Point1, tri.Point2, tri.Point3);
-                    if (d == 0)
-                    {
-                        distance = 0;
-                        return true;
-                    }
+                    distance = d;
 
-                    distance = Math.Min(distance, d);
+                    return true;
                 }
             }
 
