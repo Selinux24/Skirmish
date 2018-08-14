@@ -1,7 +1,7 @@
 # Skirmish
 Game and prototypes with SharpDX and Directx 11
 
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/ruiiqv00b6e17ibj/branch/master?svg=true)](https://ci.appveyor.com/project/Selinux24/skirmish/branch/master)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/selinux24/skirmish?svg=true&branch=master)](https://ci.appveyor.com/project/Selinux24/skirmish/branch/master)
 
 ### What is it?
 
