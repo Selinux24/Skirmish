@@ -1,6 +1,8 @@
 # Skirmish
 Game and prototypes with SharpDX and Directx 11
 
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/ruiiqv00b6e17ibj/branch/master?svg=true)](https://ci.appveyor.com/project/Selinux24/skirmish/branch/master)
+
 ### What is it?
 
 Skirmish is a collection of projects created for testing a simple game engine, that is being built tailor-made for a real game.
