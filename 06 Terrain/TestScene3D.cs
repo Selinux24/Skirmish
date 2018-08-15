@@ -629,15 +629,6 @@ namespace Terrain
             this.AttachToGround(this.tree1, false);
             this.AttachToGround(this.tree2, false);
 
-            var navSettings = BuildSettings.Default;
-            navSettings.Agents = new[]
-            {
-                walkerAgentType,
-                tankAgentType,
-            };
-            InputGeometry geom = new InputGeometry(GetTrianglesForNavigationGraph);
-            this.PathFinderDescription = new PathFinderDescription(navSettings, geom);
-
             //Helipod
             {
                 if (this.FindTopGroundPosition(75, 75, out Vector3 p, out Triangle t, out float d))
@@ -735,6 +726,16 @@ namespace Terrain
             }
 
             #endregion
+
+            var navSettings = BuildSettings.Default;
+            navSettings.Agents = new[]
+            {
+                walkerAgentType,
+                tankAgentType,
+            };
+            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            this.PathFinderDescription = new PathFinderDescription(navSettings, nvInput);
 
             this.gardener.Instance.SetWind(this.windDirection, this.windStrength);
 
