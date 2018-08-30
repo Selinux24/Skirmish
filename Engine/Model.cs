@@ -588,31 +588,29 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
-            position = new Vector3();
-            triangle = new Triangle();
-            distance = float.MaxValue;
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
 
-            BoundingSphere bsph = this.GetBoundingSphere();
+            var bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-
-                Vector3 pos;
-                Triangle tri;
-                float d;
-                if (Intersection.IntersectNearest(ref ray, triangles, facingOnly, out pos, out tri, out d))
+                if (triangles != null && triangles.Length > 0)
                 {
-                    position = pos;
-                    triangle = tri;
-                    distance = d;
+                    if (Intersection.IntersectNearest(ref ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
+                    {
+                        result.Position = pos;
+                        result.Item = tri;
+                        result.Distance = d;
 
-                    return true;
+                        return true;
+                    }
                 }
             }
 
@@ -623,31 +621,29 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
-            position = new Vector3();
-            triangle = new Triangle();
-            distance = float.MaxValue;
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
 
-            BoundingSphere bsph = this.GetBoundingSphere();
+            var bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-
-                Vector3 pos;
-                Triangle tri;
-                float d;
-                if (Intersection.IntersectFirst(ref ray, triangles, facingOnly, out pos, out tri, out d))
+                if (triangles != null && triangles.Length > 0)
                 {
-                    position = pos;
-                    triangle = tri;
-                    distance = d;
+                    if (Intersection.IntersectFirst(ref ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
+                    {
+                        result.Position = pos;
+                        result.Item = tri;
+                        result.Distance = d;
 
-                    return true;
+                        return true;
+                    }
                 }
             }
 
@@ -658,31 +654,34 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="positions">Ground positions if exists</param>
-        /// <param name="triangles">Triangles found</param>
-        /// <param name="distances">Distances to positions</param>
+        /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        public bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
         {
-            positions = null;
-            triangles = null;
-            distances = null;
+            results = null;
 
-            BoundingSphere bsph = this.GetBoundingSphere();
+            var bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
-                var tris = this.GetTriangles();
-
-                Vector3[] pos;
-                Triangle[] tri;
-                float[] ds;
-                if (Intersection.IntersectAll(ref ray, tris, facingOnly, out pos, out tri, out ds))
+                var triangles = this.GetTriangles();
+                if (triangles != null && triangles.Length > 0)
                 {
-                    positions = pos;
-                    triangles = tri;
-                    distances = ds;
+                    if (Intersection.IntersectAll(ref ray, triangles, facingOnly, out Vector3[] pos, out Triangle[] tri, out float[] ds))
+                    {
+                        results = new PickingResult<Triangle>[pos.Length];
 
-                    return true;
+                        for (int i = 0; i < results.Length; i++)
+                        {
+                            results[i] = new PickingResult<Triangle>
+                            {
+                                Position = pos[i],
+                                Item = tri[i],
+                                Distance = ds[i]
+                            };
+                        }
+
+                        return true;
+                    }
                 }
             }
 

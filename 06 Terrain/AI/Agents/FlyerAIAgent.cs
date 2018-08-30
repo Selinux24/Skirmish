@@ -56,12 +56,9 @@ namespace Terrain.AI.Agents
             var model = this.SceneObject.Get<Model>();
 
             //Find nearest ground position
-            Vector3 p;
-            Triangle t;
-            float d;
-            if (this.Parent.Scene.FindNearestGroundPosition(this.Manipulator.Position, out p, out t, out d))
+            if (this.Parent.Scene.FindNearestGroundPosition(this.Manipulator.Position, out PickingResult<Triangle> r))
             {
-                this.SetRouteToPoint(p, 15f, false);
+                this.SetRouteToPoint(r.Position, 15f, false);
                 if (model != null)
                 {
                     model.AnimationController.Stop();

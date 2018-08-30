@@ -269,10 +269,10 @@ namespace Skybox
                 if (i == 2) color = Color.Green;
                 if (i == 3) color = Color.LightBlue;
 
-                firePositions3D[i] = Vector3.Zero;
                 this.FindTopGroundPosition(
                     this.firePositions[i].X, this.firePositions[i].Y,
-                    out firePositions3D[i], out Triangle t, out float d);
+                    out PickingResult<Triangle> result);
+                firePositions3D[i] = result.Position;
 
                 this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
                 this.torchs.Instance[i].Manipulator.SetPosition(firePositions3D[i], true);
@@ -466,12 +466,9 @@ namespace Skybox
             {
                 Ray pRay = this.GetPickingRay();
 
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.ruins.Instance.PickNearest(ref pRay, true, out p, out t, out d))
+                if (this.ruins.Instance.PickNearest(ref pRay, true, out PickingResult<Triangle> r))
                 {
-                    this.volumesDrawer.Instance.SetTriangles(Color.White, new[] { t });
+                    this.volumesDrawer.Instance.SetTriangles(Color.White, new[] { r.Item });
                 }
             }
 

@@ -103,6 +103,10 @@ namespace Engine
 
             return texHeight;
         }
+        /// <summary>
+        /// Ground usage enum for ground picking
+        /// </summary>
+        private const SceneObjectUsageEnum GroundUsage = SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding;
 
         /// <summary>
         /// Scene world matrix
@@ -815,10 +819,7 @@ namespace Engine
                 var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
                 if (pickable != null)
                 {
-                    Vector3 p;
-                    Triangle t;
-                    float d;
-                    if (pickable.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                    if (pickable.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> r))
                     {
                         model = obj.Item1;
 
@@ -835,107 +836,91 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="item">Ray intersectable object found</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle item, out float distance)
+        public bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
-            return PickNearest(ref ray, facingOnly, SceneObjectUsageEnum.None, out position, out item, out distance);
+            return PickNearest(ref ray, facingOnly, SceneObjectUsageEnum.None, out result);
         }
         /// <summary>
         /// Gets first picking position of giving ray
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="item">Ray intersectable object found</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle item, out float distance)
+        public bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
-            return PickFirst(ref ray, facingOnly, SceneObjectUsageEnum.None, out position, out item, out distance);
+            return PickFirst(ref ray, facingOnly, SceneObjectUsageEnum.None, out result);
         }
         /// <summary>
         /// Gets all picking position of giving ray
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="positions">Ground positions if exists</param>
-        /// <param name="item">Ray intersectable objects found</param>
-        /// <param name="distances">Distances to positions</param>
+        /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] item, out float[] distances)
+        public bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
         {
-            return PickAll(ref ray, facingOnly, SceneObjectUsageEnum.None, out positions, out item, out distances);
+            return PickAll(ref ray, facingOnly, SceneObjectUsageEnum.None, out results);
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="z">Z coordinate</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <param name="position">Ground position if exists</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindTopGroundPosition(float x, float z, out Vector3 position, out Triangle triangle, out float distance)
+        public bool FindTopGroundPosition(float x, float z, out PickingResult<Triangle> result)
         {
-            Ray ray = this.GetTopDownRay(x, z);
+            var ray = this.GetTopDownRay(x, z);
 
-            return this.PickNearest(ref ray, true, SceneObjectUsageEnum.Ground, out position, out triangle, out distance);
+            return this.PickNearest(ref ray, true, GroundUsage, out result);
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="z">Z coordinate</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindFirstGroundPosition(float x, float z, out Vector3 position, out Triangle triangle, out float distance)
+        public bool FindFirstGroundPosition(float x, float z, out PickingResult<Triangle> result)
         {
-            Ray ray = this.GetTopDownRay(x, z);
+            var ray = this.GetTopDownRay(x, z);
 
-            return this.PickFirst(ref ray, true, SceneObjectUsageEnum.Ground, out position, out triangle, out distance);
+            return this.PickFirst(ref ray, true, GroundUsage, out result);
         }
         /// <summary>
         /// Gets all ground positions giving x, z coordinates
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="z">Z coordinate</param>
-        /// <param name="positions">Ground positions if exists</param>
-        /// <param name="triangles">Triangles found</param>
-        /// <param name="distances">Distances to positions</param>
+        /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground positions found</returns>
-        public bool FindAllGroundPosition(float x, float z, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        public bool FindAllGroundPosition(float x, float z, out PickingResult<Triangle>[] results)
         {
-            Ray ray = this.GetTopDownRay(x, z);
+            var ray = this.GetTopDownRay(x, z);
 
-            return this.PickAll(ref ray, true, SceneObjectUsageEnum.Ground, out positions, out triangles, out distances);
+            return this.PickAll(ref ray, true, GroundUsage, out results);
         }
         /// <summary>
         /// Gets nearest ground position to "from" position
         /// </summary>
         /// <param name="from">Position from</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="triangle">Triangle found</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool FindNearestGroundPosition(Vector3 from, out Vector3 position, out Triangle triangle, out float distance)
+        public bool FindNearestGroundPosition(Vector3 from, out PickingResult<Triangle> result)
         {
-            Ray ray = this.GetTopDownRay(from.X, from.Z);
+            var ray = this.GetTopDownRay(from.X, from.Z);
 
-            Vector3[] pArray;
-            Triangle[] tArray;
-            float[] dArray;
-            if (this.PickAll(ref ray, true, SceneObjectUsageEnum.Ground, out pArray, out tArray, out dArray))
+            bool picked = this.PickAll(ref ray, true, GroundUsage, out PickingResult<Triangle>[] pResults);
+            if (picked)
             {
                 int index = -1;
                 float dist = float.MaxValue;
-                for (int i = 0; i < pArray.Length; i++)
+                for (int i = 0; i < pResults.Length; i++)
                 {
-                    float d = Vector3.DistanceSquared(from, pArray[i]);
+                    float d = Vector3.DistanceSquared(from, pResults[i].Position);
                     if (d <= dist)
                     {
                         dist = d;
@@ -944,17 +929,16 @@ namespace Engine
                     }
                 }
 
-                position = pArray[index];
-                triangle = tArray[index];
-                distance = dArray[index];
+                result = pResults[index];
 
                 return true;
             }
             else
             {
-                position = Vector3.Zero;
-                triangle = new Triangle();
-                distance = float.MaxValue;
+                result = new PickingResult<Triangle>()
+                {
+                    Distance = float.MaxValue,
+                };
 
                 return false;
             }
@@ -965,15 +949,14 @@ namespace Engine
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="usage">Component usage</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="item">Ray intersectable object found</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out Vector3 position, out Triangle item, out float distance)
+        public bool PickNearest(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out PickingResult<Triangle> result)
         {
-            position = Vector3.Zero;
-            item = new Triangle();
-            distance = float.MaxValue;
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
 
             var cmpList = usage == SceneObjectUsageEnum.None ?
                 this.components :
@@ -996,18 +979,13 @@ namespace Engine
                     var components = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in components)
                     {
-                        Vector3 p;
-                        Triangle t;
-                        float d;
-                        if (pickable.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                        if (pickable.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> r))
                         {
-                            if (d < bestDistance)
+                            if (r.Distance < bestDistance)
                             {
-                                bestDistance = d;
+                                bestDistance = r.Distance;
 
-                                position = p;
-                                item = t;
-                                distance = d;
+                                result = r;
                             }
 
                             picked = true;
@@ -1018,18 +996,13 @@ namespace Engine
                 {
                     var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
 
-                    Vector3 p;
-                    Triangle t;
-                    float d;
-                    if (pickable.PickNearest(ref ray, facingOnly, out p, out t, out d))
+                    if (pickable.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> r))
                     {
-                        if (d < bestDistance)
+                        if (r.Distance < bestDistance)
                         {
-                            bestDistance = d;
+                            bestDistance = r.Distance;
 
-                            position = p;
-                            item = t;
-                            distance = d;
+                            result = r;
                         }
 
                         picked = true;
@@ -1045,15 +1018,14 @@ namespace Engine
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="usage">Component usage</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="item">Ray intersectable object found</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out Vector3 position, out Triangle item, out float distance)
+        public bool PickFirst(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out PickingResult<Triangle> result)
         {
-            position = Vector3.Zero;
-            item = new Triangle();
-            distance = float.MaxValue;
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
 
             var cmpList = usage == SceneObjectUsageEnum.None ?
                 this.components :
@@ -1068,14 +1040,9 @@ namespace Engine
                     var components = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in components)
                     {
-                        Vector3 p;
-                        Triangle t;
-                        float d;
-                        if (pickable.PickFirst(ref ray, facingOnly, out p, out t, out d))
+                        if (pickable.PickFirst(ref ray, facingOnly, out PickingResult<Triangle> r))
                         {
-                            position = p;
-                            item = t;
-                            distance = d;
+                            result = r;
 
                             return true;
                         }
@@ -1085,14 +1052,9 @@ namespace Engine
                 {
                     var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
 
-                    Vector3 p;
-                    Triangle t;
-                    float d;
-                    if (pickable.PickFirst(ref ray, facingOnly, out p, out t, out d))
+                    if (pickable.PickFirst(ref ray, facingOnly, out PickingResult<Triangle> r))
                     {
-                        position = p;
-                        item = t;
-                        distance = d;
+                        result = r;
 
                         return true;
                     }
@@ -1107,15 +1069,11 @@ namespace Engine
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="usage">Component usage</param>
-        /// <param name="positions">Ground positions if exists</param>
-        /// <param name="item">Ray intersectable objects found</param>
-        /// <param name="distances">Distances to positions</param>
+        /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out Vector3[] positions, out Triangle[] item, out float[] distances)
+        public bool PickAll(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out PickingResult<Triangle>[] results)
         {
-            positions = null;
-            item = null;
-            distances = null;
+            results = null;
 
             var cmpList = usage == SceneObjectUsageEnum.None ?
                 this.components :
@@ -1123,9 +1081,7 @@ namespace Engine
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
 
-            List<Vector3> lPositions = new List<Vector3>();
-            List<Triangle> lTriangles = new List<Triangle>();
-            List<float> lDistances = new List<float>();
+            List<PickingResult<Triangle>> lResults = new List<PickingResult<Triangle>>();
 
             foreach (var obj in coarse)
             {
@@ -1134,14 +1090,9 @@ namespace Engine
                     var components = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in components)
                     {
-                        Vector3[] p;
-                        Triangle[] t;
-                        float[] d;
-                        if (pickable.PickAll(ref ray, facingOnly, out p, out t, out d))
+                        if (pickable.PickAll(ref ray, facingOnly, out PickingResult<Triangle>[] r))
                         {
-                            lPositions.AddRange(p);
-                            lTriangles.AddRange(t);
-                            lDistances.AddRange(d);
+                            lResults.AddRange(r);
                         }
                     }
                 }
@@ -1149,23 +1100,16 @@ namespace Engine
                 {
                     var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
 
-                    Vector3[] p;
-                    Triangle[] t;
-                    float[] d;
-                    if (pickable.PickAll(ref ray, facingOnly, out p, out t, out d))
+                    if (pickable.PickAll(ref ray, facingOnly, out PickingResult<Triangle>[] r))
                     {
-                        lPositions.AddRange(p);
-                        lTriangles.AddRange(t);
-                        lDistances.AddRange(d);
+                        lResults.AddRange(r);
                     }
                 }
             }
 
-            positions = lPositions.ToArray();
-            item = lTriangles.ToArray();
-            distances = lDistances.ToArray();
+            results = lResults.ToArray();
 
-            return lPositions.Count > 0;
+            return results.Length > 0;
         }
         /// <summary>
         /// Gets bounding box
@@ -1449,10 +1393,10 @@ namespace Engine
                 {
                     for (int i = 0; i < positions.Count; i++)
                     {
-                        if (FindNearestGroundPosition(positions[i], out Vector3 position, out Triangle triangle, out float distance))
+                        if (FindNearestGroundPosition(positions[i], out PickingResult<Triangle> r))
                         {
-                            positions[i] = position;
-                            normals[i] = triangle.Normal;
+                            positions[i] = r.Position;
+                            normals[i] = r.Item.Normal;
                         }
                     }
                 }
@@ -1492,35 +1436,20 @@ namespace Engine
 
             if (prevPosition != newPosition)
             {
-                bool found = this.FindNearestGroundPosition(
-                    newPosition - new Vector3(0, agent.Height, 0),
-                    out Vector3 walkerPos,
-                    out Triangle t,
-                    out float d);
-
-                if (found)
+                if (this.FindAllGroundPosition(newPosition.X, newPosition.Z, out PickingResult<Triangle>[] results))
                 {
-                    if (this.IsWalkable(agent, walkerPos, out Vector3? nearest))
-                    {
-                        finalPosition = walkerPos;
-                        finalPosition.Y += agent.Height;
+                    Vector3 newFeetPosition = newPosition;
+                    newFeetPosition.Y -= agent.Height;
 
-                        var moveP = newPosition - prevPosition;
-                        var moveV = finalPosition - prevPosition;
-                        if (moveV.LengthSquared() > moveP.LengthSquared())
-                        {
-                            finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
-                        }
+                    results = results
+                        .Where(r => Vector3.Distance(r.Position, newFeetPosition) < agent.Height)
+                        .OrderBy(r => r.Distance).ToArray();
 
-                        return true;
-                    }
-                    else
+                    for (int i = 0; i < results.Length; i++)
                     {
-                        //Not walkable but nearest position found
-                        if (nearest.HasValue)
+                        if (this.IsWalkable(agent, results[i].Position, out Vector3? nearest))
                         {
-                            //Adjust height
-                            finalPosition = nearest.Value;
+                            finalPosition = results[i].Position;
                             finalPosition.Y += agent.Height;
 
                             var moveP = newPosition - prevPosition;
@@ -1531,6 +1460,25 @@ namespace Engine
                             }
 
                             return true;
+                        }
+                        else
+                        {
+                            //Not walkable but nearest position found
+                            if (nearest.HasValue)
+                            {
+                                //Adjust height
+                                finalPosition = nearest.Value;
+                                finalPosition.Y += agent.Height;
+
+                                var moveP = newPosition - prevPosition;
+                                var moveV = finalPosition - prevPosition;
+                                if (moveV.LengthSquared() > moveP.LengthSquared())
+                                {
+                                    finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+                                }
+
+                                return true;
+                            }
                         }
                     }
                 }

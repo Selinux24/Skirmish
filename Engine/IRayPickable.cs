@@ -12,32 +12,26 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="item">Ray intersectable object found</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance);
+        bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<T> result);
         /// <summary>
         /// Gets first picking position of giving ray
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Ground position if exists</param>
-        /// <param name="item">Ray intersectable object found</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
         /// <remarks>Based on geometry, not distance. For distance tests use PickNearest instead.</remarks>
-        bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance);
+        bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<T> result);
         /// <summary>
         /// Gets all picking position of giving ray
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="positions">Ground positions if exists</param>
-        /// <param name="item">Ray intersectable objects found</param>
-        /// <param name="distances">Distances to positions</param>
+        /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out T[] item, out float[] distances);
+        bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<T>[] results);
 
         /// <summary>
         /// Gets bounding sphere
@@ -49,7 +43,7 @@ namespace Engine
         /// </summary>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         BoundingBox GetBoundingBox();
-      
+
         /// <summary>
         /// Gets the volume geometry of the instance
         /// </summary>

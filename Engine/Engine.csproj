@@ -388,6 +388,7 @@
     <Compile Include="PathFinding\RecastNavigation\NavMesh.cs" />
     <Compile Include="PathFinding\PathFinderDescription.cs" />
     <Compile Include="Collections\ProximityGrid.cs" />
+    <Compile Include="PickingResult.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

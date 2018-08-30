@@ -162,16 +162,18 @@ namespace Engine
 
                         if (plant)
                         {
-                            Vector3 intersectionPoint;
-                            Triangle t;
-                            float d;
-                            if (scene.FindTopGroundPosition(pos.X, pos.Z, out intersectionPoint, out t, out d))
+                            var ray = scene.GetTopDownRay(pos);
+                            bool found = scene.PickFirst(
+                                ref ray, true,
+                                SceneObjectUsageEnum.Ground,
+                                out PickingResult<Triangle> r);
+                            if (found)
                             {
-                                if (t.Normal.Y > 0.5f)
+                                if (r.Item.Normal.Y > 0.5f)
                                 {
                                     vertexData.Add(new VertexBillboard()
                                     {
-                                        Position = intersectionPoint,
+                                        Position = r.Position,
                                         Size = new Vector2(
                                             rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
                                             rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),

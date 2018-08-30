@@ -195,6 +195,20 @@ namespace Engine.PathFinding.AStar
         {
 
         }
+        /// <summary>
+        /// Fires the updated event
+        /// </summary>
+        protected void FireUpdated()
+        {
+            this.Updated?.Invoke(this, new EventArgs());
+        }
+        /// <summary>
+        /// Fires the updating event
+        /// </summary>
+        protected void FireUpdating()
+        {
+            this.Updating?.Invoke(this, new EventArgs());
+        }
 
         /// <summary>
         /// Gets text representation of instance

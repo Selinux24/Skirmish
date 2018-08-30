@@ -32,30 +32,24 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
-        /// <param name="position">Picked position if exists</param>
-        /// <param name="triangle">Picked triangle if exists</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public virtual bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public virtual bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
             bool res = false;
 
-            position = Vector3.Zero;
-            triangle = new Triangle();
-            distance = float.MaxValue;
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
 
             if (this.groundPickingQuadtree != null)
             {
-                Vector3 gP;
-                Triangle gT;
-                float gD;
-                if (this.groundPickingQuadtree.PickNearest(ref ray, facingOnly, out gP, out gT, out gD))
+                if (this.groundPickingQuadtree.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> gResult))
                 {
-                    if (distance > gD)
+                    if (result.Distance > gResult.Distance)
                     {
-                        position = gP;
-                        triangle = gT;
-                        distance = gD;
+                        result = gResult;
                     }
 
                     res = true;
@@ -69,30 +63,24 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
-        /// <param name="position">Picked position if exists</param>
-        /// <param name="triangle">Picked triangle if exists</param>
-        /// <param name="distance">Distance to position</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public virtual bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out Triangle triangle, out float distance)
+        public virtual bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
             bool res = false;
 
-            position = Vector3.Zero;
-            triangle = new Triangle();
-            distance = float.MaxValue;
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
 
             if (this.groundPickingQuadtree != null)
             {
-                Vector3 gP;
-                Triangle gT;
-                float gD;
-                if (this.groundPickingQuadtree.PickFirst(ref ray, facingOnly, out gP, out gT, out gD))
+                if (this.groundPickingQuadtree.PickFirst(ref ray, facingOnly, out PickingResult<Triangle> gResult))
                 {
-                    if (distance > gD)
+                    if (result.Distance > gResult.Distance)
                     {
-                        position = gP;
-                        triangle = gT;
-                        distance = gD;
+                        result = gResult;
                     }
 
                     res = true;
@@ -106,28 +94,19 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
-        /// <param name="positions">Picked positions if exists</param>
-        /// <param name="triangles">Picked triangles if exists</param>
-        /// <param name="distances">Distances to positions</param>
+        /// <param name="results">Picking results</param>
         /// <returns>Returns true if picked position found</returns>
-        public virtual bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out Triangle[] triangles, out float[] distances)
+        public virtual bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
         {
             bool res = false;
 
-            positions = null;
-            triangles = null;
-            distances = null;
+            results = null;
 
             if (this.groundPickingQuadtree != null)
             {
-                Vector3[] gP;
-                Triangle[] gT;
-                float[] gD;
-                if (this.groundPickingQuadtree.PickAll(ref ray, facingOnly, out gP, out gT, out gD))
+                if (this.groundPickingQuadtree.PickAll(ref ray, facingOnly, out PickingResult<Triangle>[]  gResults))
                 {
-                    positions = gP;
-                    triangles = gT;
-                    distances = gD;
+                    results = gResults;
 
                     res = true;
                 }

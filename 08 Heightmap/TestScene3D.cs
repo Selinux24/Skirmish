@@ -596,10 +596,7 @@ namespace Heightmap
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
 
-                    Vector3 rockPosition;
-                    Triangle rockTri;
-                    float rockDist;
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out rockPosition, out rockTri, out rockDist))
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
                         var scale = 1f;
                         if (i < 5)
@@ -615,7 +612,7 @@ namespace Heightmap
                             scale = posRnd.NextFloat(0.1f, 1f);
                         }
 
-                        this.rocks.Instance[i].Manipulator.SetPosition(rockPosition, true);
+                        this.rocks.Instance[i].Manipulator.SetPosition(r.Position, true);
                         this.rocks.Instance[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
                         this.rocks.Instance[i].Manipulator.SetScale(scale, true);
                     }
@@ -633,11 +630,9 @@ namespace Heightmap
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
 
-                    Vector3 treePosition;
-                    Triangle treeTri;
-                    float treeDist;
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
+                        var treePosition = r.Position;
                         treePosition.Y -= posRnd.NextFloat(1f, 5f);
 
                         this.trees.Instance[i].Manipulator.SetPosition(treePosition, true);
@@ -652,11 +647,9 @@ namespace Heightmap
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
 
-                    Vector3 treePosition;
-                    Triangle treeTri;
-                    float treeDist;
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out treePosition, out treeTri, out treeDist))
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
+                        var treePosition = r.Position;
                         treePosition.Y -= posRnd.NextFloat(0f, 2f);
 
                         this.trees2.Instance[i].Manipulator.SetPosition(treePosition, true);
@@ -671,11 +664,10 @@ namespace Heightmap
             {
                 #region Torchs
 
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.FindTopGroundPosition(5, 5, out position, out triangle, out distance))
+                if (this.FindTopGroundPosition(5, 5, out PickingResult<Triangle> r))
                 {
+                    var position = r.Position;
+
                     this.torchs.Instance[0].Manipulator.SetScale(1f, 1f, 1f, true);
                     this.torchs.Instance[0].Manipulator.SetPosition(position, true);
                     BoundingBox tbbox = this.torchs.Instance[0].GetBoundingBox();
@@ -719,15 +711,14 @@ namespace Heightmap
                         rnd.NextFloat(0, 1),
                         1);
 
-                    Vector3 pos = new Vector3(
+                    Vector3 position = new Vector3(
                         rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
                         0f,
                         rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
 
-                    Triangle t;
-                    float d;
-                    this.FindTopGroundPosition(pos.X, pos.Z, out pos, out t, out d);
+                    this.FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res);
 
+                    var pos = res.Position;
                     this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
                     this.torchs.Instance[i].Manipulator.SetPosition(pos, true);
                     BoundingBox tbbox = this.torchs.Instance[i].GetBoundingBox();
@@ -755,24 +746,18 @@ namespace Heightmap
 
             //M24
             {
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.FindTopGroundPosition(100, 50, out position, out triangle, out distance))
+                if (this.FindTopGroundPosition(100, 50, out PickingResult<Triangle> r))
                 {
-                    this.helicopter.Transform.SetPosition(position, true);
+                    this.helicopter.Transform.SetPosition(r.Position, true);
                     this.helicopter.Transform.SetRotation(MathUtil.Pi / 5f, 0, 0, true);
                 }
             }
 
             //Helicopter
             {
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.FindTopGroundPosition(-100, -10, out position, out triangle, out distance))
+                if (this.FindTopGroundPosition(-100, -10, out PickingResult<Triangle> r))
                 {
-                    this.helicopter2.Transform.SetPosition(position, true);
+                    this.helicopter2.Transform.SetPosition(r.Position, true);
                     this.helicopter2.Transform.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
                     this.helicopter2.Transform.SetScale(5, true);
                 }
@@ -788,12 +773,9 @@ namespace Heightmap
 
             //Player soldier
             {
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.FindTopGroundPosition(0, 0, out position, out triangle, out distance))
+                if (this.FindTopGroundPosition(0, 0, out PickingResult<Triangle> r))
                 {
-                    this.soldier.Transform.SetPosition(position, true);
+                    this.soldier.Transform.SetPosition(r.Position, true);
                 }
 
                 this.soldier.Instance.AnimationController.AddPath(this.animations["soldier_stand"]);
@@ -812,12 +794,9 @@ namespace Heightmap
 
                 for (int i = 0; i < 4; i++)
                 {
-                    Vector3 position;
-                    Triangle triangle;
-                    float distance;
-                    if (this.FindTopGroundPosition(iPos[i].X, iPos[i].Y, out position, out triangle, out distance))
+                    if (this.FindTopGroundPosition(iPos[i].X, iPos[i].Y, out PickingResult<Triangle> r))
                     {
-                        this.troops.Instance[i].Manipulator.SetPosition(position, true);
+                        this.troops.Instance[i].Manipulator.SetPosition(r.Position, true);
                         this.troops.Instance[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
                         this.troops.Instance[i].TextureIndex = 1;
 
@@ -964,12 +943,9 @@ namespace Heightmap
                     this.soldier.Transform.MoveBackward(gameTime, delta);
                 }
 
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                if (this.FindTopGroundPosition(this.soldier.Transform.Position.X, this.soldier.Transform.Position.Z, out position, out triangle, out distance))
+                if (this.FindTopGroundPosition(this.soldier.Transform.Position.X, this.soldier.Transform.Position.Z, out PickingResult<Triangle> r))
                 {
-                    this.soldier.Transform.SetPosition(position);
+                    this.soldier.Transform.SetPosition(r.Position);
                 };
             }
 
@@ -1192,12 +1168,9 @@ namespace Heightmap
             {
                 Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
 
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.FindTopGroundPosition(v.X, v.Z, out p, out t, out d))
+                if (this.FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
                 {
-                    return p + offset;
+                    return r.Position + offset;
                 }
             }
         }
@@ -1211,12 +1184,9 @@ namespace Heightmap
 
                 Vector3 v = bsph.Center + (dist * Vector3.Normalize(dir));
 
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.FindTopGroundPosition(v.X, v.Z, out p, out t, out d))
+                if (this.FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
                 {
-                    return p + offset;
+                    return r.Position + offset;
                 }
             }
         }

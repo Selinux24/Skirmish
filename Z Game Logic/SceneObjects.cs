@@ -370,10 +370,7 @@ namespace GameLogic
                 bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
 
                 Ray cursorRay = this.GetPickingRay();
-                Vector3 position;
-                Triangle triangle;
-                float distance;
-                bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsageEnum.Ground, out position, out triangle, out distance);
+                bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsageEnum.Ground, out PickingResult<Triangle> r);
 
                 #region DEBUG
 
@@ -422,7 +419,7 @@ namespace GameLogic
 
                 if (picked)
                 {
-                    this.cursor3D.Transform.SetPosition(position);
+                    this.cursor3D.Transform.SetPosition(r.Position);
                 }
 
                 if (this.Game.Input.KeyJustReleased(this.keyCAMNextIsometric))
@@ -469,7 +466,7 @@ namespace GameLogic
                     }
                     else if (picked)
                     {
-                        this.Camera.LookTo(position, CameraTranslations.UseDelta);
+                        this.Camera.LookTo(r.Position, CameraTranslations.UseDelta);
                     }
                 }
 
@@ -522,15 +519,15 @@ namespace GameLogic
                     {
                         if (this.currentAction.Action == ActionsEnum.Move)
                         {
-                            this.Move(this.skirmishGame.CurrentSoldier, position);
+                            this.Move(this.skirmishGame.CurrentSoldier, r.Position);
                         }
                         else if (this.currentAction.Action == ActionsEnum.Run)
                         {
-                            this.Run(this.skirmishGame.CurrentSoldier, position);
+                            this.Run(this.skirmishGame.CurrentSoldier, r.Position);
                         }
                         else if (this.currentAction.Action == ActionsEnum.Crawl)
                         {
-                            this.Crawl(this.skirmishGame.CurrentSoldier, position);
+                            this.Crawl(this.skirmishGame.CurrentSoldier, r.Position);
                         }
                         else if (this.currentAction.Action == ActionsEnum.Assault)
                         {
@@ -675,12 +672,9 @@ namespace GameLogic
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
                     float z = (teamIndex * teamSeparation) - (gameWidth * 0.5f);
 
-                    Vector3 position;
-                    Triangle triangle;
-                    float distance;
-                    if (this.FindTopGroundPosition(x, z, out position, out triangle, out distance))
+                    if (this.FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                     {
-                        instance.Manipulator.SetPosition(position, true);
+                        instance.Manipulator.SetPosition(r.Position, true);
                     }
                     else
                     {
@@ -1204,16 +1198,13 @@ namespace GameLogic
             {
                 foreach (Soldier soldier in team.Soldiers)
                 {
-                    Vector3 soldierPosition;
-                    Triangle trianglePosition;
-                    float distanceToPosition;
-                    if (this.soldierModels[soldier].PickNearest(ref cursorRay, true, out soldierPosition, out trianglePosition, out distanceToPosition))
+                    if (this.soldierModels[soldier].PickNearest(ref cursorRay, true, out PickingResult<Triangle> r))
                     {
-                        if (distanceToPosition < d)
+                        if (r.Distance < d)
                         {
                             //Select nearest picked soldier
                             res = soldier;
-                            d = distanceToPosition;
+                            d = r.Distance;
                         }
                     }
                 }

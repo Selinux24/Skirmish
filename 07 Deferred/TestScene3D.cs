@@ -431,9 +431,9 @@ namespace Deferred
 
             #region Tree
             {
-                if (this.FindTopGroundPosition(20, -20, out Vector3 p, out Triangle t, out float d))
+                if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> r))
                 {
-                    this.tree.Transform.SetPosition(p);
+                    this.tree.Transform.SetPosition(r.Position);
                     this.tree.Transform.SetScale(0.5f);
                 }
             }
@@ -443,10 +443,10 @@ namespace Deferred
             {
                 for (int i = 0; i < this.trees.Count; i++)
                 {
-                    if (this.FindTopGroundPosition((i * 10) - 35, 17, out Vector3 p, out Triangle t, out float d))
+                    if (this.FindTopGroundPosition((i * 10) - 35, 17, out PickingResult<Triangle> r))
                     {
                         this.trees.Instance[i].Manipulator.SetScale(0.5f, true);
-                        this.trees.Instance[i].Manipulator.SetPosition(p, true);
+                        this.trees.Instance[i].Manipulator.SetPosition(r.Position, true);
                     }
                 }
             }
@@ -468,27 +468,21 @@ namespace Deferred
 
             #region Tanks
             {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.FindTopGroundPosition(20, 40, out p, out t, out d))
+                if (this.FindTopGroundPosition(20, 40, out PickingResult<Triangle> r))
                 {
-                    this.tankAgent1.Transform.SetPosition(p);
-                    this.tankAgent1.Transform.SetNormal(t.Normal);
-                    cameraPosition += p;
+                    this.tankAgent1.Transform.SetPosition(r.Position);
+                    this.tankAgent1.Transform.SetNormal(r.Item.Normal);
+                    cameraPosition += r.Position;
                     modelCount++;
                 }
             }
 
             {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.FindTopGroundPosition(15, 35, out p, out t, out d))
+                if (this.FindTopGroundPosition(15, 35, out PickingResult<Triangle> r))
                 {
-                    this.tankAgent2.Transform.SetPosition(p);
-                    this.tankAgent2.Transform.SetNormal(t.Normal);
-                    cameraPosition += p;
+                    this.tankAgent2.Transform.SetPosition(r.Position);
+                    this.tankAgent2.Transform.SetNormal(r.Item.Normal);
+                    cameraPosition += r.Position;
                     modelCount++;
                 }
             }
@@ -496,11 +490,9 @@ namespace Deferred
 
             #region Helicopter
             {
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.FindTopGroundPosition(20, -20, out p, out t, out d))
+                if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> r))
                 {
+                    var p = r.Position;
                     p.Y += 10f;
                     this.helicopter.Transform.SetPosition(p, true);
                     cameraPosition += p;
@@ -516,11 +508,9 @@ namespace Deferred
             {
                 for (int i = 0; i < this.helicopters.Count; i++)
                 {
-                    Vector3 p;
-                    Triangle t;
-                    float d;
-                    if (this.FindTopGroundPosition((i * 10) - 20, 20, out p, out t, out d))
+                    if (this.FindTopGroundPosition((i * 10) - 20, 20, out PickingResult<Triangle> r))
                     {
+                        var p = r.Position;
                         p.Y += 10f;
                         this.helicopters.Instance[i].Manipulator.SetPosition(p, true);
                         cameraPosition += p;
@@ -565,10 +555,7 @@ namespace Deferred
 
             #region Cursor picking and positioning
 
-            Vector3 position;
-            Triangle triangle;
-            float distance;
-            bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsageEnum.Ground, out position, out triangle, out distance);
+            bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsageEnum.Ground, out PickingResult<Triangle> r);
 
             #endregion
 
@@ -987,11 +974,9 @@ namespace Deferred
             if (!modelsOnly)
             {
                 {
-                    Vector3 lightPosition;
-                    Triangle lightTriangle;
-                    float lightDistance;
-                    if (this.FindTopGroundPosition(0, 1, out lightPosition, out lightTriangle, out lightDistance))
+                    if (this.FindTopGroundPosition(0, 1, out PickingResult<Triangle> r))
                     {
+                        var lightPosition = r.Position;
                         lightPosition.Y += 10f;
 
                         Vector3 direction = -Vector3.Normalize(lightPosition);
@@ -1024,15 +1009,11 @@ namespace Deferred
                 {
                     for (int x = 0; x < f; x++)
                     {
-                        Vector3 lightPosition;
-                        Triangle lightTriangle;
-                        float lightDistance;
-                        if (!this.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out lightPosition, out lightTriangle, out lightDistance))
+                        Vector3 lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
+
+                        if (this.FindTopGroundPosition((i * sep) - l, (x * sep) - l, out PickingResult<Triangle> r))
                         {
-                            lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
-                        }
-                        else
-                        {
+                            lightPosition = r.Position;
                             lightPosition.Y += 1f;
                         }
 

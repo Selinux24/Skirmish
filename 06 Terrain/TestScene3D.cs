@@ -8,6 +8,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Terrain
@@ -634,17 +635,17 @@ namespace Terrain
 
             //Helipod
             {
-                if (this.FindTopGroundPosition(75, 75, out Vector3 p, out Triangle t, out float d))
+                if (this.FindTopGroundPosition(75, 75, out PickingResult<Triangle> r))
                 {
-                    this.helipod.Transform.SetPosition(p);
+                    this.helipod.Transform.SetPosition(r.Position);
                 }
             }
 
             //Garage
             {
-                if (this.FindTopGroundPosition(-10, -40, out Vector3 p, out Triangle t, out float d))
+                if (this.FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
                 {
-                    this.garage.Transform.SetPosition(p);
+                    this.garage.Transform.SetPosition(r.Position);
                     this.garage.Transform.SetRotation(MathUtil.PiOverFour + MathUtil.Pi, 0, 0);
                 }
             }
@@ -656,11 +657,11 @@ namespace Terrain
                     int ox = i == 0 || i == 2 ? 1 : -1;
                     int oy = i == 0 || i == 1 ? 1 : -1;
 
-                    if (this.FindTopGroundPosition(ox * 50, oy * 50, out Vector3 obeliskPosition, out Triangle obeliskTri, out float obeliskDist))
+                    if (this.FindTopGroundPosition(ox * 50, oy * 50, out PickingResult<Triangle> r))
                     {
                         var obeliskInstance = this.obelisk.GetComponent<ITransformable3D>(i);
 
-                        obeliskInstance.Manipulator.SetPosition(obeliskPosition);
+                        obeliskInstance.Manipulator.SetPosition(r.Position);
                         obeliskInstance.Manipulator.SetScale(1.5f);
                     }
                 }
@@ -672,7 +673,7 @@ namespace Terrain
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
 
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out Vector3 rockPosition, out Triangle rockTri, out float rockDist))
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
                         var scale = 1f;
                         if (i < 5)
@@ -690,7 +691,7 @@ namespace Terrain
 
                         var rockInstance = this.rocks.GetComponent<ITransformable3D>(i);
 
-                        rockInstance.Manipulator.SetPosition(rockPosition);
+                        rockInstance.Manipulator.SetPosition(r.Position);
                         rockInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
                         rockInstance.Manipulator.SetScale(scale);
                     }
@@ -703,11 +704,11 @@ namespace Terrain
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
 
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out Vector3 treePosition, out Triangle treeTri, out float treeDist))
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
                         var treeInstance = this.tree1.GetComponent<ITransformable3D>(i);
 
-                        treeInstance.Manipulator.SetPosition(treePosition);
+                        treeInstance.Manipulator.SetPosition(r.Position);
                         treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
                         treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
                     }
@@ -717,11 +718,11 @@ namespace Terrain
                 {
                     var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
 
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out Vector3 treePosition, out Triangle treeTri, out float treeDist))
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
                         var treeInstance = this.tree2.GetComponent<ITransformable3D>(i);
 
-                        treeInstance.Manipulator.SetPosition(treePosition);
+                        treeInstance.Manipulator.SetPosition(r.Position);
                         treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
                         treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
                     }
@@ -755,13 +756,10 @@ namespace Terrain
 
             {
                 var ray = this.GetTopDownRay(this.helipod.Transform.Position);
-                Vector3 heliPos;
-                Triangle heliTri;
-                float heliDist;
-                if (this.PickNearest(ref ray, true, sceneryUsage, out heliPos, out heliTri, out heliDist))
+                if (this.PickNearest(ref ray, true, sceneryUsage, out PickingResult<Triangle> r))
                 {
-                    this.helicopter.Transform.SetPosition(heliPos);
-                    this.helicopter.Transform.SetNormal(heliTri.Normal);
+                    this.helicopter.Transform.SetPosition(r.Position);
+                    this.helicopter.Transform.SetNormal(r.Item.Normal);
                 }
 
                 var hp = new AnimationPath();
@@ -771,25 +769,19 @@ namespace Terrain
 
             {
                 var ray = this.GetTopDownRay(-60, -60);
-                Vector3 tankPosition;
-                Triangle tankTriangle;
-                float tankDist;
-                if (this.PickNearest(ref ray, true, sceneryUsage, out tankPosition, out tankTriangle, out tankDist))
+                if (this.PickNearest(ref ray, true, sceneryUsage, out PickingResult<Triangle> r))
                 {
-                    this.tankP1.Transform.SetPosition(tankPosition);
-                    this.tankP1.Transform.SetNormal(tankTriangle.Normal);
+                    this.tankP1.Transform.SetPosition(r.Position);
+                    this.tankP1.Transform.SetNormal(r.Item.Normal);
                 }
             }
 
             {
                 var ray = this.GetTopDownRay(-70, 70);
-                Vector3 tankPosition;
-                Triangle tankTriangle;
-                float tankDist;
-                if (this.PickNearest(ref ray, true, sceneryUsage, out tankPosition, out tankTriangle, out tankDist))
+                if (this.PickNearest(ref ray, true, sceneryUsage, out PickingResult<Triangle> r))
                 {
-                    this.tankP2.Transform.SetPosition(tankPosition);
-                    this.tankP2.Transform.SetNormal(tankTriangle.Normal);
+                    this.tankP2.Transform.SetPosition(r.Position);
+                    this.tankP2.Transform.SetNormal(r.Item.Normal);
                 }
             }
 
@@ -832,19 +824,16 @@ namespace Terrain
 
             #region DEBUG Ground position test
             {
-                BoundingBox bbox = this.terrain.Geometry.GetBoundingBox();
+                var bbox = this.terrain.Geometry.GetBoundingBox();
 
                 float sep = 2.1f;
                 for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
                 {
                     for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
                     {
-                        Vector3 pos;
-                        Triangle tri;
-                        float dist;
-                        if (this.FindTopGroundPosition(x, z, out pos, out tri, out dist))
+                        if (this.FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                         {
-                            this.oks.Add(new Line3D(pos, pos + Vector3.Up));
+                            this.oks.Add(new Line3D(r.Position, r.Position + Vector3.Up));
                         }
                         else
                         {
@@ -960,17 +949,17 @@ namespace Terrain
             //Adjust check-points
             for (int i = 0; i < t1CheckPoints.Length; i++)
             {
-                if (this.FindNearestGroundPosition(t1CheckPoints[i], out Vector3 p1, out Triangle t1, out float d1))
+                if (this.FindNearestGroundPosition(t1CheckPoints[i], out PickingResult<Triangle> r))
                 {
-                    t1CheckPoints[i] = p1;
+                    t1CheckPoints[i] = r.Position;
                 }
             }
 
             for (int i = 0; i < t2CheckPoints.Length; i++)
             {
-                if (this.FindNearestGroundPosition(t2CheckPoints[i], out Vector3 p2, out Triangle t2, out float d2))
+                if (this.FindNearestGroundPosition(t2CheckPoints[i], out PickingResult<Triangle> r))
                 {
-                    t2CheckPoints[i] = p2;
+                    t2CheckPoints[i] = r.Position;
                 }
             }
 
@@ -1062,6 +1051,14 @@ namespace Terrain
                     this.Camera.SlowMovementDelta = this.walkerVelocity * 0.05f;
                     this.cursor3D.Visible = false;
                     this.cursor2D.Visible = true;
+
+                    var pos = this.helipod.Transform.Position;
+                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                    {
+                        var pPos = r.Position;
+                        pPos.Y += this.walkerAgentType.Height;
+                        this.Camera.Position = pPos;
+                    }
                 }
                 else
                 {
@@ -1081,12 +1078,9 @@ namespace Terrain
 
             if (!this.walkMode)
             {
-                Vector3 pickedPosition;
-                Triangle pickedTriangle;
-                float pickedDistance;
-                if (this.terrain.Geometry.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance))
+                if (this.terrain.Geometry.PickNearest(ref cursorRay, true, out PickingResult<Triangle> r))
                 {
-                    this.cursor3D.Transform.SetPosition(pickedPosition);
+                    this.cursor3D.Transform.SetPosition(r.Position);
                 }
             }
 
@@ -1128,8 +1122,7 @@ namespace Terrain
                     this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
                 }
 
-                Vector3 walkerPos;
-                if (this.Walk(this.walkerAgentType, prevPos, this.Camera.Position, out walkerPos))
+                if (this.Walk(this.walkerAgentType, prevPos, this.Camera.Position, out Vector3 walkerPos))
                 {
                     this.Camera.Goto(walkerPos);
                 }
@@ -1162,8 +1155,7 @@ namespace Terrain
                         this.follow = false;
                     }
 
-                    SceneObject agent;
-                    if (this.PickNearest(ref cursorRay, 0, true, SceneObjectUsageEnum.Agent, out agent))
+                    if (this.PickNearest(ref cursorRay, 0, true, SceneObjectUsageEnum.Agent, out SceneObject agent))
                     {
                         this.followTarget = agent;
                         this.follow = true;
@@ -1207,14 +1199,11 @@ namespace Terrain
 
             if (this.Game.Input.LeftMouseButtonPressed)
             {
-                Vector3 pickedPosition;
-                Triangle pickedTriangle;
-                float pickedDistance;
-                if (this.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance))
+                if (this.PickNearest(ref cursorRay, true, out PickingResult<Triangle> r))
                 {
                     var t1Position = this.tankP1.Transform.Position;
 
-                    var result = this.FindPath(this.tankAgentType, t1Position, pickedPosition, false, 0f);
+                    var result = this.FindPath(this.tankAgentType, t1Position, r.Position, false, 0f);
                     if (result != null)
                     {
                         this.DEBUGDrawTankPath(t1Position, result);
@@ -1224,14 +1213,11 @@ namespace Terrain
 
             if (this.Game.Input.LeftMouseButtonJustReleased)
             {
-                Vector3 pickedPosition;
-                Triangle pickedTriangle;
-                float pickedDistance;
-                if (this.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance))
+                if (this.PickNearest(ref cursorRay, true, out PickingResult<Triangle> r))
                 {
                     var task = Task.Run(() =>
                     {
-                        return this.FindPath(this.tankAgentType, this.tankP1.Transform.Position, pickedPosition, true, 0.25f);
+                        return this.FindPath(this.tankAgentType, this.tankP1.Transform.Position, r.Position, true, 0.25f);
                     });
 
                     task.ContinueWith((t) =>
@@ -1387,12 +1373,9 @@ namespace Terrain
                 {
                     this.terrainPointDrawer.Instance.Clear();
 
-                    Vector3 pickedPosition;
-                    Triangle pickedTriangle;
-                    float pickedDistance;
-                    if (this.PickNearest(ref cursorRay, true, out pickedPosition, out pickedTriangle, out pickedDistance))
+                    if (this.PickNearest(ref cursorRay, true, out PickingResult<Triangle> r))
                     {
-                        this.DEBUGPickingPosition(pickedPosition);
+                        this.DEBUGPickingPosition(r.Position);
                     }
                 }
             }
@@ -1496,27 +1479,25 @@ namespace Terrain
 
         private Vector3 GetRandomPoint(Random rnd, Vector3 offset)
         {
-            BoundingBox bbox = this.terrain.Instance.GetBoundingBox();
+            var bbox = this.terrain.Instance.GetBoundingBox();
 
             while (true)
             {
                 Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
 
-                Vector3 p;
-                Triangle t;
-                float d;
-                if (this.FindTopGroundPosition(v.X, v.Z, out p, out t, out d))
+                if (this.FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
                 {
-                    return p + offset;
+                    return r.Position + offset;
                 }
             }
         }
         private Curve3D GenerateHelicopterPath()
         {
-            Curve3D curve = new Curve3D();
-
-            curve.PreLoop = CurveLoopType.Constant;
-            curve.PostLoop = CurveLoopType.Constant;
+            Curve3D curve = new Curve3D
+            {
+                PreLoop = CurveLoopType.Constant,
+                PostLoop = CurveLoopType.Constant
+            };
 
             Vector3[] cPoints = new Vector3[15];
 
@@ -1540,13 +1521,11 @@ namespace Terrain
                 }
             }
 
-            var p = this.helipod.Transform.Position;
-            Triangle t;
-            float d;
-            if (this.FindTopGroundPosition(p.X, p.Z, out p, out t, out d))
+            var hPos = this.helipod.Transform.Position;
+            if (this.FindTopGroundPosition(hPos.X, hPos.Z, out PickingResult<Triangle> r))
             {
-                cPoints[cPoints.Length - 2] = p + this.helicopterHeightOffset;
-                cPoints[cPoints.Length - 1] = p;
+                cPoints[cPoints.Length - 2] = r.Position + this.helicopterHeightOffset;
+                cPoints[cPoints.Length - 1] = r.Position;
             }
 
             float time = 0;
@@ -1764,11 +1743,11 @@ namespace Terrain
 
         private void DEBUGPickingPosition(Vector3 position)
         {
-            Vector3[] positions;
-            Triangle[] triangles;
-            float[] distances;
-            if (this.FindAllGroundPosition(position.X, position.Z, out positions, out triangles, out distances))
+            if (this.FindAllGroundPosition(position.X, position.Z, out PickingResult<Triangle>[] results))
             {
+                var positions = results.Select(r => r.Position).ToArray();
+                var triangles = results.Select(r => r.Item).ToArray();
+
                 this.terrainPointDrawer.Instance.SetLines(Color.Magenta, Line3D.CreateCrossList(positions, 1f));
                 this.terrainPointDrawer.Instance.SetLines(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
                 if (positions.Length > 1)

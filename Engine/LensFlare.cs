@@ -100,12 +100,9 @@ namespace Engine
 
                     Ray ray = new Ray(lightPosition, direction);
 
-                    Vector3 position;
-                    Triangle tri;
-                    float distance;
-                    if (this.Scene.PickNearest(ref ray, false, out position, out tri, out distance))
+                    if (this.Scene.PickNearest(ref ray, false, out PickingResult<Triangle> result))
                     {
-                        if (Vector3.Distance(lightPosition, context.EyePosition) > distance) return;
+                        if (Vector3.Distance(lightPosition, context.EyePosition) > result.Distance) return;
                     }
                 }
 

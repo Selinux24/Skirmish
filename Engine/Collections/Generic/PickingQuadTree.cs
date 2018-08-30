@@ -44,16 +44,28 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="triangle">Hit triangle</param>
-        /// <param name="distance">Distance to hit</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out T triangle, out float distance)
+        public bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<T> result)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.PickNearest(ref ray, facingOnly, out position, out triangle, out distance);
+                result = new PickingResult<T>()
+                {
+                    Distance = float.MaxValue,
+                };
+
+                if (this.Root.PickNearest(ref ray, facingOnly, out Vector3 position, out T item, out float distance))
+                {
+                    result.Position = position;
+                    result.Item = item;
+                    result.Distance = distance;
+
+                    return true;
+                }
+
+                return false;
             }
             finally
             {
@@ -67,16 +79,28 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="triangle">Hit triangle</param>
-        /// <param name="distance">Distance to hit</param>
+        /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out T triangle, out float distance)
+        public bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<T> result)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.PickFirst(ref ray, facingOnly, out position, out triangle, out distance);
+                result = new PickingResult<T>()
+                {
+                    Distance = float.MaxValue,
+                };
+
+                if (this.Root.PickFirst(ref ray, facingOnly, out Vector3 position, out T item, out float distance))
+                {
+                    result.Position = position;
+                    result.Item = item;
+                    result.Distance = distance;
+
+                    return true;
+                }
+
+                return false;
             }
             finally
             {
@@ -90,16 +114,33 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="positions">Hit positions</param>
-        /// <param name="triangles">Hit triangles</param>
-        /// <param name="distances">Distances to hits</param>
+        /// <param name="results">Picking results</param>
         /// <returns>Returns true if picked positions found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out T[] triangles, out float[] distances)
+        public bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<T>[] results)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.PickAll(ref ray, facingOnly, out positions, out triangles, out distances);
+                results = null;
+
+                if (this.Root.PickAll(ref ray, facingOnly, out Vector3[] positions, out T[] items, out float[] distances))
+                {
+                    results = new PickingResult<T>[positions.Length];
+
+                    for (int i = 0; i < results.Length; i++)
+                    {
+                        results[i] = new PickingResult<T>()
+                        {
+                            Position = positions[i],
+                            Item = items[i],
+                            Distance = distances[i],
+                        };
+                    }
+
+                    return true;
+                }
+
+                return false;
             }
             finally
             {
