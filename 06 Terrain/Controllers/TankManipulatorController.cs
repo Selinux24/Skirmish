@@ -1,7 +1,7 @@
 ﻿using Engine;
 using SharpDX;
 
-namespace Terrain
+namespace Terrain.Controllers
 {
     public class TankManipulatorController : SteerManipulatorController
     {

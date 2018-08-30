@@ -2,17 +2,17 @@
 using Engine.Common;
 using SharpDX;
 
-namespace Terrain
+namespace Terrain.Emitters
 {
     /// <summary>
     /// Linear emitter
     /// </summary>
     public class LinealEmitter : ParticleEmitter
     {
-        private Vector3 from;
-        private Vector3 to;
-        private float speed;
-        private Vector3 direction;
+        private readonly Vector3 from;
+        private readonly Vector3 to;
+        private readonly Vector3 direction;
+        private readonly float speed;
         private float previousDistance = float.MaxValue;
 
         /// <summary>
@@ -23,15 +23,14 @@ namespace Terrain
         /// <param name="speed">Speed</param>
         public LinealEmitter(Vector3 from, Vector3 to, float speed) : base()
         {
-            this.Position = from;
             this.from = from;
             this.to = to;
+            var vDir = (to - from);
+            this.direction = Vector3.Normalize(vDir);
             this.speed = speed;
-            this.direction = (to - from);
-            float distance = direction.Length();
-            this.direction.Normalize();
 
-            this.Duration = (distance / speed);
+            this.Position = from;
+            this.Duration = (vDir.Length() / speed);
         }
     
         /// <summary>

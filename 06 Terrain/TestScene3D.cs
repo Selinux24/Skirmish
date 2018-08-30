@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 namespace Terrain
 {
     using Terrain.AI;
+    using Terrain.AI.Agents;
+    using Terrain.Controllers;
+    using Terrain.Emitters;
 
     public class TestScene3D : Scene
     {
@@ -923,12 +926,12 @@ namespace Terrain
 
             this.helicopter.Instance.AnimationController.SetPath(this.animations["heli_default"]);
 
-            var t1W = new WeaponDescription() { Name = "Machine Gun", Damage = 0.05f, Cadence = 0.05f, Range = 30 };
-            var t2W = new WeaponDescription() { Name = "Cannon", Damage = 50, Cadence = 5f, Range = 50 };
+            var t1W = new WeaponDescription() { Name = "Machine Gun", Damage = 0.05f, Cadence = 0.05f, Range = 50 };
+            var t2W = new WeaponDescription() { Name = "Cannon", Damage = 50, Cadence = 2f, Range = 100 };
             var h1W = new WeaponDescription() { Name = "Missile", Damage = 100, Cadence = 5f, Range = 100 };
-            var h2W = new WeaponDescription() { Name = "Gatling", Damage = 10, Cadence = 0.1f, Range = 30 };
+            var h2W = new WeaponDescription() { Name = "Gatling", Damage = 10, Cadence = 0.1f, Range = 50 };
 
-            Vector3[] p1CheckPoints = new Vector3[]
+            Vector3[] t1CheckPoints = new Vector3[]
             {
                 new Vector3(+60, 0, -60),
                 new Vector3(-60, 0, -60),
@@ -936,7 +939,7 @@ namespace Terrain
                 new Vector3(-70, 0, +70),
             };
 
-            Vector3[] p2CheckPoints = new Vector3[]
+            Vector3[] t2CheckPoints = new Vector3[]
             {
                 new Vector3(+60, 0, -60),
                 new Vector3(+60, 0, +60),
@@ -955,19 +958,19 @@ namespace Terrain
             };
 
             //Adjust check-points
-            for (int i = 0; i < p1CheckPoints.Length; i++)
+            for (int i = 0; i < t1CheckPoints.Length; i++)
             {
-                if (this.FindNearestGroundPosition(p1CheckPoints[i], out Vector3 p1, out Triangle t1, out float d1))
+                if (this.FindNearestGroundPosition(t1CheckPoints[i], out Vector3 p1, out Triangle t1, out float d1))
                 {
-                    p1CheckPoints[i] = p1;
+                    t1CheckPoints[i] = p1;
                 }
             }
 
-            for (int i = 0; i < p2CheckPoints.Length; i++)
+            for (int i = 0; i < t2CheckPoints.Length; i++)
             {
-                if (this.FindNearestGroundPosition(p2CheckPoints[i], out Vector3 p2, out Triangle t2, out float d2))
+                if (this.FindNearestGroundPosition(t2CheckPoints[i], out Vector3 p2, out Triangle t2, out float d2))
                 {
-                    p2CheckPoints[i] = p2;
+                    t2CheckPoints[i] = p2;
                 }
             }
 
@@ -989,7 +992,7 @@ namespace Terrain
                 Life = 50,
                 SightDistance = 100,
                 SightAngle = 90,
-                FlightHeight = 20,
+                FlightHeight = 25,
             };
 
             this.tankP1Agent = new TankAIAgent(this.agentManager, this.tankAgentType, this.tankP1, tStatus);
@@ -1021,11 +1024,11 @@ namespace Terrain
             this.agentManager.AddAgent(1, this.tankP1Agent);
             this.agentManager.AddAgent(1, this.tankP2Agent);
 
-            this.tankP1Agent.PatrolBehavior.InitPatrollingBehavior(p1CheckPoints, 10, 5);
+            this.tankP1Agent.PatrolBehavior.InitPatrollingBehavior(t1CheckPoints, 10, 5);
             this.tankP1Agent.AttackBehavior.InitAttackingBehavior(7, 10);
             this.tankP1Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
 
-            this.tankP2Agent.PatrolBehavior.InitPatrollingBehavior(p2CheckPoints, 10, 5);
+            this.tankP2Agent.PatrolBehavior.InitPatrollingBehavior(t2CheckPoints, 10, 5);
             this.tankP2Agent.AttackBehavior.InitAttackingBehavior(7, 10);
             this.tankP2Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
 

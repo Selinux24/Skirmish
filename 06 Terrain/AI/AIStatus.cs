@@ -11,7 +11,7 @@ namespace Terrain.AI
         /// <summary>
         /// Initial life
         /// </summary>
-        private float initialLife;
+        private readonly float initialLife;
 
         /// <summary>
         /// Primary weapon
@@ -37,7 +37,9 @@ namespace Terrain.AI
         /// Angle of sight in radians
         /// </summary>
         public float SightAngle;
-
+        /// <summary>
+        /// Current damage
+        /// </summary>
         public float Damage
         {
             get
@@ -46,6 +48,10 @@ namespace Terrain.AI
             }
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="description">Description</param>
         public AIStatus(AIStatusDescription description)
         {
             this.PrimaryWeapon = new Weapon(description.PrimaryWeapon);
@@ -58,6 +64,10 @@ namespace Terrain.AI
             this.CurrentWeapon = this.PrimaryWeapon;
         }
 
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
             this.PrimaryWeapon?.Update(gameTime);

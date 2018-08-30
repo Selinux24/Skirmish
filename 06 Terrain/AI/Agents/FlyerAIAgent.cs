@@ -2,8 +2,10 @@
 using Engine.PathFinding;
 using SharpDX;
 
-namespace Terrain.AI
+namespace Terrain.AI.Agents
 {
+    using Terrain.Controllers;
+
     public class FlyerAIAgent : AIAgent
     {
         public float FlightHeight;

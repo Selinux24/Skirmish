@@ -1,4 +1,5 @@
-﻿namespace Terrain.AI
+﻿
+namespace Terrain.AI.Agents
 {
     /// <summary>
     /// AI flyer description

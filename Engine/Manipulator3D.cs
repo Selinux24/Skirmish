@@ -35,6 +35,10 @@ namespace Engine
         protected Vector3 position = Vector3.Zero;
 
         /// <summary>
+        /// Parent manipulator
+        /// </summary>
+        public Manipulator3D Parent { get; set; }
+        /// <summary>
         /// Gets Position component
         /// </summary>
         public Vector3 Position
@@ -129,10 +133,6 @@ namespace Engine
                 return (this.scaling.X + this.scaling.Y + this.scaling.Z) * 0.3333f;
             }
         }
-        /// <summary>
-        /// Parent manipulator
-        /// </summary>
-        public Manipulator3D Parent { get; set; }
 
         /// <summary>
         /// Contructor
@@ -144,6 +144,14 @@ namespace Engine
             this.scaling = new Vector3(1);
 
             this.UpdateLocalTransform();
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="parent">Parent manipulator</param>
+        public Manipulator3D(Manipulator3D parent) : this()
+        {
+            this.Parent = parent;
         }
         /// <summary>
         /// Update internal state

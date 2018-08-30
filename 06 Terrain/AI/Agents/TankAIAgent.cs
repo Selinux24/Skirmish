@@ -1,9 +1,11 @@
 ﻿using Engine;
 using Engine.PathFinding;
-using SharpDX;
 
-namespace Terrain.AI
+namespace Terrain.AI.Agents
 {
+    using Terrain.AI.Behaviors;
+    using Terrain.Controllers;
+
     public class TankAIAgent : AIAgent
     {
         public TankAIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, AIStatusDescription status) :
@@ -44,31 +46,6 @@ namespace Terrain.AI
             {
                 model.TextureIndex = 2;
             }
-        }
-    }
-
-    public class TankAttackBehavior : AttackBehavior
-    {
-        public TankAttackBehavior(TankAIAgent agent) : base(agent)
-        {
-
-        }
-
-        public override void Task(GameTime gameTime)
-        {
-            if (this.Target != null)
-            {
-                var model = this.Agent.SceneObject.Get<Model>();
-                if (model != null)
-                {
-                    if (model.ModelPartCount > 0)
-                    {
-                        model["Turret-mesh"].Manipulator.RotateTo(this.Target.Value, Vector3.Up, true, 0.01f);
-                    }
-                }
-            }
-
-            base.Task(gameTime);
         }
     }
 }

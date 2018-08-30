@@ -2,7 +2,7 @@
 using Engine.Common;
 using SharpDX;
 
-namespace Terrain
+namespace Terrain.Emitters
 {
     /// <summary>
     /// Moving emitter
@@ -12,11 +12,11 @@ namespace Terrain
         /// <summary>
         /// Manipulator to follow
         /// </summary>
-        private Manipulator3D manipulator;
+        private readonly Manipulator3D manipulator;
         /// <summary>
         /// Relative delta position from manipulator position
         /// </summary>
-        private Vector3 delta;
+        private readonly Vector3 delta;
 
         /// <summary>
         /// Constructor

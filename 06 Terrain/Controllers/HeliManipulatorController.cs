@@ -1,7 +1,7 @@
 ﻿using Engine;
 using SharpDX;
 
-namespace Terrain
+namespace Terrain.Controllers
 {
     /// <summary>
     /// Helicopter controller
@@ -11,7 +11,7 @@ namespace Terrain
         /// <summary>
         /// Internal manipulator
         /// </summary>
-        private Manipulator3D internalManipulator = null;
+        private readonly Manipulator3D internalManipulator = null;
 
         /// <summary>
         /// Constructor
@@ -19,8 +19,7 @@ namespace Terrain
         /// <param name="manipulator">Parent manipulator</param>
         public HeliManipulatorController(Manipulator3D manipulator) : base()
         {
-            this.internalManipulator = new Manipulator3D();
-            this.internalManipulator.Parent = manipulator;
+            this.internalManipulator = new Manipulator3D(manipulator);
         }
 
         /// <summary>
