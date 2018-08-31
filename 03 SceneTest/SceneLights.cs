@@ -3,10 +3,17 @@ using Engine.Common;
 using Engine.Content;
 using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SceneTest
 {
-    public class SceneStencilPass : Scene
+    /// <summary>
+    /// Lights scene test
+    /// </summary>
+    public class SceneLights : Scene
     {
         private readonly float spaceSize = 10;
 
@@ -21,10 +28,11 @@ namespace SceneTest
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
-        private bool animateLightColors = false;
-
-        public SceneStencilPass(Game game)
-            : base(game)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="game">Game</param>
+        public SceneLights(Game game) : base(game)
         {
 
         }
@@ -79,9 +87,9 @@ namespace SceneTest
             };
 
             MaterialContent mat = MaterialContent.Default;
-            mat.DiffuseTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_specular.dds";
+            mat.DiffuseTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
+            mat.NormalMapTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_normal.dds";
+            mat.SpecularTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
             var content = ModelContent.GenerateTriangleList(vertices, indices, mat);
 
@@ -113,7 +121,7 @@ namespace SceneTest
                     UseAnisotropicFiltering = true,
                     Content = new ContentDescription()
                     {
-                        ContentFolder = "SceneStencilPass/buildings/obelisk",
+                        ContentFolder = "SceneLights/buildings/obelisk",
                         ModelContentFilename = "Obelisk.xml",
                     }
                 });
@@ -161,13 +169,13 @@ namespace SceneTest
         }
         private void InitializeLights()
         {
-            this.Lights.KeyLight.Enabled = false;
+            this.Lights.KeyLight.Enabled = true;
             this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = true;
 
-            this.Lights.Add(new SceneLightPoint("Point1", false, Color.White, Color.White, true, Vector3.Zero, 5, 5));
+            this.Lights.Add(new SceneLightPoint("Point1", true, Color.White, Color.White, true, Vector3.Zero, 25, 25));
 
-            this.Lights.Add(new SceneLightSpot("Spot1", false, Color.White, Color.White, true, Vector3.Zero, Vector3.Down, 20, 5, 5));
+            this.Lights.Add(new SceneLightSpot("Spot1", true, Color.White, Color.White, true, Vector3.Zero, Vector3.Down, 50, 25, 25));
         }
 
         public override void Update(GameTime gameTime)
@@ -175,11 +183,6 @@ namespace SceneTest
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
                 this.Game.SetScene<SceneStart>();
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.L))
-            {
-                this.animateLightColors = !this.animateLightColors;
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
@@ -283,21 +286,15 @@ namespace SceneTest
             position.Z = r * (float)Math.Sin(av * this.Game.GameTime.TotalSeconds);
 
             var pos1 = position + new Vector3(0, h, 0);
-            var col1 = animateLightColors ? new Color4(pos1.X, pos1.Y, pos1.Z, 1.0f) : Color.White;
 
             this.lightEmitter1.Transform.SetPosition(pos1);
             this.Lights.PointLights[0].Position = pos1;
-            this.Lights.PointLights[0].DiffuseColor = col1;
-            this.Lights.PointLights[0].SpecularColor = col1;
 
             var pos2 = (position * -1) + new Vector3(0, h, 0);
-            var col2 = animateLightColors ? new Color4(pos2.X, pos2.Y, pos2.Z, 1.0f) : Color.White;
 
             this.lightEmitter2.Transform.SetPosition(pos2);
             this.Lights.SpotLights[0].Position = pos2;
             this.Lights.SpotLights[0].Direction = -Vector3.Normalize(new Vector3(pos2.X, 0, pos2.Z));
-            this.Lights.SpotLights[0].DiffuseColor = col2;
-            this.Lights.SpotLights[0].SpecularColor = col2;
         }
         private void UpdateLightDrawingVolumes()
         {

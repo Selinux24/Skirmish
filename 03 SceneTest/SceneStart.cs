@@ -15,6 +15,7 @@ namespace SceneTest
         SceneObject<SpriteButton> sceneMaterialsButton = null;
         SceneObject<SpriteButton> sceneWaterButton = null;
         SceneObject<SpriteButton> sceneStencilPassButton = null;
+        SceneObject<SpriteButton> sceneLightsButton = null;
         SceneObject<SpriteButton> sceneTexturesButton = null;
         SceneObject<SpriteButton> exitButton = null;
 
@@ -105,6 +106,7 @@ namespace SceneTest
             this.sceneMaterialsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
             this.sceneWaterButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
             this.sceneStencilPassButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.sceneLightsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
             this.sceneTexturesButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
 
             #endregion
@@ -151,29 +153,34 @@ namespace SceneTest
             this.title.Instance.Top = this.Game.Form.RenderHeight / 4;
 
             this.sceneMaterialsButton.Instance.Text = "Materials";
-            this.sceneMaterialsButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 1) - (this.sceneMaterialsButton.Instance.Width / 2);
+            this.sceneMaterialsButton.Instance.Left = ((this.Game.Form.RenderWidth / 7) * 1) - (this.sceneMaterialsButton.Instance.Width / 2);
             this.sceneMaterialsButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneMaterialsButton.Instance.Height / 2);
-            this.sceneMaterialsButton.Instance.Click += sceneButtonClick;
+            this.sceneMaterialsButton.Instance.Click += SceneButtonClick;
 
             this.sceneWaterButton.Instance.Text = "Water";
-            this.sceneWaterButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 2) - (this.sceneWaterButton.Instance.Width / 2);
+            this.sceneWaterButton.Instance.Left = ((this.Game.Form.RenderWidth / 7) * 2) - (this.sceneWaterButton.Instance.Width / 2);
             this.sceneWaterButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneWaterButton.Instance.Height / 2);
-            this.sceneWaterButton.Instance.Click += sceneButtonClick;
+            this.sceneWaterButton.Instance.Click += SceneButtonClick;
 
             this.sceneStencilPassButton.Instance.Text = "Stencil Pass";
-            this.sceneStencilPassButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 3) - (this.sceneStencilPassButton.Instance.Width / 2);
+            this.sceneStencilPassButton.Instance.Left = ((this.Game.Form.RenderWidth / 7) * 3) - (this.sceneStencilPassButton.Instance.Width / 2);
             this.sceneStencilPassButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneStencilPassButton.Instance.Height / 2);
-            this.sceneStencilPassButton.Instance.Click += sceneButtonClick;
+            this.sceneStencilPassButton.Instance.Click += SceneButtonClick;
+
+            this.sceneLightsButton.Instance.Text = "Lights";
+            this.sceneLightsButton.Instance.Left = ((this.Game.Form.RenderWidth / 7) * 4) - (this.sceneLightsButton.Instance.Width / 2);
+            this.sceneLightsButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneLightsButton.Instance.Height / 2);
+            this.sceneLightsButton.Instance.Click += SceneButtonClick;
 
             this.sceneTexturesButton.Instance.Text = "Textures";
-            this.sceneTexturesButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 4) - (this.sceneTexturesButton.Instance.Width / 2);
+            this.sceneTexturesButton.Instance.Left = ((this.Game.Form.RenderWidth / 7) * 5) - (this.sceneTexturesButton.Instance.Width / 2);
             this.sceneTexturesButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneTexturesButton.Instance.Height / 2);
-            this.sceneTexturesButton.Instance.Click += sceneButtonClick;
+            this.sceneTexturesButton.Instance.Click += SceneButtonClick;
 
             this.exitButton.Instance.Text = "Exit";
-            this.exitButton.Instance.Left = (this.Game.Form.RenderWidth / 6) * 5 - (this.exitButton.Instance.Width / 2);
+            this.exitButton.Instance.Left = (this.Game.Form.RenderWidth / 7) * 6 - (this.exitButton.Instance.Width / 2);
             this.exitButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Instance.Height / 2);
-            this.exitButton.Instance.Click += exitButtonClick;
+            this.exitButton.Instance.Click += ExitButtonClick;
         }
         public override void Update(GameTime gameTime)
         {
@@ -194,7 +201,7 @@ namespace SceneTest
             this.Camera.LookTo(position);
         }
 
-        private void sceneButtonClick(object sender, EventArgs e)
+        private void SceneButtonClick(object sender, EventArgs e)
         {
             if (sender == this.sceneMaterialsButton.Instance)
             {
@@ -208,12 +215,16 @@ namespace SceneTest
             {
                 this.Game.SetScene<SceneStencilPass>();
             }
+            else if (sender == this.sceneLightsButton.Instance)
+            {
+                this.Game.SetScene<SceneLights>();
+            }
             else if (sender == this.sceneTexturesButton.Instance)
             {
                 this.Game.SetScene<SceneTextures>();
             }
         }
-        private void exitButtonClick(object sender, EventArgs e)
+        private void ExitButtonClick(object sender, EventArgs e)
         {
             this.Game.Exit();
         }
