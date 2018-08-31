@@ -34,7 +34,9 @@ struct PointLight
 	float CastShadow;
 	float2 PerspectiveValues;
 	uint MapIndex;
-	uint3 Pad;
+	uint Pad1;
+	uint Pad2;
+	uint Pad3;
 };
 struct SpotLight
 {
@@ -46,7 +48,9 @@ struct SpotLight
     float Intensity;
     float Radius;
     float CastShadow;
-    float2 Pad;
+	float Pad1;
+	float Pad2;
+	float4x4 FromLightVP;
 };
 
 static const uint MaxSampleCount = 16;
@@ -112,6 +116,35 @@ inline float CalcShadowFactor(float3 pPosition, int mapIndex, uint mapCount, flo
 	}
 
     return shadow;
+}
+
+inline float CalcShadowFactor2(float3 pPosition, float4x4 fromLightVP, Texture2DArray<float> shadowMap)
+{
+	uint samples = 16;
+	float bias = 0.0001f;
+	float poissonFactor = 3500.0f;
+
+	float shadow = 0.0f;
+
+	float4 lightPosition = mul(float4(pPosition, 1), fromLightVP);
+
+	float2 tex = 0.0f;
+	tex.x = (+lightPosition.x / lightPosition.w * 0.5f) + 0.5f;
+	tex.y = (-lightPosition.y / lightPosition.w * 0.5f) + 0.5f;
+	float z = (lightPosition.z / lightPosition.w) - bias;
+
+	float sShadow = 0.0f;
+
+	for (uint i = 0; i < samples; i++)
+	{
+		float3 stc = float3(tex + poissonDisk[i] / poissonFactor, 0);
+
+		sShadow += max(minShadowFactor, shadowMap.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z));
+	}
+
+	shadow += (sShadow / samples);
+
+	return shadow;
 }
 
 inline float CalcFogFactor(float distToEye, float fogStart, float fogRange)
@@ -389,6 +422,7 @@ struct ComputeSpotLightsInput
     float3 pPosition;
     float3 pNormal;
     float3 ePosition;
+	Texture2DArray<float> shadowMapSpot;
 };
 
 inline ComputeLightsOutput ComputeSpotLightLOD1(ComputeSpotLightsInput input, float dist)
@@ -466,6 +500,7 @@ struct ComputeLightsInput
     float3 ePosition;
     Texture2DArray<float> shadowMapDir;
 	TextureCubeArray<float> shadowMapOmni;
+	Texture2DArray<float> shadowMapSpot;
 };
 
 inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
@@ -527,14 +562,21 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
         float D = length(P);
         float3 L = P / D;
 
+		float cShadowFactor = 1;
+		[flatten]
+		if (input.spotLights[i].CastShadow == 1)
+		{
+			cShadowFactor = CalcShadowFactor2(input.pPosition, input.spotLights[i].FromLightVP, input.shadowMapSpot);
+		}
+
         float attenuation = CalcSphericAttenuation(input.spotLights[i].Intensity, input.spotLights[i].Radius, D);
         attenuation *= CalcSpotCone(input.spotLights[i].Direction, input.spotLights[i].Angle, L);
 
         float4 cDiffuse = DiffusePass(input.spotLights[i].Diffuse, L, input.pNormal);
         float4 cSpecular = SpecularBlinnPhongPass(input.spotLights[i].Specular, input.k.Shininess, L, input.pNormal, V);
 
-        lDiffuse += (cDiffuse * attenuation);
-        lSpecular += (cSpecular * attenuation);
+        lDiffuse += (cDiffuse * cShadowFactor * attenuation);
+        lSpecular += (cSpecular * cShadowFactor * attenuation);
     }
 
 	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, lSpecular, input.pColorSpecular, dist);
@@ -582,7 +624,7 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 
         float4 cDiffuse = DiffusePass(input.pointLights[i].Diffuse, L, input.pNormal);
 
-        lDiffuse += (cDiffuse * attenuation * cShadowFactor);
+        lDiffuse += (cDiffuse * cShadowFactor * attenuation);
     }
 
     for (i = 0; i < input.spotLightsCount; i++)
@@ -591,12 +633,19 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
         float D = length(P);
         float3 L = P / D;
 
+		float cShadowFactor = 1;
+		[flatten]
+		if (input.spotLights[i].CastShadow == 1)
+		{
+			cShadowFactor = CalcShadowFactor2(input.pPosition, input.spotLights[i].FromLightVP, input.shadowMapSpot);
+		}
+
         float attenuation = CalcSphericAttenuation(input.spotLights[i].Intensity, input.spotLights[i].Radius, D);
         attenuation *= CalcSpotCone(input.spotLights[i].Direction, input.spotLights[i].Angle, L);
 
         float4 cDiffuse = DiffusePass(input.spotLights[i].Diffuse, L, input.pNormal);
 
-        lDiffuse += (cDiffuse * attenuation);
+        lDiffuse += (cDiffuse * cShadowFactor * attenuation);
     }
 
 	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0, 0);

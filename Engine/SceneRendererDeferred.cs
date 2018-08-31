@@ -33,28 +33,28 @@ namespace Engine
         /// <summary>
         /// Geometry buffer
         /// </summary>
-        private RenderTarget geometryBuffer = null;
+        private readonly RenderTarget geometryBuffer = null;
         /// <summary>
         /// Light buffer
         /// </summary>
-        private RenderTarget lightBuffer = null;
+        private readonly RenderTarget lightBuffer = null;
         /// <summary>
         /// Light drawer
         /// </summary>
-        private SceneRendererDeferredLights lightDrawer = null;
+        private readonly SceneRendererDeferredLights lightDrawer = null;
 
         /// <summary>
         /// Blend state for deferred lighting blending
         /// </summary>
-        private EngineBlendState blendDeferredLighting = null;
+        private readonly EngineBlendState blendDeferredLighting = null;
         /// <summary>
         /// Blend state for defered composer blending
         /// </summary>
-        private EngineBlendState blendDeferredComposer = null;
+        private readonly EngineBlendState blendDeferredComposer = null;
         /// <summary>
         /// Blend state for transparent defered composer blending
         /// </summary>
-        private EngineBlendState blendDeferredComposerTransparent = null;
+        private readonly EngineBlendState blendDeferredComposerTransparent = null;
 
         /// <summary>
         /// View * OrthoProjection Matrix
@@ -215,6 +215,7 @@ namespace Engine
                     //Initialize context data from shadow mapping
                     this.DrawContext.ShadowMapDirectional = this.ShadowMapperDirectional;
                     this.DrawContext.ShadowMapOmnidirectional = this.ShadowMapperOmnidirectional;
+                    this.DrawContext.ShadowMapSpot = this.ShadowMapperSpot;
 
 #if DEBUG
                     swStartup.Stop();
@@ -318,8 +319,7 @@ namespace Engine
 #if DEBUG
                             deferred_lbuffer = swLightBuffer.ElapsedTicks;
 
-                            long[] deferredCounters = Counters.GetStatistics("DEFERRED_LIGHTING") as long[];
-                            if (deferredCounters != null)
+                            if (Counters.GetStatistics("DEFERRED_LIGHTING") is long[] deferredCounters)
                             {
                                 deferred_lbufferInit = deferredCounters[0];
                                 deferred_lbufferDir = deferredCounters[1];
@@ -345,8 +345,7 @@ namespace Engine
 
                     deferred_compose = swComponsition.ElapsedTicks;
 
-                    long[] deferredCompositionCounters = Counters.GetStatistics("DEFERRED_COMPOSITION") as long[];
-                    if (deferredCompositionCounters != null)
+                    if (Counters.GetStatistics("DEFERRED_COMPOSITION") is long[] deferredCompositionCounters)
                     {
                         deferred_composeInit = deferredCompositionCounters[0];
                         deferred_composeDraw = deferredCompositionCounters[1];

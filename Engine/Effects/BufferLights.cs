@@ -3,9 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace Engine.Effects
 {
-    using Engine.Common;
-    using System;
-
     /// <summary>
     /// Hemispheric light buffer
     /// </summary>
@@ -315,6 +312,10 @@ namespace Engine.Effects
         /// Padding
         /// </summary>
         public float Pad2;
+        /// <summary>
+        /// From light view * projection matrix array
+        /// </summary>
+        public Matrix FromLightVP;
 
         /// <summary>
         /// Constructor
@@ -333,6 +334,12 @@ namespace Engine.Effects
             this.CastShadow = light.CastShadow ? 1 : 0;
             this.Pad1 = 1000;
             this.Pad2 = 2000;
+
+            this.FromLightVP = Matrix.Identity;
+            if (light.FromLightVP != null)
+            {
+                if (light.FromLightVP.Length > 0) this.FromLightVP = Matrix.Transpose(light.FromLightVP[0]);
+            }
         }
 
         /// <summary>

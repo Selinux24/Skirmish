@@ -19,6 +19,10 @@ namespace Engine
         /// </summary>
         ShadowMapOmnidirectional,
         /// <summary>
+        /// Spot light shadow map
+        /// </summary>
+        ShadowMapSpot,
+        /// <summary>
         /// Light map
         /// </summary>
         LightMap,

@@ -49,6 +49,10 @@ namespace Engine.Common
         /// Omnidirectional shadow map
         /// </summary>
         public IShadowMap ShadowMapOmnidirectional { get; set; }
+        /// <summary>
+        /// Spot light shadow map
+        /// </summary>
+        public IShadowMap ShadowMapSpot { get; set; }
 
         /// <summary>
         /// Constructor

@@ -39,6 +39,15 @@ namespace Engine.Common
         protected const int MaxCubicShadows = 8;
 
         /// <summary>
+        /// Spot light shadow map size
+        /// </summary>
+        protected const int SpotShadowMapSize = 1024;
+        /// <summary>
+        /// Max spot shadows
+        /// </summary>
+        protected const int MaxSpotShadows = 8;
+
+        /// <summary>
         /// Cull index for drawing
         /// </summary>
         protected const int CullIndexDrawIndex = 0;
@@ -55,6 +64,10 @@ namespace Engine.Common
         /// Cube shadow mapper for point lights
         /// </summary>
         protected IShadowMap ShadowMapperOmnidirectional { get; private set; }
+        /// <summary>
+        /// Shadow mapper for spot lights
+        /// </summary>
+        protected IShadowMap ShadowMapperSpot { get; private set; }
 
         /// <summary>
         /// Game
@@ -115,6 +128,21 @@ namespace Engine.Common
             }
         }
         /// <summary>
+        /// Spot lights shadow map
+        /// </summary>
+        protected EngineShaderResourceView ShadowMapSpot
+        {
+            get
+            {
+                if (this.ShadowMapperSpot != null)
+                {
+                    return this.ShadowMapperSpot.Texture;
+                }
+
+                return null;
+            }
+        }
+        /// <summary>
         /// Gets or sets whether the renderer was updated
         /// </summary>
         protected bool Updated { get; set; }
@@ -134,6 +162,10 @@ namespace Engine.Common
             this.ShadowMapperOmnidirectional = new CubicShadowMap(game,
                 CubicShadowMapSize, CubicShadowMapSize,
                 MaxCubicShadows);
+
+            this.ShadowMapperSpot = new ShadowMap(game,
+                SpotShadowMapSize, SpotShadowMapSize,
+                MaxSpotShadows);
 
             this.cullManager = new SceneCullManager();
 
@@ -161,6 +193,7 @@ namespace Engine.Common
         {
             Helper.Dispose(this.ShadowMapperDirectional);
             Helper.Dispose(this.ShadowMapperOmnidirectional);
+            Helper.Dispose(this.ShadowMapperSpot);
         }
         /// <summary>
         /// Resizes buffers
@@ -178,6 +211,7 @@ namespace Engine.Common
         {
             if (result == SceneRendererResultEnum.ShadowMapDirectional) return this.ShadowMapDirectional;
             if (result == SceneRendererResultEnum.ShadowMapOmnidirectional) return this.ShadowMapOmnidirectional;
+            if (result == SceneRendererResultEnum.ShadowMapSpot) return this.ShadowMapSpot;
             return null;
         }
         /// <summary>
@@ -238,6 +272,8 @@ namespace Engine.Common
 
             cullIndex = DoOmnidirectionalShadowMapping(gameTime, scene, cullIndex);
 
+            cullIndex = DoSpotShadowMapping(gameTime, scene, cullIndex);
+
             return cullIndex;
         }
         /// <summary>
@@ -246,6 +282,7 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         /// <param name="scene">Scene</param>
         /// <param name="cullIndex">Cull index</param>
+        /// <returns>Returns the resulting cull index</returns>
         protected virtual int DoDirectionalShadowMapping(GameTime gameTime, Scene scene, int cullIndex)
         {
             var shadowCastingLights = scene.Lights.GetDirectionalShadowCastingLights();
@@ -275,12 +312,10 @@ namespace Engine.Common
                         light.ShadowMapCount = 0;
                         light.FromLightVP = new Matrix[Effects.BufferDirectionalLight.MAXSubMaps];
 
-                        Vector3 lightPosition;
-                        Vector3 lightDirection;
                         if (scene.Lights.GetDirectionalLightShadowParams(
                             light,
-                            out lightPosition,
-                            out lightDirection))
+                            out Vector3 lightPosition,
+                            out Vector3 lightDirection))
                         {
                             for (int sm = 0; sm < MaxDirectionalSubshadowMaps; sm++)
                             {
@@ -326,6 +361,7 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         /// <param name="scene">Scene</param>
         /// <param name="cullIndex">Cull index</param>
+        /// <returns>Returns the resulting cull index</returns>
         protected virtual int DoOmnidirectionalShadowMapping(GameTime gameTime, Scene scene, int cullIndex)
         {
             var shadowCastingLights = scene.Lights.GetOmnidirectionalShadowCastingLights(scene.Camera.Position);
@@ -365,6 +401,69 @@ namespace Engine.Common
                             var vpArray = SceneLights.GetFromOmniLightViewProjection(light);
 
                             shadowMapper.FromLightViewProjectionArray = vpArray;
+                            shadowMapper.Bind(graphics, l);
+
+                            this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+                        }
+
+                        cullIndex++;
+                    }
+                }
+            }
+
+            return cullIndex;
+        }
+        /// <summary>
+        /// Draw spot light shadow maps
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="cullIndex">Cull index</param>
+        /// <returns>Returns the resulting cull index</returns>
+        protected virtual int DoSpotShadowMapping(GameTime gameTime, Scene scene, int cullIndex)
+        {
+            var shadowCastingLights = scene.Lights.GetSpotShadowCastingLights(scene.Camera.Position);
+            if (shadowCastingLights.Length > 0)
+            {
+                var graphics = this.Game.Graphics;
+
+                //Draw components if drop shadow (opaque)
+                var shadowObjs = scene.GetComponents(c => c.Visible == true && c.CastShadow == true);
+                if (shadowObjs.Count > 0)
+                {
+                    var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+
+                    uint assigned = 0;
+
+                    for (int l = 0; l < shadowCastingLights.Length; l++)
+                    {
+                        if (assigned >= MaxCubicShadows)
+                        {
+                            break;
+                        }
+
+                        var light = shadowCastingLights[l];
+
+                        var sph = new CullingVolumeSphere(light.Position, light.Radius);
+
+                        var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+
+                        if (doShadows)
+                        {
+                            light.ShadowMapIndex = assigned;
+                            var shadowMapper = this.ShadowMapperSpot;
+                            assigned++;
+
+                            this.DrawShadowsContext.ShadowMap = shadowMapper;
+
+                            var vp = SceneLights.GetFromSpotLightViewProjection(
+                                light.Position,
+                                light.Direction,
+                                light.Radius);
+
+                            light.FromLightVP = new[] { vp };
+
+                            shadowMapper.FromLightViewProjectionArray = new[] { vp };
                             shadowMapper.Bind(graphics, l);
 
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);

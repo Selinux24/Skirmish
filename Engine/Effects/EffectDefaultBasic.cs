@@ -134,119 +134,123 @@ namespace Engine.Effects
         /// <summary>
         /// Hemispheric light effect variable
         /// </summary>
-        private EngineEffectVariable hemiLight = null;
+        private readonly EngineEffectVariable hemiLight = null;
         /// <summary>
         /// Directional lights effect variable
         /// </summary>
-        private EngineEffectVariable dirLights = null;
+        private readonly EngineEffectVariable dirLights = null;
         /// <summary>
         /// Point lights effect variable
         /// </summary>
-        private EngineEffectVariable pointLights = null;
+        private readonly EngineEffectVariable pointLights = null;
         /// <summary>
         /// Spot light effect variable
         /// </summary>
-        private EngineEffectVariable spotLights = null;
+        private readonly EngineEffectVariable spotLights = null;
         /// <summary>
         /// Light count effect variable
         /// </summary>
-        private EngineEffectVariableVector lightCount = null;
+        private readonly EngineEffectVariableVector lightCount = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
-        private EngineEffectVariableVector eyePositionWorld = null;
+        private readonly EngineEffectVariableVector eyePositionWorld = null;
         /// <summary>
         /// Fog start effect variable
         /// </summary>
-        private EngineEffectVariableScalar fogStart = null;
+        private readonly EngineEffectVariableScalar fogStart = null;
         /// <summary>
         /// Fog range effect variable
         /// </summary>
-        private EngineEffectVariableScalar fogRange = null;
+        private readonly EngineEffectVariableScalar fogRange = null;
         /// <summary>
         /// Fog color effect variable
         /// </summary>
-        private EngineEffectVariableVector fogColor = null;
+        private readonly EngineEffectVariableVector fogColor = null;
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Animation data effect variable
         /// </summary>
-        private EngineEffectVariableScalar animationOffset = null;
+        private readonly EngineEffectVariableScalar animationOffset = null;
         /// <summary>
         /// Material index effect variable
         /// </summary>
-        private EngineEffectVariableScalar materialIndex = null;
+        private readonly EngineEffectVariableScalar materialIndex = null;
         /// <summary>
         /// Texture index effect variable
         /// </summary>
-        private EngineEffectVariableScalar textureIndex = null;
+        private readonly EngineEffectVariableScalar textureIndex = null;
         /// <summary>
         /// Use diffuse map color variable
         /// </summary>
-        private EngineEffectVariableScalar useColorDiffuse = null;
+        private readonly EngineEffectVariableScalar useColorDiffuse = null;
         /// <summary>
         /// Use specular map color variable
         /// </summary>
-        private EngineEffectVariableScalar useColorSpecular = null;
+        private readonly EngineEffectVariableScalar useColorSpecular = null;
         /// <summary>
         /// Diffuse map effect variable
         /// </summary>
-        private EngineEffectVariableTexture diffuseMap = null;
+        private readonly EngineEffectVariableTexture diffuseMap = null;
         /// <summary>
         /// Normal map effect variable
         /// </summary>
-        private EngineEffectVariableTexture normalMap = null;
+        private readonly EngineEffectVariableTexture normalMap = null;
         /// <summary>
         /// Specular map effect variable
         /// </summary>
-        private EngineEffectVariableTexture specularMap = null;
+        private readonly EngineEffectVariableTexture specularMap = null;
         /// <summary>
         /// Animation palette width effect variable
         /// </summary>
-        private EngineEffectVariableScalar animationPaletteWidth = null;
+        private readonly EngineEffectVariableScalar animationPaletteWidth = null;
         /// <summary>
         /// Animation palette
         /// </summary>
-        private EngineEffectVariableTexture animationPalette = null;
+        private readonly EngineEffectVariableTexture animationPalette = null;
         /// <summary>
         /// Material palette width effect variable
         /// </summary>
-        private EngineEffectVariableScalar materialPaletteWidth = null;
+        private readonly EngineEffectVariableScalar materialPaletteWidth = null;
         /// <summary>
         /// Material palette
         /// </summary>
-        private EngineEffectVariableTexture materialPalette = null;
+        private readonly EngineEffectVariableTexture materialPalette = null;
         /// <summary>
         /// Level of detail ranges effect variable
         /// </summary>
-        private EngineEffectVariableVector lod = null;
+        private readonly EngineEffectVariableVector lod = null;
         /// <summary>
         /// Sampler for diffuse maps
         /// </summary>
-        private EngineEffectVariableSampler samplerDiffuse = null;
+        private readonly EngineEffectVariableSampler samplerDiffuse = null;
         /// <summary>
         /// Sampler for normal maps
         /// </summary>
-        private EngineEffectVariableSampler samplerNormal = null;
+        private readonly EngineEffectVariableSampler samplerNormal = null;
         /// <summary>
         /// Sampler for specular maps
         /// </summary>
-        private EngineEffectVariableSampler samplerSpecular = null;
+        private readonly EngineEffectVariableSampler samplerSpecular = null;
         /// <summary>
         /// Directional shadow map effect variable
         /// </summary>
-        private EngineEffectVariableTexture shadowMapDirectional = null;
+        private readonly EngineEffectVariableTexture shadowMapDirectional = null;
         /// <summary>
         /// Omnidirectional shadows map effect variable
         /// </summary>
-        private EngineEffectVariableTexture shadowMapOmnidirectional = null;
+        private readonly EngineEffectVariableTexture shadowMapOmnidirectional = null;
+        /// <summary>
+        /// Spot light shadows map effect variable
+        /// </summary>
+        private readonly EngineEffectVariableTexture shadowMapSpot = null;
 
         /// <summary>
         /// Current diffuse map
@@ -280,19 +284,23 @@ namespace Engine.Effects
         /// Current omnidirectional shadow map
         /// </summary>
         private EngineShaderResourceView currentShadowMapOmnidirectional = null;
+        /// <summary>
+        /// Current spot light shadow map
+        /// </summary>
+        private EngineShaderResourceView currentShadowMapSpot = null;
 
         /// <summary>
         /// Sampler point
         /// </summary>
-        private EngineSamplerState samplerPoint = null;
+        private readonly EngineSamplerState samplerPoint = null;
         /// <summary>
         /// Sampler linear
         /// </summary>
-        private EngineSamplerState samplerLinear = null;
+        private readonly EngineSamplerState samplerLinear = null;
         /// <summary>
         /// Sampler anisotropic
         /// </summary>
-        private EngineSamplerState samplerAnisotropic = null;
+        private readonly EngineSamplerState samplerAnisotropic = null;
 
         /// <summary>
         /// Hemispheric lights
@@ -736,6 +744,27 @@ namespace Engine.Effects
                 }
             }
         }
+        /// <summary>
+        /// Spot light shadow map
+        /// </summary>
+        protected EngineShaderResourceView ShadowMapSpot
+        {
+            get
+            {
+                return this.shadowMapSpot.GetResource();
+            }
+            set
+            {
+                if (this.currentShadowMapSpot != value)
+                {
+                    this.shadowMapSpot.SetResource(value);
+
+                    this.currentShadowMapSpot = value;
+
+                    Counters.TextureUpdates++;
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -798,6 +827,7 @@ namespace Engine.Effects
             this.fogColor = this.Effect.GetVariableVector("gPSFogColor");
             this.shadowMapDirectional = this.Effect.GetVariableTexture("gPSShadowMapDir");
             this.shadowMapOmnidirectional = this.Effect.GetVariableTexture("gPSShadowMapOmni");
+            this.shadowMapSpot = this.Effect.GetVariableTexture("gPSShadowMapSpot");
 
             //Per object
             this.useColorDiffuse = this.Effect.GetVariableScalar("gPSUseColorDiffuse");
@@ -912,6 +942,7 @@ namespace Engine.Effects
                 Vector3.Zero,
                 null,
                 null,
+                null,
                 null);
         }
         /// <summary>
@@ -929,7 +960,8 @@ namespace Engine.Effects
                 context.EyePosition,
                 context.Lights,
                 context.ShadowMapDirectional,
-                context.ShadowMapOmnidirectional);
+                context.ShadowMapOmnidirectional,
+                context.ShadowMapSpot);
         }
         /// <summary>
         /// Update per model object data
@@ -978,13 +1010,15 @@ namespace Engine.Effects
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMapDirectional">Low definition shadow map</param>
         /// <param name="shadowMapOmnidirectional">Omnidirectional shadow map</param>
+        /// <param name="shadowMapSpot">Spot light shadow map</param>
         private void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
             Vector3 eyePositionWorld,
             SceneLights lights,
             IShadowMap shadowMapDirectional,
-            IShadowMap shadowMapOmnidirectional)
+            IShadowMap shadowMapOmnidirectional,
+            IShadowMap shadowMapSpot)
         {
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
@@ -1039,6 +1073,10 @@ namespace Engine.Effects
                 {
                     this.ShadowMapOmnidirectional = shadowMapOmnidirectional.Texture;
                 }
+                if (shadowMapSpot != null)
+                {
+                    this.ShadowMapSpot = shadowMapSpot.Texture;
+                }
             }
             else
             {
@@ -1050,6 +1088,7 @@ namespace Engine.Effects
 
                 this.ShadowMapDirectional = null;
                 this.ShadowMapOmnidirectional = null;
+                this.ShadowMapSpot = null;
             }
 
             this.HemiLight = bHemiLight;

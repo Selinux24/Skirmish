@@ -40,19 +40,19 @@ namespace Engine
         /// <summary>
         /// Directional lights
         /// </summary>
-        private List<SceneLightDirectional> directionalLights = new List<SceneLightDirectional>();
+        private readonly List<SceneLightDirectional> directionalLights = new List<SceneLightDirectional>();
         /// <summary>
         /// Point lights
         /// </summary>
-        private List<SceneLightPoint> pointLights = new List<SceneLightPoint>();
+        private readonly List<SceneLightPoint> pointLights = new List<SceneLightPoint>();
         /// <summary>
         /// Spot lights
         /// </summary>
-        private List<SceneLightSpot> spotLights = new List<SceneLightSpot>();
+        private readonly List<SceneLightSpot> spotLights = new List<SceneLightSpot>();
         /// <summary>
         /// Visible lights
         /// </summary>
-        private List<SceneLight> visibleLights = new List<SceneLight>();
+        private readonly List<SceneLight> visibleLights = new List<SceneLight>();
 
         /// <summary>
         /// Gets or sets the hemispheric ambient light
@@ -274,7 +274,7 @@ namespace Engine
         /// <summary>
         /// Gets the omnidirectional from light view matrix
         /// </summary>
-        /// <param name="lightPosition">Light direction</param>
+        /// <param name="lightPosition">Light position</param>
         /// <param name="direction">Direction</param>
         /// <param name="up">Up vector</param>
         /// <returns>Returns the omnidirectional from light view matrix</returns>
@@ -282,6 +282,20 @@ namespace Engine
         {
             // View from light to scene center position
             return Matrix.LookAtLH(lightPosition, lightPosition + direction, up);
+        }
+        /// <summary>
+        /// Gets the spot light from light view matrix
+        /// </summary>
+        /// <param name="lightPosition">Light position</param>
+        /// <param name="direction">Direction</param>
+        /// <param name="radius">Radius</param>
+        /// <returns>Returns the spot light from light view matrix</returns>
+        public static Matrix GetFromSpotLightViewProjection(Vector3 lightPosition, Vector3 direction, float radius)
+        {
+            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, radius);
+
+            // View from light to scene center position
+            return Matrix.LookAtLH(lightPosition, lightPosition + direction, Vector3.Up) * projection;
         }
 
         /// <summary>
@@ -533,22 +547,37 @@ namespace Engine
         /// <summary>
         /// Gets a collection of directional lights that cast shadow
         /// </summary>
+        /// <returns>Returns a light collection</returns>
         public ISceneLightDirectional[] GetDirectionalShadowCastingLights()
         {
             return this.visibleLights
-                .Where(l => l.CastShadow && l is ISceneLightDirectional)
-                .Select(l => (ISceneLightDirectional)l)
+                .Where(l => l.CastShadow && l is SceneLightDirectional)
+                .Select(l => (SceneLightDirectional)l)
                 .ToArray();
         }
         /// <summary>
         /// Gets a collection of omnidirectional lights that cast shadow
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
+        /// <returns>Returns a light collection</returns>
         public ISceneLightOmnidirectional[] GetOmnidirectionalShadowCastingLights(Vector3 eyePosition)
         {
             return this.visibleLights
-                .Where(l => l.CastShadow && l is ISceneLightOmnidirectional)
-                .Select(l => (ISceneLightOmnidirectional)l)
+                .Where(l => l.CastShadow && l is SceneLightPoint)
+                .Select(l => (SceneLightPoint)l)
+                .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
+                .ToArray();
+        }
+        /// <summary>
+        /// Gets a collection of spot lights that cast shadow
+        /// </summary>
+        /// <param name="eyePosition">Eye position</param>
+        /// <returns>Returns a light collection</returns>
+        public SceneLightSpot[] GetSpotShadowCastingLights(Vector3 eyePosition)
+        {
+            return this.visibleLights
+                .Where(l => l.CastShadow && l is SceneLightSpot)
+                .Select(l => (SceneLightSpot)l)
                 .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
                 .ToArray();
         }

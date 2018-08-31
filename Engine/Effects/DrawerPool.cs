@@ -179,7 +179,7 @@ namespace Engine.Effects
         /// <returns>Returns the new generated effect instance</returns>
         private static T CreateEffect<T>(Graphics graphics, byte[] resFxo, byte[] resFx) where T : Drawer
         {
-            var res = resFxo != null ? resFxo : resFx;
+            var res = resFxo ?? resFx;
 
             var effect = (T)Activator.CreateInstance(typeof(T), graphics, res, false);
 

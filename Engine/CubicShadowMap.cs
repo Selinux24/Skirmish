@@ -45,9 +45,10 @@ namespace Engine
 
             this.Viewports = Helper.CreateArray(6, new Viewport(0, 0, width, height, 0, 1.0f));
 
-            EngineDepthStencilView[] dsv;
-            EngineShaderResourceView srv;
-            game.Graphics.CreateCubicShadowMapTextures(width, height, arraySize, out dsv, out srv);
+            game.Graphics.CreateCubicShadowMapTextures(
+                width, height, arraySize,
+                out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv);
+
             this.DepthMap = dsv;
             this.Texture = srv;
 

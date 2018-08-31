@@ -47,6 +47,7 @@ cbuffer cbPSPerFrame : register(b3)
 };
 Texture2DArray<float> gPSShadowMapDir : register(t2);
 TextureCubeArray<float> gPSShadowMapOmni : register(t3);
+Texture2DArray<float> gPSShadowMapSpot : register(t4);
 
 cbuffer cbPSPerObject : register(b4)
 {
@@ -263,7 +264,8 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.spotLightsCount = gPSLightCount.z;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
-    lInput.shadowMapOmni = gPSShadowMapOmni;
+	lInput.shadowMapOmni = gPSShadowMapOmni;
+	lInput.shadowMapSpot = gPSShadowMapSpot;
 
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
@@ -518,6 +520,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 
 	lInput.shadowMapDir = gPSShadowMapDir;
 	lInput.shadowMapOmni = gPSShadowMapOmni;
+	lInput.shadowMapSpot = gPSShadowMapSpot;
 
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
@@ -664,6 +667,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 
 	lInput.shadowMapDir = gPSShadowMapDir;
 	lInput.shadowMapOmni = gPSShadowMapOmni;
+	lInput.shadowMapSpot = gPSShadowMapSpot;
 
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;

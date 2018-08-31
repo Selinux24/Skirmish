@@ -177,6 +177,13 @@ namespace SceneTest
                 this.Game.SetScene<SceneStart>();
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning);
+            }
+
             if (this.Game.Input.KeyJustReleased(Keys.L))
             {
                 this.animateLightColors = !this.animateLightColors;
@@ -185,55 +192,14 @@ namespace SceneTest
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
             bool rightBtn = this.Game.Input.RightMouseButtonPressed;
 
-            #region Camera
-
+            // Camera
             this.UpdateCamera(gameTime, shift, rightBtn);
 
-            #endregion
-
-            #region Light
-
+            // Light
             this.UpdateLight(gameTime);
 
-            #endregion
-
-            #region Debug
-
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
-            {
-                this.drawDrawVolumes = !this.drawDrawVolumes;
-                this.drawCullVolumes = false;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
-            {
-                this.drawCullVolumes = !this.drawCullVolumes;
-                this.drawDrawVolumes = false;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
-            {
-                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
-            }
-
-            if (this.drawDrawVolumes)
-            {
-                this.UpdateLightDrawingVolumes();
-            }
-
-            if (this.drawCullVolumes)
-            {
-                this.UpdateLightCullingVolumes();
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.R))
-            {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
-            }
-
-            #endregion
+            // Debug
+            this.UpdateDebug(gameTime);
 
             base.Update(gameTime);
         }
@@ -299,45 +265,65 @@ namespace SceneTest
             this.Lights.SpotLights[0].DiffuseColor = col2;
             this.Lights.SpotLights[0].SpecularColor = col2;
         }
-        private void UpdateLightDrawingVolumes()
+        private void UpdateDebug(GameTime gameTime)
         {
-            this.lightsVolumeDrawer.Instance.Clear();
-
-            foreach (var spot in this.Lights.SpotLights)
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
-                var lines = spot.GetVolume(10);
-
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                this.drawDrawVolumes = !this.drawDrawVolumes;
             }
 
-            foreach (var point in this.Lights.PointLights)
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
             {
-                var lines = point.GetVolume(12, 5);
-
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                this.drawCullVolumes = !this.drawCullVolumes;
             }
 
-            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+            this.UpdateLightVolumes();
         }
-        private void UpdateLightCullingVolumes()
+        private void UpdateLightVolumes()
         {
             this.lightsVolumeDrawer.Instance.Clear();
 
-            foreach (var spot in this.Lights.SpotLights)
+            if (this.drawDrawVolumes)
             {
-                var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 12, 5);
+                foreach (var spot in this.Lights.SpotLights)
+                {
+                    var color = new Color4(spot.DiffuseColor.RGB(), 0.25f);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                    var lines = spot.GetVolume(30);
+
+                    this.lightsVolumeDrawer.Instance.AddLines(color, lines);
+                }
+
+                foreach (var point in this.Lights.PointLights)
+                {
+                    var color = new Color4(point.DiffuseColor.RGB(), 0.25f);
+
+                    var lines = point.GetVolume(30, 30);
+
+                    this.lightsVolumeDrawer.Instance.AddLines(color, lines);
+                }
             }
 
-            foreach (var point in this.Lights.PointLights)
+            if (this.drawCullVolumes)
             {
-                var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 12, 5);
+                var color = new Color4(Color.Red.RGB(), 0.50f);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                foreach (var spot in this.Lights.SpotLights)
+                {
+                    var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 24, 24);
+
+                    this.lightsVolumeDrawer.Instance.AddLines(color, lines);
+                }
+
+                foreach (var point in this.Lights.PointLights)
+                {
+                    var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 24, 24);
+
+                    this.lightsVolumeDrawer.Instance.AddLines(color, lines);
+                }
             }
 
-            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = (drawDrawVolumes|| drawCullVolumes);
         }
     }
 }
