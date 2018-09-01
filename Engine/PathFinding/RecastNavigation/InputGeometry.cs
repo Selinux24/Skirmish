@@ -2,6 +2,8 @@
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    using Engine.Helpers;
+
     /// <summary>
     /// Input geometry
     /// </summary>
@@ -18,7 +20,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="fnc">Triangle function</param>
         public InputGeometry(Func<Triangle[]> fnc) : base(fnc)
         {
-            ChunkyMesh = ChunkyTriMesh.Build(this);
+            
         }
 
         /// <summary>
@@ -28,12 +30,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the new graph</returns>
         public override IGraph CreateGraph(PathFinderSettings settings)
         {
+            // Prepare input data
+            this.ChunkyMesh = ChunkyTriMesh.Build(this);
+
+            // Create graph
             var graph = new Graph()
             {
                 Input = this,
                 Settings = settings as BuildSettings,
             };
 
+            // Generate navigation meshes and gueries for each agent
             foreach (var agent in graph.Settings.Agents)
             {
                 var nm = NavMesh.Build(this, graph.Settings, agent);
@@ -50,6 +57,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public override void Refresh()
         {
+            // Recreate the input data
             this.ChunkyMesh = ChunkyTriMesh.Build(this);
         }
 
@@ -59,8 +67,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="fileName">File name</param>
         public override IGraph Load(string fileName)
         {
+            // Initialize the input data
+            this.ChunkyMesh = ChunkyTriMesh.Build(this);
+
+            // Load file
             var graph = GraphFile.Load(fileName);
 
+            // Set input data
             graph.Input = this;
 
             return graph;

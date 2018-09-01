@@ -890,12 +890,12 @@ namespace Collada
         {
             var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
 
-            //if (File.Exists(fileName))
-            //{
-            //    var graph = this.PathFinderDescription.Load(fileName);
-            //    this.SetNavigationGraph(graph);
-            //}
-            //else
+            if (File.Exists(fileName))
+            {
+                var graph = this.PathFinderDescription.Load(fileName);
+                this.SetNavigationGraph(graph);
+            }
+            else
             {
                 base.UpdateNavigationGraph();
                 this.PathFinderDescription.Save(fileName, this.NavigationGraph);
