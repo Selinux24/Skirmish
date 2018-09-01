@@ -42,18 +42,6 @@ namespace Engine
         /// </summary>
         private BoundingBox boundingBox;
         /// <summary>
-        /// Gets if model has volumes
-        /// </summary>
-        private bool hasVolumes
-        {
-            get
-            {
-                var points = this.GetPoints();
-
-                return points != null && points.Length > 0;
-            }
-        }
-        /// <summary>
         /// Level of detail
         /// </summary>
         private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
@@ -70,6 +58,18 @@ namespace Engine
         /// Model parts collection
         /// </summary>
         protected List<ModelPart> ModelParts = new List<ModelPart>();
+        /// <summary>
+        /// Gets if model has volumes
+        /// </summary>
+        protected bool HasVolumes
+        {
+            get
+            {
+                var points = this.GetPoints();
+
+                return points != null && points.Length > 0;
+            }
+        }
 
         /// <summary>
         /// Model manipulator
@@ -361,7 +361,7 @@ namespace Engine
             bool cull = false;
             distance = float.MaxValue;
 
-            if (this.hasVolumes)
+            if (this.HasVolumes)
             {
                 if (this.SphericVolume)
                 {

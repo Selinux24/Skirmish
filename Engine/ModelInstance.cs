@@ -19,7 +19,7 @@ namespace Engine
         /// <summary>
         /// Model
         /// </summary>
-        private BaseModel model = null;
+        private readonly BaseModel model = null;
         /// <summary>
         /// Update point cache flag
         /// </summary>
@@ -49,9 +49,14 @@ namespace Engine
         /// </summary>
         private BoundingBox boundingBox;
         /// <summary>
+        /// Level of detail
+        /// </summary>
+        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.High;
+
+        /// <summary>
         /// Gets if model has volumes
         /// </summary>
-        private bool hasVolumes
+        protected bool HasVolumes
         {
             get
             {
@@ -60,10 +65,6 @@ namespace Engine
                 return points != null && points.Length > 0;
             }
         }
-        /// <summary>
-        /// Level of detail
-        /// </summary>
-        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.High;
 
         /// <summary>
         /// Instance id
@@ -409,7 +410,7 @@ namespace Engine
             var cull = true;
             distance = float.MaxValue;
 
-            if (this.hasVolumes)
+            if (this.HasVolumes)
             {
                 if (this.model.SphericVolume)
                 {
