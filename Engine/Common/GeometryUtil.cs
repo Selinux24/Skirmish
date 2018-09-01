@@ -651,12 +651,12 @@ namespace Engine.Common
             for (uint index = 0; index < sliceCount; index++)
             {
                 indexList.Add(0);
-                indexList.Add(index + 2);
                 indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
+                indexList.Add(index + 2);
 
                 indexList.Add(1);
-                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
                 indexList.Add(index + 2);
+                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
             }
 
             vertices = vertList.ToArray();

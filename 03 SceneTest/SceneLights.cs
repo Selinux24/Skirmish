@@ -23,13 +23,10 @@ namespace SceneTest
 
         private SceneObject<Model> floorAsphalt = null;
 
-        private SceneObject<Model> buildingObelisk = null;
-        private SceneObject<Model> buildingObelisk2 = null;
+        private SceneObject<ModelInstanced> buildingObelisks = null;
 
-        private SceneObject<Model> lightEmitter1 = null;
-        private SceneObject<Model> lightEmitter2 = null;
-        private SceneObject<Model> lightEmitter3 = null;
-        private SceneObject<Model> lightEmitter4 = null;
+        private SceneObject<ModelInstanced> lightEmitters = null;
+        private SceneObject<ModelInstanced> lanterns = null;
 
         private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
@@ -66,6 +63,7 @@ namespace SceneTest
             this.InitializeFloorAsphalt();
             this.InitializeBuildingObelisk();
             this.InitializeEmitter();
+            this.InitializeLanterns();
             this.InitializeLights();
             this.InitializeVolumeDrawer();
             this.InitializeBufferDrawer();
@@ -116,9 +114,10 @@ namespace SceneTest
         }
         private void InitializeBuildingObelisk()
         {
-            var desc = new ModelDescription()
+            var desc = new ModelInstancedDescription()
             {
                 Name = "Obelisk",
+                Instances = 5,
                 CastShadow = true,
                 Static = true,
                 UseAnisotropicFiltering = true,
@@ -129,12 +128,7 @@ namespace SceneTest
                 }
             };
 
-            this.buildingObelisk = this.AddComponent<Model>(desc);
-            this.buildingObelisk.Transform.SetPosition(0, 0, 0);
-
-            this.buildingObelisk2 = this.AddComponent<Model>(desc);
-            this.buildingObelisk2.Transform.SetPosition(5, 0, 5);
-
+            this.buildingObelisks = this.AddComponent<ModelInstanced>(desc);
         }
         private void InitializeEmitter()
         {
@@ -158,9 +152,10 @@ namespace SceneTest
 
             var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
 
-            var desc = new ModelDescription()
+            var desc = new ModelInstancedDescription()
             {
                 Name = "Emitter",
+                Instances = 4,
                 Static = false,
                 CastShadow = false,
                 DeferredEnabled = true,
@@ -172,10 +167,48 @@ namespace SceneTest
                 }
             };
 
-            this.lightEmitter1 = this.AddComponent<Model>(desc);
-            this.lightEmitter2 = this.AddComponent<Model>(desc);
-            this.lightEmitter3 = this.AddComponent<Model>(desc);
-            this.lightEmitter4 = this.AddComponent<Model>(desc);
+            this.lightEmitters = this.AddComponent<ModelInstanced>(desc);
+        }
+        private void InitializeLanterns()
+        {
+            MaterialContent mat = MaterialContent.Default;
+
+            GeometryUtil.CreateCone(
+                0.25f, 16, 0.5f,
+                out Vector3[] v, out uint[] ix);
+
+            Matrix m = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.ForwardLH * 0.5f);
+
+            Vector3.TransformCoordinate(v, ref m, v);
+
+            VertexData[] vertices = new VertexData[v.Length];
+            for (int i = 0; i < v.Length; i++)
+            {
+                vertices[i] = new VertexData()
+                {
+                    Position = v[i],
+                    Color = Color.Gray,
+                };
+            }
+
+            var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
+
+            var desc = new ModelInstancedDescription()
+            {
+                Name = "Lanterns",
+                Instances = 3,
+                Static = false,
+                CastShadow = false,
+                DeferredEnabled = true,
+                DepthEnabled = true,
+                AlphaEnabled = false,
+                Content = new ContentDescription()
+                {
+                    ModelContent = content,
+                }
+            };
+
+            this.lanterns = this.AddComponent<ModelInstanced>(desc);
         }
         private void InitializeLights()
         {
@@ -218,6 +251,17 @@ namespace SceneTest
             this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsageEnum.UI, layerEffects);
 
             this.bufferDrawer.Visible = false;
+        }
+
+        public override void Initialized()
+        {
+            base.Initialized();
+
+            this.buildingObelisks.Instance[0].Manipulator.SetPosition(0, 0, 0);
+            this.buildingObelisks.Instance[1].Manipulator.SetPosition(+5, 0, +5);
+            this.buildingObelisks.Instance[2].Manipulator.SetPosition(+5, 0, -5);
+            this.buildingObelisks.Instance[3].Manipulator.SetPosition(-5, 0, +5);
+            this.buildingObelisks.Instance[4].Manipulator.SetPosition(-5, 0, -5);
         }
 
         public override void Update(GameTime gameTime)
@@ -288,7 +332,7 @@ namespace SceneTest
         {
             Vector3 position = Vector3.Zero;
             float h = 3.0f;
-            float r = 3.0f;
+            float r = 10.0f;
             float hv = 1.0f;
             float av = 0.5f;
             float s = MathUtil.Pi;
@@ -297,28 +341,45 @@ namespace SceneTest
             position.Y = hv * (float)Math.Sin(av * this.Game.GameTime.TotalSeconds);
             position.Z = r * (float)Math.Sin(av * this.Game.GameTime.TotalSeconds);
 
-            var pos1 = (position * +1) + new Vector3(0, h, 0);
-            this.lightEmitter1.Transform.SetPosition(pos1);
-            this.Lights.PointLights[0].Position = pos1;
+            {
+                var pos = (position * +1) + new Vector3(0, h, 0);
+                this.lightEmitters.Instance[0].Manipulator.SetPosition(pos);
+                this.Lights.PointLights[0].Position = pos;
+            }
 
-            var pos2 = (position * -1) + new Vector3(0, h, 0);
-            this.lightEmitter2.Transform.SetPosition(pos2);
-            this.Lights.SpotLights[0].Position = pos2;
-            this.Lights.SpotLights[0].Direction = -Vector3.Normalize(new Vector3(pos2.X, 0, pos2.Z));
+            {
+                var pos = (position * -1) + new Vector3(0, h, 0);
+                var dir = -Vector3.Normalize(new Vector3(pos.X, 0, pos.Z));
+                this.lightEmitters.Instance[1].Manipulator.SetPosition(pos);
+                this.lanterns.Instance[0].Manipulator.SetPosition(pos);
+                this.lanterns.Instance[0].Manipulator.LookAt(pos + dir);
+                this.Lights.SpotLights[0].Position = pos;
+                this.Lights.SpotLights[0].Direction = dir;
+            }
 
             position.X = r * (float)Math.Cos(av * (this.Game.GameTime.TotalSeconds + s));
             position.Y = hv * (float)Math.Sin(av * (this.Game.GameTime.TotalSeconds + s));
             position.Z = r * (float)Math.Sin(av * (this.Game.GameTime.TotalSeconds + s));
 
-            var pos3 = (position * +1) + new Vector3(0, h, 0);
-            this.lightEmitter3.Transform.SetPosition(pos3);
-            this.Lights.SpotLights[1].Position = pos3;
-            this.Lights.SpotLights[1].Direction = -Vector3.Normalize(new Vector3(pos3.X, 0, pos3.Z));
+            {
+                var pos = (position * +1) + new Vector3(0, h, 0);
+                var dir = -Vector3.Normalize(new Vector3(pos.X, 0, pos.Z));
+                this.lightEmitters.Instance[2].Manipulator.SetPosition(pos);
+                this.lanterns.Instance[1].Manipulator.SetPosition(pos);
+                this.lanterns.Instance[1].Manipulator.LookAt(pos + dir);
+                this.Lights.SpotLights[1].Position = pos;
+                this.Lights.SpotLights[1].Direction = dir;
+            }
 
-            var pos4 = (position * -1) + new Vector3(0, h, 0);
-            this.lightEmitter4.Transform.SetPosition(pos4);
-            this.Lights.SpotLights[2].Position = pos4;
-            this.Lights.SpotLights[2].Direction = -Vector3.Normalize(new Vector3(pos4.X, 0, pos4.Z));
+            {
+                var pos = (position * -1) + new Vector3(0, h, 0);
+                var dir = -Vector3.Normalize(new Vector3(pos.X, 0, pos.Z));
+                this.lightEmitters.Instance[3].Manipulator.SetPosition(pos);
+                this.lanterns.Instance[2].Manipulator.SetPosition(pos);
+                this.lanterns.Instance[2].Manipulator.LookAt(pos + dir);
+                this.Lights.SpotLights[2].Position = pos;
+                this.Lights.SpotLights[2].Direction = dir;
+            }
         }
         private void UpdateDebug(GameTime gameTime)
         {

@@ -35,10 +35,11 @@ cbuffer cbPerFrame : register(b1)
     uint gNormalMapCount;
     uint PAD13;
 };
-Texture2DArray gTextureArray : register(t2);
-Texture2DArray gNormalMapArray : register(t3);
-Texture2DArray<float> gShadowMapDir : register(t4);
-TextureCubeArray<float> gShadowMapOmni : register(t5);
+Texture2DArray<float> gShadowMapDir : register(t2);
+TextureCubeArray<float> gShadowMapOmni : register(t3);
+Texture2DArray<float> gShadowMapSpot : register(t4);
+Texture2DArray gTextureArray : register(t5);
+Texture2DArray gNormalMapArray : register(t6);
 
 GSVertexBillboard VSFoliage(VSVertexBillboard input)
 {
@@ -271,6 +272,7 @@ float4 PSFoliage(PSVertexBillboard input) : SV_Target
 
 	lInput.shadowMapDir = gShadowMapDir;
 	lInput.shadowMapOmni = gShadowMapOmni;
+	lInput.shadowMapSpot = gShadowMapSpot;
 
 	lInput.fogStart = gFogStart;
 	lInput.fogRange = gFogRange;
