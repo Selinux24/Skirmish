@@ -34,8 +34,7 @@ namespace Engine
                     var components = gObj.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in components)
                     {
-                        float d;
-                        if (TestCoarse(ref ray, pickable, maxDistance, out d))
+                        if (TestCoarse(ref ray, pickable, maxDistance, out float d))
                         {
                             coarse.Add(new Tuple<SceneObject, float>(gObj, d));
                         }
@@ -45,8 +44,7 @@ namespace Engine
                 {
                     var pickable = gObj.Get<IRayPickable<Triangle>>();
 
-                    float d;
-                    if (TestCoarse(ref ray, pickable, maxDistance, out d))
+                    if (TestCoarse(ref ray, pickable, maxDistance, out float d))
                     {
                         coarse.Add(new Tuple<SceneObject, float>(gObj, d));
                     }
@@ -74,8 +72,7 @@ namespace Engine
             distance = float.MaxValue;
 
             var bsph = obj.GetBoundingSphere();
-            float d;
-            if (Collision.RayIntersectsSphere(ref ray, ref bsph, out d))
+            if (Collision.RayIntersectsSphere(ref ray, ref bsph, out float d))
             {
                 if (maxDistance == 0 || d <= maxDistance)
                 {
@@ -106,7 +103,7 @@ namespace Engine
         /// <summary>
         /// Ground usage enum for ground picking
         /// </summary>
-        private const SceneObjectUsageEnum GroundUsage = SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding;
+        private const SceneObjectUsageEnum GroundUsage = SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding | SceneObjectUsageEnum.CoarsePathFinding;
 
         /// <summary>
         /// Scene world matrix
@@ -594,13 +591,9 @@ namespace Engine
         /// </summary>
         protected virtual void UpdateGlobals()
         {
-            EngineShaderResourceView materialPalette;
-            uint materialPaletteWidth;
-            this.UpdateMaterialPalette(out materialPalette, out materialPaletteWidth);
+            this.UpdateMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth);
 
-            EngineShaderResourceView animationPalette;
-            uint animationPaletteWidth;
-            this.UpdateAnimationPalette(out animationPalette, out animationPaletteWidth);
+            this.UpdateAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth);
 
             DrawerPool.UpdateSceneGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
         }
@@ -611,9 +604,10 @@ namespace Engine
         /// <param name="materialPaletteWidth">Material palette width</param>
         private void UpdateMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth)
         {
-            List<MeshMaterial> mats = new List<MeshMaterial>();
-
-            mats.Add(MeshMaterial.Default);
+            List<MeshMaterial> mats = new List<MeshMaterial>
+            {
+                MeshMaterial.Default
+            };
 
             var matComponents = this.components.FindAll(c => c.Is<UseMaterials>());
 
@@ -1466,8 +1460,19 @@ namespace Engine
                             //Not walkable but nearest position found
                             if (nearest.HasValue)
                             {
+                                //Find nearest ground position
+                                if (this.FindNearestGroundPosition(nearest.Value, out PickingResult<Triangle> nearestResult))
+                                {
+                                    //Use nearest ground position found
+                                    finalPosition = nearestResult.Position;
+                                }
+                                else
+                                {
+                                    //Use nearest position provided by path finding graph
+                                    finalPosition = nearest.Value;
+                                }
+
                                 //Adjust height
-                                finalPosition = nearest.Value;
                                 finalPosition.Y += agent.Height;
 
                                 var moveP = newPosition - prevPosition;
