@@ -70,8 +70,11 @@ namespace Engine
         {
             if (disposing)
             {
-                //Remove data from buffer manager
-                this.BufferManager.RemoveVertexData(this.vertexBuffer);
+                if (this.BufferManager != null)
+                {
+                    //Remove data from buffer manager
+                    this.BufferManager.RemoveVertexData(this.vertexBuffer);
+                }
             }
         }
         /// <summary>

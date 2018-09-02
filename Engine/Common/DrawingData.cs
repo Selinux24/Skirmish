@@ -444,13 +444,16 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                //Remove data from buffer manager
-                foreach (var dictionary in this.Meshes.Values)
+                if (this.BufferManager != null)
                 {
-                    foreach (var mesh in dictionary.Values)
+                    //Remove data from buffer manager
+                    foreach (var dictionary in this.Meshes.Values)
                     {
-                        this.BufferManager.RemoveVertexData(mesh.VertexBuffer);
-                        this.BufferManager.RemoveIndexData(mesh.IndexBuffer);
+                        foreach (var mesh in dictionary.Values)
+                        {
+                            this.BufferManager.RemoveVertexData(mesh.VertexBuffer);
+                            this.BufferManager.RemoveIndexData(mesh.IndexBuffer);
+                        }
                     }
                 }
 

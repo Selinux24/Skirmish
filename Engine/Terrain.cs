@@ -183,15 +183,18 @@ namespace Engine
             /// </summary>
             public void Dispose()
             {
-                //Remove data from buffer manager
-                foreach (var vb in this.dictVB.Values)
-                {
-                    this.BufferManager.RemoveVertexData(vb);
-                }
-                foreach (var ib in this.dictIB.Values)
+                if (this.BufferManager != null)
                 {
                     //Remove data from buffer manager
-                    this.BufferManager.RemoveIndexData(ib);
+                    foreach (var vb in this.dictVB.Values)
+                    {
+                        this.BufferManager.RemoveVertexData(vb);
+                    }
+                    foreach (var ib in this.dictIB.Values)
+                    {
+                        //Remove data from buffer manager
+                        this.BufferManager.RemoveIndexData(ib);
+                    }
                 }
 
                 Helper.Dispose(this.dictVB);

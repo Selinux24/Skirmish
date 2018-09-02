@@ -115,9 +115,12 @@ namespace Engine
         {
             if (disposing)
             {
-                //Remove data from buffer manager
-                this.BufferManager.RemoveVertexData(this.vertexBuffer);
-                this.BufferManager.RemoveIndexData(this.indexBuffer);
+                if (this.BufferManager != null)
+                {
+                    //Remove data from buffer manager
+                    this.BufferManager.RemoveVertexData(this.vertexBuffer);
+                    this.BufferManager.RemoveIndexData(this.indexBuffer);
+                }
             }
         }
         /// <summary>

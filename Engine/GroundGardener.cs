@@ -347,8 +347,11 @@ namespace Engine
             /// </summary>
             public void Dispose()
             {
-                //Remove data from buffer manager
-                this.BufferManager.RemoveVertexData(this.VertexBuffer);
+                if (this.BufferManager != null)
+                {
+                    //Remove data from buffer manager
+                    this.BufferManager.RemoveVertexData(this.VertexBuffer);
+                }
             }
 
             /// <summary>
