@@ -110,7 +110,7 @@
     <None Include="Blender\Foliage\Foliage.blend" />
     <None Include="Blender\Furniture\Lamps\concrete.jpg" />
     <None Include="Blender\Buildings\Dungeon\BaseMap.png" />
-    <None Include="Blender\Buildings\Helipod\helipod.png" />
+    <None Include="Blender\Buildings\Heliport\heliport.png" />
     <None Include="Blender\Furniture\StreetLamp\StreetLamp.blend" />
     <None Include="Blender\Planes\SkyPlane.blend" />
     <None Include="Blender\Scenery\Clif\clif.blend" />
@@ -198,10 +198,10 @@
     <Content Include="Collada\Buildings\Dungeon\BaseMap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Buildings\Helipod\concrete.jpg">
+    <Content Include="Collada\Buildings\Heliport\concrete.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Buildings\Helipod\helipod.png">
+    <Content Include="Collada\Buildings\Heliport\heliport.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Characters\Rat\Rat_d.png">
@@ -456,7 +456,7 @@
     <None Include="Blender\Buildings\Garage\garage.blend" />
     <None Include="Blender\Scenery\Ground\ground.blend" />
     <None Include="Blender\Vehicles\Helicopter\helicopter.blend" />
-    <None Include="Blender\Buildings\Helipod\helipod.blend" />
+    <None Include="Blender\Buildings\Heliport\heliport.blend" />
     <None Include="Blender\Characters\Human\human.blend" />
     <None Include="Blender\Vehicles\Jagdpanther\jagdpanther.blend" />
     <None Include="Blender\Vehicles\Leopard\Leopard.blend" />
@@ -610,7 +610,7 @@
     <Content Include="Collada\Scenery\Ground\ground.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Buildings\Helipod\helipod.dae">
+    <Content Include="Collada\Buildings\Heliport\heliport.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Vehicles\Jagdpanther\jagdpanther.dae">

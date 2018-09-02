@@ -73,7 +73,7 @@ namespace Terrain
         private List<Line3D> oks = new List<Line3D>();
         private List<Line3D> errs = new List<Line3D>();
 
-        private SceneObject<Model> helipod = null;
+        private SceneObject<Model> heliport = null;
         private SceneObject<Model> garage = null;
         private SceneObject<ModelInstanced> obelisk = null;
         private SceneObject<ModelInstanced> rocks = null;
@@ -392,25 +392,25 @@ namespace Terrain
 
             #endregion
 
-            #region Helipod
+            #region Heliport
 
             sw.Restart();
             var hpDesc = new ModelDescription()
             {
-                Name = "Helipod",
+                Name = "Heliport",
                 CastShadow = true,
                 Static = true,
                 Content = new ContentDescription()
                 {
-                    ContentFolder = "resources/Helipod",
-                    ModelContentFilename = "Helipod.xml",
+                    ContentFolder = "resources/Heliport",
+                    ModelContentFilename = "Heliport.xml",
                 }
             };
-            this.helipod = this.AddComponent<Model>(hpDesc, SceneObjectUsageEnum.None, this.layerObjects);
+            this.heliport = this.AddComponent<Model>(hpDesc, SceneObjectUsageEnum.None, this.layerObjects);
             sw.Stop();
-            loadingText += string.Format("helipod: {0} ", sw.Elapsed.TotalSeconds);
+            loadingText += string.Format("Heliport: {0} ", sw.Elapsed.TotalSeconds);
 
-            this.Lights.AddRange(this.helipod.Instance.Lights);
+            this.Lights.AddRange(this.heliport.Instance.Lights);
 
             #endregion
 
@@ -626,18 +626,18 @@ namespace Terrain
 
             //Terrain
             this.SetGround(this.terrain, true);
-            this.AttachToGround(this.helipod, true);
+            this.AttachToGround(this.heliport, true);
             this.AttachToGround(this.garage, true);
             this.AttachToGround(this.obelisk, true);
             this.AttachToGround(this.rocks, false);
             this.AttachToGround(this.tree1, false);
             this.AttachToGround(this.tree2, false);
 
-            //Helipod
+            //Heliport
             {
                 if (this.FindTopGroundPosition(75, 75, out PickingResult<Triangle> r))
                 {
-                    this.helipod.Transform.SetPosition(r.Position);
+                    this.heliport.Transform.SetPosition(r.Position);
                 }
             }
 
@@ -646,7 +646,7 @@ namespace Terrain
                 if (this.FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
                 {
                     this.garage.Transform.SetPosition(r.Position);
-                    this.garage.Transform.SetRotation(MathUtil.PiOverFour + MathUtil.Pi, 0, 0);
+                    this.garage.Transform.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
                 }
             }
 
@@ -755,7 +755,7 @@ namespace Terrain
             var sceneryUsage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
 
             {
-                var ray = this.GetTopDownRay(this.helipod.Transform.Position);
+                var ray = this.GetTopDownRay(this.heliport.Transform.Position);
                 if (this.PickNearest(ref ray, true, sceneryUsage, out PickingResult<Triangle> r))
                 {
                     this.helicopter.Transform.SetPosition(r.Position);
@@ -1055,7 +1055,7 @@ namespace Terrain
                     this.cursor3D.Visible = false;
                     this.cursor2D.Visible = true;
 
-                    var pos = this.helipod.Transform.Position;
+                    var pos = this.heliport.Transform.Position;
                     if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
                         var pPos = r.Position;
@@ -1523,7 +1523,7 @@ namespace Terrain
                 }
             }
 
-            var hPos = this.helipod.Transform.Position;
+            var hPos = this.heliport.Transform.Position;
             if (this.FindTopGroundPosition(hPos.X, hPos.Z, out PickingResult<Triangle> r))
             {
                 cPoints[cPoints.Length - 2] = r.Position + this.helicopterHeightOffset;
@@ -1887,7 +1887,7 @@ namespace Terrain
         private void DEBUGDrawStaticVolumes()
         {
             List<Line3D> lines = new List<Line3D>();
-            lines.AddRange(Line3D.CreateWiredBox(this.helipod.Geometry.GetBoundingBox()));
+            lines.AddRange(Line3D.CreateWiredBox(this.heliport.Geometry.GetBoundingBox()));
             lines.AddRange(Line3D.CreateWiredBox(this.garage.Geometry.GetBoundingBox()));
             for (int i = 0; i < this.obelisk.Count; i++)
             {
