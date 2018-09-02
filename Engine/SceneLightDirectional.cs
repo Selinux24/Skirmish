@@ -63,10 +63,6 @@ namespace Engine
         /// Initial transform
         /// </summary>
         private Matrix initialTransform = Matrix.Identity;
-        /// <summary>
-        /// Parent local transform
-        /// </summary>
-        private Matrix parentTransform = Matrix.Identity;
 
         /// <summary>
         /// Light direction
@@ -87,7 +83,7 @@ namespace Engine
         {
             get
             {
-                return this.parentTransform;
+                return base.ParentTransform;
             }
             set
             {
@@ -143,9 +139,9 @@ namespace Engine
         /// <param name="transform">Transform</param>
         private void UpdateLocalTransform(Matrix transform)
         {
-            this.parentTransform = transform;
+            base.ParentTransform = transform;
 
-            var trn = this.initialTransform * this.parentTransform;
+            var trn = this.initialTransform * base.ParentTransform;
 
             trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
 
@@ -180,7 +176,7 @@ namespace Engine
                 Direction = this.Direction,
                 Brightness = this.Brightness,
 
-                parentTransform = this.parentTransform,
+                ParentTransform = this.ParentTransform,
 
                 initialTransform = this.initialTransform,
             };

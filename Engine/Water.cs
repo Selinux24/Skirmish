@@ -124,11 +124,9 @@ namespace Engine
         /// <param name="planeHeight">Plane height</param>
         private void InitializeBuffers(string name, float planeSize, float planeHeight)
         {
-            Vector3[] vData;
-            Vector3[] nData;
-            Vector2[] uvs;
-            uint[] iData;
-            GeometryUtil.CreateXZPlane(planeSize, planeHeight, out vData, out nData, out uvs, out iData);
+            GeometryUtil.CreateXZPlane(
+                planeSize, planeHeight, 
+                out Vector3[] vData, out Vector3[] nData, out Vector2[] uvs, out uint[] iData);
 
             var vertices = VertexPositionTexture.Generate(vData, uvs);
             this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
