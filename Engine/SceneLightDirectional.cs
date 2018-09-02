@@ -60,9 +60,9 @@ namespace Engine
         }
 
         /// <summary>
-        /// Initial transform
+        /// Initial light direction
         /// </summary>
-        private Matrix initialTransform = Matrix.Identity;
+        private Vector3 initialDirection = Vector3.Zero;
 
         /// <summary>
         /// Light direction
@@ -87,7 +87,9 @@ namespace Engine
             }
             set
             {
-                this.UpdateLocalTransform(value);
+                base.ParentTransform = value;
+
+                this.UpdateLocalTransform();
             }
         }
         /// <summary>
@@ -109,10 +111,12 @@ namespace Engine
         protected SceneLightDirectional()
             : base()
         {
-            this.Direction = Vector3.Zero;
+            this.initialDirection = Vector3.ForwardLH;
             this.BaseBrightness = this.Brightness = 1f;
             this.ShadowMapIndex = 0;
             this.ShadowMapCount = 0;
+
+            this.UpdateLocalTransform();
         }
         /// <summary>
         /// Constructor
@@ -127,25 +131,18 @@ namespace Engine
         public SceneLightDirectional(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled, Vector3 direction, float brigthness)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.Direction = direction;
+            this.initialDirection = direction;
             this.BaseBrightness = this.Brightness = brigthness;
 
-            this.UpdateLocalTransform(Matrix.Identity);
+            this.UpdateLocalTransform();
         }
 
         /// <summary>
         /// Updates local transform
         /// </summary>
-        /// <param name="transform">Transform</param>
-        private void UpdateLocalTransform(Matrix transform)
+        private void UpdateLocalTransform()
         {
-            base.ParentTransform = transform;
-
-            var trn = this.initialTransform * base.ParentTransform;
-
-            trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
-
-            this.Direction = Matrix.RotationQuaternion(rotation).Down;
+            this.Direction = Vector3.TransformNormal(this.initialDirection, base.ParentTransform);
         }
 
         /// <summary>
@@ -178,7 +175,7 @@ namespace Engine
 
                 ParentTransform = this.ParentTransform,
 
-                initialTransform = this.initialTransform,
+                initialDirection = this.initialDirection,
             };
         }
     }

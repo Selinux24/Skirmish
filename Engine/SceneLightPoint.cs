@@ -1,5 +1,4 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
 
 namespace Engine
 {
@@ -54,7 +53,9 @@ namespace Engine
             }
             set
             {
-                this.UpdateLocalTransform(value);
+                base.ParentTransform = value;
+
+                this.UpdateLocalTransform();
             }
         }
         /// <summary>
@@ -100,7 +101,7 @@ namespace Engine
             this.initialRadius = radius;
             this.initialIntensity = intensity;
 
-            this.UpdateLocalTransform(Matrix.Identity);
+            this.UpdateLocalTransform();
         }
         /// <summary>
         /// Constructor
@@ -122,21 +123,17 @@ namespace Engine
             this.initialRadius = radius;
             this.initialIntensity = intensity;
 
-            this.UpdateLocalTransform(Matrix.Identity);
+            this.UpdateLocalTransform();
         }
 
         /// <summary>
         /// Updates local transform
         /// </summary>
-        /// <param name="transform">Transform</param>
-        private void UpdateLocalTransform(Matrix transform)
+        private void UpdateLocalTransform()
         {
-            base.ParentTransform = transform;
-
             var trn = this.initialTransform * base.ParentTransform;
 
             trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
-
             this.Radius = initialRadius * scale.X;
             this.Intensity = initialIntensity * scale.X;
             this.Position = translation;

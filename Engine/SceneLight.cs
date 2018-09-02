@@ -35,7 +35,10 @@ namespace Engine
         /// <summary>
         /// Free use variable
         /// </summary>
-        public object State { get; set; }
+        public virtual object State { get; set; }
+        /// <summary>
+        /// Parent local transform matrix
+        /// </summary>
         /// <summary>
         /// Parent local transform matrix
         /// </summary>
@@ -67,7 +70,6 @@ namespace Engine
             this.CastShadow = castShadow;
             this.DiffuseColor = diffuse;
             this.SpecularColor = specular;
-            this.State = null;
         }
 
         /// <summary>
