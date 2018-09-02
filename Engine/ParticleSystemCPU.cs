@@ -16,9 +16,13 @@ namespace Engine
         public static int BufferSlot = 0;
 
         /// <summary>
+        /// Random instance
+        /// </summary>
+        private readonly Random rnd = new Random();
+        /// <summary>
         /// Particle list
         /// </summary>
-        private VertexCPUParticle[] particles;
+        private readonly VertexCPUParticle[] particles;
         /// <summary>
         /// Vertex buffer
         /// </summary>
@@ -31,10 +35,6 @@ namespace Engine
         /// Time to next particle emission
         /// </summary>
         private float timeToNextParticle = 0;
-        /// <summary>
-        /// Random instance
-        /// </summary>
-        private Random rnd = new Random();
 
         /// <summary>
         /// Game instance
@@ -119,11 +119,35 @@ namespace Engine
             this.TimeToEnd = this.Emitter.Duration + this.Parameters.MaxDuration;
         }
         /// <summary>
-        /// Resource disposal
+        /// Destructor
+        /// </summary>
+        ~ParticleSystemCPU()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(this.buffer);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (buffer != null)
+                {
+                    buffer.Dispose();
+                    buffer = null;
+                }
+            }
         }
 
         /// <summary>

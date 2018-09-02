@@ -16,10 +16,32 @@ namespace Engine.PathFinding.RecastNavigation
             m_heap = new Node[m_capacity + 1];
             m_size = 0;
         }
-
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~NodeQueue()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(m_heap);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(m_heap);
+            }
         }
 
         public void Clear()

@@ -1025,11 +1025,14 @@ namespace Terrain
             this.helicopterAgent.AttackBehavior.InitAttackingBehavior(15, 10);
             this.helicopterAgent.RetreatBehavior.InitRetreatingBehavior(new Vector3(75, 0, 75), 12);
         }
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Helper.Dispose(this.debugTex);
+            if (disposing)
+            {
+                Helper.Dispose(this.debugTex);
+            }
 
-            base.Dispose();
+            base.Dispose(disposing);
         }
         public override void Update(GameTime gameTime)
         {
@@ -1457,8 +1460,7 @@ namespace Terrain
 
         private void SetScreenPosition(AIAgent agent, float height, SceneObject<SpriteProgressBar> pb)
         {
-            bool inside;
-            var screenPosition = this.GetScreenCoordinates(agent.Manipulator.Position, out inside);
+            var screenPosition = this.GetScreenCoordinates(agent.Manipulator.Position, out bool inside);
             var top = this.GetScreenCoordinates(agent.Manipulator.Position + new Vector3(0, height, 0), out inside);
 
             if (inside)
@@ -1541,7 +1543,7 @@ namespace Terrain
             return curve;
         }
 
-        private void Agent_Moving(BehaviorEventArgs e)
+        private void Agent_Moving(object sender, BehaviorEventArgs e)
         {
             if (Helper.RandomGenerator.NextFloat(0, 1) > 0.8f)
             {
@@ -1549,17 +1551,17 @@ namespace Terrain
                 this.AddDustSystem(e.Active, this.tankRightCat);
             }
         }
-        private void Agent_Attacking(BehaviorEventArgs e)
+        private void Agent_Attacking(object sender, BehaviorEventArgs e)
         {
             this.AddProjectileTrailSystem(e.Active, e.Passive, 50f);
         }
-        private void Agent_Damaged(BehaviorEventArgs e)
+        private void Agent_Damaged(object sender, BehaviorEventArgs e)
         {
             this.AddExplosionSystem(e.Passive);
             this.AddExplosionSystem(e.Passive);
             this.AddSmokeSystem(e.Passive, false);
         }
-        private void Agent_Destroyed(BehaviorEventArgs e)
+        private void Agent_Destroyed(object sender, BehaviorEventArgs e)
         {
             if (e.Passive == this.helicopterAgent)
             {

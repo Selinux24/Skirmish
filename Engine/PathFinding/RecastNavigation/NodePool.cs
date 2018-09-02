@@ -23,12 +23,34 @@ namespace Engine.PathFinding.RecastNavigation
             m_first = Helper.CreateArray(m_hashSize, Detour.DT_NULL_IDX);
             m_nodeCount = 0;
         }
-
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~NodePool()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(m_nodes);
-            Helper.Dispose(m_next);
-            Helper.Dispose(m_first);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(m_nodes);
+                Helper.Dispose(m_next);
+                Helper.Dispose(m_first);
+            }
         }
 
         public void Clear()

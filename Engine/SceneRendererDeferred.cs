@@ -112,17 +112,29 @@ namespace Engine
         /// <summary>
         /// Dispose objects
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Helper.Dispose(this.geometryBuffer);
-            Helper.Dispose(this.lightBuffer);
-            Helper.Dispose(this.lightDrawer);
+            if (disposing)
+            {
+                if (geometryBuffer != null)
+                {
+                    geometryBuffer.Dispose();
+                }
+                if (lightBuffer != null)
+                {
+                    lightBuffer.Dispose();
+                }
+                if (lightDrawer != null)
+                {
+                    lightDrawer.Dispose();
+                }
 
-            Helper.Dispose(this.blendDeferredLighting);
-            Helper.Dispose(this.blendDeferredComposer);
-            Helper.Dispose(this.blendDeferredComposerTransparent);
+                Helper.Dispose(this.blendDeferredLighting);
+                Helper.Dispose(this.blendDeferredComposer);
+                Helper.Dispose(this.blendDeferredComposerTransparent);
+            }
 
-            base.Dispose();
+            base.Dispose(disposing);
         }
         /// <summary>
         /// Resizes buffers

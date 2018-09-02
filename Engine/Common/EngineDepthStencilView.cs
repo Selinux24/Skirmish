@@ -22,6 +22,37 @@ namespace Engine.Common
         {
             this.dsv = dsv;
         }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EngineDepthStencilView()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this.dsv != null)
+                {
+                    this.dsv.Dispose();
+                    this.dsv = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the depth stencil
@@ -30,18 +61,6 @@ namespace Engine.Common
         public DepthStencilView GetDepthStencil()
         {
             return this.dsv;
-        }
-
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        public void Dispose()
-        {
-            if (this.dsv != null)
-            {
-                this.dsv.Dispose();
-                this.dsv = null;
-            }
         }
     }
 }

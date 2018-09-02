@@ -35,12 +35,37 @@ namespace Engine
         /// </summary>
         [XmlAttribute("type")]
         public ModularSceneryObjectTypeEnum Type = ModularSceneryObjectTypeEnum.Default;
-
         /// <summary>
         /// Position
         /// </summary>
-        [XmlIgnore]
+        [NonSerialized]
         public Vector3 Position = new Vector3(0, 0, 0);
+        /// <summary>
+        /// Rotation
+        /// </summary>
+        [NonSerialized]
+        public Quaternion Rotation = new Quaternion(0, 0, 0, 1);
+        /// <summary>
+        /// Scale
+        /// </summary>
+        [NonSerialized]
+        public Vector3 Scale = new Vector3(1, 1, 1);
+        /// <summary>
+        /// Load model lights into scene
+        /// </summary>
+        [XmlAttribute("load_lights")]
+        public bool LoadLights = true;
+        /// <summary>
+        /// Lights cast shadows
+        /// </summary>
+        [XmlAttribute("cast_shadows")]
+        public bool CastShadows = true;
+        /// <summary>
+        /// Particle
+        /// </summary>
+        [XmlElement("particleLight", Type = typeof(ParticleEmitterDescription))]
+        public ParticleEmitterDescription ParticleLight { get; set; }
+
         /// <summary>
         /// Position vector
         /// </summary>
@@ -64,11 +89,6 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Rotation
-        /// </summary>
-        [XmlIgnore]
-        public Quaternion Rotation = new Quaternion(0, 0, 0, 1);
         /// <summary>
         /// Rotation quaternion
         /// </summary>
@@ -97,11 +117,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Scale
-        /// </summary>
-        [XmlIgnore]
-        public Vector3 Scale = new Vector3(1, 1, 1);
-        /// <summary>
         /// Scale vector
         /// </summary>
         [XmlElement("scale")]
@@ -128,22 +143,6 @@ namespace Engine
                 }
             }
         }
-
-        /// <summary>
-        /// Load model lights into scene
-        /// </summary>
-        [XmlAttribute("load_lights")]
-        public bool LoadLights = true;
-        /// <summary>
-        /// Lights cast shadows
-        /// </summary>
-        [XmlAttribute("cast_shadows")]
-        public bool CastShadows = true;
-        /// <summary>
-        /// Particle
-        /// </summary>
-        [XmlElement("particleLight", Type = typeof(ParticleEmitterDescription))]
-        public ParticleEmitterDescription ParticleLight { get; set; }
 
         /// <summary>
         /// Gets the asset transform

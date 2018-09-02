@@ -18,7 +18,7 @@ namespace Engine
         /// <summary>
         /// Scene list
         /// </summary>
-        private List<Scene> scenes = new List<Scene>();
+        private readonly List<Scene> scenes = new List<Scene>();
 
         private Scene nextScene = null;
         /// <summary>
@@ -196,6 +196,43 @@ namespace Engine
             DrawerPool.Initialize(this.Graphics);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Game()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.scenes);
+
+                DrawerPool.Dispose();
+
+                FontMap.ClearCache();
+
+                Helper.Dispose(this.Input);
+                Helper.Dispose(this.Form);
+                Helper.Dispose(this.ResourceManager);
+                Helper.Dispose(this.Graphics);
+            }
+        }
+
+        /// <summary>
         /// Begins render loop
         /// </summary>
         public void Run()
@@ -257,22 +294,6 @@ namespace Engine
                 scene.Dispose();
                 scene = null;
             }
-        }
-        /// <summary>
-        /// Dispose opened resources
-        /// </summary>
-        public void Dispose()
-        {
-            Helper.Dispose(this.scenes);
-
-            DrawerPool.Dispose();
-
-            FontMap.ClearCache();
-
-            Helper.Dispose(this.Input);
-            Helper.Dispose(this.Form);
-            Helper.Dispose(this.ResourceManager);
-            Helper.Dispose(this.Graphics);
         }
         /// <summary>
         /// Close game

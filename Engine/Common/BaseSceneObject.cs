@@ -10,11 +10,11 @@ namespace Engine.Common
         /// <summary>
         /// Game class
         /// </summary>
-        public virtual Scene Scene { get; private set; }
+        public Scene Scene { get; private set; }
         /// <summary>
         /// Object description
         /// </summary>
-        public virtual SceneObjectDescription Description { get; private set; }
+        public SceneObjectDescription Description { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -26,10 +26,27 @@ namespace Engine.Common
             this.Scene = scene;
             this.Description = description;
         }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~BaseSceneObject()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
 
         /// <summary>
         /// Dispose resources
         /// </summary>
-        public abstract void Dispose();
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected abstract void Dispose(bool disposing);
     }
 }

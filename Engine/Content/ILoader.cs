@@ -2,7 +2,7 @@
 
 namespace Engine.Content
 {
-    public interface ILoader: IDisposable
+    public interface ILoader
     {
         ModelContent[] Load(string contentFolder, ModelContentDescription content);
     }

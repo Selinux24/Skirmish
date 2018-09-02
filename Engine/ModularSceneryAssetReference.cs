@@ -28,8 +28,19 @@ namespace Engine
         /// <summary>
         /// Position
         /// </summary>
-        [XmlIgnore]
+        [NonSerialized]
         public Vector3 Position = new Vector3(0, 0, 0);
+        /// <summary>
+        /// Rotation
+        /// </summary>
+        [NonSerialized]
+        public Quaternion Rotation = new Quaternion(0, 0, 0, 1);
+        /// <summary>
+        /// Scale
+        /// </summary>
+        [NonSerialized]
+        public Vector3 Scale = new Vector3(1, 1, 1);
+
         /// <summary>
         /// Position vector
         /// </summary>
@@ -53,11 +64,6 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Rotation
-        /// </summary>
-        [XmlIgnore]
-        public Quaternion Rotation = new Quaternion(0, 0, 0, 1);
         /// <summary>
         /// Rotation quaternion
         /// </summary>
@@ -85,11 +91,6 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Scale
-        /// </summary>
-        [XmlIgnore]
-        public Vector3 Scale = new Vector3(1, 1, 1);
         /// <summary>
         /// Scale vector
         /// </summary>

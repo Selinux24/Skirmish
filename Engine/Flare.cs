@@ -26,11 +26,31 @@ namespace Engine
         public Color Color;
 
         /// <summary>
-        /// Dispose
+        /// Destructor
+        /// </summary>
+        ~Flare()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(this.FlareSprite);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.FlareSprite);
+            }
         }
     }
 }

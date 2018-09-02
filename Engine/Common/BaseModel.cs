@@ -22,17 +22,13 @@ namespace Engine.Common
         private readonly LevelOfDetailEnum defaultLevelOfDetail = LevelOfDetailEnum.Minimum;
 
         /// <summary>
-        /// Level of detail
-        /// </summary>
-        public virtual LevelOfDetailEnum LevelOfDetail { get; set; }
-        /// <summary>
         /// Gets the texture count for texture index
         /// </summary>
         public int TextureCount { get; private set; }
         /// <summary>
         /// Gets the material list used by the current drawing data
         /// </summary>
-        public virtual MeshMaterial[] Materials
+        public MeshMaterial[] Materials
         {
             get
             {
@@ -53,11 +49,11 @@ namespace Engine.Common
         /// <summary>
         /// Use anisotropic filtering
         /// </summary>
-        public virtual bool UseAnisotropicFiltering { get; set; }
+        public bool UseAnisotropicFiltering { get; set; }
         /// <summary>
         /// Gets the skinning list used by the current drawing data
         /// </summary>
-        public virtual SkinningData[] SkinningData
+        public SkinningData[] SkinningData
         {
             get
             {
@@ -106,17 +102,13 @@ namespace Engine.Common
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
                 var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
-                using (var loader = contentDesc.GetLoader())
-                {
-                    geo = loader.Load(description.Content.ContentFolder, contentDesc);
-                }
+                var loader = contentDesc.GetLoader();
+                geo = loader.Load(description.Content.ContentFolder, contentDesc);
             }
             else if (description.Content.ModelContentDescription != null)
             {
-                using (var loader = description.Content.ModelContentDescription.GetLoader())
-                {
-                    geo = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
-                }
+                var loader = description.Content.ModelContentDescription.GetLoader();
+                geo = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
             }
             else if (description.Content.ModelContent != null)
             {
@@ -130,8 +122,6 @@ namespace Engine.Common
                 var drawable = DrawingData.Build(this.Game, this.BufferManager, geo[0], desc);
 
                 this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
-
-                this.LevelOfDetail = LevelOfDetailEnum.None;
             }
             else
             {
@@ -148,8 +138,6 @@ namespace Engine.Common
 
                     this.meshesByLOD.Add(lod, drawable);
                 }
-
-                this.LevelOfDetail = this.defaultLevelOfDetail;
             }
 
             this.UseAnisotropicFiltering = description.UseAnisotropicFiltering;
@@ -157,10 +145,13 @@ namespace Engine.Common
         /// <summary>
         /// Dispose model buffers
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Helper.Dispose(this.meshesByLOD);
-            this.meshesByLOD = null;
+            if (disposing)
+            {
+                Helper.Dispose(this.meshesByLOD);
+                this.meshesByLOD = null;
+            }
         }
 
         /// <summary>

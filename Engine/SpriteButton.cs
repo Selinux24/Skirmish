@@ -172,24 +172,27 @@ namespace Engine
         /// <summary>
         /// Releases used resources
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (this.buttonReleased != null)
+            if (disposing)
             {
-                this.buttonReleased.Dispose();
-                this.buttonReleased = null;
-            }
+                if (this.buttonReleased != null)
+                {
+                    this.buttonReleased.Dispose();
+                    this.buttonReleased = null;
+                }
 
-            if (this.buttonPressed != null)
-            {
-                this.buttonPressed.Dispose();
-                this.buttonPressed = null;
-            }
+                if (this.buttonPressed != null)
+                {
+                    this.buttonPressed.Dispose();
+                    this.buttonPressed = null;
+                }
 
-            if (this.text != null)
-            {
-                this.text.Dispose();
-                this.text = null;
+                if (this.text != null)
+                {
+                    this.text.Dispose();
+                    this.text = null;
+                }
             }
         }
         /// <summary>

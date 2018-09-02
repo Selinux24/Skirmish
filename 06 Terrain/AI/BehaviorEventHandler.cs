@@ -1,6 +1,5 @@
-﻿using System;
-
+﻿
 namespace Terrain.AI
 {
-    public delegate void BehaviorEventHandler(BehaviorEventArgs e);
+    public delegate void BehaviorEventHandler(object sender, BehaviorEventArgs e);
 }

@@ -65,9 +65,26 @@ namespace Engine.Common
         public uint ResourceSize = 0;
 
         /// <summary>
-        /// Resource disposing
+        /// Destructor
+        /// </summary>
+        ~MeshMaterial()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
         {
 
         }

@@ -12,23 +12,24 @@ namespace Engine
         /// <summary>
         /// Left sprite
         /// </summary>
-        private Sprite left = null;
+        private readonly Sprite left = null;
         /// <summary>
         /// Right sprite
         /// </summary>
-        private Sprite right = null;
+        private readonly Sprite right = null;
         /// <summary>
         /// Button text drawer
         /// </summary>
-        private TextDrawer text = null;
+        private readonly TextDrawer text = null;
+
         /// <summary>
         /// Left scale
         /// </summary>
-        private float leftScale { get { return this.ProgressValue; } }
+        protected float LeftScale { get { return this.ProgressValue; } }
         /// <summary>
         /// Right scale
         /// </summary>
-        private float rightScale { get { return 1f - this.ProgressValue; } }
+        protected float RightScale { get { return 1f - this.ProgressValue; } }
 
         /// <summary>
         /// Gets or sets the progress valur
@@ -126,11 +127,23 @@ namespace Engine
         /// <summary>
         /// Releases used resources
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Helper.Dispose(this.left);
-            Helper.Dispose(this.right);
-            Helper.Dispose(this.text);
+            if (disposing)
+            {
+                if (left != null)
+                {
+                    left.Dispose();
+                }
+                if (right != null)
+                {
+                    right.Dispose();
+                }
+                if (text != null)
+                {
+                    text.Dispose();
+                }
+            }
         }
         /// <summary>
         /// Updates state
@@ -138,13 +151,13 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            this.left.Manipulator.SetScale(leftScale, 1f);
-            this.right.Manipulator.SetScale(rightScale, 1f);
+            this.left.Manipulator.SetScale(LeftScale, 1f);
+            this.right.Manipulator.SetScale(RightScale, 1f);
 
             this.left.Left = this.Left;
             this.left.Top = this.Top;
 
-            this.right.Left = this.Left + (int)(this.left.Width * leftScale);
+            this.right.Left = this.Left + (int)(this.left.Width * LeftScale);
             this.right.Top = this.Top;
 
             if (!string.IsNullOrEmpty(this.Text))
@@ -168,12 +181,12 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.leftScale > 0f)
+            if (this.LeftScale > 0f)
             {
                 this.left.Draw(context);
             }
 
-            if (this.rightScale > 0f)
+            if (this.RightScale > 0f)
             {
                 this.right.Draw(context);
             }

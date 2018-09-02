@@ -35,12 +35,32 @@ namespace Engine
             this.game = game;
         }
         /// <summary>
-        /// Resource disposing
+        /// Destructor
+        /// </summary>
+        ~GameResourceManager()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(this.resources);
-            Helper.Dispose(this.globalResources);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.resources);
+                Helper.Dispose(this.globalResources);
+            }
         }
 
         /// <summary>

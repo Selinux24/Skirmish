@@ -38,23 +38,23 @@ namespace Engine
         /// <summary>
         /// Vertical sync enabled
         /// </summary>
-        private bool vsyncEnabled = false;
+        private readonly bool vsyncEnabled = false;
         /// <summary>
         /// Multisample count
         /// </summary>
-        private int msCount = 1;
+        private readonly int msCount = 1;
         /// <summary>
         /// Multisample quality
         /// </summary>
-        private int msQuality = 0;
+        private readonly int msQuality = 0;
         /// <summary>
         /// Graphics device
         /// </summary>
-        private Device3 device = null;
+        private readonly Device3 device = null;
         /// <summary>
         /// Graphics inmmediate context
         /// </summary>
-        private DeviceContext3 deviceContext = null;
+        private readonly DeviceContext3 deviceContext = null;
         /// <summary>
         /// Swap chain
         /// </summary>
@@ -175,7 +175,7 @@ namespace Engine
         /// <summary>
         /// Null shader resources for shader clearing
         /// </summary>
-        private ShaderResourceView[] nullSrv = new ShaderResourceView[CommonShaderStage.InputResourceSlotCount];
+        private readonly ShaderResourceView[] nullSrv = new ShaderResourceView[CommonShaderStage.InputResourceSlotCount];
 
         /// <summary>
         /// Back buffer format
@@ -344,7 +344,6 @@ namespace Engine
 
                         try
                         {
-                            ModeDescription1 result;
                             ModeDescription1 desc = new ModeDescription1()
                             {
                                 Width = width,
@@ -353,7 +352,7 @@ namespace Engine
                             };
                             output.FindClosestMatchingMode1(
                                 ref desc,
-                                out result,
+                                out ModeDescription1 result,
                                 device);
 
                             result.Width = width;
@@ -508,6 +507,57 @@ namespace Engine
             #endregion
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Graphics()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this.swapChain != null)
+                {
+                    if (this.swapChain.IsFullScreen) this.swapChain.IsFullScreen = false;
+
+                    Helper.Dispose(this.swapChain);
+                }
+
+                this.DisposeResources();
+
+                Helper.Dispose(this.device);
+
+#if DEBUG
+                if (this.deviceDebugInfoQueue != null)
+                {
+                    Helper.Dispose(this.deviceDebugInfoQueue);
+                }
+
+                if (this.deviceDebug != null)
+                {
+                    this.deviceDebug.ReportLiveDeviceObjects(ReportingLevel.Detail);
+
+                    Helper.Dispose(this.deviceDebug);
+                }
+#endif
+            }
+        }
+
+        /// <summary>
         /// Prepare device
         /// </summary>
         /// <param name="width">Render width</param>
@@ -567,7 +617,7 @@ namespace Engine
                 if (this.Resized != null)
                 {
                     //Launch the "resized" event
-                    this.Resized(this, new EventArgs());
+                    Resized(this, new EventArgs());
                 }
             }
         }
@@ -715,8 +765,8 @@ namespace Engine
                 this.ClearShaderResources();
             }
 
-            var dsv = depthMap != null ? depthMap.GetDepthStencil() : null;
-            var rtv = renderTargets != null ? renderTargets.GetRenderTargets() : null;
+            var dsv = depthMap?.GetDepthStencil();
+            var rtv = renderTargets?.GetRenderTargets();
             var rtvCount = renderTargets != null ? renderTargets.Count : 0;
 
             this.deviceContext.OutputMerger.SetTargets(dsv, rtvCount, rtv);
@@ -999,41 +1049,15 @@ namespace Engine
         }
 
         /// <summary>
-        /// Dispose created resources
-        /// </summary>
-        public void Dispose()
-        {
-            if (this.swapChain != null)
-            {
-                if (this.swapChain.IsFullScreen) this.swapChain.IsFullScreen = false;
-
-                Helper.Dispose(this.swapChain);
-            }
-
-            this.DisposeResources();
-
-            Helper.Dispose(this.device);
-
-#if DEBUG
-            if (this.deviceDebugInfoQueue != null)
-            {
-                Helper.Dispose(this.deviceDebugInfoQueue);
-            }
-
-            if (this.deviceDebug != null)
-            {
-                this.deviceDebug.ReportLiveDeviceObjects(ReportingLevel.Detail);
-
-                Helper.Dispose(this.deviceDebug);
-            }
-#endif
-        }
-        /// <summary>
         /// Dispose resources
         /// </summary>
         private void DisposeResources()
         {
-            Helper.Dispose(this.renderTargetView);
+            if (this.renderTargetView != null)
+            {
+                this.renderTargetView.Dispose();
+                this.renderTargetView = null;
+            }
             Helper.Dispose(this.depthStencilView);
 
             Helper.Dispose(this.depthStencilzBufferEnabled);
@@ -1406,8 +1430,7 @@ namespace Engine
 
                     for (int i = 0; i < descriptions.Length; i++)
                     {
-                        int mipSize;
-                        var index = textureArray.CalculateSubResourceIndex(0, i, out mipSize);
+                        var index = textureArray.CalculateSubResourceIndex(0, i, out int mipSize);
 
                         this.deviceContext.UpdateSubresource(descriptions[i].GetDataBox(0, 0), textureArray, index);
                     }
@@ -2393,13 +2416,12 @@ namespace Engine
             InputElement[] input,
             string profile)
         {
-            string compilationErrors;
             return LoadVertexShader(
                 byteCode,
                 entryPoint,
                 input,
                 profile,
-                out compilationErrors);
+                out string compilationErrors);
         }
         /// <summary>
         /// Loads vertex shader from byte code
@@ -2457,12 +2479,11 @@ namespace Engine
             string entryPoint,
             string profile)
         {
-            string compilationErrors;
             return LoadPixelShader(
                 File.ReadAllBytes(filename),
                 entryPoint,
                 profile,
-                out compilationErrors);
+                out string compilationErrors);
         }
         /// <summary>
         /// Loads a pixel shader from file
@@ -2497,12 +2518,11 @@ namespace Engine
             string entryPoint,
             string profile)
         {
-            string compilationErrors;
             return LoadPixelShader(
                 byteCode,
                 entryPoint,
                 profile,
-                out compilationErrors);
+                out string compilationErrors);
         }
         /// <summary>
         /// Loads a pixel shader from byte code
@@ -2647,8 +2667,7 @@ namespace Engine
 
             if (data != null && data.Length > 0)
             {
-                DataStream stream;
-                this.deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out stream);
+                this.deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
                 using (stream)
                 {
                     stream.Position = Marshal.SizeOf(default(T)) * offset;
@@ -2672,8 +2691,7 @@ namespace Engine
 
             if (data != null && data.Length > 0)
             {
-                DataStream stream;
-                this.deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out stream);
+                this.deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
                 using (stream)
                 {
                     stream.Position = Marshal.SizeOf(default(T)) * offset;
@@ -2712,8 +2730,7 @@ namespace Engine
 
             T[] data = new T[length];
 
-            DataStream stream;
-            this.deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out stream);
+            this.deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out DataStream stream);
             using (stream)
             {
                 stream.Position = Marshal.SizeOf(default(T)) * offset;

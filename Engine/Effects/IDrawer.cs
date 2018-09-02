@@ -1,11 +1,10 @@
-﻿using System;
-
+﻿
 namespace Engine.Effects
 {
     /// <summary>
     /// Drawer class
     /// </summary>
-    public interface IDrawer : IDisposable
+    public interface IDrawer
     {
         /// <summary>
         /// Optimize effect

@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 namespace Engine.Content
 {
     using Engine.Common;
+    using System.Security.Permissions;
 
     /// <summary>
     /// Model content
@@ -281,7 +282,7 @@ namespace Engine.Content
             protected ControllerDictionary(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-
+                
             }
 
             /// <summary>
@@ -326,7 +327,19 @@ namespace Engine.Content
             protected AnimationDictionary(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
+                Definition = info.GetValue<AnimationDescription>("Definition");
+            }
+            /// <summary>
+            /// Populates a SerializationInfo with the data needed to serialize the target object.
+            /// </summary>
+            /// <param name="info">The SerializationInfo to populate with data.</param>
+            /// <param name="context">The destination for this serialization.</param>
+            [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
+            public override void GetObjectData(SerializationInfo info, StreamingContext context)
+            {
+                info.AddValue("Definition", Definition);
 
+                base.GetObjectData(info, context);
             }
         }
 
@@ -441,9 +454,7 @@ namespace Engine.Content
 
             HeightMap hm = HeightMap.FromStream(heightMapImage.Stream, null);
 
-            VertexData[] vertices;
-            uint[] indices;
-            hm.BuildGeometry(cellSize, cellHeight, out vertices, out indices);
+            hm.BuildGeometry(cellSize, cellHeight, out VertexData[] vertices, out uint[] indices);
 
             SubMeshContent geo = new SubMeshContent()
             {
@@ -505,8 +516,7 @@ namespace Engine.Content
 
                             if (skinnedM.Count > 0)
                             {
-                                SubMeshContent gmesh;
-                                if (SubMeshContent.OptimizeMeshes(skinnedM.ToArray(), out gmesh))
+                                if (SubMeshContent.OptimizeMeshes(skinnedM.ToArray(), out SubMeshContent gmesh))
                                 {
                                     //Mesh grouped
                                     newDict.Add(skin, material, gmesh);
@@ -514,7 +524,7 @@ namespace Engine.Content
                                 else
                                 {
                                     //Cannot group
-                                    foreach (SubMeshContent m in skinnedM)
+                                    foreach (var m in skinnedM)
                                     {
                                         newDict.Add(skin, material, m);
                                     }
@@ -550,8 +560,7 @@ namespace Engine.Content
 
                     if (staticM.Count > 0)
                     {
-                        SubMeshContent gmesh;
-                        if (SubMeshContent.OptimizeMeshes(staticM.ToArray(), out gmesh))
+                        if (SubMeshContent.OptimizeMeshes(staticM.ToArray(), out SubMeshContent gmesh))
                         {
                             //Mesh grouped
                             newDict.Add(StaticMesh, material, gmesh);
@@ -559,7 +568,7 @@ namespace Engine.Content
                         else
                         {
                             //Cannot group
-                            foreach (SubMeshContent m in staticM)
+                            foreach (var m in staticM)
                             {
                                 newDict.Add(StaticMesh, material, m);
                             }

@@ -166,11 +166,14 @@ namespace Engine
         /// <summary>
         /// Resource releasing
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            //Remove data from buffer manager
-            this.BufferManager.RemoveVertexData(this.vertexBuffer);
-            this.BufferManager.RemoveIndexData(this.indexBuffer);
+            if (disposing)
+            {
+                //Remove data from buffer manager
+                this.BufferManager.RemoveVertexData(this.vertexBuffer);
+                this.BufferManager.RemoveIndexData(this.indexBuffer);
+            }
         }
 
         /// <summary>

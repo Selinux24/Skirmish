@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace Engine.Effects
 {
     using Engine.Common;
@@ -38,14 +39,34 @@ namespace Engine.Effects
             }
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Drawer()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Dispose resources
         /// </summary>
-        public virtual void Dispose()
+        public void Dispose()
         {
-            if (this.Effect != null)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                this.Effect.Dispose();
-                this.Effect = null;
+                if (this.Effect != null)
+                {
+                    this.Effect.Dispose();
+                    this.Effect = null;
+                }
             }
         }
 

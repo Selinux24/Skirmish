@@ -15,20 +15,6 @@ namespace Engine
         /// Ambient up color
         /// </summary>
         public Color4 AmbientUp { get; set; }
-        /// <summary>
-        /// Parent local transform matrix
-        /// </summary>
-        public override Matrix ParentTransform
-        {
-            get
-            {
-                return Matrix.Identity;
-            }
-            set
-            {
-
-            }
-        }
 
         /// <summary>
         /// Constructor

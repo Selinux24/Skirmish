@@ -13,11 +13,11 @@ namespace Engine
         /// <summary>
         /// Glow sprote
         /// </summary>
-        private Sprite glowSprite;
+        private readonly Sprite glowSprite;
         /// <summary>
         /// Flares
         /// </summary>
-        private Flare[] flares = null;
+        private readonly Flare[] flares;
         /// <summary>
         /// Draw flares flag
         /// </summary>
@@ -76,10 +76,17 @@ namespace Engine
         /// <summary>
         /// Dispose of resources
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Helper.Dispose(this.glowSprite);
-            Helper.Dispose(this.flares);
+            if (disposing)
+            {
+                if(glowSprite != null)
+                {
+                    glowSprite.Dispose();
+                }
+
+                Helper.Dispose(this.flares);
+            }
         }
         /// <summary>
         /// Updates internal state

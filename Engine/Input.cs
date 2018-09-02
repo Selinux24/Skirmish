@@ -24,7 +24,7 @@ namespace Engine
         /// <summary>
         /// Engine render form
         /// </summary>
-        private EngineForm form;
+        private readonly EngineForm form;
         /// <summary>
         /// First state update flag
         /// </summary>
@@ -53,19 +53,19 @@ namespace Engine
         /// <summary>
         /// Mouse buttons of last update
         /// </summary>
-        private List<MouseButtons> lastMouseButtons = new List<MouseButtons>();
+        private readonly List<MouseButtons> lastMouseButtons = new List<MouseButtons>();
         /// <summary>
         /// Current mouse buttons
         /// </summary>
-        private List<MouseButtons> currentMouseButtons = new List<MouseButtons>();
+        private readonly List<MouseButtons> currentMouseButtons = new List<MouseButtons>();
         /// <summary>
         /// Keys of last update
         /// </summary>
-        private List<Keys> lastKeyboardKeys = new List<Keys>();
+        private readonly List<Keys> lastKeyboardKeys = new List<Keys>();
         /// <summary>
         /// Current keys
         /// </summary>
-        private List<Keys> currentKeyboardKeys = new List<Keys>();
+        private readonly List<Keys> currentKeyboardKeys = new List<Keys>();
 
         /// <summary>
         /// Mouse X axis value
@@ -206,6 +206,31 @@ namespace Engine
             this.form.MouseEnter += new EventHandler(OnMouseEnter);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Input()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+
+        }
+
+        /// <summary>
         /// Updates input state
         /// </summary>
         /// <param name="gameTime">Game time</param>
@@ -330,13 +355,6 @@ namespace Engine
                     this.ClearInputData();
                 }
             }
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        public void Dispose()
-        {
-
         }
         /// <summary>
         /// Gets if specified key is just released

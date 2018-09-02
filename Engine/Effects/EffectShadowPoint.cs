@@ -152,27 +152,27 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Animation data effect variable
         /// </summary>
-        private EngineEffectVariableScalar animationOffset = null;
+        private readonly EngineEffectVariableScalar animationOffset = null;
         /// <summary>
         /// Texture index effect variable
         /// </summary>
-        private EngineEffectVariableScalar textureIndex = null;
+        private readonly EngineEffectVariableScalar textureIndex = null;
         /// <summary>
         /// Animation palette width effect variable
         /// </summary>
-        private EngineEffectVariableScalar animationPaletteWidth = null;
+        private readonly EngineEffectVariableScalar animationPaletteWidth = null;
         /// <summary>
         /// Animation palette
         /// </summary>
-        private EngineEffectVariableTexture animationPalette = null;
+        private readonly EngineEffectVariableTexture animationPalette = null;
         /// <summary>
         /// Diffuse map effect variable
         /// </summary>
-        private EngineEffectVariableTexture diffuseMap = null;
+        private readonly EngineEffectVariableTexture diffuseMap = null;
 
         /// <summary>
         /// Current animation palette
@@ -476,7 +476,7 @@ namespace Engine.Effects
             }
             else
             {
-                this.diffuseMap = null;
+                this.DiffuseMap = null;
             }
 
             this.TextureIndex = textureIndex;

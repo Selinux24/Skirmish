@@ -148,24 +148,27 @@ namespace Engine
         /// <summary>
         /// Dispose objects
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            if (this.renderTarget != null)
+            if (disposing)
             {
-                this.renderTarget.Dispose();
-                this.renderTarget = null;
-            }
+                if (this.renderTarget != null)
+                {
+                    this.renderTarget.Dispose();
+                    this.renderTarget = null;
+                }
 
-            if (this.renderTexture != null)
-            {
-                this.renderTexture.Dispose();
-                this.renderTexture = null;
-            }
+                if (this.renderTexture != null)
+                {
+                    this.renderTexture.Dispose();
+                    this.renderTexture = null;
+                }
 
-            if (this.minimapBox != null)
-            {
-                this.minimapBox.Dispose();
-                this.minimapBox = null;
+                if (this.minimapBox != null)
+                {
+                    this.minimapBox.Dispose();
+                    this.minimapBox = null;
+                }
             }
         }
         /// <summary>

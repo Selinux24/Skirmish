@@ -10,11 +10,11 @@
         /// <summary>
         /// Game class
         /// </summary>
-        public virtual Game Game { get { return this.Scene.Game; } }
+        public Game Game { get { return this.Scene.Game; } }
         /// <summary>
         /// Buffer manager
         /// </summary>
-        public virtual BufferManager BufferManager { get { return this.Scene.BufferManager; } }
+        public BufferManager BufferManager { get { return this.Scene.BufferManager; } }
 
         /// <summary>
         /// Constructor

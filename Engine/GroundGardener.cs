@@ -614,14 +614,17 @@ namespace Engine
         /// <summary>
         /// Resource disposal
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Helper.Dispose(this.foliageBuffers);
-            Helper.Dispose(this.foliagePatches);
-            Helper.Dispose(this.foliageMap);
-            Helper.Dispose(this.foliageMapChannels);
+            if (disposing)
+            {
+                Helper.Dispose(this.foliageBuffers);
+                Helper.Dispose(this.foliagePatches);
+                Helper.Dispose(this.foliageMap);
+                Helper.Dispose(this.foliageMapChannels);
 
-            Helper.Dispose(this.textureRandom);
+                Helper.Dispose(this.textureRandom);
+            }
         }
 
         /// <summary>

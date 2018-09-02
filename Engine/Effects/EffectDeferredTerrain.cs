@@ -382,13 +382,16 @@ namespace Engine.Effects
         /// <summary>
         /// Dispose
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Helper.Dispose(this.samplerPoint);
-            Helper.Dispose(this.samplerLinear);
-            Helper.Dispose(this.samplerAnisotropic);
+            if (disposing)
+            {
+                Helper.Dispose(this.samplerPoint);
+                Helper.Dispose(this.samplerLinear);
+                Helper.Dispose(this.samplerAnisotropic);
+            }
 
-            base.Dispose();
+            base.Dispose(disposing);
         }
 
         /// <summary>

@@ -377,19 +377,19 @@ namespace Terrain.AI
 
         protected virtual void FireMoving(AIAgent active, AIAgent passive)
         {
-            this.Moving?.Invoke(new BehaviorEventArgs(active, passive));
+            this.Moving?.Invoke(this, new BehaviorEventArgs(active, passive));
         }
         protected virtual void FireAttacking(AIAgent active, AIAgent passive)
         {
-            this.Attacking?.Invoke(new BehaviorEventArgs(active, passive));
+            this.Attacking?.Invoke(this, new BehaviorEventArgs(active, passive));
         }
         protected virtual void FireDamaged(AIAgent active, AIAgent passive)
         {
-            this.Damaged?.Invoke(new BehaviorEventArgs(active, passive));
+            this.Damaged?.Invoke(this, new BehaviorEventArgs(active, passive));
         }
         protected virtual void FireDestroyed(AIAgent active, AIAgent passive)
         {
-            this.Destroyed?.Invoke(new BehaviorEventArgs(active, passive));
+            this.Destroyed?.Invoke(this, new BehaviorEventArgs(active, passive));
         }
 
         public override string ToString()

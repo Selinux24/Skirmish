@@ -17,19 +17,19 @@ namespace Engine
         /// <summary>
         /// Asset models dictionary
         /// </summary>
-        private Dictionary<string, SceneObject<ModelInstanced>> assets = new Dictionary<string, SceneObject<ModelInstanced>>();
+        private readonly Dictionary<string, SceneObject<ModelInstanced>> assets = new Dictionary<string, SceneObject<ModelInstanced>>();
         /// <summary>
         /// Object models dictionary
         /// </summary>
-        private Dictionary<string, SceneObject<ModelInstanced>> objects = new Dictionary<string, SceneObject<ModelInstanced>>();
+        private readonly Dictionary<string, SceneObject<ModelInstanced>> objects = new Dictionary<string, SceneObject<ModelInstanced>>();
+        /// <summary>
+        /// Particle descriptors dictionary
+        /// </summary>
+        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptors = new Dictionary<string, ParticleSystemDescription>();
         /// <summary>
         /// Particle manager
         /// </summary>
         private SceneObject<ParticleManager> particleManager = null;
-        /// <summary>
-        /// Particle descriptors dictionary
-        /// </summary>
-        private Dictionary<string, ParticleSystemDescription> particleDescriptors = new Dictionary<string, ParticleSystemDescription>();
         /// <summary>
         /// Asset map
         /// </summary>
@@ -42,11 +42,12 @@ namespace Engine
         /// <summary>
         /// Gets the assets description
         /// </summary>
-        protected virtual ModularSceneryAssetConfiguration AssetConfiguration { get; set; }
+        protected ModularSceneryAssetConfiguration AssetConfiguration { get; set; }
         /// <summary>
         /// Gets the level list
         /// </summary>
-        protected virtual ModularSceneryLevels Levels { get; set; }
+        protected ModularSceneryLevels Levels { get; set; }
+      
         /// <summary>
         /// Current level
         /// </summary>
@@ -96,9 +97,10 @@ namespace Engine
             this.LoadLevel(this.CurrentLevel);
         }
         /// <summary>
-        /// Dispose of created resources
+        /// Resource dispose
         /// </summary>
-        public override void Dispose()
+        /// <param name="disposing">Free managed resources</param>
+        protected override void Dispose(bool disposing)
         {
 
         }
@@ -144,19 +146,15 @@ namespace Engine
             if (!string.IsNullOrEmpty(Description.Content.ModelContentFilename))
             {
                 var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(Description.Content.ContentFolder, Description.Content.ModelContentFilename));
-                using (var loader = contentDesc.GetLoader())
-                {
-                    var t = loader.Load(Description.Content.ContentFolder, contentDesc);
-                    content = t[0];
-                }
+                var loader = contentDesc.GetLoader();
+                var t = loader.Load(Description.Content.ContentFolder, contentDesc);
+                content = t[0];
             }
             else if (Description.Content.ModelContentDescription != null)
             {
-                using (var loader = Description.Content.ModelContentDescription.GetLoader())
-                {
-                    var t = loader.Load(Description.Content.ContentFolder, Description.Content.ModelContentDescription);
-                    content = t[0];
-                }
+                var loader = Description.Content.ModelContentDescription.GetLoader();
+                var t = loader.Load(Description.Content.ContentFolder, Description.Content.ModelContentDescription);
+                content = t[0];
             }
             else if (Description.Content.HeightmapDescription != null)
             {
@@ -814,11 +812,11 @@ namespace Engine
             /// <summary>
             /// Asset map
             /// </summary>
-            private List<AssetMapItem> assetMap = new List<AssetMapItem>();
+            private readonly List<AssetMapItem> assetMap = new List<AssetMapItem>();
             /// <summary>
             /// Visible bounding boxes
             /// </summary>
-            private List<BoundingBox> visibleBoxes = new List<BoundingBox>();
+            private readonly List<BoundingBox> visibleBoxes = new List<BoundingBox>();
 
             /// <summary>
             /// Position
@@ -988,8 +986,10 @@ namespace Engine
                     this.visibleBoxes.Clear();
                     this.visibleBoxes.Add(this.assetMap[itemIndex].Volume);
 
-                    List<int> visited = new List<int>();
-                    visited.Add(itemIndex);
+                    List<int> visited = new List<int>
+                    {
+                        itemIndex
+                    };
 
                     foreach (var conIndex in this.assetMap[itemIndex].Connections)
                     {

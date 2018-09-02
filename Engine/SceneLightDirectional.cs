@@ -91,15 +91,7 @@ namespace Engine
             }
             set
             {
-                this.parentTransform = value;
-
-                var trn = this.initialTransform * this.parentTransform;
-
-                Vector3 scale;
-                Quaternion rotation;
-                Vector3 translation;
-                trn.Decompose(out scale, out rotation, out translation);
-                this.Direction = Matrix.RotationQuaternion(rotation).Down;
+                this.UpdateLocalTransform(value);
             }
         }
         /// <summary>
@@ -141,6 +133,23 @@ namespace Engine
         {
             this.Direction = direction;
             this.BaseBrightness = this.Brightness = brigthness;
+
+            this.UpdateLocalTransform(Matrix.Identity);
+        }
+
+        /// <summary>
+        /// Updates local transform
+        /// </summary>
+        /// <param name="transform">Transform</param>
+        private void UpdateLocalTransform(Matrix transform)
+        {
+            this.parentTransform = transform;
+
+            var trn = this.initialTransform * this.parentTransform;
+
+            trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
+
+            this.Direction = Matrix.RotationQuaternion(rotation).Down;
         }
 
         /// <summary>

@@ -225,16 +225,35 @@ namespace Engine.Common
             this.BlendFactor = blendFactor;
             this.SampleMask = sampleMask;
         }
-
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EngineBlendState()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
         /// <summary>
         /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            if (this.blendState != null)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                this.blendState.Dispose();
-                this.blendState = null;
+                if (this.blendState != null)
+                {
+                    this.blendState.Dispose();
+                    this.blendState = null;
+                }
             }
         }
 

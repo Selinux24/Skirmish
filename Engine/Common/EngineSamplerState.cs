@@ -65,16 +65,35 @@ namespace Engine.Common
         {
             this.samplerState = samplerState;
         }
-
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EngineSamplerState()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
         /// <summary>
         /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            if (this.samplerState != null)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                this.samplerState.Dispose();
-                this.samplerState = null;
+                if (this.samplerState != null)
+                {
+                    this.samplerState.Dispose();
+                    this.samplerState = null;
+                }
             }
         }
 

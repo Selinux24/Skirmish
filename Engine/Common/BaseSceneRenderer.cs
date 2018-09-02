@@ -2,6 +2,7 @@
 using System.Diagnostics;
 #endif
 using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -185,16 +186,36 @@ namespace Engine.Common
                 Name = "Shadow mapping",
             };
         }
-
         /// <summary>
-        /// Dispose objects
+        /// Destructor
         /// </summary>
-        public virtual void Dispose()
+        ~BaseSceneRenderer()
         {
-            Helper.Dispose(this.ShadowMapperDirectional);
-            Helper.Dispose(this.ShadowMapperOmnidirectional);
-            Helper.Dispose(this.ShadowMapperSpot);
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
         }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.ShadowMapperDirectional);
+                Helper.Dispose(this.ShadowMapperOmnidirectional);
+                Helper.Dispose(this.ShadowMapperSpot);
+            }
+        }
+
         /// <summary>
         /// Resizes buffers
         /// </summary>

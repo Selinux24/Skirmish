@@ -53,12 +53,33 @@ namespace Engine
             this.CreateTargets();
         }
         /// <summary>
-        /// Release of resources
+        /// Destructor
+        /// </summary>
+        ~RenderTarget()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            this.DisposeTargets();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.DisposeTargets();
+            }
+        }
+
         /// <summary>
         /// Resizes geometry buffer using render form size
         /// </summary>

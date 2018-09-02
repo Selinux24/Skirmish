@@ -22,6 +22,37 @@ namespace Engine.Common
         {
             this.srv = srv;
         }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EngineShaderResourceView()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this.srv != null)
+                {
+                    this.srv.Dispose();
+                    this.srv = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Get the internal shader resource view
@@ -30,18 +61,6 @@ namespace Engine.Common
         public ShaderResourceView1 GetResource()
         {
             return this.srv;
-        }
-
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        public void Dispose()
-        {
-            if (this.srv != null)
-            {
-                this.srv.Dispose();
-                this.srv = null;
-            }
         }
     }
 }

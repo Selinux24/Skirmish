@@ -51,11 +51,14 @@ namespace Engine
         /// <summary>
         /// Resource releasing
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            //Remove data from buffer manager
-            this.BufferManager.RemoveVertexData(this.vertexBuffer);
-            this.BufferManager.RemoveIndexData(this.indexBuffer);
+            if (disposing)
+            {
+                //Remove data from buffer manager
+                this.BufferManager.RemoveVertexData(this.vertexBuffer);
+                this.BufferManager.RemoveIndexData(this.indexBuffer);
+            }
         }
 
         /// <summary>
@@ -126,7 +129,7 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         /// <param name="geometry">Geometry to use</param>
         /// <param name="reverse">Reverse faces</param>
-        protected virtual void InitializeBuffers(string name, CubemapDescription.CubeMapGeometryEnum geometry, bool reverse)
+        protected void InitializeBuffers(string name, CubemapDescription.CubeMapGeometryEnum geometry, bool reverse)
         {
             Vector3[] vData;
             uint[] iData;
@@ -150,7 +153,7 @@ namespace Engine
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="textures">Texture names</param>
-        protected virtual void InitializeTexture(string contentPath, params string[] textures)
+        protected void InitializeTexture(string contentPath, params string[] textures)
         {
             var image = ImageContent.Cubic(contentPath, textures[0]);
             this.cubeMapTexture = this.Game.ResourceManager.CreateResource(image);

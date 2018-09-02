@@ -7,7 +7,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Provides the ability to perform pathfinding related queries against a navigation mesh.
     /// </summary>
-    public class NavMeshQuery
+    public class NavMeshQuery : IDisposable
     {
         /// <summary>
         /// Navmesh data.
@@ -36,6 +36,47 @@ namespace Engine.PathFinding.RecastNavigation
         public NavMeshQuery()
         {
             m_query = new QueryData();
+        }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~NavMeshQuery()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (m_nodePool != null)
+                {
+                    m_nodePool.Dispose();
+                    m_nodePool = null;
+                }
+                if (m_tinyNodePool != null)
+                {
+                    m_tinyNodePool.Dispose();
+                    m_tinyNodePool = null;
+                }
+                if (m_openList != null)
+                {
+                    m_openList.Dispose();
+                    m_openList = null;
+                }
+            }
         }
 
         /// <summary>

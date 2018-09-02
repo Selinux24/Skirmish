@@ -171,16 +171,36 @@ namespace Engine
             this.nonRotatingInputLayout = game.Graphics.CreateInputLayout(effect.NonRotationDraw.GetSignature(), VertexGPUParticle.Input(BufferSlot));
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~ParticleSystemGPU()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(this.emittersBuffer);
-            Helper.Dispose(this.drawingBuffer);
-            Helper.Dispose(this.streamOutBuffer);
-            Helper.Dispose(this.streamOutInputLayout);
-            Helper.Dispose(this.rotatingInputLayout);
-            Helper.Dispose(this.nonRotatingInputLayout);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.emittersBuffer);
+                Helper.Dispose(this.drawingBuffer);
+                Helper.Dispose(this.streamOutBuffer);
+                Helper.Dispose(this.streamOutInputLayout);
+                Helper.Dispose(this.rotatingInputLayout);
+                Helper.Dispose(this.nonRotatingInputLayout);
+            }
         }
 
         /// <summary>

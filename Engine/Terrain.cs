@@ -74,15 +74,15 @@ namespace Engine
             /// <summary>
             /// Vertex buffer description dictionary
             /// </summary>
-            private Dictionary<int, BufferDescriptor> dictVB = new Dictionary<int, BufferDescriptor>();
+            private readonly Dictionary<int, BufferDescriptor> dictVB = new Dictionary<int, BufferDescriptor>();
             /// <summary>
             /// Index buffer description dictionary
             /// </summary>
-            private Dictionary<MapGridShapeId, BufferDescriptor> dictIB = new Dictionary<MapGridShapeId, BufferDescriptor>();
+            private readonly Dictionary<MapGridShapeId, BufferDescriptor> dictIB = new Dictionary<MapGridShapeId, BufferDescriptor>();
             /// <summary>
             /// Tree
             /// </summary>
-            private QuadTree<VertexData> drawingQuadTree = null;
+            private readonly QuadTree<VertexData> drawingQuadTree = null;
             /// <summary>
             /// Last mapped node
             /// </summary>
@@ -598,73 +598,73 @@ namespace Engine
         /// <summary>
         /// Grid
         /// </summary>
-        private MapGrid Map = null;
+        private readonly MapGrid Map = null;
         /// <summary>
         /// Height map
         /// </summary>
-        private HeightMap heightMap = null;
+        private readonly HeightMap heightMap = null;
         /// <summary>
         /// Heightmap cell size
         /// </summary>
-        private float heightMapCellSize;
+        private readonly float heightMapCellSize;
         /// <summary>
         /// Heightmap maximum height
         /// </summary>
-        private float heightMapHeight;
+        private readonly float heightMapHeight;
 
         /// <summary>
         /// Heightmap texture resolution
         /// </summary>
-        private float textureResolution;
+        private readonly float textureResolution;
         /// <summary>
         /// Terrain material
         /// </summary>
-        private MeshMaterial terrainMaterial;
+        private readonly MeshMaterial terrainMaterial;
 
         /// <summary>
         /// Gets or sets whether use alpha mapping or not
         /// </summary>
-        private bool useAlphaMap;
+        private readonly bool useAlphaMap;
         /// <summary>
         /// Gets or sets whether use slope texturing or not
         /// </summary>
-        private bool useSlopes;
+        private readonly bool useSlopes;
         /// <summary>
         /// Lerping proportion between alhpa mapping and slope texturing
         /// </summary>
-        private float proportion;
+        private readonly float proportion;
         /// <summary>
         /// Terrain low res textures
         /// </summary>
-        private EngineShaderResourceView terrainTexturesLR = null;
+        private readonly EngineShaderResourceView terrainTexturesLR = null;
         /// <summary>
         /// Terrain high res textures
         /// </summary>
-        private EngineShaderResourceView terrainTexturesHR = null;
+        private readonly EngineShaderResourceView terrainTexturesHR = null;
         /// <summary>
         /// Terrain normal maps
         /// </summary>
-        private EngineShaderResourceView terrainNormalMaps = null;
+        private readonly EngineShaderResourceView terrainNormalMaps = null;
         /// <summary>
         /// Terrain specular maps
         /// </summary>
-        private EngineShaderResourceView terrainSpecularMaps = null;
+        private readonly EngineShaderResourceView terrainSpecularMaps = null;
         /// <summary>
         /// Color textures for alpha map
         /// </summary>
-        private EngineShaderResourceView colorTextures = null;
+        private readonly EngineShaderResourceView colorTextures = null;
         /// <summary>
         /// Alpha map
         /// </summary>
-        private EngineShaderResourceView alphaMap = null;
+        private readonly EngineShaderResourceView alphaMap = null;
+        /// <summary>
+        /// Use anisotropic
+        /// </summary>
+        private readonly bool useAnisotropic = false;
         /// <summary>
         /// Slope ranges
         /// </summary>
         private Vector2 slopeRanges = Vector2.Zero;
-        /// <summary>
-        /// Use anisotropic
-        /// </summary>
-        private bool useAnisotropic = false;
 
         /// <summary>
         /// Gets the used material list
@@ -690,11 +690,11 @@ namespace Engine
             {
                 string contentPath = description.Content.HeightmapDescription.ContentPath;
 
-                ImageContent heightMapImage = new ImageContent()
+                var heightMapImage = new ImageContent()
                 {
                     Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.HeightmapFileName),
                 };
-                ImageContent colorMapImage = new ImageContent()
+                var colorMapImage = new ImageContent()
                 {
                     Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.ColormapFileName),
                 };
@@ -717,13 +717,13 @@ namespace Engine
                     Material = description.Content.HeightmapDescription.Material != null ? description.Content.HeightmapDescription.Material.GetMaterial() : Material.Default
                 };
 
-                ImageContent normalMapTextures = new ImageContent()
+                var normalMapTextures = new ImageContent()
                 {
                     Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.NormalMaps),
                 };
                 this.terrainNormalMaps = this.Game.ResourceManager.CreateResource(normalMapTextures);
 
-                ImageContent specularMapTextures = new ImageContent()
+                var specularMapTextures = new ImageContent()
                 {
                     Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.SpecularMaps),
                 };
@@ -731,11 +731,11 @@ namespace Engine
 
                 if (description.Content.HeightmapDescription.Textures.UseSlopes)
                 {
-                    ImageContent terrainTexturesLR = new ImageContent()
+                    var terrainTexturesLR = new ImageContent()
                     {
                         Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.TexturesLR),
                     };
-                    ImageContent terrainTexturesHR = new ImageContent()
+                    var terrainTexturesHR = new ImageContent()
                     {
                         Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.TexturesHR),
                     };
@@ -747,11 +747,11 @@ namespace Engine
 
                 if (description.Content.HeightmapDescription.Textures.UseAlphaMapping)
                 {
-                    ImageContent colors = new ImageContent()
+                    var colors = new ImageContent()
                     {
                         Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.ColorTextures),
                     };
-                    ImageContent alphaMap = new ImageContent()
+                    var alphaMap = new ImageContent()
                     {
                         Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.AlphaMap),
                     };
@@ -799,20 +799,26 @@ namespace Engine
         /// <summary>
         /// Release of resources
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Helper.Dispose(this.Map);
+            if (disposing)
+            {
+                if (Map != null)
+                {
+                    Map.Dispose();
+                }
 
-            Helper.Dispose(this.heightMap);
+                Helper.Dispose(this.heightMap);
 
-            Helper.Dispose(this.terrainTexturesLR);
-            Helper.Dispose(this.terrainTexturesHR);
-            Helper.Dispose(this.terrainNormalMaps);
-            Helper.Dispose(this.terrainSpecularMaps);
-            Helper.Dispose(this.colorTextures);
-            Helper.Dispose(this.alphaMap);
+                Helper.Dispose(this.terrainTexturesLR);
+                Helper.Dispose(this.terrainTexturesHR);
+                Helper.Dispose(this.terrainNormalMaps);
+                Helper.Dispose(this.terrainSpecularMaps);
+                Helper.Dispose(this.colorTextures);
+                Helper.Dispose(this.alphaMap);
 
-            Helper.Dispose(this.terrainMaterial);
+                Helper.Dispose(this.terrainMaterial);
+            }
         }
 
         /// <summary>

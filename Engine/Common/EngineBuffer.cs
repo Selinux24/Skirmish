@@ -40,6 +40,35 @@ namespace Engine.Common
                 new VertexBufferBinding(this.VertexBuffer, default(T).GetStride(), 0),
             };
         }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EngineBuffer()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.VertexBuffer);
+
+                Helper.Dispose(this.InputLayouts);
+            }
+        }
 
         /// <summary>
         /// Adds a new input layout
@@ -48,16 +77,6 @@ namespace Engine.Common
         public void AddInputLayout(InputLayout input)
         {
             this.InputLayouts.Add(input);
-        }
-
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        public void Dispose()
-        {
-            Helper.Dispose(this.VertexBuffer);
-
-            Helper.Dispose(this.InputLayouts);
         }
     }
 }

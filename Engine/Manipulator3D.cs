@@ -174,7 +174,7 @@ namespace Engine
         /// <summary>
         /// Update internal state
         /// </summary>
-        protected virtual void UpdateLocalTransform()
+        protected void UpdateLocalTransform()
         {
             if (this.transformUpdateNeeded)
             {
@@ -205,7 +205,7 @@ namespace Engine
         /// Sets the local transform decomposing position, scale and rotation
         /// </summary>
         /// <param name="newLocalTransform">New local transform</param>
-        protected virtual void SetLocalTransform(Matrix newLocalTransform)
+        protected void SetLocalTransform(Matrix newLocalTransform)
         {
             if (newLocalTransform.Decompose(out scaling, out rotation, out position))
             {
@@ -477,7 +477,10 @@ namespace Engine
                 if (updateState) this.UpdateLocalTransform();
             }
         }
-
+        /// <summary>
+        /// Sets transform matrix
+        /// </summary>
+        /// <param name="transform">Transform matrix</param>
         public void SetTransform(Matrix transform)
         {
             this.SetLocalTransform(transform);

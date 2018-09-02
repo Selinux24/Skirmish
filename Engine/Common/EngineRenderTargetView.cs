@@ -42,6 +42,34 @@ namespace Engine.Common
             this.rtv.Add(rtv);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EngineRenderTargetView()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.rtv);
+            }
+        }
+
+        /// <summary>
         /// Adds a new Render Target to the collection
         /// </summary>
         /// <param name="rtv">Render target view</param>
@@ -65,14 +93,6 @@ namespace Engine.Common
         public RenderTargetView1[] GetRenderTargets()
         {
             return this.rtv.ToArray();
-        }
-
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        public void Dispose()
-        {
-            Helper.Dispose(this.rtv);
         }
     }
 }

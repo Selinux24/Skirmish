@@ -22,16 +22,35 @@ namespace Engine.Common
         {
             this.shader = shader;
         }
-        
         /// <summary>
-        /// Resource dispose
+        /// Destructor
+        /// </summary>
+        ~EnginePixelShader()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            if (this.shader != null)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                this.shader.Dispose();
-                this.shader = null;
+                if (this.shader != null)
+                {
+                    this.shader.Dispose();
+                    this.shader = null;
+                }
             }
         }
     }

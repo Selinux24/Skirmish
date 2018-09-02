@@ -13,11 +13,11 @@ namespace Engine
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
-        private BufferDescriptor vertexBuffer = null;
+        private readonly BufferDescriptor vertexBuffer = null;
         /// <summary>
         /// Index buffer descriptor
         /// </summary>
-        private BufferDescriptor indexBuffer = null;
+        private readonly BufferDescriptor indexBuffer = null;
         /// <summary>
         /// Vertex couunt
         /// </summary>
@@ -48,13 +48,13 @@ namespace Engine
         private Matrix localShadow;
 
         /// <summary>
+        /// Font map
+        /// </summary>
+        private readonly FontMap fontMap = null;
+        /// <summary>
         /// View * projection matrix
         /// </summary>
         private Matrix viewProjection;
-        /// <summary>
-        /// Font map
-        /// </summary>
-        private FontMap fontMap = null;
         /// <summary>
         /// Text position in 2D screen
         /// </summary>
@@ -213,11 +213,14 @@ namespace Engine
         /// <summary>
         /// Dispose
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            //Remove data from buffer manager
-            this.BufferManager.RemoveVertexData(this.vertexBuffer);
-            this.BufferManager.RemoveIndexData(this.indexBuffer);
+            if (disposing)
+            {
+                //Remove data from buffer manager
+                this.BufferManager.RemoveVertexData(this.vertexBuffer);
+                this.BufferManager.RemoveIndexData(this.indexBuffer);
+            }
         }
         /// <summary>
         /// Update component state
@@ -324,10 +327,9 @@ namespace Engine
         /// </summary>
         private void MapText()
         {
-            Vector2 size;
             this.fontMap.MapSentence(
                 this.text,
-                out this.vertices, out this.indices, out size);
+                out this.vertices, out this.indices, out Vector2 size);
 
             this.Width = (int)size.X;
             this.Height = (int)size.Y;

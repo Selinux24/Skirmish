@@ -14,19 +14,12 @@ namespace Engine.Content
     /// <summary>
     /// Loader for collada
     /// </summary>
-    public class LoaderCOLLADA : ILoader, IDisposable
+    public class LoaderCOLLADA : ILoader
     {
         /// <summary>
         /// Constructor
         /// </summary>
         public LoaderCOLLADA()
-        {
-
-        }
-        /// <summary>
-        /// Resource disposing
-        /// </summary>
-        public void Dispose()
         {
 
         }

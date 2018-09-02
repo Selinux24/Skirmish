@@ -39,13 +39,33 @@ namespace Engine.PathFinding.AStar
 
         }
         /// <summary>
-        /// Resource dispose
+        /// Destructor
+        /// </summary>
+        ~Grid()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(this.BuildSettings);
-            Helper.Dispose(this.Input);
-            Helper.Dispose(this.Nodes);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.BuildSettings);
+                Helper.Dispose(this.Input);
+                Helper.Dispose(this.Nodes);
+            }
         }
 
         /// <summary>

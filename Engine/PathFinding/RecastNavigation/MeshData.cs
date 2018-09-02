@@ -110,7 +110,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="info">The SerializationInfo to populate with data.</param>
         /// <param name="context">The destination for this serialization.</param>
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             info.AddValue("header", header);
 

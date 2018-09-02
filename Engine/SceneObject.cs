@@ -95,13 +95,33 @@ namespace Engine
             this.Usage = SceneObjectUsageEnum.None;
         }
         /// <summary>
-        /// Resource dispose
+        /// Destructor
+        /// </summary>
+        ~SceneObject()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            if (this.baseObject is IDisposable)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                Helper.Dispose((IDisposable)this.baseObject);
+                if (this.baseObject is IDisposable)
+                {
+                    Helper.Dispose((IDisposable)this.baseObject);
+                }
             }
         }
 

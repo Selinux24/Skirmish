@@ -196,13 +196,38 @@ namespace Engine.Common
 
         }
         /// <summary>
-        /// Dispose map resources
+        /// Destructor
+        /// </summary>
+        ~FontMap()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(this.Texture);
-            Helper.Dispose(this.map);
-            Helper.Dispose(this.bitmapStream);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.Texture);
+                Helper.Dispose(this.map);
+
+                if (this.bitmapStream != null)
+                {
+                    this.bitmapStream.Dispose();
+                    this.bitmapStream = null;
+                }
+            }
         }
 
         /// <summary>

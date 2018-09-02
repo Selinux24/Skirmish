@@ -86,7 +86,7 @@ namespace Engine
         /// <summary>
         /// Level of detail
         /// </summary>
-        public override LevelOfDetailEnum LevelOfDetail
+        public LevelOfDetailEnum LevelOfDetail
         {
             get
             {

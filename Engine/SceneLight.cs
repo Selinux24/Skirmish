@@ -8,6 +8,11 @@ namespace Engine
     public abstract class SceneLight
     {
         /// <summary>
+        /// Parent transformation matrix
+        /// </summary>
+        private Matrix parentTransform = Matrix.Identity;
+
+        /// <summary>
         /// Light name
         /// </summary>
         public string Name { get; set; }
@@ -34,7 +39,11 @@ namespace Engine
         /// <summary>
         /// Parent local transform matrix
         /// </summary>
-        public abstract Matrix ParentTransform { get; set; }
+        public virtual Matrix ParentTransform
+        {
+            get { return parentTransform; }
+            set { parentTransform = value; }
+        }
 
         /// <summary>
         /// Constructor
@@ -59,7 +68,6 @@ namespace Engine
             this.DiffuseColor = diffuse;
             this.SpecularColor = specular;
             this.State = null;
-            this.ParentTransform = Matrix.Identity;
         }
 
         /// <summary>

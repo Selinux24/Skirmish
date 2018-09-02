@@ -55,12 +55,32 @@ namespace Engine
             this.FromLightViewProjectionArray = Helper.CreateArray(6, Matrix.Identity);
         }
         /// <summary>
-        /// Release of resources
+        /// Destructor
+        /// </summary>
+        ~CubicShadowMap()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(this.DepthMap);
-            Helper.Dispose(this.Texture);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.DepthMap);
+                Helper.Dispose(this.Texture);
+            }
         }
 
         /// <summary>

@@ -198,16 +198,35 @@ namespace Engine.Common
         {
             this.rasterizerState = rasterizerState;
         }
-
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EngineRasterizerState()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
         /// <summary>
         /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            if (this.rasterizerState != null)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                this.rasterizerState.Dispose();
-                this.rasterizerState = null;
+                if (this.rasterizerState != null)
+                {
+                    this.rasterizerState.Dispose();
+                    this.rasterizerState = null;
+                }
             }
         }
 

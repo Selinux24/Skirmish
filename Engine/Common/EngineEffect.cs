@@ -22,6 +22,37 @@ namespace Engine.Common
         {
             this.effect = effect;
         }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EngineEffect()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this.effect != null)
+                {
+                    this.effect.Dispose();
+                    this.effect = null;
+                }
+            }
+        }
 
         /// <summary>
         /// Optimizes the effect
@@ -96,18 +127,6 @@ namespace Engine.Common
         public EngineEffectVariableSampler GetVariableSampler(string name)
         {
             return new EngineEffectVariableSampler(this.effect.GetVariableByName(name).AsSampler());
-        }
-
-        /// <summary>
-        /// Dipose resources
-        /// </summary>
-        public void Dispose()
-        {
-            if (this.effect != null)
-            {
-                this.effect.Dispose();
-                this.effect = null;
-            }
         }
     }
 }

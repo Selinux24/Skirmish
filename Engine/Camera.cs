@@ -504,6 +504,31 @@ namespace Engine
             this.InvertY = false;
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Camera()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+
+        }
+
+        /// <summary>
         /// Sets dimensions of viewport
         /// </summary>
         /// <param name="width">Viewport width</param>
@@ -516,13 +541,6 @@ namespace Engine
             this.aspectRelation = this.viewportWidth / this.viewportHeight;
 
             this.UpdateLens();
-        }
-        /// <summary>
-        /// Resource disposing
-        /// </summary>
-        public void Dispose()
-        {
-
         }
         /// <summary>
         /// Updates camera state

@@ -34,7 +34,7 @@ namespace Engine
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public virtual bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
+        public bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
             bool res = false;
 
@@ -65,7 +65,7 @@ namespace Engine
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public virtual bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
+        public bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
             bool res = false;
 
@@ -96,7 +96,7 @@ namespace Engine
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if picked position found</returns>
-        public virtual bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
+        public bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
         {
             bool res = false;
 

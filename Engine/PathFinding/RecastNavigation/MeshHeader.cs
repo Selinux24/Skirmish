@@ -101,7 +101,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="info">Serialization information</param>
         /// <param name="context">Serializatio context</param>
-        public MeshHeader(SerializationInfo info, StreamingContext context)
+        internal MeshHeader(SerializationInfo info, StreamingContext context)
         {
             magic = info.GetInt32("magic");
             version = info.GetInt32("version");

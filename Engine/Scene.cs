@@ -211,6 +211,41 @@ namespace Engine
 
             this.UpdateGlobalResources = true;
         }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Scene()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (BufferManager != null)
+                {
+                    BufferManager.Dispose();
+                    BufferManager = null;
+                }
+
+                Helper.Dispose(this.Renderer);
+                Helper.Dispose(this.Camera);
+                Helper.Dispose(this.components);
+            }
+        }
 
         /// <summary>
         /// Initialize scene objects
@@ -299,16 +334,6 @@ namespace Engine
             this.BufferManager.SetVertexBuffers();
 
             this.Renderer.Draw(gameTime, this);
-        }
-        /// <summary>
-        /// Dispose scene objects
-        /// </summary>
-        public virtual void Dispose()
-        {
-            Helper.Dispose(this.BufferManager);
-            Helper.Dispose(this.Renderer);
-            Helper.Dispose(this.Camera);
-            Helper.Dispose(this.components);
         }
 
         /// <summary>

@@ -96,21 +96,6 @@ namespace Engine
                 return Helper.Angle(this.Normal, Vector3.Down);
             }
         }
-        /// <summary>
-        /// Gets the point at index
-        /// </summary>
-        /// <param name="index">Index</param>
-        /// <returns>Returns the point at intex</returns>
-        public Vector3 this[int index]
-        {
-            get
-            {
-                if (index == 0) return this.Point1;
-                else if (index == 1) return this.Point2;
-                else if (index == 2) return this.Point3;
-                else throw new EngineException("Bad triangle vertex index.");
-            }
-        }
 
         /// <summary>
         /// Generate a triangle list from vertices
@@ -486,9 +471,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray)
         {
-            Vector3 position;
-            float distance;
-            return this.Intersects(ref ray, false, out position, out distance);
+            return this.Intersects(ref ray, false, out Vector3 position, out float distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -498,8 +481,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray, out float distance)
         {
-            Vector3 position;
-            return this.Intersects(ref ray, false, out position, out distance);
+            return this.Intersects(ref ray, false, out Vector3 position, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -520,9 +502,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray, bool facingOnly)
         {
-            Vector3 point;
-            float distance;
-            return this.Intersects(ref ray, facingOnly, out point, out distance);
+            return this.Intersects(ref ray, facingOnly, out Vector3 point, out float distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -533,8 +513,7 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(ref Ray ray, bool facingOnly, out float distance)
         {
-            Vector3 point;
-            return this.Intersects(ref ray, facingOnly, out point, out distance);
+            return this.Intersects(ref ray, facingOnly, out Vector3 point, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle

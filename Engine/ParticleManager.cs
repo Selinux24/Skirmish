@@ -47,10 +47,13 @@ namespace Engine
         /// <summary>
         /// Resource disposal
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Helper.Dispose(this.particleSystems);
-            Helper.Dispose(this.toDelete);
+            if (disposing)
+            {
+                Helper.Dispose(this.particleSystems);
+                Helper.Dispose(this.toDelete);
+            }
         }
 
         /// <summary>

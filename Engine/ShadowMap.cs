@@ -46,7 +46,7 @@ namespace Engine
             this.Viewport = new Viewport(0, 0, width, height, 0, 1.0f);
 
             game.Graphics.CreateShadowMapTextures(
-                width, height, arraySize, 
+                width, height, arraySize,
                 out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv);
 
             this.DepthMap = dsv;
@@ -55,12 +55,32 @@ namespace Engine
             this.FromLightViewProjectionArray = Helper.CreateArray(arraySize, Matrix.Identity);
         }
         /// <summary>
-        /// Release of resources
+        /// Destructor
+        /// </summary>
+        ~ShadowMap()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(this.DepthMap);
-            Helper.Dispose(this.Texture);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                Helper.Dispose(this.DepthMap);
+                Helper.Dispose(this.Texture);
+            }
         }
 
         /// <summary>

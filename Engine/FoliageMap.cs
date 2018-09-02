@@ -81,11 +81,31 @@ namespace Engine
             this.MaxY = data.GetUpperBound(1);
         }
         /// <summary>
-        /// Dispose
+        /// Destructor
+        /// </summary>
+        ~FoliageMap()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            this.m_Data = null;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.m_Data = null;
+            }
         }
 
         /// <summary>

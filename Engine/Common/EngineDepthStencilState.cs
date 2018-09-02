@@ -262,16 +262,35 @@ namespace Engine.Common
             this.state = state;
             this.StencilRef = stencilRef;
         }
-
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EngineDepthStencilState()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
         /// <summary>
         /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            if (this.state != null)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                this.state.Dispose();
-                this.state = null;
+                if (this.state != null)
+                {
+                    this.state.Dispose();
+                    this.state = null;
+                }
             }
         }
 

@@ -268,12 +268,32 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Dispose
+        /// Destructor
+        /// </summary>
+        ~HeightMap()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            this.m_ColorData = null;
-            this.m_HeightData = null;
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.m_ColorData = null;
+                this.m_HeightData = null;
+            }
         }
 
         /// <summary>

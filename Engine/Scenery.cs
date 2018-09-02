@@ -257,19 +257,15 @@ namespace Engine
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
                 var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
-                using (var loader = contentDesc.GetLoader())
-                {
-                    var t = loader.Load(description.Content.ContentFolder, contentDesc);
-                    content = t[0];
-                }
+                var loader = contentDesc.GetLoader();
+                var t = loader.Load(description.Content.ContentFolder, contentDesc);
+                content = t[0];
             }
             else if (description.Content.ModelContentDescription != null)
             {
-                using (var loader = description.Content.ModelContentDescription.GetLoader())
-                {
-                    var t = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
-                    content = t[0];
-                }
+                var loader = description.Content.ModelContentDescription.GetLoader();
+                var t = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
+                content = t[0];
             }
             else if (description.Content.HeightmapDescription != null)
             {
@@ -326,9 +322,12 @@ namespace Engine
         /// <summary>
         /// Dispose of created resources
         /// </summary>
-        public override void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            Helper.Dispose(this.patchDictionary);
+            if (disposing)
+            {
+                Helper.Dispose(this.patchDictionary);
+            }
         }
         /// <summary>
         /// Objects updating

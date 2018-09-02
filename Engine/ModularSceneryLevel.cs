@@ -19,7 +19,7 @@ namespace Engine
         /// <summary>
         /// Objects base string for identification build
         /// </summary>
-        private static string ObjectsAutoString = "__objauto__";
+        private static readonly string ObjectsAutoString = "__objauto__";
 
         /// <summary>
         /// Level name
@@ -29,8 +29,26 @@ namespace Engine
         /// <summary>
         /// Position
         /// </summary>
-        [XmlIgnore]
+        [NonSerialized]
         public Vector3 StartPosition = new Vector3(0, 0, 0);
+        /// <summary>
+        /// Looking vector
+        /// </summary>
+        [NonSerialized]
+        public Vector3 LookingVector = new Vector3(0, 0, 0);
+        /// <summary>
+        /// Assets map
+        /// </summary>
+        [XmlArray("map")]
+        [XmlArrayItem("item", typeof(ModularSceneryAssetReference))]
+        public ModularSceneryAssetReference[] Map = new ModularSceneryAssetReference[] { };
+        /// <summary>
+        /// Map objects
+        /// </summary>
+        [XmlArray("objects")]
+        [XmlArrayItem("item", typeof(ModularSceneryObjectReference))]
+        public ModularSceneryObjectReference[] Objects = new ModularSceneryObjectReference[] { };
+
         /// <summary>
         /// Position vector
         /// </summary>
@@ -57,11 +75,6 @@ namespace Engine
         /// <summary>
         /// Looking vector
         /// </summary>
-        [XmlIgnore]
-        public Vector3 LookingVector = new Vector3(0, 0, 0);
-        /// <summary>
-        /// Looking vector
-        /// </summary>
         [XmlElement("look")]
         public string LookingVectorText
         {
@@ -82,18 +95,6 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Assets map
-        /// </summary>
-        [XmlArray("map")]
-        [XmlArrayItem("item", typeof(ModularSceneryAssetReference))]
-        public ModularSceneryAssetReference[] Map = new ModularSceneryAssetReference[] { };
-        /// <summary>
-        /// Map objects
-        /// </summary>
-        [XmlArray("objects")]
-        [XmlArrayItem("item", typeof(ModularSceneryObjectReference))]
-        public ModularSceneryObjectReference[] Objects = new ModularSceneryObjectReference[] { };
 
         /// <summary>
         /// Populate objects empty ids

@@ -420,32 +420,51 @@ namespace Engine.Common
         {
             this.BufferManager = bufferManager;
         }
-
         /// <summary>
-        /// Free resources from memory
+        /// Destructor
+        /// </summary>
+        ~DrawingData()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            //Remove data from buffer manager
-            foreach (var dictionary in this.Meshes.Values)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                foreach (var mesh in dictionary.Values)
+                //Remove data from buffer manager
+                foreach (var dictionary in this.Meshes.Values)
                 {
-                    this.BufferManager.RemoveVertexData(mesh.VertexBuffer);
-                    this.BufferManager.RemoveIndexData(mesh.IndexBuffer);
+                    foreach (var mesh in dictionary.Values)
+                    {
+                        this.BufferManager.RemoveVertexData(mesh.VertexBuffer);
+                        this.BufferManager.RemoveIndexData(mesh.IndexBuffer);
+                    }
                 }
+
+                Helper.Dispose(this.Meshes);
+                this.Meshes = null;
+
+                Helper.Dispose(this.Materials);
+                this.Materials = null;
+
+                this.Textures.Clear();
+                this.Textures = null;
+
+                this.SkinningData = null;
             }
-
-            Helper.Dispose(this.Meshes);
-            this.Meshes = null;
-
-            Helper.Dispose(this.Materials);
-            this.Materials = null;
-
-            this.Textures.Clear();
-            this.Textures = null;
-
-            this.SkinningData = null;
         }
 
         /// <summary>

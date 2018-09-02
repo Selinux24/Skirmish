@@ -13,8 +13,14 @@ namespace Engine
         /// <summary>
         /// Position
         /// </summary>
-        [XmlIgnore]
+        [NonSerialized]
         public Vector3 Position = new Vector3(0, 0, 0);
+        /// <summary>
+        /// Direction
+        /// </summary>
+        [NonSerialized]
+        public Vector3 Direction = new Vector3(0, 0, 0);
+
         /// <summary>
         /// Position vector
         /// </summary>
@@ -38,11 +44,6 @@ namespace Engine
                 }
             }
         }
-        /// <summary>
-        /// Direction
-        /// </summary>
-        [XmlIgnore]
-        public Vector3 Direction = new Vector3(0, 0, 0);
         /// <summary>
         /// Direction vector
         /// </summary>
