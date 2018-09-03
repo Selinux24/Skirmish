@@ -48,8 +48,8 @@ struct SpotLight
     float Intensity;
     float Radius;
     float CastShadow;
-	float Pad1;
-	float Pad2;
+    uint MapIndex;
+    uint MapCount;
 	float4x4 FromLightVP;
 };
 
@@ -118,7 +118,7 @@ inline float CalcShadowFactor(float3 pPosition, int mapIndex, uint mapCount, flo
     return shadow;
 }
 
-inline float CalcShadowFactor2(float3 pPosition, float4x4 fromLightVP, Texture2DArray<float> shadowMap)
+inline float CalcShadowFactor2(float3 pPosition, float4x4 fromLightVP, Texture2DArray<float> shadowMap, uint index)
 {
 	uint samples = 16;
 	float bias = 0.0001f;
@@ -137,7 +137,7 @@ inline float CalcShadowFactor2(float3 pPosition, float4x4 fromLightVP, Texture2D
 
 	for (uint i = 0; i < samples; i++)
 	{
-		float3 stc = float3(tex + poissonDisk[i] / poissonFactor, 0);
+        float3 stc = float3(tex + poissonDisk[i] / poissonFactor, index);
 
 		sShadow += max(minShadowFactor, shadowMap.SampleCmpLevelZero(SamplerComparisonLessEqual, stc, z));
 	}
@@ -566,8 +566,8 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
 		[flatten]
 		if (input.spotLights[i].CastShadow == 1)
 		{
-			cShadowFactor = CalcShadowFactor2(input.pPosition, input.spotLights[i].FromLightVP, input.shadowMapSpot);
-		}
+            cShadowFactor = CalcShadowFactor2(input.pPosition, input.spotLights[i].FromLightVP, input.shadowMapSpot, input.spotLights[i].MapIndex);
+        }
 
         float attenuation = CalcSphericAttenuation(input.spotLights[i].Intensity, input.spotLights[i].Radius, D);
         attenuation *= CalcSpotCone(input.spotLights[i].Direction, input.spotLights[i].Angle, L);
@@ -637,8 +637,8 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 		[flatten]
 		if (input.spotLights[i].CastShadow == 1)
 		{
-			cShadowFactor = CalcShadowFactor2(input.pPosition, input.spotLights[i].FromLightVP, input.shadowMapSpot);
-		}
+            cShadowFactor = CalcShadowFactor2(input.pPosition, input.spotLights[i].FromLightVP, input.shadowMapSpot, input.spotLights[i].MapIndex);
+        }
 
         float attenuation = CalcSphericAttenuation(input.spotLights[i].Intensity, input.spotLights[i].Radius, D);
         attenuation *= CalcSpotCone(input.spotLights[i].Direction, input.spotLights[i].Angle, L);

@@ -1,5 +1,4 @@
 ﻿using Engine;
-using SharpDX;
 
 namespace Terrain.Controllers
 {
@@ -9,17 +8,12 @@ namespace Terrain.Controllers
     public class HeliManipulatorController : SteerManipulatorController
     {
         /// <summary>
-        /// Internal manipulator
-        /// </summary>
-        private readonly Manipulator3D internalManipulator = null;
-
-        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="manipulator">Parent manipulator</param>
         public HeliManipulatorController(Manipulator3D manipulator) : base()
         {
-            this.internalManipulator = new Manipulator3D(manipulator);
+            
         }
 
         /// <summary>
@@ -29,11 +23,27 @@ namespace Terrain.Controllers
         /// <param name="manipulator">Manipulator</param>
         public override void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
         {
+            var prevPos = manipulator.Position;
+
             base.UpdateManipulator(gameTime, manipulator);
 
-            if (this.HasPath)
+            manipulator.Update(gameTime);
+
+            var pos = manipulator.Position;
+            var dir = manipulator.Forward;
+
+            var vel = pos - prevPos;
+            vel.Y = 0;
+
+            float maxSpeed = this.MaximumSpeed * gameTime.ElapsedSeconds;
+            float curSpeed = vel.Length();
+
+            var lookPos = pos + dir;
+            lookPos.Y = pos.Y - (1.5f * (curSpeed / (maxSpeed == 0 ? 1 : maxSpeed)));
+
+            if (lookPos != pos)
             {
-                this.internalManipulator.SetRotation(0, 0, MathUtil.PiOverFour, true);
+                manipulator.LookAt(lookPos, false, 0.05f, true);
             }
         }
     }

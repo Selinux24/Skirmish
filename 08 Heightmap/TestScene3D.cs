@@ -33,7 +33,7 @@ namespace Heightmap
         private Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
         private float windNextStrength = 1f;
-        private float windStep = 0.001f;
+        private readonly float windStep = 0.001f;
         private float windDuration = 0;
 
         private SceneObject<TextDrawer> title = null;
@@ -62,7 +62,7 @@ namespace Heightmap
         private ParticleSystemDescription pFire = null;
         private ParticleSystemDescription pDust = null;
         private float nextDust = 0;
-        private float dustTime = 0.33f;
+        private readonly float dustTime = 0.33f;
 
         private SceneObject<ModelInstanced> rocks = null;
         private SceneObject<ModelInstanced> trees = null;
@@ -78,7 +78,7 @@ namespace Heightmap
         private SceneObject<Model> helicopter = null;
         private SceneObject<Model> helicopter2 = null;
 
-        private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
@@ -676,7 +676,7 @@ namespace Heightmap
 
                     this.spotLight1 = new SceneLightSpot(
                         "Red Spot",
-                        false,
+                        true,
                         Color.Red,
                         Color.Red,
                         true,
@@ -688,7 +688,7 @@ namespace Heightmap
 
                     this.spotLight2 = new SceneLightSpot(
                         "Blue Spot",
-                        false,
+                        true,
                         Color.Blue,
                         Color.Blue,
                         true,
@@ -727,7 +727,7 @@ namespace Heightmap
 
                     this.torchLights[i - 1] = new SceneLightPoint(
                         string.Format("Torch {0}", i),
-                        false,
+                        true,
                         color,
                         color,
                         true,
@@ -824,7 +824,7 @@ namespace Heightmap
             this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
             this.ToggleFog();
 
-            this.lantern = new SceneLightSpot("lantern", false, Color.White, Color.White, true, this.Camera.Position, this.Camera.Forward, 25f, 100, 50);
+            this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, this.Camera.Position, this.Camera.Direction, 25f, 100, 1000);
             this.Lights.Add(this.lantern);
 
             #region Debug
@@ -1047,7 +1047,7 @@ namespace Heightmap
             if (this.lantern.Enabled)
             {
                 this.lantern.Position = this.Camera.Position;
-                this.lantern.Direction = this.Camera.Forward;
+                this.lantern.Direction = this.Camera.Direction;
             }
 
             if (this.Game.Input.KeyPressed(Keys.Left))

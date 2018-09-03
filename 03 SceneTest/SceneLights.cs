@@ -285,7 +285,7 @@ namespace SceneTest
             this.UpdateCamera(gameTime, shift, rightBtn);
 
             // Light
-            this.UpdateLight(gameTime);
+            this.UpdateLight(gameTime, shift);
 
             // Debug
             this.UpdateDebug(gameTime);
@@ -328,10 +328,10 @@ namespace SceneTest
                 this.Camera.MoveBackward(gameTime, shift);
             }
         }
-        private void UpdateLight(GameTime gameTime)
+        private void UpdateLight(GameTime gameTime, bool shift)
         {
             Vector3 position = Vector3.Zero;
-            float h = 3.0f;
+            float h = 8.0f;
             float r = 10.0f;
             float hv = 1.0f;
             float av = 0.5f;
@@ -349,10 +349,10 @@ namespace SceneTest
 
             {
                 var pos = (position * -1) + new Vector3(0, h, 0);
-                var dir = -Vector3.Normalize(new Vector3(pos.X, 0, pos.Z));
+                var dir = -Vector3.Normalize(new Vector3(pos.X, pos.Y, pos.Z));
                 this.lightEmitters.Instance[1].Manipulator.SetPosition(pos);
                 this.lanterns.Instance[0].Manipulator.SetPosition(pos);
-                this.lanterns.Instance[0].Manipulator.LookAt(pos + dir);
+                this.lanterns.Instance[0].Manipulator.LookAt(pos + dir, false);
                 this.Lights.SpotLights[0].Position = pos;
                 this.Lights.SpotLights[0].Direction = dir;
             }
@@ -363,22 +363,50 @@ namespace SceneTest
 
             {
                 var pos = (position * +1) + new Vector3(0, h, 0);
-                var dir = -Vector3.Normalize(new Vector3(pos.X, 0, pos.Z));
+                var dir = -Vector3.Normalize(new Vector3(pos.X, pos.Y, pos.Z));
                 this.lightEmitters.Instance[2].Manipulator.SetPosition(pos);
                 this.lanterns.Instance[1].Manipulator.SetPosition(pos);
-                this.lanterns.Instance[1].Manipulator.LookAt(pos + dir);
+                this.lanterns.Instance[1].Manipulator.LookAt(pos + dir, false);
                 this.Lights.SpotLights[1].Position = pos;
                 this.Lights.SpotLights[1].Direction = dir;
             }
 
             {
                 var pos = (position * -1) + new Vector3(0, h, 0);
-                var dir = -Vector3.Normalize(new Vector3(pos.X, 0, pos.Z));
+                var dir = -Vector3.Normalize(new Vector3(pos.X, pos.Y, pos.Z));
                 this.lightEmitters.Instance[3].Manipulator.SetPosition(pos);
                 this.lanterns.Instance[2].Manipulator.SetPosition(pos);
-                this.lanterns.Instance[2].Manipulator.LookAt(pos + dir);
+                this.lanterns.Instance[2].Manipulator.LookAt(pos + dir, false);
                 this.Lights.SpotLights[2].Position = pos;
                 this.Lights.SpotLights[2].Direction = dir;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.D1))
+            {
+                UpdateSingleLight(this.Lights.PointLights[0], shift);
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.D2))
+            {
+                UpdateSingleLight(this.Lights.SpotLights[0], shift);
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.D3))
+            {
+                UpdateSingleLight(this.Lights.SpotLights[1], shift);
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.D4))
+            {
+                UpdateSingleLight(this.Lights.SpotLights[2], shift);
+            }
+        }
+        private void UpdateSingleLight(SceneLight light, bool shift)
+        {
+            if (shift)
+            {
+                light.CastShadow = !light.CastShadow;
+            }
+            else
+            {
+                light.Enabled = !light.Enabled;
             }
         }
         private void UpdateDebug(GameTime gameTime)

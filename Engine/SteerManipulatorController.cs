@@ -83,8 +83,8 @@ namespace Engine
                         var newPosition = this.path.GetPosition(this.pathTime);
                         var newNormal = this.path.GetNormal(this.pathTime);
 
-                        manipulator.SetPosition(newPosition);
-                        manipulator.LookAt(newPosition + (newPosition - position), newNormal, false, 0.1f);
+                        manipulator.SetPosition(newPosition, true);
+                        manipulator.LookAt(newPosition + (newPosition - position), newNormal, true, 0.1f);
                     }
                 }
                 else

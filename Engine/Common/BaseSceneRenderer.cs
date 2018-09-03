@@ -464,6 +464,9 @@ namespace Engine.Common
                         }
 
                         var light = shadowCastingLights[l];
+                        light.ShadowMapIndex = 0;
+                        light.ShadowMapCount = 0;
+                        light.FromLightVP = new Matrix[1];
 
                         var sph = new CullingVolumeSphere(light.Position, light.Radius);
 
@@ -472,6 +475,7 @@ namespace Engine.Common
                         if (doShadows)
                         {
                             light.ShadowMapIndex = assigned;
+                            light.ShadowMapCount = 1;
                             var shadowMapper = this.ShadowMapperSpot;
                             assigned++;
 
@@ -482,9 +486,9 @@ namespace Engine.Common
                                 light.Direction,
                                 light.Radius);
 
-                            light.FromLightVP = new[] { vp };
+                            light.FromLightVP[0] = vp;
 
-                            shadowMapper.FromLightViewProjectionArray = new[] { vp };
+                            shadowMapper.FromLightViewProjectionArray[0] = vp;
                             shadowMapper.Bind(graphics, l);
 
                             this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);

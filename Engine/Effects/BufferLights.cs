@@ -305,13 +305,13 @@ namespace Engine.Effects
         /// </summary>
         public float CastShadow;
         /// <summary>
-        /// Padding
+        /// Shadow map index
         /// </summary>
-        public float Pad1;
+        public uint MapIndex;
         /// <summary>
-        /// Padding
+        /// Sub-shadow map count
         /// </summary>
-        public float Pad2;
+        public uint MapCount;
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
@@ -332,8 +332,8 @@ namespace Engine.Effects
             this.Angle = light.AngleRadians;
             this.Radius = light.Radius;
             this.CastShadow = light.CastShadow ? 1 : 0;
-            this.Pad1 = 1000;
-            this.Pad2 = 2000;
+            this.MapIndex = light.ShadowMapIndex;
+            this.MapCount = light.ShadowMapCount;
 
             this.FromLightVP = Matrix.Identity;
             if (light.FromLightVP != null)
