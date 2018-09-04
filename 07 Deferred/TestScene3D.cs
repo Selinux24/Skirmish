@@ -13,7 +13,7 @@ namespace Deferred
     {
         private const int MaxGridDrawer = 10000;
 
-        private string titleMask = "{0}: {1} directionals, {2} points and {3} spots. Shadows {4}";
+        private readonly string titleMask = "{0}: {1} directionals, {2} points and {3} spots. Shadows {4}";
 
         private const float near = 0.1f;
         private const float far = 1000f;
@@ -56,12 +56,12 @@ namespace Deferred
         private int spotOffset = 0;
         private bool onlyModels = true;
 
-        private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         //private AgentCrowd crowd = null;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.ForwardLigthning)
+            : base(game, SceneModesEnum.DeferredLightning)
         {
 
         }
@@ -343,12 +343,14 @@ namespace Deferred
 
             #region Lights
 
+            this.Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.White, Color.White, true);
+
             this.Lights.KeyLight.Enabled = false;
             this.Lights.BackLight.Enabled = false;
-            this.Lights.FillLight.Enabled = true;
+            this.Lights.FillLight.Enabled = false;
 
-            this.Lights.KeyLight.CastShadow = true;
-            this.Lights.BackLight.CastShadow = true;
+            this.Lights.KeyLight.CastShadow = false;
+            this.Lights.BackLight.CastShadow = false;
             this.Lights.FillLight.CastShadow = false;
 
             this.pointOffset = this.Lights.PointLights.Length;
