@@ -36,8 +36,8 @@ cbuffer cbPerFrame : register(b1)
     uint PAD13;
 };
 Texture2DArray<float> gShadowMapDir : register(t2);
-TextureCubeArray<float> gShadowMapOmni : register(t3);
-Texture2DArray<float> gShadowMapSpot : register(t4);
+Texture2DArray<float> gShadowMapSpot : register(t3);
+TextureCubeArray<float> gShadowMapOmni : register(t4);
 Texture2DArray gTextureArray : register(t5);
 Texture2DArray gNormalMapArray : register(t6);
 

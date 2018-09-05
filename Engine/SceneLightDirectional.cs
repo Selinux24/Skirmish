@@ -95,7 +95,7 @@ namespace Engine
         /// <summary>
         /// First shadow map index
         /// </summary>
-        public uint ShadowMapIndex { get; set; }
+        public int ShadowMapIndex { get; set; }
         /// <summary>
         /// Shadow map count
         /// </summary>

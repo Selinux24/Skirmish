@@ -71,7 +71,7 @@ namespace Engine
         /// <summary>
         /// Shadow map index
         /// </summary>
-        public uint ShadowMapIndex { get; set; }
+        public int ShadowMapIndex { get; set; }
 
         /// <summary>
         /// Constructor

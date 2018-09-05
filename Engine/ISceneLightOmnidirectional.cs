@@ -22,7 +22,7 @@ namespace Engine
         /// <summary>
         /// Shadow map index
         /// </summary>
-        uint ShadowMapIndex { get; set; }
+        int ShadowMapIndex { get; set; }
 
         /// <summary>
         /// Gets the perspective projection matrix for shadow mapping

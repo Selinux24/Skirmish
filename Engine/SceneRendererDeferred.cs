@@ -715,7 +715,8 @@ namespace Engine
                     effect.UpdatePerLight(
                         light,
                         light.Local,
-                        context.ViewProjection);
+                        context.ViewProjection,
+                        context.ShadowMapSpot);
 
                     this.lightDrawer.DrawSpot(graphics, effect);
                 }

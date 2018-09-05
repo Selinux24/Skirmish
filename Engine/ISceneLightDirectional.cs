@@ -18,7 +18,7 @@ namespace Engine
         /// <summary>
         /// Shadow map index
         /// </summary>
-        uint ShadowMapIndex { get; set; }
+        int ShadowMapIndex { get; set; }
         /// <summary>
         /// Shadow map index
         /// </summary>

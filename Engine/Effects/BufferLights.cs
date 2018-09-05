@@ -102,7 +102,7 @@ namespace Engine.Effects
         /// First shadow map index
         /// </summary>
         [FieldOffset(48)]
-        public uint MapIndex;
+        public int MapIndex;
         /// <summary>
         /// Shadow map count
         /// </summary>
@@ -210,7 +210,7 @@ namespace Engine.Effects
         /// <summary>
         /// Shadow map index
         /// </summary>
-        public uint MapIndex;
+        public int MapIndex;
         /// <summary>
         /// Padding
         /// </summary>
@@ -307,7 +307,7 @@ namespace Engine.Effects
         /// <summary>
         /// Shadow map index
         /// </summary>
-        public uint MapIndex;
+        public int MapIndex;
         /// <summary>
         /// Sub-shadow map count
         /// </summary>

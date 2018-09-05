@@ -2,11 +2,11 @@
 #include "IncVertexFormats.fx"
 
 Texture2D gPSAlphaTexture : register(t1);
-Texture2DArray gPSNormalMapArray : register(t2);
-Texture2DArray gPSSpecularMapArray : register(t3);
-Texture2DArray gPSColorTextureArray : register(t4);
-Texture2DArray gPSDiffuseMapLRArray : register(t5);
-Texture2DArray gPSDiffuseMapHRArray : register(t6);
+Texture2DArray gPSNormalMapArray : register(t5);
+Texture2DArray gPSSpecularMapArray : register(t6);
+Texture2DArray gPSColorTextureArray : register(t7);
+Texture2DArray gPSDiffuseMapLRArray : register(t8);
+Texture2DArray gPSDiffuseMapHRArray : register(t9);
 
 SamplerState SamplerDiffuse : register(s0);
 SamplerState SamplerNormal : register(s1);

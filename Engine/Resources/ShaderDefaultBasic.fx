@@ -46,8 +46,8 @@ cbuffer cbPSPerFrame : register(b3)
 	float PAD33;
 };
 Texture2DArray<float> gPSShadowMapDir : register(t2);
-TextureCubeArray<float> gPSShadowMapOmni : register(t3);
-Texture2DArray<float> gPSShadowMapSpot : register(t4);
+Texture2DArray<float> gPSShadowMapSpot : register(t3);
+TextureCubeArray<float> gPSShadowMapOmni : register(t4);
 
 cbuffer cbPSPerObject : register(b4)
 {

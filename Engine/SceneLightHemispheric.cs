@@ -33,10 +33,24 @@ namespace Engine
         /// <param name="ambientUp">Ambient up color contribution</param>
         /// <param name="enabled">Lights is enabled</param>
         public SceneLightHemispheric(string name, Color4 ambientDown, Color4 ambientUp, bool enabled)
+            : this(name, ambientDown, 1f, ambientUp, 1f, enabled)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Light name</param>
+        /// <param name="ambientDown">Ambient down color contribution</param>
+        /// <param name="brightnessDown">Brightness down</param>
+        /// <param name="ambientUp">Ambient up color contribution</param>
+        /// <param name="brightnessUp">Brightness up</param>
+        /// <param name="enabled">Lights is enabled</param>
+        public SceneLightHemispheric(string name, Color4 ambientDown, float brightnessDown, Color4 ambientUp, float brightnessUp, bool enabled)
             : base(name, false, Color.Transparent, Color.Transparent, enabled)
         {
-            this.AmbientDown = ambientDown;
-            this.AmbientUp = ambientUp;
+            this.AmbientDown = new Color4(ambientDown.RGB() * brightnessDown, 1);
+            this.AmbientUp = new Color4(ambientUp.RGB() * brightnessUp, 1);
         }
 
         /// <summary>

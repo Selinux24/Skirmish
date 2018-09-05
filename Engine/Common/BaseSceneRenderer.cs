@@ -319,56 +319,54 @@ namespace Engine.Common
 
                     var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
 
-                    uint assigned = 0;
+                    int assigned = 0;
 
                     for (int l = 0; l < shadowCastingLights.Length; l++)
                     {
-                        if (assigned >= MaxDirectionalShadowMaps)
-                        {
-                            break;
-                        }
-
                         var light = shadowCastingLights[l];
-                        light.ShadowMapIndex = 0;
+                        light.ShadowMapIndex = -1;
                         light.ShadowMapCount = 0;
                         light.FromLightVP = new Matrix[Effects.BufferDirectionalLight.MAXSubMaps];
 
-                        if (scene.Lights.GetDirectionalLightShadowParams(
-                            light,
-                            out Vector3 lightPosition,
-                            out Vector3 lightDirection))
+                        if (assigned < MaxDirectionalShadowMaps)
                         {
-                            for (int sm = 0; sm < MaxDirectionalSubshadowMaps; sm++)
+                            if (scene.Lights.GetDirectionalLightShadowParams(
+                                light,
+                                out Vector3 lightPosition,
+                                out Vector3 lightDirection))
                             {
-                                float distance = DirectionalShadowMapDistances[sm];
-
-                                var sph = new CullingVolumeSphere(this.DrawContext.EyePosition, distance);
-
-                                var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
-
-                                if (doShadows)
+                                for (int sm = 0; sm < MaxDirectionalSubshadowMaps; sm++)
                                 {
-                                    var fromLightVP = SceneLights.GetFromLightViewProjection(
-                                        lightPosition,
-                                        this.DrawContext.EyePosition,
-                                        distance);
+                                    float distance = DirectionalShadowMapDistances[sm];
 
-                                    light.ShadowMapIndex = assigned;
-                                    light.ShadowMapCount++;
-                                    light.FromLightVP[sm] = fromLightVP;
+                                    var sph = new CullingVolumeSphere(this.DrawContext.EyePosition, distance);
 
-                                    var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
+                                    var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
 
-                                    shadowMapper.FromLightViewProjectionArray[0] = fromLightVP;
-                                    shadowMapper.Bind(graphics, (l * MaxDirectionalSubshadowMaps) + sm);
+                                    if (doShadows)
+                                    {
+                                        var fromLightVP = SceneLights.GetFromLightViewProjection(
+                                            lightPosition,
+                                            this.DrawContext.EyePosition,
+                                            distance);
 
-                                    this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+                                        light.ShadowMapIndex = assigned;
+                                        light.ShadowMapCount++;
+                                        light.FromLightVP[sm] = fromLightVP;
+
+                                        var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
+
+                                        shadowMapper.FromLightViewProjectionArray[0] = fromLightVP;
+                                        shadowMapper.Bind(graphics, (l * MaxDirectionalSubshadowMaps) + sm);
+
+                                        this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+                                    }
+
+                                    cullIndex++;
                                 }
 
-                                cullIndex++;
+                                assigned++;
                             }
-
-                            assigned++;
                         }
                     }
                 }
@@ -396,38 +394,37 @@ namespace Engine.Common
                 {
                     var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
 
-                    uint assigned = 0;
+                    int assigned = 0;
 
                     for (int l = 0; l < shadowCastingLights.Length; l++)
                     {
-                        if (assigned >= MaxCubicShadows)
-                        {
-                            break;
-                        }
-
                         var light = shadowCastingLights[l];
+                        light.ShadowMapIndex = -1;
 
-                        var sph = new CullingVolumeSphere(light.Position, light.Radius);
-
-                        var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
-
-                        if (doShadows)
+                        if (assigned < MaxCubicShadows)
                         {
-                            light.ShadowMapIndex = assigned;
-                            var shadowMapper = this.ShadowMapperOmnidirectional;
-                            assigned++;
+                            var sph = new CullingVolumeSphere(light.Position, light.Radius);
 
-                            this.DrawShadowsContext.ShadowMap = shadowMapper;
+                            var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
 
-                            var vpArray = SceneLights.GetFromOmniLightViewProjection(light);
+                            if (doShadows)
+                            {
+                                light.ShadowMapIndex = assigned;
+                                var shadowMapper = this.ShadowMapperOmnidirectional;
+                                assigned++;
 
-                            shadowMapper.FromLightViewProjectionArray = vpArray;
-                            shadowMapper.Bind(graphics, l);
+                                this.DrawShadowsContext.ShadowMap = shadowMapper;
 
-                            this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+                                var vpArray = SceneLights.GetFromOmniLightViewProjection(light);
+
+                                shadowMapper.FromLightViewProjectionArray = vpArray;
+                                shadowMapper.Bind(graphics, l);
+
+                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+                            }
+
+                            cullIndex++;
                         }
-
-                        cullIndex++;
                     }
                 }
             }
@@ -454,47 +451,45 @@ namespace Engine.Common
                 {
                     var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
 
-                    uint assigned = 0;
+                    int assigned = 0;
 
                     for (int l = 0; l < shadowCastingLights.Length; l++)
                     {
-                        if (assigned >= MaxCubicShadows)
-                        {
-                            break;
-                        }
-
                         var light = shadowCastingLights[l];
-                        light.ShadowMapIndex = 0;
+                        light.ShadowMapIndex = -1;
                         light.ShadowMapCount = 0;
                         light.FromLightVP = new Matrix[1];
 
-                        var sph = new CullingVolumeSphere(light.Position, light.Radius);
-
-                        var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
-
-                        if (doShadows)
+                        if (assigned < MaxSpotShadows)
                         {
-                            light.ShadowMapIndex = assigned;
-                            light.ShadowMapCount = 1;
-                            var shadowMapper = this.ShadowMapperSpot;
-                            assigned++;
+                            var sph = new CullingVolumeSphere(light.Position, light.Radius);
 
-                            this.DrawShadowsContext.ShadowMap = shadowMapper;
+                            var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
 
-                            var vp = SceneLights.GetFromSpotLightViewProjection(
-                                light.Position,
-                                light.Direction,
-                                light.Radius);
+                            if (doShadows)
+                            {
+                                light.ShadowMapIndex = assigned;
+                                light.ShadowMapCount = 1;
+                                var shadowMapper = this.ShadowMapperSpot;
+                                assigned++;
 
-                            light.FromLightVP[0] = vp;
+                                this.DrawShadowsContext.ShadowMap = shadowMapper;
 
-                            shadowMapper.FromLightViewProjectionArray[0] = vp;
-                            shadowMapper.Bind(graphics, l);
+                                var vp = SceneLights.GetFromSpotLightViewProjection(
+                                    light.Position,
+                                    light.Direction,
+                                    light.Radius);
 
-                            this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+                                light.FromLightVP[0] = vp;
+
+                                shadowMapper.FromLightViewProjectionArray[0] = vp;
+                                shadowMapper.Bind(graphics, l);
+
+                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+                            }
+
+                            cullIndex++;
                         }
-
-                        cullIndex++;
                     }
                 }
             }
