@@ -173,9 +173,9 @@ namespace Engine
                 Direction = this.Direction,
                 Brightness = this.Brightness,
 
-                ParentTransform = this.ParentTransform,
-
                 initialDirection = this.initialDirection,
+
+                ParentTransform = this.ParentTransform,
             };
         }
     }

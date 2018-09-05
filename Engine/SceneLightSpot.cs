@@ -214,7 +214,7 @@ namespace Engine
         /// <returns>Returns a new instante with same data</returns>
         public override SceneLight Clone()
         {
-            var l = new SceneLightSpot()
+            return new SceneLightSpot()
             {
                 Name = this.Name,
                 Enabled = this.Enabled,
@@ -229,14 +229,12 @@ namespace Engine
                 Direction = this.Direction,
                 Intensity = this.Intensity,
 
-                ParentTransform = this.ParentTransform,
-
                 initialTransform = this.initialTransform,
                 initialRadius = this.initialRadius,
                 initialIntensity = this.initialIntensity,
-            };
 
-            return l;
+                ParentTransform = this.ParentTransform,
+            };
         }
     }
 }

@@ -701,7 +701,7 @@ namespace Engine
             }
             else
             {
-                if (this.DrawingData != null)
+                if (this.DrawingData.VolumeMesh != null)
                 {
                     return Triangle.Transform(this.DrawingData.VolumeMesh, this.Manipulator.LocalTransform);
                 }

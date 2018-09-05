@@ -37,7 +37,7 @@ namespace Engine.Common
         /// <summary>
         /// Maximum number of cubic shadow maps
         /// </summary>
-        protected const int MaxCubicShadows = 8;
+        protected const int MaxCubicShadows = 16;
 
         /// <summary>
         /// Spot light shadow map size
@@ -46,7 +46,7 @@ namespace Engine.Common
         /// <summary>
         /// Max spot shadows
         /// </summary>
-        protected const int MaxSpotShadows = 8;
+        protected const int MaxSpotShadows = 16;
 
         /// <summary>
         /// Cull index for drawing
