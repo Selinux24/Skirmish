@@ -1479,20 +1479,6 @@ namespace Terrain
             }
         }
 
-        private Vector3 GetRandomPoint(Random rnd, Vector3 offset)
-        {
-            var bbox = this.terrain.Instance.GetBoundingBox();
-
-            while (true)
-            {
-                Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
-
-                if (this.FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
-                {
-                    return r.Position + offset;
-                }
-            }
-        }
         private Curve3D GenerateHelicopterPath()
         {
             Curve3D curve = new Curve3D

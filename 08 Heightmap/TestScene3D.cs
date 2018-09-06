@@ -1,10 +1,14 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.Content;
+using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Heightmap
 {
@@ -80,6 +84,9 @@ namespace Heightmap
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
+        private readonly Dictionary<string, double> initDurationDict = new Dictionary<string, double>();
+        private int initDurationIndex = 0;
+
         public TestScene3D(Game game)
             : base(game, SceneModesEnum.ForwardLigthning)
         {
@@ -90,7 +97,56 @@ namespace Heightmap
         {
             base.Initialize();
 
-            Random rnd = new Random(1);
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
+            var taskUI = InitializeUI();
+            var taskRocks = InitializeRocks();
+            var taskTrees = InitializeTrees();
+            var taskTrees2 = InitializeTrees2();
+            var taskSoldier = InitializeSoldier();
+            var taskTroops = InitializeTroops();
+            var taskM24 = InitializeM24();
+            var taskHelicopter = InitializeHelicopter();
+            var taskTorchs = InitializeTorchs();
+            var taskTerrain = InitializeTerrain();
+            var taskGardener = InitializeGardener();
+            var taskGardener2 = InitializeGardener2();
+            var taskLensFlare = InitializeLensFlare();
+            var taskSkydom = InitializeSkydom();
+            var taskClouds = InitializeClouds();
+            var taskParticles = InitializeParticles();
+
+
+            initDurationDict.Add("UI", taskUI.Result);
+            initDurationDict.Add("Rocks", taskRocks.Result);
+            initDurationDict.Add("Trees", taskTrees.Result);
+            initDurationDict.Add("Trees2", taskTrees2.Result);
+            initDurationDict.Add("Soldier", taskSoldier.Result);
+            initDurationDict.Add("Troops", taskTroops.Result);
+            initDurationDict.Add("M24", taskM24.Result);
+            initDurationDict.Add("Helicopter", taskHelicopter.Result);
+            initDurationDict.Add("Torchs", taskTorchs.Result);
+            initDurationDict.Add("Terrain", taskTerrain.Result);
+            initDurationDict.Add("Gardener", taskGardener.Result);
+            initDurationDict.Add("Gardener2", taskGardener2.Result);
+            initDurationDict.Add("LensFlare", taskLensFlare.Result);
+            initDurationDict.Add("Skydom", taskSkydom.Result);
+            initDurationDict.Add("Clouds", taskClouds.Result);
+            initDurationDict.Add("Particles", taskParticles.Result);
+
+            sw.Stop();
+
+            initDurationDict.Add("TOTAL", sw.Elapsed.TotalSeconds);
+
+            initDurationIndex = initDurationDict.Keys.Count - 1;
+
+            SetLoadText(initDurationIndex);
+        }
+        private Task<double> InitializeUI()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
 
             #region Cursor
 
@@ -140,14 +196,12 @@ namespace Heightmap
 
             #endregion
 
-            #region Models
-
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeRocks()
+        {
             Stopwatch sw = Stopwatch.StartNew();
-
-            string loadingText = null;
-
-            #region Rocks
-
             sw.Restart();
             var rDesc = new ModelInstancedDescription()
             {
@@ -163,12 +217,12 @@ namespace Heightmap
             };
             this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsageEnum.None, layerObjects);
             sw.Stop();
-            loadingText += string.Format("Rocks: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            #region Trees
-
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeTrees()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
             var treeDesc = new ModelInstancedDescription()
             {
@@ -185,8 +239,12 @@ namespace Heightmap
             };
             this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsageEnum.None, layerTerrain);
             sw.Stop();
-            loadingText += string.Format("Trees: {0} ", sw.Elapsed.TotalSeconds);
 
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeTrees2()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
             var tree2Desc = new ModelInstancedDescription()
             {
@@ -203,11 +261,12 @@ namespace Heightmap
             };
             this.trees2 = this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsageEnum.None, layerTerrain);
             sw.Stop();
-            loadingText += string.Format("Trees2: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            #region Soldier
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeSoldier()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var sDesc = new ModelDescription()
@@ -223,15 +282,12 @@ namespace Heightmap
             };
             this.soldier = this.AddComponent<Model>(sDesc, SceneObjectUsageEnum.Agent, layerObjects);
             sw.Stop();
-            loadingText += string.Format("Soldier: {0} ", sw.Elapsed.TotalSeconds);
 
-            var sbbox = this.soldier.Instance.GetBoundingBox();
-
-            this.playerHeight.Y = sbbox.Maximum.Y - sbbox.Minimum.Y;
-
-            #endregion
-
-            #region Troops
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeTroops()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var tDesc = new ModelInstancedDescription()
@@ -247,11 +303,12 @@ namespace Heightmap
             };
             this.troops = this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsageEnum.Agent, layerObjects);
             sw.Stop();
-            loadingText += string.Format("Troops: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            #region M24
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeM24()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var mDesc = new ModelDescription()
@@ -266,11 +323,12 @@ namespace Heightmap
             };
             this.helicopter = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
             sw.Stop();
-            loadingText += string.Format("M24: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            #region Helicopter
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeHelicopter()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var hcDesc = new ModelDescription()
@@ -287,11 +345,12 @@ namespace Heightmap
             };
             this.helicopter2 = this.AddComponent<Model>(hcDesc, SceneObjectUsageEnum.None, layerObjects);
             sw.Stop();
-            loadingText += string.Format("Helicopter: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            #region Torchs
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeTorchs()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var tcDesc = new ModelInstancedDescription()
@@ -307,12 +366,14 @@ namespace Heightmap
             };
             this.torchs = this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsageEnum.None, layerObjects);
             sw.Stop();
-            loadingText += string.Format("Torchs: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeParticles()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
-            #region Particle Systems
-
+            sw.Restart();
             this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }, SceneObjectUsageEnum.None, layerEffects);
 
             this.pFire = ParticleSystemDescription.InitializeFire("resources/particles", "fire.png", 0.5f);
@@ -326,10 +387,13 @@ namespace Heightmap
             this.pDust.MaxColor = new Color(Color.SandyBrown.ToColor3(), 0.10f);
             this.pDust.MinEndSize = 2f;
             this.pDust.MaxEndSize = 20f;
+            sw.Stop();
 
-            #endregion
-
-            #region Terrain
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeTerrain()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var hDesc = new HeightmapDescription()
@@ -378,11 +442,12 @@ namespace Heightmap
             };
             this.terrain = this.AddComponent<Terrain>(gDesc, SceneObjectUsageEnum.None, layerTerrain);
             sw.Stop();
-            loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            #region Gardener
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeGardener()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var vDesc = new GroundGardenerDescription()
@@ -435,11 +500,12 @@ namespace Heightmap
             };
             this.gardener = this.AddComponent<GroundGardener>(vDesc, SceneObjectUsageEnum.None, layerFoliage);
             sw.Stop();
-            loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            #region Gardener 2
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeGardener2()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var vDesc2 = new GroundGardenerDescription()
@@ -483,11 +549,12 @@ namespace Heightmap
             };
             this.gardener2 = this.AddComponent<GroundGardener>(vDesc2, SceneObjectUsageEnum.None, layerFoliage);
             sw.Stop();
-            loadingText += string.Format("gardener2: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            #region Lens flare
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeLensFlare()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var lfDesc = new LensFlareDescription()
@@ -513,11 +580,12 @@ namespace Heightmap
             };
             this.lensFlare = this.AddComponent<LensFlare>(lfDesc, SceneObjectUsageEnum.None, layerEffects);
             sw.Stop();
-            loadingText += string.Format("Flares: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            #region Skydom
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeSkydom()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var skDesc = new SkyScatteringDescription()
@@ -526,11 +594,12 @@ namespace Heightmap
             };
             this.skydom = this.AddComponent<SkyScattering>(skDesc);
             sw.Stop();
-            loadingText += string.Format("Sky: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            #region Clouds
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeClouds()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
             var scDesc = new SkyPlaneDescription()
@@ -544,31 +613,47 @@ namespace Heightmap
             };
             this.clouds = this.AddComponent<SkyPlane>(scDesc);
             sw.Stop();
-            loadingText += string.Format("Clouds: {0} ", sw.Elapsed.TotalSeconds);
 
-            #endregion
-
-            this.load.Instance.Text = loadingText;
-
-            #endregion
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
 
         public override void Initialized()
         {
             base.Initialized();
 
-            this.SetGround(this.terrain, true);
+            var taskPathfinding = Task.Run(() => SetPathFindingInfo());
+            var taskAnimations = Task.Run(() => SetAnimationDictionaries());
+            var taskPositioning = Task.Run(() => SetPositionOverTerrain());
+            var taskDebugInfo = Task.Run(() => SetDebugInfo());
 
-            //var pfSettings = NavigationMeshGenerationSettings.Default;
-            //pfSettings.CellHeight = 5f;
-            //pfSettings.CellSize = 5f;
-            //this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription()
-            //{
-            //    Settings = pfSettings,
-            //};
+            this.Camera.NearPlaneDistance = near;
+            this.Camera.FarPlaneDistance = far;
+            this.Camera.Position = new Vector3(24, 12, 14);
+            this.Camera.Interest = new Vector3(0, 10, 0);
+            this.Camera.MovementDelta = 45f;
+            this.Camera.SlowMovementDelta = 20f;
 
-            #region Animations
+            this.skydom.Instance.RayleighScattering *= 0.8f;
+            this.skydom.Instance.MieScattering *= 0.1f;
 
+            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 55, 00), 1f);
+
+            this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
+            this.ToggleFog();
+
+            this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, this.Camera.Position, this.Camera.Direction, 25f, 100, 1000);
+            this.Lights.Add(this.lantern);
+
+            Task.WaitAll(new[]
+            {
+                taskPathfinding,
+                taskAnimations,
+                taskPositioning,
+                taskDebugInfo,
+            });
+        }
+        private void SetAnimationDictionaries()
+        {
             var hp = new AnimationPath();
             hp.AddLoop("roll");
             this.animations.Add("heli_default", new AnimationPlan(hp));
@@ -580,14 +665,14 @@ namespace Heightmap
             var sp1 = new AnimationPath();
             sp1.AddLoop("idle1");
             this.animations.Add("soldier_idle", new AnimationPlan(sp1));
-
-            #endregion
-
-            #region Positioning
-
+        }
+        private void SetPositionOverTerrain()
+        {
             Random posRnd = new Random(1024);
 
             BoundingBox bbox = this.terrain.Instance.GetBoundingBox();
+
+            this.SetGround(this.terrain, true);
 
             {
                 #region Rocks
@@ -660,6 +745,10 @@ namespace Heightmap
 
                 #endregion
             }
+
+            this.AttachToGround(this.rocks, false);
+            this.AttachToGround(this.trees, false);
+            this.AttachToGround(this.trees2, false);
 
             {
                 #region Torchs
@@ -744,6 +833,8 @@ namespace Heightmap
                 #endregion
             }
 
+            this.AttachToGround(this.torchs, false);
+
             //M24
             {
                 if (this.FindTopGroundPosition(100, 50, out PickingResult<Triangle> r))
@@ -752,6 +843,8 @@ namespace Heightmap
                     this.helicopter.Transform.SetRotation(MathUtil.Pi / 5f, 0, 0, true);
                 }
             }
+
+            this.AttachToGround(this.helicopter, false);
 
             //Helicopter
             {
@@ -767,9 +860,7 @@ namespace Heightmap
                 this.helicopter2.Instance.AnimationController.Start();
             }
 
-            //this.terrain.Instance.AttachFullPathFinding(new ModelBase[] { this.helicopter, this.helicopter2 }, false);
-            //this.terrain.Instance.AttachCoarsePathFinding(new ModelBase[] { this.torchs, this.rocks, this.trees, this.trees2 }, false);
-            //this.terrain.Instance.UpdateInternals();
+            this.AttachToGround(this.helicopter2, false);
 
             //Player soldier
             {
@@ -806,29 +897,9 @@ namespace Heightmap
                     }
                 }
             }
-
-            #endregion
-
-            this.Camera.NearPlaneDistance = near;
-            this.Camera.FarPlaneDistance = far;
-            this.Camera.Position = new Vector3(24, 12, 14);
-            this.Camera.Interest = new Vector3(0, 10, 0);
-            this.Camera.MovementDelta = 45f;
-            this.Camera.SlowMovementDelta = 20f;
-
-            this.skydom.Instance.RayleighScattering *= 0.8f;
-            this.skydom.Instance.MieScattering *= 0.1f;
-
-            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 55, 00), 1f);
-
-            this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
-            this.ToggleFog();
-
-            this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, this.Camera.Position, this.Camera.Direction, 25f, 100, 1000);
-            this.Lights.Add(this.lantern);
-
-            #region Debug
-
+        }
+        private void SetDebugInfo()
+        {
             var bboxes = this.terrain.Instance.GetBoundingBoxes(5);
             var listBoxes = Line3D.CreateWiredBox(bboxes);
 
@@ -843,8 +914,51 @@ namespace Heightmap
             };
             this.bboxesDrawer = this.AddComponent<LineListDrawer>(bboxesDrawerDesc);
             this.bboxesDrawer.Visible = false;
+        }
+        private void SetPathFindingInfo()
+        {
+            //Player height
+            var sbbox = this.soldier.Instance.GetBoundingBox();
+            this.playerHeight.Y = sbbox.Maximum.Y - sbbox.Minimum.Y;
+            var agent = new Agent()
+            {
+                Name = "Soldier",
+                Height = this.playerHeight.Y,
+                Radius = this.playerHeight.Y * 0.33f,
+                MaxClimb = this.playerHeight.Y * 0.5f,
+                MaxSlope = 45,
+            };
 
-            #endregion
+            //Navigation settings
+            var nmsettings = BuildSettings.Default;
+
+            //Rasterization
+            nmsettings.CellSize = 0.2f;
+            nmsettings.CellHeight = 0.15f;
+
+            //Agents
+            nmsettings.Agents = new[] { agent };
+
+            //Partitioning
+            nmsettings.PartitionType = SamplePartitionTypeEnum.Watershed;
+
+            //Polygonization
+            nmsettings.EdgeMaxError = 1.0f;
+
+            //Tiling
+            nmsettings.BuildMode = BuildModesEnum.TempObstacles;
+            nmsettings.TileSize = 16;
+
+            nmsettings.NavmeshBounds = new BoundingBox(sbbox.Minimum * 100f, sbbox.Maximum * 100f);
+
+            var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
+        }
+        private void ToggleFog()
+        {
+            this.Lights.FogStart = this.Lights.FogStart == 0f ? fogStart : 0f;
+            this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
         }
 
         public override void Update(GameTime gameTime)
@@ -854,30 +968,64 @@ namespace Heightmap
                 this.Game.Exit();
             }
 
-            Ray cursorRay = this.GetPickingRay();
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
+                    SceneModesEnum.DeferredLightning :
+                    SceneModesEnum.ForwardLigthning);
+            }
+
+            base.Update(gameTime);
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
-            #region Walk / Fly
+            //Input driven
+            UpdateCamera(gameTime, shift);
+            UpdatePlayer();
+            UpdateDebugInfo(gameTime);
 
+            //Auto
+            UpdateLights(gameTime);
+            UpdateWind(gameTime);
+            UpdateDust(gameTime);
+
+            this.help.Instance.Text = string.Format(
+                "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00};",
+                this.Renderer,
+                this.windDirection, this.windStrength, this.windNextStrength,
+                this.TimeOfDay,
+                this.Lights.KeyLight.Brightness);
+
+            this.help2.Instance.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}",
+                Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
+                Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime,
+                this.gardener.Instance.PlantingTasks + this.gardener2.Instance.PlantingTasks);
+        }
+        private void UpdatePlayer()
+        {
             if (this.Game.Input.KeyJustReleased(Keys.P))
             {
                 this.playerFlying = !this.playerFlying;
 
                 if (this.playerFlying)
                 {
-                    this.Fly();
+                    this.Camera.Following = null;
                 }
                 else
                 {
-                    this.Walk();
+                    var offset = (this.playerHeight * 1.2f) + (Vector3.ForwardLH * 10f) + (Vector3.Left * 3f);
+                    var view = (Vector3.BackwardLH * 4f) + Vector3.Down;
+                    this.Camera.Following = new CameraFollower(this.soldier.Transform, offset, view);
                 }
             }
 
-            #endregion
-
-            #region Camera
-
+            if (this.Game.Input.KeyJustReleased(Keys.L))
+            {
+                this.lantern.Enabled = !this.lantern.Enabled;
+            }
+        }
+        private void UpdateCamera(GameTime gameTime, bool shift)
+        {
             if (this.playerFlying)
             {
 #if DEBUG
@@ -948,20 +1096,10 @@ namespace Heightmap
                     this.soldier.Transform.SetPosition(r.Position);
                 };
             }
-
-            #endregion
-
+        }
+        private void UpdateDebugInfo(GameTime gameTime)
+        {
             #region Wind
-
-            this.windDuration += gameTime.ElapsedSeconds;
-            if (this.windDuration > 10)
-            {
-                this.windDuration = 0;
-
-                this.windNextStrength = this.windStrength + this.rnd.NextFloat(-0.5f, +0.5f);
-                if (this.windNextStrength > 100f) this.windNextStrength = 100f;
-                if (this.windNextStrength < 0f) this.windNextStrength = 0f;
-            }
 
             if (this.Game.Input.KeyPressed(Keys.Add))
             {
@@ -975,96 +1113,9 @@ namespace Heightmap
                 if (this.windStrength < 0f) this.windStrength = 0f;
             }
 
-            if (this.windNextStrength < this.windStrength)
-            {
-                this.windStrength -= this.windStep;
-                if (this.windNextStrength > this.windStrength) this.windStrength = this.windNextStrength;
-            }
-            if (this.windNextStrength > this.windStrength)
-            {
-                this.windStrength += this.windStep;
-                if (this.windNextStrength < this.windStrength) this.windStrength = this.windNextStrength;
-            }
-
-            this.gardener.Instance.SetWind(this.windDirection, this.windStrength);
-            this.gardener2.Instance.SetWind(this.windDirection, this.windStrength);
-
             #endregion
 
-            #region Particles
-
-            this.nextDust -= gameTime.ElapsedSeconds;
-
-            if (this.nextDust <= 0)
-            {
-                this.nextDust = this.dustTime;
-
-                var hbsph = this.helicopter2.Instance.GetBoundingSphere();
-                hbsph.Radius *= 0.8f;
-
-                this.GenerateDust(this.rnd, hbsph);
-                this.GenerateDust(this.rnd, hbsph);
-                this.GenerateDust(this.rnd, hbsph);
-            }
-
-            #endregion
-
-            #region Lights
-
-            {
-                float d = 1f;
-                float v = 5f;
-
-                var x = d * (float)Math.Cos(v * this.Game.GameTime.TotalSeconds);
-                var z = d * (float)Math.Sin(v * this.Game.GameTime.TotalSeconds);
-
-                this.spotLight1.Direction = Vector3.Normalize(new Vector3(x, -1, z));
-                this.spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.R))
-            {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F))
-            {
-                this.ToggleFog();
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.G))
-            {
-                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.L))
-            {
-                this.lantern.Enabled = !this.lantern.Enabled;
-            }
-
-            if (this.lantern.Enabled)
-            {
-                this.lantern.Position = this.Camera.Position;
-                this.lantern.Direction = this.Camera.Direction;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Left))
-            {
-                this.time -= gameTime.ElapsedSeconds * 0.1f;
-                this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Right))
-            {
-                this.time += gameTime.ElapsedSeconds * 0.1f;
-                this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
-            }
-
-            #endregion
-
-            #region Debug
+            #region Drawers
 
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
@@ -1124,70 +1175,100 @@ namespace Heightmap
 
             #endregion
 
-            base.Update(gameTime);
+            #region Lights
 
-            this.help.Instance.Text = string.Format(
-                "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00};",
-                this.Renderer,
-                this.windDirection, this.windStrength, this.windNextStrength,
-                this.TimeOfDay,
-                this.Lights.KeyLight.Brightness);
-
-            this.help2.Instance.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}",
-                Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
-                Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime,
-                this.gardener.Instance.PlantingTasks + this.gardener2.Instance.PlantingTasks);
-        }
-
-        public override void Draw(GameTime gameTime)
-        {
-            base.Draw(gameTime);
-
-            this.stats.Instance.Text = this.Game.RuntimeText;
-        }
-
-        private void Fly()
-        {
-            this.Camera.Following = null;
-        }
-        private void Walk()
-        {
-            var offset = (this.playerHeight * 1.2f) + (Vector3.ForwardLH * 10f) + (Vector3.Left * 3f);
-            var view = (Vector3.BackwardLH * 4f) + Vector3.Down;
-            this.Camera.Following = new CameraFollower(this.soldier.Transform, offset, view);
-        }
-        private void ToggleFog()
-        {
-            this.Lights.FogStart = this.Lights.FogStart == 0f ? fogStart : 0f;
-            this.Lights.FogRange = this.Lights.FogRange == 0f ? fogRange : 0f;
-        }
-
-        private Vector3 GetRandomPoint(Random rnd, Vector3 offset, BoundingBox bbox)
-        {
-            while (true)
+            if (this.Game.Input.KeyJustReleased(Keys.G))
             {
-                Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
-
-                if (this.FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
-                {
-                    return r.Position + offset;
-                }
+                this.Lights.KeyLight.CastShadow = !this.Lights.KeyLight.CastShadow;
             }
-        }
-        private Vector3 GetRandomPoint(Random rnd, Vector3 offset, BoundingSphere bsph)
-        {
-            while (true)
+
+            #endregion
+
+            #region Fog
+
+            if (this.Game.Input.KeyJustReleased(Keys.F))
             {
-                float dist = rnd.NextFloat(0, bsph.Radius);
+                this.ToggleFog();
+            }
 
-                Vector3 dir = new Vector3(rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1));
+            #endregion
 
-                Vector3 v = bsph.Center + (dist * Vector3.Normalize(dir));
+            #region Time of day
 
-                if (this.FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
-                {
-                    return r.Position + offset;
-                }
+            if (this.Game.Input.KeyPressed(Keys.Left))
+            {
+                this.time -= gameTime.ElapsedSeconds * 0.1f;
+                this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Right))
+            {
+                this.time += gameTime.ElapsedSeconds * 0.1f;
+                this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
+            }
+
+            #endregion
+
+            #region Load duration index
+
+            if (this.Game.Input.KeyJustReleased(Keys.Up))
+            {
+                initDurationIndex++;
+                initDurationIndex = initDurationIndex < 0 ? 0 : initDurationIndex;
+                initDurationIndex %= initDurationDict.Keys.Count;
+                SetLoadText(initDurationIndex);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Down))
+            {
+                initDurationIndex--;
+                initDurationIndex = initDurationIndex < 0 ? initDurationDict.Keys.Count - 1 : initDurationIndex;
+                initDurationIndex %= initDurationDict.Keys.Count;
+                SetLoadText(initDurationIndex);
+            }
+
+            #endregion
+        }
+        private void UpdateWind(GameTime gameTime)
+        {
+            this.windDuration += gameTime.ElapsedSeconds;
+            if (this.windDuration > 10)
+            {
+                this.windDuration = 0;
+
+                this.windNextStrength = this.windStrength + this.rnd.NextFloat(-0.5f, +0.5f);
+                if (this.windNextStrength > 100f) this.windNextStrength = 100f;
+                if (this.windNextStrength < 0f) this.windNextStrength = 0f;
+            }
+
+            if (this.windNextStrength < this.windStrength)
+            {
+                this.windStrength -= this.windStep;
+                if (this.windNextStrength > this.windStrength) this.windStrength = this.windNextStrength;
+            }
+            if (this.windNextStrength > this.windStrength)
+            {
+                this.windStrength += this.windStep;
+                if (this.windNextStrength < this.windStrength) this.windStrength = this.windNextStrength;
+            }
+
+            this.gardener.Instance.SetWind(this.windDirection, this.windStrength);
+            this.gardener2.Instance.SetWind(this.windDirection, this.windStrength);
+        }
+        private void UpdateDust(GameTime gameTime)
+        {
+            this.nextDust -= gameTime.ElapsedSeconds;
+
+            if (this.nextDust <= 0)
+            {
+                this.nextDust = this.dustTime;
+
+                var hbsph = this.helicopter2.Instance.GetBoundingSphere();
+                hbsph.Radius *= 0.8f;
+
+                this.GenerateDust(this.rnd, hbsph);
+                this.GenerateDust(this.rnd, hbsph);
+                this.GenerateDust(this.rnd, hbsph);
             }
         }
         private void GenerateDust(Random rnd, BoundingSphere bsph)
@@ -1207,6 +1288,40 @@ namespace Heightmap
             this.pDust.Gravity = (this.windStrength * this.windDirection);
 
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
+        }
+        private void UpdateLights(GameTime gameTime)
+        {
+            {
+                float d = 1f;
+                float v = 5f;
+
+                var x = d * (float)Math.Cos(v * this.Game.GameTime.TotalSeconds);
+                var z = d * (float)Math.Sin(v * this.Game.GameTime.TotalSeconds);
+
+                this.spotLight1.Direction = Vector3.Normalize(new Vector3(x, -1, z));
+                this.spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
+            }
+
+            if (this.lantern.Enabled)
+            {
+                this.lantern.Position = this.Camera.Position + this.Camera.Left;
+                this.lantern.Direction = this.Camera.Direction;
+            }
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            base.Draw(gameTime);
+
+            this.stats.Instance.Text = this.Game.RuntimeText;
+        }
+        private void SetLoadText(int index)
+        {
+            var keys = initDurationDict.Keys.ToArray();
+            if (index >= 0 && index < keys.Length)
+            {
+                this.load.Instance.Text = string.Format("{0}: {1}", keys[index], initDurationDict[keys[index]]);
+            }
         }
     }
 }

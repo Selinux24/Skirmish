@@ -1584,5 +1584,58 @@ namespace Engine
 
             this.NavigationGraph.UpdateAt(position);
         }
+
+        /// <summary>
+        /// Gets a random point over the ground
+        /// </summary>
+        /// <param name="rnd">Random instance</param>
+        /// <param name="offset">Search offset</param>
+        /// <returns>Returns a position over the ground</returns>
+        public Vector3 GetRandomPoint(Random rnd, Vector3 offset)
+        {
+            return GetRandomPoint(rnd, offset, this.boundingBox);
+        }
+        /// <summary>
+        /// Gets a random point over the ground
+        /// </summary>
+        /// <param name="rnd">Random instance</param>
+        /// <param name="offset">Search offset</param>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns a position over the ground</returns>
+        public Vector3 GetRandomPoint(Random rnd, Vector3 offset, BoundingBox bbox)
+        {
+            while (true)
+            {
+                Vector3 v = rnd.NextVector3(bbox.Minimum * 0.9f, bbox.Maximum * 0.9f);
+
+                if (this.FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
+                {
+                    return r.Position + offset;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets a random point over the ground
+        /// </summary>
+        /// <param name="rnd">Random instance</param>
+        /// <param name="offset">Search offset</param>
+        /// <param name="bsph">Bounding sphere</param>
+        /// <returns>Returns a position over the ground</returns>
+        public Vector3 GetRandomPoint(Random rnd, Vector3 offset, BoundingSphere bsph)
+        {
+            while (true)
+            {
+                float dist = rnd.NextFloat(0, bsph.Radius);
+
+                Vector3 dir = new Vector3(rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1));
+
+                Vector3 v = bsph.Center + (dist * Vector3.Normalize(dir));
+
+                if (this.FindTopGroundPosition(v.X, v.Z, out PickingResult<Triangle> r))
+                {
+                    return r.Position + offset;
+                }
+            }
+        }
     }
 }
