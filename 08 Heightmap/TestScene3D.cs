@@ -55,6 +55,7 @@ namespace Heightmap
         private SceneObject<GroundGardener> gardener = null;
         private SceneObject<GroundGardener> gardener2 = null;
         private SceneObject<LineListDrawer> bboxesDrawer = null;
+        private SceneObject<LineListDrawer> linesDrawer = null;
 
         private SceneObject<ModelInstanced> torchs = null;
         private SceneLightPoint[] torchLights = null;
@@ -117,7 +118,6 @@ namespace Heightmap
             var taskClouds = InitializeClouds();
             var taskParticles = InitializeParticles();
 
-
             initDurationDict.Add("UI", taskUI.Result);
             initDurationDict.Add("Rocks", taskRocks.Result);
             initDurationDict.Add("Trees", taskTrees.Result);
@@ -137,9 +137,10 @@ namespace Heightmap
 
             sw.Stop();
 
-            initDurationDict.Add("TOTAL", sw.Elapsed.TotalSeconds);
+            initDurationDict.Add("TOTAL", initDurationDict.Select(i => i.Value).Sum());
+            initDurationDict.Add("REAL", sw.Elapsed.TotalSeconds);
 
-            initDurationIndex = initDurationDict.Keys.Count - 1;
+            initDurationIndex = initDurationDict.Keys.Count - 2;
 
             SetLoadText(initDurationIndex);
         }
@@ -357,7 +358,7 @@ namespace Heightmap
             {
                 Name = "Torchs",
                 Instances = 50,
-                CastShadow = true,
+                CastShadow = false,
                 Content = new ContentDescription()
                 {
                     ContentFolder = @"Resources/Scenery/Objects",
@@ -759,9 +760,9 @@ namespace Heightmap
 
                     this.torchs.Instance[0].Manipulator.SetScale(1f, 1f, 1f, true);
                     this.torchs.Instance[0].Manipulator.SetPosition(position, true);
-                    BoundingBox tbbox = this.torchs.Instance[0].GetBoundingBox();
+                    var tbbox = this.torchs.Instance[0].GetBoundingBox();
 
-                    position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
+                    position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y);
 
                     this.spotLight1 = new SceneLightSpot(
                         "Red Spot",
@@ -900,20 +901,32 @@ namespace Heightmap
         }
         private void SetDebugInfo()
         {
-            var bboxes = this.terrain.Instance.GetBoundingBoxes(5);
-            var listBoxes = Line3D.CreateWiredBox(bboxes);
-
-            var bboxesDrawerDesc = new LineListDrawerDescription()
             {
-                Name = "DEBUG++ Terrain nodes bounding boxes",
-                AlphaEnabled = true,
-                DepthEnabled = true,
-                Dynamic = true,
-                Color = new Color4(1.0f, 0.0f, 0.0f, 0.55f),
-                Lines = listBoxes,
-            };
-            this.bboxesDrawer = this.AddComponent<LineListDrawer>(bboxesDrawerDesc);
-            this.bboxesDrawer.Visible = false;
+                var bboxes = this.terrain.Instance.GetBoundingBoxes(5);
+                var listBoxes = Line3D.CreateWiredBox(bboxes);
+
+                var desc = new LineListDrawerDescription()
+                {
+                    Name = "DEBUG++ Terrain nodes bounding boxes",
+                    AlphaEnabled = true,
+                    DepthEnabled = true,
+                    Dynamic = true,
+                    Color = new Color4(1.0f, 0.0f, 0.0f, 0.55f),
+                    Lines = listBoxes,
+                };
+                this.bboxesDrawer = this.AddComponent<LineListDrawer>(desc);
+                this.bboxesDrawer.Visible = false;
+            }
+
+            {
+                var desc = new LineListDrawerDescription()
+                {
+                    DepthEnabled = true,
+                    Count = 1000,
+                };
+                this.linesDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);
+                this.linesDrawer.Visible = false;
+            }
         }
         private void SetPathFindingInfo()
         {
@@ -1180,6 +1193,12 @@ namespace Heightmap
             if (this.Game.Input.KeyJustReleased(Keys.G))
             {
                 this.Lights.KeyLight.CastShadow = !this.Lights.KeyLight.CastShadow;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                this.linesDrawer.Instance.SetLines(Color.LightPink, this.lantern.GetVolume(10));
+                this.linesDrawer.Visible = true;
             }
 
             #endregion

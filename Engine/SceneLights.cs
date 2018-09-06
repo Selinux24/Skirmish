@@ -259,7 +259,7 @@ namespace Engine
         public static Matrix[] GetFromOmniLightViewProjection(ISceneLightOmnidirectional light)
         {
             // Orthogonal projection from center
-            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, light.Radius);
+            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 1f, light.Radius);
 
             return new Matrix[]
             {
@@ -292,7 +292,7 @@ namespace Engine
         /// <returns>Returns the spot light from light view matrix</returns>
         public static Matrix GetFromSpotLightViewProjection(Vector3 lightPosition, Vector3 direction, float radius)
         {
-            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, radius);
+            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 1f, radius);
 
             // View from light to scene center position
             return Matrix.LookAtLH(lightPosition, lightPosition + direction, Vector3.Up) * projection;

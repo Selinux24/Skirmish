@@ -94,7 +94,7 @@ inline float CalcShadowFactor(float3 pPosition, int mapIndex, uint mapCount, flo
 {
     if (mapCount <= 0 || samples <= 0)
     {
-        return 0.0f;
+        return 1.0f;
     }
 
     float shadow = 0.0f;
@@ -128,7 +128,7 @@ inline float CalcShadowFactor(float3 pPosition, int mapIndex, float4x4 fromLight
 {
     if (samples <= 0)
     {
-        return 0.0f;
+        return 1.0f;
     }
 
 	float shadow = 0.0f;
