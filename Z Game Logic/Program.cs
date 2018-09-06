@@ -1,5 +1,7 @@
 ﻿using Engine;
 using SharpDX;
+using System;
+using System.IO;
 
 namespace GameLogic
 {
@@ -9,20 +11,27 @@ namespace GameLogic
 
         static void Main()
         {
-#if DEBUG
-            using (game = new Game("Game Logic", false, 1600, 900, true, 0, 0))
-#else
-            using (game = new Game("Game Logic", true, 0, 0, true, 0, 0))
-#endif
+            try
             {
-                game.VisibleMouse = true;
-                game.LockMouse = false;
+#if DEBUG
+                using (game = new Game("Game Logic", false, 1600, 900, true, 0, 0))
+#else
+                using (game = new Game("Game Logic", true, 0, 0, true, 0, 4))
+#endif
+                {
+                    game.VisibleMouse = true;
+                    game.LockMouse = false;
 
-                GameEnvironment.Background = Color.CornflowerBlue;
+                    GameEnvironment.Background = Color.CornflowerBlue;
 
-                game.AddScene<SceneObjects>();
+                    game.AddScene<SceneObjects>();
 
-                game.Run();
+                    game.Run();
+                }
+            }
+            catch (Exception ex)
+            {
+                File.WriteAllText("dump.txt", ex.ToString());
             }
         }
     }
