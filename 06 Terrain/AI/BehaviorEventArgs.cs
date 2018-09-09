@@ -2,11 +2,25 @@
 
 namespace Terrain.AI
 {
+    /// <summary>
+    /// Base behavior events args
+    /// </summary>
     public class BehaviorEventArgs : EventArgs
     {
+        /// <summary>
+        /// Active agent
+        /// </summary>
         public AIAgent Active;
+        /// <summary>
+        /// Passive agent
+        /// </summary>
         public AIAgent Passive;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="active">Active agent</param>
+        /// <param name="passive">Passive agent</param>
         public BehaviorEventArgs(AIAgent active, AIAgent passive)
         {
             this.Active = active;

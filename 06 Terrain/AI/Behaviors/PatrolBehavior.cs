@@ -3,14 +3,35 @@ using SharpDX;
 
 namespace Terrain.AI.Behaviors
 {
+    /// <summary>
+    /// Patrolling behavior
+    /// </summary>
     public class PatrolBehavior : Behavior
     {
+        /// <summary>
+        /// Patrol check points
+        /// </summary>
         private Vector3[] checkPoints = null;
+        /// <summary>
+        /// Current check point index
+        /// </summary>
         private int currentCheckPoint = -1;
+        /// <summary>
+        /// Time to wait in the check point
+        /// </summary>
         private float checkPointTime;
+        /// <summary>
+        /// Last check point time
+        /// </summary>
         private float lastCheckPointTime = 0;
+        /// <summary>
+        /// Patrolling velocity
+        /// </summary>
         private float patrollVelocity;
 
+        /// <summary>
+        /// Gets the target position
+        /// </summary>
         public override Vector3? Target
         {
             get
@@ -24,11 +45,21 @@ namespace Terrain.AI.Behaviors
             }
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="agent">Agent</param>
         public PatrolBehavior(AIAgent agent) : base(agent)
         {
 
         }
 
+        /// <summary>
+        /// Initializes the behavior
+        /// </summary>
+        /// <param name="checkPoints">Check point list</param>
+        /// <param name="checkPointTime">Time to wait in the check point</param>
+        /// <param name="patrolVelocity">Velocity</param>
         public void InitPatrollingBehavior(Vector3[] checkPoints, float checkPointTime, float patrolVelocity)
         {
             this.checkPoints = checkPoints;
@@ -38,6 +69,11 @@ namespace Terrain.AI.Behaviors
             this.patrollVelocity = patrolVelocity;
         }
 
+        /// <summary>
+        /// Tests wether the current behavior can be executed
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <returns>Returns true if the behavior can be executed</returns>
         public override bool Test(GameTime gameTime)
         {
             if (this.checkPoints != null && this.checkPoints.Length > 0)
@@ -47,7 +83,10 @@ namespace Terrain.AI.Behaviors
 
             return false;
         }
-
+        /// <summary>
+        /// Executes the behavior task
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Task(GameTime gameTime)
         {
             bool navigate = false;

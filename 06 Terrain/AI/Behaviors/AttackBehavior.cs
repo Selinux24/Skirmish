@@ -3,13 +3,31 @@ using SharpDX;
 
 namespace Terrain.AI.Behaviors
 {
+    /// <summary>
+    /// Attack behavior
+    /// </summary>
     public class AttackBehavior : Behavior
     {
+        /// <summary>
+        /// Target
+        /// </summary>
         private AIAgent attackTarget;
+        /// <summary>
+        /// Target position
+        /// </summary>
         private Vector3? attackPosition = null;
+        /// <summary>
+        /// Attack velocity
+        /// </summary>
         private float attackVelocity;
+        /// <summary>
+        /// Attacking delta distance
+        /// </summary>
         private float attakingDeltaDistance = 10;
 
+        /// <summary>
+        /// Gets the target position
+        /// </summary>
         public override Vector3? Target
         {
             get
@@ -18,11 +36,20 @@ namespace Terrain.AI.Behaviors
             }
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="agent">Agent</param>
         public AttackBehavior(AIAgent agent) : base(agent)
         {
 
         }
 
+        /// <summary>
+        /// Initilializes the behavior
+        /// </summary>
+        /// <param name="attackVelocity">Velocity</param>
+        /// <param name="attakingDeltaDistance">Delta</param>
         public void InitAttackingBehavior(float attackVelocity, float attakingDeltaDistance)
         {
             this.attackTarget = null;
@@ -31,22 +58,36 @@ namespace Terrain.AI.Behaviors
             this.attakingDeltaDistance = attakingDeltaDistance;
         }
 
+        /// <summary>
+        /// Tests wether the current behavior can be executed
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <returns>Returns true if the behavior can be executed</returns>
         public override bool Test(GameTime gameTime)
         {
             bool res = false;
 
             if (this.attackTarget != null)
             {
-                if (this.attackTarget.Status.Life <= 0)
+                if (this.attackTarget.Stats.Life <= 0)
                 {
                     this.attackTarget = null;
                     this.attackPosition = null;
                     return false;
                 }
 
-                if (this.Agent.EnemyOnSight(this.attackTarget))
+                var onSight = this.Agent.EnemyOnSight(this.attackTarget);
+                if (onSight)
                 {
-                    return !this.Agent.IsHardEnemy(this.attackTarget);
+                    var onRange = this.Agent.EnemyOnAttackRange(this.attackTarget);
+                    if (onRange)
+                    {
+                        return !this.Agent.IsHardEnemy(this.attackTarget);
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
 
@@ -67,11 +108,17 @@ namespace Terrain.AI.Behaviors
 
             return res;
         }
-
+        /// <summary>
+        /// Executes the behavior task
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public override void Task(GameTime gameTime)
         {
             if (this.attackTarget != null)
             {
+                bool onSight = this.Agent.EnemyOnSight(this.attackTarget);
+                bool onRange = !onSight ? false : this.Agent.EnemyOnAttackRange(this.attackTarget);
+
                 if (!this.attackPosition.HasValue)
                 {
                     this.attackPosition = this.attackTarget.Manipulator.Position;
@@ -79,14 +126,11 @@ namespace Terrain.AI.Behaviors
                 else
                 {
                     float d = Vector3.Distance(this.attackTarget.Manipulator.Position, this.attackPosition.Value);
-                    if (d > this.attakingDeltaDistance)
+                    if (d > this.attakingDeltaDistance || !onSight || !onRange)
                     {
                         this.attackPosition = this.attackTarget.Manipulator.Position;
                     }
                 }
-
-                bool onSight = this.Agent.EnemyOnSight(this.attackTarget);
-                bool onRange = !onSight ? false : this.Agent.EnemyOnAttackRange(this.attackTarget);
 
                 if (!onRange)
                 {
@@ -108,6 +152,10 @@ namespace Terrain.AI.Behaviors
             }
         }
 
+        /// <summary>
+        /// Sets the attakcing target
+        /// </summary>
+        /// <param name="target">Attakcing target</param>
         public void SetTarget(AIAgent target)
         {
             this.attackTarget = target;

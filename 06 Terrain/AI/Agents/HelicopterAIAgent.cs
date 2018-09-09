@@ -4,24 +4,45 @@ using SharpDX;
 
 namespace Terrain.AI.Agents
 {
+    using Terrain.AI.Behaviors;
     using Terrain.Controllers;
 
-    public class FlyerAIAgent : AIAgent
+    /// <summary>
+    /// Helicopter agent
+    /// </summary>
+    public class HelicopterAIAgent : AIAgent
     {
+        /// <summary>
+        /// Flight height
+        /// </summary>
         public float FlightHeight;
 
-        public FlyerAIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, FlyerAIStatusDescription status) :
-            base(parent, agentType, sceneObject, status)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="parent">Brain</param>
+        /// <param name="agentType">Agent type</param>
+        /// <param name="sceneObject">Scene object</param>
+        /// <param name="stats">Agent stats</param>
+        public HelicopterAIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, HelicopterAIStatsDescription stats) :
+            base(parent, agentType, sceneObject, stats)
         {
-            this.FlightHeight = status.FlightHeight;
+            this.FlightHeight = stats.FlightHeight;
             this.Controller = new HeliManipulatorController(sceneObject.Get<ITransformable3D>().Manipulator);
+            this.AttackBehavior = new HelicopterAttackBehavior(this);
         }
 
-        public override void SetRouteToPoint(Vector3 point, float speed, bool fine)
+        /// <summary>
+        /// Calculates a route to a point
+        /// </summary>
+        /// <param name="point">Targer point</param>
+        /// <param name="speed">Speed</param>
+        /// <param name="refine">Refine</param>
+        public override void SetRouteToPoint(Vector3 point, float speed, bool refine)
         {
             var p = point;
 
-            if (this.Status.Life > 0)
+            if (this.Stats.Life > 0)
             {
                 p.Y = this.FlightHeight;
             }
@@ -30,6 +51,11 @@ namespace Terrain.AI.Agents
             this.Controller.MaximumSpeed = speed;
         }
 
+        /// <summary>
+        /// Fires the damaged action
+        /// </summary>
+        /// <param name="active">Active</param>
+        /// <param name="passive">Passive</param>
         protected override void FireDamaged(AIAgent active, AIAgent passive)
         {
             base.FireDamaged(active, passive);
@@ -37,11 +63,11 @@ namespace Terrain.AI.Agents
             var model = this.SceneObject.Get<Model>();
             if (model != null)
             {
-                if (this.Status.Damage > 0.9f)
+                if (this.Stats.Damage > 0.9f)
                 {
                     model.TextureIndex = 2;
                 }
-                else if (this.Status.Damage > 0.2f)
+                else if (this.Stats.Damage > 0.2f)
                 {
                     model.TextureIndex = 1;
                 }
@@ -51,6 +77,11 @@ namespace Terrain.AI.Agents
                 }
             }
         }
+        /// <summary>
+        /// Fires the destroyed action
+        /// </summary>
+        /// <param name="active">Active</param>
+        /// <param name="passive">Passive</param>
         protected override void FireDestroyed(AIAgent active, AIAgent passive)
         {
             var model = this.SceneObject.Get<Model>();

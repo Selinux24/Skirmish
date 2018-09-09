@@ -6,16 +6,31 @@ namespace Terrain.AI.Agents
     using Terrain.AI.Behaviors;
     using Terrain.Controllers;
 
+    /// <summary>
+    /// Tank agent
+    /// </summary>
     public class TankAIAgent : AIAgent
     {
-        public TankAIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, AIStatusDescription status) :
-            base(parent, agentType, sceneObject, status)
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="parent">Brain</param>
+        /// <param name="agentType">Agent type</param>
+        /// <param name="sceneObject">Scene object</param>
+        /// <param name="stats">Agent stats</param>
+        public TankAIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, AIStatsDescription stats) :
+            base(parent, agentType, sceneObject, stats)
         {
             this.Controller = new TankManipulatorController();
 
             this.AttackBehavior = new TankAttackBehavior(this);
         }
 
+        /// <summary>
+        /// Fires the damaged action
+        /// </summary>
+        /// <param name="active">Active</param>
+        /// <param name="passive">Passive</param>
         protected override void FireDamaged(AIAgent active, AIAgent passive)
         {
             base.FireDamaged(active, passive);
@@ -23,11 +38,11 @@ namespace Terrain.AI.Agents
             var model = this.SceneObject.Get<Model>();
             if (model != null)
             {
-                if (this.Status.Damage > 0.9f)
+                if (this.Stats.Damage > 0.9f)
                 {
                     model.TextureIndex = 2;
                 }
-                else if (this.Status.Damage > 0.2f)
+                else if (this.Stats.Damage > 0.2f)
                 {
                     model.TextureIndex = 1;
                 }
@@ -37,6 +52,11 @@ namespace Terrain.AI.Agents
                 }
             }
         }
+        /// <summary>
+        /// Fires the destroyed action
+        /// </summary>
+        /// <param name="active">Active</param>
+        /// <param name="passive">Passive</param>
         protected override void FireDestroyed(AIAgent active, AIAgent passive)
         {
             base.FireDestroyed(active, passive);

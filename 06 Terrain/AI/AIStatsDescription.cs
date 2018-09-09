@@ -2,9 +2,9 @@
 namespace Terrain.AI
 {
     /// <summary>
-    /// AI Status description
+    /// AI agent statistics description
     /// </summary>
-    public class AIStatusDescription
+    public class AIStatsDescription
     {
         /// <summary>
         /// Primary weapon

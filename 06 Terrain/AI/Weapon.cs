@@ -3,15 +3,35 @@ using SharpDX;
 
 namespace Terrain.AI
 {
+    /// <summary>
+    /// Agent weapon
+    /// </summary>
     public class Weapon
     {
+        /// <summary>
+        /// Last attack time
+        /// </summary>
         private float lastAttackTime = 0;
 
+        /// <summary>
+        /// Name
+        /// </summary>
         public string Name;
+        /// <summary>
+        /// Fire cadence
+        /// </summary>
         public float Cadence;
+        /// <summary>
+        /// Damage
+        /// </summary>
         public float Damage;
+        /// <summary>
+        /// Range
+        /// </summary>
         public float Range;
-
+        /// <summary>
+        /// Gets wether the weapon can make an attack
+        /// </summary>
         public bool CanShoot
         {
             get
@@ -20,10 +40,21 @@ namespace Terrain.AI
             }
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="desc">Description</param>
         public Weapon(WeaponDescription desc) : this(desc.Name, desc.Damage, desc.Range, desc.Cadence)
         {
 
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="damage">Damage</param>
+        /// <param name="range">Range</param>
+        /// <param name="cadence">Cadence</param>
         public Weapon(string name, float damage, float range, float cadence)
         {
             this.Name = name;
@@ -32,11 +63,21 @@ namespace Terrain.AI
             this.Cadence = cadence;
         }
 
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
             this.lastAttackTime += gameTime.ElapsedSeconds;
         }
-
+        /// <summary>
+        /// Performs an attack
+        /// </summary>
+        /// <param name="brain"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
         public float Shoot(Brain brain, AIAgent from, AIAgent to)
         {
             if (this.CanShoot)
@@ -62,7 +103,10 @@ namespace Terrain.AI
 
             return 0;
         }
-
+        /// <summary>
+        /// Adds delay to the next attack
+        /// </summary>
+        /// <param name="delay"></param>
         public void Delay(float delay)
         {
             this.lastAttackTime -= delay;

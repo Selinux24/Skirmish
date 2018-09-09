@@ -140,18 +140,19 @@
   <ItemGroup>
     <Compile Include="AI\AIAgent.cs" />
     <Compile Include="AI\AIStates.cs" />
-    <Compile Include="AI\AIStatus.cs" />
+    <Compile Include="AI\AIStats.cs" />
     <Compile Include="AI\Behaviors\AttackBehavior.cs" />
     <Compile Include="AI\Behavior.cs" />
     <Compile Include="AI\Behaviors\IdleBehavior.cs" />
     <Compile Include="AI\Behaviors\PatrolBehavior.cs" />
     <Compile Include="AI\Behaviors\RetreatBehavior.cs" />
-    <Compile Include="AI\Agents\FlyerAIStatusDescription.cs" />
-    <Compile Include="AI\AIStatusDescription.cs" />
+    <Compile Include="AI\Agents\HelicopterAIStatsDescription.cs" />
+    <Compile Include="AI\AIStatsDescription.cs" />
     <Compile Include="AI\BehaviorEventArgs.cs" />
     <Compile Include="AI\BehaviorEventHandler.cs" />
+    <Compile Include="AI\Behaviors\HelicopterAttackBehavior.cs" />
     <Compile Include="AI\Brain.cs" />
-    <Compile Include="AI\Agents\FlyerAIAgent.cs" />
+    <Compile Include="AI\Agents\HelicopterAIAgent.cs" />
     <Compile Include="AI\Agents\TankAIAgent.cs" />
     <Compile Include="AI\Behaviors\TankAttackBehavior.cs" />
     <Compile Include="Emitters\LinealEmitter.cs" />

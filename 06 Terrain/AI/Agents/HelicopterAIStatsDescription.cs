@@ -2,9 +2,9 @@
 namespace Terrain.AI.Agents
 {
     /// <summary>
-    /// AI flyer description
+    /// AI helicopter description
     /// </summary>
-    public class FlyerAIStatusDescription : AIStatusDescription
+    public class HelicopterAIStatsDescription : AIStatsDescription
     {
         /// <summary>
         /// Flight height

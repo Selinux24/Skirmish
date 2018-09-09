@@ -4,24 +4,23 @@ using SharpDX;
 namespace Terrain.AI.Behaviors
 {
     /// <summary>
-    /// Tank attack behavior
+    /// Helicopter attack behavior
     /// </summary>
-    public class TankAttackBehavior : AttackBehavior
+    public class HelicopterAttackBehavior : AttackBehavior
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="agent">Agent</param>
-        public TankAttackBehavior(AIAgent agent) : base(agent)
+        public HelicopterAttackBehavior(AIAgent agent) : base(agent)
         {
 
         }
 
         /// <summary>
-        /// Attack task
+        /// Executes the behavior task
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <remarks>Rotate turret towards target</remarks>
         public override void Task(GameTime gameTime)
         {
             if (this.Target != null)
@@ -29,10 +28,7 @@ namespace Terrain.AI.Behaviors
                 var model = this.Agent.SceneObject.Get<Model>();
                 if (model != null)
                 {
-                    if (model.ModelPartCount > 0)
-                    {
-                        model["Turret-mesh"].Manipulator.RotateTo(this.Target.Value, Vector3.Up, true, 0.01f);
-                    }
+                    model.Manipulator.RotateTo(this.Target.Value, Vector3.Up, true, 0.01f);
                 }
             }
 

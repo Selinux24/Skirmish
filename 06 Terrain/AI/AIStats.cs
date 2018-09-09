@@ -4,9 +4,9 @@ using SharpDX;
 namespace Terrain.AI
 {
     /// <summary>
-    /// AI status
+    /// AI agent statistics
     /// </summary>
-    public class AIStatus
+    public class AIStats
     {
         /// <summary>
         /// Initial life
@@ -52,7 +52,7 @@ namespace Terrain.AI
         /// Constructor
         /// </summary>
         /// <param name="description">Description</param>
-        public AIStatus(AIStatusDescription description)
+        public AIStats(AIStatsDescription description)
         {
             this.PrimaryWeapon = new Weapon(description.PrimaryWeapon);
             this.SecondaryWeapon = new Weapon(description.SecondaryWeapon);
