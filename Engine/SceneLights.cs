@@ -256,29 +256,29 @@ namespace Engine
         /// <param name="lightPosition">Light position</param>
         /// <param name="radius">Light radius</param>
         /// <returns>Returns the from light view * projection matrix cube</returns>
-        public static Matrix[] GetFromOmniLightViewProjection(ISceneLightOmnidirectional light)
+        public static Matrix[] GetFromPointLightViewProjection(ISceneLightOmnidirectional light)
         {
             // Orthogonal projection from center
             var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 1f, light.Radius);
 
             return new Matrix[]
             {
-                GetFromOmniLightViewProjection(light.Position, Vector3.Right,      Vector3.Up)         * projection,
-                GetFromOmniLightViewProjection(light.Position, Vector3.Left,       Vector3.Up)         * projection,
-                GetFromOmniLightViewProjection(light.Position, Vector3.Up,         Vector3.BackwardLH) * projection,
-                GetFromOmniLightViewProjection(light.Position, Vector3.Down,       Vector3.ForwardLH)  * projection,
-                GetFromOmniLightViewProjection(light.Position, Vector3.ForwardLH,  Vector3.Up)         * projection,
-                GetFromOmniLightViewProjection(light.Position, Vector3.BackwardLH, Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.Right,      Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.Left,       Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.Up,         Vector3.BackwardLH) * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.Down,       Vector3.ForwardLH)  * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.ForwardLH,  Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.BackwardLH, Vector3.Up)         * projection,
             };
         }
         /// <summary>
-        /// Gets the omnidirectional from light view matrix
+        /// Gets the point light from light view matrix
         /// </summary>
         /// <param name="lightPosition">Light position</param>
         /// <param name="direction">Direction</param>
         /// <param name="up">Up vector</param>
-        /// <returns>Returns the omnidirectional from light view matrix</returns>
-        public static Matrix GetFromOmniLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
+        /// <returns>Returns the point light from light view matrix</returns>
+        public static Matrix GetFromPointLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
         {
             // View from light to scene center position
             return Matrix.LookAtLH(lightPosition, lightPosition + direction, up);
@@ -556,11 +556,11 @@ namespace Engine
                 .ToArray();
         }
         /// <summary>
-        /// Gets a collection of omnidirectional lights that cast shadow
+        /// Gets a collection of point lights that cast shadow
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public ISceneLightOmnidirectional[] GetOmnidirectionalShadowCastingLights(Vector3 eyePosition)
+        public ISceneLightOmnidirectional[] GetPointShadowCastingLights(Vector3 eyePosition)
         {
             return this.visibleLights
                 .Where(l => l.CastShadow && l is SceneLightPoint)

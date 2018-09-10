@@ -64,7 +64,7 @@ namespace Engine.Common
         /// <summary>
         /// Cube shadow mapper for point lights
         /// </summary>
-        protected IShadowMap ShadowMapperOmnidirectional { get; private set; }
+        protected IShadowMap ShadowMapperPoint { get; private set; }
         /// <summary>
         /// Shadow mapper for spot lights
         /// </summary>
@@ -114,15 +114,15 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Omnidirectional Shadow map
+        /// Point lights shadow map
         /// </summary>
-        protected EngineShaderResourceView ShadowMapOmnidirectional
+        protected EngineShaderResourceView ShadowMapPoint
         {
             get
             {
-                if (this.ShadowMapperOmnidirectional != null)
+                if (this.ShadowMapperPoint != null)
                 {
-                    return this.ShadowMapperOmnidirectional.Texture;
+                    return this.ShadowMapperPoint.Texture;
                 }
 
                 return null;
@@ -160,7 +160,7 @@ namespace Engine.Common
                 DirectionalShadowMapSize, DirectionalShadowMapSize,
                 MaxDirectionalShadowMaps * MaxDirectionalSubshadowMaps);
 
-            this.ShadowMapperOmnidirectional = new CubicShadowMap(game,
+            this.ShadowMapperPoint = new CubicShadowMap(game,
                 CubicShadowMapSize, CubicShadowMapSize,
                 MaxCubicShadows);
 
@@ -211,7 +211,7 @@ namespace Engine.Common
             if (disposing)
             {
                 Helper.Dispose(this.ShadowMapperDirectional);
-                Helper.Dispose(this.ShadowMapperOmnidirectional);
+                Helper.Dispose(this.ShadowMapperPoint);
                 Helper.Dispose(this.ShadowMapperSpot);
             }
         }
@@ -231,7 +231,7 @@ namespace Engine.Common
         public virtual EngineShaderResourceView GetResource(SceneRendererResultEnum result)
         {
             if (result == SceneRendererResultEnum.ShadowMapDirectional) return this.ShadowMapDirectional;
-            if (result == SceneRendererResultEnum.ShadowMapOmnidirectional) return this.ShadowMapOmnidirectional;
+            if (result == SceneRendererResultEnum.ShadowMapPoint) return this.ShadowMapPoint;
             if (result == SceneRendererResultEnum.ShadowMapSpot) return this.ShadowMapSpot;
             return null;
         }
@@ -285,17 +285,15 @@ namespace Engine.Common
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="scene">Scene</param>
-        protected virtual int DoShadowMapping(GameTime gameTime, Scene scene)
+        protected virtual void DoShadowMapping(GameTime gameTime, Scene scene)
         {
             int cullIndex = CullIndexShadowMaps;
 
-            cullIndex = DoDirectionalShadowMapping(gameTime, scene, cullIndex);
+            DoDirectionalShadowMapping(gameTime, scene, ref cullIndex);
 
-            cullIndex = DoOmnidirectionalShadowMapping(gameTime, scene, cullIndex);
+            DoPointShadowMapping(gameTime, scene, ref cullIndex);
 
-            cullIndex = DoSpotShadowMapping(gameTime, scene, cullIndex);
-
-            return cullIndex;
+            DoSpotShadowMapping(gameTime, scene, ref cullIndex);
         }
         /// <summary>
         /// Draw directional shadow maps
@@ -303,8 +301,7 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         /// <param name="scene">Scene</param>
         /// <param name="cullIndex">Cull index</param>
-        /// <returns>Returns the resulting cull index</returns>
-        protected virtual int DoDirectionalShadowMapping(GameTime gameTime, Scene scene, int cullIndex)
+        protected virtual void DoDirectionalShadowMapping(GameTime gameTime, Scene scene, ref int cullIndex)
         {
             var shadowCastingLights = scene.Lights.GetDirectionalShadowCastingLights();
             if (shadowCastingLights.Length > 0)
@@ -371,19 +368,16 @@ namespace Engine.Common
                     }
                 }
             }
-
-            return cullIndex;
         }
         /// <summary>
-        /// Draw omnidirectional shadow maps
+        /// Draw point light shadow maps
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="scene">Scene</param>
         /// <param name="cullIndex">Cull index</param>
-        /// <returns>Returns the resulting cull index</returns>
-        protected virtual int DoOmnidirectionalShadowMapping(GameTime gameTime, Scene scene, int cullIndex)
+        protected virtual void DoPointShadowMapping(GameTime gameTime, Scene scene, ref int cullIndex)
         {
-            var shadowCastingLights = scene.Lights.GetOmnidirectionalShadowCastingLights(scene.Camera.Position);
+            var shadowCastingLights = scene.Lights.GetPointShadowCastingLights(scene.Camera.Position);
             if (shadowCastingLights.Length > 0)
             {
                 var graphics = this.Game.Graphics;
@@ -410,12 +404,12 @@ namespace Engine.Common
                             if (doShadows)
                             {
                                 light.ShadowMapIndex = assigned;
-                                var shadowMapper = this.ShadowMapperOmnidirectional;
+                                var shadowMapper = this.ShadowMapperPoint;
                                 assigned++;
 
                                 this.DrawShadowsContext.ShadowMap = shadowMapper;
 
-                                var vpArray = SceneLights.GetFromOmniLightViewProjection(light);
+                                var vpArray = SceneLights.GetFromPointLightViewProjection(light);
 
                                 shadowMapper.FromLightViewProjectionArray = vpArray;
                                 shadowMapper.Bind(graphics, l);
@@ -428,8 +422,6 @@ namespace Engine.Common
                     }
                 }
             }
-
-            return cullIndex;
         }
         /// <summary>
         /// Draw spot light shadow maps
@@ -437,8 +429,7 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         /// <param name="scene">Scene</param>
         /// <param name="cullIndex">Cull index</param>
-        /// <returns>Returns the resulting cull index</returns>
-        protected virtual int DoSpotShadowMapping(GameTime gameTime, Scene scene, int cullIndex)
+        protected virtual void DoSpotShadowMapping(GameTime gameTime, Scene scene, ref int cullIndex)
         {
             var shadowCastingLights = scene.Lights.GetSpotShadowCastingLights(scene.Camera.Position);
             if (shadowCastingLights.Length > 0)
@@ -493,8 +484,6 @@ namespace Engine.Common
                     }
                 }
             }
-
-            return cullIndex;
         }
 
         /// <summary>

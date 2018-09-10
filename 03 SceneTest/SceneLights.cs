@@ -479,7 +479,7 @@ namespace SceneTest
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
-                SetBuffer(SceneRendererResultEnum.ShadowMapOmnidirectional);
+                SetBuffer(SceneRendererResultEnum.ShadowMapPoint);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F7))

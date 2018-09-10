@@ -226,7 +226,7 @@ namespace Engine
                     this.DrawContext.Lights = scene.Lights;
                     //Initialize context data from shadow mapping
                     this.DrawContext.ShadowMapDirectional = this.ShadowMapperDirectional;
-                    this.DrawContext.ShadowMapOmnidirectional = this.ShadowMapperOmnidirectional;
+                    this.DrawContext.ShadowMapPoint = this.ShadowMapperPoint;
                     this.DrawContext.ShadowMapSpot = this.ShadowMapperSpot;
 
 #if DEBUG
@@ -689,7 +689,7 @@ namespace Engine
                         pointLights[i],
                         pointLights[i].Local,
                         context.ViewProjection,
-                        context.ShadowMapOmnidirectional);
+                        context.ShadowMapPoint);
 
                     this.lightDrawer.DrawPoint(graphics, effect);
                 }

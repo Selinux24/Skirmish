@@ -73,7 +73,7 @@ namespace Engine
                     //Initialize context data from scene
                     this.DrawContext.Lights = scene.Lights;
                     this.DrawContext.ShadowMapDirectional = this.ShadowMapperDirectional;
-                    this.DrawContext.ShadowMapOmnidirectional = this.ShadowMapperOmnidirectional;
+                    this.DrawContext.ShadowMapPoint = this.ShadowMapperPoint;
                     this.DrawContext.ShadowMapSpot = this.ShadowMapperSpot;
 
 #if DEBUG

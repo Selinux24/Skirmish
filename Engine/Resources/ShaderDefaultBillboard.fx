@@ -33,7 +33,7 @@ cbuffer cbPerFrame : register(b1)
 };
 Texture2DArray<float> gShadowMapDir : register(t2);
 Texture2DArray<float> gShadowMapSpot : register(t3);
-TextureCubeArray<float> gShadowMapOmni : register(t4);
+TextureCubeArray<float> gShadowMapPoint : register(t4);
 Texture2DArray gTextureArray : register(t5);
 Texture2DArray gNormalMapArray : register(t6);
 
@@ -118,7 +118,7 @@ float4 PSForwardBillboard(PSVertexBillboard input) : SV_Target
     lInput.spotLightsCount = gLightCount.z;
 
 	lInput.shadowMapDir = gShadowMapDir;
-	lInput.shadowMapOmni = gShadowMapOmni;
+    lInput.shadowMapPoint = gShadowMapPoint;
 	lInput.shadowMapSpot = gShadowMapSpot;
 
 	lInput.fogStart = gFogStart;

@@ -244,9 +244,9 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableTexture shadowMapDirectional = null;
         /// <summary>
-        /// Omnidirectional shadows map effect variable
+        /// Point light shadows map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture shadowMapOmnidirectional = null;
+        private readonly EngineEffectVariableTexture shadowMapPoint = null;
         /// <summary>
         /// Spot light shadows map effect variable
         /// </summary>
@@ -281,9 +281,9 @@ namespace Engine.Effects
         /// </summary>
         private EngineShaderResourceView currentShadowMapDirectional = null;
         /// <summary>
-        /// Current omnidirectional shadow map
+        /// Current point light shadow map
         /// </summary>
-        private EngineShaderResourceView currentShadowMapOmnidirectional = null;
+        private EngineShaderResourceView currentShadowMapPoint = null;
         /// <summary>
         /// Current spot light shadow map
         /// </summary>
@@ -724,21 +724,21 @@ namespace Engine.Effects
             }
         }
         /// <summary>
-        /// Omnidirectional shadow map
+        /// Point light shadow map
         /// </summary>
-        protected EngineShaderResourceView ShadowMapOmnidirectional
+        protected EngineShaderResourceView ShadowMapPoint
         {
             get
             {
-                return this.shadowMapOmnidirectional.GetResource();
+                return this.shadowMapPoint.GetResource();
             }
             set
             {
-                if (this.currentShadowMapOmnidirectional != value)
+                if (this.currentShadowMapPoint != value)
                 {
-                    this.shadowMapOmnidirectional.SetResource(value);
+                    this.shadowMapPoint.SetResource(value);
 
-                    this.currentShadowMapOmnidirectional = value;
+                    this.currentShadowMapPoint = value;
 
                     Counters.TextureUpdates++;
                 }
@@ -826,7 +826,7 @@ namespace Engine.Effects
             this.fogRange = this.Effect.GetVariableScalar("gPSFogRange");
             this.fogColor = this.Effect.GetVariableVector("gPSFogColor");
             this.shadowMapDirectional = this.Effect.GetVariableTexture("gPSShadowMapDir");
-            this.shadowMapOmnidirectional = this.Effect.GetVariableTexture("gPSShadowMapOmni");
+            this.shadowMapPoint = this.Effect.GetVariableTexture("gPSShadowMapPoint");
             this.shadowMapSpot = this.Effect.GetVariableTexture("gPSShadowMapSpot");
 
             //Per object
@@ -964,7 +964,7 @@ namespace Engine.Effects
                 context.EyePosition,
                 context.Lights,
                 context.ShadowMapDirectional,
-                context.ShadowMapOmnidirectional,
+                context.ShadowMapPoint,
                 context.ShadowMapSpot);
         }
         /// <summary>
@@ -1013,7 +1013,7 @@ namespace Engine.Effects
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
         /// <param name="lights">Scene ligths</param>
         /// <param name="shadowMapDirectional">Low definition shadow map</param>
-        /// <param name="shadowMapOmnidirectional">Omnidirectional shadow map</param>
+        /// <param name="shadowMapPoint">Point light shadow map</param>
         /// <param name="shadowMapSpot">Spot light shadow map</param>
         private void UpdatePerFrame(
             Matrix world,
@@ -1021,7 +1021,7 @@ namespace Engine.Effects
             Vector3 eyePositionWorld,
             SceneLights lights,
             IShadowMap shadowMapDirectional,
-            IShadowMap shadowMapOmnidirectional,
+            IShadowMap shadowMapPoint,
             IShadowMap shadowMapSpot)
         {
             this.World = world;
@@ -1073,9 +1073,9 @@ namespace Engine.Effects
                 {
                     this.ShadowMapDirectional = shadowMapDirectional.Texture;
                 }
-                if (shadowMapOmnidirectional != null)
+                if (shadowMapPoint != null)
                 {
-                    this.ShadowMapOmnidirectional = shadowMapOmnidirectional.Texture;
+                    this.ShadowMapPoint = shadowMapPoint.Texture;
                 }
                 if (shadowMapSpot != null)
                 {
@@ -1091,7 +1091,7 @@ namespace Engine.Effects
                 this.FogColor = Color.Transparent;
 
                 this.ShadowMapDirectional = null;
-                this.ShadowMapOmnidirectional = null;
+                this.ShadowMapPoint = null;
                 this.ShadowMapSpot = null;
             }
 

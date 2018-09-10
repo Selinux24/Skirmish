@@ -35,7 +35,7 @@ cbuffer cbPSPerFrame : register(b3)
 };
 Texture2DArray<float> gPSShadowMapDir : register(t2);
 Texture2DArray<float> gPSShadowMapSpot : register(t3);
-TextureCubeArray<float> gPSShadowMapOmni : register(t4);
+TextureCubeArray<float> gPSShadowMapPoint : register(t4);
 
 cbuffer cbPSPerObject : register(b4)
 {
@@ -92,7 +92,7 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 	lInput.spotLightsCount = gPSLightCount.z;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
-	lInput.shadowMapOmni = gPSShadowMapOmni;
+    lInput.shadowMapPoint = gPSShadowMapPoint;
 	lInput.shadowMapSpot = gPSShadowMapSpot;
 
 	lInput.fogStart = gPSFogStart;
@@ -130,7 +130,7 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 	lInput.spotLightsCount = gPSLightCount.z;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
-	lInput.shadowMapOmni = gPSShadowMapOmni;
+    lInput.shadowMapPoint = gPSShadowMapPoint;
 	lInput.shadowMapSpot = gPSShadowMapSpot;
 
 	lInput.fogStart = gPSFogStart;
@@ -168,7 +168,7 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 	lInput.spotLightsCount = gPSLightCount.z;
 
 	lInput.shadowMapDir = gPSShadowMapDir;
-	lInput.shadowMapOmni = gPSShadowMapOmni;
+    lInput.shadowMapPoint = gPSShadowMapPoint;
 	lInput.shadowMapSpot = gPSShadowMapSpot;
 
 	lInput.fogStart = gPSFogStart;

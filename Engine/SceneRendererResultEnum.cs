@@ -15,9 +15,9 @@ namespace Engine
         /// </summary>
         ShadowMapDirectional,
         /// <summary>
-        /// Omnidirectional shadow map
+        /// Point light shadow map
         /// </summary>
-        ShadowMapOmnidirectional,
+        ShadowMapPoint,
         /// <summary>
         /// Spot light shadow map
         /// </summary>
