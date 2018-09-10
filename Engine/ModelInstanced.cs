@@ -16,11 +16,11 @@ namespace Engine
         /// <summary>
         /// Instancing data per instance
         /// </summary>
-        private VertexInstancingData[] instancingData = null;
+        private readonly VertexInstancingData[] instancingData = null;
         /// <summary>
         /// Model instance list
         /// </summary>
-        private ModelInstance[] instances = null;
+        private readonly ModelInstance[] instances = null;
         /// <summary>
         /// Temporal instance listo for rendering
         /// </summary>
@@ -28,7 +28,7 @@ namespace Engine
         /// <summary>
         /// Instances
         /// </summary>
-        private int instanceCount = 0;
+        private readonly int instanceCount = 0;
         /// <summary>
         /// Write instancing data to graphics flag
         /// </summary>

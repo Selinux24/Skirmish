@@ -118,8 +118,7 @@ namespace Engine
             float minDistance = float.MaxValue;
             this.particleSystems.ForEach(p =>
             {
-                float d;
-                var c = p.Emitter.Cull(volume, out d);
+                var c = p.Emitter.Cull(volume, out float d);
                 if (!c)
                 {
                     cull = false;

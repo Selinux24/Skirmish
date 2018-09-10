@@ -448,11 +448,11 @@ namespace Engine
         /// <summary>
         /// Foliage patches list
         /// </summary>
-        private Dictionary<QuadTreeNode, List<FoliagePatch>> foliagePatches = new Dictionary<QuadTreeNode, List<FoliagePatch>>();
+        private readonly Dictionary<QuadTreeNode, List<FoliagePatch>> foliagePatches = new Dictionary<QuadTreeNode, List<FoliagePatch>>();
         /// <summary>
         /// Foliage buffer list
         /// </summary>
-        private List<FoliageBuffer> foliageBuffers = new List<FoliageBuffer>();
+        private readonly List<FoliageBuffer> foliageBuffers = new List<FoliageBuffer>();
         /// <summary>
         /// Wind total time
         /// </summary>
@@ -460,19 +460,19 @@ namespace Engine
         /// <summary>
         /// Random texture
         /// </summary>
-        private EngineShaderResourceView textureRandom = null;
+        private readonly EngineShaderResourceView textureRandom = null;
         /// <summary>
         /// Folliage map for vegetation planting task
         /// </summary>
-        private FoliageMap foliageMap = null;
+        private readonly FoliageMap foliageMap = null;
         /// <summary>
         /// Foliage map channels for vegetation planting task
         /// </summary>
-        private FoliageMapChannel[] foliageMapChannels = null;
+        private readonly FoliageMapChannel[] foliageMapChannels = null;
         /// <summary>
         /// Material
         /// </summary>
-        private MeshMaterial material;
+        private readonly MeshMaterial material;
         /// <summary>
         /// Foliage visible sphere
         /// </summary>
@@ -480,7 +480,7 @@ namespace Engine
         /// <summary>
         /// Foliage node size
         /// </summary>
-        private float foliageNodeSize;
+        private readonly float foliageNodeSize;
         /// <summary>
         /// Foliage quadtree
         /// </summary>

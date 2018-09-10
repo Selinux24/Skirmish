@@ -200,7 +200,7 @@ namespace Engine
         /// <summary>
         /// Scenery patch list
         /// </summary>
-        private SceneryPatchDictionary patchDictionary = new SceneryPatchDictionary();
+        private readonly SceneryPatchDictionary patchDictionary = new SceneryPatchDictionary();
         /// <summary>
         /// Visible Nodes
         /// </summary>

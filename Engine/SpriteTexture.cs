@@ -13,11 +13,11 @@ namespace Engine
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
-        private BufferDescriptor vertexBuffer = null;
+        private readonly BufferDescriptor vertexBuffer = null;
         /// <summary>
         /// Index buffer descriptor
         /// </summary>
-        private BufferDescriptor indexBuffer = null;
+        private readonly BufferDescriptor indexBuffer = null;
         /// <summary>
         /// View * projection for 2D projection
         /// </summary>
@@ -73,16 +73,13 @@ namespace Engine
         public SpriteTexture(Scene scene, SpriteTextureDescription description)
             : base(scene, description)
         {
-            Vector3[] cv;
-            Vector2[] cuv;
-            uint[] ci;
             GeometryUtil.CreateSprite(
                 Vector2.Zero,
                 1, 1,
                 0, 0,
-                out cv,
-                out cuv,
-                out ci);
+                out Vector3[] cv,
+                out Vector2[] cuv,
+                out uint[] ci);
 
             var vertices = VertexPositionTexture.Generate(cv, cuv);
 
@@ -95,13 +92,11 @@ namespace Engine
             this.Manipulator.SetPosition(description.Left, description.Top);
             this.Manipulator.Update(new GameTime(), this.Game.Form.RelativeCenter, description.Width, description.Height);
 
-            Matrix view;
-            Matrix proj;
             Sprite.CreateViewOrthoProjection(
                 this.Game.Form.RenderWidth,
                 this.Game.Form.RenderHeight,
-                out view,
-                out proj);
+                out Matrix view,
+                out Matrix proj);
 
             this.viewProjection = view * proj;
 

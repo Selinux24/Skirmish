@@ -19,9 +19,7 @@ namespace Engine
         /// <returns>Returns view * orthoprojection matrix</returns>
         public static Matrix CreateViewOrthoProjection(int width, int height)
         {
-            Matrix view;
-            Matrix projection;
-            CreateViewOrthoProjection(width, height, out view, out projection);
+            CreateViewOrthoProjection(width, height, out Matrix view, out Matrix projection);
 
             return view * projection;
         }

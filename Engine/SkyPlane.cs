@@ -15,19 +15,19 @@ namespace Engine
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
-        private BufferDescriptor vertexBuffer = null;
+        private readonly BufferDescriptor vertexBuffer = null;
         /// <summary>
         /// Index buffer descriptor
         /// </summary>
-        private BufferDescriptor indexBuffer = null;
+        private readonly BufferDescriptor indexBuffer = null;
         /// <summary>
         /// Sky texture 1
         /// </summary>
-        private EngineShaderResourceView skyTexture1 = null;
+        private readonly EngineShaderResourceView skyTexture1 = null;
         /// <summary>
         /// Sky texture 2
         /// </summary>
-        private EngineShaderResourceView skyTexture2 = null;
+        private readonly EngineShaderResourceView skyTexture2 = null;
         /// <summary>
         /// Brightness
         /// </summary>
@@ -47,7 +47,7 @@ namespace Engine
         /// <summary>
         /// Plane mode
         /// </summary>
-        private SkyPlaneMode mode;
+        private readonly SkyPlaneMode mode;
         /// <summary>
         /// Traslation direction
         /// </summary>
@@ -147,16 +147,13 @@ namespace Engine
             this.CloudsBaseColor = description.CloudBaseColor;
 
             //Create sky plane
-            Vector3[] vData;
-            Vector2[] uvs;
-            uint[] iData;
             GeometryUtil.CreateCurvePlane(
                 description.Size,
                 description.Repeat,
                 description.PlaneWidth,
                 description.PlaneTop,
                 description.PlaneBottom,
-                out vData, out uvs, out iData);
+                out Vector3[] vData, out Vector2[] uvs, out uint[] iData);
 
             VertexPositionTexture[] vertices = VertexPositionTexture.Generate(vData, uvs);
 

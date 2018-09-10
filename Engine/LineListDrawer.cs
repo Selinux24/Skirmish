@@ -22,7 +22,7 @@ namespace Engine
         /// <summary>
         /// Lines dictionary by color
         /// </summary>
-        private Dictionary<Color4, List<Line3D>> dictionary = new Dictionary<Color4, List<Line3D>>();
+        private readonly Dictionary<Color4, List<Line3D>> dictionary = new Dictionary<Color4, List<Line3D>>();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>

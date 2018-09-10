@@ -142,94 +142,52 @@ namespace Terrain
         {
             base.Initialize();
 
-            InitializeUI();
-            InitializeWalker();
-            InitializeDebug();
-            InitializeParticles();
-
             Stopwatch sw = Stopwatch.StartNew();
-
-            string loadingText = null;
-
-            // Lens flare
             sw.Restart();
-            InitializeLensFlare();
-            sw.Stop();
-            initDurationDict.Add("Lens Flare", sw.Elapsed.TotalSeconds);
 
-            // Helicopter
-            sw.Restart();
-            InitializeHelicopter();
-            sw.Stop();
-            initDurationDict.Add("Helicopter", sw.Elapsed.TotalSeconds);
+            var taskUI = InitializeUI();
+            var taskWalker = InitializeWalker();
+            var taskDebug = InitializeDebug();
+            var taskParticles = InitializeParticles();
+            var taskLensFlare = InitializeLensFlare();
+            var taskHelicopter = InitializeHelicopter();
+            var taskTanks = InitializeTanks();
+            var taskHeliport = InitializeHeliport();
+            var taskGarage = InitializeGarage();
+            var taskObelisk = InitializeObelisk();
+            var taskRocks = InitializeRocks();
+            var taskTrees = InitializeTrees();
+            var taskSkydom = InitializeSkydom();
+            var taskClouds = InitializeClouds();
+            var taskTerrain = InitializeTerrain();
+            var taskGardener = InitializeGardener();
 
-            // Tanks
-            sw.Restart();
-            InitializeTanks();
-            sw.Stop();
-            initDurationDict.Add("Tanks", sw.Elapsed.TotalSeconds);
+            initDurationDict.Add("UI", taskUI.Result);
+            initDurationDict.Add("Walker", taskWalker.Result);
+            initDurationDict.Add("Debug", taskDebug.Result);
+            initDurationDict.Add("Particles", taskParticles.Result);
+            initDurationDict.Add("Lens Flare", taskLensFlare.Result);
+            initDurationDict.Add("Helicopter", taskHelicopter.Result);
+            initDurationDict.Add("Tanks", taskTanks.Result);
+            initDurationDict.Add("Heliport", taskHeliport.Result);
+            initDurationDict.Add("Garage", taskGarage.Result);
+            initDurationDict.Add("Obelisk", taskObelisk.Result);
+            initDurationDict.Add("Rocks", taskRocks.Result);
+            initDurationDict.Add("Trees", taskTrees.Result);
+            initDurationDict.Add("Skydom", taskSkydom.Result);
+            initDurationDict.Add("Clouds", taskClouds.Result);
+            initDurationDict.Add("Terrain", taskTerrain.Result);
+            initDurationDict.Add("Gardener", taskGardener.Result);
 
-            // Heliport
-            sw.Restart();
-            InitializeHeliport();
-            sw.Stop();
-            initDurationDict.Add("Heliport", sw.Elapsed.TotalSeconds);
+            var taskPathFinding = InitializePathFinding();
 
-            // Garage
-            sw.Restart();
-            InitializeGarage();
-            sw.Stop();
-            initDurationDict.Add("Garage", sw.Elapsed.TotalSeconds);
+            initDurationDict.Add("Path Finding", taskPathFinding.Result);
 
-            // Obelisk
-            sw.Restart();
-            InitializeObelisk();
-            sw.Stop();
-            initDurationDict.Add("Obelisk", sw.Elapsed.TotalSeconds);
-
-            // Rocks
-            sw.Restart();
-            InitializeRocks();
-            sw.Stop();
-            initDurationDict.Add("Rocks", sw.Elapsed.TotalSeconds);
-
-            // Trees
-            sw.Restart();
-            InitializeTrees();
-            sw.Stop();
-            initDurationDict.Add("Trees", sw.Elapsed.TotalSeconds);
-
-            // Skydom
-            sw.Restart();
-            InitializeSkydom();
-            sw.Stop();
-            initDurationDict.Add("Skydom", sw.Elapsed.TotalSeconds);
-
-            // Clouds
-            sw.Restart();
-            InitializeClouds();
-            sw.Stop();
-            loadingText += string.Format("Clouds", sw.Elapsed.TotalSeconds);
-
-            // Terrain
-            sw.Restart();
-            InitializeTerrain();
-            sw.Stop();
-            initDurationDict.Add("Terrain", sw.Elapsed.TotalSeconds);
-
-            // Gardener
-            sw.Restart();
-            InitializeGardener();
-            sw.Stop();
-            initDurationDict.Add("Gardener", sw.Elapsed.TotalSeconds);
-
-            // Gardener
-            sw.Restart();
-            InitializePathFinding();
-            sw.Stop();
-            initDurationDict.Add("Path Finding", sw.Elapsed.TotalSeconds);
+            initDurationDict.Add("TOTAL", initDurationDict.Select(i => i.Value).Sum());
+            initDurationDict.Add("REAL", sw.Elapsed.TotalSeconds);
 
             initDurationIndex = initDurationDict.Keys.Count - 2;
+
             SetLoadText(initDurationIndex);
 
             InitializeLights();
@@ -239,8 +197,11 @@ namespace Terrain
             this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = 5000f;
         }
-        private void InitializeUI()
+        private Task<double> InitializeUI()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             {
                 this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, this.layerHud);
                 this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, this.layerHud);
@@ -323,9 +284,15 @@ namespace Terrain
                 this.cursor2D.Instance.Color = Color.Red;
                 this.cursor2D.Visible = false;
             }
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeWalker()
+        private Task<double> InitializeWalker()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             this.walkerAgentType = new Agent()
             {
                 Name = "Walker type",
@@ -333,9 +300,15 @@ namespace Terrain
                 Radius = 0.2f,
                 MaxClimb = 0.9f,
             };
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeDebug()
+        private Task<double> InitializeDebug()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             {
                 var desc = new LineListDrawerDescription()
                 {
@@ -441,9 +414,15 @@ namespace Terrain
                 this.terrainLineDrawer.Visible = false;
             }
             #endregion
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeLights()
+        private Task<double> InitializeLights()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             this.Lights.DirectionalLights[0].Enabled = true;
             this.Lights.DirectionalLights[0].CastShadow = true;
             this.Lights.DirectionalLights[1].Enabled = true;
@@ -470,16 +449,22 @@ namespace Terrain
 
             //this.Lights.ShadowLDDistance = 100f;
             //this.Lights.ShadowHDDistance = 25f;
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeLensFlare()
+        private Task<double> InitializeLensFlare()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             var lfDesc = new LensFlareDescription()
             {
                 Name = "Flares",
                 ContentPath = "resources/Flare",
                 GlowTexture = "lfGlow.png",
                 Flares = new[]
-    {
+                {
                     new LensFlareDescription.Flare(-0.5f, 0.7f, new Color( 50,  25,  50), "lfFlare1.png"),
                     new LensFlareDescription.Flare( 0.3f, 0.4f, new Color(100, 255, 200), "lfFlare1.png"),
                     new LensFlareDescription.Flare( 1.2f, 1.0f, new Color(100,  50,  50), "lfFlare1.png"),
@@ -496,9 +481,14 @@ namespace Terrain
             };
             this.lensFlare = this.AddComponent<LensFlare>(lfDesc, SceneObjectUsageEnum.None, this.layerEffects);
 
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeHelicopter()
+        private Task<double> InitializeHelicopter()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             var hDesc = new ModelDescription()
             {
                 Name = "Helicopter",
@@ -517,9 +507,15 @@ namespace Terrain
             this.helicopter.Transform.UpdateInternals(true);
 
             this.Lights.AddRange(this.helicopter.Instance.Lights);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeTanks()
+        private Task<double> InitializeTanks()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             var tDesc = new ModelDescription()
             {
                 Name = "Tank",
@@ -560,9 +556,15 @@ namespace Terrain
 
             this.Lights.AddRange(this.tankP1.Instance.Lights);
             this.Lights.AddRange(this.tankP2.Instance.Lights);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeHeliport()
+        private Task<double> InitializeHeliport()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             var hpDesc = new ModelDescription()
             {
                 Name = "Heliport",
@@ -577,9 +579,15 @@ namespace Terrain
             this.heliport = this.AddComponent<Model>(hpDesc, SceneObjectUsageEnum.None, this.layerObjects);
 
             this.Lights.AddRange(this.heliport.Instance.Lights);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeGarage()
+        private Task<double> InitializeGarage()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             var gDesc = new ModelDescription()
             {
                 Name = "Garage",
@@ -594,9 +602,15 @@ namespace Terrain
             this.garage = this.AddComponent<Model>(gDesc, SceneObjectUsageEnum.None, this.layerObjects);
 
             this.Lights.AddRange(this.garage.Instance.Lights);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeObelisk()
+        private Task<double> InitializeObelisk()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             var oDesc = new ModelInstancedDescription()
             {
                 Name = "Obelisk",
@@ -610,9 +624,15 @@ namespace Terrain
                 }
             };
             this.obelisk = this.AddComponent<ModelInstanced>(oDesc, SceneObjectUsageEnum.None, this.layerObjects);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeRocks()
+        private Task<double> InitializeRocks()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             var rDesc = new ModelInstancedDescription()
             {
                 Name = "Rocks",
@@ -626,9 +646,15 @@ namespace Terrain
                 }
             };
             this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsageEnum.None, this.layerObjects);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeTrees()
+        private Task<double> InitializeTrees()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             var t1Desc = new ModelInstancedDescription()
             {
                 Name = "birch_a",
@@ -657,9 +683,15 @@ namespace Terrain
             };
             this.tree1 = this.AddComponent<ModelInstanced>(t1Desc, SceneObjectUsageEnum.None, this.layerTerrain);
             this.tree2 = this.AddComponent<ModelInstanced>(t2Desc, SceneObjectUsageEnum.None, this.layerTerrain);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeSkydom()
+        private Task<double> InitializeSkydom()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             this.skydom = this.AddComponent<Skydom>(new SkydomDescription()
             {
                 Name = "Skydom",
@@ -667,9 +699,15 @@ namespace Terrain
                 Texture = "sunset.dds",
                 Radius = this.Camera.FarPlaneDistance,
             });
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeClouds()
+        private Task<double> InitializeClouds()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             this.clouds = this.AddComponent<SkyPlane>(new SkyPlaneDescription()
             {
                 Name = "Clouds",
@@ -683,9 +721,15 @@ namespace Terrain
                 Velocity = 1,
                 Direction = new Vector2(1, 1),
             });
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeTerrain()
+        private Task<double> InitializeTerrain()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             var terrainDescription = new GroundDescription()
             {
                 Name = "Terrain",
@@ -702,9 +746,15 @@ namespace Terrain
                 }
             };
             this.terrain = this.AddComponent<Scenery>(terrainDescription, SceneObjectUsageEnum.Ground, this.layerTerrain);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeGardener()
+        private Task<double> InitializeGardener()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             var grDesc = new GroundGardenerDescription()
             {
                 Name = "Grass",
@@ -724,9 +774,15 @@ namespace Terrain
                 }
             };
             this.gardener = this.AddComponent<GroundGardener>(grDesc, SceneObjectUsageEnum.None, this.layerTerrain);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeParticles()
+        private Task<double> InitializeParticles()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources/particles", "smoke.png");
             this.pFire = ParticleSystemDescription.InitializeFire("resources/particles", "fire.png");
             this.pDust = ParticleSystemDescription.InitializeDust("resources/particles", "smoke.png");
@@ -735,9 +791,15 @@ namespace Terrain
             this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources/particles", "smoke.png");
 
             this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Manager" }, SceneObjectUsageEnum.None, layerEffects);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializePathFinding()
+        private Task<double> InitializePathFinding()
         {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
             Random posRnd = new Random(1);
 
             this.SetGround(this.terrain, true);
@@ -860,6 +922,9 @@ namespace Terrain
             var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             this.PathFinderDescription = new PathFinderDescription(navSettings, nvInput);
+
+            sw.Stop();
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
 
         public override void Initialized()

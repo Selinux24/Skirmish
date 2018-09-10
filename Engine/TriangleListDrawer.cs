@@ -23,7 +23,7 @@ namespace Engine
         /// <summary>
         /// Triangle dictionary by color
         /// </summary>
-        private Dictionary<Color4, List<Triangle>> dictionary = new Dictionary<Color4, List<Triangle>>();
+        private readonly Dictionary<Color4, List<Triangle>> dictionary = new Dictionary<Color4, List<Triangle>>();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>
