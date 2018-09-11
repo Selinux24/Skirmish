@@ -259,7 +259,7 @@ namespace Engine
         public static Matrix[] GetFromPointLightViewProjection(ISceneLightOmnidirectional light)
         {
             // Orthogonal projection from center
-            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 1f, light.Radius);
+            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 0.1f, light.Radius);
 
             return new Matrix[]
             {
