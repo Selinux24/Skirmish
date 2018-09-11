@@ -161,6 +161,14 @@ namespace Engine
             this.indexBuffer = this.BufferManager.Add(description.Name, iData, false);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~SkyPlane()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Resource releasing
         /// </summary>
         protected override void Dispose(bool disposing)

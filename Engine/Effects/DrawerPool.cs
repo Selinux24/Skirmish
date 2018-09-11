@@ -139,34 +139,122 @@ namespace Engine.Effects
         /// <summary>
         /// Dispose of used resources
         /// </summary>
-        public static void Dispose()
+        public static void DisposeResources()
         {
-            Helper.Dispose(EffectNull);
+            if (EffectNull != null)
+            {
+                EffectNull.Dispose();
+                EffectNull = null;
+            }
 
-            Helper.Dispose(EffectDefaultSprite);
-            Helper.Dispose(EffectDefaultFont);
-            Helper.Dispose(EffectDefaultCubemap);
-            Helper.Dispose(EffectDefaultBillboard);
-            Helper.Dispose(EffectDefaultFoliage);
-            Helper.Dispose(EffectDefaultClouds);
-            Helper.Dispose(EffectDefaultBasic);
-            Helper.Dispose(EffectDefaultTerrain);
-            Helper.Dispose(EffectDefaultSkyScattering);
-            Helper.Dispose(EffectDefaultCPUParticles);
-            Helper.Dispose(EffectDefaultGPUParticles);
-            Helper.Dispose(EffectDefaultWater);
+            if (EffectDefaultSprite != null)
+            {
+                EffectDefaultSprite.Dispose();
+                EffectDefaultSprite = null;
+            }
+            if (EffectDefaultFont != null)
+            {
+                EffectDefaultFont.Dispose();
+                EffectDefaultFont = null;
+            }
+            if (EffectDefaultCubemap != null)
+            {
+                EffectDefaultCubemap.Dispose();
+                EffectDefaultCubemap = null;
+            }
+            if (EffectDefaultBillboard != null)
+            {
+                EffectDefaultBillboard.Dispose();
+                EffectDefaultBillboard = null;
+            }
+            if (EffectDefaultFoliage != null)
+            {
+                EffectDefaultFoliage.Dispose();
+                EffectDefaultFoliage = null;
+            }
+            if (EffectDefaultClouds != null)
+            {
+                EffectDefaultClouds.Dispose();
+                EffectDefaultClouds = null;
+            }
+            if (EffectDefaultBasic != null)
+            {
+                EffectDefaultBasic.Dispose();
+                EffectDefaultBasic = null;
+            }
+            if (EffectDefaultTerrain != null)
+            {
+                EffectDefaultTerrain.Dispose();
+                EffectDefaultTerrain = null;
+            }
+            if (EffectDefaultSkyScattering != null)
+            {
+                EffectDefaultSkyScattering.Dispose();
+                EffectDefaultSkyScattering = null;
+            }
+            if (EffectDefaultCPUParticles != null)
+            {
+                EffectDefaultCPUParticles.Dispose();
+                EffectDefaultCPUParticles = null;
+            }
+            if (EffectDefaultGPUParticles != null)
+            {
+                EffectDefaultGPUParticles.Dispose();
+                EffectDefaultGPUParticles = null;
+            }
+            if (EffectDefaultWater != null)
+            {
+                EffectDefaultWater.Dispose();
+                EffectDefaultWater = null;
+            }
 
-            Helper.Dispose(EffectDeferredComposer);
-            Helper.Dispose(EffectDeferredBasic);
-            Helper.Dispose(EffectDeferredTerrain);
+            if (EffectDeferredComposer != null)
+            {
+                EffectDeferredComposer.Dispose();
+                EffectDeferredComposer = null;
+            }
+            if (EffectDeferredBasic != null)
+            {
+                EffectDeferredBasic.Dispose();
+                EffectDeferredBasic = null;
+            }
+            if (EffectDeferredTerrain != null)
+            {
+                EffectDeferredTerrain.Dispose();
+                EffectDeferredTerrain = null;
+            }
 
-            Helper.Dispose(EffectShadowBillboard);
-            Helper.Dispose(EffectShadowFoliage);
-            Helper.Dispose(EffectShadowBasic);
-            Helper.Dispose(EffectShadowTerrain);
-            Helper.Dispose(EffectShadowPoint);
+            if (EffectShadowBillboard != null)
+            {
+                EffectShadowBillboard.Dispose();
+                EffectShadowBillboard = null;
+            }
+            if (EffectShadowFoliage != null)
+            {
+                EffectShadowFoliage.Dispose();
+                EffectShadowFoliage = null;
+            }
+            if (EffectShadowBasic != null)
+            {
+                EffectShadowBasic.Dispose();
+                EffectShadowBasic = null;
+            }
+            if (EffectShadowTerrain != null)
+            {
+                EffectShadowTerrain.Dispose();
+                EffectShadowTerrain = null;
+            }
+            if (EffectShadowPoint != null)
+            {
+                EffectShadowPoint.Dispose();
+                EffectShadowPoint = null;
+            }
 
-            Helper.Dispose(EffectPostBlur);
+            if (EffectPostBlur != null)
+            {
+                EffectPostBlur.Dispose();
+                EffectPostBlur = null;
+            }
         }
 
         /// <summary>

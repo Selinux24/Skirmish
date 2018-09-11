@@ -16,7 +16,7 @@ namespace Engine
         /// <summary>
         /// Game instance
         /// </summary>
-        private Game game;
+        private readonly Game game;
         /// <summary>
         /// Resource dictionary
         /// </summary>
@@ -58,8 +58,27 @@ namespace Engine
         {
             if (disposing)
             {
-                Helper.Dispose(this.resources);
-                Helper.Dispose(this.globalResources);
+                if (resources != null)
+                {
+                    foreach (var item in resources)
+                    {
+                        item.Value?.Dispose();
+                    }
+
+                    resources.Clear();
+                    resources = null;
+                }
+
+                if (globalResources != null)
+                {
+                    foreach (var item in globalResources)
+                    {
+                        item.Value?.Dispose();
+                    }
+
+                    globalResources.Clear();
+                    globalResources = null;
+                }
             }
         }
 
@@ -256,7 +275,11 @@ namespace Engine
             if (this.globalResources.ContainsKey(name))
             {
                 var cRes = this.globalResources[name];
-                Helper.Dispose(cRes);
+                if (cRes != null)
+                {
+                    cRes.Dispose();
+                    cRes = null;
+                }
                 this.globalResources[name] = resource;
             }
             else

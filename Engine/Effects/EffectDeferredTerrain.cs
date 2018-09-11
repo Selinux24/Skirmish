@@ -25,59 +25,59 @@ namespace Engine.Effects
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Texture resolution effect variable
         /// </summary>
-        private EngineEffectVariableScalar textureResolution = null;
+        private readonly EngineEffectVariableScalar textureResolution = null;
         /// <summary>
         /// Low resolution textures effect variable
         /// </summary>
-        private EngineEffectVariableTexture diffuseMapLR = null;
+        private readonly EngineEffectVariableTexture diffuseMapLR = null;
         /// <summary>
         /// High resolution textures effect variable
         /// </summary>
-        private EngineEffectVariableTexture diffuseMapHR = null;
+        private readonly EngineEffectVariableTexture diffuseMapHR = null;
         /// <summary>
         /// Normal map effect variable
         /// </summary>
-        private EngineEffectVariableTexture normalMap = null;
+        private readonly EngineEffectVariableTexture normalMap = null;
         /// <summary>
         /// Specular map effect variable
         /// </summary>
-        private EngineEffectVariableTexture specularMap = null;
+        private readonly EngineEffectVariableTexture specularMap = null;
         /// <summary>
         /// Color texture array effect variable
         /// </summary>
-        private EngineEffectVariableTexture colorTextures = null;
+        private readonly EngineEffectVariableTexture colorTextures = null;
         /// <summary>
         /// Alpha map effect variable
         /// </summary>
-        private EngineEffectVariableTexture alphaMap = null;
+        private readonly EngineEffectVariableTexture alphaMap = null;
         /// <summary>
         /// Slope ranges effect variable
         /// </summary>
-        private EngineEffectVariableVector parameters = null;
+        private readonly EngineEffectVariableVector parameters = null;
         /// <summary>
         /// Material index effect variable
         /// </summary>
-        private EngineEffectVariableScalar materialIndex = null;
+        private readonly EngineEffectVariableScalar materialIndex = null;
         /// <summary>
         /// Sampler for diffuse maps
         /// </summary>
-        private EngineEffectVariableSampler samplerDiffuse = null;
+        private readonly EngineEffectVariableSampler samplerDiffuse = null;
         /// <summary>
         /// Sampler for normal maps
         /// </summary>
-        private EngineEffectVariableSampler samplerNormal = null;
+        private readonly EngineEffectVariableSampler samplerNormal = null;
         /// <summary>
         /// Sampler for specular maps
         /// </summary>
-        private EngineEffectVariableSampler samplerSpecular = null;
+        private readonly EngineEffectVariableSampler samplerSpecular = null;
 
         /// <summary>
         /// Current low resolution diffuse map
@@ -380,15 +380,35 @@ namespace Engine.Effects
             this.samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 8);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EffectDeferredTerrain()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Dispose
         /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Helper.Dispose(this.samplerPoint);
-                Helper.Dispose(this.samplerLinear);
-                Helper.Dispose(this.samplerAnisotropic);
+                if (this.samplerPoint != null)
+                {
+                    this.samplerPoint.Dispose();
+                    this.samplerPoint = null;
+                }
+                if (this.samplerLinear != null)
+                {
+                    this.samplerLinear.Dispose();
+                    this.samplerLinear = null;
+                }
+                if (this.samplerAnisotropic != null)
+                {
+                    this.samplerAnisotropic.Dispose();
+                    this.samplerAnisotropic = null;
+                }
             }
 
             base.Dispose(disposing);

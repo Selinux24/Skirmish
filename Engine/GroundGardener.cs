@@ -14,7 +14,7 @@ namespace Engine
     /// <summary>
     /// Ground garden planter
     /// </summary>
-    public class GroundGardener : Drawable, UseMaterials, IDisposable
+    public class GroundGardener : Drawable, IUseMaterials, IDisposable
     {
         #region Helper classes
 
@@ -72,11 +72,30 @@ namespace Engine
                 this.Channel = -1;
             }
             /// <summary>
-            /// Dispose
+            /// Destructor
+            /// </summary>
+            ~FoliagePatch()
+            {
+                // Finalizer calls Dispose(false)  
+                Dispose(false);
+            }
+            /// <summary>
+            /// Dispose resources
             /// </summary>
             public void Dispose()
             {
-                this.foliageData = null;
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+            /// <summary>
+            /// Resource disposal
+            /// </summary>
+            protected virtual void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    this.foliageData = null;
+                }
             }
 
             /// <summary>
@@ -278,12 +297,39 @@ namespace Engine
             public int Count;
 
             /// <summary>
-            /// Dispose
+            /// Destructor
+            /// </summary>
+            ~FoliageMapChannel()
+            {
+                // Finalizer calls Dispose(false)  
+                Dispose(false);
+            }
+            /// <summary>
+            /// Dispose resources
             /// </summary>
             public void Dispose()
             {
-                Helper.Dispose(this.Textures);
-                Helper.Dispose(this.NormalMaps);
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+            /// <summary>
+            /// Resource disposal
+            /// </summary>
+            protected virtual void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    if (Textures != null)
+                    {
+                        Textures.Dispose();
+                        Textures = null;
+                    }
+                    if (NormalMaps != null)
+                    {
+                        NormalMaps.Dispose();
+                        NormalMaps = null;
+                    }
+                }
             }
         }
         /// <summary>
@@ -343,14 +389,33 @@ namespace Engine
                 this.VertexBuffer = bufferManager.Add(string.Format("{1}.{0}", this.Id, name), new VertexBillboard[FoliagePatch.MAX], true, 0);
             }
             /// <summary>
-            /// Dispose
+            /// Destructor
+            /// </summary>
+            ~FoliageBuffer()
+            {
+                // Finalizer calls Dispose(false)  
+                Dispose(false);
+            }
+            /// <summary>
+            /// Dispose resources
             /// </summary>
             public void Dispose()
             {
-                if (this.BufferManager != null)
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+            /// <summary>
+            /// Resource disposal
+            /// </summary>
+            protected virtual void Dispose(bool disposing)
+            {
+                if (disposing)
                 {
-                    //Remove data from buffer manager
-                    this.BufferManager.RemoveVertexData(this.VertexBuffer);
+                    if (this.BufferManager != null)
+                    {
+                        //Remove data from buffer manager
+                        this.BufferManager.RemoveVertexData(this.VertexBuffer);
+                    }
                 }
             }
 
@@ -448,11 +513,11 @@ namespace Engine
         /// <summary>
         /// Foliage patches list
         /// </summary>
-        private readonly Dictionary<QuadTreeNode, List<FoliagePatch>> foliagePatches = new Dictionary<QuadTreeNode, List<FoliagePatch>>();
+        private Dictionary<QuadTreeNode, List<FoliagePatch>> foliagePatches = new Dictionary<QuadTreeNode, List<FoliagePatch>>();
         /// <summary>
         /// Foliage buffer list
         /// </summary>
-        private readonly List<FoliageBuffer> foliageBuffers = new List<FoliageBuffer>();
+        private List<FoliageBuffer> foliageBuffers = new List<FoliageBuffer>();
         /// <summary>
         /// Wind total time
         /// </summary>
@@ -460,19 +525,19 @@ namespace Engine
         /// <summary>
         /// Random texture
         /// </summary>
-        private readonly EngineShaderResourceView textureRandom = null;
+        private EngineShaderResourceView textureRandom = null;
         /// <summary>
         /// Folliage map for vegetation planting task
         /// </summary>
-        private readonly FoliageMap foliageMap = null;
+        private FoliageMap foliageMap = null;
         /// <summary>
         /// Foliage map channels for vegetation planting task
         /// </summary>
-        private readonly FoliageMapChannel[] foliageMapChannels = null;
+        private FoliageMapChannel[] foliageMapChannels = null;
         /// <summary>
         /// Material
         /// </summary>
-        private readonly MeshMaterial material;
+        private MeshMaterial material;
         /// <summary>
         /// Foliage visible sphere
         /// </summary>
@@ -615,18 +680,74 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~GroundGardener()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Resource disposal
         /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Helper.Dispose(this.foliageBuffers);
-                Helper.Dispose(this.foliagePatches);
-                Helper.Dispose(this.foliageMap);
-                Helper.Dispose(this.foliageMapChannels);
+                if (this.foliageBuffers != null)
+                {
+                    for (int i = 0; i < this.foliageBuffers.Count; i++)
+                    {
+                        this.foliageBuffers[i]?.Dispose();
+                        this.foliageBuffers[i] = null;
+                    }
 
-                Helper.Dispose(this.textureRandom);
+                    this.foliageBuffers.Clear();
+                    this.foliageBuffers = null;
+                }
+
+                if (this.foliagePatches != null)
+                {
+                    foreach (var item in this.foliagePatches)
+                    {
+                        foreach (var value in item.Value)
+                        {
+                            value?.Dispose();
+                        }
+                    }
+
+                    this.foliagePatches.Clear();
+                    this.foliagePatches = null;
+                }
+
+                if (this.foliageMap != null)
+                {
+                    this.foliageMap.Dispose();
+                    this.foliageMap = null;
+                }
+
+                if (this.foliageMapChannels != null)
+                {
+                    for (int i = 0; i < this.foliageMapChannels.Length; i++)
+                    {
+                        this.foliageMapChannels[i]?.Dispose();
+                        this.foliageMapChannels[i] = null;
+                    }
+
+                    this.foliageMapChannels = null;
+                }
+
+                if (this.textureRandom != null)
+                {
+                    this.textureRandom.Dispose();
+                    this.textureRandom = null;
+                }
+
+                if (this.material != null)
+                {
+                    this.material.Dispose();
+                    this.material = null;
+                }
             }
         }
 

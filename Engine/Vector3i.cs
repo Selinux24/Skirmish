@@ -19,7 +19,7 @@ namespace Engine
             private const int HashConstX = unchecked((int)0x8da6b343);
             private const int HashConstZ = unchecked((int)0xcb1ab31f);
 
-            private int epsilonY;
+            private readonly int epsilonY;
 
             /// <summary>
             /// Initializes a new instance of the <see cref="RoughYEqualityComparer"/> class.
@@ -59,8 +59,7 @@ namespace Engine
         /// <returns>The component-wise minimum of the two vertices.</returns>
         public static Vector3i ComponentMin(Vector3i a, Vector3i b)
         {
-            Vector3i v;
-            ComponentMin(ref a, ref b, out v);
+            ComponentMin(ref a, ref b, out Vector3i v);
             return v;
         }
         /// <summary>
@@ -83,8 +82,7 @@ namespace Engine
         /// <returns>The component-wise maximum of the two vertices.</returns>
         public static Vector3i ComponentMax(Vector3i a, Vector3i b)
         {
-            Vector3i v;
-            ComponentMax(ref a, ref b, out v);
+            ComponentMax(ref a, ref b, out Vector3i v);
             return v;
         }
         /// <summary>
@@ -108,8 +106,7 @@ namespace Engine
         /// <returns>A value indicating the leftness of the triangle.</returns>
         public static bool IsLeft(ref Vector3i a, ref Vector3i b, ref Vector3i c)
         {
-            int area;
-            Area2D(ref a, ref b, ref c, out area);
+            Area2D(ref a, ref b, ref c, out int area);
             return area < 0;
         }
         /// <summary>
@@ -121,8 +118,7 @@ namespace Engine
         /// <returns>A value indicating whether the triangle is left or on.</returns>
         public static bool IsLeftOn(ref Vector3i a, ref Vector3i b, ref Vector3i c)
         {
-            int area;
-            Area2D(ref a, ref b, ref c, out area);
+            Area2D(ref a, ref b, ref c, out int area);
             return area <= 0;
         }
         /// <summary>
@@ -220,8 +216,7 @@ namespace Engine
         /// <returns>A value indicating whether the points are collinear.</returns>
         public static bool IsCollinear(ref Vector3i a, ref Vector3i b, ref Vector3i c)
         {
-            int area;
-            Area2D(ref a, ref b, ref c, out area);
+            Area2D(ref a, ref b, ref c, out int area);
             return area == 0;
         }
         /// <summary>

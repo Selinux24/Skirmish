@@ -27,10 +27,7 @@ namespace Engine.Content
             }
             set
             {
-                Vector3 scale;
-                Quaternion rotation;
-                Vector3 translation;
-                value.Decompose(out scale, out rotation, out translation);
+                value.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
 
                 this.Position = translation;
                 this.Rotation = rotation;

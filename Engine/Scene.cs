@@ -112,7 +112,7 @@ namespace Engine
         /// <summary>
         /// Scene component list
         /// </summary>
-        private readonly List<SceneObject> components = new List<SceneObject>();
+        private List<SceneObject> components = new List<SceneObject>();
         /// <summary>
         /// Control captured with mouse
         /// </summary>
@@ -241,9 +241,35 @@ namespace Engine
                     BufferManager = null;
                 }
 
-                Helper.Dispose(this.Renderer);
-                Helper.Dispose(this.Camera);
-                Helper.Dispose(this.components);
+                if (Renderer != null)
+                {
+                    Renderer.Dispose();
+                    Renderer = null;
+                }
+
+                if (Camera != null)
+                {
+                    Camera.Dispose();
+                    Camera = null;
+                }
+
+                if (components != null)
+                {
+                    for (int i = 0; i < components.Count; i++)
+                    {
+                        components[i]?.Dispose();
+                        components[i] = null;
+                    }
+
+                    components.Clear();
+                    components = null;
+                }
+
+                if (NavigationGraph != null)
+                {
+                    NavigationGraph.Dispose();
+                    NavigationGraph = null;
+                }
             }
         }
 
@@ -376,7 +402,11 @@ namespace Engine
 
             if (isValid)
             {
-                Helper.Dispose(this.Renderer);
+                if (this.Renderer != null)
+                {
+                    this.Renderer.Dispose();
+                    this.Renderer = null;
+                }
                 Counters.ClearAll();
                 this.Renderer = renderer;
                 this.sceneMode = mode;
@@ -634,11 +664,11 @@ namespace Engine
                 MeshMaterial.Default
             };
 
-            var matComponents = this.components.FindAll(c => c.Is<UseMaterials>());
+            var matComponents = this.components.FindAll(c => c.Is<IUseMaterials>());
 
             foreach (var component in matComponents)
             {
-                var matList = component.Get<UseMaterials>().Materials;
+                var matList = component.Get<IUseMaterials>().Materials;
                 if (matList != null && matList.Length > 0)
                 {
                     mats.AddRange(matList);
@@ -688,11 +718,11 @@ namespace Engine
         {
             List<SkinningData> skData = new List<SkinningData>();
 
-            var skComponents = this.components.FindAll(c => c.Is<UseSkinningData>());
+            var skComponents = this.components.FindAll(c => c.Is<IUseSkinningData>());
 
             foreach (var component in skComponents)
             {
-                var skList = component.Get<UseSkinningData>().SkinningData;
+                var skList = component.Get<IUseSkinningData>().SkinningData;
                 if (skList != null && skList.Length > 0)
                 {
                     skData.AddRange(skList);
@@ -1195,7 +1225,8 @@ namespace Engine
                 this.NavigationGraph.Updating -= GraphUpdating;
                 this.NavigationGraph.Updated -= GraphUpdated;
 
-                Helper.Dispose(this.NavigationGraph);
+                this.NavigationGraph.Dispose();
+                this.NavigationGraph = null;
 
                 this.boundingBox = new BoundingBox();
             }

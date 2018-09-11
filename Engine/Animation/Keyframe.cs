@@ -30,10 +30,7 @@ namespace Engine.Animation
             {
                 Matrix trn = value;
 
-                Vector3 location;
-                Quaternion rotation;
-                Vector3 scale;
-                if (trn.Decompose(out scale, out rotation, out location))
+                if (trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 location))
                 {
                     this.transform = trn;
                     this.Translation = location;

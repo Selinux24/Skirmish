@@ -292,15 +292,15 @@ namespace Engine.Effects
         /// <summary>
         /// Sampler point
         /// </summary>
-        private readonly EngineSamplerState samplerPoint = null;
+        private EngineSamplerState samplerPoint = null;
         /// <summary>
         /// Sampler linear
         /// </summary>
-        private readonly EngineSamplerState samplerLinear = null;
+        private EngineSamplerState samplerLinear = null;
         /// <summary>
         /// Sampler anisotropic
         /// </summary>
-        private readonly EngineSamplerState samplerAnisotropic = null;
+        private EngineSamplerState samplerAnisotropic = null;
 
         /// <summary>
         /// Hemispheric lights
@@ -852,6 +852,14 @@ namespace Engine.Effects
             this.samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 4);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EffectDefaultBasic()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Dispose resources
         /// </summary>
         /// <param name="disposing">Free managed resources</param>
@@ -859,9 +867,21 @@ namespace Engine.Effects
         {
             if (disposing)
             {
-                Helper.Dispose(this.samplerPoint);
-                Helper.Dispose(this.samplerLinear);
-                Helper.Dispose(this.samplerAnisotropic);
+                if (this.samplerPoint != null)
+                {
+                    this.samplerPoint.Dispose();
+                    this.samplerPoint = null;
+                }
+                if (this.samplerLinear != null)
+                {
+                    this.samplerLinear.Dispose();
+                    this.samplerLinear = null;
+                }
+                if (this.samplerAnisotropic != null)
+                {
+                    this.samplerAnisotropic.Dispose();
+                    this.samplerAnisotropic = null;
+                }
             }
 
             base.Dispose(disposing);

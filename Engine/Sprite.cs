@@ -192,6 +192,14 @@ namespace Engine
             this.Manipulator = new Manipulator2D();
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Sprite()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Internal resources disposition
         /// </summary>
         protected override void Dispose(bool disposing)

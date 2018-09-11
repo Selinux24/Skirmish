@@ -65,7 +65,17 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                Helper.Dispose(this.rtv);
+                if (rtv != null)
+                {
+                    for (int i = 0; i < rtv.Count; i++)
+                    {
+                        rtv[i]?.Dispose();
+                        rtv[i] = null;
+                    }
+
+                    rtv.Clear();
+                    rtv = null;
+                }
             }
         }
 

@@ -31,7 +31,7 @@ namespace Engine
         /// <summary>
         /// Buffer binding for emitter buffer
         /// </summary>
-        private VertexBufferBinding[] emitterBinding;
+        private readonly VertexBufferBinding[] emitterBinding;
         /// <summary>
         /// Buffer binding for drawing buffer
         /// </summary>
@@ -55,7 +55,7 @@ namespace Engine
         /// <summary>
         /// Vertex input stride
         /// </summary>
-        private int inputStride;
+        private readonly int inputStride;
         /// <summary>
         /// First run flag
         /// </summary>
@@ -63,7 +63,7 @@ namespace Engine
         /// <summary>
         /// Random instance
         /// </summary>
-        private Random rnd = new Random();
+        private readonly Random rnd = new Random();
 
         /// <summary>
         /// Game instance
@@ -194,12 +194,36 @@ namespace Engine
         {
             if (disposing)
             {
-                Helper.Dispose(this.emittersBuffer);
-                Helper.Dispose(this.drawingBuffer);
-                Helper.Dispose(this.streamOutBuffer);
-                Helper.Dispose(this.streamOutInputLayout);
-                Helper.Dispose(this.rotatingInputLayout);
-                Helper.Dispose(this.nonRotatingInputLayout);
+                if (emittersBuffer != null)
+                {
+                    emittersBuffer.Dispose();
+                    emittersBuffer = null;
+                }
+                if (drawingBuffer != null)
+                {
+                    drawingBuffer.Dispose();
+                    drawingBuffer = null;
+                }
+                if (streamOutBuffer != null)
+                {
+                    streamOutBuffer.Dispose();
+                    streamOutBuffer = null;
+                }
+                if (streamOutInputLayout != null)
+                {
+                    streamOutInputLayout.Dispose();
+                    streamOutInputLayout = null;
+                }
+                if (rotatingInputLayout != null)
+                {
+                    rotatingInputLayout.Dispose();
+                    rotatingInputLayout = null;
+                }
+                if (nonRotatingInputLayout != null)
+                {
+                    nonRotatingInputLayout.Dispose();
+                    nonRotatingInputLayout = null;
+                }
             }
         }
 

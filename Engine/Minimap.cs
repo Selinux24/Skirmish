@@ -71,6 +71,40 @@ namespace Engine
             this.InitializeContext();
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Minimap()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose objects
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this.renderTarget != null)
+                {
+                    this.renderTarget.Dispose();
+                    this.renderTarget = null;
+                }
+
+                if (this.renderTexture != null)
+                {
+                    this.renderTexture.Dispose();
+                    this.renderTexture = null;
+                }
+
+                if (this.minimapBox != null)
+                {
+                    this.minimapBox.Dispose();
+                    this.minimapBox = null;
+                }
+            }
+        }
+        /// <summary>
         /// Initialize terrain context
         /// </summary>
         private void InitializeContext()
@@ -144,32 +178,6 @@ namespace Engine
 
             this.minimapBox.Texture = this.renderTexture;
             this.minimapBox.Draw(context);
-        }
-        /// <summary>
-        /// Dispose objects
-        /// </summary>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (this.renderTarget != null)
-                {
-                    this.renderTarget.Dispose();
-                    this.renderTarget = null;
-                }
-
-                if (this.renderTexture != null)
-                {
-                    this.renderTexture.Dispose();
-                    this.renderTexture = null;
-                }
-
-                if (this.minimapBox != null)
-                {
-                    this.minimapBox.Dispose();
-                    this.minimapBox = null;
-                }
-            }
         }
         /// <summary>
         /// Resize

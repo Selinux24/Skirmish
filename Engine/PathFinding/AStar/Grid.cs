@@ -25,7 +25,6 @@ namespace Engine.PathFinding.AStar
         /// Build settings
         /// </summary>
         public GridGenerationSettings BuildSettings { get; set; }
-
         /// <summary>
         /// Graph node list
         /// </summary>
@@ -62,9 +61,9 @@ namespace Engine.PathFinding.AStar
         {
             if (disposing)
             {
-                Helper.Dispose(this.BuildSettings);
-                Helper.Dispose(this.Input);
-                Helper.Dispose(this.Nodes);
+                this.Input = null;
+                this.BuildSettings = null;
+                this.Nodes = null;
             }
         }
 
@@ -126,8 +125,7 @@ namespace Engine.PathFinding.AStar
 
             for (int i = 0; i < this.Nodes.Length; i++)
             {
-                float distance;
-                if (this.Nodes[i].Contains(position, out distance))
+                if (this.Nodes[i].Contains(position, out float distance))
                 {
                     nearest = this.Nodes[i].Center;
 

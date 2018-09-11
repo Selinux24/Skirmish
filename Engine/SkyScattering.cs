@@ -226,6 +226,14 @@ namespace Engine
             this.InitializeBuffers(description.Name);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~SkyScattering()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Resource releasing
         /// </summary>
         protected override void Dispose(bool disposing)
@@ -327,9 +335,7 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         private void InitializeBuffers(string name)
         {
-            Vector3[] vData;
-            uint[] iData;
-            GeometryUtil.CreateSphere(1, 10, 75, out vData, out iData);
+            GeometryUtil.CreateSphere(1, 10, 75, out Vector3[] vData, out uint[] iData);
 
             var vertices = new List<VertexPosition>();
 
@@ -360,9 +366,7 @@ namespace Engine
         {
             Color4 outColor = new Color4(0f, 0f, 0f, 0f);
 
-            float yaw;
-            float pitch;
-            Helper.GetAnglesFromVector(Vector3.ForwardLH, out yaw, out pitch);
+            Helper.GetAnglesFromVector(Vector3.ForwardLH, out float yaw, out float pitch);
             float originalYaw = yaw;
 
             pitch = MathUtil.DegreesToRadians(10.0f);
@@ -371,14 +375,12 @@ namespace Engine
 
             for (uint i = 0; i < samples; i++)
             {
-                Vector3 scatterPos;
-                Helper.GetVectorFromAngles(yaw, pitch, out scatterPos);
+                Helper.GetVectorFromAngles(yaw, pitch, out Vector3 scatterPos);
 
                 scatterPos *= this.PlanetRadius + this.PlanetAtmosphereRadius;
                 scatterPos.Y -= this.PlanetRadius;
 
-                Color4 tmpColor;
-                this.GetColor(scatterPos, lightDirection, out tmpColor);
+                this.GetColor(scatterPos, lightDirection, out Color4 tmpColor);
 
                 outColor += tmpColor;
 

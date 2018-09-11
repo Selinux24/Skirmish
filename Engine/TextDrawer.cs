@@ -211,6 +211,14 @@ namespace Engine
             this.MapText();
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~TextDrawer()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Dispose
         /// </summary>
         protected override void Dispose(bool disposing)

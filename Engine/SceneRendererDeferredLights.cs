@@ -122,24 +122,83 @@ namespace Engine
             //Depth-stencil state for volume drawing (Process pixels if stencil value != stencil reference)
             this.depthStencilVolumeDrawing = EngineDepthStencilState.VolumeDrawing(graphics);
         }
-
         /// <summary>
-        /// Resources dispose
+        /// Destructor
+        /// </summary>
+        ~SceneRendererDeferredLights()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
         /// </summary>
         public void Dispose()
         {
-            Helper.Dispose(this.lightGeometryVertexBuffer);
-            Helper.Dispose(this.lightGeometryIndexBuffer);
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (this.lightGeometryVertexBuffer != null)
+                {
+                    this.lightGeometryVertexBuffer.Dispose();
+                    this.lightGeometryVertexBuffer = null;
+                }
+                if (this.lightGeometryIndexBuffer != null)
+                {
+                    this.lightGeometryIndexBuffer.Dispose();
+                    this.lightGeometryIndexBuffer = null;
+                }
 
-            Helper.Dispose(this.globalLightInputLayout);
-            Helper.Dispose(this.pointLightInputLayout);
-            Helper.Dispose(this.spotLightInputLayout);
-            Helper.Dispose(this.combineLightsInputLayout);
+                if (this.globalLightInputLayout != null)
+                {
+                    this.globalLightInputLayout.Dispose();
+                    this.globalLightInputLayout = null;
+                }
+                if (this.pointLightInputLayout != null)
+                {
+                    this.pointLightInputLayout.Dispose();
+                    this.pointLightInputLayout = null;
+                }
+                if (this.spotLightInputLayout != null)
+                {
+                    this.spotLightInputLayout.Dispose();
+                    this.spotLightInputLayout = null;
+                }
+                if (this.combineLightsInputLayout != null)
+                {
+                    this.combineLightsInputLayout.Dispose();
+                    this.combineLightsInputLayout = null;
+                }
 
-            Helper.Dispose(this.rasterizerStencilPass);
-            Helper.Dispose(this.rasterizerLightingPass);
-            Helper.Dispose(this.depthStencilVolumeMarking);
-            Helper.Dispose(this.depthStencilVolumeDrawing);
+                if (this.rasterizerStencilPass != null)
+                {
+                    this.rasterizerStencilPass.Dispose();
+                    this.rasterizerStencilPass = null;
+                }
+                if (this.rasterizerLightingPass != null)
+                {
+                    this.rasterizerLightingPass.Dispose();
+                    this.rasterizerLightingPass = null;
+                }
+                if (this.depthStencilVolumeMarking != null)
+                {
+                    this.depthStencilVolumeMarking.Dispose();
+                    this.depthStencilVolumeMarking = null;
+                }
+                if (this.depthStencilVolumeDrawing != null)
+                {
+                    this.depthStencilVolumeDrawing.Dispose();
+                    this.depthStencilVolumeDrawing = null;
+                }
+            }
         }
 
         /// <summary>
@@ -154,12 +213,10 @@ namespace Engine
             List<uint> indx = new List<uint>();
 
             {
-                Vector3[] cv;
-                uint[] indices;
                 GeometryUtil.CreateScreen(
                     width, height,
-                    out cv,
-                    out indices);
+                    out Vector3[] cv,
+                    out uint[] indices);
                 var vertices = new VertexPosition[cv.Length];
                 for (int i = 0; i < vertices.Length; i++)
                 {
@@ -174,12 +231,10 @@ namespace Engine
             }
 
             {
-                Vector3[] cv;
-                uint[] indices;
                 GeometryUtil.CreateSphere(
                     1, 16, 16,
-                    out cv,
-                    out indices);
+                    out Vector3[] cv,
+                    out uint[] indices);
                 var vertices = new VertexPosition[cv.Length];
                 for (int i = 0; i < vertices.Length; i++)
                 {
@@ -200,12 +255,10 @@ namespace Engine
             }
 
             {
-                Vector3[] cv;
-                uint[] indices;
                 GeometryUtil.CreateSphere(
                     1, 16, 16,
-                    out cv,
-                    out indices);
+                    out Vector3[] cv,
+                    out uint[] indices);
                 var vertices = new VertexPosition[cv.Length];
                 for (int i = 0; i < vertices.Length; i++)
                 {

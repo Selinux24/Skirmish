@@ -211,10 +211,10 @@ namespace Engine.Collections.Generic
             this.LeftNeighbor = this.FindNeighborNodeAtLeft();
             this.RightNeighbor = this.FindNeighborNodeAtRight();
 
-            this.TopLeftNeighbor = this.TopNeighbor != null ? this.TopNeighbor.FindNeighborNodeAtLeft() : null;
-            this.TopRightNeighbor = this.TopNeighbor != null ? this.TopNeighbor.FindNeighborNodeAtRight() : null;
-            this.BottomLeftNeighbor = this.BottomNeighbor != null ? this.BottomNeighbor.FindNeighborNodeAtLeft() : null;
-            this.BottomRightNeighbor = this.BottomNeighbor != null ? this.BottomNeighbor.FindNeighborNodeAtRight() : null;
+            this.TopLeftNeighbor = this.TopNeighbor?.FindNeighborNodeAtLeft();
+            this.TopRightNeighbor = this.TopNeighbor?.FindNeighborNodeAtRight();
+            this.BottomLeftNeighbor = this.BottomNeighbor?.FindNeighborNodeAtLeft();
+            this.BottomRightNeighbor = this.BottomNeighbor?.FindNeighborNodeAtRight();
 
             if (this.Children != null && this.Children.Length > 0)
             {

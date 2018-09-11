@@ -64,7 +64,7 @@ namespace Engine.Common
         {
             return new VertexPosition
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Position = v.Position ?? Vector3.Zero,
             };
         }
         /// <summary>
@@ -76,8 +76,8 @@ namespace Engine.Common
         {
             return new VertexPositionColor
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
+                Position = v.Position ?? Vector3.Zero,
+                Color = v.Color ?? Color4.White,
             };
         }
         /// <summary>
@@ -89,9 +89,9 @@ namespace Engine.Common
         {
             return new VertexPositionNormalColor
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
+                Position = v.Position ?? Vector3.Zero,
+                Normal = v.Normal ?? Vector3.Zero,
+                Color = v.Color ?? Color4.White,
             };
         }
         /// <summary>
@@ -103,8 +103,8 @@ namespace Engine.Common
         {
             return new VertexPositionTexture
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero
+                Position = v.Position ?? Vector3.Zero,
+                Texture = v.Texture ?? Vector2.Zero
             };
         }
         /// <summary>
@@ -116,9 +116,9 @@ namespace Engine.Common
         {
             return new VertexPositionNormalTexture
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero
+                Position = v.Position ?? Vector3.Zero,
+                Normal = v.Normal ?? Vector3.Zero,
+                Texture = v.Texture ?? Vector2.Zero
             };
         }
         /// <summary>
@@ -130,10 +130,10 @@ namespace Engine.Common
         {
             return new VertexPositionNormalTextureTangent
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
-                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
+                Position = v.Position ?? Vector3.Zero,
+                Normal = v.Normal ?? Vector3.Zero,
+                Texture = v.Texture ?? Vector2.Zero,
+                Tangent = v.Tangent ?? Vector3.UnitX,
             };
         }
         /// <summary>
@@ -146,7 +146,7 @@ namespace Engine.Common
         {
             return new VertexSkinnedPosition
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
+                Position = v.Position ?? Vector3.Zero,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
@@ -166,8 +166,8 @@ namespace Engine.Common
         {
             return new VertexSkinnedPositionColor
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
+                Position = v.Position ?? Vector3.Zero,
+                Color = v.Color ?? Color4.White,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
@@ -187,9 +187,9 @@ namespace Engine.Common
         {
             return new VertexSkinnedPositionNormalColor
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
+                Position = v.Position ?? Vector3.Zero,
+                Normal = v.Normal ?? Vector3.Zero,
+                Color = v.Color ?? Color4.White,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
@@ -209,8 +209,8 @@ namespace Engine.Common
         {
             return new VertexSkinnedPositionTexture
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Position = v.Position ?? Vector3.Zero,
+                Texture = v.Texture ?? Vector2.Zero,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
@@ -230,9 +230,9 @@ namespace Engine.Common
         {
             return new VertexSkinnedPositionNormalTexture
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
+                Position = v.Position ?? Vector3.Zero,
+                Normal = v.Normal ?? Vector3.Zero,
+                Texture = v.Texture ?? Vector2.Zero,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
@@ -252,10 +252,10 @@ namespace Engine.Common
         {
             return new VertexSkinnedPositionNormalTextureTangent
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
-                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
+                Position = v.Position ?? Vector3.Zero,
+                Normal = v.Normal ?? Vector3.Zero,
+                Texture = v.Texture ?? Vector2.Zero,
+                Tangent = v.Tangent ?? Vector3.UnitX,
                 Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
                 Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
                 Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
@@ -274,11 +274,11 @@ namespace Engine.Common
         {
             return new VertexTerrain
             {
-                Position = v.Position.HasValue ? v.Position.Value : Vector3.Zero,
-                Normal = v.Normal.HasValue ? v.Normal.Value : Vector3.Zero,
-                Texture = v.Texture.HasValue ? v.Texture.Value : Vector2.Zero,
-                Tangent = v.Tangent.HasValue ? v.Tangent.Value : Vector3.UnitX,
-                Color = v.Color.HasValue ? v.Color.Value : Color4.White,
+                Position = v.Position ?? Vector3.Zero,
+                Normal = v.Normal ?? Vector3.Zero,
+                Texture = v.Texture ?? Vector2.Zero,
+                Tangent = v.Tangent ?? Vector3.UnitX,
+                Color = v.Color ?? Color4.White,
             };
         }
         /// <summary>
@@ -553,7 +553,7 @@ namespace Engine.Common
         public static Vector3 ApplyWeight(IVertexData vertex, Matrix[] boneTransforms)
         {
             Vector3 position = vertex.HasChannel(VertexDataChannels.Position) ? vertex.GetChannelValue<Vector3>(VertexDataChannels.Position) : Vector3.Zero;
-            if (VertexData.IsSkinned(vertex.VertexType))
+            if (IsSkinned(vertex.VertexType))
             {
                 byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : null;
                 float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : null;
@@ -568,8 +568,7 @@ namespace Engine.Common
                         byte index = boneIndices[w];
                         var boneTransform = boneTransforms != null ? boneTransforms[index] : Matrix.Identity;
 
-                        Vector3 p;
-                        Vector3.TransformCoordinate(ref position, ref boneTransform, out p);
+                        Vector3.TransformCoordinate(ref position, ref boneTransform, out Vector3 p);
 
                         t += (p * weight);
                     }
@@ -597,8 +596,7 @@ namespace Engine.Common
                 {
                     Vector3 position = result.Position.Value;
 
-                    Vector3 p;
-                    Vector3.TransformCoordinate(ref position, ref transform, out p);
+                    Vector3.TransformCoordinate(ref position, ref transform, out Vector3 p);
 
                     result.Position = p;
                 }

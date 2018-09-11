@@ -11,11 +11,11 @@ namespace Engine.Collections
     /// <typeparam name="TPriority">Priority value type</typeparam>
     public class PriorityDictionary<TValue, TPriority> : ICollection, IEnumerable<PriorityDictionaryItem<TValue, TPriority>>
     {
-        private const Int32 DefaultCapacity = 16;
+        private const int DefaultCapacity = 16;
 
-        private Int32 capacity;
+        private int capacity;
         private PriorityDictionaryItem<TValue, TPriority>[] items;
-        private Comparison<TPriority> compareFunc;
+        private readonly Comparison<TPriority> compareFunc;
 
         /// <summary>
         /// Gets or sets queue capacity

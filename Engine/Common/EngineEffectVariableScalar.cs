@@ -11,7 +11,7 @@ namespace Engine.Common
         /// <summary>
         /// Effect scalar variable
         /// </summary>
-        private EffectScalarVariable variable = null;
+        private readonly EffectScalarVariable variable = null;
 
         /// <summary>
         /// Constructor

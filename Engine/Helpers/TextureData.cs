@@ -245,6 +245,32 @@ namespace Engine.Helpers
                 throw new EngineException("Bad DDS File");
             }
         }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~TextureData()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Resource disposal
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.data = null;
+            }
+        }
 
         /// <summary>
         /// Gets a data box
@@ -364,14 +390,6 @@ namespace Engine.Helpers
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Resource dispose
-        /// </summary>
-        public void Dispose()
-        {
-            this.data = null;
         }
     }
 }

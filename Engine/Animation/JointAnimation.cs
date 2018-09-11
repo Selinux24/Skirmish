@@ -59,10 +59,7 @@ namespace Engine.Animation
         /// <returns>Return interpolated transformation</returns>
         public Matrix Interpolate(float time)
         {
-            Vector3 translation;
-            Quaternion rotation;
-            Vector3 scale;
-            this.Interpolate(time, out translation, out rotation, out scale);
+            this.Interpolate(time, out Vector3 translation, out Quaternion rotation, out Vector3 scale);
 
             //Create the combined transformation matrix
             return 

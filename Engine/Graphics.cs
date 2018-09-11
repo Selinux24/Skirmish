@@ -50,7 +50,7 @@ namespace Engine
         /// <summary>
         /// Graphics device
         /// </summary>
-        private readonly Device3 device = null;
+        private Device3 device = null;
         /// <summary>
         /// Graphics inmmediate context
         /// </summary>
@@ -534,24 +534,34 @@ namespace Engine
                 {
                     if (this.swapChain.IsFullScreen) this.swapChain.IsFullScreen = false;
 
-                    Helper.Dispose(this.swapChain);
+                    if (this.swapChain != null)
+                    {
+                        this.swapChain.Dispose();
+                        this.swapChain = null;
+                    }
                 }
 
                 this.DisposeResources();
 
-                Helper.Dispose(this.device);
+                if (this.device != null)
+                {
+                    this.device.Dispose();
+                    this.device = null;
+                }
 
 #if DEBUG
                 if (this.deviceDebugInfoQueue != null)
                 {
-                    Helper.Dispose(this.deviceDebugInfoQueue);
+                    this.deviceDebugInfoQueue.Dispose();
+                    this.deviceDebugInfoQueue = null;
                 }
 
                 if (this.deviceDebug != null)
                 {
                     this.deviceDebug.ReportLiveDeviceObjects(ReportingLevel.Detail);
 
-                    Helper.Dispose(this.deviceDebug);
+                    this.deviceDebug.Dispose();
+                    this.deviceDebug = null;
                 }
 #endif
             }
@@ -1058,25 +1068,89 @@ namespace Engine
                 this.renderTargetView.Dispose();
                 this.renderTargetView = null;
             }
-            Helper.Dispose(this.depthStencilView);
+            if (this.depthStencilView != null)
+            {
+                this.depthStencilView.Dispose();
+                this.depthStencilView = null;
+            }
 
-            Helper.Dispose(this.depthStencilzBufferEnabled);
-            Helper.Dispose(this.depthStencilzBufferDisabled);
-            Helper.Dispose(this.depthStencilRDzBufferEnabled);
-            Helper.Dispose(this.depthStencilRDzBufferDisabled);
-            Helper.Dispose(this.depthStencilNone);
-            Helper.Dispose(this.depthStencilShadowMapping);
+            if (this.depthStencilzBufferEnabled != null)
+            {
+                this.depthStencilzBufferEnabled.Dispose();
+                this.depthStencilzBufferEnabled = null;
+            }
+            if (this.depthStencilzBufferDisabled != null)
+            {
+                this.depthStencilzBufferDisabled.Dispose();
+                this.depthStencilzBufferDisabled = null;
+            }
+            if (this.depthStencilRDzBufferEnabled != null)
+            {
+                this.depthStencilRDzBufferEnabled.Dispose();
+                this.depthStencilRDzBufferEnabled = null;
+            }
+            if (this.depthStencilRDzBufferDisabled != null)
+            {
+                this.depthStencilRDzBufferDisabled.Dispose();
+                this.depthStencilRDzBufferDisabled = null;
+            }
+            if (this.depthStencilNone != null)
+            {
+                this.depthStencilNone.Dispose();
+                this.depthStencilNone = null;
+            }
+            if (this.depthStencilShadowMapping != null)
+            {
+                this.depthStencilShadowMapping.Dispose();
+                this.depthStencilShadowMapping = null;
+            }
 
-            Helper.Dispose(this.rasterizerDefault);
-            Helper.Dispose(this.rasterizerWireframe);
-            Helper.Dispose(this.rasterizerNoCull);
-            Helper.Dispose(this.rasterizerCullFrontFace);
-            Helper.Dispose(this.rasterizerShadowMapping);
+            if (this.rasterizerDefault != null)
+            {
+                this.rasterizerDefault.Dispose();
+                this.rasterizerDefault = null;
+            }
+            if (this.rasterizerWireframe != null)
+            {
+                this.rasterizerWireframe.Dispose();
+                this.rasterizerWireframe = null;
+            }
+            if (this.rasterizerNoCull != null)
+            {
+                this.rasterizerNoCull.Dispose();
+                this.rasterizerNoCull = null;
+            }
+            if (this.rasterizerCullFrontFace != null)
+            {
+                this.rasterizerCullFrontFace.Dispose();
+                this.rasterizerCullFrontFace = null;
+            }
+            if (this.rasterizerShadowMapping != null)
+            {
+                this.rasterizerShadowMapping.Dispose();
+                this.rasterizerShadowMapping = null;
+            }
 
-            Helper.Dispose(this.blendDefault);
-            Helper.Dispose(this.blendDefaultAlpha);
-            Helper.Dispose(this.blendTransparent);
-            Helper.Dispose(this.blendAdditive);
+            if (this.blendDefault != null)
+            {
+                this.blendDefault.Dispose();
+                this.blendDefault = null;
+            }
+            if (this.blendDefaultAlpha != null)
+            {
+                this.blendDefaultAlpha.Dispose();
+                this.blendDefaultAlpha = null;
+            }
+            if (this.blendTransparent != null)
+            {
+                this.blendTransparent.Dispose();
+                this.blendTransparent = null;
+            }
+            if (this.blendAdditive != null)
+            {
+                this.blendAdditive.Dispose();
+                this.blendAdditive = null;
+            }
         }
 
         /// <summary>
@@ -1685,7 +1759,15 @@ namespace Engine
 
                 var resource = this.CreateResource(textureList);
 
-                Helper.Dispose(textureList);
+                if (textureList != null)
+                {
+                    for (int i = 0; i < textureList.Length; i++)
+                    {
+                        textureList[i]?.Dispose();
+                        textureList[i] = null;
+                    }
+                    textureList = null;
+                }
 
                 return new EngineShaderResourceView(resource);
             }
@@ -1709,7 +1791,15 @@ namespace Engine
 
                 var resource = this.CreateResource(textureList);
 
-                Helper.Dispose(textureList);
+                if (textureList != null)
+                {
+                    for (int i = 0; i < textureList.Length; i++)
+                    {
+                        textureList[i]?.Dispose();
+                        textureList[i] = null;
+                    }
+                    textureList = null;
+                }
 
                 return new EngineShaderResourceView(resource);
             }
@@ -1775,7 +1865,15 @@ namespace Engine
 
                 var resource = this.CreateResource(textureList);
 
-                Helper.Dispose(textureList);
+                if (textureList != null)
+                {
+                    for (int i = 0; i < textureList.Length; i++)
+                    {
+                        textureList[i]?.Dispose();
+                        textureList[i] = null;
+                    }
+                    textureList = null;
+                }
 
                 return new EngineShaderResourceView(resource);
             }
@@ -1799,7 +1897,15 @@ namespace Engine
 
                 var resource = this.CreateResource(textureList);
 
-                Helper.Dispose(textureList);
+                if (textureList != null)
+                {
+                    for (int i = 0; i < textureList.Length; i++)
+                    {
+                        textureList[i]?.Dispose();
+                        textureList[i] = null;
+                    }
+                    textureList = null;
+                }
 
                 return new EngineShaderResourceView(resource);
             }

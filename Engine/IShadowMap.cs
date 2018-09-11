@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -7,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Shadow map interface
     /// </summary>
-    public interface IShadowMap
+    public interface IShadowMap : IDisposable
     {
         /// <summary>
         /// Deph map texture

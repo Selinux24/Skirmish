@@ -104,6 +104,14 @@ namespace Engine
             this.Height = description.Height;
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~SpriteTexture()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Dispose objects
         /// </summary>
         protected override void Dispose(bool disposing)

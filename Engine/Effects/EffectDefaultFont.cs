@@ -17,19 +17,19 @@ namespace Engine.Effects
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Color effect variable
         /// </summary>
-        private EngineEffectVariableVector color = null;
+        private readonly EngineEffectVariableVector color = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private EngineEffectVariableTexture texture = null;
+        private readonly EngineEffectVariableTexture texture = null;
 
         /// <summary>
         /// Current font texture

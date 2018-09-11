@@ -84,27 +84,6 @@ namespace Engine
                     }
                     else
                     {
-                        Vector3 norm1;
-                        Vector3 norm2;
-                        Vector3 norm3;
-                        Vector3 norm4;
-                        Vector3 norm5;
-                        Vector3 norm6;
-
-                        Vector3 tan1;
-                        Vector3 tan2;
-                        Vector3 tan3;
-                        Vector3 tan4;
-                        Vector3 tan5;
-                        Vector3 tan6;
-
-                        Vector3 biNorm1;
-                        Vector3 biNorm2;
-                        Vector3 biNorm3;
-                        Vector3 biNorm4;
-                        Vector3 biNorm5;
-                        Vector3 biNorm6;
-
                         long index2;
                         long index3;
                         VertexData pos1 = vertList[index1];
@@ -118,7 +97,7 @@ namespace Engine
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
                             pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out tan1, out biNorm1, out norm1);
+                            out Vector3 tan1, out Vector3 biNorm1, out Vector3 norm1);
 
                         index2 = (y * width) + (x - 1);
                         index3 = ((y + 1) * width) + (x - 1);
@@ -127,7 +106,7 @@ namespace Engine
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
                             pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out tan2, out biNorm2, out norm2);
+                            out Vector3 tan2, out Vector3 biNorm2, out Vector3 norm2);
 
                         index2 = ((y + 1) * width) + (x - 1);
                         index3 = ((y + 1) * width) + x;
@@ -136,7 +115,7 @@ namespace Engine
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
                             pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out tan3, out biNorm3, out norm3);
+                            out Vector3 tan3, out Vector3 biNorm3, out Vector3 norm3);
 
                         index2 = ((y + 1) * width) + x;
                         index3 = (y * width) + (x + 1);
@@ -145,7 +124,7 @@ namespace Engine
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
                             pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out tan4, out biNorm4, out norm4);
+                            out Vector3 tan4, out Vector3 biNorm4, out Vector3 norm4);
 
                         index2 = (y * width) + (x + 1);
                         index3 = ((y - 1) * width) + (x + 1);
@@ -154,7 +133,7 @@ namespace Engine
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
                             pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out tan5, out biNorm5, out norm5);
+                            out Vector3 tan5, out Vector3 biNorm5, out Vector3 norm5);
 
                         index2 = ((y - 1) * width) + (x + 1);
                         index3 = ((y - 1) * width) + x;
@@ -163,7 +142,7 @@ namespace Engine
                         GeometryUtil.ComputeNormals(
                             pos1.Position.Value, pos3.Position.Value, pos2.Position.Value,
                             pos1.Texture.Value, pos3.Texture.Value, pos2.Texture.Value,
-                            out tan6, out biNorm6, out norm6);
+                            out Vector3 tan6, out Vector3 biNorm6, out Vector3 norm6);
 
                         Vector3 norm = (norm1 + norm2 + norm3 + norm4 + norm5 + norm6) / 6.0f;
                         Vector3 tang = (tan1 + tan2 + tan3 + tan4 + tan5 + tan6) / 6.0f;

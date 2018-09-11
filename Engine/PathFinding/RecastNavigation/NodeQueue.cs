@@ -1,15 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    /// <summary>
+    /// Node queue
+    /// </summary>
     public class NodeQueue : IDisposable
     {
-        private Node[] m_heap;
-        private int m_capacity;
+        private readonly int m_capacity;
         private int m_size;
+        private Node[] m_heap;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="n">Node capacity</param>
         public NodeQueue(int n)
         {
             m_capacity = n;
@@ -40,7 +46,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (disposing)
             {
-                Helper.Dispose(m_heap);
+                m_heap = null;
             }
         }
 

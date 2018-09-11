@@ -272,6 +272,11 @@ namespace Terrain.AI
                     }
                 }
             }
+            else if (this.Stats.Life > 0)
+            {
+                // If it's alive, set idle state
+                this.ChangeState(AIStates.Idle);
+            }
 
             this.Stats.Update(context.GameTime);
 

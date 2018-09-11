@@ -34,7 +34,6 @@ namespace Engine.Common
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-
         /// <summary>
         /// Dispose resources
         /// </summary>

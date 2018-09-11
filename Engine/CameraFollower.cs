@@ -4,7 +4,7 @@ namespace Engine
 {
     public class CameraFollower : IFollower
     {
-        private Manipulator3D manipulator;
+        private readonly Manipulator3D manipulator;
 
         private Vector3 positionOffset = Vector3.Zero;
         private Vector3 viewOffset = Vector3.ForwardLH;

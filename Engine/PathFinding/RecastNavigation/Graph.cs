@@ -527,7 +527,16 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (disposing)
             {
-                Helper.Dispose(MeshQueryDictionary);
+                if (this.MeshQueryDictionary != null)
+                {
+                    foreach (var item in this.MeshQueryDictionary)
+                    {
+                        item.Value?.Dispose();
+                    }
+
+                    this.MeshQueryDictionary.Clear();
+                    this.MeshQueryDictionary = null;
+                }
             }
         }
 

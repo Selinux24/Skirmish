@@ -224,7 +224,7 @@ namespace Engine
         /// <returns>Returns the internal bounding box for culling tests</returns>
         public virtual BoundingBox GetBoundingBox()
         {
-            return currentBoundingBox.HasValue ? currentBoundingBox.Value : new BoundingBox();
+            return currentBoundingBox ?? new BoundingBox();
         }
     }
 }

@@ -93,51 +93,51 @@ namespace Engine.Effects
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Animation data effect variable
         /// </summary>
-        private EngineEffectVariableScalar animationOffset = null;
+        private readonly EngineEffectVariableScalar animationOffset = null;
         /// <summary>
         /// Material index effect variable
         /// </summary>
-        private EngineEffectVariableScalar materialIndex = null;
+        private readonly EngineEffectVariableScalar materialIndex = null;
         /// <summary>
         /// Texture index effect variable
         /// </summary>
-        private EngineEffectVariableScalar textureIndex = null;
+        private readonly EngineEffectVariableScalar textureIndex = null;
         /// <summary>
         /// Diffuse map effect variable
         /// </summary>
-        private EngineEffectVariableTexture diffuseMap = null;
+        private readonly EngineEffectVariableTexture diffuseMap = null;
         /// <summary>
         /// Normal map effect variable
         /// </summary>
-        private EngineEffectVariableTexture normalMap = null;
+        private readonly EngineEffectVariableTexture normalMap = null;
         /// <summary>
         /// Specular map effect variable
         /// </summary>
-        private EngineEffectVariableTexture specularMap = null;
+        private readonly EngineEffectVariableTexture specularMap = null;
         /// <summary>
         /// Animation palette width effect variable
         /// </summary>
-        private EngineEffectVariableScalar animationPaletteWidth = null;
+        private readonly EngineEffectVariableScalar animationPaletteWidth = null;
         /// <summary>
         /// Animation palette
         /// </summary>
-        private EngineEffectVariableTexture animationPalette = null;
+        private readonly EngineEffectVariableTexture animationPalette = null;
         /// <summary>
         /// Sampler for diffuse maps
         /// </summary>
-        private EngineEffectVariableSampler samplerDiffuse = null;
+        private readonly EngineEffectVariableSampler samplerDiffuse = null;
         /// <summary>
         /// Sampler for normal maps
         /// </summary>
-        private EngineEffectVariableSampler samplerNormal = null;
+        private readonly EngineEffectVariableSampler samplerNormal = null;
 
         /// <summary>
         /// Current diffuse map
@@ -412,14 +412,30 @@ namespace Engine.Effects
             this.samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 4);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EffectDeferredBasic()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Dispose
         /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Helper.Dispose(this.samplerLinear);
-                Helper.Dispose(this.samplerAnisotropic);
+                if (this.samplerLinear != null)
+                {
+                    this.samplerLinear.Dispose();
+                    this.samplerLinear = null;
+                }
+                if (this.samplerAnisotropic != null)
+                {
+                    this.samplerAnisotropic.Dispose();
+                    this.samplerAnisotropic = null;
+                }
             }
 
             base.Dispose(disposing);

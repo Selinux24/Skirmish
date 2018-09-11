@@ -170,6 +170,14 @@ namespace Engine
             this.Text = description.Text;
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~SpriteButton()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Releases used resources
         /// </summary>
         protected override void Dispose(bool disposing)
@@ -267,10 +275,7 @@ namespace Engine
         /// <param name="e">Event arguments</param>
         protected virtual void OnClick(EventArgs e)
         {
-            if (this.Click != null)
-            {
-                this.Click(this, e);
-            }
+            this.Click?.Invoke(this, e);
         }
     }
 }

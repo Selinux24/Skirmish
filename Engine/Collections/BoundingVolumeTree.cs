@@ -117,8 +117,7 @@ namespace Engine.Collections
             }
             else
             {
-                BoundingBoxi bounds;
-                CalcExtends(items, minIndex, maxIndex, out bounds);
+                CalcExtends(items, minIndex, maxIndex, out BoundingBoxi bounds);
                 this.nodes[oldNode].Bounds = bounds;
 
                 int axis = LongestAxis((int)(bounds.Max.X - bounds.Min.X), (int)(bounds.Max.Y - bounds.Min.Y), (int)(bounds.Max.Z - bounds.Min.Z));

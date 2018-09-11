@@ -40,9 +40,10 @@ namespace Engine
         /// <returns>Returns the new generated polygon</returns>
         public static Polygon FromTriangle(Triangle tri, GeometricOrientation orientation = GeometricOrientation.CounterClockwise)
         {
-            Polygon poly = new Polygon(tri.Point1, tri.Point2, tri.Point3);
-
-            poly.Orientation = orientation;
+            Polygon poly = new Polygon(tri.Point1, tri.Point2, tri.Point3)
+            {
+                Orientation = orientation
+            };
 
             return poly;
         }
@@ -117,8 +118,7 @@ namespace Engine
         {
             mergedPolygon = null;
 
-            SharedEdge[] sharedEdges;
-            if (GetSharedEdges(first, second, out sharedEdges))
+            if (GetSharedEdges(first, second, out SharedEdge[] sharedEdges))
             {
                 Polygon newpoly = new Polygon(first);
                 if (newpoly.Merge(second, sharedEdges, mergeConvex))
@@ -204,8 +204,7 @@ namespace Engine
                 {
                     float s = distances[j] / (distances[j] - distances[i]);
 
-                    Vector3 temp;
-                    Vector3.Subtract(ref inVertices[i], ref inVertices[j], out temp);
+                    Vector3.Subtract(ref inVertices[i], ref inVertices[j], out Vector3 temp);
                     Vector3.Multiply(ref temp, s, out temp);
                     Vector3.Add(ref inVertices[j], ref temp, out outVertices[m++]);
                 }

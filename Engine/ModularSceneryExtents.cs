@@ -25,8 +25,7 @@ namespace Engine
 
                 for (int i = 0; i < res.Length; i++)
                 {
-                    float n;
-                    if (float.TryParse(bits[i], NumberStyles.Float, CultureInfo.InvariantCulture, out n))
+                    if (float.TryParse(bits[i], NumberStyles.Float, CultureInfo.InvariantCulture, out float n))
                     {
                         res[i] = n;
                     }
@@ -78,8 +77,7 @@ namespace Engine
                 {
                     var degrees = value.Substring(3);
 
-                    float d;
-                    if (float.TryParse(degrees, NumberStyles.Float, CultureInfo.InvariantCulture, out d))
+                    if (float.TryParse(degrees, NumberStyles.Float, CultureInfo.InvariantCulture, out float d))
                     {
                         return Quaternion.RotationAxis(Vector3.Up, MathUtil.DegreesToRadians(d));
                     }

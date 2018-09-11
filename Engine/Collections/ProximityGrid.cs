@@ -21,11 +21,11 @@ namespace Engine.Collections
             return ((x * 73856093) ^ (y * 19349663)) & (n - 1);
         }
 
-        private float cellSize;
-        private float inverseCellSize;
-        private ProximityGridItem<T>[] pool;
+        private readonly float cellSize;
+        private readonly float inverseCellSize;
+        private readonly ProximityGridItem<T>[] pool;
         private int poolHead;
-        private int[] buckets;
+        private readonly int[] buckets;
         private BoundingRectanglei bounds;
 
         /// <summary>

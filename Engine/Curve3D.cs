@@ -8,9 +8,9 @@ namespace Engine
     /// </summary>
     public class Curve3D : IControllerPath
     {
-        private Curve cX = new Curve();
-        private Curve cY = new Curve();
-        private Curve cZ = new Curve();
+        private readonly Curve cX = new Curve();
+        private readonly Curve cY = new Curve();
+        private readonly Curve cZ = new Curve();
 
         /// <summary>
         /// Returns <c>true</c> if this curve is constant (has zero or one points); <c>false</c> otherwise.

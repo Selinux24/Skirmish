@@ -25,35 +25,35 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Sphere radii effect variable
         /// </summary>
-        private EngineEffectVariableVector sphereRadii = null;
+        private readonly EngineEffectVariableVector sphereRadii = null;
         /// <summary>
         /// 
         /// </summary>
-        private EngineEffectVariableVector scatteringCoefficients = null;
+        private readonly EngineEffectVariableVector scatteringCoefficients = null;
         /// <summary>
         /// 
         /// </summary>
-        private EngineEffectVariableVector inverseWaveLength = null;
+        private readonly EngineEffectVariableVector inverseWaveLength = null;
         /// <summary>
         /// 
         /// </summary>
-        private EngineEffectVariableVector misc = null;
+        private readonly EngineEffectVariableVector misc = null;
         /// <summary>
         /// Back color variable
         /// </summary>
-        private EngineEffectVariableVector backColor = null;
+        private readonly EngineEffectVariableVector backColor = null;
         /// <summary>
         /// Light direction effect variable
         /// </summary>
-        private EngineEffectVariableVector lightDirectionWorld = null;
+        private readonly EngineEffectVariableVector lightDirectionWorld = null;
         /// <summary>
         /// HDR exposure effect variable
         /// </summary>
-        private EngineEffectVariableScalar hdrExposure = null;
+        private readonly EngineEffectVariableScalar hdrExposure = null;
 
         /// <summary>
         /// World view projection matrix

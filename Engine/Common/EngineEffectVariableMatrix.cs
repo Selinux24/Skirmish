@@ -12,7 +12,7 @@ namespace Engine.Common
         /// <summary>
         /// Effect matrix variable
         /// </summary>
-        private EffectMatrixVariable variable = null;
+        private readonly EffectMatrixVariable variable = null;
 
         /// <summary>
         /// Constructor

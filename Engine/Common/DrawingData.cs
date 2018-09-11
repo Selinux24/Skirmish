@@ -457,14 +457,37 @@ namespace Engine.Common
                     }
                 }
 
-                Helper.Dispose(this.Meshes);
-                this.Meshes = null;
+                if (this.Meshes != null)
+                {
+                    foreach (var item in this.Meshes)
+                    {
+                        foreach (var value in item.Value)
+                        {
+                            value.Value?.Dispose();
+                        }
+                    }
 
-                Helper.Dispose(this.Materials);
-                this.Materials = null;
+                    this.Meshes.Clear();
+                    this.Meshes = null;
+                }
 
-                this.Textures.Clear();
-                this.Textures = null;
+                if (this.Materials != null)
+                {
+                    foreach (var item in this.Materials)
+                    {
+                        item.Value?.Dispose();
+                    }
+
+                    this.Materials.Clear();
+                    this.Materials = null;
+                }
+
+                if (this.Textures != null)
+                {
+                    //Don't dispose textures!
+                    this.Textures.Clear();
+                    this.Textures = null;
+                }
 
                 this.SkinningData = null;
             }

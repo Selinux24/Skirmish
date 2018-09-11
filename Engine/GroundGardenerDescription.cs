@@ -117,11 +117,12 @@ namespace Engine
         {
             get
             {
-                List<Channel> channels = new List<Channel>();
-
-                channels.Add(this.ChannelRed);
-                channels.Add(this.ChannelGreen);
-                channels.Add(this.ChannelBlue);
+                List<Channel> channels = new List<Channel>
+                {
+                    this.ChannelRed,
+                    this.ChannelGreen,
+                    this.ChannelBlue
+                };
 
                 return channels.ToArray();
             }

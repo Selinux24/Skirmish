@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Engine.Common
 {
     using Engine.Animation;
@@ -11,7 +6,7 @@ namespace Engine.Common
     /// <summary>
     /// The instance use skinning data for render
     /// </summary>
-    public interface UseSkinningData
+    public interface IUseSkinningData
     {
         /// <summary>
         /// Gets the skinning list used by the current drawing data

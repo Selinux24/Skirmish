@@ -3,7 +3,6 @@ using SharpDX.Windows;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -18,7 +17,7 @@ namespace Engine
         /// <summary>
         /// Scene list
         /// </summary>
-        private readonly List<Scene> scenes = new List<Scene>();
+        private List<Scene> scenes = new List<Scene>();
 
         private Scene nextScene = null;
         /// <summary>
@@ -219,16 +218,42 @@ namespace Engine
         {
             if (disposing)
             {
-                Helper.Dispose(this.scenes);
+                if (this.scenes != null)
+                {
+                    for (int i = 0; i < this.scenes.Count; i++)
+                    {
+                        this.scenes[i]?.Dispose();
+                        this.scenes[i] = null;
+                    }
 
-                DrawerPool.Dispose();
+                    this.scenes.Clear();
+                    this.scenes = null;
+                }
+
+                DrawerPool.DisposeResources();
 
                 FontMap.ClearCache();
 
-                Helper.Dispose(this.Input);
-                Helper.Dispose(this.Form);
-                Helper.Dispose(this.ResourceManager);
-                Helper.Dispose(this.Graphics);
+                if (Input != null)
+                {
+                    Input.Dispose();
+                    Input = null;
+                }
+                if (Form != null)
+                {
+                    Form.Dispose();
+                    Form = null;
+                }
+                if (ResourceManager != null)
+                {
+                    ResourceManager.Dispose();
+                    ResourceManager = null;
+                }
+                if (Graphics != null)
+                {
+                    Graphics.Dispose();
+                    Graphics = null;
+                }
             }
         }
 

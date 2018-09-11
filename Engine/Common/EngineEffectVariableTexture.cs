@@ -11,7 +11,7 @@ namespace Engine.Common
         /// <summary>
         /// Effect variable
         /// </summary>
-        private EffectShaderResourceVariable variable = null;
+        private readonly EffectShaderResourceVariable variable = null;
 
         /// <summary>
         /// Constructor

@@ -33,28 +33,28 @@ namespace Engine
         /// <summary>
         /// Geometry buffer
         /// </summary>
-        private readonly RenderTarget geometryBuffer = null;
+        private RenderTarget geometryBuffer = null;
         /// <summary>
         /// Light buffer
         /// </summary>
-        private readonly RenderTarget lightBuffer = null;
+        private RenderTarget lightBuffer = null;
         /// <summary>
         /// Light drawer
         /// </summary>
-        private readonly SceneRendererDeferredLights lightDrawer = null;
+        private SceneRendererDeferredLights lightDrawer = null;
 
         /// <summary>
         /// Blend state for deferred lighting blending
         /// </summary>
-        private readonly EngineBlendState blendDeferredLighting = null;
+        private EngineBlendState blendDeferredLighting = null;
         /// <summary>
         /// Blend state for defered composer blending
         /// </summary>
-        private readonly EngineBlendState blendDeferredComposer = null;
+        private EngineBlendState blendDeferredComposer = null;
         /// <summary>
         /// Blend state for transparent defered composer blending
         /// </summary>
-        private readonly EngineBlendState blendDeferredComposerTransparent = null;
+        private EngineBlendState blendDeferredComposerTransparent = null;
 
         /// <summary>
         /// View * OrthoProjection Matrix
@@ -108,7 +108,14 @@ namespace Engine
             this.blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(game.Graphics, 3);
             this.blendDeferredLighting = EngineBlendState.DeferredLighting(game.Graphics);
         }
-
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~SceneRendererDeferred()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
         /// <summary>
         /// Dispose objects
         /// </summary>
@@ -119,23 +126,39 @@ namespace Engine
                 if (geometryBuffer != null)
                 {
                     geometryBuffer.Dispose();
+                    geometryBuffer = null;
                 }
                 if (lightBuffer != null)
                 {
                     lightBuffer.Dispose();
+                    lightBuffer = null;
                 }
                 if (lightDrawer != null)
                 {
                     lightDrawer.Dispose();
+                    lightDrawer = null;
                 }
 
-                Helper.Dispose(this.blendDeferredLighting);
-                Helper.Dispose(this.blendDeferredComposer);
-                Helper.Dispose(this.blendDeferredComposerTransparent);
+                if (blendDeferredLighting != null)
+                {
+                    blendDeferredLighting.Dispose();
+                    blendDeferredLighting = null;
+                }
+                if (blendDeferredComposer != null)
+                {
+                    blendDeferredComposer.Dispose();
+                    blendDeferredComposer = null;
+                }
+                if (blendDeferredComposerTransparent != null)
+                {
+                    blendDeferredComposerTransparent.Dispose();
+                    blendDeferredComposerTransparent = null;
+                }
             }
 
             base.Dispose(disposing);
         }
+
         /// <summary>
         /// Resizes buffers
         /// </summary>

@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -28,90 +27,6 @@ namespace Engine
 
         #region Memory
 
-        /// <summary>
-        /// Dispose object
-        /// </summary>
-        /// <param name="obj">Object</param>
-        public static void Dispose(Object obj)
-        {
-            if (obj is IDisposable)
-            {
-                Dispose((IDisposable)obj);
-            }
-            else
-            {
-                obj = null;
-            }
-        }
-        /// <summary>
-        /// Dispose disposable object
-        /// </summary>
-        /// <param name="obj">Disposable object</param>
-        public static void Dispose(IDisposable obj)
-        {
-            if (obj != null)
-            {
-                obj.Dispose();
-            }
-        }
-        /// <summary>
-        /// Dispose objects array
-        /// </summary>
-        /// <param name="array">Objects array</param>
-        public static void Dispose(IEnumerable<Object> array)
-        {
-            if (array != null && array.Count() > 0)
-            {
-                foreach (var item in array)
-                {
-                    if (item is IDisposable)
-                    {
-                        Helper.Dispose((IDisposable)item);
-                    }
-                }
-            }
-        }
-        /// <summary>
-        /// Dispose disposable objects array
-        /// </summary>
-        /// <param name="array">Disposable objects array</param>
-        public static void Dispose(IEnumerable<IDisposable> array)
-        {
-            if (array != null && array.Count() > 0)
-            {
-                foreach (var item in array)
-                {
-                    Helper.Dispose(item);
-                }
-            }
-        }
-        /// <summary>
-        /// Dispose disposable objects dictionary
-        /// </summary>
-        /// <param name="dictionary">Disposable objects dictionary</param>
-        public static void Dispose(IDictionary dictionary)
-        {
-            if (dictionary != null && dictionary.Count > 0)
-            {
-                foreach (var item in dictionary.Values)
-                {
-                    if (item is IDisposable)
-                    {
-                        Helper.Dispose((IDisposable)item);
-                    }
-                    else if (item is IEnumerable<IDisposable>)
-                    {
-                        Helper.Dispose((IEnumerable<IDisposable>)item);
-                    }
-                    else if (item is IDictionary)
-                    {
-                        Helper.Dispose((IDictionary)item);
-                    }
-                }
-
-                dictionary.Clear();
-            }
-        }
         /// <summary>
         /// Swaps values
         /// </summary>
@@ -813,10 +728,7 @@ namespace Engine
         /// <returns>Return matrix description</returns>
         public static string GetDescription(this Matrix matrix)
         {
-            Vector3 scale;
-            Quaternion rotation;
-            Vector3 translation;
-            if (matrix.Decompose(out scale, out rotation, out translation))
+            if (matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation))
             {
                 return string.Format("S:{0,-30} T:{1,-30} R:{2,-30}",
                     scale.GetDescription(Vector3.One, "None"),

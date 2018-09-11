@@ -14,7 +14,7 @@ namespace Engine.Common
         /// <summary>
         /// Effect variable
         /// </summary>
-        private EffectVariable variable = null;
+        private readonly EffectVariable variable = null;
 
         /// <summary>
         /// Constructor

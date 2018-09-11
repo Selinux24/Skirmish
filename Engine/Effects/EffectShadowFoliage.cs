@@ -25,47 +25,47 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
-        private EngineEffectVariableVector eyePositionWorld = null;
+        private readonly EngineEffectVariableVector eyePositionWorld = null;
         /// <summary>
         /// Start radius
         /// </summary>
-        private EngineEffectVariableScalar startRadius = null;
+        private readonly EngineEffectVariableScalar startRadius = null;
         /// <summary>
         /// End radius
         /// </summary>
-        private EngineEffectVariableScalar endRadius = null;
+        private readonly EngineEffectVariableScalar endRadius = null;
         /// <summary>
         /// Wind direction effect variable
         /// </summary>
-        private EngineEffectVariableVector windDirection = null;
+        private readonly EngineEffectVariableVector windDirection = null;
         /// <summary>
         /// Wind strength effect variable
         /// </summary>
-        private EngineEffectVariableScalar windStrength = null;
+        private readonly EngineEffectVariableScalar windStrength = null;
         /// <summary>
         /// Time effect variable
         /// </summary>
-        private EngineEffectVariableScalar totalTime = null;
+        private readonly EngineEffectVariableScalar totalTime = null;
         /// <summary>
         /// Position delta
         /// </summary>
-        private EngineEffectVariableVector delta = null;
+        private readonly EngineEffectVariableVector delta = null;
         /// <summary>
         /// Texture count variable
         /// </summary>
-        private EngineEffectVariableScalar textureCount = null;
+        private readonly EngineEffectVariableScalar textureCount = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private EngineEffectVariableTexture textures = null;
+        private readonly EngineEffectVariableTexture textures = null;
         /// <summary>
         /// Random texture effect variable
         /// </summary>
-        private EngineEffectVariableTexture textureRandom = null;
+        private readonly EngineEffectVariableTexture textureRandom = null;
 
         /// <summary>
         /// Current texture array

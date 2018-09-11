@@ -118,9 +118,15 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.baseObject is IDisposable)
+                if (this.baseObject != null)
                 {
-                    Helper.Dispose((IDisposable)this.baseObject);
+                    if (this.baseObject is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                        disposable = null;
+                    }
+
+                    this.baseObject = null;
                 }
             }
         }
@@ -236,73 +242,5 @@ namespace Engine
                 return default(Y);
             }
         }
-    }
-
-    /// <summary>
-    /// Scene object usajes enumeration
-    /// </summary>
-    [Flags]
-    public enum SceneObjectUsageEnum
-    {
-        /// <summary>
-        /// None
-        /// </summary>
-        None = 0,
-        /// <summary>
-        /// Full triangle list for path finding
-        /// </summary>
-        FullPathFinding = 1,
-        /// <summary>
-        /// Coarse list for path finding
-        /// </summary>
-        CoarsePathFinding = 2,
-        /// <summary>
-        /// Scene ground
-        /// </summary>
-        Ground = 4,
-        /// <summary>
-        /// Scene agent
-        /// </summary>
-        Agent = 8,
-        /// <summary>
-        /// User interface
-        /// </summary>
-        UI = 16,
-    }
-
-    /// <summary>
-    /// Scene object description
-    /// </summary>
-    public class SceneObjectDescription
-    {
-        /// <summary>
-        /// Name
-        /// </summary>
-        public string Name = null;
-        /// <summary>
-        /// Is Static
-        /// </summary>
-        public bool Static = false;
-        /// <summary>
-        /// Gets or sets whether the object cast shadow
-        /// </summary>
-        public bool CastShadow = false;
-        /// <summary>
-        /// Can be renderer by the deferred renderer
-        /// </summary>
-        public bool DeferredEnabled = true;
-        /// <summary>
-        /// Uses depth info
-        /// </summary>
-        public bool DepthEnabled = true;
-        /// <summary>
-        /// Enables transparent blending
-        /// </summary>
-        public bool AlphaEnabled = false;
-
-        /// <summary>
-        /// Use spheric volume for culling by default
-        /// </summary>
-        public bool SphericVolume = true;
     }
 }

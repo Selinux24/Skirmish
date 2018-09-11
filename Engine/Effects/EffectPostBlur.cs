@@ -17,19 +17,19 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Blur direction effect variable
         /// </summary>
-        private EngineEffectVariableVector blurDirection = null;
+        private readonly EngineEffectVariableVector blurDirection = null;
         /// <summary>
         /// Texture size effect variable
         /// </summary>
-        private EngineEffectVariableVector textureSize = null;
+        private readonly EngineEffectVariableVector textureSize = null;
         /// <summary>
         /// Diffuse map effect variable
         /// </summary>
-        private EngineEffectVariableTexture diffuseMap = null;
+        private readonly EngineEffectVariableTexture diffuseMap = null;
 
         /// <summary>
         /// Current diffuse map

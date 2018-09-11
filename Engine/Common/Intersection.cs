@@ -37,8 +37,7 @@ namespace Engine.Common
             for (var i = 0; i < 6; ++i)
             {
                 var plane = instance.GetPlane(i);
-                PlaneIntersectionType planeIntersectionType;
-                frustum.Intersects(ref plane, out planeIntersectionType);
+                frustum.Intersects(ref plane, out PlaneIntersectionType planeIntersectionType);
                 if (planeIntersectionType == PlaneIntersectionType.Back)
                 {
                     return ContainmentType.Disjoint;
@@ -84,8 +83,7 @@ namespace Engine.Common
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out float distance)
         {
-            float d;
-            if (!Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out d))
+            if (!Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out float d))
             {
                 distance = float.MaxValue;
                 return false;
@@ -106,8 +104,7 @@ namespace Engine.Common
         /// <returns>Whether the two objects intersected.</returns>
         public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out Vector3 point, out float distance)
         {
-            float d;
-            if (!Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out d))
+            if (!Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out float d))
             {
                 point = Vector3.Zero;
                 distance = float.MaxValue;
@@ -245,9 +242,7 @@ namespace Engine.Common
             {
                 var cItem = items[i];
 
-                Vector3 pos;
-                float d;
-                if (cItem.Intersects(ref ray, facingOnly, out pos, out d))
+                if (cItem.Intersects(ref ray, facingOnly, out Vector3 pos, out float d))
                 {
                     position = pos;
                     item = cItem;
@@ -275,10 +270,7 @@ namespace Engine.Common
             item = default(T);
             distance = float.MaxValue;
 
-            Vector3[] pickedPositions;
-            T[] pickedTriangles;
-            float[] pickedDistances;
-            if (IntersectAll(ref ray, items, facingOnly, out pickedPositions, out pickedTriangles, out pickedDistances))
+            if (IntersectAll(ref ray, items, facingOnly, out Vector3[] pickedPositions, out T[] pickedTriangles, out float[] pickedDistances))
             {
                 float distanceMin = float.MaxValue;
 
@@ -317,9 +309,7 @@ namespace Engine.Common
 
             foreach (T t in items)
             {
-                Vector3 pos;
-                float d;
-                if (t.Intersects(ref ray, facingOnly, out pos, out d))
+                if (t.Intersects(ref ray, facingOnly, out Vector3 pos, out float d))
                 {
                     //Avoid duplicate picked positions
                     if (!pickedPositionList.ContainsValue(pos))

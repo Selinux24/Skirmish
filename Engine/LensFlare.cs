@@ -13,11 +13,11 @@ namespace Engine
         /// <summary>
         /// Glow sprote
         /// </summary>
-        private readonly Sprite glowSprite;
+        private Sprite glowSprite;
         /// <summary>
         /// Flares
         /// </summary>
-        private readonly Flare[] flares;
+        private Flare[] flares;
         /// <summary>
         /// Draw flares flag
         /// </summary>
@@ -74,20 +74,39 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~LensFlare()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Dispose of resources
         /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                if(glowSprite != null)
+                if (glowSprite != null)
                 {
                     glowSprite.Dispose();
+                    glowSprite = null;
                 }
 
-                Helper.Dispose(this.flares);
+                if (this.flares != null)
+                {
+                    for (int i = 0; i < this.flares.Length; i++)
+                    {
+                        this.flares[i]?.Dispose();
+                        this.flares[i] = null;
+                    }
+
+                    this.flares = null;
+                }
             }
         }
+
         /// <summary>
         /// Updates internal state
         /// </summary>

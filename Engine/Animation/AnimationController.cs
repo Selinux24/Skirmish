@@ -12,11 +12,7 @@ namespace Engine.Animation
         /// <summary>
         /// Controller clips
         /// </summary>
-        private AnimationPlan animationPaths = new AnimationPlan();
-        /// <summary>
-        /// Current clip index in the animation controller clips list
-        /// </summary>
-        private int currentIndex = -1;
+        private readonly AnimationPlan animationPaths = new AnimationPlan();
         /// <summary>
         /// Animation active flag
         /// </summary>
@@ -33,19 +29,13 @@ namespace Engine.Animation
         {
             get
             {
-                return this.currentIndex >= 0;
+                return this.CurrentIndex >= 0;
             }
         }
         /// <summary>
         /// Gets the current clip in the clip collection
         /// </summary>
-        public int CurrentIndex
-        {
-            get
-            {
-                return this.currentIndex;
-            }
-        }
+        public int CurrentIndex { get; private set; } = -1;
         /// <summary>
         /// Current path time
         /// </summary>
@@ -53,9 +43,9 @@ namespace Engine.Animation
         {
             get
             {
-                if (this.currentIndex >= 0)
+                if (this.CurrentIndex >= 0)
                 {
-                    var path = this.animationPaths[this.currentIndex];
+                    var path = this.animationPaths[this.CurrentIndex];
 
                     return path.Time;
                 }
@@ -70,9 +60,9 @@ namespace Engine.Animation
         {
             get
             {
-                if (this.currentIndex >= 0)
+                if (this.CurrentIndex >= 0)
                 {
-                    var path = this.animationPaths[this.currentIndex];
+                    var path = this.animationPaths[this.CurrentIndex];
 
                     return path.ItemTime;
                 }
@@ -87,9 +77,9 @@ namespace Engine.Animation
         {
             get
             {
-                if (this.currentIndex >= 0)
+                if (this.CurrentIndex >= 0)
                 {
-                    var path = this.animationPaths[this.currentIndex];
+                    var path = this.animationPaths[this.CurrentIndex];
 
                     var pathItem = path.GetCurrentItem();
                     if (pathItem != null)
@@ -178,15 +168,15 @@ namespace Engine.Animation
                 }
                 else if (flags == AppendFlags.EndsCurrent)
                 {
-                    last = this.animationPaths[this.currentIndex];
+                    last = this.animationPaths[this.CurrentIndex];
                     next = clonedPaths[0];
 
                     //Remove all paths from current to end
-                    if (this.animationPaths.Count > this.currentIndex + 1)
+                    if (this.animationPaths.Count > this.CurrentIndex + 1)
                     {
                         this.animationPaths.RemoveRange(
-                            this.currentIndex + 1,
-                            this.animationPaths.Count - (this.currentIndex + 1));
+                            this.CurrentIndex + 1,
+                            this.animationPaths.Count - (this.CurrentIndex + 1));
                     }
 
                     //Mark current path for ending
@@ -204,9 +194,9 @@ namespace Engine.Animation
 
             this.animationPaths.AddRange(clonedPaths);
 
-            if (this.currentIndex < 0)
+            if (this.CurrentIndex < 0)
             {
-                this.currentIndex = 0;
+                this.CurrentIndex = 0;
             }
         }
 
@@ -217,22 +207,19 @@ namespace Engine.Animation
         /// <param name="skData">Skinning data</param>
         public void Update(float time, SkinningData skData)
         {
-            if (this.active && this.currentIndex >= 0)
+            if (this.active && this.CurrentIndex >= 0)
             {
-                var path = this.animationPaths[this.currentIndex];
+                var path = this.animationPaths[this.CurrentIndex];
 
                 if (!path.Playing)
                 {
-                    this.currentIndex++;
-                    if (this.currentIndex >= this.animationPaths.Count)
+                    this.CurrentIndex++;
+                    if (this.CurrentIndex >= this.animationPaths.Count)
                     {
                         //No paths to do
-                        this.currentIndex = -1;
+                        this.CurrentIndex = -1;
 
-                        if (this.PathEnding != null)
-                        {
-                            this.PathEnding(this, new EventArgs());
-                        }
+                        this.PathEnding?.Invoke(this, new EventArgs());
                     }
                 }
 
@@ -248,10 +235,10 @@ namespace Engine.Animation
         public uint GetAnimationOffset(SkinningData skData)
         {
             uint offset = 0;
-            if (this.currentIndex >= 0)
+            if (this.CurrentIndex >= 0)
             {
                 //Get the path
-                var path = this.animationPaths[this.currentIndex];
+                var path = this.animationPaths[this.CurrentIndex];
 
                 //Get the path item
                 var pathItem = path.GetCurrentItem();
@@ -273,10 +260,10 @@ namespace Engine.Animation
         /// <returns>Returns the transformation matrix list at current time</returns>
         public Matrix[] GetCurrentPose(SkinningData skData)
         {
-            if (this.currentIndex >= 0)
+            if (this.CurrentIndex >= 0)
             {
                 //Get the path
-                var path = this.animationPaths[this.currentIndex];
+                var path = this.animationPaths[this.CurrentIndex];
 
                 //Get the path item
                 var pathItem = path.GetCurrentItem();
@@ -299,9 +286,9 @@ namespace Engine.Animation
         {
             this.active = true;
 
-            if (this.currentIndex >= 0)
+            if (this.CurrentIndex >= 0)
             {
-                var path = this.animationPaths[this.currentIndex];
+                var path = this.animationPaths[this.CurrentIndex];
 
                 path.SetTime(time);
             }
@@ -314,9 +301,9 @@ namespace Engine.Animation
         {
             this.active = false;
 
-            if (this.currentIndex >= 0)
+            if (this.CurrentIndex >= 0)
             {
-                var path = this.animationPaths[this.currentIndex];
+                var path = this.animationPaths[this.CurrentIndex];
 
                 path.SetTime(time);
             }
@@ -344,12 +331,12 @@ namespace Engine.Animation
         {
             string res = "Inactive";
 
-            if (this.currentIndex >= 0)
+            if (this.CurrentIndex >= 0)
             {
-                res = string.Format("{0}", this.animationPaths[this.currentIndex].GetItemList().Join(", "));
-                if (this.currentIndex + 1 < this.animationPaths.Count)
+                res = string.Format("{0}", this.animationPaths[this.CurrentIndex].GetItemList().Join(", "));
+                if (this.CurrentIndex + 1 < this.animationPaths.Count)
                 {
-                    res += string.Format(" {0}", this.animationPaths[this.currentIndex + 1].GetItemList().Join(", "));
+                    res += string.Format(" {0}", this.animationPaths[this.CurrentIndex + 1].GetItemList().Join(", "));
                 }
             }
 

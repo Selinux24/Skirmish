@@ -13,7 +13,7 @@ namespace Engine.Common
         /// <summary>
         /// Default material
         /// </summary>
-        private static MeshMaterial Default = new MeshMaterial()
+        private static readonly MeshMaterial Default = new MeshMaterial()
         {
             Material = Material.Default,
         };

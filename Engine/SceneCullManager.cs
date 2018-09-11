@@ -55,8 +55,7 @@ namespace Engine
 
             foreach (var item in objects)
             {
-                float distance;
-                var cull = item.Cull(volume, out distance);
+                var cull = item.Cull(volume, out float distance);
                 var cullData = new CullData
                 {
                     Culled = cull,

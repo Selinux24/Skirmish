@@ -64,9 +64,22 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                Helper.Dispose(this.VertexBuffer);
+                if (VertexBuffer != null)
+                {
+                    VertexBuffer.Dispose();
+                    VertexBuffer = null;
+                }
+                if (InputLayouts != null)
+                {
+                    for (int i = 0; i < InputLayouts.Count; i++)
+                    {
+                        InputLayouts[i]?.Dispose();
+                        InputLayouts[i] = null;
+                    }
 
-                Helper.Dispose(this.InputLayouts);
+                    InputLayouts.Clear();
+                    InputLayouts = null;
+                }
             }
         }
 

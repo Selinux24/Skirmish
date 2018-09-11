@@ -18,59 +18,59 @@ namespace Engine.Effects
         /// <summary>
         /// Directional lights effect variable
         /// </summary>
-        private EngineEffectVariable dirLights = null;
+        private readonly EngineEffectVariable dirLights = null;
         /// <summary>
         /// Light count effect variable
         /// </summary>
-        private EngineEffectVariableScalar lightCount = null;
+        private readonly EngineEffectVariableScalar lightCount = null;
         /// <summary>
         /// Ambient effect variable
         /// </summary>
-        private EngineEffectVariableScalar ambient = null;
+        private readonly EngineEffectVariableScalar ambient = null;
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
-        private EngineEffectVariableVector eyePositionWorld = null;
+        private readonly EngineEffectVariableVector eyePositionWorld = null;
         /// <summary>
         /// Base color effect variable
         /// </summary>
-        private EngineEffectVariableVector baseColor = null;
+        private readonly EngineEffectVariableVector baseColor = null;
         /// <summary>
         /// Water color effect variable
         /// </summary>
-        private EngineEffectVariableVector waterColor = null;
+        private readonly EngineEffectVariableVector waterColor = null;
         /// <summary>
         /// Wave parameters effect variable
         /// </summary>
-        private EngineEffectVariableVector waveParams = null;
+        private readonly EngineEffectVariableVector waveParams = null;
         /// <summary>
         /// Total time effect variable
         /// </summary>
-        private EngineEffectVariableScalar totalTime = null;
+        private readonly EngineEffectVariableScalar totalTime = null;
         /// <summary>
         /// Iteration parameters effect variable
         /// </summary>
-        private EngineEffectVariableVector iterParams = null;
+        private readonly EngineEffectVariableVector iterParams = null;
         /// <summary>
         /// Fog start effect variable
         /// </summary>
-        private EngineEffectVariableScalar fogStart = null;
+        private readonly EngineEffectVariableScalar fogStart = null;
         /// <summary>
         /// Fog range effect variable
         /// </summary>
-        private EngineEffectVariableScalar fogRange = null;
+        private readonly EngineEffectVariableScalar fogRange = null;
         /// <summary>
         /// Fog color effect variable
         /// </summary>
-        private EngineEffectVariableVector fogColor = null;
+        private readonly EngineEffectVariableVector fogColor = null;
 
         /// <summary>
         /// Directional lights

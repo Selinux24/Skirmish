@@ -152,8 +152,7 @@ namespace Engine
 
                 foreach (var item in gData.Values)
                 {
-                    var rs = item as Engine.Helpers.ResourceStatus;
-                    if (rs != null)
+                    if (item is ResourceStatus rs)
                     {
                         kBytes += rs.Size;
                     }
@@ -173,8 +172,7 @@ namespace Engine
 
                 foreach (var item in gData.Values)
                 {
-                    var rs = item as Engine.Helpers.ResourceStatus;
-                    if (rs != null)
+                    if (item is ResourceStatus rs)
                     {
                         elements += rs.Elements;
                     }
@@ -422,8 +420,7 @@ namespace Engine
 
             var key = string.Format("{0}.{1}", usage, type);
 
-            var c = Counters.GetStatistics(key) as ResourceStatus;
-            if (c == null)
+            if (!(Counters.GetStatistics(key) is ResourceStatus c))
             {
                 c = new ResourceStatus();
                 Counters.SetStatistics(key, c, true);

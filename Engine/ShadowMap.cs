@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Shadow map
     /// </summary>
-    public class ShadowMap : IShadowMap, IDisposable
+    public class ShadowMap : IShadowMap
     {
         /// <summary>
         /// Game instance
@@ -78,8 +78,22 @@ namespace Engine
         {
             if (disposing)
             {
-                Helper.Dispose(this.DepthMap);
-                Helper.Dispose(this.Texture);
+                if (this.DepthMap != null)
+                {
+                    for (int i = 0; i < this.DepthMap.Length; i++)
+                    {
+                        this.DepthMap[i]?.Dispose();
+                        this.DepthMap[i] = null;
+                    }
+
+                    this.DepthMap = null;
+                }
+
+                if (this.Texture != null)
+                {
+                    this.Texture.Dispose();
+                    this.Texture = null;
+                }
             }
         }
 

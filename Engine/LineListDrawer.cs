@@ -64,6 +64,14 @@ namespace Engine
             this.InitializeBuffers(description.Name, count);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~LineListDrawer()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Internal resources disposition
         /// </summary>
         protected override void Dispose(bool disposing)

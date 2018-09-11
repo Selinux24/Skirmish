@@ -21,44 +21,44 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// First layer texture effect variable
         /// </summary>
-        private EngineEffectVariableTexture firstTexture = null;
+        private readonly EngineEffectVariableTexture firstTexture = null;
         /// <summary>
         /// Second layer texture effect variable
         /// </summary>
-        private EngineEffectVariableTexture secondTexture = null;
+        private readonly EngineEffectVariableTexture secondTexture = null;
         /// <summary>
         /// Brightness
         /// </summary>
-        private EngineEffectVariableScalar brightness = null;
+        private readonly EngineEffectVariableScalar brightness = null;
         /// <summary>
         /// Clouds fadding distance effect variable
         /// </summary>
-        private EngineEffectVariableScalar fadingDistance = null;
+        private readonly EngineEffectVariableScalar fadingDistance = null;
         /// <summary>
         /// Cloud color effect variable
         /// </summary>
-        private EngineEffectVariableVector color = null;
+        private readonly EngineEffectVariableVector color = null;
 
         /// <summary>
         /// First layer translation effect variable
         /// </summary>
-        private EngineEffectVariableVector firstTranslation = null;
+        private readonly EngineEffectVariableVector firstTranslation = null;
         /// <summary>
         /// Second layer translation effect variable
         /// </summary>
-        private EngineEffectVariableVector secondTranslation = null;
+        private readonly EngineEffectVariableVector secondTranslation = null;
         /// <summary>
         /// Clouds translation effect variable
         /// </summary>
-        private EngineEffectVariableScalar translation = null;
+        private readonly EngineEffectVariableScalar translation = null;
         /// <summary>
         /// Clouds scale effect variable
         /// </summary>
-        private EngineEffectVariableScalar scale = null;
+        private readonly EngineEffectVariableScalar scale = null;
 
         /// <summary>
         /// Current first texture

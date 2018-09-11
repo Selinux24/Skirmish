@@ -219,8 +219,17 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                Helper.Dispose(this.Texture);
-                Helper.Dispose(this.map);
+                if (Texture != null)
+                {
+                    Texture.Dispose();
+                    Texture = null;
+                }
+
+                if (map != null)
+                {
+                    map.Clear();
+                    map = null;
+                }
 
                 if (this.bitmapStream != null)
                 {

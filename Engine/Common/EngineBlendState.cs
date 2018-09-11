@@ -30,9 +30,11 @@ namespace Engine.Common
         /// <returns>Returns the default blend state</returns>
         public static EngineBlendState Default(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1();
-            desc.AlphaToCoverageEnable = false;
-            desc.IndependentBlendEnable = false;
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -54,9 +56,11 @@ namespace Engine.Common
         /// <returns>Creates the alpha enabled blend state</returns>
         public static EngineBlendState DefaultAlpha(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1();
-            desc.AlphaToCoverageEnable = false;
-            desc.IndependentBlendEnable = false;
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -78,9 +82,11 @@ namespace Engine.Common
         /// <returns>Creates the transparent enabled blend state</returns>
         public static EngineBlendState Transparent(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1();
-            desc.AlphaToCoverageEnable = true;
-            desc.IndependentBlendEnable = false;
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = true,
+                IndependentBlendEnable = false
+            };
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -102,9 +108,11 @@ namespace Engine.Common
         /// <returns>Creates the additive enabled blend state</returns>
         public static EngineBlendState Additive(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1();
-            desc.AlphaToCoverageEnable = false;
-            desc.IndependentBlendEnable = false;
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -127,9 +135,11 @@ namespace Engine.Common
         /// <returns>Creates the deferred composer blend state</returns>
         public static EngineBlendState DeferredComposer(Graphics graphics, int rtCount)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1();
-            desc.AlphaToCoverageEnable = false;
-            desc.IndependentBlendEnable = true;
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = true
+            };
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -162,9 +172,11 @@ namespace Engine.Common
         /// <returns>Creates the deferred composer transparent enabled blend state</returns>
         public static EngineBlendState DeferredComposerTransparent(Graphics graphics, int rtCount)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1();
-            desc.AlphaToCoverageEnable = true;
-            desc.IndependentBlendEnable = true;
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = true,
+                IndependentBlendEnable = true
+            };
 
             //Transparent blending only in first buffer
             desc.RenderTarget[0].IsBlendEnabled = true;
@@ -197,9 +209,11 @@ namespace Engine.Common
         /// <returns>Creates the deferred lighting blend state</returns>
         public static EngineBlendState DeferredLighting(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1();
-            desc.AlphaToCoverageEnable = false;
-            desc.IndependentBlendEnable = false;
+            BlendStateDescription1 desc = new BlendStateDescription1
+            {
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false
+            };
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;

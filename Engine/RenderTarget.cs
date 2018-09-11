@@ -97,13 +97,11 @@ namespace Engine
             int width = this.Game.Form.RenderWidth;
             int height = this.Game.Form.RenderHeight;
 
-            EngineRenderTargetView targets;
-            EngineShaderResourceView[] textures;
             this.Game.Graphics.CreateRenderTargetTexture(
                 this.RenderTargetFormat,
                 width, height, this.BufferCount, this.UseSamples,
-                out targets,
-                out textures);
+                out EngineRenderTargetView targets,
+                out EngineShaderResourceView[] textures);
 
             this.Targets = targets;
             this.Textures = textures;
@@ -113,8 +111,22 @@ namespace Engine
         /// </summary>
         private void DisposeTargets()
         {
-            Helper.Dispose(this.Targets);
-            Helper.Dispose(this.Textures);
+            if (this.Targets != null)
+            {
+                this.Targets.Dispose();
+                this.Targets = null;
+            }
+
+            if (this.Textures != null)
+            {
+                for (int i = 0; i < this.Textures.Length; i++)
+                {
+                    this.Textures[i]?.Dispose();
+                    this.Textures[i] = null;
+                }
+
+                this.Textures = null;
+            }
         }
     }
 }

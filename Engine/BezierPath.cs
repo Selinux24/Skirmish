@@ -342,9 +342,7 @@ namespace Engine
         /// <returns>Returns curve position in specified time</returns>
         public Vector3 GetPosition(float time)
         {
-            int segment;
-            float segmentTime;
-            this.FindCurve(time, out segment, out segmentTime);
+            this.FindCurve(time, out int segment, out float segmentTime);
 
             return CalculateBezierPoint(segment, segmentTime);
         }
@@ -364,9 +362,7 @@ namespace Engine
         /// <returns>Returns the next control point in time</returns>
         public Vector3 GetNextControlPoint(float time)
         {
-            int segment;
-            float segmentTime;
-            this.FindCurve(time, out segment, out segmentTime);
+            this.FindCurve(time, out int segment, out float segmentTime);
 
             return this.controlPoints[segment];
         }

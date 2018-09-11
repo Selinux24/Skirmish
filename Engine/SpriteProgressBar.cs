@@ -12,15 +12,15 @@ namespace Engine
         /// <summary>
         /// Left sprite
         /// </summary>
-        private readonly Sprite left = null;
+        private Sprite left = null;
         /// <summary>
         /// Right sprite
         /// </summary>
-        private readonly Sprite right = null;
+        private Sprite right = null;
         /// <summary>
         /// Button text drawer
         /// </summary>
-        private readonly TextDrawer text = null;
+        private TextDrawer text = null;
 
         /// <summary>
         /// Left scale
@@ -125,6 +125,14 @@ namespace Engine
             this.Rectangle = new Rectangle(description.Left, description.Top, description.Width, description.Height);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~SpriteProgressBar()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Releases used resources
         /// </summary>
         protected override void Dispose(bool disposing)
@@ -134,14 +142,17 @@ namespace Engine
                 if (left != null)
                 {
                     left.Dispose();
+                    left = null;
                 }
                 if (right != null)
                 {
                     right.Dispose();
+                    right = null;
                 }
                 if (text != null)
                 {
                     text.Dispose();
+                    text = null;
                 }
             }
         }

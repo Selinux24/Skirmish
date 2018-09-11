@@ -13,19 +13,12 @@ namespace Engine.Collections
     public sealed class PriorityQueue<T> : ICollection<T> where T : class, IValueWithCost
     {
         private T[] heap;
-        private int capacity;
-        private int size;
+        private readonly int capacity;
 
         /// <summary>
         /// Gets the number of elements in the priority queue.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return size;
-            }
-        }
+        public int Count { get; private set; }
         /// <summary>
         /// Gets a value indicating whether the collection is read-only. For <see cref="PriorityQueue{T}"/>, this is
         /// always <c>true</c>.
@@ -45,7 +38,7 @@ namespace Engine.Collections
         public PriorityQueue(int n)
         {
             capacity = n;
-            size = 0;
+            Count = 0;
             heap = new T[capacity + 1];
         }
 
@@ -54,7 +47,7 @@ namespace Engine.Collections
         /// </summary>
         public void Clear()
         {
-            size = 0;
+            Count = 0;
         }
         /// <summary>
         /// Determines whether the priority queue is empty
@@ -62,7 +55,7 @@ namespace Engine.Collections
         /// <returns>True if empty, false if not</returns>
         public bool Empty()
         {
-            return size == 0;
+            return Count == 0;
         }
         /// <summary>
         /// Return the node at the top of the heap.
@@ -70,7 +63,7 @@ namespace Engine.Collections
         /// <returns>Top node in heap</returns>
         public T Top()
         {
-            return (size > 0) ? heap[0] : null;
+            return (Count > 0) ? heap[0] : null;
         }
         /// <summary>
         /// Remove the node at the top of the heap. Then, move the bottommost node to the top and trickle down
@@ -79,12 +72,12 @@ namespace Engine.Collections
         /// <returns>Node with lowest value in heap</returns>
         public T Pop()
         {
-            if (size == 0)
+            if (Count == 0)
                 return null;
 
             T result = heap[0];
-            size--;
-            TrickleDown(0, heap[size]);
+            Count--;
+            TrickleDown(0, heap[Count]);
             return result;
         }
         /// <summary>
@@ -93,8 +86,8 @@ namespace Engine.Collections
         /// <param name="node">The node to add</param>
         public void Push(T node)
         {
-            size++;
-            BubbleUp(size - 1, node);
+            Count++;
+            BubbleUp(Count - 1, node);
         }
         /// <summary>
         /// Returns whether the given item exists in the heap. 
@@ -103,7 +96,7 @@ namespace Engine.Collections
         /// <returns>True or False</returns>
         public bool Contains(T item)
         {
-            for (int c = 0; c < size; c++)
+            for (int c = 0; c < Count; c++)
                 if (heap[c] == item)
                     return true;
 
@@ -115,7 +108,7 @@ namespace Engine.Collections
         /// <param name="node">The node to modify</param>
         public void Modify(T node)
         {
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < Count; i++)
             {
                 if (heap[i] == node)
                 {
@@ -197,10 +190,10 @@ namespace Engine.Collections
         {
             int child = (i * 2) + 1;
 
-            while (child < size)
+            while (child < Count)
             {
                 //determine which child element has a smaller cost 
-                if (((child + 1) < size) && (heap[child].TotalCost > heap[child + 1].TotalCost))
+                if (((child + 1) < Count) && (heap[child].TotalCost > heap[child + 1].TotalCost))
                     child++;
 
                 heap[i] = heap[child];

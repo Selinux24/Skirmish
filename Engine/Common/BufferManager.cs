@@ -316,15 +316,15 @@ namespace Engine.Common
         /// <summary>
         /// Reserved slots
         /// </summary>
-        private int reservedSlots = 0;
+        private readonly int reservedSlots = 0;
         /// <summary>
         /// Vertex keys
         /// </summary>
-        private List<VertexBufferDescription> vertexData = new List<VertexBufferDescription>();
+        private readonly List<VertexBufferDescription> vertexData = new List<VertexBufferDescription>();
         /// <summary>
         /// Index keys
         /// </summary>
-        private List<IndexBufferDescription> indexData = new List<IndexBufferDescription>();
+        private readonly List<IndexBufferDescription> indexData = new List<IndexBufferDescription>();
         /// <summary>
         /// Input layouts by technique
         /// </summary>
@@ -403,9 +403,38 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                Helper.Dispose(this.VertexBuffers);
-                Helper.Dispose(this.IndexBuffers);
-                Helper.Dispose(this.inputLayouts);
+                if (this.VertexBuffers != null)
+                {
+                    for (int i = 0; i < this.VertexBuffers.Length; i++)
+                    {
+                        this.VertexBuffers[i]?.Dispose();
+                        this.VertexBuffers[i] = null;
+                    }
+
+                    this.VertexBuffers = null;
+                }
+
+                if (this.IndexBuffers != null)
+                {
+                    for (int i = 0; i < this.IndexBuffers.Length; i++)
+                    {
+                        this.IndexBuffers[i]?.Dispose();
+                        this.IndexBuffers[i] = null;
+                    }
+
+                    this.IndexBuffers = null;
+                }
+
+                if (this.inputLayouts != null)
+                {
+                    foreach (var item in this.inputLayouts)
+                    {
+                        item.Value?.Dispose();
+                    }
+
+                    this.inputLayouts.Clear();
+                    this.inputLayouts = null;
+                }
             }
         }
 

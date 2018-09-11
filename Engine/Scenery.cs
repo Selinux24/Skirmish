@@ -13,7 +13,7 @@ namespace Engine
     /// <summary>
     /// Terrain model
     /// </summary>
-    public class Scenery : Ground, UseMaterials
+    public class Scenery : Ground, IUseMaterials
     {
         #region Helper Classes
 
@@ -84,11 +84,35 @@ namespace Engine
                 this.DrawingData = drawingData;
             }
             /// <summary>
-            /// Releases created resources
+            /// Destructor
+            /// </summary>
+            ~SceneryPatch()
+            {
+                // Finalizer calls Dispose(false)  
+                Dispose(false);
+            }
+            /// <summary>
+            /// Dispose resources
             /// </summary>
             public void Dispose()
             {
-                Helper.Dispose(this.DrawingData);
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+            /// <summary>
+            /// Dispose resources
+            /// </summary>
+            /// <param name="disposing">Free managed resources</param>
+            protected virtual void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    if (this.DrawingData != null)
+                    {
+                        this.DrawingData.Dispose();
+                        this.DrawingData = null;
+                    }
+                }
             }
             /// <summary>
             /// Draws the scenery patch shadows
@@ -200,7 +224,7 @@ namespace Engine
         /// <summary>
         /// Scenery patch list
         /// </summary>
-        private readonly SceneryPatchDictionary patchDictionary = new SceneryPatchDictionary();
+        private SceneryPatchDictionary patchDictionary = new SceneryPatchDictionary();
         /// <summary>
         /// Visible Nodes
         /// </summary>
@@ -318,7 +342,14 @@ namespace Engine
 
             #endregion
         }
-
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Scenery()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
         /// <summary>
         /// Dispose of created resources
         /// </summary>
@@ -326,9 +357,19 @@ namespace Engine
         {
             if (disposing)
             {
-                Helper.Dispose(this.patchDictionary);
+                if (patchDictionary != null)
+                {
+                    foreach (var item in patchDictionary)
+                    {
+                        item.Value?.Dispose();
+                    }
+
+                    patchDictionary.Clear();
+                    patchDictionary = null;
+                }
             }
         }
+
         /// <summary>
         /// Objects updating
         /// </summary>

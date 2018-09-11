@@ -210,9 +210,23 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                Helper.Dispose(this.ShadowMapperDirectional);
-                Helper.Dispose(this.ShadowMapperPoint);
-                Helper.Dispose(this.ShadowMapperSpot);
+                if (this.ShadowMapperDirectional != null)
+                {
+                    this.ShadowMapperDirectional.Dispose();
+                    this.ShadowMapperDirectional = null;
+                }
+
+                if (this.ShadowMapperPoint != null)
+                {
+                    this.ShadowMapperPoint.Dispose();
+                    this.ShadowMapperPoint = null;
+                }
+
+                if (this.ShadowMapperSpot != null)
+                {
+                    this.ShadowMapperSpot.Dispose();
+                    this.ShadowMapperSpot = null;
+                }
             }
         }
 

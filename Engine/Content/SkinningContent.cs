@@ -12,7 +12,7 @@ namespace Engine.Content
         /// <summary>
         /// Controller collection
         /// </summary>
-        private List<string> controllers = new List<string>();
+        private readonly List<string> controllers = new List<string>();
 
         /// <summary>
         /// Controller name

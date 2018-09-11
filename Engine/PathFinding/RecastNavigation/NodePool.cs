@@ -3,6 +3,9 @@ using System.Runtime.InteropServices;
 
 namespace Engine.PathFinding.RecastNavigation
 {
+    /// <summary>
+    /// Node pool
+    /// </summary>
     public class NodePool : IDisposable
     {
         public int m_maxNodes;
@@ -13,6 +16,11 @@ namespace Engine.PathFinding.RecastNavigation
         public int[] m_next;
         public int m_hashSize;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="maxNodes">Maximum nodes in pool</param>
+        /// <param name="hashSize">Hash size</param>
         public NodePool(int maxNodes, int hashSize)
         {
             m_maxNodes = maxNodes;
@@ -47,15 +55,14 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (disposing)
             {
-                Helper.Dispose(m_nodes);
-                Helper.Dispose(m_next);
-                Helper.Dispose(m_first);
+                this.m_nodes = null;
+                this.m_next = null;
+                this.m_first = null;
             }
         }
 
         public void Clear()
         {
-            Helper.Dispose(m_first);
             m_first = Helper.CreateArray(m_hashSize, Detour.DT_NULL_IDX);
             m_nodeCount = 0;
         }

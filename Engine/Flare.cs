@@ -49,7 +49,11 @@ namespace Engine
         {
             if (disposing)
             {
-                Helper.Dispose(this.FlareSprite);
+                if (FlareSprite != null)
+                {
+                    FlareSprite.Dispose();
+                    FlareSprite = null;
+                }
             }
         }
     }

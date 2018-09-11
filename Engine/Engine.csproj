@@ -204,8 +204,8 @@
     <Compile Include="Common\ShaderIncludeManager.cs" />
     <Compile Include="Common\TimerTick.cs" />
     <Compile Include="Common\UpdateContext.cs" />
-    <Compile Include="Common\UseMaterials.cs" />
-    <Compile Include="Common\UseSkinningData.cs" />
+    <Compile Include="Common\IUseMaterials.cs" />
+    <Compile Include="Common\IUseSkinningData.cs" />
     <Compile Include="Common\VertexCPUParticle.cs" />
     <Compile Include="Content\ContentDescription.cs" />
     <Compile Include="Content\ILoader.cs" />
@@ -397,6 +397,8 @@
     <Compile Include="SceneCullManager.cs" />
     <Compile Include="SceneLightHemispheric.cs" />
     <Compile Include="SceneObject.cs" />
+    <Compile Include="SceneObjectDescription.cs" />
+    <Compile Include="SceneObjectUsageEnum.cs" />
     <Compile Include="SceneRendererDeferredLights.cs" />
     <Compile Include="ModularScenery.cs" />
     <Compile Include="ModularSceneryDescription.cs" />

@@ -41,6 +41,14 @@ namespace Engine
             this.InitializeBuffers(description.Name, description.PlaneSize, description.PlaneHeight);
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Water()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Internal resources disposition
         /// </summary>
         protected override void Dispose(bool disposing)
@@ -55,6 +63,7 @@ namespace Engine
                 }
             }
         }
+
         /// <summary>
         /// Updates internal state
         /// </summary>
@@ -125,7 +134,7 @@ namespace Engine
         private void InitializeBuffers(string name, float planeSize, float planeHeight)
         {
             GeometryUtil.CreateXZPlane(
-                planeSize, planeHeight, 
+                planeSize, planeHeight,
                 out Vector3[] vData, out Vector3[] nData, out Vector2[] uvs, out uint[] iData);
 
             var vertices = VertexPositionTexture.Generate(vData, uvs);

@@ -41,23 +41,23 @@ namespace Engine.Effects
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Texture index effect variable
         /// </summary>
-        private EngineEffectVariableScalar textureIndex = null;
+        private readonly EngineEffectVariableScalar textureIndex = null;
         /// <summary>
         /// Color effect variable
         /// </summary>
-        private EngineEffectVariableVector color = null;
+        private readonly EngineEffectVariableVector color = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private EngineEffectVariableTexture textures = null;
+        private readonly EngineEffectVariableTexture textures = null;
 
         /// <summary>
         /// Current texture array

@@ -45,14 +45,43 @@ namespace Engine
 
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~ParticleManager()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Resource disposal
         /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Helper.Dispose(this.particleSystems);
-                Helper.Dispose(this.toDelete);
+                if (this.particleSystems != null)
+                {
+                    for (int i = 0; i < this.particleSystems.Count; i++)
+                    {
+                        this.particleSystems[i]?.Dispose();
+                        this.particleSystems[i] = null;
+                    }
+
+                    this.particleSystems.Clear();
+                    this.particleSystems = null;
+                }
+
+                if (this.toDelete != null)
+                {
+                    for (int i = 0; i < this.toDelete.Count; i++)
+                    {
+                        this.toDelete[i]?.Dispose();
+                        this.toDelete[i] = null;
+                    }
+
+                    this.toDelete.Clear();
+                    this.toDelete = null;
+                }
             }
         }
 

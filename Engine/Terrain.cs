@@ -14,7 +14,7 @@ namespace Engine
     /// <summary>
     /// Terrain class
     /// </summary>
-    public class Terrain : Ground, UseMaterials
+    public class Terrain : Ground, IUseMaterials
     {
         #region Helper classes
 
@@ -74,15 +74,15 @@ namespace Engine
             /// <summary>
             /// Vertex buffer description dictionary
             /// </summary>
-            private readonly Dictionary<int, BufferDescriptor> dictVB = new Dictionary<int, BufferDescriptor>();
+            private Dictionary<int, BufferDescriptor> dictVB = new Dictionary<int, BufferDescriptor>();
             /// <summary>
             /// Index buffer description dictionary
             /// </summary>
-            private readonly Dictionary<MapGridShapeId, BufferDescriptor> dictIB = new Dictionary<MapGridShapeId, BufferDescriptor>();
+            private Dictionary<MapGridShapeId, BufferDescriptor> dictIB = new Dictionary<MapGridShapeId, BufferDescriptor>();
             /// <summary>
             /// Tree
             /// </summary>
-            private readonly QuadTree<VertexData> drawingQuadTree = null;
+            private QuadTree<VertexData> drawingQuadTree = null;
             /// <summary>
             /// Last mapped node
             /// </summary>
@@ -179,31 +179,62 @@ namespace Engine
                 }
             }
             /// <summary>
-            /// Dispose
+            /// Destructor
+            /// </summary>
+            ~MapGrid()
+            {
+                // Finalizer calls Dispose(false)  
+                Dispose(false);
+            }
+            /// <summary>
+            /// Dispose resources
             /// </summary>
             public void Dispose()
             {
-                if (this.BufferManager != null)
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
+            /// <summary>
+            /// Dispose resources
+            /// </summary>
+            /// <param name="disposing">Free managed resources</param>
+            protected virtual void Dispose(bool disposing)
+            {
+                if (disposing)
                 {
-                    //Remove data from buffer manager
-                    foreach (var vb in this.dictVB.Values)
-                    {
-                        this.BufferManager.RemoveVertexData(vb);
-                    }
-                    foreach (var ib in this.dictIB.Values)
+                    if (this.BufferManager != null)
                     {
                         //Remove data from buffer manager
-                        this.BufferManager.RemoveIndexData(ib);
+                        foreach (var vb in this.dictVB.Values)
+                        {
+                            this.BufferManager.RemoveVertexData(vb);
+                        }
+                        foreach (var ib in this.dictIB.Values)
+                        {
+                            //Remove data from buffer manager
+                            this.BufferManager.RemoveIndexData(ib);
+                        }
                     }
+
+                    if (this.dictVB != null)
+                    {
+                        this.dictVB.Clear();
+                        this.dictVB = null;
+                    }
+
+                    if (this.dictIB != null)
+                    {
+                        this.dictIB.Clear();
+                        this.dictIB = null;
+                    }
+
+                    this.drawingQuadTree = null;
+
+                    this.NodesHigh = null;
+                    this.NodesMedium = null;
+                    this.NodesLow = null;
+                    this.NodesMinimum = null;
                 }
-
-                Helper.Dispose(this.dictVB);
-                Helper.Dispose(this.dictIB);
-
-                this.NodesHigh = null;
-                this.NodesMedium = null;
-                this.NodesLow = null;
-                this.NodesMinimum = null;
             }
 
             /// <summary>
@@ -601,11 +632,11 @@ namespace Engine
         /// <summary>
         /// Grid
         /// </summary>
-        private readonly MapGrid Map = null;
+        private MapGrid Map = null;
         /// <summary>
         /// Height map
         /// </summary>
-        private readonly HeightMap heightMap = null;
+        private HeightMap heightMap = null;
         /// <summary>
         /// Heightmap cell size
         /// </summary>
@@ -622,7 +653,7 @@ namespace Engine
         /// <summary>
         /// Terrain material
         /// </summary>
-        private readonly MeshMaterial terrainMaterial;
+        private MeshMaterial terrainMaterial;
 
         /// <summary>
         /// Gets or sets whether use alpha mapping or not
@@ -639,27 +670,27 @@ namespace Engine
         /// <summary>
         /// Terrain low res textures
         /// </summary>
-        private readonly EngineShaderResourceView terrainTexturesLR = null;
+        private EngineShaderResourceView terrainTexturesLR = null;
         /// <summary>
         /// Terrain high res textures
         /// </summary>
-        private readonly EngineShaderResourceView terrainTexturesHR = null;
+        private EngineShaderResourceView terrainTexturesHR = null;
         /// <summary>
         /// Terrain normal maps
         /// </summary>
-        private readonly EngineShaderResourceView terrainNormalMaps = null;
+        private EngineShaderResourceView terrainNormalMaps = null;
         /// <summary>
         /// Terrain specular maps
         /// </summary>
-        private readonly EngineShaderResourceView terrainSpecularMaps = null;
+        private EngineShaderResourceView terrainSpecularMaps = null;
         /// <summary>
         /// Color textures for alpha map
         /// </summary>
-        private readonly EngineShaderResourceView colorTextures = null;
+        private EngineShaderResourceView colorTextures = null;
         /// <summary>
         /// Alpha map
         /// </summary>
-        private readonly EngineShaderResourceView alphaMap = null;
+        private EngineShaderResourceView alphaMap = null;
         /// <summary>
         /// Use anisotropic
         /// </summary>
@@ -800,6 +831,14 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Terrain()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Release of resources
         /// </summary>
         protected override void Dispose(bool disposing)
@@ -809,18 +848,51 @@ namespace Engine
                 if (Map != null)
                 {
                     Map.Dispose();
+                    Map = null;
                 }
 
-                Helper.Dispose(this.heightMap);
+                if (heightMap != null)
+                {
+                    heightMap.Dispose();
+                    heightMap = null;
+                }
 
-                Helper.Dispose(this.terrainTexturesLR);
-                Helper.Dispose(this.terrainTexturesHR);
-                Helper.Dispose(this.terrainNormalMaps);
-                Helper.Dispose(this.terrainSpecularMaps);
-                Helper.Dispose(this.colorTextures);
-                Helper.Dispose(this.alphaMap);
+                if (terrainTexturesLR != null)
+                {
+                    terrainTexturesLR.Dispose();
+                    terrainTexturesLR = null;
+                }
+                if (terrainTexturesHR != null)
+                {
+                    terrainTexturesHR.Dispose();
+                    terrainTexturesHR = null;
+                }
+                if (terrainNormalMaps != null)
+                {
+                    terrainNormalMaps.Dispose();
+                    terrainNormalMaps = null;
+                }
+                if (terrainSpecularMaps != null)
+                {
+                    terrainSpecularMaps.Dispose();
+                    terrainSpecularMaps = null;
+                }
+                if (colorTextures != null)
+                {
+                    colorTextures.Dispose();
+                    colorTextures = null;
+                }
+                if (alphaMap != null)
+                {
+                    alphaMap.Dispose();
+                    alphaMap = null;
+                }
 
-                Helper.Dispose(this.terrainMaterial);
+                if (terrainMaterial != null)
+                {
+                    terrainMaterial.Dispose();
+                    terrainMaterial = null;
+                }
             }
         }
 

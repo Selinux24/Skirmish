@@ -790,17 +790,16 @@ namespace Engine.Content
         /// <returns>Returns controller content</returns>
         private static ControllerContent ProcessSkin(string name, Skin skin)
         {
-            ControllerContent res = new ControllerContent();
-
-            res.BindShapeMatrix = Matrix.Transpose(skin.BindShapeMatrix.ToMatrix());
-            res.Skin = skin.SourceUri.Replace("#", "");
-            res.Armature = name;
+            ControllerContent res = new ControllerContent
+            {
+                BindShapeMatrix = Matrix.Transpose(skin.BindShapeMatrix.ToMatrix()),
+                Skin = skin.SourceUri.Replace("#", ""),
+                Armature = name
+            };
 
             if (skin.VertexWeights != null)
             {
-                Dictionary<string, Matrix> ibmList;
-                Weight[] wgList;
-                ProcessVertexWeights(name, skin, out ibmList, out wgList);
+                ProcessVertexWeights(name, skin, out Dictionary<string, Matrix> ibmList, out Weight[] wgList);
 
                 res.InverseBindMatrix = ibmList;
                 res.Weights = wgList;
@@ -818,8 +817,7 @@ namespace Engine.Content
         {
             ControllerContent res = new ControllerContent();
 
-            Weight[] wgList;
-            ProcessVertexWeights(morph, out wgList);
+            ProcessVertexWeights(morph, out Weight[] wgList);
 
             res.Weights = wgList;
 
@@ -1120,7 +1118,7 @@ namespace Engine.Content
 
             if (technique.Blinn != null || technique.Phong != null)
             {
-                BlinnPhong algorithm = technique.Blinn != null ? technique.Blinn : technique.Phong;
+                BlinnPhong algorithm = technique.Blinn ?? technique.Phong;
 
                 algorithmName = "BlinnPhong";
 
@@ -1362,14 +1360,12 @@ namespace Engine.Content
                 var vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl, StringComparison.OrdinalIgnoreCase));
                 if (vScene != null)
                 {
-                    Skeleton skeleton = null;
-                    string[] controllers = null;
                     if (!ProcessSceneNodes(
                         vScene.Nodes,
                         transform, useControllerTransform,
                         modelContent,
-                        out skeleton,
-                        out controllers))
+                        out Skeleton skeleton,
+                        out string[] controllers))
                     {
                         throw new EngineException("Error processing scene. Bad visual scene configuration.");
                     }
@@ -1408,13 +1404,11 @@ namespace Engine.Content
 
                 foreach (Node childNode in nodes)
                 {
-                    Skeleton pSkeleton;
-                    string[] pControllers;
                     if (ProcessSceneNode(
                         childNode,
                         transform, useControllerTransform,
                         modelContent,
-                        out pSkeleton, out pControllers))
+                        out Skeleton pSkeleton, out string[] pControllers))
                     {
                         if (pSkeleton != null)
                         {
@@ -1572,14 +1566,12 @@ namespace Engine.Content
 
             if (processChilds)
             {
-                Skeleton pSkeleton;
-                string[] pControllers;
                 if (ProcessSceneNodes(
                     node.Nodes,
                     trn, true,
                     modelContent,
-                    out pSkeleton,
-                    out pControllers))
+                    out Skeleton pSkeleton,
+                    out string[] pControllers))
                 {
                     if (pSkeleton != null) skeleton = pSkeleton;
                     lControllers.AddRange(pControllers);

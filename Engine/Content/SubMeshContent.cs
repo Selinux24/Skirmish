@@ -209,13 +209,10 @@ namespace Engine.Content
                         var v1 = this.vertices[(int)this.indices[i + 1]];
                         var v2 = this.vertices[(int)this.indices[i + 2]];
 
-                        Vector3 tangent;
-                        Vector3 binormal;
-                        Vector3 normal;
                         GeometryUtil.ComputeNormals(
                             v0.Position.Value, v1.Position.Value, v2.Position.Value,
                             v0.Texture.Value, v1.Texture.Value, v2.Texture.Value,
-                            out tangent, out binormal, out normal);
+                            out Vector3 tangent, out Vector3 binormal, out Vector3 normal);
 
                         v0.Tangent = tangent;
                         v1.Tangent = tangent;
@@ -238,13 +235,10 @@ namespace Engine.Content
                         var v1 = this.vertices[i + 1];
                         var v2 = this.vertices[i + 2];
 
-                        Vector3 tangent;
-                        Vector3 binormal;
-                        Vector3 normal;
                         GeometryUtil.ComputeNormals(
                             v0.Position.Value, v1.Position.Value, v2.Position.Value,
                             v0.Texture.Value, v1.Texture.Value, v2.Texture.Value,
-                            out tangent, out binormal, out normal);
+                            out Vector3 tangent, out Vector3 binormal, out Vector3 normal);
 
                         v0.Tangent = tangent;
                         v1.Tangent = tangent;

@@ -288,15 +288,15 @@ namespace Engine
         /// <summary>
         /// Radius for slow aproximation delta
         /// </summary>
-        private float translationRadius = 10f;
+        private readonly float translationRadius = 10f;
         /// <summary>
         /// Modifier applied to delta out of the radius
         /// </summary>
-        private float translationOutOfRadius = 0.2f;
+        private readonly float translationOutOfRadius = 0.2f;
         /// <summary>
         /// Modifier applied to delta into the radius
         /// </summary>
-        private float translationIntoRadius = 0.01f;
+        private readonly float translationIntoRadius = 0.01f;
 
         #endregion
 

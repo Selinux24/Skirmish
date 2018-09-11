@@ -12,7 +12,7 @@ namespace Engine.Common
         /// <summary>
         /// Effect technique
         /// </summary>
-        private EffectTechnique techinque = null;
+        private readonly EffectTechnique techinque = null;
 
         /// <summary>
         /// Gets the effect pass count

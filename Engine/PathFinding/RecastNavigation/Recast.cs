@@ -3808,29 +3808,33 @@ namespace Engine.PathFinding.RecastNavigation
             int w = chf.width;
             int h = chf.height;
             int borderSize = chf.borderSize;
+            int maxContours = Math.Max(chf.maxRegions, 8);
 
-            cset = new ContourSet();
-            cset.bmin = chf.boundingBox.Minimum;
-            cset.bmax = chf.boundingBox.Maximum;
+            var bmin = chf.boundingBox.Minimum;
+            var bmax = chf.boundingBox.Maximum;
             if (borderSize > 0)
             {
                 // If the heightfield was build with bordersize, remove the offset.
                 float pad = borderSize * chf.cs;
-                cset.bmin[0] += pad;
-                cset.bmin[2] += pad;
-                cset.bmax[0] -= pad;
-                cset.bmax[2] -= pad;
+                bmin.X += pad;
+                bmin.Z += pad;
+                bmax.X -= pad;
+                bmax.Z -= pad;
             }
-            cset.cs = chf.cs;
-            cset.ch = chf.ch;
-            cset.width = chf.width - chf.borderSize * 2;
-            cset.height = chf.height - chf.borderSize * 2;
-            cset.borderSize = chf.borderSize;
-            cset.maxError = maxError;
 
-            int maxContours = Math.Max(chf.maxRegions, 8);
-            cset.conts = new Contour[maxContours];
-            cset.nconts = 0;
+            cset = new ContourSet
+            {
+                bmin = bmin,
+                bmax = bmax,
+                cs = chf.cs,
+                ch = chf.ch,
+                width = chf.width - chf.borderSize * 2,
+                height = chf.height - chf.borderSize * 2,
+                borderSize = chf.borderSize,
+                maxError = maxError,
+                conts = new Contour[maxContours],
+                nconts = 0
+            };
 
             int[] flags = new int[chf.spanCount];
 

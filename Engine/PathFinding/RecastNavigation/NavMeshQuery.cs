@@ -98,7 +98,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 if (m_nodePool != null)
                 {
-                    Helper.Dispose(m_nodePool);
+                    m_nodePool.Dispose();
                     m_nodePool = null;
                 }
 
@@ -122,7 +122,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 if (m_openList != null)
                 {
-                    Helper.Dispose(m_openList);
+                    m_openList.Dispose();
                     m_openList = null;
                 }
 

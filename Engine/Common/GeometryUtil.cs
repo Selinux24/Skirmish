@@ -324,8 +324,7 @@ namespace Engine.Common
         /// <param name="indices">Result indices</param>
         public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out Vector3[] vertices, out uint[] indices)
         {
-            Vector2[] uvs;
-            CreateSprite(position, width, height, formWidth, formHeight, 0, 0, 0, out vertices, out uvs, out indices);
+            CreateSprite(position, width, height, formWidth, formHeight, 0, 0, 0, out vertices, out Vector2[] uvs, out indices);
         }
         /// <summary>
         /// Creates a sprite of VertexPositionTexture VertexData
@@ -452,8 +451,7 @@ namespace Engine.Common
         /// <param name="indices">Resulting indices</param>
         public static void CreateScreen(EngineForm form, out Vector3[] vertices, out uint[] indices)
         {
-            Vector2[] uvs;
-            CreateScreen(form, out vertices, out uvs, out indices);
+            CreateScreen(form, out vertices, out Vector2[] uvs, out indices);
         }
         /// <summary>
         /// Creates a screen of VertexPositionTexture VertexData
@@ -464,8 +462,7 @@ namespace Engine.Common
         /// <param name="indices">Resulting indices</param>
         public static void CreateScreen(int renderWidth, int renderHeight, out Vector3[] vertices, out uint[] indices)
         {
-            Vector2[] uvs;
-            CreateScreen(renderWidth, renderHeight, out vertices, out uvs, out indices);
+            CreateScreen(renderWidth, renderHeight, out vertices, out Vector2[] uvs, out indices);
         }
         /// <summary>
         /// Creates a screen of VertexPositionTexture VertexData
@@ -672,11 +669,7 @@ namespace Engine.Common
         /// <param name="indices">Result indices</param>
         public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out Vector3[] vertices, out uint[] indices)
         {
-            Vector3[] normals;
-            Vector3[] tangents;
-            Vector3[] binormals;
-            Vector2[] uvs;
-            CreateSphere(radius, sliceCount, stackCount, out vertices, out normals, out uvs, out tangents, out binormals, out indices);
+            CreateSphere(radius, sliceCount, stackCount, out vertices, out Vector3[] normals, out Vector2[] uvs, out Vector3[] tangents, out Vector3[] binormals, out indices);
         }
         /// <summary>
         /// Creates a sphere of VertexPositionNormalTextureTangent VertexData
@@ -690,9 +683,7 @@ namespace Engine.Common
         /// <param name="indices">Result indices</param>
         public static void CreateSphere(float radius, uint sliceCount, uint stackCount, out Vector3[] vertices, out Vector3[] normals, out Vector2[] uvs, out uint[] indices)
         {
-            Vector3[] tangents;
-            Vector3[] binormals;
-            CreateSphere(radius, sliceCount, stackCount, out vertices, out normals, out uvs, out tangents, out binormals, out indices);
+            CreateSphere(radius, sliceCount, stackCount, out vertices, out normals, out uvs, out Vector3[] tangents, out Vector3[] binormals, out indices);
         }
         /// <summary>
         /// Creates a sphere of VertexPositionNormalTextureTangent VertexData

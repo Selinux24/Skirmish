@@ -25,89 +25,89 @@ namespace Engine.Effects
         /// <summary>
         /// World effect variable
         /// </summary>
-        private EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix world = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
-        private EngineEffectVariableVector eyePositionWorld = null;
+        private readonly EngineEffectVariableVector eyePositionWorld = null;
         /// <summary>
         /// Game time effect variable
         /// </summary>
-        private EngineEffectVariableScalar totalTime = null;
+        private readonly EngineEffectVariableScalar totalTime = null;
         /// <summary>
         /// Elapsed time effect variable
         /// </summary>
-        private EngineEffectVariableScalar elapsedTime = null;
+        private readonly EngineEffectVariableScalar elapsedTime = null;
         /// <summary>
         /// Texture count effect variable
         /// </summary>
-        private EngineEffectVariableScalar textureCount = null;
+        private readonly EngineEffectVariableScalar textureCount = null;
         /// <summary>
         /// Textures effect variable
         /// </summary>
-        private EngineEffectVariableTexture textureArray = null;
+        private readonly EngineEffectVariableTexture textureArray = null;
 
         /// <summary>
         /// Emission age effect variable
         /// </summary>
-        private EngineEffectVariableScalar emissionRate = null;
+        private readonly EngineEffectVariableScalar emissionRate = null;
         /// <summary>
         /// Velocity sensitivity effect variable
         /// </summary>
-        private EngineEffectVariableScalar velocitySensitivity = null;
+        private readonly EngineEffectVariableScalar velocitySensitivity = null;
         /// <summary>
         /// Horizontal velocity effect variable
         /// </summary>
-        private EngineEffectVariableVector horizontalVelocity = null;
+        private readonly EngineEffectVariableVector horizontalVelocity = null;
         /// <summary>
         /// Vertical velocity effect variable
         /// </summary>
-        private EngineEffectVariableVector verticalVelocity = null;
+        private readonly EngineEffectVariableVector verticalVelocity = null;
         /// <summary>
         /// Random values effect variable
         /// </summary>
-        private EngineEffectVariableVector randomValues = null;
+        private readonly EngineEffectVariableVector randomValues = null;
 
         /// <summary>
         /// Maximum particle duration variable
         /// </summary>
-        private EngineEffectVariableScalar maxDuration = null;
+        private readonly EngineEffectVariableScalar maxDuration = null;
         /// <summary>
         /// Maximum particle duration randomness variable
         /// </summary>
-        private EngineEffectVariableScalar maxDurationRandomness = null;
+        private readonly EngineEffectVariableScalar maxDurationRandomness = null;
         /// <summary>
         /// End velocity variable
         /// </summary>
-        private EngineEffectVariableScalar endVelocity = null;
+        private readonly EngineEffectVariableScalar endVelocity = null;
         /// <summary>
         /// Gravity variable
         /// </summary>
-        private EngineEffectVariableVector gravity = null;
+        private readonly EngineEffectVariableVector gravity = null;
         /// <summary>
         /// Starting size variable
         /// </summary>
-        private EngineEffectVariableVector startSize = null;
+        private readonly EngineEffectVariableVector startSize = null;
         /// <summary>
         /// Ending size variable
         /// </summary>
-        private EngineEffectVariableVector endSize = null;
+        private readonly EngineEffectVariableVector endSize = null;
         /// <summary>
         /// Minimum color variable
         /// </summary>
-        private EngineEffectVariableVector minColor = null;
+        private readonly EngineEffectVariableVector minColor = null;
         /// <summary>
         /// Maximum color variable
         /// </summary>
-        private EngineEffectVariableVector maxColor = null;
+        private readonly EngineEffectVariableVector maxColor = null;
         /// <summary>
         /// Rotation speed variable
         /// </summary>
-        private EngineEffectVariableVector rotateSpeed = null;
+        private readonly EngineEffectVariableVector rotateSpeed = null;
 
         /// <summary>
         /// Current texture array

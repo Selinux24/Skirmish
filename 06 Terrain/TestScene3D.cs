@@ -127,12 +127,19 @@ namespace Terrain
         {
 
         }
-
+        ~TestScene3D()
+        {
+            Dispose(false);
+        }
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Helper.Dispose(this.debugTex);
+                if (this.debugTex != null)
+                {
+                    this.debugTex.Dispose();
+                    this.debugTex = null;
+                }
             }
 
             base.Dispose(disposing);

@@ -66,39 +66,40 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeDust(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription
+            {
+                Name = "Dust",
 
-            settings.Name = "Dust";
+                ContentPath = contentPath,
+                TextureName = texture,
 
-            settings.ContentPath = contentPath;
-            settings.TextureName = texture;
+                MaxDuration = 1,
 
-            settings.MaxDuration = 1;
+                MinHorizontalVelocity = 0,
+                MaxHorizontalVelocity = 0.5f,
 
-            settings.MinHorizontalVelocity = 0;
-            settings.MaxHorizontalVelocity = 0.5f;
+                MinVerticalVelocity = -1,
+                MaxVerticalVelocity = 1,
 
-            settings.MinVerticalVelocity = -1;
-            settings.MaxVerticalVelocity = 1;
+                Gravity = new Vector3(0.0f, -0.35f, 0.0f),
 
-            settings.Gravity = new Vector3(0.0f, -0.35f, 0.0f);
+                EndVelocity = 0.1f,
 
-            settings.EndVelocity = 0.1f;
+                MinColor = Color.SandyBrown * 0.5f,
+                MaxColor = Color.SandyBrown,
 
-            settings.MinColor = Color.SandyBrown * 0.5f;
-            settings.MaxColor = Color.SandyBrown;
+                MinRotateSpeed = -1,
+                MaxRotateSpeed = 1,
 
-            settings.MinRotateSpeed = -1;
-            settings.MaxRotateSpeed = 1;
+                MinStartSize = 0.25f,
+                MaxStartSize = 0.5f,
 
-            settings.MinStartSize = 0.25f;
-            settings.MaxStartSize = 0.5f;
+                MinEndSize = 0.5f,
+                MaxEndSize = 1f,
 
-            settings.MinEndSize = 0.5f;
-            settings.MaxEndSize = 1f;
-
-            settings.Transparent = true;
-            settings.Additive = false;
+                Transparent = true,
+                Additive = false
+            };
 
             settings.Scale(scale);
 
@@ -113,35 +114,36 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeFire(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription
+            {
+                Name = "Fire",
 
-            settings.Name = "Fire";
+                ContentPath = contentPath,
+                TextureName = texture,
 
-            settings.ContentPath = contentPath;
-            settings.TextureName = texture;
+                MaxDuration = 2,
+                MaxDurationRandomness = 1,
 
-            settings.MaxDuration = 2;
-            settings.MaxDurationRandomness = 1;
+                MinHorizontalVelocity = 0,
+                MaxHorizontalVelocity = 1.5f,
 
-            settings.MinHorizontalVelocity = 0;
-            settings.MaxHorizontalVelocity = 1.5f;
+                MinVerticalVelocity = -1,
+                MaxVerticalVelocity = 1,
 
-            settings.MinVerticalVelocity = -1;
-            settings.MaxVerticalVelocity = 1;
+                Gravity = new Vector3(0, 1, 0),
 
-            settings.Gravity = new Vector3(0, 1, 0);
+                MinColor = new Color(1f, 1f, 1f, 0.55f),
+                MaxColor = new Color(1f, 1f, 1f, 1f),
 
-            settings.MinColor = new Color(1f, 1f, 1f, 0.55f);
-            settings.MaxColor = new Color(1f, 1f, 1f, 1f);
+                MinStartSize = 0.5f,
+                MaxStartSize = 1,
 
-            settings.MinStartSize = 0.5f;
-            settings.MaxStartSize = 1;
+                MinEndSize = 2.5f,
+                MaxEndSize = 4f,
 
-            settings.MinEndSize = 2.5f;
-            settings.MaxEndSize = 4f;
-
-            settings.Transparent = true;
-            settings.Additive = true;
+                Transparent = true,
+                Additive = true
+            };
 
             settings.Scale(scale);
 
@@ -156,36 +158,37 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeSmokePlume(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription
+            {
+                Name = "SmokePlume",
 
-            settings.Name = "SmokePlume";
+                ContentPath = contentPath,
+                TextureName = texture,
 
-            settings.ContentPath = contentPath;
-            settings.TextureName = texture;
+                MaxDuration = 10,
 
-            settings.MaxDuration = 10;
+                MinHorizontalVelocity = 0,
+                MaxHorizontalVelocity = 0.5f,
 
-            settings.MinHorizontalVelocity = 0;
-            settings.MaxHorizontalVelocity = 0.5f;
+                MinVerticalVelocity = 1.0f,
+                MaxVerticalVelocity = 2.0f,
 
-            settings.MinVerticalVelocity = 1.0f;
-            settings.MaxVerticalVelocity = 2.0f;
+                Gravity = new Vector3(0.0f, 0.5f, 0.0f),
 
-            settings.Gravity = new Vector3(0.0f, 0.5f, 0.0f);
+                EndVelocity = 0.75f,
 
-            settings.EndVelocity = 0.75f;
+                MinRotateSpeed = -1f,
+                MaxRotateSpeed = 1f,
 
-            settings.MinRotateSpeed = -1f;
-            settings.MaxRotateSpeed = 1f;
+                MinStartSize = 1,
+                MaxStartSize = 2,
 
-            settings.MinStartSize = 1;
-            settings.MaxStartSize = 2;
+                MinEndSize = 5,
+                MaxEndSize = 20,
 
-            settings.MinEndSize = 5;
-            settings.MaxEndSize = 20;
-
-            settings.Transparent = true;
-            settings.Additive = false;
+                Transparent = true,
+                Additive = false
+            };
 
             settings.Scale(scale);
 
@@ -200,38 +203,39 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeProjectileTrail(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription
+            {
+                Name = "ProjectileTrail",
 
-            settings.Name = "ProjectileTrail";
+                ContentPath = contentPath,
+                TextureName = texture,
 
-            settings.ContentPath = contentPath;
-            settings.TextureName = texture;
+                MaxDuration = 0.5f,
+                MaxDurationRandomness = 1.5f,
 
-            settings.MaxDuration = 0.5f;
-            settings.MaxDurationRandomness = 1.5f;
+                EmitterVelocitySensitivity = 0.1f,
 
-            settings.EmitterVelocitySensitivity = 0.1f;
+                MinHorizontalVelocity = -0.1f,
+                MaxHorizontalVelocity = 0.1f,
 
-            settings.MinHorizontalVelocity = -0.1f;
-            settings.MaxHorizontalVelocity = 0.1f;
+                MinVerticalVelocity = -0.1f,
+                MaxVerticalVelocity = 0.1f,
 
-            settings.MinVerticalVelocity = -0.1f;
-            settings.MaxVerticalVelocity = 0.1f;
+                MinColor = Color.Gray,
+                MaxColor = Color.White,
 
-            settings.MinColor = Color.Gray;
-            settings.MaxColor = Color.White;
+                MinRotateSpeed = 1,
+                MaxRotateSpeed = 1,
 
-            settings.MinRotateSpeed = 1;
-            settings.MaxRotateSpeed = 1;
+                MinStartSize = 0.25f,
+                MaxStartSize = 0.5f,
 
-            settings.MinStartSize = 0.25f;
-            settings.MaxStartSize = 0.5f;
+                MinEndSize = 0.5f,
+                MaxEndSize = 1.0f,
 
-            settings.MinEndSize = 0.5f;
-            settings.MaxEndSize = 1.0f;
-
-            settings.Transparent = true;
-            settings.Additive = false;
+                Transparent = true,
+                Additive = false
+            };
 
             settings.Scale(scale);
 
@@ -246,38 +250,39 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeExplosion(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription
+            {
+                Name = "Explosion",
 
-            settings.Name = "Explosion";
+                ContentPath = contentPath,
+                TextureName = texture,
 
-            settings.ContentPath = contentPath;
-            settings.TextureName = texture;
+                MaxDuration = 1.5f,
+                MaxDurationRandomness = 1,
 
-            settings.MaxDuration = 1.5f;
-            settings.MaxDurationRandomness = 1;
+                MinHorizontalVelocity = 1.0f,
+                MaxHorizontalVelocity = 1.5f,
 
-            settings.MinHorizontalVelocity = 1.0f;
-            settings.MaxHorizontalVelocity = 1.5f;
+                MinVerticalVelocity = -1f,
+                MaxVerticalVelocity = 1f,
 
-            settings.MinVerticalVelocity = -1f;
-            settings.MaxVerticalVelocity = 1f;
+                EndVelocity = 0,
 
-            settings.EndVelocity = 0;
+                MinColor = Color.DarkGray,
+                MaxColor = Color.Gray,
 
-            settings.MinColor = Color.DarkGray;
-            settings.MaxColor = Color.Gray;
+                MinRotateSpeed = -1,
+                MaxRotateSpeed = 1,
 
-            settings.MinRotateSpeed = -1;
-            settings.MaxRotateSpeed = 1;
+                MinStartSize = 0.25f,
+                MaxStartSize = 0.25f,
 
-            settings.MinStartSize = 0.25f;
-            settings.MaxStartSize = 0.25f;
+                MinEndSize = 5,
+                MaxEndSize = 10,
 
-            settings.MinEndSize = 5;
-            settings.MaxEndSize = 10;
-
-            settings.Transparent = true;
-            settings.Additive = true;
+                Transparent = true,
+                Additive = true
+            };
 
             settings.Scale(scale);
 
@@ -292,39 +297,40 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeSmokeExplosion(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription();
+            ParticleSystemDescription settings = new ParticleSystemDescription
+            {
+                Name = "SmokeExplosion",
 
-            settings.Name = "SmokeExplosion";
+                ContentPath = contentPath,
+                TextureName = texture,
 
-            settings.ContentPath = contentPath;
-            settings.TextureName = texture;
+                MaxDuration = 4,
 
-            settings.MaxDuration = 4;
+                MinHorizontalVelocity = 0,
+                MaxHorizontalVelocity = 5,
 
-            settings.MinHorizontalVelocity = 0;
-            settings.MaxHorizontalVelocity = 5;
+                MinVerticalVelocity = -1,
+                MaxVerticalVelocity = 5,
 
-            settings.MinVerticalVelocity = -1;
-            settings.MaxVerticalVelocity = 5;
+                Gravity = new Vector3(0, -20, 0),
 
-            settings.Gravity = new Vector3(0, -20, 0);
+                EndVelocity = 0,
 
-            settings.EndVelocity = 0;
+                MinColor = Color.LightGray,
+                MaxColor = Color.White,
 
-            settings.MinColor = Color.LightGray;
-            settings.MaxColor = Color.White;
+                MinRotateSpeed = -2,
+                MaxRotateSpeed = 2,
 
-            settings.MinRotateSpeed = -2;
-            settings.MaxRotateSpeed = 2;
+                MinStartSize = 1,
+                MaxStartSize = 1,
 
-            settings.MinStartSize = 1;
-            settings.MaxStartSize = 1;
+                MinEndSize = 10,
+                MaxEndSize = 20,
 
-            settings.MinEndSize = 10;
-            settings.MaxEndSize = 20;
-
-            settings.Transparent = true;
-            settings.Additive = false;
+                Transparent = true,
+                Additive = false
+            };
 
             settings.Scale(scale);
 
@@ -633,8 +639,7 @@ namespace Engine
 
                 for (int i = 0; i < res.Length; i++)
                 {
-                    float n;
-                    if (float.TryParse(bits[i], NumberStyles.Float, CultureInfo.InvariantCulture, out n))
+                    if (float.TryParse(bits[i], NumberStyles.Float, CultureInfo.InvariantCulture, out float n))
                     {
                         res[i] = n;
                     }

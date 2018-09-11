@@ -11,7 +11,7 @@ namespace Engine.Common
         /// <summary>
         /// Effect sampler variable
         /// </summary>
-        private EffectSamplerVariable variable = null;
+        private readonly EffectSamplerVariable variable = null;
 
         /// <summary>
         /// Constructor

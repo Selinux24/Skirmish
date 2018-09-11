@@ -17,11 +17,11 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjection = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private EngineEffectVariableTexture cubeTexture = null;
+        private readonly EngineEffectVariableTexture cubeTexture = null;
 
         /// <summary>
         /// Current cube texture

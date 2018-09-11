@@ -135,8 +135,7 @@ namespace Engine
 
                 for (int i = 0; i < res.Length; i++)
                 {
-                    float n;
-                    if (float.TryParse(bits[i], NumberStyles.Float, CultureInfo.InvariantCulture, out n))
+                    if (float.TryParse(bits[i], NumberStyles.Float, CultureInfo.InvariantCulture, out float n))
                     {
                         res[i] = n;
                     }

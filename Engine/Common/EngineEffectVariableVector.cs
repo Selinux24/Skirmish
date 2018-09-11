@@ -12,7 +12,7 @@ namespace Engine.Common
         /// <summary>
         /// Effect vector variable
         /// </summary>
-        private EffectVectorVariable variable = null;
+        private readonly EffectVectorVariable variable = null;
 
         /// <summary>
         /// Constructor

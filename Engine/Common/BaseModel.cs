@@ -10,7 +10,7 @@ namespace Engine.Common
     /// <summary>
     /// Model basic implementation
     /// </summary>
-    public abstract class BaseModel : Drawable, UseMaterials, UseSkinningData
+    public abstract class BaseModel : Drawable, IUseMaterials, IUseSkinningData
     {
         /// <summary>
         /// Meshes by level of detail dictionary
@@ -143,13 +143,20 @@ namespace Engine.Common
             this.UseAnisotropicFiltering = description.UseAnisotropicFiltering;
         }
         /// <summary>
+        /// Destructor
+        /// </summary>
+        ~BaseModel()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
         /// Dispose model buffers
         /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Helper.Dispose(this.meshesByLOD);
                 this.meshesByLOD = null;
             }
         }

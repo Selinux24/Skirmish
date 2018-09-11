@@ -87,10 +87,8 @@ namespace Engine.Animation
         /// <param name="factor">Interpolation factor</param>
         private static void BuildTransforms(Joint joint, float time1, JointAnimation[] animations1, float time2, JointAnimation[] animations2, float factor)
         {
-            Vector3 pos1; Quaternion rot1; Vector3 sca1;
-            Vector3 pos2; Quaternion rot2; Vector3 sca2;
-            Array.Find(animations1, a => a.Joint == joint.Name).Interpolate(time1, out pos1, out rot1, out sca1);
-            Array.Find(animations2, a => a.Joint == joint.Name).Interpolate(time2, out pos2, out rot2, out sca2);
+            Array.Find(animations1, a => a.Joint == joint.Name).Interpolate(time1, out Vector3 pos1, out Quaternion rot1, out Vector3 sca1);
+            Array.Find(animations2, a => a.Joint == joint.Name).Interpolate(time2, out Vector3 pos2, out Quaternion rot2, out Vector3 sca2);
 
             Vector3 translation = pos1 + (pos2 - pos1) * factor;
             Quaternion rotation = Quaternion.Slerp(rot1, rot2, factor);
