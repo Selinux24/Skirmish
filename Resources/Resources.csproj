@@ -108,6 +108,7 @@
     <None Include="Blender\Characters\Human2\Human2.blend" />
     <None Include="Blender\Characters\Rat\Rat.blend" />
     <None Include="Blender\Foliage\Foliage.blend" />
+    <None Include="Blender\Furniture\Container\container.blend" />
     <None Include="Blender\Furniture\Lamps\concrete.jpg" />
     <None Include="Blender\Buildings\Dungeon\BaseMap.png" />
     <None Include="Blender\Buildings\Heliport\heliport.png" />
@@ -122,6 +123,7 @@
     <None Include="Blender\Foliage\grass_v1.dds" />
     <None Include="Blender\Foliage\grass_v2.dds" />
     <None Include="Blender\Characters\Rat\Rat_d.png" />
+    <None Include="Blender\Furniture\Container\ikube azul.png" />
     <Content Include="Blender\Scenery\Clif\dirt_2048x2048.jpg" />
     <Content Include="Blender\Scenery\Ground\buildings.png" />
     <None Include="Blender\Scenery\ModularDungeon\Assets.blend" />
@@ -208,6 +210,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Characters\Soldier\soldier_anim2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Furniture\Container\ikube azul-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Furniture\Container\ikube azul-2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Furniture\Container\ikube azul-3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Furniture\Container\ikube azul-4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Furniture\Container\ikube azul-5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Furniture\Lamps\Readme.txt" />
@@ -532,6 +549,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Characters\Human2\Human2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Furniture\Container\container.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Tests\AniCube\aniCube.dae" />

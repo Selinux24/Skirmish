@@ -12,10 +12,10 @@ namespace SceneTest
     {
         private const int layerHUD = 99;
 
-        private float baseHeight = 0.1f;
-        private float spaceSize = 40;
+        private readonly float baseHeight = 0.1f;
+        private readonly float spaceSize = 40;
 
-        private Random rnd = new Random();
+        private readonly Random rnd = new Random();
 
         private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> runtime = null;
@@ -43,6 +43,9 @@ namespace SceneTest
         private SceneObject<Model> streetlamp = null;
         private SceneObject<ModelInstanced> streetlampI = null;
 
+        private SceneObject<Model> container = null;
+        private SceneObject<ModelInstanced> containerI = null;
+
         private SceneObject<SkyScattering> sky = null;
         private SceneObject<SkyPlane> skyPlane = null;
 
@@ -60,12 +63,12 @@ namespace SceneTest
 
         private IParticleSystem[] particlePlumes = null;
         private Vector3 plumeGravity = new Vector3(0, 5, 0);
-        private float plumeMaxHorizontalVelocity = 25f;
+        private readonly float plumeMaxHorizontalVelocity = 25f;
         private Vector2 wind = new Vector2(0, 0);
         private Vector2 nextWind = new Vector2();
         private float nextWindChange = 0;
 
-        private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
@@ -108,6 +111,7 @@ namespace SceneTest
             this.InitializeVehiclesLeopard();
             this.InitializeLamps();
             this.InitializeStreetLamps();
+            this.InitializeContainers();
             this.InitializeTestCube();
             this.InitializeParticles();
             this.InitializeWater();
@@ -407,7 +411,7 @@ namespace SceneTest
 
             float s = -spaceSize / 2f;
 
-            this.vehicleLeopard.Transform.SetPosition(s, baseHeight, 0);
+            this.vehicleLeopard.Transform.SetPosition(s, baseHeight, -10);
             this.vehicleLeopard.Transform.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
 
             this.vehicleLeopardI.Instance[0].Manipulator.SetPosition(-spaceSize * 2, baseHeight, -spaceSize * 2);
@@ -539,6 +543,79 @@ namespace SceneTest
             this.Lights.AddRange(this.streetlampI.Instance[6].Lights);
             this.Lights.AddRange(this.streetlampI.Instance[7].Lights);
             this.Lights.AddRange(this.streetlampI.Instance[8].Lights);
+        }
+        private void InitializeContainers()
+        {
+            this.container = this.AddComponent<Model>(
+                new ModelDescription()
+                {
+                    Name = "Container",
+                    CastShadow = true,
+                    Static = true,
+                    SphericVolume = false,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/container",
+                        ModelContentFilename = "Container.xml",
+                    }
+                });
+
+            this.containerI = this.AddComponent<ModelInstanced>(
+                new ModelInstancedDescription()
+                {
+                    Name = "ContainerI",
+                    CastShadow = true,
+                    Static = true,
+                    SphericVolume = false,
+                    Instances = 96,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTextures/container",
+                        ModelContentFilename = "Container.xml",
+                    }
+                });
+
+            float s = -spaceSize / 2f;
+
+            Random rnd = new Random(1000);
+
+            this.container.Transform.SetScale(5f);
+            this.container.Transform.UpdateInternals(true);
+            var bbox = this.container.Instance.GetBoundingBox();
+
+            this.container.Transform.SetPosition(s + 12, baseHeight, 30);
+            this.container.Transform.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);
+
+            for (int i = 0; i < this.containerI.Instance.Count; i++)
+            {
+                uint textureIndex = (uint)rnd.Next(0, 6);
+                textureIndex %= 5;
+
+                float height = (i < 48 ? 0 : bbox.GetY()) + baseHeight;
+
+                if ((i % 48) < 24)
+                {
+                    float angle = MathUtil.Pi * rnd.Next(0, 2);
+                    float x = ((i % 24) < 12 ? -120f : 120f) + rnd.NextFloat(-1f, 1f);
+
+                    this.containerI.Instance[i].TextureIndex = textureIndex;
+
+                    this.containerI.Instance[i].Manipulator.SetPosition(x, height, ((i % 12) * bbox.GetZ()) - (120));
+                    this.containerI.Instance[i].Manipulator.SetRotation(angle, 0, 0);
+                    this.containerI.Instance[i].Manipulator.SetScale(5f);
+                }
+                else
+                {
+                    float angle = MathUtil.Pi * rnd.Next(0, 2);
+                    float z = ((i % 24) < 12 ? -120f : 120f) + rnd.NextFloat(-1f, 1f);
+
+                    this.containerI.Instance[i].TextureIndex = textureIndex;
+
+                    this.containerI.Instance[i].Manipulator.SetPosition(((i % 12) * bbox.GetX()) - (120), height, z);
+                    this.containerI.Instance[i].Manipulator.SetRotation(angle, 0, 0);
+                    this.containerI.Instance[i].Manipulator.SetScale(5f);
+                }
+            }
         }
         private void InitializeTestCube()
         {
