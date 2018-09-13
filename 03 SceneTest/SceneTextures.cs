@@ -100,10 +100,10 @@ namespace SceneTest
             this.Camera.Goto(-20, 10, -40f);
             this.Camera.LookTo(0, 0, 0);
 
-            GameEnvironment.LODDistanceLow *= 2;
-            GameEnvironment.LODDistanceMedium *= 2;
-            GameEnvironment.LODDistanceHigh *= 2;
-            GameEnvironment.LODDistanceMinimum *= 2;
+            //GameEnvironment.LODDistanceLow *= 2;
+            //GameEnvironment.LODDistanceMedium *= 2;
+            //GameEnvironment.LODDistanceHigh *= 2;
+            //GameEnvironment.LODDistanceMinimum *= 2;
 
             this.InitializeTextBoxes();
             this.InitializeSkyEffects();
@@ -122,9 +122,8 @@ namespace SceneTest
             var desc = new LineListDrawerDescription() { DepthEnabled = true, Count = 10000 };
             this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(5, 00, 00), 5f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(9, 00, 00), 0.1f);
         }
-
         private void InitializeTextBoxes()
         {
             this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsageEnum.UI, layerHUD);
@@ -725,46 +724,12 @@ namespace SceneTest
 
             this.UpdateCamera(gameTime, shift, rightBtn);
             this.UpdateWind(gameTime);
-            //this.UpdateSkyEffects();
-            //this.UpdateParticles();
+            this.UpdateSkyEffects();
+            this.UpdateParticles();
             this.UpdateDebug();
 
             this.runtime.Instance.Text = this.Game.RuntimeText;
         }
-
-        private void UpdateWind(GameTime gameTime)
-        {
-            if (this.nextWindChange <= 0)
-            {
-                this.nextWindChange = this.rnd.NextFloat(0, 120);
-
-                var limits = Vector2.One * 100f;
-                this.nextWind = this.rnd.NextVector2(-limits, limits);
-            }
-
-            this.wind = Vector2.Lerp(this.wind, this.nextWind, 0.001f);
-            this.nextWindChange -= gameTime.ElapsedSeconds;
-        }
-        private void UpdateSkyEffects()
-        {
-            this.skyPlane.Instance.Direction = Vector2.Normalize(this.wind);
-            this.skyPlane.Instance.Velocity = Math.Min(1f, MathUtil.Lerp(this.skyPlane.Instance.Velocity, this.wind.Length() / 100f, 0.001f));
-        }
-        private void UpdateParticles()
-        {
-            for (int i = 0; i < this.particlePlumes.Length; i++)
-            {
-                var gravity = new Vector3(plumeGravity.X - wind.X, plumeGravity.Y, plumeGravity.Z - wind.Y);
-
-                var parameters = this.particlePlumes[i].Parameters;
-
-                parameters.Gravity = gravity;
-                parameters.MaxHorizontalVelocity = plumeMaxHorizontalVelocity;
-
-                this.particlePlumes[i].Parameters = parameters;
-            }
-        }
-
         private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
         {
 #if DEBUG
@@ -795,6 +760,38 @@ namespace SceneTest
             if (this.Game.Input.KeyPressed(Keys.S))
             {
                 this.Camera.MoveBackward(gameTime, shift);
+            }
+        }
+        private void UpdateWind(GameTime gameTime)
+        {
+            if (this.nextWindChange <= 0)
+            {
+                this.nextWindChange = this.rnd.NextFloat(0, 120);
+
+                var limits = Vector2.One * 100f;
+                this.nextWind = this.rnd.NextVector2(-limits, limits);
+            }
+
+            this.wind = Vector2.Lerp(this.wind, this.nextWind, 0.001f);
+            this.nextWindChange -= gameTime.ElapsedSeconds;
+        }
+        private void UpdateSkyEffects()
+        {
+            this.skyPlane.Instance.Direction = Vector2.Normalize(this.wind);
+            this.skyPlane.Instance.Velocity = Math.Min(1f, MathUtil.Lerp(this.skyPlane.Instance.Velocity, this.wind.Length() / 100f, 0.001f));
+        }
+        private void UpdateParticles()
+        {
+            for (int i = 0; i < this.particlePlumes.Length; i++)
+            {
+                var gravity = new Vector3(plumeGravity.X - wind.X, plumeGravity.Y, plumeGravity.Z - wind.Y);
+
+                var parameters = this.particlePlumes[i].Parameters;
+
+                parameters.Gravity = gravity;
+                parameters.MaxHorizontalVelocity = plumeMaxHorizontalVelocity;
+
+                this.particlePlumes[i].Parameters = parameters;
             }
         }
         private void UpdateLightDrawingVolumes()
@@ -837,7 +834,6 @@ namespace SceneTest
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
-
         private void UpdateDebug()
         {
             if (this.Game.Input.KeyJustReleased(Keys.F1))

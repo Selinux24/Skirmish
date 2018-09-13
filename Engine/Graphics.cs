@@ -1692,7 +1692,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = TextureData.ReadTexture(buffer))
+                using (var resource = Helper.Attempt(TextureData.ReadTexture, buffer, 5))
                 {
                     return new EngineShaderResourceView(CreateResource(resource));
                 }
@@ -1713,7 +1713,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = TextureData.ReadTexture(filename))
+                using (var resource = Helper.Attempt(TextureData.ReadTexture, filename, 5))
                 {
                     return new EngineShaderResourceView(CreateResource(resource));
                 }
@@ -1730,32 +1730,19 @@ namespace Engine
         /// <returns>Returns the resource view</returns>
         internal EngineShaderResourceView LoadTexture(MemoryStream stream)
         {
-            int reTrys = 5;
-            Exception lastEx = null;
-
-            while (reTrys > 0)
+            try
             {
-                try
-                {
-                    Counters.Textures++;
+                Counters.Textures++;
 
-                    using (var resource = TextureData.ReadTexture(stream))
-                    {
-                        return new EngineShaderResourceView(CreateResource(resource));
-                    }
-                }
-                catch (SharpDXException ex)
+                using (var resource = Helper.Attempt(TextureData.ReadTexture, stream, 5))
                 {
-                    lastEx = ex;
-                    reTrys--;
-                }
-                catch (Exception ex)
-                {
-                    throw new EngineException("LoadTexture from stream Error. See inner exception for details", ex);
+                    return new EngineShaderResourceView(CreateResource(resource));
                 }
             }
-
-            throw new EngineException("LoadTexture from stream Error. See inner exception for details", lastEx);
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from stream Error. See inner exception for details", ex);
+            }
         }
         /// <summary>
         /// Loads a texture array from a file collection in the graphics device
@@ -1768,7 +1755,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                var textureList = TextureData.ReadTexture(filenames);
+                var textureList = Helper.Attempt(TextureData.ReadTexture, filenames, 5);
 
                 var resource = this.CreateResource(textureList);
 
@@ -1800,7 +1787,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                var textureList = TextureData.ReadTexture(streams);
+                var textureList = Helper.Attempt(TextureData.ReadTexture, streams, 5);
 
                 var resource = this.CreateResource(textureList);
 
@@ -1832,7 +1819,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = TextureData.ReadTexture(filename))
+                using (var resource = Helper.Attempt(TextureData.ReadTexture, filename, 5))
                 {
                     return new EngineShaderResourceView(CreateResource(resource));
                 }
@@ -1853,7 +1840,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = TextureData.ReadTexture(stream))
+                using (var resource = Helper.Attempt(TextureData.ReadTexture, stream, 5))
                 {
                     return new EngineShaderResourceView(CreateResource(resource));
                 }
@@ -1874,7 +1861,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                var textureList = TextureData.ReadTexture(filenames);
+                var textureList = Helper.Attempt(TextureData.ReadTexture, filenames, 5);
 
                 var resource = this.CreateResource(textureList);
 
@@ -1906,7 +1893,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                var textureList = TextureData.ReadTexture(streams);
+                var textureList = Helper.Attempt(TextureData.ReadTexture, streams, 5);
 
                 var resource = this.CreateResource(textureList);
 

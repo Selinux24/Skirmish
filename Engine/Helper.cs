@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
 
 namespace Engine
@@ -54,6 +55,99 @@ namespace Engine
             T stuff = (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
             handle.Free();
             return stuff;
+        }
+
+        #endregion
+
+        #region Actions & Functions
+
+        /// <summary>
+        /// Executes especified action with attempts on exception
+        /// </summary>
+        /// <typeparam name="T">Input type</typeparam>
+        /// <param name="action">Action</param>
+        /// <param name="input">Input</param>
+        /// <param name="attempts">Number of attempts</param>
+        public static void Attempt<T>(Action<T> action, T input, int attempts)
+        {
+            Attempt(action, input, attempts, TimeSpan.FromSeconds(0));
+        }
+        /// <summary>
+        /// Executes especified action with attempts on exception
+        /// </summary>
+        /// <typeparam name="T">Input type</typeparam>
+        /// <param name="action">Action</param>
+        /// <param name="input">Input</param>
+        /// <param name="attempts">Number of attempts</param>
+        /// <param name="delay">Delay between attempts</param>
+        public static void Attempt<T>(Action<T> action, T input, int attempts, TimeSpan delay)
+        {
+            Exception lastEx = null;
+
+            do
+            {
+                try
+                {
+                    action.Invoke(input);
+
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    lastEx = ex;
+                    attempts--;
+                }
+
+                Task.Delay(delay).Wait();
+            }
+            while (attempts > 0);
+
+            throw lastEx;
+        }
+        /// <summary>
+        /// Executes especified function with attempts on exception
+        /// </summary>
+        /// <typeparam name="T">Input type</typeparam>
+        /// <typeparam name="TResult">Result type</typeparam>
+        /// <param name="func">Function</param>
+        /// <param name="input">Input</param>
+        /// <param name="attempts">Number of attempts</param>
+        /// <returns>Returns the function execution result</returns>
+        public static TResult Attempt<T, TResult>(Func<T, TResult> func, T input, int attempts)
+        {
+            return Attempt(func, input, attempts, TimeSpan.FromSeconds(0));
+        }
+        /// <summary>
+        /// Executes especified function with attempts on exception
+        /// </summary>
+        /// <typeparam name="T">Input type</typeparam>
+        /// <typeparam name="TResult">Result type</typeparam>
+        /// <param name="func">Function</param>
+        /// <param name="input">Input</param>
+        /// <param name="attempts">Number of attempts</param>
+        /// <param name="delay">Delay between attempts</param>
+        /// <returns>Returns the function execution result</returns>
+        public static TResult Attempt<T, TResult>(Func<T, TResult> func, T input, int attempts, TimeSpan delay)
+        {
+            Exception lastEx = null;
+
+            do
+            {
+                try
+                {
+                    return func.Invoke(input);
+                }
+                catch (Exception ex)
+                {
+                    lastEx = ex;
+                    attempts--;
+                }
+
+                Task.Delay(delay).Wait();
+            }
+            while (attempts > 0);
+
+            throw lastEx;
         }
 
         #endregion
