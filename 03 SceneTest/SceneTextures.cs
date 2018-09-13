@@ -5,6 +5,8 @@ using Engine.Content;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace SceneTest
 {
@@ -84,6 +86,7 @@ namespace SceneTest
         {
             base.Initialize();
 
+            this.Game.ShootTaken += Game_ShootTaken;
 #if DEBUG
             this.Game.VisibleMouse = false;
             this.Game.LockMouse = false;
@@ -424,11 +427,20 @@ namespace SceneTest
             this.vehicleLeopardI.Instance[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             this.vehicleLeopardI.Instance[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
-            this.Lights.AddRange(this.vehicleLeopard.Instance.Lights);
-            this.Lights.AddRange(this.vehicleLeopardI.Instance[0].Lights);
-            this.Lights.AddRange(this.vehicleLeopardI.Instance[1].Lights);
-            this.Lights.AddRange(this.vehicleLeopardI.Instance[2].Lights);
-            this.Lights.AddRange(this.vehicleLeopardI.Instance[3].Lights);
+            var lights = new List<SceneLight>();
+
+            lights.AddRange(this.vehicleLeopard.Instance.Lights);
+            lights.AddRange(this.vehicleLeopardI.Instance[0].Lights);
+            lights.AddRange(this.vehicleLeopardI.Instance[1].Lights);
+            lights.AddRange(this.vehicleLeopardI.Instance[2].Lights);
+            lights.AddRange(this.vehicleLeopardI.Instance[3].Lights);
+
+            foreach (var light in lights)
+            {
+                light.CastShadow = false;
+            }
+
+            this.Lights.AddRange(lights);
         }
         private void InitializeLamps()
         {
@@ -477,11 +489,20 @@ namespace SceneTest
             this.lampI.Instance[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
             this.lampI.Instance[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
 
-            this.Lights.AddRange(this.lamp.Instance.Lights);
-            this.Lights.AddRange(this.lampI.Instance[0].Lights);
-            this.Lights.AddRange(this.lampI.Instance[1].Lights);
-            this.Lights.AddRange(this.lampI.Instance[2].Lights);
-            this.Lights.AddRange(this.lampI.Instance[3].Lights);
+            var lights = new List<SceneLight>();
+
+            lights.AddRange(this.lamp.Instance.Lights);
+            lights.AddRange(this.lampI.Instance[0].Lights);
+            lights.AddRange(this.lampI.Instance[1].Lights);
+            lights.AddRange(this.lampI.Instance[2].Lights);
+            lights.AddRange(this.lampI.Instance[3].Lights);
+
+            foreach (var light in lights)
+            {
+                light.CastShadow = false;
+            }
+
+            this.Lights.AddRange(lights);
         }
         private void InitializeStreetLamps()
         {
@@ -533,16 +554,25 @@ namespace SceneTest
             this.streetlampI.Instance[7].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             this.streetlampI.Instance[8].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
 
-            this.Lights.AddRange(this.streetlamp.Instance.Lights);
-            this.Lights.AddRange(this.streetlampI.Instance[0].Lights);
-            this.Lights.AddRange(this.streetlampI.Instance[1].Lights);
-            this.Lights.AddRange(this.streetlampI.Instance[2].Lights);
-            this.Lights.AddRange(this.streetlampI.Instance[3].Lights);
-            this.Lights.AddRange(this.streetlampI.Instance[4].Lights);
-            this.Lights.AddRange(this.streetlampI.Instance[5].Lights);
-            this.Lights.AddRange(this.streetlampI.Instance[6].Lights);
-            this.Lights.AddRange(this.streetlampI.Instance[7].Lights);
-            this.Lights.AddRange(this.streetlampI.Instance[8].Lights);
+            var lights = new List<SceneLight>();
+
+            lights.AddRange(this.streetlamp.Instance.Lights);
+            lights.AddRange(this.streetlampI.Instance[0].Lights);
+            lights.AddRange(this.streetlampI.Instance[1].Lights);
+            lights.AddRange(this.streetlampI.Instance[2].Lights);
+            lights.AddRange(this.streetlampI.Instance[3].Lights);
+            lights.AddRange(this.streetlampI.Instance[4].Lights);
+            lights.AddRange(this.streetlampI.Instance[5].Lights);
+            lights.AddRange(this.streetlampI.Instance[6].Lights);
+            lights.AddRange(this.streetlampI.Instance[7].Lights);
+            lights.AddRange(this.streetlampI.Instance[8].Lights);
+
+            foreach (var light in lights)
+            {
+                light.CastShadow = false;
+            }
+
+            this.Lights.AddRange(lights);
         }
         private void InitializeContainers()
         {
@@ -681,52 +711,6 @@ namespace SceneTest
                 this.Game.SetScene<SceneStart>();
             }
 
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
-
-            #region Camera
-
-            this.UpdateCamera(gameTime, shift, rightBtn);
-
-            #endregion
-
-            #region Wind
-
-            this.UpdateWind(gameTime);
-            this.UpdateSkyEffects();
-            this.UpdateParticles();
-
-            #endregion
-
-            #region Debug
-
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
-            {
-                this.drawDrawVolumes = !this.drawDrawVolumes;
-                this.drawCullVolumes = false;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
-            {
-                this.drawCullVolumes = !this.drawCullVolumes;
-                this.drawDrawVolumes = false;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
-            {
-                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
-            }
-
-            if (this.drawDrawVolumes)
-            {
-                this.UpdateLightDrawingVolumes();
-            }
-
-            if (this.drawCullVolumes)
-            {
-                this.UpdateLightCullingVolumes();
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
                 this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
@@ -734,9 +718,16 @@ namespace SceneTest
                     SceneModesEnum.ForwardLigthning);
             }
 
-            #endregion
-
             base.Update(gameTime);
+
+            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
+
+            this.UpdateCamera(gameTime, shift, rightBtn);
+            this.UpdateWind(gameTime);
+            //this.UpdateSkyEffects();
+            //this.UpdateParticles();
+            this.UpdateDebug();
 
             this.runtime.Instance.Text = this.Game.RuntimeText;
         }
@@ -845,6 +836,49 @@ namespace SceneTest
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+        }
+
+        private void UpdateDebug()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.drawDrawVolumes = !this.drawDrawVolumes;
+                this.drawCullVolumes = false;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.drawCullVolumes = !this.drawCullVolumes;
+                this.drawDrawVolumes = false;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            {
+                this.Game.TakeFrameShoot = true;
+            }
+
+            if (this.drawDrawVolumes)
+            {
+                this.UpdateLightDrawingVolumes();
+            }
+
+            if (this.drawCullVolumes)
+            {
+                this.UpdateLightCullingVolumes();
+            }
+        }
+
+        private void Game_ShootTaken(object sender, ShootTakenEventArgs e)
+        {
+            var lines = e.Trace.Select((i) => $"{i.Key}: {i.Value:0.00}");
+            var file = $"frame.{this.Game.GameTime.Ticks}.txt";
+
+            File.WriteAllLines(file, lines);
         }
     }
 }

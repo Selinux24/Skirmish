@@ -303,12 +303,34 @@ namespace Engine.Common
         {
             int cullIndex = CullIndexShadowMaps;
 
+            Dictionary<string, double> dict = new Dictionary<string, double>();
+
+            Stopwatch stopwatch = new Stopwatch();
+
+            stopwatch.Start();
             DoDirectionalShadowMapping(gameTime, scene, ref cullIndex);
+            stopwatch.Stop();
+            dict.Add("DoDirectionalShadowMapping", stopwatch.Elapsed.TotalMilliseconds);
 
+            stopwatch.Restart();
             DoPointShadowMapping(gameTime, scene, ref cullIndex);
+            stopwatch.Stop();
+            dict.Add("DoPointShadowMapping", stopwatch.Elapsed.TotalMilliseconds);
 
+            stopwatch.Restart();
             DoSpotShadowMapping(gameTime, scene, ref cullIndex);
+            stopwatch.Stop();
+            dict.Add("DoSpotShadowMapping", stopwatch.Elapsed.TotalMilliseconds);
+
+            if (this.Game.TakeFrameShoot)
+            {
+                foreach (var item in dict)
+                {
+                    this.Game.FrameShoot.Add(item.Key, item.Value);
+                }
+            }
         }
+
         /// <summary>
         /// Draw directional shadow maps
         /// </summary>

@@ -18,7 +18,9 @@ namespace Engine
         /// Scene list
         /// </summary>
         private List<Scene> scenes = new List<Scene>();
-
+        /// <summary>
+        /// Next scene to load
+        /// </summary>
         private Scene nextScene = null;
         /// <summary>
         /// Application exiting flag
@@ -125,6 +127,12 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Takes a shoot of the frame
+        /// </summary>
+        public bool TakeFrameShoot { get; set; }
+
+        internal Dictionary<string, double> FrameShoot = new Dictionary<string, double>();
 
         /// <summary>
         /// Gets desktop mode description
@@ -335,21 +343,43 @@ namespace Engine
         {
             this.GameTime.Update();
 
-            this.Input.Update(this.GameTime);
+            Stopwatch gSW = new Stopwatch();
+            gSW.Start();
 
+            Stopwatch pSW = new Stopwatch();
+            pSW.Start();
+            this.Input.Update(this.GameTime);
+            pSW.Stop();
+            FrameShoot.Add("Input", pSW.Elapsed.TotalMilliseconds);
+
+            pSW.Restart();
             this.Graphics.Begin();
+            pSW.Stop();
+            FrameShoot.Add("Begin", pSW.Elapsed.TotalMilliseconds);
 
             for (int i = 0; i < this.scenes.Count; i++)
             {
                 if (this.scenes[i].Active)
                 {
+                    pSW.Restart();
                     this.scenes[i].Update(this.GameTime);
+                    pSW.Stop();
+                    FrameShoot.Add($"Scene {i} Update", pSW.Elapsed.TotalMilliseconds);
 
+                    pSW.Restart();
                     this.scenes[i].Draw(this.GameTime);
+                    pSW.Stop();
+                    FrameShoot.Add($"Scene {i} Draw", pSW.Elapsed.TotalMilliseconds);
                 }
             }
 
+            pSW.Restart();
             this.Graphics.End();
+            pSW.Stop();
+            FrameShoot.Add("End", pSW.Elapsed.TotalMilliseconds);
+
+            gSW.Stop();
+            FrameShoot.Add("TOTAL", gSW.Elapsed.TotalMilliseconds);
 
             Counters.FrameCount++;
             Counters.FrameTime += this.GameTime.ElapsedSeconds;
@@ -375,6 +405,20 @@ namespace Engine
                 Counters.FrameCount = 0;
                 Counters.FrameTime = 0f;
             }
+
+            if (TakeFrameShoot)
+            {
+                ShootTakenEventArgs e = new ShootTakenEventArgs()
+                {
+                    Trace = new Dictionary<string, double>(FrameShoot),
+                };
+
+                ShootTaken?.Invoke(this, e);
+
+                TakeFrameShoot = false;
+            }
+
+            FrameShoot.Clear();
 
             Counters.ClearFrame();
 
@@ -412,5 +456,14 @@ namespace Engine
             this.AddScene(sceneToLoad);
             sceneToLoad.Active = true;
         }
+
+        public event ShootTakenEventHandler ShootTaken;
     }
+
+    public class ShootTakenEventArgs : EventArgs
+    {
+        public Dictionary<string, double> Trace = new Dictionary<string, double>();
+    }
+
+    public delegate void ShootTakenEventHandler(object sender, ShootTakenEventArgs e);
 }

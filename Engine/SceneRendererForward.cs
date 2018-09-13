@@ -223,7 +223,12 @@ namespace Engine
             var mode = context.DrawerMode;
             var graphics = this.Game.Graphics;
 
+            Dictionary<string, double> dict = new Dictionary<string, double>();
+
+            Stopwatch stopwatch = new Stopwatch();
+
             //First opaques
+            stopwatch.Start();
             var opaques = components.Where(c =>
             {
                 if (!c.Is<Drawable>()) return false;
@@ -232,10 +237,14 @@ namespace Engine
 
                 return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
             }).ToList();
+            stopwatch.Stop();
+            dict.Add("Opaques Selection", stopwatch.Elapsed.TotalMilliseconds);
+
             if (opaques.Count > 0)
             {
                 context.DrawerMode = mode | DrawerModesEnum.OpaqueOnly;
 
+                stopwatch.Restart();
                 opaques.Sort((c1, c2) =>
                 {
                     int res = c1.Order.CompareTo(c2.Order);
@@ -258,10 +267,17 @@ namespace Engine
 
                     return res;
                 });
+                stopwatch.Stop();
+                dict.Add("Opaques Sort", stopwatch.Elapsed.TotalMilliseconds);
 
+                stopwatch.Restart();
+                int oDIndex = 0;
                 opaques.ForEach((c) =>
                 {
                     Counters.MaxInstancesPerFrame += c.Count;
+
+                    Stopwatch stopwatch2 = new Stopwatch();
+                    stopwatch2.Start();
 
                     graphics.SetRasterizerDefault();
                     graphics.SetBlendDefault();
@@ -276,10 +292,16 @@ namespace Engine
                     }
 
                     c.Get<IDrawable>().Draw(context);
+
+                    stopwatch2.Stop();
+                    dict.Add($"Opaque Draw {oDIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
                 });
+                stopwatch.Stop();
+                dict.Add("Opaques Draw", stopwatch.Elapsed.TotalMilliseconds);
             }
 
             //Then transparents
+            stopwatch.Restart();
             var transparents = components.Where(c =>
             {
                 if (!c.AlphaEnabled) return false;
@@ -290,10 +312,14 @@ namespace Engine
 
                 return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
             }).ToList();
+            stopwatch.Stop();
+            dict.Add("Transparents Selection", stopwatch.Elapsed.TotalMilliseconds);
+
             if (transparents.Count > 0)
             {
                 context.DrawerMode = mode | DrawerModesEnum.TransparentOnly;
 
+                stopwatch.Restart();
                 transparents.Sort((c1, c2) =>
                 {
                     int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
@@ -315,10 +341,17 @@ namespace Engine
 
                     return -res;
                 });
+                stopwatch.Stop();
+                dict.Add("Transparents Sort", stopwatch.Elapsed.TotalMilliseconds);
 
+                stopwatch.Restart();
+                int oTIndex = 0;
                 transparents.ForEach((c) =>
                 {
                     Counters.MaxInstancesPerFrame += c.Count;
+
+                    Stopwatch stopwatch2 = new Stopwatch();
+                    stopwatch2.Start();
 
                     graphics.SetRasterizerDefault();
                     graphics.SetBlendTransparent();
@@ -333,10 +366,23 @@ namespace Engine
                     }
 
                     c.Get<IDrawable>().Draw(context);
+
+                    stopwatch2.Stop();
+                    dict.Add($"Transparent Draw {oTIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
                 });
+                stopwatch.Stop();
+                dict.Add("Transparents Draw", stopwatch.Elapsed.TotalMilliseconds);
             }
 
             context.DrawerMode = mode;
+
+            if (this.Game.TakeFrameShoot)
+            {
+                foreach (var item in dict)
+                {
+                    this.Game.FrameShoot.Add(item.Key, item.Value);
+                }
+            }
         }
     }
 }

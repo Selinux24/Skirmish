@@ -1730,19 +1730,32 @@ namespace Engine
         /// <returns>Returns the resource view</returns>
         internal EngineShaderResourceView LoadTexture(MemoryStream stream)
         {
-            try
-            {
-                Counters.Textures++;
+            int reTrys = 5;
+            Exception lastEx = null;
 
-                using (var resource = TextureData.ReadTexture(stream))
+            while (reTrys > 0)
+            {
+                try
                 {
-                    return new EngineShaderResourceView(CreateResource(resource));
+                    Counters.Textures++;
+
+                    using (var resource = TextureData.ReadTexture(stream))
+                    {
+                        return new EngineShaderResourceView(CreateResource(resource));
+                    }
+                }
+                catch (SharpDXException ex)
+                {
+                    lastEx = ex;
+                    reTrys--;
+                }
+                catch (Exception ex)
+                {
+                    throw new EngineException("LoadTexture from stream Error. See inner exception for details", ex);
                 }
             }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTexture from stream Error. See inner exception for details", ex);
-            }
+
+            throw new EngineException("LoadTexture from stream Error. See inner exception for details", lastEx);
         }
         /// <summary>
         /// Loads a texture array from a file collection in the graphics device

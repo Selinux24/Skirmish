@@ -74,6 +74,16 @@ namespace Engine
                 return (float)this.TotalTime.TotalMilliseconds;
             }
         }
+        /// <summary>
+        /// Total ticks
+        /// </summary>
+        public long Ticks
+        {
+            get
+            {
+                return this.TotalTime.Ticks;
+            }
+        }
 
         /// <summary>
         /// Constructor
