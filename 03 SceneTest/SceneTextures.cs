@@ -76,8 +76,7 @@ namespace SceneTest
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
-        public SceneTextures(Game game)
-            : base(game)
+        public SceneTextures(Game game) : base(game)
         {
 
         }
@@ -100,10 +99,10 @@ namespace SceneTest
             this.Camera.Goto(-20, 10, -40f);
             this.Camera.LookTo(0, 0, 0);
 
-            //GameEnvironment.LODDistanceLow *= 2;
-            //GameEnvironment.LODDistanceMedium *= 2;
-            //GameEnvironment.LODDistanceHigh *= 2;
-            //GameEnvironment.LODDistanceMinimum *= 2;
+            GameEnvironment.LODDistanceLow *= 5;
+            GameEnvironment.LODDistanceMedium *= 5;
+            GameEnvironment.LODDistanceHigh *= 5;
+            GameEnvironment.LODDistanceMinimum *= 5;
 
             this.InitializeTextBoxes();
             this.InitializeSkyEffects();
@@ -429,15 +428,16 @@ namespace SceneTest
             var lights = new List<SceneLight>();
 
             lights.AddRange(this.vehicleLeopard.Instance.Lights);
-            lights.AddRange(this.vehicleLeopardI.Instance[0].Lights);
-            lights.AddRange(this.vehicleLeopardI.Instance[1].Lights);
-            lights.AddRange(this.vehicleLeopardI.Instance[2].Lights);
-            lights.AddRange(this.vehicleLeopardI.Instance[3].Lights);
 
-            foreach (var light in lights)
+            for (int i = 0; i < this.vehicleLeopardI.Count; i++)
             {
-                light.CastShadow = false;
+                lights.AddRange(this.vehicleLeopardI.Instance[i].Lights);
             }
+
+            //foreach (var light in lights)
+            //{
+            //    light.CastShadow = false;
+            //}
 
             this.Lights.AddRange(lights);
         }
@@ -491,15 +491,16 @@ namespace SceneTest
             var lights = new List<SceneLight>();
 
             lights.AddRange(this.lamp.Instance.Lights);
-            lights.AddRange(this.lampI.Instance[0].Lights);
-            lights.AddRange(this.lampI.Instance[1].Lights);
-            lights.AddRange(this.lampI.Instance[2].Lights);
-            lights.AddRange(this.lampI.Instance[3].Lights);
 
-            foreach (var light in lights)
+            for (int i = 0; i < this.lampI.Count; i++)
             {
-                light.CastShadow = false;
+                lights.AddRange(this.lampI.Instance[i].Lights);
             }
+
+            //foreach (var light in lights)
+            //{
+            //    light.CastShadow = false;
+            //}
 
             this.Lights.AddRange(lights);
         }
@@ -556,20 +557,16 @@ namespace SceneTest
             var lights = new List<SceneLight>();
 
             lights.AddRange(this.streetlamp.Instance.Lights);
-            lights.AddRange(this.streetlampI.Instance[0].Lights);
-            lights.AddRange(this.streetlampI.Instance[1].Lights);
-            lights.AddRange(this.streetlampI.Instance[2].Lights);
-            lights.AddRange(this.streetlampI.Instance[3].Lights);
-            lights.AddRange(this.streetlampI.Instance[4].Lights);
-            lights.AddRange(this.streetlampI.Instance[5].Lights);
-            lights.AddRange(this.streetlampI.Instance[6].Lights);
-            lights.AddRange(this.streetlampI.Instance[7].Lights);
-            lights.AddRange(this.streetlampI.Instance[8].Lights);
 
-            foreach (var light in lights)
+            for (int i = 0; i < this.streetlampI.Count; i++)
             {
-                light.CastShadow = false;
+                lights.AddRange(this.streetlampI.Instance[i].Lights);
             }
+
+            //foreach (var light in lights)
+            //{
+            //    light.CastShadow = false;
+            //}
 
             this.Lights.AddRange(lights);
         }

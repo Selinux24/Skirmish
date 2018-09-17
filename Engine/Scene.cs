@@ -207,7 +207,10 @@ namespace Engine
 
             this.PerformFrustumCulling = true;
 
-            this.SetRenderMode(sceneMode);
+            if (!this.SetRenderMode(sceneMode))
+            {
+                throw new EngineException($"Bad render mode: {sceneMode}");
+            }
 
             this.UpdateGlobalResources = true;
         }
@@ -357,9 +360,16 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         public virtual void Draw(GameTime gameTime)
         {
-            this.BufferManager.SetVertexBuffers();
+            try
+            {
+                this.BufferManager?.SetVertexBuffers();
 
-            this.Renderer.Draw(gameTime, this);
+                this.Renderer?.Draw(gameTime, this);
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("Drawing error", ex);
+            }
         }
 
         /// <summary>

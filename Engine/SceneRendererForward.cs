@@ -1,7 +1,5 @@
-﻿#if DEBUG
+﻿using System.Collections.Generic;
 using System.Diagnostics;
-#endif
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine

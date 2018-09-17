@@ -1,9 +1,7 @@
-﻿#if DEBUG
-using System.Diagnostics;
-#endif
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Common
