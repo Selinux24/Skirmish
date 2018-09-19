@@ -105,6 +105,7 @@
     <None Include="Blender\Buildings\Obelisk\normal.dds" />
     <None Include="Blender\Buildings\Obelisk\specular.dds" />
     <None Include="Blender\Buildings\Garage\concrete.jpg" />
+    <None Include="Blender\Buildings\Watch Tower\Watch Tower.blend" />
     <None Include="Blender\Characters\Human2\Human2.blend" />
     <None Include="Blender\Characters\Rat\Rat.blend" />
     <None Include="Blender\Foliage\Foliage.blend" />
@@ -124,6 +125,7 @@
     <None Include="Blender\Foliage\grass_v2.dds" />
     <None Include="Blender\Characters\Rat\Rat_d.png" />
     <None Include="Blender\Furniture\Container\ikube azul.png" />
+    <None Include="Blender\Buildings\Watch Tower\Wood.jpg" />
     <Content Include="Blender\Scenery\Clif\dirt_2048x2048.jpg" />
     <Content Include="Blender\Scenery\Ground\buildings.png" />
     <None Include="Blender\Scenery\ModularDungeon\Assets.blend" />
@@ -138,6 +140,7 @@
     <None Include="Blender\Scenery\ModularDungeon\Dn_Tables.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Traps.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Walls.blend" />
+    <None Include="Blender\Vehicles\Bradley\Bradley.blend" />
     <None Include="Blender\Vehicles\CapitalShip\Booster.bmp" />
     <None Include="Blender\Vehicles\CapitalShip\Hull.bmp" />
     <None Include="Blender\Vehicles\CapitalShip\Hullf.bmp" />
@@ -199,6 +202,7 @@
     <None Include="Blender\Scenery\ModularDungeon\stuff_map.png" />
     <None Include="Blender\Scenery\ModularDungeon\wood_d.jpg" />
     <None Include="Blender\Vehicles\Challenger\challenger.bmp" />
+    <None Include="Blender\Vehicles\Bradley\Bradley.jpg" />
     <Content Include="Collada\Buildings\Dungeon\BaseMap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -206,6 +210,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Buildings\Heliport\heliport.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Buildings\Watch Tower\Wood.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Characters\Rat\Rat_d.png">
@@ -363,6 +370,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Scenery\ModularDungeon\wood_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Vehicles\Bradley\Bradley.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Vehicles\CapitalShip\booster.bmp">
@@ -560,6 +570,9 @@
     <Content Include="Collada\Furniture\Container\container.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Collada\Buildings\Watch Tower\Watch Tower.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Collada\Tests\AniCube\aniCube.dae" />
     <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_diffuse.dds" />
     <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_normal.dds" />
@@ -626,6 +639,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Vehicles\Challenger\challenger.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Vehicles\Bradley\Bradley.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Vehicles\LandRaider\landraider.dae" />
