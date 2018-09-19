@@ -144,6 +144,7 @@
     <None Include="Blender\Vehicles\CapitalShip\HullL.bmp" />
     <None Include="Blender\Vehicles\CapitalShip\HullR.bmp" />
     <None Include="Blender\Vehicles\CapitalShip\Hullw.bmp" />
+    <None Include="Blender\Vehicles\Challenger\challenger.blend" />
     <None Include="Blender\Vehicles\Jagdpanther\1pix.jpg" />
     <None Include="Blender\Vehicles\Jagdpanther\Anegre.jpg" />
     <None Include="Blender\Vehicles\Jagdpanther\Ashsen.jpg" />
@@ -197,6 +198,7 @@
     <None Include="Blender\Scenery\ModularDungeon\marble_d.png" />
     <None Include="Blender\Scenery\ModularDungeon\stuff_map.png" />
     <None Include="Blender\Scenery\ModularDungeon\wood_d.jpg" />
+    <None Include="Blender\Vehicles\Challenger\challenger.bmp" />
     <Content Include="Collada\Buildings\Dungeon\BaseMap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -381,6 +383,10 @@
     <Content Include="Collada\Vehicles\CapitalShip\Hullw.bmp">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Collada\Vehicles\Challenger\Challenger.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Vehicles\Challenger\Readme.txt" />
     <Content Include="Collada\Vehicles\Jagdpanther\ASHSEN.JPG">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -617,6 +623,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Vehicles\CapitalShip\capital ship.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Vehicles\Challenger\challenger.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Vehicles\LandRaider\landraider.dae" />

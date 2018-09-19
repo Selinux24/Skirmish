@@ -36,8 +36,8 @@ namespace SceneTest
         private SceneObject<Model> characterSoldier = null;
         private SceneObject<ModelInstanced> characterSoldierI = null;
 
-        private SceneObject<Model> vehicleLeopard = null;
-        private SceneObject<ModelInstanced> vehicleLeopardI = null;
+        private SceneObject<Model> vehicle = null;
+        private SceneObject<ModelInstanced> vehicleI = null;
 
         private SceneObject<Model> lamp = null;
         private SceneObject<ModelInstanced> lampI = null;
@@ -110,7 +110,7 @@ namespace SceneTest
             this.InitializeFloorAsphalt();
             this.InitializeBuildingObelisk();
             this.InitializeCharacterSoldier();
-            this.InitializeVehiclesLeopard();
+            this.InitializeVehicles();
             this.InitializeLamps();
             this.InitializeStreetLamps();
             this.InitializeContainers();
@@ -379,23 +379,23 @@ namespace SceneTest
             this.characterSoldierI.Instance[2].AnimationController.Start(3);
             this.characterSoldierI.Instance[3].AnimationController.Start(4);
         }
-        private void InitializeVehiclesLeopard()
+        private void InitializeVehicles()
         {
-            this.vehicleLeopard = this.AddComponent<Model>(
+            this.vehicle = this.AddComponent<Model>(
                 new ModelDescription()
                 {
-                    Name = "Leopard",
+                    Name = "Challenger",
                     CastShadow = true,
                     Static = false,
                     SphericVolume = false,
                     Content = new ContentDescription()
                     {
-                        ContentFolder = "SceneTextures/vehicles/leopard",
-                        ModelContentFilename = "Leopard.xml",
+                        ContentFolder = "SceneTextures/vehicles/Challenger",
+                        ModelContentFilename = "Challenger.xml",
                     }
                 });
 
-            this.vehicleLeopardI = this.AddComponent<ModelInstanced>(
+            this.vehicleI = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "LeopardI",
@@ -412,26 +412,26 @@ namespace SceneTest
 
             float s = -spaceSize / 2f;
 
-            this.vehicleLeopard.Transform.SetPosition(s, baseHeight, -10);
-            this.vehicleLeopard.Transform.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
+            this.vehicle.Transform.SetPosition(s, baseHeight, -10);
+            this.vehicle.Transform.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
 
-            this.vehicleLeopardI.Instance[0].Manipulator.SetPosition(-spaceSize * 2, baseHeight, -spaceSize * 2);
-            this.vehicleLeopardI.Instance[1].Manipulator.SetPosition(spaceSize * 2, baseHeight, -spaceSize * 2);
-            this.vehicleLeopardI.Instance[2].Manipulator.SetPosition(-spaceSize * 2, baseHeight, spaceSize * 2);
-            this.vehicleLeopardI.Instance[3].Manipulator.SetPosition(spaceSize * 2, baseHeight, spaceSize * 2);
+            this.vehicleI.Instance[0].Manipulator.SetPosition(-spaceSize * 2, baseHeight, -spaceSize * 2);
+            this.vehicleI.Instance[1].Manipulator.SetPosition(spaceSize * 2, baseHeight, -spaceSize * 2);
+            this.vehicleI.Instance[2].Manipulator.SetPosition(-spaceSize * 2, baseHeight, spaceSize * 2);
+            this.vehicleI.Instance[3].Manipulator.SetPosition(spaceSize * 2, baseHeight, spaceSize * 2);
 
-            this.vehicleLeopardI.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
-            this.vehicleLeopardI.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
-            this.vehicleLeopardI.Instance[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
-            this.vehicleLeopardI.Instance[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
+            this.vehicleI.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo * 0, 0, 0);
+            this.vehicleI.Instance[1].Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
+            this.vehicleI.Instance[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
+            this.vehicleI.Instance[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
             var lights = new List<SceneLight>();
 
-            lights.AddRange(this.vehicleLeopard.Instance.Lights);
+            lights.AddRange(this.vehicle.Instance.Lights);
 
-            for (int i = 0; i < this.vehicleLeopardI.Count; i++)
+            for (int i = 0; i < this.vehicleI.Count; i++)
             {
-                lights.AddRange(this.vehicleLeopardI.Instance[i].Lights);
+                lights.AddRange(this.vehicleI.Instance[i].Lights);
             }
 
             //foreach (var light in lights)
