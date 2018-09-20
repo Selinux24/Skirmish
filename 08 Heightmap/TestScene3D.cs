@@ -82,6 +82,8 @@ namespace Heightmap
 
         private SceneObject<Model> helicopter = null;
         private SceneObject<Model> helicopter2 = null;
+        private SceneObject<Model> bradley = null;
+        private SceneObject<Model> watchTower = null;
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
@@ -109,6 +111,8 @@ namespace Heightmap
             var taskTroops = InitializeTroops();
             var taskM24 = InitializeM24();
             var taskHelicopter = InitializeHelicopter();
+            var taskBradley = InitializeBradley();
+            var taskWatchTower = InitializeWatchTower();
             var taskTorchs = InitializeTorchs();
             var taskTerrain = InitializeTerrain();
             var taskGardener = InitializeGardener();
@@ -126,6 +130,8 @@ namespace Heightmap
             initDurationDict.Add("Troops", taskTroops.Result);
             initDurationDict.Add("M24", taskM24.Result);
             initDurationDict.Add("Helicopter", taskHelicopter.Result);
+            initDurationDict.Add("Bradley", taskBradley.Result);
+            initDurationDict.Add("Watch Tower", taskWatchTower.Result);
             initDurationDict.Add("Torchs", taskTorchs.Result);
             initDurationDict.Add("Terrain", taskTerrain.Result);
             initDurationDict.Add("Gardener", taskGardener.Result);
@@ -345,6 +351,47 @@ namespace Heightmap
                 }
             };
             this.helicopter2 = this.AddComponent<Model>(hcDesc, SceneObjectUsageEnum.None, layerObjects);
+            sw.Stop();
+
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeBradley()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+
+            sw.Restart();
+            var mDesc = new ModelDescription()
+            {
+                Name = "Bradley",
+                CastShadow = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = @"Resources/Bradley",
+                    ModelContentFilename = @"Bradley.xml",
+                }
+            };
+            this.bradley = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.Lights.AddRange(this.bradley.Instance.Lights);
+            sw.Stop();
+
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeWatchTower()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+
+            sw.Restart();
+            var mDesc = new ModelDescription()
+            {
+                Name = "Watch Tower",
+                CastShadow = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = @"Resources/Watch Tower",
+                    ModelContentFilename = @"Watch Tower.xml",
+                }
+            };
+            this.watchTower = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -705,6 +752,8 @@ namespace Heightmap
                 }
 
                 #endregion
+
+                this.AttachToGround(this.rocks, false);
             }
 
             {
@@ -745,11 +794,25 @@ namespace Heightmap
                 }
 
                 #endregion
+
+                this.AttachToGround(this.trees, false);
+                this.AttachToGround(this.trees2, false);
             }
 
-            this.AttachToGround(this.rocks, false);
-            this.AttachToGround(this.trees, false);
-            this.AttachToGround(this.trees2, false);
+            {
+                #region Watch tower
+
+                if (this.FindTopGroundPosition(-40, -40, out PickingResult<Triangle> r))
+                {
+                    this.watchTower.Transform.SetPosition(r.Position, true);
+                    this.watchTower.Transform.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
+                    this.watchTower.Transform.SetScale(1.5f, true);
+                }
+
+                #endregion
+
+                this.AttachToGround(this.watchTower, false);
+            }
 
             {
                 #region Torchs
@@ -832,9 +895,9 @@ namespace Heightmap
                 }
 
                 #endregion
-            }
 
-            this.AttachToGround(this.torchs, false);
+                this.AttachToGround(this.torchs, false);
+            }
 
             //M24
             {
@@ -843,9 +906,9 @@ namespace Heightmap
                     this.helicopter.Transform.SetPosition(r.Position, true);
                     this.helicopter.Transform.SetRotation(MathUtil.Pi / 5f, 0, 0, true);
                 }
-            }
 
-            this.AttachToGround(this.helicopter, false);
+                this.AttachToGround(this.helicopter, false);
+            }
 
             //Helicopter
             {
@@ -859,9 +922,22 @@ namespace Heightmap
                 this.helicopter2.Instance.AnimationController.TimeDelta = 2f;
                 this.helicopter2.Instance.AnimationController.AddPath(this.animations["heli_default"]);
                 this.helicopter2.Instance.AnimationController.Start();
+
+                this.AttachToGround(this.helicopter2, false);
             }
 
-            this.AttachToGround(this.helicopter2, false);
+            //Bradley
+            {
+                if (this.FindTopGroundPosition(20, 200, out PickingResult<Triangle> r))
+                {
+                    this.bradley.Transform.SetScale(1.2f, true);
+                    this.bradley.Transform.SetPosition(r.Position, true);
+                    this.bradley.Transform.SetRotation(0, 0, 0, true);
+                    this.bradley.Transform.SetNormal(r.Item.Normal);
+                }
+
+                this.AttachToGround(this.bradley, false);
+            }
 
             //Player soldier
             {
