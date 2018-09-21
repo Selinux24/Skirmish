@@ -362,10 +362,20 @@ namespace Engine.Effects
             {
                 switch (vertexType)
                 {
+                    case VertexTypes.PositionColor:
+                        return instanced ? this.ShadowMapPositionColorInstanced : this.ShadowMapPositionColor;
+                    case VertexTypes.PositionColorSkinned:
+                        return instanced ? this.ShadowMapPositionColorSkinnedInstanced : this.ShadowMapPositionColorSkinned;
+
                     case VertexTypes.PositionTexture:
                         return instanced ? this.ShadowMapPositionTextureTransparentInstanced : this.ShadowMapPositionTextureTransparent;
                     case VertexTypes.PositionTextureSkinned:
                         return instanced ? this.ShadowMapPositionTextureTransparentSkinnedInstanced : this.ShadowMapPositionTextureTransparentSkinned;
+
+                    case VertexTypes.PositionNormalColor:
+                        return instanced ? this.ShadowMapPositionNormalColorInstanced : this.ShadowMapPositionNormalColor;
+                    case VertexTypes.PositionNormalColorSkinned:
+                        return instanced ? this.ShadowMapPositionNormalColorSkinnedInstanced : this.ShadowMapPositionNormalColorSkinned;
 
                     case VertexTypes.PositionNormalTexture:
                         return instanced ? this.ShadowMapPositionNormalTextureTransparentInstanced : this.ShadowMapPositionNormalTextureTransparent;

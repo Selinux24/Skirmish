@@ -82,7 +82,7 @@ namespace Heightmap
 
         private SceneObject<Model> helicopter = null;
         private SceneObject<Model> helicopter2 = null;
-        private SceneObject<Model> bradley = null;
+        private SceneObject<ModelInstanced> bradleyI = null;
         private SceneObject<Model> watchTower = null;
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
@@ -322,13 +322,17 @@ namespace Heightmap
             {
                 Name = "M24",
                 CastShadow = true,
+                Optimize = false,
                 Content = new ContentDescription()
                 {
                     ContentFolder = @"Resources/m24",
                     ModelContentFilename = @"m24.xml",
-                }
+                },
+                TransformNames = new[] { "Blades-mesh", "Rudder-mesh", "Hull-mesh" },
+                TransformDependences = new[] { 2, 2, -1 },
             };
             this.helicopter = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.Lights.AddRange(this.helicopter.Instance.Lights);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -360,18 +364,22 @@ namespace Heightmap
             Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
-            var mDesc = new ModelDescription()
+            var mDesc = new ModelInstancedDescription()
             {
                 Name = "Bradley",
                 CastShadow = true,
+                Instances = 5,
                 Content = new ContentDescription()
                 {
                     ContentFolder = @"Resources/Bradley",
                     ModelContentFilename = @"Bradley.xml",
                 }
             };
-            this.bradley = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
-            this.Lights.AddRange(this.bradley.Instance.Lights);
+            this.bradleyI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            for (int i = 0; i < this.bradleyI.Count; i++)
+            {
+                this.Lights.AddRange(this.bradleyI.Instance[i].Lights);
+            }
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -928,15 +936,27 @@ namespace Heightmap
 
             //Bradley
             {
-                if (this.FindTopGroundPosition(20, 200, out PickingResult<Triangle> r))
+                var bPositions = new[]
                 {
-                    this.bradley.Transform.SetScale(1.2f, true);
-                    this.bradley.Transform.SetPosition(r.Position, true);
-                    this.bradley.Transform.SetRotation(0, 0, 0, true);
-                    this.bradley.Transform.SetNormal(r.Item.Normal);
+                    new Vector3(-100, 220, MathUtil.Pi * -0.1f),
+                    new Vector3(-50, 210, MathUtil.Pi * -0.05f),
+                    new Vector3(0, 200, MathUtil.Pi * 0),
+                    new Vector3(50, 210, MathUtil.Pi * 0.05f),
+                    new Vector3(100, 220, MathUtil.Pi * 0.1f),
+                };
+
+                for (int i = 0; i < bPositions.Length; i++)
+                {
+                    if (this.FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Triangle> r))
+                    {
+                        this.bradleyI.Instance[i].Manipulator.SetScale(1.2f, true);
+                        this.bradleyI.Instance[i].Manipulator.SetPosition(r.Position, true);
+                        this.bradleyI.Instance[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
+                        this.bradleyI.Instance[i].Manipulator.SetNormal(r.Item.Normal);
+                    }
                 }
 
-                this.AttachToGround(this.bradley, false);
+                this.AttachToGround(this.bradleyI, false);
             }
 
             //Player soldier
@@ -1074,6 +1094,7 @@ namespace Heightmap
             UpdateDebugInfo(gameTime);
 
             //Auto
+            UpdateM24(gameTime);
             UpdateLights(gameTime);
             UpdateWind(gameTime);
             UpdateDust(gameTime);
@@ -1185,6 +1206,15 @@ namespace Heightmap
                     this.soldier.Transform.SetPosition(r.Position);
                 };
             }
+        }
+
+        private void UpdateM24(GameTime gameTime)
+        {
+            var blades = helicopter.Instance["Blades-mesh"];
+            blades.Manipulator.Rotate(gameTime.ElapsedSeconds, 0, 0);
+
+            //var rudder = helicopter.Instance["Rudder-mesh"];
+            //rudder.Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
         }
         private void UpdateDebugInfo(GameTime gameTime)
         {

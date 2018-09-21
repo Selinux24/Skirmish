@@ -137,6 +137,12 @@ namespace Engine
 
             if (description.TransformDependences != null && description.TransformDependences.Length > 0)
             {
+                var parents = Array.FindAll(description.TransformDependences, i => i == -1);
+                if (parents == null || parents.Length != 1)
+                {
+                    throw new EngineException("Model with transform dependences must have one (and only one) parent mesh identified by -1");
+                }
+
                 for (int i = 0; i < description.TransformNames.Length; i++)
                 {
                     this.ModelParts.Add(new ModelPart(description.TransformNames[i]));
@@ -450,19 +456,15 @@ namespace Engine
         /// <returns>Retusn the transform of the specified transform name</returns>
         public Matrix GetTransformByName(string name)
         {
-            Manipulator3D man = null;
-
             var part = this.ModelParts.Find(p => p.Name == name);
             if (part != null)
             {
-                man = part.Manipulator;
+                return part.Manipulator.FinalTransform;
             }
             else
             {
-                man = this.Manipulator;
+                return this.Manipulator.FinalTransform;
             }
-
-            return man.FinalTransform;
         }
 
         /// <summary>

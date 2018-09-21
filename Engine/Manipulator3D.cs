@@ -95,7 +95,12 @@ namespace Engine
                 }
                 else
                 {
-                    return this.localTransform * this.Parent.FinalTransform;
+                    //Compose final transform
+                    Matrix scaling = Matrix.Scaling(this.Parent.scaling) * Matrix.Scaling(this.scaling);
+                    Matrix rotation = Matrix.RotationQuaternion(this.Parent.rotation * this.rotation);
+                    Matrix translation = Matrix.Translation(this.Parent.position) * Matrix.Translation(this.position);
+
+                    return scaling * rotation * translation;
                 }
             }
         }
@@ -590,7 +595,7 @@ namespace Engine
         /// <returns>Returns manipulator text description</returns>
         public override string ToString()
         {
-            return string.Format("{0}", this.localTransform.GetDescription());
+            return string.Format("{0}", this.FinalTransform.GetDescription());
         }
     }
 }
