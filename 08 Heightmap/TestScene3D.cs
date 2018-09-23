@@ -322,14 +322,11 @@ namespace Heightmap
             {
                 Name = "M24",
                 CastShadow = true,
-                Optimize = false,
                 Content = new ContentDescription()
                 {
                     ContentFolder = @"Resources/m24",
                     ModelContentFilename = @"m24.xml",
                 },
-                TransformNames = new[] { "Blades-mesh", "Rudder-mesh", "Hull-mesh" },
-                TransformDependences = new[] { 2, 2, -1 },
             };
             this.helicopter = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
             this.Lights.AddRange(this.helicopter.Instance.Lights);
@@ -692,7 +689,7 @@ namespace Heightmap
             this.skydom.Instance.RayleighScattering *= 0.8f;
             this.skydom.Instance.MieScattering *= 0.1f;
 
-            this.TimeOfDay.BeginAnimation(new TimeSpan(4, 55, 00), 1f);
+            this.TimeOfDay.BeginAnimation(new TimeSpan(8, 55, 00), 1f);
 
             this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
             this.ToggleFog();
@@ -721,6 +718,14 @@ namespace Heightmap
             var sp1 = new AnimationPath();
             sp1.AddLoop("idle1");
             this.animations.Add("soldier_idle", new AnimationPlan(sp1));
+
+            var m24_1 = new AnimationPath();
+            m24_1.AddLoop("fly");
+            this.animations.Add("m24_idle", new AnimationPlan(m24_1));
+
+            var m24_2 = new AnimationPath();
+            m24_2.AddLoop("fly", 5);
+            this.animations.Add("m24_fly", new AnimationPlan(m24_2));
         }
         private void SetPositionOverTerrain()
         {
@@ -909,18 +914,22 @@ namespace Heightmap
 
             //M24
             {
-                if (this.FindTopGroundPosition(100, 50, out PickingResult<Triangle> r))
+                if (this.FindTopGroundPosition(-100, -10, out PickingResult<Triangle> r))
                 {
                     this.helicopter.Transform.SetPosition(r.Position, true);
                     this.helicopter.Transform.SetRotation(MathUtil.Pi / 5f, 0, 0, true);
                 }
+
+                this.helicopter.Instance.AnimationController.TimeDelta = 5f;
+                this.helicopter.Instance.AnimationController.AddPath(this.animations["m24_fly"]);
+                this.helicopter.Instance.AnimationController.Start();
 
                 this.AttachToGround(this.helicopter, false);
             }
 
             //Helicopter
             {
-                if (this.FindTopGroundPosition(-100, -10, out PickingResult<Triangle> r))
+                if (this.FindTopGroundPosition(100, 50, out PickingResult<Triangle> r))
                 {
                     this.helicopter2.Transform.SetPosition(r.Position, true);
                     this.helicopter2.Transform.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
@@ -1094,7 +1103,6 @@ namespace Heightmap
             UpdateDebugInfo(gameTime);
 
             //Auto
-            UpdateM24(gameTime);
             UpdateLights(gameTime);
             UpdateWind(gameTime);
             UpdateDust(gameTime);
@@ -1206,15 +1214,6 @@ namespace Heightmap
                     this.soldier.Transform.SetPosition(r.Position);
                 };
             }
-        }
-
-        private void UpdateM24(GameTime gameTime)
-        {
-            var blades = helicopter.Instance["Blades-mesh"];
-            blades.Manipulator.Rotate(gameTime.ElapsedSeconds, 0, 0);
-
-            //var rudder = helicopter.Instance["Rudder-mesh"];
-            //rudder.Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
         }
         private void UpdateDebugInfo(GameTime gameTime)
         {
