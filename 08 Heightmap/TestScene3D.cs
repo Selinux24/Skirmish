@@ -67,6 +67,7 @@ namespace Heightmap
         private ParticleSystemDescription pFire = null;
         private ParticleSystemDescription pDust = null;
         private float nextDust = 0;
+        private int nextDustHeli = 0;
         private readonly float dustTime = 0.33f;
 
         private SceneObject<ModelInstanced> rocks = null;
@@ -80,10 +81,13 @@ namespace Heightmap
 
         private SceneObject<ModelInstanced> troops = null;
 
-        private SceneObject<Model> helicopter = null;
-        private SceneObject<Model> helicopter2 = null;
+        private SceneObject<ModelInstanced> helicopterI = null;
         private SceneObject<ModelInstanced> bradleyI = null;
         private SceneObject<Model> watchTower = null;
+
+        private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
+        private bool drawDrawVolumes = false;
+        private bool drawCullVolumes = false;
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
@@ -110,7 +114,6 @@ namespace Heightmap
             var taskSoldier = InitializeSoldier();
             var taskTroops = InitializeTroops();
             var taskM24 = InitializeM24();
-            var taskHelicopter = InitializeHelicopter();
             var taskBradley = InitializeBradley();
             var taskWatchTower = InitializeWatchTower();
             var taskTorchs = InitializeTorchs();
@@ -129,7 +132,6 @@ namespace Heightmap
             initDurationDict.Add("Soldier", taskSoldier.Result);
             initDurationDict.Add("Troops", taskTroops.Result);
             initDurationDict.Add("M24", taskM24.Result);
-            initDurationDict.Add("Helicopter", taskHelicopter.Result);
             initDurationDict.Add("Bradley", taskBradley.Result);
             initDurationDict.Add("Watch Tower", taskWatchTower.Result);
             initDurationDict.Add("Torchs", taskTorchs.Result);
@@ -318,40 +320,22 @@ namespace Heightmap
             Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
-            var mDesc = new ModelDescription()
+            var mDesc = new ModelInstancedDescription()
             {
                 Name = "M24",
                 CastShadow = true,
+                Instances = 3,
                 Content = new ContentDescription()
                 {
                     ContentFolder = @"Resources/m24",
                     ModelContentFilename = @"m24.xml",
                 },
             };
-            this.helicopter = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
-            this.Lights.AddRange(this.helicopter.Instance.Lights);
-            sw.Stop();
-
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
-        }
-        private Task<double> InitializeHelicopter()
-        {
-            Stopwatch sw = Stopwatch.StartNew();
-
-            sw.Restart();
-            var hcDesc = new ModelDescription()
+            this.helicopterI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            for (int i = 0; i < this.helicopterI.Count; i++)
             {
-                Name = "Helicopter",
-                CastShadow = true,
-                Static = false,
-                TextureIndex = 2,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = @"Resources/Helicopter",
-                    ModelContentFilename = @"Helicopter.xml",
-                }
-            };
-            this.helicopter2 = this.AddComponent<Model>(hcDesc, SceneObjectUsageEnum.None, layerObjects);
+                this.Lights.AddRange(this.helicopterI.Instance[i].Lights);
+            }
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -704,6 +688,9 @@ namespace Heightmap
                 taskPositioning,
                 taskDebugInfo,
             });
+
+            var desc = new LineListDrawerDescription() { DepthEnabled = true, Count = 10000 };
+            this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
         }
         private void SetAnimationDictionaries()
         {
@@ -914,33 +901,28 @@ namespace Heightmap
 
             //M24
             {
-                if (this.FindTopGroundPosition(-100, -10, out PickingResult<Triangle> r))
+                var hPositions = new[]
                 {
-                    this.helicopter.Transform.SetPosition(r.Position, true);
-                    this.helicopter.Transform.SetRotation(MathUtil.Pi / 5f, 0, 0, true);
+                    new Vector3(-100, -10, 0),
+                    new Vector3(-180, -10, 0),
+                    new Vector3(-260, -10, 0),
+                };
+
+                for (int i = 0; i < hPositions.Length; i++)
+                {
+                    if (this.FindTopGroundPosition(hPositions[i].X, hPositions[i].Y, out PickingResult<Triangle> r))
+                    {
+                        this.helicopterI.Instance[i].Manipulator.SetPosition(r.Position, true);
+                        this.helicopterI.Instance[i].Manipulator.SetRotation(hPositions[i].Z, 0, 0, true);
+                        this.helicopterI.Instance[i].Manipulator.SetNormal(r.Item.Normal);
+
+                        this.helicopterI.Instance[i].AnimationController.TimeDelta = 0.5f * (i + 1);
+                        this.helicopterI.Instance[i].AnimationController.AddPath(this.animations["m24_fly"]);
+                        this.helicopterI.Instance[i].AnimationController.Start();
+                    }
                 }
 
-                this.helicopter.Instance.AnimationController.TimeDelta = 5f;
-                this.helicopter.Instance.AnimationController.AddPath(this.animations["m24_fly"]);
-                this.helicopter.Instance.AnimationController.Start();
-
-                this.AttachToGround(this.helicopter, false);
-            }
-
-            //Helicopter
-            {
-                if (this.FindTopGroundPosition(100, 50, out PickingResult<Triangle> r))
-                {
-                    this.helicopter2.Transform.SetPosition(r.Position, true);
-                    this.helicopter2.Transform.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
-                    this.helicopter2.Transform.SetScale(5, true);
-                }
-
-                this.helicopter2.Instance.AnimationController.TimeDelta = 2f;
-                this.helicopter2.Instance.AnimationController.AddPath(this.animations["heli_default"]);
-                this.helicopter2.Instance.AnimationController.Start();
-
-                this.AttachToGround(this.helicopter2, false);
+                this.AttachToGround(this.helicopterI, false);
             }
 
             //Bradley
@@ -970,12 +952,13 @@ namespace Heightmap
 
             //Player soldier
             {
-                if (this.FindTopGroundPosition(0, 0, out PickingResult<Triangle> r))
+                if (this.FindAllGroundPosition(-40, -40, out PickingResult<Triangle>[] res))
                 {
-                    this.soldier.Transform.SetPosition(r.Position, true);
+                    this.soldier.Transform.SetPosition(res[2].Position, true);
+                    this.soldier.Transform.SetRotation(MathUtil.Pi, 0, 0, true);
                 }
 
-                this.soldier.Instance.AnimationController.AddPath(this.animations["soldier_stand"]);
+                this.soldier.Instance.AnimationController.AddPath(this.animations["soldier_idle"]);
                 this.soldier.Instance.AnimationController.Start();
             }
 
@@ -1248,6 +1231,23 @@ namespace Heightmap
                 if (this.soldierLines != null) this.soldierLines.Visible = this.showSoldierDEBUG;
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            {
+                this.drawDrawVolumes = !this.drawDrawVolumes;
+                this.drawCullVolumes = false;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F4))
+            {
+                this.drawCullVolumes = !this.drawCullVolumes;
+                this.drawDrawVolumes = false;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
+            }
+
             if (this.showSoldierDEBUG)
             {
                 Color color = new Color(Color.Red.ToColor3(), 0.6f);
@@ -1289,6 +1289,16 @@ namespace Heightmap
                 {
                     this.soldierLines.Instance.SetLines(color, Line3D.CreateWiredBox(bboxes));
                 }
+            }
+
+            if (this.drawDrawVolumes)
+            {
+                this.UpdateLightDrawingVolumes();
+            }
+
+            if (this.drawCullVolumes)
+            {
+                this.UpdateLightCullingVolumes();
             }
 
             #endregion
@@ -1387,7 +1397,10 @@ namespace Heightmap
             {
                 this.nextDust = this.dustTime;
 
-                var hbsph = this.helicopter2.Instance.GetBoundingSphere();
+                var hbsph = this.helicopterI.Instance[nextDustHeli++].GetBoundingSphere();
+
+                nextDustHeli %= this.helicopterI.Count;
+
                 hbsph.Radius *= 0.8f;
 
                 this.GenerateDust(this.rnd, hbsph);
@@ -1431,6 +1444,46 @@ namespace Heightmap
                 this.lantern.Position = this.Camera.Position + this.Camera.Left;
                 this.lantern.Direction = this.Camera.Direction;
             }
+        }
+        private void UpdateLightDrawingVolumes()
+        {
+            this.lightsVolumeDrawer.Instance.Clear();
+
+            foreach (var spot in this.Lights.SpotLights)
+            {
+                var lines = spot.GetVolume(10);
+
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+            }
+
+            foreach (var point in this.Lights.PointLights)
+            {
+                var lines = point.GetVolume(12, 5);
+
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+            }
+
+            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
+        }
+        private void UpdateLightCullingVolumes()
+        {
+            this.lightsVolumeDrawer.Instance.Clear();
+
+            foreach (var spot in this.Lights.SpotLights)
+            {
+                var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 12, 5);
+
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+            }
+
+            foreach (var point in this.Lights.PointLights)
+            {
+                var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 12, 5);
+
+                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+            }
+
+            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
 
         public override void Draw(GameTime gameTime)

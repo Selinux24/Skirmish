@@ -1620,7 +1620,7 @@ namespace Engine.Content
         {
             if (vector.Values != null && vector.Values.Length == 3)
             {
-                return new Vector3(vector.Values[0], vector.Values[1], vector.Values[2]);
+                return new Vector3(vector.Values[0], vector.Values[2], vector.Values[1]);
             }
             else
             {
@@ -1636,7 +1636,7 @@ namespace Engine.Content
         {
             if (vector.Values != null && vector.Values.Length == 4)
             {
-                return new Vector4(vector.Values[0], vector.Values[1], vector.Values[2], vector.Values[3]);
+                return new Vector4(vector.Values[0], vector.Values[2], vector.Values[1], vector.Values[3]);
             }
             else
             {
@@ -1723,7 +1723,7 @@ namespace Engine.Content
         {
             if (node.Matrix != null)
             {
-                Matrix m = SharpDX.Matrix.Identity;
+                Matrix m = Matrix.Identity;
 
                 BasicFloat4x4 trn = Array.Find(node.Matrix, t => string.Equals(t.SId, "transform"));
                 if (trn != null) m = trn.ToMatrix();
@@ -1732,14 +1732,14 @@ namespace Engine.Content
             }
             else
             {
-                Matrix finalTranslation = SharpDX.Matrix.Identity;
-                Matrix finalRotation = SharpDX.Matrix.Identity;
-                Matrix finalScale = SharpDX.Matrix.Identity;
+                Matrix finalTranslation = Matrix.Identity;
+                Matrix finalRotation = Matrix.Identity;
+                Matrix finalScale = Matrix.Identity;
 
                 if (node.Translate != null)
                 {
                     BasicFloat3 loc = Array.Find(node.Translate, t => string.Equals(t.SId, "location"));
-                    if (loc != null) finalTranslation *= SharpDX.Matrix.Translation(loc.ToVector3());
+                    if (loc != null) finalTranslation *= Matrix.Translation(loc.ToVector3());
                 }
 
                 if (node.Rotate != null)
@@ -1748,28 +1748,28 @@ namespace Engine.Content
                     if (rotX != null)
                     {
                         Vector4 r = rotX.ToVector4();
-                        finalRotation *= SharpDX.Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                        finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                     }
 
                     BasicFloat4 rotY = Array.Find(node.Rotate, t => string.Equals(t.SId, "rotationY"));
                     if (rotY != null)
                     {
                         Vector4 r = rotY.ToVector4();
-                        finalRotation *= SharpDX.Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                        finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                     }
 
                     BasicFloat4 rotZ = Array.Find(node.Rotate, t => string.Equals(t.SId, "rotationZ"));
                     if (rotZ != null)
                     {
                         Vector4 r = rotZ.ToVector4();
-                        finalRotation *= SharpDX.Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                        finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
                     }
                 }
 
                 if (node.Scale != null)
                 {
                     BasicFloat3 sca = Array.Find(node.Scale, t => string.Equals(t.SId, "scale"));
-                    if (sca != null) finalScale *= SharpDX.Matrix.Scaling(sca.ToVector3());
+                    if (sca != null) finalScale *= Matrix.Scaling(sca.ToVector3());
                 }
 
                 return finalScale * finalRotation * finalTranslation;
