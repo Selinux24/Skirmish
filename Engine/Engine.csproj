@@ -638,11 +638,17 @@
     <None Include="Resources\ShaderDefaultClouds.fxo" />
     <None Include="Resources\ShaderDefaultFoliage.fxo" />
     <None Include="Resources\ShaderDefaultWater.fxo" />
+    <None Include="Resources\ShaderLightCapsule.fxo" />
+    <None Include="Resources\ShaderLightDirectional.fxo" />
+    <None Include="Resources\ShaderLightEmissive.fxo" />
+    <None Include="Resources\ShaderLightPoint.fxo" />
+    <None Include="Resources\ShaderLightSpot.fxo" />
     <None Include="Resources\ShaderPostBlur.fx" />
     <None Include="Resources\ShaderPostBlur.fxo" />
     <None Include="Resources\IncScattering.fx" />
     <None Include="Resources\ShaderShadowBillboard.fx" />
     <None Include="Resources\ShaderShadowBillboard.fxo" />
+    <None Include="Resources\ShaderShadowCascade.fxo" />
     <None Include="Resources\ShaderShadowFoliage.fxo" />
     <None Include="Resources\ShaderShadowPoints.fxo" />
     <None Include="Resources\ShaderShadowTerrain.fxo" />
@@ -684,6 +690,13 @@
     <None Include="Resources\ShaderDefaultWater.fx" />
     <None Include="Resources\IncMaterials.fx" />
     <None Include="Resources\ShaderShadowPoints.fx" />
+    <None Include="Resources\ShaderLightDirectional.fx" />
+    <None Include="Resources\ShaderLightPoint.fx" />
+    <None Include="Resources\ShaderLightSpot.fx" />
+    <None Include="Resources\ShaderLightCapsule.fx" />
+    <None Include="Resources\ShaderLightEmissive.fx" />
+    <Content Include="Resources\ShaderShadowCascade.fx" />
+    <Content Include="Resources\Common.hlsl" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
