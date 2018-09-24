@@ -1258,6 +1258,8 @@ namespace Engine
                 var graph = this.PathFinderDescription.Build();
 
                 this.SetNavigationGraph(graph);
+
+                this.NavigationGraphUpdated();
             }
         }
         /// <summary>
@@ -1276,6 +1278,11 @@ namespace Engine
         /// <param name="e">Event args</param>
         private void GraphUpdated(object sender, EventArgs e)
         {
+            if (this.PathFinderDescription != null)
+            {
+                this.boundingBox = this.PathFinderDescription.Input.BoundingBox;
+            }
+
             NavigationGraphUpdated();
         }
         /// <summary>
@@ -1290,10 +1297,7 @@ namespace Engine
         /// </summary>
         public virtual void NavigationGraphUpdated()
         {
-            if (this.PathFinderDescription != null)
-            {
-                this.boundingBox = this.PathFinderDescription.Input.BoundingBox;
-            }
+
         }
 
         /// <summary>
@@ -1364,6 +1368,18 @@ namespace Engine
                         tris.AddRange(vTris);
                     }
                 }
+            }
+
+            var bounds = this.PathFinderDescription.Settings.Bounds;
+
+            if (bounds.HasValue)
+            {
+                tris = tris.FindAll(t =>
+                {
+                    var tbbox = BoundingBox.FromPoints(t.GetVertices());
+
+                    return bounds.Value.Contains(ref tbbox) != ContainmentType.Disjoint;
+                });
             }
 
             return tris.ToArray();

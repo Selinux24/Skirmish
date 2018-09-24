@@ -37,7 +37,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
+            var bbox = settings.Bounds ?? geometry.BoundingBox;
 
             Recast.CalcGridSize(bbox, settings.CellSize, out int width, out int height);
 
@@ -221,7 +221,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
+            var bbox = settings.Bounds ?? geometry.BoundingBox;
 
             // Init cache
             Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);
@@ -253,7 +253,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static NavMesh BuildTempObstacles(InputGeometry geometry, BuildSettings settings, Agent agent)
         {
-            var bbox = settings.NavmeshBounds ?? geometry.BoundingBox;
+            var bbox = settings.Bounds ?? geometry.BoundingBox;
 
             // Init cache
             Recast.CalcGridSize(bbox, settings.CellSize, out int gw, out int gh);

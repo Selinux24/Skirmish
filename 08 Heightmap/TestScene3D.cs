@@ -89,6 +89,14 @@ namespace Heightmap
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
+        private SceneObject<TriangleListDrawer> graphDrawer = null;
+
+        private readonly Agent agent = new Agent()
+        {
+            Name = "Soldier",
+            MaxSlope = 45,
+        };
+
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         private readonly Dictionary<string, double> initDurationDict = new Dictionary<string, double>();
@@ -224,7 +232,7 @@ namespace Heightmap
                     ModelContentFilename = @"boulder.xml",
                 }
             };
-            this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsageEnum.CoarsePathFinding, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -246,7 +254,7 @@ namespace Heightmap
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsageEnum.None, layerTerrain);
+            this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsageEnum.CoarsePathFinding, layerTerrain);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -268,7 +276,7 @@ namespace Heightmap
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            this.trees2 = this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsageEnum.None, layerTerrain);
+            this.trees2 = this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsageEnum.CoarsePathFinding, layerTerrain);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -331,7 +339,7 @@ namespace Heightmap
                     ModelContentFilename = @"m24.xml",
                 },
             };
-            this.helicopterI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.helicopterI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.FullPathFinding, layerObjects);
             for (int i = 0; i < this.helicopterI.Count; i++)
             {
                 this.Lights.AddRange(this.helicopterI.Instance[i].Lights);
@@ -356,7 +364,7 @@ namespace Heightmap
                     ModelContentFilename = @"Bradley.xml",
                 }
             };
-            this.bradleyI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.bradleyI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.FullPathFinding, layerObjects);
             for (int i = 0; i < this.bradleyI.Count; i++)
             {
                 this.Lights.AddRange(this.bradleyI.Instance[i].Lights);
@@ -380,7 +388,7 @@ namespace Heightmap
                     ModelContentFilename = @"Watch Tower.xml",
                 }
             };
-            this.watchTower = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.watchTower = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.FullPathFinding, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -401,7 +409,7 @@ namespace Heightmap
                     ModelContentFilename = @"torch.xml",
                 }
             };
-            this.torchs = this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.torchs = this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsageEnum.CoarsePathFinding, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -477,7 +485,7 @@ namespace Heightmap
                     HeightmapDescription = hDesc,
                 }
             };
-            this.terrain = this.AddComponent<Terrain>(gDesc, SceneObjectUsageEnum.None, layerTerrain);
+            this.terrain = this.AddComponent<Terrain>(gDesc, SceneObjectUsageEnum.Ground, layerTerrain);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -658,7 +666,6 @@ namespace Heightmap
         {
             base.Initialized();
 
-            var taskPathfinding = Task.Run(() => SetPathFindingInfo());
             var taskAnimations = Task.Run(() => SetAnimationDictionaries());
             var taskPositioning = Task.Run(() => SetPositionOverTerrain());
             var taskDebugInfo = Task.Run(() => SetDebugInfo());
@@ -683,14 +690,33 @@ namespace Heightmap
 
             Task.WaitAll(new[]
             {
-                taskPathfinding,
                 taskAnimations,
                 taskPositioning,
                 taskDebugInfo,
             });
 
-            var desc = new LineListDrawerDescription() { DepthEnabled = true, Count = 10000 };
-            this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
+            SetPathFindingInfo();
+
+            {
+                var desc = new LineListDrawerDescription()
+                {
+                    Name = "DEBUG++ Light Volumes",
+                    DepthEnabled = true,
+                    Count = 10000
+                };
+                this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
+            }
+
+            {
+                var desc = new TriangleListDrawerDescription()
+                {
+                    Name = "DEBUG++ Graph",
+                    AlphaEnabled = true,
+                    Count = 50000,
+                };
+                this.graphDrawer = this.AddComponent<TriangleListDrawer>(desc);
+                this.graphDrawer.Visible = false;
+            }
         }
         private void SetAnimationDictionaries()
         {
@@ -752,8 +778,6 @@ namespace Heightmap
                 }
 
                 #endregion
-
-                this.AttachToGround(this.rocks, false);
             }
 
             {
@@ -794,9 +818,6 @@ namespace Heightmap
                 }
 
                 #endregion
-
-                this.AttachToGround(this.trees, false);
-                this.AttachToGround(this.trees2, false);
             }
 
             {
@@ -810,14 +831,12 @@ namespace Heightmap
                 }
 
                 #endregion
-
-                this.AttachToGround(this.watchTower, false);
             }
 
             {
                 #region Torchs
 
-                if (this.FindTopGroundPosition(5, 5, out PickingResult<Triangle> r))
+                if (this.FindTopGroundPosition(15, 15, out PickingResult<Triangle> r))
                 {
                     var position = r.Position;
 
@@ -895,9 +914,13 @@ namespace Heightmap
                 }
 
                 #endregion
-
-                this.AttachToGround(this.torchs, false);
             }
+
+            this.AttachToGround(this.rocks, false);
+            this.AttachToGround(this.trees, false);
+            this.AttachToGround(this.trees2, false);
+            this.AttachToGround(this.watchTower, true);
+            this.AttachToGround(this.torchs, false);
 
             //M24
             {
@@ -921,8 +944,6 @@ namespace Heightmap
                         this.helicopterI.Instance[i].AnimationController.Start();
                     }
                 }
-
-                this.AttachToGround(this.helicopterI, false);
             }
 
             //Bradley
@@ -946,9 +967,10 @@ namespace Heightmap
                         this.bradleyI.Instance[i].Manipulator.SetNormal(r.Item.Normal);
                     }
                 }
-
-                this.AttachToGround(this.bradleyI, false);
             }
+
+            this.AttachToGround(this.helicopterI, true);
+            this.AttachToGround(this.bradleyI, true);
 
             //Player soldier
             {
@@ -1021,21 +1043,17 @@ namespace Heightmap
             //Player height
             var sbbox = this.soldier.Instance.GetBoundingBox();
             this.playerHeight.Y = sbbox.Maximum.Y - sbbox.Minimum.Y;
-            var agent = new Agent()
-            {
-                Name = "Soldier",
-                Height = this.playerHeight.Y,
-                Radius = this.playerHeight.Y * 0.33f,
-                MaxClimb = this.playerHeight.Y * 0.5f,
-                MaxSlope = 45,
-            };
+            this.agent.Height = this.playerHeight.Y;
+            this.agent.Radius = this.playerHeight.Y * 0.33f;
+            this.agent.MaxClimb = this.playerHeight.Y * 0.5f;
+            this.agent.MaxSlope = 45;
 
             //Navigation settings
             var nmsettings = BuildSettings.Default;
 
             //Rasterization
-            nmsettings.CellSize = 0.2f;
-            nmsettings.CellHeight = 0.15f;
+            nmsettings.CellSize = 1f;
+            nmsettings.CellHeight = 1f;
 
             //Agents
             nmsettings.Agents = new[] { agent };
@@ -1050,11 +1068,15 @@ namespace Heightmap
             nmsettings.BuildMode = BuildModesEnum.TempObstacles;
             nmsettings.TileSize = 16;
 
-            nmsettings.NavmeshBounds = new BoundingBox(sbbox.Minimum * 100f, sbbox.Maximum * 100f);
+            nmsettings.Bounds = new BoundingBox(
+                new Vector3(-100, -100, -100),
+                new Vector3(+100, +100, +100));
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
 
             this.PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
+
+            this.UpdateNavigationGraph();
         }
         private void ToggleFog()
         {
@@ -1089,6 +1111,7 @@ namespace Heightmap
             UpdateLights(gameTime);
             UpdateWind(gameTime);
             UpdateDust(gameTime);
+            UpdateGraph(gameTime);
 
             this.help.Instance.Text = string.Format(
                 "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00};",
@@ -1246,6 +1269,11 @@ namespace Heightmap
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
                 this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = false;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            {
+                this.graphDrawer.Visible = !this.graphDrawer.Visible;
             }
 
             if (this.showSoldierDEBUG)
@@ -1485,6 +1513,45 @@ namespace Heightmap
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
         }
+        private void UpdateGraph(GameTime gameTime)
+        {
+            graphUpdateSeconds -= gameTime.ElapsedSeconds;
+
+            if (graphUpdateRequested && graphUpdateSeconds <= 0f)
+            {
+                graphUpdateRequested = false;
+                graphUpdateSeconds = 0;
+
+                this.UpdateGraphNodes(this.agent);
+            }
+        }
+
+        private bool graphUpdateRequested = false;
+        private float graphUpdateSeconds = 0;
+        private void UpdateGraphNodes(AgentType agent)
+        {
+            var nodes = this.GetNodes(agent);
+            if (nodes != null && nodes.Length > 0)
+            {
+                this.graphDrawer.Instance.Clear();
+
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    if (nodes[i] is GraphNode node)
+                    {
+                        var color = node.Color;
+                        var tris = node.Triangles;
+
+                        this.graphDrawer.Instance.AddTriangles(color, tris);
+                    }
+                }
+            }
+        }
+        private void RequestGraphUpdate(float seconds)
+        {
+            graphUpdateRequested = true;
+            graphUpdateSeconds = seconds;
+        }
 
         public override void Draw(GameTime gameTime)
         {
@@ -1499,6 +1566,11 @@ namespace Heightmap
             {
                 this.load.Instance.Text = string.Format("{0}: {1}", keys[index], initDurationDict[keys[index]]);
             }
+        }
+
+        public override void NavigationGraphUpdated()
+        {
+            this.RequestGraphUpdate(0.2f);
         }
     }
 }

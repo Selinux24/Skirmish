@@ -90,50 +90,5 @@ namespace Engine.PathFinding.RecastNavigation
         /// Filter walkable low hight spans when generation
         /// </summary>
         public bool FilterWalkableLowHeightSpans = true;
-
-        /// <summary>
-        /// Navigation mesh bounds
-        /// </summary>
-        [NonSerialized]
-        public BoundingBox? NavmeshBounds = null;
-        /// <summary>
-        /// Serialization property
-        /// </summary>
-        internal float[] InternalNavmeshBounds
-        {
-            get
-            {
-                if (NavmeshBounds.HasValue)
-                {
-                    return new float[]
-                    {
-                        NavmeshBounds.Value.Minimum.X,
-                        NavmeshBounds.Value.Minimum.Y,
-                        NavmeshBounds.Value.Minimum.Z,
-
-                        NavmeshBounds.Value.Maximum.X,
-                        NavmeshBounds.Value.Maximum.Y,
-                        NavmeshBounds.Value.Maximum.Z,
-                    };
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            set
-            {
-                if (value != null && value.Length == 6)
-                {
-                    NavmeshBounds = new BoundingBox(
-                        new Vector3(value[0], value[1], value[2]),
-                        new Vector3(value[3], value[4], value[5]));
-                }
-                else
-                {
-                    NavmeshBounds = null;
-                }
-            }
-        }
     }
 }

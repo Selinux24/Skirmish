@@ -903,8 +903,6 @@ namespace Collada
         }
         public override void NavigationGraphUpdated()
         {
-            base.NavigationGraphUpdated();
-
             this.RequestGraphUpdate(0.2f);
         }
     }
