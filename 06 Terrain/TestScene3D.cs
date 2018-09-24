@@ -435,25 +435,6 @@ namespace Terrain
             this.Lights.DirectionalLights[1].Enabled = true;
             this.Lights.DirectionalLights[2].Enabled = true;
 
-            this.Lights.Add(new SceneLightPoint(
-                "Blue point",
-                true,
-                Color.Blue,
-                Color.Blue,
-                true,
-                Vector3.Zero,
-                2f,
-                5f));
-            this.Lights.Add(new SceneLightPoint(
-                "Red point",
-                true,
-                Color.Red,
-                Color.Red,
-                true,
-                Vector3.Zero,
-                2f,
-                5f));
-
             //this.Lights.ShadowLDDistance = 100f;
             //this.Lights.ShadowHDDistance = 25f;
 
@@ -505,12 +486,12 @@ namespace Terrain
                 Content = new ContentDescription()
                 {
                     ContentFolder = "resources/Helicopter",
-                    ModelContentFilename = "Helicopter.xml",
+                    ModelContentFilename = "M24.xml",
                 }
             };
             this.helicopter = this.AddComponent<Model>(hDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
 
-            this.helicopter.Transform.SetScale(0.75f);
+            this.helicopter.Transform.SetScale(0.15f);
             this.helicopter.Transform.UpdateInternals(true);
 
             this.Lights.AddRange(this.helicopter.Instance.Lights);
@@ -971,6 +952,7 @@ namespace Terrain
 
             // Set animation
             this.helicopter.Instance.AnimationController.SetPath(this.animations["heli_default"]);
+            this.helicopter.Instance.AnimationController.TimeDelta = 3f;
             this.helicopter.Instance.AnimationController.Start();
 
             // Define weapons
@@ -1379,9 +1361,6 @@ namespace Terrain
                 this.helicopter.Instance.AnimationController.SetPath(this.animations["heli_default"]);
                 this.DEBUGDrawHelicopterPath(curve);
             }
-
-            this.Lights.PointLights[0].Position = (this.helicopter.Transform.Position + this.helicopter.Transform.Up + this.helicopter.Transform.Left);
-            this.Lights.PointLights[1].Position = (this.helicopter.Transform.Position + this.helicopter.Transform.Up + this.helicopter.Transform.Right);
 
             this.SetStatsScreenPosition(this.helicopterAgent, 4, this.hProgressBar);
         }

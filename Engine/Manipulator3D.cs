@@ -95,12 +95,7 @@ namespace Engine
                 }
                 else
                 {
-                    //Compose final transform
-                    Matrix scaling = Matrix.Scaling(this.Parent.scaling) * Matrix.Scaling(this.scaling);
-                    Matrix rotation = Matrix.RotationQuaternion(this.Parent.rotation * this.rotation);
-                    Matrix translation = Matrix.Translation(this.Parent.position) * Matrix.Translation(this.position);
-
-                    return scaling * rotation * translation;
+                    return this.localTransform * this.Parent.FinalTransform;
                 }
             }
         }
