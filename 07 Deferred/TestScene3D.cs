@@ -227,10 +227,11 @@ namespace Deferred
                 Content = new ContentDescription()
                 {
                     ContentFolder = "Resources",
-                    ModelContentFilename = "helicopter.xml",
+                    ModelContentFilename = "m24.xml",
                 }
             };
             this.helicopter = this.AddComponent<Model>(desc);
+            this.Lights.AddRange(this.helicopter.Instance.Lights);
         }
         private void InitializeHelicopters()
         {
@@ -242,10 +243,14 @@ namespace Deferred
                 Content = new ContentDescription()
                 {
                     ContentFolder = "Resources",
-                    ModelContentFilename = "helicopter.xml",
+                    ModelContentFilename = "m24.xml",
                 }
             };
             this.helicopters = this.AddComponent<ModelInstanced>(desc);
+            for (int i = 0; i < this.helicopters.Count; i++)
+            {
+                this.Lights.AddRange(this.helicopters.Instance[i].Lights);
+            }
         }
         private void InitializeTanks()
         {
@@ -540,11 +545,13 @@ namespace Deferred
                     var p = r.Position;
                     p.Y += 10f;
                     this.helicopter.Transform.SetPosition(p, true);
+                    this.helicopter.Transform.SetScale(0.15f, true);
                     cameraPosition += p;
                     modelCount++;
                 }
 
                 this.helicopter.Instance.AnimationController.AddPath(this.animations["default"]);
+                this.helicopter.Instance.AnimationController.TimeDelta = 3f;
                 this.helicopter.Instance.AnimationController.Start();
             }
             #endregion
@@ -558,11 +565,13 @@ namespace Deferred
                         var p = r.Position;
                         p.Y += 10f;
                         this.helicopters.Instance[i].Manipulator.SetPosition(p, true);
+                        this.helicopters.Instance[i].Manipulator.SetScale(0.15f, true);
                         cameraPosition += p;
                         modelCount++;
                     }
 
                     this.helicopters.Instance[i].AnimationController.AddPath(this.animations["default"]);
+                    this.helicopters.Instance[i].AnimationController.TimeDelta = 3f;
                     this.helicopters.Instance[i].AnimationController.Start();
                 }
             }
@@ -686,22 +695,34 @@ namespace Deferred
             {
                 if (this.Game.Input.KeyPressed(Keys.Left))
                 {
-                    this.spotLight.Position += (Vector3.Left) * gameTime.ElapsedSeconds * 10f;
+                    var v = this.Camera.Left;
+                    v.Y = 0;
+                    v.Normalize();
+                    this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.Right))
                 {
-                    this.spotLight.Position += (Vector3.Right) * gameTime.ElapsedSeconds * 10f;
+                    var v = this.Camera.Right;
+                    v.Y = 0;
+                    v.Normalize();
+                    this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.Up))
                 {
-                    this.spotLight.Position += (Vector3.ForwardLH) * gameTime.ElapsedSeconds * 10f;
+                    var v = this.Camera.Forward;
+                    v.Y = 0;
+                    v.Normalize();
+                    this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.Down))
                 {
-                    this.spotLight.Position += (Vector3.BackwardLH) * gameTime.ElapsedSeconds * 10f;
+                    var v = this.Camera.Backward;
+                    v.Y = 0;
+                    v.Normalize();
+                    this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
                 }
 
                 if (this.Game.Input.KeyPressed(Keys.PageUp))
@@ -1002,6 +1023,11 @@ namespace Deferred
 
             this.Lights.AddRange(this.tankAgent1.Instance.Lights);
             this.Lights.AddRange(this.tankAgent2.Instance.Lights);
+            this.Lights.AddRange(this.helicopter.Instance.Lights);
+            for (int i = 0; i < this.helicopters.Count; i++)
+            {
+                this.Lights.AddRange(this.helicopters.Instance[i].Lights);
+            }
 
             if (!modelsOnly)
             {
