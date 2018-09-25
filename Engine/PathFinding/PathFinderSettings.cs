@@ -7,7 +7,7 @@ namespace Engine.PathFinding
     public abstract class PathFinderSettings
     {
         /// <summary>
-        /// Navigation mesh bounds
+        /// Path Finder bounds
         /// </summary>
         [NonSerialized]
         public BoundingBox? Bounds = null;

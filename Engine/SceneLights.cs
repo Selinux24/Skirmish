@@ -297,6 +297,24 @@ namespace Engine
             // View from light to scene center position
             return Matrix.LookAtLH(lightPosition, lightPosition + direction, Vector3.Up) * projection;
         }
+        /// <summary>
+        /// Gets cascades from light view * projection matrix array
+        /// </summary>
+        /// <param name="camera">Camera</param>
+        /// <param name="direction">Light direction</param>
+        /// <param name="cascadeSet">Cascade set</param>
+        /// <returns>Returns the cascades from light view * projection matrix array</returns>
+        public static Matrix[] GetCascadeFromLightViewProjection(Camera camera, Vector3 direction, ShadowMapCascadeSet cascadeSet)
+        {
+            cascadeSet.Update(camera, direction);
+
+            return new[]
+            {
+                cascadeSet.GetWorldToCascadeProj(0),
+                cascadeSet.GetWorldToCascadeProj(1),
+                cascadeSet.GetWorldToCascadeProj(2),
+            };
+        }
 
         /// <summary>
         /// Constructor
