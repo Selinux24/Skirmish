@@ -1,11 +1,35 @@
+
+cbuffer cbGlobals : register(b0)
+{
+    uint gAnimationPaletteWidth;
+};
+Texture2D gAnimationPalette : register(t0);
+
+cbuffer cbVSPerFrame : register(b1)
+{
+    float4x4 ShadowMat;
+    float4x4 CubeViewProj[6];
+    float4x4 CascadeViewProj[3];
+};
+
+cbuffer cbVSPerInstance : register(b2)
+{
+    uint gVSAnimationOffset;
+    uint3 PAD21;
+};
+
+//TEXTURE VARIABLES FOR TRANSPARENCY
+Texture2DArray gPSDiffuseMapArray : register(t1);
+
+cbuffer cbPSPerInstance : register(b5)
+{
+    uint gPSTextureIndex;
+    uint3 PAD51;
+};
+
 ///////////////////////////////////////////////////////////////////
 // Spot shadow map generation
 ///////////////////////////////////////////////////////////////////
-cbuffer cbSpotShadowGenVS : register(b0)
-{
-    float4x4 ShadowMat : packoffset(c0);
-}
-
 float4 SpotShadowGenVS(float4 Pos : POSITION) : SV_Position
 {
     return mul(Pos, ShadowMat);
@@ -18,11 +42,6 @@ float4 PointShadowGenVS(float4 Pos : POSITION) : SV_Position
 {
     return Pos;
 }
-
-cbuffer cbuffercbShadowMapCubeGS : register(b0)
-{
-    float4x4 CubeViewProj[6] : packoffset(c0);
-};
 
 struct GS_OUTPUT
 {
@@ -51,10 +70,17 @@ void PointShadowGenGS(triangle float4 InPos[3] : SV_Position, inout TriangleStre
 ///////////////////////////////////////////////////////////////////
 // Cascaded shadow maps generation
 ///////////////////////////////////////////////////////////////////
-cbuffer cbuffercbShadowMapCubeGS : register(b0)
+struct VSVertexPositionNormalTexture
 {
-    float4x4 CascadeViewProj[3] : packoffset(c0);
+    float3 positionLocal : POSITION;
+    float3 normalLocal : NORMAL;
+    float2 tex : TEXCOORD0;
 };
+
+float4 CascadedShadowGenVS(VSVertexPositionNormalTexture input) : SV_Position
+{
+    return float4(input.positionLocal, 1);
+}
 
 [maxvertexcount(9)]
 void CascadedShadowMapsGenGS(triangle float4 InPos[3] : SV_Position, inout TriangleStream<GS_OUTPUT> OutStream)
@@ -98,7 +124,7 @@ technique11 CascadedShadowMapsGen
 {
     pass P0
     {
-        SetVertexShader(NULL);
+        SetVertexShader(CompileShader(vs_5_0, CascadedShadowGenVS()));
         SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
         SetPixelShader(NULL);
     }

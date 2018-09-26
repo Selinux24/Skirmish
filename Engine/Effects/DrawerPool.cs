@@ -97,6 +97,10 @@ namespace Engine.Effects
         /// Point shadows effect
         /// </summary>
         public static EffectShadowPoint EffectShadowPoint { get; private set; }
+        /// <summary>
+        /// Shadows effect
+        /// </summary>
+        public static EffectShadow EffectShadow { get; private set; }
 
         /// <summary>
         /// Blur effect
@@ -133,6 +137,7 @@ namespace Engine.Effects
             EffectShadowBasic = CreateEffect<EffectShadowBasic>(graphics, Resources.ShaderShadowBasicFxo, Resources.ShaderShadowBasicFx);
             EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(graphics, Resources.ShaderShadowTerrainFxo, Resources.ShaderShadowTerrainFx);
             EffectShadowPoint = CreateEffect<EffectShadowPoint>(graphics, Resources.ShaderShadowPointFxo, Resources.ShaderShadowPointFx);
+            EffectShadow = CreateEffect<EffectShadow>(graphics, Resources.ShaderShadowFxo, Resources.ShaderShadowFx);
 
             EffectPostBlur = CreateEffect<EffectPostBlur>(graphics, Resources.ShaderPostBlurFxo, Resources.ShaderPostBlurFx);
         }
@@ -248,6 +253,11 @@ namespace Engine.Effects
             {
                 EffectShadowPoint.Dispose();
                 EffectShadowPoint = null;
+            }
+            if (EffectShadow != null)
+            {
+                EffectShadow.Dispose();
+                EffectShadow = null;
             }
 
             if (EffectPostBlur != null)

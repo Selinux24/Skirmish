@@ -232,6 +232,10 @@ namespace Engine
                 {
                     effect = DrawerPool.EffectShadowBasic;
                 }
+                else if (context.ShadowMap is ShadowMapCascade)
+                {
+                    effect = DrawerPool.EffectShadow;
+                }
                 else if (context.ShadowMap is CubicShadowMap)
                 {
                     effect = DrawerPool.EffectShadowPoint;

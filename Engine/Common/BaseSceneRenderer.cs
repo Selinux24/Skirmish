@@ -14,19 +14,23 @@ namespace Engine.Common
         /// <summary>
         /// Shadow map size
         /// </summary>
-        protected const int DirectionalShadowMapSize = 1024 * 2;
+        protected const int DirectionalShadowMapSize = 1024;
         /// <summary>
         /// Maximum number of directional shadow maps
         /// </summary>
-        protected const int MaxDirectionalShadowMaps = 3;
+        protected const int MaxDirectionalShadowMaps = 1;
         /// <summary>
-        /// Maximum number of shadow maps per light
+        /// Maximum number of cascade shadow maps per directional light
         /// </summary>
-        public const int MaxDirectionalSubshadowMaps = 2;
+        public const int MaxDirectionalCascadeShadowMaps = 3;
         /// <summary>
         /// Shadow map sampling distances
         /// </summary>
-        public static float[] DirectionalShadowMapDistances = new[] { 50f, 100f };
+        public static float[] CascadeShadowMapsDistances = new[] { 10f, 25f, 50f };
+        /// <summary>
+        /// Cascade shadow map matrix set
+        /// </summary>
+        protected ShadowMapCascadeSet ShadowMapDirectionalMatrixSet = null;
 
         /// <summary>
         /// Cubic shadow map size
@@ -154,14 +158,23 @@ namespace Engine.Common
         {
             this.Game = game;
 
-            this.ShadowMapperDirectional = new ShadowMap(game,
-                DirectionalShadowMapSize, DirectionalShadowMapSize,
-                MaxDirectionalShadowMaps * MaxDirectionalSubshadowMaps);
+            // Directional shadow mapper
+            this.ShadowMapperDirectional = new ShadowMapCascade(game,
+                DirectionalShadowMapSize,
+                MaxDirectionalCascadeShadowMaps, MaxDirectionalShadowMaps,
+                CascadeShadowMapsDistances);
+            // Cascade shadow mapper matrix set
+            this.ShadowMapDirectionalMatrixSet = new ShadowMapCascadeSet(
+                DirectionalShadowMapSize,
+                1,
+                CascadeShadowMapsDistances);
 
+            // Point shadow mapper
             this.ShadowMapperPoint = new CubicShadowMap(game,
                 CubicShadowMapSize, CubicShadowMapSize,
                 MaxCubicShadows);
 
+            // Spot shadow mapper
             this.ShadowMapperSpot = new ShadowMap(game,
                 SpotShadowMapSize, SpotShadowMapSize,
                 MaxSpotShadows);
@@ -357,7 +370,7 @@ namespace Engine.Common
                         var light = shadowCastingLights[l];
                         light.ShadowMapIndex = -1;
                         light.ShadowMapCount = 0;
-                        light.FromLightVP = new Matrix[Effects.BufferDirectionalLight.MAXSubMaps];
+                        light.FromLightVP = new Matrix[MaxDirectionalCascadeShadowMaps];
 
                         if (assigned < MaxDirectionalShadowMaps)
                         {
@@ -366,35 +379,32 @@ namespace Engine.Common
                                 out Vector3 lightPosition,
                                 out Vector3 lightDirection))
                             {
-                                for (int sm = 0; sm < MaxDirectionalSubshadowMaps; sm++)
+                                float distance = CascadeShadowMapsDistances.Last();
+
+                                var sph = new CullingVolumeSphere(this.DrawContext.EyePosition, distance);
+
+                                var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+
+                                if (doShadows)
                                 {
-                                    float distance = DirectionalShadowMapDistances[sm];
+                                    var fromLightVP = SceneLights.GetCascadeFromLightViewProjection(
+                                        scene.Camera,
+                                        lightDirection,
+                                        this.ShadowMapDirectionalMatrixSet);
 
-                                    var sph = new CullingVolumeSphere(this.DrawContext.EyePosition, distance);
+                                    light.ShadowMapIndex = assigned;
+                                    light.ShadowMapCount++;
+                                    light.FromLightVP = fromLightVP;
 
-                                    var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+                                    var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
 
-                                    if (doShadows)
-                                    {
-                                        var fromLightVP = SceneLights.GetFromLightViewProjection(
-                                            lightPosition,
-                                            this.DrawContext.EyePosition,
-                                            distance);
+                                    shadowMapper.FromLightViewProjectionArray = fromLightVP;
+                                    shadowMapper.Bind(graphics, l * MaxDirectionalCascadeShadowMaps);
 
-                                        light.ShadowMapIndex = assigned;
-                                        light.ShadowMapCount++;
-                                        light.FromLightVP[sm] = fromLightVP;
-
-                                        var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
-
-                                        shadowMapper.FromLightViewProjectionArray[0] = fromLightVP;
-                                        shadowMapper.Bind(graphics, (l * MaxDirectionalSubshadowMaps) + sm);
-
-                                        this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
-                                    }
-
-                                    cullIndex++;
+                                    this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
                                 }
+
+                                cullIndex++;
 
                                 assigned++;
                             }

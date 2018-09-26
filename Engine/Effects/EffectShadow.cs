@@ -64,7 +64,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.cubeViewProj.SetMatrix(value);
+                if (value == null)
+                {
+                    this.cubeViewProj.SetMatrix(new Matrix[6]);
+                }
+                else
+                {
+                    this.cubeViewProj.SetMatrix(value);
+                }
             }
         }
         /// <summary>
@@ -78,7 +85,14 @@ namespace Engine.Effects
             }
             set
             {
-                this.cascadeViewProj.SetMatrix(value);
+                if (value == null)
+                {
+                    this.cascadeViewProj.SetMatrix(new Matrix[3]);
+                }
+                else
+                {
+                    this.cascadeViewProj.SetMatrix(value);
+                }
             }
         }
 
@@ -95,9 +109,9 @@ namespace Engine.Effects
             this.PointShadowGen = this.Effect.GetTechniqueByName("PointShadowGen");
             this.CascadedShadowMapsGen = this.Effect.GetTechniqueByName("CascadedShadowMapsGen");
 
-            this.shadowMat = this.Effect.GetVariableMatrix("shadowMat");
-            this.cubeViewProj = this.Effect.GetVariableMatrix("cubeViewProj");
-            this.cascadeViewProj = this.Effect.GetVariableMatrix("cascadeViewProj");
+            this.shadowMat = this.Effect.GetVariableMatrix("ShadowMat");
+            this.cubeViewProj = this.Effect.GetVariableMatrix("CubeViewProj");
+            this.cascadeViewProj = this.Effect.GetVariableMatrix("CascadeViewProj");
         }
 
         /// <summary>
@@ -112,7 +126,7 @@ namespace Engine.Effects
             bool instanced,
             bool transparent)
         {
-            throw new EngineException();
+            return CascadedShadowMapsGen;
         }
 
         /// <summary>
@@ -124,7 +138,7 @@ namespace Engine.Effects
             EngineShaderResourceView animationPalette,
             uint animationPaletteWidth)
         {
-            
+
         }
         /// <summary>
         /// Update per frame data
@@ -148,7 +162,7 @@ namespace Engine.Effects
             MeshMaterial material,
             uint textureIndex)
         {
-            
+
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -11,20 +13,20 @@ namespace Engine
         /// <summary>
         /// Total cascades
         /// </summary>
-        public readonly int TotalCascades = 3;
+        public readonly int TotalCascades;
 
-        private bool antiFlickerOn = true;
-        private int shadowMapSize = 0;
-        private readonly float cascadeTotalRange = 50;
-        private readonly float[] cascadeRanges = new float[4];
+        private readonly int shadowMapSize;
+        private readonly float cascadeTotalRange;
+        private readonly float[] cascadeRanges;
+        private bool antiFlickerOn;
 
         private Vector3 shadowBoundCenter = Vector3.Zero;
         private float shadowBoundRadius = 0;
-        private Vector3[] cascadeBoundCenter;
-        private float[] cascadeBoundRadius;
+        private readonly Vector3[] cascadeBoundCenter;
+        private readonly float[] cascadeBoundRadius;
 
         private Matrix worldToShadowSpace = Matrix.Identity;
-        private Matrix[] worldToCascadeProj;
+        private readonly Matrix[] worldToCascadeProj;
 
         private Vector4 toCascadeOffsetX = Vector4.Zero;
         private Vector4 toCascadeOffsetY = Vector4.Zero;
@@ -95,24 +97,20 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public ShadowMapCascadeSet()
-        {
-
-        }
-
-        /// <summary>
-        /// Initialize the cascaded matrix set
-        /// </summary>
-        /// <param name="camera">Camera</param>
-        /// <param name="mapSize">Map size</param>
-        public void Init(Camera camera, int mapSize)
+        /// <param name="mapSize">Shadow map size</param>
+        /// <param name="nearClip">Near clipping distance</param>
+        /// <param name="cascades">Cascade far clipping distances</param>
+        public ShadowMapCascadeSet(int mapSize, float nearClip, float[] cascades)
         {
             shadowMapSize = mapSize;
 
-            cascadeRanges[0] = camera.NearPlaneDistance;
-            cascadeRanges[1] = 10;
-            cascadeRanges[2] = 25;
-            cascadeRanges[3] = cascadeTotalRange;
+            TotalCascades = cascades.Length;
+
+            List<float> ranges = new List<float>(cascades);
+            ranges.Insert(0, nearClip);
+            cascadeRanges = ranges.ToArray();
+
+            cascadeTotalRange = ranges.Last();
 
             cascadeBoundCenter = new Vector3[TotalCascades];
             cascadeBoundRadius = new float[TotalCascades];
@@ -125,6 +123,7 @@ namespace Engine
 
             worldToCascadeProj = new Matrix[TotalCascades];
         }
+
         /// <summary>
         /// Updates the matrix set
         /// </summary>
@@ -142,8 +141,8 @@ namespace Engine
 
             // Get the bounds for the shadow space
             ExtractFrustumBoundSphere(camera,
-                cascadeRanges[0],
-                cascadeRanges[3],
+                cascadeRanges.First(),
+                cascadeRanges.Last(),
                 out BoundingSphere boundingSphere);
 
             // Expend the radius to compensate for numerical errors
@@ -297,13 +296,12 @@ namespace Engine
             return worldToShadowSpace;
         }
         /// <summary>
-        /// Gets the world to cascade projection matrix by cascade index
+        /// Gets the world to cascade projection matrix
         /// </summary>
-        /// <param name="i">Cascade index</param>
         /// <returns>Returns the world to cascade projection matrix</returns>
-        public Matrix GetWorldToCascadeProj(int i)
+        public Matrix[] GetWorldToCascadeProj()
         {
-            return worldToCascadeProj[i];
+            return worldToCascadeProj;
         }
         /// <summary>
         /// Gets the cascade X offset

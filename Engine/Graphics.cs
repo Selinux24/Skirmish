@@ -2234,6 +2234,69 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Creates a new multiple render target and his textures
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="mapCount">Number of maps for each depth stencil view</param>
+        /// <param name="arraySize">Render target list size</param>
+        /// <param name="dsv">Depth stencil view</param>
+        /// <param name="srv">Textures</param>
+        internal void CreateShadowMapTextures(int width, int height, int mapCount, int arraySize, out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv)
+        {
+            var depthMap = new Texture2D1(
+                this.device,
+                new Texture2DDescription1()
+                {
+                    Width = width,
+                    Height = height,
+                    MipLevels = 1,
+                    ArraySize = arraySize * mapCount,
+                    Format = Format.R24G8_Typeless,
+                    SampleDescription = new SampleDescription(1, 0),
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.None
+                });
+
+            using (depthMap)
+            {
+                dsv = new EngineDepthStencilView[arraySize];
+                for (int i = 0; i < arraySize; i++)
+                {
+                    var dsDescription = new DepthStencilViewDescription
+                    {
+                        Flags = DepthStencilViewFlags.None,
+                        Format = Format.D24_UNorm_S8_UInt,
+                        Dimension = DepthStencilViewDimension.Texture2DArray,
+                        Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                        {
+                            ArraySize = mapCount,
+                            FirstArraySlice = i,
+                            MipSlice = 0,
+                        },
+                    };
+                    dsv[i] = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
+                }
+
+                var rvDescription = new ShaderResourceViewDescription1
+                {
+                    Format = Format.R24_UNorm_X8_Typeless,
+                    Dimension = ShaderResourceViewDimension.Texture2DArray,
+                    Texture2DArray = new ShaderResourceViewDescription1.Texture2DArrayResource1()
+                    {
+                        MipLevels = 1,
+                        MostDetailedMip = 0,
+                        ArraySize = arraySize,
+                        FirstArraySlice = 0,
+                        PlaneSlice = 0,
+                    },
+                };
+                srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
+            }
+        }
+        /// <summary>
         /// Creates a set of texture and depth stencil view for shadow mapping
         /// </summary>
         /// <param name="width">Width</param>

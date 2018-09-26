@@ -73,10 +73,6 @@ namespace Engine.Effects
         /// Maximum light count
         /// </summary>
         public const int MAX = 3;
-        /// <summary>
-        /// Maximum shadow maps per light
-        /// </summary>
-        public const int MAXSubMaps = 2;
 
         /// <summary>
         /// Diffuse color

@@ -308,12 +308,7 @@ namespace Engine
         {
             cascadeSet.Update(camera, direction);
 
-            return new[]
-            {
-                cascadeSet.GetWorldToCascadeProj(0),
-                cascadeSet.GetWorldToCascadeProj(1),
-                cascadeSet.GetWorldToCascadeProj(2),
-            };
+            return cascadeSet.GetWorldToCascadeProj();
         }
 
         /// <summary>
