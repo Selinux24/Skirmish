@@ -226,21 +226,7 @@ namespace Engine
 
                 instanceCount++;
 
-                IShadowMapDrawer effect = null;
-
-                if (context.ShadowMap is ShadowMap)
-                {
-                    effect = DrawerPool.EffectShadowBasic;
-                }
-                else if (context.ShadowMap is ShadowMapCascade)
-                {
-                    effect = DrawerPool.EffectShadow;
-                }
-                else if (context.ShadowMap is CubicShadowMap)
-                {
-                    effect = DrawerPool.EffectShadowPoint;
-                }
-
+                var effect = context.ShadowMap.GetEffect();
                 if (effect != null)
                 {
                     var graphics = this.Game.Graphics;

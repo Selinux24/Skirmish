@@ -4,6 +4,7 @@ using System;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Effects;
 
     /// <summary>
     /// Shadow map
@@ -45,9 +46,10 @@ namespace Engine
 
             this.Viewports = Helper.CreateArray(cascades.Length, new Viewport(0, 0, size, size, 0, 1.0f));
 
-            game.Graphics.CreateShadowMapTextures(
+            game.Graphics.CreateShadowMapTextureArrays(
                 size, size, mapCount, arraySize,
-                out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv);
+                out EngineDepthStencilView[] dsv,
+                out EngineShaderResourceView srv);
 
             this.DepthMap = dsv;
             this.Texture = srv;
@@ -112,6 +114,14 @@ namespace Engine
                 null, false, Color.Transparent,
                 this.DepthMap[index], true, false,
                 true);
+        }
+        /// <summary>
+        /// Gets the effect to draw this shadow map
+        /// </summary>
+        /// <returns>Returns an effect</returns>
+        public IShadowMapDrawer GetEffect()
+        {
+            return DrawerPool.EffectShadowCascade;
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Engine
         private readonly int shadowMapSize;
         private readonly float cascadeTotalRange;
         private readonly float[] cascadeRanges;
-        private bool antiFlickerOn;
+        private bool antiFlickerOn = true;
 
         private Vector3 shadowBoundCenter = Vector3.Zero;
         private float shadowBoundRadius = 0;

@@ -4,6 +4,7 @@ using System;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Effects;
 
     /// <summary>
     /// Shadow map
@@ -112,6 +113,14 @@ namespace Engine
                 null, false, Color.Transparent,
                 this.DepthMap[index], true, false,
                 true);
+        }
+        /// <summary>
+        /// Gets the effect to draw this shadow map
+        /// </summary>
+        /// <returns>Returns an effect</returns>
+        public IShadowMapDrawer GetEffect()
+        {
+            return DrawerPool.EffectShadowBasic;
         }
     }
 }

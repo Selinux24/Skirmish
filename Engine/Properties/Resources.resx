@@ -262,10 +262,10 @@
   <data name="ShaderDefaultWaterFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\ShaderDefaultWater.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderShadowFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\shadershadow.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderShadowCascadeFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\shadershadowCascade.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderShadowFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\shadershadow.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShaderShadowCascadeFxo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\shadershadowCascade.fxo;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

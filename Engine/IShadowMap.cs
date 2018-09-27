@@ -4,6 +4,7 @@ using System;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Effects;
 
     /// <summary>
     /// Shadow map interface
@@ -25,5 +26,10 @@ namespace Engine
         /// <param name="graphics">Graphics</param>
         /// <param name="index">Array index</param>
         void Bind(Graphics graphics, int index);
+        /// <summary>
+        /// Gets the effect to draw this shadow map
+        /// </summary>
+        /// <returns>Returns an effect</returns>
+        IShadowMapDrawer GetEffect();
     }
 }

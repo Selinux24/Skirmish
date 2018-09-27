@@ -389,17 +389,7 @@ namespace Engine
             {
                 var graphics = this.Game.Graphics;
 
-                IShadowMapDrawer sceneryEffect = null;
-
-                if (context.ShadowMap is ShadowMap)
-                {
-                    sceneryEffect = DrawerPool.EffectShadowBasic;
-                }
-                else if (context.ShadowMap is CubicShadowMap)
-                {
-                    sceneryEffect = DrawerPool.EffectShadowPoint;
-                }
-
+                var sceneryEffect = context.ShadowMap.GetEffect();
                 if (sceneryEffect != null)
                 {
                     sceneryEffect.UpdatePerFrame(Matrix.Identity, context);

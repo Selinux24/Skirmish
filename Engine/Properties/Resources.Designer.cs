@@ -483,6 +483,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        internal static byte[] ShaderShadowCascadeFx {
+            get {
+                object obj = ResourceManager.GetObject("ShaderShadowCascadeFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] ShaderShadowCascadeFxo {
+            get {
+                object obj = ResourceManager.GetObject("ShaderShadowCascadeFxo", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         internal static byte[] ShaderShadowFoliageFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderShadowFoliageFx", resourceCulture);
@@ -496,26 +516,6 @@ namespace Engine.Properties {
         internal static byte[] ShaderShadowFoliageFxo {
             get {
                 object obj = ResourceManager.GetObject("ShaderShadowFoliageFxo", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] ShaderShadowFx {
-            get {
-                object obj = ResourceManager.GetObject("ShaderShadowFx", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] ShaderShadowFxo {
-            get {
-                object obj = ResourceManager.GetObject("ShaderShadowFxo", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -98,9 +98,9 @@ namespace Engine.Effects
         /// </summary>
         public static EffectShadowPoint EffectShadowPoint { get; private set; }
         /// <summary>
-        /// Shadows effect
+        /// Cascade shadows effect
         /// </summary>
-        public static EffectShadow EffectShadow { get; private set; }
+        public static EffectShadowCascade EffectShadowCascade { get; private set; }
 
         /// <summary>
         /// Blur effect
@@ -137,7 +137,7 @@ namespace Engine.Effects
             EffectShadowBasic = CreateEffect<EffectShadowBasic>(graphics, Resources.ShaderShadowBasicFxo, Resources.ShaderShadowBasicFx);
             EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(graphics, Resources.ShaderShadowTerrainFxo, Resources.ShaderShadowTerrainFx);
             EffectShadowPoint = CreateEffect<EffectShadowPoint>(graphics, Resources.ShaderShadowPointFxo, Resources.ShaderShadowPointFx);
-            EffectShadow = CreateEffect<EffectShadow>(graphics, Resources.ShaderShadowFxo, Resources.ShaderShadowFx);
+            EffectShadowCascade = CreateEffect<EffectShadowCascade>(graphics, Resources.ShaderShadowCascadeFxo, Resources.ShaderShadowCascadeFx);
 
             EffectPostBlur = CreateEffect<EffectPostBlur>(graphics, Resources.ShaderPostBlurFxo, Resources.ShaderPostBlurFx);
         }
@@ -254,10 +254,10 @@ namespace Engine.Effects
                 EffectShadowPoint.Dispose();
                 EffectShadowPoint = null;
             }
-            if (EffectShadow != null)
+            if (EffectShadowCascade != null)
             {
-                EffectShadow.Dispose();
-                EffectShadow = null;
+                EffectShadowCascade.Dispose();
+                EffectShadowCascade = null;
             }
 
             if (EffectPostBlur != null)
@@ -315,6 +315,8 @@ namespace Engine.Effects
             EffectDeferredComposer.UpdateGlobals(
                 materialPalette, materialPaletteWidth,
                 GameEnvironment.LODDistanceHigh, GameEnvironment.LODDistanceMedium, GameEnvironment.LODDistanceLow);
+
+            EffectShadowCascade.UpdateGlobals(animationPalette, animationPaletteWidth);
 
             EffectShadowBasic.UpdateGlobals(animationPalette, animationPaletteWidth);
 

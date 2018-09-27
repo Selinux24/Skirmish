@@ -14,7 +14,7 @@ namespace Engine.Common
         /// <summary>
         /// Shadow map size
         /// </summary>
-        protected const int DirectionalShadowMapSize = 1024;
+        protected const int DirectionalShadowMapSize = 1024 * 4;
         /// <summary>
         /// Maximum number of directional shadow maps
         /// </summary>
@@ -387,10 +387,9 @@ namespace Engine.Common
 
                                 if (doShadows)
                                 {
-                                    var fromLightVP = SceneLights.GetCascadeFromLightViewProjection(
-                                        scene.Camera,
-                                        lightDirection,
-                                        this.ShadowMapDirectionalMatrixSet);
+                                    this.ShadowMapDirectionalMatrixSet.Update(scene.Camera, lightDirection);
+
+                                    var fromLightVP = this.ShadowMapDirectionalMatrixSet.GetWorldToCascadeProj();
 
                                     light.ShadowMapIndex = assigned;
                                     light.ShadowMapCount++;
