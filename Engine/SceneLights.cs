@@ -575,35 +575,5 @@ namespace Engine
 
             return Color4.White;
         }
-        /// <summary>
-        /// Gets light position and direction for shadow casting directional lights
-        /// </summary>
-        /// <param name="light">Light</param>
-        /// <param name="lightPosition">Light position</param>
-        /// <param name="lightDirection">Light direction</param>
-        /// <remarks>Returns true if the light has valid parameters</remarks>
-        public bool GetDirectionalLightShadowParams(ISceneLightDirectional light, out Vector3 lightPosition, out Vector3 lightDirection)
-        {
-            lightPosition = Vector3.Zero;
-            lightDirection = Vector3.Zero;
-
-            if (light is SceneLightDirectional lightDir)
-            {
-                // Calc light position outside the scene volume
-                lightPosition = lightDir.GetPosition(this.FarLightsDistance);
-                lightDirection = lightDir.Direction;
-
-                return true;
-            }
-            else if (light is SceneLightSpot lightSpot)
-            {
-                lightPosition = lightSpot.Position;
-                lightDirection = lightSpot.Direction;
-
-                return true;
-            }
-
-            return false;
-        }
     }
 }
