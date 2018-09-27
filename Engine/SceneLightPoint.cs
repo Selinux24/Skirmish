@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Point light
     /// </summary>
-    public class SceneLightPoint : SceneLight, ISceneLightOmnidirectional
+    public class SceneLightPoint : SceneLight, ISceneLightPoint
     {
         /// <summary>
         /// Initial transform
@@ -137,15 +137,6 @@ namespace Engine
             this.Radius = initialRadius * scale.X;
             this.Intensity = initialIntensity * scale.X;
             this.Position = translation;
-        }
-
-        /// <summary>
-        /// Gets the perspective projection matrix
-        /// </summary>
-        /// <returns>Returns de perspective projection matrix for shadow mapping</returns>
-        public Matrix GetProjection()
-        {
-            return Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, this.Radius + 0.1f);
         }
 
         /// <summary>

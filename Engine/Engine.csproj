@@ -210,7 +210,9 @@
     <Compile Include="Content\ContentDescription.cs" />
     <Compile Include="Content\ILoader.cs" />
     <Compile Include="Content\LoaderOBJ.cs" />
-    <Compile Include="CubicShadowMap.cs" />
+    <Compile Include="ISceneLight.cs" />
+    <Compile Include="ISceneLightSpot.cs" />
+    <Compile Include="ShadowMapPoint.cs" />
     <Compile Include="CullingVolumeCamera.cs" />
     <Compile Include="CullingVolumeAABB.cs" />
     <Compile Include="CullingVolumeSphere.cs" />
@@ -248,7 +250,7 @@
     <Compile Include="IParticleSystem.cs" />
     <Compile Include="IRayIntersectable.cs" />
     <Compile Include="ISceneLightDirectional.cs" />
-    <Compile Include="ISceneLightOmnidirectional.cs" />
+    <Compile Include="ISceneLightPoint.cs" />
     <Compile Include="IShadowMap.cs" />
     <Compile Include="ITransformable2D.cs" />
     <Compile Include="ITransformable3D.cs" />
@@ -562,7 +564,7 @@
     <Compile Include="PathFinding\PathFindingPath.cs" />
     <Compile Include="PathFinding\AStar\AStarQuery.cs" />
     <Compile Include="PathFinding\AStar\AStarQueryData.cs" />
-    <Compile Include="ShadowMap.cs" />
+    <Compile Include="ShadowMapSpot.cs" />
     <Compile Include="SpriteButton.cs" />
     <Compile Include="Terrain.cs" />
     <Compile Include="GroundDescription.cs" />

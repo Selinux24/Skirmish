@@ -9,7 +9,7 @@ namespace Engine
     /// <summary>
     /// Shadow map
     /// </summary>
-    public class ShadowMap : IShadowMap
+    public class ShadowMapSpot : IShadowMap
     {
         /// <summary>
         /// Game instance
@@ -40,7 +40,7 @@ namespace Engine
         /// <param name="width">With</param>
         /// <param name="height">Height</param>
         /// <param name="arraySize">Array size</param>
-        public ShadowMap(Game game, int width, int height, int arraySize)
+        public ShadowMapSpot(Game game, int width, int height, int arraySize)
         {
             this.Game = game;
 
@@ -58,7 +58,7 @@ namespace Engine
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowMap()
+        ~ShadowMapSpot()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -98,6 +98,21 @@ namespace Engine
             }
         }
 
+        /// <summary>
+        /// Updates the from light view projection
+        /// </summary>
+        public void UpdateFromLightViewProjection(Camera camera, ISceneLight light)
+        {
+            if (light is ISceneLightSpot lightSpot)
+            {
+                var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 1f, lightSpot.Radius);
+
+                // View from light to scene center position
+                var view = Matrix.LookAtLH(lightSpot.Position, lightSpot.Position + lightSpot.Direction, Vector3.Up);
+
+                FromLightViewProjectionArray = new[] { view * projection };
+            }
+        }
         /// <summary>
         /// Binds the shadow map data to graphics
         /// </summary>

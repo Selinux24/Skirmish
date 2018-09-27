@@ -234,7 +234,7 @@ namespace Engine.Effects
             this.CastShadow = light.CastShadow ? 1 : 0;
             this.MapIndex = light.ShadowMapIndex;
 
-            var perspectiveMatrix = light.GetProjection();
+            var perspectiveMatrix = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, this.Radius + 0.1f);
             this.PerspectiveValues = new Vector2(perspectiveMatrix[2, 2], perspectiveMatrix[3, 2]);
 
             this.Pad1 = 1000;

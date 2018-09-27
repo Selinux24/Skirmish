@@ -27,10 +27,6 @@ namespace Engine.Common
         /// Shadow map sampling distances
         /// </summary>
         public static float[] CascadeShadowMapsDistances = new[] { 10f, 25f, 50f };
-        /// <summary>
-        /// Cascade shadow map matrix set
-        /// </summary>
-        protected ShadowMapCascadeSet ShadowMapDirectionalMatrixSet = null;
 
         /// <summary>
         /// Cubic shadow map size
@@ -163,19 +159,14 @@ namespace Engine.Common
                 DirectionalShadowMapSize,
                 MaxDirectionalCascadeShadowMaps, MaxDirectionalShadowMaps,
                 CascadeShadowMapsDistances);
-            // Cascade shadow mapper matrix set
-            this.ShadowMapDirectionalMatrixSet = new ShadowMapCascadeSet(
-                DirectionalShadowMapSize,
-                1,
-                CascadeShadowMapsDistances);
 
             // Point shadow mapper
-            this.ShadowMapperPoint = new CubicShadowMap(game,
+            this.ShadowMapperPoint = new ShadowMapPoint(game,
                 CubicShadowMapSize, CubicShadowMapSize,
                 MaxCubicShadows);
 
             // Spot shadow mapper
-            this.ShadowMapperSpot = new ShadowMap(game,
+            this.ShadowMapperSpot = new ShadowMapSpot(game,
                 SpotShadowMapSize, SpotShadowMapSize,
                 MaxSpotShadows);
 
@@ -374,39 +365,29 @@ namespace Engine.Common
 
                         if (assigned < MaxDirectionalShadowMaps)
                         {
-                            if (scene.Lights.GetDirectionalLightShadowParams(
-                                light,
-                                out Vector3 lightPosition,
-                                out Vector3 lightDirection))
+                            float distance = CascadeShadowMapsDistances.Last();
+
+                            var sph = new CullingVolumeSphere(this.DrawContext.EyePosition, distance);
+
+                            var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+
+                            if (doShadows)
                             {
-                                float distance = CascadeShadowMapsDistances.Last();
+                                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
 
-                                var sph = new CullingVolumeSphere(this.DrawContext.EyePosition, distance);
+                                shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
+                                shadowMapper.Bind(graphics, l * MaxDirectionalCascadeShadowMaps);
 
-                                var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+                                light.ShadowMapIndex = assigned;
+                                light.ShadowMapCount++;
+                                light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
 
-                                if (doShadows)
-                                {
-                                    this.ShadowMapDirectionalMatrixSet.Update(scene.Camera, lightDirection);
-
-                                    var fromLightVP = this.ShadowMapDirectionalMatrixSet.GetWorldToCascadeProj();
-
-                                    light.ShadowMapIndex = assigned;
-                                    light.ShadowMapCount++;
-                                    light.FromLightVP = fromLightVP;
-
-                                    var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
-
-                                    shadowMapper.FromLightViewProjectionArray = fromLightVP;
-                                    shadowMapper.Bind(graphics, l * MaxDirectionalCascadeShadowMaps);
-
-                                    this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
-                                }
-
-                                cullIndex++;
-
-                                assigned++;
+                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
                             }
+
+                            assigned++;
+
+                            cullIndex++;
                         }
                     }
                 }
@@ -446,19 +427,17 @@ namespace Engine.Common
 
                             if (doShadows)
                             {
-                                light.ShadowMapIndex = assigned;
-                                var shadowMapper = this.ShadowMapperPoint;
-                                assigned++;
+                                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperPoint;
 
-                                this.DrawShadowsContext.ShadowMap = shadowMapper;
-
-                                var vpArray = SceneLights.GetFromPointLightViewProjection(light);
-
-                                shadowMapper.FromLightViewProjectionArray = vpArray;
+                                shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
                                 shadowMapper.Bind(graphics, l);
+
+                                light.ShadowMapIndex = assigned;
 
                                 this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
                             }
+
+                            assigned++;
 
                             cullIndex++;
                         }
@@ -502,25 +481,19 @@ namespace Engine.Common
 
                             if (doShadows)
                             {
+                                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperSpot;
+
+                                shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
+                                shadowMapper.Bind(graphics, l);
+
+                                light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
                                 light.ShadowMapIndex = assigned;
                                 light.ShadowMapCount = 1;
-                                var shadowMapper = this.ShadowMapperSpot;
-                                assigned++;
-
-                                this.DrawShadowsContext.ShadowMap = shadowMapper;
-
-                                var vp = SceneLights.GetFromSpotLightViewProjection(
-                                    light.Position,
-                                    light.Direction,
-                                    light.Radius);
-
-                                light.FromLightVP[0] = vp;
-
-                                shadowMapper.FromLightViewProjectionArray[0] = vp;
-                                shadowMapper.Bind(graphics, l);
 
                                 this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
                             }
+
+                            assigned++;
 
                             cullIndex++;
                         }

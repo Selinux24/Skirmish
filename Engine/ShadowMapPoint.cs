@@ -9,7 +9,7 @@ namespace Engine
     /// <summary>
     /// Cubic shadow map
     /// </summary>
-    public class CubicShadowMap : IShadowMap
+    public class ShadowMapPoint : IShadowMap
     {
         /// <summary>
         /// Game instance
@@ -34,13 +34,47 @@ namespace Engine
         public Matrix[] FromLightViewProjectionArray { get; set; }
 
         /// <summary>
+        /// Gets from light view * projection matrix cube
+        /// </summary>
+        /// <param name="lightPosition">Light position</param>
+        /// <param name="radius">Light radius</param>
+        /// <returns>Returns the from light view * projection matrix cube</returns>
+        private static Matrix[] GetFromPointLightViewProjection(ISceneLightPoint light)
+        {
+            // Orthogonal projection from center
+            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 0.1f, light.Radius);
+
+            return new Matrix[]
+            {
+                GetFromPointLightViewProjection(light.Position, Vector3.Right,      Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.Left,       Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.Up,         Vector3.BackwardLH) * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.Down,       Vector3.ForwardLH)  * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.ForwardLH,  Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(light.Position, Vector3.BackwardLH, Vector3.Up)         * projection,
+            };
+        }
+        /// <summary>
+        /// Gets the point light from light view matrix
+        /// </summary>
+        /// <param name="lightPosition">Light position</param>
+        /// <param name="direction">Direction</param>
+        /// <param name="up">Up vector</param>
+        /// <returns>Returns the point light from light view matrix</returns>
+        private static Matrix GetFromPointLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
+        {
+            // View from light to scene center position
+            return Matrix.LookAtLH(lightPosition, lightPosition + direction, up);
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game instance</param>
         /// <param name="width">With</param>
         /// <param name="height">Height</param>
         /// <param name="arraySize">Array size</param>
-        public CubicShadowMap(Game game, int width, int height, int arraySize)
+        public ShadowMapPoint(Game game, int width, int height, int arraySize)
         {
             this.Game = game;
 
@@ -58,7 +92,7 @@ namespace Engine
         /// <summary>
         /// Destructor
         /// </summary>
-        ~CubicShadowMap()
+        ~ShadowMapPoint()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -98,6 +132,16 @@ namespace Engine
             }
         }
 
+        /// <summary>
+        /// Updates the from light view projection
+        /// </summary>
+        public void UpdateFromLightViewProjection(Camera camera, ISceneLight light)
+        {
+            if (light is ISceneLightPoint lightPoint)
+            {
+                FromLightViewProjectionArray = GetFromPointLightViewProjection(lightPoint);
+            }
+        }
         /// <summary>
         /// Binds the shadow map data to graphics
         /// </summary>

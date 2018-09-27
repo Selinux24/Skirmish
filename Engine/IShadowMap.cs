@@ -21,6 +21,10 @@ namespace Engine
         Matrix[] FromLightViewProjectionArray { get; set; }
 
         /// <summary>
+        /// Updates the from light view projection
+        /// </summary>
+        void UpdateFromLightViewProjection(Camera camera, ISceneLight light);
+        /// <summary>
         /// Binds the shadow map data to graphics
         /// </summary>
         /// <param name="graphics">Graphics</param>

@@ -3,14 +3,22 @@
 namespace Engine
 {
     /// <summary>
-    /// Directional light
+    /// Spot light
     /// </summary>
-    public interface ISceneLightDirectional : ISceneLight
+    public interface ISceneLightSpot : ISceneLight
     {
+        /// <summary>
+        /// Position
+        /// </summary>
+        Vector3 Position { get; }
         /// <summary>
         /// Light direction
         /// </summary>
         Vector3 Direction { get; }
+        /// <summary>
+        /// Light radius
+        /// </summary>
+        float Radius { get; }
 
         /// <summary>
         /// Shadow map index

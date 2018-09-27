@@ -34,10 +34,6 @@ namespace Engine
         #endregion
 
         /// <summary>
-        /// Hemispheric ambient light
-        /// </summary>
-        private SceneLightHemispheric hemisphericLigth = null;
-        /// <summary>
         /// Directional lights
         /// </summary>
         private readonly List<SceneLightDirectional> directionalLights = new List<SceneLightDirectional>();
@@ -57,17 +53,7 @@ namespace Engine
         /// <summary>
         /// Gets or sets the hemispheric ambient light
         /// </summary>
-        public SceneLightHemispheric HemisphericLigth
-        {
-            get
-            {
-                return this.hemisphericLigth;
-            }
-            set
-            {
-                this.hemisphericLigth = value;
-            }
-        }
+        public SceneLightHemispheric HemisphericLigth { get; set; }
         /// <summary>
         /// Gets or sets directional lights
         /// </summary>
@@ -223,82 +209,6 @@ namespace Engine
         public Color4 SunColor { get; set; }
 
         /// <summary>
-        /// Gets from light view * projection matrix
-        /// </summary>
-        /// <param name="lightPosition">Light position</param>
-        /// <param name="eyePosition">Eye position</param>
-        /// <param name="shadowDistance">Shadows visible distance</param>
-        /// <returns>Returns the from light view * projection matrix</returns>
-        public static Matrix GetFromLightViewProjection(Vector3 lightPosition, Vector3 eyePosition, float shadowDistance)
-        {
-            // View from light to scene center position
-            var view = Matrix.LookAtLH(lightPosition, eyePosition, Vector3.Up);
-
-            // Transform bounding sphere to light space.
-            Vector3 sphereCenterLS = Vector3.TransformCoordinate(eyePosition, view);
-
-            // Ortho frustum in light space encloses scene.
-            float xleft = sphereCenterLS.X - shadowDistance;
-            float xright = sphereCenterLS.X + shadowDistance;
-            float ybottom = sphereCenterLS.Y - shadowDistance;
-            float ytop = sphereCenterLS.Y + shadowDistance;
-            float znear = sphereCenterLS.Z - shadowDistance;
-            float zfar = sphereCenterLS.Z + shadowDistance;
-
-            // Orthogonal projection from center
-            var projection = Matrix.OrthoOffCenterLH(xleft, xright, ybottom, ytop, znear, zfar);
-
-            return view * projection;
-        }
-        /// <summary>
-        /// Gets from light view * projection matrix cube
-        /// </summary>
-        /// <param name="lightPosition">Light position</param>
-        /// <param name="radius">Light radius</param>
-        /// <returns>Returns the from light view * projection matrix cube</returns>
-        public static Matrix[] GetFromPointLightViewProjection(ISceneLightOmnidirectional light)
-        {
-            // Orthogonal projection from center
-            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 0.1f, light.Radius);
-
-            return new Matrix[]
-            {
-                GetFromPointLightViewProjection(light.Position, Vector3.Right,      Vector3.Up)         * projection,
-                GetFromPointLightViewProjection(light.Position, Vector3.Left,       Vector3.Up)         * projection,
-                GetFromPointLightViewProjection(light.Position, Vector3.Up,         Vector3.BackwardLH) * projection,
-                GetFromPointLightViewProjection(light.Position, Vector3.Down,       Vector3.ForwardLH)  * projection,
-                GetFromPointLightViewProjection(light.Position, Vector3.ForwardLH,  Vector3.Up)         * projection,
-                GetFromPointLightViewProjection(light.Position, Vector3.BackwardLH, Vector3.Up)         * projection,
-            };
-        }
-        /// <summary>
-        /// Gets the point light from light view matrix
-        /// </summary>
-        /// <param name="lightPosition">Light position</param>
-        /// <param name="direction">Direction</param>
-        /// <param name="up">Up vector</param>
-        /// <returns>Returns the point light from light view matrix</returns>
-        public static Matrix GetFromPointLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
-        {
-            // View from light to scene center position
-            return Matrix.LookAtLH(lightPosition, lightPosition + direction, up);
-        }
-        /// <summary>
-        /// Gets the spot light from light view matrix
-        /// </summary>
-        /// <param name="lightPosition">Light position</param>
-        /// <param name="direction">Direction</param>
-        /// <param name="radius">Radius</param>
-        /// <returns>Returns the spot light from light view matrix</returns>
-        public static Matrix GetFromSpotLightViewProjection(Vector3 lightPosition, Vector3 direction, float radius)
-        {
-            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 1f, radius);
-
-            // View from light to scene center position
-            return Matrix.LookAtLH(lightPosition, lightPosition + direction, Vector3.Up) * projection;
-        }
-
-        /// <summary>
         /// Constructor
         /// </summary>
         public SceneLights()
@@ -328,7 +238,7 @@ namespace Engine
         /// <param name="hemiLight">Hemispheric light</param>
         public void SetAmbient(SceneLightHemispheric hemiLight)
         {
-            this.hemisphericLigth = hemiLight;
+            this.HemisphericLigth = hemiLight;
         }
         /// <summary>
         /// Adds the specified new light to colection
@@ -508,7 +418,7 @@ namespace Engine
         /// <returns>Returns the visible hemispheric light</returns>
         public SceneLightHemispheric GetVisibleHemisphericLight()
         {
-            return this.hemisphericLigth != null && this.hemisphericLigth.Enabled ? this.hemisphericLigth : null;
+            return this.HemisphericLigth != null && this.HemisphericLigth.Enabled ? this.HemisphericLigth : null;
         }
         /// <summary>
         /// Gets the visible directional lights
@@ -560,7 +470,7 @@ namespace Engine
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public ISceneLightOmnidirectional[] GetPointShadowCastingLights(Vector3 eyePosition)
+        public ISceneLightPoint[] GetPointShadowCastingLights(Vector3 eyePosition)
         {
             return this.visibleLights
                 .Where(l => l.CastShadow && l is SceneLightPoint)
@@ -573,11 +483,11 @@ namespace Engine
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public SceneLightSpot[] GetSpotShadowCastingLights(Vector3 eyePosition)
+        public ISceneLightSpot[] GetSpotShadowCastingLights(Vector3 eyePosition)
         {
             return this.visibleLights
-                .Where(l => l.CastShadow && l is SceneLightSpot)
-                .Select(l => (SceneLightSpot)l)
+                .Where(l => l.CastShadow && l is ISceneLightSpot)
+                .Select(l => (ISceneLightSpot)l)
                 .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
                 .ToArray();
         }

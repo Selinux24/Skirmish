@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Spot light
     /// </summary>
-    public class SceneLightSpot : SceneLight, ISceneLightDirectional
+    public class SceneLightSpot : SceneLight, ISceneLightSpot
     {
         /// <summary>
         /// Initial transform

@@ -23,6 +23,10 @@ namespace Engine
         /// Depth map
         /// </summary>
         protected EngineDepthStencilView[] DepthMap { get; set; }
+        /// <summary>
+        /// Cascade matrix set
+        /// </summary>
+        protected ShadowMapCascadeSet MatrixSet { get; set; }
 
         /// <summary>
         /// Deph map texture
@@ -55,6 +59,8 @@ namespace Engine
             this.Texture = srv;
 
             this.FromLightViewProjectionArray = Helper.CreateArray(cascades.Length, Matrix.Identity);
+
+            this.MatrixSet = new ShadowMapCascadeSet(size, 1, cascades);
         }
         /// <summary>
         /// Destructor
@@ -99,6 +105,18 @@ namespace Engine
             }
         }
 
+        /// <summary>
+        /// Updates the from light view projection
+        /// </summary>
+        public void UpdateFromLightViewProjection(Camera camera, ISceneLight light)
+        {
+            if (light is ISceneLightDirectional lightDirectional)
+            {
+                this.MatrixSet.Update(camera, lightDirectional.Direction);
+
+                this.FromLightViewProjectionArray = this.MatrixSet.GetWorldToCascadeProj();
+            }
+        }
         /// <summary>
         /// Binds the shadow map data to graphics
         /// </summary>
