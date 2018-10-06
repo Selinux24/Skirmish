@@ -431,8 +431,6 @@ namespace Engine
                 var eyePosition = volume.Position;
 
                 distance = Vector3.DistanceSquared(this.Manipulator.Position, eyePosition);
-
-                this.SetLOD(eyePosition);
             }
 
             return cull;
@@ -441,7 +439,7 @@ namespace Engine
         /// Set level of detail values
         /// </summary>
         /// <param name="origin">Origin point</param>
-        private void SetLOD(Vector3 origin)
+        public void SetLOD(Vector3 origin)
         {
             var position = Vector3.TransformCoordinate(this.coarseBoundingSphere.Center, this.Manipulator.LocalTransform);
             var radius = this.coarseBoundingSphere.Radius * this.Manipulator.AveragingScale;

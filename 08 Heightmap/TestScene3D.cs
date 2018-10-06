@@ -232,7 +232,7 @@ namespace Heightmap
                     ModelContentFilename = @"boulder.xml",
                 }
             };
-            this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsageEnum.CoarsePathFinding, layerObjects);
+            this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsageEnum.None, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -254,7 +254,7 @@ namespace Heightmap
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsageEnum.CoarsePathFinding, layerTerrain);
+            this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsageEnum.None, layerTerrain);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -265,7 +265,7 @@ namespace Heightmap
             sw.Restart();
             var tree2Desc = new ModelInstancedDescription()
             {
-                Name = "Trees",
+                Name = "Trees2",
                 CastShadow = true,
                 Static = true,
                 Instances = 200,
@@ -276,7 +276,7 @@ namespace Heightmap
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            this.trees2 = this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsageEnum.CoarsePathFinding, layerTerrain);
+            this.trees2 = this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsageEnum.None, layerTerrain);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -339,7 +339,7 @@ namespace Heightmap
                     ModelContentFilename = @"m24.xml",
                 },
             };
-            this.helicopterI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.FullPathFinding, layerObjects);
+            this.helicopterI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.None, layerObjects);
             for (int i = 0; i < this.helicopterI.Count; i++)
             {
                 this.Lights.AddRange(this.helicopterI.Instance[i].Lights);
@@ -364,7 +364,7 @@ namespace Heightmap
                     ModelContentFilename = @"Bradley.xml",
                 }
             };
-            this.bradleyI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.FullPathFinding, layerObjects);
+            this.bradleyI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.None, layerObjects);
             for (int i = 0; i < this.bradleyI.Count; i++)
             {
                 this.Lights.AddRange(this.bradleyI.Instance[i].Lights);
@@ -388,7 +388,7 @@ namespace Heightmap
                     ModelContentFilename = @"Watch Tower.xml",
                 }
             };
-            this.watchTower = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.FullPathFinding, layerObjects);
+            this.watchTower = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -409,7 +409,7 @@ namespace Heightmap
                     ModelContentFilename = @"torch.xml",
                 }
             };
-            this.torchs = this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsageEnum.CoarsePathFinding, layerObjects);
+            this.torchs = this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsageEnum.None, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -485,7 +485,7 @@ namespace Heightmap
                     HeightmapDescription = hDesc,
                 }
             };
-            this.terrain = this.AddComponent<Terrain>(gDesc, SceneObjectUsageEnum.Ground, layerTerrain);
+            this.terrain = this.AddComponent<Terrain>(gDesc, SceneObjectUsageEnum.None, layerTerrain);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);

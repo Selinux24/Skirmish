@@ -26,10 +26,6 @@ namespace Engine
         /// </summary>
         private ModelInstance[] instancesTmp = null;
         /// <summary>
-        /// Instances
-        /// </summary>
-        private readonly int instanceCount = 0;
-        /// <summary>
         /// Write instancing data to graphics flag
         /// </summary>
         private bool hasDataToWrite = false;
@@ -58,13 +54,7 @@ namespace Engine
         /// <summary>
         /// Maximum number of instances
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return this.instanceCount;
-            }
-        }
+        public int Count { get; } = 0;
         /// <summary>
         /// Gets or sets the maximum number of instances to draw
         /// </summary>
@@ -80,10 +70,10 @@ namespace Engine
         {
             if (description.Instances <= 0) throw new ArgumentException(string.Format("Instances parameter must be more than 0: {0}", instances));
 
-            this.instanceCount = description.Instances;
+            this.Count = description.Instances;
 
-            this.instances = Helper.CreateArray(this.instanceCount, () => new ModelInstance(this));
-            this.instancingData = new VertexInstancingData[this.instanceCount];
+            this.instances = Helper.CreateArray(this.Count, () => new ModelInstance(this));
+            this.instancingData = new VertexInstancingData[this.Count];
 
             this.MaximumCount = -1;
         }
@@ -98,12 +88,14 @@ namespace Engine
             {
                 Array.ForEach(this.instances, i =>
                 {
-                    if (i.Active) i.Update(context);
+                    if (i.Active)
+                    {
+                        i.Update(context);
+                        i.SetLOD(context.EyePosition);
+                    }
                 });
 
                 this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && i.LevelOfDetail != LevelOfDetailEnum.None);
-
-                this.SortInstances(context.EyePosition);
             }
 
             #region Update instancing data
@@ -111,6 +103,8 @@ namespace Engine
             //Process only visible instances
             if (this.instancesTmp != null && this.instancesTmp.Length > 0)
             {
+                this.SortInstances(context.EyePosition);
+
                 LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;
                 DrawingData drawingData = null;
                 int instanceIndex = 0;
@@ -432,7 +426,7 @@ namespace Engine
         {
             List<T> res = new List<T>();
 
-            for (int i = 0; i < this.instanceCount; i++)
+            for (int i = 0; i < this.Count; i++)
             {
                 if (this.instances[i].Visible && this.instances[i] is T)
                 {
