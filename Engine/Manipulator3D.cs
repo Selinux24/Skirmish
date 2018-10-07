@@ -576,11 +576,11 @@ namespace Engine
             {
                 Vector3 axis = Vector3.Cross(Vector3.Up, normal);
 
-                this.SetRotation(Quaternion.RotationAxis(axis, angle));
+                this.SetRotation(Quaternion.RotationAxis(axis, angle) * this.rotation);
             }
             else
             {
-                this.SetRotation(Quaternion.RotationAxis(Vector3.Left, 0f));
+                this.SetRotation(Quaternion.RotationAxis(Vector3.Left, 0f) * this.rotation);
             }
         }
 

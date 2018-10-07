@@ -84,6 +84,7 @@ namespace Heightmap
         private SceneObject<ModelInstanced> helicopterI = null;
         private SceneObject<ModelInstanced> bradleyI = null;
         private SceneObject<Model> watchTower = null;
+        private SceneObject<ModelInstanced> containers = null;
 
         private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
@@ -124,6 +125,7 @@ namespace Heightmap
             var taskM24 = InitializeM24();
             var taskBradley = InitializeBradley();
             var taskWatchTower = InitializeWatchTower();
+            var taskContainers = InitializeContainers();
             var taskTorchs = InitializeTorchs();
             var taskTerrain = InitializeTerrain();
             var taskGardener = InitializeGardener();
@@ -142,6 +144,7 @@ namespace Heightmap
             initDurationDict.Add("M24", taskM24.Result);
             initDurationDict.Add("Bradley", taskBradley.Result);
             initDurationDict.Add("Watch Tower", taskWatchTower.Result);
+            initDurationDict.Add("Containers", taskContainers.Result);
             initDurationDict.Add("Torchs", taskTorchs.Result);
             initDurationDict.Add("Terrain", taskTerrain.Result);
             initDurationDict.Add("Gardener", taskGardener.Result);
@@ -389,6 +392,29 @@ namespace Heightmap
                 }
             };
             this.watchTower = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            sw.Stop();
+
+            return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private Task<double> InitializeContainers()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+
+            sw.Restart();
+            this.containers = this.AddComponent<ModelInstanced>(
+                new ModelInstancedDescription()
+                {
+                    Name = "Container",
+                    CastShadow = true,
+                    Static = true,
+                    SphericVolume = false,
+                    Instances = 5,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = @"Resources/container",
+                        ModelContentFilename = "Container.xml",
+                    }
+                });
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -834,6 +860,40 @@ namespace Heightmap
             }
 
             {
+                #region Containers
+
+                var positions = new[]
+                {
+                    new Vector3(85,0,-000),
+                    new Vector3(75,0,-030),
+                    new Vector3(95,0,-060),
+                    new Vector3(75,0,-090),
+                    new Vector3(65,0,-120),
+                };
+
+                for (int i = 0; i < this.containers.Count; i++)
+                {
+                    var position = positions[i];
+
+                    if (this.FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res))
+                    {
+                        var pos = res.Position;
+                        pos.Y -= 0.5f;
+
+                        this.containers.Instance[i].Manipulator.SetScale(5);
+                        this.containers.Instance[i].Manipulator.SetPosition(pos);
+                        this.containers.Instance[i].Manipulator.SetRotation(MathUtil.Pi / 16f * (i - 2), 0, 0);
+                        this.containers.Instance[i].Manipulator.SetNormal(res.Item.Normal);
+                        this.containers.Instance[i].Manipulator.UpdateInternals(true);
+                    }
+
+                    this.containers.Instance[i].TextureIndex = (uint)i;
+                }
+
+                #endregion
+            }
+
+            {
                 #region Torchs
 
                 if (this.FindTopGroundPosition(15, 15, out PickingResult<Triangle> r))
@@ -950,11 +1010,11 @@ namespace Heightmap
             {
                 var bPositions = new[]
                 {
-                    new Vector3(-100, 220, MathUtil.Pi * -0.1f),
-                    new Vector3(-50, 210, MathUtil.Pi * -0.05f),
+                    new Vector3(-100, 220, MathUtil.Pi * +0.3f),
+                    new Vector3(-50, 210, MathUtil.Pi * +0.15f),
                     new Vector3(0, 200, MathUtil.Pi * 0),
-                    new Vector3(50, 210, MathUtil.Pi * 0.05f),
-                    new Vector3(100, 220, MathUtil.Pi * 0.1f),
+                    new Vector3(50, 210, MathUtil.Pi * -0.15f),
+                    new Vector3(100, 220, MathUtil.Pi * -0.3f),
                 };
 
                 for (int i = 0; i < bPositions.Length; i++)
