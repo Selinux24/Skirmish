@@ -194,6 +194,7 @@
     <None Include="Blender\Scenery\ModularDungeon\green-algae.png" />
     <None Include="Blender\Scenery\ModularDungeon\jewels_d.png" />
     <None Include="Blender\Scenery\ModularDungeon\treasure_d.jpg" />
+    <None Include="Blender\Vehicles\LandSpeeder\LandSpeeder.blend" />
     <None Include="Blender\Weapons\golden_f.jpg" />
     <None Include="Blender\Scenery\ModularDungeon\brick_d.png" />
     <None Include="Blender\Scenery\ModularDungeon\brick_n.png" />
@@ -203,6 +204,7 @@
     <None Include="Blender\Scenery\ModularDungeon\wood_d.jpg" />
     <None Include="Blender\Vehicles\Challenger\challenger.bmp" />
     <None Include="Blender\Vehicles\Bradley\Bradley.jpg" />
+    <None Include="Blender\Vehicles\LandSpeeder\Map.png" />
     <Content Include="Collada\Buildings\Dungeon\BaseMap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -469,6 +471,9 @@
     <Content Include="Collada\Vehicles\Jagdpanther\TURBAKCL.JPG">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Collada\Vehicles\LandSpeeder\Map.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Collada\Vehicles\Leopard\Readme.txt" />
     <Content Include="Collada\Vehicles\M24\m24.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -694,6 +699,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Vehicles\M24\m24.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Vehicles\LandSpeeder\LandSpeeder.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Vehicles\Tank\tank.dae" />
