@@ -1,4 +1,4 @@
-#include "Common.hlsl"
+#include "IncCommon.hlsl"
 
 Texture2D<float> SpotShadowMapTexture : register(t4);
 

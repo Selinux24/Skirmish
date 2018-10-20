@@ -1,5 +1,5 @@
-#include "IncLights.fx"
-#include "IncVertexFormats.fx"
+#include "IncLights.hlsl"
+#include "IncVertexFormats.hlsl"
 
 cbuffer cbGlobals : register(b0)
 {
@@ -96,6 +96,7 @@ float4 PSDirectionalLight(PSLightInput input) : SV_TARGET
 		linput.dirLight = gDirLight;
 		linput.lod = gLOD;
 		linput.shininess = k.Shininess;
+        linput.specular = k.Specular;
 		linput.pPosition = position;
 		linput.pNormal = normal;
 		linput.ePosition = gEyePositionWorld;
@@ -207,7 +208,7 @@ float4 PSCombineLights(PSLightInput input) : SV_TARGET
 		float materialIndex = tg3.w;
 		float4 light = lmap;
 
-		float4 lAmbient = CalcAmbient(gHemiLight.AmbientDown, gHemiLight.AmbientUp, normal);
+		float3 lAmbient = CalcAmbient(gHemiLight.AmbientDown, gHemiLight.AmbientRange, normal);
 
 		Material k = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 

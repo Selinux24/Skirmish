@@ -159,7 +159,7 @@ namespace Engine
             worldToShadowSpace = shadowView * shadowProj;
 
             // For each cascade find the transformation from shadow to cascade space
-            Matrix shadowViewInv = Matrix.Transpose(shadowView);
+            Matrix shadowViewInv = Matrix.Invert(shadowView);
             for (int cascadeIdx = 0; cascadeIdx < TotalCascades; cascadeIdx++)
             {
                 Matrix cascadeTrans;

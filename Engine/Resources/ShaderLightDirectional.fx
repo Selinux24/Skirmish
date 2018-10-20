@@ -1,4 +1,4 @@
-#include "Common.hlsl"
+#include "IncCommon.hlsl"
 
 Texture2DArray<float> CascadeShadowMapTexture : register(t4);
 

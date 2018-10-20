@@ -66,7 +66,7 @@ namespace Engine.Effects
     /// <summary>
     /// Directional light buffer
     /// </summary>
-    [StructLayout(LayoutKind.Explicit, Size = 192)]
+    [StructLayout(LayoutKind.Sequential)]
     public struct BufferDirectionalLight : IBufferData
     {
         /// <summary>
@@ -75,55 +75,27 @@ namespace Engine.Effects
         public const int MAX = 3;
 
         /// <summary>
-        /// Diffuse color
-        /// </summary>
-        [FieldOffset(0)]
-        public Color4 DiffuseColor;
-        /// <summary>
-        /// Specular color
-        /// </summary>
-        [FieldOffset(16)]
-        public Color4 SpecularColor;
-        /// <summary>
         /// Light direction vector
         /// </summary>
-        [FieldOffset(32)]
-        public Vector3 Direction;
+        public Vector3 DirToLight;
         /// <summary>
         /// The light casts shadow
         /// </summary>
-        [FieldOffset(44)]
         public float CastShadow;
         /// <summary>
-        /// First shadow map index
+        /// Diffuse color
         /// </summary>
-        [FieldOffset(48)]
-        public int MapIndex;
-        /// <summary>
-        /// Shadow map count
-        /// </summary>
-        [FieldOffset(52)]
-        public uint MapCount;
-        /// <summary>
-        /// Padding
-        /// </summary>
-        [FieldOffset(56)]
-        public uint Pad1;
-        /// <summary>
-        /// Padding
-        /// </summary>
-        [FieldOffset(60)]
-        public uint Pad2;
+        public Color4 LightColor;
+
+        public Vector4 ToCascadeOffsetX;
+
+        public Vector4 ToCascadeOffsetY;
+
+        public Vector4 ToCascadeScale;
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
-        [FieldOffset(64)]
-        public Matrix FromLightVP1;
-        /// <summary>
-        /// From light view * projection matrix array
-        /// </summary>
-        [FieldOffset(128)]
-        public Matrix FromLightVP2;
+        public Matrix ToShadowSpace;
 
         /// <summary>
         /// Constructor
@@ -131,22 +103,13 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferDirectionalLight(SceneLightDirectional light)
         {
-            this.DiffuseColor = light.DiffuseColor * light.Brightness;
-            this.SpecularColor = light.SpecularColor * light.Brightness;
-            this.Direction = light.Direction;
+            this.DirToLight = -light.Direction;
             this.CastShadow = light.CastShadow ? 1 : 0;
-            this.MapIndex = light.ShadowMapIndex;
-            this.MapCount = light.ShadowMapCount;
-            this.Pad1 = 1001;
-            this.Pad2 = 2002;
-
-            this.FromLightVP1 = Matrix.Identity;
-            this.FromLightVP2 = Matrix.Identity;
-            if (light.FromLightVP != null)
-            {
-                if (light.FromLightVP.Length > 0) this.FromLightVP1 = Matrix.Transpose(light.FromLightVP[0]);
-                if (light.FromLightVP.Length > 1) this.FromLightVP2 = Matrix.Transpose(light.FromLightVP[1]);
-            }
+            this.LightColor = light.DiffuseColor * light.Brightness;
+            this.ToCascadeOffsetX = light.ToCascadeOffsetX;
+            this.ToCascadeOffsetY = light.ToCascadeOffsetY;
+            this.ToCascadeScale = light.ToCascadeScale;
+            this.ToShadowSpace = Matrix.Transpose(light.ToShadowSpace);
         }
 
         /// <summary>

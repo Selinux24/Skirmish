@@ -1,4 +1,4 @@
-#include "Common.hlsl"
+#include "IncCommon.hlsl"
 
 TextureCube<float> PointShadowMapTexture : register(t4);
 

@@ -73,36 +73,6 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] IncLightsFx {
-            get {
-                object obj = ResourceManager.GetObject("IncLightsFx", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] IncScatteringFx {
-            get {
-                object obj = ResourceManager.GetObject("IncScatteringFx", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] IncVertexFormatsFx {
-            get {
-                object obj = ResourceManager.GetObject("IncVertexFormatsFx", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         internal static byte[] ShaderDefaultBasicFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultBasicFx", resourceCulture);

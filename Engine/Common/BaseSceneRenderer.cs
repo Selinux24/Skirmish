@@ -361,7 +361,10 @@ namespace Engine.Common
                         var light = shadowCastingLights[l];
                         light.ShadowMapIndex = -1;
                         light.ShadowMapCount = 0;
-                        light.FromLightVP = new Matrix[MaxDirectionalCascadeShadowMaps];
+                        light.ToShadowSpace = Matrix.Identity;
+                        light.ToCascadeOffsetX = Vector4.Zero;
+                        light.ToCascadeOffsetY = Vector4.Zero;
+                        light.ToCascadeScale = Vector4.Zero;
 
                         if (assigned < MaxDirectionalShadowMaps)
                         {
@@ -380,7 +383,7 @@ namespace Engine.Common
 
                                 light.ShadowMapIndex = assigned;
                                 light.ShadowMapCount++;
-                                light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
+                                //light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
 
                                 this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
                             }

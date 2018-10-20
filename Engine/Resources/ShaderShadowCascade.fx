@@ -1,4 +1,4 @@
-#include "IncVertexFormats.fx"
+#include "IncVertexFormats.hlsl"
 
 cbuffer cbGlobals : register(b0)
 {

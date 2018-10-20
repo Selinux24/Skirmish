@@ -1,4 +1,4 @@
-#include "IncVertexFormats.fx"
+#include "IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {

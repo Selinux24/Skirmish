@@ -1,5 +1,5 @@
-#include "IncHelpers.fx"
-#include "IncMaterials.fx"
+#include "IncHelpers.hlsl"
+#include "IncMaterials.hlsl"
 
 static const int MAX_LIGHTS_DIRECTIONAL = 3;
 static const int MAX_LIGHTS_POINT = 16;
@@ -13,20 +13,18 @@ static const uint SHADOW_SAMPLES_MIN = 1;
 
 struct HemisphericLight
 {
-	float4 AmbientDown;
-	float4 AmbientUp;
+    float3 AmbientDown;
+    float3 AmbientRange;
 };
 struct DirectionalLight
 {
-    float4 Diffuse;
-    float4 Specular;
-    float3 Direction;
+    float3 DirToLight;
     float CastShadow;
-	int MapIndex;
-	uint MapCount;
-	uint Pad1;
-	uint Pad2;
-	float4x4 FromLightVP[MAX_DIRECTIONAL_SUBMAPS];
+    float4 LightColor;
+    float4 ToCascadeOffsetX;
+    float4 ToCascadeOffsetY;
+    float4 ToCascadeScale;
+    float4x4 ToShadowSpace;
 };
 struct PointLight
 {
@@ -149,6 +147,45 @@ inline float CalcShadowFactor(float3 pPosition, int mapIndex, float4x4 fromLight
 
     return (sShadow / float(samples));
 }
+inline float CalcCascadedShadowFactor(float3 position, float4x4 toShadowSpace, float4 toCascadeOffsetX, float4 toCascadeOffsetY, float4 toCascadeScale, Texture2DArray<float> CascadeShadowMapTexture)
+{
+	// Transform the world position to shadow space
+    float4 posShadowSpace = mul(float4(position, 1.0), toShadowSpace);
+
+	// Transform the shadow space position into each cascade position
+    float4 posCascadeSpaceX = (toCascadeOffsetX + posShadowSpace.xxxx) * toCascadeScale;
+    float4 posCascadeSpaceY = (toCascadeOffsetY + posShadowSpace.yyyy) * toCascadeScale;
+
+	// Check which cascade we are in
+    float4 inCascadeX = abs(posCascadeSpaceX) <= 1.0;
+    float4 inCascadeY = abs(posCascadeSpaceY) <= 1.0;
+    float4 inCascade = inCascadeX * inCascadeY;
+
+	// Prepare a mask for the highest quality cascade the position is in
+    float4 bestCascadeMask = inCascade;
+    bestCascadeMask.yzw = (1.0 - bestCascadeMask.x) * bestCascadeMask.yzw;
+    bestCascadeMask.zw = (1.0 - bestCascadeMask.y) * bestCascadeMask.zw;
+    bestCascadeMask.w = (1.0 - bestCascadeMask.z) * bestCascadeMask.w;
+    float bestCascade = dot(bestCascadeMask, float4(0.0, 1.0, 2.0, 3.0));
+
+	// Pick the position in the selected cascade
+    float3 UVD;
+    UVD.x = dot(posCascadeSpaceX, bestCascadeMask);
+    UVD.y = dot(posCascadeSpaceY, bestCascadeMask);
+    UVD.z = posShadowSpace.z;
+
+	// Convert to shadow map UV values
+    UVD.xy = 0.5 * UVD.xy + 0.5;
+    UVD.y = 1.0 - UVD.y;
+
+	// Compute the hardware PCF value
+    float shadow = CascadeShadowMapTexture.SampleCmpLevelZero(PCFSampler, float3(UVD.xy, bestCascade), UVD.z);
+	
+	// set the shadow to one (fully lit) for positions with no cascade coverage
+    shadow = saturate(shadow + 1.0 - any(bestCascadeMask));
+	
+    return shadow;
+}
 
 inline float CalcFogFactor(float distToEye, float fogStart, float fogRange)
 {
@@ -174,13 +211,13 @@ inline float4 SpecularBlinnPhongPass(float4 lSpecular, float lShininess, float3 
     return pow(max(0, dot(reflect(V, N), -L)), lShininess) * lSpecular;
 }
 
-inline float4 CalcAmbient(float4 ambientDown, float4 ambientUp, float3 normal)
+inline float3 CalcAmbient(float3 ambientDown, float3 ambientRange, float3 normal)
 {
 	// Convert from [-1, 1] to [0, 1]
 	float up = normal.y * 0.5 + 0.5;
 
 	// Calculate the ambient value
-    return float4(ambientDown.rgb + up * ambientUp.rgb, 1);
+    return ambientDown + up * ambientRange;
 }
 inline float CalcSphericAttenuation(float intensity, float radius, float distance)
 {
@@ -206,20 +243,20 @@ inline float CalcSpotCone(float3 lightDirection, float spotAngle, float3 L)
     return smoothstep(minCos, maxCos, cosAngle);
 }
 
-inline float4 LightEquation(Material k, float4 lAmbient, float4 lDiffuse, float4 pDiffuse, float4 lSpecular, float4 pSpecular, float dist)
+inline float4 LightEquation(Material k, float3 lAmbient, float4 lDiffuse, float4 pDiffuse, float4 lSpecular, float4 pSpecular)
 {
 	float4 emissive = k.Emissive;
-	float4 ambient = k.Ambient * lAmbient;
+    float4 ambient = k.Ambient * float4(lAmbient, 1);
 
 	float4 diffuse = k.Diffuse * lDiffuse;
-	float4 specular = k.Specular * lSpecular * pSpecular * dist;
+    float4 specular = k.Specular * lSpecular * pSpecular;
 
 	return (emissive + ambient + diffuse + specular) * pDiffuse;
 }
-inline float4 LightEquation(Material k, float4 lAmbient, float4 light, float4 pDiffuse)
+inline float4 LightEquation(Material k, float3 lAmbient, float4 light, float4 pDiffuse)
 {
 	float4 emissive = k.Emissive;
-    float4 ambient = k.Ambient * lAmbient;
+    float4 ambient = k.Ambient * float4(lAmbient, 1);
 
 	return (emissive + ambient + light) * pDiffuse;
 }
@@ -234,6 +271,7 @@ struct ComputeDirectionalLightsInput
 {
     DirectionalLight dirLight;
     float3 lod;
+    float4 specular;
     float shininess;
     float3 pPosition;
     float3 pNormal;
@@ -241,75 +279,99 @@ struct ComputeDirectionalLightsInput
     Texture2DArray<float> shadowMap;
 };
 
-inline ComputeLightsOutput ComputeDirectionalLightLOD1(ComputeDirectionalLightsInput input, float dist)
+inline ComputeLightsOutput ComputeDirectionalLightLOD1(ComputeDirectionalLightsInput input)
 {
-    float3 L = normalize(-input.dirLight.Direction);
+    float3 L = normalize(input.dirLight.DirToLight);
     float3 V = normalize(input.ePosition - input.pPosition);
 
     float cShadowFactor = 1;
     [flatten]
-    if (input.dirLight.CastShadow == 1 && input.dirLight.MapIndex >= 0)
+    if (input.dirLight.CastShadow == 1)
     {
-        cShadowFactor = CalcShadowFactor(input.pPosition, input.dirLight.MapIndex, input.dirLight.MapCount, input.dirLight.FromLightVP, input.shadowMap, SHADOW_SAMPLES_HD);
+        cShadowFactor = CalcCascadedShadowFactor(
+            input.pPosition, 
+            input.dirLight.ToShadowSpace,
+            input.dirLight.ToCascadeOffsetX,
+            input.dirLight.ToCascadeOffsetY,
+            input.dirLight.ToCascadeScale,
+            input.shadowMap);
     }
 
     ComputeLightsOutput output;
 
-    output.diffuse = DiffusePass(input.dirLight.Diffuse, L, input.pNormal) * cShadowFactor;
-    output.specular = SpecularBlinnPhongPass(input.dirLight.Specular, input.shininess, L, input.pNormal, V) * dist * cShadowFactor;
+    output.diffuse = DiffusePass(input.dirLight.LightColor, L, input.pNormal) * cShadowFactor;
+    output.specular = SpecularBlinnPhongPass(input.specular, input.shininess, L, input.pNormal, V) * cShadowFactor;
 
     return output;
 }
 inline ComputeLightsOutput ComputeDirectionalLightLOD2(ComputeDirectionalLightsInput input)
 {
-    float3 L = normalize(-input.dirLight.Direction);
+    float3 L = normalize(input.dirLight.DirToLight);
 
     float cShadowFactor = 1;
     [flatten]
-    if (input.dirLight.CastShadow == 1 && input.dirLight.MapIndex >= 0)
+    if (input.dirLight.CastShadow == 1)
     {
-        cShadowFactor = CalcShadowFactor(input.pPosition, input.dirLight.MapIndex, input.dirLight.MapCount, input.dirLight.FromLightVP, input.shadowMap, SHADOW_SAMPLES_LD);
+        cShadowFactor = CalcCascadedShadowFactor(
+            input.pPosition,
+            input.dirLight.ToShadowSpace,
+            input.dirLight.ToCascadeOffsetX,
+            input.dirLight.ToCascadeOffsetY,
+            input.dirLight.ToCascadeScale,
+            input.shadowMap);
     }
 
     ComputeLightsOutput output;
 
-    output.diffuse = DiffusePass(input.dirLight.Diffuse, L, input.pNormal) * cShadowFactor;
+    output.diffuse = DiffusePass(input.dirLight.LightColor, L, input.pNormal) * cShadowFactor;
     output.specular = 0;
 
     return output;
 }
 inline ComputeLightsOutput ComputeDirectionalLightLOD3(ComputeDirectionalLightsInput input)
 {
-    float3 L = normalize(-input.dirLight.Direction);
+    float3 L = normalize(input.dirLight.DirToLight);
 
     float cShadowFactor = 1;
     [flatten]
-    if (input.dirLight.CastShadow == 1 && input.dirLight.MapIndex >= 0)
+    if (input.dirLight.CastShadow == 1)
     {
-        cShadowFactor = CalcShadowFactor(input.pPosition, input.dirLight.MapIndex, input.dirLight.MapCount, input.dirLight.FromLightVP, input.shadowMap, SHADOW_SAMPLES_MIN);
+        cShadowFactor = CalcCascadedShadowFactor(
+            input.pPosition,
+            input.dirLight.ToShadowSpace,
+            input.dirLight.ToCascadeOffsetX,
+            input.dirLight.ToCascadeOffsetY,
+            input.dirLight.ToCascadeScale,
+            input.shadowMap);
     }
 
     ComputeLightsOutput output;
 
-    output.diffuse = DiffusePass(input.dirLight.Diffuse, L, input.pNormal) * cShadowFactor;
+    output.diffuse = DiffusePass(input.dirLight.LightColor, L, input.pNormal) * cShadowFactor;
     output.specular = 0;
 
     return output;
 }
 inline ComputeLightsOutput ComputeDirectionalLightLOD4(ComputeDirectionalLightsInput input)
 {
-    float3 L = normalize(-input.dirLight.Direction);
+    float3 L = normalize(input.dirLight.DirToLight);
 
     float cShadowFactor = 1;
     [flatten]
-    if (input.dirLight.CastShadow == 1 && input.dirLight.MapIndex >= 0)
+    if (input.dirLight.CastShadow == 1)
     {
-        cShadowFactor = CalcShadowFactor(input.pPosition, input.dirLight.MapIndex, input.dirLight.MapCount, input.dirLight.FromLightVP, input.shadowMap, SHADOW_SAMPLES_MIN);
+        cShadowFactor = CalcCascadedShadowFactor(
+            input.pPosition,
+            input.dirLight.ToShadowSpace,
+            input.dirLight.ToCascadeOffsetX,
+            input.dirLight.ToCascadeOffsetY,
+            input.dirLight.ToCascadeScale,
+            input.shadowMap);
     }
 
     ComputeLightsOutput output;
 
-    output.diffuse = DiffusePass(input.dirLight.Diffuse, L, input.pNormal) * cShadowFactor;
+    output.diffuse = DiffusePass(input.dirLight.LightColor, L, input.pNormal) * cShadowFactor;
     output.specular = 0;
 
     return output;
@@ -320,7 +382,7 @@ inline ComputeLightsOutput ComputeDirectionalLight(ComputeDirectionalLightsInput
 
     if (distToEye < input.lod.x)
     {
-        return ComputeDirectionalLightLOD1(input, 1.0f - (distToEye / input.lod.x));
+        return ComputeDirectionalLightLOD1(input);
     }
     else if (distToEye < input.lod.y)
     {
@@ -520,30 +582,36 @@ struct ComputeLightsInput
     TextureCubeArray<float> shadowMapPoint;
 };
 
-inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
+inline float4 ComputeLightsLOD1(ComputeLightsInput input)
 {
     float4 lDiffuse = 0;
     float4 lSpecular = 0;
 
     float3 V = normalize(input.ePosition - input.pPosition);
 
-	float4 lAmbient = CalcAmbient(input.hemiLight.AmbientDown, input.hemiLight.AmbientUp, input.pNormal);
+	float3 lAmbient = CalcAmbient(input.hemiLight.AmbientDown.rgb, input.hemiLight.AmbientRange.rgb, input.pNormal);
 
     uint i = 0;
 
     for (i = 0; i < input.dirLightsCount; i++)
     {
-        float3 L = normalize(-input.dirLights[i].Direction);
+        float3 L = normalize(input.dirLights[i].DirToLight);
 
         float cShadowFactor = 1;
         [flatten]
-        if (input.dirLights[i].CastShadow == 1 && input.dirLights[i].MapIndex >= 0)
+        if (input.dirLights[i].CastShadow == 1)
         {
-            cShadowFactor = CalcShadowFactor(input.pPosition, input.dirLights[i].MapIndex, input.dirLights[i].MapCount, input.dirLights[i].FromLightVP, input.shadowMapDir, SHADOW_SAMPLES_HD);
+            cShadowFactor = CalcCascadedShadowFactor(
+                input.pPosition,
+                input.dirLights[i].ToShadowSpace,
+                input.dirLights[i].ToCascadeOffsetX,
+                input.dirLights[i].ToCascadeOffsetY,
+                input.dirLights[i].ToCascadeScale,
+                input.shadowMapDir);
         }
 
-        float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal);
-        float4 cSpecular = SpecularBlinnPhongPass(input.dirLights[i].Specular, input.k.Shininess, L, input.pNormal, V);
+        float4 cDiffuse = DiffusePass(input.dirLights[i].LightColor, L, input.pNormal);
+        float4 cSpecular = SpecularBlinnPhongPass(input.k.Specular, input.k.Shininess, L, input.pNormal, V);
 
         lDiffuse += (cDiffuse * cShadowFactor);
         lSpecular += (cSpecular * cShadowFactor);
@@ -596,28 +664,34 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input, float dist)
         lSpecular += (cSpecular * cShadowFactor * attenuation);
     }
 
-	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, lSpecular, input.pColorSpecular, dist);
+	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, lSpecular, input.pColorSpecular);
 }
 inline float4 ComputeLightsLOD2(ComputeLightsInput input)
 {
     float4 lDiffuse = 0;
 
-	float4 lAmbient = CalcAmbient(input.hemiLight.AmbientDown, input.hemiLight.AmbientUp, input.pNormal);
+	float3 lAmbient = CalcAmbient(input.hemiLight.AmbientDown.rgb, input.hemiLight.AmbientRange.rgb, input.pNormal);
 
     uint i = 0;
 
     for (i = 0; i < input.dirLightsCount; i++)
     {
-        float3 L = normalize(-input.dirLights[i].Direction);
+        float3 L = normalize(input.dirLights[i].DirToLight);
 
         float cShadowFactor = 1;
         [flatten]
-        if (input.dirLights[i].CastShadow == 1 && input.dirLights[i].MapIndex >= 0)
+        if (input.dirLights[i].CastShadow == 1)
         {
-            cShadowFactor = CalcShadowFactor(input.pPosition, input.dirLights[i].MapIndex, input.dirLights[i].MapCount, input.dirLights[i].FromLightVP, input.shadowMapDir, SHADOW_SAMPLES_LD);
+            cShadowFactor = CalcCascadedShadowFactor(
+                input.pPosition,
+                input.dirLights[i].ToShadowSpace,
+                input.dirLights[i].ToCascadeOffsetX,
+                input.dirLights[i].ToCascadeOffsetY,
+                input.dirLights[i].ToCascadeScale,
+                input.shadowMapDir);
         }
 
-        float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal);
+        float4 cDiffuse = DiffusePass(input.dirLights[i].LightColor, L, input.pNormal);
 
         lDiffuse += (cDiffuse * cShadowFactor);
     }
@@ -665,59 +739,71 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
         lDiffuse += (cDiffuse * cShadowFactor * attenuation);
     }
 
-	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0, 0);
+	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0);
 }
 inline float4 ComputeLightsLOD3(ComputeLightsInput input)
 {
     float4 lDiffuse = 0;
 
-	float4 lAmbient = CalcAmbient(input.hemiLight.AmbientDown, input.hemiLight.AmbientUp, input.pNormal);
+	float3 lAmbient = CalcAmbient(input.hemiLight.AmbientDown.rgb, input.hemiLight.AmbientRange.rgb, input.pNormal);
 
     uint i = 0;
 
     for (i = 0; i < input.dirLightsCount; i++)
     {
-        float3 L = normalize(-input.dirLights[i].Direction);
+        float3 L = normalize(input.dirLights[i].DirToLight);
 
         float cShadowFactor = 1;
         [flatten]
-        if (input.dirLights[i].CastShadow == 1 && input.dirLights[i].MapIndex >= 0)
+        if (input.dirLights[i].CastShadow == 1)
         {
-            cShadowFactor = CalcShadowFactor(input.pPosition, input.dirLights[i].MapIndex, input.dirLights[i].MapCount, input.dirLights[i].FromLightVP, input.shadowMapDir, SHADOW_SAMPLES_MIN);
+            cShadowFactor = CalcCascadedShadowFactor(
+                input.pPosition,
+                input.dirLights[i].ToShadowSpace,
+                input.dirLights[i].ToCascadeOffsetX,
+                input.dirLights[i].ToCascadeOffsetY,
+                input.dirLights[i].ToCascadeScale,
+                input.shadowMapDir);
         }
 
-        float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal);
+        float4 cDiffuse = DiffusePass(input.dirLights[i].LightColor, L, input.pNormal);
 
         lDiffuse += (cDiffuse * cShadowFactor);
     }
 
-	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0, 0);
+	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0);
 }
 inline float4 ComputeLightsLOD4(ComputeLightsInput input)
 {
     float4 lDiffuse = 0;
 
-	float4 lAmbient = CalcAmbient(input.hemiLight.AmbientDown, input.hemiLight.AmbientUp, input.pNormal);
+	float3 lAmbient = CalcAmbient(input.hemiLight.AmbientDown.rgb, input.hemiLight.AmbientRange.rgb, input.pNormal);
 
     uint i = 0;
 
     for (i = 0; i < input.dirLightsCount; i++)
     {
-        float3 L = normalize(-input.dirLights[i].Direction);
+        float3 L = normalize(input.dirLights[i].DirToLight);
 
         float cShadowFactor = 1;
         [flatten]
-        if (input.dirLights[i].CastShadow == 1 && input.dirLights[i].MapIndex >= 0)
+        if (input.dirLights[i].CastShadow == 1)
         {
-            cShadowFactor = CalcShadowFactor(input.pPosition, input.dirLights[i].MapIndex, input.dirLights[i].MapCount, input.dirLights[i].FromLightVP, input.shadowMapDir, SHADOW_SAMPLES_MIN);
+            cShadowFactor = CalcCascadedShadowFactor(
+                input.pPosition,
+                input.dirLights[i].ToShadowSpace,
+                input.dirLights[i].ToCascadeOffsetX,
+                input.dirLights[i].ToCascadeOffsetY,
+                input.dirLights[i].ToCascadeScale,
+                input.shadowMapDir);
         }
 
-        float4 cDiffuse = DiffusePass(input.dirLights[i].Diffuse, L, input.pNormal);
+        float4 cDiffuse = DiffusePass(input.dirLights[i].LightColor, L, input.pNormal);
 
         lDiffuse += (cDiffuse * cShadowFactor);
     }
 
-	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0, 0);
+	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0);
 }
 inline float4 ComputeLights(ComputeLightsInput input)
 {
@@ -738,7 +824,7 @@ inline float4 ComputeLights(ComputeLightsInput input)
         float4 color = 0;
         if (distToEye < input.lod.x)
         {
-            color = ComputeLightsLOD1(input, 1.0f - (distToEye / input.lod.x));
+            color = ComputeLightsLOD1(input);
         }
         else if (distToEye < input.lod.y)
         {

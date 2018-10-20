@@ -1,5 +1,5 @@
-#include "IncLights.fx"
-#include "IncVertexFormats.fx"
+#include "IncLights.hlsl"
+#include "IncVertexFormats.hlsl"
 
 struct PSVertexBlur
 {

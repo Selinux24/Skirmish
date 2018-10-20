@@ -19,6 +19,12 @@ namespace Engine
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
-        Matrix[] FromLightVP { get; set; }
+        Matrix ToShadowSpace { get; set; }
+
+        Vector4 ToCascadeOffsetX { get; set; }
+
+        Vector4 ToCascadeOffsetY { get; set; }
+
+        Vector4 ToCascadeScale { get; set; }
     }
 }

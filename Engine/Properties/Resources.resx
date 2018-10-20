@@ -121,15 +121,6 @@
   <data name="engine" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\engine.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="IncLightsFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\IncLights.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IncVertexFormatsFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\incvertexformats.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IncScatteringFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\IncScattering.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ShaderNullFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shadernull.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

@@ -1,5 +1,5 @@
-#include "IncLights.fx"
-#include "IncVertexFormats.fx"
+#include "IncLights.hlsl"
+#include "IncVertexFormats.hlsl"
 
 cbuffer cbVSPerFrame : register(b1)
 {
@@ -104,10 +104,10 @@ float3 HeightMapTracing(float3 eyePos, float3 eyeDir, float time)
 // Water lighting
 void GetLightColor(DirectionalLight light, float3 normal, float3 eyeDir, out float3 diffusePass, out float3 specularPass)
 {
-    float3 lightDir = normalize(-light.Direction);
+    float3 lightDir = normalize(-light.DirToLight);
 
-    diffusePass = DiffusePass(light.Diffuse, -lightDir, normal).rgb;
-    specularPass = SpecularBlinnPhongPass(light.Specular, waterShinniness, lightDir, normal, eyeDir).rgb;
+    diffusePass = DiffusePass(light.LightColor, -lightDir, normal).rgb;
+    specularPass = SpecularBlinnPhongPass(0, waterShinniness, lightDir, normal, eyeDir).rgb;
 }
 float3 GetSkyColor(float3 eyeDir)
 {

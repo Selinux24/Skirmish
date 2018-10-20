@@ -1,5 +1,5 @@
-#include "IncLights.fx"
-#include "IncVertexFormats.fx"
+#include "IncLights.hlsl"
+#include "IncVertexFormats.hlsl"
 
 Texture2D gPSAlphaTexture : register(t1);
 Texture2DArray gPSNormalMapArray : register(t5);

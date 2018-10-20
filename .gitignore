@@ -204,3 +204,5 @@ Thumbs.db
 *.sqlite
 *.json
 /.vs
+/.sonarqube
+/SonarQube.cmd

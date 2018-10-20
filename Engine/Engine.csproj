@@ -650,7 +650,7 @@
     <None Include="Resources\ShaderLightSpot.fxo" />
     <None Include="Resources\ShaderPostBlur.fx" />
     <None Include="Resources\ShaderPostBlur.fxo" />
-    <None Include="Resources\IncScattering.fx" />
+    <Content Include="Resources\IncScattering.hlsl" />
     <None Include="Resources\ShaderShadowBillboard.fx" />
     <None Include="Resources\ShaderShadowBillboard.fxo" />
     <None Include="Resources\ShaderShadowCascade.fxo" />
@@ -673,7 +673,7 @@
     <None Include="Resources\ShaderNull.fxo" />
     <None Include="Resources\ShaderDefaultGPUParticles.fxo" />
     <None Include="Resources\ShaderShadowBasic.fx" />
-    <None Include="Resources\IncVertexFormats.fx" />
+    <Content Include="Resources\IncVertexFormats.hlsl" />
     <None Include="Resources\ShaderDefaultBasic.fx" />
     <None Include="Resources\ShaderDefaultBillboard.fx" />
     <None Include="Resources\ShaderDefaultFont.fx" />
@@ -685,15 +685,15 @@
     <None Include="Resources\ShaderDefaultTerrain.fxo" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\IncLights.fx" />
+    <Content Include="Resources\IncLights.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="engine.ico" />
-    <None Include="Resources\IncHelpers.fx" />
+    <Content Include="Resources\IncHelpers.hlsl" />
     <None Include="Resources\ShaderDefaultFoliage.fx" />
     <None Include="Resources\ShaderShadowFoliage.fx" />
     <None Include="Resources\ShaderDefaultWater.fx" />
-    <None Include="Resources\IncMaterials.fx" />
+    <Content Include="Resources\IncMaterials.hlsl" />
     <None Include="Resources\ShaderShadowPoints.fx" />
     <None Include="Resources\ShaderLightDirectional.fx" />
     <None Include="Resources\ShaderLightPoint.fx" />
@@ -701,7 +701,7 @@
     <None Include="Resources\ShaderLightCapsule.fx" />
     <None Include="Resources\ShaderLightEmissive.fx" />
     <Content Include="Resources\ShaderShadowCascade.fx" />
-    <Content Include="Resources\Common.hlsl" />
+    <Content Include="Resources\IncCommon.hlsl" />
     <Content Include="sharpdx_direct3d11_1_effects_x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -719,7 +719,7 @@
     <None Include="Resources\ShaderDefaultSprite.fx" />
     <None Include="Resources\ShaderDefaultTerrain.fx" />
     <None Include="Resources\ShaderDefaultClouds.fx" />
-    <None Include="Resources\IncTerrain.fx" />
+    <Content Include="Resources\IncTerrain.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ContentCollada\ContentCollada.csproj">

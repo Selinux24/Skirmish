@@ -114,6 +114,11 @@ namespace Engine
             {
                 this.MatrixSet.Update(camera, lightDirectional.Direction);
 
+                lightDirectional.ToShadowSpace = this.MatrixSet.GetWorldToShadowSpace();
+                lightDirectional.ToCascadeOffsetX = this.MatrixSet.GetToCascadeOffsetX();
+                lightDirectional.ToCascadeOffsetY = this.MatrixSet.GetToCascadeOffsetY();
+                lightDirectional.ToCascadeScale = this.MatrixSet.GetToCascadeScale();
+
                 this.FromLightViewProjectionArray = this.MatrixSet.GetWorldToCascadeProj();
             }
         }

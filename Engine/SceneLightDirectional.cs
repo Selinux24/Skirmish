@@ -103,7 +103,13 @@ namespace Engine
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
-        public Matrix[] FromLightVP { get; set; }
+        public Matrix ToShadowSpace { get; set; }
+
+        public Vector4 ToCascadeOffsetX { get; set; }
+
+        public Vector4 ToCascadeOffsetY { get; set; }
+
+        public Vector4 ToCascadeScale { get; set; }
 
         /// <summary>
         /// Constructor

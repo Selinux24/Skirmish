@@ -1,6 +1,6 @@
-#include "IncScattering.fx"
-#include "IncLights.fx"
-#include "IncVertexFormats.fx"
+#include "IncScattering.hlsl"
+#include "IncLights.hlsl"
+#include "IncVertexFormats.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
