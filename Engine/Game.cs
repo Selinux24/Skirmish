@@ -30,7 +30,7 @@ namespace Engine
         /// <summary>
         /// Name
         /// </summary>
-        public string Name = null;
+        public string Name { get; set; } = null;
         /// <summary>
         /// Resource manager
         /// </summary>
@@ -76,7 +76,7 @@ namespace Engine
         {
             get
             {
-                return this.scenes.FindAll(s => s.Active == true).Count;
+                return this.scenes.FindAll(s => s.Active).Count;
             }
         }
         /// <summary>
@@ -325,7 +325,6 @@ namespace Engine
                 this.scenes.Remove(scene);
 
                 scene.Dispose();
-                scene = null;
             }
         }
         /// <summary>
@@ -450,7 +449,6 @@ namespace Engine
                 s.Dispose();
             }
             toDispose.Clear();
-            toDispose = null;
 
             this.scenes.Clear();
             this.AddScene(sceneToLoad);
@@ -462,7 +460,7 @@ namespace Engine
 
     public class ShootTakenEventArgs : EventArgs
     {
-        public Dictionary<string, double> Trace = new Dictionary<string, double>();
+        public Dictionary<string, double> Trace { get; set; } = new Dictionary<string, double>();
     }
 
     public delegate void ShootTakenEventHandler(object sender, ShootTakenEventArgs e);

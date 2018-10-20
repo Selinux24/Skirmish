@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Key point on the <see cref="Curve3D"/>.
     /// </summary>
-    public class Curve3DKey : IEquatable<Curve3DKey>, IComparable<Curve3DKey>
+    public sealed class Curve3DKey : IEquatable<Curve3DKey>, IComparable<Curve3DKey>
     {
         /// <summary>
         /// Gets or sets the indicator whether the segment between this point and the next point on the curve is discrete or continuous.
@@ -69,7 +69,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// 
         /// Compares whether two <see cref="CurveKey"/> instances are not equal.
         /// </summary>
         /// <param name="value1"><see cref="CurveKey"/> instance on the left of the not equal sign.</param>
@@ -103,6 +102,46 @@ namespace Engine
                 && (value1.TangentOut == value2.TangentOut)
                 && (value1.Continuity == value2.Continuity);
         }
+        /// <summary>
+        /// Gets wether the left curve is major than the right one
+        /// </summary>
+        /// <param name="left">Left curve</param>
+        /// <param name="right">Right curve</param>
+        /// <returns>Returns wether the left curve is major than the right one</returns>
+        public static bool operator >(Curve3DKey left, Curve3DKey right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+        /// <summary>
+        /// Gets wether the left curve is minor than the right one
+        /// </summary>
+        /// <param name="left">Left curve</param>
+        /// <param name="right">Right curve</param>
+        /// <returns>Returns wether the left curve is minor than the right one</returns>
+        public static bool operator <(Curve3DKey left, Curve3DKey right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+        /// <summary>
+        /// Gets wether the left curve is major than or equal to the right one
+        /// </summary>
+        /// <param name="left">Left curve</param>
+        /// <param name="right">Right curve</param>
+        /// <returns>Returns wether the left curve is major than or equal to the right one</returns>
+        public static bool operator >=(Curve3DKey left, Curve3DKey right)
+        {
+            return left.CompareTo(right) >= 0;
+        }
+        /// <summary>
+        /// Gets wether the left curve is minor than or equal to the right one
+        /// </summary>
+        /// <param name="left">Left curve</param>
+        /// <param name="right">Right curve</param>
+        /// <returns>Returns wether the left curve is minor than or equal to the right one</returns>
+        public static bool operator <=(Curve3DKey left, Curve3DKey right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
 
         /// <summary>
         /// Compares another curve with this instance for equality.
@@ -129,7 +168,7 @@ namespace Engine
         /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public override bool Equals(object obj)
         {
-            return (obj as Curve3DKey) != null && Equals((Curve3DKey)obj);
+            return (obj is Curve3DKey) && Equals((Curve3DKey)obj);
         }
         /// <summary>
         /// Calculates a hash code unique to the contents of this instance.

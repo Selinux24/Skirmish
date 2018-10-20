@@ -14,7 +14,7 @@ namespace Engine
         /// <summary>
         /// Intialization internal flag
         /// </summary>
-        private bool initialized = false;
+        private readonly bool initialized = false;
 
         /// <summary>
         /// Render width

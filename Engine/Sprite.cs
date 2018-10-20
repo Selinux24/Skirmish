@@ -206,12 +206,9 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.BufferManager != null)
-                {
-                    //Remove data from buffer manager
-                    this.BufferManager.RemoveVertexData(this.vertexBuffer);
-                    this.BufferManager.RemoveIndexData(this.indexBuffer);
-                }
+                //Remove data from buffer manager
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
+                this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
         /// <summary>
@@ -229,37 +226,36 @@ namespace Engine
         public override void Draw(DrawContext context)
         {
             var mode = context.DrawerMode;
+            var draw =
+                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled);
 
-            if ((mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
+            if (draw && this.indexBuffer.Count > 0)
             {
-                if (this.indexBuffer.Count > 0)
+                var effect = DrawerPool.EffectDefaultSprite;
+                var technique = effect.GetTechnique(
+                    this.Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
+                    SpriteTextureChannels.All);
+
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+
+                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+
+                effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
+                effect.UpdatePerObject(this.Color, this.spriteTexture, this.TextureIndex);
+
+                var graphics = this.Game.Graphics;
+
+                for (int p = 0; p < technique.PassCount; p++)
                 {
-                    var effect = DrawerPool.EffectDefaultSprite;
-                    var technique = effect.GetTechnique(
-                        this.Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
-                        SpriteTextureChannelsEnum.All);
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-
-                    this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
-
-                    effect.UpdatePerFrame(this.Manipulator.LocalTransform, this.viewProjection);
-                    effect.UpdatePerObject(this.Color, this.spriteTexture, this.TextureIndex);
-
-                    var graphics = this.Game.Graphics;
-
-                    for (int p = 0; p < technique.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(technique, p, 0);
-
-                        graphics.DrawIndexed(
-                            this.indexBuffer.Count,
-                            this.indexBuffer.Offset,
-                            this.vertexBuffer.Offset);
-                    }
+                    graphics.DrawIndexed(
+                        this.indexBuffer.Count,
+                        this.indexBuffer.Offset,
+                        this.vertexBuffer.Offset);
                 }
             }
         }

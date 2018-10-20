@@ -67,51 +67,51 @@ namespace Engine
         /// <summary>
         /// Base color
         /// </summary>
-        public Color BaseColor = new Color(0.1f, 0.19f, 0.22f, 1.0f);
+        public Color BaseColor { get; set; } = new Color(0.1f, 0.19f, 0.22f, 1.0f);
         /// <summary>
         /// Water color
         /// </summary>
-        public Color WaterColor = new Color(0.8f, 0.9f, 0.6f, 1.0f);
+        public Color WaterColor { get; set; } = new Color(0.8f, 0.9f, 0.6f, 1.0f);
         /// <summary>
         /// Wave height
         /// </summary>
         /// <remarks>0.6f by default</remarks>
-        public float WaveHeight = 0.6f;
+        public float WaveHeight { get; set; } = 0.6f;
         /// <summary>
         /// Wave choppy
         /// </summary>
         /// <remarks>4.0f by default</remarks>
-        public float WaveChoppy = 4.0f;
+        public float WaveChoppy { get; set; } = 4.0f;
         /// <summary>
         /// Wave speed
         /// </summary>
         /// <remarks>0.8f by default</remarks>
-        public float WaveSpeed = 0.8f;
+        public float WaveSpeed { get; set; } = 0.8f;
         /// <summary>
         /// Wave frequency
         /// </summary>
         /// <remarks>0.16f by default</remarks>
-        public float WaveFrequency = 0.16f;
+        public float WaveFrequency { get; set; } = 0.16f;
         /// <summary>
         /// Water plane size
         /// </summary>
-        public float PlaneSize = 100f;
+        public float PlaneSize { get; set; } = 100f;
         /// <summary>
         /// Water plane height
         /// </summary>
-        public float PlaneHeight = 0f;
+        public float PlaneHeight { get; set; } = 0f;
         /// <summary>
         /// Number of iterations to obtain the wave height
         /// </summary>
-        public int HeightmapIterations = 8;
+        public int HeightmapIterations { get; set; } = 8;
         /// <summary>
         /// Number of iterations to obtain the wave shape
         /// </summary>
-        public int GeometryIterations = 4;
+        public int GeometryIterations { get; set; } = 4;
         /// <summary>
         /// Number of iterations to obtain the wave color
         /// </summary>
-        public int ColorIterations = 6;
+        public int ColorIterations { get; set; } = 6;
 
         /// <summary>
         /// Constructor

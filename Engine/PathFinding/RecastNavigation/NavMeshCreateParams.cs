@@ -27,7 +27,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The user defined flags assigned to each polygon. [Size: #polyCount]
         /// </summary>
-        public SamplePolyFlags[] polyFlags;
+        public SamplePolyFlagTypes[] polyFlags;
         /// <summary>
         /// The user defined area ids assigned to each polygon. [Size: #polyCount]
         /// </summary>

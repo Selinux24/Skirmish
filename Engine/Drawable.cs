@@ -1,4 +1,5 @@
-﻿namespace Engine
+﻿
+namespace Engine
 {
     using Engine.Common;
 
@@ -21,7 +22,7 @@
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Drawable(Scene scene, SceneObjectDescription description) : base(scene, description)
+        protected Drawable(Scene scene, SceneObjectDescription description) : base(scene, description)
         {
 
         }

@@ -16,10 +16,6 @@ namespace Engine
         /// Frame time
         /// </summary>
         public const float InputTime = 1f / 60f;
-        /// <summary>
-        /// Elapsed time
-        /// </summary>
-        public float Elapsed = 0f;
 
         /// <summary>
         /// Engine render form
@@ -47,10 +43,6 @@ namespace Engine
         /// </summary>
         private int mouseWheel;
         /// <summary>
-        /// Mouse wheel delta of last update
-        /// </summary>
-        private int lastMouseWheel;
-        /// <summary>
         /// Mouse buttons of last update
         /// </summary>
         private readonly List<MouseButtons> lastMouseButtons = new List<MouseButtons>();
@@ -68,6 +60,10 @@ namespace Engine
         private readonly List<Keys> currentKeyboardKeys = new List<Keys>();
 
         /// <summary>
+        /// Elapsed time
+        /// </summary>
+        public float Elapsed { get; set; } = 0f;
+        /// <summary>
         /// Mouse X axis value
         /// </summary>
         public int MouseXDelta { get; private set; }
@@ -78,7 +74,7 @@ namespace Engine
         /// <summary>
         /// Mouse wheel value
         /// </summary>
-        public int MouseWheelDelta { get { return this.lastMouseWheel; } }
+        public int MouseWheelDelta { get; private set; }
         /// <summary>
         /// Absolute Mouse X axis value
         /// </summary>
@@ -327,7 +323,7 @@ namespace Engine
                         #region Mouse Wheel
 
                         {
-                            this.lastMouseWheel = this.mouseWheel;
+                            this.MouseWheelDelta = this.mouseWheel;
                             this.mouseWheel = 0;
                         }
 
@@ -452,7 +448,7 @@ namespace Engine
             #region Mouse Wheel
 
             {
-                this.lastMouseWheel = 0;
+                this.MouseWheelDelta = 0;
                 this.mouseWheel = 0;
             }
 

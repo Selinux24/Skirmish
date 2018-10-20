@@ -2,9 +2,9 @@
 namespace Engine
 {
     /// <summary>
-    /// Font map style enum
+    /// Font map style enumeration
     /// </summary>
-    public enum FontMapStyleEnum
+    public enum FontMapStyles
     {
         /// <summary>
         /// Regular

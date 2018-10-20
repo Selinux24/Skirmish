@@ -8,11 +8,6 @@ namespace Engine
     public abstract class SceneLight
     {
         /// <summary>
-        /// Parent transformation matrix
-        /// </summary>
-        private Matrix parentTransform = Matrix.Identity;
-
-        /// <summary>
         /// Light name
         /// </summary>
         public string Name { get; set; }
@@ -42,11 +37,7 @@ namespace Engine
         /// <summary>
         /// Parent local transform matrix
         /// </summary>
-        public virtual Matrix ParentTransform
-        {
-            get { return parentTransform; }
-            set { parentTransform = value; }
-        }
+        public virtual Matrix ParentTransform { get; set; } = Matrix.Identity;
 
         /// <summary>
         /// Constructor
@@ -63,7 +54,7 @@ namespace Engine
         /// <param name="diffuse">Diffuse color contribution</param>
         /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Lights is enabled</param>
-        public SceneLight(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled)
+        protected SceneLight(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled)
         {
             this.Name = name;
             this.Enabled = enabled;

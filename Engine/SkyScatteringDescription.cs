@@ -87,7 +87,7 @@ namespace Engine
         /// <summary>
         /// Resolution
         /// </summary>
-        public SkyScatteringResolutionEnum Resolution { get; set; }
+        public SkyScatteringResolutions Resolution { get; set; }
 
         /// <summary>
         /// Constructor
@@ -107,7 +107,7 @@ namespace Engine
             this.WaveLength = SunLightWaveLength;
             this.Brightness = EarthSkyBrightness;
             this.HDRExposure = 2.0f;
-            this.Resolution = SkyScatteringResolutionEnum.Low;
+            this.Resolution = SkyScatteringResolutions.Low;
 
             this.Static = true;
             this.CastShadow = false;

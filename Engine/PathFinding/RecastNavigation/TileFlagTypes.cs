@@ -1,10 +1,12 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Tile flags used for various functions and fields.
     /// </summary>
-    public enum TileFlags
+    [Flags]
+    public enum TileFlagTypes
     {
         /// <summary>
         /// The navigation mesh owns the tile memory and is responsible for freeing it.

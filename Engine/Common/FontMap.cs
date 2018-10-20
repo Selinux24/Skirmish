@@ -69,7 +69,7 @@ namespace Engine.Common
         /// <summary>
         /// Font style
         /// </summary>
-        public FontMapStyleEnum Style { get; private set; }
+        public FontMapStyles Style { get; private set; }
         /// <summary>
         /// Font texture
         /// </summary>
@@ -103,7 +103,7 @@ namespace Engine.Common
         /// <param name="size">Size</param>
         /// <param name="bold">Weight</param>
         /// <returns>Returns created font map</returns>
-        public static FontMap Map(Game game, string font, float size, FontMapStyleEnum style)
+        public static FontMap Map(Game game, string font, float size, FontMapStyles style)
         {
             var fMap = gCache.Find(f => f.Font == font && f.Size == size && f.Style == style);
             if (fMap == null)

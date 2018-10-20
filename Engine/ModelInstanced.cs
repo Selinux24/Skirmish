@@ -48,7 +48,7 @@ namespace Engine
         {
             get
             {
-                return Array.FindAll(this.instances, i => i.Visible == true).Length;
+                return Array.FindAll(this.instances, i => i.Visible).Length;
             }
         }
         /// <summary>
@@ -95,7 +95,7 @@ namespace Engine
                     }
                 });
 
-                this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && i.LevelOfDetail != LevelOfDetailEnum.None);
+                this.instancesTmp = Array.FindAll(this.instances, i => i.Visible && i.LevelOfDetail != LevelOfDetail.None);
             }
 
             #region Update instancing data
@@ -105,7 +105,7 @@ namespace Engine
             {
                 this.SortInstances(context.EyePosition);
 
-                LevelOfDetailEnum lastLod = LevelOfDetailEnum.None;
+                LevelOfDetail lastLod = LevelOfDetail.None;
                 DrawingData drawingData = null;
                 int instanceIndex = 0;
 
@@ -195,15 +195,14 @@ namespace Engine
                     if (maxCount > 0)
                     {
                         //Get instances
-                        var instances = this.instancesTmp;
-                        if (instances != null && instances.Length > 0)
+                        var tmp = this.instancesTmp;
+                        if (tmp?.Length > 0)
                         {
                             //Render minimum LOD available
-                            var drawingData = GetFirstDrawingData(LevelOfDetailEnum.Minimum);
+                            var drawingData = GetFirstDrawingData(LevelOfDetail.Minimum);
                             {
-                                var index = Array.IndexOf(this.instancesTmp, instances[0]);
-                                var length = Math.Min(maxCount, instances.Length);
-                                maxCount -= length;
+                                var index = Array.IndexOf(this.instancesTmp, tmp[0]);
+                                var length = Math.Min(maxCount, tmp.Length);
 
                                 if (length > 0)
                                 {
@@ -214,8 +213,6 @@ namespace Engine
                                         foreach (string material in dictionary.Keys)
                                         {
                                             var mesh = dictionary[material];
-
-                                            bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
 
                                             var mat = drawingData.Materials[material];
 
@@ -281,14 +278,14 @@ namespace Engine
                         this.Count;
 
                     //Render by level of detail
-                    for (int l = 1; l < (int)LevelOfDetailEnum.Minimum + 1; l *= 2)
+                    for (int l = 1; l < (int)LevelOfDetail.Minimum + 1; l *= 2)
                     {
                         if (maxCount <= 0)
                         {
                             break;
                         }
 
-                        LevelOfDetailEnum lod = (LevelOfDetailEnum)l;
+                        LevelOfDetail lod = (LevelOfDetail)l;
 
                         //Get instances in this LOD
                         var lodInstances = Array.FindAll(this.instancesTmp, i => i != null && i.LevelOfDetail == lod);
@@ -362,23 +359,20 @@ namespace Engine
         /// <param name="positions">New positions</param>
         public void SetPositions(Vector3[] positions)
         {
-            if (positions != null && positions.Length > 0)
+            if (positions?.Length > 0 && this.instances?.Length > 0)
             {
-                if (this.instances != null && this.instances.Length > 0)
+                for (int i = 0; i < this.instances.Length; i++)
                 {
-                    for (int i = 0; i < this.instances.Length; i++)
+                    if (i < positions.Length)
                     {
-                        if (i < positions.Length)
-                        {
-                            this.instances[i].Manipulator.SetPosition(positions[i], true);
-                            this.instances[i].Active = true;
-                            this.instances[i].Visible = true;
-                        }
-                        else
-                        {
-                            this.instances[i].Active = false;
-                            this.instances[i].Visible = false;
-                        }
+                        this.instances[i].Manipulator.SetPosition(positions[i], true);
+                        this.instances[i].Active = true;
+                        this.instances[i].Visible = true;
+                    }
+                    else
+                    {
+                        this.instances[i].Active = false;
+                        this.instances[i].Visible = false;
                     }
                 }
             }
@@ -389,23 +383,20 @@ namespace Engine
         /// <param name="transforms">Transform matrix list</param>
         public void SetTransforms(Matrix[] transforms)
         {
-            if (transforms != null && transforms.Length > 0)
+            if (transforms?.Length > 0 && this.instances?.Length > 0)
             {
-                if (this.instances != null && this.instances.Length > 0)
+                for (int i = 0; i < this.instances.Length; i++)
                 {
-                    for (int i = 0; i < this.instances.Length; i++)
+                    if (i < transforms.Length)
                     {
-                        if (i < transforms.Length)
-                        {
-                            this.instances[i].Manipulator.SetTransform(transforms[i]);
-                            this.instances[i].Active = true;
-                            this.instances[i].Visible = true;
-                        }
-                        else
-                        {
-                            this.instances[i].Active = false;
-                            this.instances[i].Visible = false;
-                        }
+                        this.instances[i].Manipulator.SetTransform(transforms[i]);
+                        this.instances[i].Active = true;
+                        this.instances[i].Visible = true;
+                    }
+                    else
+                    {
+                        this.instances[i].Active = false;
+                        this.instances[i].Visible = false;
                     }
                 }
             }

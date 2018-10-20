@@ -55,23 +55,12 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.BufferManager != null)
-                {
-                    //Remove data from buffer manager
-                    this.BufferManager.RemoveVertexData(this.vertexBuffer);
-                    this.BufferManager.RemoveIndexData(this.indexBuffer);
-                }
+                //Remove data from buffer manager
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
+                this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
 
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="context">Update context</param>
-        public override void Update(UpdateContext context)
-        {
-
-        }
         /// <summary>
         /// Draw
         /// </summary>
@@ -79,49 +68,46 @@ namespace Engine
         public override void Draw(DrawContext context)
         {
             var mode = context.DrawerMode;
+            var draw =
+                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled);
 
-            if ((mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
+            if (draw && this.indexBuffer.Count > 0)
             {
-                if (this.indexBuffer.Count > 0)
+                var effect = DrawerPool.EffectDefaultWater;
+                var technique = DrawerPool.EffectDefaultWater.Water;
+
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+
+                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+
+                effect.UpdatePerFrame(
+                    context.ViewProjection,
+                    context.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
+                    context.Lights,
+                    this.Description.BaseColor,
+                    this.Description.WaterColor,
+                    this.Description.WaveHeight,
+                    this.Description.WaveChoppy,
+                    this.Description.WaveSpeed,
+                    this.Description.WaveFrequency,
+                    context.GameTime.TotalSeconds,
+                    this.Description.HeightmapIterations,
+                    this.Description.GeometryIterations,
+                    this.Description.ColorIterations);
+
+                var graphics = this.Game.Graphics;
+
+                for (int p = 0; p < technique.PassCount; p++)
                 {
-                    var effect = DrawerPool.EffectDefaultWater;
-                    var technique = DrawerPool.EffectDefaultWater.Water;
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-
-                    this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
-
-                    var dwContext = context as DrawContext;
-
-                    effect.UpdatePerFrame(
-                        dwContext.ViewProjection,
-                        dwContext.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
-                        dwContext.Lights,
-                        this.Description.BaseColor,
-                        this.Description.WaterColor,
-                        this.Description.WaveHeight,
-                        this.Description.WaveChoppy,
-                        this.Description.WaveSpeed,
-                        this.Description.WaveFrequency,
-                        dwContext.GameTime.TotalSeconds,
-                        this.Description.HeightmapIterations,
-                        this.Description.GeometryIterations,
-                        this.Description.ColorIterations);
-
-                    var graphics = this.Game.Graphics;
-
-                    for (int p = 0; p < technique.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(technique, p, 0);
-
-                        graphics.DrawIndexed(
-                            this.indexBuffer.Count,
-                            this.indexBuffer.Offset,
-                            this.vertexBuffer.Offset);
-                    }
+                    graphics.DrawIndexed(
+                        this.indexBuffer.Count,
+                        this.indexBuffer.Offset,
+                        this.vertexBuffer.Offset);
                 }
             }
         }

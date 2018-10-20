@@ -79,15 +79,15 @@ namespace Engine
         /// <summary>
         /// Position
         /// </summary>
-        public Vector3 Position;
+        public Vector3 Position { get; set; }
         /// <summary>
         /// Radius
         /// </summary>
-        public float Radius;
+        public float Radius { get; set; }
         /// <summary>
         /// Height
         /// </summary>
-        public float Height;
+        public float Height { get; set; }
         /// <summary>
         /// Center
         /// </summary>
@@ -157,22 +157,22 @@ namespace Engine
         /// <summary>
         /// Determines whether the specified BoundingCylinder is equal to this instance.
         /// </summary>
-        /// <param name="value">The BoundingCylinder to compare with this instance.</param>
+        /// <param name="other">The BoundingCylinder to compare with this instance.</param>
         /// <returns>true if the specified BoundingCylinder is equal to this instance; otherwise, false</returns>
-        public bool Equals(BoundingCylinder value)
+        public bool Equals(BoundingCylinder other)
         {
-            return this == value;
+            return this == other;
         }
         /// <summary>
         /// Determines whether the specified System.Object is equal to this instance.
         /// </summary>
-        /// <param name="value">The System.Object to compare with this instance.</param>
+        /// <param name="obj">The System.Object to compare with this instance.</param>
         /// <returns>true if the specified System.Object is equal to this instance; otherwise, false</returns>
-        public override bool Equals(object value)
+        public override bool Equals(object obj)
         {
-            if (value is BoundingCylinder)
+            if (obj is BoundingCylinder)
             {
-                return this == (BoundingCylinder)value;
+                return this == (BoundingCylinder)obj;
             }
 
             return false;

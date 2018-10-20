@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    public enum SamplePolyFlags
+    [Flags]
+    public enum SamplePolyFlagTypes
     {
         /// <summary>
         /// Ability to walk (ground, grass, road)

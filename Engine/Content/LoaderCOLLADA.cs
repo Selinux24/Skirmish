@@ -14,12 +14,12 @@ namespace Engine.Content
     /// <summary>
     /// Loader for collada
     /// </summary>
-    public class LoaderCOLLADA : ILoader
+    public class LoaderCollada : ILoader
     {
         /// <summary>
         /// Constructor
         /// </summary>
-        public LoaderCOLLADA()
+        public LoaderCollada()
         {
 
         }
@@ -229,12 +229,9 @@ namespace Engine.Content
                 foreach (Geometry geometry in dae.LibraryGeometries)
                 {
                     bool isVolume = false;
-                    if (volumes != null && volumes.Length > 0)
+                    if (volumes?.Length > 0 && Array.Exists(volumes, v => string.Equals(v, geometry.Name, StringComparison.OrdinalIgnoreCase)))
                     {
-                        if (Array.Exists(volumes, v => string.Equals(v, geometry.Name, StringComparison.OrdinalIgnoreCase)))
-                        {
-                            isVolume = true;
-                        }
+                        isVolume = true;
                     }
 
                     SubMeshContent[] info = ProcessGeometry(geometry, isVolume);
@@ -534,8 +531,6 @@ namespace Engine.Content
         {
             List<SubMeshContent> res = new List<SubMeshContent>();
 
-            int sourceCount = meshSources.Length;
-
             foreach (var polyList in polyLists)
             {
                 List<VertexData> verts = new List<VertexData>();
@@ -815,7 +810,10 @@ namespace Engine.Content
         /// <returns>Returns controller content</returns>
         private static ControllerContent ProcessMorph(string name, Morph morph)
         {
-            ControllerContent res = new ControllerContent();
+            ControllerContent res = new ControllerContent()
+            {
+                Armature = name,
+            };
 
             ProcessVertexWeights(morph, out Weight[] wgList);
 
@@ -836,7 +834,6 @@ namespace Engine.Content
             var wgList = new List<Weight>();
 
             int jointsOffset = -1;
-            int bindsOffset = -1;
             int weightsOffset = -1;
 
             string[] joints = null;
@@ -847,7 +844,6 @@ namespace Engine.Content
             if (jointsInput != null)
             {
                 jointsOffset = jointsInput.Offset;
-                bindsOffset = jointsInput.Offset;
 
                 //Joint names
                 var jInput = skin.Joints[EnumSemantics.Joint];
@@ -889,12 +885,12 @@ namespace Engine.Content
                     string jointName = null;
                     float weightValue = 0;
 
-                    if (jointsOffset >= 0)
+                    if (jointsOffset >= 0 && joints != null)
                     {
                         jointName = name + "_" + joints[skin.VertexWeights.V[index + jointsOffset]];
                     }
 
-                    if (weightsOffset >= 0)
+                    if (weightsOffset >= 0 && weights != null)
                     {
                         weightValue = weights[skin.VertexWeights.V[index + weightsOffset]];
                     }
@@ -917,7 +913,7 @@ namespace Engine.Content
 
             if (weightsOffset >= 0)
             {
-                for (int i = 0; i < joints.Length; i++)
+                for (int i = 0; i < joints?.Length; i++)
                 {
                     ibmList.Add(name + "_" + joints[i], mats[i]);
                 }
@@ -933,34 +929,7 @@ namespace Engine.Content
         /// <param name="weightList">Weight list result</param>
         private static void ProcessVertexWeights(Morph morph, out Weight[] weightList)
         {
-            List<Weight> wgList = new List<Weight>();
-
-            int targetsOffset = -1;
-            int weightsOffset = -1;
-
-            string[] targets = null;
-            float[] weights = null;
-
-            var targetsInput = morph.Targets[EnumSemantics.MorphTarget];
-            if (targetsInput != null)
-            {
-                targetsOffset = targetsInput.Offset;
-
-                targets = morph[targetsInput.Source].ReadIDRefs();
-            }
-
-            var weightsInput = morph.Targets[EnumSemantics.MorphWeight];
-            if (weightsInput != null)
-            {
-                weightsOffset = weightsInput.Offset;
-
-                weights = morph[weightsInput.Source].ReadFloat();
-            }
-
-            //TODO: Processing the morph
-
-
-            weightList = wgList.ToArray();
+            throw new NotImplementedException();
         }
 
         #endregion
@@ -990,10 +959,6 @@ namespace Engine.Content
 
                 foreach (Sampler sampler in animationLibrary.Samplers)
                 {
-                    int inputOffset = -1;
-                    int outputOffset = -1;
-                    int interpolationOffset = -1;
-
                     float[] inputs = null;
                     Matrix[] outputs = null;
                     string[] interpolations = null;
@@ -1002,8 +967,6 @@ namespace Engine.Content
                     Input inputsInput = sampler[EnumSemantics.Input];
                     if (inputsInput != null)
                     {
-                        inputOffset = inputsInput.Offset;
-
                         inputs = animationLibrary[inputsInput.Source].ReadFloat();
                     }
 
@@ -1011,8 +974,6 @@ namespace Engine.Content
                     Input outputsInput = sampler[EnumSemantics.Output];
                     if (outputsInput != null)
                     {
-                        outputOffset = outputsInput.Offset;
-
                         outputs = animationLibrary[outputsInput.Source].ReadMatrix();
                         for (int i = 0; i < outputs.Length; i++)
                         {
@@ -1024,20 +985,18 @@ namespace Engine.Content
                     Input interpolationsInput = sampler[EnumSemantics.Interpolation];
                     if (interpolationsInput != null)
                     {
-                        interpolationOffset = interpolationsInput.Offset;
-
                         interpolations = animationLibrary[interpolationsInput.Source].ReadNames();
                     }
 
                     List<Keyframe> keyframes = new List<Keyframe>();
 
-                    for (int i = 0; i < inputs.Length; i++)
+                    for (int i = 0; i < inputs?.Length; i++)
                     {
                         Keyframe keyframe = new Keyframe()
                         {
                             Time = inputs[i],
-                            Transform = outputs[i],
-                            Interpolation = interpolations[i],
+                            Transform = outputs != null ? outputs[i] : Matrix.Identity,
+                            Interpolation = interpolations?[i],
                         };
 
                         keyframes.Add(keyframe);
@@ -1459,19 +1418,16 @@ namespace Engine.Content
             {
                 #region Lights
 
-                if (!trn.IsIdentity)
+                if (!trn.IsIdentity && node.InstanceLight?.Length > 0)
                 {
-                    if (node.InstanceLight != null && node.InstanceLight.Length > 0)
+                    foreach (InstanceWithExtra il in node.InstanceLight)
                     {
-                        foreach (InstanceWithExtra il in node.InstanceLight)
-                        {
-                            string lightName = il.Url.Replace("#", "");
+                        string lightName = il.Url.Replace("#", "");
 
-                            var light = modelContent.Lights[lightName];
+                        var light = modelContent.Lights[lightName];
 
-                            light.Name = lightName;
-                            light.Transform = trn;
-                        }
+                        light.Name = lightName;
+                        light.Transform = trn;
                     }
                 }
 
@@ -1496,18 +1452,15 @@ namespace Engine.Content
             {
                 #region Geometry nodes
 
-                if (!trn.IsIdentity)
+                if (!trn.IsIdentity && node.InstanceGeometry?.Length > 0)
                 {
-                    if (node.InstanceGeometry != null && node.InstanceGeometry.Length > 0)
+                    foreach (InstanceGeometry ig in node.InstanceGeometry)
                     {
-                        foreach (InstanceGeometry ig in node.InstanceGeometry)
-                        {
-                            string meshName = ig.Url.Replace("#", "");
+                        string meshName = ig.Url.Replace("#", "");
 
-                            foreach (var submesh in modelContent.Geometry[meshName].Values)
-                            {
-                                submesh.Transform(trn);
-                            }
+                        foreach (var submesh in modelContent.Geometry[meshName].Values)
+                        {
+                            submesh.Transform(trn);
                         }
                     }
                 }
@@ -1593,7 +1546,7 @@ namespace Engine.Content
     /// <summary>
     /// Extensions for collada to sharpDX data parse
     /// </summary>
-    static class LoaderCOLLADAExtensions
+    static class LoaderColladaExtensions
     {
         /// <summary>
         /// Reads a Vector2 from BasicFloat2
@@ -1668,21 +1621,22 @@ namespace Engine.Content
         /// </summary>
         /// <param name="matrix">BasicFloat4x4 matrix</param>
         /// <returns>Returns the parsed Matrix from BasicFloat4x4</returns>
+        /// <remarks>
+        /// From right handed
+        /// { rx, ry, rz, 0 }
+        /// { ux, uy, uz, 0 }
+        /// { lx, ly, lz, 0 }
+        /// { px, py, pz, 1 }
+        /// To left handed
+        /// { rx, rz, ry, 0 }
+        /// { lx, lz, ly, 0 }
+        /// { ux, uz, uy, 0 }
+        /// { px, pz, py, 1 }
+        /// </remarks>
         public static Matrix ToMatrix(this BasicFloat4x4 matrix)
         {
             if (matrix.Values != null && matrix.Values.Length == 16)
             {
-                //From right handed
-                //{ rx, ry, rz, 0 }  
-                //{ ux, uy, uz, 0 }  
-                //{ lx, ly, lz, 0 }  
-                //{ px, py, pz, 1 }
-                //To left handed
-                //{ rx, rz, ry, 0 }  
-                //{ lx, lz, ly, 0 }  
-                //{ ux, uz, uy, 0 }  
-                //{ px, pz, py, 1 }
-
                 Matrix m = new Matrix()
                 {
                     M11 = matrix.Values[0],
@@ -2030,6 +1984,18 @@ namespace Engine.Content
         /// </summary>
         /// <param name="source">Source</param>
         /// <returns>Returns the Matrix array</returns>
+        /// <remarks>
+        /// From right handed
+        /// { rx, ry, rz, 0 }
+        /// { ux, uy, uz, 0 }
+        /// { lx, ly, lz, 0 }
+        /// { px, py, pz, 1 }
+        /// To left handed
+        /// { rx, rz, ry, 0 }
+        /// { lx, lz, ly, 0 }
+        /// { ux, uz, uy, 0 }
+        /// { px, pz, py, 1 }
+        /// </remarks>
         public static Matrix[] ReadMatrix(this Source source)
         {
             int stride = source.TechniqueCommon.Accessor.Stride;
@@ -2041,17 +2007,6 @@ namespace Engine.Content
             int length = source.TechniqueCommon.Accessor.Count;
 
             List<Matrix> mats = new List<Matrix>();
-
-            //From right handed
-            //{ rx, ry, rz, 0 }  
-            //{ ux, uy, uz, 0 }  
-            //{ lx, ly, lz, 0 }  
-            //{ px, py, pz, 1 }
-            //To left handed
-            //{ rx, rz, ry, 0 }  
-            //{ lx, lz, ly, 0 }  
-            //{ ux, uz, uy, 0 }  
-            //{ px, pz, py, 1 }
 
             for (int i = 0; i < length * stride; i += stride)
             {

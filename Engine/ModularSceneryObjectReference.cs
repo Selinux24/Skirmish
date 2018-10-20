@@ -14,52 +14,52 @@ namespace Engine
         /// Asset map id
         /// </summary>
         [XmlAttribute("asset_map_id")]
-        public string AssetMapId;
+        public string AssetMapId { get; set; }
         /// <summary>
         /// Asset id
         /// </summary>
         [XmlAttribute("asset_id")]
-        public string AssetId;
+        public string AssetId { get; set; }
         /// <summary>
         /// Item id
         /// </summary>
         [XmlAttribute("id")]
-        public string Id;
+        public string Id { get; set; }
         /// <summary>
         /// Asset name
         /// </summary>
         [XmlAttribute("asset_name")]
-        public string AssetName;
+        public string AssetName { get; set; }
         /// <summary>
         /// Item type
         /// </summary>
         [XmlAttribute("type")]
-        public ModularSceneryObjectTypeEnum Type = ModularSceneryObjectTypeEnum.Default;
+        public ModularSceneryObjectTypes Type { get; set; } = ModularSceneryObjectTypes.Default;
         /// <summary>
         /// Position
         /// </summary>
-        [NonSerialized]
-        public Vector3 Position = new Vector3(0, 0, 0);
+        [XmlIgnore]
+        public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
         /// <summary>
         /// Rotation
         /// </summary>
-        [NonSerialized]
-        public Quaternion Rotation = new Quaternion(0, 0, 0, 1);
+        [XmlIgnore]
+        public Quaternion Rotation { get; set; } = new Quaternion(0, 0, 0, 1);
         /// <summary>
         /// Scale
         /// </summary>
-        [NonSerialized]
-        public Vector3 Scale = new Vector3(1, 1, 1);
+        [XmlIgnore]
+        public Vector3 Scale { get; set; } = new Vector3(1, 1, 1);
         /// <summary>
         /// Load model lights into scene
         /// </summary>
         [XmlAttribute("load_lights")]
-        public bool LoadLights = true;
+        public bool LoadLights { get; set; } = true;
         /// <summary>
         /// Lights cast shadows
         /// </summary>
         [XmlAttribute("cast_shadows")]
-        public bool CastShadows = true;
+        public bool CastShadows { get; set; } = true;
         /// <summary>
         /// Particle
         /// </summary>

@@ -1,4 +1,5 @@
-﻿namespace Engine
+﻿
+namespace Engine
 {
     /// <summary>
     /// 2D transformable interface

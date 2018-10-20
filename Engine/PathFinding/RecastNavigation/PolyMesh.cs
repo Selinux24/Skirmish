@@ -22,7 +22,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The user defined flags for each polygon. [Length: #maxpolys]
         /// </summary>
-        public SamplePolyFlags[] flags;
+        public SamplePolyFlagTypes[] flags;
         /// <summary>
         /// The area id assigned to each polygon. [Length: #maxpolys]
         /// </summary>

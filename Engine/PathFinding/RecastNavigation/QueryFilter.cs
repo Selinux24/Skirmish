@@ -14,11 +14,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Flags for polygons that can be visited. (Used by default implementation.)
         /// </summary>
-        public SamplePolyFlags m_includeFlags;
+        public SamplePolyFlagTypes m_includeFlags;
         /// <summary>
         /// Flags for polygons that should not be visted. (Used by default implementation.)
         /// </summary>
-        public SamplePolyFlags m_excludeFlags;
+        public SamplePolyFlagTypes m_excludeFlags;
 
         /// <summary>
         /// Constructor
@@ -88,23 +88,23 @@ namespace Engine.PathFinding.RecastNavigation
         /// Any polygons that include one or more of these flags will be included in the operation.
         /// </summary>
         /// <returns></returns>
-        public SamplePolyFlags GetIncludeFlags() { return m_includeFlags; }
+        public SamplePolyFlagTypes GetIncludeFlags() { return m_includeFlags; }
         /// <summary>
         /// Sets the include flags for the filter.
         /// </summary>
         /// <param name="flags">The new flags.</param>
-        public void SetIncludeFlags(SamplePolyFlags flags) { m_includeFlags = flags; }
+        public void SetIncludeFlags(SamplePolyFlagTypes flags) { m_includeFlags = flags; }
 
         /// <summary>
         /// Returns the exclude flags for the filter.
         /// Any polygons that include one ore more of these flags will be excluded from the operation.
         /// </summary>
         /// <returns></returns>
-        public SamplePolyFlags GetExcludeFlags() { return m_excludeFlags; }
+        public SamplePolyFlagTypes GetExcludeFlags() { return m_excludeFlags; }
         /// <summary>
         /// Sets the exclude flags for the filter.
         /// </summary>
         /// <param name="flags">The new flags.</param>
-        public void SetExcludeFlags(SamplePolyFlags flags) { m_excludeFlags = flags; }
+        public void SetExcludeFlags(SamplePolyFlagTypes flags) { m_excludeFlags = flags; }
     }
 }

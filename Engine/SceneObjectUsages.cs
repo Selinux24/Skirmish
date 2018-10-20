@@ -6,7 +6,7 @@ namespace Engine
     /// Scene object usajes enumeration
     /// </summary>
     [Flags]
-    public enum SceneObjectUsageEnum
+    public enum SceneObjectUsages
     {
         /// <summary>
         /// None

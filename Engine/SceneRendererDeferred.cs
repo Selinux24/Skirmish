@@ -27,10 +27,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// View port
-        /// </summary>
-        public Viewport viewport;
-        /// <summary>
         /// Geometry buffer
         /// </summary>
         private RenderTarget geometryBuffer = null;
@@ -72,7 +68,7 @@ namespace Engine
                     return this.geometryBuffer.Textures;
                 }
 
-                return null;
+                return new EngineShaderResourceView[] { };
             }
         }
         /// <summary>
@@ -87,9 +83,14 @@ namespace Engine
                     return this.lightBuffer.Textures;
                 }
 
-                return null;
+                return new EngineShaderResourceView[] { };
             }
         }
+
+        /// <summary>
+        /// View port
+        /// </summary>
+        public Viewport Viewport { get; set; }
 
         /// <summary>
         /// Constructor
@@ -183,15 +184,15 @@ namespace Engine
         /// </summary>
         /// <param name="result">Resource type</param>
         /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
-        public override EngineShaderResourceView GetResource(SceneRendererResultEnum result)
+        public override EngineShaderResourceView GetResource(SceneRendererResults result)
         {
-            if (result == SceneRendererResultEnum.LightMap) return this.LightMap[0];
+            if (result == SceneRendererResults.LightMap) return this.LightMap[0];
 
             if (this.GeometryMap != null && this.GeometryMap.Length > 0)
             {
-                if (result == SceneRendererResultEnum.ColorMap) return this.GeometryMap.Length > 0 ? this.GeometryMap[0] : null;
-                if (result == SceneRendererResultEnum.NormalMap) return this.GeometryMap.Length > 1 ? this.GeometryMap[1] : null;
-                if (result == SceneRendererResultEnum.DepthMap) return this.GeometryMap.Length > 2 ? this.GeometryMap[2] : null;
+                if (result == SceneRendererResults.ColorMap) return this.GeometryMap.Length > 0 ? this.GeometryMap[0] : null;
+                if (result == SceneRendererResults.NormalMap) return this.GeometryMap.Length > 1 ? this.GeometryMap[1] : null;
+                if (result == SceneRendererResults.DepthMap) return this.GeometryMap.Length > 2 ? this.GeometryMap[2] : null;
             }
 
             return base.GetResource(result);
@@ -208,7 +209,6 @@ namespace Engine
                 this.Updated = false;
 #if DEBUG
                 long total = 0;
-                long start = 0;
                 long shadowMap_start = 0;
                 long shadowMap_cull = 0;
                 long shadowMap_draw = 0;
@@ -254,8 +254,6 @@ namespace Engine
 
 #if DEBUG
                     swStartup.Stop();
-
-                    start = swStartup.ElapsedTicks;
 #endif
                     #endregion
 
@@ -266,7 +264,7 @@ namespace Engine
 
                     //Render to G-Buffer only opaque objects
                     var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled);
-                    if (deferredEnabledComponents.Count() > 0)
+                    if (deferredEnabledComponents.Any())
                     {
                         #region Cull
 #if DEBUG
@@ -319,7 +317,7 @@ namespace Engine
                             Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
                             //Draw scene on g-buffer render targets
-                            this.DrawResultComponents(gameTime, this.DrawContext, CullIndexDrawIndex, deferredEnabledComponents, true);
+                            this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, deferredEnabledComponents, true);
 #if DEBUG
                             swGeometryBufferDraw.Stop();
 #endif
@@ -395,7 +393,7 @@ namespace Engine
 
                     //Render to screen deferred disabled components
                     var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled);
-                    if (deferredDisabledComponents.Count() > 0)
+                    if (deferredDisabledComponents.Any())
                     {
                         #region Cull
 #if DEBUG
@@ -440,7 +438,7 @@ namespace Engine
                             this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
 
                             //Draw scene
-                            this.DrawResultComponents(gameTime, this.DrawContext, CullIndexDrawIndex, deferredDisabledComponents, false);
+                            this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, deferredDisabledComponents, false);
 
                             //Set deferred mode
                             this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
@@ -584,7 +582,7 @@ namespace Engine
             this.Width = this.Game.Form.RenderWidth;
             this.Height = this.Game.Form.RenderHeight;
 
-            this.viewport = new Viewport(0, 0, this.Width, this.Height, 0, 1.0f);
+            this.Viewport = new Viewport(0, 0, this.Width, this.Height, 0, 1.0f);
 
             this.ViewProjection = Sprite.CreateViewOrthoProjection(this.Width, this.Height);
 
@@ -598,7 +596,7 @@ namespace Engine
             var graphics = this.Game.Graphics;
 
             //Set local viewport
-            graphics.SetViewport(this.viewport);
+            graphics.SetViewport(this.Viewport);
 
             //Set g-buffer render targets
             graphics.SetRenderTargets(
@@ -614,7 +612,7 @@ namespace Engine
             var graphics = this.Game.Graphics;
 
             //Set local viewport
-            graphics.SetViewport(this.viewport);
+            graphics.SetViewport(this.Viewport);
 
             //Set light buffer to draw lights
             graphics.SetRenderTargets(
@@ -654,7 +652,6 @@ namespace Engine
 #endif
             var effect = DrawerPool.EffectDeferredComposer;
 
-            var hemisphericLight = context.Lights.GetVisibleHemisphericLight();
             var directionalLights = context.Lights.GetVisibleDirectionalLights();
             var spotLights = context.Lights.GetVisibleSpotLights();
             var pointLights = context.Lights.GetVisiblePointLights();
@@ -826,7 +823,6 @@ namespace Engine
             var graphics = this.Game.Graphics;
 
 #if DEBUG
-            long total = 0;
             long init = 0;
             long draw = 0;
 
@@ -867,8 +863,6 @@ namespace Engine
             }
 #if DEBUG
             swTotal.Stop();
-
-            total = swTotal.ElapsedTicks;
 #endif
 #if DEBUG
             Counters.SetStatistics("DEFERRED_COMPOSITION", new[]
@@ -881,11 +875,10 @@ namespace Engine
         /// <summary>
         /// Draw components
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
         /// <param name="deferred">Deferred drawing</param>
-        private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components, bool deferred)
+        private void DrawResultComponents(DrawContext context, int index, IEnumerable<SceneObject> components, bool deferred)
         {
             var mode = context.DrawerMode;
             var graphics = this.Game.Graphics;
@@ -896,8 +889,12 @@ namespace Engine
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
+                if (cull != null)
+                {
+                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                }
 
-                return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
+                return true;
             }).ToList();
             if (opaques.Count > 0)
             {
@@ -962,8 +959,12 @@ namespace Engine
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
+                if (cull != null)
+                {
+                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                }
 
-                return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
+                return true;
             }).ToList();
             if (transparents.Count > 0)
             {

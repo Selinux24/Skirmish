@@ -179,9 +179,9 @@ namespace SceneTest
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.L))

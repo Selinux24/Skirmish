@@ -17,7 +17,7 @@ namespace Engine.Common
         /// <returns>Returns the generated index list</returns>
         public static uint[] GenerateIndices(IndexBufferShapeEnum bufferShape, int triangles)
         {
-            return GenerateIndices(LevelOfDetailEnum.High, bufferShape, triangles);
+            return GenerateIndices(LevelOfDetail.High, bufferShape, triangles);
         }
         /// <summary>
         /// Generates a index for a triangle soup quad with the specified shape
@@ -26,7 +26,7 @@ namespace Engine.Common
         /// <param name="bufferShape">Buffer shape</param>
         /// <param name="triangles">Triangle count</param>
         /// <returns>Returns the generated index list</returns>
-        public static uint[] GenerateIndices(LevelOfDetailEnum lod, IndexBufferShapeEnum bufferShape, int triangles)
+        public static uint[] GenerateIndices(LevelOfDetail lod, IndexBufferShapeEnum bufferShape, int triangles)
         {
             uint offset = (uint)lod;
             uint fullSide = (uint)Math.Sqrt(triangles / 2);
@@ -63,9 +63,7 @@ namespace Engine.Common
             if (leftSide) totalTriangles -= sideLoss;
             if (rightSide) totalTriangles -= sideLoss;
 
-            uint[] indices = new uint[totalTriangles * 3];
-
-            int index = 0;
+            List<uint> indices = new List<uint>((int)totalTriangles * 3);
 
             for (uint y = 1; y < side; y += 2)
             {
@@ -79,85 +77,85 @@ namespace Engine.Common
                     if (y == 1 && topSide)
                     {
                         //Top
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexPRow - (1 * offset);
-                        indices[index++] = indexPRow + (1 * offset);
+                        indices.Add(indexCRow);
+                        indices.Add(indexPRow - (1 * offset));
+                        indices.Add(indexPRow + (1 * offset));
                     }
                     else
                     {
                         //Top left
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexPRow - (1 * offset);
-                        indices[index++] = indexPRow;
+                        indices.Add(indexCRow);
+                        indices.Add(indexPRow - (1 * offset));
+                        indices.Add(indexPRow);
                         //Top right
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexPRow;
-                        indices[index++] = indexPRow + (1 * offset);
+                        indices.Add(indexCRow);
+                        indices.Add(indexPRow);
+                        indices.Add(indexPRow + (1 * offset));
                     }
 
                     //Bottom side
                     if (y == side - 1 && bottomSide)
                     {
                         //Bottom only
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexNRow + (1 * offset);
-                        indices[index++] = indexNRow - (1 * offset);
+                        indices.Add(indexCRow);
+                        indices.Add(indexNRow + (1 * offset));
+                        indices.Add(indexNRow - (1 * offset));
                     }
                     else
                     {
                         //Bottom left
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexNRow;
-                        indices[index++] = indexNRow - (1 * offset);
+                        indices.Add(indexCRow);
+                        indices.Add(indexNRow);
+                        indices.Add(indexNRow - (1 * offset));
                         //Bottom right
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexNRow + (1 * offset);
-                        indices[index++] = indexNRow;
+                        indices.Add(indexCRow);
+                        indices.Add(indexNRow + (1 * offset));
+                        indices.Add(indexNRow);
                     }
 
                     //Left side
                     if (x == 1 && leftSide)
                     {
                         //Left only
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexNRow - (1 * offset);
-                        indices[index++] = indexPRow - (1 * offset);
+                        indices.Add(indexCRow);
+                        indices.Add(indexNRow - (1 * offset));
+                        indices.Add(indexPRow - (1 * offset));
                     }
                     else
                     {
                         //Left top
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexCRow - (1 * offset);
-                        indices[index++] = indexPRow - (1 * offset);
+                        indices.Add(indexCRow);
+                        indices.Add(indexCRow - (1 * offset));
+                        indices.Add(indexPRow - (1 * offset));
                         //Left bottom
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexNRow - (1 * offset);
-                        indices[index++] = indexCRow - (1 * offset);
+                        indices.Add(indexCRow);
+                        indices.Add(indexNRow - (1 * offset));
+                        indices.Add(indexCRow - (1 * offset));
                     }
 
                     //Right side
                     if (x == side - 1 && rightSide)
                     {
                         //Right only
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexPRow + (1 * offset);
-                        indices[index++] = indexNRow + (1 * offset);
+                        indices.Add(indexCRow);
+                        indices.Add(indexPRow + (1 * offset));
+                        indices.Add(indexNRow + (1 * offset));
                     }
                     else
                     {
                         //Right top
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexPRow + (1 * offset);
-                        indices[index++] = indexCRow + (1 * offset);
+                        indices.Add(indexCRow);
+                        indices.Add(indexPRow + (1 * offset));
+                        indices.Add(indexCRow + (1 * offset));
                         //Right bottom
-                        indices[index++] = indexCRow;
-                        indices[index++] = indexCRow + (1 * offset);
-                        indices[index++] = indexNRow + (1 * offset);
+                        indices.Add(indexCRow);
+                        indices.Add(indexCRow + (1 * offset));
+                        indices.Add(indexNRow + (1 * offset));
                     }
                 }
             }
 
-            return indices;
+            return indices.ToArray();
         }
         /// <summary>
         /// Toggle coordinates from left-handed to right-handed and vice versa
@@ -904,10 +902,7 @@ namespace Engine.Common
 
 
             // Create the index array.
-            indices = new uint[(size + 1) * (size + 1) * 6];
-
-            // Initialize the index into the vertex array.
-            var index = 0;
+            List<uint> indexList = new List<uint>((size + 1) * (size + 1) * 6);
 
             // Load the vertex and index array with the sky plane array data.
             for (int j = 0; j < size; j++)
@@ -920,24 +915,26 @@ namespace Engine.Common
                     int index4 = (j + 1) * (size + 1) + (i + 1);
 
                     // Triangle 1 - Upper Left
-                    indices[index++] = (uint)index1;
+                    indexList.Add((uint)index1);
 
                     // Triangle 1 - Upper Right
-                    indices[index++] = (uint)index2;
+                    indexList.Add((uint)index2);
 
                     // Triangle 1 - Bottom Left
-                    indices[index++] = (uint)index3;
+                    indexList.Add((uint)index3);
 
                     // Triangle 2 - Bottom Left
-                    indices[index++] = (uint)index3;
+                    indexList.Add((uint)index3);
 
                     // Triangle 2 - Upper Right
-                    indices[index++] = (uint)index2;
+                    indexList.Add((uint)index2);
 
                     // Triangle 2 - Bottom Right
-                    indices[index++] = (uint)index4;
+                    indexList.Add((uint)index4);
                 }
             }
+
+            indices = indexList.ToArray();
         }
 
         /// <summary>

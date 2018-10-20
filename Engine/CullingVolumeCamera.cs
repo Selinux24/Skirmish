@@ -11,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Internal volume
         /// </summary>
-        private BoundingFrustum frustum;
+        private readonly BoundingFrustum frustum;
 
         /// <summary>
         /// Gets the view position

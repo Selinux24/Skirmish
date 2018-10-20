@@ -32,7 +32,7 @@ namespace Engine
         /// <summary>
         /// Coarse bounding sphere
         /// </summary>
-        private BoundingSphere coarseBoundingSphere;
+        private readonly BoundingSphere coarseBoundingSphere;
         /// <summary>
         /// Bounding sphere
         /// </summary>
@@ -44,7 +44,7 @@ namespace Engine
         /// <summary>
         /// Level of detail
         /// </summary>
-        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.None;
+        private LevelOfDetail levelOfDetail = LevelOfDetail.None;
 
         /// <summary>
         /// Current drawing data
@@ -78,7 +78,7 @@ namespace Engine
         /// <summary>
         /// Animation controller
         /// </summary>
-        public AnimationController AnimationController = new AnimationController();
+        public AnimationController AnimationController { get; set; } = new AnimationController();
         /// <summary>
         /// Texture index
         /// </summary>
@@ -86,7 +86,7 @@ namespace Engine
         /// <summary>
         /// Level of detail
         /// </summary>
-        public LevelOfDetailEnum LevelOfDetail
+        public LevelOfDetail LevelOfDetail
         {
             get
             {
@@ -173,7 +173,7 @@ namespace Engine
                 this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
             }
 
-            var drawData = this.GetDrawingData(LevelOfDetailEnum.High);
+            var drawData = this.GetDrawingData(LevelOfDetail.High);
             if (drawData != null)
             {
                 this.coarseBoundingSphere = BoundingSphere.FromPoints(drawData.GetPoints(true));
@@ -222,9 +222,6 @@ namespace Engine
             if (this.DrawingData != null)
             {
                 int count = 0;
-                int instanceCount = 0;
-
-                instanceCount++;
 
                 var effect = context.ShadowMap.GetEffect();
                 if (effect != null)
@@ -242,7 +239,6 @@ namespace Engine
                         foreach (string material in dictionary.Keys)
                         {
                             var mesh = dictionary[material];
-                            bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
 
                             var mat = this.DrawingData.Materials[material];
 
@@ -392,28 +388,27 @@ namespace Engine
         {
             var position = Vector3.TransformCoordinate(this.coarseBoundingSphere.Center, this.Manipulator.LocalTransform);
             var radius = this.coarseBoundingSphere.Radius * this.Manipulator.AveragingScale;
-            var bsph = new BoundingSphere(position, radius);
 
             var dist = Vector3.Distance(position, origin) - radius;
             if (dist < GameEnvironment.LODDistanceHigh)
             {
-                this.LevelOfDetail = LevelOfDetailEnum.High;
+                this.LevelOfDetail = LevelOfDetail.High;
             }
             else if (dist < GameEnvironment.LODDistanceMedium)
             {
-                this.LevelOfDetail = LevelOfDetailEnum.Medium;
+                this.LevelOfDetail = LevelOfDetail.Medium;
             }
             else if (dist < GameEnvironment.LODDistanceLow)
             {
-                this.LevelOfDetail = LevelOfDetailEnum.Low;
+                this.LevelOfDetail = LevelOfDetail.Low;
             }
             else if (dist < GameEnvironment.LODDistanceMinimum)
             {
-                this.LevelOfDetail = LevelOfDetailEnum.Minimum;
+                this.LevelOfDetail = LevelOfDetail.Minimum;
             }
             else
             {
-                this.levelOfDetail = LevelOfDetailEnum.None;
+                this.levelOfDetail = LevelOfDetail.None;
             }
         }
 
@@ -593,16 +588,13 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles != null && triangles.Length > 0)
+                if (triangles?.Length > 0 && Intersection.IntersectNearest(ref ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
                 {
-                    if (Intersection.IntersectNearest(ref ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
-                    {
-                        result.Position = pos;
-                        result.Item = tri;
-                        result.Distance = d;
+                    result.Position = pos;
+                    result.Item = tri;
+                    result.Distance = d;
 
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -626,16 +618,13 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles != null && triangles.Length > 0)
+                if (triangles?.Length > 0 && Intersection.IntersectFirst(ref ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
                 {
-                    if (Intersection.IntersectFirst(ref ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
-                    {
-                        result.Position = pos;
-                        result.Item = tri;
-                        result.Distance = d;
+                    result.Position = pos;
+                    result.Item = tri;
+                    result.Distance = d;
 
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -656,24 +645,21 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles != null && triangles.Length > 0)
+                if (triangles?.Length > 0 && Intersection.IntersectAll(ref ray, triangles, facingOnly, out Vector3[] pos, out Triangle[] tri, out float[] ds))
                 {
-                    if (Intersection.IntersectAll(ref ray, triangles, facingOnly, out Vector3[] pos, out Triangle[] tri, out float[] ds))
+                    results = new PickingResult<Triangle>[pos.Length];
+
+                    for (int i = 0; i < results.Length; i++)
                     {
-                        results = new PickingResult<Triangle>[pos.Length];
-
-                        for (int i = 0; i < results.Length; i++)
+                        results[i] = new PickingResult<Triangle>
                         {
-                            results[i] = new PickingResult<Triangle>
-                            {
-                                Position = pos[i],
-                                Item = tri[i],
-                                Distance = ds[i]
-                            };
-                        }
-
-                        return true;
+                            Position = pos[i],
+                            Item = tri[i],
+                            Distance = ds[i]
+                        };
                     }
+
+                    return true;
                 }
             }
 

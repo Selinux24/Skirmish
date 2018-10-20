@@ -15,6 +15,14 @@ namespace Engine
         /// Global id counter
         /// </summary>
         private static int InstanceId = 0;
+        /// <summary>
+        /// Gets the next instance Id
+        /// </summary>
+        /// <returns>Returns the next instance Id</returns>
+        private static int GetNextInstanceId()
+        {
+            return ++InstanceId;
+        }
 
         /// <summary>
         /// Model
@@ -39,7 +47,7 @@ namespace Engine
         /// <summary>
         /// Coarse bounding sphere
         /// </summary>
-        private BoundingSphere coarseBoundingSphere;
+        private readonly BoundingSphere coarseBoundingSphere;
         /// <summary>
         /// Bounding sphere
         /// </summary>
@@ -51,7 +59,7 @@ namespace Engine
         /// <summary>
         /// Level of detail
         /// </summary>
-        private LevelOfDetailEnum levelOfDetail = LevelOfDetailEnum.High;
+        private LevelOfDetail levelOfDetail = LevelOfDetail.High;
 
         /// <summary>
         /// Gets if model has volumes
@@ -77,19 +85,19 @@ namespace Engine
         /// <summary>
         /// Texture index
         /// </summary>
-        public uint TextureIndex = 0;
+        public uint TextureIndex { get; set; } = 0;
         /// <summary>
         /// Active
         /// </summary>
-        public bool Active = true;
+        public bool Active { get; set; } = true;
         /// <summary>
         /// Visible
         /// </summary>
-        public bool Visible = true;
+        public bool Visible { get; set; } = true;
         /// <summary>
         /// Instance level of detail
         /// </summary>
-        public LevelOfDetailEnum LevelOfDetail
+        public LevelOfDetail LevelOfDetail
         {
             get
             {
@@ -103,7 +111,7 @@ namespace Engine
         /// <summary>
         /// Animation controller
         /// </summary>
-        public AnimationController AnimationController = new AnimationController();
+        public AnimationController AnimationController { get; set; } = new AnimationController();
         /// <summary>
         /// Gets the current instance lights collection
         /// </summary>
@@ -115,13 +123,13 @@ namespace Engine
         /// <param name="model">Model</param>
         public ModelInstance(BaseModel model)
         {
-            this.Id = ++InstanceId;
+            this.Id = GetNextInstanceId();
             this.model = model;
 
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
 
-            var drawData = model.GetDrawingData(LevelOfDetailEnum.High);
+            var drawData = model.GetDrawingData(LevelOfDetail.High);
             if (drawData != null)
             {
                 this.coarseBoundingSphere = BoundingSphere.FromPoints(drawData.GetPoints(true));
@@ -313,16 +321,13 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles != null && triangles.Length > 0)
+                if (triangles?.Length > 0 && Intersection.IntersectNearest(ref ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
                 {
-                    if (Intersection.IntersectNearest(ref ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
-                    {
-                        result.Position = p;
-                        result.Item = t;
-                        result.Distance = d;
+                    result.Position = p;
+                    result.Item = t;
+                    result.Distance = d;
 
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -346,16 +351,13 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles != null && triangles.Length > 0)
+                if (triangles?.Length > 0 && Intersection.IntersectFirst(ref ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
                 {
-                    if (Intersection.IntersectFirst(ref ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
-                    {
-                        result.Position = p;
-                        result.Item = t;
-                        result.Distance = d;
+                    result.Position = p;
+                    result.Item = t;
+                    result.Distance = d;
 
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -376,23 +378,20 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles != null && triangles.Length > 0)
+                if (triangles?.Length > 0 && Intersection.IntersectAll(ref ray, triangles, facingOnly, out Vector3[] p, out Triangle[] t, out float[] d))
                 {
-                    if (Intersection.IntersectAll(ref ray, triangles, facingOnly, out Vector3[] p, out Triangle[] t, out float[] d))
+                    results = new PickingResult<Triangle>[p.Length];
+                    for (int i = 0; i < results.Length; i++)
                     {
-                        results = new PickingResult<Triangle>[p.Length];
-                        for (int i = 0; i < results.Length; i++)
+                        results[i] = new PickingResult<Triangle>()
                         {
-                            results[i] = new PickingResult<Triangle>()
-                            {
-                                Position = p[i],
-                                Item = t[i],
-                                Distance = d[i],
-                            };
-                        }
-
-                        return true;
+                            Position = p[i],
+                            Item = t[i],
+                            Distance = d[i],
+                        };
                     }
+
+                    return true;
                 }
             }
 
@@ -443,28 +442,27 @@ namespace Engine
         {
             var position = Vector3.TransformCoordinate(this.coarseBoundingSphere.Center, this.Manipulator.LocalTransform);
             var radius = this.coarseBoundingSphere.Radius * this.Manipulator.AveragingScale;
-            var bsph = new BoundingSphere(position, radius);
 
             var dist = Vector3.Distance(position, origin) - radius;
             if (dist < GameEnvironment.LODDistanceHigh)
             {
-                this.LevelOfDetail = LevelOfDetailEnum.High;
+                this.LevelOfDetail = LevelOfDetail.High;
             }
             else if (dist < GameEnvironment.LODDistanceMedium)
             {
-                this.LevelOfDetail = LevelOfDetailEnum.Medium;
+                this.LevelOfDetail = LevelOfDetail.Medium;
             }
             else if (dist < GameEnvironment.LODDistanceLow)
             {
-                this.LevelOfDetail = LevelOfDetailEnum.Low;
+                this.LevelOfDetail = LevelOfDetail.Low;
             }
             else if (dist < GameEnvironment.LODDistanceMinimum)
             {
-                this.LevelOfDetail = LevelOfDetailEnum.Minimum;
+                this.LevelOfDetail = LevelOfDetail.Minimum;
             }
             else
             {
-                this.levelOfDetail = LevelOfDetailEnum.None;
+                this.levelOfDetail = LevelOfDetail.None;
             }
         }
 

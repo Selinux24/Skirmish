@@ -5667,7 +5667,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                         if (va.X == 0 && vb.X == 0)
                         {
-                            p[nvp + j] = 0x8000 | 0;
+                            p[nvp + j] = 0x8000;
                         }
                         else if (va.Z == h && vb.Z == h)
                         {
@@ -5686,7 +5686,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Just allocate the mesh flags array. The user is resposible to fill it.
-            mesh.flags = new SamplePolyFlags[mesh.npolys];
+            mesh.flags = new SamplePolyFlagTypes[mesh.npolys];
 
             if (mesh.nverts > 0xffff)
             {
@@ -5735,7 +5735,7 @@ namespace Engine.PathFinding.RecastNavigation
             mesh.polys = new Polygoni[maxPolys];
             mesh.regs = new int[maxPolys];
             mesh.areas = new SamplePolyAreas[maxPolys];
-            mesh.flags = new SamplePolyFlags[maxPolys];
+            mesh.flags = new SamplePolyFlagTypes[maxPolys];
 
             int[] nextVert = Helper.CreateArray(maxVerts, 0);
             int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, -1);
@@ -5840,7 +5840,7 @@ namespace Engine.PathFinding.RecastNavigation
                 polys = new Polygoni[src.npolys],
                 regs = new int[src.npolys],
                 areas = new SamplePolyAreas[src.npolys],
-                flags = new SamplePolyFlags[src.npolys]
+                flags = new SamplePolyFlagTypes[src.npolys]
             };
 
             Array.Copy(src.verts, dst.verts, src.nverts);

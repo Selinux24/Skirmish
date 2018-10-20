@@ -2,6 +2,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -233,7 +234,7 @@ namespace Engine
             this.m_HeightData = heightData;
             this.m_ColorData = colorData;
 
-            foreach (int height in heightData)
+            foreach (var height in heightData)
             {
                 if (height < this.Min)
                 {
@@ -291,7 +292,6 @@ namespace Engine
             long vertexCountZ = this.Depth;
 
             vertices = new VertexData[vertexCountX * vertexCountZ];
-            indices = new uint[(vertexCountX - 1) * (vertexCountZ - 1) * 2 * 3];
 
             long vertexCount = 0;
 
@@ -317,7 +317,7 @@ namespace Engine
                 }
             }
 
-            long indexCount = 0;
+            List<uint> indexList = new List<uint>();
 
             for (long depth = 0; depth < vertexCountZ - 1; depth++)
             {
@@ -328,15 +328,17 @@ namespace Engine
                     long index3 = (vertexCountZ * (depth + 1)) + (width + 0); // bottom left
                     long index4 = (vertexCountZ * (depth + 1)) + (width + 1); // bottom right
 
-                    indices[indexCount++] = (uint)index1;
-                    indices[indexCount++] = (uint)index3;
-                    indices[indexCount++] = (uint)index2;
+                    indexList.Add((uint)index1);
+                    indexList.Add((uint)index3);
+                    indexList.Add((uint)index2);
 
-                    indices[indexCount++] = (uint)index2;
-                    indices[indexCount++] = (uint)index3;
-                    indices[indexCount++] = (uint)index4;
+                    indexList.Add((uint)index2);
+                    indexList.Add((uint)index3);
+                    indexList.Add((uint)index4);
                 }
             }
+
+            indices = indexList.ToArray();
 
             ComputeHeightMapNormals(vertices, this.Width, this.Depth);
         }

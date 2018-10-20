@@ -1,6 +1,8 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation
 {
+    [Flags]
     public enum FindPathOptions
     {
         /// <summary>

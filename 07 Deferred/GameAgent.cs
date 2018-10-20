@@ -104,13 +104,6 @@ namespace Deferred
             this.controller = controller;
             this.AgentType = agentType;
         }
-        /// <summary>
-        /// Disposing
-        /// </summary>
-        public void Dispose()
-        {
-
-        }
 
         /// <summary>
         /// Updates internal state

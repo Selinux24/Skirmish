@@ -20,34 +20,42 @@ namespace Engine
         /// Objects base string for identification build
         /// </summary>
         private static readonly string ObjectsAutoString = "__objauto__";
+        /// <summary>
+        /// Gets the next Id
+        /// </summary>
+        /// <returns>Returns the next Id</returns>
+        private static int GetNextId()
+        {
+            return ++ObjectsAutoId;
+        }
 
         /// <summary>
         /// Level name
         /// </summary>
         [XmlAttribute("name")]
-        public string Name = null;
+        public string Name { get; set; } = null;
         /// <summary>
         /// Position
         /// </summary>
-        [NonSerialized]
-        public Vector3 StartPosition = new Vector3(0, 0, 0);
+        [XmlIgnore]
+        public Vector3 StartPosition { get; set; } = new Vector3(0, 0, 0);
         /// <summary>
         /// Looking vector
         /// </summary>
-        [NonSerialized]
-        public Vector3 LookingVector = new Vector3(0, 0, 0);
+        [XmlIgnore]
+        public Vector3 LookingVector { get; set; } = new Vector3(0, 0, 0);
         /// <summary>
         /// Assets map
         /// </summary>
         [XmlArray("map")]
         [XmlArrayItem("item", typeof(ModularSceneryAssetReference))]
-        public ModularSceneryAssetReference[] Map = new ModularSceneryAssetReference[] { };
+        public ModularSceneryAssetReference[] Map { get; set; } = new ModularSceneryAssetReference[] { };
         /// <summary>
         /// Map objects
         /// </summary>
         [XmlArray("objects")]
         [XmlArrayItem("item", typeof(ModularSceneryObjectReference))]
-        public ModularSceneryObjectReference[] Objects = new ModularSceneryObjectReference[] { };
+        public ModularSceneryObjectReference[] Objects { get; set; } = new ModularSceneryObjectReference[] { };
 
         /// <summary>
         /// Position vector
@@ -105,7 +113,7 @@ namespace Engine
             {
                 if (string.IsNullOrEmpty(item.Id))
                 {
-                    item.Id = string.Format("{0}_{1}", ObjectsAutoString, ObjectsAutoId++);
+                    item.Id = string.Format("{0}_{1}", ObjectsAutoString, GetNextId());
                 }
             }
         }
@@ -121,8 +129,7 @@ namespace Engine
             foreach (var item in this.Map)
             {
                 var asset = assets
-                    .Where(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase))
-                    .FirstOrDefault();
+                    .FirstOrDefault(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
 
                 if (asset != null)
                 {
@@ -177,10 +184,10 @@ namespace Engine
         public ModularSceneryAssetReference FindAssetInstance(ModularSceneryAssetDescription[] assets, string mapId, string id)
         {
             var res = assets
-                .Where(a => this.Map.Count(m =>
+                .Where(a => this.Map.Any(m =>
                     string.Equals(m.Id, mapId, StringComparison.OrdinalIgnoreCase) &&
-                    string.Equals(m.AssetName, a.Name, StringComparison.OrdinalIgnoreCase)) > 0)
-                .Select(a => a.Assets.Where(d => string.Equals(d.Id, id, StringComparison.OrdinalIgnoreCase)).FirstOrDefault())
+                    string.Equals(m.AssetName, a.Name, StringComparison.OrdinalIgnoreCase)))
+                .Select(a => a.Assets.FirstOrDefault(d => string.Equals(d.Id, id, StringComparison.OrdinalIgnoreCase)))
                 .FirstOrDefault();
 
             return res;
@@ -200,8 +207,7 @@ namespace Engine
             foreach (var item in this.Map)
             {
                 var asset = assets
-                    .Where(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase))
-                    .FirstOrDefault();
+                    .FirstOrDefault(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
 
                 if (asset != null)
                 {

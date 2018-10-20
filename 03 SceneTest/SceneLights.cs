@@ -246,9 +246,9 @@ namespace SceneTest
                 Top = smTop,
                 Width = width,
                 Height = height,
-                Channel = SpriteTextureChannelsEnum.NoAlpha,
+                Channel = SpriteTextureChannels.NoAlpha,
             };
-            this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsageEnum.UI, layerEffects);
+            this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
 
             this.bufferDrawer.Visible = false;
         }
@@ -273,9 +273,9 @@ namespace SceneTest
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
@@ -474,17 +474,17 @@ namespace SceneTest
         {
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                SetBuffer(SceneRendererResultEnum.ShadowMapDirectional);
+                SetBuffer(SceneRendererResults.ShadowMapDirectional);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
-                SetBuffer(SceneRendererResultEnum.ShadowMapPoint);
+                SetBuffer(SceneRendererResults.ShadowMapPoint);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F7))
             {
-                SetBuffer(SceneRendererResultEnum.ShadowMapSpot);
+                SetBuffer(SceneRendererResults.ShadowMapSpot);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Add))
@@ -500,13 +500,13 @@ namespace SceneTest
                 }
             }
         }
-        private void SetBuffer(SceneRendererResultEnum resource)
+        private void SetBuffer(SceneRendererResults resource)
         {
             var buffer = this.Renderer.GetResource(resource);
 
             this.bufferDrawer.Instance.Texture = buffer;
             this.bufferDrawer.Instance.TextureIndex = 0;
-            this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.Red;
+            this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Red;
             this.bufferDrawer.Visible = true;
         }
     }

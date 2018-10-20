@@ -10,35 +10,35 @@ namespace Engine
         /// <summary>
         /// Left position
         /// </summary>
-        public int Left;
+        public int Left { get; set; }
         /// <summary>
         /// Top position
         /// </summary>
-        public int Top;
+        public int Top { get; set; }
         /// <summary>
         /// Width
         /// </summary>
-        public int Width;
+        public int Width { get; set; }
         /// <summary>
         /// Height
         /// </summary>
-        public int Height;
+        public int Height { get; set; }
         /// <summary>
         /// Base color
         /// </summary>
-        public Color BaseColor;
+        public Color BaseColor { get; set; }
         /// <summary>
         /// Progress color
         /// </summary>
-        public Color ProgressColor;
+        public Color ProgressColor { get; set; }
         /// <summary>
         /// Button text
         /// </summary>
-        public string Text;
+        public string Text { get; set; }
         /// <summary>
         /// Text description
         /// </summary>
-        public TextDrawerDescription TextDescription;
+        public TextDrawerDescription TextDescription { get; set; }
 
         /// <summary>
         /// Constructor

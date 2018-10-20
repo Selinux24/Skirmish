@@ -3,7 +3,7 @@
     /// <summary>
     /// Sky plane modes
     /// </summary>
-    public enum SkyPlaneMode
+    public enum SkyPlaneModes
     {
         /// <summary>
         /// Static sky

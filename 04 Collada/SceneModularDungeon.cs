@@ -70,7 +70,7 @@ namespace Collada
         private Color connectionColor = new Color(Color.LightBlue.ToColor3(), 1f);
 
         public SceneModularDungeon(Game game)
-            : base(game, SceneModesEnum.DeferredLightning)
+            : base(game, SceneModes.DeferredLightning)
         {
 
         }
@@ -149,15 +149,15 @@ namespace Collada
         }
         private void InitializeUI()
         {
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             this.title.Instance.Text = "Collada Modular Dungeon Scene";
             this.title.Instance.Position = Vector2.Zero;
 
-            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.fps.Instance.Text = null;
             this.fps.Instance.Position = new Vector2(0, 24);
 
-            this.info = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.info = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.info.Instance.Text = null;
             this.info.Instance.Position = new Vector2(0, 48);
 
@@ -169,9 +169,9 @@ namespace Collada
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            this.messages = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 48, Color.Red, Color.DarkRed), SceneObjectUsageEnum.UI, layerHUD);
+            this.messages = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 48, Color.Red, Color.DarkRed), SceneObjectUsages.UI, layerHUD);
             this.messages.Instance.Text = null;
             this.messages.Instance.Position = new Vector2(0, 0);
             this.messages.Visible = false;
@@ -193,7 +193,7 @@ namespace Collada
                 LevelsFile = "levels.xml",
             };
 
-            this.scenery = this.AddComponent<ModularScenery>(desc, SceneObjectUsageEnum.Ground);
+            this.scenery = this.AddComponent<ModularScenery>(desc, SceneObjectUsages.Ground);
 
             this.SetGround(this.scenery, true);
         }
@@ -380,9 +380,9 @@ namespace Collada
             }
 
             //Doors
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypeEnum.Door), Color.LightYellow);
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypeEnum.Entrance), Color.PaleVioletRed);
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypeEnum.Exit), Color.ForestGreen);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Door), Color.LightYellow);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Entrance), Color.PaleVioletRed);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Exit), Color.ForestGreen);
         }
         private void UpdateBoundingBoxes(ModelInstance[] items, Color color)
         {
@@ -509,9 +509,9 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.G))
@@ -666,15 +666,15 @@ namespace Collada
         {
             var sphere = new BoundingSphere(this.Camera.Position, doorDistance);
 
-            var objTypes = ModularSceneryObjectTypeEnum.Entrance |
-                ModularSceneryObjectTypeEnum.Exit |
-                ModularSceneryObjectTypeEnum.Door |
-                ModularSceneryObjectTypeEnum.Light;
+            var objTypes = ModularSceneryObjectTypes.Entrance |
+                ModularSceneryObjectTypes.Exit |
+                ModularSceneryObjectTypes.Door |
+                ModularSceneryObjectTypes.Light;
 
             var items = this.scenery.Instance.GetObjectsInVolume(sphere, objTypes, true);
             if (items != null && items.Length > 0)
             {
-                if (items[0].Object.Type == ModularSceneryObjectTypeEnum.Entrance)
+                if (items[0].Object.Type == ModularSceneryObjectTypes.Entrance)
                 {
                     var msg = "The door locked when you closed it.\r\nYou must find an exit...";
 
@@ -683,7 +683,7 @@ namespace Collada
                     return;
                 }
 
-                if (items[0].Object.Type == ModularSceneryObjectTypeEnum.Exit)
+                if (items[0].Object.Type == ModularSceneryObjectTypes.Exit)
                 {
                     var msg = "Press space to exit...";
 
@@ -694,7 +694,7 @@ namespace Collada
                     return;
                 }
 
-                if (items[0].Object.Type == ModularSceneryObjectTypeEnum.Door)
+                if (items[0].Object.Type == ModularSceneryObjectTypes.Door)
                 {
                     var msg = string.Format("Press space to {0} the door...", items[0].Item.Visible ? "open" : "close");
 
@@ -705,7 +705,7 @@ namespace Collada
                     return;
                 }
 
-                if (items[0].Object.Type == ModularSceneryObjectTypeEnum.Light)
+                if (items[0].Object.Type == ModularSceneryObjectTypes.Light)
                 {
                     var lights = items[0].Item.Lights;
 

@@ -19,7 +19,7 @@ namespace Engine.Common
         /// <summary>
         /// Default level of detail
         /// </summary>
-        private readonly LevelOfDetailEnum defaultLevelOfDetail = LevelOfDetailEnum.Minimum;
+        private readonly LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
 
         /// <summary>
         /// Gets the texture count for texture index
@@ -34,7 +34,7 @@ namespace Engine.Common
             {
                 List<MeshMaterial> matList = new List<MeshMaterial>();
 
-                var drawingData = this.GetDrawingData(LevelOfDetailEnum.High);
+                var drawingData = this.GetDrawingData(LevelOfDetail.High);
                 if (drawingData != null)
                 {
                     foreach (var meshMaterial in drawingData.Materials.Keys)
@@ -59,7 +59,7 @@ namespace Engine.Common
             {
                 List<SkinningData> skList = new List<SkinningData>();
 
-                var drawingData = this.GetDrawingData(LevelOfDetailEnum.High);
+                var drawingData = this.GetDrawingData(LevelOfDetail.High);
                 if (drawingData != null)
                 {
                     foreach (var meshMaterial in drawingData.Materials.Keys)
@@ -114,6 +114,10 @@ namespace Engine.Common
             {
                 geo = new[] { description.Content.ModelContent };
             }
+            else
+            {
+                throw new EngineException("No geometry found in description.");
+            }
 
             if (geo.Length == 1)
             {
@@ -121,7 +125,7 @@ namespace Engine.Common
 
                 var drawable = DrawingData.Build(this.Game, this.BufferManager, geo[0], desc);
 
-                this.meshesByLOD.Add(LevelOfDetailEnum.High, drawable);
+                this.meshesByLOD.Add(LevelOfDetail.High, drawable);
             }
             else
             {
@@ -129,7 +133,7 @@ namespace Engine.Common
 
                 foreach (var lod in content.Keys)
                 {
-                    if (this.defaultLevelOfDetail == LevelOfDetailEnum.None)
+                    if (this.defaultLevelOfDetail == LevelOfDetail.None)
                     {
                         this.defaultLevelOfDetail = lod;
                     }
@@ -166,7 +170,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="lod">Level of detail</param>
         /// <returns>Returns the nearest level of detail for the specified level of detail</returns>
-        internal LevelOfDetailEnum GetLODNearest(LevelOfDetailEnum lod)
+        internal LevelOfDetail GetLODNearest(LevelOfDetail lod)
         {
             if (this.meshesByLOD.Keys.Count == 0)
             {
@@ -184,9 +188,9 @@ namespace Engine.Common
 
                     for (int l = i; l > 0; l /= 2)
                     {
-                        if (this.meshesByLOD.ContainsKey((LevelOfDetailEnum)l))
+                        if (this.meshesByLOD.ContainsKey((LevelOfDetail)l))
                         {
-                            return (LevelOfDetailEnum)l;
+                            return (LevelOfDetail)l;
                         }
                     }
 
@@ -198,7 +202,7 @@ namespace Engine.Common
         /// Gets the minimum level of detail
         /// </summary>
         /// <returns>Returns the minimum level of detail</returns>
-        internal LevelOfDetailEnum GetLODMinimum()
+        internal LevelOfDetail GetLODMinimum()
         {
             int l = int.MaxValue;
 
@@ -210,13 +214,13 @@ namespace Engine.Common
                 }
             }
 
-            return (LevelOfDetailEnum)l;
+            return (LevelOfDetail)l;
         }
         /// <summary>
         /// Gets the maximum level of detail
         /// </summary>
         /// <returns>Returns the maximum level of detail</returns>
-        internal LevelOfDetailEnum GetLODMaximum()
+        internal LevelOfDetail GetLODMaximum()
         {
             int l = int.MinValue;
 
@@ -228,14 +232,14 @@ namespace Engine.Common
                 }
             }
 
-            return (LevelOfDetailEnum)l;
+            return (LevelOfDetail)l;
         }
         /// <summary>
         /// Gets the drawing data by level of detail
         /// </summary>
         /// <param name="lod">Level of detail</param>
         /// <returns>Returns the drawing data object</returns>
-        internal DrawingData GetDrawingData(LevelOfDetailEnum lod)
+        internal DrawingData GetDrawingData(LevelOfDetail lod)
         {
             if (this.meshesByLOD.ContainsKey(lod))
             {
@@ -249,16 +253,16 @@ namespace Engine.Common
         /// </summary>
         /// <param name="lod">First level of detail</param>
         /// <returns>Returns the first available level of detail drawing data</returns>
-        internal DrawingData GetFirstDrawingData(LevelOfDetailEnum lod)
+        internal DrawingData GetFirstDrawingData(LevelOfDetail lod)
         {
-            while (lod > LevelOfDetailEnum.None)
+            while (lod > LevelOfDetail.None)
             {
                 if (this.meshesByLOD.ContainsKey(lod))
                 {
                     return this.meshesByLOD[lod];
                 }
 
-                lod = (LevelOfDetailEnum)((int)lod / 2);
+                lod = (LevelOfDetail)((int)lod / 2);
             }
 
             return null;

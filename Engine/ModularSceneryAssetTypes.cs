@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Modular scenery asset type enum
     /// </summary>
-    public enum ModularSceneryAssetTypeEnum
+    public enum ModularSceneryAssetTypes
     {
         /// <summary>
         /// None

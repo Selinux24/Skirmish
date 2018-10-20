@@ -10,11 +10,11 @@ namespace Engine
         /// <summary>
         /// Path check-points
         /// </summary>
-        private Vector3[] checkPoints = null;
+        private readonly Vector3[] checkPoints = null;
         /// <summary>
         /// Path surface normals
         /// </summary>
-        private Vector3[] normals = null;
+        private readonly Vector3[] normals = null;
         /// <summary>
         /// Gets the total length of the path
         /// </summary>
@@ -59,19 +59,19 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets the path position at specified distance
+        /// Gets the path position at specified time
         /// </summary>
-        /// <param name="distance">Distance</param>
-        /// <returns>Returns the position at distance</returns>
-        public Vector3 GetPosition(float distance)
+        /// <param name="time">Time</param>
+        /// <returns>Returns the position at time</returns>
+        public Vector3 GetPosition(float time)
         {
             if (this.PositionCount > 0)
             {
-                if (distance == 0) return checkPoints[0];
-                if (distance >= this.Length) return checkPoints[checkPoints.Length - 1];
+                if (time == 0) return checkPoints[0];
+                if (time >= this.Length) return checkPoints[checkPoints.Length - 1];
 
                 Vector3 res = Vector3.Zero;
-                float l = distance;
+                float l = time;
                 for (int i = 1; i < checkPoints.Length; i++)
                 {
                     Vector3 segment = checkPoints[i] - checkPoints[i - 1];
@@ -97,17 +97,17 @@ namespace Engine
         /// <summary>
         /// Gets path normal in specified time
         /// </summary>
-        /// <param name="distance">Distance</param>
+        /// <param name="time">Time</param>
         /// <returns>Returns path normal</returns>
-        public Vector3 GetNormal(float distance)
+        public Vector3 GetNormal(float time)
         {
             if (this.NormalCount > 0)
             {
-                if (distance == 0) return normals[0];
-                if (distance >= this.Length) return normals[normals.Length - 1];
+                if (time == 0) return normals[0];
+                if (time >= this.Length) return normals[normals.Length - 1];
 
                 Vector3 res = Vector3.Zero;
-                float l = distance;
+                float l = time;
                 for (int i = 1; i < checkPoints.Length; i++)
                 {
                     Vector3 segment = checkPoints[i] - checkPoints[i - 1];
@@ -131,19 +131,19 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Gets the next control point at specified distance
+        /// Gets the next control point at specified time
         /// </summary>
-        /// <param name="distance">Distance</param>
-        /// <returns>Returns the next control path at specified distance</returns>
-        public Vector3 GetNextControlPoint(float distance)
+        /// <param name="time">Time</param>
+        /// <returns>Returns the next control path at specified time</returns>
+        public Vector3 GetNextControlPoint(float time)
         {
             if (this.PositionCount > 0)
             {
-                if (distance == 0) return checkPoints[0];
-                if (distance >= this.Length) return checkPoints[checkPoints.Length - 1];
+                if (time == 0) return checkPoints[0];
+                if (time >= this.Length) return checkPoints[checkPoints.Length - 1];
 
                 Vector3 res = Vector3.Zero;
-                float l = distance;
+                float l = time;
                 for (int i = 1; i < checkPoints.Length; i++)
                 {
                     Vector3 segment = checkPoints[i] - checkPoints[i - 1];

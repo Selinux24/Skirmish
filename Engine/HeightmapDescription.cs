@@ -15,84 +15,84 @@ namespace Engine
             /// <summary>
             /// Content path
             /// </summary>
-            public string ContentPath = "Textures";
+            public string ContentPath { get; set; } = "Textures";
 
             /// <summary>
             /// Normal maps
             /// </summary>
-            public string[] NormalMaps = null;
+            public string[] NormalMaps { get; set; } = null;
             /// <summary>
             /// Specular maps
             /// </summary>
-            public string[] SpecularMaps = null;
+            public string[] SpecularMaps { get; set; } = null;
 
             /// <summary>
             /// Gets or sets if use alpha mapping or not
             /// </summary>
-            public bool UseAlphaMapping = false;
+            public bool UseAlphaMapping { get; set; } = false;
             /// <summary>
             /// Alpha map
             /// </summary>
-            public string AlphaMap = null;
+            public string AlphaMap { get; set; } = null;
             /// <summary>
             /// Color textures for alpha map
             /// </summary>
-            public string[] ColorTextures = null;
+            public string[] ColorTextures { get; set; } = null;
 
             /// <summary>
             /// Gets or sets if use slope texturing or not
             /// </summary>
-            public bool UseSlopes = false;
+            public bool UseSlopes { get; set; } = false;
             /// <summary>
             /// Slope ranges
             /// </summary>
-            public Vector2 SlopeRanges = Vector2.Zero;
+            public Vector2 SlopeRanges { get; set; } = Vector2.Zero;
             /// <summary>
             /// High resolution textures
             /// </summary>
-            public string[] TexturesHR = null;
+            public string[] TexturesHR { get; set; } = null;
             /// <summary>
             /// Low resolution textures
             /// </summary>
-            public string[] TexturesLR = null;
+            public string[] TexturesLR { get; set; } = null;
 
             /// <summary>
             /// Lerping proportion between alpha mapping and slope texturing
             /// </summary>
-            public float Proportion = 0f;
+            public float Proportion { get; set; } = 0f;
         }
 
         /// <summary>
         /// Content path
         /// </summary>
-        public string ContentPath = "Resources";
+        public string ContentPath { get; set; } = "Resources";
         /// <summary>
         /// Height map file name
         /// </summary>
-        public string HeightmapFileName = null;
+        public string HeightmapFileName { get; set; } = null;
         /// <summary>
         /// Color map file name
         /// </summary>
-        public string ColormapFileName = null;
+        public string ColormapFileName { get; set; } = null;
         /// <summary>
         /// Cell size
         /// </summary>
-        public float CellSize = 1;
+        public float CellSize { get; set; } = 1;
         /// <summary>
         /// Maximum height
         /// </summary>
-        public float MaximumHeight = 1;
+        public float MaximumHeight { get; set; } = 1;
         /// <summary>
         /// Texture resolution
         /// </summary>
-        public float TextureResolution = 10;
+        public float TextureResolution { get; set; } = 10;
         /// <summary>
         /// Textures
         /// </summary>
-        public TexturesDescription Textures = new TexturesDescription();
+        public TexturesDescription Textures { get; set; } = new TexturesDescription();
         /// <summary>
         /// Terrain material
         /// </summary>
-        public MaterialDescription Material = new MaterialDescription();
+        public MaterialDescription Material { get; set; } = new MaterialDescription();
     }
 }

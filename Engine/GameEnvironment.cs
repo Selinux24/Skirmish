@@ -10,27 +10,27 @@ namespace Engine
         /// <summary>
         /// Background color
         /// </summary>
-        public static Color4 Background = Color.Black.ToColor4();
+        public static Color4 Background { get; set; } = Color.Black.ToColor4();
         /// <summary>
         /// Gravity
         /// </summary>
-        public static readonly Vector3 Gravity = new Vector3(0, -9.8f, 0);
+        public static Vector3 Gravity { get; set; } = new Vector3(0, -9.8f, 0);
 
         /// <summary>
         /// Maximum distance for high level of detail models
         /// </summary>
-        public static float LODDistanceHigh = 100f;
+        public static float LODDistanceHigh { get; set; } = 100f;
         /// <summary>
         /// Maximum distance for medium level of detail models
         /// </summary>
-        public static float LODDistanceMedium = 150f;
+        public static float LODDistanceMedium { get; set; } = 150f;
         /// <summary>
         /// Maximum distance for low level of detail models
         /// </summary>
-        public static float LODDistanceLow = 300f;
+        public static float LODDistanceLow { get; set; } = 300f;
         /// <summary>
         /// Maximum distance for minimum level of detail models
         /// </summary>
-        public static float LODDistanceMinimum = 1000f;
+        public static float LODDistanceMinimum { get; set; } = 1000f;
     }
 }

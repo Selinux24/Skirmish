@@ -6,6 +6,7 @@ namespace SpriteDrawing
 {
     static class Program
     {
+        [STAThread]
         static void Main()
         {
             try

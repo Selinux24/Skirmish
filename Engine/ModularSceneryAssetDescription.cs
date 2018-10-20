@@ -16,19 +16,19 @@ namespace Engine
         /// Asset name
         /// </summary>
         [XmlElement("name")]
-        public string Name;
+        public string Name { get; set; }
         /// <summary>
         /// Assets list
         /// </summary>
         [XmlArray("references")]
         [XmlArrayItem("asset", typeof(ModularSceneryAssetReference))]
-        public ModularSceneryAssetReference[] Assets = null;
+        public ModularSceneryAssetReference[] Assets { get; set; } = null;
         /// <summary>
         /// Connections list
         /// </summary>
         [XmlArray("connections")]
         [XmlArrayItem("connection", typeof(ModularSceneryAssetDescriptionConnection))]
-        public ModularSceneryAssetDescriptionConnection[] Connections = null;
+        public ModularSceneryAssetDescriptionConnection[] Connections { get; set; } = null;
 
         /// <summary>
         /// Gets the instance count dictionary

@@ -19,10 +19,6 @@ namespace Engine
         /// </summary>
         private readonly BufferDescriptor indexBuffer = null;
         /// <summary>
-        /// Vertex couunt
-        /// </summary>
-        private int vertexDrawCount = 0;
-        /// <summary>
         /// Index count
         /// </summary>
         private int indexDrawCount = 0;
@@ -198,11 +194,11 @@ namespace Engine
 
             this.fontMap = FontMap.Map(this.Game, description.Font, description.FontSize, description.Style);
 
-            VertexPositionTexture[] vertices = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
-            uint[] indices = new uint[FontMap.MAXTEXTLENGTH * 6];
+            VertexPositionTexture[] verts = new VertexPositionTexture[FontMap.MAXTEXTLENGTH * 4];
+            uint[] idx = new uint[FontMap.MAXTEXTLENGTH * 6];
 
-            this.vertexBuffer = this.BufferManager.Add(description.Name, vertices, true, 0);
-            this.indexBuffer = this.BufferManager.Add(description.Name, indices, true);
+            this.vertexBuffer = this.BufferManager.Add(description.Name, verts, true, 0);
+            this.indexBuffer = this.BufferManager.Add(description.Name, idx, true);
 
             this.TextColor = description.TextColor;
             this.ShadowColor = description.ShadowColor;
@@ -226,20 +222,9 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                if (this.BufferManager != null)
-                {
-                    this.BufferManager.RemoveVertexData(this.vertexBuffer);
-                    this.BufferManager.RemoveIndexData(this.indexBuffer);
-                }
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
+                this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
-        }
-        /// <summary>
-        /// Update component state
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Update(UpdateContext context)
-        {
-
         }
         /// <summary>
         /// Draw text
@@ -248,37 +233,34 @@ namespace Engine
         public override void Draw(DrawContext context)
         {
             var mode = context.DrawerMode;
-            if (mode.HasFlag(DrawerModesEnum.TransparentOnly))
+
+            if (mode.HasFlag(DrawerModesEnum.TransparentOnly) && !string.IsNullOrWhiteSpace(this.text))
             {
-                if (!string.IsNullOrWhiteSpace(this.text))
+                if (this.updateBuffers)
                 {
-                    if (this.updateBuffers)
-                    {
-                        this.BufferManager.WriteBuffer(this.vertexBuffer.Slot, this.vertexBuffer.Offset, this.vertices);
-                        this.BufferManager.WriteBuffer(this.indexBuffer.Slot, this.indexBuffer.Offset, this.indices);
+                    this.BufferManager.WriteBuffer(this.vertexBuffer.Slot, this.vertexBuffer.Offset, this.vertices);
+                    this.BufferManager.WriteBuffer(this.indexBuffer.Slot, this.indexBuffer.Offset, this.indices);
 
-                        this.vertexDrawCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 4;
-                        this.indexDrawCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
+                    this.indexDrawCount = string.IsNullOrWhiteSpace(this.text) ? 0 : this.text.Length * 6;
 
-                        this.updateBuffers = false;
-                    }
-
-                    this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-
-                    var effect = DrawerPool.EffectDefaultFont;
-                    var technique = effect.FontDrawer;
-
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
-
-                    if (this.ShadowColor != Color.Transparent)
-                    {
-                        //Draw shadow
-                        this.DrawText(effect, technique, this.localShadow, this.ShadowColor);
-                    }
-
-                    //Draw text
-                    this.DrawText(effect, technique, this.local, this.TextColor);
+                    this.updateBuffers = false;
                 }
+
+                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+
+                var effect = DrawerPool.EffectDefaultFont;
+                var technique = effect.FontDrawer;
+
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+
+                if (this.ShadowColor != Color.Transparent)
+                {
+                    //Draw shadow
+                    this.DrawText(effect, technique, this.localShadow, this.ShadowColor);
+                }
+
+                //Draw text
+                this.DrawText(effect, technique, this.local, this.TextColor);
             }
         }
         /// <summary>

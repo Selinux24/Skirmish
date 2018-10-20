@@ -49,14 +49,14 @@ namespace SceneTest
                 Delta = new Vector2(-14, -6),
                 Color = Color.White,
             };
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI, layerCursor);
+            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
 
             #endregion
 
             #region Background
 
             var backGroundDesc = ModelDescription.FromXml("Background", "SceneStart", "SkyPlane.xml");
-            this.backGround = this.AddComponent<Model>(backGroundDesc, SceneObjectUsageEnum.UI);
+            this.backGround = this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI);
 
             #endregion
 
@@ -67,12 +67,12 @@ namespace SceneTest
                 Name = "Title",
                 Font = "Showcard Gothic",
                 FontSize = 72,
-                Style = FontMapStyleEnum.Bold,
+                Style = FontMapStyles.Bold,
                 TextColor = Color.Gold,
                 ShadowColor = new Color4(Color.LightYellow.RGB(), 0.55f),
                 ShadowDelta = new Vector2(4, -4),
             };
-            this.title = this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.title = this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD);
 
             #endregion
 
@@ -98,16 +98,16 @@ namespace SceneTest
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = "Verdana",
-                    Style = FontMapStyleEnum.Bold,
+                    Style = FontMapStyles.Bold,
                     FontSize = 24,
                     TextColor = Color.Gold,
                 }
             };
-            this.sceneMaterialsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
-            this.sceneWaterButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
-            this.sceneStencilPassButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
-            this.sceneLightsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
-            this.sceneTexturesButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.sceneMaterialsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneWaterButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneStencilPassButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneLightsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneTexturesButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
 
             #endregion
 
@@ -133,12 +133,12 @@ namespace SceneTest
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = "Verdana",
-                    Style = FontMapStyleEnum.Bold,
+                    Style = FontMapStyles.Bold,
                     FontSize = 24,
                     TextColor = Color.Gold,
                 }
             };
-            this.exitButton = this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.exitButton = this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD);
 
             #endregion
         }

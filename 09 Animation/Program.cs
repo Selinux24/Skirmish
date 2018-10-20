@@ -6,6 +6,7 @@ namespace Animation
 {
     static class Program
     {
+        [STAThread]
         static void Main()
         {
             try

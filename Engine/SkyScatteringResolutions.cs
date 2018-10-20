@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Sky scattering resolution
     /// </summary>
-    public enum SkyScatteringResolutionEnum
+    public enum SkyScatteringResolutions
     {
         /// <summary>
         /// None

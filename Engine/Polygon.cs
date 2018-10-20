@@ -17,19 +17,19 @@ namespace Engine
             /// <summary>
             /// First edge point index in first polygon
             /// </summary>
-            public int FirstPoint1;
+            public int FirstPoint1 { get; set; }
             /// <summary>
             /// Second edge point index in first polygon
             /// </summary>
-            public int FirstPoint2;
+            public int FirstPoint2 { get; set; }
             /// <summary>
             /// First edge point index in second polygon
             /// </summary>
-            public int SecondPoint1;
+            public int SecondPoint1 { get; set; }
             /// <summary>
             /// Second edge point index in second polygon
             /// </summary>
-            public int SecondPoint2;
+            public int SecondPoint2 { get; set; }
         }
 
         /// <summary>
@@ -592,12 +592,9 @@ namespace Engine
                 Line2D pEdge1 = new Line2D(new Vector2(edge1.Point1.X, edge1.Point1.Z), new Vector2(edge1.Point2.X, edge1.Point2.Z));
                 Line2D pEdge2 = new Line2D(new Vector2(edge2.Point1.X, edge2.Point1.Z), new Vector2(edge2.Point2.X, edge2.Point2.Z));
 
-                if (pEdge1.Direction == pEdge2.Direction)
+                if (pEdge1.Direction == pEdge2.Direction && !Array.Exists(exclusions, e => e == edges[i].Point1))
                 {
-                    if (!Array.Exists(exclusions, e => e == edges[i].Point1))
-                    {
-                        toRemove.Add(edges[i].Point1);
-                    }
+                    toRemove.Add(edges[i].Point1);
                 }
             }
 

@@ -104,7 +104,7 @@ namespace Heightmap
         private int initDurationIndex = 0;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.ForwardLigthning)
+            : base(game, SceneModes.ForwardLigthning)
         {
 
         }
@@ -179,17 +179,17 @@ namespace Heightmap
                 Height = 20,
             };
 
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI, layerCursor);
+            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
 
             #endregion
 
             #region Texts
 
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
-            this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
-            this.stats = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
-            this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
-            this.help2 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange), SceneObjectUsageEnum.UI, layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.stats = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.help2 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
             this.title.Instance.Text = "Heightmap Terrain test";
             this.load.Instance.Text = "";
@@ -212,7 +212,7 @@ namespace Heightmap
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
@@ -235,7 +235,7 @@ namespace Heightmap
                     ModelContentFilename = @"boulder.xml",
                 }
             };
-            this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsages.None, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -257,7 +257,7 @@ namespace Heightmap
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsageEnum.None, layerTerrain);
+            this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -279,7 +279,7 @@ namespace Heightmap
                     ModelContentFilename = @"tree.xml",
                 }
             };
-            this.trees2 = this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsageEnum.None, layerTerrain);
+            this.trees2 = this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsages.None, layerTerrain);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -300,7 +300,7 @@ namespace Heightmap
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            this.soldier = this.AddComponent<Model>(sDesc, SceneObjectUsageEnum.Agent, layerObjects);
+            this.soldier = this.AddComponent<Model>(sDesc, SceneObjectUsages.Agent, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -321,7 +321,7 @@ namespace Heightmap
                     ModelContentFilename = @"soldier_anim2.xml",
                 }
             };
-            this.troops = this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsageEnum.Agent, layerObjects);
+            this.troops = this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -342,7 +342,7 @@ namespace Heightmap
                     ModelContentFilename = @"m24.xml",
                 },
             };
-            this.helicopterI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.helicopterI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsages.None, layerObjects);
             for (int i = 0; i < this.helicopterI.Count; i++)
             {
                 this.Lights.AddRange(this.helicopterI.Instance[i].Lights);
@@ -367,7 +367,7 @@ namespace Heightmap
                     ModelContentFilename = @"Bradley.xml",
                 }
             };
-            this.bradleyI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.bradleyI = this.AddComponent<ModelInstanced>(mDesc, SceneObjectUsages.None, layerObjects);
             for (int i = 0; i < this.bradleyI.Count; i++)
             {
                 this.Lights.AddRange(this.bradleyI.Instance[i].Lights);
@@ -391,7 +391,7 @@ namespace Heightmap
                     ModelContentFilename = @"Watch Tower.xml",
                 }
             };
-            this.watchTower = this.AddComponent<Model>(mDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.watchTower = this.AddComponent<Model>(mDesc, SceneObjectUsages.None, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -435,7 +435,7 @@ namespace Heightmap
                     ModelContentFilename = @"torch.xml",
                 }
             };
-            this.torchs = this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsageEnum.None, layerObjects);
+            this.torchs = this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsages.None, layerObjects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -445,7 +445,7 @@ namespace Heightmap
             Stopwatch sw = Stopwatch.StartNew();
 
             sw.Restart();
-            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }, SceneObjectUsageEnum.None, layerEffects);
+            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" }, SceneObjectUsages.None, layerEffects);
 
             this.pFire = ParticleSystemDescription.InitializeFire("resources/particles", "fire.png", 0.5f);
             this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources/particles", "smoke.png", 0.5f);
@@ -511,7 +511,7 @@ namespace Heightmap
                     HeightmapDescription = hDesc,
                 }
             };
-            this.terrain = this.AddComponent<Terrain>(gDesc, SceneObjectUsageEnum.None, layerTerrain);
+            this.terrain = this.AddComponent<Terrain>(gDesc, SceneObjectUsages.None, layerTerrain);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -569,7 +569,7 @@ namespace Heightmap
                     Count = 1,
                 },
             };
-            this.gardener = this.AddComponent<GroundGardener>(vDesc, SceneObjectUsageEnum.None, layerFoliage);
+            this.gardener = this.AddComponent<GroundGardener>(vDesc, SceneObjectUsages.None, layerFoliage);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -618,7 +618,7 @@ namespace Heightmap
                     WindEffect = 0.5f,
                 },
             };
-            this.gardener2 = this.AddComponent<GroundGardener>(vDesc2, SceneObjectUsageEnum.None, layerFoliage);
+            this.gardener2 = this.AddComponent<GroundGardener>(vDesc2, SceneObjectUsages.None, layerFoliage);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -649,7 +649,7 @@ namespace Heightmap
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            this.lensFlare = this.AddComponent<LensFlare>(lfDesc, SceneObjectUsageEnum.None, layerEffects);
+            this.lensFlare = this.AddComponent<LensFlare>(lfDesc, SceneObjectUsages.None, layerEffects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -679,7 +679,7 @@ namespace Heightmap
                 ContentPath = "Resources/sky",
                 Texture1Name = "perturb001.dds",
                 Texture2Name = "cloud001.dds",
-                Mode = SkyPlaneMode.Perturbed,
+                Mode = SkyPlaneModes.Perturbed,
                 Direction = new Vector2(1, 1),
             };
             this.clouds = this.AddComponent<SkyPlane>(scDesc);
@@ -1094,7 +1094,7 @@ namespace Heightmap
                     DepthEnabled = true,
                     Count = 1000,
                 };
-                this.linesDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);
+                this.linesDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, layerEffects);
                 this.linesDrawer.Visible = false;
             }
         }
@@ -1153,9 +1153,9 @@ namespace Heightmap
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
             base.Update(gameTime);

@@ -2,8 +2,6 @@
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Minimap description
     /// </summary>
@@ -12,27 +10,27 @@ namespace Engine
         /// <summary>
         /// Top position
         /// </summary>
-        public int Top;
+        public int Top { get; set; }
         /// <summary>
         /// Left position
         /// </summary>
-        public int Left;
+        public int Left { get; set; }
         /// <summary>
         /// Width
         /// </summary>
-        public int Width;
+        public int Width { get; set; }
         /// <summary>
         /// Height
         /// </summary>
-        public int Height;
+        public int Height { get; set; }
         /// <summary>
         /// Terrain to draw
         /// </summary>
-        public SceneObject[] Drawables;
+        public SceneObject[] Drawables { get; set; }
         /// <summary>
         /// Minimap render area
         /// </summary>
-        public BoundingBox MinimapArea;
+        public BoundingBox MinimapArea { get; set; }
 
         /// <summary>
         /// Constructor

@@ -83,7 +83,7 @@ namespace Engine.PathFinding.RecastNavigation
                     var tile = file.NavMeshData[i];
                     if (tile == null || tile.header.magic != Detour.DT_NAVMESH_MAGIC) continue;
 
-                    navmesh.AddTile(tile, TileFlags.DT_TILE_FREE_DATA, 0, out int res);
+                    navmesh.AddTile(tile, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res);
                 }
 
                 if (file.HasTileCache)
@@ -98,7 +98,7 @@ namespace Engine.PathFinding.RecastNavigation
                         var tile = file.TileCacheData[i];
                         if (tile.Header.magic != DetourTileCache.DT_TILECACHE_MAGIC) continue;
 
-                        navmesh.TileCache.AddTile(tile, CompressedTileFlags.DT_COMPRESSEDTILE_FREE_DATA);
+                        navmesh.TileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
                     }
                 }
 

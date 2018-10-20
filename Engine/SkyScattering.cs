@@ -21,7 +21,7 @@ namespace Engine
         {
             float icos = 1.0f - cos;
 
-            return 0.25f * (float)Math.Exp(-0.00287f + icos * (0.459f + icos * (3.83f + icos * ((-6.80f + (icos * 5.25f))))));
+            return 0.25f * (float)Math.Exp(-0.00287f + icos * (0.459f + icos * (3.83f + icos * (-6.80f + (icos * 5.25f)))));
         }
         /// <summary>
         /// Mie phase
@@ -195,7 +195,7 @@ namespace Engine
         /// <summary>
         /// Resolution
         /// </summary>
-        public SkyScatteringResolutionEnum Resolution { get; set; }
+        public SkyScatteringResolutions Resolution { get; set; }
 
         /// <summary>
         /// Constructor
@@ -240,12 +240,9 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.BufferManager != null)
-                {
-                    //Remove data from buffer manager
-                    this.BufferManager.RemoveVertexData(this.vertexBuffer);
-                    this.BufferManager.RemoveIndexData(this.indexBuffer);
-                }
+                //Remove data from buffer manager
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
+                this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
 
@@ -271,9 +268,7 @@ namespace Engine
 
             if (mode.HasFlag(DrawerModesEnum.OpaqueOnly))
             {
-                var dwContext = context as DrawContext;
-
-                var keyLight = dwContext.Lights.KeyLight;
+                var keyLight = context.Lights.KeyLight;
                 if (keyLight != null && this.indexBuffer.Count > 0)
                 {
                     Counters.InstancesPerFrame++;
@@ -282,11 +277,11 @@ namespace Engine
                     var effect = DrawerPool.EffectDefaultSkyScattering;
 
                     EngineEffectTechnique technique = null;
-                    if (this.Resolution == SkyScatteringResolutionEnum.High)
+                    if (this.Resolution == SkyScatteringResolutions.High)
                     {
                         technique = effect.SkyScatteringHigh;
                     }
-                    else if (this.Resolution == SkyScatteringResolutionEnum.Medium)
+                    else if (this.Resolution == SkyScatteringResolutions.Medium)
                     {
                         technique = effect.SkyScatteringMedium;
                     }
@@ -299,8 +294,8 @@ namespace Engine
                     this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
 
                     effect.UpdatePerFrame(
-                        Matrix.Translation(dwContext.EyePosition),
-                        dwContext.ViewProjection,
+                        Matrix.Translation(context.EyePosition),
+                        context.ViewProjection,
                         this.PlanetRadius,
                         this.PlanetAtmosphereRadius,
                         this.SphereOuterRadius,
@@ -313,7 +308,7 @@ namespace Engine
                         this.InvWaveLength4,
                         this.ScatteringScale,
                         this.RayleighScaleDepth,
-                        dwContext.Lights.FogColor,
+                        context.Lights.FogColor,
                         keyLight.Direction,
                         this.HDRExposure);
 

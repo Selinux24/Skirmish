@@ -2,9 +2,9 @@
 namespace Engine
 {
     /// <summary>
-    /// Directions
+    /// Heading directions
     /// </summary>
-    public enum Headings : int
+    public enum Headings
     {
         /// <summary>
         /// None

@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Levels of detail
     /// </summary>
-    public enum LevelOfDetailEnum
+    public enum LevelOfDetail
     {
         /// <summary>
         /// None

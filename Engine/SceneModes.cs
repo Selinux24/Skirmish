@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Scene modes enumeration
     /// </summary>
-    public enum SceneModesEnum
+    public enum SceneModes
     {
         /// <summary>
         /// Unknown

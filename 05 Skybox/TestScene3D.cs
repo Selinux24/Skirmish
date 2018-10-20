@@ -62,7 +62,7 @@ namespace Skybox
         private int directionalLightCount = 0;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.ForwardLigthning)
+            : base(game, SceneModes.ForwardLigthning)
         {
 
         }
@@ -83,15 +83,15 @@ namespace Skybox
                 Width = 16,
                 Height = 16,
             };
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI, layerHUD + 1);
+            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
 
             #endregion
 
             #region Text
 
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
-            this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
-            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
             this.title.Instance.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -114,7 +114,7 @@ namespace Skybox
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
@@ -166,7 +166,7 @@ namespace Skybox
             #region Water
 
             WaterDescription waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -1f);
-            this.water = this.AddComponent<Water>(waterDesc, SceneObjectUsageEnum.None);
+            this.water = this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
 
             #endregion
 
@@ -385,9 +385,9 @@ namespace Skybox
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F1))

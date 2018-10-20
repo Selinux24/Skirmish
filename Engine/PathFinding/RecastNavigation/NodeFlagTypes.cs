@@ -1,7 +1,9 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation
 {
-    public enum NodeFlags
+    [Flags]
+    public enum NodeFlagTypes
     {
         DT_NODE_NONE = 0x00,
         DT_NODE_OPEN = 0x01,

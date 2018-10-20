@@ -174,7 +174,7 @@ namespace Engine.PathFinding.RecastNavigation
             startNode.cost = 0;
             startNode.total = Vector3.Distance(startPos, endPos) * Detour.H_SCALE;
             startNode.id = startRef;
-            startNode.flags = NodeFlags.DT_NODE_OPEN;
+            startNode.flags = NodeFlagTypes.DT_NODE_OPEN;
             m_openList.Push(startNode);
 
             var lastBestNode = startNode;
@@ -186,8 +186,8 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 // Remove node from open list and put it in closed list.
                 var bestNode = m_openList.Pop();
-                bestNode.flags &= ~NodeFlags.DT_NODE_OPEN;
-                bestNode.flags |= NodeFlags.DT_NODE_CLOSED;
+                bestNode.flags &= ~NodeFlagTypes.DT_NODE_OPEN;
+                bestNode.flags |= NodeFlagTypes.DT_NODE_CLOSED;
 
                 // Reached the goal, stop searching.
                 if (bestNode.id == endRef)
@@ -249,7 +249,7 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // If the node is visited the first time, calculate node position.
-                    if (neighbourNode.flags == NodeFlags.DT_NODE_NONE)
+                    if (neighbourNode.flags == NodeFlagTypes.DT_NODE_NONE)
                     {
                         GetEdgeMidPoint(
                             bestRef, bestPoly, bestTile,
@@ -294,12 +294,12 @@ namespace Engine.PathFinding.RecastNavigation
                     float total = cost + heuristic;
 
                     // The node is already in open list and the new result is worse, skip.
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
                     {
                         continue;
                     }
                     // The node is already visited and process, and the new result is worse, skip.
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_CLOSED) != 0 && total >= neighbourNode.total)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_CLOSED) != 0 && total >= neighbourNode.total)
                     {
                         continue;
                     }
@@ -307,11 +307,11 @@ namespace Engine.PathFinding.RecastNavigation
                     // Add or update the node.
                     neighbourNode.pidx = m_nodePool.GetNodeIdx(bestNode);
                     neighbourNode.id = neighbourRef;
-                    neighbourNode.flags = (neighbourNode.flags & ~NodeFlags.DT_NODE_CLOSED);
+                    neighbourNode.flags = (neighbourNode.flags & ~NodeFlagTypes.DT_NODE_CLOSED);
                     neighbourNode.cost = cost;
                     neighbourNode.total = total;
 
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0)
                     {
                         // Already in open, update node location.
                         m_openList.Modify(neighbourNode);
@@ -319,7 +319,7 @@ namespace Engine.PathFinding.RecastNavigation
                     else
                     {
                         // Put the node in open list.
-                        neighbourNode.flags |= NodeFlags.DT_NODE_OPEN;
+                        neighbourNode.flags |= NodeFlagTypes.DT_NODE_OPEN;
                         m_openList.Push(neighbourNode);
                     }
 
@@ -454,12 +454,9 @@ namespace Engine.PathFinding.RecastNavigation
                         }
 
                         // If starting really close the portal, advance.
-                        if (i == 0)
+                        if (i == 0 && Detour.DistancePtSegSqr2D(portalApex, left, right, out float t) < (0.001f * 0.001f))
                         {
-                            if (Detour.DistancePtSegSqr2D(portalApex, left, right, out float t) < (0.001f * 0.001f))
-                            {
-                                continue;
-                            }
+                            continue;
                         }
                     }
                     else
@@ -683,7 +680,7 @@ namespace Engine.PathFinding.RecastNavigation
             startNode.cost = 0;
             startNode.total = Vector3.Distance(startPos, endPos) * Detour.H_SCALE;
             startNode.id = startRef;
-            startNode.flags = NodeFlags.DT_NODE_OPEN;
+            startNode.flags = NodeFlagTypes.DT_NODE_OPEN;
             m_openList.Push(startNode);
 
             m_query.status = Status.DT_IN_PROGRESS;
@@ -721,8 +718,8 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // Remove node from open list and put it in closed list.
                 Node bestNode = m_openList.Pop();
-                bestNode.flags &= ~NodeFlags.DT_NODE_OPEN;
-                bestNode.flags |= NodeFlags.DT_NODE_CLOSED;
+                bestNode.flags &= ~NodeFlagTypes.DT_NODE_OPEN;
+                bestNode.flags |= NodeFlagTypes.DT_NODE_CLOSED;
 
                 // Reached the goal, stop searching.
                 if (bestNode.id == m_query.endRef)
@@ -774,12 +771,11 @@ namespace Engine.PathFinding.RecastNavigation
 
                 // decide whether to test raycast to previous nodes
                 bool tryLOS = false;
-                if ((m_query.options & FindPathOptions.DT_FINDPATH_ANY_ANGLE) != 0)
+                if ((m_query.options & FindPathOptions.DT_FINDPATH_ANY_ANGLE) != 0 &&
+                    (parentRef != 0) &&
+                    (Vector3.DistanceSquared(parentNode.pos, bestNode.pos) < m_query.raycastLimitSqr))
                 {
-                    if ((parentRef != 0) && (Vector3.DistanceSquared(parentNode.pos, bestNode.pos) < m_query.raycastLimitSqr))
-                    {
-                        tryLOS = true;
-                    }
+                    tryLOS = true;
                 }
 
                 for (int i = bestPoly.FirstLink; i != Detour.DT_NULL_LINK; i = bestTile.links[i].next)
@@ -816,7 +812,7 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // If the node is visited the first time, calculate node position.
-                    if (neighbourNode.flags == NodeFlags.DT_NODE_NONE)
+                    if (neighbourNode.flags == NodeFlagTypes.DT_NODE_NONE)
                     {
                         GetEdgeMidPoint(
                             bestRef, bestPoly, bestTile,
@@ -881,12 +877,12 @@ namespace Engine.PathFinding.RecastNavigation
                     float total = cost + heuristic;
 
                     // The node is already in open list and the new result is worse, skip.
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
                     {
                         continue;
                     }
                     // The node is already visited and process, and the new result is worse, skip.
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_CLOSED) != 0 && total >= neighbourNode.total)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_CLOSED) != 0 && total >= neighbourNode.total)
                     {
                         continue;
                     }
@@ -894,15 +890,15 @@ namespace Engine.PathFinding.RecastNavigation
                     // Add or update the node.
                     neighbourNode.pidx = foundShortCut ? bestNode.pidx : m_nodePool.GetNodeIdx(bestNode);
                     neighbourNode.id = neighbourRef;
-                    neighbourNode.flags = (neighbourNode.flags & ~(NodeFlags.DT_NODE_CLOSED | NodeFlags.DT_NODE_PARENT_DETACHED));
+                    neighbourNode.flags = (neighbourNode.flags & ~(NodeFlagTypes.DT_NODE_CLOSED | NodeFlagTypes.DT_NODE_PARENT_DETACHED));
                     neighbourNode.cost = cost;
                     neighbourNode.total = total;
                     if (foundShortCut)
                     {
-                        neighbourNode.flags = (neighbourNode.flags | NodeFlags.DT_NODE_PARENT_DETACHED);
+                        neighbourNode.flags = (neighbourNode.flags | NodeFlagTypes.DT_NODE_PARENT_DETACHED);
                     }
 
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0)
                     {
                         // Already in open, update node location.
                         m_openList.Modify(neighbourNode);
@@ -910,7 +906,7 @@ namespace Engine.PathFinding.RecastNavigation
                     else
                     {
                         // Put the node in open list.
-                        neighbourNode.flags |= NodeFlags.DT_NODE_OPEN;
+                        neighbourNode.flags |= NodeFlagTypes.DT_NODE_OPEN;
                         m_openList.Push(neighbourNode);
                     }
 
@@ -970,14 +966,14 @@ namespace Engine.PathFinding.RecastNavigation
 
                 Node prev = null;
                 Node node = m_query.lastBestNode;
-                NodeFlags prevRay = 0;
+                NodeFlagTypes prevRay = 0;
                 do
                 {
                     Node next = m_nodePool.GetNodeAtIdx(node.pidx);
                     node.pidx = m_nodePool.GetNodeIdx(prev);
                     prev = node;
-                    NodeFlags nextRay = node.flags & NodeFlags.DT_NODE_PARENT_DETACHED; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
-                    node.flags = (node.flags & ~NodeFlags.DT_NODE_PARENT_DETACHED) | prevRay; // and store it in the reversed path's node
+                    NodeFlagTypes nextRay = node.flags & NodeFlagTypes.DT_NODE_PARENT_DETACHED; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
+                    node.flags = (node.flags & ~NodeFlagTypes.DT_NODE_PARENT_DETACHED) | prevRay; // and store it in the reversed path's node
                     prevRay = nextRay;
                     node = next;
                 }
@@ -989,7 +985,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     Node next = m_nodePool.GetNodeAtIdx(node.pidx);
                     Status status = 0;
-                    if ((node.flags & NodeFlags.DT_NODE_PARENT_DETACHED) != 0)
+                    if ((node.flags & NodeFlagTypes.DT_NODE_PARENT_DETACHED) != 0)
                     {
                         status = Raycast(node.id, node.pos, next.pos, m_query.filter, out float t, out Vector3 normal, out int[] rpath, out int m, maxPath - pathList.Count);
                         if (status.HasFlag(Status.DT_SUCCESS))
@@ -1086,14 +1082,14 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Reverse the path.
-                NodeFlags prevRay = 0;
+                NodeFlagTypes prevRay = 0;
                 do
                 {
                     Node next = m_nodePool.GetNodeAtIdx(node.pidx);
                     node.pidx = m_nodePool.GetNodeIdx(prev);
                     prev = node;
-                    NodeFlags nextRay = node.flags & NodeFlags.DT_NODE_PARENT_DETACHED; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
-                    node.flags = (node.flags & ~NodeFlags.DT_NODE_PARENT_DETACHED) | prevRay; // and store it in the reversed path's node
+                    NodeFlagTypes nextRay = node.flags & NodeFlagTypes.DT_NODE_PARENT_DETACHED; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
+                    node.flags = (node.flags & ~NodeFlagTypes.DT_NODE_PARENT_DETACHED) | prevRay; // and store it in the reversed path's node
                     prevRay = nextRay;
                     node = next;
                 }
@@ -1105,7 +1101,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     Node next = m_nodePool.GetNodeAtIdx(node.pidx);
                     Status status = 0;
-                    if ((node.flags & NodeFlags.DT_NODE_PARENT_DETACHED) != 0)
+                    if ((node.flags & NodeFlagTypes.DT_NODE_PARENT_DETACHED) != 0)
                     {
                         status = Raycast(node.id, node.pos, next.pos, m_query.filter, out float t, out Vector3 normal, out int[] rpath, out int m, maxPath - pathList.Count);
                         if (status.HasFlag(Status.DT_SUCCESS))
@@ -1182,7 +1178,7 @@ namespace Engine.PathFinding.RecastNavigation
             startNode.cost = 0;
             startNode.total = 0;
             startNode.id = startRef;
-            startNode.flags = NodeFlags.DT_NODE_OPEN;
+            startNode.flags = NodeFlagTypes.DT_NODE_OPEN;
             m_openList.Push(startNode);
 
             Status status = Status.DT_SUCCESS;
@@ -1194,8 +1190,8 @@ namespace Engine.PathFinding.RecastNavigation
             while (!m_openList.Empty())
             {
                 Node bestNode = m_openList.Pop();
-                bestNode.flags &= ~NodeFlags.DT_NODE_OPEN;
-                bestNode.flags |= NodeFlags.DT_NODE_CLOSED;
+                bestNode.flags &= ~NodeFlagTypes.DT_NODE_OPEN;
+                bestNode.flags |= NodeFlagTypes.DT_NODE_CLOSED;
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
@@ -1266,7 +1262,7 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
 
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_CLOSED) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_CLOSED) != 0)
                     {
                         continue;
                     }
@@ -1286,7 +1282,7 @@ namespace Engine.PathFinding.RecastNavigation
                     float total = bestNode.total + cost;
 
                     // The node is already in open list and the new result is worse, skip.
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
                     {
                         continue;
                     }
@@ -1295,13 +1291,13 @@ namespace Engine.PathFinding.RecastNavigation
                     neighbourNode.pidx = m_nodePool.GetNodeIdx(bestNode);
                     neighbourNode.total = total;
 
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0)
                     {
                         m_openList.Modify(neighbourNode);
                     }
                     else
                     {
-                        neighbourNode.flags = NodeFlags.DT_NODE_OPEN;
+                        neighbourNode.flags = NodeFlagTypes.DT_NODE_OPEN;
                         m_openList.Push(neighbourNode);
                     }
                 }
@@ -1353,7 +1349,7 @@ namespace Engine.PathFinding.RecastNavigation
             startNode.cost = 0;
             startNode.total = 0;
             startNode.id = startRef;
-            startNode.flags = NodeFlags.DT_NODE_OPEN;
+            startNode.flags = NodeFlagTypes.DT_NODE_OPEN;
             m_openList.Push(startNode);
 
             Status status = Status.DT_SUCCESS;
@@ -1363,8 +1359,8 @@ namespace Engine.PathFinding.RecastNavigation
             while (!m_openList.Empty())
             {
                 Node bestNode = m_openList.Pop();
-                bestNode.flags &= ~NodeFlags.DT_NODE_OPEN;
-                bestNode.flags |= NodeFlags.DT_NODE_CLOSED;
+                bestNode.flags &= ~NodeFlagTypes.DT_NODE_OPEN;
+                bestNode.flags |= NodeFlagTypes.DT_NODE_CLOSED;
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
@@ -1438,7 +1434,7 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
 
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_CLOSED) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_CLOSED) != 0)
                     {
                         continue;
                     }
@@ -1458,7 +1454,7 @@ namespace Engine.PathFinding.RecastNavigation
                     float total = bestNode.total + cost;
 
                     // The node is already in open list and the new result is worse, skip.
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
                     {
                         continue;
                     }
@@ -1467,13 +1463,13 @@ namespace Engine.PathFinding.RecastNavigation
                     neighbourNode.pidx = m_nodePool.GetNodeIdx(bestNode);
                     neighbourNode.total = total;
 
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0)
                     {
                         m_openList.Modify(neighbourNode);
                     }
                     else
                     {
-                        neighbourNode.flags = NodeFlags.DT_NODE_OPEN;
+                        neighbourNode.flags = NodeFlagTypes.DT_NODE_OPEN;
                         m_openList.Push(neighbourNode);
                     }
                 }
@@ -1510,7 +1506,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            if (m_nodePool.FindNodes(endRef, out Node[] endNodes, 1) != 1 || (endNodes[0].flags & NodeFlags.DT_NODE_CLOSED) == 0)
+            if (m_nodePool.FindNodes(endRef, out Node[] endNodes, 1) != 1 || (endNodes[0].flags & NodeFlagTypes.DT_NODE_CLOSED) == 0)
             {
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
@@ -1643,7 +1639,7 @@ namespace Engine.PathFinding.RecastNavigation
             Node startNode = m_tinyNodePool.GetNode(startRef, 0);
             startNode.pidx = 0;
             startNode.id = startRef;
-            startNode.flags = NodeFlags.DT_NODE_CLOSED;
+            startNode.flags = NodeFlagTypes.DT_NODE_CLOSED;
             stack[nstack++] = startNode;
 
             float radiusSqr = (radius * radius);
@@ -1697,7 +1693,7 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
                     // Skip visited.
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_CLOSED) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_CLOSED) != 0)
                     {
                         continue;
                     }
@@ -1732,7 +1728,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                     // Mark node visited, this is done before the overlap test so that
                     // we will not visit the poly again if the test fails.
-                    neighbourNode.flags |= NodeFlags.DT_NODE_CLOSED;
+                    neighbourNode.flags |= NodeFlagTypes.DT_NODE_CLOSED;
                     neighbourNode.pidx = m_tinyNodePool.GetNodeIdx(curNode);
 
                     // Check that the polygon does not collide with existing polygons.
@@ -1847,7 +1843,7 @@ namespace Engine.PathFinding.RecastNavigation
             startNode.cost = 0;
             startNode.total = 0;
             startNode.id = startRef;
-            startNode.flags = NodeFlags.DT_NODE_CLOSED;
+            startNode.flags = NodeFlagTypes.DT_NODE_CLOSED;
             stack[nstack++] = startNode;
 
             Vector3 bestPos = startPos;
@@ -1904,18 +1900,12 @@ namespace Engine.PathFinding.RecastNavigation
                         for (int k = curPoly.FirstLink; k != Detour.DT_NULL_LINK; k = curTile.links[k].next)
                         {
                             Link link = curTile.links[k];
-                            if (link.edge == j)
+                            if (link.edge == j && link.nref != 0)
                             {
-                                if (link.nref != 0)
+                                m_nav.GetTileAndPolyByRefUnsafe(link.nref, out MeshTile neiTile, out Poly neiPoly);
+                                if (filter.PassFilter(link.nref, neiTile, neiPoly) && nneis < MAX_NEIS)
                                 {
-                                    m_nav.GetTileAndPolyByRefUnsafe(link.nref, out MeshTile neiTile, out Poly neiPoly);
-                                    if (filter.PassFilter(link.nref, neiTile, neiPoly))
-                                    {
-                                        if (nneis < MAX_NEIS)
-                                        {
-                                            neis[nneis++] = link.nref;
-                                        }
-                                    }
+                                    neis[nneis++] = link.nref;
                                 }
                             }
                         }
@@ -1923,7 +1913,7 @@ namespace Engine.PathFinding.RecastNavigation
                     else if (curPoly.Neis[j] != 0)
                     {
                         int idx = (curPoly.Neis[j] - 1);
-                        int r = m_nav.GetPolyRefBase(curTile) | idx;
+                        int r = m_nav.GetTileRef(curTile) | idx;
                         if (filter.PassFilter(r, curTile, curTile.polys[idx]))
                         {
                             // Internal edge, encode id.
@@ -1956,7 +1946,7 @@ namespace Engine.PathFinding.RecastNavigation
                                 continue;
                             }
                             // Skip if already visited.
-                            if ((neighbourNode.flags & NodeFlags.DT_NODE_CLOSED) != 0)
+                            if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_CLOSED) != 0)
                             {
                                 continue;
                             }
@@ -1975,7 +1965,7 @@ namespace Engine.PathFinding.RecastNavigation
                             if (nstack < MAX_STACK)
                             {
                                 neighbourNode.pidx = m_tinyNodePool.GetNodeIdx(curNode);
-                                neighbourNode.flags |= NodeFlags.DT_NODE_CLOSED;
+                                neighbourNode.flags |= NodeFlagTypes.DT_NODE_CLOSED;
                                 stack[nstack++] = neighbourNode;
                             }
                         }
@@ -2328,7 +2318,7 @@ namespace Engine.PathFinding.RecastNavigation
             startNode.cost = 0;
             startNode.total = 0;
             startNode.id = startRef;
-            startNode.flags = NodeFlags.DT_NODE_OPEN;
+            startNode.flags = NodeFlagTypes.DT_NODE_OPEN;
             m_openList.Push(startNode);
 
             float radiusSqr = (maxRadius * maxRadius);
@@ -2338,8 +2328,8 @@ namespace Engine.PathFinding.RecastNavigation
             while (!m_openList.Empty())
             {
                 Node bestNode = m_openList.Pop();
-                bestNode.flags &= ~NodeFlags.DT_NODE_OPEN;
-                bestNode.flags |= NodeFlags.DT_NODE_CLOSED;
+                bestNode.flags &= ~NodeFlagTypes.DT_NODE_OPEN;
+                bestNode.flags |= NodeFlagTypes.DT_NODE_CLOSED;
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
@@ -2392,7 +2382,7 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         // Internal edge
                         int idx = bestPoly.Neis[j] - 1;
-                        int r = m_nav.GetPolyRefBase(bestTile) | idx;
+                        int r = m_nav.GetTileRef(bestTile) | idx;
                         if (filter.PassFilter(r, bestTile, bestTile.polys[idx]))
                         {
                             continue;
@@ -2458,7 +2448,7 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
 
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_CLOSED) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_CLOSED) != 0)
                     {
                         continue;
                     }
@@ -2475,23 +2465,23 @@ namespace Engine.PathFinding.RecastNavigation
                     float total = bestNode.total + Vector3.Distance(bestNode.pos, neighbourNode.pos);
 
                     // The node is already in open list and the new result is worse, skip.
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
                     {
                         continue;
                     }
 
                     neighbourNode.id = neighbourRef;
-                    neighbourNode.flags = (neighbourNode.flags & ~NodeFlags.DT_NODE_CLOSED);
+                    neighbourNode.flags = (neighbourNode.flags & ~NodeFlagTypes.DT_NODE_CLOSED);
                     neighbourNode.pidx = m_nodePool.GetNodeIdx(bestNode);
                     neighbourNode.total = total;
 
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0)
                     {
                         m_openList.Modify(neighbourNode);
                     }
                     else
                     {
-                        neighbourNode.flags |= NodeFlags.DT_NODE_OPEN;
+                        neighbourNode.flags |= NodeFlagTypes.DT_NODE_OPEN;
                         m_openList.Push(neighbourNode);
                     }
                 }
@@ -2545,15 +2535,12 @@ namespace Engine.PathFinding.RecastNavigation
                     for (int k = poly.FirstLink; k != Detour.DT_NULL_LINK; k = tile.links[k].next)
                     {
                         Link link = tile.links[k];
-                        if (link.edge == j)
+                        if (link.edge == j && link.nref != 0)
                         {
-                            if (link.nref != 0)
+                            m_nav.GetTileAndPolyByRefUnsafe(link.nref, out MeshTile neiTile, out Poly neiPoly);
+                            if (filter.PassFilter(link.nref, neiTile, neiPoly))
                             {
-                                m_nav.GetTileAndPolyByRefUnsafe(link.nref, out MeshTile neiTile, out Poly neiPoly);
-                                if (filter.PassFilter(link.nref, neiTile, neiPoly))
-                                {
-                                    SegInterval.InsertInterval(ref ints, ref nints, MAX_INTERVAL, link.bmin, link.bmax, link.nref);
-                                }
+                                SegInterval.InsertInterval(ref ints, ref nints, MAX_INTERVAL, link.bmin, link.bmax, link.nref);
                             }
                         }
                     }
@@ -2565,7 +2552,7 @@ namespace Engine.PathFinding.RecastNavigation
                     if (poly.Neis[j] != 0)
                     {
                         int idx = (poly.Neis[j] - 1);
-                        neiRef = m_nav.GetPolyRefBase(tile) | idx;
+                        neiRef = m_nav.GetTileRef(tile) | idx;
                         if (!filter.PassFilter(neiRef, tile, tile.polys[idx]))
                         {
                             neiRef = 0;
@@ -2687,7 +2674,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Randomly pick one polygon weighted by polygon area.
             Poly poly = null;
             int polyRef = 0;
-            int bse = m_nav.GetPolyRefBase(tile);
+            int bse = m_nav.GetTileRef(tile);
 
             float areaSum = 0.0f;
             for (int i = 0; i < tile.header.polyCount; ++i)
@@ -2799,7 +2786,7 @@ namespace Engine.PathFinding.RecastNavigation
             startNode.cost = 0;
             startNode.total = 0;
             startNode.id = startRef;
-            startNode.flags = NodeFlags.DT_NODE_OPEN;
+            startNode.flags = NodeFlagTypes.DT_NODE_OPEN;
             m_openList.Push(startNode);
 
             Status status = Status.DT_SUCCESS;
@@ -2814,8 +2801,8 @@ namespace Engine.PathFinding.RecastNavigation
             while (!m_openList.Empty())
             {
                 Node bestNode = m_openList.Pop();
-                bestNode.flags &= ~NodeFlags.DT_NODE_OPEN;
-                bestNode.flags |= NodeFlags.DT_NODE_CLOSED;
+                bestNode.flags &= ~NodeFlagTypes.DT_NODE_OPEN;
+                bestNode.flags |= NodeFlagTypes.DT_NODE_CLOSED;
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
@@ -2897,13 +2884,13 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
 
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_CLOSED) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_CLOSED) != 0)
                     {
                         continue;
                     }
 
                     // Cost
-                    if (neighbourNode.flags == NodeFlags.DT_NODE_NONE)
+                    if (neighbourNode.flags == NodeFlagTypes.DT_NODE_NONE)
                     {
                         neighbourNode.pos = Vector3.Lerp(va, vb, 0.5f);
                     }
@@ -2911,23 +2898,23 @@ namespace Engine.PathFinding.RecastNavigation
                     float total = bestNode.total + Vector3.Distance(bestNode.pos, neighbourNode.pos);
 
                     // The node is already in open list and the new result is worse, skip.
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
                     {
                         continue;
                     }
 
                     neighbourNode.id = neighbourRef;
-                    neighbourNode.flags = (neighbourNode.flags & ~NodeFlags.DT_NODE_CLOSED);
+                    neighbourNode.flags = (neighbourNode.flags & ~NodeFlagTypes.DT_NODE_CLOSED);
                     neighbourNode.pidx = m_nodePool.GetNodeIdx(bestNode);
                     neighbourNode.total = total;
 
-                    if ((neighbourNode.flags & NodeFlags.DT_NODE_OPEN) != 0)
+                    if ((neighbourNode.flags & NodeFlagTypes.DT_NODE_OPEN) != 0)
                     {
                         m_openList.Modify(neighbourNode);
                     }
                     else
                     {
-                        neighbourNode.flags = NodeFlags.DT_NODE_OPEN;
+                        neighbourNode.flags = NodeFlagTypes.DT_NODE_OPEN;
                         m_openList.Push(neighbourNode);
                     }
                 }
@@ -3201,7 +3188,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             for (int i = 0; i < n; i++)
             {
-                if ((nodes[i].flags & NodeFlags.DT_NODE_CLOSED) != 0)
+                if ((nodes[i].flags & NodeFlagTypes.DT_NODE_CLOSED) != 0)
                 {
                     return true;
                 }
@@ -3257,7 +3244,7 @@ namespace Engine.PathFinding.RecastNavigation
                 bmax.Z = (int)(qfac * maxz + 1) | 1;
 
                 // Traverse tree
-                int bse = m_nav.GetPolyRefBase(tile);
+                int bse = m_nav.GetTileRef(tile);
                 while (nodeIndex < endIndex)
                 {
                     var node = nodeIndex < tile.bvTree.Length ? tile.bvTree[nodeIndex] : new BVNode();
@@ -3298,7 +3285,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                int bse = m_nav.GetPolyRefBase(tile);
+                int bse = m_nav.GetTileRef(tile);
                 for (int i = 0; i < tile.header.polyCount; ++i)
                 {
                     var p = tile.polys[i];
@@ -3434,23 +3421,20 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Find portal vertices.
             int v0 = fromPoly.Verts[link.Value.edge];
-            int v1 = fromPoly.Verts[(link.Value.edge + 1) % (int)fromPoly.VertCount];
+            int v1 = fromPoly.Verts[(link.Value.edge + 1) % fromPoly.VertCount];
             left = fromTile.verts[v0];
             right = fromTile.verts[v1];
 
             // If the link is at tile boundary, dtClamp the vertices to
             // the link width.
-            if (link.Value.side != 0xff)
+            if (link.Value.side != 0xff && link.Value.bmin != 0 || link.Value.bmax != 255)
             {
                 // Unpack portal limits.
-                if (link.Value.bmin != 0 || link.Value.bmax != 255)
-                {
-                    float s = 1.0f / 255.0f;
-                    float tmin = link.Value.bmin * s;
-                    float tmax = link.Value.bmax * s;
-                    left = Vector3.Lerp(fromTile.verts[v0], fromTile.verts[v1], tmin);
-                    right = Vector3.Lerp(fromTile.verts[v0], fromTile.verts[v1], tmax);
-                }
+                float s = 1.0f / 255.0f;
+                float tmin = link.Value.bmin * s;
+                float tmax = link.Value.bmax * s;
+                left = Vector3.Lerp(fromTile.verts[v0], fromTile.verts[v1], tmin);
+                right = Vector3.Lerp(fromTile.verts[v0], fromTile.verts[v1], tmax);
             }
 
             return Status.DT_SUCCESS;
@@ -3560,13 +3544,11 @@ namespace Engine.PathFinding.RecastNavigation
                     break;
                 }
 
-                if (options.HasFlag(StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS))
+                if (options.HasFlag(StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS) && 
+                    fromPoly.Area == toPoly.Area)
                 {
                     // Skip intersection if only area crossings are requested.
-                    if (fromPoly.Area == toPoly.Area)
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
                 // Append intersection

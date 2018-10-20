@@ -30,15 +30,15 @@ namespace Engine
         /// <summary>
         /// Content
         /// </summary>
-        public ContentDescription Content = new ContentDescription();
+        public ContentDescription Content { get; set; } = new ContentDescription();
         /// <summary>
         /// Quadtree
         /// </summary>
-        public QuadtreeDescription Quadtree = new QuadtreeDescription();
+        public QuadtreeDescription Quadtree { get; set; } = new QuadtreeDescription();
         /// <summary>
         /// Use anisotropic filtering
         /// </summary>
-        public bool UseAnisotropic = true;
+        public bool UseAnisotropic { get; set; } = true;
 
         /// <summary>
         /// Constructor

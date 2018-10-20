@@ -32,8 +32,6 @@ namespace Engine
         /// </remarks>
         class SceneryPatch : IDisposable
         {
-            const int MAX = 1024 * 2;
-
             /// <summary>
             /// Creates a new patch
             /// </summary>
@@ -107,20 +105,16 @@ namespace Engine
             {
                 if (disposing)
                 {
-                    if (this.DrawingData != null)
-                    {
-                        this.DrawingData.Dispose();
-                        this.DrawingData = null;
-                    }
+                    this.DrawingData?.Dispose();
+                    this.DrawingData = null;
                 }
             }
             /// <summary>
             /// Draws the scenery patch shadows
             /// </summary>
-            /// <param name="context">Drawing context</param>
             /// <param name="sceneryEffect">Scenery effect</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawSceneryShadows(DrawContextShadows context, IShadowMapDrawer sceneryEffect, BufferManager bufferManager)
+            public void DrawSceneryShadows(IShadowMapDrawer sceneryEffect, BufferManager bufferManager)
             {
                 var graphics = this.Game.Graphics;
 
@@ -153,13 +147,11 @@ namespace Engine
             /// <summary>
             /// Draws the scenery patch
             /// </summary>
-            /// <param name="context">Drawing context</param>
             /// <param name="sceneryEffect">Scenery effect</param>
             /// <param name="techniqueFn">Function for technique</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawScenery(DrawContext context, IGeometryDrawer sceneryEffect, BufferManager bufferManager)
+            public void DrawScenery(IGeometryDrawer sceneryEffect, BufferManager bufferManager)
             {
-                var mode = context.DrawerMode;
                 var graphics = this.Game.Graphics;
                 int count = 0;
 
@@ -304,6 +296,10 @@ namespace Engine
             {
                 content = description.Content.ModelContent;
             }
+            else
+            {
+                throw new EngineException("No geometry found in description.");
+            }
 
             #region Patches
 
@@ -357,27 +353,16 @@ namespace Engine
         {
             if (disposing)
             {
-                if (patchDictionary != null)
+                foreach (var item in patchDictionary?.Values)
                 {
-                    foreach (var item in patchDictionary)
-                    {
-                        item.Value?.Dispose();
-                    }
-
-                    patchDictionary.Clear();
-                    patchDictionary = null;
+                    item?.Dispose();
                 }
+
+                patchDictionary?.Clear();
+                patchDictionary = null;
             }
         }
 
-        /// <summary>
-        /// Objects updating
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Update(UpdateContext context)
-        {
-
-        }
         /// <summary>
         /// Draw shadows
         /// </summary>
@@ -398,7 +383,7 @@ namespace Engine
 
                     foreach (var node in nodes)
                     {
-                        this.patchDictionary[node.Id].DrawSceneryShadows(context, sceneryEffect, this.BufferManager);
+                        this.patchDictionary[node.Id].DrawSceneryShadows(sceneryEffect, this.BufferManager);
                     }
                 }
             }
@@ -436,7 +421,7 @@ namespace Engine
 
                         foreach (var node in nodes)
                         {
-                            this.patchDictionary[node.Id].DrawScenery(context, sceneryEffect, this.BufferManager);
+                            this.patchDictionary[node.Id].DrawScenery(sceneryEffect, this.BufferManager);
                         }
                     }
                 }

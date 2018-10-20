@@ -32,15 +32,15 @@ namespace Engine
         /// <summary>
         /// Texture index
         /// </summary>
-        public uint TextureIndex = 0;
+        public uint TextureIndex { get; set; } = 0;
         /// <summary>
         /// Transform names
         /// </summary>
-        public string[] TransformNames;
+        public string[] TransformNames { get; set; }
         /// <summary>
         /// Transform dependences
         /// </summary>
-        public int[] TransformDependences;
+        public int[] TransformDependences { get; set; }
 
         /// <summary>
         /// Constructor

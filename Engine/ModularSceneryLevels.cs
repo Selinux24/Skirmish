@@ -16,19 +16,19 @@ namespace Engine
         /// </summary>
         [XmlArray("volumes")]
         [XmlArrayItem("mask", typeof(string))]
-        public string[] Volumes = null;
+        public string[] Volumes { get; set; } = null;
         /// <summary>
         /// Particle systems
         /// </summary>
         [XmlArray("particles")]
         [XmlArrayItem("system", typeof(ParticleSystemDescription))]
-        public ParticleSystemDescription[] ParticleSystems = null;
+        public ParticleSystemDescription[] ParticleSystems { get; set; } = null;
         /// <summary>
         /// Levels
         /// </summary>
         [XmlArray("levels")]
         [XmlArrayItem("level", typeof(ModularSceneryLevel))]
-        public ModularSceneryLevel[] Levels = null;
+        public ModularSceneryLevel[] Levels { get; set; } = null;
 
         /// <summary>
         /// Gets a list of masks to find volume meshes for the specified asset name
@@ -42,7 +42,7 @@ namespace Engine
                 return this.Volumes.Select(v => assetName + v);
             }
 
-            return null;
+            return new string[] { };
         }
     }
 }

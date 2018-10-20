@@ -14,7 +14,7 @@ namespace Engine.Collections
         /// <summary>
         /// Nodes in the tree
         /// </summary>
-        private BoundingVolumeTreeNode[] nodes;
+        private readonly BoundingVolumeTreeNode[] nodes;
         /// <summary>
         /// Gets the number of nodes in the tree.
         /// </summary>
@@ -51,9 +51,9 @@ namespace Engine.Collections
 
             for (int i = minIndex + 1; i < maxIndex; i++)
             {
-                BoundingVolumeTreeNode it = items[i];
-                Vector3i.ComponentMin(ref it.Bounds.Min, ref bounds.Min, out bounds.Min);
-                Vector3i.ComponentMax(ref it.Bounds.Max, ref bounds.Max, out bounds.Max);
+                var it = items[i];
+                bounds.Min = Vector3Int.ComponentMin(it.Bounds.Min, bounds.Min);
+                bounds.Max = Vector3Int.ComponentMax(it.Bounds.Max, bounds.Max);
             }
         }
         /// <summary>
@@ -120,7 +120,7 @@ namespace Engine.Collections
                 CalcExtends(items, minIndex, maxIndex, out BoundingBoxi bounds);
                 this.nodes[oldNode].Bounds = bounds;
 
-                int axis = LongestAxis((int)(bounds.Max.X - bounds.Min.X), (int)(bounds.Max.Y - bounds.Min.Y), (int)(bounds.Max.Z - bounds.Min.Z));
+                int axis = LongestAxis((bounds.Max.X - bounds.Min.X), (bounds.Max.Y - bounds.Min.Y), (bounds.Max.Z - bounds.Min.Z));
 
                 switch (axis)
                 {

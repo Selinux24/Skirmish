@@ -61,7 +61,7 @@ namespace Deferred
         //private AgentCrowd crowd = null;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.DeferredLightning)
+            : base(game, SceneModes.DeferredLightning)
         {
 
         }
@@ -204,7 +204,7 @@ namespace Deferred
                 Width = 16,
                 Height = 16,
             };
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI, layerHUD + 1);
+            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
         }
         private void InitializeSkydom()
         {
@@ -374,10 +374,10 @@ namespace Deferred
             var dHelp = TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow);
             var dStats = TextDrawerDescription.Generate("Lucida Casual", 10, Color.Red);
 
-            this.title = this.AddComponent<TextDrawer>(dTitle, SceneObjectUsageEnum.UI, layerHUD);
-            this.load = this.AddComponent<TextDrawer>(dLoad, SceneObjectUsageEnum.UI, layerHUD);
-            this.help = this.AddComponent<TextDrawer>(dHelp, SceneObjectUsageEnum.UI, layerHUD);
-            this.statistics = this.AddComponent<TextDrawer>(dStats, SceneObjectUsageEnum.UI, layerHUD);
+            this.title = this.AddComponent<TextDrawer>(dTitle, SceneObjectUsages.UI, layerHUD);
+            this.load = this.AddComponent<TextDrawer>(dLoad, SceneObjectUsages.UI, layerHUD);
+            this.help = this.AddComponent<TextDrawer>(dHelp, SceneObjectUsages.UI, layerHUD);
+            this.statistics = this.AddComponent<TextDrawer>(dStats, SceneObjectUsages.UI, layerHUD);
 
             this.title.Instance.Position = Vector2.Zero;
             this.load.Instance.Position = new Vector2(0, this.title.Instance.Top + this.title.Instance.Height + 2);
@@ -391,7 +391,7 @@ namespace Deferred
                 Height = this.statistics.Instance.Top + this.statistics.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeDebug()
         {
@@ -407,9 +407,9 @@ namespace Deferred
                     Top = smTop,
                     Width = width,
                     Height = height,
-                    Channel = SpriteTextureChannelsEnum.NoAlpha,
+                    Channel = SpriteTextureChannels.NoAlpha,
                 };
-                this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsageEnum.UI, layerEffects);
+                this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
                 this.bufferDrawer.Visible = false;
             }
 
@@ -419,7 +419,7 @@ namespace Deferred
                     DepthEnabled = true,
                     Count = 1000,
                 };
-                this.lineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);
+                this.lineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, layerEffects);
                 this.lineDrawer.Visible = false;
             }
 
@@ -428,7 +428,7 @@ namespace Deferred
                 {
                     Count = MaxGridDrawer,
                 };
-                this.terrainGraphDrawer = this.AddComponent<TriangleListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);
+                this.terrainGraphDrawer = this.AddComponent<TriangleListDrawer>(desc, SceneObjectUsages.None, layerEffects);
                 this.terrainGraphDrawer.Visible = false;
             }
         }
@@ -587,9 +587,9 @@ namespace Deferred
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
             base.Update(gameTime);
@@ -597,7 +597,7 @@ namespace Deferred
             Ray cursorRay = this.GetPickingRay();
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsageEnum.Ground, out PickingResult<Triangle> r);
+            bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
 
             UpdateCamera(gameTime, shift);
 
@@ -806,11 +806,11 @@ namespace Deferred
             {
                 if (this.Game.Input.KeyJustReleased(Keys.F1))
                 {
-                    var colorMap = this.Renderer.GetResource(SceneRendererResultEnum.ColorMap);
+                    var colorMap = this.Renderer.GetResource(SceneRendererResults.ColorMap);
 
                     //Colors
                     this.bufferDrawer.Instance.Texture = colorMap;
-                    this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                    this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
                     this.help.Instance.Text = "Colors";
 
                     this.bufferDrawer.Visible = true;
@@ -818,21 +818,21 @@ namespace Deferred
 
                 if (this.Game.Input.KeyJustReleased(Keys.F2))
                 {
-                    var normalMap = this.Renderer.GetResource(SceneRendererResultEnum.NormalMap);
+                    var normalMap = this.Renderer.GetResource(SceneRendererResults.NormalMap);
 
                     if (this.bufferDrawer.Instance.Texture == normalMap &&
-                        this.bufferDrawer.Instance.Channels == SpriteTextureChannelsEnum.NoAlpha)
+                        this.bufferDrawer.Instance.Channels == SpriteTextureChannels.NoAlpha)
                     {
                         //Specular Power
                         this.bufferDrawer.Instance.Texture = normalMap;
-                        this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.Alpha;
+                        this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Alpha;
                         this.help.Instance.Text = "Specular Power";
                     }
                     else
                     {
                         //Normals
                         this.bufferDrawer.Instance.Texture = normalMap;
-                        this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                        this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
                         this.help.Instance.Text = "Normals";
                     }
                     this.bufferDrawer.Visible = true;
@@ -840,21 +840,21 @@ namespace Deferred
 
                 if (this.Game.Input.KeyJustReleased(Keys.F3))
                 {
-                    var depthMap = this.Renderer.GetResource(SceneRendererResultEnum.DepthMap);
+                    var depthMap = this.Renderer.GetResource(SceneRendererResults.DepthMap);
 
                     if (this.bufferDrawer.Instance.Texture == depthMap &&
-                        this.bufferDrawer.Instance.Channels == SpriteTextureChannelsEnum.NoAlpha)
+                        this.bufferDrawer.Instance.Channels == SpriteTextureChannels.NoAlpha)
                     {
                         //Specular Factor
                         this.bufferDrawer.Instance.Texture = depthMap;
-                        this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.Alpha;
+                        this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Alpha;
                         this.help.Instance.Text = "Specular Intensity";
                     }
                     else
                     {
                         //Position
                         this.bufferDrawer.Instance.Texture = depthMap;
-                        this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                        this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
                         this.help.Instance.Text = "Position";
                     }
                     this.bufferDrawer.Visible = true;
@@ -868,7 +868,7 @@ namespace Deferred
 
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
-                var shadowMap = this.Renderer.GetResource(SceneRendererResultEnum.ShadowMapDirectional);
+                var shadowMap = this.Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
 
                 if (shadowMap != null)
                 {
@@ -877,7 +877,7 @@ namespace Deferred
                     {
                         this.bufferDrawer.Instance.Texture = shadowMap;
                         this.bufferDrawer.Instance.TextureIndex = 0;
-                        this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.Red;
+                        this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Red;
                         this.bufferDrawer.Visible = true;
                     }
                     else
@@ -910,13 +910,13 @@ namespace Deferred
 
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
-                var lightMap = this.Renderer.GetResource(SceneRendererResultEnum.LightMap);
+                var lightMap = this.Renderer.GetResource(SceneRendererResults.LightMap);
 
                 if (lightMap != null)
                 {
                     //Light map
                     this.bufferDrawer.Instance.Texture = lightMap;
-                    this.bufferDrawer.Instance.Channels = SpriteTextureChannelsEnum.NoAlpha;
+                    this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
                     this.bufferDrawer.Visible = true;
                     this.help.Instance.Text = "Light map";
                 }

@@ -26,11 +26,11 @@ namespace Engine
         /// <summary>
         /// Arriving radius
         /// </summary>
-        public float ArrivingRadius = 10f;
+        public float ArrivingRadius { get; set; } = 10f;
         /// <summary>
         /// Arriving threshold
         /// </summary>
-        public float ArrivingThreshold = 0.01f;
+        public float ArrivingThreshold { get; set; } = 0.01f;
 
         /// <summary>
         /// Updates the manipulator's view and position

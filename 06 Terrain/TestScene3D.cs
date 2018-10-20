@@ -38,7 +38,7 @@ namespace Terrain
         private Agent walkerAgentType = null;
 
         private bool useDebugTex = false;
-        private SceneRendererResultEnum shadowResult = SceneRendererResultEnum.ShadowMapDirectional;
+        private SceneRendererResults shadowResult = SceneRendererResults.ShadowMapDirectional;
         private SceneObject<SpriteTexture> shadowMapDrawer = null;
         private EngineShaderResourceView debugTex = null;
         private int graphIndex = -1;
@@ -123,7 +123,7 @@ namespace Terrain
         private int initDurationIndex = 0;
 
         public TestScene3D(Game game)
-            : base(game, SceneModesEnum.ForwardLigthning)
+            : base(game, SceneModes.ForwardLigthning)
         {
 
         }
@@ -210,11 +210,11 @@ namespace Terrain
             sw.Restart();
 
             {
-                this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, this.layerHud);
-                this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, this.layerHud);
-                this.stats = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsageEnum.UI, this.layerHud);
-                this.counters1 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsageEnum.UI, this.layerHud);
-                this.counters2 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsageEnum.UI, this.layerHud);
+                this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, this.layerHud);
+                this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
+                this.stats = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
+                this.counters1 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
+                this.counters2 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
 
                 this.title.Instance.Text = "Terrain collision and trajectories test";
                 this.load.Instance.Text = "";
@@ -237,7 +237,7 @@ namespace Terrain
                     Color = new Color4(0, 0, 0, 0.75f),
                 };
 
-                this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHud - 1);
+                this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHud - 1);
 
                 var spbDesc = new SpriteProgressBarDescription()
                 {
@@ -248,9 +248,9 @@ namespace Terrain
                     ProgressColor = Color.Green,
                 };
 
-                this.hProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerGameHud);
-                this.t1ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerGameHud);
-                this.t2ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsageEnum.UI, layerGameHud);
+                this.hProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsages.UI, layerGameHud);
+                this.t1ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsages.UI, layerGameHud);
+                this.t2ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsages.UI, layerGameHud);
 
                 this.hProgressBar.Instance.Top = 120;
                 this.t1ProgressBar.Instance.Top = 120;
@@ -274,7 +274,7 @@ namespace Terrain
                         ModelContentFilename = "cursor.xml",
                     }
                 };
-                this.cursor3D = this.AddComponent<Model>(c3DDesc, SceneObjectUsageEnum.UI, this.layerHud);
+                this.cursor3D = this.AddComponent<Model>(c3DDesc, SceneObjectUsages.UI, this.layerHud);
             }
 
             {
@@ -287,7 +287,7 @@ namespace Terrain
                     Width = 16,
                     Height = 16,
                 };
-                this.cursor2D = this.AddComponent<Cursor>(c2DDesc, SceneObjectUsageEnum.UI, this.layerHud + 1);
+                this.cursor2D = this.AddComponent<Cursor>(c2DDesc, SceneObjectUsages.UI, this.layerHud + 1);
                 this.cursor2D.Instance.Color = Color.Red;
                 this.cursor2D.Visible = false;
             }
@@ -323,7 +323,7 @@ namespace Terrain
                     DepthEnabled = true,
                     Count = 5000,
                 };
-                this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.lightsVolumeDrawer.Visible = false;
             }
 
@@ -340,9 +340,9 @@ namespace Terrain
                     Top = smTop,
                     Width = width,
                     Height = height,
-                    Channel = SpriteTextureChannelsEnum.Red,
+                    Channel = SpriteTextureChannels.Red,
                 };
-                this.shadowMapDrawer = this.AddComponent<SpriteTexture>(stDescription, SceneObjectUsageEnum.UI, this.layerHud);
+                this.shadowMapDrawer = this.AddComponent<SpriteTexture>(stDescription, SceneObjectUsages.UI, this.layerHud);
                 this.shadowMapDrawer.Visible = false;
                 this.shadowMapDrawer.DeferredEnabled = false;
 
@@ -357,7 +357,7 @@ namespace Terrain
                     Name = "++DEBUG++ Path finding Graph",
                     Count = MaxGridDrawer
                 };
-                this.terrainGraphDrawer = this.AddComponent<TriangleListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.terrainGraphDrawer = this.AddComponent<TriangleListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.terrainGraphDrawer.Visible = false;
             }
             #endregion
@@ -369,7 +369,7 @@ namespace Terrain
                     Name = "++DEBUG++ Picking test",
                     Count = MaxPickingTest
                 };
-                this.terrainPointDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.terrainPointDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.terrainPointDrawer.Visible = false;
             }
             #endregion
@@ -381,7 +381,7 @@ namespace Terrain
                     Name = "++DEBUG++ Trajectory",
                     Count = 20000
                 };
-                this.curveLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.curveLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.curveLineDrawer.Visible = false;
             }
             #endregion
@@ -393,7 +393,7 @@ namespace Terrain
                     Name = "++DEBUG++ Helicopter manipulator",
                     Count = 1000
                 };
-                this.movingObjLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.movingObjLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.movingObjLineDrawer.Visible = false;
             }
             #endregion
@@ -405,7 +405,7 @@ namespace Terrain
                     Name = "++DEBUG++ Static Volumes",
                     Count = 20000
                 };
-                this.staticObjLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);
+                this.staticObjLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, layerEffects);
                 this.staticObjLineDrawer.Visible = false;
             }
             #endregion
@@ -417,7 +417,7 @@ namespace Terrain
                     Name = "++DEBUG++ Ground position test",
                     Count = 10000
                 };
-                this.terrainLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, this.layerEffects);
+                this.terrainLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.terrainLineDrawer.Visible = false;
             }
             #endregion
@@ -467,7 +467,7 @@ namespace Terrain
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            this.lensFlare = this.AddComponent<LensFlare>(lfDesc, SceneObjectUsageEnum.None, this.layerEffects);
+            this.lensFlare = this.AddComponent<LensFlare>(lfDesc, SceneObjectUsages.None, this.layerEffects);
 
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -489,7 +489,7 @@ namespace Terrain
                     ModelContentFilename = "M24.xml",
                 }
             };
-            this.helicopter = this.AddComponent<Model>(hDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
+            this.helicopter = this.AddComponent<Model>(hDesc, SceneObjectUsages.Agent, this.layerObjects);
 
             this.helicopter.Transform.SetScale(0.15f);
             this.helicopter.Transform.UpdateInternals(true);
@@ -518,8 +518,8 @@ namespace Terrain
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
                 TransformDependences = new[] { 1, 2, -1 },
             };
-            this.tankP1 = this.AddComponent<Model>(tDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
-            this.tankP2 = this.AddComponent<Model>(tDesc, SceneObjectUsageEnum.Agent, this.layerObjects);
+            this.tankP1 = this.AddComponent<Model>(tDesc, SceneObjectUsages.Agent, this.layerObjects);
+            this.tankP2 = this.AddComponent<Model>(tDesc, SceneObjectUsages.Agent, this.layerObjects);
 
             this.tankP1.Transform.SetScale(0.2f, true);
             this.tankP1.Transform.UpdateInternals(true);
@@ -564,7 +564,7 @@ namespace Terrain
                     ModelContentFilename = "Heliport.xml",
                 }
             };
-            this.heliport = this.AddComponent<Model>(hpDesc, SceneObjectUsageEnum.None, this.layerObjects);
+            this.heliport = this.AddComponent<Model>(hpDesc, SceneObjectUsages.None, this.layerObjects);
 
             this.Lights.AddRange(this.heliport.Instance.Lights);
 
@@ -587,7 +587,7 @@ namespace Terrain
                     ModelContentFilename = "Garage.xml",
                 }
             };
-            this.garage = this.AddComponent<Model>(gDesc, SceneObjectUsageEnum.None, this.layerObjects);
+            this.garage = this.AddComponent<Model>(gDesc, SceneObjectUsages.None, this.layerObjects);
 
             this.Lights.AddRange(this.garage.Instance.Lights);
 
@@ -611,7 +611,7 @@ namespace Terrain
                     ModelContentFilename = "Obelisk.xml",
                 }
             };
-            this.obelisk = this.AddComponent<ModelInstanced>(oDesc, SceneObjectUsageEnum.None, this.layerObjects);
+            this.obelisk = this.AddComponent<ModelInstanced>(oDesc, SceneObjectUsages.None, this.layerObjects);
 
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -633,7 +633,7 @@ namespace Terrain
                     ModelContentFilename = "boulder.xml",
                 }
             };
-            this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsageEnum.None, this.layerObjects);
+            this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsages.None, this.layerObjects);
 
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -669,8 +669,8 @@ namespace Terrain
                     ModelContentFilename = "birch_b.xml",
                 }
             };
-            this.tree1 = this.AddComponent<ModelInstanced>(t1Desc, SceneObjectUsageEnum.None, this.layerTerrain);
-            this.tree2 = this.AddComponent<ModelInstanced>(t2Desc, SceneObjectUsageEnum.None, this.layerTerrain);
+            this.tree1 = this.AddComponent<ModelInstanced>(t1Desc, SceneObjectUsages.None, this.layerTerrain);
+            this.tree2 = this.AddComponent<ModelInstanced>(t2Desc, SceneObjectUsages.None, this.layerTerrain);
 
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -702,7 +702,7 @@ namespace Terrain
                 ContentPath = "Resources/clouds",
                 Texture1Name = "perturb001.dds",
                 Texture2Name = "cloud001.dds",
-                Mode = SkyPlaneMode.Perturbed,
+                Mode = SkyPlaneModes.Perturbed,
                 MaxBrightness = 0.8f,
                 MinBrightness = 0.1f,
                 Repeat = 5,
@@ -733,7 +733,7 @@ namespace Terrain
                     ModelContentFilename = "two_levels.xml",
                 }
             };
-            this.terrain = this.AddComponent<Scenery>(terrainDescription, SceneObjectUsageEnum.Ground, this.layerTerrain);
+            this.terrain = this.AddComponent<Scenery>(terrainDescription, SceneObjectUsages.Ground, this.layerTerrain);
 
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -761,7 +761,7 @@ namespace Terrain
                     Count = 4,
                 }
             };
-            this.gardener = this.AddComponent<GroundGardener>(grDesc, SceneObjectUsageEnum.None, this.layerTerrain);
+            this.gardener = this.AddComponent<GroundGardener>(grDesc, SceneObjectUsages.None, this.layerTerrain);
 
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -778,7 +778,7 @@ namespace Terrain
             this.pExplosion = ParticleSystemDescription.InitializeExplosion("resources/particles", "fire.png");
             this.pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources/particles", "smoke.png");
 
-            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Manager" }, SceneObjectUsageEnum.None, layerEffects);
+            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Manager" }, SceneObjectUsages.None, layerEffects);
 
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -931,7 +931,7 @@ namespace Terrain
         private void StartHelicopter()
         {
             // Set position
-            var sceneryUsage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
+            var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
             {
                 var ray = this.GetTopDownRay(this.heliport.Transform.Position);
                 if (this.PickNearest(ref ray, true, sceneryUsage, out PickingResult<Triangle> r))
@@ -973,7 +973,7 @@ namespace Terrain
             this.helicopterAgent = new HelicopterAIAgent(this.agentManager, null, this.helicopter, hStats);
 
             // Adds agent to scene
-            this.AddComponent(this.helicopterAgent, new SceneObjectDescription() { }, SceneObjectUsageEnum.None);
+            this.AddComponent(this.helicopterAgent, new SceneObjectDescription() { }, SceneObjectUsages.None);
 
             // Register events
             this.helicopterAgent.Attacking += Agent_Attacking;
@@ -1000,7 +1000,7 @@ namespace Terrain
         }
         private void StartTanks()
         {
-            var sceneryUsage = SceneObjectUsageEnum.CoarsePathFinding | SceneObjectUsageEnum.FullPathFinding;
+            var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
 
             {
                 var ray = this.GetTopDownRay(-60, -60);
@@ -1041,8 +1041,8 @@ namespace Terrain
             this.tankP1Agent.SceneObject.Name = "Tank1";
             this.tankP2Agent.SceneObject.Name = "Tank2";
 
-            this.AddComponent(this.tankP1Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.None);
-            this.AddComponent(this.tankP2Agent, new SceneObjectDescription() { }, SceneObjectUsageEnum.None);
+            this.AddComponent(this.tankP1Agent, new SceneObjectDescription() { }, SceneObjectUsages.None);
+            this.AddComponent(this.tankP2Agent, new SceneObjectDescription() { }, SceneObjectUsages.None);
 
             // Register events
             this.tankP1Agent.Moving += Agent_Moving;
@@ -1272,7 +1272,7 @@ namespace Terrain
                         this.follow = false;
                     }
 
-                    if (this.PickNearest(ref pickingRay, 0, true, SceneObjectUsageEnum.Agent, out SceneObject agent))
+                    if (this.PickNearest(ref pickingRay, 0, true, SceneObjectUsages.Agent, out SceneObject agent))
                     {
                         this.followTarget = agent;
                         this.follow = true;
@@ -1399,7 +1399,7 @@ namespace Terrain
             if (this.Game.Input.KeyJustReleased(Keys.F7))
             {
                 this.shadowMapDrawer.Visible = !this.shadowMapDrawer.Visible;
-                this.shadowResult = SceneRendererResultEnum.ShadowMapDirectional;
+                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F8))
@@ -1455,18 +1455,18 @@ namespace Terrain
 
             if (this.Game.Input.KeyJustReleased(Keys.Up) && !this.Game.Input.ShiftPressed)
             {
-                this.shadowResult = SceneRendererResultEnum.ShadowMapDirectional;
+                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
             }
             if (this.Game.Input.KeyJustReleased(Keys.Down) && !this.Game.Input.ShiftPressed)
             {
-                this.shadowResult = SceneRendererResultEnum.ShadowMapDirectional;
+                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.C))

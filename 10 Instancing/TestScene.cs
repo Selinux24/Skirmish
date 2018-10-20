@@ -25,7 +25,7 @@ namespace Instancing
         private SceneObject<ModelInstanced> troops = null;
         private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        public TestScene(Game game) : base(game, SceneModesEnum.ForwardLigthning)
+        public TestScene(Game game) : base(game, SceneModes.ForwardLigthning)
         {
             
         }
@@ -38,8 +38,8 @@ namespace Instancing
 
             #region Texts
 
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsageEnum.UI, layerHUD);
-            this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
             this.title.Instance.Text = "Instancing test";
             this.runtime.Instance.Text = "";
@@ -55,7 +55,7 @@ namespace Instancing
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
@@ -143,7 +143,7 @@ namespace Instancing
                         ModelContentFilename = @"tree.xml",
                     }
                 };
-                this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsageEnum.None, layerTerrain);
+                this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
 
                 int side = instances / 4;
                 float groundSide = 55f;
@@ -193,7 +193,7 @@ namespace Instancing
                         ModelContentFilename = @"soldier_anim2.xml",
                     }
                 };
-                this.troops = this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsageEnum.Agent, layerObjects);
+                this.troops = this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects);
                 this.troops.Instance.MaximumCount = -1;
 
                 {
@@ -256,9 +256,9 @@ namespace Instancing
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);

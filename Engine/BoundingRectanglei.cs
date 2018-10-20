@@ -32,18 +32,18 @@ namespace Engine
         /// <summary>
         /// The minimum of the bounding box.
         /// </summary>
-        public Vector2i Min;
+        public Vector2Int Min { get; set; }
         /// <summary>
         /// The maximum of the bounding box.
         /// </summary>
-        public Vector2i Max;
+        public Vector2Int Max { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BBox2i"/> struct.
         /// </summary>
         /// <param name="min">A minimum bound.</param>
         /// <param name="max">A maximum bound.</param>
-        public BoundingRectanglei(Vector2i min, Vector2i max)
+        public BoundingRectanglei(Vector2Int min, Vector2Int max)
         {
             Min = min;
             Max = max;
@@ -57,10 +57,8 @@ namespace Engine
         /// <param name="maxY">The maximum Y bound.</param>
         public BoundingRectanglei(int minX, int minY, int maxX, int maxY)
         {
-            Min.X = minX;
-            Min.Y = minY;
-            Max.X = maxX;
-            Max.Y = maxY;
+            Min = new Vector2Int(minX, minY);
+            Max = new Vector2Int(maxX, maxY);
         }
 
         /// <summary>
@@ -77,7 +75,6 @@ namespace Engine
         /// <returns>A hash code.</returns>
         public override int GetHashCode()
         {
-            //TODO write a good hash code.
             return Min.GetHashCode() ^ Max.GetHashCode();
         }
         /// <summary>

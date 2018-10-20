@@ -172,7 +172,7 @@ namespace Engine.Effects
         /// <param name="vertexType">VertexType</param>
         /// <param name="channel">Color channel</param>
         /// <returns>Returns the technique to process the specified vertex type</returns>
-        public EngineEffectTechnique GetTechnique(VertexTypes vertexType, SpriteTextureChannelsEnum channel)
+        public EngineEffectTechnique GetTechnique(VertexTypes vertexType, SpriteTextureChannels channel)
         {
             if (vertexType == VertexTypes.PositionColor)
             {
@@ -180,12 +180,12 @@ namespace Engine.Effects
             }
             else if (vertexType == VertexTypes.PositionTexture)
             {
-                if (channel == SpriteTextureChannelsEnum.All) return this.PositionTexture;
-                else if (channel == SpriteTextureChannelsEnum.Red) return this.PositionTextureRED;
-                else if (channel == SpriteTextureChannelsEnum.Green) return this.PositionTextureGREEN;
-                else if (channel == SpriteTextureChannelsEnum.Blue) return this.PositionTextureBLUE;
-                else if (channel == SpriteTextureChannelsEnum.Alpha) return this.PositionTextureALPHA;
-                else if (channel == SpriteTextureChannelsEnum.NoAlpha) return this.PositionTextureNOALPHA;
+                if (channel == SpriteTextureChannels.All) return this.PositionTexture;
+                else if (channel == SpriteTextureChannels.Red) return this.PositionTextureRED;
+                else if (channel == SpriteTextureChannels.Green) return this.PositionTextureGREEN;
+                else if (channel == SpriteTextureChannels.Blue) return this.PositionTextureBLUE;
+                else if (channel == SpriteTextureChannels.Alpha) return this.PositionTextureALPHA;
+                else if (channel == SpriteTextureChannels.NoAlpha) return this.PositionTextureNOALPHA;
                 else return this.PositionTexture;
             }
             else

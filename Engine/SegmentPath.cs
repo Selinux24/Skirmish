@@ -107,19 +107,19 @@ namespace Engine
             this.Length = length;
         }
         /// <summary>
-        /// Gets the path position at specified distance
+        /// Gets the path position at specified time
         /// </summary>
-        /// <param name="distance">Distance</param>
-        /// <returns>Returns the position at distance</returns>
-        public Vector3 GetPosition(float distance)
+        /// <param name="time">Time</param>
+        /// <returns>Returns the position at time</returns>
+        public Vector3 GetPosition(float time)
         {
             if (this.PositionCount > 0)
             {
-                if (distance == 0) return path[0];
-                if (distance >= this.Length) return path[path.Length - 1];
+                if (time == 0) return path[0];
+                if (time >= this.Length) return path[path.Length - 1];
 
                 Vector3 res = Vector3.Zero;
-                float l = distance;
+                float l = time;
                 for (int i = 1; i < path.Length; i++)
                 {
                     Vector3 segment = path[i] - path[i - 1];
@@ -152,19 +152,19 @@ namespace Engine
             return Vector3.Up;
         }
         /// <summary>
-        /// Gets the next control point at specified distance
+        /// Gets the next control point at specified time
         /// </summary>
-        /// <param name="distance">Distance</param>
-        /// <returns>Returns the next control path at specified distance</returns>
-        public Vector3 GetNextControlPoint(float distance)
+        /// <param name="time">Time</param>
+        /// <returns>Returns the next control path at specified time</returns>
+        public Vector3 GetNextControlPoint(float time)
         {
             if (this.PositionCount > 0)
             {
-                if (distance == 0) return path[0];
-                if (distance >= this.Length) return path[path.Length - 1];
+                if (time == 0) return path[0];
+                if (time >= this.Length) return path[path.Length - 1];
 
                 Vector3 res = Vector3.Zero;
-                float l = distance;
+                float l = time;
                 for (int i = 1; i < path.Length; i++)
                 {
                     Vector3 segment = path[i] - path[i - 1];

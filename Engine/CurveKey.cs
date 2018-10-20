@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Key point on the <see cref="Curve"/>.
     /// </summary>
-    public class CurveKey : IEquatable<CurveKey>, IComparable<CurveKey>
+    public sealed class CurveKey : IEquatable<CurveKey>, IComparable<CurveKey>
     {
         /// <summary>
         /// Gets or sets the indicator whether the segment between this point and the next point on the curve is discrete or continuous.
@@ -102,6 +102,46 @@ namespace Engine
                 && (value1.TangentOut == value2.TangentOut)
                 && (value1.Continuity == value2.Continuity);
         }
+        /// <summary>
+        /// Gets wether the left curve is major than the right one
+        /// </summary>
+        /// <param name="left">Left curve</param>
+        /// <param name="right">Right curve</param>
+        /// <returns>Returns wether the left curve is major than the right one</returns>
+        public static bool operator >(CurveKey left, CurveKey right)
+        {
+            return left.CompareTo(right) > 0;
+        }
+        /// <summary>
+        /// Gets wether the left curve is minor than the right one
+        /// </summary>
+        /// <param name="left">Left curve</param>
+        /// <param name="right">Right curve</param>
+        /// <returns>Returns wether the left curve is minor than the right one</returns>
+        public static bool operator <(CurveKey left, CurveKey right)
+        {
+            return left.CompareTo(right) < 0;
+        }
+        /// <summary>
+        /// Gets wether the left curve is major than or equal to the right one
+        /// </summary>
+        /// <param name="left">Left curve</param>
+        /// <param name="right">Right curve</param>
+        /// <returns>Returns wether the left curve is major than or equal to the right one</returns>
+        public static bool operator >=(CurveKey left, CurveKey right)
+        {
+            return left.CompareTo(right) >= 0;
+        }
+        /// <summary>
+        /// Gets wether the left curve is minor than or equal to the right one
+        /// </summary>
+        /// <param name="left">Left curve</param>
+        /// <param name="right">Right curve</param>
+        /// <returns>Returns wether the left curve is minor than or equal to the right one</returns>
+        public static bool operator <=(CurveKey left, CurveKey right)
+        {
+            return left.CompareTo(right) <= 0;
+        }
 
         /// <summary>
         /// Compares another curve with this instance for equality.
@@ -128,7 +168,7 @@ namespace Engine
         /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public override bool Equals(object obj)
         {
-            return (obj as CurveKey) != null && Equals((CurveKey)obj);
+            return (obj is CurveKey) && Equals((CurveKey)obj);
         }
         /// <summary>
         /// Calculates a hash code unique to the contents of this instance.

@@ -130,7 +130,7 @@ namespace Engine
                     //go back on curve from end and target start 
                     // start-> end / end -> start
                     int cycle = this.GetNumberOfCycle(position);
-                    float virtualPos = position - (cycle * (last.Position - first.Position));
+                    float virtualPos;
                     if (0 == cycle % 2f)
                     {
                         //if pair

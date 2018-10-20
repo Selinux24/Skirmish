@@ -78,20 +78,9 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.BufferManager != null)
-                {
-                    //Remove data from buffer manager
-                    this.BufferManager.RemoveVertexData(this.vertexBuffer);
-                }
+                //Remove data from buffer manager
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
             }
-        }
-        /// <summary>
-        /// Update content
-        /// </summary>
-        /// <param name="context">Update context</param>
-        public override void Update(UpdateContext context)
-        {
-
         }
         /// <summary>
         /// Draw content

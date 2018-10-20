@@ -22,14 +22,6 @@ namespace Engine
         /// Draw flares flag
         /// </summary>
         private bool drawFlares = false;
-        /// <summary>
-        /// Light projected position
-        /// </summary>
-        private Vector2 lightProjectedPosition;
-        /// <summary>
-        /// Light projected direction
-        /// </summary>
-        private Vector2 lightProjectedDirection;
 
         /// <summary>
         /// Constructor
@@ -126,9 +118,10 @@ namespace Engine
 
                     Ray ray = new Ray(lightPosition, direction);
 
-                    if (this.Scene.PickNearest(ref ray, false, out PickingResult<Triangle> result))
+                    if (this.Scene.PickNearest(ref ray, false, out PickingResult<Triangle> result) &&
+                        Vector3.Distance(lightPosition, context.EyePosition) > result.Distance)
                     {
-                        if (Vector3.Distance(lightPosition, context.EyePosition) > result.Distance) return;
+                        return;
                     }
                 }
 
@@ -154,13 +147,13 @@ namespace Engine
                         //The light is in front of the camera.
                         this.drawFlares = true;
 
-                        this.lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
-                        this.lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
+                        var lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
+                        var lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
 
                         //Update glow sprite
                         float glowScale = 50f / this.glowSprite.Width;
                         this.glowSprite.Color = new Color4(keyLight.DiffuseColor.RGB(), 0.25f);
-                        this.glowSprite.Manipulator.SetPosition(this.lightProjectedPosition - (this.glowSprite.RelativeCenter * glowScale * scale));
+                        this.glowSprite.Manipulator.SetPosition(lightProjectedPosition - (this.glowSprite.RelativeCenter * glowScale * scale));
                         this.glowSprite.Manipulator.SetScale(glowScale * scale);
                         this.glowSprite.Update(context);
 
@@ -172,7 +165,7 @@ namespace Engine
                                 Flare flare = this.flares[i];
 
                                 // Compute the position of this flare sprite.
-                                Vector2 flarePosition = (this.lightProjectedPosition + this.lightProjectedDirection * flare.Position);
+                                Vector2 flarePosition = (lightProjectedPosition + lightProjectedDirection * flare.Position);
 
                                 // Set the flare alpha based on the angle with view and light directions.
                                 flare.FlareSprite.Color = new Color4(flare.Color.RGB(), 0.5f * transparency);

@@ -10,15 +10,15 @@ namespace Engine
         /// <summary>
         /// Maximum triangle count
         /// </summary>
-        public int Count;
+        public int Count { get; set; }
         /// <summary>
         /// Initial triangles
         /// </summary>
-        public Triangle[] Triangles;
+        public Triangle[] Triangles { get; set; }
         /// <summary>
         /// Initial color
         /// </summary>
-        public Color4 Color;
+        public Color4 Color { get; set; }
 
         /// <summary>
         /// Constructor

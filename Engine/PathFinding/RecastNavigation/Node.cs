@@ -27,7 +27,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Node flags. A combination of dtNodeFlags.
         /// </summary>
-        public NodeFlags flags;
+        public NodeFlagTypes flags;
         /// <summary>
         /// Polygon ref the node corresponds to.
         /// </summary>

@@ -8,7 +8,7 @@ namespace Engine.Common
     /// Drawing data by level of detail dictionary
     /// </summary>
     [Serializable]
-    public class LODDictionary : Dictionary<LevelOfDetailEnum, DrawingData>
+    public class LODDictionary : Dictionary<LevelOfDetail, DrawingData>
     {
         /// <summary>
         /// Constructor

@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using SharpDX;
+﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding
 {
@@ -11,11 +11,11 @@ namespace Engine.PathFinding
         /// <summary>
         /// Path nodes
         /// </summary>
-        public readonly List<Vector3> ReturnPath = new List<Vector3>();
+        public List<Vector3> ReturnPath { get; set; } = new List<Vector3>();
         /// <summary>
         /// Normal nodes
         /// </summary>
-        public readonly List<Vector3> Normals = new List<Vector3>();
+        public List<Vector3> Normals { get; set; } = new List<Vector3>();
 
         /// <summary>
         /// Constructor

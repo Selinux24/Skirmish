@@ -47,7 +47,7 @@ namespace Engine
         /// <summary>
         /// Plane mode
         /// </summary>
-        private readonly SkyPlaneMode mode;
+        private readonly SkyPlaneModes mode;
         /// <summary>
         /// Traslation direction
         /// </summary>
@@ -175,12 +175,9 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.BufferManager != null)
-                {
-                    //Remove data from buffer manager
-                    this.BufferManager.RemoveVertexData(this.vertexBuffer);
-                    this.BufferManager.RemoveIndexData(this.indexBuffer);
-                }
+                //Remove data from buffer manager
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
+                this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
 
@@ -211,58 +208,56 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            var mode = context.DrawerMode;
+            var draw =
+                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled);
 
-            if ((mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
+            if (draw && this.indexBuffer.Count > 0)
             {
-                if (this.indexBuffer.Count > 0)
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+
+                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+
+                var effect = DrawerPool.EffectDefaultClouds;
+                var technique = this.mode == SkyPlaneModes.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
+
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+
+                effect.UpdatePerFrame(
+                    this.rotation * Matrix.Translation(context.EyePosition),
+                    context.ViewProjection,
+                    this.brightness,
+                    this.color,
+                    this.FadingDistance,
+                    this.skyTexture1,
+                    this.skyTexture2);
+
+                if (this.mode == SkyPlaneModes.Static)
                 {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+                    effect.UpdatePerFrameStatic(
+                        this.firstLayerTranslation,
+                        this.secondLayerTranslation);
+                }
+                else
+                {
+                    effect.UpdatePerFramePerturbed(
+                        this.translation,
+                        this.PerturbationScale);
+                }
 
-                    this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+                var graphics = this.Game.Graphics;
 
-                    var effect = DrawerPool.EffectDefaultClouds;
-                    var technique = this.mode == SkyPlaneMode.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
+                graphics.SetBlendAdditive();
 
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+                for (int p = 0; p < technique.PassCount; p++)
+                {
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    effect.UpdatePerFrame(
-                        this.rotation * Matrix.Translation(context.EyePosition),
-                        context.ViewProjection,
-                        this.brightness,
-                        this.color,
-                        this.FadingDistance,
-                        this.skyTexture1,
-                        this.skyTexture2);
-
-                    if (this.mode == SkyPlaneMode.Static)
-                    {
-                        effect.UpdatePerFrameStatic(
-                            this.firstLayerTranslation,
-                            this.secondLayerTranslation);
-                    }
-                    else
-                    {
-                        effect.UpdatePerFramePerturbed(
-                            this.translation,
-                            this.PerturbationScale);
-                    }
-
-                    var graphics = this.Game.Graphics;
-
-                    graphics.SetBlendAdditive();
-
-                    for (int p = 0; p < technique.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(technique, p, 0);
-
-                        graphics.DrawIndexed(
-                            this.indexBuffer.Count,
-                            this.indexBuffer.Offset,
-                            this.vertexBuffer.Offset);
-                    }
+                    graphics.DrawIndexed(
+                        this.indexBuffer.Count,
+                        this.indexBuffer.Offset,
+                        this.vertexBuffer.Offset);
                 }
             }
         }

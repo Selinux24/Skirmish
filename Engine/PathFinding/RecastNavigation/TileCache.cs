@@ -12,7 +12,6 @@ namespace Engine.PathFinding.RecastNavigation
         private TileCacheMeshProcess m_tmproc;
         private TileCacheObstacle[] m_obstacles = null;
         private int m_nextFreeObstacle = -1;
-        private int m_tileLutSize;
         private int m_tileLutMask;
         private CompressedTile[] m_tiles = null;
         private CompressedTile[] m_posLookup = null;
@@ -85,7 +84,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Init tiles
-            m_tileLutSize = Helper.NextPowerOfTwo(tcparams.MaxTiles / 4);
+            var m_tileLutSize = Helper.NextPowerOfTwo(tcparams.MaxTiles / 4);
             if (m_tileLutSize == 0) m_tileLutSize = 1;
             m_tileLutMask = m_tileLutSize - 1;
 
@@ -124,12 +123,9 @@ namespace Engine.PathFinding.RecastNavigation
             var tile = m_posLookup[h];
             while (tile != null)
             {
-                if (tile.Header.tx == tx && tile.Header.ty == ty)
+                if (tile.Header.tx == tx && tile.Header.ty == ty && n < maxTiles)
                 {
-                    if (n < maxTiles)
-                    {
-                        tiles[n++] = tile;
-                    }
+                    tiles[n++] = tile;
                 }
 
                 tile = tile.Next;
@@ -186,7 +182,7 @@ namespace Engine.PathFinding.RecastNavigation
             return tile;
         }
 
-        public CompressedTile AddTile(TileCacheData data, CompressedTileFlags flags)
+        public CompressedTile AddTile(TileCacheData data, CompressedTileFlagTypes flags)
         {
             // Make sure the data is in right format.
             var header = data.Header;
@@ -212,6 +208,10 @@ namespace Engine.PathFinding.RecastNavigation
                 tile = m_nextFreeTile;
                 m_nextFreeTile = tile.Next;
                 tile.Next = null;
+            }
+            else
+            {
+                tile = new CompressedTile();
             }
 
             // Insert tile into the position lut.
@@ -270,7 +270,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Reset tile.
-            if ((tile.Flags & CompressedTileFlags.DT_COMPRESSEDTILE_FREE_DATA) != 0)
+            if ((tile.Flags & CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA) != 0)
             {
                 // Owns data
                 tile.Data = TileCacheLayerData.Empty;
@@ -497,12 +497,9 @@ namespace Engine.PathFinding.RecastNavigation
                         var tile = tiles[i];
                         CalcTightTileBounds(tile.Header, out Vector3 tbmin, out Vector3 tbmax);
 
-                        if (Detour.OverlapBounds(bmin, bmax, tbmin, tbmax))
+                        if (Detour.OverlapBounds(bmin, bmax, tbmin, tbmax) && n < maxResults)
                         {
-                            if (n < maxResults)
-                            {
-                                results[n++] = tiles[i];
-                            }
+                            results[n++] = tiles[i];
                         }
                     }
                 }
@@ -760,15 +757,12 @@ namespace Engine.PathFinding.RecastNavigation
             navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.tx, tile.Header.ty, tile.Header.tlayer), null, 0);
 
             // Add new tile, or leave the location empty.
-            if (navData != null)
+            if (navData != null && !navmesh.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int result))
             {
                 // Let the navmesh own the data.
-                if (!navmesh.AddTile(navData, TileFlags.DT_TILE_FREE_DATA, 0, out int result))
-                {
-                    navData = null;
+                navData = null;
 
-                    return false;
-                }
+                return false;
             }
 
             return true;

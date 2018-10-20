@@ -14,11 +14,11 @@ namespace Engine
         /// </summary>
         [XmlArray("assets")]
         [XmlArrayItem("asset", typeof(ModularSceneryAssetDescription))]
-        public ModularSceneryAssetDescription[] Assets = null;
+        public ModularSceneryAssetDescription[] Assets { get; set; } = null;
         /// <summary>
         /// Maintain texture direction for ceilings and floors, avoiding asset map rotations
         /// </summary>
         [XmlAttribute("maintain_texture_direction")]
-        public bool MaintainTextureDirection = true;
+        public bool MaintainTextureDirection { get; set; } = true;
     }
 }

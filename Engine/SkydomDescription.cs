@@ -18,7 +18,7 @@ namespace Engine
             this.DepthEnabled = false;
             this.AlphaEnabled = false;
 
-            this.Geometry = CubeMapGeometryEnum.Sphere;
+            this.Geometry = CubeMapGeometry.Sphere;
             this.ReverseFaces = true;
         }
     }

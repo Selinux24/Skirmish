@@ -17,62 +17,62 @@ namespace Engine
             /// <summary>
             /// Texture names array for vegetation
             /// </summary>
-            public string[] VegetationTextures = null;
+            public string[] VegetationTextures { get; set; } = null;
             /// <summary>
             /// Normal maps names array for vegetation
             /// </summary>
-            public string[] VegetationNormalMaps = null;
+            public string[] VegetationNormalMaps { get; set; } = null;
             /// <summary>
             /// Vegetation sprite minimum size
             /// </summary>
-            public Vector2 MinSize = Vector2.One;
+            public Vector2 MinSize { get; set; } = Vector2.One;
             /// <summary>
             /// Vegetation sprite maximum size
             /// </summary>
-            public Vector2 MaxSize = Vector2.One * 2f;
+            public Vector2 MaxSize { get; set; } = Vector2.One * 2f;
             /// <summary>
             /// Delta
             /// </summary>
-            public Vector3 Delta = new Vector3(0.5f, 0.0f, 0.5f);
+            public Vector3 Delta { get; set; } = new Vector3(0.5f, 0.0f, 0.5f);
             /// <summary>
             /// Drawing radius for vegetation
             /// </summary>
-            public float StartRadius = 0f;
+            public float StartRadius { get; set; } = 0f;
             /// <summary>
             /// Drawing radius for vegetation
             /// </summary>
-            public float EndRadius = 0f;
+            public float EndRadius { get; set; } = 0f;
             /// <summary>
             /// Seed for random position generation
             /// </summary>
-            public int Seed = 0;
+            public int Seed { get; set; } = 0;
             /// <summary>
             /// Vegetation saturation per triangle
             /// </summary>
-            public float Saturation = 0.1f;
+            public float Saturation { get; set; } = 0.1f;
             /// <summary>
             /// Wind effect
             /// </summary>
-            public float WindEffect = 1f;
+            public float WindEffect { get; set; } = 1f;
             /// <summary>
             /// Channel enabled
             /// </summary>
-            public bool Enabled = true;
+            public bool Enabled { get; set; } = true;
             /// <summary>
             /// Geometry output count
             /// </summary>
-            public int Count = 1;
+            public int Count { get; set; } = 1;
         }
 
         /// <summary>
         /// Content path
         /// </summary>
-        public string ContentPath = "Resources";
+        public string ContentPath { get; set; } = "Resources";
 
         /// <summary>
         /// Vegetation map
         /// </summary>
-        public string VegetationMap = null;
+        public string VegetationMap { get; set; } = null;
         /// <summary>
         /// Visible radius
         /// </summary>
@@ -93,23 +93,23 @@ namespace Engine
         /// <summary>
         /// Node size
         /// </summary>
-        public float NodeSize = 640f;
+        public float NodeSize { get; set; } = 640f;
         /// <summary>
         /// Material
         /// </summary>
-        public MaterialDescription Material = new MaterialDescription();
+        public MaterialDescription Material { get; set; } = new MaterialDescription();
         /// <summary>
         /// Red vegetation channel from map
         /// </summary>
-        public Channel ChannelRed = new Channel() { Enabled = false };
+        public Channel ChannelRed { get; set; } = new Channel() { Enabled = false };
         /// <summary>
         /// Green vegetation channel from map
         /// </summary>
-        public Channel ChannelGreen = new Channel() { Enabled = false };
+        public Channel ChannelGreen { get; set; } = new Channel() { Enabled = false };
         /// <summary>
         /// Blue vegetation channel from map
         /// </summary>
-        public Channel ChannelBlue = new Channel() { Enabled = false };
+        public Channel ChannelBlue { get; set; } = new Channel() { Enabled = false };
         /// <summary>
         /// Gets the active channel list
         /// </summary>

@@ -274,9 +274,9 @@ namespace Engine
             {
                 foreach (var light in sceneLights)
                 {
-                    if (light is SceneLightDirectional) this.directionalLights.Add((SceneLightDirectional)light);
-                    else if (light is SceneLightPoint) this.pointLights.Add((SceneLightPoint)light);
-                    else if (light is SceneLightSpot) this.spotLights.Add((SceneLightSpot)light);
+                    if (light is SceneLightDirectional dirLight) this.directionalLights.Add(dirLight);
+                    else if (light is SceneLightPoint pointLight) this.pointLights.Add(pointLight);
+                    else if (light is SceneLightSpot spotLight) this.spotLights.Add(spotLight);
                 }
             }
         }
@@ -352,7 +352,7 @@ namespace Engine
         {
             this.visibleLights.Clear();
 
-            var dLights = this.directionalLights.FindAll(l => l.Enabled == true);
+            var dLights = this.directionalLights.FindAll(l => l.Enabled);
             if (dLights.Count > 0)
             {
                 this.visibleLights.AddRange(dLights);
@@ -360,7 +360,7 @@ namespace Engine
 
             var pLights = this.pointLights.FindAll(l =>
             {
-                if (l.Enabled == true && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
+                if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
                 {
                     float d = Vector3.Distance(viewerPosition, l.Position);
 
@@ -387,7 +387,7 @@ namespace Engine
 
             var sLights = this.spotLights.FindAll(l =>
             {
-                if (l.Enabled == true && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
+                if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
                 {
                     float d = Vector3.Distance(viewerPosition, l.Position);
 

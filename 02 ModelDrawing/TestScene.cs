@@ -33,7 +33,7 @@ namespace ModelDrawing
         private Random rnd = new Random();
 
         public TestScene(Game game)
-            : base(game, SceneModesEnum.ForwardLigthning)
+            : base(game, SceneModes.ForwardLigthning)
         {
 
         }
@@ -56,10 +56,10 @@ namespace ModelDrawing
         }
         private void InitializeTexts()
         {
-            this.text = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed }, SceneObjectUsageEnum.UI, layerHUD);
-            this.statistics = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsageEnum.UI, layerHUD);
-            this.text1 = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsageEnum.UI, layerHUD);
-            this.text2 = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsageEnum.UI, layerHUD);
+            this.text = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 20, TextColor = Color.Yellow, ShadowColor = Color.OrangeRed }, SceneObjectUsages.UI, layerHUD);
+            this.statistics = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
+            this.text1 = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
+            this.text2 = this.AddComponent<TextDrawer>(new TextDrawerDescription() { Font = "Arial", FontSize = 10, TextColor = Color.LightBlue, ShadowColor = Color.DarkBlue }, SceneObjectUsages.UI, layerHUD);
 
             this.text.Instance.Position = Vector2.One;
             this.statistics.Instance.Position = Vector2.One;
@@ -78,7 +78,7 @@ namespace ModelDrawing
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeFloor()
         {
@@ -114,7 +114,7 @@ namespace ModelDrawing
                 }
             };
 
-            this.floor = this.AddComponent<Model>(desc, SceneObjectUsageEnum.Ground);
+            this.floor = this.AddComponent<Model>(desc, SceneObjectUsages.Ground);
         }
         private void InitializeModels()
         {
@@ -133,7 +133,7 @@ namespace ModelDrawing
             {
                 Count = 20000
             };
-            this.pManagerLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsageEnum.None, layerEffects);
+            this.pManagerLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, layerEffects);
             this.pManagerLineDrawer.Visible = true;
         }
 
@@ -145,9 +145,9 @@ namespace ModelDrawing
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)

@@ -372,35 +372,35 @@ namespace Engine
         /// <summary>
         /// Movement delta (20.5f)
         /// </summary>
-        public float MovementDelta = 20.5f;
+        public float MovementDelta { get; set; } = 20.5f;
         /// <summary>
         /// Slow movement delta (1.0f)
         /// </summary>
-        public float SlowMovementDelta = 1.0f;
+        public float SlowMovementDelta { get; set; } = 1.0f;
         /// <summary>
         /// Rotation delta (0.25f)
         /// </summary>
-        public float RotationDelta = 0.25f;
+        public float RotationDelta { get; set; } = 0.25f;
         /// <summary>
         /// Slow rotation delta (0.10f)
         /// </summary>
-        public float SlowRotationDelta = 0.10f;
+        public float SlowRotationDelta { get; set; } = 0.10f;
         /// <summary>
         /// Maximum zoom value
         /// </summary>
-        public float ZoomMax = 200f;
+        public float ZoomMax { get; set; } = 200f;
         /// <summary>
         /// Minimum zoom value
         /// </summary>
-        public float ZoomMin = 15f;
+        public float ZoomMin { get; set; } = 15f;
         /// <summary>
         /// Zoom delta
         /// </summary>
-        public float ZoomDelta = 100f;
+        public float ZoomDelta { get; set; } = 100f;
         /// <summary>
         /// Zoom movement delta
         /// </summary>
-        public float SlowZoomDelta = 40f;
+        public float SlowZoomDelta { get; set; } = 40f;
         /// <summary>
         /// Gets or sets field of view value
         /// </summary>
@@ -921,7 +921,7 @@ namespace Engine
         {
             float degrees = (slow) ? this.SlowRotationDelta : this.RotationDelta;
 
-            this.Rotate(axis, degrees);
+            this.Rotate(axis, degrees * gameTime.ElapsedSeconds);
         }
         /// <summary>
         /// Rotation
@@ -966,7 +966,7 @@ namespace Engine
         {
             this.StopTranslations();
 
-            float delta = delta = (slow) ? this.SlowZoomDelta : this.ZoomDelta;
+            float delta = (slow) ? this.SlowZoomDelta : this.ZoomDelta;
             float zooming = (zoomIn) ? +delta : -delta;
 
             if (zooming != 0f)
@@ -1035,7 +1035,7 @@ namespace Engine
                     distanceThisMove = distanceToTarget * this.translationOutOfRadius;
                 }
 
-                Vector3 movingVector = Vector3.Zero;
+                Vector3 movingVector;
                 if (distanceThisMove >= distanceToTarget)
                 {
                     //This movement goes beyond the destination.

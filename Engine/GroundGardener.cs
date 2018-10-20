@@ -14,7 +14,7 @@ namespace Engine
     /// <summary>
     /// Ground garden planter
     /// </summary>
-    public class GroundGardener : Drawable, IUseMaterials, IDisposable
+    public class GroundGardener : Drawable, IUseMaterials
     {
         #region Helper classes
 
@@ -184,22 +184,19 @@ namespace Engine
                             var ray = scene.GetTopDownRay(pos);
                             bool found = scene.PickFirst(
                                 ref ray, true,
-                                SceneObjectUsageEnum.Ground,
+                                SceneObjectUsages.Ground,
                                 out PickingResult<Triangle> r);
-                            if (found)
+                            if (found && r.Item.Normal.Y > 0.5f)
                             {
-                                if (r.Item.Normal.Y > 0.5f)
+                                vertexData.Add(new VertexBillboard()
                                 {
-                                    vertexData.Add(new VertexBillboard()
-                                    {
-                                        Position = r.Position,
-                                        Size = new Vector2(
-                                            rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                                            rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
-                                    });
+                                    Position = r.Position,
+                                    Size = new Vector2(
+                                        rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
+                                        rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
+                                });
 
-                                    count--;
-                                }
+                                count--;
                             }
                         }
                         else
@@ -341,6 +338,14 @@ namespace Engine
             /// Foliage buffer id static counter
             /// </summary>
             private static int ID = 0;
+            /// <summary>
+            /// Gets the next instance Id
+            /// </summary>
+            /// <returns>Returns the next Instance Id</returns>
+            private static int GetID()
+            {
+                return ++ID;
+            }
 
             /// <summary>
             /// Vertex count
@@ -383,7 +388,7 @@ namespace Engine
             {
                 this.Game = game;
                 this.BufferManager = bufferManager;
-                this.Id = ++ID;
+                this.Id = GetID();
                 this.Attached = false;
                 this.CurrentPatch = null;
                 this.VertexBuffer = bufferManager.Add(string.Format("{1}.{0}", this.Id, name), new VertexBillboard[FoliagePatch.MAX], true, 0);
@@ -411,11 +416,8 @@ namespace Engine
             {
                 if (disposing)
                 {
-                    if (this.BufferManager != null)
-                    {
-                        //Remove data from buffer manager
-                        this.BufferManager.RemoveVertexData(this.VertexBuffer);
-                    }
+                    //Remove data from buffer manager
+                    this.BufferManager?.RemoveVertexData(this.VertexBuffer);
                 }
             }
 
@@ -450,9 +452,8 @@ namespace Engine
             /// <summary>
             /// Draw foliage shadows
             /// </summary>
-            /// <param name="context">Context</param>
             /// <param name="technique">Technique</param>
-            public void DrawFoliageShadows(DrawContextShadows context, EngineEffectTechnique technique)
+            public void DrawFoliageShadows(EngineEffectTechnique technique)
             {
                 if (this.vertexDrawCount > 0)
                 {
@@ -469,9 +470,8 @@ namespace Engine
             /// <summary>
             /// Draws the foliage data
             /// </summary>
-            /// <param name="context">Drawing context</param>
             /// <param name="technique">Technique</param>
-            public void DrawFoliage(DrawContext context, EngineEffectTechnique technique)
+            public void DrawFoliage(EngineEffectTechnique technique)
             {
                 if (this.vertexDrawCount > 0)
                 {
@@ -573,11 +573,11 @@ namespace Engine
         /// <summary>
         /// Wind direction
         /// </summary>
-        public Vector3 WindDirection;
+        public Vector3 WindDirection { get; set; }
         /// <summary>
         /// Wind strength
         /// </summary>
-        public float WindStrength;
+        public float WindStrength { get; set; }
 
         /// <summary>
         /// Constructor
@@ -831,12 +831,9 @@ namespace Engine
                         }
                         else
                         {
-                            if (!this.foliageBuffers.Exists(b => b.CurrentPatch == fPatch))
+                            if (fPatch.HasData && !this.foliageBuffers.Exists(b => b.CurrentPatch == fPatch))
                             {
-                                if (fPatch.HasData)
-                                {
-                                    toAssign.Add(fPatch);
-                                }
+                                toAssign.Add(fPatch);
                             }
                         }
                     }
@@ -915,7 +912,7 @@ namespace Engine
 
             foreach (var q in this.foliagePatches)
             {
-                this.PlantingTasks += q.Value.FindAll(f => f.Planting == true).Count;
+                this.PlantingTasks += q.Value.FindAll(f => f.Planting).Count;
             }
         }
         /// <summary>
@@ -945,7 +942,7 @@ namespace Engine
                                     buffer.VertexBuffer.Slot,
                                     Topology.PointList);
 
-                                buffer.DrawFoliageShadows(context, vegetationTechnique);
+                                buffer.DrawFoliageShadows(vegetationTechnique);
                             }
                         }
                     }
@@ -960,31 +957,30 @@ namespace Engine
         {
             var mode = context.DrawerMode;
             var graphics = this.Game.Graphics;
+            var draw =
+                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled);
 
-            if ((mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
+            if (draw && this.visibleNodes?.Length > 0)
             {
-                if (this.visibleNodes != null && this.visibleNodes.Length > 0)
+                graphics.SetBlendDefaultAlpha();
+
+                foreach (var item in this.visibleNodes)
                 {
-                    graphics.SetBlendDefaultAlpha();
-
-                    foreach (var item in this.visibleNodes)
+                    var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch != null && b.CurrentPatch.CurrentNode == item);
+                    if (buffers.Count > 0)
                     {
-                        var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch != null && b.CurrentPatch.CurrentNode == item);
-                        if (buffers.Count > 0)
+                        foreach (var buffer in buffers)
                         {
-                            foreach (var buffer in buffers)
+                            var vegetationTechnique = this.SetTechniqueVegetationDefault(context, buffer.CurrentPatch.Channel);
+                            if (vegetationTechnique != null)
                             {
-                                var vegetationTechnique = this.SetTechniqueVegetationDefault(context, buffer.CurrentPatch.Channel);
-                                if (vegetationTechnique != null)
-                                {
-                                    this.BufferManager.SetInputAssembler(
-                                        vegetationTechnique,
-                                        buffer.VertexBuffer.Slot,
-                                        Topology.PointList);
+                                this.BufferManager.SetInputAssembler(
+                                    vegetationTechnique,
+                                    buffer.VertexBuffer.Slot,
+                                    Topology.PointList);
 
-                                    buffer.DrawFoliage(context, vegetationTechnique);
-                                }
+                                buffer.DrawFoliage(vegetationTechnique);
                             }
                         }
                     }
@@ -1088,13 +1084,13 @@ namespace Engine
         /// <returns>Returns a node list</returns>
         private QuadTreeNode[] GetFoliageNodes(ICullingVolume volume, BoundingSphere sph)
         {
-            var visibleNodes = this.foliageQuadtree.GetNodesInVolume(ref sph);
-            if (visibleNodes != null && visibleNodes.Length > 0)
+            var nodes = this.foliageQuadtree.GetNodesInVolume(ref sph);
+            if (nodes?.Length > 0)
             {
-                return Array.FindAll(visibleNodes, n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint);
+                return Array.FindAll(nodes, n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint);
             }
 
-            return null;
+            return new QuadTreeNode[] { };
         }
     }
 }

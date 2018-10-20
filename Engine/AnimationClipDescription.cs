@@ -13,16 +13,16 @@ namespace Engine
         /// Clip name
         /// </summary>
         [XmlAttribute("name")]
-        public string Name;
+        public string Name { get; set; }
         /// <summary>
         /// Index from
         /// </summary>
         [XmlAttribute("from")]
-        public int From;
+        public int From { get; set; }
         /// <summary>
         /// Index to
         /// </summary>
         [XmlAttribute("to")]
-        public int To;
+        public int To { get; set; }
     }
 }

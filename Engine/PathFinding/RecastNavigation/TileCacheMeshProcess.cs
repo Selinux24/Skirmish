@@ -10,7 +10,7 @@ namespace Engine.PathFinding.RecastNavigation
             this.m_geom = geometry;
         }
 
-        public void Process(ref NavMeshCreateParams param, ref SamplePolyAreas[] polyAreas, ref SamplePolyFlags[] polyFlags)
+        public void Process(ref NavMeshCreateParams param, ref SamplePolyAreas[] polyAreas, ref SamplePolyFlagTypes[] polyFlags)
         {
             // Update poly flags from areas.
             for (int i = 0; i < param.polyCount; ++i)
@@ -24,15 +24,15 @@ namespace Engine.PathFinding.RecastNavigation
                     polyAreas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GRASS ||
                     polyAreas[i] == SamplePolyAreas.SAMPLE_POLYAREA_ROAD)
                 {
-                    polyFlags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK;
+                    polyFlags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK;
                 }
                 else if (polyAreas[i] == SamplePolyAreas.SAMPLE_POLYAREA_WATER)
                 {
-                    polyFlags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_SWIM;
+                    polyFlags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_SWIM;
                 }
                 else if (polyAreas[i] == SamplePolyAreas.SAMPLE_POLYAREA_DOOR)
                 {
-                    polyFlags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK | SamplePolyFlags.SAMPLE_POLYFLAGS_DOOR;
+                    polyFlags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK | SamplePolyFlagTypes.SAMPLE_POLYFLAGS_DOOR;
                 }
             }
 

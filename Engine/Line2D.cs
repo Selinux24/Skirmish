@@ -10,11 +10,11 @@ namespace Engine
         /// <summary>
         /// Start point
         /// </summary>
-        public Vector2 Point1;
+        public Vector2 Point1 { get; set; }
         /// <summary>
         /// End point
         /// </summary>
-        public Vector2 Point2;
+        public Vector2 Point2 { get; set; }
         /// <summary>
         /// Length
         /// </summary>
@@ -25,7 +25,9 @@ namespace Engine
                 return Vector2.Distance(this.Point1, this.Point2);
             }
         }
-
+        /// <summary>
+        /// Direction vector of the line
+        /// </summary>
         public Vector2 Direction
         {
             get
@@ -33,7 +35,7 @@ namespace Engine
                 return Vector2.Normalize(this.Point2 - this.Point1);
             }
         }
-   
+
         /// <summary>
         /// Transform line coordinates
         /// </summary>
@@ -94,5 +96,5 @@ namespace Engine
         {
             return string.Format("Vertex 1 {0}; Vertex 2 {1};", this.Point1, this.Point2);
         }
- }
+    }
 }

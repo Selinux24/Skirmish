@@ -10,7 +10,7 @@ namespace Engine
         /// <summary>
         /// Bounding sphere
         /// </summary>
-        private BoundingBox bbox;
+        private readonly BoundingBox bbox;
 
         /// <summary>
         /// Gets the center of the sphere

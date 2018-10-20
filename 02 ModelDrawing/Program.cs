@@ -6,6 +6,7 @@ namespace ModelDrawing
 {
     static class Program
     {
+        [STAThread]
         static void Main()
         {
             try

@@ -8,17 +8,9 @@ namespace Engine
     public class Manipulator2D
     {
         /// <summary>
-        /// Final transform for the controller
-        /// </summary>
-        private Matrix localTransform = Matrix.Identity;
-        /// <summary>
         /// Position component
         /// </summary>
         private Vector2 position = Vector2.Zero;
-        /// <summary>
-        /// Scale component
-        /// </summary>
-        private Vector2 scale = Vector2.One;
 
         /// <summary>
         /// Gets Position component
@@ -33,34 +25,22 @@ namespace Engine
         /// <summary>
         /// Gets Scale component
         /// </summary>
-        public Vector2 Scale
-        {
-            get
-            {
-                return this.scale;
-            }
-        }
+        public Vector2 Scale { get; private set; } = Vector2.One;
         /// <summary>
         /// Gets final transform of controller
         /// </summary>
-        public Matrix LocalTransform
-        {
-            get
-            {
-                return this.localTransform;
-            }
-        }
+        public Matrix LocalTransform { get; private set; } = Matrix.Identity;
         /// <summary>
         /// Linear velocity modifier
         /// </summary>
-        public float LinearVelocity = 1f;
+        public float LinearVelocity { get; set; } = 1f;
 
         /// <summary>
         /// Contructor
         /// </summary>
         public Manipulator2D()
         {
-            this.position = Vector2.Zero;
+
         }
         /// <summary>
         /// Update internal state
@@ -71,21 +51,12 @@ namespace Engine
         /// <param name="height">Height</param>
         public void Update(GameTime gameTime, Point relativeCenter, float width, float height)
         {
-            this.localTransform =
-                Matrix.Scaling(this.scale.X * width, this.scale.Y * height, 1f) *
+            this.LocalTransform =
+                Matrix.Scaling(this.Scale.X * width, this.Scale.Y * height, 1f) *
                 Matrix.Translation(-relativeCenter.X, +relativeCenter.Y, 0f) *
                 Matrix.Translation(this.position.X, this.position.Y, 0f);
 
             Counters.UpdatesPerFrame++;
-        }
-
-        /// <summary>
-        /// Increments position component d length along d vector
-        /// </summary>
-        /// <param name="d">Distance</param>
-        private void Move(Vector2 d)
-        {
-            this.position += d;
         }
 
         /// <summary>
@@ -144,7 +115,7 @@ namespace Engine
         /// <param name="scale">Scale component</param>
         public void SetScale(float scale)
         {
-            this.scale = new Vector2(scale, scale);
+            this.Scale = new Vector2(scale, scale);
         }
         /// <summary>
         /// Sets scale
@@ -153,7 +124,7 @@ namespace Engine
         /// <param name="y">Y component of scale</param>
         public void SetScale(float x, float y)
         {
-            this.scale = new Vector2(x, y);
+            this.Scale = new Vector2(x, y);
         }
         /// <summary>
         /// Sets scale
@@ -161,7 +132,7 @@ namespace Engine
         /// <param name="scale">Scale component</param>
         public void SetScale(Vector2 scale)
         {
-            this.scale = scale;
+            this.Scale = scale;
         }
 
         /// <summary>
@@ -170,7 +141,7 @@ namespace Engine
         /// <returns>Returns manipulator text description</returns>
         public override string ToString()
         {
-            return string.Format("{0}", this.localTransform.GetDescription());
+            return string.Format("{0}", this.LocalTransform.GetDescription());
         }
     }
 }

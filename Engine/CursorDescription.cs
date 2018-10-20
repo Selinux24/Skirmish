@@ -10,14 +10,6 @@ namespace Engine
         /// <summary>
         /// Delta to position
         /// </summary>
-        public Vector2 Delta { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public CursorDescription() : base()
-        {
-            this.Delta = Vector2.Zero;
-        }
+        public Vector2 Delta { get; set; } = Vector2.Zero;
     }
 }

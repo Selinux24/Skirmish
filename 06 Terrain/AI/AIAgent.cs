@@ -464,7 +464,7 @@ namespace Terrain.AI
         /// <param name="refine">Refine route</param>
         public virtual void SetRouteToPoint(Vector3 point, float speed, bool refine)
         {
-            if (this.AgentType != null & this.Parent.Scene != null)
+            if (this.AgentType != null && this.Parent.Scene != null)
             {
                 var refineDelta = refine ? speed * 0.1f : 0f;
 

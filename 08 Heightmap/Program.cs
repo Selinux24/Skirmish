@@ -6,6 +6,7 @@ namespace Heightmap
 {
     static class Program
     {
+        [STAThread]
         static void Main()
         {
             try

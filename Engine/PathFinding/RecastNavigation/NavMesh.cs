@@ -134,7 +134,8 @@ namespace Engine.PathFinding.RecastNavigation
             else if (settings.PartitionType == SamplePartitionTypeEnum.Layers)
             {
                 // Partition the walkable surface into simple regions without holes.
-                if (!Recast.BuildLayerRegions(chf, 0, cfg.MinRegionArea))
+                var hasLayers = Recast.BuildLayerRegions(chf, 0, cfg.MinRegionArea);
+                if (!hasLayers)
                 {
                     throw new EngineException("buildNavigation: Could not build layer regions.");
                 }
@@ -169,15 +170,15 @@ namespace Engine.PathFinding.RecastNavigation
                         pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GRASS ||
                         pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_ROAD)
                     {
-                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK;
+                        pmesh.flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK;
                     }
                     else if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_WATER)
                     {
-                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_SWIM;
+                        pmesh.flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_SWIM;
                     }
                     else if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_DOOR)
                     {
-                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK | SamplePolyFlags.SAMPLE_POLYFLAGS_DOOR;
+                        pmesh.flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK | SamplePolyFlagTypes.SAMPLE_POLYFLAGS_DOOR;
                     }
                 }
 
@@ -213,7 +214,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 var nm = new NavMesh();
-                nm.Init(navData, TileFlags.DT_TILE_FREE_DATA);
+                nm.Init(navData, TileFlagTypes.DT_TILE_FREE_DATA);
                 return nm;
             }
 
@@ -338,7 +339,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                     for (int i = 0; i < ntiles; ++i)
                     {
-                        var tile = tileCache.AddTile(tiles[i], CompressedTileFlags.DT_COMPRESSEDTILE_FREE_DATA);
+                        var tile = tileCache.AddTile(tiles[i], CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
                         if (tile == null)
                         {
                             continue;
@@ -403,7 +404,7 @@ namespace Engine.PathFinding.RecastNavigation
             Vector2 tbmax = new Vector2(tcfg.BoundingBox.Maximum.X, tcfg.BoundingBox.Maximum.Z);
 
             var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
-            if (cid.Count() == 0)
+            if (!cid.Any())
             {
                 return 0; // empty
             }
@@ -541,7 +542,7 @@ namespace Engine.PathFinding.RecastNavigation
                         // Remove any previous data (navmesh owns and deletes the data).
                         navMesh.RemoveTile(navMesh.GetTileRefAt(x, y, 0), data, 0);
                         // Let the navmesh own the data.
-                        navMesh.AddTile(data, TileFlags.DT_TILE_FREE_DATA, 0, out int result);
+                        navMesh.AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int result);
                     }
                 }
             }
@@ -616,7 +617,7 @@ namespace Engine.PathFinding.RecastNavigation
             Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
             Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
             var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
-            if (cid.Count() == 0)
+            if (!cid.Any())
             {
                 return null; // empty
             }
@@ -727,7 +728,8 @@ namespace Engine.PathFinding.RecastNavigation
             else if (settings.PartitionType == SamplePartitionTypeEnum.Layers)
             {
                 // Partition the walkable surface into simple regions without holes.
-                if (!Recast.BuildLayerRegions(chf, cfg.BorderSize, cfg.MinRegionArea))
+                var hasLayerRegions = Recast.BuildLayerRegions(chf, cfg.BorderSize, cfg.MinRegionArea);
+                if (!hasLayerRegions)
                 {
                     return null;
                 }
@@ -776,15 +778,15 @@ namespace Engine.PathFinding.RecastNavigation
                         pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_GRASS ||
                         pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_ROAD)
                     {
-                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK;
+                        pmesh.flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK;
                     }
                     else if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_WATER)
                     {
-                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_SWIM;
+                        pmesh.flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_SWIM;
                     }
                     else if (pmesh.areas[i] == SamplePolyAreas.SAMPLE_POLYAREA_DOOR)
                     {
-                        pmesh.flags[i] = SamplePolyFlags.SAMPLE_POLYFLAGS_WALK | SamplePolyFlags.SAMPLE_POLYFLAGS_DOOR;
+                        pmesh.flags[i] = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK | SamplePolyFlagTypes.SAMPLE_POLYFLAGS_DOOR;
                     }
                 }
 
@@ -831,7 +833,6 @@ namespace Engine.PathFinding.RecastNavigation
         private Vector3 m_orig;
         private float m_tileWidth;
         private float m_tileHeight;
-        private int m_tileLutSize;
         private int m_tileLutMask;
         private MeshTile[] m_posLookup;
         private MeshTile m_nextFree = null;
@@ -861,7 +862,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Init tiles
             MaxTiles = nmparams.MaxTiles;
-            m_tileLutSize = Helper.NextPowerOfTwo(nmparams.MaxTiles / 4);
+            var m_tileLutSize = Helper.NextPowerOfTwo(nmparams.MaxTiles / 4);
             if (m_tileLutSize == 0) m_tileLutSize = 1;
             m_tileLutMask = m_tileLutSize - 1;
 
@@ -890,7 +891,7 @@ namespace Engine.PathFinding.RecastNavigation
                 throw new EngineException("DT_INVALID_PARAM");
             }
         }
-        public bool Init(MeshData data, TileFlags flags)
+        public bool Init(MeshData data, TileFlagTypes flags)
         {
             // Make sure the data is in right format.
             MeshHeader header = data.header;
@@ -920,7 +921,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return m_params;
         }
-        public bool AddTile(MeshData data, TileFlags flags, int lastRef, out int result)
+        public bool AddTile(MeshData data, TileFlagTypes flags, int lastRef, out int result)
         {
             result = -1;
 
@@ -969,23 +970,23 @@ namespace Engine.PathFinding.RecastNavigation
                     prev = tile;
                     tile = tile.next;
                 }
-                // Could not find the correct location.
-                if (tile != target)
-                {
-                    return false;
-                }
-                // Remove from freelist
-                if (prev == null)
-                {
-                    m_nextFree = tile.next;
-                }
-                else
-                {
-                    prev.next = tile.next;
-                }
 
-                // Restore salt.
-                tile.salt = DecodePolyIdSalt(lastRef);
+                // Could not find the correct location.
+                if (tile != null && tile == target)
+                {
+                    // Remove from freelist
+                    if (prev == null)
+                    {
+                        m_nextFree = tile.next;
+                    }
+                    else
+                    {
+                        prev.next = tile.next;
+                    }
+
+                    // Restore salt.
+                    tile.salt = DecodePolyIdSalt(lastRef);
+                }
             }
 
             // Make sure we could allocate a tile.
@@ -1114,18 +1115,11 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Reset tile.
-            if ((tile.flags & TileFlags.DT_TILE_FREE_DATA) != 0)
+            if ((tile.flags & TileFlagTypes.DT_TILE_FREE_DATA) != 0)
             {
                 // Owns data
                 tile.data = null;
                 tile.dataSize = 0;
-                data = null;
-                dataSize = 0;
-            }
-            else
-            {
-                data = tile.data;
-                dataSize = tile.dataSize;
             }
 
             tile.header = new MeshHeader();
@@ -1182,12 +1176,9 @@ namespace Engine.PathFinding.RecastNavigation
             var tile = m_posLookup[h];
             while (tile != null)
             {
-                if (tile.header.x == x &&
-                    tile.header.y == y)
+                if (tile.header.x == x && tile.header.y == y && n < maxTiles)
                 {
-                    if (n < maxTiles)
-
-                        tiles[n++] = tile;
+                    tiles[n++] = tile;
                 }
                 tile = tile.next;
             }
@@ -1275,12 +1266,6 @@ namespace Engine.PathFinding.RecastNavigation
             if (ip >= Tiles[it].header.polyCount) return false;
 
             return true;
-        }
-        public int GetPolyRefBase(MeshTile tile)
-        {
-            if (tile == null) return 0;
-            int it = Array.IndexOf(Tiles, tile);
-            return EncodePolyId(tile.salt, it, 0);
         }
         public bool GetOffMeshConnectionPolyEndPoints(int prevRef, int polyRef, out Vector3 startPos, out Vector3 endPos)
         {
@@ -1371,7 +1356,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return tile.offMeshCons[idx];
         }
-        public bool SetPolyFlags(int r, SamplePolyFlags flags)
+        public bool SetPolyFlags(int r, SamplePolyFlagTypes flags)
         {
             if (r == 0)
             {
@@ -1401,7 +1386,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-        public bool GetPolyFlags(int r, out SamplePolyFlags resultFlags)
+        public bool GetPolyFlags(int r, out SamplePolyFlagTypes resultFlags)
         {
             resultFlags = 0;
 
@@ -1537,7 +1522,7 @@ namespace Engine.PathFinding.RecastNavigation
                 case 5: nx--; ny--; break;
                 case 6: ny--; break;
                 case 7: nx++; ny--; break;
-            };
+            }
 
             return GetTilesAt(nx, ny, tiles, maxTiles);
         }
@@ -1555,7 +1540,7 @@ namespace Engine.PathFinding.RecastNavigation
             int m = Detour.DT_EXT_LINK | side;
             int n = 0;
 
-            int bse = GetPolyRefBase(tile);
+            int bse = GetTileRef(tile);
 
             for (int i = 0; i < tile.header.polyCount; ++i)
             {
@@ -1596,7 +1581,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (tile == null) return;
 
-            int bse = GetPolyRefBase(tile);
+            int bse = GetTileRef(tile);
 
             for (int i = 0; i < tile.header.polyCount; ++i)
             {
@@ -1638,7 +1623,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (tile == null) return;
 
-            int bse = GetPolyRefBase(tile);
+            int bse = GetTileRef(tile);
 
             // Base off-mesh connection start points.
             for (int i = 0; i < tile.header.offMeshConCount; ++i)
@@ -1659,8 +1644,7 @@ namespace Engine.PathFinding.RecastNavigation
                     continue;
                 }
                 // Make sure the location is on current mesh.
-                var v = tile.verts[poly.Verts[0]];
-                v = nearestPt;
+                tile.verts[poly.Verts[0]] = nearestPt;
 
                 // Link off-mesh connection to target poly.
                 int idx = Detour.AllocLink(tile);
@@ -1711,8 +1695,6 @@ namespace Engine.PathFinding.RecastNavigation
                 var poly = tile.polys[i];
 
                 // Create new links.
-                //		unsigned short m = DT_EXT_LINK | (unsigned short)side;
-
                 int nv = poly.VertCount;
                 for (int j = 0; j < nv; ++j)
                 {
@@ -1722,7 +1704,7 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
 
-                    int dir = (int)(poly.Neis[j] & 0xff);
+                    int dir = (poly.Neis[j] & 0xff);
                     if (side != -1 && dir != side)
                     {
                         continue;
@@ -1838,7 +1820,7 @@ namespace Engine.PathFinding.RecastNavigation
                         var landPoly = tile.polys[landPolyIdx];
                         var link = new Link
                         {
-                            nref = (GetPolyRefBase(target) | (targetCon.poly)),
+                            nref = (GetTileRef(target) | (targetCon.poly)),
                             edge = 0xff,
                             side = (side == -1 ? 0xff : side),
                             bmin = 0,
@@ -1865,7 +1847,7 @@ namespace Engine.PathFinding.RecastNavigation
                 int pj = Detour.DT_NULL_LINK;
                 while (j != Detour.DT_NULL_LINK)
                 {
-                    if (DecodePolyIdTile((int)tile.links[j].nref) == targetNum)
+                    if (DecodePolyIdTile(tile.links[j].nref) == targetNum)
                     {
                         // Remove link.
                         int nj = tile.links[j].next;
@@ -1918,7 +1900,7 @@ namespace Engine.PathFinding.RecastNavigation
                 bmax.Z = (int)(qfac * maxz + 1) | 1;
 
                 // Traverse tree
-                int bse = GetPolyRefBase(tile);
+                int bse = GetTileRef(tile);
                 int n = 0;
                 while (nodeIndex < endIndex)
                 {
@@ -1927,12 +1909,9 @@ namespace Engine.PathFinding.RecastNavigation
                     bool overlap = Detour.OverlapQuantBounds(bmin, bmax, node.bmin, node.bmax);
                     bool isLeafNode = node.i >= 0;
 
-                    if (isLeafNode && overlap)
+                    if (isLeafNode && overlap && n < maxPolys)
                     {
-                        if (n < maxPolys)
-                        {
-                            polys[n++] = bse | node.i;
-                        }
+                        polys[n++] = bse | node.i;
                     }
 
                     if (overlap || isLeafNode)
@@ -1950,10 +1929,10 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                Vector3 bmin = new Vector3();
-                Vector3 bmax = new Vector3();
+                Vector3 bmin;
+                Vector3 bmax;
                 int n = 0;
-                int bse = GetPolyRefBase(tile);
+                int bse = GetTileRef(tile);
                 for (int i = 0; i < tile.header.polyCount; ++i)
                 {
                     var p = tile.polys[i];
@@ -1972,12 +1951,10 @@ namespace Engine.PathFinding.RecastNavigation
                         bmin = Vector3.Min(bmin, v);
                         bmax = Vector3.Max(bmax, v);
                     }
-                    if (Recast.OverlapBounds(qmin, qmax, bmin, bmax))
+
+                    if (Recast.OverlapBounds(qmin, qmax, bmin, bmax) && n < maxPolys)
                     {
-                        if (n < maxPolys)
-                        {
-                            polys[n++] = bse | i;
-                        }
+                        polys[n++] = bse | i;
                     }
                 }
 
@@ -2129,13 +2106,10 @@ namespace Engine.PathFinding.RecastNavigation
             RemoveTile(GetTileRefAt(tx, ty, 0), data, 0);
 
             // Add tile, or leave the location empty.
-            if (data != null)
+            if (data != null && !AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res))
             {
                 // Let the navmesh own the data.
-                if (!AddTile(data, TileFlags.DT_TILE_FREE_DATA, 0, out int res))
-                {
-                    data = null;
-                }
+                data = null;
             }
         }
         public void GetTilePos(Vector3 pos, InputGeometry geom, BuildSettings settings, out int tx, out int ty)

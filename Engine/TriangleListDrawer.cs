@@ -69,20 +69,9 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.BufferManager != null)
-                {
-                    //Remove data from buffer manager
-                    this.BufferManager.RemoveVertexData(this.vertexBuffer);
-                }
+                //Remove data from buffer manager
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
             }
-        }
-        /// <summary>
-        /// Update content
-        /// </summary>
-        /// <param name="context">Update context</param>
-        public override void Update(UpdateContext context)
-        {
-
         }
         /// <summary>
         /// Draw content
@@ -143,7 +132,7 @@ namespace Engine
         /// <param name="lines">Triangle list</param>
         public void SetTriangles(Color4 color, IEnumerable<Triangle> triangle)
         {
-            if (triangle != null && triangle.Count() > 0)
+            if (triangle?.Count() > 0)
             {
                 if (!this.dictionary.ContainsKey(color))
                 {

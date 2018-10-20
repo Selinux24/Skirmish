@@ -63,7 +63,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Tile flags. (See: #dtTileFlags)
         /// </summary>
-        public TileFlags flags;
+        public TileFlagTypes flags;
         /// <summary>
         /// The next free tile, or the next tile in the spatial grid.
         /// </summary>

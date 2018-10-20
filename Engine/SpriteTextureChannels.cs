@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Channel color
     /// </summary>
-    public enum SpriteTextureChannelsEnum
+    public enum SpriteTextureChannels
     {
         /// <summary>
         /// No channel selected

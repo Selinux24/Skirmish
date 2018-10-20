@@ -21,7 +21,6 @@ namespace Engine.Collections
             return ((x * 73856093) ^ (y * 19349663)) & (n - 1);
         }
 
-        private readonly float cellSize;
         private readonly float inverseCellSize;
         private readonly ProximityGridItem<T>[] pool;
         private int poolHead;
@@ -35,7 +34,6 @@ namespace Engine.Collections
         /// <param name="cellSize">The size of each cell</param>
         public ProximityGrid(int poolSize, float cellSize)
         {
-            this.cellSize = cellSize;
             this.inverseCellSize = 1.0f / cellSize;
 
             //allocate hash buckets
@@ -63,7 +61,7 @@ namespace Engine.Collections
 
             this.poolHead = 0;
 
-            this.bounds = new BoundingRectanglei(Vector2i.Max, Vector2i.Min);
+            this.bounds = new BoundingRectanglei(Vector2Int.Max, Vector2Int.Min);
         }
         /// <summary>
         /// Take all the coordinates within a certain range and add them all to an array
@@ -80,10 +78,13 @@ namespace Engine.Collections
             int invMaxX = (int)Math.Floor(maxX * inverseCellSize);
             int invMaxY = (int)Math.Floor(maxY * inverseCellSize);
 
-            this.bounds.Min.X = Math.Min(this.bounds.Min.X, invMinX);
-            this.bounds.Min.Y = Math.Min(this.bounds.Min.Y, invMinY);
-            this.bounds.Max.X = Math.Max(this.bounds.Max.X, invMaxX);
-            this.bounds.Max.Y = Math.Max(this.bounds.Max.Y, invMaxY);
+            var vMinX = Math.Min(this.bounds.Min.X, invMinX);
+            var vMinY = Math.Min(this.bounds.Min.Y, invMinY);
+            var vMaxX = Math.Max(this.bounds.Max.X, invMaxX);
+            var vMaxY = Math.Max(this.bounds.Max.Y, invMaxY);
+
+            this.bounds.Min = new Vector2Int(vMinX, vMinY);
+            this.bounds.Max = new Vector2Int(vMaxX, vMaxY);
 
             for (int y = invMinY; y <= invMaxY; y++)
             {

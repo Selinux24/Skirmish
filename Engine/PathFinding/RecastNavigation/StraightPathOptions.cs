@@ -1,9 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Options for findStraightPath.
     /// </summary>
+    [Flags]
     public enum StraightPathOptions
     {
         /// <summary>

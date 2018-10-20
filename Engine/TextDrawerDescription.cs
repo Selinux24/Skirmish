@@ -16,7 +16,7 @@ namespace Engine
         /// <returns>Returns the new generated description</returns>
         public static TextDrawerDescription Generate(string font, int size, Color textColor)
         {
-            return Generate(font, size, FontMapStyleEnum.Regular, textColor, Color.Transparent);
+            return Generate(font, size, FontMapStyles.Regular, textColor, Color.Transparent);
         }
         /// <summary>
         /// Generates a new description
@@ -26,7 +26,7 @@ namespace Engine
         /// <param name="style">Style</param>
         /// <param name="textColor">Text color</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription Generate(string font, int size, FontMapStyleEnum style, Color textColor)
+        public static TextDrawerDescription Generate(string font, int size, FontMapStyles style, Color textColor)
         {
             return Generate(font, size, style, textColor, Color.Transparent);
         }
@@ -40,7 +40,7 @@ namespace Engine
         /// <returns>Returns the new generated description</returns>
         public static TextDrawerDescription Generate(string font, int size, Color textColor, Color shadowColor)
         {
-            return Generate(font, size, FontMapStyleEnum.Regular, textColor, shadowColor);
+            return Generate(font, size, FontMapStyles.Regular, textColor, shadowColor);
         }
         /// <summary>
         /// Generates a new description
@@ -51,7 +51,7 @@ namespace Engine
         /// <param name="textColor">Text color</param>
         /// <param name="shadowColor">Shadow color</param>
         /// <returns>Returns the new generated description</returns>
-        public static TextDrawerDescription Generate(string font, int size, FontMapStyleEnum style, Color textColor, Color shadowColor)
+        public static TextDrawerDescription Generate(string font, int size, FontMapStyles style, Color textColor, Color shadowColor)
         {
             return new TextDrawerDescription()
             {
@@ -75,7 +75,7 @@ namespace Engine
         /// <summary>
         /// Font style
         /// </summary>
-        public FontMapStyleEnum Style;
+        public FontMapStyles Style;
         /// <summary>
         /// Text color
         /// </summary>
@@ -101,7 +101,7 @@ namespace Engine
             this.DepthEnabled = false;
             this.AlphaEnabled = true;
 
-            this.Style = FontMapStyleEnum.Regular;
+            this.Style = FontMapStyles.Regular;
             this.ShadowDelta = new Vector2(1, -1);
         }
     }

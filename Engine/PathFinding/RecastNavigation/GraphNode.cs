@@ -29,7 +29,7 @@ namespace Engine.PathFinding.RecastNavigation
                     var p = tile.polys[t];
                     if (p.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION) continue;
 
-                    var bse = mesh.GetPolyRefBase(tile);
+                    var bse = mesh.GetTileRef(tile);
 
                     int tileNum = mesh.DecodePolyIdTile(bse);
                     var tileColor = IntToCol(tileNum, 128);
@@ -100,7 +100,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Node triangle list
         /// </summary>
-        public Triangle[] Triangles;
+        public Triangle[] Triangles { get; set; }
         /// <summary>
         /// Center point
         /// </summary>

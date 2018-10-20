@@ -573,7 +573,7 @@ namespace Engine.PathFinding.RecastNavigation
                 verts = Helper.CreateArray(maxVertices, () => new Int3()),
                 polys = new Polygoni[maxTris],
                 areas = new SamplePolyAreas[maxTris],
-                flags = new SamplePolyFlags[maxTris],
+                flags = new SamplePolyFlagTypes[maxTris],
                 nverts = 0,
                 npolys = 0
             };

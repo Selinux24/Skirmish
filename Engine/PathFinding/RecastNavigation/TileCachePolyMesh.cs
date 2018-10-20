@@ -24,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Per polygon flags.
         /// </summary>
-        public SamplePolyFlags[] flags;
+        public SamplePolyFlagTypes[] flags;
         /// <summary>
         /// Area ID of polygons.
         /// </summary>

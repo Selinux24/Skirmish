@@ -283,10 +283,9 @@ namespace Engine
         /// <param name="format">Format</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
-        /// <param name="fullScreen">True for full screen modes</param>
         /// <param name="refreshRate">Refresh date</param>
         /// <returns>Returns found mode description</returns>
-        private static ModeDescription1 FindModeDescription(Device3 device, Format format, int width, int height, bool fullScreen, int refreshRate)
+        private static ModeDescription1 FindModeDescription(Device3 device, Format format, int width, int height, int refreshRate)
         {
 #if DEBUG
             using (var tmpFactory = new Factory2(true))
@@ -301,6 +300,9 @@ namespace Engine
                     using (var tmpOutput = adapter.GetOutput(0))
                     using (var output = tmpOutput.QueryInterface<Output6>())
                     {
+                        ModeDescription1 result = new ModeDescription1();
+                        bool found = false;
+
                         try
                         {
                             var displayModeList = output.GetDisplayModeList1(
@@ -334,35 +336,44 @@ namespace Engine
                                     });
                                 }
 
-                                return displayModeList[0];
+                                result = displayModeList[0];
+                                found = true;
                             }
                         }
                         catch
                         {
-
+                            // Display mode not found
                         }
 
-                        try
+                        if (!found)
                         {
-                            ModeDescription1 desc = new ModeDescription1()
+                            try
                             {
-                                Width = width,
-                                Height = height,
-                                Format = format,
-                            };
-                            output.FindClosestMatchingMode1(
-                                ref desc,
-                                out ModeDescription1 result,
-                                device);
+                                ModeDescription1 desc = new ModeDescription1()
+                                {
+                                    Width = width,
+                                    Height = height,
+                                    Format = format,
+                                };
+                                output.FindClosestMatchingMode1(
+                                    ref desc,
+                                    out result,
+                                    device);
 
-                            result.Width = width;
-                            result.Height = height;
+                                result.Width = width;
+                                result.Height = height;
 
-                            return result;
+                                found = true;
+                            }
+                            catch
+                            {
+                                // Display mode not found
+                            }
                         }
-                        catch
-                        {
 
+                        if (found)
+                        {
+                            return result;
                         }
                     }
                 }
@@ -417,7 +428,6 @@ namespace Engine
                 this.BufferFormat,
                 form.RenderWidth,
                 form.RenderHeight,
-                form.IsFullscreen,
                 refreshRate);
 
             this.vsyncEnabled = vsyncEnabled && displayMode.RefreshRate != new Rational(0, 1);
@@ -445,12 +455,9 @@ namespace Engine
                     }
                 }
 
-                if (multiSampling != 0)
+                if (multiSampling != 0 && !CheckMultisample(this.device, this.BufferFormat, multiSampling, out this.msCount, out this.msQuality))
                 {
-                    if (!CheckMultisample(this.device, this.BufferFormat, multiSampling, out this.msCount, out this.msQuality))
-                    {
-                        throw new EngineException(string.Format("The specified multisampling value [{0}] is not supported for {1}", multiSampling, this.BufferFormat));
-                    }
+                    throw new EngineException(string.Format("The specified multisampling value [{0}] is not supported for {1}", multiSampling, this.BufferFormat));
                 }
 
                 var desc = new SwapChainDescription1()
@@ -534,11 +541,8 @@ namespace Engine
                 {
                     if (this.swapChain.IsFullScreen) this.swapChain.IsFullScreen = false;
 
-                    if (this.swapChain != null)
-                    {
-                        this.swapChain.Dispose();
-                        this.swapChain = null;
-                    }
+                    this.swapChain.Dispose();
+                    this.swapChain = null;
                 }
 
                 this.DisposeResources();
@@ -624,11 +628,8 @@ namespace Engine
 
             if (resizing)
             {
-                if (this.Resized != null)
-                {
-                    //Launch the "resized" event
-                    Resized(this, new EventArgs());
-                }
+                //Launch the "resized" event
+                this.Resized?.Invoke(this, new EventArgs());
             }
         }
 
@@ -640,9 +641,6 @@ namespace Engine
         {
             this.deviceDebug = this.device.QueryInterface<DeviceDebug>();
             this.deviceDebugInfoQueue = this.deviceDebug.QueryInterface<InfoQueue>();
-
-            //this.deviceDebugInfoQueue.SetBreakOnSeverity(MessageSeverity.Corruption, true);
-            //this.deviceDebugInfoQueue.SetBreakOnSeverity(MessageSeverity.Error, true);
 
             var severityFilter = new InfoQueueFilter()
             {
@@ -1766,7 +1764,6 @@ namespace Engine
                         textureList[i]?.Dispose();
                         textureList[i] = null;
                     }
-                    textureList = null;
                 }
 
                 return new EngineShaderResourceView(resource);
@@ -1798,7 +1795,6 @@ namespace Engine
                         textureList[i]?.Dispose();
                         textureList[i] = null;
                     }
-                    textureList = null;
                 }
 
                 return new EngineShaderResourceView(resource);
@@ -1872,7 +1868,6 @@ namespace Engine
                         textureList[i]?.Dispose();
                         textureList[i] = null;
                     }
-                    textureList = null;
                 }
 
                 return new EngineShaderResourceView(resource);
@@ -1904,7 +1899,6 @@ namespace Engine
                         textureList[i]?.Dispose();
                         textureList[i] = null;
                     }
-                    textureList = null;
                 }
 
                 return new EngineShaderResourceView(resource);
@@ -1970,7 +1964,7 @@ namespace Engine
 
                 using (var str = DataStream.Create(tmp, false, false))
                 {
-                    var dBox = new DataBox(str.DataPointer, size * (int)FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
+                    var dBox = new DataBox(str.DataPointer, size * FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
 
                     using (var texture = new Texture2D1(
                         this.device,

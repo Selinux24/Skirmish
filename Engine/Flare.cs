@@ -11,19 +11,19 @@ namespace Engine
         /// <summary>
         /// Sripte
         /// </summary>
-        public Sprite FlareSprite;
+        public Sprite FlareSprite { get; set; }
         /// <summary>
         /// Relative Position
         /// </summary>
-        public float Position;
+        public float Position { get; set; }
         /// <summary>
         /// Relative Scale
         /// </summary>
-        public float Scale;
+        public float Scale { get; set; }
         /// <summary>
         /// Color
         /// </summary>
-        public Color Color;
+        public Color Color { get; set; }
 
         /// <summary>
         /// Destructor
@@ -49,11 +49,8 @@ namespace Engine
         {
             if (disposing)
             {
-                if (FlareSprite != null)
-                {
-                    FlareSprite.Dispose();
-                    FlareSprite = null;
-                }
+                FlareSprite?.Dispose();
+                FlareSprite = null;
             }
         }
     }

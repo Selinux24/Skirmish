@@ -125,8 +125,8 @@ namespace SceneTest
         }
         private void InitializeTextBoxes()
         {
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsageEnum.UI, layerHUD);
-            this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsageEnum.UI, layerHUD);
+            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White, Color.Orange), SceneObjectUsages.UI, layerHUD);
+            this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 10, Color.Yellow, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
             this.title.Instance.Text = "Scene Test - Textures";
             this.runtime.Instance.Text = "";
@@ -142,7 +142,7 @@ namespace SceneTest
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
+            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeSkyEffects()
         {
@@ -176,7 +176,7 @@ namespace SceneTest
                 ContentPath = "SceneTextures/sky",
                 Texture1Name = "perturb001.dds",
                 Texture2Name = "cloud001.dds",
-                Mode = SkyPlaneMode.Perturbed,
+                Mode = SkyPlaneModes.Perturbed,
             });
         }
         private void InitializeScenery()
@@ -697,7 +697,7 @@ namespace SceneTest
         private void InitializeWater()
         {
             WaterDescription waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -100f);
-            this.water = this.AddComponent<Water>(waterDesc, SceneObjectUsageEnum.None);
+            this.water = this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
         }
 
         public override void Update(GameTime gameTime)
@@ -709,9 +709,9 @@ namespace SceneTest
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                    SceneModesEnum.DeferredLightning :
-                    SceneModesEnum.ForwardLigthning);
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
             base.Update(gameTime);

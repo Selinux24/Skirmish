@@ -100,7 +100,7 @@ namespace GameLogic
         #endregion
 
         public SceneObjects(Game game)
-            : base(game, SceneModesEnum.ForwardLigthning)
+            : base(game, SceneModes.ForwardLigthning)
         {
 
         }
@@ -143,7 +143,7 @@ namespace GameLogic
                         ModelContentFilename = "cursor.xml",
                     }
                 },
-                SceneObjectUsageEnum.UI,
+                SceneObjectUsages.UI,
                 layerHUD);
 
             this.terrain = this.AddComponent<Scenery>(
@@ -156,7 +156,7 @@ namespace GameLogic
                         ModelContentFilename = "terrain.xml",
                     }
                 },
-                SceneObjectUsageEnum.Ground);
+                SceneObjectUsages.Ground);
 
             this.soldier = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
@@ -169,7 +169,7 @@ namespace GameLogic
                         ModelContentFilename = "soldier_anim2.xml",
                     }
                 },
-                SceneObjectUsageEnum.Agent);
+                SceneObjectUsages.Agent);
 
             #endregion
 
@@ -190,7 +190,7 @@ namespace GameLogic
                 Textures = new[] { "HUD.png" },
                 Color = new Color4(1f, 1f, 1f, 1f),
             };
-            this.sprHUD = this.AddComponent<Sprite>(bkDesc, SceneObjectUsageEnum.UI, layerHUD - 1);
+            this.sprHUD = this.AddComponent<Sprite>(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             int minimapHeight = (this.Game.Form.RenderHeight / 4) - 8;
             int minimapWidth = minimapHeight;
@@ -218,14 +218,14 @@ namespace GameLogic
                 },
                 MinimapArea = this.terrain.Instance.GetBoundingBox(),
             };
-            this.minimap = this.AddComponent<Minimap>(minimapDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.minimap = this.AddComponent<Minimap>(minimapDesc, SceneObjectUsages.UI, layerHUD);
 
-            this.txtTitle = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsageEnum.UI, layerHUD);
-            this.txtGame = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsageEnum.UI, layerHUD);
-            this.txtTeam = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
-            this.txtSoldier = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
-            this.txtActionList = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
-            this.txtAction = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsageEnum.UI, layerHUD);
+            this.txtTitle = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsages.UI, layerHUD);
+            this.txtGame = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsages.UI, layerHUD);
+            this.txtTeam = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtSoldier = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtActionList = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtAction = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
             this.butClose = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
@@ -241,7 +241,7 @@ namespace GameLogic
                     ShadowColor = Color.Orange,
                 },
                 Text = "EXIT",
-            }, SceneObjectUsageEnum.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD);
 
             this.butNext = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
@@ -256,7 +256,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next",
-            }, SceneObjectUsageEnum.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD);
 
             this.butPrevSoldier = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
@@ -271,7 +271,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Soldier",
-            }, SceneObjectUsageEnum.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD);
 
             this.butNextSoldier = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
@@ -286,7 +286,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Soldier",
-            }, SceneObjectUsageEnum.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD);
 
             this.butPrevAction = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
@@ -301,7 +301,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Action",
-            }, SceneObjectUsageEnum.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD);
 
             this.butNextAction = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
@@ -316,7 +316,7 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Action",
-            }, SceneObjectUsageEnum.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD);
 
             this.butClose.Instance.Click += (sender, eventArgs) => { this.Game.Exit(); };
             this.butNext.Instance.Click += (sender, eventArgs) => { this.NextPhase(); };
@@ -362,15 +362,15 @@ namespace GameLogic
 
                 if (this.Game.Input.KeyJustReleased(this.keyChangeMode))
                 {
-                    this.SetRenderMode(this.GetRenderMode() == SceneModesEnum.ForwardLigthning ?
-                        SceneModesEnum.DeferredLightning :
-                        SceneModesEnum.ForwardLigthning);
+                    this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                        SceneModes.DeferredLightning :
+                        SceneModes.ForwardLigthning);
                 }
 
                 bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
 
                 Ray cursorRay = this.GetPickingRay();
-                bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsageEnum.Ground, out PickingResult<Triangle> r);
+                bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
 
                 #region DEBUG
 

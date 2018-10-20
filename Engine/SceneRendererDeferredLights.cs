@@ -18,7 +18,7 @@ namespace Engine
         /// <summary>
         /// Render helper geometry buffer slot
         /// </summary>
-        public static int BufferSlot = 0;
+        public static int BufferSlot { get; set; } = 0;
 
         /// <summary>
         /// Light geometry

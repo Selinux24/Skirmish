@@ -47,14 +47,14 @@ namespace Collada
                 Centered = false,
                 Color = Color.White,
             };
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsageEnum.UI, layerCursor);
+            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
 
             #endregion
 
             #region Background
 
             var backGroundDesc = ModelDescription.FromXml("Background", "Resources/SceneStart", "SkyPlane.xml");
-            this.backGround = this.AddComponent<Model>(backGroundDesc, SceneObjectUsageEnum.UI);
+            this.backGround = this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI);
 
             #endregion
 
@@ -65,12 +65,12 @@ namespace Collada
                 Name = "Title",
                 Font = "Viner Hand ITC",
                 FontSize = 90,
-                Style = FontMapStyleEnum.Bold,
+                Style = FontMapStyles.Bold,
                 TextColor = Color.IndianRed,
                 ShadowColor = new Color4(Color.Brown.RGB(), 0.55f),
                 ShadowDelta = new Vector2(2, -3),
             };
-            this.title = this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.title = this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD);
 
             #endregion
 
@@ -96,15 +96,15 @@ namespace Collada
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = "Buxton Sketch",
-                    Style = FontMapStyleEnum.Regular,
+                    Style = FontMapStyles.Regular,
                     FontSize = 22,
                     TextColor = Color.Gold,
                 }
             };
-            this.sceneDungeonWallButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsageEnum.UI, layerHUD);
-            this.sceneNavMeshTestButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsageEnum.UI, layerHUD);
-            this.sceneDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsageEnum.UI, layerHUD);
-            this.sceneModularDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.sceneDungeonWallButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneNavMeshTestButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneModularDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD);
 
             #endregion
 
@@ -130,12 +130,12 @@ namespace Collada
                 TextDescription = new TextDrawerDescription()
                 {
                     Font = "Buxton Sketch",
-                    Style = FontMapStyleEnum.Bold,
+                    Style = FontMapStyles.Bold,
                     FontSize = 22,
                     TextColor = Color.Gold,
                 }
             };
-            this.exitButton = this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsageEnum.UI, layerHUD);
+            this.exitButton = this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD);
 
             #endregion
         }

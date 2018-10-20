@@ -12,8 +12,9 @@
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public Updatable(Scene scene, SceneObjectDescription description) : base(scene, description)
+        protected Updatable(Scene scene, SceneObjectDescription description) : base(scene, description)
         {
+
         }
 
         /// <summary>

@@ -23,7 +23,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The user defined polygon flags.
         /// </summary>
-        public SamplePolyFlags Flags;
+        public SamplePolyFlagTypes Flags;
         /// <summary>
         /// The number of vertices in the polygon.
         /// </summary>

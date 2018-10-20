@@ -139,10 +139,6 @@ namespace Engine
         /// </summary>
         public Manipulator3D()
         {
-            this.position = Vector3.Zero;
-            this.rotation = Quaternion.Identity;
-            this.scaling = new Vector3(1);
-
             this.UpdateLocalTransform();
         }
         /// <summary>
@@ -374,14 +370,14 @@ namespace Engine
         {
             Vector3 newScaling = this.scaling + (scale * gameTime.ElapsedSeconds);
 
-            if (maxSize.HasValue)
+            if (maxSize.HasValue && newScaling.LengthSquared() > maxSize.Value.LengthSquared())
             {
-                if (newScaling.LengthSquared() > maxSize.Value.LengthSquared()) newScaling = maxSize.Value;
+                newScaling = maxSize.Value;
             }
 
-            if (minSize.HasValue)
+            if (minSize.HasValue && newScaling.LengthSquared() < minSize.Value.LengthSquared())
             {
-                if (newScaling.LengthSquared() < minSize.Value.LengthSquared()) newScaling = minSize.Value;
+                newScaling = minSize.Value;
             }
 
             this.SetScale(newScaling);

@@ -55,12 +55,9 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.BufferManager != null)
-                {
-                    //Remove data from buffer manager
-                    this.BufferManager.RemoveVertexData(this.vertexBuffer);
-                    this.BufferManager.RemoveIndexData(this.indexBuffer);
-                }
+                //Remove data from buffer manager
+                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
+                this.BufferManager?.RemoveIndexData(this.indexBuffer);
             }
         }
 
@@ -81,38 +78,37 @@ namespace Engine
         public override void Draw(DrawContext context)
         {
             var mode = context.DrawerMode;
+            var draw =
+                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled);
 
-            if ((mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled))
+            if (draw && this.indexBuffer.Count > 0)
             {
-                if (this.indexBuffer.Count > 0)
+                var effect = DrawerPool.EffectDefaultCubemap;
+                var technique = DrawerPool.EffectDefaultCubemap.ForwardCubemap;
+
+                if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
                 {
-                    var effect = DrawerPool.EffectDefaultCubemap;
-                    var technique = DrawerPool.EffectDefaultCubemap.ForwardCubemap;
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
+                }
 
-                    if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
-                    {
-                        Counters.InstancesPerFrame++;
-                        Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-                    }
+                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
+                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
 
-                    this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
+                effect.UpdatePerFrame(this.local, context.ViewProjection);
+                effect.UpdatePerObject(this.cubeMapTexture);
 
-                    effect.UpdatePerFrame(this.local, context.ViewProjection);
-                    effect.UpdatePerObject(this.cubeMapTexture);
+                var graphics = this.Game.Graphics;
 
-                    var graphics = this.Game.Graphics;
+                for (int p = 0; p < technique.PassCount; p++)
+                {
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    for (int p = 0; p < technique.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(technique, p, 0);
-
-                        graphics.DrawIndexed(
-                            this.indexBuffer.Count,
-                            this.indexBuffer.Offset,
-                            this.vertexBuffer.Offset);
-                    }
+                    graphics.DrawIndexed(
+                        this.indexBuffer.Count,
+                        this.indexBuffer.Offset,
+                        this.vertexBuffer.Offset);
                 }
             }
         }
@@ -132,12 +128,12 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         /// <param name="geometry">Geometry to use</param>
         /// <param name="reverse">Reverse faces</param>
-        protected void InitializeBuffers(string name, CubemapDescription.CubeMapGeometryEnum geometry, bool reverse)
+        protected void InitializeBuffers(string name, CubemapDescription.CubeMapGeometry geometry, bool reverse)
         {
             Vector3[] vData;
             uint[] iData;
-            if (geometry == CubemapDescription.CubeMapGeometryEnum.Box) GeometryUtil.CreateBox(1, 10, 10, out vData, out iData);
-            else if (geometry == CubemapDescription.CubeMapGeometryEnum.Sphere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
+            if (geometry == CubemapDescription.CubeMapGeometry.Box) GeometryUtil.CreateBox(1, 10, 10, out vData, out iData);
+            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
             else throw new ArgumentException("Bad geometry enum type");
 
             var vertices = new List<VertexPosition>();

@@ -33,12 +33,12 @@ namespace Engine
         /// <summary>
         /// Minimap rendered area
         /// </summary>
-        private BoundingBox minimapArea;
+        private readonly BoundingBox minimapArea;
 
         /// <summary>
         /// Reference to the objects that we render in the minimap
         /// </summary>
-        public SceneObject[] Drawables;
+        public SceneObject[] Drawables { get; set; }
 
         /// <summary>
         /// Contructor
@@ -118,7 +118,6 @@ namespace Engine
 
             Vector3 eyePos = new Vector3(0, y + near, 0);
             Vector3 target = Vector3.Zero;
-            Vector3 dir = Vector3.Normalize(target - eyePos);
 
             Matrix view = Matrix.LookAtLH(
                 eyePos,
@@ -139,14 +138,6 @@ namespace Engine
                 EyeTarget = target,
                 Lights = SceneLights.CreateDefault(),
             };
-        }
-        /// <summary>
-        /// Update objects
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Update(UpdateContext context)
-        {
-
         }
         /// <summary>
         /// Draw objects

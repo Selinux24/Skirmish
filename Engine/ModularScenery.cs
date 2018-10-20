@@ -37,7 +37,7 @@ namespace Engine
         /// <summary>
         /// Scenery entities
         /// </summary>
-        private List<ModularSceneryItem> entities = new List<ModularSceneryItem>();
+        private readonly List<ModularSceneryItem> entities = new List<ModularSceneryItem>();
 
         /// <summary>
         /// Gets the assets description
@@ -47,7 +47,7 @@ namespace Engine
         /// Gets the level list
         /// </summary>
         protected ModularSceneryLevels Levels { get; set; }
-      
+
         /// <summary>
         /// Current level
         /// </summary>
@@ -124,8 +124,7 @@ namespace Engine
 
             //Find the level
             var level = this.Levels.Levels
-                .Where(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase))
-                .FirstOrDefault();
+                .FirstOrDefault(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
             if (level != null)
             {
                 this.CurrentLevel = level;
@@ -199,7 +198,7 @@ namespace Engine
                     {
                         Name = string.Format("{0}.{1}", this.Description.Name, "Particle Manager"),
                     },
-                    SceneObjectUsageEnum.None,
+                    SceneObjectUsages.None,
                     98);
 
                 foreach (var item in this.Levels.ParticleSystems)
@@ -245,7 +244,7 @@ namespace Engine
                                     ModelContent = modelContent,
                                 }
                             },
-                            SceneObjectUsageEnum.Ground | (hasVolumes ? SceneObjectUsageEnum.CoarsePathFinding : SceneObjectUsageEnum.FullPathFinding));
+                            SceneObjectUsages.Ground | (hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding));
 
                         model.HasParent = true;
 
@@ -291,7 +290,7 @@ namespace Engine
                                     ModelContent = modelContent,
                                 }
                             },
-                            SceneObjectUsageEnum.None | (hasVolumes ? SceneObjectUsageEnum.CoarsePathFinding : SceneObjectUsageEnum.FullPathFinding));
+                            SceneObjectUsages.None | (hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding));
 
                         //Get the object list to process
                         var objList = Array.FindAll(level.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
@@ -314,22 +313,19 @@ namespace Engine
                                     {
                                         light.CastShadow = objList[i].CastShadows;
 
-                                        if (emitterDesc != null)
+                                        if (emitterDesc != null && light is SceneLightPoint pointL)
                                         {
-                                            if (light is SceneLightPoint pointL)
+                                            var pos = Vector3.TransformCoordinate(pointL.Position, trn);
+
+                                            var emitter = new ParticleEmitter(emitterDesc)
                                             {
-                                                var pos = Vector3.TransformCoordinate(pointL.Position, trn);
+                                                Position = pos,
+                                            };
 
-                                                var emitter = new ParticleEmitter(emitterDesc)
-                                                {
-                                                    Position = pos,
-                                                };
-
-                                                this.particleManager.Instance.AddParticleSystem(
-                                                    ParticleSystemTypes.CPU,
-                                                    this.particleDescriptors[emitterDesc.Name],
-                                                    emitter);
-                                            }
+                                            this.particleManager.Instance.AddParticleSystem(
+                                                ParticleSystemTypes.CPU,
+                                                this.particleDescriptors[emitterDesc.Name],
+                                                emitter);
                                         }
                                     }
 
@@ -424,8 +420,10 @@ namespace Engine
 
                         if (this.AssetConfiguration.MaintainTextureDirection)
                         {
-                            if (basicAssetType == ModularSceneryAssetTypeEnum.Floor ||
-                                basicAssetType == ModularSceneryAssetTypeEnum.Ceiling)
+                            var maintain =
+                                basicAssetType == ModularSceneryAssetTypes.Floor ||
+                                basicAssetType == ModularSceneryAssetTypes.Ceiling;
+                            if (maintain)
                             {
                                 //Invert complex asset rotation
                                 basicTrn = Matrix.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
@@ -492,14 +490,6 @@ namespace Engine
         public override void Update(UpdateContext context)
         {
             this.assetMap.Update(context.CameraVolume);
-        }
-        /// <summary>
-        /// Objects drawing
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Draw(DrawContext context)
-        {
-
         }
 
         /// <summary>
@@ -648,9 +638,9 @@ namespace Engine
         /// <returns>Returns a position array of the specified object instances</returns>
         public Vector3[] GetObjectsPositionsByAssetName(string name)
         {
-            var assets = this.GetObjectsByName(name);
+            var namedAssets = this.GetObjectsByName(name);
 
-            return assets.Select(a => a.Manipulator.Position).ToArray();
+            return namedAssets.Select(a => a.Manipulator.Position).ToArray();
         }
         /// <summary>
         /// Get objects by name
@@ -670,7 +660,7 @@ namespace Engine
         /// </summary>
         /// <param name="objectType">Object type</param>
         /// <returns>Returns a list of objects of the specified type</returns>
-        public ModelInstance[] GetObjectsByType(ModularSceneryObjectTypeEnum objectType)
+        public ModelInstance[] GetObjectsByType(ModularSceneryObjectTypes objectType)
         {
             var objs = this.entities
                 .Where(o => o.Object.Type == objectType)
@@ -695,7 +685,7 @@ namespace Engine
         /// <param name="filter">Filter by entity type</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, ModularSceneryObjectTypeEnum filter, bool sortByDistance)
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, ModularSceneryObjectTypes filter, bool sortByDistance)
         {
             return GetObjects(bbox, filter, sortByDistance);
         }
@@ -706,18 +696,16 @@ namespace Engine
         /// <param name="filter">Filter by entity type</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private ModularSceneryItem[] GetObjects(BoundingBox bbox, ModularSceneryObjectTypeEnum? filter, bool sortByDistance)
+        private ModularSceneryItem[] GetObjects(BoundingBox bbox, ModularSceneryObjectTypes? filter, bool sortByDistance)
         {
             List<ModularSceneryItem> res = new List<ModularSceneryItem>();
 
             for (int i = 0; i < entities.Count; i++)
             {
-                if (!filter.HasValue || filter.Value.HasFlag(entities[i].Object.Type))
+                var isOfType = !filter.HasValue || filter.Value.HasFlag(entities[i].Object.Type);
+                if (isOfType && bbox.Intersects(entities[i].Item.GetBoundingBox()))
                 {
-                    if (bbox.Intersects(entities[i].Item.GetBoundingBox()))
-                    {
-                        res.Add(entities[i]);
-                    }
+                    res.Add(entities[i]);
                 }
             }
 
@@ -753,7 +741,7 @@ namespace Engine
         /// <param name="filter">Filter by entity type</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, ModularSceneryObjectTypeEnum filter, bool sortByDistance)
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, ModularSceneryObjectTypes filter, bool sortByDistance)
         {
             return GetObjects(sphere, filter, sortByDistance);
         }
@@ -764,18 +752,16 @@ namespace Engine
         /// <param name="filter">Filter by entity type</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private ModularSceneryItem[] GetObjects(BoundingSphere sphere, ModularSceneryObjectTypeEnum? filter, bool sortByDistance)
+        private ModularSceneryItem[] GetObjects(BoundingSphere sphere, ModularSceneryObjectTypes? filter, bool sortByDistance)
         {
             List<ModularSceneryItem> res = new List<ModularSceneryItem>();
 
             for (int i = 0; i < entities.Count; i++)
             {
-                if (!filter.HasValue || filter.Value.HasFlag(entities[i].Object.Type))
+                var isOfType = !filter.HasValue || filter.Value.HasFlag(entities[i].Object.Type);
+                if (isOfType && sphere.Intersects(entities[i].Item.GetBoundingSphere()))
                 {
-                    if (sphere.Intersects(entities[i].Item.GetBoundingSphere()))
-                    {
-                        res.Add(entities[i]);
-                    }
+                    res.Add(entities[i]);
                 }
             }
 
@@ -939,7 +925,7 @@ namespace Engine
                                     var sourcePositions = sourceConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, source.Transform));
                                     var targetPositions = targetConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, target.Transform));
 
-                                    if (sourcePositions.Count(p1 => targetPositions.Contains(p1)) > 0)
+                                    if (sourcePositions.Any(p1 => targetPositions.Contains(p1)))
                                     {
                                         source.Connections.Add(t);
                                         target.Connections.Add(s);

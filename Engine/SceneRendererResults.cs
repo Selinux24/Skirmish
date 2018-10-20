@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Renderer results enumeration
     /// </summary>
-    public enum SceneRendererResultEnum
+    public enum SceneRendererResults
     {
         /// <summary>
         /// None

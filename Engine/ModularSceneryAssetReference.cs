@@ -14,32 +14,32 @@ namespace Engine
         /// Asset name
         /// </summary>
         [XmlAttribute("asset_name")]
-        public string AssetName;
+        public string AssetName { get; set; }
         /// <summary>
         /// Id
         /// </summary>
         [XmlAttribute("id")]
-        public string Id;
+        public string Id { get; set; }
         /// <summary>
         /// Type
         /// </summary>
         [XmlAttribute("type")]
-        public ModularSceneryAssetTypeEnum Type = ModularSceneryAssetTypeEnum.None;
+        public ModularSceneryAssetTypes Type { get; set; } = ModularSceneryAssetTypes.None;
         /// <summary>
         /// Position
         /// </summary>
-        [NonSerialized]
-        public Vector3 Position = new Vector3(0, 0, 0);
+        [XmlIgnore]
+        public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
         /// <summary>
         /// Rotation
         /// </summary>
-        [NonSerialized]
-        public Quaternion Rotation = new Quaternion(0, 0, 0, 1);
+        [XmlIgnore]
+        public Quaternion Rotation { get; set; } = new Quaternion(0, 0, 0, 1);
         /// <summary>
         /// Scale
         /// </summary>
-        [NonSerialized]
-        public Vector3 Scale = new Vector3(1, 1, 1);
+        [XmlIgnore]
+        public Vector3 Scale { get; set; } = new Vector3(1, 1, 1);
 
         /// <summary>
         /// Position vector

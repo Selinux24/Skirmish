@@ -985,7 +985,7 @@ namespace Engine.PathFinding.RecastNavigation
                         }
                         else if (dir == 2) // Portal x+
                         {
-                            p.Neis[j] = DT_EXT_LINK | 0;
+                            p.Neis[j] = DT_EXT_LINK;
                         }
                         else if (dir == 3) // Portal z-
                         {
@@ -1015,7 +1015,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     Poly p = new Poly
                     {
-                        Flags = (SamplePolyFlags)param.offMeshCon[i].FlagTypes,
+                        Flags = (SamplePolyFlagTypes)param.offMeshCon[i].FlagTypes,
                         Area = (SamplePolyAreas)param.offMeshCon[i].AreaType,
                         Type = PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION
                     };

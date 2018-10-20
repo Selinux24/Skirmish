@@ -1,4 +1,5 @@
-﻿namespace Engine
+﻿
+namespace Engine
 {
     using Engine.Common;
 
@@ -10,7 +11,7 @@
         /// <summary>
         /// Arriving threshold
         /// </summary>
-        public float ArrivingThreshold = 0.01f;
+        public float ArrivingThreshold { get; set; } = 0.01f;
 
         /// <summary>
         /// Computes current position and orientation in the curve

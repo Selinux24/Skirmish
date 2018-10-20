@@ -9,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int Salt;
         public TileCacheLayerData Data;
-        public CompressedTileFlags Flags;
+        public CompressedTileFlagTypes Flags;
         public CompressedTile Next;
 
         /// <summary>

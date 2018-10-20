@@ -50,11 +50,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Current light direction
-        /// </summary>
-        private Vector3 currentLightDirection;
-
-        /// <summary>
         /// The 0-360 normalized elevation for the previous update.                                            
         /// </summary>
         protected float PreviuosElevation;
@@ -174,13 +169,7 @@ namespace Engine
         /// <summary>
         /// Gets the ligth direction base upon elevation and azimuth angles
         /// </summary>
-        public Vector3 LightDirection
-        {
-            get
-            {
-                return this.currentLightDirection;
-            }
-        }
+        public Vector3 LightDirection { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -255,7 +244,7 @@ namespace Engine
                 this.NextElevation = normalizedElevation;
             }
 
-            this.currentLightDirection = CalcLightDirection(this.Elevation, this.Azimuth);
+            this.LightDirection = CalcLightDirection(this.Elevation, this.Azimuth);
         }
 
         /// <summary>
@@ -265,7 +254,7 @@ namespace Engine
         /// <param name="update">Sets wheter update internal state or not</param>
         public void SetTimeOfDay(float time, bool update = false)
         {
-            this.TimeOfDayValue = (float)Math.Abs(time) % 1.0f;
+            this.TimeOfDayValue = Math.Abs(time) % 1.0f;
 
             if (update)
             {

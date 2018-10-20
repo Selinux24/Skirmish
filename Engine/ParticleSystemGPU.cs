@@ -12,9 +12,9 @@ namespace Engine
     /// <summary>
     /// Particle system
     /// </summary>
-    public class ParticleSystemGPU : IParticleSystem
+    public class ParticleSystemGpu : IParticleSystem
     {
-        public static int BufferSlot = 0;
+        public static int BufferSlot { get; set; } = 0;
 
         /// <summary>
         /// Emitter initialization buffer
@@ -121,7 +121,7 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Emitter</param>
-        public ParticleSystemGPU(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
+        public ParticleSystemGpu(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             this.Game = game;
             this.Name = name;
@@ -173,7 +173,7 @@ namespace Engine
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ParticleSystemGPU()
+        ~ParticleSystemGpu()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

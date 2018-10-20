@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Geometric orientation
     /// </summary>
-    public enum GeometricOrientation : int
+    public enum GeometricOrientation
     {
         /// <summary>
         /// None

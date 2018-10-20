@@ -1,8 +1,6 @@
 ﻿
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Cube-map description
     /// </summary>
@@ -11,7 +9,7 @@ namespace Engine
         /// <summary>
         /// Cube map geometry enumeration
         /// </summary>
-        public enum CubeMapGeometryEnum
+        public enum CubeMapGeometry
         {
             /// <summary>
             /// Box
@@ -26,23 +24,23 @@ namespace Engine
         /// <summary>
         /// Content path
         /// </summary>
-        public string ContentPath = "Resources";
+        public string ContentPath { get; set; } = "Resources";
         /// <summary>
         /// Texture
         /// </summary>
-        public string Texture;
+        public string Texture { get; set; }
         /// <summary>
         /// Radius
         /// </summary>
-        public float Radius;
+        public float Radius { get; set; }
         /// <summary>
         /// Cubemap geometry
         /// </summary>
-        public CubeMapGeometryEnum Geometry = CubeMapGeometryEnum.Sphere;
+        public CubeMapGeometry Geometry { get; set; } = CubeMapGeometry.Sphere;
         /// <summary>
         /// Reverse geometry faces
         /// </summary>
-        public bool ReverseFaces = false;
+        public bool ReverseFaces { get; set; } = false;
 
         /// <summary>
         /// Constructor

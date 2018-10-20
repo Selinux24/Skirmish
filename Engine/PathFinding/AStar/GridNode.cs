@@ -12,7 +12,7 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Connected nodes dictionary
         /// </summary>
-        private Dictionary<Headings, int> nodesDictionary = new Dictionary<Headings, int>();
+        private readonly Dictionary<Headings, int> nodesDictionary = new Dictionary<Headings, int>();
 
         /// <summary>
         /// Connections to this node list
@@ -82,7 +82,7 @@ namespace Engine.PathFinding.AStar
                 {
                     int index = this.nodesDictionary[heading];
 
-                    return (GridNode)this.ConnectedNodes[index];
+                    return this.ConnectedNodes[index];
                 }
 
                 return null;
@@ -200,44 +200,38 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns specified node direction from current node</returns>
         public Headings GetHeadingTo(GridNode node)
         {
-            bool containsNorthWest = this.IsConnected(node.NorthWest);
-            bool containsNorthEast = this.IsConnected(node.NorthEast);
-            bool containsSouthWest = this.IsConnected(node.SouthWest);
-            bool containsSouthEast = this.IsConnected(node.SouthEast);
+            bool connectedWithNorthWest = this.IsConnected(node.NorthWest);
+            bool connectedWithNorthEast = this.IsConnected(node.NorthEast);
+            bool connectedWithSouthWest = this.IsConnected(node.SouthWest);
+            bool connectedWithSouthEast = this.IsConnected(node.SouthEast);
 
-            if (!containsNorthWest &&
-                !containsNorthEast &&
-                !containsSouthWest &&
-                !containsSouthEast)
+            if (!connectedWithNorthWest &&
+                !connectedWithNorthEast &&
+                !connectedWithSouthWest &&
+                !connectedWithSouthEast)
             {
                 return Headings.None;
             }
-            else if (containsNorthWest)
+            else if (connectedWithNorthWest)
             {
-                if (containsNorthEast) return Headings.North;
-                else if (containsSouthWest) return Headings.West;
+                if (connectedWithNorthEast) return Headings.North;
+                else if (connectedWithSouthWest) return Headings.West;
                 else return Headings.NorthWest;
             }
-            else if (containsNorthEast)
+            else if (connectedWithNorthEast)
             {
-                if (containsNorthWest) return Headings.North;
-                else if (containsSouthEast) return Headings.East;
+                if (connectedWithSouthEast) return Headings.East;
                 else return Headings.NorthEast;
             }
-            else if (containsSouthWest)
+            else if (connectedWithSouthWest)
             {
-                if (containsNorthWest) return Headings.West;
-                else if (containsSouthEast) return Headings.South;
+                if (connectedWithSouthEast) return Headings.South;
                 else return Headings.SouthWest;
             }
-            else if (containsSouthEast)
+            else
             {
-                if (containsNorthEast) return Headings.East;
-                else if (containsSouthWest) return Headings.South;
-                else return Headings.SouthEast;
+                return Headings.SouthEast;
             }
-
-            return Headings.None;
         }
         /// <summary>
         /// Try connect nodes

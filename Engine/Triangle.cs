@@ -13,31 +13,31 @@ namespace Engine
         /// <summary>
         /// First point
         /// </summary>
-        public Vector3 Point1;
+        public Vector3 Point1 { get; set; }
         /// <summary>
         /// Second point
         /// </summary>
-        public Vector3 Point2;
+        public Vector3 Point2 { get; set; }
         /// <summary>
         /// Third point
         /// </summary>
-        public Vector3 Point3;
+        public Vector3 Point3 { get; set; }
         /// <summary>
         /// Center
         /// </summary>
-        public Vector3 Center;
+        public Vector3 Center { get; set; }
         /// <summary>
         /// First index
         /// </summary>
-        public int I1;
+        public int I1 { get; set; }
         /// <summary>
         /// Second index
         /// </summary>
-        public int I2;
+        public int I2 { get; set; }
         /// <summary>
         /// Plane
         /// </summary>
-        public Plane Plane;
+        public Plane Plane { get; set; }
         /// <summary>
         /// Normal
         /// </summary>
@@ -423,9 +423,9 @@ namespace Engine
             this.Plane = new Plane(this.Point1, this.Point2, this.Point3);
 
             Vector3 n = this.Plane.Normal;
-            float absX = (float)Math.Abs(n.X);
-            float absY = (float)Math.Abs(n.Y);
-            float absZ = (float)Math.Abs(n.Z);
+            float absX = Math.Abs(n.X);
+            float absY = Math.Abs(n.Y);
+            float absZ = Math.Abs(n.Z);
 
             Vector3 a = new Vector3(absX, absY, absZ);
             if (a.X > a.Y)
@@ -529,14 +529,17 @@ namespace Engine
             distance = 0;
 
             bool cull = false;
-            if (facingOnly == true)
+            if (facingOnly)
             {
                 cull = Vector3.Dot(ray.Direction, this.Normal) >= 0f;
             }
 
             if (!cull)
             {
-                return Intersection.RayIntersectsTriangle(ref ray, ref this.Point1, ref this.Point2, ref this.Point3, out point, out distance);
+                var p1 = Point1;
+                var p2 = Point2;
+                var p3 = Point3;
+                return Intersection.RayIntersectsTriangle(ref ray, ref p1, ref p2, ref p3, out point, out distance);
             }
 
             return false;

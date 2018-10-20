@@ -19,7 +19,6 @@ namespace Engine
         {
             Bitmap bitmap = Bitmap.FromStream(data) as Bitmap;
 
-            var heights = new float[bitmap.Height + 1, bitmap.Width + 1];
             var colors = new Color4[bitmap.Height + 1, bitmap.Width + 1];
 
             using (bitmap)

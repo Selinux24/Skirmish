@@ -53,7 +53,7 @@ namespace SceneTest
             this.sky = this.AddComponent<SkyScattering>(new SkyScatteringDescription()
             {
                 Name = "Sky",
-                Resolution = SkyScatteringResolutionEnum.High
+                Resolution = SkyScatteringResolutions.High
             });
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(5, 00, 00), 10f);

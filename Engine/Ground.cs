@@ -21,7 +21,7 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Ground description</param>
-        public Ground(Scene scene, GroundDescription description)
+        protected Ground(Scene scene, GroundDescription description)
             : base(scene, description)
         {
 
@@ -43,17 +43,14 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            if (this.groundPickingQuadtree != null)
+            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> gResult))
             {
-                if (this.groundPickingQuadtree.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> gResult))
+                if (result.Distance > gResult.Distance)
                 {
-                    if (result.Distance > gResult.Distance)
-                    {
-                        result = gResult;
-                    }
-
-                    res = true;
+                    result = gResult;
                 }
+
+                res = true;
             }
 
             return res;
@@ -74,17 +71,14 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            if (this.groundPickingQuadtree != null)
+            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickFirst(ref ray, facingOnly, out PickingResult<Triangle> gResult))
             {
-                if (this.groundPickingQuadtree.PickFirst(ref ray, facingOnly, out PickingResult<Triangle> gResult))
+                if (result.Distance > gResult.Distance)
                 {
-                    if (result.Distance > gResult.Distance)
-                    {
-                        result = gResult;
-                    }
-
-                    res = true;
+                    result = gResult;
                 }
+
+                res = true;
             }
 
             return res;
@@ -102,14 +96,11 @@ namespace Engine
 
             results = null;
 
-            if (this.groundPickingQuadtree != null)
+            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickAll(ref ray, facingOnly, out PickingResult<Triangle>[] gResults))
             {
-                if (this.groundPickingQuadtree.PickAll(ref ray, facingOnly, out PickingResult<Triangle>[]  gResults))
-                {
-                    results = gResults;
+                results = gResults;
 
-                    res = true;
-                }
+                res = true;
             }
 
             return res;

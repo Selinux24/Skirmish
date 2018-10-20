@@ -1,10 +1,12 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Flags for addTile
     /// </summary>
-    public enum CompressedTileFlags
+    [Flags]
+    public enum CompressedTileFlagTypes
     {
         /// <summary>
         /// Navmesh owns the tile memory and should free it.

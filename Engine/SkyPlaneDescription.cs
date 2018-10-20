@@ -12,7 +12,7 @@ namespace Engine
         /// <summary>
         /// Content path
         /// </summary>
-        public string ContentPath = "Resources";
+        public string ContentPath { get; set; } = "Resources";
         /// <summary>
         /// Texture 1 name
         /// </summary>
@@ -73,7 +73,7 @@ namespace Engine
         /// <summary>
         /// Sky plane mode
         /// </summary>
-        public SkyPlaneMode Mode { get; set; }
+        public SkyPlaneModes Mode { get; set; }
 
         /// <summary>
         /// Constructor
@@ -99,7 +99,7 @@ namespace Engine
             this.Velocity = 1f;
             this.Direction = Vector2.One;
             this.PerturbationScale = 0.3f;
-            this.Mode = SkyPlaneMode.Static;
+            this.Mode = SkyPlaneModes.Static;
         }
     }
 }

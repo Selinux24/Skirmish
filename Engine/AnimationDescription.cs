@@ -15,13 +15,13 @@ namespace Engine
         /// </summary>
         [XmlArray("animations")]
         [XmlArrayItem("animation", typeof(AnimationClipDescription))]
-        public List<AnimationClipDescription> Clips = new List<AnimationClipDescription>();
+        public List<AnimationClipDescription> Clips { get; set; } = new List<AnimationClipDescription>();
         /// <summary>
         /// Transitions
         /// </summary>
         [XmlArray("transitions")]
         [XmlArrayItem("transition", typeof(TransitionDescription))]
-        public List<TransitionDescription> Transitions = new List<TransitionDescription>();
+        public List<TransitionDescription> Transitions { get; set; } = new List<TransitionDescription>();
 
         /// <summary>
         /// Adds a clip to clip list

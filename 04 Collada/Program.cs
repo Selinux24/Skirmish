@@ -6,6 +6,7 @@ namespace Collada
 {
     static class Program
     {
+        [STAThread]
         static void Main()
         {
             try

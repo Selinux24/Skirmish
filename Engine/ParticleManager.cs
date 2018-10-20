@@ -190,11 +190,11 @@ namespace Engine
 
             if (type == ParticleSystemTypes.CPU)
             {
-                pSystem = new ParticleSystemCPU(this.Game, name, description, emitter);
+                pSystem = new ParticleSystemCpu(this.Game, name, description, emitter);
             }
             else if (type == ParticleSystemTypes.GPU)
             {
-                pSystem = new ParticleSystemGPU(this.Game, name, description, emitter);
+                pSystem = new ParticleSystemGpu(this.Game, name, description, emitter);
             }
             else
             {

@@ -2,8 +2,6 @@
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Lens flare description
     /// </summary>
@@ -17,19 +15,19 @@ namespace Engine
             /// <summary>
             /// Relative position
             /// </summary>
-            public float Position;
+            public float Position { get; set; }
             /// <summary>
             /// Relative scale
             /// </summary>
-            public float Scale;
+            public float Scale { get; set; }
             /// <summary>
             /// Color
             /// </summary>
-            public Color Color;
+            public Color Color { get; set; }
             /// <summary>
             /// Texture
             /// </summary>
-            public string Texture;
+            public string Texture { get; set; }
 
             /// <summary>
             /// Constructor
@@ -50,15 +48,15 @@ namespace Engine
         /// <summary>
         /// Content path
         /// </summary>
-        public string ContentPath;
+        public string ContentPath { get; set; }
         /// <summary>
         /// Glow texture
         /// </summary>
-        public string GlowTexture;
+        public string GlowTexture { get; set; }
         /// <summary>
         /// Flare collection
         /// </summary>
-        public Flare[] Flares;
+        public Flare[] Flares { get; set; }
 
         /// <summary>
         /// Constructor

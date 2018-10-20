@@ -2,8 +2,6 @@
 
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Sprite description
     /// </summary>
@@ -12,35 +10,35 @@ namespace Engine
         /// <summary>
         /// Sprite color
         /// </summary>
-        public Color4 Color = Color4.White;
+        public Color4 Color { get; set; } = Color4.White;
         /// <summary>
         /// Sprite textures
         /// </summary>
-        public string[] Textures;
+        public string[] Textures { get; set; }
         /// <summary>
         /// UV map
         /// </summary>
-        public Vector4? UVMap = null;
+        public Vector4? UVMap { get; set; } = null;
         /// <summary>
         /// Content path
         /// </summary>
-        public string ContentPath = "Resources";
+        public string ContentPath { get; set; } = "Resources";
         /// <summary>
         /// Width
         /// </summary>
-        public int Width;
+        public int Width { get; set; }
         /// <summary>
         /// Height
         /// </summary>
-        public int Height;
+        public int Height { get; set; }
         /// <summary>
         /// Fit screen
         /// </summary>
-        public bool FitScreen;
+        public bool FitScreen { get; set; }
         /// <summary>
         /// Centered
         /// </summary>
-        public bool Centered = true;
+        public bool Centered { get; set; } = true;
 
         /// <summary>
         /// Constructor

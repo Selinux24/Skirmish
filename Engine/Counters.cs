@@ -26,47 +26,47 @@ namespace Engine
         /// <summary>
         /// Frame count
         /// </summary>
-        public static long FrameCount = 0;
+        public static long FrameCount { get; set; } = 0;
         /// <summary>
         /// Frame time
         /// </summary>
-        public static float FrameTime = 0f;
+        public static float FrameTime { get; set; } = 0f;
         /// <summary>
         /// Draw calls per frame
         /// </summary>
-        public static int DrawCallsPerFrame = 0;
+        public static int DrawCallsPerFrame { get; set; } = 0;
         /// <summary>
         /// Sum of single draw calls and instance draw calls * instance count of this call
         /// </summary>
-        public static int InstancesPerFrame = 0;
+        public static int InstancesPerFrame { get; set; } = 0;
         /// <summary>
         /// Maximum count of single draw calls and instance draw calls * instance count of this call
         /// </summary>
-        public static int MaxInstancesPerFrame = 0;
+        public static int MaxInstancesPerFrame { get; set; } = 0;
         /// <summary>
         /// Sum of primitives drawn per frame
         /// </summary>
-        public static int PrimitivesPerFrame = 0;
+        public static int PrimitivesPerFrame { get; set; } = 0;
         /// <summary>
         /// Updates per frame
         /// </summary>
-        public static int UpdatesPerFrame = 0;
+        public static int UpdatesPerFrame { get; set; } = 0;
         /// <summary>
         /// Updates per object
         /// </summary>
-        public static int UpdatesPerObject = 0;
+        public static int UpdatesPerObject { get; set; } = 0;
         /// <summary>
         /// Updates per instance
         /// </summary>
-        public static int UpdatesPerInstance = 0;
+        public static int UpdatesPerInstance { get; set; } = 0;
         /// <summary>
         /// Texture count
         /// </summary>
-        public static int Textures = 0;
+        public static int Textures { get; set; } = 0;
         /// <summary>
         /// Texture updates
         /// </summary>
-        public static int TextureUpdates = 0;
+        public static int TextureUpdates { get; set; } = 0;
         /// <summary>
         /// Picking test per frame
         /// </summary>
@@ -118,15 +118,15 @@ namespace Engine
         /// <summary>
         /// Rasterizer state changes count per frame
         /// </summary>
-        public static int RasterizerStateChanges = 0;
+        public static int RasterizerStateChanges { get; set; } = 0;
         /// <summary>
         /// Blend state changes count per frame
         /// </summary>
-        public static int BlendStateChanges = 0;
+        public static int BlendStateChanges { get; set; } = 0;
         /// <summary>
         /// Depth-Stencil state changes count per frame
         /// </summary>
-        public static int DepthStencilStateChanges = 0;
+        public static int DepthStencilStateChanges { get; set; } = 0;
         /// <summary>
         /// State changes count per frame (rasterizer, blend and depth-stencil states)
         /// </summary>
@@ -140,7 +140,7 @@ namespace Engine
         /// <summary>
         /// Active buffers
         /// </summary>
-        public static int Buffers = 0;
+        public static int Buffers { get; set; } = 0;
         /// <summary>
         /// Total buffer bytes
         /// </summary>
@@ -184,31 +184,31 @@ namespace Engine
         /// <summary>
         /// Buffer reads
         /// </summary>
-        public static int BufferReads = 0;
+        public static int BufferReads { get; set; } = 0;
         /// <summary>
         /// Buffer writes
         /// </summary>
-        public static int BufferWrites = 0;
+        public static int BufferWrites { get; set; } = 0;
         /// <summary>
         /// Input assembler layout sets
         /// </summary>
-        public static int IAInputLayoutSets = 0;
+        public static int IAInputLayoutSets { get; set; } = 0;
         /// <summary>
         /// Input assembler primitive topology sets
         /// </summary>
-        public static int IAPrimitiveTopologySets = 0;
+        public static int IAPrimitiveTopologySets { get; set; } = 0;
         /// <summary>
         /// Vertex buffer sets
         /// </summary>
-        public static int IAVertexBuffersSets = 0;
+        public static int IAVertexBuffersSets { get; set; } = 0;
         /// <summary>
         /// Index buffer sets
         /// </summary>
-        public static int IAIndexBufferSets = 0;
+        public static int IAIndexBufferSets { get; set; } = 0;
         /// <summary>
         /// Stream output targets sets
         /// </summary>
-        public static int SOTargetsSet = 0;
+        public static int SOTargetsSet { get; set; } = 0;
         /// <summary>
         /// Statistics keys
         /// </summary>

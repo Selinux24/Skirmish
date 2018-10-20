@@ -6,6 +6,7 @@ namespace Terrain
 {
     static class Program
     {
+        [STAThread]
         static void Main()
         {
             try

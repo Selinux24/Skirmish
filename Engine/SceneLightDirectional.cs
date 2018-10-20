@@ -62,7 +62,7 @@ namespace Engine
         /// <summary>
         /// Initial light direction
         /// </summary>
-        private Vector3 initialDirection = Vector3.Zero;
+        private Vector3 initialDirection = Vector3.ForwardLH;
 
         /// <summary>
         /// Light direction
@@ -71,11 +71,11 @@ namespace Engine
         /// <summary>
         /// Base brightness
         /// </summary>
-        public float BaseBrightness { get; protected set; }
+        public float BaseBrightness { get; protected set; } = 1f;
         /// <summary>
         /// Light brightness
         /// </summary>
-        public float Brightness { get; set; }
+        public float Brightness { get; set; } = 1f;
         /// <summary>
         /// Parent local transform matrix
         /// </summary>
@@ -95,11 +95,11 @@ namespace Engine
         /// <summary>
         /// First shadow map index
         /// </summary>
-        public int ShadowMapIndex { get; set; }
+        public int ShadowMapIndex { get; set; } = 0;
         /// <summary>
         /// Shadow map count
         /// </summary>
-        public uint ShadowMapCount { get; set; }
+        public uint ShadowMapCount { get; set; } = 0;
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
@@ -117,11 +117,6 @@ namespace Engine
         protected SceneLightDirectional()
             : base()
         {
-            this.initialDirection = Vector3.ForwardLH;
-            this.BaseBrightness = this.Brightness = 1f;
-            this.ShadowMapIndex = 0;
-            this.ShadowMapCount = 0;
-
             this.UpdateLocalTransform();
         }
         /// <summary>

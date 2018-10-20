@@ -32,11 +32,7 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         internal static ParticleSystemDescription Initialize(ParticleSystemDescription particleDesc, float scale = 1f)
         {
-            var desc = Initialize(particleDesc.ParticleType, particleDesc.ContentPath, particleDesc.TextureName, scale);
-
-            //desc.Update(particleDesc);
-
-            return desc;
+            return Initialize(particleDesc.ParticleType, particleDesc.ContentPath, particleDesc.TextureName, scale);
         }
         /// <summary>
         /// Initializes particle system by type

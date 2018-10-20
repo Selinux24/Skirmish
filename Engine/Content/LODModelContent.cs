@@ -8,7 +8,7 @@ namespace Engine.Content
     /// Model content dictionary by level of detail
     /// </summary>
     [Serializable]
-    public class LODModelContent : Dictionary<LevelOfDetailEnum, ModelContent>
+    public class LODModelContent : Dictionary<LevelOfDetail, ModelContent>
     {
         /// <summary>
         /// Constructor
@@ -31,7 +31,7 @@ namespace Engine.Content
             {
                 if (optimize) geo[i].Optimize();
 
-                this.Add((LevelOfDetailEnum)lastLod, geo[i]);
+                this.Add((LevelOfDetail)lastLod, geo[i]);
 
                 lastLod = Helper.NextPowerOfTwo(lastLod + 1);
             }

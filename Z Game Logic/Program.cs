@@ -9,6 +9,7 @@ namespace GameLogic
     {
         private static Game game = null;
 
+        [STAThread]
         static void Main()
         {
             try

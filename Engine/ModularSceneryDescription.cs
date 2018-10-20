@@ -9,18 +9,18 @@ namespace Engine
         /// <summary>
         /// Assets configuration file
         /// </summary>
-        public string AssetsConfigurationFile = null;
+        public string AssetsConfigurationFile { get; set; } = null;
         /// <summary>
         /// Assets configuration
         /// </summary>
-        public ModularSceneryAssetConfiguration AssetsConfiguration = null;
+        public ModularSceneryAssetConfiguration AssetsConfiguration { get; set; } = null;
         /// <summary>
         /// Levels file
         /// </summary>
-        public string LevelsFile = null;
+        public string LevelsFile { get; set; } = null;
         /// <summary>
         /// Levels
         /// </summary>
-        public ModularSceneryLevels Levels = null;
+        public ModularSceneryLevels Levels { get; set; } = null;
     }
 }

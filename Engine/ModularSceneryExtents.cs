@@ -55,6 +55,14 @@ namespace Engine
             {
                 return Vector3.Zero;
             }
+            else if (string.Equals(value, "Max", StringComparison.OrdinalIgnoreCase))
+            {
+                return new Vector3(float.MaxValue);
+            }
+            else if (string.Equals(value, "Min", StringComparison.OrdinalIgnoreCase))
+            {
+                return new Vector3(float.MinValue);
+            }
             else
             {
                 return Vector3.Zero;

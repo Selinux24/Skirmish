@@ -31,8 +31,8 @@ namespace Engine
             {
                 if (gObj.Is<IComposed>())
                 {
-                    var components = gObj.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
-                    foreach (var pickable in components)
+                    var pickComponents = gObj.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    foreach (var pickable in pickComponents)
                     {
                         if (TestCoarse(ref ray, pickable, maxDistance, out float d))
                         {
@@ -72,14 +72,12 @@ namespace Engine
             distance = float.MaxValue;
 
             var bsph = obj.GetBoundingSphere();
-            if (Collision.RayIntersectsSphere(ref ray, ref bsph, out float d))
+            var intersects = Collision.RayIntersectsSphere(ref ray, ref bsph, out float d);
+            if (intersects && (maxDistance == 0 || d <= maxDistance))
             {
-                if (maxDistance == 0 || d <= maxDistance)
-                {
-                    distance = d;
+                distance = d;
 
-                    return true;
-                }
+                return true;
             }
 
             return false;
@@ -103,12 +101,12 @@ namespace Engine
         /// <summary>
         /// Ground usage enum for ground picking
         /// </summary>
-        private const SceneObjectUsageEnum GroundUsage = SceneObjectUsageEnum.Ground | SceneObjectUsageEnum.FullPathFinding | SceneObjectUsageEnum.CoarsePathFinding;
+        private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding;
 
         /// <summary>
         /// Scene world matrix
         /// </summary>
-        private Matrix world = Matrix.Identity;
+        private readonly Matrix world = Matrix.Identity;
         /// <summary>
         /// Scene component list
         /// </summary>
@@ -121,7 +119,7 @@ namespace Engine
         /// <summary>
         /// Scene mode
         /// </summary>
-        private SceneModesEnum sceneMode = SceneModesEnum.Unknown;
+        private SceneModes sceneMode = SceneModes.Unknown;
         /// <summary>
         /// Scene bounding box
         /// </summary>
@@ -185,7 +183,7 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game class</param>
-        public Scene(Game game, SceneModesEnum sceneMode = SceneModesEnum.ForwardLigthning)
+        public Scene(Game game, SceneModes sceneMode = SceneModes.ForwardLigthning)
         {
             this.Game = game;
 
@@ -332,20 +330,14 @@ namespace Engine
 
                 ctrl.MouseOver = ctrl.Rectangle.Contains(this.Game.Input.MouseX, this.Game.Input.MouseY);
 
-                if (this.Game.Input.LeftMouseButtonJustPressed)
+                if (this.Game.Input.LeftMouseButtonJustPressed && ctrl.MouseOver)
                 {
-                    if (ctrl.MouseOver)
-                    {
-                        this.capturedControl = ctrl;
-                    }
+                    this.capturedControl = ctrl;
                 }
 
-                if (this.Game.Input.LeftMouseButtonJustReleased)
+                if (this.Game.Input.LeftMouseButtonJustReleased && ctrl.MouseOver && this.capturedControl == ctrl)
                 {
-                    if (this.capturedControl == ctrl && ctrl.MouseOver)
-                    {
-                        ctrl.FireOnClickEvent();
-                    }
+                    ctrl.FireOnClickEvent();
                 }
 
                 ctrl.Pressed = this.Game.Input.LeftMouseButtonPressed && this.capturedControl == ctrl;
@@ -376,7 +368,7 @@ namespace Engine
         /// Gets the render mode
         /// </summary>
         /// <returns>Returns the render mode</returns>
-        public SceneModesEnum GetRenderMode()
+        public SceneModes GetRenderMode()
         {
             return this.sceneMode;
         }
@@ -385,7 +377,7 @@ namespace Engine
         /// </summary>
         /// <param name="mode">New renderer mode</param>
         /// <returns>Returns true if the renderer changes correctly</returns>
-        public bool SetRenderMode(SceneModesEnum mode)
+        public bool SetRenderMode(SceneModes mode)
         {
             bool isValid = false;
 
@@ -393,21 +385,15 @@ namespace Engine
 
             ISceneRenderer renderer = null;
 
-            if (mode == SceneModesEnum.ForwardLigthning)
+            if (mode == SceneModes.ForwardLigthning && SceneRendererForward.Validate(graphics))
             {
-                if (SceneRendererForward.Validate(graphics))
-                {
-                    renderer = new SceneRendererForward(this.Game);
-                    isValid = true;
-                }
+                renderer = new SceneRendererForward(this.Game);
+                isValid = true;
             }
-            else if (mode == SceneModesEnum.DeferredLightning)
+            else if (mode == SceneModes.DeferredLightning && SceneRendererDeferred.Validate(graphics))
             {
-                if (SceneRendererDeferred.Validate(graphics))
-                {
-                    renderer = new SceneRendererDeferred(this.Game);
-                    isValid = true;
-                }
+                renderer = new SceneRendererDeferred(this.Game);
+                isValid = true;
             }
 
             if (isValid)
@@ -487,7 +473,7 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="order">Processing order</param>
         /// <returns></returns>
-        public SceneObject<T> AddComponent<T>(SceneObjectDescription description, SceneObjectUsageEnum usage = SceneObjectUsageEnum.None, int order = 0) where T : BaseSceneObject
+        public SceneObject<T> AddComponent<T>(SceneObjectDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0) where T : BaseSceneObject
         {
             T component = this.CreateResource<T>(description);
 
@@ -502,7 +488,7 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the added component</returns>
-        public SceneObject<T> AddComponent<T>(T component, SceneObjectDescription description, SceneObjectUsageEnum usage = SceneObjectUsageEnum.None, int order = 0)
+        public SceneObject<T> AddComponent<T>(T component, SceneObjectDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
         {
             var sceneObject = new SceneObject<T>(component, description);
 
@@ -518,7 +504,7 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="order">Processing order</param>
         /// <returns>Returns the added component</returns>
-        private SceneObject<T> AddComponent<T>(SceneObject<T> component, SceneObjectUsageEnum usage, int order)
+        private void AddComponent<T>(SceneObject<T> component, SceneObjectUsages usage, int order)
         {
             if (!this.components.Contains(component))
             {
@@ -548,8 +534,6 @@ namespace Engine
 
                 this.UpdateGlobalResources = true;
             }
-
-            return component;
         }
         /// <summary>
         /// Removes and disposes the specified component
@@ -639,12 +623,9 @@ namespace Engine
 
             for (int i = 0; i < this.components.Count; i++)
             {
-                if (func == null || func(this.components[i]))
+                if ((func == null || func(this.components[i])) && this.components[i].Is<T>())
                 {
-                    if (this.components[i].Is<T>())
-                    {
-                        res.Add(this.components[i].Get<T>());
-                    }
+                    res.Add(this.components[i].Get<T>());
                 }
             }
 
@@ -850,9 +831,9 @@ namespace Engine
         /// <returns>Returns true if a pickable object in the ray path was found</returns>
         public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, out SceneObject model)
         {
-            var usage = SceneObjectUsageEnum.Agent &
-                SceneObjectUsageEnum.CoarsePathFinding &
-                SceneObjectUsageEnum.FullPathFinding;
+            var usage = SceneObjectUsages.Agent &
+                SceneObjectUsages.CoarsePathFinding &
+                SceneObjectUsages.FullPathFinding;
 
             return this.PickNearest(ref ray, maxDistance, facingOnly, usage, out model);
         }
@@ -865,7 +846,7 @@ namespace Engine
         /// <param name="usage">Object usage mask</param>
         /// <param name="model">Gets the resulting ray pickable object</param>
         /// <returns>Returns true if a pickable object in the ray path was found</returns>
-        public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, SceneObjectUsageEnum usage, out SceneObject model)
+        public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, SceneObjectUsages usage, out SceneObject model)
         {
             model = null;
 
@@ -876,14 +857,11 @@ namespace Engine
             foreach (var obj in coarse)
             {
                 var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
-                if (pickable != null)
+                if (pickable != null && pickable.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> r))
                 {
-                    if (pickable.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> r))
-                    {
-                        model = obj.Item1;
+                    model = obj.Item1;
 
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -899,7 +877,7 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
-            return PickNearest(ref ray, facingOnly, SceneObjectUsageEnum.None, out result);
+            return PickNearest(ref ray, facingOnly, SceneObjectUsages.None, out result);
         }
         /// <summary>
         /// Gets first picking position of giving ray
@@ -910,7 +888,7 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
-            return PickFirst(ref ray, facingOnly, SceneObjectUsageEnum.None, out result);
+            return PickFirst(ref ray, facingOnly, SceneObjectUsages.None, out result);
         }
         /// <summary>
         /// Gets all picking position of giving ray
@@ -921,7 +899,7 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
         {
-            return PickAll(ref ray, facingOnly, SceneObjectUsageEnum.None, out results);
+            return PickAll(ref ray, facingOnly, SceneObjectUsages.None, out results);
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -1010,16 +988,16 @@ namespace Engine
         /// <param name="usage">Component usage</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out PickingResult<Triangle> result)
+        public bool PickNearest(ref Ray ray, bool facingOnly, SceneObjectUsages usage, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
             {
                 Distance = float.MaxValue,
             };
 
-            var cmpList = usage == SceneObjectUsageEnum.None ?
+            var cmpList = usage == SceneObjectUsages.None ?
                 this.components :
-                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsageEnum.None);
+                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsages.None);
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
 
@@ -1035,8 +1013,8 @@ namespace Engine
 
                 if (obj.Item1.Is<IComposed>())
                 {
-                    var components = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
-                    foreach (var pickable in components)
+                    var pickComponents = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    foreach (var pickable in pickComponents)
                     {
                         if (pickable.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> r))
                         {
@@ -1079,16 +1057,16 @@ namespace Engine
         /// <param name="usage">Component usage</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out PickingResult<Triangle> result)
+        public bool PickFirst(ref Ray ray, bool facingOnly, SceneObjectUsages usage, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
             {
                 Distance = float.MaxValue,
             };
 
-            var cmpList = usage == SceneObjectUsageEnum.None ?
+            var cmpList = usage == SceneObjectUsages.None ?
                 this.components :
-                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsageEnum.None);
+                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsages.None);
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
 
@@ -1096,8 +1074,8 @@ namespace Engine
             {
                 if (obj.Item1.Is<IComposed>())
                 {
-                    var components = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
-                    foreach (var pickable in components)
+                    var pickComponents = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    foreach (var pickable in pickComponents)
                     {
                         if (pickable.PickFirst(ref ray, facingOnly, out PickingResult<Triangle> r))
                         {
@@ -1130,13 +1108,13 @@ namespace Engine
         /// <param name="usage">Component usage</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, SceneObjectUsageEnum usage, out PickingResult<Triangle>[] results)
+        public bool PickAll(ref Ray ray, bool facingOnly, SceneObjectUsages usage, out PickingResult<Triangle>[] results)
         {
             results = null;
 
-            var cmpList = usage == SceneObjectUsageEnum.None ?
+            var cmpList = usage == SceneObjectUsages.None ?
                 this.components :
-                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsageEnum.None);
+                this.components.FindAll(c => (c.Usage & usage) != SceneObjectUsages.None);
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
 
@@ -1146,8 +1124,8 @@ namespace Engine
             {
                 if (obj.Item1.Is<IComposed>())
                 {
-                    var components = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
-                    foreach (var pickable in components)
+                    var pickComponents = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+                    foreach (var pickable in pickComponents)
                     {
                         if (pickable.PickAll(ref ray, facingOnly, out PickingResult<Triangle>[] r))
                         {
@@ -1186,7 +1164,7 @@ namespace Engine
         public ICullingVolume GetSceneVolume()
         {
             var ground = this.components
-                .Where(c => c.Usage.HasFlag(SceneObjectUsageEnum.Ground) && c.Is<Ground>())
+                .Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground) && c.Is<Ground>())
                 .Select(c => c.Get<Ground>())
                 .FirstOrDefault();
             if (ground != null)
@@ -1207,8 +1185,8 @@ namespace Engine
         {
             this.boundingBox = obj.Get<IRayPickable<Triangle>>().GetBoundingBox();
 
-            obj.Usage |= SceneObjectUsageEnum.Ground;
-            obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
+            obj.Usage |= SceneObjectUsages.Ground;
+            obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding);
         }
         /// <summary>
         /// Attach geometry to ground
@@ -1221,7 +1199,7 @@ namespace Engine
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
         public void AttachToGround(SceneObject obj, bool fullGeometryPathFinding)
         {
-            obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsageEnum.FullPathFinding : SceneObjectUsageEnum.CoarsePathFinding);
+            obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding);
         }
 
         /// <summary>
@@ -1311,9 +1289,9 @@ namespace Engine
             var pfComponents = this.components.FindAll(c =>
             {
                 return
-                    c.HasParent == false &&
-                    c.Visible == true &&
-                    (c.Usage.HasFlag(SceneObjectUsageEnum.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsageEnum.CoarsePathFinding));
+                    !c.HasParent &&
+                    c.Visible &&
+                    (c.Usage.HasFlag(SceneObjectUsages.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding));
             });
 
             for (int i = 0; i < pfComponents.Count; i++)
@@ -1342,7 +1320,7 @@ namespace Engine
                     var currComposed = curr.Get<IComposed>();
 
                     var trnChilds = currComposed.GetComponents<ITransformable3D>();
-                    if (trnChilds != null && trnChilds.Count() > 0)
+                    if (trnChilds.Any())
                     {
                         foreach (var child in trnChilds)
                         {
@@ -1351,7 +1329,7 @@ namespace Engine
                     }
 
                     var pickableChilds = currComposed.GetComponents<IRayPickable<Triangle>>();
-                    if (pickableChilds != null && pickableChilds.Count() > 0)
+                    if (pickableChilds.Any())
                     {
                         volumes.AddRange(pickableChilds);
                     }
@@ -1359,7 +1337,7 @@ namespace Engine
 
                 for (int p = 0; p < volumes.Count; p++)
                 {
-                    var full = curr.Usage.HasFlag(SceneObjectUsageEnum.FullPathFinding);
+                    var full = curr.Usage.HasFlag(SceneObjectUsages.FullPathFinding);
 
                     var vTris = volumes[p].GetVolume(full);
                     if (vTris != null && vTris.Length > 0)
@@ -1510,22 +1488,49 @@ namespace Engine
         {
             finalPosition = prevPosition;
 
-            if (prevPosition != newPosition)
+            if (prevPosition != newPosition && this.FindAllGroundPosition(newPosition.X, newPosition.Z, out PickingResult<Triangle>[] results))
             {
-                if (this.FindAllGroundPosition(newPosition.X, newPosition.Z, out PickingResult<Triangle>[] results))
+                Vector3 newFeetPosition = newPosition;
+                newFeetPosition.Y -= agent.Height;
+
+                results = results
+                    .Where(r => Vector3.Distance(r.Position, newFeetPosition) < agent.Height)
+                    .OrderBy(r => r.Distance).ToArray();
+
+                for (int i = 0; i < results.Length; i++)
                 {
-                    Vector3 newFeetPosition = newPosition;
-                    newFeetPosition.Y -= agent.Height;
-
-                    results = results
-                        .Where(r => Vector3.Distance(r.Position, newFeetPosition) < agent.Height)
-                        .OrderBy(r => r.Distance).ToArray();
-
-                    for (int i = 0; i < results.Length; i++)
+                    if (this.IsWalkable(agent, results[i].Position, out Vector3? nearest))
                     {
-                        if (this.IsWalkable(agent, results[i].Position, out Vector3? nearest))
+                        finalPosition = results[i].Position;
+                        finalPosition.Y += agent.Height;
+
+                        var moveP = newPosition - prevPosition;
+                        var moveV = finalPosition - prevPosition;
+                        if (moveV.LengthSquared() > moveP.LengthSquared())
                         {
-                            finalPosition = results[i].Position;
+                            finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+                        }
+
+                        return true;
+                    }
+                    else
+                    {
+                        //Not walkable but nearest position found
+                        if (nearest.HasValue)
+                        {
+                            //Find nearest ground position
+                            if (this.FindNearestGroundPosition(nearest.Value, out PickingResult<Triangle> nearestResult))
+                            {
+                                //Use nearest ground position found
+                                finalPosition = nearestResult.Position;
+                            }
+                            else
+                            {
+                                //Use nearest position provided by path finding graph
+                                finalPosition = nearest.Value;
+                            }
+
+                            //Adjust height
                             finalPosition.Y += agent.Height;
 
                             var moveP = newPosition - prevPosition;
@@ -1536,36 +1541,6 @@ namespace Engine
                             }
 
                             return true;
-                        }
-                        else
-                        {
-                            //Not walkable but nearest position found
-                            if (nearest.HasValue)
-                            {
-                                //Find nearest ground position
-                                if (this.FindNearestGroundPosition(nearest.Value, out PickingResult<Triangle> nearestResult))
-                                {
-                                    //Use nearest ground position found
-                                    finalPosition = nearestResult.Position;
-                                }
-                                else
-                                {
-                                    //Use nearest position provided by path finding graph
-                                    finalPosition = nearest.Value;
-                                }
-
-                                //Adjust height
-                                finalPosition.Y += agent.Height;
-
-                                var moveP = newPosition - prevPosition;
-                                var moveV = finalPosition - prevPosition;
-                                if (moveV.LengthSquared() > moveP.LengthSquared())
-                                {
-                                    finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
-                                }
-
-                                return true;
-                            }
                         }
                     }
                 }

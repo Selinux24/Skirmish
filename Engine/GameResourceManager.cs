@@ -278,7 +278,6 @@ namespace Engine
                 if (cRes != null)
                 {
                     cRes.Dispose();
-                    cRes = null;
                 }
                 this.globalResources[name] = resource;
             }

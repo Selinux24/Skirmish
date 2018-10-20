@@ -244,11 +244,11 @@ namespace Engine.Common
         /// </summary>
         /// <param name="result">Resource type</param>
         /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
-        public virtual EngineShaderResourceView GetResource(SceneRendererResultEnum result)
+        public virtual EngineShaderResourceView GetResource(SceneRendererResults result)
         {
-            if (result == SceneRendererResultEnum.ShadowMapDirectional) return this.ShadowMapDirectional;
-            if (result == SceneRendererResultEnum.ShadowMapPoint) return this.ShadowMapPoint;
-            if (result == SceneRendererResultEnum.ShadowMapSpot) return this.ShadowMapSpot;
+            if (result == SceneRendererResults.ShadowMapDirectional) return this.ShadowMapDirectional;
+            if (result == SceneRendererResults.ShadowMapPoint) return this.ShadowMapPoint;
+            if (result == SceneRendererResults.ShadowMapSpot) return this.ShadowMapSpot;
             return null;
         }
         /// <summary>

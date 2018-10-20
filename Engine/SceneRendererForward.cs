@@ -42,7 +42,6 @@ namespace Engine
                 this.Updated = false;
 #if DEBUG
                 long total = 0;
-                long start = 0;
                 long shadowMap_start = 0;
                 long shadowMap_cull = 0;
                 long shadowMap_draw = 0;
@@ -76,8 +75,6 @@ namespace Engine
 
 #if DEBUG
                     swStartup.Stop();
-
-                    start = swStartup.ElapsedTicks;
 #endif
                     #endregion
 
@@ -144,7 +141,7 @@ namespace Engine
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
                             //Draw solid
-                            this.DrawResultComponents(gameTime, this.DrawContext, CullIndexDrawIndex, visibleComponents);
+                            this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, visibleComponents);
 #if DEBUG
                             swDraw.Stop();
 
@@ -212,11 +209,10 @@ namespace Engine
         /// <summary>
         /// Draw components
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
         /// <param name="index">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(GameTime gameTime, DrawContext context, int index, IEnumerable<SceneObject> components)
+        private void DrawResultComponents(DrawContext context, int index, IEnumerable<SceneObject> components)
         {
             var mode = context.DrawerMode;
             var graphics = this.Game.Graphics;
@@ -232,8 +228,12 @@ namespace Engine
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
+                if (cull != null)
+                {
+                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                }
 
-                return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
+                return true;
             }).ToList();
             stopwatch.Stop();
             dict.Add("Opaques Selection", stopwatch.Elapsed.TotalMilliseconds);
@@ -307,8 +307,12 @@ namespace Engine
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
+                if (cull != null)
+                {
+                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                }
 
-                return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
+                return true;
             }).ToList();
             stopwatch.Stop();
             dict.Add("Transparents Selection", stopwatch.Elapsed.TotalMilliseconds);

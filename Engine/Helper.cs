@@ -102,7 +102,10 @@ namespace Engine
             }
             while (attempts > 0);
 
-            throw lastEx;
+            if (lastEx != null)
+            {
+                throw lastEx;
+            }
         }
         /// <summary>
         /// Executes especified function with attempts on exception
@@ -425,7 +428,7 @@ namespace Engine
         /// <returns>Returns next pair</returns>
         public static int NextPair(this int num)
         {
-            return num = num * 0.5f != (int)(num * 0.5f) ? num + 1 : num;
+            return num * 0.5f != (int)(num * 0.5f) ? num + 1 : num;
         }
         /// <summary>
         /// Gets next odd of even number, if even
@@ -434,7 +437,7 @@ namespace Engine
         /// <returns>Returns next odd</returns>
         public static int NextOdd(this int num)
         {
-            return num = num * 0.5f != (int)(num * 0.5f) ? num : num + 1;
+            return num * 0.5f != (int)(num * 0.5f) ? num : num + 1;
         }
         /// <summary>
         /// Calculates the next highest power of two.

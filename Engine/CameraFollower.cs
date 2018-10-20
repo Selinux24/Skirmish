@@ -6,8 +6,8 @@ namespace Engine
     {
         private readonly Manipulator3D manipulator;
 
-        private Vector3 positionOffset = Vector3.Zero;
-        private Vector3 viewOffset = Vector3.ForwardLH;
+        private readonly Vector3 positionOffset = Vector3.Zero;
+        private readonly Vector3 viewOffset = Vector3.ForwardLH;
 
         public Vector3 Position
         {

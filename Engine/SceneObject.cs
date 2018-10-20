@@ -52,7 +52,7 @@ namespace Engine
         /// <summary>
         /// Object usage
         /// </summary>
-        public SceneObjectUsageEnum Usage { get; internal set; }
+        public SceneObjectUsages Usage { get; internal set; }
         /// <summary>
         /// Maximum instance count
         /// </summary>
@@ -92,7 +92,7 @@ namespace Engine
             this.DeferredEnabled = description.DeferredEnabled;
             this.DepthEnabled = description.DepthEnabled;
             this.AlphaEnabled = description.AlphaEnabled;
-            this.Usage = SceneObjectUsageEnum.None;
+            this.Usage = SceneObjectUsages.None;
         }
         /// <summary>
         /// Destructor
@@ -118,16 +118,12 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.baseObject != null)
+                if (this.baseObject != null && this.baseObject is IDisposable disposable)
                 {
-                    if (this.baseObject is IDisposable disposable)
-                    {
-                        disposable.Dispose();
-                        disposable = null;
-                    }
-
-                    this.baseObject = null;
+                    disposable.Dispose();
                 }
+
+                this.baseObject = null;
             }
         }
 

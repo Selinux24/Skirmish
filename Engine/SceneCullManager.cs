@@ -30,11 +30,11 @@ namespace Engine
             /// <summary>
             /// Cull flag. If true, the item is culled
             /// </summary>
-            public bool Culled;
+            public bool Culled { get; set; }
             /// <summary>
             /// Distance from point of view when the item is'nt culled
             /// </summary>
-            public float Distance;
+            public float Distance { get; set; }
         }
 
         /// <summary>
@@ -68,19 +68,6 @@ namespace Engine
             }
 
             return res;
-        }
-        /// <summary>
-        /// Sets the specified cull value to the object list at results index
-        /// </summary>
-        /// <param name="value">Value</param>
-        /// <param name="index">Results index</param>
-        /// <param name="objects">Object list</param>
-        private void SetCullValue(CullData value, int index, IEnumerable<ICullable> objects)
-        {
-            foreach (var item in objects)
-            {
-                this.SetCullValue(value, index, item, true);
-            }
         }
         /// <summary>
         /// Sets the specified cull value to the object at results index
