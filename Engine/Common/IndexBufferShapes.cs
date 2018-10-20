@@ -4,7 +4,7 @@ namespace Engine.Common
     /// <summary>
     /// Index buffer shape
     /// </summary>
-    public enum IndexBufferShapeEnum : int
+    public enum IndexBufferShapes
     {
         /// <summary>
         /// None

@@ -108,31 +108,6 @@ namespace Engine.Content
 
                 return res.ToArray();
             }
-            /// <summary>
-            /// Gets file streams of the entry list
-            /// </summary>
-            /// <param name="file">Zip file name</param>
-            /// <param name="entryNames">Entry names list</param>
-            /// <returns>Returns file streams of the entry list</returns>
-            public static MemoryStream[] GetFiles(string file, string[] entryNames)
-            {
-                MemoryStream[] res = new MemoryStream[entryNames.Length];
-
-                using (ZipArchive archive = ZipFile.OpenRead(file))
-                {
-                    for (int i = 0; i < entryNames.Length; i++)
-                    {
-                        ZipArchiveEntry entry = archive.GetEntry(GetEntryName(file, entryNames[i]));
-
-                        using (var stream = entry.Open())
-                        {
-                            res[i] = stream.WriteToMemory();
-                        }
-                    }
-                }
-
-                return res;
-            }
         }
 
         /// <summary>
@@ -149,7 +124,7 @@ namespace Engine.Content
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
-                return null;
+                return new MemoryStream[] { };
             }
             else if (File.Exists(resourcePath))
             {
@@ -213,7 +188,7 @@ namespace Engine.Content
                 }
             }
 
-            return null;
+            return new MemoryStream[] { };
         }
         /// <summary>
         /// Finds content
@@ -260,7 +235,7 @@ namespace Engine.Content
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
-                return null;
+                return new string[] { };
             }
             else if (File.Exists(resourcePath))
             {
@@ -302,7 +277,7 @@ namespace Engine.Content
                 }
             }
 
-            return null;
+            return new string[] { };
         }
         /// <summary>
         /// Finds paths

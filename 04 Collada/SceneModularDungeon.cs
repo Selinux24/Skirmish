@@ -482,7 +482,7 @@ namespace Collada
                             File.Delete(fileName);
                         }
 
-                        var loader = new LoaderOBJ();
+                        var loader = new LoaderObj();
                         var tris = this.GetTrianglesForNavigationGraph();
                         loader.Save(tris, fileName);
 

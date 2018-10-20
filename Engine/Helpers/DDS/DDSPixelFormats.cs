@@ -5,7 +5,7 @@ namespace Engine.Helpers.DDS
     /// DDS Pixel Format Flags enumeration
     /// </summary>
     /// <remarks>https://msdn.microsoft.com/en-us/library/windows/desktop/bb943984(v=vs.85).aspx</remarks>
-    enum DDPFFlags : int
+    enum DDSPixelFormats
     {
         /// <summary>
         /// Texture contains alpha data; dwRGBAlphaBitMask contains valid data.

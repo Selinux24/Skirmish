@@ -10,11 +10,11 @@ namespace Engine.Collections
         /// <summary>
         /// The bounding box of the node.
         /// </summary>
-        public BoundingBoxi Bounds;
+        public BoundingBoxi Bounds { get; set; }
         /// <summary>
         /// The index of this node in a <see cref="BoundingVolumeTree"/>.
         /// </summary>
-        public int Index;
+        public int Index { get; set; }
 
         /// <summary>
         /// An <see cref="IComparer{T}"/> implementation that only compares two <see cref="BoundingVolumeTreeNode"/>s on the X axis.

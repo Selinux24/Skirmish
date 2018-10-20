@@ -1,11 +1,13 @@
-﻿
+﻿using System;
+
 namespace Engine.Helpers.DDS
 {
     /// <summary>
     /// DDS Caps2
     /// </summary>
     /// <remarks>https://msdn.microsoft.com/es-es/library/windows/desktop/bb943982(v=vs.85).aspx</remarks>
-    enum DDSCaps2Enum : int
+    [Flags]
+    enum DDSCaps2
     {
         /// <summary>
         /// DDSCAPS2_CUBEMAP

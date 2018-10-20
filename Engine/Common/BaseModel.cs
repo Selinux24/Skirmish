@@ -15,7 +15,7 @@ namespace Engine.Common
         /// <summary>
         /// Meshes by level of detail dictionary
         /// </summary>
-        private LODDictionary meshesByLOD = new LODDictionary();
+        private LevelOfDetailDictionary meshesByLOD = new LevelOfDetailDictionary();
         /// <summary>
         /// Default level of detail
         /// </summary>
@@ -84,7 +84,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Object description</param>
-        public BaseModel(Scene scene, BaseModelDescription description)
+        protected BaseModel(Scene scene, BaseModelDescription description)
             : base(scene, description)
         {
             var desc = new DrawingDataDescription()
@@ -129,7 +129,7 @@ namespace Engine.Common
             }
             else
             {
-                var content = new LODModelContent(geo, description.Optimize);
+                var content = new LevelOfDetailModelContent(geo, description.Optimize);
 
                 foreach (var lod in content.Keys)
                 {

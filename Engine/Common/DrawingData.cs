@@ -15,27 +15,27 @@ namespace Engine.Common
         /// <summary>
         /// Materials dictionary
         /// </summary>
-        public MaterialDictionary Materials = new MaterialDictionary();
+        public MaterialDictionary Materials { get; set; } = new MaterialDictionary();
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        public TextureDictionary Textures = new TextureDictionary();
+        public TextureDictionary Textures { get; set; } = new TextureDictionary();
         /// <summary>
         /// Meshes
         /// </summary>
-        public MeshDictionary Meshes = new MeshDictionary();
+        public MeshDictionary Meshes { get; set; } = new MeshDictionary();
         /// <summary>
         /// Volume mesh
         /// </summary>
-        public Triangle[] VolumeMesh = null;
+        public Triangle[] VolumeMesh { get; set; } = null;
         /// <summary>
         /// Datos de animación
         /// </summary>
-        public SkinningData SkinningData = null;
+        public SkinningData SkinningData { get; set; } = null;
         /// <summary>
         /// Lights collection
         /// </summary>
-        public SceneLight[] Lights = null;
+        public SceneLight[] Lights { get; set; } = null;
 
         /// <summary>
         /// Buffer manager
@@ -316,7 +316,7 @@ namespace Engine.Common
 
             if (boneAnimations.Count > 0)
             {
-                //TODO: Only one bone animation for now
+                //Only one bone animation (for now)
                 animations.Add(boneAnimations[0]);
             }
 
@@ -384,7 +384,7 @@ namespace Engine.Common
                 }
             }
 
-            return null;
+            return new AnimationContent[] { };
         }
         /// <summary>
         /// Initialize lights
@@ -399,11 +399,11 @@ namespace Engine.Common
             {
                 var l = modelContent.Lights[key];
 
-                if (l.LightType == LightContentTypeEnum.Point)
+                if (l.LightType == LightContentTypes.Point)
                 {
                     lights.Add(l.CreatePointLight());
                 }
-                else if (l.LightType == LightContentTypeEnum.Spot)
+                else if (l.LightType == LightContentTypes.Spot)
                 {
                     lights.Add(l.CreateSpotLight());
                 }
@@ -473,11 +473,6 @@ namespace Engine.Common
 
                 if (this.Materials != null)
                 {
-                    foreach (var item in this.Materials)
-                    {
-                        item.Value?.Dispose();
-                    }
-
                     this.Materials.Clear();
                     this.Materials = null;
                 }

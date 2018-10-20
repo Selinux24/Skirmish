@@ -7,7 +7,7 @@ namespace Engine.Animation
     /// <summary>
     /// Skinning data
     /// </summary>
-    public class SkinningData : IEquatable<SkinningData>
+    public sealed class SkinningData : IEquatable<SkinningData>
     {
         /// <summary>
         /// Default clip name
@@ -21,36 +21,36 @@ namespace Engine.Animation
         /// <summary>
         /// Animations clip dictionary
         /// </summary>
-        private List<AnimationClip> animations = null;
+        private readonly List<AnimationClip> animations = new List<AnimationClip>();
         /// <summary>
         /// Transition between animations list
         /// </summary>
-        private List<Transition> transitions = null;
+        private readonly List<Transition> transitions = new List<Transition>();
         /// <summary>
         /// Animation clip names collection
         /// </summary>
-        private List<string> clips = null;
+        private readonly List<string> clips = new List<string>();
         /// <summary>
         /// Clip offsets in animation palette
         /// </summary>
-        private List<int> offsets = null;
+        private readonly List<int> offsets = new List<int>();
         /// <summary>
         /// Skeleton
         /// </summary>
-        private Skeleton skeleton = null;
+        private readonly Skeleton skeleton = null;
 
         /// <summary>
         /// Resource index
         /// </summary>
-        public uint ResourceIndex = 0;
+        public uint ResourceIndex { get; set; } = 0;
         /// <summary>
         /// Resource offset
         /// </summary>
-        public uint ResourceOffset = 0;
+        public uint ResourceOffset { get; set; } = 0;
         /// <summary>
         /// Resource size
         /// </summary>
-        public uint ResourceSize = 0;
+        public uint ResourceSize { get; set; } = 0;
 
         /// <summary>
         /// Constructor
@@ -60,10 +60,6 @@ namespace Engine.Animation
         /// <param name="animationDescription">Animation description</param>
         public SkinningData(Skeleton skeleton, JointAnimation[] jointAnimations, AnimationDescription animationDescription)
         {
-            this.animations = new List<AnimationClip>();
-            this.transitions = new List<Transition>();
-            this.clips = new List<string>();
-            this.offsets = new List<int>();
             this.skeleton = skeleton;
 
             if (animationDescription != null)
@@ -90,13 +86,10 @@ namespace Engine.Animation
                     dictAnimations.Add(clip.Name, ja);
                 }
 
-                if (dictAnimations != null)
+                foreach (var key in dictAnimations.Keys)
                 {
-                    foreach (var key in dictAnimations.Keys)
-                    {
-                        this.animations.Add(new AnimationClip(key, dictAnimations[key]));
-                        this.clips.Add(key);
-                    }
+                    this.animations.Add(new AnimationClip(key, dictAnimations[key]));
+                    this.clips.Add(key);
                 }
 
                 foreach (var transition in animationDescription.Transitions)

@@ -69,8 +69,8 @@ namespace Engine
         {
             var mode = context.DrawerMode;
             var draw =
-                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled);
+                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
 
             if (draw && this.indexBuffer.Count > 0)
             {

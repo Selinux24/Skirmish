@@ -6,7 +6,7 @@ namespace Engine.Common
     /// <summary>
     /// Mesh material
     /// </summary>
-    public class MeshMaterial : IDisposable, IEquatable<MeshMaterial>
+    public sealed class MeshMaterial : IEquatable<MeshMaterial>
     {
         /// <summary>
         /// Default material
@@ -54,40 +54,15 @@ namespace Engine.Common
         /// <summary>
         /// Resource index
         /// </summary>
-        public uint ResourceIndex = 0;
+        public uint ResourceIndex { get; set; } = 0;
         /// <summary>
         /// Resource offset
         /// </summary>
-        public uint ResourceOffset = 0;
+        public uint ResourceOffset { get; set; } = 0;
         /// <summary>
         /// Resource size
         /// </summary>
-        public uint ResourceSize = 0;
-
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~MeshMaterial()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-
-        }
+        public uint ResourceSize { get; set; } = 0;
 
         /// <summary>
         /// Packs current instance into a Vector4 array

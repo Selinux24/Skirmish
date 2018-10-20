@@ -9,12 +9,12 @@ namespace Engine.Helpers.DDS
     /// DDS Header DXT10
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    struct DDSHeaderDX10
+    struct DdsHeaderDX10
     {
         /// <summary>
         /// Size of structure
         /// </summary>
-        public readonly static int StructSize = Marshal.SizeOf(new DDSHeaderDX10());
+        public readonly static int StructSize = Marshal.SizeOf(new DdsHeaderDX10());
 
         /// <summary>
         /// The surface pixel format
@@ -35,6 +35,6 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Contains additional metadata (formerly was reserved). The lower 3 bits indicate the alpha mode of the associated resource. The upper 29 bits are reserved and are typically 0.
         /// </summary>
-        public DDSFlagsDX10Enum MiscFlag2;
+        public DDSFlagsDX10 MiscFlag2;
     }
 }

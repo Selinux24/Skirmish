@@ -4,7 +4,7 @@
     /// DDS Caps
     /// </summary>
     /// <remarks>https://msdn.microsoft.com/es-es/library/windows/desktop/bb943982(v=vs.85).aspx</remarks>
-    public enum DDSCapsEnum : int
+    public enum DDSCaps
     {
         /// <summary>
         /// DDSCAPS_COMPLEX: Optional; must be used on any file that contains more than one surface (a mipmap, a cubic environment map, or mipmapped volume texture).

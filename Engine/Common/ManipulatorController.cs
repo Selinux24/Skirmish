@@ -20,6 +20,7 @@ namespace Engine.Common
         /// Current velocity
         /// </summary>
         protected Vector3 Velocity = Vector3.Zero;
+
         /// <summary>
         /// Current speed
         /// </summary>
@@ -33,11 +34,11 @@ namespace Engine.Common
         /// <summary>
         /// Maximum speed
         /// </summary>
-        public float MaximumSpeed = 1f;
+        public float MaximumSpeed { get; set; } = 1f;
         /// <summary>
         /// Maximum force
         /// </summary>
-        public float MaximumForce = 1f;
+        public float MaximumForce { get; set; } = 1f;
         /// <summary>
         /// Gets if the current controller has a initialized path
         /// </summary>

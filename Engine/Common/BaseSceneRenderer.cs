@@ -22,11 +22,11 @@ namespace Engine.Common
         /// <summary>
         /// Maximum number of cascade shadow maps per directional light
         /// </summary>
-        public const int MaxDirectionalCascadeShadowMaps = 3;
+        protected const int MaxDirectionalCascadeShadowMaps = 3;
         /// <summary>
         /// Shadow map sampling distances
         /// </summary>
-        public static float[] CascadeShadowMapsDistances = new[] { 10f, 25f, 50f };
+        public static float[] CascadeShadowMapsDistances { get; set; } = new[] { 10f, 25f, 50f };
 
         /// <summary>
         /// Cubic shadow map size
@@ -150,7 +150,7 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
-        public BaseSceneRenderer(Game game)
+        protected BaseSceneRenderer(Game game)
         {
             this.Game = game;
 
@@ -180,7 +180,7 @@ namespace Engine.Common
             this.DrawContext = new DrawContext()
             {
                 Name = "Primary",
-                DrawerMode = DrawerModesEnum.Forward,
+                DrawerMode = DrawerModes.Forward,
             };
 
             this.DrawShadowsContext = new DrawContextShadows()
@@ -346,7 +346,7 @@ namespace Engine.Common
             {
                 var graphics = this.Game.Graphics;
 
-                var shadowObjs = scene.GetComponents(c => c.Visible == true && c.CastShadow == true);
+                var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
                 if (shadowObjs.Count > 0)
                 {
                     this.DrawShadowsContext.ViewProjection = this.UpdateContext.ViewProjection;
@@ -383,7 +383,6 @@ namespace Engine.Common
 
                                 light.ShadowMapIndex = assigned;
                                 light.ShadowMapCount++;
-                                //light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
 
                                 this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
                             }
@@ -410,7 +409,7 @@ namespace Engine.Common
                 var graphics = this.Game.Graphics;
 
                 //Draw components if drop shadow (opaque)
-                var shadowObjs = scene.GetComponents(c => c.Visible == true && c.CastShadow == true);
+                var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
                 if (shadowObjs.Count > 0)
                 {
                     var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
@@ -462,7 +461,7 @@ namespace Engine.Common
                 var graphics = this.Game.Graphics;
 
                 //Draw components if drop shadow (opaque)
-                var shadowObjs = scene.GetComponents(c => c.Visible == true && c.CastShadow == true);
+                var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
                 if (shadowObjs.Count > 0)
                 {
                     var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
@@ -520,8 +519,12 @@ namespace Engine.Common
                 if (!c.Is<Drawable>()) return false;
 
                 var cull = c.Get<ICullable>();
+                if (cull != null)
+                {
+                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                }
 
-                return cull != null ? !this.cullManager.GetCullValue(index, cull).Culled : true;
+                return true;
             }).ToList();
             if (objects.Count > 0)
             {

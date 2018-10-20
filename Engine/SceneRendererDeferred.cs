@@ -435,13 +435,13 @@ namespace Engine
                             Stopwatch swDraw = Stopwatch.StartNew();
 #endif
                             //Set forward mode
-                            this.DrawContext.DrawerMode = DrawerModesEnum.Forward;
+                            this.DrawContext.DrawerMode = DrawerModes.Forward;
 
                             //Draw scene
                             this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, deferredDisabledComponents, false);
 
                             //Set deferred mode
-                            this.DrawContext.DrawerMode = DrawerModesEnum.Deferred;
+                            this.DrawContext.DrawerMode = DrawerModes.Deferred;
 #if DEBUG
                             swDraw.Stop();
 
@@ -898,7 +898,7 @@ namespace Engine
             }).ToList();
             if (opaques.Count > 0)
             {
-                context.DrawerMode = mode | DrawerModesEnum.OpaqueOnly;
+                context.DrawerMode = mode | DrawerModes.OpaqueOnly;
 
                 opaques.Sort((c1, c2) =>
                 {
@@ -968,7 +968,7 @@ namespace Engine
             }).ToList();
             if (transparents.Count > 0)
             {
-                context.DrawerMode = mode | DrawerModesEnum.TransparentOnly;
+                context.DrawerMode = mode | DrawerModes.TransparentOnly;
 
                 transparents.Sort((c1, c2) =>
                 {

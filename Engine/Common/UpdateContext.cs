@@ -10,46 +10,46 @@ namespace Engine.Common
         /// <summary>
         /// Context name
         /// </summary>
-        public string Name = "";
+        public string Name { get; set; } = "";
         /// <summary>
         /// Game time
         /// </summary>
-        public GameTime GameTime;
+        public GameTime GameTime { get; set; }
         /// <summary>
         /// View matrix
         /// </summary>
-        public Matrix View;
+        public Matrix View { get; set; }
         /// <summary>
         /// Projection matrix
         /// </summary>
-        public Matrix Projection;
+        public Matrix Projection { get; set; }
         /// <summary>
         /// Projection near plane distance
         /// </summary>
-        public float NearPlaneDistance;
+        public float NearPlaneDistance { get; set; }
         /// <summary>
         /// Projection far plane distance
         /// </summary>
-        public float FarPlaneDistance;
+        public float FarPlaneDistance { get; set; }
         /// <summary>
         /// View * projection matrix
         /// </summary>
-        public Matrix ViewProjection;
+        public Matrix ViewProjection { get; set; }
         /// <summary>
         /// Camera culling volume
         /// </summary>
-        public CullingVolumeCamera CameraVolume;
+        public CullingVolumeCamera CameraVolume { get; set; }
         /// <summary>
         /// Eye position
         /// </summary>
-        public Vector3 EyePosition;
+        public Vector3 EyePosition { get; set; }
         /// <summary>
         /// Eye view direction
         /// </summary>
-        public Vector3 EyeDirection;
+        public Vector3 EyeDirection { get; set; }
         /// <summary>
         /// Lights
         /// </summary>
-        public SceneLights Lights;
+        public SceneLights Lights { get; set; }
     }
 }

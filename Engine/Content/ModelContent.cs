@@ -36,17 +36,6 @@ namespace Engine.Content
         public class LightDictionary : Dictionary<string, LightContent>
         {
             /// <summary>
-            /// Gets next light name
-            /// </summary>
-            private string NextLightName
-            {
-                get
-                {
-                    return string.Format("_light_{0}_", this.Count + 1);
-                }
-            }
-
-            /// <summary>
             /// Constructor
             /// </summary>
             public LightDictionary()
@@ -282,7 +271,7 @@ namespace Engine.Content
             protected ControllerDictionary(SerializationInfo info, StreamingContext context)
                 : base(info, context)
             {
-                
+
             }
 
             /// <summary>
@@ -348,27 +337,27 @@ namespace Engine.Content
         /// <summary>
         /// Light dictionary
         /// </summary>
-        public LightDictionary Lights = new LightDictionary();
+        public LightDictionary Lights { get; set; } = new LightDictionary();
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        public ImageDictionary Images = new ImageDictionary();
+        public ImageDictionary Images { get; set; } = new ImageDictionary();
         /// <summary>
         /// Material dictionary
         /// </summary>
-        public MaterialDictionary Materials = new MaterialDictionary();
+        public MaterialDictionary Materials { get; set; } = new MaterialDictionary();
         /// <summary>
         /// Geometry dictionary
         /// </summary>
-        public GeometryDictionary Geometry = new GeometryDictionary();
+        public GeometryDictionary Geometry { get; set; } = new GeometryDictionary();
         /// <summary>
         /// Controller dictionary
         /// </summary>
-        public ControllerDictionary Controllers = new ControllerDictionary();
+        public ControllerDictionary Controllers { get; set; } = new ControllerDictionary();
         /// <summary>
         /// Animation dictionary
         /// </summary>
-        public AnimationDictionary Animations = new AnimationDictionary();
+        public AnimationDictionary Animations { get; set; } = new AnimationDictionary();
         /// <summary>
         /// Skinning information
         /// </summary>
@@ -606,7 +595,7 @@ namespace Engine.Content
         {
             var geo = this.Geometry.Where(g => string.Equals(g.Key, geometryName + "-mesh", StringComparison.OrdinalIgnoreCase));
 
-            if (geo.Count() > 0)
+            if (geo.Any())
             {
                 var res = new ModelContent
                 {
@@ -631,11 +620,11 @@ namespace Engine.Content
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
         public ModelContent Filter(IEnumerable<string> geometryNames)
         {
-            if (geometryNames != null && geometryNames.Count() > 0)
+            if (geometryNames != null && geometryNames.Any())
             {
-                var geo = this.Geometry.Where(g => geometryNames.Count(i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)) > 0);
+                var geo = this.Geometry.Where(g => geometryNames.Any(i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)));
 
-                if (geo.Count() > 0)
+                if (geo.Any())
                 {
                     var res = new ModelContent
                     {
@@ -672,7 +661,7 @@ namespace Engine.Content
         {
             ModelContent res = null;
 
-            if (masks != null && masks.Count() > 0)
+            if (masks != null && masks.Any())
             {
                 foreach (var mask in masks)
                 {
@@ -680,7 +669,7 @@ namespace Engine.Content
                         g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                         g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
 
-                    if (geo.Count() > 0)
+                    if (geo.Any())
                     {
                         if (res == null)
                         {
@@ -699,7 +688,7 @@ namespace Engine.Content
                             l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                             l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
 
-                        if (lights.Count() > 0)
+                        if (lights.Any())
                         {
                             foreach (var l in lights)
                             {
@@ -755,7 +744,7 @@ namespace Engine.Content
         {
             int count = 0;
 
-            if (masks != null && masks.Count() > 0)
+            if (masks != null && masks.Any())
             {
                 foreach (var mask in masks)
                 {
@@ -763,7 +752,7 @@ namespace Engine.Content
                         g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                         g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
 
-                    if (geo.Count() > 0)
+                    if (geo.Any())
                     {
                         foreach (var g in geo)
                         {

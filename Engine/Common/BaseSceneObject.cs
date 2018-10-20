@@ -21,7 +21,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public BaseSceneObject(Scene scene, SceneObjectDescription description)
+        protected BaseSceneObject(Scene scene, SceneObjectDescription description)
         {
             this.Scene = scene;
             this.Description = description;

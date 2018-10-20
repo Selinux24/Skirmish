@@ -150,15 +150,15 @@ namespace Engine.Collections
         /// <summary>
         /// Node Id
         /// </summary>
-        public int Id;
+        public int Id { get; set; }
         /// <summary>
         /// Depth level
         /// </summary>
-        public int Level;
+        public int Level { get; set; }
         /// <summary>
         /// Bounding box
         /// </summary>
-        public BoundingBox BoundingBox;
+        public BoundingBox BoundingBox { get; set; }
         /// <summary>
         /// Gets the node center position
         /// </summary>
@@ -172,7 +172,7 @@ namespace Engine.Collections
         /// <summary>
         /// Children list
         /// </summary>
-        public QuadTreeNode[] Children;
+        public QuadTreeNode[] Children { get; set; }
 
         /// <summary>
         /// Constructor
@@ -363,8 +363,7 @@ namespace Engine.Collections
 
             if (this.Children != null)
             {
-                bool haltByDepth = maxDepth > 0 ? this.Level == maxDepth : false;
-                if (haltByDepth)
+                if (maxDepth > 0 && this.Level == maxDepth)
                 {
                     Array.ForEach(this.Children, (c) =>
                     {
@@ -482,7 +481,8 @@ namespace Engine.Collections
 
             if (this.Children == null)
             {
-                if (sphere.Contains(ref this.BoundingBox) != ContainmentType.Disjoint)
+                var bbox = this.BoundingBox;
+                if (sphere.Contains(ref bbox) != ContainmentType.Disjoint)
                 {
                     nodes.Add(this);
                 }

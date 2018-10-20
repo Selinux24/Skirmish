@@ -12,8 +12,7 @@ namespace Engine.Collections
     /// </typeparam>
     public sealed class PriorityQueue<T> : ICollection<T> where T : class, IValueWithCost
     {
-        private T[] heap;
-        private readonly int capacity;
+        private readonly T[] heap;
 
         /// <summary>
         /// Gets the number of elements in the priority queue.
@@ -37,9 +36,8 @@ namespace Engine.Collections
         /// <param name="n">The maximum number of nodes that can be stored.</param>
         public PriorityQueue(int n)
         {
-            capacity = n;
             Count = 0;
-            heap = new T[capacity + 1];
+            heap = new T[n + 1];
         }
 
         /// <summary>

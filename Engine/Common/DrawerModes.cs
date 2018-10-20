@@ -6,7 +6,7 @@ namespace Engine.Common
     /// Drawer modes
     /// </summary>
 	[Flags]
-    public enum DrawerModesEnum
+    public enum DrawerModes
     {
         /// <summary>
         /// None

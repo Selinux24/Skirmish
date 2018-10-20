@@ -9,14 +9,14 @@ namespace Engine.Helpers
         /// <summary>
         /// Vertex shader profile
         /// </summary>
-        public static string VSProfile = "vs_5_0";
+        public static string VSProfile { get; set; } = "vs_5_0";
         /// <summary>
         /// Pixel shader profile
         /// </summary>
-        public static string PSProfile = "ps_5_0";
+        public static string PSProfile { get; set; } = "ps_5_0";
         /// <summary>
         /// Effect profile
         /// </summary>
-        public static string FXProfile = "fx_5_0";
+        public static string FXProfile { get; set; } = "fx_5_0";
     }
 }

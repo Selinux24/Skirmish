@@ -52,7 +52,7 @@ namespace Engine.Content
             if (this.Skin != null) text += string.Format("Skin: {0}; ", this.Skin);
             if (this.InverseBindMatrix != null) text += string.Format("InverseBindMatrix: {0}; ", this.InverseBindMatrix.Count);
             if (this.Weights != null) text += string.Format("Weights: {0}; ", this.Weights.Length);
-            if (this.BindShapeMatrix != null) text += string.Format("BindShapeMatrix: {0}; ", this.BindShapeMatrix);
+            text += string.Format("BindShapeMatrix: {0}; ", this.BindShapeMatrix);
 
             return text;
         }

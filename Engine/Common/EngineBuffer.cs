@@ -14,15 +14,15 @@ namespace Engine.Common
         /// <summary>
         /// Buffer
         /// </summary>
-        public Buffer VertexBuffer;
+        public Buffer VertexBuffer { get; set; }
         /// <summary>
         /// Vertex buffer binding
         /// </summary>
-        public VertexBufferBinding[] VertexBufferBinding;
+        public VertexBufferBinding[] VertexBufferBinding { get; set; }
         /// <summary>
         /// Input layouts
         /// </summary>
-        public List<InputLayout> InputLayouts = new List<InputLayout>();
+        public List<InputLayout> InputLayouts { get; set; } = new List<InputLayout>();
 
         /// <summary>
         /// Constructor

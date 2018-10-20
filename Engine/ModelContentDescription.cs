@@ -51,7 +51,7 @@ namespace Engine
             }
             else if (string.Equals(Path.GetExtension(ModelFileName), ".obj", StringComparison.OrdinalIgnoreCase))
             {
-                return new LoaderOBJ();
+                return new LoaderObj();
             }
 
             return null;

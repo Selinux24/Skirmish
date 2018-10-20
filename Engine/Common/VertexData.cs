@@ -13,47 +13,47 @@ namespace Engine.Common
         /// <summary>
         /// Face index
         /// </summary>
-        public int FaceIndex;
+        public int FaceIndex { get; set; }
         /// <summary>
         /// Vertex index
         /// </summary>
-        public int VertexIndex;
+        public int VertexIndex { get; set; }
         /// <summary>
         /// Position
         /// </summary>
-        public Vector3? Position;
+        public Vector3? Position { get; set; }
         /// <summary>
         /// Normal
         /// </summary>
-        public Vector3? Normal;
+        public Vector3? Normal { get; set; }
         /// <summary>
         /// Tangent
         /// </summary>
-        public Vector3? Tangent;
+        public Vector3? Tangent { get; set; }
         /// <summary>
         /// Binormal
         /// </summary>
-        public Vector3? BiNormal;
+        public Vector3? BiNormal { get; set; }
         /// <summary>
         /// Texture UV
         /// </summary>
-        public Vector2? Texture;
+        public Vector2? Texture { get; set; }
         /// <summary>
         /// Color
         /// </summary>
-        public Color4? Color;
+        public Color4? Color { get; set; }
         /// <summary>
         /// Sprite size
         /// </summary>
-        public Vector2? Size;
+        public Vector2? Size { get; set; }
         /// <summary>
         /// Vertex weights
         /// </summary>
-        public float[] Weights;
+        public float[] Weights { get; set; }
         /// <summary>
         /// Bone weights
         /// </summary>
-        public byte[] BoneIndices;
+        public byte[] BoneIndices { get; set; }
 
         /// <summary>
         /// Generates vertex from helper

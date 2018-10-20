@@ -324,11 +324,11 @@ namespace Engine
             {
                 var l = content.Lights[key];
 
-                if (l.LightType == LightContentTypeEnum.Point)
+                if (l.LightType == LightContentTypes.Point)
                 {
                     lights.Add(l.CreatePointLight());
                 }
-                else if (l.LightType == LightContentTypeEnum.Spot)
+                else if (l.LightType == LightContentTypes.Spot)
                 {
                     lights.Add(l.CreateSpotLight());
                 }
@@ -397,18 +397,18 @@ namespace Engine
             var mode = context.DrawerMode;
             var graphics = this.Game.Graphics;
 
-            if (mode.HasFlag(DrawerModesEnum.OpaqueOnly))
+            if (mode.HasFlag(DrawerModes.OpaqueOnly))
             {
                 var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
                 if (nodes != null && nodes.Length > 0)
                 {
                     IGeometryDrawer sceneryEffect = null;
 
-                    if (mode.HasFlag(DrawerModesEnum.Forward))
+                    if (mode.HasFlag(DrawerModes.Forward))
                     {
                         sceneryEffect = DrawerPool.EffectDefaultBasic;
                     }
-                    else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                    else if (mode.HasFlag(DrawerModes.Deferred))
                     {
                         sceneryEffect = DrawerPool.EffectDeferredBasic;
                     }

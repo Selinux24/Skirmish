@@ -105,7 +105,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(byte[] buffer)
         {
-            if (DDSHeader.GetInfo(buffer, out DDSHeader header, out DDSHeaderDX10? header10, out int offset))
+            if (DdsHeader.GetInfo(buffer, out DdsHeader header, out DdsHeaderDX10? header10, out int offset))
             {
                 return new TextureData(header, header10, buffer, offset, 0);
             }
@@ -125,7 +125,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(string filename)
         {
-            if (DDSHeader.GetInfo(filename, out DDSHeader header, out DDSHeaderDX10? header10, out int offset, out byte[] buffer))
+            if (DdsHeader.GetInfo(filename, out DdsHeader header, out DdsHeaderDX10? header10, out int offset, out byte[] buffer))
             {
                 return new TextureData(header, header10, buffer, offset, 0);
             }
@@ -144,7 +144,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(MemoryStream stream)
         {
-            if (DDSHeader.GetInfo(stream, out DDSHeader header, out DDSHeaderDX10? header10, out int offset, out byte[] buffer))
+            if (DdsHeader.GetInfo(stream, out DdsHeader header, out DdsHeaderDX10? header10, out int offset, out byte[] buffer))
             {
                 return new TextureData(header, header10, buffer, offset, 0);
             }
@@ -220,9 +220,9 @@ namespace Engine.Helpers
         /// <param name="bitData">Bit data</param>
         /// <param name="offset">Offset</param>
         /// <param name="maxsize">Maximum size</param>
-        private TextureData(DDSHeader header, DDSHeaderDX10? header10, byte[] bitData, int offset, int maxsize)
+        private TextureData(DdsHeader header, DdsHeaderDX10? header10, byte[] bitData, int offset, int maxsize)
         {
-            bool validFile = DDSHeader.ValidateTexture(
+            bool validFile = DdsHeader.ValidateTexture(
                 header, header10,
                 out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap);
             if (validFile)
@@ -334,7 +334,7 @@ namespace Engine.Helpers
         /// <param name="size">Returns the slice and mip size</param>
         /// <param name="stride">Returns the slice and mip stride</param>
         /// <returns>Returns true if the slice and mip were located</returns>
-        private bool GetDataOffset(
+        private void GetDataOffset(
             int slice, int mip,
             out int offset, out int size, out int stride)
         {
@@ -355,7 +355,7 @@ namespace Engine.Helpers
 
                 for (int i = 0; i < this.MipMaps; i++)
                 {
-                    DDSPixelFormat.GetSurfaceInfo(
+                    DdsPixelFormat.GetSurfaceInfo(
                         width,
                         height,
                         this.Format,
@@ -368,14 +368,14 @@ namespace Engine.Helpers
                         size = numBytes;
                         stride = rowBytes;
 
-                        return true;
+                        return;
                     }
 
                     offset += numBytes * depth;
 
                     if (offset > this.data.Length)
                     {
-                        throw new Exception("File too short");
+                        throw new EngineException("File too short");
                     }
 
                     width = width >> 1;
@@ -388,8 +388,6 @@ namespace Engine.Helpers
                     index++;
                 }
             }
-
-            return false;
         }
     }
 }

@@ -8,15 +8,15 @@
         /// <summary>
         /// Vertex buffer slot
         /// </summary>
-        public int Slot;
+        public int Slot { get; set; }
         /// <summary>
         /// Vertex buffer offset
         /// </summary>
-        public int Offset;
+        public int Offset { get; set; }
         /// <summary>
         /// Vertices count
         /// </summary>
-        public int Count;
+        public int Count { get; set; }
 
         /// <summary>
         /// Constructor

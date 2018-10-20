@@ -11,7 +11,7 @@ namespace Engine.Common
         /// <summary>
         /// Optimize geometry
         /// </summary>
-        public bool Optimize = true;
+        public bool Optimize { get; set; } = true;
         /// <summary>
         /// Instancing model
         /// </summary>
@@ -19,32 +19,32 @@ namespace Engine.Common
         /// <summary>
         /// Instances
         /// </summary>
-        public int Instances = 1;
+        public int Instances { get; set; } = 1;
         /// <summary>
         /// Load animation
         /// </summary>
-        public bool LoadAnimation = true;
+        public bool LoadAnimation { get; set; } = true;
         /// <summary>
         /// Load normal maps
         /// </summary>
-        public bool LoadNormalMaps = true;
+        public bool LoadNormalMaps { get; set; } = true;
         /// <summary>
         /// Use anisotropic filtering
         /// </summary>
-        public bool UseAnisotropicFiltering = false;
+        public bool UseAnisotropicFiltering { get; set; } = false;
         /// <summary>
         /// Dynamic buffers
         /// </summary>
-        public bool Dynamic = false;
+        public bool Dynamic { get; set; } = false;
         /// <summary>
         /// Content info
         /// </summary>
-        public ContentDescription Content = new ContentDescription();
+        public ContentDescription Content { get; set; } = new ContentDescription();
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public BaseModelDescription()
+        protected BaseModelDescription()
             : base()
         {
             this.Instanced = false;

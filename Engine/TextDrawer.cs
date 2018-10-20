@@ -234,7 +234,7 @@ namespace Engine
         {
             var mode = context.DrawerMode;
 
-            if (mode.HasFlag(DrawerModesEnum.TransparentOnly) && !string.IsNullOrWhiteSpace(this.text))
+            if (mode.HasFlag(DrawerModes.TransparentOnly) && !string.IsNullOrWhiteSpace(this.text))
             {
                 if (this.updateBuffers)
                 {

@@ -343,13 +343,13 @@ namespace Engine.Effects
 
             if (lights != null)
             {
-                var dirLights = lights.GetVisibleDirectionalLights();
-                for (int i = 0; i < Math.Min(dirLights.Length, BufferDirectionalLight.MAX); i++)
+                var dir = lights.GetVisibleDirectionalLights();
+                for (int i = 0; i < Math.Min(dir.Length, BufferDirectionalLight.MAX); i++)
                 {
-                    bDirLights[i] = new BufferDirectionalLight(dirLights[i]);
+                    bDirLights[i] = new BufferDirectionalLight(dir[i]);
                 }
 
-                lCount = Math.Min(dirLights.Length, BufferDirectionalLight.MAX);
+                lCount = Math.Min(dir.Length, BufferDirectionalLight.MAX);
 
                 this.Ambient = lights.Intensity;
 

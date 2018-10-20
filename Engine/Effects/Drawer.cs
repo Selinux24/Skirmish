@@ -25,7 +25,7 @@ namespace Engine.Effects
         /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect file</param>
         /// <param name="compile">Compile effect</param>
-        public Drawer(Graphics graphics, byte[] effect, bool compile)
+        protected Drawer(Graphics graphics, byte[] effect, bool compile)
         {
             this.Graphics = graphics;
 
@@ -62,11 +62,8 @@ namespace Engine.Effects
         {
             if (disposing)
             {
-                if (this.Effect != null)
-                {
-                    this.Effect.Dispose();
-                    this.Effect = null;
-                }
+                this.Effect?.Dispose();
+                this.Effect = null;
             }
         }
 

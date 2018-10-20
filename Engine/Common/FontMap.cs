@@ -24,9 +24,9 @@ namespace Engine.Common
         /// </summary>
         internal static void ClearCache()
         {
-            foreach (FontMap map in gCache)
+            foreach (FontMap fmap in gCache)
             {
-                map.Dispose();
+                fmap.Dispose();
             }
 
             gCache.Clear();
@@ -253,8 +253,6 @@ namespace Engine.Common
             out Vector2 size)
         {
             size = Vector2.Zero;
-
-            int delta = (int)Math.Sqrt(Size) + 10;
 
             Vector2 pos = Vector2.Zero;
 

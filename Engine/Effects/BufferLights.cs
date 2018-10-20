@@ -295,9 +295,9 @@ namespace Engine.Effects
             this.MapCount = light.ShadowMapCount;
 
             this.FromLightVP = Matrix.Identity;
-            if (light.FromLightVP != null)
+            if (light.FromLightVP?.Length > 0)
             {
-                if (light.FromLightVP.Length > 0) this.FromLightVP = Matrix.Transpose(light.FromLightVP[0]);
+                this.FromLightVP = Matrix.Transpose(light.FromLightVP[0]);
             }
         }
 

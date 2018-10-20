@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.Content
 {
-    public enum LightContentTypeEnum
+    public enum LightContentTypes
     {
         Unknown,
         Directional,

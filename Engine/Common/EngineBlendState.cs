@@ -14,14 +14,15 @@ namespace Engine.Common
         /// Internal blend state
         /// </summary>
         private BlendState1 blendState = null;
+
         /// <summary>
         /// Blend factor
         /// </summary>
-        public Color4? BlendFactor = Color.Transparent;
+        public Color4? BlendFactor { get; set; }
         /// <summary>
         /// Sample mask
         /// </summary>
-        public int SampleMask = -1;
+        public int SampleMask { get; set; }
 
         /// <summary>
         /// Creates a default blend state
@@ -263,11 +264,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.blendState != null)
-                {
-                    this.blendState.Dispose();
-                    this.blendState = null;
-                }
+                this.blendState?.Dispose();
+                this.blendState = null;
             }
         }
 

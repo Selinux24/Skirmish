@@ -132,7 +132,7 @@ namespace Engine
 
             this.drawContext = new DrawContext()
             {
-                DrawerMode = DrawerModesEnum.Forward | DrawerModesEnum.OpaqueOnly,
+                DrawerMode = DrawerModes.Forward | DrawerModes.OpaqueOnly,
                 ViewProjection = view * proj,
                 EyePosition = eyePos,
                 EyeTarget = target,

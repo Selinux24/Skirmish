@@ -7,7 +7,7 @@ namespace Engine.Effects
     /// <summary>
     /// Particles effect
     /// </summary>
-    public class EffectDefaultGPUParticles : Drawer
+    public class EffectDefaultGpuParticles : Drawer
     {
         /// <summary>
         /// Fire stream out technique
@@ -424,7 +424,7 @@ namespace Engine.Effects
         /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectDefaultGPUParticles(Graphics graphics, byte[] effect, bool compile)
+        public EffectDefaultGpuParticles(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
             this.ParticleStreamOut = this.Effect.GetTechniqueByName("ParticleStreamOut");

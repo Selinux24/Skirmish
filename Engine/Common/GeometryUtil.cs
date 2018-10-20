@@ -15,7 +15,7 @@ namespace Engine.Common
         /// <param name="bufferShape">Buffer shape</param>
         /// <param name="triangles">Triangle count</param>
         /// <returns>Returns the generated index list</returns>
-        public static uint[] GenerateIndices(IndexBufferShapeEnum bufferShape, int triangles)
+        public static uint[] GenerateIndices(IndexBufferShapes bufferShape, int triangles)
         {
             return GenerateIndices(LevelOfDetail.High, bufferShape, triangles);
         }
@@ -26,10 +26,10 @@ namespace Engine.Common
         /// <param name="bufferShape">Buffer shape</param>
         /// <param name="triangles">Triangle count</param>
         /// <returns>Returns the generated index list</returns>
-        public static uint[] GenerateIndices(LevelOfDetail lod, IndexBufferShapeEnum bufferShape, int triangles)
+        public static uint[] GenerateIndices(LevelOfDetail lod, IndexBufferShapes bufferShape, int triangles)
         {
             uint offset = (uint)lod;
-            uint fullSide = (uint)Math.Sqrt(triangles / 2);
+            uint fullSide = (uint)Math.Sqrt(triangles / 2f);
 
             int tris = triangles / (int)Math.Pow(offset, 2);
 
@@ -38,24 +38,24 @@ namespace Engine.Common
             uint sideLoss = side / 2;
 
             bool topSide =
-                bufferShape == IndexBufferShapeEnum.CornerTopLeft ||
-                bufferShape == IndexBufferShapeEnum.CornerTopRight ||
-                bufferShape == IndexBufferShapeEnum.SideTop;
+                bufferShape == IndexBufferShapes.CornerTopLeft ||
+                bufferShape == IndexBufferShapes.CornerTopRight ||
+                bufferShape == IndexBufferShapes.SideTop;
 
             bool bottomSide =
-                bufferShape == IndexBufferShapeEnum.CornerBottomLeft ||
-                bufferShape == IndexBufferShapeEnum.CornerBottomRight ||
-                bufferShape == IndexBufferShapeEnum.SideBottom;
+                bufferShape == IndexBufferShapes.CornerBottomLeft ||
+                bufferShape == IndexBufferShapes.CornerBottomRight ||
+                bufferShape == IndexBufferShapes.SideBottom;
 
             bool leftSide =
-                bufferShape == IndexBufferShapeEnum.CornerBottomLeft ||
-                bufferShape == IndexBufferShapeEnum.CornerTopLeft ||
-                bufferShape == IndexBufferShapeEnum.SideLeft;
+                bufferShape == IndexBufferShapes.CornerBottomLeft ||
+                bufferShape == IndexBufferShapes.CornerTopLeft ||
+                bufferShape == IndexBufferShapes.SideLeft;
 
             bool rightSide =
-                bufferShape == IndexBufferShapeEnum.CornerBottomRight ||
-                bufferShape == IndexBufferShapeEnum.CornerTopRight ||
-                bufferShape == IndexBufferShapeEnum.SideRight;
+                bufferShape == IndexBufferShapes.CornerBottomRight ||
+                bufferShape == IndexBufferShapes.CornerTopRight ||
+                bufferShape == IndexBufferShapes.SideRight;
 
             uint totalTriangles = (uint)tris;
             if (topSide) totalTriangles -= sideLoss;
@@ -490,10 +490,10 @@ namespace Engine.Common
             float width = renderWidth;
             float height = renderHeight;
 
-            float left = (float)((width / 2) * -1);
-            float right = left + (float)width;
-            float top = (float)(height / 2);
-            float bottom = top - (float)height;
+            float left = ((width / 2) * -1);
+            float right = left + width;
+            float top = (height / 2);
+            float bottom = top - height;
 
             vertices[0] = new Vector3(left, top, 0.0f);
             uvs[0] = new Vector2(0.0f, 0.0f);
@@ -618,7 +618,6 @@ namespace Engine.Common
                 Vector3 position;
                 Vector3 normal;
                 Vector3 tangent;
-                Vector3 binormal;
                 Vector2 texture;
 
                 // spherical to cartesian
@@ -634,8 +633,6 @@ namespace Engine.Common
                 tangent.Y = 0.0f;
                 tangent.Z = +radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta);
                 tangent.Normalize();
-
-                binormal = tangent;
 
                 texture.X = theta / MathUtil.TwoPi;
                 texture.Y = 1f;

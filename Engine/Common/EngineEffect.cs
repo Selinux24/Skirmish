@@ -46,11 +46,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.effect != null)
-                {
-                    this.effect.Dispose();
-                    this.effect = null;
-                }
+                this.effect?.Dispose();
+                this.effect = null;
             }
         }
 

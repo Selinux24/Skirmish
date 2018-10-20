@@ -14,7 +14,7 @@ namespace Engine.Common
         /// <summary>
         /// Drawer mode
         /// </summary>
-        public DrawerModesEnum DrawerMode { get; set; }
+        public DrawerModes DrawerMode { get; set; }
 
         /// <summary>
         /// Game time
@@ -60,7 +60,7 @@ namespace Engine.Common
         public DrawContext()
         {
             this.Name = string.Empty;
-            this.DrawerMode = DrawerModesEnum.Forward;
+            this.DrawerMode = DrawerModes.Forward;
         }
     }
 }

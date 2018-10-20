@@ -79,15 +79,15 @@ namespace Engine
         {
             var mode = context.DrawerMode;
             var draw =
-                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Description.AlphaEnabled);
+                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
+                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
 
             if (draw && this.indexBuffer.Count > 0)
             {
                 var effect = DrawerPool.EffectDefaultCubemap;
                 var technique = DrawerPool.EffectDefaultCubemap.ForwardCubemap;
 
-                if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
+                if (!mode.HasFlag(DrawerModes.ShadowMap))
                 {
                     Counters.InstancesPerFrame++;
                     Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;

@@ -972,20 +972,23 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Could not find the correct location.
-                if (tile != null && tile == target)
+                if (tile == target)
                 {
                     // Remove from freelist
                     if (prev == null)
                     {
-                        m_nextFree = tile.next;
+                        m_nextFree = tile?.next;
                     }
                     else
                     {
-                        prev.next = tile.next;
+                        prev.next = tile?.next;
                     }
 
                     // Restore salt.
-                    tile.salt = DecodePolyIdSalt(lastRef);
+                    if (tile != null)
+                    {
+                        tile.salt = DecodePolyIdSalt(lastRef);
+                    }
                 }
             }
 

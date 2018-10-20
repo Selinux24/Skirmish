@@ -5,7 +5,7 @@ namespace Engine.Animation
     /// <summary>
     /// Animation clip
     /// </summary>
-    public class AnimationClip : IEquatable<AnimationClip>
+    public sealed class AnimationClip : IEquatable<AnimationClip>
     {
         /// <summary>
         /// Clip name

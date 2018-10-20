@@ -9,7 +9,7 @@ namespace Engine.Common
     /// Particle data buffer
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct VertexCPUParticle : IVertexData
+    public struct VertexCpuParticle : IVertexData
     {
         /// <summary>
         /// Defined input colection
@@ -92,7 +92,7 @@ namespace Engine.Common
         /// </summary>
         public int GetStride()
         {
-            return Marshal.SizeOf(typeof(VertexCPUParticle));
+            return Marshal.SizeOf(typeof(VertexCpuParticle));
         }
         /// <summary>
         /// Get input elements
@@ -101,7 +101,7 @@ namespace Engine.Common
         /// <returns>Returns input elements</returns>
         public InputElement[] GetInput(int slot)
         {
-            return VertexCPUParticle.Input(slot);
+            return VertexCpuParticle.Input(slot);
         }
 
         /// <summary>

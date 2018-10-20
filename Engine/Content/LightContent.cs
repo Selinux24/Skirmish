@@ -11,11 +11,11 @@ namespace Engine.Content
         /// <summary>
         /// Light type
         /// </summary>
-        public LightContentTypeEnum LightType = LightContentTypeEnum.Unknown;
+        public LightContentTypes LightType { get; set; } = LightContentTypes.Unknown;
         /// <summary>
         /// Name
         /// </summary>
-        public string Name;
+        public string Name { get; set; }
         /// <summary>
         /// Initial light transform
         /// </summary>
@@ -49,27 +49,27 @@ namespace Engine.Content
         /// <summary>
         /// Light color
         /// </summary>
-        public Color4 Color;
+        public Color4 Color { get; set; }
         /// <summary>
         /// Constant attenuation
         /// </summary>
-        public float ConstantAttenuation;
+        public float ConstantAttenuation { get; set; }
         /// <summary>
         /// Linear attenuation
         /// </summary>
-        public float LinearAttenuation;
+        public float LinearAttenuation { get; set; }
         /// <summary>
         /// Quadratic attenuation
         /// </summary>
-        public float QuadraticAttenuation;
+        public float QuadraticAttenuation { get; set; }
         /// <summary>
         /// Falloff angle
         /// </summary>
-        public float FallOffAngle;
+        public float FallOffAngle { get; set; }
         /// <summary>
         /// Falloff exponent
         /// </summary>
-        public float FallOffExponent;
+        public float FallOffExponent { get; set; }
 
         /// <summary>
         /// Creates a new spot light from content

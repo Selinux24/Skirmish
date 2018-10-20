@@ -222,11 +222,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.rasterizerState != null)
-                {
-                    this.rasterizerState.Dispose();
-                    this.rasterizerState = null;
-                }
+                this.rasterizerState?.Dispose();
+                this.rasterizerState = null;
             }
         }
 

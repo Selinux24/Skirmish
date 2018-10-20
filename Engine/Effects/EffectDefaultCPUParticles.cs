@@ -7,7 +7,7 @@ namespace Engine.Effects
     /// <summary>
     /// Particles effect
     /// </summary>
-    public class EffectDefaultCPUParticles : Drawer
+    public class EffectDefaultCpuParticles : Drawer
     {
         /// <summary>
         /// Non rotation particles drawing technique
@@ -310,7 +310,7 @@ namespace Engine.Effects
         /// <param name="graphics">Graphics device</param>
         /// <param name="effect">Effect code</param>
         /// <param name="compile">Compile code</param>
-        public EffectDefaultCPUParticles(Graphics graphics, byte[] effect, bool compile)
+        public EffectDefaultCpuParticles(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
             this.NonRotationDraw = this.Effect.GetTechniqueByName("NonRotationParticle");

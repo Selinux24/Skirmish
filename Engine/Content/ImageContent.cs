@@ -11,10 +11,6 @@ namespace Engine.Content
         /// Path list
         /// </summary>
         private string[] paths = null;
-        /// <summary>
-        /// Stream list
-        /// </summary>
-        private MemoryStream[] streams = null;
 
         /// <summary>
         /// Image data in stream
@@ -23,27 +19,17 @@ namespace Engine.Content
         {
             get
             {
-                return this.streams != null && this.streams.Length == 1 ? this.streams[0] : null;
+                return this.Streams != null && this.Streams.Length == 1 ? this.Streams[0] : null;
             }
             set
             {
-                this.streams = new[] { value };
+                this.Streams = new[] { value };
             }
         }
         /// <summary>
         /// Image array streams
         /// </summary>
-        public MemoryStream[] Streams
-        {
-            get
-            {
-                return this.streams;
-            }
-            set
-            {
-                this.streams = value;
-            }
-        }
+        public MemoryStream[] Streams { get; set; } = null;
         /// <summary>
         /// Image path
         /// </summary>
@@ -81,7 +67,7 @@ namespace Engine.Content
             {
                 return
                     (this.paths != null && this.paths.Length > 1) ||
-                    (this.streams != null && this.streams.Length > 1);
+                    (this.Streams != null && this.Streams.Length > 1);
             }
         }
         /// <summary>
@@ -95,9 +81,9 @@ namespace Engine.Content
         {
             get
             {
-                if (this.paths != null || this.streams != null)
+                if (this.paths != null || this.Streams != null)
                 {
-                    return this.paths != null ? this.paths.Length : this.streams.Length;
+                    return this.paths != null ? this.paths.Length : this.Streams.Length;
                 }
                 else
                 {
@@ -115,7 +101,7 @@ namespace Engine.Content
         public static ImageContent Texture(string contentFolder, string texture)
         {
             var p = ContentManager.FindPaths(contentFolder, texture);
-            
+
             return new ImageContent()
             {
                 Paths = p,

@@ -12,11 +12,11 @@ namespace Engine.Content
     /// <summary>
     /// Loader for .obj files
     /// </summary>
-    public class LoaderOBJ : ILoader
+    public class LoaderObj : ILoader
     {
-        public static CultureInfo Locale = CultureInfo.InvariantCulture;
+        public static CultureInfo Locale { get; set; } = CultureInfo.InvariantCulture;
 
-        public LoaderOBJ()
+        public LoaderObj()
         {
 
         }

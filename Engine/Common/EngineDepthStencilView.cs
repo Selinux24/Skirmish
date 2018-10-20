@@ -46,11 +46,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.dsv != null)
-                {
-                    this.dsv.Dispose();
-                    this.dsv = null;
-                }
+                this.dsv?.Dispose();
+                this.dsv = null;
             }
         }
 

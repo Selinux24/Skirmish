@@ -14,6 +14,14 @@ namespace Engine.Common
         /// Static id counter
         /// </summary>
         private static int ID = 0;
+        /// <summary>
+        /// Gets the next Id
+        /// </summary>
+        /// <returns>Returns the next Id</returns>
+        private static int GetNextId()
+        {
+            return ++ID;
+        }
 
         /// <summary>
         /// Position list cache
@@ -27,19 +35,19 @@ namespace Engine.Common
         /// <summary>
         /// Mesh id
         /// </summary>
-        public int Id = -1;
+        public int Id { get; set; }
         /// <summary>
         /// Vertices cache
         /// </summary>
-        public IVertexData[] Vertices = null;
+        public IVertexData[] Vertices { get; set; } = null;
         /// <summary>
         /// Indexed model
         /// </summary>
-        public bool Indexed = false;
+        public bool Indexed { get; set; } = false;
         /// <summary>
         /// Indices cache
         /// </summary>
-        public uint[] Indices = null;
+        public uint[] Indices { get; set; } = null;
 
         /// <summary>
         /// Name
@@ -81,11 +89,11 @@ namespace Engine.Common
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
-        public BufferDescriptor VertexBuffer = null;
+        public BufferDescriptor VertexBuffer { get; set; } = null;
         /// <summary>
         /// Index buffer descriptor
         /// </summary>
-        public BufferDescriptor IndexBuffer = null;
+        public BufferDescriptor IndexBuffer { get; set; } = null;
 
         /// <summary>
         /// Constructor
@@ -101,7 +109,7 @@ namespace Engine.Common
         {
             var vFirst = vertices[0];
 
-            this.Id = ++ID;
+            this.Id = GetNextId();
             this.Name = name;
             this.Material = material;
             this.Topology = topology;
@@ -209,15 +217,12 @@ namespace Engine.Common
             {
                 var positionList = new List<Vector3>();
 
-                if (this.Vertices != null && this.Vertices.Length > 0)
+                if (this.Vertices?.Length > 0 && this.Vertices[0].HasChannel(VertexDataChannels.Position))
                 {
-                    if (this.Vertices[0].HasChannel(VertexDataChannels.Position))
+                    this.Vertices.ToList().ForEach(v =>
                     {
-                        this.Vertices.ToList().ForEach(v =>
-                        {
-                            positionList.Add(v.GetChannelValue<Vector3>(VertexDataChannels.Position));
-                        });
-                    }
+                        positionList.Add(v.GetChannelValue<Vector3>(VertexDataChannels.Position));
+                    });
                 }
 
                 this.positionCache = positionList.ToArray();

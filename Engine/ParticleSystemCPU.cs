@@ -22,11 +22,11 @@ namespace Engine
         /// <summary>
         /// Particle list
         /// </summary>
-        private readonly VertexCPUParticle[] particles;
+        private readonly VertexCpuParticle[] particles;
         /// <summary>
         /// Vertex buffer
         /// </summary>
-        private EngineBuffer<VertexCPUParticle> buffer;
+        private EngineBuffer<VertexCpuParticle> buffer;
         /// <summary>
         /// Current particle index to update data
         /// </summary>
@@ -110,11 +110,11 @@ namespace Engine
             this.Emitter.SetBoundingBox(ParticleEmitter.GenerateBBox(description.MaxDuration, this.Parameters.EndSize, this.Parameters.HorizontalVelocity, this.Parameters.VerticalVelocity));
             this.MaxConcurrentParticles = this.Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
 
-            this.particles = new VertexCPUParticle[this.MaxConcurrentParticles];
+            this.particles = new VertexCpuParticle[this.MaxConcurrentParticles];
 
-            this.buffer = new EngineBuffer<VertexCPUParticle>(game.Graphics, description.Name, this.particles, true);
-            buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetSignature(), VertexCPUParticle.Input(BufferSlot)));
-            buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetSignature(), VertexCPUParticle.Input(BufferSlot)));
+            this.buffer = new EngineBuffer<VertexCpuParticle>(game.Graphics, description.Name, this.particles, true);
+            buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
+            buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
 
             this.TimeToEnd = this.Emitter.Duration + this.Parameters.MaxDuration;
         }
@@ -173,9 +173,9 @@ namespace Engine
         {
             var mode = context.DrawerMode;
             var draw =
-                mode.HasFlag(DrawerModesEnum.ShadowMap) ||
-                (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Parameters.Transparent) ||
-                (mode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Parameters.Transparent);
+                mode.HasFlag(DrawerModes.ShadowMap) ||
+                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Parameters.Transparent) ||
+                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Parameters.Transparent);
 
             if (draw && this.ActiveParticles > 0)
             {
@@ -184,7 +184,7 @@ namespace Engine
                 var effect = DrawerPool.EffectDefaultCPUParticles;
                 var technique = rot ? effect.RotationDraw : effect.NonRotationDraw;
 
-                if (!mode.HasFlag(DrawerModesEnum.ShadowMap))
+                if (!mode.HasFlag(DrawerModes.ShadowMap))
                 {
                     Counters.InstancesPerFrame++;
                     Counters.PrimitivesPerFrame += this.ActiveParticles;

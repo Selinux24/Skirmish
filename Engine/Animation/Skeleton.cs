@@ -7,12 +7,12 @@ namespace Engine.Animation
     /// <summary>
     /// Skeleton class
     /// </summary>
-    public class Skeleton : IEquatable<Skeleton>
+    public sealed class Skeleton : IEquatable<Skeleton>
     {
         /// <summary>
         /// Joint names list
         /// </summary>
-        private List<string> jointNames = new List<string>();
+        private readonly List<string> jointNames = new List<string>();
 
         /// <summary>
         /// Root joint

@@ -172,11 +172,11 @@ namespace Engine.Common
                 }
                 else if (vertices[0].VertexType == VertexTypes.Particle)
                 {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexCPUParticle>(vertices), dynamic);
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexCpuParticle>(vertices), dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.GPUParticle)
                 {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexGPUParticle>(vertices), dynamic);
+                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexGpuParticle>(vertices), dynamic);
                 }
                 else if (vertices[0].VertexType == VertexTypes.Position)
                 {
@@ -312,7 +312,7 @@ namespace Engine.Common
         /// <summary>
         /// Game instance
         /// </summary>
-        private Game game = null;
+        private readonly Game game = null;
         /// <summary>
         /// Reserved slots
         /// </summary>
@@ -634,9 +634,7 @@ namespace Engine.Common
                     if (vKey.ReallocationNeeded)
                     {
                         var mb = this.VertexBuffers[i];
-
                         mb.Dispose();
-                        mb = null;
 
                         var buffer = CreateVertexBuffer(game.Graphics, vKey.Name, vKey.Data.ToArray(), vKey.Dynamic);
                         var binding = new VertexBufferBinding(buffer, vKey.Data[0].GetStride(), 0);
@@ -660,9 +658,7 @@ namespace Engine.Common
                     if (iKey.ReallocationNeeded)
                     {
                         var ib = this.IndexBuffers[i];
-
                         ib.Dispose();
-                        ib = null;
 
                         var buffer = CreateIndexBuffer(game.Graphics, iKey.Name, iKey.Data.ToArray(), iKey.Dynamic);
 
@@ -677,9 +673,7 @@ namespace Engine.Common
                     if (instances > 0)
                     {
                         var instancingBuffer = this.VertexBuffers[this.VertexBuffers.Length - 1];
-
                         instancingBuffer.Dispose();
-                        instancingBuffer = null;
 
                         var data = new VertexInstancingData[instances];
                         var buffer = CreateInstancingBuffer(game.Graphics, data);

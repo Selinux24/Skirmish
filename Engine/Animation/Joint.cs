@@ -6,7 +6,7 @@ namespace Engine.Animation
     /// <summary>
     /// Skeleton's Joint
     /// </summary>
-    public class Joint : IEquatable<Joint>
+    public sealed class Joint : IEquatable<Joint>
     {
         /// <summary>
         /// Name

@@ -46,11 +46,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.srv != null)
-                {
-                    this.srv.Dispose();
-                    this.srv = null;
-                }
+                this.srv?.Dispose();
+                this.srv = null;
             }
         }
 

@@ -8,12 +8,12 @@ namespace Engine.Helpers.DDS
     /// DDS Pixel Format
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    struct DDSPixelFormat
+    struct DdsPixelFormat
     {
         /// <summary>
         /// Size of structure
         /// </summary>
-        public readonly static int StructSize = Marshal.SizeOf(new DDSPixelFormat());
+        public readonly static int StructSize = Marshal.SizeOf(new DdsPixelFormat());
 
         /// <summary>
         /// Make four CC
@@ -254,7 +254,7 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Values which indicate what type of data is in the surface.
         /// </summary>
-        public DDPFFlags Flags;
+        public DDSPixelFormats Flags;
         /// <summary>
         /// Four-character codes for specifying compressed or custom formats. Possible values include: DXT1, DXT2, DXT3, DXT4, or DXT5. A FourCC of DX10 indicates the prescense of the DDS_HEADER_DXT10 extended header, and the dxgiFormat member of that structure indicates the true format. When using a four-character code, dwFlags must include DDPF_FOURCC.
         /// </summary>
@@ -286,7 +286,7 @@ namespace Engine.Helpers.DDS
         public bool IsDX10()
         {
             return
-                (this.Flags.HasFlag(DDPFFlags.DDPF_FOURCC)) &&
+                (this.Flags.HasFlag(DDSPixelFormats.DDPF_FOURCC)) &&
                 (MakeFourCC('D', 'X', '1', '0') == this.FourCC);
         }
         /// <summary>
@@ -295,7 +295,7 @@ namespace Engine.Helpers.DDS
         /// <returns>Returns the equivalent DXGI format</returns>
         public Format GetDXGIFormat()
         {
-            if (this.Flags.HasFlag(DDPFFlags.DDPF_RGB))
+            if (this.Flags.HasFlag(DDSPixelFormats.DDPF_RGB))
             {
                 // Note that sRGB formats are written using the "DX10" extended header
                 switch (this.RGBBitCount)
@@ -370,17 +370,13 @@ namespace Engine.Helpers.DDS
                         break;
                 }
             }
-            else if (this.Flags.HasFlag(DDPFFlags.DDPF_LUMINANCE))
+            else if (this.Flags.HasFlag(DDSPixelFormats.DDPF_LUMINANCE))
             {
-                if (8 == this.RGBBitCount)
+                if (8 == this.RGBBitCount && this.IsBitMask(0x000000ff, 0x00000000, 0x00000000, 0x00000000))
                 {
-                    if (this.IsBitMask(0x000000ff, 0x00000000, 0x00000000, 0x00000000))
-                    {
-                        return Format.R8_UNorm; // D3DX10/11 writes this out as DX10 extension
-                    }
-
-                    // No DXGI format maps to ISBITMASK(0x0f, 0x00, 0x00, 0xf0) aka D3DFMT_A4L4
+                    return Format.R8_UNorm; // D3DX10/11 writes this out as DX10 extension
                 }
+                // No DXGI format maps to ISBITMASK(0x0f, 0x00, 0x00, 0xf0) aka D3DFMT_A4L4
 
                 if (16 == this.RGBBitCount)
                 {
@@ -394,14 +390,14 @@ namespace Engine.Helpers.DDS
                     }
                 }
             }
-            else if (this.Flags.HasFlag(DDPFFlags.DDPF_ALPHA))
+            else if (this.Flags.HasFlag(DDSPixelFormats.DDPF_ALPHA))
             {
                 if (8 == this.RGBBitCount)
                 {
                     return Format.A8_UNorm;
                 }
             }
-            else if (this.Flags.HasFlag(DDPFFlags.DDPF_FOURCC))
+            else if (this.Flags.HasFlag(DDSPixelFormats.DDPF_FOURCC))
             {
                 if (MakeFourCC('D', 'X', 'T', '1') == this.FourCC)
                 {

@@ -112,7 +112,7 @@ namespace Engine.Content
                     {
                         info = new LightContent()
                         {
-                            LightType = LightContentTypeEnum.Directional,
+                            LightType = LightContentTypes.Directional,
                             Color = dirTechnique.Directional.Color.ToColor4(),
                         };
                     }
@@ -122,7 +122,7 @@ namespace Engine.Content
                     {
                         info = new LightContent()
                         {
-                            LightType = LightContentTypeEnum.Point,
+                            LightType = LightContentTypes.Point,
                             Color = pointTechnique.Point.Color.ToColor4(),
                             ConstantAttenuation = pointTechnique.Point.ConstantAttenuation.Value,
                             LinearAttenuation = pointTechnique.Point.LinearAttenuation.Value,
@@ -135,7 +135,7 @@ namespace Engine.Content
                     {
                         info = new LightContent()
                         {
-                            LightType = LightContentTypeEnum.Spot,
+                            LightType = LightContentTypes.Spot,
                             Color = spotTechnique.Spot.Color.ToColor4(),
                             ConstantAttenuation = spotTechnique.Spot.ConstantAttenuation.Value,
                             LinearAttenuation = spotTechnique.Spot.LinearAttenuation.Value,

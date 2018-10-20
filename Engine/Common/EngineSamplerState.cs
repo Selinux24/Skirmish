@@ -89,11 +89,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.samplerState != null)
-                {
-                    this.samplerState.Dispose();
-                    this.samplerState = null;
-                }
+                this.samplerState?.Dispose();
+                this.samplerState = null;
             }
         }
 

@@ -16,7 +16,7 @@ namespace Engine.Animation
         /// <summary>
         /// Time
         /// </summary>
-        public float Time;
+        public float Time { get; set; }
         /// <summary>
         /// Frame transformation
         /// </summary>
@@ -58,7 +58,7 @@ namespace Engine.Animation
         /// <summary>
         /// Interpolation type
         /// </summary>
-        public string Interpolation;
+        public string Interpolation { get; set; }
 
         /// <summary>
         /// Gets text representation

@@ -266,7 +266,7 @@ namespace Engine
         {
             var mode = context.DrawerMode;
 
-            if (mode.HasFlag(DrawerModesEnum.OpaqueOnly))
+            if (mode.HasFlag(DrawerModes.OpaqueOnly))
             {
                 var keyLight = context.Lights.KeyLight;
                 if (keyLight != null && this.indexBuffer.Count > 0)

@@ -37,7 +37,7 @@ namespace Engine.Collections
 
                 if (newCap < this.Count)
                 {
-                    throw new ArgumentOutOfRangeException("newCapacity", "The new capacity is not enough for the elements currently in the queue");
+                    throw new ArgumentOutOfRangeException("value", "The new capacity is not enough for the elements currently in the queue");
                 }
 
                 this.capacity = newCap;
@@ -173,7 +173,7 @@ namespace Engine.Collections
                 }
             }
 
-            throw new ApplicationException("The specified item is not in the queue.");
+            throw new InvalidOperationException("The specified item is not in the queue.");
         }
         /// <summary>
         /// Gets the highest priority queue without removing it

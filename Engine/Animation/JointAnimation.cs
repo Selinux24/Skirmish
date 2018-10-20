@@ -62,9 +62,9 @@ namespace Engine.Animation
             this.Interpolate(time, out Vector3 translation, out Quaternion rotation, out Vector3 scale);
 
             //Create the combined transformation matrix
-            return 
-                Matrix.Scaling(scale) * 
-                Matrix.RotationQuaternion(rotation) * 
+            return
+                Matrix.Scaling(scale) *
+                Matrix.RotationQuaternion(rotation) *
                 Matrix.Translation(translation);
         }
         /// <summary>
@@ -119,7 +119,7 @@ namespace Engine.Animation
                 if (diffTime > 0.0)
                 {
                     //Interpolate
-                    var factor = (float)((deltaTime - currKey.Time) / diffTime);
+                    var factor = (deltaTime - currKey.Time) / diffTime;
 
                     translation = currKey.Translation + (nextKey.Translation - currKey.Translation) * factor;
                     rotation = Quaternion.Slerp(currKey.Rotation, nextKey.Rotation, factor);

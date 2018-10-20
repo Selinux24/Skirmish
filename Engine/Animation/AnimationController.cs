@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
 
 namespace Engine.Animation
 {
@@ -21,7 +20,7 @@ namespace Engine.Animation
         /// <summary>
         /// Time delta to aply to controller time
         /// </summary>
-        public float TimeDelta = 1f;
+        public float TimeDelta { get; set; } = 1f;
         /// <summary>
         /// Gets wheter the controller is currently playing an animation
         /// </summary>
@@ -121,7 +120,7 @@ namespace Engine.Animation
         /// <param name="paths">Animation path list</param>
         public void AddPath(AnimationPlan paths)
         {
-            this.AppendPaths(AppendFlags.None, paths);
+            this.AppendPaths(AppendFlagTypes.None, paths);
         }
         /// <summary>
         /// Sets the specified past as current path list
@@ -129,7 +128,7 @@ namespace Engine.Animation
         /// <param name="paths">Animation path list</param>
         public void SetPath(AnimationPlan paths)
         {
-            this.AppendPaths(AppendFlags.ClearCurrent, paths);
+            this.AppendPaths(AppendFlagTypes.ClearCurrent, paths);
         }
         /// <summary>
         /// Adds clips to the controller clips list and ends the current animation
@@ -137,14 +136,14 @@ namespace Engine.Animation
         /// <param name="paths">Animation path list</param>
         public void ContinuePath(AnimationPlan paths)
         {
-            this.AppendPaths(AppendFlags.EndsCurrent, paths);
+            this.AppendPaths(AppendFlagTypes.EndsCurrent, paths);
         }
         /// <summary>
         /// Append animation paths to the controller
         /// </summary>
         /// <param name="flags">Append path flags</param>
         /// <param name="paths">Paths to append</param>
-        private void AppendPaths(AppendFlags flags, AnimationPlan paths)
+        private void AppendPaths(AppendFlagTypes flags, AnimationPlan paths)
         {
             var clonedPaths = new AnimationPath[paths.Count];
 
@@ -158,7 +157,7 @@ namespace Engine.Animation
                 AnimationPath last = null;
                 AnimationPath next = null;
 
-                if (flags == AppendFlags.ClearCurrent)
+                if (flags == AppendFlagTypes.ClearCurrent)
                 {
                     last = this.animationPaths[this.animationPaths.Count - 1];
                     next = clonedPaths[0];
@@ -166,7 +165,7 @@ namespace Engine.Animation
                     //Clear all paths
                     this.animationPaths.Clear();
                 }
-                else if (flags == AppendFlags.EndsCurrent)
+                else if (flags == AppendFlagTypes.EndsCurrent)
                 {
                     last = this.animationPaths[this.CurrentIndex];
                     next = clonedPaths[0];
@@ -275,7 +274,7 @@ namespace Engine.Animation
                 }
             }
 
-            return null;
+            return new Matrix[] { };
         }
 
         /// <summary>
@@ -346,7 +345,7 @@ namespace Engine.Animation
         /// <summary>
         /// Animation paths append flags
         /// </summary>
-        enum AppendFlags
+        enum AppendFlagTypes
         {
             /// <summary>
             /// None

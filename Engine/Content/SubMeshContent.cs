@@ -14,7 +14,15 @@ namespace Engine.Content
         /// <summary>
         /// Global id counter
         /// </summary>
-        private static int ID = 1;
+        private static int ID = 0;
+        /// <summary>
+        /// Gets the next instance Id
+        /// </summary>
+        /// <returns>Returns the next instance Id</returns>
+        private static int GetNextId()
+        {
+            return ++ID;
+        }
 
         /// <summary>
         /// Vertices
@@ -134,11 +142,11 @@ namespace Engine.Content
                 string material = meshArray[0].Material;
                 Topology topology = meshArray[0].Topology;
                 VertexTypes vertexType = meshArray[0].VertexType;
-                bool textured = meshArray[0].Textured;
+                bool isTextured = meshArray[0].Textured;
                 bool transparent = meshArray[0].Transparent;
 
-                List<VertexData> vertices = new List<VertexData>();
-                List<uint> indices = new List<uint>();
+                List<VertexData> verts = new List<VertexData>();
+                List<uint> idx = new List<uint>();
 
                 uint indexOffset = 0;
 
@@ -155,7 +163,7 @@ namespace Engine.Content
                     {
                         foreach (VertexData v in mesh.vertices)
                         {
-                            vertices.Add(v);
+                            verts.Add(v);
                         }
                     }
 
@@ -163,11 +171,11 @@ namespace Engine.Content
                     {
                         foreach (uint i in mesh.indices)
                         {
-                            indices.Add(indexOffset + i);
+                            idx.Add(indexOffset + i);
                         }
                     }
 
-                    indexOffset = (uint)vertices.Count;
+                    indexOffset = (uint)verts.Count;
                 }
 
                 optimizedMesh = new SubMeshContent()
@@ -176,9 +184,9 @@ namespace Engine.Content
                     Topology = topology,
                     VertexType = vertexType,
 
-                    indices = indices,
-                    vertices = vertices,
-                    textured = textured,
+                    indices = idx,
+                    vertices = verts,
+                    textured = isTextured,
                     Transparent = transparent,
                 };
             }
@@ -191,7 +199,7 @@ namespace Engine.Content
         /// </summary>
         public SubMeshContent()
         {
-            this.Id = ID++;
+            this.Id = GetNextId();
         }
 
         /// <summary>

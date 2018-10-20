@@ -11,7 +11,7 @@ namespace Engine.Helpers.DDS
     /// DDS Header
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    struct DDSHeader
+    struct DdsHeader
     {
         /// <summary>
         /// DDS_MAGIC
@@ -21,7 +21,7 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Size of DDS Header
         /// </summary>
-        public readonly static int StructSize = Marshal.SizeOf(new DDSHeader());
+        public readonly static int StructSize = Marshal.SizeOf(new DdsHeader());
 
         /// <summary>
         /// Gets info from byte data
@@ -31,30 +31,30 @@ namespace Engine.Helpers.DDS
         /// <param name="header10">Resulting Header DX10</param>
         /// <param name="offset">Resulting Offset</param>
         /// <returns>Returns true if the byte data contains a DDS Header</returns>
-        public static bool GetInfo(byte[] data, out DDSHeader header, out DDSHeaderDX10? header10, out int offset)
+        public static bool GetInfo(byte[] data, out DdsHeader header, out DdsHeaderDX10? header10, out int offset)
         {
             // Validate DDS file in memory
-            header = new DDSHeader();
+            header = new DdsHeader();
             header10 = null;
             offset = 0;
 
-            if (data.Length < (sizeof(uint) + DDSHeader.StructSize))
+            if (data.Length < (sizeof(uint) + DdsHeader.StructSize))
             {
                 return false;
             }
 
             // First is magic number
             int dwMagicNumber = BitConverter.ToInt32(data, 0);
-            if (dwMagicNumber != DDSHeader.DDSMagic)
+            if (dwMagicNumber != DdsHeader.DDSMagic)
             {
                 return false;
             }
 
-            header = data.ToStructure<DDSHeader>(4, DDSHeader.StructSize);
+            header = data.ToStructure<DdsHeader>(4, DdsHeader.StructSize);
 
             // Verify header to validate DDS file
-            if (header.Size != DDSHeader.StructSize ||
-                header.PixelFormat.Size != DDSPixelFormat.StructSize)
+            if (header.Size != DdsHeader.StructSize ||
+                header.PixelFormat.Size != DdsPixelFormat.StructSize)
             {
                 return false;
             }
@@ -62,7 +62,7 @@ namespace Engine.Helpers.DDS
             // Check for DX10 extension
             if (header.PixelFormat.IsDX10())
             {
-                var h10Offset = 4 + DDSHeader.StructSize + DDSHeaderDX10.StructSize;
+                var h10Offset = 4 + DdsHeader.StructSize + DdsHeaderDX10.StructSize;
 
                 // Must be long enough for both headers and magic value
                 if (data.Length < h10Offset)
@@ -70,13 +70,13 @@ namespace Engine.Helpers.DDS
                     return false;
                 }
 
-                header10 = data.ToStructure<DDSHeaderDX10>(4, DDSHeaderDX10.StructSize);
+                header10 = data.ToStructure<DdsHeaderDX10>(4, DdsHeaderDX10.StructSize);
 
                 offset = h10Offset;
             }
             else
             {
-                offset = 4 + DDSHeader.StructSize;
+                offset = 4 + DdsHeader.StructSize;
             }
 
             return true;
@@ -90,7 +90,7 @@ namespace Engine.Helpers.DDS
         /// <param name="offset">Resulting Offset</param>
         /// <param name="buffer">Readed byte buffer</param>
         /// <returns>Returns true if the file contains a DDS Header</returns>
-        public static bool GetInfo(string filename, out DDSHeader header, out DDSHeaderDX10? header10, out int offset, out byte[] buffer)
+        public static bool GetInfo(string filename, out DdsHeader header, out DdsHeaderDX10? header10, out int offset, out byte[] buffer)
         {
             buffer = File.ReadAllBytes(filename);
             return GetInfo(buffer, out header, out header10, out offset);
@@ -104,7 +104,7 @@ namespace Engine.Helpers.DDS
         /// <param name="offset">Resulting Offset</param>
         /// <param name="buffer">Readed byte buffer</param>
         /// <returns>Returns true if the stream contains a DDS Header</returns>
-        public static bool GetInfo(MemoryStream stream, out DDSHeader header, out DDSHeaderDX10? header10, out int offset, out byte[] buffer)
+        public static bool GetInfo(MemoryStream stream, out DdsHeader header, out DdsHeaderDX10? header10, out int offset, out byte[] buffer)
         {
             buffer = stream.GetBuffer();
             return GetInfo(buffer, out header, out header10, out offset);
@@ -120,7 +120,7 @@ namespace Engine.Helpers.DDS
         /// <param name="arraySize">Returns the texture array size</param>
         /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
         /// <returns>Returns true if the texture is valid</returns>
-        public static bool ValidateTexture(DDSHeader header, DDSHeaderDX10? header10, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
+        public static bool ValidateTexture(DdsHeader header, DdsHeaderDX10? header10, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
         {
             if (header10.HasValue)
             {
@@ -141,7 +141,7 @@ namespace Engine.Helpers.DDS
         /// <param name="arraySize">Returns the texture array size</param>
         /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
         /// <returns>Returns true if the texture is valid</returns>
-        private static bool ValidateTexture(DDSHeader header, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
+        private static bool ValidateTexture(DdsHeader header, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
         {
             depth = 0;
             format = Format.Unknown;
@@ -155,16 +155,16 @@ namespace Engine.Helpers.DDS
                 return false;
             }
 
-            if (header.Flags.HasFlag(DDSFlagsEnum.Depth))
+            if (header.Flags.HasFlag(DDSFlagTypes.Depth))
             {
                 resDim = ResourceDimension.Texture3D;
             }
             else
             {
-                if (header.Caps2.HasFlag(DDSCaps2Enum.Cubemap))
+                if (header.Caps2.HasFlag(DDSCaps2.Cubemap))
                 {
                     // We require all six faces to be defined
-                    if ((header.Caps2 & DDSCaps2Enum.AllFaces) != DDSCaps2Enum.AllFaces)
+                    if ((header.Caps2 & DDSCaps2.AllFaces) != DDSCaps2.AllFaces)
                     {
                         return false;
                     }
@@ -190,7 +190,7 @@ namespace Engine.Helpers.DDS
         /// <param name="arraySize">Returns the texture array size</param>
         /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
         /// <returns>Returns true if the texture is valid</returns>
-        private static bool ValidateTexture(DDSHeaderDX10 header, DDSFlagsEnum flags, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
+        private static bool ValidateTexture(DdsHeaderDX10 header, DDSFlagTypes flags, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
         {
             depth = 0;
             format = Format.Unknown;
@@ -204,12 +204,12 @@ namespace Engine.Helpers.DDS
                 return false;
             }
 
-            if (header.MiscFlag2 != DDSFlagsDX10Enum.AlphaModeUnknown)
+            if (header.MiscFlag2 != DDSFlagsDX10.AlphaModeUnknown)
             {
                 return false;
             }
 
-            if (DDSPixelFormat.BitsPerPixel(header.DXGIFormat) == 0)
+            if (DdsPixelFormat.BitsPerPixel(header.DXGIFormat) == 0)
             {
                 return false;
             }
@@ -232,7 +232,7 @@ namespace Engine.Helpers.DDS
                     break;
 
                 case ResourceDimension.Texture3D:
-                    if (!flags.HasFlag(DDSFlagsEnum.Depth))
+                    if (!flags.HasFlag(DDSFlagTypes.Depth))
                     {
                         return false;
                     }
@@ -259,7 +259,7 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Flags to indicate which members contain valid data.
         /// </summary>
-        public DDSFlagsEnum Flags;
+        public DDSFlagTypes Flags;
         /// <summary>
         /// Surface height (in pixels).
         /// </summary>
@@ -288,15 +288,15 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// The pixel format
         /// </summary>
-        public DDSPixelFormat PixelFormat;
+        public DdsPixelFormat PixelFormat;
         /// <summary>
         /// Specifies the complexity of the surfaces stored.
         /// </summary>
-        public DDSCapsEnum Caps;
+        public DDSCaps Caps;
         /// <summary>
         /// Additional detail about the surfaces stored.
         /// </summary>
-        public DDSCaps2Enum Caps2;
+        public DDSCaps2 Caps2;
         /// <summary>
         /// Unused.
         /// </summary>

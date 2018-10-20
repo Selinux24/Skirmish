@@ -240,7 +240,7 @@ namespace Engine
 
             if (opaques.Count > 0)
             {
-                context.DrawerMode = mode | DrawerModesEnum.OpaqueOnly;
+                context.DrawerMode = mode | DrawerModes.OpaqueOnly;
 
                 stopwatch.Restart();
                 opaques.Sort((c1, c2) =>
@@ -319,7 +319,7 @@ namespace Engine
 
             if (transparents.Count > 0)
             {
-                context.DrawerMode = mode | DrawerModesEnum.TransparentOnly;
+                context.DrawerMode = mode | DrawerModes.TransparentOnly;
 
                 stopwatch.Restart();
                 transparents.Sort((c1, c2) =>

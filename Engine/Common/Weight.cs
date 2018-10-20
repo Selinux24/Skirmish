@@ -9,15 +9,15 @@ namespace Engine.Common
         /// <summary>
         /// Vertex index of this weight
         /// </summary>
-        public int VertexIndex;
+        public int VertexIndex { get; set; }
         /// <summary>
         /// Joint name
         /// </summary>
-        public string Joint;
+        public string Joint { get; set; }
         /// <summary>
         /// Value
         /// </summary>
-        public float WeightValue;
+        public float WeightValue { get; set; }
 
         /// <summary>
         /// Gets text representation of this weight

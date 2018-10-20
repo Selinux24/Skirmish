@@ -141,7 +141,7 @@ namespace Engine
 
             this.TimeToEnd = this.Emitter.Duration + this.Parameters.MaxDuration;
 
-            var data = Helper.CreateArray(1, new VertexGPUParticle()
+            var data = Helper.CreateArray(1, new VertexGpuParticle()
             {
                 Position = this.Emitter.Position,
                 Velocity = this.Emitter.Velocity,
@@ -156,19 +156,19 @@ namespace Engine
             int size = (int)(this.MaxConcurrentParticles * (this.Emitter.Duration == 0 ? 60 : this.Emitter.Duration));
             size = Math.Min(size, 5000);
 
-            this.emittersBuffer = game.Graphics.CreateBuffer<VertexGPUParticle>(description.Name, data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
-            this.drawingBuffer = game.Graphics.CreateBuffer<VertexGPUParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            this.streamOutBuffer = game.Graphics.CreateBuffer<VertexGPUParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            this.inputStride = default(VertexGPUParticle).GetStride();
+            this.emittersBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
+            this.drawingBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
+            this.streamOutBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
+            this.inputStride = default(VertexGpuParticle).GetStride();
 
             this.emitterBinding = new[] { new VertexBufferBinding(this.emittersBuffer, this.inputStride, 0) };
             this.drawingBinding = new[] { new VertexBufferBinding(this.drawingBuffer, this.inputStride, 0) };
             this.streamOutBinding = new[] { new StreamOutputBufferBinding(this.streamOutBuffer, 0) };
 
             var effect = DrawerPool.EffectDefaultGPUParticles;
-            this.streamOutInputLayout = game.Graphics.CreateInputLayout(effect.ParticleStreamOut.GetSignature(), VertexGPUParticle.Input(BufferSlot));
-            this.rotatingInputLayout = game.Graphics.CreateInputLayout(effect.RotationDraw.GetSignature(), VertexGPUParticle.Input(BufferSlot));
-            this.nonRotatingInputLayout = game.Graphics.CreateInputLayout(effect.NonRotationDraw.GetSignature(), VertexGPUParticle.Input(BufferSlot));
+            this.streamOutInputLayout = game.Graphics.CreateInputLayout(effect.ParticleStreamOut.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            this.rotatingInputLayout = game.Graphics.CreateInputLayout(effect.RotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            this.nonRotatingInputLayout = game.Graphics.CreateInputLayout(effect.NonRotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
         }
         /// <summary>
         /// Destructor
@@ -245,8 +245,8 @@ namespace Engine
         {
             var drawerMode = context.DrawerMode;
 
-            if ((drawerMode.HasFlag(DrawerModesEnum.OpaqueOnly) && !this.Parameters.Transparent) ||
-                (drawerMode.HasFlag(DrawerModesEnum.TransparentOnly) && this.Parameters.Transparent))
+            if ((drawerMode.HasFlag(DrawerModes.OpaqueOnly) && !this.Parameters.Transparent) ||
+                (drawerMode.HasFlag(DrawerModes.TransparentOnly) && this.Parameters.Transparent))
             {
                 var effect = DrawerPool.EffectDefaultGPUParticles;
 
@@ -288,7 +288,7 @@ namespace Engine
         /// Stream output
         /// </summary>
         /// <param name="effect">Effect for stream out</param>
-        private void StreamOut(EffectDefaultGPUParticles effect)
+        private void StreamOut(EffectDefaultGpuParticles effect)
         {
             var graphics = this.Game.Graphics;
 
@@ -336,14 +336,14 @@ namespace Engine
         /// </summary>
         /// <param name="effect">Effect for drawing</param>
         /// <param name="drawerMode">Drawe mode</param>
-        private void Draw(EffectDefaultGPUParticles effect, DrawerModesEnum drawerMode)
+        private void Draw(EffectDefaultGpuParticles effect, DrawerModes drawerMode)
         {
             var rot = this.Parameters.RotateSpeed != Vector2.Zero;
 
             var techniqueForDrawing = rot ? effect.RotationDraw : effect.NonRotationDraw;
             if (techniqueForDrawing != null)
             {
-                if (!drawerMode.HasFlag(DrawerModesEnum.ShadowMap))
+                if (!drawerMode.HasFlag(DrawerModes.ShadowMap))
                 {
                     Counters.InstancesPerFrame++;
                 }

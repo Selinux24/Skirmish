@@ -511,8 +511,7 @@ namespace Engine.Effects
             Matrix world,
             DrawContext context)
         {
-            this.World = world;
-            this.WorldViewProjection = world * context.ViewProjection;
+            this.UpdatePerFrameBasic(world, context);
         }
         /// <summary>
         /// Update per model object data

@@ -29,7 +29,7 @@ namespace Engine.Content
             }
             else
             {
-                return string.Format("No animation;");
+                return "No animation;";
             }
         }
     }

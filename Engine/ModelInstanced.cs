@@ -258,11 +258,11 @@ namespace Engine
 
                 IGeometryDrawer effect = null;
 
-                if (mode.HasFlag(DrawerModesEnum.Forward))
+                if (mode.HasFlag(DrawerModes.Forward))
                 {
                     effect = DrawerPool.EffectDefaultBasic;
                 }
-                else if (mode.HasFlag(DrawerModesEnum.Deferred))
+                else if (mode.HasFlag(DrawerModes.Deferred))
                 {
                     effect = DrawerPool.EffectDeferredBasic;
                 }
@@ -311,11 +311,11 @@ namespace Engine
                                             var mesh = dictionary[material];
 
                                             bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
-                                            if (mode.HasFlag(DrawerModesEnum.OpaqueOnly) && transparent)
+                                            if (mode.HasFlag(DrawerModes.OpaqueOnly) && transparent)
                                             {
                                                 continue;
                                             }
-                                            if (mode.HasFlag(DrawerModesEnum.TransparentOnly) && !transparent)
+                                            if (mode.HasFlag(DrawerModes.TransparentOnly) && !transparent)
                                             {
                                                 continue;
                                             }

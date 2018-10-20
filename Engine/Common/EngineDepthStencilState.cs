@@ -13,10 +13,11 @@ namespace Engine.Common
         /// Internal depth stencil state
         /// </summary>
         private DepthStencilState state = null;
+
         /// <summary>
         /// Stencil reference
         /// </summary>
-        public int StencilRef = 0;
+        public int StencilRef { get; set; } = 0;
 
         /// <summary>
         /// Creates a Z-buffer enabled for write depth-stencil state
@@ -286,11 +287,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.state != null)
-                {
-                    this.state.Dispose();
-                    this.state = null;
-                }
+                this.state?.Dispose();
+                this.state = null;
             }
         }
 

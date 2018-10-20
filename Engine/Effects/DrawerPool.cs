@@ -54,11 +54,11 @@ namespace Engine.Effects
         /// <summary>
         /// CPU Particles drawing effect
         /// </summary>
-        public static EffectDefaultCPUParticles EffectDefaultCPUParticles { get; private set; }
+        public static EffectDefaultCpuParticles EffectDefaultCPUParticles { get; private set; }
         /// <summary>
         /// GPU Particles drawing effect
         /// </summary>
-        public static EffectDefaultGPUParticles EffectDefaultGPUParticles { get; private set; }
+        public static EffectDefaultGpuParticles EffectDefaultGPUParticles { get; private set; }
         /// <summary>
         /// Water drawing effect
         /// </summary>
@@ -124,8 +124,8 @@ namespace Engine.Effects
             EffectDefaultBasic = CreateEffect<EffectDefaultBasic>(graphics, Resources.ShaderDefaultBasicFxo, Resources.ShaderDefaultBasicFx);
             EffectDefaultTerrain = CreateEffect<EffectDefaultTerrain>(graphics, Resources.ShaderDefaultTerrainFxo, Resources.ShaderDefaultTerrainFx);
             EffectDefaultSkyScattering = CreateEffect<EffectDefaultSkyScattering>(graphics, Resources.ShaderDefaultSkyScatteringFxo, Resources.ShaderDefaultSkyScatteringFx);
-            EffectDefaultCPUParticles = CreateEffect<EffectDefaultCPUParticles>(graphics, Resources.ShaderDefaultCPUParticlesFxo, Resources.ShaderDefaultCPUParticlesFx);
-            EffectDefaultGPUParticles = CreateEffect<EffectDefaultGPUParticles>(graphics, Resources.ShaderDefaultGPUParticlesFxo, Resources.ShaderDefaultGPUParticlesFx);
+            EffectDefaultCPUParticles = CreateEffect<EffectDefaultCpuParticles>(graphics, Resources.ShaderDefaultCPUParticlesFxo, Resources.ShaderDefaultCPUParticlesFx);
+            EffectDefaultGPUParticles = CreateEffect<EffectDefaultGpuParticles>(graphics, Resources.ShaderDefaultGPUParticlesFxo, Resources.ShaderDefaultGPUParticlesFx);
             EffectDefaultWater = CreateEffect<EffectDefaultWater>(graphics, Resources.ShaderDefaultWaterFxo, Resources.ShaderDefaultWaterFx);
 
             EffectDeferredComposer = CreateEffect<EffectDeferredComposer>(graphics, Resources.ShaderDeferredComposerFxo, Resources.ShaderDeferredComposerFx);

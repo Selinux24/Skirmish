@@ -309,22 +309,20 @@ namespace Engine.Common
 
             foreach (T t in items)
             {
-                if (t.Intersects(ref ray, facingOnly, out Vector3 pos, out float d))
+                //Avoid duplicate picked positions
+                var intersects = t.Intersects(ref ray, facingOnly, out Vector3 pos, out float d);
+                if (intersects && !pickedPositionList.ContainsValue(pos))
                 {
-                    //Avoid duplicate picked positions
-                    if (!pickedPositionList.ContainsValue(pos))
+                    float k = d;
+                    while (pickedPositionList.ContainsKey(k))
                     {
-                        float k = d;
-                        while (pickedPositionList.ContainsKey(k))
-                        {
-                            //Avoid duplicate distance keys
-                            k += 0.001f;
-                        }
-
-                        pickedPositionList.Add(k, pos);
-                        pickedTriangleList.Add(k, t);
-                        pickedDistancesList.Add(k, d);
+                        //Avoid duplicate distance keys
+                        k += 0.001f;
                     }
+
+                    pickedPositionList.Add(k, pos);
+                    pickedTriangleList.Add(k, t);
+                    pickedDistancesList.Add(k, d);
                 }
             }
 

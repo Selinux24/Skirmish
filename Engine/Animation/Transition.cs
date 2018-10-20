@@ -5,7 +5,7 @@ namespace Engine.Animation
     /// <summary>
     /// Transition manager between two animation clips
     /// </summary>
-    public class Transition : IEquatable<Transition>
+    public sealed class Transition : IEquatable<Transition>
     {
         /// <summary>
         /// From clip
