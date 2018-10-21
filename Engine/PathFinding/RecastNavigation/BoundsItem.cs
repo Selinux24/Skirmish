@@ -39,17 +39,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Compares two nodes's bounds on the X axis.
         /// </summary>
-        /// <param name="a">A node.</param>
-        /// <param name="b">Another node.</param>
+        /// <param name="x">A node.</param>
+        /// <param name="y">Another node.</param>
         /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
-        public int Compare(BoundsItem a, BoundsItem b)
+        public int Compare(BoundsItem x, BoundsItem y)
         {
-            if (a.bmin.X < b.bmin.X) return -1;
-            if (a.bmin.X > b.bmin.X) return 1;
-            if (a.bmax.X < b.bmax.X) return -1;
-            if (a.bmax.X > b.bmax.X) return 1;
-            if (a.i < b.i) return -1;
-            if (a.i > b.i) return 1;
+            if (x.bmin.X < y.bmin.X) return -1;
+            if (x.bmin.X > y.bmin.X) return 1;
+            if (x.bmax.X < y.bmax.X) return -1;
+            if (x.bmax.X > y.bmax.X) return 1;
+            if (x.i < y.i) return -1;
+            if (x.i > y.i) return 1;
             return 0;
         }
     }
@@ -62,17 +62,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Compares two nodes's bounds on the Y axis.
         /// </summary>
-        /// <param name="a">A node.</param>
-        /// <param name="b">Another node.</param>
+        /// <param name="x">A node.</param>
+        /// <param name="y">Another node.</param>
         /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
-        public int Compare(BoundsItem a, BoundsItem b)
+        public int Compare(BoundsItem x, BoundsItem y)
         {
-            if (a.bmin.Y < b.bmin.Y) return -1;
-            if (a.bmin.Y > b.bmin.Y) return 1;
-            if (a.bmax.Y < b.bmax.Y) return -1;
-            if (a.bmax.Y > b.bmax.Y) return 1;
-            if (a.i < b.i) return -1;
-            if (a.i > b.i) return 1;
+            if (x.bmin.Y < y.bmin.Y) return -1;
+            if (x.bmin.Y > y.bmin.Y) return 1;
+            if (x.bmax.Y < y.bmax.Y) return -1;
+            if (x.bmax.Y > y.bmax.Y) return 1;
+            if (x.i < y.i) return -1;
+            if (x.i > y.i) return 1;
             return 0;
         }
     }

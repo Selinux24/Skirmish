@@ -719,9 +719,9 @@
     <Content Include="Resources\IncTerrain.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ContentCollada\ContentCollada.csproj">
+    <ProjectReference Include="..\ContentCollada\Engine.Collada.csproj">
       <Project>{b5e51939-46dc-412d-a096-e1c892f95fb3}</Project>
-      <Name>ContentCollada</Name>
+      <Name>Engine.Collada</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

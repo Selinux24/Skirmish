@@ -7,7 +7,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Navigation graph
     /// </summary>
-    public class Graph : IGraph, IDisposable
+    public class Graph : IGraph
     {
         public const int MAX_POLYS = 256;
         public const int MAX_SMOOTH = 2048;
@@ -22,6 +22,14 @@ namespace Engine.PathFinding.RecastNavigation
             /// Id counter
             /// </summary>
             private static int ID = 0;
+            /// <summary>
+            /// Gets the next Id
+            /// </summary>
+            /// <returns>Returns the next Id</returns>
+            private static int GetNextId()
+            {
+                return ++ID;
+            }
 
             /// <summary>
             /// Graph item id
@@ -37,7 +45,7 @@ namespace Engine.PathFinding.RecastNavigation
             /// </summary>
             public GraphItem()
             {
-                this.Id = ++ID;
+                this.Id = GetNextId();
             }
         }
 
@@ -103,8 +111,8 @@ namespace Engine.PathFinding.RecastNavigation
                                 break;
                             }
 
-                            bool endOfPath = (steerPosFlag & StraightPathFlags.DT_STRAIGHTPATH_END) != 0 ? true : false;
-                            bool offMeshConnection = (steerPosFlag & StraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ? true : false;
+                            bool endOfPath = (steerPosFlag & StraightPathFlags.DT_STRAIGHTPATH_END) != 0;
+                            bool offMeshConnection = (steerPosFlag & StraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0;
 
                             // Find movement delta.
                             Vector3 delta = Vector3.Subtract(steerPos, iterPos);
@@ -241,7 +249,8 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else if (mode == PathFindingMode.TOOLMODE_PATHFIND_SLICED)
             {
-                if (startRef != 0 && endRef != 0)
+                var endPointsDefined = (startRef != 0 && endRef != 0);
+                if (endPointsDefined)
                 {
                     pathFindStatus = navQuery.InitSlicedFindPath(
                         startRef, endRef, startPos, endPos, filter,
@@ -419,12 +428,9 @@ namespace Engine.PathFinding.RecastNavigation
             for (int k = poly.FirstLink; k != Detour.DT_NULL_LINK; k = tile.links[k].next)
             {
                 var link = tile.links[k];
-                if (link.nref != 0)
+                if (link.nref != 0 && neis.Count < maxNeis)
                 {
-                    if (neis.Count < maxNeis)
-                    {
-                        neis.Add(link.nref);
-                    }
+                    neis.Add(link.nref);
                 }
             }
 
@@ -481,7 +487,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Item indices
         /// </summary>
-        private List<GraphItem> itemIndices = new List<GraphItem>();
+        private readonly List<GraphItem> itemIndices = new List<GraphItem>();
 
         /// <summary>
         /// Input geometry
@@ -494,7 +500,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Navigation mesh query dictionary (by agent type)
         /// </summary>
-        public Dictionary<Agent, NavMeshQuery> MeshQueryDictionary = new Dictionary<Agent, NavMeshQuery>();
+        public Dictionary<Agent, NavMeshQuery> MeshQueryDictionary { get; set; } = new Dictionary<Agent, NavMeshQuery>();
 
         /// <summary>
         /// Constructor
@@ -527,16 +533,13 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (disposing)
             {
-                if (this.MeshQueryDictionary != null)
+                foreach (var item in this.MeshQueryDictionary)
                 {
-                    foreach (var item in this.MeshQueryDictionary)
-                    {
-                        item.Value?.Dispose();
-                    }
-
-                    this.MeshQueryDictionary.Clear();
-                    this.MeshQueryDictionary = null;
+                    item.Value?.Dispose();
                 }
+
+                this.MeshQueryDictionary.Clear();
+                this.MeshQueryDictionary = null;
             }
         }
 
@@ -598,12 +601,19 @@ namespace Engine.PathFinding.RecastNavigation
                 m_includeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
             };
 
-            CalcPath(
+            var status = CalcPath(
                 MeshQueryDictionary[(Agent)agent],
                 filter, new Vector3(2, 4, 2), PathFindingMode.TOOLMODE_PATHFIND_FOLLOW,
                 from, to, out Vector3[] result);
 
-            return result;
+            if (status.HasFlag(Status.DT_SUCCESS))
+            {
+                return result;
+            }
+            else
+            {
+                return new Vector3[] { };
+            }
         }
         /// <summary>
         /// Gets wether the specified position is walkable for the specified agent type
@@ -632,14 +642,11 @@ namespace Engine.PathFinding.RecastNavigation
                     position, agentExtents, filter,
                     out int nRef, out Vector3 nPoint);
 
-                if (!status.HasFlag(Status.DT_FAILURE))
+                if (nRef != 0 && !status.HasFlag(Status.DT_FAILURE))
                 {
-                    if (nRef != 0)
-                    {
-                        nearest = nPoint;
+                    nearest = nPoint;
 
-                        return nPoint.X == position.X && nPoint.Z == position.Z;
-                    }
+                    return nPoint.X == position.X && nPoint.Z == position.Z;
                 }
             }
 
@@ -762,15 +769,15 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Removes an obstacle by obstacle id
         /// </summary>
-        /// <param name="obstacleId">Obstacle id</param>
-        public void RemoveObstacle(int obstacleId)
+        /// <param name="obstacle">Obstacle id</param>
+        public void RemoveObstacle(int obstacle)
         {
             this.updated = false;
 
-            var obstacle = itemIndices.Find(o => o.Id == obstacleId);
-            if (obstacle != null)
+            var instance = itemIndices.Find(o => o.Id == obstacle);
+            if (instance != null)
             {
-                foreach (var item in obstacle.Indices)
+                foreach (var item in instance.Indices)
                 {
                     var cache = MeshQueryDictionary[item.Item1].GetAttachedNavMesh().TileCache;
                     if (cache != null)
@@ -779,7 +786,7 @@ namespace Engine.PathFinding.RecastNavigation
                     }
                 }
 
-                itemIndices.Remove(obstacle);
+                itemIndices.Remove(instance);
             }
         }
 
@@ -823,12 +830,12 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Removes an off-mesh connection by off-mesh connection id
         /// </summary>
-        /// <param name="offmeshId">Off-mesh connection id</param>
-        public void RemoveConnection(int offmeshId)
+        /// <param name="id">Off-mesh connection id</param>
+        public void RemoveConnection(int id)
         {
             this.updated = false;
 
-            var offmeshConnection = itemIndices.Find(o => o.Id == offmeshId);
+            var offmeshConnection = itemIndices.Find(o => o.Id == id);
             if (offmeshConnection != null)
             {
                 foreach (var item in offmeshConnection.Indices)
@@ -856,20 +863,17 @@ namespace Engine.PathFinding.RecastNavigation
                 if (nm.TileCache != null)
                 {
                     var status = nm.TileCache.Update(gameTime.TotalMilliseconds, nm, out bool upToDate);
-                    if (status.HasFlag(Status.DT_SUCCESS))
+                    if (status.HasFlag(Status.DT_SUCCESS) && updated != upToDate)
                     {
-                        if (updated != upToDate)
-                        {
-                            updated = upToDate;
+                        updated = upToDate;
 
-                            if (updated)
-                            {
-                                this.Updated?.Invoke(this, new EventArgs());
-                            }
-                            else
-                            {
-                                this.Updating?.Invoke(this, new EventArgs());
-                            }
+                        if (updated)
+                        {
+                            this.Updated?.Invoke(this, new EventArgs());
+                        }
+                        else
+                        {
+                            this.Updating?.Invoke(this, new EventArgs());
                         }
                     }
                 }

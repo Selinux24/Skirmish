@@ -64,7 +64,7 @@ namespace Engine.Content
 
                 for (int i = 0; i < modelList.Length; i++)
                 {
-                    var dae = COLLADA.Load(modelList[i]);
+                    var dae = Collada.Load(modelList[i]);
 
                     var modelContent = new ModelContent();
 
@@ -99,7 +99,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessLibraryLights(COLLADA dae, ModelContent modelContent)
+        private static void ProcessLibraryLights(Collada dae, ModelContent modelContent)
         {
             if (dae.LibraryLights != null && dae.LibraryLights.Length > 0)
             {
@@ -155,7 +155,7 @@ namespace Engine.Content
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="contentFolder">Content folder</param>
-        private static void ProcessLibraryImages(COLLADA dae, ModelContent modelContent, string contentFolder)
+        private static void ProcessLibraryImages(Collada dae, ModelContent modelContent, string contentFolder)
         {
             if (dae.LibraryImages != null && dae.LibraryImages.Length > 0)
             {
@@ -181,12 +181,12 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessLibraryMaterial(COLLADA dae, ModelContent modelContent)
+        private static void ProcessLibraryMaterial(Collada dae, ModelContent modelContent)
         {
             if (dae.LibraryMaterials != null && dae.LibraryMaterials.Length > 0 &&
                 dae.LibraryEffects != null && dae.LibraryEffects.Length > 0)
             {
-                foreach (Collada.Material material in dae.LibraryMaterials)
+                foreach (Engine.Collada.Material material in dae.LibraryMaterials)
                 {
                     MaterialContent info = MaterialContent.Default;
 
@@ -222,7 +222,7 @@ namespace Engine.Content
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="volumes">Volume mesh names</param>
-        private static void ProcessLibraryGeometries(COLLADA dae, ModelContent modelContent, string[] volumes)
+        private static void ProcessLibraryGeometries(Collada dae, ModelContent modelContent, string[] volumes)
         {
             if (dae.LibraryGeometries != null && dae.LibraryGeometries.Length > 0)
             {
@@ -260,7 +260,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessLibraryControllers(COLLADA dae, ModelContent modelContent)
+        private static void ProcessLibraryControllers(Collada dae, ModelContent modelContent)
         {
             if (dae.LibraryControllers != null && dae.LibraryControllers.Length > 0)
             {
@@ -280,7 +280,7 @@ namespace Engine.Content
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="animation">Animation description</param>
-        private static void ProcessLibraryAnimations(COLLADA dae, ModelContent modelContent, AnimationDescription animation)
+        private static void ProcessLibraryAnimations(Collada dae, ModelContent modelContent, AnimationDescription animation)
         {
             if (dae.LibraryAnimations != null && dae.LibraryAnimations.Length > 0)
             {
@@ -334,7 +334,7 @@ namespace Engine.Content
         /// <param name="mesh">Mesh</param>
         /// <param name="isVolume">Current geometry is a volume mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static SubMeshContent[] ProcessMesh(Collada.Mesh mesh, bool isVolume)
+        private static SubMeshContent[] ProcessMesh(Engine.Collada.Mesh mesh, bool isVolume)
         {
             SubMeshContent[] res = null;
 
@@ -1310,7 +1310,7 @@ namespace Engine.Content
         /// <param name="transform">Parent transform</param>
         /// <param name="useControllerTransform">Use parent controller transform</param>
         /// <param name="modelContent">Model content</param>
-        private static void ProcessVisualScene(COLLADA dae, Matrix transform, bool useControllerTransform, ModelContent modelContent)
+        private static void ProcessVisualScene(Collada dae, Matrix transform, bool useControllerTransform, ModelContent modelContent)
         {
             if (dae.Scene.InstanceVisualScene != null)
             {

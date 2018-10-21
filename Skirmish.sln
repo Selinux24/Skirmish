@@ -38,16 +38,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Reso
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "09 Animation", "09 Animation\09 Animation.csproj", "{E3320FA8-28C2-4D85-8F58-B9033520BC02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContentCollada", "ContentCollada\ContentCollada.csproj", "{B5E51939-46DC-412D-A096-E1C892F95FB3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Collada", "ContentCollada\Engine.Collada.csproj", "{B5E51939-46DC-412D-A096-E1C892F95FB3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "03 SceneTest", "03 SceneTest\03 SceneTest.csproj", "{CE29A59F-3400-4C87-8D53-320B9E365C6C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "10 Instancing", "10 Instancing\10 Instancing.csproj", "{826ACF60-EDC8-4941-9FF9-6BB05ECECA45}"
 EndProject
 Global
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -290,5 +287,8 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {37E26178-AF4C-4355-8F20-2DA5F9A09F3E}
+	EndGlobalSection
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
 	EndGlobalSection
 EndGlobal

@@ -73,6 +73,17 @@ namespace Engine.Common
             return Collision.RayIntersectsBox(ref ray, ref box, out distance);
         }
         /// <summary>
+        /// Determines whether there is an intersection between a Ray and a BoundingBox
+        /// </summary>
+        /// <param name="ray">The ray to test</param>
+        /// <param name="box">The box to test</param>
+        /// <param name="distance">When the method completes, contains the distance of the intersection, or 0 if there was no intersection</param>
+        /// <returns>Whether the two objects intersected</returns>
+        public static bool RayIntersectsBox(Ray ray, BoundingBox box, out float distance)
+        {
+            return Collision.RayIntersectsBox(ref ray, ref box, out distance);
+        }
+        /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
         /// </summary>
         /// <param name="ray">The ray to test.</param>

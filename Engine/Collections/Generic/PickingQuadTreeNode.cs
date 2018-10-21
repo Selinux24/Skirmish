@@ -9,13 +9,27 @@ namespace Engine.Collections.Generic
     /// <summary>
     /// Picking quad tree node
     /// </summary>
-    public class PickingQuadTreeNode<T> where T : IVertexList, IRayIntersectable
+    public abstract class PickingQuadTreeNode
     {
         /// <summary>
         /// Static node count
         /// </summary>
-        private static int NodeCount = 0;
+        protected static int NodeCount { get; set; } = 0;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        protected PickingQuadTreeNode()
+        {
+
+        }
+    }
+
+    /// <summary>
+    /// Picking quad tree node
+    /// </summary>
+    public class PickingQuadTreeNode<T> : PickingQuadTreeNode where T : IVertexList, IRayIntersectable
+    {
         /// <summary>
         /// Recursive partition creation
         /// </summary>
@@ -105,7 +119,7 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Bounding box
         /// </summary>
-        public BoundingBox BoundingBox;
+        public BoundingBox BoundingBox { get; set; }
 
         /// <summary>
         /// Parent
@@ -168,11 +182,11 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Node Id
         /// </summary>
-        public int Id;
+        public int Id { get; set; }
         /// <summary>
         /// Depth level
         /// </summary>
-        public int Level;
+        public int Level { get; set; }
         /// <summary>
         /// Gets the node center position
         /// </summary>
@@ -186,18 +200,18 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Children list
         /// </summary>
-        public PickingQuadTreeNode<T>[] Children;
+        public PickingQuadTreeNode<T>[] Children { get; set; }
         /// <summary>
         /// Node items
         /// </summary>
-        internal T[] Items;
+        internal T[] Items { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="quadTree">Quadtree</param>
         /// <param name="parent">Parent node</param>
-        public PickingQuadTreeNode(PickingQuadTree<T> quadTree, PickingQuadTreeNode<T> parent)
+        public PickingQuadTreeNode(PickingQuadTree<T> quadTree, PickingQuadTreeNode<T> parent) : base()
         {
             this.QuadTree = quadTree;
             this.Parent = parent;
@@ -411,15 +425,17 @@ namespace Engine.Collections.Generic
 
             if (this.Children == null)
             {
-                if (this.Items != null && this.Items.Length > 0)
+                if (this.Items?.Length > 0)
                 {
                     #region Per bound test
 
-                    if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out float d))
+                    var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
+                    if (inBox)
                     {
                         #region Per item test
 
-                        if (Intersection.IntersectNearest(ref ray, this.Items, facingOnly, out Vector3 pos, out T tri, out d))
+                        var inItem = Intersection.IntersectNearest(ref ray, this.Items, facingOnly, out Vector3 pos, out T tri, out d);
+                        if (inItem)
                         {
                             position = pos;
                             item = tri;
@@ -442,7 +458,7 @@ namespace Engine.Collections.Generic
 
                 foreach (var node in this.Children)
                 {
-                    if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out float d))
+                    if (Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
                     {
                         while (boxHitsByDistance.ContainsKey(d))
                         {
@@ -468,17 +484,15 @@ namespace Engine.Collections.Generic
 
                     foreach (var node in boxHitsByDistance.Values)
                     {
-                        if (node.PickNearest(ref ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD))
+                        // check that the intersection is closer than the nearest intersection found thus far
+                        var inNode = node.PickNearest(ref ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
+                        if (inNode && thisD < bestD)
                         {
-                            // check that the intersection is closer than the nearest intersection found thus far
-                            if (thisD < bestD)
-                            {
-                                // if we have found a closer intersection store the new closest intersection
-                                bestHit = thisHit;
-                                bestTri = thisTri;
-                                bestD = thisD;
-                                intersect = true;
-                            }
+                            // if we have found a closer intersection store the new closest intersection
+                            bestHit = thisHit;
+                            bestTri = thisTri;
+                            bestD = thisD;
+                            intersect = true;
                         }
                     }
 
@@ -542,11 +556,13 @@ namespace Engine.Collections.Generic
                 {
                     #region Per bound test
 
-                    if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out float d))
+                    var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
+                    if (inBox)
                     {
                         #region Per item test
 
-                        if (Intersection.IntersectFirst(ref ray, this.Items, facingOnly, out Vector3 pos, out T tri, out d))
+                        var inItem = Intersection.IntersectFirst(ref ray, this.Items, facingOnly, out Vector3 pos, out T tri, out d);
+                        if (inItem)
                         {
                             position = pos;
                             item = tri;
@@ -567,9 +583,11 @@ namespace Engine.Collections.Generic
 
                 foreach (var node in this.Children)
                 {
-                    if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out float d))
+                    var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d);
+                    if (inBox)
                     {
-                        if (node.PickFirst(ref ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD))
+                        var inItem = node.PickFirst(ref ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
+                        if (inItem)
                         {
                             position = thisHit;
                             item = thisTri;
@@ -630,11 +648,13 @@ namespace Engine.Collections.Generic
                 {
                     #region Per bound test
 
-                    if (Intersection.RayIntersectsBox(ref ray, ref this.BoundingBox, out float d))
+                    var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
+                    if (inBox)
                     {
                         #region Per item test
 
-                        if (Intersection.IntersectAll(ref ray, this.Items, facingOnly, out Vector3[] pos, out T[] tri, out float[] ds))
+                        var inItem = Intersection.IntersectAll(ref ray, this.Items, facingOnly, out Vector3[] pos, out T[] tri, out float[] ds);
+                        if (inItem)
                         {
                             positions = pos;
                             items = tri;
@@ -661,9 +681,11 @@ namespace Engine.Collections.Generic
 
                 foreach (var node in this.Children)
                 {
-                    if (Intersection.RayIntersectsBox(ref ray, ref node.BoundingBox, out float d))
+                    var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d);
+                    if (inBox)
                     {
-                        if (node.PickAll(ref ray, facingOnly, out Vector3[] thisHits, out T[] thisTris, out float[] thisDs))
+                        var inItem = node.PickAll(ref ray, facingOnly, out Vector3[] thisHits, out T[] thisTris, out float[] thisDs);
+                        if (inItem)
                         {
                             for (int i = 0; i < thisHits.Length; i++)
                             {
@@ -705,7 +727,7 @@ namespace Engine.Collections.Generic
 
             if (this.Children != null)
             {
-                bool haltByDepth = maxDepth > 0 ? this.Level == maxDepth : false;
+                bool haltByDepth = maxDepth > 0 && this.Level == maxDepth;
                 if (haltByDepth)
                 {
                     Array.ForEach(this.Children, (c) =>

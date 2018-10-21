@@ -1,9 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Vertex flags returned by dtNavMeshQuery::findStraightPath.
     /// </summary>
+    [Flags]
     public enum StraightPathFlags
     {
         /// <summary>
