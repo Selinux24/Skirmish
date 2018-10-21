@@ -16,27 +16,27 @@ namespace Terrain.AI
         /// <summary>
         /// Primary weapon
         /// </summary>
-        public Weapon PrimaryWeapon;
+        public Weapon PrimaryWeapon { get; set; }
         /// <summary>
         /// Secondary weapon
         /// </summary>
-        public Weapon SecondaryWeapon;
+        public Weapon SecondaryWeapon { get; set; }
         /// <summary>
         /// Current weapon
         /// </summary>
-        public Weapon CurrentWeapon;
+        public Weapon CurrentWeapon { get; set; }
         /// <summary>
         /// Current life
         /// </summary>
-        public float Life;
+        public float Life { get; set; }
         /// <summary>
         /// Distance of sight
         /// </summary>
-        public float SightDistance;
+        public float SightDistance { get; set; }
         /// <summary>
         /// Angle of sight in radians
         /// </summary>
-        public float SightAngle;
+        public float SightAngle { get; set; }
         /// <summary>
         /// Current damage
         /// </summary>

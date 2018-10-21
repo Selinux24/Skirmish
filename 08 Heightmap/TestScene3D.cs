@@ -26,7 +26,7 @@ namespace Heightmap
         private const int layerHUD = 99;
         private const int layerCursor = 100;
 
-        private Random rnd = new Random();
+        private readonly Random rnd = new Random();
 
         private float time = 0.23f;
 
@@ -34,7 +34,7 @@ namespace Heightmap
         private bool playerFlying = true;
         private SceneLightSpot lantern = null;
 
-        private Vector3 windDirection = Vector3.UnitX;
+        private readonly Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
         private float windNextStrength = 1f;
         private readonly float windStep = 0.001f;
@@ -932,7 +932,7 @@ namespace Heightmap
 
                     this.Lights.Add(this.spotLight1);
                     this.Lights.Add(this.spotLight2);
-                };
+                }
 
                 this.torchLights = new SceneLightPoint[this.torchs.Count - 1];
                 for (int i = 1; i < this.torchs.Count; i++)
@@ -1168,7 +1168,7 @@ namespace Heightmap
             UpdateDebugInfo(gameTime);
 
             //Auto
-            UpdateLights(gameTime);
+            UpdateLights();
             UpdateWind(gameTime);
             UpdateDust(gameTime);
             UpdateGraph(gameTime);
@@ -1278,7 +1278,7 @@ namespace Heightmap
                 if (this.FindTopGroundPosition(this.soldier.Transform.Position.X, this.soldier.Transform.Position.Z, out PickingResult<Triangle> r))
                 {
                     this.soldier.Transform.SetPosition(r.Position);
-                };
+                }
             }
         }
         private void UpdateDebugInfo(GameTime gameTime)
@@ -1514,7 +1514,7 @@ namespace Heightmap
 
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pDust, emitter);
         }
-        private void UpdateLights(GameTime gameTime)
+        private void UpdateLights()
         {
             {
                 float d = 1f;

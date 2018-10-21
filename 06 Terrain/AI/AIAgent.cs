@@ -21,7 +21,7 @@ namespace Terrain.AI
         /// <summary>
         /// Last distance
         /// </summary>
-        private float lastDistance = 0f;
+        protected float LastDistance = 0f;
         /// <summary>
         /// Looking for route
         /// </summary>
@@ -172,7 +172,7 @@ namespace Terrain.AI
         /// <param name="agentType"></param>
         /// <param name="sceneObject"></param>
         /// <param name="stats"></param>
-        public AIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, AIStatsDescription stats)
+        protected AIAgent(Brain parent, AgentType agentType, SceneObject sceneObject, AIStatsDescription stats)
         {
             this.Parent = parent;
             this.AgentType = agentType;
@@ -284,12 +284,12 @@ namespace Terrain.AI
 
             this.Controller.UpdateManipulator(context.GameTime, this.Manipulator);
 
-            this.lastDistance += Vector3.Distance(lastPosition, this.Manipulator.Position);
-            if (this.lastDistance > 0.2f)
+            this.LastDistance += Vector3.Distance(lastPosition, this.Manipulator.Position);
+            if (this.LastDistance > 0.2f)
             {
                 this.FireMoving(this, null);
 
-                this.lastDistance -= 0.2f;
+                this.LastDistance -= 0.2f;
             }
         }
         /// <summary>
@@ -399,12 +399,11 @@ namespace Terrain.AI
         /// <returns>Returns true if the target is too hard</returns>
         public virtual bool IsHardEnemy(AIAgent target)
         {
-            if (target != null)
+            if (target?.Stats.CurrentWeapon != null &&
+                target?.Stats.CurrentWeapon.Damage > this.Stats.Life &&
+                this.Stats.Damage > 0.9f)
             {
-                if (target.Stats.CurrentWeapon != null && target.Stats.CurrentWeapon.Damage > this.Stats.Life && this.Stats.Damage > 0.9f)
-                {
-                    return true;
-                }
+                return true;
             }
 
             return false;
@@ -468,11 +467,11 @@ namespace Terrain.AI
             {
                 var refineDelta = refine ? speed * 0.1f : 0f;
 
-                if (this.lookingForRoute == false)
+                if (!this.lookingForRoute)
                 {
                     this.lookingForRoute = true;
 
-                    var task = Task.Run(async () =>
+                    Task.Run(async () =>
                     {
                         await Task.Delay(100);
 

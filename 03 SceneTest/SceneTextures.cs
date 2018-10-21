@@ -64,7 +64,7 @@ namespace SceneTest
         private SceneObject<ParticleManager> pManager = null;
 
         private IParticleSystem[] particlePlumes = null;
-        private Vector3 plumeGravity = new Vector3(0, 5, 0);
+        private readonly Vector3 plumeGravity = new Vector3(0, 5, 0);
         private readonly float plumeMaxHorizontalVelocity = 25f;
         private Vector2 wind = new Vector2(0, 0);
         private Vector2 nextWind = new Vector2();
@@ -434,11 +434,6 @@ namespace SceneTest
                 lights.AddRange(this.vehicleI.Instance[i].Lights);
             }
 
-            //foreach (var light in lights)
-            //{
-            //    light.CastShadow = false;
-            //}
-
             this.Lights.AddRange(lights);
         }
         private void InitializeLamps()
@@ -496,11 +491,6 @@ namespace SceneTest
             {
                 lights.AddRange(this.lampI.Instance[i].Lights);
             }
-
-            //foreach (var light in lights)
-            //{
-            //    light.CastShadow = false;
-            //}
 
             this.Lights.AddRange(lights);
         }
@@ -563,11 +553,6 @@ namespace SceneTest
                 lights.AddRange(this.streetlampI.Instance[i].Lights);
             }
 
-            //foreach (var light in lights)
-            //{
-            //    light.CastShadow = false;
-            //}
-
             this.Lights.AddRange(lights);
         }
         private void InitializeContainers()
@@ -603,7 +588,7 @@ namespace SceneTest
 
             float s = -spaceSize / 2f;
 
-            Random rnd = new Random(1000);
+            Random prnd = new Random(1000);
 
             this.container.Transform.SetScale(5f);
             this.container.Transform.UpdateInternals(true);
@@ -614,15 +599,15 @@ namespace SceneTest
 
             for (int i = 0; i < this.containerI.Instance.Count; i++)
             {
-                uint textureIndex = (uint)rnd.Next(0, 6);
+                uint textureIndex = (uint)prnd.Next(0, 6);
                 textureIndex %= 5;
 
                 float height = (i < 48 ? 0 : bbox.GetY()) + baseHeight;
 
                 if ((i % 48) < 24)
                 {
-                    float angle = MathUtil.Pi * rnd.Next(0, 2);
-                    float x = ((i % 24) < 12 ? -120f : 120f) + rnd.NextFloat(-1f, 1f);
+                    float angle = MathUtil.Pi * prnd.Next(0, 2);
+                    float x = ((i % 24) < 12 ? -120f : 120f) + prnd.NextFloat(-1f, 1f);
 
                     this.containerI.Instance[i].TextureIndex = textureIndex;
 
@@ -632,8 +617,8 @@ namespace SceneTest
                 }
                 else
                 {
-                    float angle = MathUtil.Pi * rnd.Next(0, 2);
-                    float z = ((i % 24) < 12 ? -120f : 120f) + rnd.NextFloat(-1f, 1f);
+                    float angle = MathUtil.Pi * prnd.Next(0, 2);
+                    float z = ((i % 24) < 12 ? -120f : 120f) + prnd.NextFloat(-1f, 1f);
 
                     this.containerI.Instance[i].TextureIndex = textureIndex;
 

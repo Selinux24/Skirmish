@@ -117,11 +117,9 @@ namespace Collada
             MaterialContent mat = MaterialContent.Default;
             mat.EmissionColor = Color.White;
 
-            Vector3[] v = null;
-            Vector3[] n = null;
-            Vector2[] uv = null;
-            uint[] ix = null;
-            GeometryUtil.CreateSphere(0.05f, (uint)16, (uint)5, out v, out n, out uv, out ix);
+            GeometryUtil.CreateSphere(
+                0.05f, 16, 5, 
+                out Vector3[] v, out Vector3[] n, out Vector2[] uv, out uint[] ix);
 
             VertexData[] vertices = new VertexData[v.Length];
             for (int i = 0; i < v.Length; i++)
@@ -169,13 +167,13 @@ namespace Collada
                     SceneModes.ForwardLigthning);
             }
 
-            this.UpdateCamera(gameTime);
+            this.UpdateCamera();
 
             this.UpdateLight(gameTime);
 
             this.fps.Instance.Text = this.Game.RuntimeText;
         }
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateCamera()
         {
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
 

@@ -23,7 +23,7 @@ namespace GameLogic
         private SceneObject<TextDrawer> txtActionList = null;
         private SceneObject<TextDrawer> txtAction = null;
 
-        private string fontName = "Lucida Sans";
+        private readonly string fontName = "Lucida Sans";
         private SceneObject<Sprite> sprHUD = null;
         private SceneObject<SpriteButton> butClose = null;
         private SceneObject<SpriteButton> butNext = null;
@@ -37,11 +37,11 @@ namespace GameLogic
         private SceneLightSpot spotLight = null;
 
         private SceneObject<ModelInstanced> soldier = null;
-        private GridAgentType soldierAgent = null;
-        private Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
-        private Dictionary<Soldier, ManipulatorController> soldierControllers = new Dictionary<Soldier, ManipulatorController>();
-        private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
-        private ModelInstance current
+        private readonly GridAgentType soldierAgent = null;
+        private readonly Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
+        private readonly Dictionary<Soldier, ManipulatorController> soldierControllers = new Dictionary<Soldier, ManipulatorController>();
+        private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+        private ModelInstance Current
         {
             get
             {
@@ -50,10 +50,10 @@ namespace GameLogic
         }
 
         private SceneObject<LineListDrawer> lineDrawer = null;
-        private Color4 bsphColor = new Color4(Color.LightYellow.ToColor3(), 0.25f);
-        private Color4 frstColor = new Color4(Color.Yellow.ToColor3(), 1f);
-        private int bsphSlices = 50;
-        private int bsphStacks = 25;
+        private readonly Color4 bsphColor = new Color4(Color.LightYellow.ToColor3(), 0.25f);
+        private readonly Color4 frstColor = new Color4(Color.Yellow.ToColor3(), 1f);
+        private readonly int bsphSlices = 50;
+        private readonly int bsphStacks = 25;
 
         private SceneObject<Scenery> terrain = null;
         private SceneObject<Minimap> minimap = null;
@@ -62,7 +62,7 @@ namespace GameLogic
         private ActionSpecification[] currentActions = null;
         private Skirmish skirmishGame = null;
         private bool gameFinished = false;
-        private ActionSpecification currentAction
+        private ActionSpecification CurrentAction
         {
             get
             {
@@ -77,25 +77,25 @@ namespace GameLogic
 
         #region Keys
 
-        private Keys keyExit = Keys.Escape;
-        private Keys keyChangeMode = Keys.R;
+        private readonly Keys keyExit = Keys.Escape;
+        private readonly Keys keyChangeMode = Keys.R;
 
-        private Keys keyDebugFrustum = Keys.Space;
-        private Keys keyDebugVolumes = Keys.F1;
+        private readonly Keys keyDebugFrustum = Keys.Space;
+        private readonly Keys keyDebugVolumes = Keys.F1;
 
-        private Keys keyHUDNextSoldier = Keys.N;
-        private Keys keyHUDPrevSoldier = Keys.P;
-        private Keys keyHUDNextAction = Keys.Right;
-        private Keys keyHUDPrevAction = Keys.Left;
-        private Keys keyHUDNextPhase = Keys.E;
+        private readonly Keys keyHUDNextSoldier = Keys.N;
+        private readonly Keys keyHUDPrevSoldier = Keys.P;
+        private readonly Keys keyHUDNextAction = Keys.Right;
+        private readonly Keys keyHUDPrevAction = Keys.Left;
+        private readonly Keys keyHUDNextPhase = Keys.E;
 
-        private Keys keyCAMNextIsometric = Keys.PageDown;
-        private Keys keyCAMPrevIsometric = Keys.PageUp;
-        private Keys keyCAMMoveLeft = Keys.A;
-        private Keys keyCAMMoveForward = Keys.W;
-        private Keys keyCAMMoveBackward = Keys.S;
-        private Keys keyCAMMoveRight = Keys.D;
-        private Keys keyCAMCenterSoldier = Keys.Home;
+        private readonly Keys keyCAMNextIsometric = Keys.PageDown;
+        private readonly Keys keyCAMPrevIsometric = Keys.PageUp;
+        private readonly Keys keyCAMMoveLeft = Keys.A;
+        private readonly Keys keyCAMMoveForward = Keys.W;
+        private readonly Keys keyCAMMoveBackward = Keys.S;
+        private readonly Keys keyCAMMoveRight = Keys.D;
+        private readonly Keys keyCAMCenterSoldier = Keys.Home;
 
         #endregion
 
@@ -348,9 +348,9 @@ namespace GameLogic
         {
             base.Update(gameTime);
 
-            foreach (var soldier in this.soldierControllers.Keys)
+            foreach (var soldierC in this.soldierControllers.Keys)
             {
-                this.soldierControllers[soldier].UpdateManipulator(gameTime, this.soldierModels[soldier].Manipulator);
+                this.soldierControllers[soldierC].UpdateManipulator(gameTime, this.soldierModels[soldierC].Manipulator);
             }
 
             if (!this.CapturedControl)
@@ -491,12 +491,12 @@ namespace GameLogic
 
                 #region Actions
 
-                if (this.currentAction != null)
+                if (this.CurrentAction != null)
                 {
                     bool selectorDone = false;
                     Area area = null;
 
-                    if (this.currentAction.Selector == SelectorEnum.Goto)
+                    if (this.CurrentAction.Selector == Selectors.Goto)
                     {
                         //TODO: Show goto selector
                         if (this.Game.Input.LeftMouseButtonJustReleased)
@@ -504,7 +504,7 @@ namespace GameLogic
                             selectorDone = true;
                         }
                     }
-                    else if (this.currentAction.Selector == SelectorEnum.Area)
+                    else if (this.CurrentAction.Selector == Selectors.Area)
                     {
                         //TODO: Show area selector
                         if (this.Game.Input.LeftMouseButtonJustReleased)
@@ -517,55 +517,55 @@ namespace GameLogic
 
                     if (selectorDone)
                     {
-                        if (this.currentAction.Action == ActionsEnum.Move)
+                        if (this.CurrentAction.Action == Actions.Move)
                         {
                             this.Move(this.skirmishGame.CurrentSoldier, r.Position);
                         }
-                        else if (this.currentAction.Action == ActionsEnum.Run)
+                        else if (this.CurrentAction.Action == Actions.Run)
                         {
                             this.Run(this.skirmishGame.CurrentSoldier, r.Position);
                         }
-                        else if (this.currentAction.Action == ActionsEnum.Crawl)
+                        else if (this.CurrentAction.Action == Actions.Crawl)
                         {
                             this.Crawl(this.skirmishGame.CurrentSoldier, r.Position);
                         }
-                        else if (this.currentAction.Action == ActionsEnum.Assault)
+                        else if (this.CurrentAction.Action == Actions.Assault)
                         {
                             Soldier active = this.skirmishGame.CurrentSoldier;
-                            Vector3 pos = this.current.Manipulator.Position;
+                            Vector3 pos = this.Current.Manipulator.Position;
                             Soldier passive = this.PickSoldierNearestToPosition(ref cursorRay, ref pos, true);
                             if (passive != null)
                             {
                                 this.Assault(active, passive);
                             }
                         }
-                        else if (this.currentAction.Action == ActionsEnum.CoveringFire)
+                        else if (this.CurrentAction.Action == Actions.CoveringFire)
                         {
                             Soldier active = this.skirmishGame.CurrentSoldier;
 
                             this.CoveringFire(active, active.CurrentShootingWeapon, area);
                         }
-                        else if (this.currentAction.Action == ActionsEnum.Reload)
+                        else if (this.CurrentAction.Action == Actions.Reload)
                         {
                             Soldier active = this.skirmishGame.CurrentSoldier;
 
                             this.Reload(active, active.CurrentShootingWeapon);
                         }
-                        else if (this.currentAction.Action == ActionsEnum.Repair)
+                        else if (this.CurrentAction.Action == Actions.Repair)
                         {
                             Soldier active = this.skirmishGame.CurrentSoldier;
 
                             this.Repair(active, active.CurrentShootingWeapon);
                         }
-                        else if (this.currentAction.Action == ActionsEnum.Inventory)
+                        else if (this.CurrentAction.Action == Actions.Inventory)
                         {
                             this.Inventory(this.skirmishGame.CurrentSoldier);
                         }
-                        else if (this.currentAction.Action == ActionsEnum.UseMovementItem)
+                        else if (this.CurrentAction.Action == Actions.UseMovementItem)
                         {
                             this.UseMovementItem(this.skirmishGame.CurrentSoldier);
                         }
-                        else if (this.currentAction.Action == ActionsEnum.Communications)
+                        else if (this.CurrentAction.Action == Actions.Communications)
                         {
                             this.Communications(this.skirmishGame.CurrentSoldier);
                         }
@@ -580,7 +580,7 @@ namespace GameLogic
                     this.txtTeam.Instance.Text = string.Format("{0}", this.skirmishGame.CurrentTeam);
                     this.txtSoldier.Instance.Text = string.Format("{0}", this.skirmishGame.CurrentSoldier);
                     this.txtActionList.Instance.Text = string.Format("{0}", this.currentActions.Join(" | "));
-                    this.txtAction.Instance.Text = string.Format("{0}", this.currentAction);
+                    this.txtAction.Instance.Text = string.Format("{0}", this.CurrentAction);
                 }
             }
         }
@@ -660,7 +660,7 @@ namespace GameLogic
                 float teamWidth = team.Soldiers.Length * soldierSeparation;
 
                 int soldierIndex = 0;
-                foreach (Soldier soldier in team.Soldiers)
+                foreach (var soldierC in team.Soldiers)
                 {
                     ModelInstance instance = this.soldier.Instance[instanceIndex++];
 
@@ -678,7 +678,7 @@ namespace GameLogic
                     }
                     else
                     {
-                        throw new Exception("Bad position");
+                        throw new GameLogicException("Bad position");
                     }
 
                     if (teamIndex == 0)
@@ -686,10 +686,10 @@ namespace GameLogic
                         instance.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
                     }
 
-                    this.soldierModels.Add(soldier, instance);
+                    this.soldierModels.Add(soldierC, instance);
                     var controller = new BasicManipulatorController();
                     controller.PathEnd += Controller_PathEnd;
-                    this.soldierControllers.Add(soldier, controller);
+                    this.soldierControllers.Add(soldierC, controller);
 
                     soldierIndex++;
                 }
@@ -719,8 +719,8 @@ namespace GameLogic
         private void NewGame()
         {
             this.skirmishGame = new Skirmish();
-            this.skirmishGame.AddTeam("Team1", "Reds", TeamRoleEnum.Defense, 5, 1, 1);
-            this.skirmishGame.AddTeam("Team2", "Blues", TeamRoleEnum.Assault, 5, 1, 1);
+            this.skirmishGame.AddTeam("Team1", "Reds", TeamRoles.Defense, 5, 1, 1);
+            this.skirmishGame.AddTeam("Team2", "Blues", TeamRoles.Assault, 5, 1, 1);
             //this.SkirmishGame.AddTeam("Team3", "Gray", TeamRole.Neutral, 2, 0, 0, false);
             this.skirmishGame.Start();
             this.currentActions = this.skirmishGame.GetActions();
@@ -786,31 +786,31 @@ namespace GameLogic
             this.skirmishGame.NextPhase();
 
             //Do automatic actions
-            foreach (Soldier soldier in this.skirmishGame.Soldiers)
+            foreach (var soldierC in this.skirmishGame.Soldiers)
             {
-                Melee melee = this.skirmishGame.GetMelee(soldier);
+                Melee melee = this.skirmishGame.GetMelee(soldierC);
 
-                ActionSpecification[] actions = ActionsManager.GetActions(this.skirmishGame.CurrentPhase, soldier.Team, soldier, melee != null, ActionTypeEnum.Automatic);
+                ActionSpecification[] actions = ActionsManager.GetActions(this.skirmishGame.CurrentPhase, soldierC.Team, soldierC, melee != null, ActionTypes.Automatic);
                 if (actions.Length > 0)
                 {
                     foreach (ActionSpecification ac in actions)
                     {
                         //TODO: Need of standar method
-                        if (ac.Action == ActionsEnum.FindCover)
+                        if (ac.Action == Actions.FindCover)
                         {
                             Vector3 point = this.GetRandomPoint();
 
-                            this.FindCover(soldier, point);
+                            this.FindCover(soldierC, point);
                         }
-                        else if (ac.Action == ActionsEnum.RunAway)
+                        else if (ac.Action == Actions.RunAway)
                         {
                             Vector3 point = this.GetRandomPoint();
 
-                            this.RunAway(soldier, point);
+                            this.RunAway(soldierC, point);
                         }
-                        else if (ac.Action == ActionsEnum.TakeControl)
+                        else if (ac.Action == Actions.TakeControl)
                         {
-                            this.TakeControl(soldier);
+                            this.TakeControl(soldierC);
                         }
                     }
                 }
@@ -847,17 +847,17 @@ namespace GameLogic
         }
         private void UpdateSoldierStates()
         {
-            foreach (Soldier soldier in this.soldierModels.Keys)
+            foreach (var soldierC in this.soldierModels.Keys)
             {
-                if (soldier.CurrentHealth == HealthStateEnum.Disabled)
+                if (soldierC.CurrentHealth == HealthStates.Disabled)
                 {
-                    this.soldierModels[soldier].Active = false;
-                    this.soldierModels[soldier].Visible = false;
+                    this.soldierModels[soldierC].Active = false;
+                    this.soldierModels[soldierC].Visible = false;
                 }
                 else
                 {
-                    this.soldierModels[soldier].Active = true;
-                    this.soldierModels[soldier].Visible = true;
+                    this.soldierModels[soldierC].Active = true;
+                    this.soldierModels[soldierC].Visible = true;
                 }
             }
         }
@@ -1065,7 +1065,7 @@ namespace GameLogic
 
                 //TODO: Set shooting animation clip for active
 
-                if (passive.CurrentHealth == HealthStateEnum.Disabled)
+                if (passive.CurrentHealth == HealthStates.Disabled)
                 {
                     //TODO: Set impacted and killed animation clip for passive
                 }
@@ -1196,14 +1196,14 @@ namespace GameLogic
 
             foreach (Team team in teams)
             {
-                foreach (Soldier soldier in team.Soldiers)
+                foreach (var soldierC in team.Soldiers)
                 {
-                    if (this.soldierModels[soldier].PickNearest(ref cursorRay, true, out PickingResult<Triangle> r))
+                    if (this.soldierModels[soldierC].PickNearest(ref cursorRay, true, out PickingResult<Triangle> r))
                     {
                         if (r.Distance < d)
                         {
                             //Select nearest picked soldier
-                            res = soldier;
+                            res = soldierC;
                             d = r.Distance;
                         }
                     }

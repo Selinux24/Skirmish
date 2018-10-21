@@ -19,8 +19,8 @@ namespace SceneTest
         SceneObject<SpriteButton> sceneTexturesButton = null;
         SceneObject<SpriteButton> exitButton = null;
 
-        private Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
-        private Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
+        private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
+        private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
 
         public SceneStart(Game game) : base(game)
         {

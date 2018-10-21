@@ -7,7 +7,7 @@ namespace GameLogic.Rules
     public class Soldier
     {
         public string Name { get; set; }
-        public SoldierClassEnum SoldierClass { get; set; }
+        public SoldierClasses SoldierClass { get; set; }
         public Team Team { get; set; }
 
         public readonly int BaseMovingCapacity = 100;
@@ -86,15 +86,15 @@ namespace GameLogic.Rules
                 return this.BaseEndurance - this.GetModifiersEndurance();
             }
         }
-        public HealthStateEnum CurrentHealth
+        public HealthStates CurrentHealth
         {
             get
             {
                 int health = this.BaseHealth - this.GetModifiersHealth();
 
-                if (health >= 50) return HealthStateEnum.Healthy;
-                else if (health >= 0) return HealthStateEnum.Wounded;
-                else return HealthStateEnum.Disabled;
+                if (health >= 50) return HealthStates.Healthy;
+                else if (health >= 0) return HealthStates.Wounded;
+                else return HealthStates.Disabled;
             }
         }
         public int CurrentInitiative
@@ -104,7 +104,7 @@ namespace GameLogic.Rules
                 return this.BaseInitiative - this.GetModifiersInitiative();
             }
         }
-        public MoraleStateEnum CurrentMorale { get; private set; }
+        public MoraleStates CurrentMorale { get; private set; }
         public int CurrentFirstAidHability
         {
             get
@@ -130,7 +130,7 @@ namespace GameLogic.Rules
             {
                 if (this.CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClassEnum.Movement;
+                    return this.CurrentItem.Class == ItemClasses.Movement;
                 }
 
                 return false;
@@ -142,7 +142,7 @@ namespace GameLogic.Rules
             {
                 if (this.CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClassEnum.Shooting;
+                    return this.CurrentItem.Class == ItemClasses.Shooting;
                 }
 
                 return false;
@@ -154,7 +154,7 @@ namespace GameLogic.Rules
             {
                 if (this.CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClassEnum.Melee;
+                    return this.CurrentItem.Class == ItemClasses.Melee;
                 }
 
                 return false;
@@ -166,7 +166,7 @@ namespace GameLogic.Rules
             {
                 if (this.CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClassEnum.Morale;
+                    return this.CurrentItem.Class == ItemClasses.Morale;
                 }
 
                 return false;
@@ -177,7 +177,7 @@ namespace GameLogic.Rules
             get
             {
                 return 
-                    this.CurrentHealth != HealthStateEnum.Disabled &&
+                    this.CurrentHealth != HealthStates.Disabled &&
                     this.canMove && 
                     !this.onMelee &&
                     this.CurrentMovingCapacity > 0;
@@ -188,7 +188,7 @@ namespace GameLogic.Rules
             get
             {
                 return
-                    this.CurrentHealth != HealthStateEnum.Disabled &&
+                    this.CurrentHealth != HealthStates.Disabled &&
                     this.canShoot && 
                     !this.onMelee && 
                     this.CurrentActionPoints > 0;
@@ -199,12 +199,12 @@ namespace GameLogic.Rules
             get
             {
                 return
-                    this.CurrentHealth != HealthStateEnum.Disabled &&
+                    this.CurrentHealth != HealthStates.Disabled &&
                     this.canFight && this.onMelee;
             }
         }
 
-        public Soldier(string name, SoldierClassEnum soldierClass, Team team)
+        public Soldier(string name, SoldierClasses soldierClass, Team team)
         {
             this.Name = name;
             this.SoldierClass = soldierClass;
@@ -269,7 +269,7 @@ namespace GameLogic.Rules
         }
         public void NextTurn()
         {
-            if (this.CurrentHealth == HealthStateEnum.Disabled || this.CurrentMorale == MoraleStateEnum.Demoralized)
+            if (this.CurrentHealth == HealthStates.Disabled || this.CurrentMorale == MoraleStates.Demoralized)
             {
                 this.canMove = false;
                 this.canShoot = false;
@@ -278,7 +278,7 @@ namespace GameLogic.Rules
                 this.turnMovingCapacity = this.BaseMovingCapacity;
                 this.turnActionPoints = this.BaseMovingCapacity;
             }
-            else if (this.CurrentMorale == MoraleStateEnum.Cowed)
+            else if (this.CurrentMorale == MoraleStates.Cowed)
             {
                 this.canMove = !this.onMelee;
                 this.canShoot = false;
@@ -439,9 +439,9 @@ namespace GameLogic.Rules
             }
         }
 
-        public void SetState(SoldierStateEnum soldierStates, Weapon weapon, Area area)
+        public void SetState(SoldierStates soldierStates, Weapon weapon, Area area)
         {
-            if (soldierStates != SoldierStateEnum.None)
+            if (soldierStates != SoldierStates.None)
             {
                 this.turnMovingCapacity = 0;
                 this.turnActionPoints = 0;
@@ -502,6 +502,8 @@ namespace GameLogic.Rules
 
         public override string ToString()
         {
+            string melee = this.onMelee ? "Can't fight" : "Not on melee";
+
             return string.Format(
                 "{0} [{1}][{2}] -> {3}, {4}, {5}",
                 this.Name,
@@ -509,7 +511,7 @@ namespace GameLogic.Rules
                 this.CurrentMorale,
                 this.IdleForMovement ? "Can move" : "Can't move",
                 this.IdleForShooting ? "Can shoot" : "Can't shoot",
-                this.IdleForMelee ? "Can fight" : this.onMelee ? "Can't fight" : "Not on melee");
+                this.IdleForMelee ? "Can fight" : melee);
         }
     }
 }

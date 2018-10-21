@@ -23,7 +23,7 @@ namespace Instancing
         private SceneObject<ModelInstanced> trees = null;
 
         private SceneObject<ModelInstanced> troops = null;
-        private Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         public TestScene(Game game) : base(game, SceneModes.ForwardLigthning)
         {

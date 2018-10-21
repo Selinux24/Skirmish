@@ -9,6 +9,6 @@ namespace Terrain.AI.Agents
         /// <summary>
         /// Flight height
         /// </summary>
-        public float FlightHeight;
+        public float FlightHeight { get; set; }
     }
 }

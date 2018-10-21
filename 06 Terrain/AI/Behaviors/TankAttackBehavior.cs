@@ -27,12 +27,9 @@ namespace Terrain.AI.Behaviors
             if (this.Target != null)
             {
                 var model = this.Agent.SceneObject.Get<Model>();
-                if (model != null)
+                if (model?.ModelPartCount > 0)
                 {
-                    if (model.ModelPartCount > 0)
-                    {
-                        model["Turret-mesh"].Manipulator.RotateTo(this.Target.Value, Vector3.Up, true, 0.01f);
-                    }
+                    model["Turret-mesh"].Manipulator.RotateTo(this.Target.Value, Vector3.Up, true, 0.01f);
                 }
             }
 

@@ -196,10 +196,10 @@ namespace SceneTest
             this.UpdateCamera(gameTime, shift, rightBtn);
 
             // Light
-            this.UpdateLight(gameTime);
+            this.UpdateLight();
 
             // Debug
-            this.UpdateDebug(gameTime);
+            this.UpdateDebug();
 
             base.Update(gameTime);
         }
@@ -236,7 +236,7 @@ namespace SceneTest
                 this.Camera.MoveBackward(gameTime, shift);
             }
         }
-        private void UpdateLight(GameTime gameTime)
+        private void UpdateLight()
         {
             Vector3 position = Vector3.Zero;
             float h = 3.0f;
@@ -265,7 +265,7 @@ namespace SceneTest
             this.Lights.SpotLights[0].DiffuseColor = col2;
             this.Lights.SpotLights[0].SpecularColor = col2;
         }
-        private void UpdateDebug(GameTime gameTime)
+        private void UpdateDebug()
         {
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {

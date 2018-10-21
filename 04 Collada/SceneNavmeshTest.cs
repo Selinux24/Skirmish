@@ -25,7 +25,7 @@ namespace Collada
         private SceneObject<TriangleListDrawer> graphDrawer = null;
 
         private SceneObject<Model> inputGeometry = null;
-        private BuildSettings nmsettings = BuildSettings.Default;
+        private readonly BuildSettings nmsettings = BuildSettings.Default;
 
         private float? lastElapsedSeconds = null;
 
@@ -179,15 +179,13 @@ namespace Collada
                 this.Game.SetScene<SceneStart>();
             }
 
-            this.UpdateCamera(gameTime);
+            this.UpdateCamera();
 
-            this.UpdateGraph(gameTime);
+            this.UpdateGraph();
         }
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateCamera()
         {
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
-
-            var prevPos = this.Camera.Position;
 
             if (this.Game.Input.KeyPressed(Keys.A))
             {
@@ -219,7 +217,7 @@ namespace Collada
                     this.Game.Input.MouseYDelta);
             }
         }
-        private void UpdateGraph(GameTime gameTime)
+        private void UpdateGraph()
         {
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 

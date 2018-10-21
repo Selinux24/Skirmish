@@ -10,11 +10,11 @@ namespace Terrain.AI
         /// <summary>
         /// Active agent
         /// </summary>
-        public AIAgent Active;
+        public AIAgent Active { get; set; }
         /// <summary>
         /// Passive agent
         /// </summary>
-        public AIAgent Passive;
+        public AIAgent Passive { get; set; }
 
         /// <summary>
         /// Constructor

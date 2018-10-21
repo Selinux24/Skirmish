@@ -40,7 +40,7 @@ namespace GameLogic.Rules
 
                 foreach (Team team in this.turnInfo.Keys)
                 {
-                    if (this.turnInfo[team] == true)
+                    if (this.turnInfo[team])
                     {
                         idleTeams.Add(team);
                     }
@@ -97,7 +97,7 @@ namespace GameLogic.Rules
 
         }
 
-        public void AddTeam(string name, string faction, TeamRoleEnum role, int soldiers, int heavy, int docs, bool addLeader = true)
+        public void AddTeam(string name, string faction, TeamRoles role, int soldiers, int heavy, int docs, bool addLeader = true)
         {
             Team team = new Team(name)
             {
@@ -107,22 +107,22 @@ namespace GameLogic.Rules
 
             if (addLeader)
             {
-                team.AddSoldier(string.Format("Hannibal Smith of {0}", name), SoldierClassEnum.Line);
+                team.AddSoldier(string.Format("Hannibal Smith of {0}", name), SoldierClasses.Line);
             }
 
             for (int i = 0; i < soldiers; i++)
             {
-                team.AddSoldier(string.Format("John Smith {0:00} of {1}", i + 1, name), SoldierClassEnum.Line);
+                team.AddSoldier(string.Format("John Smith {0:00} of {1}", i + 1, name), SoldierClasses.Line);
             }
 
             for (int i = 0; i < heavy; i++)
             {
-                team.AddSoldier(string.Format("Puro Smith {0:00} of {1}", i + 1, name), SoldierClassEnum.Heavy);
+                team.AddSoldier(string.Format("Puro Smith {0:00} of {1}", i + 1, name), SoldierClasses.Heavy);
             }
 
             for (int i = 0; i < docs; i++)
             {
-                team.AddSoldier(string.Format("Doc Smith {0:00} of {1}", i + 1, name), SoldierClassEnum.Medic);
+                team.AddSoldier(string.Format("Doc Smith {0:00} of {1}", i + 1, name), SoldierClasses.Medic);
             }
 
             this.teams.Add(team);
@@ -144,8 +144,8 @@ namespace GameLogic.Rules
         {
             //Victory conditions...
             Team[] activeTeams = teams.FindAll(t =>
-                t.Role != TeamRoleEnum.Neutral &&
-                Array.Exists(t.Soldiers, s => s.CurrentHealth != HealthStateEnum.Disabled)).ToArray();
+                t.Role != TeamRoles.Neutral &&
+                Array.Exists(t.Soldiers, s => s.CurrentHealth != HealthStates.Disabled)).ToArray();
 
             string[] factions = activeTeams.Select((a) => { return a.Faction; }).Distinct().ToArray();
             if (factions.Length == 1)
@@ -207,17 +207,14 @@ namespace GameLogic.Rules
                 int index = Array.IndexOf(selectables, current);
                 if (index >= 0)
                 {
-                    this.currentSoldier = index - 1;
+                    this.PrevSoldierIndex();
                 }
                 else
                 {
                     this.currentSoldier = Array.IndexOf(this.Soldiers, selectables[0]);
                 }
 
-                if (this.currentSoldier < 0)
-                {
-                    this.currentSoldier = this.Soldiers.Length - 1;
-                }
+                this.PrevSoldierIndex();
             }
 
             return this.CurrentSoldier;
@@ -250,7 +247,7 @@ namespace GameLogic.Rules
                 this.CurrentTeam,
                 this.CurrentSoldier,
                 melee != null,
-                ActionTypeEnum.Manual);
+                ActionTypes.Manual);
         }
         public Melee GetMelee(Soldier soldier)
         {
@@ -334,7 +331,7 @@ namespace GameLogic.Rules
                         }
                     }
 
-                    this.melees.RemoveAll(m => m.Done == true);
+                    this.melees.RemoveAll(m => m.Done);
                 }
 
                 this.CurrentPhase++;
@@ -346,11 +343,11 @@ namespace GameLogic.Rules
 
         public Team[] EnemyOf(Team team)
         {
-            return teams.FindAll(t => t.Faction != team.Faction && t.Role != TeamRoleEnum.Neutral).ToArray();
+            return teams.FindAll(t => t.Faction != team.Faction && t.Role != TeamRoles.Neutral).ToArray();
         }
         public Team[] FriendOf(Team team)
         {
-            return teams.FindAll(t => t.Faction == team.Faction || t.Role == TeamRoleEnum.Neutral).ToArray();
+            return teams.FindAll(t => t.Faction == team.Faction || t.Role == TeamRoles.Neutral).ToArray();
         }
 
         public override string ToString()

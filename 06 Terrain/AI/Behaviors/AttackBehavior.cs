@@ -117,7 +117,7 @@ namespace Terrain.AI.Behaviors
             if (this.attackTarget != null)
             {
                 bool onSight = this.Agent.EnemyOnSight(this.attackTarget);
-                bool onRange = !onSight ? false : this.Agent.EnemyOnAttackRange(this.attackTarget);
+                bool onRange = onSight && this.Agent.EnemyOnAttackRange(this.attackTarget);
 
                 if (!this.attackPosition.HasValue)
                 {

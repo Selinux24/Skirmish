@@ -16,19 +16,19 @@ namespace Terrain.AI
         /// <summary>
         /// Name
         /// </summary>
-        public string Name;
+        public string Name { get; set; }
         /// <summary>
         /// Fire cadence
         /// </summary>
-        public float Cadence;
+        public float Cadence { get; set; }
         /// <summary>
         /// Damage
         /// </summary>
-        public float Damage;
+        public float Damage { get; set; }
         /// <summary>
         /// Range
         /// </summary>
-        public float Range;
+        public float Range { get; set; }
         /// <summary>
         /// Gets wether the weapon can make an attack
         /// </summary>
@@ -80,24 +80,21 @@ namespace Terrain.AI
         /// <returns></returns>
         public float Shoot(Brain brain, AIAgent from, AIAgent to)
         {
-            if (this.CanShoot)
+            if (this.CanShoot && from.EnemyOnSight(to))
             {
-                if (from.EnemyOnSight(to))
+                var fromPosition = from.Manipulator.Position;
+                var toPosition = to.Manipulator.Position;
+
+                var distance = Vector3.Distance(toPosition, fromPosition);
+                if (distance <= this.Range)
                 {
-                    var fromPosition = from.Manipulator.Position;
-                    var toPosition = to.Manipulator.Position;
+                    //TODO: Ray picking
 
-                    var distance = Vector3.Distance(toPosition, fromPosition);
-                    if (distance <= this.Range)
-                    {
-                        //TODO: Ray picking
+                    this.lastAttackTime = 0;
+                    var damage = Helper.RandomGenerator.NextFloat(0, this.Damage);
+                    if (Helper.RandomGenerator.NextFloat(0, 1) > 0.9f) { damage *= 2f; } //Critic
 
-                        this.lastAttackTime = 0;
-                        var damage = Helper.RandomGenerator.NextFloat(0, this.Damage);
-                        if (Helper.RandomGenerator.NextFloat(0, 1) > 0.9f) { damage *= 2f; } //Critic
-
-                        return damage;
-                    }
+                    return damage;
                 }
             }
 

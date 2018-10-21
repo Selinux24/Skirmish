@@ -19,8 +19,6 @@ namespace Deferred
         private const float far = 1000f;
         private const float fogStart = 0.01f;
         private const float fogRange = 0.10f;
-        private const int layerObjects = 0;
-        private const int layerTerrain = 1;
         private const int layerEffects = 2;
         private const int layerHUD = 99;
 
@@ -51,9 +49,7 @@ namespace Deferred
         private SceneObject<LineListDrawer> lineDrawer = null;
         private SceneObject<TriangleListDrawer> terrainGraphDrawer = null;
 
-        private Random rnd = new Random(0);
-        private int pointOffset = 0;
-        private int spotOffset = 0;
+        private readonly Random rnd = new Random(0);
         private bool onlyModels = true;
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
@@ -179,9 +175,6 @@ namespace Deferred
             this.Lights.KeyLight.CastShadow = false;
             this.Lights.BackLight.CastShadow = false;
             this.Lights.FillLight.CastShadow = false;
-
-            this.pointOffset = this.Lights.PointLights.Length;
-            this.spotOffset = this.Lights.SpotLights.Length;
 
             #endregion
 
@@ -605,7 +598,7 @@ namespace Deferred
 
             UpdateLights(gameTime, shift);
 
-            UpdateDebug(gameTime, shift);
+            UpdateDebug(shift);
 
             //this.crowd.Update(gameTime);
         }
@@ -754,35 +747,32 @@ namespace Deferred
                 this.lineDrawer.Visible = false;
             }
 
-            if (animateLights)
+            if (animateLights && this.Lights.PointLights.Length > 0)
             {
-                if (this.Lights.PointLights.Length > 0)
+                for (int i = 1; i < this.Lights.PointLights.Length; i++)
                 {
-                    for (int i = 1; i < this.Lights.PointLights.Length; i++)
+                    var l = this.Lights.PointLights[i];
+
+                    if ((int)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds * 50f);
+                    if ((int)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds * 50f);
+
+                    if (l.Radius <= 0)
                     {
-                        var l = this.Lights.PointLights[i];
-
-                        if ((int)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds * 50f);
-                        if ((int)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds * 50f);
-
-                        if (l.Radius <= 0)
-                        {
-                            l.Radius = 0;
-                            l.State = 1;
-                        }
-
-                        if (l.Radius >= 50)
-                        {
-                            l.Radius = 50;
-                            l.State = -1;
-                        }
-
-                        l.Intensity = l.Radius * 0.1f;
+                        l.Radius = 0;
+                        l.State = 1;
                     }
+
+                    if (l.Radius >= 50)
+                    {
+                        l.Radius = 50;
+                        l.State = -1;
+                    }
+
+                    l.Intensity = l.Radius * 0.1f;
                 }
             }
         }
-        private void UpdateDebug(GameTime gameTime, bool shift)
+        private void UpdateDebug(bool shift)
         {
             if (this.Game.Input.KeyJustReleased(Keys.F12))
             {

@@ -18,8 +18,8 @@ namespace Collada
         SceneObject<SpriteButton> sceneModularDungeonButton = null;
         SceneObject<SpriteButton> exitButton = null;
 
-        private Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
-        private Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
+        private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
+        private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
 
         public SceneStart(Game game) : base(game)
         {
@@ -155,30 +155,30 @@ namespace Collada
             this.sceneDungeonWallButton.Instance.Text = "Dungeon Wall";
             this.sceneDungeonWallButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 1) - (this.sceneDungeonWallButton.Instance.Width / 2);
             this.sceneDungeonWallButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonWallButton.Instance.Height / 2);
-            this.sceneDungeonWallButton.Instance.Click += sceneButtonClick;
+            this.sceneDungeonWallButton.Instance.Click += SceneButtonClick;
 
             this.sceneNavMeshTestButton.Instance.Text = "Navmesh Test";
             this.sceneNavMeshTestButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 2) - (this.sceneNavMeshTestButton.Instance.Width / 2);
             this.sceneNavMeshTestButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneNavMeshTestButton.Instance.Height / 2);
-            this.sceneNavMeshTestButton.Instance.Click += sceneButtonClick;
+            this.sceneNavMeshTestButton.Instance.Click += SceneButtonClick;
 
             this.sceneDungeonButton.Instance.Text = "Dungeon";
             this.sceneDungeonButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 3) - (this.sceneDungeonButton.Instance.Width / 2);
             this.sceneDungeonButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonButton.Instance.Height / 2);
-            this.sceneDungeonButton.Instance.Click += sceneButtonClick;
+            this.sceneDungeonButton.Instance.Click += SceneButtonClick;
 
             this.sceneModularDungeonButton.Instance.Text = "Modular Dungeon";
             this.sceneModularDungeonButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 4) - (this.sceneModularDungeonButton.Instance.Width / 2);
             this.sceneModularDungeonButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneModularDungeonButton.Instance.Height / 2);
-            this.sceneModularDungeonButton.Instance.Click += sceneButtonClick;
+            this.sceneModularDungeonButton.Instance.Click += SceneButtonClick;
 
             this.exitButton.Instance.Text = "Exit";
             this.exitButton.Instance.Left = (this.Game.Form.RenderWidth / 6) * 5 - (this.exitButton.Instance.Width / 2);
             this.exitButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Instance.Height / 2);
-            this.exitButton.Instance.Click += exitButtonClick;
+            this.exitButton.Instance.Click += ExitButtonClick;
         }
 
-        private void sceneButtonClick(object sender, EventArgs e)
+        private void SceneButtonClick(object sender, EventArgs e)
         {
             if (sender == this.sceneDungeonWallButton.Instance)
             {
@@ -197,7 +197,7 @@ namespace Collada
                 this.Game.SetScene<SceneModularDungeon>();
             }
         }
-        private void exitButtonClick(object sender, EventArgs e)
+        private void ExitButtonClick(object sender, EventArgs e)
         {
             this.Game.Exit();
         }

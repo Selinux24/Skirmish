@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GameLogic.Rules
 {
     using GameLogic.Rules.Enum;
 
-    public abstract class ActionsManager
+    public static class ActionsManager
     {
-        public static ActionSpecification[] GetActions(Phase phase, Team team, Soldier soldier, bool onMelee, ActionTypeEnum actionType = ActionTypeEnum.All)
+        public static ActionSpecification[] GetActions(Phase phase, Team team, Soldier soldier, bool onMelee, ActionTypes actionType = ActionTypes.All)
         {
             ActionSpecification[] teamActions = ActionsManager.GetListForTeam();
 
@@ -44,42 +45,60 @@ namespace GameLogic.Rules
             return actions.ToArray();
         }
 
-        private static ActionSpecification[] FilterTeamActions(ActionSpecification[] actions, Phase phase, Team team, ActionTypeEnum actionType)
+        private static ActionSpecification[] FilterTeamActions(ActionSpecification[] actions, Phase phase, Team team, ActionTypes actionType)
         {
+            if (phase != Phase.End && actionType.HasFlag(ActionTypes.Automatic))
+            {
+                return actions.Where(a => a.Automatic).ToArray();
+            }
+            else if (phase != Phase.End && actionType.HasFlag(ActionTypes.Manual))
+            {
+                return actions.Where(a => !a.Automatic).ToArray();
+            }
+
             return actions;
         }
 
-        private static ActionSpecification[] FilterSoldierActions(ActionSpecification[] actions, Phase phase, Soldier soldier, bool onMelee, ActionTypeEnum actionType)
+        private static ActionSpecification[] FilterSoldierActions(ActionSpecification[] actions, Phase phase, Soldier soldier, bool onMelee, ActionTypes actionType)
         {
+            IEnumerable<ActionSpecification> filteredActions = actions;
+
             if (phase == Phase.Movement && soldier.IdleForMovement)
             {
-                actions = Array.FindAll(actions, a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMovingPhase);
+                filteredActions = actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMovingPhase);
             }
             else if (phase == Phase.Shooting && soldier.IdleForShooting)
             {
-                actions = Array.FindAll(actions, a => !a.ItemAction || a.ItemAction && soldier.HasItemsForShootingPhase);
+                filteredActions = actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForShootingPhase);
             }
             else if (phase == Phase.Melee && soldier.IdleForMelee)
             {
-                actions = Array.FindAll(actions, a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMeleePhase);
+                filteredActions = actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMeleePhase);
             }
             else if (phase == Phase.Morale)
             {
-                actions = Array.FindAll(actions, a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMoralePhase);
+                filteredActions = actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMoralePhase);
             }
 
-            actions = Array.FindAll(actions, a => !a.LeadersOnly || (a.LeadersOnly && soldier.IsLeader));
+            filteredActions = filteredActions.Where(a => !a.LeadersOnly || (a.LeadersOnly && soldier.IsLeader));
 
-            actions = Array.FindAll(actions, a => ((a.Classes & soldier.SoldierClass) == soldier.SoldierClass));
+            filteredActions = filteredActions.Where(a => ((a.Classes & soldier.SoldierClass) == soldier.SoldierClass));
 
-            if (actionType == ActionTypeEnum.All)
+            if (onMelee)
             {
-                return actions;
+                filteredActions = filteredActions.Where(a => onMelee && a.MeleeOnly);
             }
             else
             {
-                return Array.FindAll(actions, a => a.Automatic == (actionType == ActionTypeEnum.Automatic));
+                filteredActions = filteredActions.Where(a => !onMelee && !a.MeleeOnly);
             }
+
+            if (actionType != ActionTypes.All)
+            {
+                filteredActions = filteredActions.Where(a => a.Automatic == (actionType == ActionTypes.Automatic));
+            }
+
+            return filteredActions.ToArray();
         }
 
         #region Team actions
@@ -97,18 +116,18 @@ namespace GameLogic.Rules
         {
             return new[]
             {
-                new ActionSpecification() { Action = ActionsEnum.Move,              Name = "Move" },
-                new ActionSpecification() { Action = ActionsEnum.Run,               Name = "Run" },
-                new ActionSpecification() { Action = ActionsEnum.Crawl,             Name = "Crawl" },
-                new ActionSpecification() { Action = ActionsEnum.Assault,           Name = "Assault" },
-                new ActionSpecification() { Action = ActionsEnum.CoveringFire,      Name = "Covering Fire" },
-                new ActionSpecification() { Action = ActionsEnum.Reload,            Name = "Reload" },
-                new ActionSpecification() { Action = ActionsEnum.Repair,            Name = "Repair" },
-                new ActionSpecification() { Action = ActionsEnum.Inventory,         Name = "Inventory" },
-                new ActionSpecification() { Action = ActionsEnum.UseMovementItem,   Name = "Use Item",          ItemAction = true },
-                new ActionSpecification() { Action = ActionsEnum.Communications,    Name = "Communications",    LeadersOnly = true },
-                new ActionSpecification() { Action = ActionsEnum.FindCover,         Name = "Find Cover",        Automatic = true },
-                new ActionSpecification() { Action = ActionsEnum.RunAway,           Name = "Run Away",          Automatic = true },
+                new ActionSpecification() { Action = Actions.Move,              Name = "Move" },
+                new ActionSpecification() { Action = Actions.Run,               Name = "Run" },
+                new ActionSpecification() { Action = Actions.Crawl,             Name = "Crawl" },
+                new ActionSpecification() { Action = Actions.Assault,           Name = "Assault" },
+                new ActionSpecification() { Action = Actions.CoveringFire,      Name = "Covering Fire" },
+                new ActionSpecification() { Action = Actions.Reload,            Name = "Reload" },
+                new ActionSpecification() { Action = Actions.Repair,            Name = "Repair" },
+                new ActionSpecification() { Action = Actions.Inventory,         Name = "Inventory" },
+                new ActionSpecification() { Action = Actions.UseMovementItem,   Name = "Use Item",          ItemAction = true },
+                new ActionSpecification() { Action = Actions.Communications,    Name = "Communications",    LeadersOnly = true },
+                new ActionSpecification() { Action = Actions.FindCover,         Name = "Find Cover",        Automatic = true },
+                new ActionSpecification() { Action = Actions.RunAway,           Name = "Run Away",          Automatic = true },
             };
         }
 
@@ -157,7 +176,7 @@ namespace GameLogic.Rules
         public static bool Assault(Skirmish game, Soldier active, Soldier passive, int wastedPoints)
         {
             //TODO: This test must be repeated many times
-            if (passive.CurrentHealth != HealthStateEnum.Disabled)
+            if (passive.CurrentHealth != HealthStates.Disabled)
             {
                 game.JoinMelee(active, passive);
 
@@ -174,7 +193,7 @@ namespace GameLogic.Rules
 
         public static bool CoveringFire(Skirmish game, Soldier active, Weapon weapon, Area area, int wastedPoints)
         {
-            active.SetState(SoldierStateEnum.CoveringFire, weapon, area);
+            active.SetState(SoldierStates.CoveringFire, weapon, area);
 
             return true;
         }
@@ -236,11 +255,11 @@ namespace GameLogic.Rules
         {
             return new[]
             {
-                new ActionSpecification() { Action = ActionsEnum.Shoot,             Name = "Shoot",  },
-                new ActionSpecification() { Action = ActionsEnum.SupressingFire,    Name = "Supressing Fire",  },
-                new ActionSpecification() { Action = ActionsEnum.Support,           Name = "Support",           NeedsCommunicator = true, },
-                new ActionSpecification() { Action = ActionsEnum.UseShootingItem,   Name = "Use Item",          ItemAction = true },
-                new ActionSpecification() { Action = ActionsEnum.FirstAid,          Name = "First Aid",         Classes = SoldierClassEnum.Medic },
+                new ActionSpecification() { Action = Actions.Shoot,             Name = "Shoot",  },
+                new ActionSpecification() { Action = Actions.SupressingFire,    Name = "Supressing Fire",  },
+                new ActionSpecification() { Action = Actions.Support,           Name = "Support",           NeedsCommunicator = true, },
+                new ActionSpecification() { Action = Actions.UseShootingItem,   Name = "Use Item",          ItemAction = true },
+                new ActionSpecification() { Action = Actions.FirstAid,          Name = "First Aid",         Classes = SoldierClasses.Medic },
             };
         }
 
@@ -256,7 +275,7 @@ namespace GameLogic.Rules
 
         public static bool SupressingFire(Skirmish game, Soldier active, Weapon weapon, Area area, int wastedPoints)
         {
-            active.SetState(SoldierStateEnum.SupressingFire, weapon, area);
+            active.SetState(SoldierStates.SupressingFire, weapon, area);
 
             return true;
         }
@@ -293,8 +312,8 @@ namespace GameLogic.Rules
         {
             return new[]
             {
-                new ActionSpecification() { Action = ActionsEnum.LeaveCombat,      Name = "Leave Combat" },
-                new ActionSpecification() { Action = ActionsEnum.UseMeleeItem,     Name = "Use Item",      ItemAction = true },
+                new ActionSpecification() { Action = Actions.LeaveCombat,      Name = "Leave Combat" },
+                new ActionSpecification() { Action = Actions.UseMeleeItem,     Name = "Use Item",      ItemAction = true },
             };
         }
 
@@ -325,8 +344,8 @@ namespace GameLogic.Rules
         {
             return new[]
             {
-                new ActionSpecification() { Action = ActionsEnum.TakeControl,     Name = "Take Control",  Automatic = true },
-                new ActionSpecification() { Action = ActionsEnum.UseMoraleItem,   Name = "Use Item", },
+                new ActionSpecification() { Action = Actions.TakeControl,     Name = "Take Control",  Automatic = true },
+                new ActionSpecification() { Action = Actions.UseMoraleItem,   Name = "Use Item", },
             };
         }
 

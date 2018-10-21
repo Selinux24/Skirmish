@@ -9,9 +9,9 @@ namespace SceneTest
     {
         private const int layerHUD = 99;
 
-        private float spaceSize = 40;
-        private float radius = 1;
-        private uint stacks = 40;
+        private readonly float spaceSize = 40;
+        private readonly float radius = 1;
+        private readonly uint stacks = 40;
 
         private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> runtime = null;

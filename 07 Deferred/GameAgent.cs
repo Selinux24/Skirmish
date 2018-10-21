@@ -10,17 +10,18 @@ namespace Deferred
     public class GameAgent<T> : IUpdatable, IAgent where T : ManipulatorController
     {
         /// <summary>
-        /// Agent type
-        /// </summary>
-        public AgentType AgentType { get; set; }
-        /// <summary>
         /// Model
         /// </summary>
-        private SceneObject model;
+        private readonly SceneObject model;
         /// <summary>
         /// Controller
         /// </summary>
-        private T controller;
+        private readonly T controller;
+
+        /// <summary>
+        /// Agent type
+        /// </summary>
+        public AgentType AgentType { get; set; }
 
         /// <summary>
         /// Gets or sets if the agent is active

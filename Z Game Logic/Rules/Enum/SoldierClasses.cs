@@ -1,7 +1,9 @@
-﻿
+﻿using System;
+
 namespace GameLogic.Rules.Enum
 {
-    public enum SoldierClassEnum : int
+    [Flags]
+    public enum SoldierClasses
     {
         None = 0,
         Line = 1,

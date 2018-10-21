@@ -30,7 +30,7 @@ namespace ModelDrawing
         private SceneObject<ParticleManager> pManager = null;
         private SceneObject<LineListDrawer> pManagerLineDrawer = null;
 
-        private Random rnd = new Random();
+        private readonly Random rnd = new Random();
 
         public TestScene(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -197,7 +197,7 @@ namespace ModelDrawing
             }
             if (this.Game.Input.KeyJustPressed(Keys.D6))
             {
-                this.AddSmokePlumeSystemGPU2();
+                this.AddSmokePlumeSystemGPU();
             }
 
             if (this.Game.Input.KeyJustPressed(Keys.P))
@@ -324,37 +324,6 @@ namespace ModelDrawing
         }
         private void AddSmokePlumeSystemGPU()
         {
-            Vector3 position = new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10));
-            Vector3 velocity = Vector3.Up;
-            float duration = this.rnd.NextFloat(10, 60);
-            float rate = this.rnd.NextFloat(0.1f, 1f);
-
-            var emitter1 = new ParticleEmitter()
-            {
-                Position = position,
-                Velocity = velocity,
-                Duration = duration,
-                EmissionRate = rate * 0.5f,
-                InfiniteDuration = false,
-                MaximumDistance = 100f,
-            };
-
-            var emitter2 = new ParticleEmitter()
-            {
-                Position = position,
-                Velocity = velocity,
-                Duration = duration + (duration * 0.1f),
-                EmissionRate = rate,
-                InfiniteDuration = false,
-                MaximumDistance = 500f,
-            };
-
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.GPU, this.pFire, emitter1);
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.GPU, this.pPlume, emitter2);
-        }
-
-        private void AddSmokePlumeSystemGPU2()
-        {
             Vector3 position = new Vector3(-5, 0, 0);
             Vector3 velocity = Vector3.Up;
             float duration = 60;
@@ -407,7 +376,7 @@ namespace ModelDrawing
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.GPU, this.pPlume, emitter22);
         }
 
-        private List<Line3D> lines = new List<Line3D>();
+        private readonly List<Line3D> lines = new List<Line3D>();
         private void DrawVolumes()
         {
             lines.Clear();
@@ -428,7 +397,7 @@ namespace ModelDrawing
             var particle1 = this.pManager.Instance.GetParticleSystem(0);
             var particle2 = this.pManager.Instance.GetParticleSystem(1);
 
-            this.text.Instance.Text = string.Format("Model Drawing");
+            this.text.Instance.Text = "Model Drawing";
             this.statistics.Instance.Text = this.Game.RuntimeText;
             this.text1.Instance.Text = string.Format("P1 - {0}", particle1);
             this.text2.Instance.Text = string.Format("P2 - {0}", particle2);

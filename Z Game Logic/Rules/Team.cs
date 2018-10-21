@@ -6,11 +6,11 @@ namespace GameLogic.Rules
 
     public class Team
     {
-        private List<Soldier> soldiers = new List<Soldier>();
+        private readonly List<Soldier> soldiers = new List<Soldier>();
 
         public string Name { get; set; }
         public string Faction { get; set; }
-        public TeamRoleEnum Role { get; set; }
+        public TeamRoles Role { get; set; }
         public Soldier Leader
         {
             get
@@ -59,7 +59,7 @@ namespace GameLogic.Rules
             }
         }
 
-        public void AddSoldier(string name, SoldierClassEnum soldierClass)
+        public void AddSoldier(string name, SoldierClasses soldierClass)
         {
             this.soldiers.Add(new Soldier(name, soldierClass, this));
         }

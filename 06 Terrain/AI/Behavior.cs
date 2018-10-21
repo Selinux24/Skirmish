@@ -21,7 +21,7 @@ namespace Terrain.AI
         /// Constructor
         /// </summary>
         /// <param name="agent">Agent</param>
-        public Behavior(AIAgent agent)
+        protected Behavior(AIAgent agent)
         {
             this.Agent = agent;
         }

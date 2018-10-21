@@ -7,8 +7,6 @@ namespace ModelDrawing
 {
     public class MovingEmitter : ParticleEmitter
     {
-        private float totalTime = 0;
-
         public float AngularVelocity { get; set; }
         public float Radius { get; set; }
 
@@ -18,9 +16,7 @@ namespace ModelDrawing
         {
             base.Update(context);
 
-            this.totalTime += context.GameTime.ElapsedSeconds;
-
-            var position = GetPosition(this.AngularVelocity, this.Radius, totalTime);
+            var position = GetPosition(this.AngularVelocity, this.Radius, this.TotalTime);
 
             this.Velocity = position - this.Position;
             this.Position = position;

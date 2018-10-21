@@ -7,7 +7,7 @@ namespace GameLogic.Rules
 
     public class Melee
     {
-        private List<Soldier> soldiers = new List<Soldier>();
+        private readonly List<Soldier> soldiers = new List<Soldier>();
 
         public string[] Factions
         {
@@ -72,24 +72,21 @@ namespace GameLogic.Rules
                 {
                     foreach (Soldier s in iSoldiers)
                     {
-                        Soldier enemy = this.GetRandomEnemy(s);
-                        if (enemy != null)
+                        var enemy = this.GetRandomEnemy(s);
+                        if (enemy != null && s.FightingTest())
                         {
-                            if (s.FightingTest())
-                            {
-                                enemy.HitTest(s.CurrentMeleeWeapon);
-                            }
+                            enemy.HitTest(s.CurrentMeleeWeapon);
                         }
                     }
                 }
             }
 
-            this.soldiers.ForEach((s) => 
+            this.soldiers.ForEach((s) =>
             {
-                if (s.CurrentHealth == HealthStateEnum.Disabled) s.MeleeDisolved();
+                if (s.CurrentHealth == HealthStates.Disabled) s.MeleeDisolved();
             });
 
-            this.soldiers.RemoveAll(s => s.CurrentHealth == HealthStateEnum.Disabled);
+            this.soldiers.RemoveAll(s => s.CurrentHealth == HealthStates.Disabled);
         }
         public void Disolve()
         {

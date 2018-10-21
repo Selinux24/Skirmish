@@ -68,7 +68,7 @@ namespace Terrain
         private SceneObject<SkyPlane> clouds = null;
         private SceneObject<Scenery> terrain = null;
         private SceneObject<GroundGardener> gardener = null;
-        private Vector3 windDirection = Vector3.UnitX;
+        private readonly Vector3 windDirection = Vector3.UnitX;
         private readonly float windStrength = 1f;
         private readonly List<Line3D> oks = new List<Line3D>();
         private readonly List<Line3D> errs = new List<Line3D>();
@@ -79,19 +79,17 @@ namespace Terrain
         private SceneObject<ModelInstanced> rocks = null;
         private SceneObject<ModelInstanced> tree1 = null;
         private SceneObject<ModelInstanced> tree2 = null;
-        private Color4 objColor = Color.Magenta;
+        private readonly Color4 objColor = Color.Magenta;
         private bool objNotSet = true;
 
         private SceneObject<Model> helicopter = null;
         private readonly HeliManipulatorController helicopterController = null;
-        private Vector3 helicopterHeightOffset = (Vector3.Up * 15f);
-        private Color4 gridColor = new Color4(Color.LightSeaGreen.ToColor3(), 0.5f);
-        private Color4 curvesColor = Color.Red;
-        private Color4 pointsColor = Color.Blue;
-        private Color4 segmentsColor = new Color4(Color.Cyan.ToColor3(), 0.8f);
-        private Color4 hAxisColor = Color.YellowGreen;
-        private Color4 wAxisColor = Color.White;
-        private Color4 velocityColor = Color.Green;
+        private readonly Vector3 helicopterHeightOffset = (Vector3.Up * 15f);
+        private readonly Color4 curvesColor = Color.Red;
+        private readonly Color4 pointsColor = Color.Blue;
+        private readonly Color4 segmentsColor = new Color4(Color.Cyan.ToColor3(), 0.8f);
+        private readonly Color4 hAxisColor = Color.YellowGreen;
+        private readonly Color4 wAxisColor = Color.White;
 
         private SceneObject<LineListDrawer> staticObjLineDrawer = null;
         private SceneObject<LineListDrawer> movingObjLineDrawer = null;
@@ -135,11 +133,8 @@ namespace Terrain
         {
             if (disposing)
             {
-                if (this.debugTex != null)
-                {
-                    this.debugTex.Dispose();
-                    this.debugTex = null;
-                }
+                this.debugTex?.Dispose();
+                this.debugTex = null;
             }
 
             base.Dispose(disposing);
@@ -425,21 +420,12 @@ namespace Terrain
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeLights()
+        private void InitializeLights()
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Restart();
-
             this.Lights.DirectionalLights[0].Enabled = true;
             this.Lights.DirectionalLights[0].CastShadow = true;
             this.Lights.DirectionalLights[1].Enabled = true;
             this.Lights.DirectionalLights[2].Enabled = true;
-
-            //this.Lights.ShadowLDDistance = 100f;
-            //this.Lights.ShadowHDDistance = 25f;
-
-            sw.Stop();
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
         private Task<double> InitializeLensFlare()
         {
@@ -1193,12 +1179,9 @@ namespace Terrain
         }
         private void UpdateCursor(Ray pickingRay)
         {
-            if (!this.walkMode)
+            if (!this.walkMode && this.terrain.Geometry.PickNearest(ref pickingRay, true, out PickingResult<Triangle> r))
             {
-                if (this.terrain.Geometry.PickNearest(ref pickingRay, true, out PickingResult<Triangle> r))
-                {
-                    this.cursor3D.Transform.SetPosition(r.Position);
-                }
+                this.cursor3D.Transform.SetPosition(r.Position);
             }
         }
         private void UpdateCamera(GameTime gameTime, Ray pickingRay)
@@ -1414,17 +1397,17 @@ namespace Terrain
 
             if (this.Game.Input.KeyJustReleased(Keys.F11))
             {
-                if (this.drawDrawVolumes == false && this.drawCullVolumes == false)
+                if (!this.drawDrawVolumes && !this.drawCullVolumes)
                 {
                     this.drawDrawVolumes = true;
                     this.drawCullVolumes = false;
                 }
-                else if (this.drawDrawVolumes == true && this.drawCullVolumes == false)
+                else if (this.drawDrawVolumes && !this.drawCullVolumes)
                 {
                     this.drawDrawVolumes = false;
                     this.drawCullVolumes = true;
                 }
-                else if (this.drawDrawVolumes == false && this.drawCullVolumes == true)
+                else if (!this.drawDrawVolumes && this.drawCullVolumes)
                 {
                     this.drawDrawVolumes = false;
                     this.drawCullVolumes = false;
@@ -1617,13 +1600,13 @@ namespace Terrain
 
             Vector3[] cPoints = new Vector3[15];
 
-            Random rnd = new Random();
+            Random hrnd = new Random();
 
             if (this.helicopterController != null && this.helicopterController.HasPath)
             {
                 for (int i = 0; i < cPoints.Length - 2; i++)
                 {
-                    cPoints[i] = this.GetRandomPoint(rnd, this.helicopterHeightOffset);
+                    cPoints[i] = this.GetRandomPoint(hrnd, this.helicopterHeightOffset);
                 }
             }
             else
@@ -1633,7 +1616,7 @@ namespace Terrain
 
                 for (int i = 2; i < cPoints.Length - 2; i++)
                 {
-                    cPoints[i] = this.GetRandomPoint(rnd, this.helicopterHeightOffset);
+                    cPoints[i] = this.GetRandomPoint(hrnd, this.helicopterHeightOffset);
                 }
             }
 

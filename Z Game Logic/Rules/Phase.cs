@@ -1,7 +1,7 @@
 ﻿
 namespace GameLogic.Rules
 {
-    public enum Phase : int
+    public enum Phase
     {
         Movement = 0,
         Shooting = 1,

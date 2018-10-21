@@ -20,8 +20,8 @@ namespace Skybox
             new Vector2(+5, -5),
             new Vector2(-5, -5),
         };
-        private Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
-        private Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
+        private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
+        private readonly Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
         private readonly int bsphSlices = 20;
         private readonly int bsphStacks = 10;
 
@@ -335,8 +335,7 @@ namespace Skybox
             #region Walk
 
             {
-                Vector3 walkerPosition;
-                if (this.Walk(this.walker, previousPosition, this.Camera.Position, out walkerPosition))
+                if (this.Walk(this.walker, previousPosition, this.Camera.Position, out Vector3 walkerPosition))
                 {
                     this.Camera.Goto(walkerPosition);
                 }

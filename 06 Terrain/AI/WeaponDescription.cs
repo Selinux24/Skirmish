@@ -1,4 +1,5 @@
-﻿namespace Terrain.AI
+﻿
+namespace Terrain.AI
 {
     /// <summary>
     /// Weapon description
@@ -8,18 +9,18 @@
         /// <summary>
         /// Name
         /// </summary>
-        public string Name;
+        public string Name { get; set; }
         /// <summary>
         /// Cadence
         /// </summary>
-        public float Cadence;
+        public float Cadence { get; set; }
         /// <summary>
         /// Damage
         /// </summary>
-        public float Damage;
+        public float Damage { get; set; }
         /// <summary>
         /// Range
         /// </summary>
-        public float Range;
+        public float Range { get; set; }
     }
 }

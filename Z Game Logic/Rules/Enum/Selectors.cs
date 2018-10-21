@@ -1,7 +1,7 @@
 ﻿
 namespace GameLogic.Rules.Enum
 {
-    public enum SelectorEnum
+    public enum Selectors
     {
         Goto,
         Area,

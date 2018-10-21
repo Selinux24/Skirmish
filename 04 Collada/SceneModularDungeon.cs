@@ -15,28 +15,27 @@ namespace Collada
     public class SceneModularDungeon : Scene
     {
         private const int layerHUD = 99;
-        private const int layerEffects = 98;
 
         private const float maxDistance = 35;
 
-        private Random rnd = new Random();
+        private readonly Random rnd = new Random();
 
         private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> fps = null;
         private SceneObject<TextDrawer> info = null;
         private SceneObject<Sprite> backPannel = null;
 
-        private Color ambientDown = new Color(127, 127, 127, 255);
-        private Color ambientUp = new Color(137, 116, 104, 255);
+        private readonly Color ambientDown = new Color(127, 127, 127, 255);
+        private readonly Color ambientUp = new Color(137, 116, 104, 255);
 
         private Player agent = null;
-        private Color agentTorchLight = new Color(255, 249, 224, 255);
+        private readonly Color agentTorchLight = new Color(255, 249, 224, 255);
 
         private SceneLightPoint torch = null;
 
         private SceneObject<ModularScenery> scenery = null;
 
-        private float doorDistance = 3f;
+        private readonly float doorDistance = 3f;
         private SceneObject<TextDrawer> messages = null;
 
         private SceneObject<Model> rat = null;
@@ -45,7 +44,7 @@ namespace Collada
         private Dictionary<string, AnimationPlan> ratPaths = null;
         private bool ratActive = false;
         private float ratTime = 5f;
-        private float nextRatTime = 3f;
+        private readonly float nextRatTime = 3f;
         private Vector3[] ratHoles = null;
 
         private SceneObject<ModelInstanced> human = null;
@@ -63,11 +62,10 @@ namespace Collada
         private readonly string ntFile = "nm.obj";
         private bool taskRunning = false;
 
-        private Dictionary<int, object> obstacles = new Dictionary<int, object>();
-        private Color obstacleColor = new Color(Color.Pink.ToColor3(), 1f);
+        private readonly Dictionary<int, object> obstacles = new Dictionary<int, object>();
+        private readonly Color obstacleColor = new Color(Color.Pink.ToColor3(), 1f);
 
-        private Dictionary<int, object> connections = new Dictionary<int, object>();
-        private Color connectionColor = new Color(Color.LightBlue.ToColor3(), 1f);
+        private readonly Color connectionColor = new Color(Color.LightBlue.ToColor3(), 1f);
 
         public SceneModularDungeon(Game game)
             : base(game, SceneModes.DeferredLightning)
@@ -469,7 +467,7 @@ namespace Collada
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
                 //Save the navigation triangles to a file
-                var task = Task.Run(() =>
+                Task.Run(() =>
                 {
                     if (!taskRunning)
                     {
@@ -537,14 +535,14 @@ namespace Collada
 
             this.UpdateRat(gameTime);
 
-            this.UpdateCamera(gameTime);
+            this.UpdateCamera();
 
-            this.UpdateEntities(gameTime);
+            this.UpdateEntities();
 
             this.fps.Instance.Text = this.Game.RuntimeText;
             this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
         }
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateCamera()
         {
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
@@ -662,7 +660,7 @@ namespace Collada
                 this.ratDrawer.Instance.SetLines(Color.White, Line3D.CreateWiredBox(bbox));
             }
         }
-        private void UpdateEntities(GameTime gameTime)
+        private void UpdateEntities()
         {
             var sphere = new BoundingSphere(this.Camera.Position, doorDistance);
 
@@ -689,7 +687,7 @@ namespace Collada
 
                     PrepareMessage(true, msg);
 
-                    UpdateExit(gameTime, items[0].Item);
+                    UpdateExit(items[0].Item);
 
                     return;
                 }
@@ -700,7 +698,7 @@ namespace Collada
 
                     PrepareMessage(true, msg);
 
-                    UpdateDoor(gameTime, items[0].Item);
+                    UpdateDoor(items[0].Item);
 
                     return;
                 }
@@ -715,7 +713,7 @@ namespace Collada
 
                         PrepareMessage(true, msg);
 
-                        UpdateLight(gameTime, lights);
+                        UpdateLight(lights);
 
                         return;
                     }
@@ -745,7 +743,7 @@ namespace Collada
                 }
             }
         }
-        private void UpdateExit(GameTime gameTime, ModelInstance item)
+        private void UpdateExit(ModelInstance item)
         {
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
@@ -760,7 +758,7 @@ namespace Collada
                 }
             }
         }
-        private void UpdateDoor(GameTime gameTime, ModelInstance item)
+        private void UpdateDoor(ModelInstance item)
         {
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
@@ -774,7 +772,7 @@ namespace Collada
                 this.RequestGraphUpdate(1);
             }
         }
-        private void UpdateLight(GameTime gameTime, SceneLight[] lights)
+        private void UpdateLight(SceneLight[] lights)
         {
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
@@ -866,9 +864,9 @@ namespace Collada
         {
             this.connectionDrawer.Instance.Clear(connectionColor);
 
-            var connections = this.PathFinderDescription.Input.GetConnections();
+            var conns = this.PathFinderDescription.Input.GetConnections();
 
-            foreach (var conn in connections)
+            foreach (var conn in conns)
             {
                 Line3D[] arclines = Line3D.CreateArc(conn.Start, conn.End, 0.25f, 8);
                 this.connectionDrawer.Instance.AddLines(connectionColor, arclines);

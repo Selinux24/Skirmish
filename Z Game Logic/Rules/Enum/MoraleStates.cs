@@ -1,7 +1,7 @@
 ﻿
 namespace GameLogic.Rules.Enum
 {
-    public enum MoraleStateEnum
+    public enum MoraleStates
     {
         Lucid,
         Cowed,

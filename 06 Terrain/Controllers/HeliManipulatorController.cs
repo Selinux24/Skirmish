@@ -11,6 +11,7 @@ namespace Terrain.Controllers
         /// Previous speed
         /// </summary>
         private float prevSpeed = 0;
+      
         /// <summary>
         /// Current acceleration
         /// </summary>

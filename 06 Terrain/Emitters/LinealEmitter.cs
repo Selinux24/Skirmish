@@ -9,7 +9,6 @@ namespace Terrain.Emitters
     /// </summary>
     public class LinealEmitter : ParticleEmitter
     {
-        private readonly Vector3 from;
         private readonly Vector3 to;
         private readonly Vector3 direction;
         private readonly float speed;
@@ -23,7 +22,6 @@ namespace Terrain.Emitters
         /// <param name="speed">Speed</param>
         public LinealEmitter(Vector3 from, Vector3 to, float speed) : base()
         {
-            this.from = from;
             this.to = to;
             var vDir = (to - from);
             this.direction = Vector3.Normalize(vDir);
@@ -32,7 +30,7 @@ namespace Terrain.Emitters
             this.Position = from;
             this.Duration = (vDir.Length() / speed);
         }
-    
+
         /// <summary>
         /// Updates the emitter state
         /// </summary>

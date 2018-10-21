@@ -1,7 +1,7 @@
 ﻿
 namespace GameLogic.Rules.Enum
 {
-    public enum SoldierStateEnum
+    public enum SoldierStates
     {
         None,
         CoveringFire,

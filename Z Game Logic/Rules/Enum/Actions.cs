@@ -1,7 +1,7 @@
 ﻿
 namespace GameLogic.Rules.Enum
 {
-    public enum ActionsEnum
+    public enum Actions
     {
         Move,
         Run,

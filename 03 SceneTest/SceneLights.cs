@@ -15,10 +15,7 @@ namespace SceneTest
     /// </summary>
     public class SceneLights : Scene
     {
-        private const int layerObjects = 0;
-        private const int layerTerrain = 1;
         private const int layerEffects = 2;
-        private const int layerHUD = 99;
         private const float spaceSize = 20;
 
         private SceneObject<Model> floorAsphalt = null;
@@ -285,13 +282,13 @@ namespace SceneTest
             this.UpdateCamera(gameTime, shift, rightBtn);
 
             // Light
-            this.UpdateLight(gameTime, shift);
+            this.UpdateLight(shift);
 
             // Debug
-            this.UpdateDebug(gameTime);
+            this.UpdateDebug();
 
             // Buffers
-            this.UpdateBufferDrawer(gameTime);
+            this.UpdateBufferDrawer(shift);
 
             base.Update(gameTime);
         }
@@ -328,7 +325,7 @@ namespace SceneTest
                 this.Camera.MoveBackward(gameTime, shift);
             }
         }
-        private void UpdateLight(GameTime gameTime, bool shift)
+        private void UpdateLight(bool shift)
         {
             Vector3 position = Vector3.Zero;
             float h = 8.0f;
@@ -409,7 +406,7 @@ namespace SceneTest
                 light.Enabled = !light.Enabled;
             }
         }
-        private void UpdateDebug(GameTime gameTime)
+        private void UpdateDebug()
         {
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
@@ -470,7 +467,7 @@ namespace SceneTest
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = (drawDrawVolumes || drawCullVolumes);
         }
-        private void UpdateBufferDrawer(GameTime gameTime)
+        private void UpdateBufferDrawer(bool shift)
         {
             if (this.Game.Input.KeyJustReleased(Keys.F5))
             {
@@ -497,6 +494,11 @@ namespace SceneTest
                 if (this.bufferDrawer.Instance.TextureIndex > 0)
                 {
                     this.bufferDrawer.Instance.TextureIndex--;
+                }
+
+                if (shift)
+                {
+                    this.bufferDrawer.Instance.TextureIndex = 0;
                 }
             }
         }

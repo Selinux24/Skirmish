@@ -124,11 +124,11 @@ namespace Collada
                 this.Game.SetScene<SceneStart>();
             }
 
-            this.UpdateCamera(gameTime);
+            this.UpdateCamera();
 
             this.fps.Instance.Text = this.Game.RuntimeText;
         }
-        private void UpdateCamera(GameTime gameTime)
+        private void UpdateCamera()
         {
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
@@ -164,8 +164,7 @@ namespace Collada
                     this.Game.Input.MouseYDelta);
             }
 
-            Vector3 walkerPos;
-            if (this.Walk(this.agent, prevPos, this.Camera.Position, out walkerPos))
+            if (this.Walk(this.agent, prevPos, this.Camera.Position, out Vector3 walkerPos))
             {
                 this.Camera.Goto(walkerPos);
             }

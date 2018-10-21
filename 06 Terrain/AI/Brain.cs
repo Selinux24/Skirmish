@@ -9,13 +9,14 @@ namespace Terrain.AI
     public class Brain
     {
         /// <summary>
-        /// Ground instance
-        /// </summary>
-        public Scene Scene;
-        /// <summary>
         /// Groups dictionary
         /// </summary>
-        private Dictionary<int, List<AIAgent>> groups = new Dictionary<int, List<AIAgent>>();
+        private readonly Dictionary<int, List<AIAgent>> groups = new Dictionary<int, List<AIAgent>>();
+
+        /// <summary>
+        /// Ground instance
+        /// </summary>
+        public Scene Scene { get; set; }
 
         /// <summary>
         /// Constructor

@@ -21,17 +21,17 @@ namespace Animation
         private SceneObject<Model> floor = null;
 
         private SceneObject<Model> soldier = null;
-        private Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
         private SceneObject<TriangleListDrawer> soldierTris = null;
         private SceneObject<LineListDrawer> soldierLines = null;
-        private Color soldierTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
-        private Color soldierLinesColor = new Color(Color.Red.ToColor3(), 1f);
+        private readonly Color soldierTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
+        private readonly Color soldierLinesColor = new Color(Color.Red.ToColor3(), 1f);
         private bool showSoldierDEBUG = false;
 
         private SceneObject<Model> rat = null;
-        private Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
 
-        private Random rnd = new Random();
+        private readonly Random rnd = new Random();
 
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)

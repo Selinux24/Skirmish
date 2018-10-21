@@ -21,13 +21,14 @@ namespace Terrain.AI.Behaviors
         /// </summary>
         private float checkPointTime;
         /// <summary>
-        /// Last check point time
-        /// </summary>
-        private float lastCheckPointTime = 0;
-        /// <summary>
         /// Patrolling velocity
         /// </summary>
         private float patrollVelocity;
+
+        /// <summary>
+        /// Last check point time
+        /// </summary>
+        protected float LastCheckPointTime { get; set; } = 0;
 
         /// <summary>
         /// Gets the target position
@@ -65,7 +66,7 @@ namespace Terrain.AI.Behaviors
             this.checkPoints = checkPoints;
             this.currentCheckPoint = -1;
             this.checkPointTime = checkPointTime;
-            this.lastCheckPointTime = 0;
+            this.LastCheckPointTime = 0;
             this.patrollVelocity = patrolVelocity;
         }
 
@@ -108,11 +109,11 @@ namespace Terrain.AI.Behaviors
             float d = Vector3.Distance(currentPosition, this.checkPoints[this.currentCheckPoint]);
             if (d < 10f)
             {
-                this.lastCheckPointTime += gameTime.ElapsedSeconds;
+                this.LastCheckPointTime += gameTime.ElapsedSeconds;
 
-                if (this.lastCheckPointTime > this.checkPointTime)
+                if (this.LastCheckPointTime > this.checkPointTime)
                 {
-                    this.lastCheckPointTime = 0;
+                    this.LastCheckPointTime = 0;
 
                     this.currentCheckPoint++;
                     if (this.currentCheckPoint > this.checkPoints.Length - 1)

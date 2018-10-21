@@ -1,7 +1,7 @@
 ﻿
 namespace GameLogic.Rules.Enum
 {
-    public enum HealthStateEnum
+    public enum HealthStates
     {
         Healthy,
         Wounded,

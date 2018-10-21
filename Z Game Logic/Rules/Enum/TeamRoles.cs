@@ -1,7 +1,7 @@
 ﻿
 namespace GameLogic.Rules.Enum
 {
-    public enum TeamRoleEnum
+    public enum TeamRoles
     {
         Neutral,
         Defense,
