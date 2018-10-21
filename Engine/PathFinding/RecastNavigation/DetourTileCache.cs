@@ -403,13 +403,10 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         continue;
                     }
-                    if (regn.area > mergea)
+                    if (regn.area > mergea && CanMerge(reg.regId, regn.regId, regs, nregs))
                     {
-                        if (CanMerge(reg.regId, regn.regId, regs, nregs))
-                        {
-                            mergea = regn.area;
-                            merge = (int)nei;
-                        }
+                        mergea = regn.area;
+                        merge = nei;
                     }
                 }
                 if (merge != -1)
@@ -642,7 +639,7 @@ namespace Engine.PathFinding.RecastNavigation
                 int maxVertsPerPoly = Detour.DT_VERTS_PER_POLYGON;
                 if (maxVertsPerPoly > 3)
                 {
-                    for (; ; )
+                    while (true)
                     {
                         // Find best polygons to merge.
                         int bestMergeVal = 0;
@@ -745,7 +742,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static bool OverlapRangeExl(int amin, int amax, int bmin, int bmax)
         {
-            return (amin >= bmax || amax <= bmin) ? false : true;
+            return !(amin >= bmax || amax <= bmin);
         }
         public static void AddUniqueLast(ref int[] a, ref int an, int v)
         {
@@ -890,7 +887,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 int nx = x;
                 int ny = y;
-                int ndir = dir;
+                int ndir;
 
                 if (rn != layer.regs[x + y * w])
                 {
@@ -1125,7 +1122,7 @@ namespace Engine.PathFinding.RecastNavigation
                     if (px >= 0 && pz >= 0 && px < w && pz < h)
                     {
                         int idx = px + pz * w;
-                        int lh = (int)layer.heights[idx];
+                        int lh = layer.heights[idx];
                         if (Math.Abs(lh - y) <= walkableClimb && layer.areas[idx] != TileCacheAreas.RC_NULL_AREA)
                         {
                             height = Math.Max(height, lh);
@@ -1602,8 +1599,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Start with one vertex, keep appending connected
             // segments to the start and end of the hole.
-            Recast.PushBack(edges[0].X, hole, nhole);
-            Recast.PushBack((SamplePolyAreas)edges[0].Z, harea, nharea);
+            Recast.PushBack(edges[0].X, hole, ref nhole);
+            Recast.PushBack((SamplePolyAreas)edges[0].Z, harea, ref nharea);
 
             while (nedges != 0)
             {
@@ -1623,9 +1620,9 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             return false;
                         }
-                        Recast.PushFront(ea, hole, nhole);
+                        Recast.PushFront(ea, hole, ref nhole);
 
-                        Recast.PushFront(a, harea, nharea);
+                        Recast.PushFront(a, harea, ref nharea);
                         add = true;
                     }
                     else if (hole[nhole - 1] == ea)
@@ -1635,9 +1632,9 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             return false;
                         }
-                        Recast.PushBack(eb, hole, nhole);
+                        Recast.PushBack(eb, hole, ref nhole);
 
-                        Recast.PushBack(a, harea, nharea);
+                        Recast.PushBack(a, harea, ref nharea);
                         add = true;
                     }
                     if (add)
@@ -1712,7 +1709,7 @@ namespace Engine.PathFinding.RecastNavigation
             int maxVertsPerPoly = Detour.DT_VERTS_PER_POLYGON;
             if (maxVertsPerPoly > 3)
             {
-                for (; ; )
+                while (true)
                 {
                     // Find best polygons to merge.
                     int bestMergeVal = 0;

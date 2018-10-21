@@ -524,8 +524,6 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            dist = null;
-
             return true;
         }
 
@@ -609,8 +607,6 @@ namespace Engine.PathFinding.RecastNavigation
 
             Array.Copy(areas, chf.areas, chf.spanCount);
 
-            areas = null;
-
             return true;
         }
         /// <summary>
@@ -647,15 +643,12 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int x = minx; x <= maxx; ++x)
                 {
                     var c = chf.cells[x + z * chf.width];
-                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
                     {
                         var s = chf.spans[i];
-                        if ((int)s.y >= miny && (int)s.y <= maxy)
+                        if (s.y >= miny && s.y <= maxy && chf.areas[i] != TileCacheAreas.RC_NULL_AREA)
                         {
-                            if (chf.areas[i] != TileCacheAreas.RC_NULL_AREA)
-                            {
-                                chf.areas[i] = areaId;
-                            }
+                            chf.areas[i] = areaId;
                         }
                     }
                 }
@@ -887,7 +880,7 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int x = minx; x <= maxx; ++x)
                 {
                     var c = chf.cells[x + z * chf.width];
-                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
                     {
                         var s = chf.spans[i];
 
@@ -896,7 +889,7 @@ namespace Engine.PathFinding.RecastNavigation
                             continue;
                         }
 
-                        if ((int)s.y >= miny && (int)s.y <= maxy)
+                        if (s.y >= miny && s.y <= maxy)
                         {
                             float sx = chf.boundingBox.Minimum.X + (x + 0.5f) * chf.cs;
                             float sz = chf.boundingBox.Minimum.Z + (z + 0.5f) * chf.cs;
@@ -1324,13 +1317,10 @@ namespace Engine.PathFinding.RecastNavigation
                         int ay = y + GetDirOffsetY(dir);
                         int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
                         if (chf.areas[ai] != area) continue;
-                        if (srcReg[ai] > 0 && (srcReg[ai] & RC_BORDER_REG) == 0)
+                        if (srcReg[ai] > 0 && (srcReg[ai] & RC_BORDER_REG) == 0 && srcDist[ai] + 2 < d2)
                         {
-                            if (srcDist[ai] + 2 < d2)
-                            {
-                                r = srcReg[ai];
-                                d2 = srcDist[ai] + 2;
-                            }
+                            r = srcReg[ai];
+                            d2 = srcDist[ai] + 2;
                         }
                     }
                     if (r != 0)
@@ -1715,7 +1705,7 @@ namespace Engine.PathFinding.RecastNavigation
                         reg.spanCount++;
 
                         // Update floors.
-                        for (int j = (int)c.index; j < ni; ++j)
+                        for (int j = c.index; j < ni; ++j)
                         {
                             if (i == j) continue;
                             int floorId = srcReg[j];
@@ -1984,8 +1974,6 @@ namespace Engine.PathFinding.RecastNavigation
                 regions[i] = null;
             }
 
-            regions = null;
-
             return true;
         }
         private static void AddUniqueConnection(Region reg, int n)
@@ -2230,16 +2218,11 @@ namespace Engine.PathFinding.RecastNavigation
                 regions[i] = null;
             }
 
-            regions = null;
-
             return true;
         }
         public static bool BuildDistanceField(CompactHeightfield chf)
         {
-            if (chf.dist != null)
-            {
-                chf.dist = null;
-            }
+            chf.dist = null;
 
             int[] src = new int[chf.spanCount];
             {
@@ -2257,8 +2240,6 @@ namespace Engine.PathFinding.RecastNavigation
                 // Store distance.
                 chf.dist = src;
             }
-
-            dst = null;
 
             return true;
         }
@@ -2435,7 +2416,6 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             List<int> stack = new List<int>();
-            List<int> visited = new List<int>();
 
             int[] srcReg = new int[chf.spanCount];
             int[] srcDist = new int[chf.spanCount];
@@ -2499,7 +2479,8 @@ namespace Engine.PathFinding.RecastNavigation
                         int i = lvlStacks[sId][j + 2];
                         if (i >= 0 && srcReg[i] == 0)
                         {
-                            if (FloodRegion(x, y, i, level, regionId, chf, srcReg, srcDist, stack))
+                            var floodRes = FloodRegion(x, y, i, level, regionId, chf, srcReg, srcDist, stack);
+                            if (floodRes)
                             {
                                 if (regionId == 0xFFFF)
                                 {
@@ -2706,12 +2687,9 @@ namespace Engine.PathFinding.RecastNavigation
                         bool walkable = s.area != TileCacheAreas.RC_NULL_AREA;
 
                         // If current span is not walkable, but there is walkable span just below it, mark the span above it walkable too.
-                        if (!walkable && previousWalkable)
+                        if (!walkable && previousWalkable && Math.Abs(s.smax - ps.smax) <= walkableClimb)
                         {
-                            if (Math.Abs(s.smax - ps.smax) <= walkableClimb)
-                            {
-                                s.area = previousArea;
-                            }
+                            s.area = previousArea;
                         }
 
                         // Copy walkable flag so that it cannot propagate past multiple non-walkable objects.
@@ -2840,11 +2818,10 @@ namespace Engine.PathFinding.RecastNavigation
 
         public static bool OverlapBounds(Vector3 amin, Vector3 amax, Vector3 bmin, Vector3 bmax)
         {
-            bool overlap = true;
-            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
-            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
-            overlap = (amin.Z > bmax.Z || amax.Z < bmin.Z) ? false : overlap;
-            return overlap;
+            return
+                !(amin.X > bmax.X || amax.X < bmin.X) &&
+                !(amin.Y > bmax.Y || amax.Y < bmin.Y) &&
+                !(amin.Z > bmax.Z || amax.Z < bmin.Z);
         }
         public static bool OverlapInterval(int amin, int amax, int bmin, int bmax)
         {
@@ -2937,7 +2914,7 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Merge flags.
-                    if (Math.Abs((int)s.smax - (int)cur.smax) <= flagMergeThr)
+                    if (Math.Abs(s.smax - cur.smax) <= flagMergeThr)
                     {
                         s.area = (TileCacheAreas)Math.Max((int)s.area, (int)cur.area);
                     }
@@ -4053,7 +4030,7 @@ namespace Engine.PathFinding.RecastNavigation
 
         public static bool OverlapRange(int amin, int amax, int bmin, int bmax)
         {
-            return (amin > bmax || amax < bmin) ? false : true;
+            return !(amin > bmax || amax < bmin);
         }
         public static bool Contains(int[] a, int an, int v)
         {
@@ -4215,7 +4192,7 @@ namespace Engine.PathFinding.RecastNavigation
                     int[] lregs = new int[LayerRegion.MaxLayers];
                     int nlregs = 0;
 
-                    for (int i = (int)c.index, ni = (int)(c.index + c.count); i < ni; ++i)
+                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
                     {
                         var s = chf.spans[i];
                         int ri = srcReg[i];
@@ -4381,7 +4358,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 int newId = ri.layerId;
 
-                for (; ; )
+                while (true)
                 {
                     int oldId = 0xff;
 
@@ -5049,7 +5026,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return tmp;
         }
-        public static void PushFront<T>(T v, T[] arr, int an)
+        public static void PushFront<T>(T v, T[] arr, ref int an)
         {
             an++;
             for (int i = an - 1; i > 0; --i)
@@ -5058,15 +5035,13 @@ namespace Engine.PathFinding.RecastNavigation
             }
             arr[0] = v;
         }
-        public static void PushBack<T>(T v, T[] arr, int an)
+        public static void PushBack<T>(T v, T[] arr, ref int an)
         {
             arr[an] = v;
             an++;
         }
         private static bool CanRemoveVertex(PolyMesh mesh, int rem)
         {
-            int nvp = mesh.nvp;
-
             // Count number of polygons to remove.
             int numRemovedVerts = 0;
             int numTouchedVerts = 0;
@@ -5259,9 +5234,9 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Start with one vertex, keep appending connected
             // segments to the start and end of the hole.
-            PushBack(edges[0].X, hole, nhole);
-            PushBack(edges[0].Z, hreg, nhreg);
-            PushBack((SamplePolyAreas)edges[0].W, harea, nharea);
+            PushBack(edges[0].X, hole, ref nhole);
+            PushBack(edges[0].Z, hreg, ref nhreg);
+            PushBack((SamplePolyAreas)edges[0].W, harea, ref nharea);
 
             while (nedges != 0)
             {
@@ -5277,17 +5252,17 @@ namespace Engine.PathFinding.RecastNavigation
                     if (hole[0] == eb)
                     {
                         // The segment matches the beginning of the hole boundary.
-                        PushFront(ea, hole, nhole);
-                        PushFront(r, hreg, nhreg);
-                        PushFront(a, harea, nharea);
+                        PushFront(ea, hole, ref nhole);
+                        PushFront(r, hreg, ref nhreg);
+                        PushFront(a, harea, ref nharea);
                         add = true;
                     }
                     else if (hole[nhole - 1] == ea)
                     {
                         // The segment matches the end of the hole boundary.
-                        PushBack(eb, hole, nhole);
-                        PushBack(r, hreg, nhreg);
-                        PushBack(a, harea, nharea);
+                        PushBack(eb, hole, ref nhole);
+                        PushBack(r, hreg, ref nhreg);
+                        PushBack(a, harea, ref nharea);
                         add = true;
                     }
                     if (add)
@@ -5367,7 +5342,7 @@ namespace Engine.PathFinding.RecastNavigation
             int nvp = mesh.nvp;
             if (nvp > 3)
             {
-                for (; ; )
+                while (true)
                 {
                     // Find best polygons to merge.
                     int bestMergeVal = 0;
@@ -5477,7 +5452,6 @@ namespace Engine.PathFinding.RecastNavigation
             int[] nextVert = Helper.CreateArray(maxVertices, 0);
             int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, -1);
             int[] indices = new int[maxVertsPerCont];
-            Polygoni tmpPoly = new Polygoni(maxVertsPerCont);
 
             for (int i = 0; i < cset.nconts; ++i)
             {
@@ -5548,7 +5522,7 @@ namespace Engine.PathFinding.RecastNavigation
                 // Merge polygons.
                 if (nvp > 3)
                 {
-                    for (; ; )
+                    while (true)
                     {
                         // Find best polygons to merge.
                         int bestMergeVal = 0;
@@ -7330,17 +7304,17 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return !x ^ !y;
         }
-        public static bool Left(Int4 a, Int4 b, Int4 c)
+        public static bool Left(Int4 aV, Int4 bV, Int4 cV)
         {
-            return Area2(a, b, c) < 0;
+            return Area2(aV, bV, cV) < 0;
         }
-        public static bool LeftOn(Int4 a, Int4 b, Int4 c)
+        public static bool LeftOn(Int4 aV, Int4 bV, Int4 cV)
         {
-            return Area2(a, b, c) <= 0;
+            return Area2(aV, bV, cV) <= 0;
         }
-        public static bool Collinear(Int4 a, Int4 b, Int4 c)
+        public static bool Collinear(Int4 aV, Int4 bV, Int4 cV)
         {
-            return Area2(a, b, c) == 0;
+            return Area2(aV, bV, cV) == 0;
         }
         /// <summary>
         /// Returns true iff ab properly intersects cd: they share 
@@ -7364,25 +7338,25 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Returns T iff (a,b,c) are collinear and point c lies on the closed segement ab.
         /// </summary>
-        /// <param name="a"></param>
-        /// <param name="b"></param>
-        /// <param name="c"></param>
+        /// <param name="aV"></param>
+        /// <param name="bV"></param>
+        /// <param name="cV"></param>
         /// <returns></returns>
-        public static bool Between(Int4 a, Int4 b, Int4 c)
+        public static bool Between(Int4 aV, Int4 bV, Int4 cV)
         {
-            if (!Collinear(a, b, c))
+            if (!Collinear(aV, bV, cV))
             {
                 return false;
             }
 
             // If ab not vertical, check betweenness on x; else on y.
-            if (a.X != b.X)
+            if (aV.X != bV.X)
             {
-                return ((a.X <= c.X) && (c.X <= b.X)) || ((a.X >= c.X) && (c.X >= b.X));
+                return ((aV.X <= cV.X) && (cV.X <= bV.X)) || ((aV.X >= cV.X) && (cV.X >= bV.X));
             }
             else
             {
-                return ((a.Z <= c.Z) && (c.Z <= b.Z)) || ((a.Z >= c.Z) && (c.Z >= b.Z));
+                return ((aV.Z <= cV.Z) && (cV.Z <= bV.Z)) || ((aV.Z >= cV.Z) && (cV.Z >= bV.Z));
             }
         }
         /// <summary>

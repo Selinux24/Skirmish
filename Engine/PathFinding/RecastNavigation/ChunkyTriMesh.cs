@@ -20,9 +20,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns true if rectangles overlap</returns>
         private static bool CheckOverlapRect(Vector2 amin, Vector2 amax, Vector2 bmin, Vector2 bmax)
         {
-            bool overlap = true;
-            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
-            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
+            bool overlap =
+                !(amin.X > bmax.X || amax.X < bmin.X) &&
+                !(amin.Y > bmax.Y || amax.Y < bmin.Y);
+
             return overlap;
         }
 
@@ -38,27 +39,27 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Triangle list
         /// </summary>
-        public Triangle[] triangles;
+        public Triangle[] Triangles { get; set; }
         /// <summary>
         /// Maximum number of triangles per chunk
         /// </summary>
-        public int maxTrisPerChunk;
+        public int MaxTrisPerChunk { get; set; }
         /// <summary>
         /// Chunk nodes
         /// </summary>
-        public ChunkyTriMeshNode[] nodes;
+        public ChunkyTriMeshNode[] Nodes { get; set; }
         /// <summary>
         /// Node count
         /// </summary>
-        public int nnodes;
+        public int NNodes { get; set; }
         /// <summary>
         /// Chunk triangle indices
         /// </summary>
-        public int[] tris;
+        public int[] Tris { get; set; }
         /// <summary>
         /// Triangle index count
         /// </summary>
-        public int ntris;
+        public int NTris { get; set; }
 
         /// <summary>
         /// Builds a chunky mesh
@@ -68,12 +69,9 @@ namespace Engine.PathFinding.RecastNavigation
         public static ChunkyTriMesh Build(InputGeometry input)
         {
             var triangles = input.GetTriangles();
-            if (triangles != null && triangles.Length > 0)
+            if (triangles?.Length > 0 && CreateChunkyTriMesh(triangles, 256, out ChunkyTriMesh chunkyMesh))
             {
-                if (CreateChunkyTriMesh(triangles, 256, out ChunkyTriMesh chunkyMesh))
-                {
-                    return chunkyMesh;
-                }
+                return chunkyMesh;
             }
 
             return null;
@@ -93,10 +91,10 @@ namespace Engine.PathFinding.RecastNavigation
 
             cm = new ChunkyTriMesh
             {
-                triangles = tris,
-                nodes = new ChunkyTriMeshNode[nchunks * 4],
-                tris = new int[ntris],
-                ntris = ntris,
+                Triangles = tris,
+                Nodes = new ChunkyTriMeshNode[nchunks * 4],
+                Tris = new int[ntris],
+                NTris = ntris,
             };
 
             // Build tree
@@ -119,23 +117,22 @@ namespace Engine.PathFinding.RecastNavigation
             Subdivide(
                 items,
                 0, ntris, trisPerChunk,
-                ref curNode, cm.nodes, nchunks * 4,
-                ref curTri, cm.tris, tris);
+                ref curNode, cm.Nodes, nchunks * 4,
+                ref curTri, cm.Tris, tris);
 
-            items = null;
-            cm.nnodes = curNode;
+            cm.NNodes = curNode;
 
             // Calc max tris per node.
-            cm.maxTrisPerChunk = 0;
-            for (int i = 0; i < cm.nnodes; ++i)
+            cm.MaxTrisPerChunk = 0;
+            for (int i = 0; i < cm.NNodes; ++i)
             {
-                var node = cm.nodes[i];
+                var node = cm.Nodes[i];
 
                 bool isLeaf = node.i >= 0;
                 if (!isLeaf) continue;
-                if (node.n > cm.maxTrisPerChunk)
+                if (node.n > cm.MaxTrisPerChunk)
                 {
-                    cm.maxTrisPerChunk = node.n;
+                    cm.MaxTrisPerChunk = node.n;
                 }
             }
 
@@ -267,7 +264,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the triangles in the specified node</returns>
         public Triangle[] GetTriangles(int index)
         {
-            return GetTriangles(this.nodes[index]);
+            return GetTriangles(this.Nodes[index]);
         }
         /// <summary>
         /// Gets the triangles in the specified node
@@ -279,17 +276,17 @@ namespace Engine.PathFinding.RecastNavigation
             if (node.i >= 0)
             {
                 int[] indices = new int[node.n];
-                Array.Copy(tris.ToArray(), node.i, indices, 0, node.n);
+                Array.Copy(Tris.ToArray(), node.i, indices, 0, node.n);
 
                 Triangle[] res = new Triangle[node.n];
                 for (int i = 0; i < node.n; i++)
                 {
-                    res[i] = triangles[indices[i]];
+                    res[i] = Triangles[indices[i]];
                 }
                 return res;
             }
 
-            return null;
+            return new Triangle[] { };
         }
 
         /// <summary>
@@ -304,9 +301,9 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Traverse tree
             int i = 0;
-            while (i < nnodes)
+            while (i < NNodes)
             {
-                var node = nodes[i];
+                var node = Nodes[i];
                 bool overlap = CheckOverlapRect(bmin, bmax, node.bmin, node.bmax);
                 bool isLeafNode = node.i >= 0;
 

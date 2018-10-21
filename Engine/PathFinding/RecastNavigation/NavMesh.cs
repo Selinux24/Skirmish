@@ -64,8 +64,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             var solid = Recast.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
-            var ntris = geometry.ChunkyMesh.ntris;
-            var tris = geometry.ChunkyMesh.triangles;
+            var ntris = geometry.ChunkyMesh.NTris;
+            var tris = geometry.ChunkyMesh.Triangles;
             var triareas = new TileCacheAreas[ntris];
 
             Recast.MarkWalkableTriangles(cfg.WalkableSlopeAngle, tris, triareas);
@@ -395,7 +395,7 @@ namespace Engine.PathFinding.RecastNavigation
                 // Allocate array that can hold triangle flags.
                 // If you have multiple meshes you need to process, allocate
                 // and array which can hold the max number of triangles you need to process.
-                triareas = new TileCacheAreas[chunkyMesh.maxTrisPerChunk],
+                triareas = new TileCacheAreas[chunkyMesh.MaxTrisPerChunk],
 
                 tiles = new TileCacheData[RasterizationContext.MaxLayers],
             };
@@ -612,7 +612,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Allocate array that can hold triangle flags.
             // If you have multiple meshes you need to process, allocate
             // and array which can hold the max number of triangles you need to process.
-            TileCacheAreas[] triareas = new TileCacheAreas[chunkyMesh.maxTrisPerChunk];
+            TileCacheAreas[] triareas = new TileCacheAreas[chunkyMesh.MaxTrisPerChunk];
 
             Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
             Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);

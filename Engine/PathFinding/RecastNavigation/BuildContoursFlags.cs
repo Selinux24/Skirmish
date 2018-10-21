@@ -1,9 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.PathFinding.RecastNavigation
 {
     /// <summary>
     /// Contour build flags.
     /// </summary>
+    [Flags]
     public enum BuildContoursFlags
     {
         /// <summary>

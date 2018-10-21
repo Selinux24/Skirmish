@@ -9,13 +9,27 @@ namespace Engine.Collections.Generic
     /// <summary>
     /// Quadtree node
     /// </summary>
-    public class QuadTreeNode<T> where T : IVertexList
+    public abstract class QuadTreeNode
     {
         /// <summary>
         /// Static node count
         /// </summary>
-        private static int NodeCount = 0;
+        protected static int NodeCount { get; set; } = 0;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        protected QuadTreeNode()
+        {
+
+        }
+    }
+
+    /// <summary>
+    /// Quadtree node
+    /// </summary>
+    public class QuadTreeNode<T> : QuadTreeNode where T : IVertexList
+    {
         /// <summary>
         /// Recursive partition creation
         /// </summary>
@@ -163,15 +177,15 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Node Id
         /// </summary>
-        public int Id;
+        public int Id { get; set; }
         /// <summary>
         /// Depth level
         /// </summary>
-        public int Level;
+        public int Level { get; set; }
         /// <summary>
         /// Bounding box
         /// </summary>
-        public BoundingBox BoundingBox;
+        public BoundingBox BoundingBox { get; set; }
         /// <summary>
         /// Gets the node center position
         /// </summary>
@@ -185,7 +199,7 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Children list
         /// </summary>
-        public QuadTreeNode<T>[] Children;
+        public QuadTreeNode<T>[] Children { get; set; }
         /// <summary>
         /// Node triangles
         /// </summary>
@@ -196,7 +210,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="quadTree">Quadtree</param>
         /// <param name="parent">Parent node</param>
-        public QuadTreeNode(QuadTree<T> quadTree, QuadTreeNode<T> parent)
+        public QuadTreeNode(QuadTree<T> quadTree, QuadTreeNode<T> parent) : base()
         {
             this.QuadTree = quadTree;
             this.Parent = parent;
@@ -380,7 +394,7 @@ namespace Engine.Collections.Generic
 
             if (this.Children != null)
             {
-                bool haltByDepth = maxDepth > 0 ? this.Level == maxDepth : false;
+                bool haltByDepth = (maxDepth > 0 && this.Level == maxDepth);
                 if (haltByDepth)
                 {
                     Array.ForEach(this.Children, (c) =>
@@ -499,7 +513,8 @@ namespace Engine.Collections.Generic
 
             if (this.Children == null)
             {
-                if (sphere.Contains(ref this.BoundingBox) != ContainmentType.Disjoint)
+                var bbox = this.BoundingBox;
+                if (sphere.Contains(ref bbox) != ContainmentType.Disjoint)
                 {
                     nodes.Add(this);
                 }

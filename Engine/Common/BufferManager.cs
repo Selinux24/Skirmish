@@ -462,10 +462,7 @@ namespace Engine.Common
         /// <param name="instances">Add instancing space</param>
         public BufferDescriptor Add(string id, IVertexData[] data, bool dynamic, int instances)
         {
-            int offset = -1;
-            int slot = -1;
-
-            if (data != null && data.Length > 0)
+            if (data?.Length > 0)
             {
                 VertexTypes vType = data[0].VertexType;
 
@@ -479,12 +476,12 @@ namespace Engine.Common
 
                 var key = this.vertexData[keyIndex];
 
-                offset = key.Data.Count;
+                int offset = key.Data.Count;
 
                 key.Data.AddRange(data);
                 key.Instances += instances;
 
-                slot = keyIndex;
+                int slot = keyIndex;
 
                 if (key.ReallocationNeeded)
                 {
@@ -506,10 +503,7 @@ namespace Engine.Common
         /// <param name="dynamic">Add to dynamic buffers</param>
         public BufferDescriptor Add(string id, uint[] indexData, bool dynamic)
         {
-            int offset = -1;
-            int slot = -1;
-
-            if (indexData != null && indexData.Length > 0)
+            if (indexData?.Length > 0)
             {
                 var keyIndex = this.indexData.FindIndex(k => k.Dynamic == dynamic);
                 if (keyIndex < 0)
@@ -521,10 +515,10 @@ namespace Engine.Common
 
                 var key = this.indexData[keyIndex];
 
-                offset = key.Data.Count;
+                int offset = key.Data.Count;
                 key.Data.AddRange(indexData);
 
-                slot = keyIndex;
+                int slot = keyIndex;
 
                 if (key.ReallocationNeeded)
                 {

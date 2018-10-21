@@ -98,11 +98,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>True if the two AABB's overlap</returns>
         public static bool OverlapQuantBounds(Int3 amin, Int3 amax, Int3 bmin, Int3 bmax)
         {
-            bool overlap = true;
-            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
-            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
-            overlap = (amin.Z > bmax.Z || amax.Z < bmin.Z) ? false : overlap;
-            return overlap;
+            return
+                !(amin.X > bmax.X || amax.X < bmin.X) &&
+                !(amin.Y > bmax.Y || amax.Y < bmin.Y) &&
+                !(amin.Z > bmax.Z || amax.Z < bmin.Z);
         }
         /// <summary>
         /// Determines if two axis-aligned bounding boxes overlap.
