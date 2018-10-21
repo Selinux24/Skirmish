@@ -28,7 +28,7 @@ namespace Engine
         /// <summary>
         /// Scaling component
         /// </summary>
-        protected Vector3 scaling = Vector3.Zero;
+        protected Vector3 scaling = Vector3.One;
         /// <summary>
         /// Position component
         /// </summary>

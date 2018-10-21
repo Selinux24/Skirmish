@@ -73,7 +73,7 @@ namespace Engine
         /// <summary>
         /// Sky plane mode
         /// </summary>
-        public SkyPlaneModes Mode { get; set; }
+        public SkyPlaneModes SkyMode { get; set; }
 
         /// <summary>
         /// Constructor
@@ -99,7 +99,7 @@ namespace Engine
             this.Velocity = 1f;
             this.Direction = Vector2.One;
             this.PerturbationScale = 0.3f;
-            this.Mode = SkyPlaneModes.Static;
+            this.SkyMode = SkyPlaneModes.Static;
         }
     }
 }

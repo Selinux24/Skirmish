@@ -679,7 +679,7 @@ namespace Heightmap
                 ContentPath = "Resources/sky",
                 Texture1Name = "perturb001.dds",
                 Texture2Name = "cloud001.dds",
-                Mode = SkyPlaneModes.Perturbed,
+                SkyMode = SkyPlaneModes.Perturbed,
                 Direction = new Vector2(1, 1),
             };
             this.clouds = this.AddComponent<SkyPlane>(scDesc);

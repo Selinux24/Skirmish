@@ -47,7 +47,7 @@ namespace Engine
         /// <summary>
         /// Plane mode
         /// </summary>
-        private readonly SkyPlaneModes mode;
+        private readonly SkyPlaneModes skyMode;
         /// <summary>
         /// Traslation direction
         /// </summary>
@@ -135,7 +135,7 @@ namespace Engine
             };
             this.skyTexture2 = this.Game.ResourceManager.CreateResource(img2);
 
-            this.mode = description.Mode;
+            this.skyMode = description.SkyMode;
             this.rotation = Matrix.Identity;
 
             this.MaxBrightness = description.MaxBrightness;
@@ -208,6 +208,7 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
+            var mode = context.DrawerMode;
             var draw =
                 (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
                 (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
@@ -220,7 +221,7 @@ namespace Engine
                 this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
 
                 var effect = DrawerPool.EffectDefaultClouds;
-                var technique = this.mode == SkyPlaneModes.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
+                var technique = this.skyMode == SkyPlaneModes.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
 
                 this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
 
@@ -233,7 +234,7 @@ namespace Engine
                     this.skyTexture1,
                     this.skyTexture2);
 
-                if (this.mode == SkyPlaneModes.Static)
+                if (this.skyMode == SkyPlaneModes.Static)
                 {
                     effect.UpdatePerFrameStatic(
                         this.firstLayerTranslation,

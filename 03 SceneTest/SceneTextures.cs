@@ -176,7 +176,7 @@ namespace SceneTest
                 ContentPath = "SceneTextures/sky",
                 Texture1Name = "perturb001.dds",
                 Texture2Name = "cloud001.dds",
-                Mode = SkyPlaneModes.Perturbed,
+                SkyMode = SkyPlaneModes.Perturbed,
             });
         }
         private void InitializeScenery()

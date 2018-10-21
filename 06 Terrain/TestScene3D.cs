@@ -702,7 +702,7 @@ namespace Terrain
                 ContentPath = "Resources/clouds",
                 Texture1Name = "perturb001.dds",
                 Texture2Name = "cloud001.dds",
-                Mode = SkyPlaneModes.Perturbed,
+                SkyMode = SkyPlaneModes.Perturbed,
                 MaxBrightness = 0.8f,
                 MinBrightness = 0.1f,
                 Repeat = 5,
