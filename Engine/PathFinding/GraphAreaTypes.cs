@@ -4,7 +4,7 @@ namespace Engine.PathFinding
     /// <summary>
     /// Area types enum
     /// </summary>
-    public enum GraphAreaTypes : int
+    public enum GraphAreaTypes
     {
         /// <summary>
         /// Unwalkable area

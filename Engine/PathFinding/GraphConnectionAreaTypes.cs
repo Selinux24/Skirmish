@@ -4,7 +4,7 @@ namespace Engine.PathFinding
     /// <summary>
     /// Graph connection area types enum
     /// </summary>
-    public enum GraphConnectionAreaTypes : int
+    public enum GraphConnectionAreaTypes
     {
         /// <summary>
         /// Ground

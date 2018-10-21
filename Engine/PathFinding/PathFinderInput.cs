@@ -41,7 +41,7 @@ namespace Engine.PathFinding
         /// Constructor
         /// </summary>
         /// <param name="fnc">Get triangle function</param>
-        public PathFinderInput(Func<Triangle[]> fnc)
+        protected PathFinderInput(Func<Triangle[]> fnc)
         {
             getTrianglesFnc = fnc;
         }
@@ -62,7 +62,7 @@ namespace Engine.PathFinding
             }
             else
             {
-                return null;
+                return new Triangle[] { };
             }
         }
 

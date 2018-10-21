@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Xml.Serialization;
 
 namespace Engine.PathFinding
 {
@@ -9,8 +10,8 @@ namespace Engine.PathFinding
         /// <summary>
         /// Path Finder bounds
         /// </summary>
-        [NonSerialized]
-        public BoundingBox? Bounds = null;
+        [XmlIgnore]
+        public BoundingBox? Bounds { get; set; } = null;
         /// <summary>
         /// Serialization property
         /// </summary>
@@ -33,7 +34,7 @@ namespace Engine.PathFinding
                 }
                 else
                 {
-                    return null;
+                    return new float[] { };
                 }
             }
             set

@@ -4,7 +4,7 @@ namespace Engine.PathFinding.AStar
     /// <summary>
     /// Graph node sate
     /// </summary>
-    public enum GridNodeStates : int
+    public enum GridNodeStates
     {
         /// <summary>
         /// None

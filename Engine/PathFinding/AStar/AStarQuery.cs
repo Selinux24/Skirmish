@@ -68,7 +68,7 @@ namespace Engine.PathFinding.AStar
                 }
             }
 
-            return null;
+            return new Vector3[] { };
         }
         /// <summary>
         /// Gets the path from start to end
@@ -141,12 +141,9 @@ namespace Engine.PathFinding.AStar
 
                                 float newGone = currentNode.TotalCost + ((int)nextNodeData.State);
 
-                                if (nextNodeData.State == GridNodeStates.Clear)
+                                if (nextNodeData.State == GridNodeStates.Clear && nextNode.TotalCost < newGone)
                                 {
-                                    if (nextNode.TotalCost < newGone)
-                                    {
-                                        continue;
-                                    }
+                                    continue;
                                 }
 
                                 nextNodeData.NextNode = currentNode;
@@ -184,7 +181,7 @@ namespace Engine.PathFinding.AStar
             else
             {
                 //If no result...
-                return null;
+                return new Vector3[] { };
             }
         }
         /// <summary>

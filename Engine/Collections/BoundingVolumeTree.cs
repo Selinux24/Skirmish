@@ -45,7 +45,7 @@ namespace Engine.Collections
         /// <param name="minIndex">The first bounding box in the list to get the extends of.</param>
         /// <param name="maxIndex">The last bounding box in the list to get the extends of.</param>
         /// <param name="bounds">The extends of all the bounding boxes.</param>
-        private static void CalcExtends(BoundingVolumeTreeNode[] items, int minIndex, int maxIndex, out BoundingBoxi bounds)
+        private static void CalcExtends(BoundingVolumeTreeNode[] items, int minIndex, int maxIndex, out BoundingBoxInt bounds)
         {
             bounds = items[minIndex].Bounds;
 
@@ -117,7 +117,7 @@ namespace Engine.Collections
             }
             else
             {
-                CalcExtends(items, minIndex, maxIndex, out BoundingBoxi bounds);
+                CalcExtends(items, minIndex, maxIndex, out BoundingBoxInt bounds);
                 this.nodes[oldNode].Bounds = bounds;
 
                 int axis = LongestAxis((bounds.Max.X - bounds.Min.X), (bounds.Max.Y - bounds.Min.Y), (bounds.Max.Z - bounds.Min.Z));

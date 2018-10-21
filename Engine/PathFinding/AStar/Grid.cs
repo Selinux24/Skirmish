@@ -79,13 +79,10 @@ namespace Engine.PathFinding.AStar
 
             for (int i = 0; i < this.Nodes.Length; i++)
             {
-                if (this.Nodes[i].Contains(point, out float distance))
+                if (this.Nodes[i].Contains(point, out float distance) && distance < minDistance)
                 {
-                    if (distance < minDistance)
-                    {
-                        minDistance = distance;
-                        bestNode = this.Nodes[i];
-                    }
+                    minDistance = distance;
+                    bestNode = this.Nodes[i];
                 }
             }
 
@@ -142,7 +139,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="position">Position</param>
         public void UpdateAt(Vector3 position)
         {
-
+            //TODO: update grid state around position
         }
 
         /// <summary>
@@ -183,7 +180,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="obstacle">Obstacle id</param>
         public void RemoveObstacle(int obstacle)
         {
-
+            //TODO: update grid state using obstacle
         }
 
         /// <summary>
@@ -202,7 +199,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="id">Connection id</param>
         public void RemoveConnection(int id)
         {
-
+            //TODO: update grid state
         }
 
         /// <summary>
@@ -211,7 +208,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-
+            //TODO: update grid state
         }
         /// <summary>
         /// Fires the updated event

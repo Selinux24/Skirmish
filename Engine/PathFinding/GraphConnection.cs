@@ -11,6 +11,14 @@ namespace Engine.PathFinding
         /// Id Counter
         /// </summary>
         private static int ID = 1000;
+        /// <summary>
+        /// Gets the next id
+        /// </summary>
+        /// <returns>Returns the next id</returns>
+        private static int GetNextId()
+        {
+            return ID++;
+        }
 
         /// <summary>
         /// Connection Id
@@ -46,7 +54,7 @@ namespace Engine.PathFinding
         /// </summary>
         public GraphConnection()
         {
-            Id = ID++;
+            Id = GetNextId();
         }
     }
 }

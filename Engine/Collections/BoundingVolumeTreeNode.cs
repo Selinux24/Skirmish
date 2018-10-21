@@ -10,7 +10,7 @@ namespace Engine.Collections
         /// <summary>
         /// The bounding box of the node.
         /// </summary>
-        public BoundingBoxi Bounds { get; set; }
+        public BoundingBoxInt Bounds { get; set; }
         /// <summary>
         /// The index of this node in a <see cref="BoundingVolumeTree"/>.
         /// </summary>

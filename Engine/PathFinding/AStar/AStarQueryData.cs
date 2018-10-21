@@ -9,24 +9,22 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Node State
         /// </summary>
-        public GridNodeStates State = GridNodeStates.None;
+        public GridNodeStates State { get; set; } = GridNodeStates.None;
         /// <summary>
         /// Accumulated cost of the path
         /// </summary>
-        public float Cost = 0f;
+        public float Cost { get; set; } = 0f;
         /// <summary>
         /// Next node
         /// </summary>
-        public GridNode NextNode = null;
+        public GridNode NextNode { get; set; } = null;
 
         /// <summary>
         /// Constructor
         /// </summary>
         public AStarQueryData()
         {
-            this.State = GridNodeStates.None;
-            this.Cost = 0;
-            this.NextNode = null;
+
         }
 
         /// <summary>

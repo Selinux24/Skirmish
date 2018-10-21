@@ -25,7 +25,7 @@ namespace Engine.Collections
         private readonly ProximityGridItem<T>[] pool;
         private int poolHead;
         private readonly int[] buckets;
-        private BoundingRectanglei bounds;
+        private BoundingRectangleInt bounds;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProximityGrid{T}"/> class.
@@ -61,7 +61,7 @@ namespace Engine.Collections
 
             this.poolHead = 0;
 
-            this.bounds = new BoundingRectanglei(Vector2Int.Max, Vector2Int.Min);
+            this.bounds = new BoundingRectangleInt(Vector2Int.Max, Vector2Int.Min);
         }
         /// <summary>
         /// Take all the coordinates within a certain range and add them all to an array

@@ -20,7 +20,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Constructor
         /// </summary>
-        public AgentType()
+        protected AgentType()
         {
             Name = "Player";
             Height = 2.0f;

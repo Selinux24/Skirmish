@@ -4,7 +4,7 @@ namespace Engine.PathFinding
     /// <summary>
     /// Graph connection flag types
     /// </summary>
-    public enum GraphConnectionFlagTypes : int
+    public enum GraphConnectionFlagTypes
     {
         /// <summary>
         /// Ability to walk (ground, grass, road)

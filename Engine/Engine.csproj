@@ -165,7 +165,7 @@
     <Compile Include="Animation\AnimationPlan.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
-    <Compile Include="BoundingRectanglei.cs" />
+    <Compile Include="BoundingRectangleInt.cs" />
     <Compile Include="Collections\FixedArray.cs" />
     <Compile Include="Collections\ProximityGridItem.cs" />
     <Compile Include="Common\BaseSceneObject.cs" />
@@ -485,7 +485,7 @@
     <Compile Include="Common\GeometryUtil.cs" />
     <Compile Include="PathFinding\AStar\Grid.cs" />
     <Compile Include="PathFinding\AStar\GridNode.cs" />
-    <Compile Include="BoundingBoxi.cs" />
+    <Compile Include="BoundingBoxInt.cs" />
     <Compile Include="SkydomDescription.cs" />
     <Compile Include="SpriteBackgroundDescription.cs" />
     <Compile Include="SpriteButtonDescription.cs" />

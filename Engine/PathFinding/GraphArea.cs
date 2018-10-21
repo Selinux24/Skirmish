@@ -11,6 +11,14 @@ namespace Engine.PathFinding
         /// Id counter
         /// </summary>
         private static int ID = 1;
+        /// <summary>
+        /// Gets the next id
+        /// </summary>
+        /// <returns>Returns the next id</returns>
+        private static int GetNextId()
+        {
+            return ID++;
+        }
 
         /// <summary>
         /// Maximum polygon vertices points
@@ -47,7 +55,7 @@ namespace Engine.PathFinding
         /// </summary>
         public GraphArea()
         {
-            Id = ID++;
+            Id = GetNextId();
         }
 
         /// <summary>

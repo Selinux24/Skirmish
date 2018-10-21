@@ -6,7 +6,7 @@ namespace Engine
     /// A bounding rectangle represeted by integers.
     /// </summary>
     [Serializable]
-    public struct BoundingRectanglei : IEquatable<BoundingRectanglei>
+    public struct BoundingRectangleInt : IEquatable<BoundingRectangleInt>
     {
         /// <summary>
         /// Compares two instances of <see cref="BBox2i"/> for equality.
@@ -14,7 +14,7 @@ namespace Engine
         /// <param name="left">An instance of <see cref="BBox2i"/>.</param>
         /// <param name="right">Another instance of <see cref="BBox2i"/>.</param>
         /// <returns>A value indicating whether the two instances are equal.</returns>
-        public static bool operator ==(BoundingRectanglei left, BoundingRectanglei right)
+        public static bool operator ==(BoundingRectangleInt left, BoundingRectangleInt right)
         {
             return left.Equals(right);
         }
@@ -24,7 +24,7 @@ namespace Engine
         /// <param name="left">An instance of <see cref="BBox2i"/>.</param>
         /// <param name="right">Another instance of <see cref="BBox2i"/>.</param>
         /// <returns>A value indicating whether the two instances are unequal.</returns>
-        public static bool operator !=(BoundingRectanglei left, BoundingRectanglei right)
+        public static bool operator !=(BoundingRectangleInt left, BoundingRectangleInt right)
         {
             return !(left == right);
         }
@@ -43,7 +43,7 @@ namespace Engine
         /// </summary>
         /// <param name="min">A minimum bound.</param>
         /// <param name="max">A maximum bound.</param>
-        public BoundingRectanglei(Vector2Int min, Vector2Int max)
+        public BoundingRectangleInt(Vector2Int min, Vector2Int max)
         {
             Min = min;
             Max = max;
@@ -55,7 +55,7 @@ namespace Engine
         /// <param name="minY">The minimum Y bound.</param>
         /// <param name="maxX">The maximum X bound.</param>
         /// <param name="maxY">The maximum Y bound.</param>
-        public BoundingRectanglei(int minX, int minY, int maxX, int maxY)
+        public BoundingRectangleInt(int minX, int minY, int maxX, int maxY)
         {
             Min = new Vector2Int(minX, minY);
             Max = new Vector2Int(maxX, maxY);
@@ -84,7 +84,7 @@ namespace Engine
         /// <returns>A value indicating whether this instance and the object are equal.</returns>
         public override bool Equals(object obj)
         {
-            var objV = obj as BoundingRectanglei?;
+            var objV = obj as BoundingRectangleInt?;
             if (objV != null)
             {
                 return this.Equals(objV);
@@ -97,7 +97,7 @@ namespace Engine
         /// </summary>
         /// <param name="other">An instance of <see cref="BBox2i"/>.</param>
         /// <returns>A value indicating whether this instance and the other instance are equal.</returns>
-        public bool Equals(BoundingRectanglei other)
+        public bool Equals(BoundingRectangleInt other)
         {
             return Min == other.Min && Max == other.Max;
         }

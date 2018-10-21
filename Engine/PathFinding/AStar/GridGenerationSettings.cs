@@ -9,10 +9,10 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Path node side size
         /// </summary>
-        public float NodeSize = 10f;
+        public float NodeSize { get; set; } = 10f;
         /// <summary>
         /// Path node maximum inclination
         /// </summary>
-        public float NodeInclination = MathUtil.PiOverFour;
+        public float NodeInclination { get; set; } = MathUtil.PiOverFour;
     }
 }
