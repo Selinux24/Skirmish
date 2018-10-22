@@ -113,11 +113,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>True if the two AABB's overlap.</returns>
         public static bool OverlapBounds(Vector3 amin, Vector3 amax, Vector3 bmin, Vector3 bmax)
         {
-            bool overlap = true;
-            overlap = (amin.X > bmax.X || amax.X < bmin.X) ? false : overlap;
-            overlap = (amin.Y > bmax.Y || amax.Y < bmin.Y) ? false : overlap;
-            overlap = (amin.Z > bmax.Z || amax.Z < bmin.Z) ? false : overlap;
-            return overlap;
+            return
+                !(amin.X > bmax.X || amax.X < bmin.X) &&
+                !(amin.Y > bmax.Y || amax.Y < bmin.Y) &&
+                !(amin.Z > bmax.Z || amax.Z < bmin.Z);
         }
 
         public static void ClosestPtPointTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out Vector3 closest)
@@ -443,7 +442,7 @@ namespace Engine.PathFinding.RecastNavigation
 
         public static bool OverlapRange(float amin, float amax, float bmin, float bmax, float eps)
         {
-            return ((amin + eps) > bmax || (amax - eps) < bmin) ? false : true;
+            return !((amin + eps) > bmax || (amax - eps) < bmin);
         }
 
         public static int OppositeTile(int side)
@@ -682,8 +681,6 @@ namespace Engine.PathFinding.RecastNavigation
             int curNode = 0;
             Subdivide(items, param.polyCount, 0, param.polyCount, ref curNode, ref nodes);
 
-            items = null;
-
             return curNode;
         }
         public static int ClassifyOffMeshPoint(Vector3 pt, Vector3 bmin, Vector3 bmax)
@@ -781,12 +778,9 @@ namespace Engine.PathFinding.RecastNavigation
                     offMeshConClass[i + 1] = ClassifyOffMeshPoint(p1, bmin, bmax);
 
                     // Zero out off-mesh start positions which are not even potentially touching the mesh.
-                    if (offMeshConClass[i * 2] == 0xff)
+                    if (offMeshConClass[i * 2] == 0xff && (p0.Y < bmin.Y || p0.Y > bmax.Y))
                     {
-                        if (p0.Y < bmin.Y || p0.Y > bmax.Y)
-                        {
-                            offMeshConClass[i * 2] = 0;
-                        }
+                        offMeshConClass[i * 2] = 0;
                     }
 
                     // Count how many links should be allocated for off-mesh connections.
@@ -1123,8 +1117,6 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            offMeshConClass = null;
-
             outData = data;
 
             return true;
@@ -1227,7 +1219,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static int ComputeTileHash(int x, int y, int mask)
         {
-            uint h1 = 0x8da6b343; // Large multiplicative constants;
+            uint h1 = 0x8da6b343; // Large multiplicative constants
             uint h2 = 0xd8163841; // here arbitrarily chosen primes
             uint n = (uint)(h1 * x + h2 * y);
             return (int)(n & mask);

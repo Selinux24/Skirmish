@@ -77,7 +77,7 @@ namespace Terrain.AI.Behaviors
         /// <returns>Returns true if the behavior can be executed</returns>
         public override bool Test(GameTime gameTime)
         {
-            if (this.checkPoints != null && this.checkPoints.Length > 0)
+            if (this.checkPoints?.Length > 0)
             {
                 return true;
             }

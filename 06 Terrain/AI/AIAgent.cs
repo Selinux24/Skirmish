@@ -201,75 +201,19 @@ namespace Terrain.AI
 
                 if (this.CurrentState == AIStates.Idle)
                 {
-                    if (this.AttackBehavior.Test(context.GameTime))
-                    {
-                        this.ChangeState(AIStates.Attacking);
-                    }
-                    else if (this.RetreatBehavior.Test(context.GameTime))
-                    {
-                        this.ChangeState(AIStates.Retreating);
-                    }
-                    else if (this.PatrolBehavior.Test(context.GameTime))
-                    {
-                        this.ChangeState(AIStates.Patrolling);
-                    }
-                    else
-                    {
-                        //Continue doing nothing
-                    }
+                    this.UpdateIdle(context);
                 }
                 else if (this.CurrentState == AIStates.Patrolling)
                 {
-                    if (this.AttackBehavior.Test(context.GameTime))
-                    {
-                        this.ChangeState(AIStates.Attacking);
-                    }
-                    else if (this.RetreatBehavior.Test(context.GameTime))
-                    {
-                        this.ChangeState(AIStates.Retreating);
-                    }
-                    else if (this.PatrolBehavior.Test(context.GameTime))
-                    {
-                        //Continue patrolling
-                    }
-                    else
-                    {
-                        this.ChangeState(AIStates.Idle);
-                    }
+                    this.UpdatePatrolling(context);
                 }
                 else if (this.CurrentState == AIStates.Attacking)
                 {
-                    if (this.AttackBehavior.Test(context.GameTime))
-                    {
-                        //Continue attacking
-                    }
-                    else if (this.RetreatBehavior.Test(context.GameTime))
-                    {
-                        this.ChangeState(AIStates.Retreating);
-                    }
-                    else if (this.PatrolBehavior.Test(context.GameTime))
-                    {
-                        this.ChangeState(AIStates.Patrolling);
-                    }
-                    else
-                    {
-                        this.ChangeState(AIStates.Idle);
-                    }
+                    this.UpdateAttacking(context);
                 }
                 else if (this.CurrentState == AIStates.Retreating)
                 {
-                    if (this.RetreatBehavior.Test(context.GameTime))
-                    {
-                        //Continue the retreat
-                    }
-                    else if (this.PatrolBehavior.Test(context.GameTime))
-                    {
-                        this.ChangeState(AIStates.Patrolling);
-                    }
-                    else
-                    {
-                        this.ChangeState(AIStates.Idle);
-                    }
+                    this.UpdateRetreating(context);
                 }
             }
             else if (this.Stats.Life > 0)
@@ -280,6 +224,102 @@ namespace Terrain.AI
 
             this.Stats.Update(context.GameTime);
 
+            this.UpdateController(context);
+        }
+        /// <summary>
+        /// Updates agent state when on idle state
+        /// </summary>
+        /// <param name="context">Updating context</param>
+        private void UpdateIdle(UpdateContext context)
+        {
+            if (this.AttackBehavior.Test(context.GameTime))
+            {
+                this.ChangeState(AIStates.Attacking);
+            }
+            else if (this.RetreatBehavior.Test(context.GameTime))
+            {
+                this.ChangeState(AIStates.Retreating);
+            }
+            else if (this.PatrolBehavior.Test(context.GameTime))
+            {
+                this.ChangeState(AIStates.Patrolling);
+            }
+            else
+            {
+                //Continue doing nothing
+            }
+        }
+        /// <summary>
+        /// Updates agent state when on patrolling state
+        /// </summary>
+        /// <param name="context">Updating context</param>
+        private void UpdatePatrolling(UpdateContext context)
+        {
+            if (this.AttackBehavior.Test(context.GameTime))
+            {
+                this.ChangeState(AIStates.Attacking);
+            }
+            else if (this.RetreatBehavior.Test(context.GameTime))
+            {
+                this.ChangeState(AIStates.Retreating);
+            }
+            else if (this.PatrolBehavior.Test(context.GameTime))
+            {
+                //Continue patrolling
+            }
+            else
+            {
+                this.ChangeState(AIStates.Idle);
+            }
+        }
+        /// <summary>
+        /// Updates agent state when on attacking state state
+        /// </summary>
+        /// <param name="context">Updating context</param>
+        private void UpdateAttacking(UpdateContext context)
+        {
+            if (this.AttackBehavior.Test(context.GameTime))
+            {
+                //Continue attacking
+            }
+            else if (this.RetreatBehavior.Test(context.GameTime))
+            {
+                this.ChangeState(AIStates.Retreating);
+            }
+            else if (this.PatrolBehavior.Test(context.GameTime))
+            {
+                this.ChangeState(AIStates.Patrolling);
+            }
+            else
+            {
+                this.ChangeState(AIStates.Idle);
+            }
+        }
+        /// <summary>
+        /// Updates agent state when on retreating state
+        /// </summary>
+        /// <param name="context">Updating context</param>
+        private void UpdateRetreating(UpdateContext context)
+        {
+            if (this.RetreatBehavior.Test(context.GameTime))
+            {
+                //Continue the retreat
+            }
+            else if (this.PatrolBehavior.Test(context.GameTime))
+            {
+                this.ChangeState(AIStates.Patrolling);
+            }
+            else
+            {
+                this.ChangeState(AIStates.Idle);
+            }
+        }
+        /// <summary>
+        /// Updates model controller
+        /// </summary>
+        /// <param name="context">Updating context</param>
+        private void UpdateController(UpdateContext context)
+        {
             var lastPosition = this.Manipulator.Position;
 
             this.Controller.UpdateManipulator(context.GameTime, this.Manipulator);

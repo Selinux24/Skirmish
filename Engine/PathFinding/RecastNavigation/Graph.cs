@@ -71,7 +71,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             navQuery.FindNearestPoly(endPos, polyPickExt, filter, out int endRef, out Vector3 nep);
 
-            Status pathFindStatus = Status.DT_FAILURE;
+            Status pathFindStatus = Status.DT_SUCCESS;
 
             if (mode == PathFindingMode.TOOLMODE_PATHFIND_FOLLOW)
             {

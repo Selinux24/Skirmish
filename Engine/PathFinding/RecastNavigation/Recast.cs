@@ -2428,7 +2428,7 @@ namespace Engine.PathFinding.RecastNavigation
             // TODO: Figure better formula, expandIters defines how much the 
             // watershed "overflows" and simplifies the regions. Tying it to
             // agent radius was usually good indication how greedy it could be.
-            //	const int expandIters = 4 + walkableRadius * 2;
+            //	const int expandIters = 4 + walkableRadius * 2
             const int expandIters = 8;
 
             if (borderSize > 0)
@@ -3770,13 +3770,11 @@ namespace Engine.PathFinding.RecastNavigation
 
                 if (index == -1)
                 {
-                    //ctx->log(RC_LOG_WARNING, "mergeHoles: Failed to find merge points for %p and %p.", region.outline, hole);
-                    continue;
+                    Console.WriteLine($"Failed to find merge points for {region.outline} and {hole}.");
                 }
-                if (!MergeContours(region.outline, hole, index, bestVertex))
+                else if (!MergeContours(region.outline, hole, index, bestVertex))
                 {
-                    //ctx->log(RC_LOG_WARNING, "mergeHoles: Failed to merge contours %p and %p.", region.outline, hole);
-                    continue;
+                    Console.WriteLine($"Failed to merge contours {region.outline} and {hole}.");
                 }
             }
         }
@@ -3966,7 +3964,7 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             if (regions[cont.reg].outline != null)
                             {
-                                //ctx->log(RC_LOG_ERROR, "rcBuildContours: Multiple outlines for region %d.", cont.reg);
+                                Console.WriteLine($"Multiple outlines for region {cont.reg}");
                             }
                             regions[cont.reg].outline = cont;
                         }
@@ -4012,9 +4010,8 @@ namespace Engine.PathFinding.RecastNavigation
                         else
                         {
                             // The region does not have an outline.
-                            // This can happen if the contour becaomes selfoverlapping because of
-                            // too aggressive simplification settings.
-                            //ctx->log(RC_LOG_ERROR, "rcBuildContours: Bad outline for region %d, contour simplification is likely too aggressive.", i);
+                            // This can happen if the contour becames selfoverlapping because of too aggressive simplification settings.
+                            Console.WriteLine($"Bad outline for region {i}, contour simplification is likely too aggressive.");
                         }
                     }
                 }
@@ -4737,7 +4734,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static int ComputeVertexHash(int x, int y, int z)
         {
-            uint h1 = 0x8da6b343; // Large multiplicative constants;
+            uint h1 = 0x8da6b343; // Large multiplicative constants
             uint h2 = 0xd8163841; // here arbitrarily chosen primes
             uint h3 = 0xcb1ab31f;
             uint n = (uint)(h1 * x + h2 * y + h3 * z);
@@ -5299,7 +5296,7 @@ namespace Engine.PathFinding.RecastNavigation
             int ntris = Triangulate(nhole, tverts, ref thole, out Int3[] tris);
             if (ntris < 0)
             {
-                //ctx->log(RC_LOG_WARNING, "removeVertex: triangulate() returned bad results.");
+                Console.WriteLine("removeVertex: triangulate() returned bad results.");
                 ntris = -ntris;
             }
 
@@ -5401,7 +5398,7 @@ namespace Engine.PathFinding.RecastNavigation
                 mesh.npolys++;
                 if (mesh.npolys > maxTris)
                 {
-                    //ctx->log(RC_LOG_ERROR, "removeVertex: Too many polygons %d (max:%d).", mesh.npolys, maxTris);
+                    Console.WriteLine($"removeVertex: Too many polygons {mesh.npolys} (max:{maxTris}).");
                     return false;
                 }
             }
@@ -5473,17 +5470,7 @@ namespace Engine.PathFinding.RecastNavigation
                 if (ntris <= 0)
                 {
                     // Bad triangulation, should not happen.
-                    /*			printf("\tconst float bmin[3] = {%ff,%ff,%ff};\n", cset.bmin[0], cset.bmin[1], cset.bmin[2]);
-                                printf("\tconst float cs = %ff;\n", cset.cs);
-                                printf("\tconst float ch = %ff;\n", cset.ch);
-                                printf("\tconst int verts[] = {\n");
-                                for (int k = 0; k < cont.nverts; ++k)
-                                {
-                                    const int* v = &cont.verts[k*4];
-                                    printf("\t\t%d,%d,%d,%d,\n", v[0], v[1], v[2], v[3]);
-                                }
-                                printf("\t};\n\tconst int nverts = sizeof(verts)/(sizeof(int)*4);\n");*/
-                    //ctx->log(RC_LOG_WARNING, "rcBuildPolyMesh: Bad triangulation Contour %d.", i);
+                    Console.WriteLine($"rcBuildPolyMesh: Bad triangulation Contour {i}.");
                     ntris = -ntris;
                 }
 
@@ -6090,7 +6077,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (nedges >= maxEdges)
             {
-                //ctx->log(RC_LOG_ERROR, "addEdge: Too many edges (%d/%d).", nedges, maxEdges);
+                Console.WriteLine($"addEdge: Too many edges ({nedges}/{maxEdges}).");
                 return (int)EdgeValues.EV_UNDEF;
             }
 
@@ -6195,7 +6182,6 @@ namespace Engine.PathFinding.RecastNavigation
                     if (d > r * (1 + tol))
                     {
                         // Outside current circumcircle, skip.
-                        continue;
                     }
                     else if (d < r * (1 - tol))
                     {
@@ -6334,7 +6320,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var t = tris[i];
                 if (t.X == -1 || t.Y == -1 || t.Z == -1)
                 {
-                    //ctx->log(RC_LOG_WARNING, "delaunayHull: Removing dangling face %d [%d,%d,%d].", i, t[0], t[1], t[2]);
+                    Console.WriteLine($"delaunayHull: Removing dangling face {i} [{t.X},{t.Y},{t.Z}].");
                     tris[i] = tris[tris.Length - 1];
                     Array.Resize(ref tris, tris.Length - 1);
                     i--;
@@ -6620,7 +6606,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (tris.Count == 0)
             {
                 // Could not triangulate the poly, make sure there is some valid data there.
-                //ctx->log(RC_LOG_WARNING, "buildPolyDetail: Could not triangulate polygon (%d verts).", nverts);
+                Console.WriteLine($"buildPolyDetail: Could not triangulate polygon ({nverts} verts).");
 
                 outTris = tris.ToArray();
 
@@ -6725,7 +6711,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (ntris > MAX_TRIS)
             {
                 tris.RemoveRange(MAX_TRIS, ntris - MAX_TRIS);
-                //ctx->log(RC_LOG_ERROR, "rcBuildPolyMeshDetail: Shrinking triangle count from %d to max %d.", ntris, MAX_TRIS);
+                Console.WriteLine($"rcBuildPolyMeshDetail: Shrinking triangle count from {ntris} to max {MAX_TRIS}.");
             }
 
             outTris = tris.ToArray();
@@ -6801,7 +6787,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 if (array.Count < 3)
                 {
-                    //ctx->log(RC_LOG_WARNING, "Walk towards polygon center failed to reach center");
+                    Console.WriteLine("Walk towards polygon center failed to reach center");
                     break;
                 }
 
