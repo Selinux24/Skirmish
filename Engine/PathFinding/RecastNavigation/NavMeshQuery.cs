@@ -3427,7 +3427,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // If the link is at tile boundary, dtClamp the vertices to
             // the link width.
-            if (link.Value.side != 0xff && link.Value.bmin != 0 || link.Value.bmax != 255)
+            if (link.Value.side != 0xff && (link.Value.bmin != 0 || link.Value.bmax != 255))
             {
                 // Unpack portal limits.
                 float s = 1.0f / 255.0f;
@@ -3544,7 +3544,7 @@ namespace Engine.PathFinding.RecastNavigation
                     break;
                 }
 
-                if (options.HasFlag(StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS) && 
+                if (options.HasFlag(StraightPathOptions.DT_STRAIGHTPATH_AREA_CROSSINGS) &&
                     fromPoly.Area == toPoly.Area)
                 {
                     // Skip intersection if only area crossings are requested.
