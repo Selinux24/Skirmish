@@ -36,10 +36,10 @@ namespace Engine
         }
 
         /// <summary>
-        /// Evaluate the value at a position of this <see cref="Curve"/>.
+        /// Evaluates the value at a position of this <see cref="Curve"/>.
         /// </summary>
         /// <param name="position">The position on this <see cref="Curve"/>.</param>
-        /// <returns>Value at the position on this <see cref="Curve"/>.</returns>
+        /// <returns>Returns the value at the position on this <see cref="Curve"/>.</returns>
         public float Evaluate(float position)
         {
             if (this.Keys.Count == 0)
@@ -52,101 +52,213 @@ namespace Engine
                 return this.Keys[0].Value;
             }
 
-            CurveKey first = this.Keys[0];
-            CurveKey last = this.Keys[this.Keys.Count - 1];
+            if (this.PreLoop == CurveLoopType.Constant)
+            {
+                return EvaluateConstant(this.Keys, position);
+            }
+            else if (this.PreLoop == CurveLoopType.Linear)
+            {
+                return EvaluateLinear(this.Keys, position);
+            }
+            else if (this.PreLoop == CurveLoopType.Cycle)
+            {
+                return EvaluateCycle(this.Keys, position);
+            }
+            else if (this.PreLoop == CurveLoopType.CycleOffset)
+            {
+                return EvaluateCycleOffset(this.Keys, position);
+            }
+            else if (this.PreLoop == CurveLoopType.Oscillate)
+            {
+                return EvaluateOscillate(this.Keys, position);
+            }
+            else
+            {
+                throw new EngineException($"Bad curve loop type: {this.PreLoop}");
+            }
+        }
+        /// <summary>
+        /// Gets the cycle number
+        /// </summary>
+        /// <param name="first">First key</param>
+        /// <param name="last">Last key</param>
+        /// <param name="position">Position to test</param>
+        /// <returns>Returns the cycle number</returns>
+        private static int GetNumberOfCycle(CurveKey first, CurveKey last, float position)
+        {
+            float cycle = (position - first.Position) / (last.Position - first.Position);
+            if (cycle < 0f)
+            {
+                cycle--;
+            }
+
+            return (int)cycle;
+        }
+        /// <summary>
+        /// Gets the curve position
+        /// </summary>
+        /// <param name="keys">Key collection</param>
+        /// <param name="position">Position to test</param>
+        /// <returns>Returns the curve position</returns>
+        private static float GetCurvePosition(CurveKeyCollection keys, float position)
+        {
+            //only for position in curve
+            CurveKey prev = keys[0];
+            CurveKey next;
+
+            for (int i = 1; i < keys.Count; ++i)
+            {
+                next = keys[i];
+                if (next.Position >= position)
+                {
+                    if (prev.Continuity == CurveContinuity.Step)
+                    {
+                        if (position >= 1f)
+                        {
+                            return next.Value;
+                        }
+
+                        return prev.Value;
+                    }
+
+                    //http://en.wikipedia.org/wiki/Cubic_Hermite_spline
+                    //P(t) = (2*t^3 - 3t^2 + 1)*P0 + (t^3 - 2t^2 + t)m0 + (-2t^3 + 3t^2)P1 + (t^3-t^2)m1
+                    //with P0.value = prev.value , m0 = prev.tangentOut, P1= next.value, m1 = next.TangentIn
+                    float t = (position - prev.Position) / (next.Position - prev.Position);//to have t in [0,1]
+                    float ts = t * t;
+                    float tss = ts * t;
+                    return (2 * tss - 3 * ts + 1f) * prev.Value + (tss - 2 * ts + t) * prev.TangentOut + (3 * ts - 2 * tss) * next.Value + (tss - ts) * next.TangentIn;
+                }
+                prev = next;
+            }
+
+            return 0f;
+        }
+        /// <summary>
+        /// Evaluates the value at a position of this <see cref="Curve"/>.
+        /// </summary>
+        /// <param name="keys">Curve keys</param>
+        /// <param name="position">Position to test</param>
+        /// <returns>Returns the value at the position on this <see cref="Curve"/>.</returns>
+        private static float EvaluateConstant(CurveKeyCollection keys, float position)
+        {
+            var first = keys[0];
+            var last = keys[keys.Count - 1];
 
             if (position < first.Position)
             {
-                if (this.PreLoop == CurveLoopType.Constant)
-                {
-                    //constant
-                    return first.Value;
-                }
-                else if (this.PreLoop == CurveLoopType.Linear)
-                {
-                    // linear y = a*x +b with a tangeant of last point
-                    return first.Value - first.TangentIn * (first.Position - position);
-                }
-                else if (this.PreLoop == CurveLoopType.Cycle)
-                {
-                    //start -> end / start -> end
-                    int cycle = this.GetNumberOfCycle(position);
-                    float virtualPos = position - (cycle * (last.Position - first.Position));
-                    return this.GetCurvePosition(virtualPos);
-                }
-                else if (this.PreLoop == CurveLoopType.CycleOffset)
-                {
-                    //make the curve continue (with no step) so must up the curve each cycle of delta(value)
-                    int cycle = this.GetNumberOfCycle(position);
-                    float virtualPos = position - (cycle * (last.Position - first.Position));
-                    return (this.GetCurvePosition(virtualPos) + cycle * (last.Value - first.Value));
-                }
-                else if (this.PreLoop == CurveLoopType.Oscillate)
-                {
-                    //go back on curve from end and target start 
-                    // start-> end / end -> start
-                    int cycle = this.GetNumberOfCycle(position);
-                    float virtualPos;
-                    if (0 == cycle % 2f)
-                    {
-                        //if pair
-                        virtualPos = position - (cycle * (last.Position - first.Position));
-                    }
-                    else
-                    {
-                        virtualPos = last.Position - position + first.Position + (cycle * (last.Position - first.Position));
-                    }
-                    return this.GetCurvePosition(virtualPos);
-                }
+                //constant
+                return first.Value;
             }
             else if (position > last.Position)
             {
-                if (this.PreLoop == CurveLoopType.Constant)
-                {
-                    //constant
-                    return last.Value;
-                }
-                else if (this.PreLoop == CurveLoopType.Linear)
-                {
-                    // linear y = a*x +b with a tangeant of last point
-                    return last.Value + first.TangentOut * (position - last.Position);
-                }
-                else if (this.PreLoop == CurveLoopType.Cycle)
-                {
-                    //start -> end / start -> end
-                    int cycle = this.GetNumberOfCycle(position);
-                    float virtualPos = position - (cycle * (last.Position - first.Position));
-                    return this.GetCurvePosition(virtualPos);
-                }
-                else if (this.PreLoop == CurveLoopType.CycleOffset)
-                {
-                    //make the curve continue (with no step) so must up the curve each cycle of delta(value)
-                    int cycle = this.GetNumberOfCycle(position);
-                    float virtualPos = position - (cycle * (last.Position - first.Position));
-                    return (this.GetCurvePosition(virtualPos) + cycle * (last.Value - first.Value));
-                }
-                else if (this.PreLoop == CurveLoopType.Oscillate)
-                {
-                    //go back on curve from end and target start 
-                    // start-> end / end -> start
-                    int cycle = this.GetNumberOfCycle(position);
-                    float virtualPos;
-                    if (0 == cycle % 2f)
-                    {
-                        //if pair
-                        virtualPos = position - (cycle * (last.Position - first.Position));
-                    }
-                    else
-                    {
-                        virtualPos = last.Position - position + first.Position + (cycle * (last.Position - first.Position));
-                    }
-                    return this.GetCurvePosition(virtualPos);
-                }
+                //constant
+                return last.Value;
+            }
+
+            return GetCurvePosition(keys, position);
+        }
+        /// <summary>
+        /// Evaluates the value at a position of this <see cref="Curve"/>.
+        /// </summary>
+        /// <param name="keys">Curve keys</param>
+        /// <param name="position">Position to test</param>
+        /// <returns>Returns the value at the position on this <see cref="Curve"/>.</returns>
+        private static float EvaluateLinear(CurveKeyCollection keys, float position)
+        {
+            var first = keys[0];
+            var last = keys[keys.Count - 1];
+
+            if (position < first.Position)
+            {
+                // linear y = a*x +b with a tangeant of last point
+                return first.Value - first.TangentIn * (first.Position - position);
+            }
+            else if (position > last.Position)
+            {
+                // linear y = a*x +b with a tangeant of last point
+                return last.Value + first.TangentOut * (position - last.Position);
+            }
+
+            return GetCurvePosition(keys, position);
+        }
+        /// <summary>
+        /// Evaluates the value at a position of this <see cref="Curve"/>.
+        /// </summary>
+        /// <param name="keys">Curve keys</param>
+        /// <param name="position">Position to test</param>
+        /// <returns>Returns the value at the position on this <see cref="Curve"/>.</returns>
+        private static float EvaluateCycle(CurveKeyCollection keys, float position)
+        {
+            var first = keys[0];
+            var last = keys[keys.Count - 1];
+
+            if (position != first.Position)
+            {
+                //start -> end / start -> end
+                int cycle = GetNumberOfCycle(first, last, position);
+                float virtualPos = position - (cycle * (last.Position - first.Position));
+                return GetCurvePosition(keys, virtualPos);
             }
 
             //in curve
-            return this.GetCurvePosition(position);
+            return GetCurvePosition(keys, position);
         }
+        /// <summary>
+        /// Evaluates the value at a position of this <see cref="Curve"/>.
+        /// </summary>
+        /// <param name="keys">Curve keys</param>
+        /// <param name="position">Position to test</param>
+        /// <returns>Returns the value at the position on this <see cref="Curve"/>.</returns>
+        private static float EvaluateCycleOffset(CurveKeyCollection keys, float position)
+        {
+            var first = keys[0];
+            var last = keys[keys.Count - 1];
+
+            if (position != first.Position)
+            {
+                //make the curve continue (with no step) so must up the curve each cycle of delta(value)
+                int cycle = GetNumberOfCycle(first, last, position);
+                float virtualPos = position - (cycle * (last.Position - first.Position));
+                return (GetCurvePosition(keys, virtualPos) + cycle * (last.Value - first.Value));
+            }
+
+            //in curve
+            return GetCurvePosition(keys, position);
+        }
+        /// <summary>
+        /// Evaluates the value at a position of this <see cref="Curve"/>.
+        /// </summary>
+        /// <param name="keys">Curve keys</param>
+        /// <param name="position">Position to test</param>
+        /// <returns>Returns the value at the position on this <see cref="Curve"/>.</returns>
+        private static float EvaluateOscillate(CurveKeyCollection keys, float position)
+        {
+            var first = keys[0];
+            var last = keys[keys.Count - 1];
+
+            if (position != first.Position)
+            {
+                //go back on curve from end and target start 
+                // start-> end / end -> start
+                int cycle = GetNumberOfCycle(first, last, position);
+                float virtualPos;
+                if (0 == cycle % 2f)
+                {
+                    //if pair
+                    virtualPos = position - (cycle * (last.Position - first.Position));
+                }
+                else
+                {
+                    virtualPos = last.Position - position + first.Position + (cycle * (last.Position - first.Position));
+                }
+                return GetCurvePosition(keys, virtualPos);
+            }
+
+            //in curve
+            return GetCurvePosition(keys, position);
+        }
+
         /// <summary>
         /// Computes tangents for all keys in the collection.
         /// </summary>
@@ -247,50 +359,6 @@ namespace Engine
                     key.TangentOut = (v1 - v0) * ((p1 - p) / pn);
                 }
             }
-        }
-
-        private int GetNumberOfCycle(float position)
-        {
-            float cycle = (position - this.Keys[0].Position) / (this.Keys[this.Keys.Count - 1].Position - this.Keys[0].Position);
-            if (cycle < 0f)
-            {
-                cycle--;
-            }
-
-            return (int)cycle;
-        }
-
-        private float GetCurvePosition(float position)
-        {
-            //only for position in curve
-            CurveKey prev = this.Keys[0];
-            CurveKey next;
-            for (int i = 1; i < this.Keys.Count; ++i)
-            {
-                next = this.Keys[i];
-                if (next.Position >= position)
-                {
-                    if (prev.Continuity == CurveContinuity.Step)
-                    {
-                        if (position >= 1f)
-                        {
-                            return next.Value;
-                        }
-
-                        return prev.Value;
-                    }
-
-                    //http://en.wikipedia.org/wiki/Cubic_Hermite_spline
-                    //P(t) = (2*t^3 - 3t^2 + 1)*P0 + (t^3 - 2t^2 + t)m0 + (-2t^3 + 3t^2)P1 + (t^3-t^2)m1
-                    //with P0.value = prev.value , m0 = prev.tangentOut, P1= next.value, m1 = next.TangentIn
-                    float t = (position - prev.Position) / (next.Position - prev.Position);//to have t in [0,1]
-                    float ts = t * t;
-                    float tss = ts * t;
-                    return (2 * tss - 3 * ts + 1f) * prev.Value + (tss - 2 * ts + t) * prev.TangentOut + (3 * ts - 2 * tss) * next.Value + (tss - ts) * next.TangentIn;
-                }
-                prev = next;
-            }
-            return 0f;
         }
     }
 }

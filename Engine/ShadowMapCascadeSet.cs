@@ -20,7 +20,6 @@ namespace Engine
         private readonly float[] cascadeRanges;
         private bool antiFlickerOn = true;
 
-        private Vector3 shadowBoundCenter = Vector3.Zero;
         private float shadowBoundRadius = 0;
         private readonly Vector3[] cascadeBoundCenter;
         private readonly float[] cascadeBoundRadius;
@@ -28,9 +27,9 @@ namespace Engine
         private Matrix worldToShadowSpace = Matrix.Identity;
         private readonly Matrix[] worldToCascadeProj;
 
-        private Vector4 toCascadeOffsetX = Vector4.Zero;
-        private Vector4 toCascadeOffsetY = Vector4.Zero;
-        private Vector4 toCascadeScale = Vector4.Zero;
+        private Vector4 toCascadeOffsetX;
+        private Vector4 toCascadeOffsetY;
+        private Vector4 toCascadeScale;
 
         /// <summary>
         /// Extract the frustum corners for the given near and far values
@@ -112,16 +111,9 @@ namespace Engine
 
             cascadeTotalRange = ranges.Last();
 
-            cascadeBoundCenter = new Vector3[TotalCascades];
-            cascadeBoundRadius = new float[TotalCascades];
-
-            for (int i = 0; i < TotalCascades; i++)
-            {
-                cascadeBoundCenter[i] = Vector3.Zero;
-                cascadeBoundRadius[i] = 0.0f;
-            }
-
-            worldToCascadeProj = new Matrix[TotalCascades];
+            cascadeBoundCenter = Helper.CreateArray(TotalCascades, Vector3.Zero);
+            cascadeBoundRadius = Helper.CreateArray(TotalCascades, 0.0f);
+            worldToCascadeProj = Helper.CreateArray(TotalCascades, Matrix.Identity);
         }
 
         /// <summary>
@@ -139,8 +131,13 @@ namespace Engine
             Vector3 up = Vector3.Normalize(Vector3.Cross(lightDirection, right));
             Matrix shadowView = Matrix.LookAtLH(pos, lookAt, up);
 
+            this.toCascadeOffsetX = Vector4.Zero;
+            this.toCascadeOffsetY = Vector4.Zero;
+            this.toCascadeScale = Vector4.Zero;
+
             // Get the bounds for the shadow space
-            ExtractFrustumBoundSphere(camera,
+            ExtractFrustumBoundSphere(
+                camera,
                 cascadeRanges.First(),
                 cascadeRanges.Last(),
                 out BoundingSphere boundingSphere);

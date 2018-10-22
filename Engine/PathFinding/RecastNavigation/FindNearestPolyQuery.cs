@@ -5,8 +5,8 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public class FindNearestPolyQuery : IPolyQuery
     {
-        private NavMeshQuery m_query;
-        private Vector3 m_center;
+        private readonly NavMeshQuery m_query;
+        private readonly Vector3 m_center;
         private float m_nearestDistanceSqr;
         private int m_nearestRef;
         private Vector3 m_nearestPoint;

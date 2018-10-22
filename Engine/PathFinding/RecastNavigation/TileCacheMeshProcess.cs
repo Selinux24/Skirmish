@@ -3,7 +3,7 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public class TileCacheMeshProcess
     {
-        private InputGeometry m_geom = null;
+        private readonly InputGeometry m_geom = null;
 
         public TileCacheMeshProcess(InputGeometry geometry)
         {
