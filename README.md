@@ -2,6 +2,7 @@
 Game and prototypes with SharpDX and Directx 11
 
 [![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/selinux24/skirmish?svg=true&branch=master)](https://ci.appveyor.com/project/Selinux24/skirmish/branch/master)
+[![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish&metric=alert_status)](https://sonarcloud.io/dashboard?id=Selinux24_Skirmish)
 
 ### What is it?
 
