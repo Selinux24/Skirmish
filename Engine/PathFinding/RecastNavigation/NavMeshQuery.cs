@@ -1568,8 +1568,6 @@ namespace Engine.PathFinding.RecastNavigation
                 return Status.DT_FAILURE;
             }
 
-            polyCount = collector.NumCollected();
-
             return collector.Overflowed() ? Status.DT_SUCCESS | Status.DT_BUFFER_TOO_SMALL : Status.DT_SUCCESS;
         }
         /// <summary>

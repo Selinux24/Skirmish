@@ -28,7 +28,16 @@ namespace GameLogic.Rules
         private int turnActionPoints = 0;
         private bool onMelee = false;
         private bool canFight = false;
+        private int turnMelee = 0;
+        private int turnSmallWeapons = 0;
+        private int turnBigWeapons = 0;
+        private int turnStrength = 0;
+        private int turnAgility = 0;
+        private int turnEndurance = 0;
         private int wounds = 0;
+        private int turnInitiative = 0;
+        private int turnHability = 0;
+
 
         public int CurrentMovingCapacity
         {
@@ -176,9 +185,9 @@ namespace GameLogic.Rules
         {
             get
             {
-                return 
+                return
                     this.CurrentHealth != HealthStates.Disabled &&
-                    this.canMove && 
+                    this.canMove &&
                     !this.onMelee &&
                     this.CurrentMovingCapacity > 0;
             }
@@ -189,8 +198,8 @@ namespace GameLogic.Rules
             {
                 return
                     this.CurrentHealth != HealthStates.Disabled &&
-                    this.canShoot && 
-                    !this.onMelee && 
+                    this.canShoot &&
+                    !this.onMelee &&
                     this.CurrentActionPoints > 0;
             }
         }
@@ -224,27 +233,27 @@ namespace GameLogic.Rules
         }
         private int GetModifiersMelee()
         {
-            return 0;
+            return this.turnMelee;
         }
         private int GetModifiersSmallWeapons()
         {
-            return 0;
+            return turnSmallWeapons;
         }
         private int GetModifiersBigWeapons()
         {
-            return 0;
+            return turnBigWeapons;
         }
         private int GetModifiersStrength()
         {
-            return 0;
+            return this.turnStrength;
         }
         private int GetModifiersAgility()
         {
-            return 0;
+            return this.turnAgility;
         }
         private int GetModifiersEndurance()
         {
-            return 0;
+            return this.turnEndurance;
         }
         private int GetModifiersHealth()
         {
@@ -252,11 +261,11 @@ namespace GameLogic.Rules
         }
         private int GetModifiersInitiative()
         {
-            return 0;
+            return this.turnInitiative;
         }
         private int GetModifiersHability()
         {
-            return 0;
+            return this.turnHability;
         }
 
         public bool IdleForPhase(Phase phase)
@@ -277,6 +286,16 @@ namespace GameLogic.Rules
 
                 this.turnMovingCapacity = this.BaseMovingCapacity;
                 this.turnActionPoints = this.BaseMovingCapacity;
+
+                this.turnMelee = 0;
+                this.turnSmallWeapons = 0;
+                this.turnBigWeapons = 0;
+
+                this.turnStrength = 0;
+                this.turnAgility = 0;
+                this.turnEndurance = 0;
+                this.turnInitiative = 0;
+                this.turnHability = 0;
             }
             else if (this.CurrentMorale == MoraleStates.Cowed)
             {
@@ -286,6 +305,16 @@ namespace GameLogic.Rules
 
                 this.turnMovingCapacity = this.onMelee ? this.BaseMovingCapacity : 0;
                 this.turnActionPoints = this.onMelee ? this.BaseMovingCapacity : 0;
+
+                this.turnMelee = this.BaseMelee / 2;
+                this.turnSmallWeapons = this.BaseSmallWeapons / 2;
+                this.turnBigWeapons = this.BaseBigWeapons / 2;
+
+                this.turnStrength = 0;
+                this.turnAgility = 0;
+                this.turnEndurance = 0;
+                this.turnInitiative = 0;
+                this.turnHability = 0;
             }
             else
             {
@@ -295,6 +324,16 @@ namespace GameLogic.Rules
 
                 this.turnMovingCapacity = this.onMelee ? this.BaseMovingCapacity : 0;
                 this.turnActionPoints = this.onMelee ? this.BaseMovingCapacity : 0;
+
+                this.turnMelee = this.BaseMelee;
+                this.turnSmallWeapons = this.BaseSmallWeapons;
+                this.turnBigWeapons = this.BaseBigWeapons;
+
+                this.turnStrength = 0;
+                this.turnAgility = 0;
+                this.turnEndurance = 0;
+                this.turnInitiative = 0;
+                this.turnHability = 0;
             }
         }
 
@@ -302,6 +341,7 @@ namespace GameLogic.Rules
         {
             this.ConsumeMovingCapacity(points);
 
+            //Normal move
             this.canMove = false;
             this.canShoot = true;
             this.canFight = false;
@@ -310,6 +350,7 @@ namespace GameLogic.Rules
         {
             this.ConsumeMovingCapacity(points);
 
+            //Running
             this.canMove = false;
             this.canShoot = false;
             this.canFight = false;
@@ -318,6 +359,7 @@ namespace GameLogic.Rules
         {
             this.ConsumeMovingCapacity(points);
 
+            //Crawling move
             this.canMove = false;
             this.canShoot = true;
             this.canFight = false;
