@@ -372,215 +372,219 @@ namespace GameLogic
                 Ray cursorRay = this.GetPickingRay();
                 bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
 
-                #region DEBUG
+                //DEBUG
+                this.UpdateDebug();
 
-                if (this.Game.Input.KeyJustReleased(this.keyDebugFrustum))
+                //HUD
+                this.UpdateHUD(shift);
+
+                //3D
+                this.Update3D(gameTime, shift, cursorRay, picked, r);
+
+                //Actions
+                this.UpdateActions(cursorRay, picked, r);
+            }
+        }
+        private void UpdateDebug()
+        {
+            if (this.Game.Input.KeyJustReleased(this.keyDebugFrustum))
+            {
+                this.SetFrustum();
+            }
+
+            if (this.Game.Input.KeyJustReleased(this.keyDebugVolumes))
+            {
+                this.lineDrawer.Visible = !this.lineDrawer.Visible;
+            }
+        }
+        private void UpdateHUD(bool shift)
+        {
+            if (this.Game.Input.KeyJustReleased(this.keyHUDNextSoldier))
+            {
+                this.NextSoldier(!shift);
+            }
+
+            if (this.Game.Input.KeyJustReleased(this.keyHUDPrevSoldier))
+            {
+                this.PrevSoldier(!shift);
+            }
+
+            if (this.Game.Input.KeyJustReleased(this.keyHUDNextAction))
+            {
+                this.NextAction();
+            }
+
+            if (this.Game.Input.KeyJustReleased(this.keyHUDPrevAction))
+            {
+                this.PrevAction();
+            }
+
+            if (this.Game.Input.KeyJustReleased(this.keyHUDNextPhase))
+            {
+                this.NextPhase();
+            }
+
+            if (!this.gameFinished)
+            {
+                this.txtGame.Instance.Text = string.Format("{0}", this.skirmishGame);
+                this.txtTeam.Instance.Text = string.Format("{0}", this.skirmishGame.CurrentTeam);
+                this.txtSoldier.Instance.Text = string.Format("{0}", this.skirmishGame.CurrentSoldier);
+                this.txtActionList.Instance.Text = string.Format("{0}", this.currentActions.Join(" | "));
+                this.txtAction.Instance.Text = string.Format("{0}", this.CurrentAction);
+            }
+        }
+        private void Update3D(GameTime gameTime, bool shift, Ray cursorRay, bool picked, PickingResult<Triangle> r)
+        {
+            if (picked)
+            {
+                this.cursor3D.Transform.SetPosition(r.Position);
+            }
+
+            if (this.Game.Input.KeyJustReleased(this.keyCAMNextIsometric))
+            {
+                this.Camera.NextIsometricAxis();
+            }
+
+            if (this.Game.Input.KeyJustReleased(this.keyCAMPrevIsometric))
+            {
+                this.Camera.PreviousIsometricAxis();
+            }
+
+            if (this.Game.Input.KeyPressed(this.keyCAMMoveLeft))
+            {
+                this.Camera.MoveLeft(gameTime, shift);
+            }
+
+            if (this.Game.Input.KeyPressed(this.keyCAMMoveRight))
+            {
+                this.Camera.MoveRight(gameTime, shift);
+            }
+
+            if (this.Game.Input.KeyPressed(this.keyCAMMoveForward))
+            {
+                this.Camera.MoveForward(gameTime, shift);
+            }
+
+            if (this.Game.Input.KeyPressed(this.keyCAMMoveBackward))
+            {
+                this.Camera.MoveBackward(gameTime, shift);
+            }
+
+            if (this.Game.Input.RightMouseButtonJustReleased)
+            {
+                Soldier pickedSoldier = this.PickSoldier(ref cursorRay, false);
+                if (pickedSoldier != null)
                 {
-                    this.SetFrustum();
-                }
-
-                if (this.Game.Input.KeyJustReleased(this.keyDebugVolumes))
-                {
-                    this.lineDrawer.Visible = !this.lineDrawer.Visible;
-                }
-
-                #endregion
-
-                #region HUD
-
-                if (this.Game.Input.KeyJustReleased(this.keyHUDNextSoldier))
-                {
-                    this.NextSoldier(!shift);
-                }
-
-                if (this.Game.Input.KeyJustReleased(this.keyHUDPrevSoldier))
-                {
-                    this.PrevSoldier(!shift);
-                }
-
-                if (this.Game.Input.KeyJustReleased(this.keyHUDNextAction))
-                {
-                    this.NextAction();
-                }
-
-                if (this.Game.Input.KeyJustReleased(this.keyHUDPrevAction))
-                {
-                    this.PrevAction();
-                }
-
-                if (this.Game.Input.KeyJustReleased(this.keyHUDNextPhase))
-                {
-                    this.NextPhase();
-                }
-
-                #endregion
-
-                #region 3D
-
-                if (picked)
-                {
-                    this.cursor3D.Transform.SetPosition(r.Position);
-                }
-
-                if (this.Game.Input.KeyJustReleased(this.keyCAMNextIsometric))
-                {
-                    this.Camera.NextIsometricAxis();
-                }
-
-                if (this.Game.Input.KeyJustReleased(this.keyCAMPrevIsometric))
-                {
-                    this.Camera.PreviousIsometricAxis();
-                }
-
-                if (this.Game.Input.KeyPressed(this.keyCAMMoveLeft))
-                {
-                    this.Camera.MoveLeft(gameTime, shift);
-                }
-
-                if (this.Game.Input.KeyPressed(this.keyCAMMoveRight))
-                {
-                    this.Camera.MoveRight(gameTime, shift);
-                }
-
-                if (this.Game.Input.KeyPressed(this.keyCAMMoveForward))
-                {
-                    this.Camera.MoveForward(gameTime, shift);
-                }
-
-                if (this.Game.Input.KeyPressed(this.keyCAMMoveBackward))
-                {
-                    this.Camera.MoveBackward(gameTime, shift);
-                }
-
-                if (this.Game.Input.RightMouseButtonJustReleased)
-                {
-                    Soldier pickedSoldier = this.PickSoldier(ref cursorRay, false);
-                    if (pickedSoldier != null)
+                    if (pickedSoldier.Team == this.skirmishGame.CurrentTeam)
                     {
-                        if (pickedSoldier.Team == this.skirmishGame.CurrentTeam)
-                        {
-                            this.skirmishGame.CurrentSoldier = pickedSoldier;
-                        }
-
-                        this.GoToSoldier(pickedSoldier);
-                    }
-                    else if (picked)
-                    {
-                        this.Camera.LookTo(r.Position, CameraTranslations.UseDelta);
-                    }
-                }
-
-                if (this.Game.Input.MouseWheelDelta > 0)
-                {
-                    this.Camera.ZoomIn(gameTime, shift);
-                }
-
-                if (this.Game.Input.MouseWheelDelta < 0)
-                {
-                    this.Camera.ZoomOut(gameTime, shift);
-                }
-
-                if (this.Game.Input.KeyJustReleased(this.keyCAMCenterSoldier))
-                {
-                    this.GoToSoldier(this.skirmishGame.CurrentSoldier);
-                }
-
-                this.spotLight.Position = this.soldierModels[this.skirmishGame.CurrentSoldier].Manipulator.Position + (Vector3.UnitY * 10f);
-
-                #endregion
-
-                #region Actions
-
-                if (this.CurrentAction != null)
-                {
-                    bool selectorDone = false;
-                    Area area = null;
-
-                    if (this.CurrentAction.Selector == Selectors.Goto)
-                    {
-                        //TODO: Show goto selector
-                        if (this.Game.Input.LeftMouseButtonJustReleased)
-                        {
-                            selectorDone = true;
-                        }
-                    }
-                    else if (this.CurrentAction.Selector == Selectors.Area)
-                    {
-                        //TODO: Show area selector
-                        if (this.Game.Input.LeftMouseButtonJustReleased)
-                        {
-                            area = new Area();
-
-                            selectorDone = true;
-                        }
+                        this.skirmishGame.CurrentSoldier = pickedSoldier;
                     }
 
-                    if (selectorDone)
+                    this.GoToSoldier(pickedSoldier);
+                }
+                else if (picked)
+                {
+                    this.Camera.LookTo(r.Position, CameraTranslations.UseDelta);
+                }
+            }
+
+            if (this.Game.Input.MouseWheelDelta > 0)
+            {
+                this.Camera.ZoomIn(gameTime, shift);
+            }
+
+            if (this.Game.Input.MouseWheelDelta < 0)
+            {
+                this.Camera.ZoomOut(gameTime, shift);
+            }
+
+            if (this.Game.Input.KeyJustReleased(this.keyCAMCenterSoldier))
+            {
+                this.GoToSoldier(this.skirmishGame.CurrentSoldier);
+            }
+
+            this.spotLight.Position = this.soldierModels[this.skirmishGame.CurrentSoldier].Manipulator.Position + (Vector3.UnitY * 10f);
+        }
+        private void UpdateActions(Ray cursorRay, bool picked, PickingResult<Triangle> r)
+        {
+            if (this.CurrentAction != null)
+            {
+                bool selectorDone = false;
+                Area area = null;
+
+                if (this.CurrentAction.Selector == Selectors.Goto)
+                {
+                    //TODO: Show goto selector
+                    if (this.Game.Input.LeftMouseButtonJustReleased)
                     {
-                        if (this.CurrentAction.Action == Actions.Move)
-                        {
-                            this.Move(this.skirmishGame.CurrentSoldier, r.Position);
-                        }
-                        else if (this.CurrentAction.Action == Actions.Run)
-                        {
-                            this.Run(this.skirmishGame.CurrentSoldier, r.Position);
-                        }
-                        else if (this.CurrentAction.Action == Actions.Crawl)
-                        {
-                            this.Crawl(this.skirmishGame.CurrentSoldier, r.Position);
-                        }
-                        else if (this.CurrentAction.Action == Actions.Assault)
-                        {
-                            Soldier active = this.skirmishGame.CurrentSoldier;
-                            Vector3 pos = this.Current.Manipulator.Position;
-                            Soldier passive = this.PickSoldierNearestToPosition(ref cursorRay, ref pos, true);
-                            if (passive != null)
-                            {
-                                this.Assault(active, passive);
-                            }
-                        }
-                        else if (this.CurrentAction.Action == Actions.CoveringFire)
-                        {
-                            Soldier active = this.skirmishGame.CurrentSoldier;
+                        selectorDone = picked;
+                    }
+                }
+                else if (this.CurrentAction.Selector == Selectors.Area)
+                {
+                    //TODO: Show area selector
+                    if (this.Game.Input.LeftMouseButtonJustReleased)
+                    {
+                        area = new Area();
 
-                            this.CoveringFire(active, active.CurrentShootingWeapon, area);
-                        }
-                        else if (this.CurrentAction.Action == Actions.Reload)
-                        {
-                            Soldier active = this.skirmishGame.CurrentSoldier;
-
-                            this.Reload(active, active.CurrentShootingWeapon);
-                        }
-                        else if (this.CurrentAction.Action == Actions.Repair)
-                        {
-                            Soldier active = this.skirmishGame.CurrentSoldier;
-
-                            this.Repair(active, active.CurrentShootingWeapon);
-                        }
-                        else if (this.CurrentAction.Action == Actions.Inventory)
-                        {
-                            this.Inventory(this.skirmishGame.CurrentSoldier);
-                        }
-                        else if (this.CurrentAction.Action == Actions.UseMovementItem)
-                        {
-                            this.UseMovementItem(this.skirmishGame.CurrentSoldier);
-                        }
-                        else if (this.CurrentAction.Action == Actions.Communications)
-                        {
-                            this.Communications(this.skirmishGame.CurrentSoldier);
-                        }
+                        selectorDone = picked;
                     }
                 }
 
-                #endregion
-
-                if (!this.gameFinished)
+                if (selectorDone)
                 {
-                    this.txtGame.Instance.Text = string.Format("{0}", this.skirmishGame);
-                    this.txtTeam.Instance.Text = string.Format("{0}", this.skirmishGame.CurrentTeam);
-                    this.txtSoldier.Instance.Text = string.Format("{0}", this.skirmishGame.CurrentSoldier);
-                    this.txtActionList.Instance.Text = string.Format("{0}", this.currentActions.Join(" | "));
-                    this.txtAction.Instance.Text = string.Format("{0}", this.CurrentAction);
+                    if (this.CurrentAction.Action == Actions.Move)
+                    {
+                        this.Move(this.skirmishGame.CurrentSoldier, r.Position);
+                    }
+                    else if (this.CurrentAction.Action == Actions.Run)
+                    {
+                        this.Run(this.skirmishGame.CurrentSoldier, r.Position);
+                    }
+                    else if (this.CurrentAction.Action == Actions.Crawl)
+                    {
+                        this.Crawl(this.skirmishGame.CurrentSoldier, r.Position);
+                    }
+                    else if (this.CurrentAction.Action == Actions.Assault)
+                    {
+                        Soldier active = this.skirmishGame.CurrentSoldier;
+                        Vector3 pos = this.Current.Manipulator.Position;
+                        Soldier passive = this.PickSoldierNearestToPosition(ref cursorRay, ref pos, true);
+                        if (passive != null)
+                        {
+                            this.Assault(active, passive);
+                        }
+                    }
+                    else if (this.CurrentAction.Action == Actions.CoveringFire)
+                    {
+                        Soldier active = this.skirmishGame.CurrentSoldier;
+
+                        this.CoveringFire(active, active.CurrentShootingWeapon, area);
+                    }
+                    else if (this.CurrentAction.Action == Actions.Reload)
+                    {
+                        Soldier active = this.skirmishGame.CurrentSoldier;
+
+                        this.Reload(active, active.CurrentShootingWeapon);
+                    }
+                    else if (this.CurrentAction.Action == Actions.Repair)
+                    {
+                        Soldier active = this.skirmishGame.CurrentSoldier;
+
+                        this.Repair(active, active.CurrentShootingWeapon);
+                    }
+                    else if (this.CurrentAction.Action == Actions.Inventory)
+                    {
+                        this.Inventory(this.skirmishGame.CurrentSoldier);
+                    }
+                    else if (this.CurrentAction.Action == Actions.UseMovementItem)
+                    {
+                        this.UseMovementItem(this.skirmishGame.CurrentSoldier);
+                    }
+                    else if (this.CurrentAction.Action == Actions.Communications)
+                    {
+                        this.Communications(this.skirmishGame.CurrentSoldier);
+                    }
                 }
             }
         }
@@ -721,14 +725,12 @@ namespace GameLogic
             this.skirmishGame = new Skirmish();
             this.skirmishGame.AddTeam("Team1", "Reds", TeamRoles.Defense, 5, 1, 1);
             this.skirmishGame.AddTeam("Team2", "Blues", TeamRoles.Assault, 5, 1, 1);
-            //this.SkirmishGame.AddTeam("Team3", "Gray", TeamRole.Neutral, 2, 0, 0, false);
             this.skirmishGame.Start();
             this.currentActions = this.skirmishGame.GetActions();
         }
         private void LoadGame()
         {
             //TODO: Load game from file
-            this.NewGame();
         }
         private void SaveGame()
         {

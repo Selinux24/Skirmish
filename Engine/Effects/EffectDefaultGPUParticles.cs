@@ -461,61 +461,37 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="viewProjection">View * projection matrix</param>
         /// <param name="eyePositionWorld">Eye position in world coordinates</param>
-        /// <param name="totalTime">Total time</param>
-        /// <param name="maxDuration">Maximum particle duration</param>
-        /// <param name="maxDurationRandomness">Maximum particle duration randomness</param>
-        /// <param name="endVelocity">End particle velocity</param>
-        /// <param name="gravity">Gravity</param>
-        /// <param name="startSize">Start size</param>
-        /// <param name="endSize">End size</param>
-        /// <param name="minColor">Minimum color</param>
-        /// <param name="maxColor">Maximum color</param>
-        /// <param name="rotateSpeed">Rotation speed</param>
+        /// <param name="state">Particle state</param>
         /// <param name="textureCount">Texture count</param>
         /// <param name="textures">Texture</param>
         public void UpdatePerFrame(
             Matrix viewProjection,
             Vector3 eyePositionWorld,
-            float totalTime,
-            float elapsedTime,
-            float emissionRate,
-            float velocitySensitivity,
-            Vector2 horizontalVelocity,
-            Vector2 verticalVelocity,
-            Vector4 randomValues,
-            float maxDuration,
-            float maxDurationRandomness,
-            float endVelocity,
-            Vector3 gravity,
-            Vector2 startSize,
-            Vector2 endSize,
-            Color4 minColor,
-            Color4 maxColor,
-            Vector2 rotateSpeed,
+            EffectParticleState state,
             uint textureCount,
             EngineShaderResourceView textures)
         {
             this.World = Matrix.Identity;
             this.WorldViewProjection = viewProjection;
             this.EyePositionWorld = eyePositionWorld;
-            this.TotalTime = totalTime;
-            this.ElapsedTime = elapsedTime;
+            this.TotalTime = state.TotalTime;
+            this.ElapsedTime = state.ElapsedTime;
 
-            this.EmissionRate = emissionRate;
-            this.VelocitySensitivity = velocitySensitivity;
-            this.HorizontalVelocity = horizontalVelocity;
-            this.VerticalVelocity = verticalVelocity;
-            this.RandomValues = randomValues;
+            this.EmissionRate = state.EmissionRate;
+            this.VelocitySensitivity = state.VelocitySensitivity;
+            this.HorizontalVelocity = state.HorizontalVelocity;
+            this.VerticalVelocity = state.VerticalVelocity;
+            this.RandomValues = state.RandomValues;
 
-            this.MaxDuration = maxDuration;
-            this.MaxDurationRandomness = maxDurationRandomness;
-            this.EndVelocity = endVelocity;
-            this.Gravity = gravity;
-            this.StartSize = startSize;
-            this.EndSize = endSize;
-            this.MinColor = minColor;
-            this.MaxColor = maxColor;
-            this.RotateSpeed = rotateSpeed;
+            this.MaxDuration = state.MaxDuration;
+            this.MaxDurationRandomness = state.MaxDurationRandomness;
+            this.EndVelocity = state.EndVelocity;
+            this.Gravity = state.Gravity;
+            this.StartSize = state.StartSize;
+            this.EndSize = state.EndSize;
+            this.MinColor = state.MinColor;
+            this.MaxColor = state.MaxColor;
+            this.RotateSpeed = state.RotateSpeed;
             this.TextureCount = textureCount;
             this.TextureArray = textures;
         }

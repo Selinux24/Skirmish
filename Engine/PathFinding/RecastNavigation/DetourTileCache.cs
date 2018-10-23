@@ -261,9 +261,10 @@ namespace Engine.PathFinding.RecastNavigation
                     int xidx = (x - 1) + y * w;
                     if (x > 0 && IsConnected(layer, idx, xidx, walkableClimb))
                     {
-                        if (layer.regs[xidx] != 0xff)
+                        int layerReg = layer.regs[xidx];
+                        if (layerReg != 0xff)
                         {
-                            sid = layer.regs[xidx];
+                            sid = layerReg;
                         }
                     }
 
@@ -1157,7 +1158,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static int ComputeVertexHash2(int x, int y, int z)
         {
-            uint h1 = 0x8da6b343; // Large multiplicative constants;
+            uint h1 = 0x8da6b343; // Large multiplicative constants
             uint h2 = 0xd8163841; // here arbitrarily chosen primes
             uint h3 = 0xcb1ab31f;
             uint n = (uint)(h1 * x + h2 * y + h3 * z);
@@ -1556,13 +1557,8 @@ namespace Engine.PathFinding.RecastNavigation
                         }
                     }
                     // Remove the polygon.
-                    var p2 = mesh.polys[mesh.npolys - 1];
-                    if (p != p2)
-                    {
-                        //memcpy(p, p2, sizeof(unsigned short) * MAX_VERTS_PER_POLY);
-                    }
-                    //memset(p + MAX_VERTS_PER_POLY, 0xff, sizeof(unsigned short) * MAX_VERTS_PER_POLY);
-
+                    mesh.polys[i] = mesh.polys[mesh.npolys - 1];
+                    mesh.polys[mesh.npolys - 1] = null;
                     mesh.areas[i] = mesh.areas[mesh.npolys - 1];
                     mesh.npolys--;
                     --i;
@@ -1763,7 +1759,7 @@ namespace Engine.PathFinding.RecastNavigation
                 mesh.npolys++;
                 if (mesh.npolys > maxTris)
                 {
-                    //ctx->log(RC_LOG_ERROR, "removeVertex: Too many polygons %d (max:%d).", mesh.npolys, maxTris);
+                    Console.WriteLine($"removeVertex: Too many polygons {mesh.npolys} (max:{maxTris}).");
                     return false;
                 }
             }
@@ -1777,7 +1773,7 @@ namespace Engine.PathFinding.RecastNavigation
 
         public static int ComputeTileHash(int x, int y, int mask)
         {
-            uint h1 = 0x8da6b343; // Large multiplicative constants;
+            uint h1 = 0x8da6b343; // Large multiplicative constants
             uint h2 = 0xd8163841; // here arbitrarily chosen primes
             uint n = h1 * (uint)x + h2 * (uint)y;
             return (int)(n & mask);

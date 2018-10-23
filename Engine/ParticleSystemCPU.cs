@@ -1,12 +1,12 @@
-﻿using SharpDX;
-using SharpDX.Direct3D;
-using System;
+﻿using System;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
+    using SharpDX;
+    using SharpDX.Direct3D;
 
     /// <summary>
     /// CPU particle system
@@ -211,19 +211,24 @@ namespace Engine
                     graphics.SetBlendDefault();
                 }
 
+                var state = new EffectParticleState
+                {
+                    TotalTime = this.Emitter.TotalTime,
+                    MaxDuration = this.Parameters.MaxDuration,
+                    MaxDurationRandomness = this.Parameters.MaxDurationRandomness,
+                    EndVelocity = this.Parameters.EndVelocity,
+                    Gravity = this.Parameters.Gravity,
+                    StartSize = this.Parameters.StartSize,
+                    EndSize = this.Parameters.EndSize,
+                    MinColor = this.Parameters.MinColor,
+                    MaxColor = this.Parameters.MaxColor,
+                    RotateSpeed = this.Parameters.RotateSpeed,
+                };
+
                 effect.UpdatePerFrame(
                     context.ViewProjection,
                     context.EyePosition,
-                    this.Emitter.TotalTime,
-                    this.Parameters.MaxDuration,
-                    this.Parameters.MaxDurationRandomness,
-                    this.Parameters.EndVelocity,
-                    this.Parameters.Gravity,
-                    this.Parameters.StartSize,
-                    this.Parameters.EndSize,
-                    this.Parameters.MinColor,
-                    this.Parameters.MaxColor,
-                    this.Parameters.RotateSpeed,
+                    state,
                     this.TextureCount,
                     this.Texture);
 

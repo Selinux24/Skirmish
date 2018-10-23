@@ -252,25 +252,30 @@ namespace Engine
 
                 #region Per frame update
 
+                var state = new EffectParticleState
+                {
+                    TotalTime = this.Emitter.TotalTime,
+                    ElapsedTime = this.Emitter.ElapsedTime,
+                    EmissionRate = this.Emitter.EmissionRate,
+                    VelocitySensitivity = this.Parameters.EmitterVelocitySensitivity,
+                    HorizontalVelocity = this.Parameters.HorizontalVelocity,
+                    VerticalVelocity = this.Parameters.VerticalVelocity,
+                    RandomValues = this.rnd.NextVector4(Vector4.Zero, Vector4.One),
+                    MaxDuration = this.Parameters.MaxDuration,
+                    MaxDurationRandomness = this.Parameters.MaxDurationRandomness,
+                    EndVelocity = this.Parameters.EndVelocity,
+                    Gravity = this.Parameters.Gravity,
+                    StartSize = this.Parameters.StartSize,
+                    EndSize = this.Parameters.EndSize,
+                    MinColor = this.Parameters.MinColor,
+                    MaxColor = this.Parameters.MaxColor,
+                    RotateSpeed = this.Parameters.RotateSpeed,
+                };
+
                 effect.UpdatePerFrame(
                     context.ViewProjection,
                     context.EyePosition,
-                    this.Emitter.TotalTime,
-                    this.Emitter.ElapsedTime,
-                    this.Emitter.EmissionRate,
-                    this.Parameters.EmitterVelocitySensitivity,
-                    this.Parameters.HorizontalVelocity,
-                    this.Parameters.VerticalVelocity,
-                    this.rnd.NextVector4(Vector4.Zero, Vector4.One),
-                    this.Parameters.MaxDuration,
-                    this.Parameters.MaxDurationRandomness,
-                    this.Parameters.EndVelocity,
-                    this.Parameters.Gravity,
-                    this.Parameters.StartSize,
-                    this.Parameters.EndSize,
-                    this.Parameters.MinColor,
-                    this.Parameters.MaxColor,
-                    this.Parameters.RotateSpeed,
+                    state,
                     this.TextureCount,
                     this.Texture);
 

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
 namespace Engine
@@ -10,47 +9,6 @@ namespace Engine
     [StructLayout(LayoutKind.Sequential)]
     public struct Vector3Int : IEquatable<Vector3Int>
     {
-        /// <summary>
-        /// An implementation of <see cref="IEqualityComparer{T}"/> of <see cref="Vector3Int"/> that allows for the
-        /// Y coordinates of two vertices to be within a specified range and still be considered equal.
-        /// </summary>
-        internal class RoughYEqualityComparer : IEqualityComparer<Vector3Int>
-        {
-            private const int HashConstX = unchecked((int)0x8da6b343);
-            private const int HashConstZ = unchecked((int)0xcb1ab31f);
-
-            private readonly int epsilonY;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="RoughYEqualityComparer"/> class.
-            /// </summary>
-            /// <param name="epsilonY">The range of Y values in which two vertices are considered equal.</param>
-            public RoughYEqualityComparer(int epsilonY)
-            {
-                this.epsilonY = epsilonY;
-            }
-
-            /// <summary>
-            /// Compares two vertices for equality.
-            /// </summary>
-            /// <param name="x">A vertex.</param>
-            /// <param name="y">Another vertex.</param>
-            /// <returns>A value indicating whether the two vertices are equal.</returns>
-            public bool Equals(Vector3Int x, Vector3Int y)
-            {
-                return x.X == y.X && (Math.Abs(x.Y - y.Y) <= epsilonY) && x.Z == y.Z;
-            }
-            /// <summary>
-            /// Gets a unique hash code for the contents of a <see cref="Vector3Int"/> instance.
-            /// </summary>
-            /// <param name="obj">A vertex.</param>
-            /// <returns>A hash code.</returns>
-            public int GetHashCode(Vector3Int obj)
-            {
-                return HashConstX * obj.X + HashConstZ * obj.Z;
-            }
-        }
-
         /// <summary>
         /// Calculates the component-wise minimum of two vertices.
         /// </summary>

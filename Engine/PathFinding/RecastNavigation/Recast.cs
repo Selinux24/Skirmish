@@ -5191,9 +5191,9 @@ namespace Engine.PathFinding.RecastNavigation
                     var p2 = mesh.polys[mesh.npolys - 1];
                     if (p != p2)
                     {
-                        //memcpy(p, p2, sizeof(unsigned short) * nvp);
+                        mesh.polys[i] = mesh.polys[mesh.npolys - 1];
                     }
-                    //memset(p + nvp, 0xff, sizeof(unsigned short) * nvp);
+                    mesh.polys[mesh.npolys - 1] = null;
                     mesh.regs[i] = mesh.regs[mesh.npolys - 1];
                     mesh.areas[i] = mesh.areas[mesh.npolys - 1];
                     mesh.npolys--;
