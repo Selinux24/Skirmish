@@ -634,14 +634,14 @@ namespace Engine.PathFinding.RecastNavigation
             // Init path state.
             m_query = new QueryData
             {
-                status = 0,
-                startRef = startRef,
-                endRef = endRef,
-                startPos = startPos,
-                endPos = endPos,
-                filter = filter,
-                options = options,
-                raycastLimitSqr = float.MaxValue
+                Status = 0,
+                StartRef = startRef,
+                EndRef = endRef,
+                StartPos = startPos,
+                EndPos = endPos,
+                Filter = filter,
+                Options = options,
+                RaycastLimitSqr = float.MaxValue
             };
 
             if (startRef == 0 || endRef == 0)
@@ -662,12 +662,12 @@ namespace Engine.PathFinding.RecastNavigation
                 // so it is enough to compute it from the first tile.
                 MeshTile tile = m_nav.GetTileByRef(startRef);
                 float agentRadius = tile.header.walkableRadius;
-                m_query.raycastLimitSqr = (float)Math.Pow(agentRadius * Detour.DT_RAY_CAST_LIMIT_PROPORTIONS, 2);
+                m_query.RaycastLimitSqr = (float)Math.Pow(agentRadius * Detour.DT_RAY_CAST_LIMIT_PROPORTIONS, 2);
             }
 
             if (startRef == endRef)
             {
-                m_query.status = Status.DT_SUCCESS;
+                m_query.Status = Status.DT_SUCCESS;
                 return Status.DT_SUCCESS;
             }
 
@@ -683,11 +683,11 @@ namespace Engine.PathFinding.RecastNavigation
             startNode.flags = NodeFlagTypes.DT_NODE_OPEN;
             m_openList.Push(startNode);
 
-            m_query.status = Status.DT_IN_PROGRESS;
-            m_query.lastBestNode = startNode;
-            m_query.lastBestNodeCost = startNode.total;
+            m_query.Status = Status.DT_IN_PROGRESS;
+            m_query.LastBestNode = startNode;
+            m_query.LastBestNodeCost = startNode.total;
 
-            return m_query.status;
+            return m_query.Status;
         }
         /// <summary>
         /// Updates an in-progress sliced path query.
@@ -699,15 +699,15 @@ namespace Engine.PathFinding.RecastNavigation
         {
             doneIters = 0;
 
-            if (!m_query.status.HasFlag(Status.DT_IN_PROGRESS))
+            if (!m_query.Status.HasFlag(Status.DT_IN_PROGRESS))
             {
-                return m_query.status;
+                return m_query.Status;
             }
 
             // Make sure the request is still valid.
-            if (!m_nav.IsValidPolyRef(m_query.startRef) || !m_nav.IsValidPolyRef(m_query.endRef))
+            if (!m_nav.IsValidPolyRef(m_query.StartRef) || !m_nav.IsValidPolyRef(m_query.EndRef))
             {
-                m_query.status = Status.DT_FAILURE;
+                m_query.Status = Status.DT_FAILURE;
                 return Status.DT_FAILURE;
             }
 
@@ -722,13 +722,13 @@ namespace Engine.PathFinding.RecastNavigation
                 bestNode.flags |= NodeFlagTypes.DT_NODE_CLOSED;
 
                 // Reached the goal, stop searching.
-                if (bestNode.id == m_query.endRef)
+                if (bestNode.id == m_query.EndRef)
                 {
-                    m_query.lastBestNode = bestNode;
-                    Status details = m_query.status & Status.DT_STATUS_DETAIL_MASK;
-                    m_query.status = Status.DT_SUCCESS | details;
+                    m_query.LastBestNode = bestNode;
+                    Status details = m_query.Status & Status.DT_STATUS_DETAIL_MASK;
+                    m_query.Status = Status.DT_SUCCESS | details;
                     doneIters = iter;
-                    return m_query.status;
+                    return m_query.Status;
                 }
 
                 // Get current poly and tile.
@@ -737,9 +737,9 @@ namespace Engine.PathFinding.RecastNavigation
                 if (!m_nav.GetTileAndPolyByRef(bestRef, out MeshTile bestTile, out Poly bestPoly))
                 {
                     // The polygon has disappeared during the sliced query, fail.
-                    m_query.status = Status.DT_FAILURE;
+                    m_query.Status = Status.DT_FAILURE;
                     doneIters = iter;
-                    return m_query.status;
+                    return m_query.Status;
                 }
 
                 // Get parent and grand parent poly and tile.
@@ -763,17 +763,17 @@ namespace Engine.PathFinding.RecastNavigation
                     if (invalidParent || (grandpaRef != 0 && !m_nav.IsValidPolyRef(grandpaRef)))
                     {
                         // The polygon has disappeared during the sliced query, fail.
-                        m_query.status = Status.DT_FAILURE;
+                        m_query.Status = Status.DT_FAILURE;
                         doneIters = iter;
-                        return m_query.status;
+                        return m_query.Status;
                     }
                 }
 
                 // decide whether to test raycast to previous nodes
                 bool tryLOS = false;
-                if ((m_query.options & FindPathOptions.DT_FINDPATH_ANY_ANGLE) != 0 &&
+                if ((m_query.Options & FindPathOptions.DT_FINDPATH_ANY_ANGLE) != 0 &&
                     (parentRef != 0) &&
-                    (Vector3.DistanceSquared(parentNode.pos, bestNode.pos) < m_query.raycastLimitSqr))
+                    (Vector3.DistanceSquared(parentNode.pos, bestNode.pos) < m_query.RaycastLimitSqr))
                 {
                     tryLOS = true;
                 }
@@ -792,7 +792,7 @@ namespace Engine.PathFinding.RecastNavigation
                     // The API input has been cheked already, skip checking internal data.
                     m_nav.GetTileAndPolyByRefUnsafe(neighbourRef, out MeshTile neighbourTile, out Poly neighbourPoly);
 
-                    if (!m_query.filter.PassFilter(neighbourRef, neighbourTile, neighbourPoly))
+                    if (!m_query.Filter.PassFilter(neighbourRef, neighbourTile, neighbourPoly))
                     {
                         continue;
                     }
@@ -801,7 +801,7 @@ namespace Engine.PathFinding.RecastNavigation
                     Node neighbourNode = m_nodePool.GetNode(neighbourRef, 0);
                     if (neighbourNode == null)
                     {
-                        m_query.status |= Status.DT_OUT_OF_NODES;
+                        m_query.Status |= Status.DT_OUT_OF_NODES;
                         continue;
                     }
 
@@ -829,26 +829,26 @@ namespace Engine.PathFinding.RecastNavigation
 
                     RaycastHit rayHit = new RaycastHit
                     {
-                        maxPath = 0,
-                        pathCost = 0,
-                        t = 0,
+                        MaxPath = 0,
+                        PathCost = 0,
+                        T = 0,
                     };
                     if (tryLOS)
                     {
-                        Raycast(parentRef, parentNode.pos, neighbourNode.pos, m_query.filter, RaycastOptions.DT_RAYCAST_USE_COSTS, 0, out rayHit, ref grandpaRef);
-                        foundShortCut = rayHit.t >= 1.0f;
+                        Raycast(parentRef, parentNode.pos, neighbourNode.pos, m_query.Filter, RaycastOptions.DT_RAYCAST_USE_COSTS, 0, out rayHit, ref grandpaRef);
+                        foundShortCut = rayHit.T >= 1.0f;
                     }
 
                     // update move cost
                     if (foundShortCut)
                     {
                         // shortcut found using raycast. Using shorter cost instead
-                        cost = parentNode.cost + rayHit.pathCost;
+                        cost = parentNode.cost + rayHit.PathCost;
                     }
                     else
                     {
                         // No shortcut found.
-                        float curCost = m_query.filter.GetCost(
+                        float curCost = m_query.Filter.GetCost(
                             bestNode.pos, neighbourNode.pos,
                             parentRef, parentTile, parentPoly,
                             bestRef, bestTile, bestPoly,
@@ -858,10 +858,10 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Special case for last node.
-                    if (neighbourRef == m_query.endRef)
+                    if (neighbourRef == m_query.EndRef)
                     {
-                        float endCost = m_query.filter.GetCost(
-                            neighbourNode.pos, m_query.endPos,
+                        float endCost = m_query.Filter.GetCost(
+                            neighbourNode.pos, m_query.EndPos,
                             bestRef, bestTile, bestPoly,
                             neighbourRef, neighbourTile, neighbourPoly,
                             0, null, null);
@@ -871,7 +871,7 @@ namespace Engine.PathFinding.RecastNavigation
                     }
                     else
                     {
-                        heuristic = Vector3.Distance(neighbourNode.pos, m_query.endPos) * Detour.H_SCALE;
+                        heuristic = Vector3.Distance(neighbourNode.pos, m_query.EndPos) * Detour.H_SCALE;
                     }
 
                     float total = cost + heuristic;
@@ -911,10 +911,10 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Update nearest node to target so far.
-                    if (heuristic < m_query.lastBestNodeCost)
+                    if (heuristic < m_query.LastBestNodeCost)
                     {
-                        m_query.lastBestNodeCost = heuristic;
-                        m_query.lastBestNode = neighbourNode;
+                        m_query.LastBestNodeCost = heuristic;
+                        m_query.LastBestNode = neighbourNode;
                     }
                 }
             }
@@ -922,13 +922,13 @@ namespace Engine.PathFinding.RecastNavigation
             // Exhausted all nodes, but could not find path.
             if (m_openList.Empty())
             {
-                Status details = m_query.status & Status.DT_STATUS_DETAIL_MASK;
-                m_query.status = Status.DT_SUCCESS | details;
+                Status details = m_query.Status & Status.DT_STATUS_DETAIL_MASK;
+                m_query.Status = Status.DT_SUCCESS | details;
             }
 
             doneIters = iter;
 
-            return m_query.status;
+            return m_query.Status;
         }
         /// <summary>
         /// Finalizes and returns the results of a sliced path query.
@@ -944,28 +944,28 @@ namespace Engine.PathFinding.RecastNavigation
 
             List<int> pathList = new List<int>();
 
-            if (m_query.status.HasFlag(Status.DT_FAILURE))
+            if (m_query.Status.HasFlag(Status.DT_FAILURE))
             {
                 // Reset query.
                 m_query = null;
                 return Status.DT_FAILURE;
             }
 
-            if (m_query.startRef == m_query.endRef)
+            if (m_query.StartRef == m_query.EndRef)
             {
                 // Special case: the search starts and ends at same poly.
-                pathList.Add(m_query.startRef);
+                pathList.Add(m_query.StartRef);
             }
             else
             {
                 // Reverse the path.
-                if (m_query.lastBestNode.id != m_query.endRef)
+                if (m_query.LastBestNode.id != m_query.EndRef)
                 {
-                    m_query.status |= Status.DT_PARTIAL_RESULT;
+                    m_query.Status |= Status.DT_PARTIAL_RESULT;
                 }
 
                 Node prev = null;
-                Node node = m_query.lastBestNode;
+                Node node = m_query.LastBestNode;
                 NodeFlagTypes prevRay = 0;
                 do
                 {
@@ -987,7 +987,7 @@ namespace Engine.PathFinding.RecastNavigation
                     Status status = 0;
                     if ((node.flags & NodeFlagTypes.DT_NODE_PARENT_DETACHED) != 0)
                     {
-                        status = Raycast(node.id, node.pos, next.pos, m_query.filter, out float t, out Vector3 normal, out int[] rpath, out int m, maxPath - pathList.Count);
+                        status = Raycast(node.id, node.pos, next.pos, m_query.Filter, out float t, out Vector3 normal, out int[] rpath, out int m, maxPath - pathList.Count);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
                             pathList.AddRange(rpath);
@@ -1009,7 +1009,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                     if ((status & Status.DT_STATUS_DETAIL_MASK) != 0)
                     {
-                        m_query.status |= status & Status.DT_STATUS_DETAIL_MASK;
+                        m_query.Status |= status & Status.DT_STATUS_DETAIL_MASK;
                         break;
                     }
                     node = next;
@@ -1017,7 +1017,7 @@ namespace Engine.PathFinding.RecastNavigation
                 while (node != null);
             }
 
-            Status details = m_query.status & Status.DT_STATUS_DETAIL_MASK;
+            Status details = m_query.Status & Status.DT_STATUS_DETAIL_MASK;
 
             // Reset query.
             m_query = new QueryData();
@@ -1046,7 +1046,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return Status.DT_FAILURE;
             }
 
-            if (m_query.status.HasFlag(Status.DT_FAILURE))
+            if (m_query.Status.HasFlag(Status.DT_FAILURE))
             {
                 // Reset query.
                 m_query = new QueryData();
@@ -1055,10 +1055,10 @@ namespace Engine.PathFinding.RecastNavigation
 
             List<int> pathList = new List<int>();
 
-            if (m_query.startRef == m_query.endRef)
+            if (m_query.StartRef == m_query.EndRef)
             {
                 // Special case: the search starts and ends at same poly.
-                pathList.Add(m_query.startRef);
+                pathList.Add(m_query.StartRef);
             }
             else
             {
@@ -1077,8 +1077,8 @@ namespace Engine.PathFinding.RecastNavigation
 
                 if (node == null)
                 {
-                    m_query.status |= Status.DT_PARTIAL_RESULT;
-                    node = m_query.lastBestNode;
+                    m_query.Status |= Status.DT_PARTIAL_RESULT;
+                    node = m_query.LastBestNode;
                 }
 
                 // Reverse the path.
@@ -1103,7 +1103,7 @@ namespace Engine.PathFinding.RecastNavigation
                     Status status = 0;
                     if ((node.flags & NodeFlagTypes.DT_NODE_PARENT_DETACHED) != 0)
                     {
-                        status = Raycast(node.id, node.pos, next.pos, m_query.filter, out float t, out Vector3 normal, out int[] rpath, out int m, maxPath - pathList.Count);
+                        status = Raycast(node.id, node.pos, next.pos, m_query.Filter, out float t, out Vector3 normal, out int[] rpath, out int m, maxPath - pathList.Count);
                         if (status.HasFlag(Status.DT_SUCCESS))
                         {
                             pathList.AddRange(rpath);
@@ -1125,7 +1125,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                     if ((status & Status.DT_STATUS_DETAIL_MASK) != 0)
                     {
-                        m_query.status |= status & Status.DT_STATUS_DETAIL_MASK;
+                        m_query.Status |= status & Status.DT_STATUS_DETAIL_MASK;
                         break;
                     }
                     node = next;
@@ -1133,7 +1133,7 @@ namespace Engine.PathFinding.RecastNavigation
                 while (node != null);
             }
 
-            Status details = m_query.status & Status.DT_STATUS_DETAIL_MASK;
+            Status details = m_query.Status & Status.DT_STATUS_DETAIL_MASK;
 
             // Reset query.
             m_query = new QueryData();
@@ -2025,10 +2025,10 @@ namespace Engine.PathFinding.RecastNavigation
             int prevRef = 0;
             Status status = Raycast(startRef, startPos, endPos, filter, 0, maxPath, out RaycastHit hit, ref prevRef);
 
-            t = hit.t;
-            path = hit.path;
-            hitNormal = hit.hitNormal;
-            pathCount = hit.pathCount;
+            t = hit.T;
+            path = hit.Path;
+            hitNormal = hit.HitNormal;
+            pathCount = hit.PathCount;
 
             return status;
         }
@@ -2048,10 +2048,10 @@ namespace Engine.PathFinding.RecastNavigation
         {
             hit = new RaycastHit
             {
-                maxPath = maxPath,
-                t = 0,
-                pathCount = 0,
-                pathCost = 0
+                MaxPath = maxPath,
+                T = 0,
+                PathCount = 0,
+                PathCost = 0
             };
 
             // Validate input
@@ -2070,7 +2070,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             curPos = startPos;
             dir = Vector3.Subtract(endPos, startPos);
-            hit.hitNormal = Vector3.Zero;
+            hit.HitNormal = Vector3.Zero;
 
             Status status = Status.DT_SUCCESS;
 
@@ -2105,22 +2105,22 @@ namespace Engine.PathFinding.RecastNavigation
                 if (!Detour.IntersectSegmentPoly2D(startPos, endPos, verts, nv, out float tmin, out float tmax, out int segMin, out int segMax))
                 {
                     // Could not hit the polygon, keep the old t and report hit.
-                    hit.pathCount = n;
+                    hit.PathCount = n;
                     return status;
                 }
 
-                hit.hitEdgeIndex = segMax;
+                hit.HitEdgeIndex = segMax;
 
                 // Keep track of furthest t so far.
-                if (tmax > hit.t)
+                if (tmax > hit.T)
                 {
-                    hit.t = tmax;
+                    hit.T = tmax;
                 }
 
                 // Store visited polygons.
-                if (n < hit.maxPath)
+                if (n < hit.MaxPath)
                 {
-                    hit.path[n++] = curRef;
+                    hit.Path[n++] = curRef;
                 }
                 else
                 {
@@ -2130,13 +2130,13 @@ namespace Engine.PathFinding.RecastNavigation
                 // Ray end is completely inside the polygon.
                 if (segMax == -1)
                 {
-                    hit.t = float.MaxValue;
-                    hit.pathCount = n;
+                    hit.T = float.MaxValue;
+                    hit.PathCount = n;
 
                     // add the cost
                     if ((options & RaycastOptions.DT_RAYCAST_USE_COSTS) != 0)
                     {
-                        hit.pathCost += filter.GetCost(curPos, endPos, prevRef, prevTile, prevPoly, curRef, tile, poly, curRef, tile, poly);
+                        hit.PathCost += filter.GetCost(curPos, endPos, prevRef, prevTile, prevPoly, curRef, tile, poly, curRef, tile, poly);
                     }
 
                     return status;
@@ -2239,7 +2239,7 @@ namespace Engine.PathFinding.RecastNavigation
                     // compute the intersection point at the furthest end of the polygon
                     // and correct the height (since the raycast moves in 2d)
                     lastPos = curPos;
-                    curPos = Vector3.Add(startPos, dir) * hit.t;
+                    curPos = Vector3.Add(startPos, dir) * hit.T;
                     var e1 = verts[segMax];
                     var e2 = verts[((segMax + 1) % nv)];
                     Vector3 eDir;
@@ -2249,7 +2249,7 @@ namespace Engine.PathFinding.RecastNavigation
                     float s = (eDir.X * eDir.X) > (eDir.Z * eDir.Z) ? diff.X / eDir.X : diff.Z / eDir.Z;
                     curPos.Y = e1.Y + eDir.Y * s;
 
-                    hit.pathCost += filter.GetCost(lastPos, curPos, prevRef, prevTile, prevPoly, curRef, tile, poly, nextRef, nextTile, nextPoly);
+                    hit.PathCost += filter.GetCost(lastPos, curPos, prevRef, prevTile, prevPoly, curRef, tile, poly, nextRef, nextTile, nextPoly);
                 }
 
                 if (nextRef == 0)
@@ -2263,11 +2263,8 @@ namespace Engine.PathFinding.RecastNavigation
                     var vb = verts[b];
                     float dx = vb.X - va.X;
                     float dz = vb.Z - va.Z;
-                    hit.hitNormal.X = dz;
-                    hit.hitNormal.Y = 0;
-                    hit.hitNormal.Z = -dx;
-                    hit.hitNormal.Normalize();
-                    hit.pathCount = n;
+                    hit.HitNormal = Vector3.Normalize(new Vector3(dz, 0, -dx));
+                    hit.PathCount = n;
                     return status;
                 }
 
@@ -2280,7 +2277,7 @@ namespace Engine.PathFinding.RecastNavigation
                 poly = nextPoly;
             }
 
-            hit.pathCount = n;
+            hit.PathCount = n;
 
             return status;
         }

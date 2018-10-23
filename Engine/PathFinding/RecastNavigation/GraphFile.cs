@@ -81,7 +81,7 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int i = 0; i < file.NavMeshData.Count; i++)
                 {
                     var tile = file.NavMeshData[i];
-                    if (tile == null || tile.header.magic != Detour.DT_NAVMESH_MAGIC) continue;
+                    if (tile == null || tile.Header.magic != Detour.DT_NAVMESH_MAGIC) continue;
 
                     navmesh.AddTile(tile, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res);
                 }
@@ -96,7 +96,7 @@ namespace Engine.PathFinding.RecastNavigation
                     for (int i = 0; i < file.TileCacheData.Count; i++)
                     {
                         var tile = file.TileCacheData[i];
-                        if (tile.Header.magic != DetourTileCache.DT_TILECACHE_MAGIC) continue;
+                        if (tile.Header.Magic != DetourTileCache.DT_TILECACHE_MAGIC) continue;
 
                         navmesh.TileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
                     }

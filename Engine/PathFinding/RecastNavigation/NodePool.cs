@@ -8,13 +8,13 @@ namespace Engine.PathFinding.RecastNavigation
     /// </summary>
     public class NodePool : IDisposable
     {
-        public int m_maxNodes;
-        public int m_nodeCount;
+        public int MaxNodes { get; set; }
+        public int NodeCount { get; set; }
 
-        public Node[] m_nodes;
-        public int[] m_first;
-        public int[] m_next;
-        public int m_hashSize;
+        public Node[] Nodes { get; set; }
+        public int[] First { get; set; }
+        public int[] Next { get; set; }
+        public int HashSize { get; set; }
 
         /// <summary>
         /// Constructor
@@ -23,13 +23,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="hashSize">Hash size</param>
         public NodePool(int maxNodes, int hashSize)
         {
-            m_maxNodes = maxNodes;
-            m_hashSize = hashSize;
+            MaxNodes = maxNodes;
+            HashSize = hashSize;
 
-            m_nodes = new Node[m_maxNodes];
-            m_next = Helper.CreateArray(m_maxNodes, Detour.DT_NULL_IDX);
-            m_first = Helper.CreateArray(m_hashSize, Detour.DT_NULL_IDX);
-            m_nodeCount = 0;
+            Nodes = new Node[MaxNodes];
+            Next = Helper.CreateArray(MaxNodes, Detour.DT_NULL_IDX);
+            First = Helper.CreateArray(HashSize, Detour.DT_NULL_IDX);
+            NodeCount = 0;
         }
         /// <summary>
         /// Destructor
@@ -55,40 +55,40 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (disposing)
             {
-                this.m_nodes = null;
-                this.m_next = null;
-                this.m_first = null;
+                this.Nodes = null;
+                this.Next = null;
+                this.First = null;
             }
         }
 
         public void Clear()
         {
-            m_first = Helper.CreateArray(m_hashSize, Detour.DT_NULL_IDX);
-            m_nodeCount = 0;
+            First = Helper.CreateArray(HashSize, Detour.DT_NULL_IDX);
+            NodeCount = 0;
         }
         public Node GetNode(int id, int state)
         {
-            int bucket = Detour.HashRef(id) & (m_hashSize - 1);
-            int i = m_first[bucket];
+            int bucket = Detour.HashRef(id) & (HashSize - 1);
+            int i = First[bucket];
             while (i != Detour.DT_NULL_IDX)
             {
-                if (m_nodes[i] != null && m_nodes[i].id == id && m_nodes[i].state == state)
+                if (Nodes[i] != null && Nodes[i].id == id && Nodes[i].state == state)
                 {
-                    return m_nodes[i];
+                    return Nodes[i];
                 }
-                i = m_next[i];
+                i = Next[i];
             }
 
-            if (m_nodeCount >= m_maxNodes)
+            if (NodeCount >= MaxNodes)
             {
                 return null;
             }
 
-            i = m_nodeCount;
-            m_nodeCount++;
+            i = NodeCount;
+            NodeCount++;
 
             // Init node
-            m_nodes[i] = new Node
+            Nodes[i] = new Node
             {
                 pidx = 0,
                 cost = 0,
@@ -98,22 +98,22 @@ namespace Engine.PathFinding.RecastNavigation
                 flags = 0
             };
 
-            m_next[i] = m_first[bucket];
-            m_first[bucket] = i;
+            Next[i] = First[bucket];
+            First[bucket] = i;
 
-            return m_nodes[i];
+            return Nodes[i];
         }
         public Node FindNode(int id, int state)
         {
-            int bucket = Detour.HashRef(id) & (m_hashSize - 1);
-            int i = m_first[bucket];
+            int bucket = Detour.HashRef(id) & (HashSize - 1);
+            int i = First[bucket];
             while (i != Detour.DT_NULL_IDX)
             {
-                if (m_nodes[i].id == id && m_nodes[i].state == state)
+                if (Nodes[i].id == id && Nodes[i].state == state)
                 {
-                    return m_nodes[i];
+                    return Nodes[i];
                 }
-                i = m_next[i];
+                i = Next[i];
             }
             return null;
         }
@@ -122,19 +122,19 @@ namespace Engine.PathFinding.RecastNavigation
             nodes = new Node[maxNodes];
 
             int n = 0;
-            int bucket = Detour.HashRef(id) & (m_hashSize - 1);
-            int i = m_first[bucket];
+            int bucket = Detour.HashRef(id) & (HashSize - 1);
+            int i = First[bucket];
             while (i != Detour.DT_NULL_IDX)
             {
-                if (m_nodes[i].id == id)
+                if (Nodes[i].id == id)
                 {
                     if (n >= maxNodes)
                     {
                         return n;
                     }
-                    nodes[n++] = m_nodes[i];
+                    nodes[n++] = Nodes[i];
                 }
-                i = m_next[i];
+                i = Next[i];
             }
 
             return n;
@@ -143,42 +143,42 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (node == null) return 0;
 
-            return Array.IndexOf(m_nodes, node) + 1;
+            return Array.IndexOf(Nodes, node) + 1;
         }
         public Node GetNodeAtIdx(int idx)
         {
             if (idx == 0) return null;
-            return m_nodes[idx - 1];
+            return Nodes[idx - 1];
         }
 
         public int GetMemUsed()
         {
             return
                 Marshal.SizeOf(this) +
-                Marshal.SizeOf(typeof(Node)) * m_maxNodes +
-                Marshal.SizeOf(typeof(int)) * m_maxNodes +
-                Marshal.SizeOf(typeof(int)) * m_hashSize;
+                Marshal.SizeOf(typeof(Node)) * MaxNodes +
+                Marshal.SizeOf(typeof(int)) * MaxNodes +
+                Marshal.SizeOf(typeof(int)) * HashSize;
         }
 
         public int GetMaxNodes()
         {
-            return m_maxNodes;
+            return MaxNodes;
         }
         public int GetHashSize()
         {
-            return m_hashSize;
+            return HashSize;
         }
         public int GetFirst(int bucket)
         {
-            return m_first[bucket];
+            return First[bucket];
         }
         public int GetNext(int i)
         {
-            return m_next[i];
+            return Next[i];
         }
         public int GetNodeCount()
         {
-            return m_nodeCount;
+            return NodeCount;
         }
     }
 }

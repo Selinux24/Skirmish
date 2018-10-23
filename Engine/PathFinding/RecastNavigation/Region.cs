@@ -7,22 +7,23 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Number of spans belonging to this region
         /// </summary>
-        public int spanCount;
+        public int spanCount { get; set; }
         /// <summary>
         /// ID of the region
         /// </summary>
-        public int id;
+        public int id { get; set; }
         /// <summary>
         /// Area type.
         /// </summary>
-        public TileCacheAreas areaType;
-        public bool remap;
-        public bool visited;
-        public bool overlap;
-        public bool connectsToBorder;
-        public int ymin, ymax;
-        public List<int> connections = new List<int>();
-        public List<int> floors = new List<int>();
+        public TileCacheAreas areaType { get; set; }
+        public bool remap { get; set; }
+        public bool visited { get; set; }
+        public bool overlap { get; set; }
+        public bool connectsToBorder { get; set; }
+        public int ymin { get; set; }
+        public int ymax { get; set; }
+        public List<int> connections { get; set; } = new List<int>();
+        public List<int> floors { get; set; } = new List<int>();
 
         public Region(int i)
         {

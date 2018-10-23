@@ -3,16 +3,16 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public class HeightPatch
     {
-        public int[] data;
-        public int xmin;
-        public int ymin;
-        public int width;
-        public int height;
+        public int[] Data { get; set; }
+        public int Xmin { get; set; }
+        public int Ymin { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
 
         public HeightPatch()
         {
-            data = null;
-            xmin = ymin = width = height = 0;
+            Data = null;
+            Xmin = Ymin = Width = Height = 0;
         }
     }
 }

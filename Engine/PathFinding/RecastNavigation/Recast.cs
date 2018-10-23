@@ -217,8 +217,8 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             int bot = s.smax;
                             int top = s.next != null ? s.next.smin : int.MaxValue;
-                            chf.spans[idx].y = MathUtil.Clamp(bot, 0, 0xffff);
-                            chf.spans[idx].h = MathUtil.Clamp(top - bot, 0, 0xff);
+                            chf.spans[idx].Y = MathUtil.Clamp(bot, 0, 0xffff);
+                            chf.spans[idx].H = MathUtil.Clamp(top - bot, 0, 0xff);
                             chf.areas[idx] = s.area;
                             idx++;
                             c.count++;
@@ -263,12 +263,12 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 var ns = chf.spans[k];
 
-                                int bot = Math.Max(s.y, ns.y);
-                                int top = Math.Min(s.y + s.h, ns.y + ns.h);
+                                int bot = Math.Max(s.Y, ns.Y);
+                                int top = Math.Min(s.Y + s.H, ns.Y + ns.H);
 
                                 // Check that the gap between the spans is walkable,
                                 // and that the climb height between the gaps is not too high.
-                                if ((top - bot) >= walkableHeight && Math.Abs(ns.y - s.y) <= walkableClimb)
+                                if ((top - bot) >= walkableHeight && Math.Abs(ns.Y - s.Y) <= walkableClimb)
                                 {
                                     // Mark direction as walkable.
                                     int lidx = k - nc.index;
@@ -299,13 +299,13 @@ namespace Engine.PathFinding.RecastNavigation
         public static void SetCon(ref CompactSpan s, int dir, int i)
         {
             int shift = dir * 6;
-            int con = s.con;
-            s.con = (con & ~(0x3f << shift)) | ((i & 0x3f) << shift);
+            int con = s.Con;
+            s.Con = (con & ~(0x3f << shift)) | ((i & 0x3f) << shift);
         }
         public static int GetCon(CompactSpan s, int dir)
         {
             int shift = dir * 6;
-            return (s.con >> shift) & 0x3f;
+            return (s.Con >> shift) & 0x3f;
         }
         public static int GetDirOffsetX(int dir)
         {
@@ -646,7 +646,7 @@ namespace Engine.PathFinding.RecastNavigation
                     for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
                     {
                         var s = chf.spans[i];
-                        if (s.y >= miny && s.y <= maxy && chf.areas[i] != TileCacheAreas.RC_NULL_AREA)
+                        if (s.Y >= miny && s.Y <= maxy && chf.areas[i] != TileCacheAreas.RC_NULL_AREA)
                         {
                             chf.areas[i] = areaId;
                         }
@@ -736,7 +736,7 @@ namespace Engine.PathFinding.RecastNavigation
                             continue;
                         }
 
-                        if (s.y >= miny && s.y <= maxy)
+                        if (s.Y >= miny && s.Y <= maxy)
                         {
                             Vector3 p = new Vector3();
                             p[0] = chf.boundingBox.Minimum[0] + (x + 0.5f) * chf.cs;
@@ -889,7 +889,7 @@ namespace Engine.PathFinding.RecastNavigation
                             continue;
                         }
 
-                        if (s.y >= miny && s.y <= maxy)
+                        if (s.Y >= miny && s.Y <= maxy)
                         {
                             float sx = chf.boundingBox.Minimum.X + (x + 0.5f) * chf.cs;
                             float sz = chf.boundingBox.Minimum.Z + (z + 0.5f) * chf.cs;
@@ -1626,7 +1626,7 @@ namespace Engine.PathFinding.RecastNavigation
                         int ax = x + GetDirOffsetX(dir);
                         int ay = y + GetDirOffsetY(dir);
                         int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
-                        r = chf.spans[ai].reg;
+                        r = chf.spans[ai].Reg;
                         if (area != chf.areas[ai])
                         {
                             isAreaBorder = true;
@@ -2026,8 +2026,8 @@ namespace Engine.PathFinding.RecastNavigation
 
                         reg.spanCount++;
 
-                        reg.ymin = Math.Min(reg.ymin, s.y);
-                        reg.ymax = Math.Max(reg.ymax, s.y);
+                        reg.ymin = Math.Min(reg.ymin, s.Y);
+                        reg.ymax = Math.Max(reg.ymax, s.Y);
 
                         // Collect all region layers.
                         lregs.Add(ri);
@@ -2397,7 +2397,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Store the result out.
             for (int i = 0; i < chf.spanCount; ++i)
             {
-                chf.spans[i].reg = srcReg[i];
+                chf.spans[i].Reg = srcReg[i];
             }
 
             return true;
@@ -2519,7 +2519,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Write the result out.
             for (int i = 0; i < chf.spanCount; ++i)
             {
-                chf.spans[i].reg = srcReg[i];
+                chf.spans[i].Reg = srcReg[i];
             }
 
             return true;
@@ -2658,7 +2658,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Store the result out.
             for (int i = 0; i < chf.spanCount; ++i)
             {
-                chf.spans[i].reg = srcReg[i];
+                chf.spans[i].Reg = srcReg[i];
             }
 
             return true;
@@ -3129,14 +3129,14 @@ namespace Engine.PathFinding.RecastNavigation
             isBorderVertex = false;
 
             var s = chf.spans[i];
-            int ch = s.y;
+            int ch = s.Y;
             int dirp = (dir + 1) & 0x3;
 
             int[] regs = { 0, 0, 0, 0 };
 
             // Combine region and area codes in order to prevent
             // border vertices which are in between two areas to be removed.
-            regs[0] = chf.spans[i].reg | ((int)chf.areas[i] << 16);
+            regs[0] = chf.spans[i].Reg | ((int)chf.areas[i] << 16);
 
             if (GetCon(s, dir) != RC_NOT_CONNECTED)
             {
@@ -3144,16 +3144,16 @@ namespace Engine.PathFinding.RecastNavigation
                 int ay = y + GetDirOffsetY(dir);
                 int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
                 var a = chf.spans[ai];
-                ch = Math.Max(ch, a.y);
-                regs[1] = chf.spans[ai].reg | ((int)chf.areas[ai] << 16);
+                ch = Math.Max(ch, a.Y);
+                regs[1] = chf.spans[ai].Reg | ((int)chf.areas[ai] << 16);
                 if (GetCon(a, dirp) != RC_NOT_CONNECTED)
                 {
                     int ax2 = ax + GetDirOffsetX(dirp);
                     int ay2 = ay + GetDirOffsetY(dirp);
                     int ai2 = chf.cells[ax2 + ay2 * chf.width].index + GetCon(a, dirp);
                     var as2 = chf.spans[ai2];
-                    ch = Math.Max(ch, as2.y);
-                    regs[2] = chf.spans[ai2].reg | ((int)chf.areas[ai2] << 16);
+                    ch = Math.Max(ch, as2.Y);
+                    regs[2] = chf.spans[ai2].Reg | ((int)chf.areas[ai2] << 16);
                 }
             }
             if (GetCon(s, dirp) != RC_NOT_CONNECTED)
@@ -3162,16 +3162,16 @@ namespace Engine.PathFinding.RecastNavigation
                 int ay = y + GetDirOffsetY(dirp);
                 int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dirp);
                 var a = chf.spans[ai];
-                ch = Math.Max(ch, a.y);
-                regs[3] = chf.spans[ai].reg | ((int)chf.areas[ai] << 16);
+                ch = Math.Max(ch, a.Y);
+                regs[3] = chf.spans[ai].Reg | ((int)chf.areas[ai] << 16);
                 if (GetCon(a, dir) != RC_NOT_CONNECTED)
                 {
                     int ax2 = ax + GetDirOffsetX(dir);
                     int ay2 = ay + GetDirOffsetY(dir);
                     int ai2 = chf.cells[ax2 + ay2 * chf.width].index + GetCon(a, dir);
                     var as2 = chf.spans[ai2];
-                    ch = Math.Max(ch, as2.y);
-                    regs[2] = chf.spans[ai2].reg | ((int)chf.areas[ai2] << 16);
+                    ch = Math.Max(ch, as2.Y);
+                    regs[2] = chf.spans[ai2].Reg | ((int)chf.areas[ai2] << 16);
                 }
             }
 
@@ -3612,7 +3612,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return true;
         }
-        private static void FindLeftMostVertex(Contour contour, ref int minx, ref int minz, ref int leftmost)
+        private static void FindLeftMostVertex(Contour contour, out int minx, out int minz, out int leftmost)
         {
             minx = contour.verts[0].X;
             minz = contour.verts[0].Z;
@@ -3633,24 +3633,24 @@ namespace Engine.PathFinding.RecastNavigation
         {
             ContourHole a = va;
             ContourHole b = vb;
-            if (a.minx == b.minx)
+            if (a.MinX == b.MinX)
             {
-                if (a.minz < b.minz)
+                if (a.MinZ < b.MinZ)
                 {
                     return -1;
                 }
-                if (a.minz > b.minz)
+                if (a.MinZ > b.MinZ)
                 {
                     return 1;
                 }
             }
             else
             {
-                if (a.minx < b.minx)
+                if (a.MinX < b.MinX)
                 {
                     return -1;
                 }
-                if (a.minx > b.minx)
+                if (a.MinX > b.MinX)
                 {
                     return 1;
                 }
@@ -3676,22 +3676,25 @@ namespace Engine.PathFinding.RecastNavigation
             // Sort holes from left to right.
             for (int i = 0; i < region.nholes; i++)
             {
-                FindLeftMostVertex(region.holes[i].contour, ref region.holes[i].minx, ref region.holes[i].minz, ref region.holes[i].leftmost);
+                FindLeftMostVertex(region.holes[i].Contour, out var minx, out var minz, out var leftmost);
+                region.holes[i].MinX = minx;
+                region.holes[i].MinZ = minz;
+                region.holes[i].Leftmost = leftmost;
             }
 
             Array.Sort(region.holes, (va, vb) =>
             {
                 var a = va;
                 var b = vb;
-                if (a.minx == b.minx)
+                if (a.MinX == b.MinX)
                 {
-                    if (a.minz < b.minz) return -1;
-                    if (a.minz > b.minz) return 1;
+                    if (a.MinZ < b.MinZ) return -1;
+                    if (a.MinZ > b.MinZ) return 1;
                 }
                 else
                 {
-                    if (a.minx < b.minx) return -1;
-                    if (a.minx > b.minx) return 1;
+                    if (a.MinX < b.MinX) return -1;
+                    if (a.MinX > b.MinX) return 1;
                 }
                 return 0;
             });
@@ -3699,7 +3702,7 @@ namespace Engine.PathFinding.RecastNavigation
             int maxVerts = region.outline.nverts;
             for (int i = 0; i < region.nholes; i++)
             {
-                maxVerts += region.holes[i].contour.nverts;
+                maxVerts += region.holes[i].Contour.nverts;
             }
 
             PotentialDiagonal[] diags = Helper.CreateArray(maxVerts, new PotentialDiagonal()
@@ -3713,10 +3716,10 @@ namespace Engine.PathFinding.RecastNavigation
             // Merge holes into the outline one by one.
             for (int i = 0; i < region.nholes; i++)
             {
-                var hole = region.holes[i].contour;
+                var hole = region.holes[i].Contour;
 
                 int index = -1;
-                int bestVertex = region.holes[i].leftmost;
+                int bestVertex = region.holes[i].Leftmost;
                 for (int iter = 0; iter < hole.nverts; iter++)
                 {
                     // Find potential diagonals.
@@ -3751,7 +3754,7 @@ namespace Engine.PathFinding.RecastNavigation
                         bool intersect = IntersectSegCountour(pt, corner, diags[i].vert, outline.nverts, outline.verts);
                         for (int k = i; k < region.nholes && !intersect; k++)
                         {
-                            intersect |= IntersectSegCountour(pt, corner, -1, region.holes[k].contour.nverts, region.holes[k].contour.verts);
+                            intersect |= IntersectSegCountour(pt, corner, -1, region.holes[k].Contour.nverts, region.holes[k].Contour.verts);
                         }
                         if (!intersect)
                         {
@@ -3823,7 +3826,7 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         int res = 0;
                         var s = chf.spans[i];
-                        if (chf.spans[i].reg == 0 || (chf.spans[i].reg & RC_BORDER_REG) != 0)
+                        if (chf.spans[i].Reg == 0 || (chf.spans[i].Reg & RC_BORDER_REG) != 0)
                         {
                             flags[i] = 0;
                             continue;
@@ -3836,9 +3839,9 @@ namespace Engine.PathFinding.RecastNavigation
                                 int ax = x + GetDirOffsetX(dir);
                                 int ay = y + GetDirOffsetY(dir);
                                 int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
-                                r = chf.spans[ai].reg;
+                                r = chf.spans[ai].Reg;
                             }
-                            if (r == chf.spans[i].reg)
+                            if (r == chf.spans[i].Reg)
                             {
                                 res |= (1 << dir);
                             }
@@ -3863,7 +3866,7 @@ namespace Engine.PathFinding.RecastNavigation
                             flags[i] = 0;
                             continue;
                         }
-                        int reg = chf.spans[i].reg;
+                        int reg = chf.spans[i].Reg;
                         if (reg == 0 || (reg & RC_BORDER_REG) != 0)
                         {
                             continue;
@@ -3990,7 +3993,7 @@ namespace Engine.PathFinding.RecastNavigation
                         var reg = regions[cont.reg];
                         if (winding[i] < 0)
                         {
-                            reg.holes[reg.nholes++].contour = cont;
+                            reg.holes[reg.nholes++].Contour = cont;
                         }
                     }
 
@@ -4198,8 +4201,8 @@ namespace Engine.PathFinding.RecastNavigation
                             continue;
                         }
 
-                        regs[ri].ymin = Math.Min(regs[ri].ymin, s.y);
-                        regs[ri].ymax = Math.Max(regs[ri].ymax, s.y);
+                        regs[ri].ymin = Math.Min(regs[ri].ymin, s.Y);
+                        regs[ri].ymax = Math.Max(regs[ri].ymax, s.Y);
 
                         // Collect all region layers.
                         if (nlregs < LayerRegion.MaxLayers)
@@ -4577,7 +4580,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                             // Store height and area type.
                             int idx = x + y * lw;
-                            layer.heights[idx] = (s.y - hmin);
+                            layer.heights[idx] = (s.Y - hmin);
                             layer.areas[idx] = chf.areas[j];
 
                             // Check connection.
@@ -4598,9 +4601,9 @@ namespace Engine.PathFinding.RecastNavigation
 
                                         // Update height so that it matches on both sides of the portal.
                                         var ass = chf.spans[ai];
-                                        if (ass.y > hmin)
+                                        if (ass.Y > hmin)
                                         {
-                                            layer.heights[idx] = Math.Max(layer.heights[idx], (ass.y - hmin));
+                                            layer.heights[idx] = Math.Max(layer.heights[idx], (ass.Y - hmin));
                                         }
                                     }
                                     // Valid connection mask
@@ -5986,9 +5989,9 @@ namespace Engine.PathFinding.RecastNavigation
         {
             int ix = (int)Math.Floor(fx * ics + 0.01f);
             int iz = (int)Math.Floor(fz * ics + 0.01f);
-            ix = MathUtil.Clamp(ix - hp.xmin, 0, hp.width - 1);
-            iz = MathUtil.Clamp(iz - hp.ymin, 0, hp.height - 1);
-            int h = hp.data[ix + iz * hp.width];
+            ix = MathUtil.Clamp(ix - hp.Xmin, 0, hp.Width - 1);
+            iz = MathUtil.Clamp(iz - hp.Ymin, 0, hp.Height - 1);
+            int h = hp.Data[ix + iz * hp.Width];
             if (h == RC_UNSET_HEIGHT)
             {
                 // Special case when data might be bad.
@@ -6007,9 +6010,9 @@ namespace Engine.PathFinding.RecastNavigation
                     int nx = ix + x;
                     int nz = iz + z;
 
-                    if (nx >= 0 && nz >= 0 && nx < hp.width && nz < hp.height)
+                    if (nx >= 0 && nz >= 0 && nx < hp.Width && nz < hp.Height)
                     {
-                        int nh = hp.data[nx + nz * hp.width];
+                        int nh = hp.Data[nx + nz * hp.Width];
                         if (nh != RC_UNSET_HEIGHT)
                         {
                             float d = Math.Abs(nh * ch - fy);
@@ -6738,8 +6741,8 @@ namespace Engine.PathFinding.RecastNavigation
                     int ax = verts[poly[j]][0] + offset[k * 2 + 0];
                     int ay = verts[poly[j]][1];
                     int az = verts[poly[j]][2] + offset[k * 2 + 1];
-                    if (ax < hp.xmin || ax >= hp.xmin + hp.width ||
-                        az < hp.ymin || az >= hp.ymin + hp.height)
+                    if (ax < hp.Xmin || ax >= hp.Xmin + hp.Width ||
+                        az < hp.Ymin || az >= hp.Ymin + hp.Height)
                     {
                         continue;
                     }
@@ -6748,7 +6751,7 @@ namespace Engine.PathFinding.RecastNavigation
                     for (int i = c.index, ni = (c.index + c.count); i < ni && dmin > 0; ++i)
                     {
                         var s = chf.spans[i];
-                        int d = Math.Abs(ay - s.y);
+                        int d = Math.Abs(ay - s.Y);
                         if (d < dmin)
                         {
                             startCellX = ax;
@@ -6777,7 +6780,7 @@ namespace Engine.PathFinding.RecastNavigation
             array.Add(startSpanIndex);
 
             int[] dirs = { 0, 1, 2, 3 };
-            hp.data = Helper.CreateArray(hp.width * hp.height, 0);
+            hp.Data = Helper.CreateArray(hp.Width * hp.Height, 0);
             // DFS to move to the center. Note that we need a DFS here and can not just move
             // directly towards the center without recording intermediate nodes, even though the polygons
             // are convex. In very rare we can get stuck due to contour simplification if we do not
@@ -6828,19 +6831,19 @@ namespace Engine.PathFinding.RecastNavigation
                     int newX = cx + GetDirOffsetX(dir);
                     int newY = cy + GetDirOffsetY(dir);
 
-                    int hpx = newX - hp.xmin;
-                    int hpy = newY - hp.ymin;
-                    if (hpx < 0 || hpx >= hp.width || hpy < 0 || hpy >= hp.height)
+                    int hpx = newX - hp.Xmin;
+                    int hpy = newY - hp.Ymin;
+                    if (hpx < 0 || hpx >= hp.Width || hpy < 0 || hpy >= hp.Height)
                     {
                         continue;
                     }
 
-                    if (hp.data[hpx + hpy * hp.width] != 0)
+                    if (hp.Data[hpx + hpy * hp.Width] != 0)
                     {
                         continue;
                     }
 
-                    hp.data[hpx + hpy * hp.width] = 1;
+                    hp.Data[hpx + hpy * hp.Width] = 1;
                     array.Add(newX);
                     array.Add(newY);
                     array.Add(chf.cells[(newX + bs) + (newY + bs) * chf.width].index + GetCon(cs, dir));
@@ -6855,9 +6858,9 @@ namespace Engine.PathFinding.RecastNavigation
             array.Add(cy + bs);
             array.Add(ci);
 
-            hp.data = Helper.CreateArray(hp.width * hp.height, 0xff);
+            hp.Data = Helper.CreateArray(hp.Width * hp.Height, 0xff);
             var chs = chf.spans[ci];
-            hp.data[cx - hp.xmin + (cy - hp.ymin) * hp.width] = chs.y;
+            hp.Data[cx - hp.Xmin + (cy - hp.Ymin) * hp.Width] = chs.Y;
         }
         public static void Push3(List<int> queue, int v1, int v2, int v3)
         {
@@ -6872,7 +6875,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             queue.Clear();
             // Set all heights to RC_UNSET_HEIGHT.
-            hp.data = Helper.CreateArray(hp.width * hp.height, RC_UNSET_HEIGHT);
+            hp.Data = Helper.CreateArray(hp.Width * hp.Height, RC_UNSET_HEIGHT);
 
             bool empty = true;
 
@@ -6883,20 +6886,20 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 // Copy the height from the same region, and mark region borders
                 // as seed points to fill the rest.
-                for (int hy = 0; hy < hp.height; hy++)
+                for (int hy = 0; hy < hp.Height; hy++)
                 {
-                    int y = hp.ymin + hy + bs;
-                    for (int hx = 0; hx < hp.width; hx++)
+                    int y = hp.Ymin + hy + bs;
+                    for (int hx = 0; hx < hp.Width; hx++)
                     {
-                        int x = hp.xmin + hx + bs;
+                        int x = hp.Xmin + hx + bs;
                         var c = chf.cells[x + y * chf.width];
                         for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
                         {
                             var s = chf.spans[i];
-                            if (s.reg == region)
+                            if (s.Reg == region)
                             {
                                 // Store height
-                                hp.data[hx + hy * hp.width] = s.y;
+                                hp.Data[hx + hy * hp.Width] = s.Y;
                                 empty = false;
 
                                 // If any of the neighbours is not in same region,
@@ -6910,7 +6913,7 @@ namespace Engine.PathFinding.RecastNavigation
                                         int ay = y + GetDirOffsetY(dir);
                                         int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
                                         var a = chf.spans[ai];
-                                        if (a.reg != region)
+                                        if (a.Reg != region)
                                         {
                                             border = true;
                                             break;
@@ -6968,15 +6971,15 @@ namespace Engine.PathFinding.RecastNavigation
 
                     int ax = cx + GetDirOffsetX(dir);
                     int ay = cy + GetDirOffsetY(dir);
-                    int hx = ax - hp.xmin - bs;
-                    int hy = ay - hp.ymin - bs;
+                    int hx = ax - hp.Xmin - bs;
+                    int hy = ay - hp.Ymin - bs;
 
-                    if (hx < 0 || hy < 0 || hx >= hp.width || hy >= hp.height)
+                    if (hx < 0 || hy < 0 || hx >= hp.Width || hy >= hp.Height)
                     {
                         continue;
                     }
 
-                    if (hp.data[hx + hy * hp.width] != RC_UNSET_HEIGHT)
+                    if (hp.Data[hx + hy * hp.Width] != RC_UNSET_HEIGHT)
                     {
                         continue;
                     }
@@ -6984,7 +6987,7 @@ namespace Engine.PathFinding.RecastNavigation
                     int ai = chf.cells[ax + ay * chf.width].index + GetCon(cs, dir);
                     var a = chf.spans[ai];
 
-                    hp.data[hx + hy * hp.width] = a.y;
+                    hp.Data[hx + hy * hp.Width] = a.Y;
 
                     Push3(queue, ax, ay, ai);
                 }
@@ -7065,7 +7068,7 @@ namespace Engine.PathFinding.RecastNavigation
                 maxhh = Math.Max(maxhh, ymax - ymin);
             }
 
-            hp.data = new int[maxhw * maxhh];
+            hp.Data = new int[maxhw * maxhh];
 
             int vcap = nPolyVerts + nPolyVerts / 2;
             int tcap = vcap * 2;
@@ -7097,10 +7100,10 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Get the height data from the area of the polygon.
-                hp.xmin = bounds[i].X;
-                hp.ymin = bounds[i].Z;
-                hp.width = bounds[i].Y - bounds[i].X;
-                hp.height = bounds[i].W - bounds[i].Z;
+                hp.Xmin = bounds[i].X;
+                hp.Ymin = bounds[i].Z;
+                hp.Width = bounds[i].Y - bounds[i].X;
+                hp.Height = bounds[i].W - bounds[i].Z;
                 GetHeightData(chf, p, npoly, mesh.verts, borderSize, hp, arr, mesh.regs[i]);
 
                 // Build detail mesh.

@@ -14,23 +14,23 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Origin
         /// </summary>
-        public Vector3 Origin;
+        public Vector3 Origin { get; set; }
         /// <summary>
         /// Tile width
         /// </summary>
-        public float TileWidth;
+        public float TileWidth { get; set; }
         /// <summary>
         /// Tile height
         /// </summary>
-        public float TileHeight;
+        public float TileHeight { get; set; }
         /// <summary>
         /// Maximum tiles
         /// </summary>
-        public int MaxTiles;
+        public int MaxTiles { get; set; }
         /// <summary>
         /// Maximum polygons
         /// </summary>
-        public int MaxPolys;
+        public int MaxPolys { get; set; }
 
         /// <summary>
         /// Serialization constructor

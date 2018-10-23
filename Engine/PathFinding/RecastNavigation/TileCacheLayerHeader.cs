@@ -14,59 +14,59 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Data magic
         /// </summary>
-        public int magic;
+        public int Magic { get; set; }
         /// <summary>
         /// Data version
         /// </summary>
-        public int version;
+        public int Version { get; set; }
         /// <summary>
         /// Tile x
         /// </summary>
-        public int tx;
+        public int TX { get; set; }
         /// <summary>
         /// Tile y
         /// </summary>
-        public int ty;
+        public int TY { get; set; }
         /// <summary>
         /// Tile layer
         /// </summary>
-        public int tlayer;
+        public int TLayer { get; set; }
         /// <summary>
         /// Bounding box
         /// </summary>
-        public BoundingBox b;
+        public BoundingBox BBox { get; set; }
         /// <summary>
         /// Height min range
         /// </summary>
-        public int hmin;
+        public int HMin { get; set; }
         /// <summary>
         /// Height max range
         /// </summary>
-        public int hmax;
+        public int HMax { get; set; }
         /// <summary>
         /// Width of the layer.
         /// </summary>
-        public int width;
+        public int Width { get; set; }
         /// <summary>
         /// Height of the layer.
         /// </summary>
-        public int height;
+        public int Height { get; set; }
         /// <summary>
         /// Minx usable sub-region.
         /// </summary>
-        public int minx;
+        public int MinX { get; set; }
         /// <summary>
         /// Maxx usable sub-region.
         /// </summary>
-        public int maxx;
+        public int MaxX { get; set; }
         /// <summary>
         /// Miny usable sub-region.
         /// </summary>
-        public int miny;
+        public int MinY { get; set; }
         /// <summary>
         /// Maxy usable sub-region.
         /// </summary>
-        public int maxy;
+        public int MaxY { get; set; }
 
         /// <summary>
         /// Serialization constructor
@@ -75,20 +75,20 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="context">Serialization context</param>
         internal TileCacheLayerHeader(SerializationInfo info, StreamingContext context)
         {
-            magic = info.GetInt32("magic");
-            version = info.GetInt32("version");
-            tx = info.GetInt32("tx");
-            ty = info.GetInt32("ty");
-            tlayer = info.GetInt32("tlayer");
-            b = info.GetBoundingBox("b");
-            hmin = info.GetInt32("hmin");
-            hmax = info.GetInt32("hmax");
-            width = info.GetInt32("width");
-            height = info.GetInt32("height");
-            minx = info.GetInt32("minx");
-            maxx = info.GetInt32("maxx");
-            miny = info.GetInt32("miny");
-            maxy = info.GetInt32("maxy");
+            Magic = info.GetInt32("magic");
+            Version = info.GetInt32("version");
+            TX = info.GetInt32("tx");
+            TY = info.GetInt32("ty");
+            TLayer = info.GetInt32("tlayer");
+            BBox = info.GetBoundingBox("b");
+            HMin = info.GetInt32("hmin");
+            HMax = info.GetInt32("hmax");
+            Width = info.GetInt32("width");
+            Height = info.GetInt32("height");
+            MinX = info.GetInt32("minx");
+            MaxX = info.GetInt32("maxx");
+            MinY = info.GetInt32("miny");
+            MaxY = info.GetInt32("maxy");
         }
         /// <summary>
         /// Populates a SerializationInfo with the data needed to serialize the target object.
@@ -98,20 +98,20 @@ namespace Engine.PathFinding.RecastNavigation
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("magic", magic);
-            info.AddValue("version", version);
-            info.AddValue("tx", tx);
-            info.AddValue("ty", ty);
-            info.AddValue("tlayer", tlayer);
-            info.AddBoundingBox("b", b);
-            info.AddValue("hmin", hmin);
-            info.AddValue("hmax", hmax);
-            info.AddValue("width", width);
-            info.AddValue("height", height);
-            info.AddValue("minx", minx);
-            info.AddValue("maxx", maxx);
-            info.AddValue("miny", miny);
-            info.AddValue("maxy", maxy);
+            info.AddValue("magic", Magic);
+            info.AddValue("version", Version);
+            info.AddValue("tx", TX);
+            info.AddValue("ty", TY);
+            info.AddValue("tlayer", TLayer);
+            info.AddBoundingBox("b", BBox);
+            info.AddValue("hmin", HMin);
+            info.AddValue("hmax", HMax);
+            info.AddValue("width", Width);
+            info.AddValue("height", Height);
+            info.AddValue("minx", MinX);
+            info.AddValue("maxx", MaxX);
+            info.AddValue("miny", MinY);
+            info.AddValue("maxy", MaxY);
         }
 
         /// <summary>
@@ -120,18 +120,18 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            if (this.magic == 0 && this.version == 0)
+            if (this.Magic == 0 && this.Version == 0)
             {
                 return "Empty;";
             }
 
-            if (this.magic != DetourTileCache.DT_TILECACHE_MAGIC)
+            if (this.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
             {
                 return "Invalid;";
             }
 
             return string.Format("tx {0:000}; ty {1:000}; tlayer {2:000};",
-                this.tx, this.ty, this.tlayer);
+                this.TX, this.TY, this.TLayer);
         }
     }
 }

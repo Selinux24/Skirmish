@@ -598,7 +598,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var filter = new QueryFilter()
             {
-                m_includeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
+                IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
             };
 
             var status = CalcPath(
@@ -632,7 +632,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var filter = new QueryFilter()
                 {
-                    m_includeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
+                    IncludeFlags = SamplePolyFlagTypes.SAMPLE_POLYFLAGS_WALK,
                 };
 
                 //Set extents based upon agent height

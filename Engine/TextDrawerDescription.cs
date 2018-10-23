@@ -67,27 +67,27 @@ namespace Engine
         /// <summary>
         /// Font name
         /// </summary>
-        public string Font;
+        public string Font { get; set; }
         /// <summary>
         /// Font size
         /// </summary>
-        public int FontSize;
+        public int FontSize { get; set; }
         /// <summary>
         /// Font style
         /// </summary>
-        public FontMapStyles Style;
+        public FontMapStyles Style { get; set; }
         /// <summary>
         /// Text color
         /// </summary>
-        public Color4 TextColor;
+        public Color4 TextColor { get; set; }
         /// <summary>
         /// Shadow color
         /// </summary>
-        public Color4 ShadowColor;
+        public Color4 ShadowColor { get; set; }
         /// <summary>
         /// Shadow position delta
         /// </summary>
-        public Vector2 ShadowDelta;
+        public Vector2 ShadowDelta { get; set; }
 
         /// <summary>
         /// Constructor

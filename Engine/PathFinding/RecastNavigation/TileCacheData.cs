@@ -11,11 +11,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Header
         /// </summary>
-        public TileCacheLayerHeader Header;
+        public TileCacheLayerHeader Header { get; set; }
         /// <summary>
         /// Data
         /// </summary>
-        public TileCacheLayerData Data;
+        public TileCacheLayerData Data { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance

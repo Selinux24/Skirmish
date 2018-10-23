@@ -128,11 +128,11 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var node = cm.Nodes[i];
 
-                bool isLeaf = node.i >= 0;
+                bool isLeaf = node.I >= 0;
                 if (!isLeaf) continue;
-                if (node.n > cm.MaxTrisPerChunk)
+                if (node.N > cm.MaxTrisPerChunk)
                 {
-                    cm.MaxTrisPerChunk = node.n;
+                    cm.MaxTrisPerChunk = node.N;
                 }
             }
 
@@ -168,16 +168,16 @@ namespace Engine.PathFinding.RecastNavigation
 
             CalcExtends(items, imin, imax, out Vector2 bmin, out Vector2 bmax);
 
-            nodes[iNode].bmin = bmin;
-            nodes[iNode].bmax = bmax;
+            nodes[iNode].Bmin = bmin;
+            nodes[iNode].Bmax = bmax;
 
             if (inum <= trisPerChunk)
             {
                 // Leaf
 
                 // Copy triangles.
-                nodes[iNode].i = curTri;
-                nodes[iNode].n = inum;
+                nodes[iNode].I = curTri;
+                nodes[iNode].N = inum;
 
                 for (int i = imin; i < imax; ++i)
                 {
@@ -218,7 +218,7 @@ namespace Engine.PathFinding.RecastNavigation
                 int iescape = curNode - icur;
 
                 // Negative index means escape.
-                nodes[iNode].i = -iescape;
+                nodes[iNode].I = -iescape;
             }
         }
         /// <summary>
@@ -273,13 +273,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the triangles in the specified node</returns>
         public Triangle[] GetTriangles(ChunkyTriMeshNode node)
         {
-            if (node.i >= 0)
+            if (node.I >= 0)
             {
-                int[] indices = new int[node.n];
-                Array.Copy(Tris.ToArray(), node.i, indices, 0, node.n);
+                int[] indices = new int[node.N];
+                Array.Copy(Tris.ToArray(), node.I, indices, 0, node.N);
 
-                Triangle[] res = new Triangle[node.n];
-                for (int i = 0; i < node.n; i++)
+                Triangle[] res = new Triangle[node.N];
+                for (int i = 0; i < node.N; i++)
                 {
                     res[i] = Triangles[indices[i]];
                 }
@@ -304,8 +304,8 @@ namespace Engine.PathFinding.RecastNavigation
             while (i < NNodes)
             {
                 var node = Nodes[i];
-                bool overlap = CheckOverlapRect(bmin, bmax, node.bmin, node.bmax);
-                bool isLeafNode = node.i >= 0;
+                bool overlap = CheckOverlapRect(bmin, bmax, node.Bmin, node.Bmax);
+                bool isLeafNode = node.I >= 0;
 
                 if (isLeafNode && overlap)
                 {
@@ -318,7 +318,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
                 else
                 {
-                    int escapeIndex = -node.i;
+                    int escapeIndex = -node.I;
                     i += escapeIndex;
                 }
             }

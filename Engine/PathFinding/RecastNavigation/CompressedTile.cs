@@ -3,14 +3,14 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public class CompressedTile
     {
-        public TileCacheLayerHeader Header;
+        public TileCacheLayerHeader Header { get; set; }
         /// <summary>
         /// Counter describing modifications to the tile.
         /// </summary>
-        public int Salt;
-        public TileCacheLayerData Data;
-        public CompressedTileFlagTypes Flags;
-        public CompressedTile Next;
+        public int Salt { get; set; }
+        public TileCacheLayerData Data { get; set; }
+        public CompressedTileFlagTypes Flags { get; set; }
+        public CompressedTile Next { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance

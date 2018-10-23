@@ -15,34 +15,34 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The start endpoint of the connection. [(ax, ay, az)]
         /// </summary>
-        public Vector3 start;
+        public Vector3 start { get; set; }
         /// <summary>
         /// The end endpoint of the connection. [(bx, by, bz)]
         /// </summary>
-        public Vector3 end;
+        public Vector3 end { get; set; }
         /// <summary>
         /// The radius of the endpoints. [Limit: >= 0]
         /// </summary>
-        public float rad;
+        public float rad { get; set; }
         /// <summary>
         /// The polygon reference of the connection within the tile.
         /// </summary>
-        public int poly;
+        public int poly { get; set; }
         /// <summary>
         /// Link flags. 
         /// </summary>
         /// <remarks>
         /// These are not the connection's user defined flags. Those are assigned via the connection's dtPoly definition. These are link flags used for internal purposes.
         /// </remarks>
-        public int flags;
+        public int flags { get; set; }
         /// <summary>
         /// End point side.
         /// </summary>
-        public int side;
+        public int side { get; set; }
         /// <summary>
         /// The id of the offmesh connection. (User assigned when the navigation mesh is built.)
         /// </summary>
-        public int userId;
+        public int userId { get; set; }
 
         /// <summary>
         /// Constructor

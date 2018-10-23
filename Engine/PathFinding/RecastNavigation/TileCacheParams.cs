@@ -14,47 +14,47 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Origin
         /// </summary>
-        public Vector3 Origin;
+        public Vector3 Origin { get; set; }
         /// <summary>
         /// Cell size
         /// </summary>
-        public float CellSize;
+        public float CellSize { get; set; }
         /// <summary>
         /// Cell height
         /// </summary>
-        public float CellHeight;
+        public float CellHeight { get; set; }
         /// <summary>
         /// Width
         /// </summary>
-        public int Width;
+        public int Width { get; set; }
         /// <summary>
         /// Height
         /// </summary>
-        public int Height;
+        public int Height { get; set; }
         /// <summary>
         /// Walkable height
         /// </summary>
-        public float WalkableHeight;
+        public float WalkableHeight { get; set; }
         /// <summary>
         /// Walkable radius
         /// </summary>
-        public float WalkableRadius;
+        public float WalkableRadius { get; set; }
         /// <summary>
         /// Walkable climb
         /// </summary>
-        public float WalkableClimb;
+        public float WalkableClimb { get; set; }
         /// <summary>
         /// Maximum simplification error
         /// </summary>
-        public float MaxSimplificationError;
+        public float MaxSimplificationError { get; set; }
         /// <summary>
         /// Maximum tiles
         /// </summary>
-        public int MaxTiles;
+        public int MaxTiles { get; set; }
         /// <summary>
         /// Maximum obstacles
         /// </summary>
-        public int MaxObstacles;
+        public int MaxObstacles { get; set; }
 
         /// <summary>
         /// Serialization constructor

@@ -23,72 +23,72 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Cell size
         /// </summary>
-        public float CellSize = 0.3f;
+        public float CellSize { get; set; } = 0.3f;
         /// <summary>
         /// Cell height
         /// </summary>
-        public float CellHeight = 0.2f;
+        public float CellHeight { get; set; } = 0.2f;
         /// <summary>
         /// Edge maximum length
         /// </summary>
-        public float EdgeMaxLength = 12.0f;
+        public float EdgeMaxLength { get; set; } = 12.0f;
         /// <summary>
         /// Edge maximum error
         /// </summary>
-        public float EdgeMaxError = 1.3f;
+        public float EdgeMaxError { get; set; } = 1.3f;
         /// <summary>
         /// Detail sample distance
         /// </summary>
-        public float DetailSampleDist = 6.0f;
+        public float DetailSampleDist { get; set; } = 6.0f;
         /// <summary>
         /// Detail sample maximum error
         /// </summary>
-        public float DetailSampleMaxError = 1.0f;
+        public float DetailSampleMaxError { get; set; } = 1.0f;
         /// <summary>
         /// Region minimum size
         /// </summary>
-        public float RegionMinSize = 8;
+        public float RegionMinSize { get; set; } = 8;
         /// <summary>
         /// Region merge size
         /// </summary>
-        public float RegionMergeSize = 20;
+        public float RegionMergeSize { get; set; } = 20;
         /// <summary>
         /// Vertices per polygon
         /// </summary>
-        public int VertsPerPoly = 6;
+        public int VertsPerPoly { get; set; } = 6;
         /// <summary>
         /// Partition type
         /// </summary>
-        public SamplePartitionTypeEnum PartitionType = SamplePartitionTypeEnum.Watershed;
+        public SamplePartitionTypeEnum PartitionType { get; set; } = SamplePartitionTypeEnum.Watershed;
         /// <summary>
         /// Agents list
         /// </summary>
-        public Agent[] Agents = new Agent[] { new Agent() };
+        public Agent[] Agents { get; set; } = new Agent[] { new Agent() };
 
         /// <summary>
         /// Navigation mesh building mode
         /// </summary>
-        public BuildModesEnum BuildMode = BuildModesEnum.Tiled;
+        public BuildModesEnum BuildMode { get; set; } = BuildModesEnum.Tiled;
         /// <summary>
         /// Tile size (if tiled mode)
         /// </summary>
-        public float TileSize = 32;
+        public float TileSize { get; set; } = 32;
         /// <summary>
         /// Maximum number of nodes
         /// </summary>
-        public int MaxNodes = 2048;
+        public int MaxNodes { get; set; } = 2048;
 
         /// <summary>
         /// Filter low hanging obstacles when generation
         /// </summary>
-        public bool FilterLowHangingObstacles = true;
+        public bool FilterLowHangingObstacles { get; set; } = true;
         /// <summary>
         /// Filter ledge spans when generation
         /// </summary>
-        public bool FilterLedgeSpans = true;
+        public bool FilterLedgeSpans { get; set; } = true;
         /// <summary>
         /// Filter walkable low hight spans when generation
         /// </summary>
-        public bool FilterWalkableLowHeightSpans = true;
+        public bool FilterWalkableLowHeightSpans { get; set; } = true;
     }
 }

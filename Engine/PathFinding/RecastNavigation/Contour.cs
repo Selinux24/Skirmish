@@ -10,27 +10,27 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Simplified contour vertex and connection data. [Size: 4 * #nverts]
         /// </summary>
-        public Int4[] verts;
+        public Int4[] verts { get; set; }
         /// <summary>
         /// The number of vertices in the simplified contour. 
         /// </summary>
-        public int nverts;
+        public int nverts { get; set; }
         /// <summary>
         /// Raw contour vertex and connection data. [Size: 4 * #nrverts]
         /// </summary>
-        public Int4[] rverts;
+        public Int4[] rverts { get; set; }
         /// <summary>
         /// The number of vertices in the raw contour. 
         /// </summary>
-        public int nrverts;
+        public int nrverts { get; set; }
         /// <summary>
         /// The region id of the contour.
         /// </summary>
-        public int reg;
+        public int reg { get; set; }
         /// <summary>
         /// The area id of the contour.
         /// </summary>
-        public TileCacheAreas area;
+        public TileCacheAreas area { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance

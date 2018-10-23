@@ -92,14 +92,14 @@ namespace Engine.PathFinding.RecastNavigation
         {
             this.data = data;
 
-            if (data.navVerts.Count > 0) verts = data.navVerts.ToArray();
-            if (data.navPolys.Count > 0) polys = data.navPolys.ToArray();
+            if (data.NavVerts.Count > 0) verts = data.NavVerts.ToArray();
+            if (data.NavPolys.Count > 0) polys = data.NavPolys.ToArray();
 
-            if (data.navDMeshes.Count > 0) detailMeshes = data.navDMeshes.ToArray();
-            if (data.navDVerts.Count > 0) detailVerts = data.navDVerts.ToArray();
-            if (data.navDTris.Count > 0) detailTris = data.navDTris.ToArray();
-            if (data.navBvtree.Count > 0) bvTree = data.navBvtree.ToArray();
-            if (data.offMeshCons.Count > 0) offMeshCons = data.offMeshCons.ToArray();
+            if (data.NavDMeshes.Count > 0) detailMeshes = data.NavDMeshes.ToArray();
+            if (data.NavDVerts.Count > 0) detailVerts = data.NavDVerts.ToArray();
+            if (data.NavDTris.Count > 0) detailTris = data.NavDTris.ToArray();
+            if (data.NavBvtree.Count > 0) bvTree = data.NavBvtree.ToArray();
+            if (data.OffMeshCons.Count > 0) offMeshCons = data.OffMeshCons.ToArray();
         }
 
         /// <summary>

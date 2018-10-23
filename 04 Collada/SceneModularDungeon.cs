@@ -890,14 +890,22 @@ namespace Collada
 
             if (File.Exists(fileName))
             {
-                var graph = this.PathFinderDescription.Load(fileName);
-                this.SetNavigationGraph(graph);
+                try
+                {
+                    var graph = this.PathFinderDescription.Load(fileName);
+
+                    this.SetNavigationGraph(graph);
+
+                    return;
+                }
+                catch (EngineException ex)
+                {
+                    Console.WriteLine($"Bad graph file. Generating navigation mesh. {ex.Message}");
+                }
             }
-            else
-            {
-                base.UpdateNavigationGraph();
-                this.PathFinderDescription.Save(fileName, this.NavigationGraph);
-            }
+
+            base.UpdateNavigationGraph();
+            this.PathFinderDescription.Save(fileName, this.NavigationGraph);
         }
         public override void NavigationGraphUpdated()
         {

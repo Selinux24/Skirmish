@@ -14,31 +14,31 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Tile magic number. (Used to identify the data format.)
         /// </summary>
-        public int magic;
+        public int magic { get; set; }
         /// <summary>
         /// Tile data format version number.
         /// </summary>
-        public int version;
+        public int version { get; set; }
         /// <summary>
         /// The x-position of the tile within the dtNavMesh tile grid. (x, y, layer)
         /// </summary>
-        public int x;
+        public int x { get; set; }
         /// <summary>
         /// The y-position of the tile within the dtNavMesh tile grid. (x, y, layer)
         /// </summary>
-        public int y;
+        public int y { get; set; }
         /// <summary>
         /// The layer of the tile within the dtNavMesh tile grid. (x, y, layer)
         /// </summary>
-        public int layer;
+        public int layer { get; set; }
         /// <summary>
         /// The user defined id of the tile.
         /// </summary>
-        public int userId;
+        public int userId { get; set; }
         /// <summary>
         /// The number of polygons in the tile.
         /// </summary>
-        public int polyCount;
+        public int polyCount { get; set; }
         /// <summary>
         /// The number of vertices in the tile.
         /// </summary>
@@ -46,55 +46,55 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The number of allocated links.
         /// </summary>
-        public int maxLinkCount;
+        public int maxLinkCount { get; set; }
         /// <summary>
         /// The number of sub-meshes in the detail mesh.
         /// </summary>
-        public int detailMeshCount;
+        public int detailMeshCount { get; set; }
         /// <summary>
         /// The number of unique vertices in the detail mesh. (In addition to the polygon vertices.)
         /// </summary>
-        public int detailVertCount;
+        public int detailVertCount { get; set; }
         /// <summary>
         /// The number of triangles in the detail mesh.
         /// </summary>
-        public int detailTriCount;
+        public int detailTriCount { get; set; }
         /// <summary>
         /// The number of bounding volume nodes. (Zero if bounding volumes are disabled.)
         /// </summary>
-        public int bvNodeCount;
+        public int bvNodeCount { get; set; }
         /// <summary>
         /// The number of off-mesh connections.
         /// </summary>
-        public int offMeshConCount;
+        public int offMeshConCount { get; set; }
         /// <summary>
         /// The index of the first polygon which is an off-mesh connection.
         /// </summary>
-        public int offMeshBase;
+        public int offMeshBase { get; set; }
         /// <summary>
         /// The height of the agents using the tile.
         /// </summary>
-        public float walkableHeight;
+        public float walkableHeight { get; set; }
         /// <summary>
         /// The radius of the agents using the tile.
         /// </summary>
-        public float walkableRadius;
+        public float walkableRadius { get; set; }
         /// <summary>
         /// The maximum climb height of the agents using the tile.
         /// </summary>
-        public float walkableClimb;
+        public float walkableClimb { get; set; }
         /// <summary>
         /// The minimum bounds of the tile's AABB. [(x, y, z)]
         /// </summary>
-        public Vector3 bmin;
+        public Vector3 bmin { get; set; }
         /// <summary>
         /// The maximum bounds of the tile's AABB. [(x, y, z)]
         /// </summary>
-        public Vector3 bmax;
+        public Vector3 bmax { get; set; }
         /// <summary>
         /// The bounding volume quantization factor.
         /// </summary>
-        public float bvQuantFactor;
+        public float bvQuantFactor { get; set; }
 
         /// <summary>
         /// Serialization constructor

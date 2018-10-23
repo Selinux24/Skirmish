@@ -9,27 +9,27 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Neighbour reference. (The neighbor that is linked to.)
         /// </summary>
-        public int nref;
+        public int nref { get; set; }
         /// <summary>
         /// Index of the next link.
         /// </summary>
-        public int next;
+        public int next { get; set; }
         /// <summary>
         /// Index of the polygon edge that owns this link.
         /// </summary>
-        public int edge;
+        public int edge { get; set; }
         /// <summary>
         /// If a boundary link, defines on which side the link is.
         /// </summary>
-        public int side;
+        public int side { get; set; }
         /// <summary>
         /// If a boundary link, defines the minimum sub-edge area.
         /// </summary>
-        public int bmin;
+        public int bmin { get; set; }
         /// <summary>
         /// If a boundary link, defines the maximum sub-edge area.
         /// </summary>
-        public int bmax;
+        public int bmax { get; set; }
 
         public override string ToString()
         {

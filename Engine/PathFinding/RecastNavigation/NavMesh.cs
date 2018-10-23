@@ -184,11 +184,11 @@ namespace Engine.PathFinding.RecastNavigation
 
                 var param = new NavMeshCreateParams
                 {
-                    verts = pmesh.verts,
-                    vertCount = pmesh.nverts,
-                    polys = pmesh.polys,
-                    polyAreas = pmesh.areas,
-                    polyFlags = pmesh.flags,
+                    Verts = pmesh.verts,
+                    VertCount = pmesh.nverts,
+                    Polys = pmesh.polys,
+                    PolyAreas = pmesh.areas,
+                    PolyFlags = pmesh.flags,
                     polyCount = pmesh.npolys,
                     nvp = pmesh.nvp,
                     detailMeshes = dmesh.meshes,
@@ -372,18 +372,22 @@ namespace Engine.PathFinding.RecastNavigation
 
             Config tcfg = cfg;
 
-            tcfg.BoundingBox.Minimum.X = cfg.BoundingBox.Minimum.X + tx * tcs;
-            tcfg.BoundingBox.Minimum.Y = cfg.BoundingBox.Minimum.Y;
-            tcfg.BoundingBox.Minimum.Z = cfg.BoundingBox.Minimum.Z + ty * tcs;
+            BoundingBox bbox = new BoundingBox();
 
-            tcfg.BoundingBox.Maximum.X = cfg.BoundingBox.Minimum.X + (tx + 1) * tcs;
-            tcfg.BoundingBox.Maximum.Y = cfg.BoundingBox.Maximum.Y;
-            tcfg.BoundingBox.Maximum.Z = cfg.BoundingBox.Minimum.Z + (ty + 1) * tcs;
+            bbox.Minimum.X = cfg.BoundingBox.Minimum.X + tx * tcs;
+            bbox.Minimum.Y = cfg.BoundingBox.Minimum.Y;
+            bbox.Minimum.Z = cfg.BoundingBox.Minimum.Z + ty * tcs;
 
-            tcfg.BoundingBox.Minimum.X -= tcfg.BorderSize * tcfg.CellSize;
-            tcfg.BoundingBox.Minimum.Z -= tcfg.BorderSize * tcfg.CellSize;
-            tcfg.BoundingBox.Maximum.X += tcfg.BorderSize * tcfg.CellSize;
-            tcfg.BoundingBox.Maximum.Z += tcfg.BorderSize * tcfg.CellSize;
+            bbox.Maximum.X = cfg.BoundingBox.Minimum.X + (tx + 1) * tcs;
+            bbox.Maximum.Y = cfg.BoundingBox.Maximum.Y;
+            bbox.Maximum.Z = cfg.BoundingBox.Minimum.Z + (ty + 1) * tcs;
+
+            bbox.Minimum.X -= tcfg.BorderSize * tcfg.CellSize;
+            bbox.Minimum.Z -= tcfg.BorderSize * tcfg.CellSize;
+            bbox.Maximum.X += tcfg.BorderSize * tcfg.CellSize;
+            bbox.Maximum.Z += tcfg.BorderSize * tcfg.CellSize;
+
+            tcfg.BoundingBox = bbox;
 
             var solid = Recast.CreateHeightfield(tcfg.Width, tcfg.Height, tcfg.BoundingBox, tcfg.CellSize, tcfg.CellHeight);
 
@@ -472,28 +476,30 @@ namespace Engine.PathFinding.RecastNavigation
                 // Store header
                 tile.Header = new TileCacheLayerHeader
                 {
-                    magic = DetourTileCache.DT_TILECACHE_MAGIC,
-                    version = DetourTileCache.DT_TILECACHE_VERSION,
+                    Magic = DetourTileCache.DT_TILECACHE_MAGIC,
+                    Version = DetourTileCache.DT_TILECACHE_VERSION,
 
                     // Tile layer location in the navmesh.
-                    tx = tx,
-                    ty = ty,
-                    tlayer = i,
-                    b = layer.boundingBox,
+                    TX = tx,
+                    TY = ty,
+                    TLayer = i,
+                    BBox = layer.boundingBox,
 
                     // Tile info.
-                    width = layer.width,
-                    height = layer.height,
-                    minx = layer.minx,
-                    maxx = layer.maxx,
-                    miny = layer.miny,
-                    maxy = layer.maxy,
-                    hmin = layer.hmin,
-                    hmax = layer.hmax
+                    Width = layer.width,
+                    Height = layer.height,
+                    MinX = layer.minx,
+                    MaxX = layer.maxx,
+                    MinY = layer.miny,
+                    MaxY = layer.maxy,
+                    HMin = layer.hmin,
+                    HMax = layer.hmax
                 };
 
                 // Store data
-                DetourTileCache.BuildTileCacheLayer(layer.heights, layer.areas, layer.cons, ref tile.Data);
+                DetourTileCache.BuildTileCacheLayer(layer.heights, layer.areas, layer.cons, out var data);
+
+                tile.Data = data;
 
                 rc.tiles[rc.ntiles++] = tile;
             }
@@ -601,10 +607,12 @@ namespace Engine.PathFinding.RecastNavigation
             // For example if you build a navmesh for terrain, and want the navmesh tiles to match the terrain tile size
             // you will need to pass in data from neighbour terrain tiles too! In a simple case, just pass in all the 8 neighbours,
             // or use the bounding box below to only pass in a sliver of each of the 8 neighbours.
-            cfg.BoundingBox.Minimum.X -= borderSize * settings.CellSize;
-            cfg.BoundingBox.Minimum.Z -= borderSize * settings.CellSize;
-            cfg.BoundingBox.Maximum.X += borderSize * settings.CellSize;
-            cfg.BoundingBox.Maximum.Z += borderSize * settings.CellSize;
+            var tmpBbox = cfg.BoundingBox;
+            tmpBbox.Minimum.X -= borderSize * settings.CellSize;
+            tmpBbox.Minimum.Z -= borderSize * settings.CellSize;
+            tmpBbox.Maximum.X += borderSize * settings.CellSize;
+            tmpBbox.Maximum.Z += borderSize * settings.CellSize;
+            cfg.BoundingBox = tmpBbox;
 
             // Allocate voxel heightfield where we rasterize our input data to.
             var solid = Recast.CreateHeightfield(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
@@ -792,11 +800,11 @@ namespace Engine.PathFinding.RecastNavigation
 
                 var param = new NavMeshCreateParams
                 {
-                    verts = pmesh.verts,
-                    vertCount = pmesh.nverts,
-                    polys = pmesh.polys,
-                    polyAreas = pmesh.areas,
-                    polyFlags = pmesh.flags,
+                    Verts = pmesh.verts,
+                    VertCount = pmesh.nverts,
+                    Polys = pmesh.polys,
+                    PolyAreas = pmesh.areas,
+                    PolyFlags = pmesh.flags,
                     polyCount = pmesh.npolys,
                     nvp = pmesh.nvp,
                     detailMeshes = dmesh.meshes,
@@ -894,7 +902,7 @@ namespace Engine.PathFinding.RecastNavigation
         public bool Init(MeshData data, TileFlagTypes flags)
         {
             // Make sure the data is in right format.
-            MeshHeader header = data.header;
+            MeshHeader header = data.Header;
             if (header.magic != Detour.DT_NAVMESH_MAGIC)
             {
                 return false;
@@ -926,7 +934,7 @@ namespace Engine.PathFinding.RecastNavigation
             result = -1;
 
             // Make sure the data is in right format.
-            MeshHeader header = data.header;
+            MeshHeader header = data.Header;
             if (header.magic != Detour.DT_NAVMESH_MAGIC)
             {
                 return false;
@@ -1006,7 +1014,7 @@ namespace Engine.PathFinding.RecastNavigation
             tile.Patch(header);
 
             // If there are no items in the bvtree, reset the tree pointer.
-            if (data.navBvtree == null)
+            if (data.NavBvtree == null)
             {
                 tile.bvTree = null;
             }

@@ -10,26 +10,26 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The sub-mesh data. [Size: 4*#nmeshes] 
         /// </summary>
-        public Int4[] meshes;
+        public Int4[] meshes { get; set; }
         /// <summary>
         /// The mesh vertices. [Size: 3*#nverts] 
         /// </summary>
-        public Vector3[] verts;
+        public Vector3[] verts { get; set; }
         /// <summary>
         /// The mesh triangles. [Size: 4*#ntris] 
         /// </summary>
-        public Int4[] tris;
+        public Int4[] tris { get; set; }
         /// <summary>
         /// The number of sub-meshes defined by #meshes.
         /// </summary>
-        public int nmeshes;
+        public int nmeshes { get; set; }
         /// <summary>
         /// The number of vertices in #verts.
         /// </summary>
-        public int nverts;
+        public int nverts { get; set; }
         /// <summary>
         /// The number of triangles in #tris.
         /// </summary>
-        public int ntris;
+        public int ntris { get; set; }
     }
 }

@@ -15,8 +15,8 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return new CompactSpan()
                 {
-                    con = 24,
-                    h = 8,
+                    Con = 24,
+                    H = 8,
                 };
             }
         }
@@ -24,19 +24,19 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The lower extent of the span. (Measured from the heightfield's base.)
         /// </summary>
-        public int y;
+        public int Y { get; set; }
         /// <summary>
         /// The id of the region the span belongs to. (Or zero if not in a region.)
         /// </summary>
-        public int reg;
+        public int Reg { get; set; }
         /// <summary>
         /// Packed neighbor connection data.
         /// </summary>
-        public int con;
+        public int Con { get; set; }
         /// <summary>
         /// The height of the span.  (Measured from #y.)
         /// </summary>
-        public int h;
+        public int H { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -44,7 +44,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Lower Extent {0}; Region {1}; Connection {2}; Height {3};", this.y, this.reg, this.con, this.h);
+            return string.Format("Lower Extent {0}; Region {1}; Connection {2}; Height {3};", this.Y, this.Reg, this.Con, this.H);
         }
     }
 }

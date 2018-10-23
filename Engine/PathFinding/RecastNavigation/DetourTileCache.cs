@@ -24,7 +24,7 @@ namespace Engine.PathFinding.RecastNavigation
 
         #region DETOURTILECACHEBUILDER
 
-        public static bool BuildTileCacheLayer(int[] heights, TileCacheAreas[] areas, int[] cons, ref TileCacheLayerData data)
+        public static bool BuildTileCacheLayer(int[] heights, TileCacheAreas[] areas, int[] cons, out TileCacheLayerData data)
         {
             data = new TileCacheLayerData()
             {
@@ -39,12 +39,12 @@ namespace Engine.PathFinding.RecastNavigation
         {
             layer = new TileCacheLayer()
             {
-                header = header,
+                Header = header,
                 areas = null,
-                heights = null,
+                Heights = null,
                 cons = null,
                 regs = null,
-                regCount = 0,
+                RegCount = 0,
             };
 
             if (data.areas != null && data.areas.Length > 0)
@@ -55,8 +55,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (data.heights != null && data.heights.Length > 0)
             {
-                layer.heights = new int[data.heights.Length];
-                Array.Copy(data.heights, layer.heights, data.heights.Length);
+                layer.Heights = new int[data.heights.Length];
+                Array.Copy(data.heights, layer.Heights, data.heights.Length);
             }
 
             if (data.cons != null && data.cons.Length > 0)
@@ -79,8 +79,8 @@ namespace Engine.PathFinding.RecastNavigation
             bmax.Z = pos.Z + radius;
             float r2 = (float)Math.Pow(radius / cs + 0.5f, 2.0f);
 
-            int w = layer.header.width;
-            int h = layer.header.height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
@@ -114,7 +114,7 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         continue;
                     }
-                    int y = layer.heights[x + z * w];
+                    int y = layer.Heights[x + z * w];
                     if (y < miny || y > maxy)
                     {
                         continue;
@@ -127,8 +127,8 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static bool MarkBoxArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 center, Vector3 halfExtents, Vector2 rotAux, TileCacheAreas areaId)
         {
-            int w = layer.header.width;
-            int h = layer.header.height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
@@ -172,7 +172,7 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         continue;
                     }
-                    int y = layer.heights[x + z * w];
+                    int y = layer.Heights[x + z * w];
                     if (y < miny || y > maxy)
                     {
                         continue;
@@ -185,8 +185,8 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static bool MarkBoxArea(ref TileCacheLayer layer, Vector3 orig, float cs, float ch, Vector3 bmin, Vector3 bmax, TileCacheAreas areaId)
         {
-            int w = layer.header.width;
-            int h = layer.header.height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
@@ -211,7 +211,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = minx; x <= maxx; ++x)
                 {
-                    int y = layer.heights[x + z * w];
+                    int y = layer.Heights[x + z * w];
                     if (y < miny || y > maxy)
                     {
                         continue;
@@ -224,8 +224,8 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static bool BuildTileCacheRegions(ref TileCacheLayer layer, int walkableClimb)
         {
-            int w = layer.header.width;
-            int h = layer.header.height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
 
             layer.regs = Helper.CreateArray(w * h, 0xff);
 
@@ -343,11 +343,11 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return new LayerMonotoneRegion()
                 {
-                    area = 0,
-                    neis = new int[DT_LAYER_MAX_NEIS],
-                    nneis = 0,
-                    regId = 0xff,
-                    areaId = TileCacheAreas.RC_NULL_AREA,
+                    Area = 0,
+                    Neis = new int[DT_LAYER_MAX_NEIS],
+                    NNeis = 0,
+                    RegId = 0xff,
+                    AreaId = TileCacheAreas.RC_NULL_AREA,
                 };
             });
 
@@ -364,8 +364,8 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Update area.
-                    regs[ri].area++;
-                    regs[ri].areaId = layer.areas[idx];
+                    regs[ri].Area++;
+                    regs[ri].AreaId = layer.areas[idx];
 
                     // Update neighbours
                     int ymi = x + (y - 1) * w;
@@ -374,8 +374,8 @@ namespace Engine.PathFinding.RecastNavigation
                         int rai = layer.regs[ymi];
                         if (rai != 0xff && rai != ri)
                         {
-                            AddUniqueLast(ref regs[ri].neis, ref regs[ri].nneis, rai);
-                            AddUniqueLast(ref regs[rai].neis, ref regs[rai].nneis, ri);
+                            AddUniqueLast(ref regs[ri], rai);
+                            AddUniqueLast(ref regs[rai], ri);
                         }
                     }
                 }
@@ -383,7 +383,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             for (int i = 0; i < nregs; ++i)
             {
-                regs[i].regId = i;
+                regs[i].RegId = i;
             }
 
             for (int i = 0; i < nregs; ++i)
@@ -392,33 +392,33 @@ namespace Engine.PathFinding.RecastNavigation
 
                 int merge = -1;
                 int mergea = 0;
-                for (int j = 0; j < reg.nneis; ++j)
+                for (int j = 0; j < reg.NNeis; ++j)
                 {
-                    int nei = reg.neis[j];
+                    int nei = reg.Neis[j];
                     LayerMonotoneRegion regn = regs[nei];
-                    if (reg.regId == regn.regId)
+                    if (reg.RegId == regn.RegId)
                     {
                         continue;
                     }
-                    if (reg.areaId != regn.areaId)
+                    if (reg.AreaId != regn.AreaId)
                     {
                         continue;
                     }
-                    if (regn.area > mergea && CanMerge(reg.regId, regn.regId, regs, nregs))
+                    if (regn.Area > mergea && CanMerge(reg.RegId, regn.RegId, regs, nregs))
                     {
-                        mergea = regn.area;
+                        mergea = regn.Area;
                         merge = nei;
                     }
                 }
                 if (merge != -1)
                 {
-                    int oldId = reg.regId;
-                    int newId = regs[merge].regId;
+                    int oldId = reg.RegId;
+                    int newId = regs[merge].RegId;
                     for (int j = 0; j < nregs; ++j)
                     {
-                        if (regs[j].regId == oldId)
+                        if (regs[j].RegId == oldId)
                         {
-                            regs[j].regId = newId;
+                            regs[j].RegId = newId;
                         }
                     }
                 }
@@ -430,7 +430,7 @@ namespace Engine.PathFinding.RecastNavigation
             regId = 0;
             for (int i = 0; i < nregs; ++i)
             {
-                remap[regs[i].regId] = 1;
+                remap[regs[i].RegId] = 1;
             }
             for (int i = 0; i < 256; ++i)
             {
@@ -442,16 +442,16 @@ namespace Engine.PathFinding.RecastNavigation
             // Remap ids.
             for (int i = 0; i < nregs; ++i)
             {
-                regs[i].regId = remap[regs[i].regId];
+                regs[i].RegId = remap[regs[i].RegId];
             }
 
-            layer.regCount = regId;
+            layer.RegCount = regId;
 
             for (int i = 0; i < w * h; ++i)
             {
                 if (layer.regs[i] != 0xff)
                 {
-                    layer.regs[i] = regs[layer.regs[i]].regId;
+                    layer.regs[i] = regs[layer.regs[i]].RegId;
                 }
             }
 
@@ -459,13 +459,13 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static bool BuildTileCacheContours(TileCacheLayer layer, int walkableClimb, float maxError, out TileCacheContourSet lcset)
         {
-            int w = layer.header.width;
-            int h = layer.header.height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
 
             lcset = new TileCacheContourSet
             {
-                nconts = layer.regCount,
-                conts = new TileCacheContour[layer.regCount],
+                nconts = layer.RegCount,
+                conts = new TileCacheContour[layer.RegCount],
             };
 
             // Allocate temp buffer for contour tracing.
@@ -745,15 +745,15 @@ namespace Engine.PathFinding.RecastNavigation
         {
             return !(amin >= bmax || amax <= bmin);
         }
-        public static void AddUniqueLast(ref int[] a, ref int an, int v)
+        public static void AddUniqueLast(ref LayerMonotoneRegion reg, int v)
         {
-            int n = an;
-            if (n > 0 && a[n - 1] == v)
+            int n = reg.NNeis;
+            if (n > 0 && reg.Neis[n - 1] == v)
             {
                 return;
             }
-            a[an] = v;
-            an++;
+            reg.Neis[reg.NNeis] = v;
+            reg.NNeis++;
         }
         public static bool IsConnected(TileCacheLayer layer, int ia, int ib, int walkableClimb)
         {
@@ -761,7 +761,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return false;
             }
-            if (Math.Abs(layer.heights[ia] - layer.heights[ib]) > walkableClimb)
+            if (Math.Abs(layer.Heights[ia] - layer.Heights[ib]) > walkableClimb)
             {
                 return false;
             }
@@ -773,14 +773,14 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < nregs; ++i)
             {
                 LayerMonotoneRegion reg = regs[i];
-                if (reg.regId != oldRegId)
+                if (reg.RegId != oldRegId)
                 {
                     continue;
                 }
-                int nnei = reg.nneis;
+                int nnei = reg.NNeis;
                 for (int j = 0; j < nnei; ++j)
                 {
-                    if (regs[reg.neis[j]].regId == newRegId)
+                    if (regs[reg.Neis[j]].RegId == newRegId)
                     {
                         count++;
                     }
@@ -829,7 +829,7 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static int GetNeighbourReg(TileCacheLayer layer, int ax, int ay, int dir)
         {
-            int w = layer.header.width;
+            int w = layer.Header.Width;
             int ia = ax + ay * w;
 
             int con = layer.cons[ia] & 0xf;
@@ -854,8 +854,8 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static bool WalkContour(TileCacheLayer layer, int x, int y, TempContour cont)
         {
-            int w = layer.header.width;
-            int h = layer.header.height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
 
             cont.nverts = 0;
 
@@ -903,7 +903,7 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // Try to merge with previous vertex.
-                    if (!AppendVertex(cont, px, layer.heights[x + y * w], pz, rn))
+                    if (!AppendVertex(cont, px, layer.Heights[x + y * w], pz, rn))
                     {
                         return false;
                     }
@@ -1104,8 +1104,8 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static int GetCornerHeight(TileCacheLayer layer, int x, int y, int z, int walkableClimb, ref bool shouldRemove)
         {
-            int w = layer.header.width;
-            int h = layer.header.height;
+            int w = layer.Header.Width;
+            int h = layer.Header.Height;
 
             int n = 0;
 
@@ -1123,7 +1123,7 @@ namespace Engine.PathFinding.RecastNavigation
                     if (px >= 0 && pz >= 0 && px < w && pz < h)
                     {
                         int idx = px + pz * w;
-                        int lh = layer.heights[idx];
+                        int lh = layer.Heights[idx];
                         if (Math.Abs(lh - y) <= walkableClimb && layer.areas[idx] != TileCacheAreas.RC_NULL_AREA)
                         {
                             height = Math.Max(height, lh);

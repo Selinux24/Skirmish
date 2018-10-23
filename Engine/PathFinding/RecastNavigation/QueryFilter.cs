@@ -10,22 +10,22 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Cost per area type. (Used by default implementation.)
         /// </summary>
-        public float[] m_areaCost;
+        public float[] AreaCost { get; set; }
         /// <summary>
         /// Flags for polygons that can be visited. (Used by default implementation.)
         /// </summary>
-        public SamplePolyFlagTypes m_includeFlags;
+        public SamplePolyFlagTypes IncludeFlags { get; set; }
         /// <summary>
         /// Flags for polygons that should not be visted. (Used by default implementation.)
         /// </summary>
-        public SamplePolyFlagTypes m_excludeFlags;
+        public SamplePolyFlagTypes ExcludeFlags { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         public QueryFilter()
         {
-            m_areaCost = Helper.CreateArray(Detour.DT_MAX_AREAS, 1.0f);
+            AreaCost = Helper.CreateArray(Detour.DT_MAX_AREAS, 1.0f);
 
             SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_GROUND, 1.0f);
             SetAreaCost(SamplePolyAreas.SAMPLE_POLYAREA_WATER, 10.0f);
@@ -44,7 +44,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns></returns>
         public virtual bool PassFilter(int r, MeshTile tile, Poly poly)
         {
-            return (poly.Flags & m_includeFlags) != 0 && (poly.Flags & m_excludeFlags) == 0;
+            return (poly.Flags & IncludeFlags) != 0 && (poly.Flags & ExcludeFlags) == 0;
         }
         /// <summary>
         /// Returns cost to move from the beginning to the end of a line segment that is fully contained within a polygon.
@@ -67,7 +67,7 @@ namespace Engine.PathFinding.RecastNavigation
             int curRef, MeshTile curTile, Poly curPoly,
             int nextRef, MeshTile nextTile, Poly nextPoly)
         {
-            return Vector3.Distance(pa, pb) * m_areaCost[(int)curPoly.Area];
+            return Vector3.Distance(pa, pb) * AreaCost[(int)curPoly.Area];
         }
 
         /// <summary>
@@ -75,36 +75,36 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="i">The id of the area.</param>
         /// <returns>The traversal cost of the area.</returns>
-        public float GetAreaCost(SamplePolyAreas i) { return m_areaCost[(int)i]; }
+        public float GetAreaCost(SamplePolyAreas i) { return AreaCost[(int)i]; }
         /// <summary>
         /// Sets the traversal cost of the area.
         /// </summary>
         /// <param name="i">The id of the area.</param>
         /// <param name="cost">The new cost of traversing the area.</param>
-        public void SetAreaCost(SamplePolyAreas i, float cost) { m_areaCost[(int)i] = cost; }
+        public void SetAreaCost(SamplePolyAreas i, float cost) { AreaCost[(int)i] = cost; }
 
         /// <summary>
         /// Returns the include flags for the filter.
         /// Any polygons that include one or more of these flags will be included in the operation.
         /// </summary>
         /// <returns></returns>
-        public SamplePolyFlagTypes GetIncludeFlags() { return m_includeFlags; }
+        public SamplePolyFlagTypes GetIncludeFlags() { return IncludeFlags; }
         /// <summary>
         /// Sets the include flags for the filter.
         /// </summary>
         /// <param name="flags">The new flags.</param>
-        public void SetIncludeFlags(SamplePolyFlagTypes flags) { m_includeFlags = flags; }
+        public void SetIncludeFlags(SamplePolyFlagTypes flags) { IncludeFlags = flags; }
 
         /// <summary>
         /// Returns the exclude flags for the filter.
         /// Any polygons that include one ore more of these flags will be excluded from the operation.
         /// </summary>
         /// <returns></returns>
-        public SamplePolyFlagTypes GetExcludeFlags() { return m_excludeFlags; }
+        public SamplePolyFlagTypes GetExcludeFlags() { return ExcludeFlags; }
         /// <summary>
         /// Sets the exclude flags for the filter.
         /// </summary>
         /// <param name="flags">The new flags.</param>
-        public void SetExcludeFlags(SamplePolyFlagTypes flags) { m_excludeFlags = flags; }
+        public void SetExcludeFlags(SamplePolyFlagTypes flags) { ExcludeFlags = flags; }
     }
 }
