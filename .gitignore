@@ -189,6 +189,8 @@ Thumbs.db
 
 #NUGET
 .nuget/
+
+#Shaders
 *.cod
 
 #VS
@@ -196,13 +198,6 @@ Thumbs.db
 
 #Blender
 *.blend1
-/.vs/Skirmish/v15/Browse.VC.opendb
-/.vs/Skirmish/v15/Browse.VC.db
-/.vs/Skirmish/v15
-/.vs
-/.vs
-*.sqlite
-*.json
-/.vs
+
+#SonarQube
 /.sonarqube
-/SonarQube.cmd
