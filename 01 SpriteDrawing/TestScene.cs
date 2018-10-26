@@ -6,8 +6,6 @@ namespace SpriteDrawing
     {
         private const float delta = 250f;
 
-        private SceneObject<Sprite> background = null;
-        private SceneObject<Sprite> spriteFixed = null;
         private SceneObject<Sprite> spriteMov = null;
 
         public TestScene(Game game)
@@ -38,14 +36,14 @@ namespace SpriteDrawing
                 Height = 512,
                 FitScreen = true,
             };
-            this.spriteFixed = this.AddComponent<Sprite>(spriteFixedDesc, SceneObjectUsages.None, 2);
+            this.AddComponent<Sprite>(spriteFixedDesc, SceneObjectUsages.None, 2);
 
             SpriteBackgroundDescription bkDescription = new SpriteBackgroundDescription()
             {
                 ContentPath = "Resources",
                 Textures = new[] { "background.jpg" },
             };
-            this.background = this.AddComponent<Sprite>(bkDescription, SceneObjectUsages.None, 1);
+            this.AddComponent<Sprite>(bkDescription, SceneObjectUsages.None, 1);
 
             this.spriteMov.ScreenTransform.SetPosition(256, 0);
         }

@@ -16,9 +16,6 @@ namespace ModelDrawing
         private SceneObject<TextDrawer> statistics = null;
         private SceneObject<TextDrawer> text1 = null;
         private SceneObject<TextDrawer> text2 = null;
-        private SceneObject<Sprite> backPannel = null;
-
-        private SceneObject<Model> floor = null;
 
         private ParticleSystemDescription pPlume = null;
         private ParticleSystemDescription pFire = null;
@@ -78,7 +75,7 @@ namespace ModelDrawing
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeFloor()
         {
@@ -114,7 +111,7 @@ namespace ModelDrawing
                 }
             };
 
-            this.floor = this.AddComponent<Model>(desc, SceneObjectUsages.Ground);
+            this.AddComponent<Model>(desc, SceneObjectUsages.Ground);
         }
         private void InitializeModels()
         {

@@ -9,15 +9,15 @@ namespace SceneTest
         private const int layerHUD = 99;
         private const int layerCursor = 100;
 
-        SceneObject<Cursor> cursor = null;
-        SceneObject<Model> backGround = null;
-        SceneObject<TextDrawer> title = null;
-        SceneObject<SpriteButton> sceneMaterialsButton = null;
-        SceneObject<SpriteButton> sceneWaterButton = null;
-        SceneObject<SpriteButton> sceneStencilPassButton = null;
-        SceneObject<SpriteButton> sceneLightsButton = null;
-        SceneObject<SpriteButton> sceneTexturesButton = null;
-        SceneObject<SpriteButton> exitButton = null;
+        private SceneObject<Cursor> cursor = null;
+        private SceneObject<Model> backGround = null;
+        private SceneObject<TextDrawer> title = null;
+        private SceneObject<SpriteButton> sceneMaterialsButton = null;
+        private SceneObject<SpriteButton> sceneWaterButton = null;
+        private SceneObject<SpriteButton> sceneStencilPassButton = null;
+        private SceneObject<SpriteButton> sceneLightsButton = null;
+        private SceneObject<SpriteButton> sceneTexturesButton = null;
+        private SceneObject<SpriteButton> exitButton = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);

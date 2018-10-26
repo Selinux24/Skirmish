@@ -9,12 +9,8 @@ namespace Collada
     {
         private const int layerHUD = 99;
 
-        private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> fps = null;
-        private SceneObject<TextDrawer> picks = null;
-        private SceneObject<Sprite> backPannel = null;
 
-        private SceneObject<ModelInstanced> wall = null;
         private SceneObject<Model> lightEmitter = null;
 
         private SceneLightPoint pointLight = null;
@@ -61,31 +57,31 @@ namespace Collada
         }
         private void InitializeText()
         {
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.title.Instance.Text = "Tiled Wall Test Scene";
-            this.title.Instance.Position = Vector2.Zero;
+            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            title.Instance.Text = "Tiled Wall Test Scene";
+            title.Instance.Position = Vector2.Zero;
 
             this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.fps.Instance.Text = null;
             this.fps.Instance.Position = new Vector2(0, 24);
 
-            this.picks = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.picks.Instance.Text = null;
-            this.picks.Instance.Position = new Vector2(0, 48);
+            var picks = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            picks.Instance.Text = null;
+            picks.Instance.Position = new Vector2(0, 48);
 
             var spDesc = new SpriteDescription()
             {
                 AlphaEnabled = true,
                 Width = this.Game.Form.RenderWidth,
-                Height = this.picks.Instance.Top + this.picks.Instance.Height + 3,
+                Height = picks.Instance.Top + picks.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeDungeon()
         {
-            this.wall = this.AddComponent<ModelInstanced>(
+            var wall = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Name = "wall",
@@ -99,18 +95,18 @@ namespace Collada
                     }
                 });
 
-            BoundingBox bbox = this.wall.Instance[0].GetBoundingBox();
+            BoundingBox bbox = wall.Instance[0].GetBoundingBox();
 
             float x = bbox.GetX() * (10f / 11f);
             float z = bbox.GetZ();
 
-            this.wall.Instance[0].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
-            this.wall.Instance[1].Manipulator.SetPosition(new Vector3(+2 * x, 0, +0 * z));
-            this.wall.Instance[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, +0 * z));
-            this.wall.Instance[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
-            this.wall.Instance[4].Manipulator.SetPosition(new Vector3(-1 * x, 0, +0 * z));
-            this.wall.Instance[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
-            this.wall.Instance[6].Manipulator.SetPosition(new Vector3(-3 * x, 0, +0 * z));
+            wall.Instance[0].Manipulator.SetPosition(new Vector3(+3 * x, 0, +0 * z));
+            wall.Instance[1].Manipulator.SetPosition(new Vector3(+2 * x, 0, +0 * z));
+            wall.Instance[2].Manipulator.SetPosition(new Vector3(+1 * x, 0, +0 * z));
+            wall.Instance[3].Manipulator.SetPosition(new Vector3(+0 * x, 0, +0 * z));
+            wall.Instance[4].Manipulator.SetPosition(new Vector3(-1 * x, 0, +0 * z));
+            wall.Instance[5].Manipulator.SetPosition(new Vector3(-2 * x, 0, +0 * z));
+            wall.Instance[6].Manipulator.SetPosition(new Vector3(-3 * x, 0, +0 * z));
         }
         private void InitializeEmitter()
         {
@@ -118,7 +114,7 @@ namespace Collada
             mat.EmissionColor = Color.White;
 
             GeometryUtil.CreateSphere(
-                0.05f, 16, 5, 
+                0.05f, 16, 5,
                 out Vector3[] v, out Vector3[] n, out Vector2[] uv, out uint[] ix);
 
             VertexData[] vertices = new VertexData[v.Length];

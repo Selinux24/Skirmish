@@ -17,10 +17,7 @@ namespace Collada
 
         private Player agent = null;
 
-        private SceneObject<TextDrawer> title = null;
-        private SceneObject<TextDrawer> help = null;
         private SceneObject<TextDrawer> debug = null;
-        private SceneObject<Sprite> backPannel = null;
 
         private SceneObject<TriangleListDrawer> graphDrawer = null;
 
@@ -57,13 +54,13 @@ namespace Collada
         }
         private void InitializeText()
         {
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.title.Instance.Text = "Navigation Mesh Test Scene";
-            this.title.Instance.Position = Vector2.Zero;
+            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            title.Instance.Text = "Navigation Mesh Test Scene";
+            title.Instance.Position = Vector2.Zero;
 
-            this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.help.Instance.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse). F5: Save. F6: Load. Space: Update current tile (SHIFT remove).";
-            this.help.Instance.Position = new Vector2(0, 24);
+            var help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            help.Instance.Text = "Camera: WASD+Mouse. B: Change Build Mode. P: Change Partition Type. (SHIFT reverse). F5: Save. F6: Load. Space: Update current tile (SHIFT remove).";
+            help.Instance.Position = new Vector2(0, 24);
 
             this.debug = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.debug.Instance.Text = null;
@@ -77,7 +74,7 @@ namespace Collada
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeAgent()
         {

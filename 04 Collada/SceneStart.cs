@@ -9,7 +9,6 @@ namespace Collada
         private const int layerHUD = 99;
         private const int layerCursor = 100;
 
-        SceneObject<Cursor> cursor = null;
         SceneObject<Model> backGround = null;
         SceneObject<TextDrawer> title = null;
         SceneObject<SpriteButton> sceneDungeonWallButton = null;
@@ -47,7 +46,7 @@ namespace Collada
                 Centered = false,
                 Color = Color.White,
             };
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
+            this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
 
             #endregion
 
