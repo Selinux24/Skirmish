@@ -14,20 +14,14 @@ namespace Instancing
         private const int layerTerrain = 1;
         private const int layerHUD = 99;
 
-        private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> runtime = null;
-        private SceneObject<Sprite> backPannel = null;
-
-        private SceneObject<ModelInstanced> floor = null;
-
-        private SceneObject<ModelInstanced> trees = null;
 
         private SceneObject<ModelInstanced> troops = null;
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
         public TestScene(Game game) : base(game, SceneModes.ForwardLigthning)
         {
-            
+
         }
 
         public override void Initialize()
@@ -38,14 +32,14 @@ namespace Instancing
 
             #region Texts
 
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
-            this.title.Instance.Text = "Instancing test";
+            title.Instance.Text = "Instancing test";
             this.runtime.Instance.Text = "";
 
-            this.title.Instance.Position = Vector2.Zero;
-            this.runtime.Instance.Position = new Vector2(5, this.title.Instance.Top + this.title.Instance.Height + 3);
+            title.Instance.Position = Vector2.Zero;
+            this.runtime.Instance.Position = new Vector2(5, title.Instance.Top + title.Instance.Height + 3);
 
             var spDesc = new SpriteDescription()
             {
@@ -55,7 +49,7 @@ namespace Instancing
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
@@ -102,16 +96,16 @@ namespace Instancing
                     }
                 };
 
-                this.floor = this.AddComponent<ModelInstanced>(desc);
+                var floor = this.AddComponent<ModelInstanced>(desc);
 
                 Vector3 delta = new Vector3(l * side, 0, l * side) - new Vector3(l, 0, l);
                 int x = 0;
                 int y = 0;
-                for (int i = 0; i < this.floor.Count; i++)
+                for (int i = 0; i < floor.Count; i++)
                 {
                     var iPos = new Vector3(x * l * 2, 0, y * l * 2) - delta;
 
-                    this.floor.Instance[i].Manipulator.SetPosition(iPos, true);
+                    floor.Instance[i].Manipulator.SetPosition(iPos, true);
 
                     x++;
                     if (x >= side)
@@ -143,12 +137,12 @@ namespace Instancing
                         ModelContentFilename = @"tree.xml",
                     }
                 };
-                this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
+                var trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
 
                 int side = instances / 4;
                 float groundSide = 55f;
 
-                for (int i = 0; i < this.trees.Count; i++)
+                for (int i = 0; i < trees.Count; i++)
                 {
                     var iPos = Vector3.Zero;
 
@@ -169,10 +163,10 @@ namespace Instancing
                         iPos = new Vector3(-groundSide, 0, (i - ((side * 3) + (side * 0.5f))) * side);
                     }
 
-                    this.trees.Instance[i].Manipulator.SetPosition(iPos, true);
-                    this.trees.Instance[i].Manipulator.SetRotation(iPos.Z + iPos.X, 0, 0, true);
-                    this.trees.Instance[i].Manipulator.SetScale(2 + (i % 3 * 0.2f), true);
-                    this.trees.Instance[i].TextureIndex = (uint)(i % 2);
+                    trees.Instance[i].Manipulator.SetPosition(iPos, true);
+                    trees.Instance[i].Manipulator.SetRotation(iPos.Z + iPos.X, 0, 0, true);
+                    trees.Instance[i].Manipulator.SetScale(2 + (i % 3 * 0.2f), true);
+                    trees.Instance[i].TextureIndex = (uint)(i % 2);
                 }
             }
 

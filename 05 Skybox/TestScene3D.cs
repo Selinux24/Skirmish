@@ -317,9 +317,8 @@ namespace Skybox
         {
             Vector3 previousPosition = this.Camera.Position;
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
 
-            this.UpdateInput(shift, rightBtn);
+            this.UpdateInput(shift);
 
             #region Walk
 
@@ -359,7 +358,7 @@ namespace Skybox
             base.Update(gameTime);
         }
 
-        private void UpdateInput(bool shift, bool rightBtn)
+        private void UpdateInput(bool shift)
         {
             if (this.Game.Input.KeyJustReleased(Keys.Escape))
             {
@@ -441,7 +440,7 @@ namespace Skybox
             }
 
 #if DEBUG
-            if (rightBtn)
+            if (this.Game.Input.RightMouseButtonPressed)
 #endif
             {
                 this.Camera.RotateMouse(

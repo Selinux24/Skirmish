@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.PathFinding.RecastNavigation
 {
-    public enum SamplePolyAreas : int
+    public enum SamplePolyAreas
     {
         SAMPLE_POLYAREA_GROUND = GraphConnectionAreaTypes.Ground,
         SAMPLE_POLYAREA_WATER = GraphConnectionAreaTypes.Water,

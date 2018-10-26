@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.PathFinding.RecastNavigation
 {
-    public enum TileCacheAreas : int
+    public enum TileCacheAreas
     {
         /// <summary>
         /// Represents the null area.

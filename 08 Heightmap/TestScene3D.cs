@@ -40,17 +40,12 @@ namespace Heightmap
         private readonly float windStep = 0.001f;
         private float windDuration = 0;
 
-        private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> load = null;
         private SceneObject<TextDrawer> stats = null;
         private SceneObject<TextDrawer> help = null;
         private SceneObject<TextDrawer> help2 = null;
-        private SceneObject<Sprite> backPannel = null;
 
-        private SceneObject<Cursor> cursor;
-        private SceneObject<LensFlare> lensFlare = null;
         private SceneObject<SkyScattering> skydom = null;
-        private SceneObject<SkyPlane> clouds = null;
         private SceneObject<Terrain> terrain = null;
         private SceneObject<GroundGardener> gardener = null;
         private SceneObject<GroundGardener> gardener2 = null;
@@ -58,7 +53,6 @@ namespace Heightmap
         private SceneObject<LineListDrawer> linesDrawer = null;
 
         private SceneObject<ModelInstanced> torchs = null;
-        private SceneLightPoint[] torchLights = null;
         private SceneLightSpot spotLight1 = null;
         private SceneLightSpot spotLight2 = null;
 
@@ -179,26 +173,26 @@ namespace Heightmap
                 Height = 20,
             };
 
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
+            this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
 
             #endregion
 
             #region Texts
 
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.stats = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.help2 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
-            this.title.Instance.Text = "Heightmap Terrain test";
+            title.Instance.Text = "Heightmap Terrain test";
             this.load.Instance.Text = "";
             this.stats.Instance.Text = "";
             this.help.Instance.Text = "";
             this.help2.Instance.Text = "";
 
-            this.title.Instance.Position = Vector2.Zero;
-            this.load.Instance.Position = new Vector2(5, this.title.Instance.Top + this.title.Instance.Height + 3);
+            title.Instance.Position = Vector2.Zero;
+            this.load.Instance.Position = new Vector2(5, title.Instance.Top + title.Instance.Height + 3);
             this.stats.Instance.Position = new Vector2(5, this.load.Instance.Top + this.load.Instance.Height + 3);
             this.help.Instance.Position = new Vector2(5, this.stats.Instance.Top + this.stats.Instance.Height + 3);
             this.help2.Instance.Position = new Vector2(5, this.help.Instance.Top + this.help.Instance.Height + 3);
@@ -212,7 +206,7 @@ namespace Heightmap
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
@@ -649,7 +643,7 @@ namespace Heightmap
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            this.lensFlare = this.AddComponent<LensFlare>(lfDesc, SceneObjectUsages.None, layerEffects);
+            this.AddComponent<LensFlare>(lfDesc, SceneObjectUsages.None, layerEffects);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -682,7 +676,7 @@ namespace Heightmap
                 SkyMode = SkyPlaneModes.Perturbed,
                 Direction = new Vector2(1, 1),
             };
-            this.clouds = this.AddComponent<SkyPlane>(scDesc);
+            this.AddComponent<SkyPlane>(scDesc);
             sw.Stop();
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -934,7 +928,7 @@ namespace Heightmap
                     this.Lights.Add(this.spotLight2);
                 }
 
-                this.torchLights = new SceneLightPoint[this.torchs.Count - 1];
+                SceneLightPoint[] torchLights = new SceneLightPoint[this.torchs.Count - 1];
                 for (int i = 1; i < this.torchs.Count; i++)
                 {
                     Color color = new Color(
@@ -957,7 +951,7 @@ namespace Heightmap
 
                     pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
 
-                    this.torchLights[i - 1] = new SceneLightPoint(
+                    torchLights[i - 1] = new SceneLightPoint(
                         string.Format("Torch {0}", i),
                         true,
                         color,
@@ -967,7 +961,7 @@ namespace Heightmap
                         4f,
                         5f);
 
-                    this.Lights.Add(this.torchLights[i - 1]);
+                    this.Lights.Add(torchLights[i - 1]);
 
                     this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f });
                     this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
