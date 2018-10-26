@@ -87,16 +87,19 @@ namespace Engine
                     context.ViewProjection,
                     context.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
                     context.Lights,
-                    this.Description.BaseColor,
-                    this.Description.WaterColor,
-                    this.Description.WaveHeight,
-                    this.Description.WaveChoppy,
-                    this.Description.WaveSpeed,
-                    this.Description.WaveFrequency,
-                    context.GameTime.TotalSeconds,
-                    this.Description.HeightmapIterations,
-                    this.Description.GeometryIterations,
-                    this.Description.ColorIterations);
+                    new EffectWaterState
+                    {
+                        BaseColor = this.Description.BaseColor,
+                        WaterColor = this.Description.WaterColor,
+                        WaveHeight = this.Description.WaveHeight,
+                        WaveChoppy = this.Description.WaveChoppy,
+                        WaveSpeed = this.Description.WaveSpeed,
+                        WaveFrequency = this.Description.WaveFrequency,
+                        TotalTime = context.GameTime.TotalSeconds,
+                        Steps = this.Description.HeightmapIterations,
+                        GeometryIterations = this.Description.GeometryIterations,
+                        ColorIterations = this.Description.ColorIterations,
+                    });
 
                 var graphics = this.Game.Graphics;
 

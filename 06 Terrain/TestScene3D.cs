@@ -43,12 +43,10 @@ namespace Terrain
         private EngineShaderResourceView debugTex = null;
         private int graphIndex = -1;
 
-        private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> load = null;
         private SceneObject<TextDrawer> stats = null;
         private SceneObject<TextDrawer> counters1 = null;
         private SceneObject<TextDrawer> counters2 = null;
-        private SceneObject<Sprite> backPannel = null;
 
         private SceneObject<SpriteProgressBar> hProgressBar = null;
         private SceneObject<SpriteProgressBar> t1ProgressBar = null;
@@ -63,9 +61,6 @@ namespace Terrain
         private Vector3 tankLeftCat = Vector3.Zero;
         private Vector3 tankRightCat = Vector3.Zero;
 
-        private SceneObject<LensFlare> lensFlare = null;
-        private SceneObject<Skydom> skydom = null;
-        private SceneObject<SkyPlane> clouds = null;
         private SceneObject<Scenery> terrain = null;
         private SceneObject<GroundGardener> gardener = null;
         private readonly Vector3 windDirection = Vector3.UnitX;
@@ -205,19 +200,19 @@ namespace Terrain
             sw.Restart();
 
             {
-                this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, this.layerHud);
+                var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, this.layerHud);
                 this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
                 this.stats = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
                 this.counters1 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
                 this.counters2 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
 
-                this.title.Instance.Text = "Terrain collision and trajectories test";
+                title.Instance.Text = "Terrain collision and trajectories test";
                 this.load.Instance.Text = "";
                 this.stats.Instance.Text = "";
                 this.counters1.Instance.Text = "";
                 this.counters2.Instance.Text = "";
 
-                this.title.Instance.Position = Vector2.Zero;
+                title.Instance.Position = Vector2.Zero;
                 this.load.Instance.Position = new Vector2(0, 24);
                 this.stats.Instance.Position = new Vector2(0, 46);
                 this.counters1.Instance.Position = new Vector2(0, 68);
@@ -232,7 +227,7 @@ namespace Terrain
                     Color = new Color4(0, 0, 0, 0.75f),
                 };
 
-                this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHud - 1);
+                this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHud - 1);
 
                 var spbDesc = new SpriteProgressBarDescription()
                 {
@@ -453,7 +448,7 @@ namespace Terrain
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            this.lensFlare = this.AddComponent<LensFlare>(lfDesc, SceneObjectUsages.None, this.layerEffects);
+            this.AddComponent<LensFlare>(lfDesc, SceneObjectUsages.None, this.layerEffects);
 
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -666,7 +661,7 @@ namespace Terrain
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            this.skydom = this.AddComponent<Skydom>(new SkydomDescription()
+            this.AddComponent<Skydom>(new SkydomDescription()
             {
                 Name = "Skydom",
                 ContentPath = "resources/Skydom",
@@ -682,7 +677,7 @@ namespace Terrain
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            this.clouds = this.AddComponent<SkyPlane>(new SkyPlaneDescription()
+            this.AddComponent<SkyPlane>(new SkyPlaneDescription()
             {
                 Name = "Clouds",
                 ContentPath = "Resources/clouds",
@@ -1299,7 +1294,8 @@ namespace Terrain
         {
             if (this.Game.Input.LeftMouseButtonPressed)
             {
-                if (this.PickNearest(ref pickingRay, true, out PickingResult<Triangle> r))
+                var picked = this.PickNearest(ref pickingRay, true, out PickingResult<Triangle> r);
+                if (picked)
                 {
                     var t1Position = this.tankP1.Transform.Position;
 
@@ -1313,7 +1309,8 @@ namespace Terrain
 
             if (this.Game.Input.LeftMouseButtonJustReleased)
             {
-                if (this.PickNearest(ref pickingRay, true, out PickingResult<Triangle> r))
+                var picked = this.PickNearest(ref pickingRay, true, out PickingResult<Triangle> r);
+                if (picked)
                 {
                     var task = Task.Run(() =>
                     {
@@ -1466,7 +1463,8 @@ namespace Terrain
 
             if (this.Game.Input.LeftMouseButtonPressed)
             {
-                if (this.terrainGraphDrawer.Visible)
+                var visible = this.terrainGraphDrawer.Visible;
+                if (visible)
                 {
                     this.terrainPointDrawer.Instance.Clear();
 

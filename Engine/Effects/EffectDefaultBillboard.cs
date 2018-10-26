@@ -611,37 +611,23 @@ namespace Engine.Effects
         /// Update per frame data
         /// </summary>
         /// <param name="context">Drawing context</param>
-        /// <param name="randomTexture">Random texture</param>
-        /// <param name="startRadius">Drawing start radius</param>
-        /// <param name="endRadius">Drawing end radius</param>
-        /// <param name="textureCount">Texture count</param>
-        /// <param name="normalMapCount">Normal map count</param>
-        /// <param name="texture">Texture</param>
-        /// <param name="normalMaps">Normal maps</param>
-        /// <param name="materialIndex">Material index</param>
+        /// <param name="state">State</param>
         public void UpdatePerFrame(
             DrawContext context,
-            EngineShaderResourceView randomTexture,
-            float startRadius,
-            float endRadius,
-            uint materialIndex,
-            uint textureCount,
-            uint normalMapCount,
-            EngineShaderResourceView texture,
-            EngineShaderResourceView normalMaps)
+            EffectBillboardState state)
         {
             this.World = Matrix.Identity;
             this.WorldViewProjection = context.ViewProjection;
             this.EyePositionWorld = context.EyePosition;
 
-            this.StartRadius = startRadius;
-            this.EndRadius = endRadius;
-            this.TextureCount = textureCount;
-            this.NormalMapCount = normalMapCount;
-            this.Textures = texture;
-            this.NormalMaps = normalMaps;
+            this.StartRadius = state.StartRadius;
+            this.EndRadius = state.EndRadius;
+            this.TextureCount = state.TextureCount;
+            this.NormalMapCount = state.NormalMapCount;
+            this.Textures = state.Texture;
+            this.NormalMaps = state.NormalMaps;
 
-            this.MaterialIndex = materialIndex;
+            this.MaterialIndex = state.MaterialIndex;
 
             var bHemiLight = BufferHemisphericLight.Default;
             var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
@@ -714,7 +700,7 @@ namespace Engine.Effects
             this.SpotLights = bSpotLights;
             this.LightCount = lCount;
 
-            this.TextureRandom = randomTexture;
+            this.TextureRandom = state.RandomTexture;
         }
     }
 }

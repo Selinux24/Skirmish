@@ -36,24 +36,13 @@ namespace Skybox
 
         private SceneObject<Cursor> cursor;
 
-        private SceneObject<TextDrawer> title = null;
-        private SceneObject<TextDrawer> help = null;
         private SceneObject<TextDrawer> fps = null;
-        private SceneObject<Sprite> backPannel = null;
 
-        private SceneObject<Skydom> skydom = null;
         private SceneObject<Scenery> ruins = null;
         private SceneObject<LineListDrawer> volumesDrawer = null;
         private SceneObject<TriangleListDrawer> graphDrawer = null;
-        private SceneObject<Water> water = null;
-
-        private SceneObject<ParticleManager> pManager = null;
-        private ParticleSystemDescription pPlume = null;
-        private ParticleSystemDescription pFire = null;
-        private ParticleSystemDescription pBigFire = null;
 
         private SceneObject<ModelInstanced> torchs = null;
-        private SceneLightPoint[] torchLights = null;
 
         private SceneObject<Model> movingFire = null;
         private ParticleEmitter movingFireEmitter = null;
@@ -89,20 +78,20 @@ namespace Skybox
 
             #region Text
 
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
 
-            this.title.Instance.Text = "Collada Scene with Skybox";
+            title.Instance.Text = "Collada Scene with Skybox";
 #if DEBUG
-            this.help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
+            help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
 #else
-            this.help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
+            help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
 #endif
             this.fps.Instance.Text = null;
 
-            this.title.Instance.Position = Vector2.Zero;
-            this.help.Instance.Position = new Vector2(0, 24);
+            title.Instance.Position = Vector2.Zero;
+            help.Instance.Position = new Vector2(0, 24);
             this.fps.Instance.Position = new Vector2(0, 40);
 
             var spDesc = new SpriteDescription()
@@ -114,13 +103,13 @@ namespace Skybox
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             #endregion
 
             #region Skydom
 
-            this.skydom = this.AddComponent<Skydom>(new SkydomDescription()
+            this.AddComponent<Skydom>(new SkydomDescription()
             {
                 Name = "Skydom",
                 ContentPath = "Resources",
@@ -165,8 +154,8 @@ namespace Skybox
 
             #region Water
 
-            WaterDescription waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -1f);
-            this.water = this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
+            var waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -1f);
+            this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
 
             #endregion
 
@@ -175,11 +164,11 @@ namespace Skybox
 
             #region Particle Systems
 
-            this.pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" });
+            var pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" });
 
-            this.pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
-            this.pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
-            this.pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
+            var pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
+            var pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
+            var pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
 
             #endregion
 
@@ -223,7 +212,7 @@ namespace Skybox
 
             this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
 
-            this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pBigFire, this.movingFireEmitter);
+            pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, this.movingFireEmitter);
 
             #endregion
 
@@ -261,7 +250,7 @@ namespace Skybox
             this.Lights.Add(this.movingFireLight);
 
             Vector3[] firePositions3D = new Vector3[this.firePositions.Length];
-            this.torchLights = new SceneLightPoint[this.firePositions.Length];
+            SceneLightPoint[] torchLights = new SceneLightPoint[this.firePositions.Length];
             for (int i = 0; i < this.firePositions.Length; i++)
             {
                 Color color = Color.Yellow;
@@ -281,7 +270,7 @@ namespace Skybox
 
                 firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
 
-                this.torchLights[i] = new SceneLightPoint(
+                torchLights[i] = new SceneLightPoint(
                     string.Format("Torch {0}", i),
                     false,
                     color,
@@ -291,10 +280,10 @@ namespace Skybox
                     4f,
                     20f);
 
-                this.Lights.Add(this.torchLights[i]);
+                this.Lights.Add(torchLights[i]);
 
-                this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
-                this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
+                pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
+                pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
             }
 
             #endregion

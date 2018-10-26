@@ -38,7 +38,6 @@ namespace GameLogic.Rules
         private int turnInitiative = 0;
         private int turnHability = 0;
 
-
         public int CurrentMovingCapacity
         {
             get
@@ -404,6 +403,7 @@ namespace GameLogic.Rules
         }
         public void CommunicationsTest()
         {
+            // Stationary when doing communications
             this.turnMovingCapacity = 0;
 
             this.canMove = false;
@@ -412,6 +412,7 @@ namespace GameLogic.Rules
         }
         public void FindCover()
         {
+            // Automatic movement to nearest cover
             this.turnMovingCapacity = 0;
 
             this.canMove = false;
@@ -420,6 +421,7 @@ namespace GameLogic.Rules
         }
         public void RunAway()
         {
+            // Automatic movement to nearest scenery exit
             this.turnMovingCapacity = 0;
 
             this.canMove = false;
@@ -540,6 +542,15 @@ namespace GameLogic.Rules
         internal void MeleeDisolved()
         {
             this.onMelee = false;
+        }
+
+        public void AnimateHurt(Weapon weapon)
+        {
+            // TODO: hurt animation
+        }
+        public void AnimateKill(Weapon weapon)
+        {
+            // TODO: kill animation
         }
 
         public override string ToString()

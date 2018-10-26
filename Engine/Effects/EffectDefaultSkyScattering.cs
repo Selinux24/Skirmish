@@ -196,58 +196,32 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
-        /// <param name="planetRadius">Planet radius</param>
-        /// <param name="planetAtmosphereRadius">Planet atmosphere radius from surface</param>
-        /// <param name="sphereOuterRadius">Sphere inner radius</param>
-        /// <param name="sphereInnerRadius">Sphere outer radius</param>
-        /// <param name="skyBrightness">Sky brightness</param>
-        /// <param name="rayleighScattering">Rayleigh scattering constant</param>
-        /// <param name="rayleighScattering4PI">Rayleigh scattering constant * 4 * PI</param>
-        /// <param name="mieScattering">Mie scattering constant</param>
-        /// <param name="mieScattering4PI">Mie scattering constant * 4 * PI</param>
-        /// <param name="invWaveLength4">Inverse light wave length</param>
-        /// <param name="scale">Scale</param>
-        /// <param name="rayleighScaleDepth">Rayleigh scale depth</param>
-        /// <param name="backColor">Back color</param>
         /// <param name="lightDirection">Light direction</param>
-        /// <param name="hdrExposure">HDR exposure</param>
+        /// <param name="state">State</param>
         public void UpdatePerFrame(
             Matrix world,
             Matrix viewProjection,
-            float planetRadius,
-            float planetAtmosphereRadius,
-            float sphereOuterRadius,
-            float sphereInnerRadius,
-            float skyBrightness,
-            float rayleighScattering,
-            float rayleighScattering4PI,
-            float mieScattering,
-            float mieScattering4PI,
-            Color4 invWaveLength4,
-            float scale,
-            float rayleighScaleDepth,
-            Color4 backColor,
             Vector3 lightDirection,
-            float hdrExposure)
+            EffectSkyScatterState state)
         {
             this.WorldViewProjection = world * viewProjection;
 
             this.SphereRadii = new Vector4(
-                sphereOuterRadius, sphereOuterRadius * sphereOuterRadius,
-                sphereInnerRadius, sphereInnerRadius * sphereInnerRadius);
+                state.SphereOuterRadius, state.SphereOuterRadius * state.SphereOuterRadius,
+                state.SphereInnerRadius, state.SphereInnerRadius * state.SphereInnerRadius);
 
             this.ScatteringCoefficients = new Vector4(
-                rayleighScattering * skyBrightness, rayleighScattering4PI,
-                mieScattering * skyBrightness, mieScattering4PI);
+                state.RayleighScattering * state.SkyBrightness, state.RayleighScattering4PI,
+                state.MieScattering * state.SkyBrightness, state.MieScattering4PI);
 
-            this.InverseWaveLength = invWaveLength4;
+            this.InverseWaveLength = state.InvWaveLength4;
 
-            this.Misc = new Vector4(planetRadius, planetAtmosphereRadius, scale, scale / rayleighScaleDepth);
+            this.Misc = new Vector4(state.PlanetRadius, state.PlanetAtmosphereRadius, state.Scale, state.Scale / state.RayleighScaleDepth);
 
-            this.BackColor = backColor;
+            this.BackColor = state.BackColor;
 
             this.LightDirectionWorld = -lightDirection;
-            this.HDRExposure = hdrExposure;
+            this.HDRExposure = state.HdrExposure;
         }
     }
 }

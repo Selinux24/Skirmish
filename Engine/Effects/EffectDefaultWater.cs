@@ -303,40 +303,21 @@ namespace Engine.Effects
         /// <param name="world">World</param>
         /// <param name="viewProjection">View * projection</param>
         /// <param name="eyePosition">Eye position</param>
-        /// <param name="lightDirection">Light direction</param>
-        /// <param name="baseColor">Base color</param>
-        /// <param name="waterColor">Water color</param>
-        /// <param name="waveHeight">Wave heigth</param>
-        /// <param name="waveChoppy">Wave choppy</param>
-        /// <param name="waveSpeed">Wave speed</param>
-        /// <param name="waveFrequency">Wave frequency</param>
-        /// <param name="totalTime">Total time</param>
-        /// <param name="steps">Shader steps</param>
-        /// <param name="geometryIterations">Geometry iterations</param>
-        /// <param name="colorIterations">Color iterations</param>
+        /// <param name="lights">State</param>
         public void UpdatePerFrame(
             Matrix viewProjection,
             Vector3 eyePosition,
             SceneLights lights,
-            Color baseColor,
-            Color waterColor,
-            float waveHeight,
-            float waveChoppy,
-            float waveSpeed,
-            float waveFrequency,
-            float totalTime,
-            int steps = 8,
-            int geometryIterations = 4,
-            int colorIterations = 6)
+            EffectWaterState state)
         {
             this.World = Matrix.Identity;
             this.WorldViewProjection = viewProjection;
             this.EyePositionWorld = eyePosition;
-            this.BaseColor = baseColor.RGB();
-            this.WaterColor = waterColor.RGB();
-            this.WaveParams = new Vector4(waveHeight, waveChoppy, waveSpeed, waveFrequency);
-            this.TotalTime = totalTime;
-            this.IterParams = new Int3(steps, geometryIterations, colorIterations);
+            this.BaseColor = state.BaseColor.RGB();
+            this.WaterColor = state.WaterColor.RGB();
+            this.WaveParams = new Vector4(state.WaveHeight, state.WaveChoppy, state.WaveSpeed, state.WaveFrequency);
+            this.TotalTime = state.TotalTime;
+            this.IterParams = new Int3(state.Steps, state.GeometryIterations, state.ColorIterations);
 
             var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
             int lCount = 0;

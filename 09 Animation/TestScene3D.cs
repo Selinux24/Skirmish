@@ -13,12 +13,8 @@ namespace Animation
     {
         private const int layerHUD = 99;
 
-        private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> runtime = null;
         private SceneObject<TextDrawer> animText = null;
-        private SceneObject<Sprite> backPannel = null;
-
-        private SceneObject<Model> floor = null;
 
         private SceneObject<Model> soldier = null;
         private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
@@ -54,16 +50,16 @@ namespace Animation
         }
         private void InitializeUI()
         {
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
             this.runtime = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 11, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.animText = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 15, Color.Orange), SceneObjectUsages.UI, layerHUD);
 
-            this.title.Instance.Text = "Animation test";
+            title.Instance.Text = "Animation test";
             this.runtime.Instance.Text = "";
             this.animText.Instance.Text = "";
 
-            this.title.Instance.Position = Vector2.Zero;
-            this.runtime.Instance.Position = new Vector2(5, this.title.Instance.Top + this.title.Instance.Height + 3);
+            title.Instance.Position = Vector2.Zero;
+            this.runtime.Instance.Position = new Vector2(5, title.Instance.Top + title.Instance.Height + 3);
             this.animText.Instance.Position = new Vector2(5, this.runtime.Instance.Top + this.runtime.Instance.Height + 3);
 
             var spDesc = new SpriteDescription()
@@ -74,7 +70,7 @@ namespace Animation
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeFloor()
         {
@@ -116,7 +112,7 @@ namespace Animation
                 }
             };
 
-            this.floor = this.AddComponent<Model>(desc);
+            this.AddComponent<Model>(desc);
         }
         private void InitializeRat()
         {
@@ -222,11 +218,10 @@ namespace Animation
             }
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
 
             #region Camera
 
-            this.UpdateCamera(gameTime, shift, rightBtn);
+            this.UpdateCamera(gameTime, shift);
 
             #endregion
 
@@ -298,10 +293,10 @@ namespace Animation
                 this.soldier.Instance.AnimationController.CurrentPathTime,
                 this.soldier.Instance.AnimationController.CurrentPathItemTime);
         }
-        private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
+        private void UpdateCamera(GameTime gameTime, bool shift)
         {
 #if DEBUG
-            if (rightBtn)
+            if (this.Game.Input.RightMouseButtonPressed)
 #endif
             {
                 this.Camera.RotateMouse(

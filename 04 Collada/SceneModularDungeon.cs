@@ -20,10 +20,8 @@ namespace Collada
 
         private readonly Random rnd = new Random();
 
-        private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> fps = null;
         private SceneObject<TextDrawer> info = null;
-        private SceneObject<Sprite> backPannel = null;
 
         private readonly Color ambientDown = new Color(127, 127, 127, 255);
         private readonly Color ambientUp = new Color(137, 116, 104, 255);
@@ -41,7 +39,6 @@ namespace Collada
         private SceneObject<Model> rat = null;
         private BasicManipulatorController ratController = null;
         private Player ratAgentType = null;
-        private Dictionary<string, AnimationPlan> ratPaths = null;
         private bool ratActive = false;
         private float ratTime = 5f;
         private readonly float nextRatTime = 3f;
@@ -147,9 +144,9 @@ namespace Collada
         }
         private void InitializeUI()
         {
-            this.title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            this.title.Instance.Text = "Collada Modular Dungeon Scene";
-            this.title.Instance.Position = Vector2.Zero;
+            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
+            title.Instance.Text = "Collada Modular Dungeon Scene";
+            title.Instance.Position = Vector2.Zero;
 
             this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
             this.fps.Instance.Text = null;
@@ -167,7 +164,7 @@ namespace Collada
                 Color = new Color4(0, 0, 0, 0.75f),
             };
 
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
 
             this.messages = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 48, Color.Red, Color.DarkRed), SceneObjectUsages.UI, layerHUD);
             this.messages.Instance.Text = null;
@@ -238,14 +235,14 @@ namespace Collada
             this.rat.Transform.SetPosition(0, 0, 0, true);
             this.rat.Visible = false;
 
-            this.ratPaths = new Dictionary<string, AnimationPlan>();
+            var ratPaths = new Dictionary<string, AnimationPlan>();
             this.ratController = new BasicManipulatorController();
 
             AnimationPath p0 = new AnimationPath();
             p0.AddLoop("walk");
-            this.ratPaths.Add("walk", new AnimationPlan(p0));
+            ratPaths.Add("walk", new AnimationPlan(p0));
 
-            this.rat.Instance.AnimationController.AddPath(this.ratPaths["walk"]);
+            this.rat.Instance.AnimationController.AddPath(ratPaths["walk"]);
             this.rat.Instance.AnimationController.TimeDelta = 1.5f;
         }
         private void InitializeHuman()
@@ -745,7 +742,7 @@ namespace Collada
         }
         private void UpdateExit(ModelInstance item)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            if (item != null && this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 // TODO: Set navigation between levels in levels file
                 if (this.scenery.Instance.CurrentLevel.Name == "Lvl1")

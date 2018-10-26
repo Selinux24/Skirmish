@@ -22,21 +22,17 @@ namespace Deferred
         private const int layerEffects = 2;
         private const int layerHUD = 99;
 
-        private SceneObject<Cursor> cursor = null;
         private SceneObject<TextDrawer> title = null;
         private SceneObject<TextDrawer> load = null;
         private SceneObject<TextDrawer> help = null;
         private SceneObject<TextDrawer> statistics = null;
-        private SceneObject<Sprite> backPannel = null;
 
         private Agent tankAgentType = null;
         private SceneObject<GameAgent<SteerManipulatorController>> tankAgent1 = null;
         private SceneObject<GameAgent<SteerManipulatorController>> tankAgent2 = null;
         private SceneObject<Model> helicopter = null;
         private SceneObject<ModelInstanced> helicopters = null;
-        private SceneObject<Skydom> skydom = null;
         private SceneObject<Scenery> terrain = null;
-        private SceneObject<GroundGardener> gardener = null;
 
         private SceneObject<Model> tree = null;
         private SceneObject<ModelInstanced> trees = null;
@@ -53,8 +49,6 @@ namespace Deferred
         private bool onlyModels = true;
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
-
-        //private AgentCrowd crowd = null;
 
         public TestScene3D(Game game)
             : base(game, SceneModes.DeferredLightning)
@@ -197,7 +191,7 @@ namespace Deferred
                 Width = 16,
                 Height = 16,
             };
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
+            this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
         }
         private void InitializeSkydom()
         {
@@ -208,7 +202,7 @@ namespace Deferred
                 Radius = far,
                 Texture = "sunset.dds",
             };
-            this.skydom = this.AddComponent<Skydom>(desc);
+            this.AddComponent<Skydom>(desc);
         }
         private void InitializeHelicopter()
         {
@@ -323,7 +317,7 @@ namespace Deferred
                     MaxSize = Vector2.One * 0.25f,
                 }
             };
-            this.gardener = this.AddComponent<GroundGardener>(desc);
+            this.AddComponent<GroundGardener>(desc);
         }
         private void InitializeTree()
         {
@@ -384,7 +378,7 @@ namespace Deferred
                 Height = this.statistics.Instance.Top + this.statistics.Instance.Height + 3,
                 Color = new Color4(0, 0, 0, 0.75f),
             };
-            this.backPannel = this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
         }
         private void InitializeDebug()
         {
@@ -443,10 +437,6 @@ namespace Deferred
             this.Camera.LookTo(cameraPosition + Vector3.Up);
             this.Camera.NearPlaneDistance = near;
             this.Camera.FarPlaneDistance = far;
-
-            //this.crowd = new AgentCrowd(this, this.navigationGraph as NavigationMesh, this.tankAgentType);
-            //crowd.AddAgent(this.tankAgent1.Instance);
-            //crowd.AddAgent(this.tankAgent2.Instance);
         }
         private void StartNodes()
         {
@@ -587,20 +577,13 @@ namespace Deferred
 
             base.Update(gameTime);
 
-            Ray cursorRay = this.GetPickingRay();
-
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool picked = this.PickNearest(ref cursorRay, true, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
 
             UpdateCamera(gameTime, shift);
-
-            UpdateTanks(gameTime, picked);
 
             UpdateLights(gameTime, shift);
 
             UpdateDebug(shift);
-
-            //this.crowd.Update(gameTime);
         }
         private void UpdateCamera(GameTime gameTime, bool shift)
         {
@@ -638,24 +621,6 @@ namespace Deferred
             {
                 this.lineDrawer.Instance.SetLines(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
                 this.lineDrawer.Visible = true;
-            }
-        }
-        private void UpdateTanks(GameTime gameTime, bool picked)
-        {
-            if (this.Game.Input.LeftMouseButtonPressed)
-            {
-                if (picked)
-                {
-                    //var p = this.FindPath(
-                    //    this.tankAgent.Instance.AgentType,
-                    //    this.tankAgent.Transform.Position, position, true, this.tankAgent.Instance.MaximumSpeed * gameTime.ElapsedSeconds);
-                    //if (p != null)
-                    //{
-                    //    this.tankAgent.Instance.FollowPath(p);
-                    //}
-
-                    //this.crowd.MoveTo(position, 1f);
-                }
             }
         }
         private void UpdateLights(GameTime gameTime, bool shift)

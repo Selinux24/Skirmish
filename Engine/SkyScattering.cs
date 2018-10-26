@@ -296,21 +296,24 @@ namespace Engine
                     effect.UpdatePerFrame(
                         Matrix.Translation(context.EyePosition),
                         context.ViewProjection,
-                        this.PlanetRadius,
-                        this.PlanetAtmosphereRadius,
-                        this.SphereOuterRadius,
-                        this.SphereInnerRadius,
-                        this.Brightness,
-                        this.RayleighScattering,
-                        this.RayleighScattering4PI,
-                        this.MieScattering,
-                        this.MieScattering4PI,
-                        this.InvWaveLength4,
-                        this.ScatteringScale,
-                        this.RayleighScaleDepth,
-                        context.Lights.FogColor,
                         keyLight.Direction,
-                        this.HDRExposure);
+                        new EffectSkyScatterState
+                        {
+                            PlanetRadius = this.PlanetRadius,
+                            PlanetAtmosphereRadius = this.PlanetAtmosphereRadius,
+                            SphereOuterRadius = this.SphereOuterRadius,
+                            SphereInnerRadius = this.SphereInnerRadius,
+                            SkyBrightness = this.Brightness,
+                            RayleighScattering = this.RayleighScattering,
+                            RayleighScattering4PI = this.RayleighScattering4PI,
+                            MieScattering = this.MieScattering,
+                            MieScattering4PI = this.MieScattering4PI,
+                            InvWaveLength4 = this.InvWaveLength4,
+                            Scale = this.ScatteringScale,
+                            RayleighScaleDepth = this.RayleighScaleDepth,
+                            BackColor = context.Lights.FogColor,
+                            HdrExposure = this.HDRExposure,
+                        });
 
                     var graphics = this.Game.Graphics;
 

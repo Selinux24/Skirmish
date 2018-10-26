@@ -998,18 +998,21 @@ namespace Engine
 
             effect.UpdatePerFrame(
                 context,
-                this.WindDirection,
-                this.WindStrength * channelData.WindEffect,
-                this.windTime * channelData.WindEffect,
-                channelData.Delta,
-                this.textureRandom,
-                channelData.StartRadius,
-                channelData.EndRadius,
-                this.material.ResourceIndex,
-                channelData.TextureCount,
-                channelData.NormalMapCount,
-                channelData.Textures,
-                channelData.NormalMaps);
+                new EffectFoliageState
+                {
+                    WindDirection = this.WindDirection,
+                    WindStrength = this.WindStrength * channelData.WindEffect,
+                    TotalTime = this.windTime * channelData.WindEffect,
+                    Delta = channelData.Delta,
+                    StartRadius = channelData.StartRadius,
+                    EndRadius = channelData.EndRadius,
+                    RandomTexture = this.textureRandom,
+                    MaterialIndex = this.material.ResourceIndex,
+                    TextureCount = channelData.TextureCount,
+                    Texture = channelData.Textures,
+                    NormalMapCount = channelData.NormalMapCount,
+                    NormalMaps = channelData.NormalMaps,
+                });
 
             #endregion
 

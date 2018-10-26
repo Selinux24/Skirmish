@@ -210,7 +210,11 @@
     <Compile Include="Content\ContentDescription.cs" />
     <Compile Include="Content\ILoader.cs" />
     <Compile Include="Content\LoaderObj.cs" />
+    <Compile Include="Effects\EffectBillboardState.cs" />
+    <Compile Include="Effects\EffectFoliageState.cs" />
     <Compile Include="Effects\EffectParticleState.cs" />
+    <Compile Include="Effects\EffectSkyScatterState.cs" />
+    <Compile Include="Effects\EffectWaterState.cs" />
     <Compile Include="ISceneLight.cs" />
     <Compile Include="ISceneLightSpot.cs" />
     <Compile Include="ShadowMapPoint.cs" />
