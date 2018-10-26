@@ -360,10 +360,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="maxStraightPath">The maximum number of points the straight path arrays can hold.</param>
         /// <param name="options">Query options.</param>
         /// <returns>The status flags for the query.</returns>
-        public Status FindStraightPath(Vector3 startPos, Vector3 endPos, int[] path, int pathSize, out Vector3[] straightPath, out StraightPathFlags[] straightPathFlags, out int[] straightPathRefs, out int straightPathCount, int maxStraightPath, StraightPathOptions options)
+        public Status FindStraightPath(Vector3 startPos, Vector3 endPos, int[] path, int pathSize, out Vector3[] straightPath, out StraightPathFlagTypes[] straightPathFlags, out int[] straightPathRefs, out int straightPathCount, int maxStraightPath, StraightPathOptions options)
         {
             straightPath = new Vector3[maxStraightPath];
-            straightPathFlags = new StraightPathFlags[maxStraightPath];
+            straightPathFlags = new StraightPathFlagTypes[maxStraightPath];
             straightPathRefs = new int[maxStraightPath];
             straightPathCount = 0;
 
@@ -392,7 +392,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Add start point.
             stat = AppendVertex(
-                closestStartPos, StraightPathFlags.DT_STRAIGHTPATH_START, path[0],
+                closestStartPos, StraightPathFlagTypes.DT_STRAIGHTPATH_START, path[0],
                 ref straightPath, ref straightPathFlags, ref straightPathRefs,
                 ref straightPathCount, maxStraightPath);
             if (stat != Status.DT_IN_PROGRESS)
@@ -496,14 +496,14 @@ namespace Engine.PathFinding.RecastNavigation
                             portalApex = portalLeft;
                             apexIndex = leftIndex;
 
-                            StraightPathFlags flags = 0;
+                            StraightPathFlagTypes flags = 0;
                             if (leftPolyRef == 0)
                             {
-                                flags = StraightPathFlags.DT_STRAIGHTPATH_END;
+                                flags = StraightPathFlagTypes.DT_STRAIGHTPATH_END;
                             }
                             else if (leftPolyType == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                             {
-                                flags = StraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
+                                flags = StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
                             }
                             int r = leftPolyRef;
 
@@ -557,14 +557,14 @@ namespace Engine.PathFinding.RecastNavigation
                             portalApex = portalRight;
                             apexIndex = rightIndex;
 
-                            StraightPathFlags flags = 0;
+                            StraightPathFlagTypes flags = 0;
                             if (rightPolyRef == 0)
                             {
-                                flags = StraightPathFlags.DT_STRAIGHTPATH_END;
+                                flags = StraightPathFlagTypes.DT_STRAIGHTPATH_END;
                             }
                             else if (rightPolyType == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                             {
-                                flags = StraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
+                                flags = StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
                             }
                             int r = rightPolyRef;
 
@@ -607,7 +607,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Ignore status return value as we're just about to return anyway.
             AppendVertex(
-                closestEndPos, StraightPathFlags.DT_STRAIGHTPATH_END, 0,
+                closestEndPos, StraightPathFlagTypes.DT_STRAIGHTPATH_END, 0,
                 ref straightPath, ref straightPathFlags, ref straightPathRefs,
                 ref straightPathCount, maxStraightPath);
 
@@ -3469,7 +3469,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Appends vertex to a straight path
         /// </summary>
-        private Status AppendVertex(Vector3 pos, StraightPathFlags flags, int r, ref Vector3[] straightPath, ref StraightPathFlags[] straightPathFlags, ref int[] straightPathRefs, ref int straightPathCount, int maxStraightPath)
+        private Status AppendVertex(Vector3 pos, StraightPathFlagTypes flags, int r, ref Vector3[] straightPath, ref StraightPathFlagTypes[] straightPathFlags, ref int[] straightPathRefs, ref int straightPathCount, int maxStraightPath)
         {
             if ((straightPathCount) > 0 && Detour.Vequal(straightPath[((straightPathCount) - 1)], pos))
             {
@@ -3504,7 +3504,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // If reached end of path, return.
-                if (flags == StraightPathFlags.DT_STRAIGHTPATH_END)
+                if (flags == StraightPathFlagTypes.DT_STRAIGHTPATH_END)
                 {
                     return Status.DT_SUCCESS;
                 }
@@ -3514,7 +3514,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Appends intermediate portal points to a straight path.
         /// </summary>
-        private Status AppendPortals(int startIdx, int endIdx, Vector3 endPos, int[] path, ref Vector3[] straightPath, ref StraightPathFlags[] straightPathFlags, ref int[] straightPathRefs, ref int straightPathCount, int maxStraightPath, StraightPathOptions options)
+        private Status AppendPortals(int startIdx, int endIdx, Vector3 endPos, int[] path, ref Vector3[] straightPath, ref StraightPathFlagTypes[] straightPathFlags, ref int[] straightPathRefs, ref int straightPathCount, int maxStraightPath, StraightPathOptions options)
         {
             Vector3 startPos = straightPath[straightPathCount - 1];
             // Append or update last vertex

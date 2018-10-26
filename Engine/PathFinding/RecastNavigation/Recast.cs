@@ -3312,7 +3312,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return dx * dx + dz * dz;
         }
-        private static void SimplifyContour(List<Int4> points, List<Int4> simplified, float maxError, int maxEdgeLen, BuildContoursFlags buildFlags)
+        private static void SimplifyContour(List<Int4> points, List<Int4> simplified, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags)
         {
             // Add initial points.
             bool hasConnections = false;
@@ -3446,7 +3446,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Split too long edges.
-            if (maxEdgeLen > 0 && (buildFlags & (BuildContoursFlags.RC_CONTOUR_TESS_WALL_EDGES | BuildContoursFlags.RC_CONTOUR_TESS_AREA_EDGES)) != 0)
+            if (maxEdgeLen > 0 && (buildFlags & (BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES | BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES)) != 0)
             {
                 for (int i = 0; i < simplified.Count;)
                 {
@@ -3467,13 +3467,13 @@ namespace Engine.PathFinding.RecastNavigation
                     // Tessellate only outer edges or edges between areas.
                     bool tess = false;
                     // Wall edges.
-                    if ((buildFlags & BuildContoursFlags.RC_CONTOUR_TESS_WALL_EDGES) != 0 &&
+                    if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES) != 0 &&
                         (points[ci].W & RC_CONTOUR_REG_MASK) == 0)
                     {
                         tess = true;
                     }
                     // Edges between areas.
-                    if ((buildFlags & BuildContoursFlags.RC_CONTOUR_TESS_AREA_EDGES) != 0 &&
+                    if ((buildFlags & BuildContoursFlagTypes.RC_CONTOUR_TESS_AREA_EDGES) != 0 &&
                         (points[ci].W & RC_AREA_BORDER) != 0)
                     {
                         tess = true;
@@ -3661,11 +3661,11 @@ namespace Engine.PathFinding.RecastNavigation
         {
             PotentialDiagonal a = va;
             PotentialDiagonal b = vb;
-            if (a.dist < b.dist)
+            if (a.Dist < b.Dist)
             {
                 return -1;
             }
-            if (a.dist > b.dist)
+            if (a.Dist > b.Dist)
             {
                 return 1;
             }
@@ -3707,8 +3707,8 @@ namespace Engine.PathFinding.RecastNavigation
 
             PotentialDiagonal[] diags = Helper.CreateArray(maxVerts, new PotentialDiagonal()
             {
-                dist = int.MinValue,
-                vert = int.MinValue,
+                Dist = int.MinValue,
+                Vert = int.MinValue,
             });
 
             var outline = region.outline;
@@ -3738,8 +3738,8 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             int dx = outline.verts[j].X - corner.X;
                             int dz = outline.verts[j].Z - corner.Z;
-                            diags[ndiags].vert = j;
-                            diags[ndiags].dist = dx * dx + dz * dz;
+                            diags[ndiags].Vert = j;
+                            diags[ndiags].Dist = dx * dx + dz * dz;
                             ndiags++;
                         }
                     }
@@ -3750,15 +3750,15 @@ namespace Engine.PathFinding.RecastNavigation
                     index = -1;
                     for (int j = 0; j < ndiags; j++)
                     {
-                        var pt = outline.verts[diags[j].vert];
-                        bool intersect = IntersectSegCountour(pt, corner, diags[i].vert, outline.nverts, outline.verts);
+                        var pt = outline.verts[diags[j].Vert];
+                        bool intersect = IntersectSegCountour(pt, corner, diags[i].Vert, outline.nverts, outline.verts);
                         for (int k = i; k < region.nholes && !intersect; k++)
                         {
                             intersect |= IntersectSegCountour(pt, corner, -1, region.holes[k].Contour.nverts, region.holes[k].Contour.verts);
                         }
                         if (!intersect)
                         {
-                            index = diags[j].vert;
+                            index = diags[j].Vert;
                             break;
                         }
                     }
@@ -3781,7 +3781,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
         }
-        public static bool BuildContours(CompactHeightfield chf, float maxError, int maxEdgeLen, BuildContoursFlags buildFlags, out ContourSet cset)
+        public static bool BuildContours(CompactHeightfield chf, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags, out ContourSet cset)
         {
             int w = chf.width;
             int h = chf.height;

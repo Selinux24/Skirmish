@@ -296,7 +296,7 @@ namespace Skybox
             nvSettings.TileSize = 32;
             nvSettings.CellSize = 0.05f;
             nvSettings.CellHeight = 0.2f;
-            nvSettings.PartitionType = SamplePartitionTypeEnum.Monotone;
+            nvSettings.PartitionType = SamplePartitionTypes.Monotone;
             nvSettings.Agents[0] = this.walker;
 
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);

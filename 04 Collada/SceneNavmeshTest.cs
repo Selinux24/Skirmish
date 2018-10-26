@@ -120,13 +120,13 @@ namespace Collada
             nmsettings.Agents = new[] { this.agent };
 
             //Partitioning
-            nmsettings.PartitionType = SamplePartitionTypeEnum.Watershed;
+            nmsettings.PartitionType = SamplePartitionTypes.Watershed;
 
             //Polygonization
             nmsettings.EdgeMaxError = 1.0f;
 
             //Tiling
-            nmsettings.BuildMode = BuildModesEnum.Tiled;
+            nmsettings.BuildMode = BuildModes.Tiled;
             nmsettings.TileSize = 32;
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);
@@ -254,11 +254,11 @@ namespace Collada
             {
                 if (!shift)
                 {
-                    nmsettings.BuildMode = (BuildModesEnum)Helper.Next((int)nmsettings.BuildMode, 3);
+                    nmsettings.BuildMode = (BuildModes)Helper.Next((int)nmsettings.BuildMode, 3);
                 }
                 else
                 {
-                    nmsettings.BuildMode = (BuildModesEnum)Helper.Prev((int)nmsettings.BuildMode, 3);
+                    nmsettings.BuildMode = (BuildModes)Helper.Prev((int)nmsettings.BuildMode, 3);
                 }
                 updateGraph = true;
                 updateGraphDrawing = true;
@@ -268,11 +268,11 @@ namespace Collada
             {
                 if (!shift)
                 {
-                    nmsettings.PartitionType = (SamplePartitionTypeEnum)Helper.Next((int)nmsettings.PartitionType, 3);
+                    nmsettings.PartitionType = (SamplePartitionTypes)Helper.Next((int)nmsettings.PartitionType, 3);
                 }
                 else
                 {
-                    nmsettings.PartitionType = (SamplePartitionTypeEnum)Helper.Prev((int)nmsettings.PartitionType, 3);
+                    nmsettings.PartitionType = (SamplePartitionTypes)Helper.Prev((int)nmsettings.PartitionType, 3);
                 }
                 updateGraph = true;
                 updateGraphDrawing = true;

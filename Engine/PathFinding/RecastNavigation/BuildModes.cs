@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.PathFinding.RecastNavigation
 {
-    public enum BuildModesEnum
+    public enum BuildModes
     {
         Solo,
         Tiled,

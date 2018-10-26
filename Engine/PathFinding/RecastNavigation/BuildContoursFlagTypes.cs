@@ -6,7 +6,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// Contour build flags.
     /// </summary>
     [Flags]
-    public enum BuildContoursFlags
+    public enum BuildContoursFlagTypes
     {
         /// <summary>
         /// Tessellate solid (impassable) edges during contour simplification.

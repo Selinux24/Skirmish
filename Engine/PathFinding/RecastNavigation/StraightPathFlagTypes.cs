@@ -6,7 +6,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// Vertex flags returned by dtNavMeshQuery::findStraightPath.
     /// </summary>
     [Flags]
-    public enum StraightPathFlags
+    public enum StraightPathFlagTypes
     {
         /// <summary>
         /// The vertex is the start position in the path.

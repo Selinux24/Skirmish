@@ -105,13 +105,13 @@ namespace Collada
             nmsettings.Agents = new[] { agent, ratAgentType };
 
             //Partitioning
-            nmsettings.PartitionType = SamplePartitionTypeEnum.Watershed;
+            nmsettings.PartitionType = SamplePartitionTypes.Watershed;
 
             //Polygonization
             nmsettings.EdgeMaxError = 1.0f;
 
             //Tiling
-            nmsettings.BuildMode = BuildModesEnum.TempObstacles;
+            nmsettings.BuildMode = BuildModes.TempObstacles;
             nmsettings.TileSize = 16;
 
             var nminput = new InputGeometry(GetTrianglesForNavigationGraph);

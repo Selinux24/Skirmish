@@ -4,7 +4,7 @@ namespace Engine.PathFinding.RecastNavigation
     /// <summary>
     /// Sample partition type enumeration
     /// </summary>
-    public enum SamplePartitionTypeEnum
+    public enum SamplePartitionTypes
     {
         /// <summary>
         /// Watershed

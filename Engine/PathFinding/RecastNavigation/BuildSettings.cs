@@ -59,7 +59,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Partition type
         /// </summary>
-        public SamplePartitionTypeEnum PartitionType { get; set; } = SamplePartitionTypeEnum.Watershed;
+        public SamplePartitionTypes PartitionType { get; set; } = SamplePartitionTypes.Watershed;
         /// <summary>
         /// Agents list
         /// </summary>
@@ -68,7 +68,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Navigation mesh building mode
         /// </summary>
-        public BuildModesEnum BuildMode { get; set; } = BuildModesEnum.Tiled;
+        public BuildModes BuildMode { get; set; } = BuildModes.Tiled;
         /// <summary>
         /// Tile size (if tiled mode)
         /// </summary>

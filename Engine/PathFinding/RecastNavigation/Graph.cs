@@ -105,14 +105,14 @@ namespace Engine.PathFinding.RecastNavigation
                             // Find location to steer towards.
                             if (!GetSteerTarget(
                                 navQuery, iterPos, targetPos, SLOP,
-                                iterPolys, nIterPolys, out Vector3 steerPos, out StraightPathFlags steerPosFlag, out int steerPosRef,
+                                iterPolys, nIterPolys, out Vector3 steerPos, out StraightPathFlagTypes steerPosFlag, out int steerPosRef,
                                 out Vector3[] points, out int nPoints))
                             {
                                 break;
                             }
 
-                            bool endOfPath = (steerPosFlag & StraightPathFlags.DT_STRAIGHTPATH_END) != 0;
-                            bool offMeshConnection = (steerPosFlag & StraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0;
+                            bool endOfPath = (steerPosFlag & StraightPathFlagTypes.DT_STRAIGHTPATH_END) != 0;
+                            bool offMeshConnection = (steerPosFlag & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0;
 
                             // Find movement delta.
                             Vector3 delta = Vector3.Subtract(steerPos, iterPos);
@@ -210,7 +210,7 @@ namespace Engine.PathFinding.RecastNavigation
             else if (mode == PathFindingMode.TOOLMODE_PATHFIND_STRAIGHT)
             {
                 Vector3[] straightPath = null;
-                StraightPathFlags[] straightPathFlags = null;
+                StraightPathFlagTypes[] straightPathFlags = null;
                 int[] straightPathPolys = null;
                 int nstraightPath = 0;
 
@@ -281,7 +281,7 @@ namespace Engine.PathFinding.RecastNavigation
             NavMeshQuery navQuery, Vector3 startPos, Vector3 endPos,
             float minTargetDist,
             int[] path, int pathSize,
-            out Vector3 steerPos, out StraightPathFlags steerPosFlag, out int steerPosRef,
+            out Vector3 steerPos, out StraightPathFlagTypes steerPosFlag, out int steerPosRef,
             out Vector3[] outPoints, out int outPointCount)
         {
             steerPos = Vector3.Zero;
@@ -294,7 +294,7 @@ namespace Engine.PathFinding.RecastNavigation
             int MAX_STEER_POINTS = 3;
             navQuery.FindStraightPath(
                 startPos, endPos, path, pathSize,
-                out Vector3[] steerPath, out StraightPathFlags[] steerPathFlags, out int[] steerPathPolys, out int nsteerPath,
+                out Vector3[] steerPath, out StraightPathFlagTypes[] steerPathFlags, out int[] steerPathPolys, out int nsteerPath,
                 MAX_STEER_POINTS, StraightPathOptions.DT_STRAIGHTPATH_NONE);
 
             if (nsteerPath == 0)
@@ -310,7 +310,7 @@ namespace Engine.PathFinding.RecastNavigation
             while (ns < nsteerPath)
             {
                 // Stop at Off-Mesh link or when point is further than slop away.
-                if ((steerPathFlags[ns] & StraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
+                if ((steerPathFlags[ns] & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0 ||
                     !InRange(steerPath[ns], startPos, minTargetDist, 1000.0f))
                 {
                     break;

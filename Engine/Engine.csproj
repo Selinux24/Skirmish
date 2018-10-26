@@ -300,8 +300,8 @@
     <Compile Include="PathFinding\PathFinderInput.cs" />
     <Compile Include="PathFinding\RecastNavigation\Agent.cs" />
     <Compile Include="PathFinding\RecastNavigation\BoundsItem.cs" />
-    <Compile Include="PathFinding\RecastNavigation\BuildContoursFlags.cs" />
-    <Compile Include="PathFinding\RecastNavigation\BuildModesEnum.cs" />
+    <Compile Include="PathFinding\RecastNavigation\BuildContoursFlagTypes.cs" />
+    <Compile Include="PathFinding\RecastNavigation\BuildModes.cs" />
     <Compile Include="PathFinding\RecastNavigation\BVItem.cs" />
     <Compile Include="PathFinding\RecastNavigation\BVNode.cs" />
     <Compile Include="PathFinding\RecastNavigation\ChunkyTriMesh.cs" />
@@ -372,12 +372,12 @@
     <Compile Include="PathFinding\RecastNavigation\RasterizationContext.cs" />
     <Compile Include="PathFinding\RecastNavigation\BuildSettings.cs" />
     <Compile Include="PathFinding\RecastNavigation\Region.cs" />
-    <Compile Include="PathFinding\RecastNavigation\SamplePartitionTypeEnum.cs" />
+    <Compile Include="PathFinding\RecastNavigation\SamplePartitionTypes.cs" />
     <Compile Include="PathFinding\RecastNavigation\SamplePolyAreas.cs" />
     <Compile Include="PathFinding\RecastNavigation\SamplePolyFlagTypes.cs" />
     <Compile Include="PathFinding\RecastNavigation\Span.cs" />
     <Compile Include="PathFinding\RecastNavigation\SpanPool.cs" />
-    <Compile Include="PathFinding\RecastNavigation\StraightPathFlags.cs" />
+    <Compile Include="PathFinding\RecastNavigation\StraightPathFlagTypes.cs" />
     <Compile Include="PathFinding\RecastNavigation\StraightPathOptions.cs" />
     <Compile Include="PathFinding\RecastNavigation\SweepSpan.cs" />
     <Compile Include="PathFinding\RecastNavigation\TempContour.cs" />

@@ -1119,13 +1119,13 @@ namespace Heightmap
             nmsettings.Agents = new[] { agent };
 
             //Partitioning
-            nmsettings.PartitionType = SamplePartitionTypeEnum.Watershed;
+            nmsettings.PartitionType = SamplePartitionTypes.Watershed;
 
             //Polygonization
             nmsettings.EdgeMaxError = 1.0f;
 
             //Tiling
-            nmsettings.BuildMode = BuildModesEnum.TempObstacles;
+            nmsettings.BuildMode = BuildModes.TempObstacles;
             nmsettings.TileSize = 16;
 
             nmsettings.Bounds = new BoundingBox(

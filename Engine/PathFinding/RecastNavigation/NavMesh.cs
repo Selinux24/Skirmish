@@ -16,15 +16,15 @@ namespace Engine.PathFinding.RecastNavigation
         {
             NavMesh res = null;
 
-            if (settings.BuildMode == BuildModesEnum.Solo)
+            if (settings.BuildMode == BuildModes.Solo)
             {
                 res = BuildSolo(geometry, settings, agent);
             }
-            else if (settings.BuildMode == BuildModesEnum.Tiled)
+            else if (settings.BuildMode == BuildModes.Tiled)
             {
                 res = BuildTiled(geometry, settings, agent);
             }
-            else if (settings.BuildMode == BuildModesEnum.TempObstacles)
+            else if (settings.BuildMode == BuildModes.TempObstacles)
             {
                 res = BuildTempObstacles(geometry, settings, agent);
             }
@@ -108,7 +108,7 @@ namespace Engine.PathFinding.RecastNavigation
                     (TileCacheAreas)vols[i].AreaType, chf);
             }
 
-            if (settings.PartitionType == SamplePartitionTypeEnum.Watershed)
+            if (settings.PartitionType == SamplePartitionTypes.Watershed)
             {
                 // Prepare for region partitioning, by calculating distance field along the walkable surface.
                 if (!Recast.BuildDistanceField(chf))
@@ -122,7 +122,7 @@ namespace Engine.PathFinding.RecastNavigation
                     throw new EngineException("buildNavigation: Could not build watershed regions.");
                 }
             }
-            else if (settings.PartitionType == SamplePartitionTypeEnum.Monotone)
+            else if (settings.PartitionType == SamplePartitionTypes.Monotone)
             {
                 // Partition the walkable surface into simple regions without holes.
                 // Monotone partitioning does not need distancefield.
@@ -131,7 +131,7 @@ namespace Engine.PathFinding.RecastNavigation
                     throw new EngineException("buildNavigation: Could not build monotone regions.");
                 }
             }
-            else if (settings.PartitionType == SamplePartitionTypeEnum.Layers)
+            else if (settings.PartitionType == SamplePartitionTypes.Layers)
             {
                 // Partition the walkable surface into simple regions without holes.
                 var hasLayers = Recast.BuildLayerRegions(chf, 0, cfg.MinRegionArea);
@@ -141,7 +141,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            if (!Recast.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlags.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
+            if (!Recast.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
             {
                 throw new EngineException("buildNavigation: Could not create contours.");
             }
@@ -710,7 +710,7 @@ namespace Engine.PathFinding.RecastNavigation
             //     if you have large open areas with small obstacles (not a problem if you use tiles)
             //   * good choice to use for tiled navmesh with medium and small sized tiles
 
-            if (settings.PartitionType == SamplePartitionTypeEnum.Watershed)
+            if (settings.PartitionType == SamplePartitionTypes.Watershed)
             {
                 // Prepare for region partitioning, by calculating distance field along the walkable surface.
                 if (!Recast.BuildDistanceField(chf))
@@ -724,7 +724,7 @@ namespace Engine.PathFinding.RecastNavigation
                     return null;
                 }
             }
-            else if (settings.PartitionType == SamplePartitionTypeEnum.Monotone)
+            else if (settings.PartitionType == SamplePartitionTypes.Monotone)
             {
                 // Partition the walkable surface into simple regions without holes.
                 // Monotone partitioning does not need distancefield.
@@ -733,7 +733,7 @@ namespace Engine.PathFinding.RecastNavigation
                     return null;
                 }
             }
-            else if (settings.PartitionType == SamplePartitionTypeEnum.Layers)
+            else if (settings.PartitionType == SamplePartitionTypes.Layers)
             {
                 // Partition the walkable surface into simple regions without holes.
                 var hasLayerRegions = Recast.BuildLayerRegions(chf, cfg.BorderSize, cfg.MinRegionArea);
@@ -744,7 +744,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Create contours.
-            if (!Recast.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlags.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
+            if (!Recast.BuildContours(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES, out ContourSet cset))
             {
                 return null;
             }
