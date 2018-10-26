@@ -915,19 +915,23 @@ namespace Engine
                 this.textureResolution,
                 context);
 
-            effect.UpdatePerObject(
-                this.useAnisotropic,
-                this.terrainNormalMaps,
-                this.terrainSpecularMaps,
-                this.useAlphaMap,
-                this.alphaMap,
-                this.colorTextures,
-                this.useSlopes,
-                this.slopeRanges,
-                this.terrainTexturesLR,
-                this.terrainTexturesHR,
-                this.proportion,
-                this.terrainMaterial.ResourceIndex);
+            var state = new EffectTerrainState
+            {
+                UseAnisotropic = this.useAnisotropic,
+                NormalMap = this.terrainNormalMaps,
+                SpecularMap = this.terrainSpecularMaps,
+                UseAlphaMap = this.useAlphaMap,
+                AlphaMap = this.alphaMap,
+                ColorTextures = this.colorTextures,
+                UseSlopes = this.useSlopes,
+                SlopeRanges = this.slopeRanges,
+                DiffuseMapLR = this.terrainTexturesLR,
+                DiffuseMapHR = this.terrainTexturesHR,
+                Proportion = this.proportion,
+                MaterialIndex = this.terrainMaterial.ResourceIndex,
+            };
+
+            effect.UpdatePerObject(state);
 
             if (this.useAlphaMap && this.useSlopes) { return effect.TerrainFullForward; }
             if (this.useAlphaMap) { return effect.TerrainAlphaMapForward; }
@@ -948,19 +952,23 @@ namespace Engine
                 context.ViewProjection,
                 this.textureResolution);
 
-            effect.UpdatePerObject(
-                this.terrainMaterial.ResourceIndex,
-                this.useAnisotropic,
-                this.terrainNormalMaps,
-                this.terrainSpecularMaps,
-                this.useAlphaMap,
-                this.alphaMap,
-                this.colorTextures,
-                this.useSlopes,
-                this.slopeRanges,
-                this.terrainTexturesLR,
-                this.terrainTexturesHR,
-                this.proportion);
+            var state = new EffectTerrainState
+            {
+                UseAnisotropic = this.useAnisotropic,
+                NormalMap = this.terrainNormalMaps,
+                SpecularMap = this.terrainSpecularMaps,
+                UseAlphaMap = this.useAlphaMap,
+                AlphaMap = this.alphaMap,
+                ColorTextures = this.colorTextures,
+                UseSlopes = this.useSlopes,
+                SlopeRanges = this.slopeRanges,
+                DiffuseMapLR = this.terrainTexturesLR,
+                DiffuseMapHR = this.terrainTexturesHR,
+                Proportion = this.proportion,
+                MaterialIndex = this.terrainMaterial.ResourceIndex,
+            };
+
+            effect.UpdatePerObject(state);
 
             if (this.useAlphaMap && this.useSlopes) { return effect.TerrainFullDeferred; }
             if (this.useAlphaMap) { return effect.TerrainAlphaMapDeferred; }

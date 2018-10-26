@@ -903,48 +903,26 @@ namespace Engine.Effects
         /// <summary>
         /// Update per model object data
         /// </summary>
-        /// <param name="useAnisotropic">Use anisotropic filtering</param>
-        /// <param name="normalMap">Normal map</param>
-        /// <param name="specularMap">Specular map</param>
-        /// <param name="useAlphaMap">Use alpha mapping</param>
-        /// <param name="alphaMap">Alpha map</param>
-        /// <param name="colorTextures">Color textures</param>
-        /// <param name="useSlopes">Use slope texturing</param>
-        /// <param name="diffuseMapLR">Low resolution textures</param>
-        /// <param name="diffuseMapHR">High resolution textures</param>
-        /// <param name="slopeRanges">Slope ranges</param>
-        /// <param name="proportion">Lerping proportion</param>
-        /// <param name="materialIndex">Marerial index</param>
+        /// <param name="state">State</param>
         public void UpdatePerObject(
-            bool useAnisotropic,
-            EngineShaderResourceView normalMap,
-            EngineShaderResourceView specularMap,
-            bool useAlphaMap,
-            EngineShaderResourceView alphaMap,
-            EngineShaderResourceView colorTextures,
-            bool useSlopes,
-            Vector2 slopeRanges,
-            EngineShaderResourceView diffuseMapLR,
-            EngineShaderResourceView diffuseMapHR,
-            float proportion,
-            uint materialIndex)
+            EffectTerrainState state)
         {
-            this.Anisotropic = useAnisotropic;
+            this.Anisotropic = state.UseAnisotropic;
 
-            this.NormalMap = normalMap;
-            this.SpecularMap = specularMap;
-            this.UseColorSpecular = specularMap != null;
+            this.NormalMap = state.NormalMap;
+            this.SpecularMap = state.SpecularMap;
+            this.UseColorSpecular = state.SpecularMap != null;
 
-            this.AlphaMap = alphaMap;
-            this.ColorTextures = colorTextures;
+            this.AlphaMap = state.AlphaMap;
+            this.ColorTextures = state.ColorTextures;
             this.UseColorDiffuse = colorTextures != null;
 
-            this.DiffuseMapLR = diffuseMapLR;
-            this.DiffuseMapHR = diffuseMapHR;
+            this.DiffuseMapLR = state.DiffuseMapLR;
+            this.DiffuseMapHR = state.DiffuseMapHR;
 
-            this.Parameters = new Vector4(0, proportion, slopeRanges.X, slopeRanges.Y);
+            this.Parameters = new Vector4(0, state.Proportion, state.SlopeRanges.X, state.SlopeRanges.Y);
 
-            this.MaterialIndex = materialIndex;
+            this.MaterialIndex = state.MaterialIndex;
         }
     }
 }

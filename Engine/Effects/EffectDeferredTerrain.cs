@@ -443,32 +443,21 @@ namespace Engine.Effects
         /// <param name="slopeRanges">Slope ranges</param>
         /// <param name="proportion">Lerping proportion</param>
         public void UpdatePerObject(
-            uint materialIndex,
-            bool useAnisotropic,
-            EngineShaderResourceView normalMap,
-            EngineShaderResourceView specularMap,
-            bool useAlphaMap,
-            EngineShaderResourceView alphaMap,
-            EngineShaderResourceView colorTextures,
-            bool useSlopes,
-            Vector2 slopeRanges,
-            EngineShaderResourceView diffuseMapLR,
-            EngineShaderResourceView diffuseMapHR,
-            float proportion)
+            EffectTerrainState state)
         {
-            this.MaterialIndex = materialIndex;
+            this.MaterialIndex = state.MaterialIndex;
 
-            this.Anisotropic = useAnisotropic;
-            this.NormalMap = normalMap;
-            this.SpecularMap = specularMap;
+            this.Anisotropic = state.UseAnisotropic;
+            this.NormalMap = state.NormalMap;
+            this.SpecularMap = state.SpecularMap;
 
-            this.AlphaMap = alphaMap;
-            this.ColorTextures = colorTextures;
+            this.AlphaMap = state.AlphaMap;
+            this.ColorTextures = state.ColorTextures;
 
-            this.DiffuseMapLR = diffuseMapLR;
-            this.DiffuseMapHR = diffuseMapHR;
+            this.DiffuseMapLR = state.DiffuseMapLR;
+            this.DiffuseMapHR = state.DiffuseMapHR;
 
-            this.Parameters = new Vector4(0, proportion, slopeRanges.X, slopeRanges.Y);
+            this.Parameters = new Vector4(0, state.Proportion, state.SlopeRanges.X, state.SlopeRanges.Y);
         }
     }
 }
