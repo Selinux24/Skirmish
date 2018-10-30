@@ -4,9 +4,9 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public class SegInterval
     {
-        public int r;
-        public int tmin;
-        public int tmax;
+        public int R { get; set; }
+        public int TMin { get; set; }
+        public int TMax { get; set; }
 
         public static void InsertInterval(ref SegInterval[] ints, ref int nints, int maxInts, int tmin, int tmax, int r)
         {
@@ -16,7 +16,7 @@ namespace Engine.PathFinding.RecastNavigation
             int idx = 0;
             while (idx < nints)
             {
-                if (tmax <= ints[idx].tmin)
+                if (tmax <= ints[idx].TMin)
                 {
                     break;
                 }
@@ -30,9 +30,9 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Store
-            ints[idx].r = r;
-            ints[idx].tmin = tmin;
-            ints[idx].tmax = tmax;
+            ints[idx].R = r;
+            ints[idx].TMin = tmin;
+            ints[idx].TMax = tmax;
             nints++;
         }
     }

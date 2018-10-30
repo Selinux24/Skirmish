@@ -12,42 +12,42 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return new LayerRegion()
                 {
-                    layers = new int[63],
-                    nlayers = 0,
+                    Layers = new int[63],
+                    NLayers = 0,
 
-                    neis = new int[MaxNeighbors],
-                    nneis = 0,
+                    Neis = new int[MaxNeighbors],
+                    NNeis = 0,
 
-                    ymin = 0xffff,
-                    ymax = 0,
+                    YMin = 0xffff,
+                    YMax = 0,
 
-                    layerId = 0xff,
+                    LayerId = 0xff,
 
-                    isBase = false,
+                    IsBase = false,
                 };
             }
         }
 
-        public int[] layers;
-        public int[] neis;
-        public int ymin;
-        public int ymax;
+        public int[] Layers { get; set; }
+        public int[] Neis { get; set; }
+        public int YMin { get; set; }
+        public int YMax { get; set; }
         /// <summary>
         /// Layer ID
         /// </summary>
-        public int layerId;
+        public int LayerId { get; set; }
         /// <summary>
         /// Layer count
         /// </summary>
-        public int nlayers;
+        public int NLayers { get; set; }
         /// <summary>
         ///  Neighbour count
         /// </summary>
-        public int nneis;
+        public int NNeis { get; set; }
         /// <summary>
         /// Flag indicating if the region is the base of merged regions.
         /// </summary>
-        public bool isBase;
+        public bool IsBase { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -55,7 +55,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Id: {0}; Layers: {1}; Neighbors: {2}; Base: {3}", layerId, nlayers, nneis, isBase);
+            return string.Format("Id: {0}; Layers: {1}; Neighbors: {2}; Base: {3}", LayerId, NLayers, NNeis, IsBase);
         }
     }
 }

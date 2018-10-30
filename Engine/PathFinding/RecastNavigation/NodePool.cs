@@ -72,7 +72,7 @@ namespace Engine.PathFinding.RecastNavigation
             int i = First[bucket];
             while (i != Detour.DT_NULL_IDX)
             {
-                if (Nodes[i] != null && Nodes[i].id == id && Nodes[i].state == state)
+                if (Nodes[i] != null && Nodes[i].Id == id && Nodes[i].State == state)
                 {
                     return Nodes[i];
                 }
@@ -90,12 +90,12 @@ namespace Engine.PathFinding.RecastNavigation
             // Init node
             Nodes[i] = new Node
             {
-                pidx = 0,
-                cost = 0,
-                total = 0,
-                id = id,
-                state = state,
-                flags = 0
+                PIdx = 0,
+                Cost = 0,
+                Total = 0,
+                Id = id,
+                State = state,
+                Flags = 0
             };
 
             Next[i] = First[bucket];
@@ -109,7 +109,7 @@ namespace Engine.PathFinding.RecastNavigation
             int i = First[bucket];
             while (i != Detour.DT_NULL_IDX)
             {
-                if (Nodes[i].id == id && Nodes[i].state == state)
+                if (Nodes[i].Id == id && Nodes[i].State == state)
                 {
                     return Nodes[i];
                 }
@@ -126,7 +126,7 @@ namespace Engine.PathFinding.RecastNavigation
             int i = First[bucket];
             while (i != Detour.DT_NULL_IDX)
             {
-                if (Nodes[i].id == id)
+                if (Nodes[i].Id == id)
                 {
                     if (n >= maxNodes)
                     {

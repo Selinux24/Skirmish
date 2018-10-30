@@ -10,64 +10,64 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Counter describing modifications to the tile.
         /// </summary>
-        public int salt;
+        public int Salt { get; set; }
         /// <summary>
         /// Index to the next free link.
         /// </summary>
-        public int linksFreeList;
+        public int LinksFreeList { get; set; }
         /// <summary>
         /// The tile header.
         /// </summary>
-        public MeshHeader header;
+        public MeshHeader Header { get; set; }
         /// <summary>
         /// The tile polygons. [Size: dtMeshHeader::polyCount]
         /// </summary>
-        public Poly[] polys;
+        public Poly[] Polys { get; set; }
         /// <summary>
         /// The tile vertices. [Size: dtMeshHeader::vertCount]
         /// </summary>
-        public Vector3[] verts;
+        public Vector3[] Verts { get; set; }
         /// <summary>
         /// The tile links. [Size: dtMeshHeader::maxLinkCount]
         /// </summary>
-        public Link[] links;
+        public Link[] Links { get; set; }
         /// <summary>
         /// The tile's detail sub-meshes. [Size: dtMeshHeader::detailMeshCount]
         /// </summary>
-        public PolyDetail[] detailMeshes;
+        public PolyDetail[] DetailMeshes { get; set; }
         /// <summary>
         /// The detail mesh's unique vertices. [(x, y, z) * dtMeshHeader::detailVertCount]
         /// </summary>
-        public Vector3[] detailVerts;
+        public Vector3[] DetailVerts { get; set; }
         /// <summary>
         /// The detail mesh's triangles. [(vertA, vertB, vertC) * dtMeshHeader::detailTriCount]
         /// </summary>
-        public Int4[] detailTris;
+        public Int4[] DetailTris { get; set; }
         /// <summary>
         /// The tile bounding volume nodes. [Size: dtMeshHeader::bvNodeCount]
         /// (Will be null if bounding volumes are disabled.)
         /// </summary>
-        public BVNode[] bvTree;
+        public BVNode[] BvTree { get; set; }
         /// <summary>
         /// The tile off-mesh connections. [Size: dtMeshHeader::offMeshConCount]
         /// </summary>
-        public OffMeshConnection[] offMeshCons;
+        public OffMeshConnection[] OffMeshCons { get; set; }
         /// <summary>
         /// The tile data. (Not directly accessed under normal situations.)
         /// </summary>
-        public MeshData data;
+        public MeshData Data { get; set; }
         /// <summary>
         /// Size of the tile data.
         /// </summary>
-        public int dataSize;
+        public int DataSize { get; set; }
         /// <summary>
         /// Tile flags. (See: #dtTileFlags)
         /// </summary>
-        public TileFlagTypes flags;
+        public TileFlagTypes Flags { get; set; }
         /// <summary>
         /// The next free tile, or the next tile in the spatial grid.
         /// </summary>
-        public MeshTile next;
+        public MeshTile Next { get; set; }
 
         /// <summary>
         /// Patch header pointers
@@ -75,14 +75,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="header">Header</param>
         public void Patch(MeshHeader header)
         {
-            verts = new Vector3[header.vertCount];
-            polys = new Poly[header.polyCount];
-            links = new Link[header.maxLinkCount];
-            detailMeshes = new PolyDetail[header.detailMeshCount];
-            detailVerts = new Vector3[header.detailVertCount];
-            detailTris = new Int4[header.detailTriCount];
-            bvTree = new BVNode[header.bvNodeCount];
-            offMeshCons = new OffMeshConnection[header.offMeshConCount];
+            Verts = new Vector3[header.VertCount];
+            Polys = new Poly[header.PolyCount];
+            Links = new Link[header.MaxLinkCount];
+            DetailMeshes = new PolyDetail[header.DetailMeshCount];
+            DetailVerts = new Vector3[header.DetailVertCount];
+            DetailTris = new Int4[header.DetailTriCount];
+            BvTree = new BVNode[header.BvNodeCount];
+            OffMeshCons = new OffMeshConnection[header.OffMeshConCount];
         }
         /// <summary>
         /// Set mesh data
@@ -90,16 +90,16 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="data">Mesh data</param>
         public void SetData(MeshData data)
         {
-            this.data = data;
+            this.Data = data;
 
-            if (data.NavVerts.Count > 0) verts = data.NavVerts.ToArray();
-            if (data.NavPolys.Count > 0) polys = data.NavPolys.ToArray();
+            if (data.NavVerts.Count > 0) Verts = data.NavVerts.ToArray();
+            if (data.NavPolys.Count > 0) Polys = data.NavPolys.ToArray();
 
-            if (data.NavDMeshes.Count > 0) detailMeshes = data.NavDMeshes.ToArray();
-            if (data.NavDVerts.Count > 0) detailVerts = data.NavDVerts.ToArray();
-            if (data.NavDTris.Count > 0) detailTris = data.NavDTris.ToArray();
-            if (data.NavBvtree.Count > 0) bvTree = data.NavBvtree.ToArray();
-            if (data.OffMeshCons.Count > 0) offMeshCons = data.OffMeshCons.ToArray();
+            if (data.NavDMeshes.Count > 0) DetailMeshes = data.NavDMeshes.ToArray();
+            if (data.NavDVerts.Count > 0) DetailVerts = data.NavDVerts.ToArray();
+            if (data.NavDTris.Count > 0) DetailTris = data.NavDTris.ToArray();
+            if (data.NavBvtree.Count > 0) BvTree = data.NavBvtree.ToArray();
+            if (data.OffMeshCons.Count > 0) OffMeshCons = data.OffMeshCons.ToArray();
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Engine.PathFinding.RecastNavigation
         public override string ToString()
         {
             return string.Format("Salt: {0}; Links: {1}; Flags: {2}; Header: {3}; Data: {4}",
-                salt, linksFreeList, flags, header, data);
+                Salt, LinksFreeList, Flags, Header, Data);
         }
     }
 }

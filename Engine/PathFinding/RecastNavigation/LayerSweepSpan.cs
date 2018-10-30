@@ -6,15 +6,15 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Number samples
         /// </summary>
-        public int ns;
+        public int NS { get; set; }
         /// <summary>
         /// Region id
         /// </summary>
-        public int id;
+        public int Id { get; set; }
         /// <summary>
         /// Neighbour id
         /// </summary>
-        public int nei;
+        public int Nei { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -22,7 +22,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Samples {0}; Region {1}; Neighbour {2};", ns, id, nei);
+            return string.Format("Samples {0}; Region {1}; Neighbour {2};", NS, Id, Nei);
         }
     }
 }

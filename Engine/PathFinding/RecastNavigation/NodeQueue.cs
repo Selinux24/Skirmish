@@ -105,7 +105,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             int parent = (i - 1) / 2;
             // note: (index > 0) means there is a parent
-            while ((i > 0) && (m_heap[parent].total > node.total))
+            while ((i > 0) && (m_heap[parent].Total > node.Total))
             {
                 m_heap[i] = m_heap[parent];
                 i = parent;
@@ -120,7 +120,7 @@ namespace Engine.PathFinding.RecastNavigation
             while (child < m_size)
             {
                 if (((child + 1) < m_size) &&
-                    (m_heap[child].total > m_heap[child + 1].total))
+                    (m_heap[child].Total > m_heap[child + 1].Total))
                 {
                     child++;
                 }

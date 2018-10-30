@@ -520,26 +520,26 @@ namespace Engine.PathFinding.RecastNavigation
 
         #region DETOURNAVMESHBUILDER
 
-        public static void CalcExtends(BVItem[] items, int nitems, int imin, int imax, ref Int3 bmin, ref Int3 bmax)
+        public static void CalcExtends(BVItem[] items, int nitems, int imin, int imax, out Int3 bmin, out Int3 bmax)
         {
-            bmin.X = items[imin].bmin.X;
-            bmin.Y = items[imin].bmin.Y;
-            bmin.Z = items[imin].bmin.Z;
+            bmin.X = items[imin].BMin.X;
+            bmin.Y = items[imin].BMin.Y;
+            bmin.Z = items[imin].BMin.Z;
 
-            bmax.X = items[imin].bmax.X;
-            bmax.Y = items[imin].bmax.Y;
-            bmax.Z = items[imin].bmax.Z;
+            bmax.X = items[imin].BMax.X;
+            bmax.Y = items[imin].BMax.Y;
+            bmax.Z = items[imin].BMax.Z;
 
             for (int i = imin + 1; i < imax; ++i)
             {
                 BVItem it = items[i];
-                if (it.bmin.X < bmin.X) bmin.X = it.bmin.X;
-                if (it.bmin.Y < bmin.Y) bmin.Y = it.bmin.Y;
-                if (it.bmin.Z < bmin.Z) bmin.Z = it.bmin.Z;
+                if (it.BMin.X < bmin.X) bmin.X = it.BMin.X;
+                if (it.BMin.Y < bmin.Y) bmin.Y = it.BMin.Y;
+                if (it.BMin.Z < bmin.Z) bmin.Z = it.BMin.Z;
 
-                if (it.bmax.X > bmax.X) bmax.X = it.bmax.X;
-                if (it.bmax.Y > bmax.Y) bmax.Y = it.bmax.Y;
-                if (it.bmax.Z > bmax.Z) bmax.Z = it.bmax.Z;
+                if (it.BMax.X > bmax.X) bmax.X = it.BMax.X;
+                if (it.BMax.Y > bmax.Y) bmax.Y = it.BMax.Y;
+                if (it.BMax.Z > bmax.Z) bmax.Z = it.BMax.Z;
             }
         }
         private static int LongestAxis(int x, int y, int z)
@@ -569,25 +569,21 @@ namespace Engine.PathFinding.RecastNavigation
             if (inum == 1)
             {
                 // Leaf
-                node.bmin.X = items[imin].bmin.X;
-                node.bmin.Y = items[imin].bmin.Y;
-                node.bmin.Z = items[imin].bmin.Z;
-
-                node.bmax.X = items[imin].bmax.X;
-                node.bmax.Y = items[imin].bmax.Y;
-                node.bmax.Z = items[imin].bmax.Z;
-
-                node.i = items[imin].i;
+                node.BMin = items[imin].BMin;
+                node.BMax = items[imin].BMax;
+                node.I = items[imin].I;
             }
             else
             {
                 // Split
-                CalcExtends(items, nitems, imin, imax, ref node.bmin, ref node.bmax);
+                CalcExtends(items, nitems, imin, imax, out var bmin, out var bmax);
+                node.BMin = bmin;
+                node.BMax = bmax;
 
                 int axis = LongestAxis(
-                    node.bmax.X - node.bmin.X,
-                    node.bmax.Y - node.bmin.Y,
-                    node.bmax.Z - node.bmin.Z);
+                    node.BMax.X - node.BMin.X,
+                    node.BMax.Y - node.BMin.Y,
+                    node.BMax.Z - node.BMin.Z);
 
                 if (axis == 0)
                 {
@@ -614,7 +610,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 int iescape = curNode - icur;
                 // Negative index means escape.
-                node.i = -iescape;
+                node.I = -iescape;
             }
         }
         public static int CreateBVTree(NavMeshCreateParams param, out List<BVNode> nodes)
@@ -626,15 +622,15 @@ namespace Engine.PathFinding.RecastNavigation
             BVItem[] items = new BVItem[param.polyCount];
             for (int i = 0; i < param.polyCount; i++)
             {
-                BVItem it = items[i];
-                it.i = i;
+                var it = items[i];
+                it.I = i;
                 // Calc polygon bounds. Use detail meshes if available.
                 if (param.detailMeshes != null)
                 {
                     int vb = param.detailMeshes[i][0];
                     int ndv = param.detailMeshes[i][1];
-                    Vector3 bmin = param.detailVerts[vb];
-                    Vector3 bmax = param.detailVerts[vb];
+                    var bmin = param.detailVerts[vb];
+                    var bmax = param.detailVerts[vb];
 
                     for (int j = 1; j < ndv; j++)
                     {
@@ -643,20 +639,26 @@ namespace Engine.PathFinding.RecastNavigation
                     }
 
                     // BV-tree uses cs for all dimensions
-                    it.bmin.X = MathUtil.Clamp((int)((bmin.X - param.bmin.X) * quantFactor), 0, 0xffff);
-                    it.bmin.Y = MathUtil.Clamp((int)((bmin.Y - param.bmin.Y) * quantFactor), 0, 0xffff);
-                    it.bmin.Z = MathUtil.Clamp((int)((bmin.Z - param.bmin.Z) * quantFactor), 0, 0xffff);
+                    it.BMin = new Int3
+                    {
+                        X = MathUtil.Clamp((int)((bmin.X - param.bmin.X) * quantFactor), 0, 0xffff),
+                        Y = MathUtil.Clamp((int)((bmin.Y - param.bmin.Y) * quantFactor), 0, 0xffff),
+                        Z = MathUtil.Clamp((int)((bmin.Z - param.bmin.Z) * quantFactor), 0, 0xffff)
+                    };
 
-                    it.bmax.X = MathUtil.Clamp((int)((bmax.X - param.bmin.X) * quantFactor), 0, 0xffff);
-                    it.bmax.Y = MathUtil.Clamp((int)((bmax.Y - param.bmin.Y) * quantFactor), 0, 0xffff);
-                    it.bmax.Z = MathUtil.Clamp((int)((bmax.Z - param.bmin.Z) * quantFactor), 0, 0xffff);
+                    it.BMax = new Int3
+                    {
+                        X = MathUtil.Clamp((int)((bmax.X - param.bmin.X) * quantFactor), 0, 0xffff),
+                        Y = MathUtil.Clamp((int)((bmax.Y - param.bmin.Y) * quantFactor), 0, 0xffff),
+                        Z = MathUtil.Clamp((int)((bmax.Z - param.bmin.Z) * quantFactor), 0, 0xffff)
+                    };
                 }
                 else
                 {
                     var p = param.Polys[i];
-                    it.bmin.X = it.bmax.X = param.Verts[p[0]].X;
-                    it.bmin.Y = it.bmax.Y = param.Verts[p[0]].Y;
-                    it.bmin.Z = it.bmax.Z = param.Verts[p[0]].Z;
+
+                    var itBMin = param.Verts[p[0]];
+                    var itBMax = param.Verts[p[0]];
 
                     for (int j = 1; j < param.nvp; ++j)
                     {
@@ -665,17 +667,20 @@ namespace Engine.PathFinding.RecastNavigation
                         var y = param.Verts[p[j]].Y;
                         var z = param.Verts[p[j]].Z;
 
-                        if (x < it.bmin.X) it.bmin.X = x;
-                        if (y < it.bmin.Y) it.bmin.Y = y;
-                        if (z < it.bmin.Z) it.bmin.Z = z;
+                        if (x < it.BMin.X) itBMin.X = x;
+                        if (y < it.BMin.Y) itBMin.Y = y;
+                        if (z < it.BMin.Z) itBMin.Z = z;
 
-                        if (x > it.bmax.X) it.bmax.X = x;
-                        if (y > it.bmax.Y) it.bmax.Y = y;
-                        if (z > it.bmax.Z) it.bmax.Z = z;
+                        if (x > it.BMax.X) itBMax.X = x;
+                        if (y > it.BMax.Y) itBMax.Y = y;
+                        if (z > it.BMax.Z) itBMax.Z = z;
                     }
                     // Remap y
-                    it.bmin.Y = (int)Math.Floor(it.bmin.Y * param.ch / param.cs);
-                    it.bmax.Y = (int)Math.Ceiling(it.bmax.Y * param.ch / param.cs);
+                    itBMin.Y = (int)Math.Floor(it.BMin.Y * param.ch / param.cs);
+                    itBMax.Y = (int)Math.Ceiling(it.BMax.Y * param.ch / param.cs);
+
+                    it.BMin = itBMin;
+                    it.BMax = itBMax;
                 }
                 items[i] = it;
             }
@@ -884,27 +889,27 @@ namespace Engine.PathFinding.RecastNavigation
                 // Store header
                 Header = new MeshHeader
                 {
-                    magic = DT_NAVMESH_MAGIC,
-                    version = DT_NAVMESH_VERSION,
-                    x = param.tileX,
-                    y = param.tileY,
-                    layer = param.tileLayer,
-                    userId = param.userId,
-                    polyCount = totPolyCount,
-                    vertCount = totVertCount,
-                    maxLinkCount = maxLinkCount,
-                    bmin = param.bmin,
-                    bmax = param.bmax,
-                    detailMeshCount = param.polyCount,
-                    detailVertCount = uniqueDetailVertCount,
-                    detailTriCount = detailTriCount,
-                    bvQuantFactor = 1.0f / param.cs,
-                    offMeshBase = param.polyCount,
-                    walkableHeight = param.walkableHeight,
-                    walkableRadius = param.walkableRadius,
-                    walkableClimb = param.walkableClimb,
-                    offMeshConCount = storedOffMeshConCount,
-                    bvNodeCount = param.buildBvTree ? param.polyCount * 2 : 0
+                    Magic = DT_NAVMESH_MAGIC,
+                    Version = DT_NAVMESH_VERSION,
+                    X = param.tileX,
+                    Y = param.tileY,
+                    Layer = param.tileLayer,
+                    UserId = param.userId,
+                    PolyCount = totPolyCount,
+                    VertCount = totVertCount,
+                    MaxLinkCount = maxLinkCount,
+                    BMin = param.bmin,
+                    BMax = param.bmax,
+                    DetailMeshCount = param.polyCount,
+                    DetailVertCount = uniqueDetailVertCount,
+                    DetailTriCount = detailTriCount,
+                    BvQuantFactor = 1.0f / param.cs,
+                    OffMeshBase = param.polyCount,
+                    WalkableHeight = param.walkableHeight,
+                    WalkableRadius = param.walkableRadius,
+                    WalkableClimb = param.walkableClimb,
+                    OffMeshConCount = storedOffMeshConCount,
+                    BvNodeCount = param.buildBvTree ? param.polyCount * 2 : 0
                 }
             };
 
@@ -1035,10 +1040,10 @@ namespace Engine.PathFinding.RecastNavigation
                     int nv = data.NavPolys[i].VertCount;
                     PolyDetail dtl = new PolyDetail
                     {
-                        vertBase = data.NavDVerts.Count,
-                        vertCount = (ndv - nv),
-                        triBase = param.detailMeshes[i][2],
-                        triCount = param.detailMeshes[i][3]
+                        VertBase = data.NavDVerts.Count,
+                        VertCount = (ndv - nv),
+                        TriBase = param.detailMeshes[i][2],
+                        TriCount = param.detailMeshes[i][3]
                     };
                     // Copy vertices except the first 'nv' verts which are equal to nav poly verts.
                     if (ndv - nv != 0)
@@ -1060,10 +1065,10 @@ namespace Engine.PathFinding.RecastNavigation
                     int nv = data.NavPolys[i].VertCount;
                     PolyDetail dtl = new PolyDetail
                     {
-                        vertBase = 0,
-                        vertCount = 0,
-                        triBase = tbase,
-                        triCount = (nv - 2)
+                        VertBase = 0,
+                        VertCount = 0,
+                        TriBase = tbase,
+                        TriCount = (nv - 2)
                     };
                     // Triangulate polygon (local indices).
                     for (int j = 2; j < nv; ++j)
@@ -1230,18 +1235,18 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static int AllocLink(MeshTile tile)
         {
-            if (tile.linksFreeList == DT_NULL_LINK)
+            if (tile.LinksFreeList == DT_NULL_LINK)
             {
                 return DT_NULL_LINK;
             }
-            int link = tile.linksFreeList;
-            tile.linksFreeList = tile.links[link].next;
+            int link = tile.LinksFreeList;
+            tile.LinksFreeList = tile.Links[link].next;
             return link;
         }
         public static void FreeLink(MeshTile tile, int link)
         {
-            tile.links[link].next = tile.linksFreeList;
-            tile.linksFreeList = link;
+            tile.Links[link].next = tile.LinksFreeList;
+            tile.LinksFreeList = link;
         }
 
         #endregion

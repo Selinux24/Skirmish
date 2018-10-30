@@ -9,9 +9,9 @@ namespace Engine.PathFinding.RecastNavigation
         public static readonly CompareY YComparer = new CompareY();
         public static readonly CompareZ ZComparer = new CompareZ();
 
-        public Int3 bmin;
-        public Int3 bmax;
-        public int i;
+        public Int3 BMin { get; set; }
+        public Int3 BMax { get; set; }
+        public int I { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -19,7 +19,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Region Id: {0}; BMin: {1}; BMax: {2};", this.i, this.bmin, this.bmax);
+            return string.Format("Region Id: {0}; BMin: {1}; BMax: {2};", this.I, this.BMin, this.BMax);
         }
 
         /// <summary>
@@ -35,12 +35,12 @@ namespace Engine.PathFinding.RecastNavigation
             /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
             public int Compare(BVItem x, BVItem y)
             {
-                if (x.bmin.X < y.bmin.X) return -1;
-                if (x.bmin.X > y.bmin.X) return 1;
-                if (x.bmax.X < y.bmax.X) return -1;
-                if (x.bmax.X > y.bmax.X) return 1;
-                if (x.i < y.i) return -1;
-                if (x.i > y.i) return 1;
+                if (x.BMin.X < y.BMin.X) return -1;
+                if (x.BMin.X > y.BMin.X) return 1;
+                if (x.BMax.X < y.BMax.X) return -1;
+                if (x.BMax.X > y.BMax.X) return 1;
+                if (x.I < y.I) return -1;
+                if (x.I > y.I) return 1;
                 return 0;
             }
         }
@@ -57,12 +57,12 @@ namespace Engine.PathFinding.RecastNavigation
             /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
             public int Compare(BVItem x, BVItem y)
             {
-                if (x.bmin.Y < y.bmin.Y) return -1;
-                if (x.bmin.Y > y.bmin.Y) return 1;
-                if (x.bmax.Y < y.bmax.Y) return -1;
-                if (x.bmax.Y > y.bmax.Y) return 1;
-                if (x.i < y.i) return -1;
-                if (x.i > y.i) return 1;
+                if (x.BMin.Y < y.BMin.Y) return -1;
+                if (x.BMin.Y > y.BMin.Y) return 1;
+                if (x.BMax.Y < y.BMax.Y) return -1;
+                if (x.BMax.Y > y.BMax.Y) return 1;
+                if (x.I < y.I) return -1;
+                if (x.I > y.I) return 1;
                 return 0;
             }
         }
@@ -79,12 +79,12 @@ namespace Engine.PathFinding.RecastNavigation
             /// <returns>A negative value if a is less than b; 0 if they are equal; a positive value of a is greater than b.</returns>
             public int Compare(BVItem x, BVItem y)
             {
-                if (x.bmin.Z < y.bmin.Z) return -1;
-                if (x.bmin.Z > y.bmin.Z) return 1;
-                if (x.bmax.Z < y.bmax.Z) return -1;
-                if (x.bmax.Z > y.bmax.Z) return 1;
-                if (x.i < y.i) return -1;
-                if (x.i > y.i) return 1;
+                if (x.BMin.Z < y.BMin.Z) return -1;
+                if (x.BMin.Z > y.BMin.Z) return 1;
+                if (x.BMax.Z < y.BMax.Z) return -1;
+                if (x.BMax.Z > y.BMax.Z) return 1;
+                if (x.I < y.I) return -1;
+                if (x.I > y.I) return 1;
                 return 0;
             }
         }

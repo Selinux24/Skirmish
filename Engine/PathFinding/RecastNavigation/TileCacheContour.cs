@@ -4,9 +4,9 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public struct TileCacheContour
     {
-        public int nverts;
-        public Int4[] verts;
-        public int reg;
-        public TileCacheAreas area;
+        public int NVerts { get; set; }
+        public Int4[] Verts { get; set; }
+        public int Reg { get; set; }
+        public TileCacheAreas Area { get; set; }
     }
 }

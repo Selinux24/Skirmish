@@ -3,7 +3,7 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public struct TileCacheContourSet
     {
-        public int nconts;
-        public TileCacheContour[] conts;
+        public int NConts { get; set; }
+        public TileCacheContour[] Conts { get; set; }
     }
 }

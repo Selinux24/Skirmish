@@ -3,16 +3,16 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public struct Edge
     {
-        public int[] vert;
-        public int[] polyEdge;
-        public int[] poly;
+        public int[] Vert { get; set; }
+        public int[] PolyEdge { get; set; }
+        public int[] Poly { get; set; }
 
         public override string ToString()
         {
             return string.Format("Vert {0}; PolyEdge {1}; Poly {2};",
-                vert?.Join(","),
-                polyEdge?.Join(","),
-                poly?.Join(","));
+                Vert?.Join(","),
+                PolyEdge?.Join(","),
+                Poly?.Join(","));
         }
     };
 }

@@ -36,7 +36,7 @@ namespace Engine.PathFinding.RecastNavigation
                 Vector3 diff = Vector3.Subtract(m_center, closestPtPoly);
                 if (posOverPoly)
                 {
-                    d = Math.Abs(diff.Y) - tile.header.walkableClimb;
+                    d = Math.Abs(diff.Y) - tile.Header.WalkableClimb;
                     d = d > 0 ? d * d : 0;
                 }
                 else

@@ -323,13 +323,13 @@ namespace Engine.PathFinding.RecastNavigation
             m_obstacles[ob] = new TileCacheObstacle
             {
                 Salt = salt,
-                state = ObstacleState.DT_OBSTACLE_PROCESSING,
-                type = ObstacleType.DT_OBSTACLE_CYLINDER,
-                cylinder = new ObstacleCylinder
+                State = ObstacleState.DT_OBSTACLE_PROCESSING,
+                Type = ObstacleType.DT_OBSTACLE_CYLINDER,
+                Cylinder = new ObstacleCylinder
                 {
-                    pos = pos,
-                    radius = radius,
-                    height = height
+                    Pos = pos,
+                    Radius = radius,
+                    Height = height
                 }
             };
 
@@ -369,12 +369,12 @@ namespace Engine.PathFinding.RecastNavigation
             m_obstacles[ob] = new TileCacheObstacle
             {
                 Salt = salt,
-                state = ObstacleState.DT_OBSTACLE_PROCESSING,
-                type = ObstacleType.DT_OBSTACLE_BOX,
-                box = new ObstacleBox
+                State = ObstacleState.DT_OBSTACLE_PROCESSING,
+                Type = ObstacleType.DT_OBSTACLE_BOX,
+                Box = new ObstacleBox
                 {
-                    bmin = bmin,
-                    bmax = bmax
+                    BMin = bmin,
+                    BMax = bmax
                 }
             };
 
@@ -414,19 +414,19 @@ namespace Engine.PathFinding.RecastNavigation
             m_obstacles[ob] = new TileCacheObstacle
             {
                 Salt = salt,
-                state = ObstacleState.DT_OBSTACLE_PROCESSING,
-                type = ObstacleType.DT_OBSTACLE_ORIENTED_BOX,
-                orientedBox = new ObstacleOrientedBox
+                State = ObstacleState.DT_OBSTACLE_PROCESSING,
+                Type = ObstacleType.DT_OBSTACLE_ORIENTED_BOX,
+                OrientedBox = new ObstacleOrientedBox
                 {
-                    center = center,
-                    halfExtents = halfExtents
+                    Center = center,
+                    HalfExtents = halfExtents
                 }
             };
 
             float coshalf = (float)Math.Cos(0.5f * yRadians);
             float sinhalf = (float)Math.Sin(-0.5f * yRadians);
-            m_obstacles[ob].orientedBox.rotAux.X = coshalf * sinhalf;
-            m_obstacles[ob].orientedBox.rotAux.Y = coshalf * coshalf - 0.5f;
+            m_obstacles[ob].OrientedBox.RotAux.X = coshalf * sinhalf;
+            m_obstacles[ob].OrientedBox.RotAux.Y = coshalf * coshalf - 0.5f;
 
             var req = new ObstacleRequest
             {
@@ -537,36 +537,36 @@ namespace Engine.PathFinding.RecastNavigation
                         // Find touched tiles.
                         GetObstacleBounds(ob, out Vector3 bmin, out Vector3 bmax);
 
-                        QueryTiles(bmin, bmax, out ob.touched, out ob.ntouched, DetourTileCache.DT_MAX_TOUCHED_TILES);
+                        QueryTiles(bmin, bmax, out ob.Touched, out ob.NTouched, DetourTileCache.DT_MAX_TOUCHED_TILES);
                         // Add tiles to update list.
-                        ob.npending = 0;
-                        for (int j = 0; j < ob.ntouched; ++j)
+                        ob.NPending = 0;
+                        for (int j = 0; j < ob.NTouched; ++j)
                         {
                             if (m_nupdate < DetourTileCache.MAX_UPDATE)
                             {
-                                if (!DetourTileCache.Contains(m_update, m_nupdate, ob.touched[j]))
+                                if (!DetourTileCache.Contains(m_update, m_nupdate, ob.Touched[j]))
                                 {
-                                    m_update[m_nupdate++] = ob.touched[j];
+                                    m_update[m_nupdate++] = ob.Touched[j];
                                 }
-                                ob.pending[ob.npending++] = ob.touched[j];
+                                ob.Pending[ob.NPending++] = ob.Touched[j];
                             }
                         }
                     }
                     else if (req.Action == ObstacleRequestAction.REQUEST_REMOVE)
                     {
                         // Prepare to remove obstacle.
-                        ob.state = ObstacleState.DT_OBSTACLE_REMOVING;
+                        ob.State = ObstacleState.DT_OBSTACLE_REMOVING;
                         // Add tiles to update list.
-                        ob.npending = 0;
-                        for (int j = 0; j < ob.ntouched; ++j)
+                        ob.NPending = 0;
+                        for (int j = 0; j < ob.NTouched; ++j)
                         {
                             if (m_nupdate < DetourTileCache.MAX_UPDATE)
                             {
-                                if (!DetourTileCache.Contains(m_update, m_nupdate, ob.touched[j]))
+                                if (!DetourTileCache.Contains(m_update, m_nupdate, ob.Touched[j]))
                                 {
-                                    m_update[m_nupdate++] = ob.touched[j];
+                                    m_update[m_nupdate++] = ob.Touched[j];
                                 }
-                                ob.pending[ob.npending++] = ob.touched[j];
+                                ob.Pending[ob.NPending++] = ob.Touched[j];
                             }
                         }
                     }
@@ -595,29 +595,29 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int i = 0; i < m_params.MaxObstacles; ++i)
                 {
                     var ob = m_obstacles[i];
-                    if (ob.state == ObstacleState.DT_OBSTACLE_PROCESSING || ob.state == ObstacleState.DT_OBSTACLE_REMOVING)
+                    if (ob.State == ObstacleState.DT_OBSTACLE_PROCESSING || ob.State == ObstacleState.DT_OBSTACLE_REMOVING)
                     {
                         // Remove handled tile from pending list.
-                        for (int j = 0; j < ob.npending; j++)
+                        for (int j = 0; j < ob.NPending; j++)
                         {
-                            if (ob.pending[j] == r)
+                            if (ob.Pending[j] == r)
                             {
-                                ob.pending[j] = ob.pending[ob.npending - 1];
-                                ob.npending--;
+                                ob.Pending[j] = ob.Pending[ob.NPending - 1];
+                                ob.NPending--;
                                 break;
                             }
                         }
 
                         // If all pending tiles processed, change state.
-                        if (ob.npending == 0)
+                        if (ob.NPending == 0)
                         {
-                            if (ob.state == ObstacleState.DT_OBSTACLE_PROCESSING)
+                            if (ob.State == ObstacleState.DT_OBSTACLE_PROCESSING)
                             {
-                                ob.state = ObstacleState.DT_OBSTACLE_PROCESSED;
+                                ob.State = ObstacleState.DT_OBSTACLE_PROCESSED;
                             }
-                            else if (ob.state == ObstacleState.DT_OBSTACLE_REMOVING)
+                            else if (ob.State == ObstacleState.DT_OBSTACLE_REMOVING)
                             {
-                                ob.state = ObstacleState.DT_OBSTACLE_EMPTY;
+                                ob.State = ObstacleState.DT_OBSTACLE_EMPTY;
                                 // Update salt, salt should never be zero.
                                 ob.Salt = (ob.Salt + 1) & ((1 << 16) - 1);
                                 if (ob.Salt == 0)
@@ -659,62 +659,63 @@ namespace Engine.PathFinding.RecastNavigation
             int walkableClimbVx = (int)(m_params.WalkableClimb / m_params.CellHeight);
 
             // Decompress tile layer data.
-            if (!DetourTileCache.DecompressTileCacheLayer(tile.Header, tile.Data, 0, out bc.layer))
+            if (!DetourTileCache.DecompressTileCacheLayer(tile.Header, tile.Data, 0, out var layer))
             {
                 return false;
             }
+            bc.Layer = layer;
 
             // Rasterize obstacles.
             for (int i = 0; i < m_params.MaxObstacles; ++i)
             {
                 var ob = m_obstacles[i];
 
-                if (ob.state == ObstacleState.DT_OBSTACLE_EMPTY || ob.state == ObstacleState.DT_OBSTACLE_REMOVING)
+                if (ob.State == ObstacleState.DT_OBSTACLE_EMPTY || ob.State == ObstacleState.DT_OBSTACLE_REMOVING)
                 {
                     continue;
                 }
 
-                if (DetourTileCache.Contains(ob.touched, ob.ntouched, tile))
+                if (DetourTileCache.Contains(ob.Touched, ob.NTouched, tile))
                 {
-                    if (ob.type == ObstacleType.DT_OBSTACLE_CYLINDER)
+                    if (ob.Type == ObstacleType.DT_OBSTACLE_CYLINDER)
                     {
-                        DetourTileCache.MarkCylinderArea(ref bc.layer,
+                        DetourTileCache.MarkCylinderArea(bc,
                             tile.Header.BBox.Minimum, m_params.CellSize, m_params.CellHeight,
-                            ob.cylinder.pos, ob.cylinder.radius, ob.cylinder.height, 0);
+                            ob.Cylinder.Pos, ob.Cylinder.Radius, ob.Cylinder.Height, 0);
                     }
-                    else if (ob.type == ObstacleType.DT_OBSTACLE_BOX)
+                    else if (ob.Type == ObstacleType.DT_OBSTACLE_BOX)
                     {
-                        DetourTileCache.MarkBoxArea(ref bc.layer,
+                        DetourTileCache.MarkBoxArea(bc,
                             tile.Header.BBox.Minimum, m_params.CellSize, m_params.CellHeight,
-                            ob.box.bmin, ob.box.bmax, 0);
+                            ob.Box.BMin, ob.Box.BMax, 0);
                     }
-                    else if (ob.type == ObstacleType.DT_OBSTACLE_ORIENTED_BOX)
+                    else if (ob.Type == ObstacleType.DT_OBSTACLE_ORIENTED_BOX)
                     {
-                        DetourTileCache.MarkBoxArea(ref bc.layer,
+                        DetourTileCache.MarkBoxArea(bc,
                             tile.Header.BBox.Minimum, m_params.CellSize, m_params.CellHeight,
-                            ob.orientedBox.center, ob.orientedBox.halfExtents, ob.orientedBox.rotAux, 0);
+                            ob.OrientedBox.Center, ob.OrientedBox.HalfExtents, ob.OrientedBox.RotAux, 0);
                     }
                 }
             }
 
             // Build navmesh
-            if (!DetourTileCache.BuildTileCacheRegions(ref bc.layer, walkableClimbVx))
+            if (!DetourTileCache.BuildTileCacheRegions(bc, walkableClimbVx))
             {
                 return false;
             }
 
-            if (!DetourTileCache.BuildTileCacheContours(bc.layer, walkableClimbVx, m_params.MaxSimplificationError, out bc.lcset))
+            if (!DetourTileCache.BuildTileCacheContours(bc, walkableClimbVx, m_params.MaxSimplificationError))
             {
                 return false;
             }
 
-            if (!DetourTileCache.BuildTileCachePolyMesh(bc.lcset, out bc.lmesh))
+            if (!DetourTileCache.BuildTileCachePolyMesh(bc))
             {
                 return false;
             }
 
             // Early out if the mesh tile is empty.
-            if (bc.lmesh.npolys == 0)
+            if (bc.LMesh.NPolys == 0)
             {
                 // Remove existing tile.
                 navmesh.RemoveTile(navmesh.GetTileRefAt(tile.Header.TX, tile.Header.TY, tile.Header.TLayer), null, 0);
@@ -723,12 +724,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             var param = new NavMeshCreateParams
             {
-                Verts = bc.lmesh.verts,
-                VertCount = bc.lmesh.nverts,
-                Polys = bc.lmesh.polys,
-                PolyAreas = bc.lmesh.areas,
-                PolyFlags = bc.lmesh.flags,
-                polyCount = bc.lmesh.npolys,
+                Verts = bc.LMesh.Verts,
+                VertCount = bc.LMesh.NVerts,
+                Polys = bc.LMesh.Polys,
+                PolyAreas = bc.LMesh.Areas,
+                PolyFlags = bc.LMesh.Flags,
+                polyCount = bc.LMesh.NPolys,
                 nvp = Detour.DT_VERTS_PER_POLYGON,
                 walkableHeight = m_params.WalkableHeight,
                 walkableRadius = m_params.WalkableRadius,
@@ -745,7 +746,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (m_tmproc != null)
             {
-                m_tmproc.Process(ref param, ref bc.lmesh.areas, ref bc.lmesh.flags);
+                m_tmproc.Process(ref param, bc);
             }
 
             if (!Detour.CreateNavMeshData(param, out MeshData navData))
@@ -786,33 +787,33 @@ namespace Engine.PathFinding.RecastNavigation
             bmin = new Vector3();
             bmax = new Vector3();
 
-            if (ob.type == ObstacleType.DT_OBSTACLE_CYLINDER)
+            if (ob.Type == ObstacleType.DT_OBSTACLE_CYLINDER)
             {
-                var cl = ob.cylinder;
+                var cl = ob.Cylinder;
 
-                bmin.X = cl.pos.X - cl.radius;
-                bmin.Y = cl.pos.Y;
-                bmin.Z = cl.pos.Z - cl.radius;
-                bmax.X = cl.pos.X + cl.radius;
-                bmax.Y = cl.pos.Y + cl.height;
-                bmax.Z = cl.pos.Z + cl.radius;
+                bmin.X = cl.Pos.X - cl.Radius;
+                bmin.Y = cl.Pos.Y;
+                bmin.Z = cl.Pos.Z - cl.Radius;
+                bmax.X = cl.Pos.X + cl.Radius;
+                bmax.Y = cl.Pos.Y + cl.Height;
+                bmax.Z = cl.Pos.Z + cl.Radius;
             }
-            else if (ob.type == ObstacleType.DT_OBSTACLE_BOX)
+            else if (ob.Type == ObstacleType.DT_OBSTACLE_BOX)
             {
-                bmin = ob.box.bmin;
-                bmax = ob.box.bmax;
+                bmin = ob.Box.BMin;
+                bmax = ob.Box.BMax;
             }
-            else if (ob.type == ObstacleType.DT_OBSTACLE_ORIENTED_BOX)
+            else if (ob.Type == ObstacleType.DT_OBSTACLE_ORIENTED_BOX)
             {
-                var orientedBox = ob.orientedBox;
+                var orientedBox = ob.OrientedBox;
 
-                float maxr = 1.41f * Math.Max(orientedBox.halfExtents.X, orientedBox.halfExtents.Z);
-                bmin.X = orientedBox.center.X - maxr;
-                bmax.X = orientedBox.center.X + maxr;
-                bmin.Y = orientedBox.center.Y - orientedBox.halfExtents.Y;
-                bmax.Y = orientedBox.center.Y + orientedBox.halfExtents.Y;
-                bmin.Z = orientedBox.center.Z - maxr;
-                bmax.Z = orientedBox.center.Z + maxr;
+                float maxr = 1.41f * Math.Max(orientedBox.HalfExtents.X, orientedBox.HalfExtents.Z);
+                bmin.X = orientedBox.Center.X - maxr;
+                bmax.X = orientedBox.Center.X + maxr;
+                bmin.Y = orientedBox.Center.Y - orientedBox.HalfExtents.Y;
+                bmax.Y = orientedBox.Center.Y + orientedBox.HalfExtents.Y;
+                bmin.Z = orientedBox.Center.Z - maxr;
+                bmax.Z = orientedBox.Center.Z + maxr;
             }
         }
 

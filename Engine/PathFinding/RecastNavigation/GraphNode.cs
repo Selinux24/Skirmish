@@ -22,11 +22,11 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < mesh.MaxTiles; ++i)
             {
                 var tile = mesh.Tiles[i];
-                if (tile.header.magic != Detour.DT_NAVMESH_MAGIC) continue;
+                if (tile.Header.Magic != Detour.DT_NAVMESH_MAGIC) continue;
 
-                for (int t = 0; t < tile.header.polyCount; t++)
+                for (int t = 0; t < tile.Header.PolyCount; t++)
                 {
-                    var p = tile.polys[t];
+                    var p = tile.Polys[t];
                     if (p.Type == PolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION) continue;
 
                     var bse = mesh.GetTileRef(tile);
@@ -34,23 +34,23 @@ namespace Engine.PathFinding.RecastNavigation
                     int tileNum = mesh.DecodePolyIdTile(bse);
                     var tileColor = IntToCol(tileNum, 128);
 
-                    var pd = tile.detailMeshes[t];
+                    var pd = tile.DetailMeshes[t];
 
                     List<Triangle> tris = new List<Triangle>();
 
-                    for (int j = 0; j < pd.triCount; ++j)
+                    for (int j = 0; j < pd.TriCount; ++j)
                     {
-                        var dt = tile.detailTris[(pd.triBase + j)];
+                        var dt = tile.DetailTris[(pd.TriBase + j)];
                         Vector3[] triVerts = new Vector3[3];
                         for (int k = 0; k < 3; ++k)
                         {
                             if (dt[k] < p.VertCount)
                             {
-                                triVerts[k] = tile.verts[p.Verts[dt[k]]];
+                                triVerts[k] = tile.Verts[p.Verts[dt[k]]];
                             }
                             else
                             {
-                                triVerts[k] = tile.detailVerts[(pd.vertBase + dt[k] - p.VertCount)];
+                                triVerts[k] = tile.DetailVerts[(pd.VertBase + dt[k] - p.VertCount)];
                             }
                         }
 

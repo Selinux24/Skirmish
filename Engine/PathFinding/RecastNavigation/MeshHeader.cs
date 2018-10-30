@@ -14,87 +14,87 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Tile magic number. (Used to identify the data format.)
         /// </summary>
-        public int magic { get; set; }
+        public int Magic { get; set; }
         /// <summary>
         /// Tile data format version number.
         /// </summary>
-        public int version { get; set; }
+        public int Version { get; set; }
         /// <summary>
         /// The x-position of the tile within the dtNavMesh tile grid. (x, y, layer)
         /// </summary>
-        public int x { get; set; }
+        public int X { get; set; }
         /// <summary>
         /// The y-position of the tile within the dtNavMesh tile grid. (x, y, layer)
         /// </summary>
-        public int y { get; set; }
+        public int Y { get; set; }
         /// <summary>
         /// The layer of the tile within the dtNavMesh tile grid. (x, y, layer)
         /// </summary>
-        public int layer { get; set; }
+        public int Layer { get; set; }
         /// <summary>
         /// The user defined id of the tile.
         /// </summary>
-        public int userId { get; set; }
+        public int UserId { get; set; }
         /// <summary>
         /// The number of polygons in the tile.
         /// </summary>
-        public int polyCount { get; set; }
+        public int PolyCount { get; set; }
         /// <summary>
         /// The number of vertices in the tile.
         /// </summary>
-        public int vertCount;
+        public int VertCount { get; set; }
         /// <summary>
         /// The number of allocated links.
         /// </summary>
-        public int maxLinkCount { get; set; }
+        public int MaxLinkCount { get; set; }
         /// <summary>
         /// The number of sub-meshes in the detail mesh.
         /// </summary>
-        public int detailMeshCount { get; set; }
+        public int DetailMeshCount { get; set; }
         /// <summary>
         /// The number of unique vertices in the detail mesh. (In addition to the polygon vertices.)
         /// </summary>
-        public int detailVertCount { get; set; }
+        public int DetailVertCount { get; set; }
         /// <summary>
         /// The number of triangles in the detail mesh.
         /// </summary>
-        public int detailTriCount { get; set; }
+        public int DetailTriCount { get; set; }
         /// <summary>
         /// The number of bounding volume nodes. (Zero if bounding volumes are disabled.)
         /// </summary>
-        public int bvNodeCount { get; set; }
+        public int BvNodeCount { get; set; }
         /// <summary>
         /// The number of off-mesh connections.
         /// </summary>
-        public int offMeshConCount { get; set; }
+        public int OffMeshConCount { get; set; }
         /// <summary>
         /// The index of the first polygon which is an off-mesh connection.
         /// </summary>
-        public int offMeshBase { get; set; }
+        public int OffMeshBase { get; set; }
         /// <summary>
         /// The height of the agents using the tile.
         /// </summary>
-        public float walkableHeight { get; set; }
+        public float WalkableHeight { get; set; }
         /// <summary>
         /// The radius of the agents using the tile.
         /// </summary>
-        public float walkableRadius { get; set; }
+        public float WalkableRadius { get; set; }
         /// <summary>
         /// The maximum climb height of the agents using the tile.
         /// </summary>
-        public float walkableClimb { get; set; }
+        public float WalkableClimb { get; set; }
         /// <summary>
         /// The minimum bounds of the tile's AABB. [(x, y, z)]
         /// </summary>
-        public Vector3 bmin { get; set; }
+        public Vector3 BMin { get; set; }
         /// <summary>
         /// The maximum bounds of the tile's AABB. [(x, y, z)]
         /// </summary>
-        public Vector3 bmax { get; set; }
+        public Vector3 BMax { get; set; }
         /// <summary>
         /// The bounding volume quantization factor.
         /// </summary>
-        public float bvQuantFactor { get; set; }
+        public float BvQuantFactor { get; set; }
 
         /// <summary>
         /// Serialization constructor
@@ -103,27 +103,27 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="context">Serializatio context</param>
         internal MeshHeader(SerializationInfo info, StreamingContext context)
         {
-            magic = info.GetInt32("magic");
-            version = info.GetInt32("version");
-            x = info.GetInt32("x");
-            y = info.GetInt32("y");
-            layer = info.GetInt32("layer");
-            userId = info.GetInt32("userId");
-            polyCount = info.GetInt32("polyCount");
-            vertCount = info.GetInt32("vertCount");
-            maxLinkCount = info.GetInt32("maxLinkCount");
-            detailMeshCount = info.GetInt32("detailMeshCount");
-            detailVertCount = info.GetInt32("detailVertCount");
-            detailTriCount = info.GetInt32("detailTriCount");
-            bvNodeCount = info.GetInt32("bvNodeCount");
-            offMeshConCount = info.GetInt32("offMeshConCount");
-            offMeshBase = info.GetInt32("offMeshBase");
-            walkableHeight = info.GetSingle("walkableHeight");
-            walkableRadius = info.GetSingle("walkableRadius");
-            walkableClimb = info.GetSingle("walkableClimb");
-            bmin = info.GetVector3("bmin");
-            bmax = info.GetVector3("bmax");
-            bvQuantFactor = info.GetSingle("bvQuantFactor");
+            Magic = info.GetInt32("magic");
+            Version = info.GetInt32("version");
+            X = info.GetInt32("x");
+            Y = info.GetInt32("y");
+            Layer = info.GetInt32("layer");
+            UserId = info.GetInt32("userId");
+            PolyCount = info.GetInt32("polyCount");
+            VertCount = info.GetInt32("vertCount");
+            MaxLinkCount = info.GetInt32("maxLinkCount");
+            DetailMeshCount = info.GetInt32("detailMeshCount");
+            DetailVertCount = info.GetInt32("detailVertCount");
+            DetailTriCount = info.GetInt32("detailTriCount");
+            BvNodeCount = info.GetInt32("bvNodeCount");
+            OffMeshConCount = info.GetInt32("offMeshConCount");
+            OffMeshBase = info.GetInt32("offMeshBase");
+            WalkableHeight = info.GetSingle("walkableHeight");
+            WalkableRadius = info.GetSingle("walkableRadius");
+            WalkableClimb = info.GetSingle("walkableClimb");
+            BMin = info.GetVector3("bmin");
+            BMax = info.GetVector3("bmax");
+            BvQuantFactor = info.GetSingle("bvQuantFactor");
         }
         /// <summary>
         /// Populates a SerializationInfo with the data needed to serialize the target object.
@@ -133,27 +133,27 @@ namespace Engine.PathFinding.RecastNavigation
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("magic", magic);
-            info.AddValue("version", version);
-            info.AddValue("x", x);
-            info.AddValue("y", y);
-            info.AddValue("layer", layer);
-            info.AddValue("userId", userId);
-            info.AddValue("polyCount", polyCount);
-            info.AddValue("vertCount", vertCount);
-            info.AddValue("maxLinkCount", maxLinkCount);
-            info.AddValue("detailMeshCount", detailMeshCount);
-            info.AddValue("detailVertCount", detailVertCount);
-            info.AddValue("detailTriCount", detailTriCount);
-            info.AddValue("bvNodeCount", bvNodeCount);
-            info.AddValue("offMeshConCount", offMeshConCount);
-            info.AddValue("offMeshBase", offMeshBase);
-            info.AddValue("walkableHeight", walkableHeight);
-            info.AddValue("walkableRadius", walkableRadius);
-            info.AddValue("walkableClimb", walkableClimb);
-            info.AddVector3("bmin", bmin);
-            info.AddVector3("bmax", bmax);
-            info.AddValue("bvQuantFactor", bvQuantFactor);
+            info.AddValue("magic", Magic);
+            info.AddValue("version", Version);
+            info.AddValue("x", X);
+            info.AddValue("y", Y);
+            info.AddValue("layer", Layer);
+            info.AddValue("userId", UserId);
+            info.AddValue("polyCount", PolyCount);
+            info.AddValue("vertCount", VertCount);
+            info.AddValue("maxLinkCount", MaxLinkCount);
+            info.AddValue("detailMeshCount", DetailMeshCount);
+            info.AddValue("detailVertCount", DetailVertCount);
+            info.AddValue("detailTriCount", DetailTriCount);
+            info.AddValue("bvNodeCount", BvNodeCount);
+            info.AddValue("offMeshConCount", OffMeshConCount);
+            info.AddValue("offMeshBase", OffMeshBase);
+            info.AddValue("walkableHeight", WalkableHeight);
+            info.AddValue("walkableRadius", WalkableRadius);
+            info.AddValue("walkableClimb", WalkableClimb);
+            info.AddVector3("bmin", BMin);
+            info.AddVector3("bmax", BMax);
+            info.AddValue("bvQuantFactor", BvQuantFactor);
         }
 
         /// <summary>
@@ -163,10 +163,10 @@ namespace Engine.PathFinding.RecastNavigation
         public override string ToString()
         {
             return string.Format("{0}.{1}.{2}; Id: {3}; Bbox: {4}{5}; Polys: {6}; Vertices: {7}; DMeshes: {8}; DTriangles: {9}; DVertices: {10}",
-                x, y, layer, userId,
-                bmin, bmax,
-                polyCount, vertCount,
-                detailMeshCount, detailTriCount, detailVertCount);
+                X, Y, Layer, UserId,
+                BMin, BMax,
+                PolyCount, VertCount,
+                DetailMeshCount, DetailTriCount, DetailVertCount);
         }
     };
 }

@@ -7,58 +7,58 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The size of each cell. (On the xz-plane.)
         /// </summary>
-        public float cs;
+        public float CS { get; set; }
         /// <summary>
         /// The height of each cell. (The minimum increment along the y-axis.)
         /// </summary>
-        public float ch;
+        public float CH { get; set; }
         /// <summary>
         /// The heightfield. [Size: width * height]
         /// </summary>
-        public int[] heights;
+        public int[] Heights { get; set; }
         /// <summary>
         /// Area ids. [Size: Same as #heights]
         /// </summary>
-        public TileCacheAreas[] areas;
+        public TileCacheAreas[] Areas { get; set; }
         /// <summary>
         /// Packed neighbor connection information. [Size: Same as #heights]
         /// </summary>
-        public int[] cons;
+        public int[] Cons { get; set; }
         /// <summary>
         /// Bounding box
         /// </summary>
-        public BoundingBox boundingBox;
+        public BoundingBox BoundingBox { get; set; }
         /// <summary>
         /// Height min range
         /// </summary>
-        public int hmin;
+        public int HMin { get; set; }
         /// <summary>
         /// Height max range
         /// </summary>
-        public int hmax;
+        public int HMax { get; set; }
         /// <summary>
         /// Width of the layer.
         /// </summary>
-        public int width;
+        public int Width { get; set; }
         /// <summary>
         /// Height of the layer.
         /// </summary>
-        public int height;
+        public int Height { get; set; }
         /// <summary>
         /// Minx usable sub-region.
         /// </summary>
-        public int minx;
+        public int MinX { get; set; }
         /// <summary>
         /// Maxx usable sub-region.
         /// </summary>
-        public int maxx;
+        public int MaxX { get; set; }
         /// <summary>
         /// Miny usable sub-region.
         /// </summary>
-        public int miny;
+        public int MinY { get; set; }
         /// <summary>
         /// Maxy usable sub-region.
         /// </summary>
-        public int maxy;
+        public int MaxY { get; set; }
     }
 }

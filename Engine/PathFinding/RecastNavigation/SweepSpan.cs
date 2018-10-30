@@ -6,19 +6,19 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// row id
         /// </summary>
-        public int rid;
+        public int RId { get; set; }
         /// <summary>
         /// region id
         /// </summary>
-        public int id;
+        public int Id { get; set; }
         /// <summary>
         /// number samples
         /// </summary>
-        public int ns;
+        public int NS { get; set; }
         /// <summary>
         /// neighbour id
         /// </summary>
-        public int nei;
+        public int Nei { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -26,11 +26,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            if (rid != 0 || id != 0 || ns != 0 || nei != 0)
+            if (RId != 0 || Id != 0 || NS != 0 || Nei != 0)
             {
                 return string.Format(
                     "Row Id: {0}; Region Id: {1}; Samples: {2}; Neighbor Id: {3};",
-                    this.rid, this.id, this.ns, this.nei);
+                    this.RId, this.Id, this.NS, this.Nei);
             }
             else
             {

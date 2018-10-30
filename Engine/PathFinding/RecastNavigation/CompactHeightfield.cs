@@ -7,62 +7,62 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The width of the heightfield. (Along the x-axis in cell units.)
         /// </summary>
-        public int width;
+        public int Width { get; set; }
         /// <summary>
         /// The height of the heightfield. (Along the z-axis in cell units.)
         /// </summary>
-        public int height;
+        public int Height { get; set; }
         /// <summary>
         /// The number of spans in the heightfield.
         /// </summary>
-        public int spanCount;
+        public int SpanCount { get; set; }
         /// <summary>
         /// The walkable height used during the build of the field.  (See: rcConfig::walkableHeight)
         /// </summary>
-        public int walkableHeight;
+        public int WalkableHeight { get; set; }
         /// <summary>
         /// The walkable climb used during the build of the field. (See: rcConfig::walkableClimb)
         /// </summary>
-        public int walkableClimb;
+        public int WalkableClimb { get; set; }
         /// <summary>
         /// The AABB border size used during the build of the field. (See: rcConfig::borderSize)
         /// </summary>
-        public int borderSize;
+        public int BorderSize { get; set; }
         /// <summary>
         /// The maximum distance value of any span within the field.         
         /// </summary>
-        public int maxDistance;
+        public int MaxDistance { get; set; }
         /// <summary>
         /// The maximum region id of any span within the field. 
         /// </summary>
-        public int maxRegions;
+        public int MaxRegions { get; set; }
         /// <summary>
         /// The minimum bounds in world space. [(x, y, z)]
         /// </summary>
-        public BoundingBox boundingBox;
+        public BoundingBox BoundingBox { get; set; }
         /// <summary>
         /// The size of each cell. (On the xz-plane.)
         /// </summary>
-        public float cs;
+        public float CS { get; set; }
         /// <summary>
         /// The height of each cell. (The minimum increment along the y-axis.)
         /// </summary>
-        public float ch;
+        public float CH { get; set; }
         /// <summary>
         /// Array of cells. [Size: width*height] 
         /// </summary>
-        public CompactCell[] cells;
+        public CompactCell[] Cells { get; set; }
         /// <summary>
         /// Array of spans. [Size: spanCount]
         /// </summary>
-        public CompactSpan[] spans;
+        public CompactSpan[] Spans { get; set; }
         /// <summary>
         /// Array containing border distance data. [Size: spanCount]      
         /// </summary>
-        public int[] dist;
+        public int[] Dist { get; set; }
         /// <summary>
         /// Array containing area id data. [Size: spanCount] 
         /// </summary>
-        public TileCacheAreas[] areas;
+        public TileCacheAreas[] Areas { get; set; }
     }
 }

@@ -14,15 +14,15 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Minimum bounds of the node's AABB. [(x, y, z)]
         /// </summary>
-        public Int3 bmin;
+        public Int3 BMin { get; set; }
         /// <summary>
         /// Maximum bounds of the node's AABB. [(x, y, z)]
         /// </summary>
-        public Int3 bmax;
+        public Int3 BMax { get; set; }
         /// <summary>
         /// The node's index. (Negative for escape sequence.)
         /// </summary>
-        public int i;
+        public int I { get; set; }
 
         /// <summary>
         /// Constructor
@@ -39,9 +39,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="context">Serializatio context</param>
         protected BVNode(SerializationInfo info, StreamingContext context)
         {
-            bmin = info.GetInt3("bmin");
-            bmax = info.GetInt3("bmax");
-            i = info.GetInt32("i");
+            BMin = info.GetInt3("bmin");
+            BMax = info.GetInt3("bmax");
+            I = info.GetInt32("i");
         }
         /// <summary>
         /// Populates a SerializationInfo with the data needed to serialize the target object.
@@ -51,9 +51,9 @@ namespace Engine.PathFinding.RecastNavigation
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public virtual void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddInt3("bmin", bmin);
-            info.AddInt3("bmax", bmax);
-            info.AddValue("i", i);
+            info.AddInt3("bmin", BMin);
+            info.AddInt3("bmax", BMax);
+            info.AddValue("i", I);
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("bmin: {0}; bmax: {1}; i: {2};", bmin, bmax, i);
+            return string.Format("bmin: {0}; bmax: {1}; i: {2};", BMin, BMax, I);
         }
     }
 }

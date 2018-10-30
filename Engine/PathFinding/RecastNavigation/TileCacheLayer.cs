@@ -9,8 +9,8 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public int RegCount { get; set; }
         public int[] Heights { get; set; }
-        public TileCacheAreas[] areas { get; set; }
-        public int[] cons { get; set; }
-        public int[] regs { get; set; }
+        public TileCacheAreas[] Areas { get; set; }
+        public int[] Cons { get; set; }
+        public int[] Regs { get; set; }
     }
 }

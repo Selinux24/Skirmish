@@ -177,18 +177,18 @@ namespace Engine.PathFinding.RecastNavigation
             // Fill in header.
             chf = new CompactHeightfield
             {
-                width = w,
-                height = h,
-                spanCount = spanCount,
-                walkableHeight = walkableHeight,
-                walkableClimb = walkableClimb,
-                maxRegions = 0,
-                boundingBox = bbox,
-                cs = hf.cs,
-                ch = hf.ch,
-                cells = new CompactCell[w * h],
-                spans = new CompactSpan[spanCount],
-                areas = new TileCacheAreas[spanCount]
+                Width = w,
+                Height = h,
+                SpanCount = spanCount,
+                WalkableHeight = walkableHeight,
+                WalkableClimb = walkableClimb,
+                MaxRegions = 0,
+                BoundingBox = bbox,
+                CS = hf.cs,
+                CH = hf.ch,
+                Cells = new CompactCell[w * h],
+                Spans = new CompactSpan[spanCount],
+                Areas = new TileCacheAreas[spanCount]
             };
 
             // Fill in cells and spans.
@@ -207,8 +207,8 @@ namespace Engine.PathFinding.RecastNavigation
 
                     var c = new CompactCell
                     {
-                        index = idx,
-                        count = 0
+                        Index = idx,
+                        Count = 0
                     };
 
                     while (s != null)
@@ -217,17 +217,17 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             int bot = s.smax;
                             int top = s.next != null ? s.next.smin : int.MaxValue;
-                            chf.spans[idx].Y = MathUtil.Clamp(bot, 0, 0xffff);
-                            chf.spans[idx].H = MathUtil.Clamp(top - bot, 0, 0xff);
-                            chf.areas[idx] = s.area;
+                            chf.Spans[idx].Y = MathUtil.Clamp(bot, 0, 0xffff);
+                            chf.Spans[idx].H = MathUtil.Clamp(top - bot, 0, 0xff);
+                            chf.Areas[idx] = s.area;
                             idx++;
-                            c.count++;
+                            c.Count++;
                         }
 
                         s = s.next;
                     }
 
-                    chf.cells[x + y * w] = c;
+                    chf.Cells[x + y * w] = c;
                 }
             }
 
@@ -238,11 +238,11 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
+                    var c = chf.Cells[x + y * w];
 
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; i++)
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; i++)
                     {
-                        var s = chf.spans[i];
+                        var s = chf.Spans[i];
 
                         for (int dir = 0; dir < 4; dir++)
                         {
@@ -257,11 +257,11 @@ namespace Engine.PathFinding.RecastNavigation
 
                             // Iterate over all neighbour spans and check if any of the is
                             // accessible from current cell.
-                            var nc = chf.cells[nx + ny * w];
+                            var nc = chf.Cells[nx + ny * w];
 
-                            for (int k = nc.index, nk = (nc.index + nc.count); k < nk; ++k)
+                            for (int k = nc.Index, nk = (nc.Index + nc.Count); k < nk; ++k)
                             {
-                                var ns = chf.spans[k];
+                                var ns = chf.Spans[k];
 
                                 int bot = Math.Max(s.Y, ns.Y);
                                 int top = Math.Min(s.Y + s.H, ns.Y + ns.H);
@@ -271,7 +271,7 @@ namespace Engine.PathFinding.RecastNavigation
                                 if ((top - bot) >= walkableHeight && Math.Abs(ns.Y - s.Y) <= walkableClimb)
                                 {
                                     // Mark direction as walkable.
-                                    int lidx = k - nc.index;
+                                    int lidx = k - nc.Index;
                                     if (lidx < 0 || lidx > maxLayers)
                                     {
                                         tooHighNeighbour = Math.Max(tooHighNeighbour, lidx);
@@ -284,7 +284,7 @@ namespace Engine.PathFinding.RecastNavigation
                             }
                         }
 
-                        chf.spans[i] = s;
+                        chf.Spans[i] = s;
                     }
                 }
             }
@@ -338,27 +338,27 @@ namespace Engine.PathFinding.RecastNavigation
         /// </remarks>
         public static bool ErodeWalkableArea(int radius, CompactHeightfield chf)
         {
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
 
             // Init distance.
-            int[] dist = Helper.CreateArray(chf.spanCount, 0xff);
+            int[] dist = Helper.CreateArray(chf.SpanCount, 0xff);
 
             // Mark boundary cells.
             for (int y = 0; y < h; ++y)
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    CompactCell c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    CompactCell c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        if (chf.areas[i] == TileCacheAreas.RC_NULL_AREA)
+                        if (chf.Areas[i] == TileCacheAreas.RC_NULL_AREA)
                         {
                             dist[i] = 0;
                         }
                         else
                         {
-                            CompactSpan s = chf.spans[i];
+                            CompactSpan s = chf.Spans[i];
                             int nc = 0;
                             for (int dir = 0; dir < 4; ++dir)
                             {
@@ -366,8 +366,8 @@ namespace Engine.PathFinding.RecastNavigation
                                 {
                                     int nx = x + GetDirOffsetX(dir);
                                     int ny = y + GetDirOffsetY(dir);
-                                    int nidx = chf.cells[nx + ny * w].index + GetCon(s, dir);
-                                    if (chf.areas[nidx] != TileCacheAreas.RC_NULL_AREA)
+                                    int nidx = chf.Cells[nx + ny * w].Index + GetCon(s, dir);
+                                    if (chf.Areas[nidx] != TileCacheAreas.RC_NULL_AREA)
                                     {
                                         nc++;
                                     }
@@ -390,17 +390,17 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    CompactCell c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    CompactCell c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        CompactSpan s = chf.spans[i];
+                        CompactSpan s = chf.Spans[i];
                         if (GetCon(s, 0) != RC_NOT_CONNECTED)
                         {
                             // (-1,0)
                             int ax = x + GetDirOffsetX(0);
                             int ay = y + GetDirOffsetY(0);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 0);
-                            CompactSpan asp = chf.spans[ai];
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 0);
+                            CompactSpan asp = chf.Spans[ai];
                             nd = Math.Min(dist[ai] + 2, 255);
                             if (nd < dist[i])
                             {
@@ -412,7 +412,7 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int aax = ax + GetDirOffsetX(3);
                                 int aay = ay + GetDirOffsetY(3);
-                                int aai = chf.cells[aax + aay * w].index + GetCon(asp, 3);
+                                int aai = chf.Cells[aax + aay * w].Index + GetCon(asp, 3);
                                 nd = Math.Min(dist[aai] + 3, 255);
                                 if (nd < dist[i])
                                 {
@@ -425,8 +425,8 @@ namespace Engine.PathFinding.RecastNavigation
                             // (0,-1)
                             int ax = x + GetDirOffsetX(3);
                             int ay = y + GetDirOffsetY(3);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 3);
-                            CompactSpan asp = chf.spans[ai];
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 3);
+                            CompactSpan asp = chf.Spans[ai];
                             nd = Math.Min(dist[ai] + 2, 255);
                             if (nd < dist[i])
                             {
@@ -438,7 +438,7 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int aax = ax + GetDirOffsetX(2);
                                 int aay = ay + GetDirOffsetY(2);
-                                int aai = chf.cells[aax + aay * w].index + GetCon(asp, 2);
+                                int aai = chf.Cells[aax + aay * w].Index + GetCon(asp, 2);
                                 nd = Math.Min(dist[aai] + 3, 255);
                                 if (nd < dist[i])
                                 {
@@ -455,17 +455,17 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = w - 1; x >= 0; --x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
+                        var s = chf.Spans[i];
                         if (GetCon(s, 2) != RC_NOT_CONNECTED)
                         {
                             // (1,0)
                             int ax = x + GetDirOffsetX(2);
                             int ay = y + GetDirOffsetY(2);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 2);
-                            var asp = chf.spans[ai];
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 2);
+                            var asp = chf.Spans[ai];
                             nd = Math.Min(dist[ai] + 2, 255);
                             if (nd < dist[i])
                             {
@@ -477,7 +477,7 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int aax = ax + GetDirOffsetX(1);
                                 int aay = ay + GetDirOffsetY(1);
-                                int aai = chf.cells[aax + aay * w].index + GetCon(asp, 1);
+                                int aai = chf.Cells[aax + aay * w].Index + GetCon(asp, 1);
                                 nd = Math.Min(dist[aai] + 3, 255);
                                 if (nd < dist[i])
                                 {
@@ -490,8 +490,8 @@ namespace Engine.PathFinding.RecastNavigation
                             // (0,1)
                             int ax = x + GetDirOffsetX(1);
                             int ay = y + GetDirOffsetY(1);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 1);
-                            var asp = chf.spans[ai];
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 1);
+                            var asp = chf.Spans[ai];
                             nd = Math.Min(dist[ai] + 2, 255);
                             if (nd < dist[i])
                             {
@@ -503,7 +503,7 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int aax = ax + GetDirOffsetX(0);
                                 int aay = ay + GetDirOffsetY(0);
-                                int aai = chf.cells[aax + aay * w].index + GetCon(asp, 0);
+                                int aai = chf.Cells[aax + aay * w].Index + GetCon(asp, 0);
                                 nd = Math.Min(dist[aai] + 3, 255);
                                 if (nd < dist[i])
                                 {
@@ -516,11 +516,11 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             int thr = radius * 2;
-            for (int i = 0; i < chf.spanCount; ++i)
+            for (int i = 0; i < chf.SpanCount; ++i)
             {
                 if (dist[i] < thr)
                 {
-                    chf.areas[i] = TileCacheAreas.RC_NULL_AREA;
+                    chf.Areas[i] = TileCacheAreas.RC_NULL_AREA;
                 }
             }
 
@@ -547,30 +547,30 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns always true</returns>
         public static bool MedianFilterWalkableArea(CompactHeightfield chf)
         {
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
 
             // Init distance.
-            TileCacheAreas[] areas = Helper.CreateArray(chf.spanCount, (TileCacheAreas)0xff);
+            TileCacheAreas[] areas = Helper.CreateArray(chf.SpanCount, (TileCacheAreas)0xff);
 
             for (int y = 0; y < h; ++y)
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
-                        if (chf.areas[i] == TileCacheAreas.RC_NULL_AREA)
+                        var s = chf.Spans[i];
+                        if (chf.Areas[i] == TileCacheAreas.RC_NULL_AREA)
                         {
-                            areas[i] = chf.areas[i];
+                            areas[i] = chf.Areas[i];
                             continue;
                         }
 
                         TileCacheAreas[] nei = new TileCacheAreas[9];
                         for (int j = 0; j < 9; ++j)
                         {
-                            nei[j] = chf.areas[i];
+                            nei[j] = chf.Areas[i];
                         }
 
                         for (int dir = 0; dir < 4; ++dir)
@@ -579,22 +579,22 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int ax = x + GetDirOffsetX(dir);
                                 int ay = y + GetDirOffsetY(dir);
-                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
-                                if (chf.areas[ai] != TileCacheAreas.RC_NULL_AREA)
+                                int ai = chf.Cells[ax + ay * w].Index + GetCon(s, dir);
+                                if (chf.Areas[ai] != TileCacheAreas.RC_NULL_AREA)
                                 {
-                                    nei[dir * 2 + 0] = chf.areas[ai];
+                                    nei[dir * 2 + 0] = chf.Areas[ai];
                                 }
 
-                                var a = chf.spans[ai];
+                                var a = chf.Spans[ai];
                                 int dir2 = (dir + 1) & 0x3;
                                 if (GetCon(a, dir2) != RC_NOT_CONNECTED)
                                 {
                                     int ax2 = ax + GetDirOffsetX(dir2);
                                     int ay2 = ay + GetDirOffsetY(dir2);
-                                    int ai2 = chf.cells[ax2 + ay2 * w].index + GetCon(a, dir2);
-                                    if (chf.areas[ai2] != TileCacheAreas.RC_NULL_AREA)
+                                    int ai2 = chf.Cells[ax2 + ay2 * w].Index + GetCon(a, dir2);
+                                    if (chf.Areas[ai2] != TileCacheAreas.RC_NULL_AREA)
                                     {
-                                        nei[dir * 2 + 1] = chf.areas[ai2];
+                                        nei[dir * 2 + 1] = chf.Areas[ai2];
                                     }
                                 }
                             }
@@ -605,7 +605,7 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
-            Array.Copy(areas, chf.areas, chf.spanCount);
+            Array.Copy(areas, chf.Areas, chf.SpanCount);
 
             return true;
         }
@@ -621,34 +621,34 @@ namespace Engine.PathFinding.RecastNavigation
         /// </remarks>
         public static void MarkBoxArea(Vector3 bmin, Vector3 bmax, TileCacheAreas areaId, CompactHeightfield chf)
         {
-            int minx = (int)((bmin.X - chf.boundingBox.Minimum.X) / chf.cs);
-            int miny = (int)((bmin.Y - chf.boundingBox.Minimum.Y) / chf.ch);
-            int minz = (int)((bmin.Z - chf.boundingBox.Minimum.Z) / chf.cs);
-            int maxx = (int)((bmax.X - chf.boundingBox.Minimum.X) / chf.cs);
-            int maxy = (int)((bmax.Y - chf.boundingBox.Minimum.Y) / chf.ch);
-            int maxz = (int)((bmax.Z - chf.boundingBox.Minimum.Z) / chf.cs);
+            int minx = (int)((bmin.X - chf.BoundingBox.Minimum.X) / chf.CS);
+            int miny = (int)((bmin.Y - chf.BoundingBox.Minimum.Y) / chf.CH);
+            int minz = (int)((bmin.Z - chf.BoundingBox.Minimum.Z) / chf.CS);
+            int maxx = (int)((bmax.X - chf.BoundingBox.Minimum.X) / chf.CS);
+            int maxy = (int)((bmax.Y - chf.BoundingBox.Minimum.Y) / chf.CH);
+            int maxz = (int)((bmax.Z - chf.BoundingBox.Minimum.Z) / chf.CS);
 
             if (maxx < 0) return;
-            if (minx >= chf.width) return;
+            if (minx >= chf.Width) return;
             if (maxz < 0) return;
-            if (minz >= chf.height) return;
+            if (minz >= chf.Height) return;
 
             if (minx < 0) minx = 0;
-            if (maxx >= chf.width) maxx = chf.width - 1;
+            if (maxx >= chf.Width) maxx = chf.Width - 1;
             if (minz < 0) minz = 0;
-            if (maxz >= chf.height) maxz = chf.height - 1;
+            if (maxz >= chf.Height) maxz = chf.Height - 1;
 
             for (int z = minz; z <= maxz; ++z)
             {
                 for (int x = minx; x <= maxx; ++x)
                 {
-                    var c = chf.cells[x + z * chf.width];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + z * chf.Width];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
-                        if (s.Y >= miny && s.Y <= maxy && chf.areas[i] != TileCacheAreas.RC_NULL_AREA)
+                        var s = chf.Spans[i];
+                        if (s.Y >= miny && s.Y <= maxy && chf.Areas[i] != TileCacheAreas.RC_NULL_AREA)
                         {
-                            chf.areas[i] = areaId;
+                            chf.Areas[i] = areaId;
                         }
                     }
                 }
@@ -704,22 +704,22 @@ namespace Engine.PathFinding.RecastNavigation
             bmin[1] = hmin;
             bmax[1] = hmax;
 
-            int minx = (int)((bmin[0] - chf.boundingBox.Minimum[0]) / chf.cs);
-            int miny = (int)((bmin[1] - chf.boundingBox.Minimum[1]) / chf.ch);
-            int minz = (int)((bmin[2] - chf.boundingBox.Minimum[2]) / chf.cs);
-            int maxx = (int)((bmax[0] - chf.boundingBox.Minimum[0]) / chf.cs);
-            int maxy = (int)((bmax[1] - chf.boundingBox.Minimum[1]) / chf.ch);
-            int maxz = (int)((bmax[2] - chf.boundingBox.Minimum[2]) / chf.cs);
+            int minx = (int)((bmin[0] - chf.BoundingBox.Minimum[0]) / chf.CS);
+            int miny = (int)((bmin[1] - chf.BoundingBox.Minimum[1]) / chf.CH);
+            int minz = (int)((bmin[2] - chf.BoundingBox.Minimum[2]) / chf.CS);
+            int maxx = (int)((bmax[0] - chf.BoundingBox.Minimum[0]) / chf.CS);
+            int maxy = (int)((bmax[1] - chf.BoundingBox.Minimum[1]) / chf.CH);
+            int maxz = (int)((bmax[2] - chf.BoundingBox.Minimum[2]) / chf.CS);
 
             if (maxx < 0) return;
-            if (minx >= chf.width) return;
+            if (minx >= chf.Width) return;
             if (maxz < 0) return;
-            if (minz >= chf.height) return;
+            if (minz >= chf.Height) return;
 
             if (minx < 0) minx = 0;
-            if (maxx >= chf.width) maxx = chf.width - 1;
+            if (maxx >= chf.Width) maxx = chf.Width - 1;
             if (minz < 0) minz = 0;
-            if (maxz >= chf.height) maxz = chf.height - 1;
+            if (maxz >= chf.Height) maxz = chf.Height - 1;
 
 
             // TODO: Optimize.
@@ -727,11 +727,11 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = minx; x <= maxx; ++x)
                 {
-                    CompactCell c = chf.cells[x + z * chf.width];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    CompactCell c = chf.Cells[x + z * chf.Width];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        CompactSpan s = chf.spans[i];
-                        if (chf.areas[i] == TileCacheAreas.RC_NULL_AREA)
+                        CompactSpan s = chf.Spans[i];
+                        if (chf.Areas[i] == TileCacheAreas.RC_NULL_AREA)
                         {
                             continue;
                         }
@@ -739,13 +739,13 @@ namespace Engine.PathFinding.RecastNavigation
                         if (s.Y >= miny && s.Y <= maxy)
                         {
                             Vector3 p = new Vector3();
-                            p[0] = chf.boundingBox.Minimum[0] + (x + 0.5f) * chf.cs;
+                            p[0] = chf.BoundingBox.Minimum[0] + (x + 0.5f) * chf.CS;
                             p[1] = 0;
-                            p[2] = chf.boundingBox.Minimum[2] + (z + 0.5f) * chf.cs;
+                            p[2] = chf.BoundingBox.Minimum[2] + (z + 0.5f) * chf.CS;
 
                             if (PointInPoly(nverts, verts, p))
                             {
-                                chf.areas[i] = areaId;
+                                chf.Areas[i] = areaId;
                             }
                         }
                     }
@@ -857,48 +857,48 @@ namespace Engine.PathFinding.RecastNavigation
             bmax.Z = pos.Z + r;
             float r2 = r * r;
 
-            int minx = (int)((bmin.X - chf.boundingBox.Minimum.X) / chf.cs);
-            int miny = (int)((bmin.Y - chf.boundingBox.Minimum.Y) / chf.ch);
-            int minz = (int)((bmin.Z - chf.boundingBox.Minimum.Z) / chf.cs);
-            int maxx = (int)((bmax.X - chf.boundingBox.Minimum.X) / chf.cs);
-            int maxy = (int)((bmax.Y - chf.boundingBox.Minimum.Y) / chf.ch);
-            int maxz = (int)((bmax.Z - chf.boundingBox.Minimum.Z) / chf.cs);
+            int minx = (int)((bmin.X - chf.BoundingBox.Minimum.X) / chf.CS);
+            int miny = (int)((bmin.Y - chf.BoundingBox.Minimum.Y) / chf.CH);
+            int minz = (int)((bmin.Z - chf.BoundingBox.Minimum.Z) / chf.CS);
+            int maxx = (int)((bmax.X - chf.BoundingBox.Minimum.X) / chf.CS);
+            int maxy = (int)((bmax.Y - chf.BoundingBox.Minimum.Y) / chf.CH);
+            int maxz = (int)((bmax.Z - chf.BoundingBox.Minimum.Z) / chf.CS);
 
             if (maxx < 0) return;
-            if (minx >= chf.width) return;
+            if (minx >= chf.Width) return;
             if (maxz < 0) return;
-            if (minz >= chf.height) return;
+            if (minz >= chf.Height) return;
 
             if (minx < 0) minx = 0;
-            if (maxx >= chf.width) maxx = chf.width - 1;
+            if (maxx >= chf.Width) maxx = chf.Width - 1;
             if (minz < 0) minz = 0;
-            if (maxz >= chf.height) maxz = chf.height - 1;
+            if (maxz >= chf.Height) maxz = chf.Height - 1;
 
 
             for (int z = minz; z <= maxz; ++z)
             {
                 for (int x = minx; x <= maxx; ++x)
                 {
-                    var c = chf.cells[x + z * chf.width];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + z * chf.Width];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
+                        var s = chf.Spans[i];
 
-                        if (chf.areas[i] == TileCacheAreas.RC_NULL_AREA)
+                        if (chf.Areas[i] == TileCacheAreas.RC_NULL_AREA)
                         {
                             continue;
                         }
 
                         if (s.Y >= miny && s.Y <= maxy)
                         {
-                            float sx = chf.boundingBox.Minimum.X + (x + 0.5f) * chf.cs;
-                            float sz = chf.boundingBox.Minimum.Z + (z + 0.5f) * chf.cs;
+                            float sx = chf.BoundingBox.Minimum.X + (x + 0.5f) * chf.CS;
+                            float sz = chf.BoundingBox.Minimum.Z + (z + 0.5f) * chf.CS;
                             float dx = sx - pos.X;
                             float dz = sz - pos.Z;
 
                             if (dx * dx + dz * dz < r2)
                             {
-                                chf.areas[i] = areaId;
+                                chf.Areas[i] = areaId;
                             }
                         }
                     }
@@ -913,11 +913,11 @@ namespace Engine.PathFinding.RecastNavigation
 
         private static void CalculateDistanceField(CompactHeightfield chf, int[] src, out int maxDist)
         {
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
 
             // Init distance and points.
-            for (int i = 0; i < chf.spanCount; ++i)
+            for (int i = 0; i < chf.SpanCount; ++i)
             {
                 src[i] = 0xffff;
             }
@@ -927,11 +927,11 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
-                        var area = chf.areas[i];
+                        var s = chf.Spans[i];
+                        var area = chf.Areas[i];
 
                         int nc = 0;
                         for (int dir = 0; dir < 4; ++dir)
@@ -940,8 +940,8 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int ax = x + GetDirOffsetX(dir);
                                 int ay = y + GetDirOffsetY(dir);
-                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
-                                if (area == chf.areas[ai])
+                                int ai = chf.Cells[ax + ay * w].Index + GetCon(s, dir);
+                                if (area == chf.Areas[ai])
                                 {
                                     nc++;
                                 }
@@ -960,18 +960,18 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
+                        var s = chf.Spans[i];
 
                         if (GetCon(s, 0) != RC_NOT_CONNECTED)
                         {
                             // (-1,0)
                             int ax = x + GetDirOffsetX(0);
                             int ay = y + GetDirOffsetY(0);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 0);
-                            var a = chf.spans[ai];
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 0);
+                            var a = chf.Spans[ai];
                             if (src[ai] + 2 < src[i])
                             {
                                 src[i] = src[ai] + 2;
@@ -982,7 +982,7 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int aax = ax + GetDirOffsetX(3);
                                 int aay = ay + GetDirOffsetY(3);
-                                int aai = chf.cells[aax + aay * w].index + GetCon(a, 3);
+                                int aai = chf.Cells[aax + aay * w].Index + GetCon(a, 3);
                                 if (src[aai] + 3 < src[i])
                                 {
                                     src[i] = src[aai] + 3;
@@ -994,8 +994,8 @@ namespace Engine.PathFinding.RecastNavigation
                             // (0,-1)
                             int ax = x + GetDirOffsetX(3);
                             int ay = y + GetDirOffsetY(3);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 3);
-                            var a = chf.spans[ai];
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 3);
+                            var a = chf.Spans[ai];
                             if (src[ai] + 2 < src[i])
                             {
                                 src[i] = src[ai] + 2;
@@ -1006,7 +1006,7 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int aax = ax + GetDirOffsetX(2);
                                 int aay = ay + GetDirOffsetY(2);
-                                int aai = chf.cells[aax + aay * w].index + GetCon(a, 2);
+                                int aai = chf.Cells[aax + aay * w].Index + GetCon(a, 2);
                                 if (src[aai] + 3 < src[i])
                                 {
                                     src[i] = src[aai] + 3;
@@ -1022,18 +1022,18 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = w - 1; x >= 0; --x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
+                        var s = chf.Spans[i];
 
                         if (GetCon(s, 2) != RC_NOT_CONNECTED)
                         {
                             // (1,0)
                             int ax = x + GetDirOffsetX(2);
                             int ay = y + GetDirOffsetY(2);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 2);
-                            var a = chf.spans[ai];
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 2);
+                            var a = chf.Spans[ai];
                             if (src[ai] + 2 < src[i])
                             {
                                 src[i] = src[ai] + 2;
@@ -1044,7 +1044,7 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int aax = ax + GetDirOffsetX(1);
                                 int aay = ay + GetDirOffsetY(1);
-                                int aai = chf.cells[aax + aay * w].index + GetCon(a, 1);
+                                int aai = chf.Cells[aax + aay * w].Index + GetCon(a, 1);
                                 if (src[aai] + 3 < src[i])
                                 {
                                     src[i] = src[aai] + 3;
@@ -1056,8 +1056,8 @@ namespace Engine.PathFinding.RecastNavigation
                             // (0,1)
                             int ax = x + GetDirOffsetX(1);
                             int ay = y + GetDirOffsetY(1);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 1);
-                            var a = chf.spans[ai];
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 1);
+                            var a = chf.Spans[ai];
                             if (src[ai] + 2 < src[i])
                             {
                                 src[i] = src[ai] + 2;
@@ -1068,7 +1068,7 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int aax = ax + GetDirOffsetX(0);
                                 int aay = ay + GetDirOffsetY(0);
-                                int aai = chf.cells[aax + aay * w].index + GetCon(a, 0);
+                                int aai = chf.Cells[aax + aay * w].Index + GetCon(a, 0);
                                 if (src[aai] + 3 < src[i])
                                 {
                                     src[i] = src[aai] + 3;
@@ -1080,15 +1080,15 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             maxDist = 0;
-            for (int i = 0; i < chf.spanCount; ++i)
+            for (int i = 0; i < chf.SpanCount; ++i)
             {
                 maxDist = Math.Max(src[i], maxDist);
             }
         }
         private static int[] BoxBlur(CompactHeightfield chf, int thr, int[] src, int[] dst)
         {
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
 
             thr *= 2;
 
@@ -1096,10 +1096,10 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
+                        var s = chf.Spans[i];
                         var cd = src[i];
                         if (cd <= thr)
                         {
@@ -1114,16 +1114,16 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int ax = x + GetDirOffsetX(dir);
                                 int ay = y + GetDirOffsetY(dir);
-                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
+                                int ai = chf.Cells[ax + ay * w].Index + GetCon(s, dir);
                                 d += src[ai];
 
-                                var a = chf.spans[ai];
+                                var a = chf.Spans[ai];
                                 int dir2 = (dir + 1) & 0x3;
                                 if (GetCon(a, dir2) != RC_NOT_CONNECTED)
                                 {
                                     int ax2 = ax + GetDirOffsetX(dir2);
                                     int ay2 = ay + GetDirOffsetY(dir2);
-                                    int ai2 = chf.cells[ax2 + ay2 * w].index + GetCon(a, dir2);
+                                    int ai2 = chf.Cells[ax2 + ay2 * w].Index + GetCon(a, dir2);
                                     d += src[ai2];
                                 }
                                 else
@@ -1145,9 +1145,9 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static bool FloodRegion(int x, int y, int i, int level, int r, CompactHeightfield chf, int[] srcReg, int[] srcDist, List<int> stack)
         {
-            int w = chf.width;
+            int w = chf.Width;
 
-            var area = chf.areas[i];
+            var area = chf.Areas[i];
 
             // Flood fill mark region.
             stack.Clear();
@@ -1166,7 +1166,7 @@ namespace Engine.PathFinding.RecastNavigation
                 int cy = stack.Pop();
                 int cx = stack.Pop();
 
-                var cs = chf.spans[ci];
+                var cs = chf.Spans[ci];
 
                 // Check if any of the neighbours already have a valid region set.
                 int ar = 0;
@@ -1177,8 +1177,8 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         int ax = cx + GetDirOffsetX(dir);
                         int ay = cy + GetDirOffsetY(dir);
-                        int ai = chf.cells[ax + ay * w].index + GetCon(cs, dir);
-                        if (chf.areas[ai] != area)
+                        int ai = chf.Cells[ax + ay * w].Index + GetCon(cs, dir);
+                        if (chf.Areas[ai] != area)
                         {
                             continue;
                         }
@@ -1193,15 +1193,15 @@ namespace Engine.PathFinding.RecastNavigation
                             break;
                         }
 
-                        var a = chf.spans[ai];
+                        var a = chf.Spans[ai];
 
                         int dir2 = (dir + 1) & 0x3;
                         if (GetCon(a, dir2) != RC_NOT_CONNECTED)
                         {
                             int ax2 = ax + GetDirOffsetX(dir2);
                             int ay2 = ay + GetDirOffsetY(dir2);
-                            int ai2 = chf.cells[ax2 + ay2 * w].index + GetCon(a, dir2);
-                            if (chf.areas[ai2] != area)
+                            int ai2 = chf.Cells[ax2 + ay2 * w].Index + GetCon(a, dir2);
+                            if (chf.Areas[ai2] != area)
                             {
                                 continue;
                             }
@@ -1229,12 +1229,12 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         int ax = cx + GetDirOffsetX(dir);
                         int ay = cy + GetDirOffsetY(dir);
-                        int ai = chf.cells[ax + ay * w].index + GetCon(cs, dir);
-                        if (chf.areas[ai] != area)
+                        int ai = chf.Cells[ax + ay * w].Index + GetCon(cs, dir);
+                        if (chf.Areas[ai] != area)
                         {
                             continue;
                         }
-                        if (chf.dist[ai] >= lev && srcReg[ai] == 0)
+                        if (chf.Dist[ai] >= lev && srcReg[ai] == 0)
                         {
                             srcReg[ai] = r;
                             srcDist[ai] = 0;
@@ -1250,8 +1250,8 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static int[] ExpandRegions(int maxIter, int level, CompactHeightfield chf, int[] srcReg, int[] srcDist, int[] dstReg, int[] dstDist, List<int> stack, bool fillStack)
         {
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
 
             if (fillStack)
             {
@@ -1261,10 +1261,10 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     for (int x = 0; x < w; ++x)
                     {
-                        var c = chf.cells[x + y * w];
-                        for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                        var c = chf.Cells[x + y * w];
+                        for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                         {
-                            if (chf.dist[i] >= level && srcReg[i] == 0 && chf.areas[i] != TileCacheAreas.RC_NULL_AREA)
+                            if (chf.Dist[i] >= level && srcReg[i] == 0 && chf.Areas[i] != TileCacheAreas.RC_NULL_AREA)
                             {
                                 stack.Add(x);
                                 stack.Add(y);
@@ -1292,8 +1292,8 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 int failed = 0;
 
-                Array.Copy(srcReg, dstReg, chf.spanCount);
-                Array.Copy(srcDist, dstDist, chf.spanCount);
+                Array.Copy(srcReg, dstReg, chf.SpanCount);
+                Array.Copy(srcDist, dstDist, chf.SpanCount);
 
                 for (int j = 0; j < stack.Count; j += 3)
                 {
@@ -1308,15 +1308,15 @@ namespace Engine.PathFinding.RecastNavigation
 
                     int r = srcReg[i];
                     int d2 = int.MaxValue;
-                    var area = chf.areas[i];
-                    var s = chf.spans[i];
+                    var area = chf.Areas[i];
+                    var s = chf.Spans[i];
                     for (int dir = 0; dir < 4; ++dir)
                     {
                         if (GetCon(s, dir) == RC_NOT_CONNECTED) continue;
                         int ax = x + GetDirOffsetX(dir);
                         int ay = y + GetDirOffsetY(dir);
-                        int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
-                        if (chf.areas[ai] != area) continue;
+                        int ai = chf.Cells[ax + ay * w].Index + GetCon(s, dir);
+                        if (chf.Areas[ai] != area) continue;
                         if (srcReg[ai] > 0 && (srcReg[ai] & RC_BORDER_REG) == 0 && srcDist[ai] + 2 < d2)
                         {
                             r = srcReg[ai];
@@ -1358,8 +1358,8 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static void SortCellsByLevel(int startLevel, CompactHeightfield chf, int[] srcReg, int nbStacks, List<List<int>> stacks, int loglevelsPerStack) // the levels per stack (2 in our case) as a bit shift
         {
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
             startLevel = startLevel >> loglevelsPerStack;
 
             for (int j = 0; j < nbStacks; ++j)
@@ -1372,15 +1372,15 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        if (chf.areas[i] == TileCacheAreas.RC_NULL_AREA || srcReg[i] != 0)
+                        if (chf.Areas[i] == TileCacheAreas.RC_NULL_AREA || srcReg[i] != 0)
                         {
                             continue;
                         }
 
-                        int level = chf.dist[i] >> loglevelsPerStack;
+                        int level = chf.Dist[i] >> loglevelsPerStack;
                         int sId = startLevel - level;
                         if (sId >= nbStacks)
                         {
@@ -1572,13 +1572,13 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static bool IsSolidEdge(CompactHeightfield chf, int[] srcReg, int x, int y, int i, int dir)
         {
-            var s = chf.spans[i];
+            var s = chf.Spans[i];
             int r = 0;
             if (GetCon(s, dir) != RC_NOT_CONNECTED)
             {
                 int ax = x + GetDirOffsetX(dir);
                 int ay = y + GetDirOffsetY(dir);
-                int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
+                int ai = chf.Cells[ax + ay * chf.Width].Index + GetCon(s, dir);
                 r = srcReg[ai];
             }
             if (r == srcReg[i])
@@ -1601,7 +1601,7 @@ namespace Engine.PathFinding.RecastNavigation
             int startDir = dir;
             int starti = i;
 
-            var area = chf.areas[i];
+            var area = chf.Areas[i];
 
             int iter = 0;
             while (++iter < 40000)
@@ -1620,14 +1620,14 @@ namespace Engine.PathFinding.RecastNavigation
                         case 2: px++; break;
                     }
                     int r = 0;
-                    var s = chf.spans[i];
+                    var s = chf.Spans[i];
                     if (GetCon(s, dir) != RC_NOT_CONNECTED)
                     {
                         int ax = x + GetDirOffsetX(dir);
                         int ay = y + GetDirOffsetY(dir);
-                        int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
-                        r = chf.spans[ai].Reg;
-                        if (area != chf.areas[ai])
+                        int ai = chf.Cells[ax + ay * chf.Width].Index + GetCon(s, dir);
+                        r = chf.Spans[ai].Reg;
+                        if (area != chf.Areas[ai])
                         {
                             isAreaBorder = true;
                         }
@@ -1650,11 +1650,11 @@ namespace Engine.PathFinding.RecastNavigation
                     int ni = -1;
                     int nx = x + GetDirOffsetX(dir);
                     int ny = y + GetDirOffsetY(dir);
-                    var s = chf.spans[i];
+                    var s = chf.Spans[i];
                     if (GetCon(s, dir) != RC_NOT_CONNECTED)
                     {
-                        var nc = chf.cells[nx + ny * chf.width];
-                        ni = nc.index + GetCon(s, dir);
+                        var nc = chf.Cells[nx + ny * chf.Width];
+                        ni = nc.Index + GetCon(s, dir);
                     }
                     if (ni == -1)
                     {
@@ -1673,10 +1673,10 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
         }
-        private static bool MergeAndFilterRegions(int minRegionArea, int mergeRegionSize, ref int maxRegionId, CompactHeightfield chf, int[] srcReg, out int[] overlaps)
+        private static bool MergeAndFilterRegions(int minRegionArea, int mergeRegionSize, int maxRegionId, CompactHeightfield chf, int[] srcReg, out int[] overlaps, out int maxRegionIdResult)
         {
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
 
             int nreg = maxRegionId + 1;
             Region[] regions = new Region[nreg];
@@ -1692,8 +1692,8 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
                         int r = srcReg[i];
                         if (r == 0 || r >= nreg)
@@ -1705,7 +1705,7 @@ namespace Engine.PathFinding.RecastNavigation
                         reg.spanCount++;
 
                         // Update floors.
-                        for (int j = c.index; j < ni; ++j)
+                        for (int j = c.Index; j < ni; ++j)
                         {
                             if (i == j) continue;
                             int floorId = srcReg[j];
@@ -1724,7 +1724,7 @@ namespace Engine.PathFinding.RecastNavigation
                         if (reg.connections.Count > 0)
                             continue;
 
-                        reg.areaType = chf.areas[i];
+                        reg.areaType = chf.Areas[i];
 
                         // Check if this cell is next to a border.
                         int ndir = -1;
@@ -1947,10 +1947,10 @@ namespace Engine.PathFinding.RecastNavigation
                     }
                 }
             }
-            maxRegionId = regIdGen;
+            maxRegionIdResult = regIdGen;
 
             // Remap regions.
-            for (int i = 0; i < chf.spanCount; ++i)
+            for (int i = 0; i < chf.SpanCount; ++i)
             {
                 if ((srcReg[i] & RC_BORDER_REG) == 0)
                 {
@@ -1988,12 +1988,12 @@ namespace Engine.PathFinding.RecastNavigation
 
             reg.connections.Add(n);
         }
-        private static bool MergeAndFilterLayerRegions(int minRegionArea, ref int maxRegionId, CompactHeightfield chf, int[] srcReg, out int[] overlaps)
+        private static bool MergeAndFilterLayerRegions(int minRegionArea, int maxRegionId, CompactHeightfield chf, int[] srcReg, out int[] overlaps, out int maxRegionIdResult)
         {
             overlaps = null;
 
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
 
             int nreg = maxRegionId + 1;
             Region[] regions = new Region[nreg];
@@ -2010,13 +2010,13 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
+                    var c = chf.Cells[x + y * w];
 
                     lregs.Clear();
 
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
+                        var s = chf.Spans[i];
                         int ri = srcReg[i];
                         if (ri == 0 || ri >= nreg)
                         {
@@ -2039,7 +2039,7 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int ax = x + GetDirOffsetX(dir);
                                 int ay = y + GetDirOffsetY(dir);
-                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
+                                int ai = chf.Cells[ax + ay * w].Index + GetCon(s, dir);
                                 int rai = srcReg[ai];
                                 if (rai > 0 && rai < nreg && rai != ri)
                                 {
@@ -2202,10 +2202,10 @@ namespace Engine.PathFinding.RecastNavigation
                     }
                 }
             }
-            maxRegionId = regIdGen;
+            maxRegionIdResult = regIdGen;
 
             // Remap regions.
-            for (int i = 0; i < chf.spanCount; ++i)
+            for (int i = 0; i < chf.SpanCount; ++i)
             {
                 if ((srcReg[i] & RC_BORDER_REG) == 0)
                 {
@@ -2222,14 +2222,16 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static bool BuildDistanceField(CompactHeightfield chf)
         {
-            chf.dist = null;
+            chf.Dist = null;
 
-            int[] src = new int[chf.spanCount];
+            int[] src = new int[chf.SpanCount];
             {
-                CalculateDistanceField(chf, src, out chf.maxDistance);
+                CalculateDistanceField(chf, src, out var maxDistance);
+
+                chf.MaxDistance = maxDistance;
             }
 
-            int[] dst = new int[chf.spanCount];
+            int[] dst = new int[chf.SpanCount];
             {
                 // Blur
                 if (BoxBlur(chf, 1, src, dst) != src)
@@ -2238,22 +2240,22 @@ namespace Engine.PathFinding.RecastNavigation
                 }
 
                 // Store distance.
-                chf.dist = src;
+                chf.Dist = src;
             }
 
             return true;
         }
         private static void PaintRectRegion(int minx, int maxx, int miny, int maxy, int regId, CompactHeightfield chf, int[] srcReg)
         {
-            int w = chf.width;
+            int w = chf.Width;
             for (int y = miny; y < maxy; ++y)
             {
                 for (int x = minx; x < maxx; ++x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        if (chf.areas[i] != TileCacheAreas.RC_NULL_AREA)
+                        if (chf.Areas[i] != TileCacheAreas.RC_NULL_AREA)
                         {
                             srcReg[i] = regId;
                         }
@@ -2263,13 +2265,13 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static bool BuildRegionsMonotone(CompactHeightfield chf, int borderSize, int minRegionArea, int mergeRegionArea)
         {
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
             int id = 1;
 
-            int[] srcReg = new int[chf.spanCount];
+            int[] srcReg = new int[chf.SpanCount];
 
-            int nsweeps = Math.Max(chf.width, chf.height);
+            int nsweeps = Math.Max(chf.Width, chf.Height);
             SweepSpan[] sweeps = new SweepSpan[nsweeps];
 
             // Mark border regions.
@@ -2284,7 +2286,7 @@ namespace Engine.PathFinding.RecastNavigation
                 PaintRectRegion(0, w, 0, bh, id | RC_BORDER_REG, chf, srcReg); id++;
                 PaintRectRegion(0, w, h - bh, h, id | RC_BORDER_REG, chf, srcReg); id++;
 
-                chf.borderSize = borderSize;
+                chf.BorderSize = borderSize;
             }
 
             // Sweep one line at a time.
@@ -2296,12 +2298,12 @@ namespace Engine.PathFinding.RecastNavigation
 
                 for (int x = borderSize; x < w - borderSize; ++x)
                 {
-                    var c = chf.cells[x + y * w];
+                    var c = chf.Cells[x + y * w];
 
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
-                        if (chf.areas[i] == TileCacheAreas.RC_NULL_AREA)
+                        var s = chf.Spans[i];
+                        if (chf.Areas[i] == TileCacheAreas.RC_NULL_AREA)
                         {
                             continue;
                         }
@@ -2312,8 +2314,8 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             int ax = x + GetDirOffsetX(0);
                             int ay = y + GetDirOffsetY(0);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 0);
-                            if ((srcReg[ai] & RC_BORDER_REG) == 0 && chf.areas[i] == chf.areas[ai])
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 0);
+                            if ((srcReg[ai] & RC_BORDER_REG) == 0 && chf.Areas[i] == chf.Areas[ai])
                             {
                                 previd = srcReg[ai];
                             }
@@ -2322,9 +2324,9 @@ namespace Engine.PathFinding.RecastNavigation
                         if (previd == 0)
                         {
                             previd = rid++;
-                            sweeps[previd].rid = previd;
-                            sweeps[previd].ns = 0;
-                            sweeps[previd].nei = 0;
+                            sweeps[previd].RId = previd;
+                            sweeps[previd].NS = 0;
+                            sweeps[previd].Nei = 0;
                         }
 
                         // -y
@@ -2332,19 +2334,19 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             int ax = x + GetDirOffsetX(3);
                             int ay = y + GetDirOffsetY(3);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 3);
-                            if (srcReg[ai] != 0 && (srcReg[ai] & RC_BORDER_REG) == 0 && chf.areas[i] == chf.areas[ai])
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 3);
+                            if (srcReg[ai] != 0 && (srcReg[ai] & RC_BORDER_REG) == 0 && chf.Areas[i] == chf.Areas[ai])
                             {
                                 int nr = srcReg[ai];
-                                if (sweeps[previd].nei == 0 || sweeps[previd].nei == nr)
+                                if (sweeps[previd].Nei == 0 || sweeps[previd].Nei == nr)
                                 {
-                                    sweeps[previd].nei = nr;
-                                    sweeps[previd].ns++;
+                                    sweeps[previd].Nei = nr;
+                                    sweeps[previd].NS++;
                                     prev[nr]++;
                                 }
                                 else
                                 {
-                                    sweeps[previd].nei = RC_NULL_NEI;
+                                    sweeps[previd].Nei = RC_NULL_NEI;
                                 }
                             }
                         }
@@ -2356,28 +2358,28 @@ namespace Engine.PathFinding.RecastNavigation
                 // Create unique ID.
                 for (int i = 1; i < rid; ++i)
                 {
-                    if (sweeps[i].nei != RC_NULL_NEI &&
-                        sweeps[i].nei != 0 &&
-                        prev[sweeps[i].nei] == sweeps[i].ns)
+                    if (sweeps[i].Nei != RC_NULL_NEI &&
+                        sweeps[i].Nei != 0 &&
+                        prev[sweeps[i].Nei] == sweeps[i].NS)
                     {
-                        sweeps[i].id = sweeps[i].nei;
+                        sweeps[i].Id = sweeps[i].Nei;
                     }
                     else
                     {
-                        sweeps[i].id = id++;
+                        sweeps[i].Id = id++;
                     }
                 }
 
                 // Remap IDs
                 for (int x = borderSize; x < w - borderSize; ++x)
                 {
-                    var c = chf.cells[x + y * w];
+                    var c = chf.Cells[x + y * w];
 
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
                         if (srcReg[i] > 0 && srcReg[i] < rid)
                         {
-                            srcReg[i] = sweeps[srcReg[i]].id;
+                            srcReg[i] = sweeps[srcReg[i]].Id;
                         }
                     }
                 }
@@ -2385,8 +2387,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             {
                 // Merge regions and filter out small regions.
-                chf.maxRegions = id;
-                if (!MergeAndFilterRegions(minRegionArea, mergeRegionArea, ref chf.maxRegions, chf, srcReg, out int[] overlaps))
+                chf.MaxRegions = id;
+                var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, id, chf, srcReg, out int[] overlaps, out var maxRegionId);
+                chf.MaxRegions = maxRegionId;
+
+                if (!merged)
                 {
                     return false;
                 }
@@ -2395,17 +2400,17 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Store the result out.
-            for (int i = 0; i < chf.spanCount; ++i)
+            for (int i = 0; i < chf.SpanCount; ++i)
             {
-                chf.spans[i].Reg = srcReg[i];
+                chf.Spans[i].Reg = srcReg[i];
             }
 
             return true;
         }
         public static bool BuildRegions(CompactHeightfield chf, int borderSize, int minRegionArea, int mergeRegionArea)
         {
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
 
             int LOG_NB_STACKS = 3;
             int NB_STACKS = 1 << LOG_NB_STACKS;
@@ -2417,13 +2422,13 @@ namespace Engine.PathFinding.RecastNavigation
 
             List<int> stack = new List<int>();
 
-            int[] srcReg = new int[chf.spanCount];
-            int[] srcDist = new int[chf.spanCount];
-            int[] dstReg = new int[chf.spanCount];
-            int[] dstDist = new int[chf.spanCount];
+            int[] srcReg = new int[chf.SpanCount];
+            int[] srcDist = new int[chf.SpanCount];
+            int[] dstReg = new int[chf.SpanCount];
+            int[] dstDist = new int[chf.SpanCount];
 
             int regionId = 1;
-            int level = (chf.maxDistance + 1) & ~1;
+            int level = (chf.MaxDistance + 1) & ~1;
 
             // TODO: Figure better formula, expandIters defines how much the 
             // watershed "overflows" and simplifies the regions. Tying it to
@@ -2443,7 +2448,7 @@ namespace Engine.PathFinding.RecastNavigation
                 PaintRectRegion(0, w, 0, bh, (regionId | RC_BORDER_REG), chf, srcReg); regionId++;
                 PaintRectRegion(0, w, h - bh, h, (regionId | RC_BORDER_REG), chf, srcReg); regionId++;
 
-                chf.borderSize = borderSize;
+                chf.BorderSize = borderSize;
             }
 
             int sId = -1;
@@ -2503,8 +2508,10 @@ namespace Engine.PathFinding.RecastNavigation
 
             {
                 // Merge regions and filter out smalle regions.
-                chf.maxRegions = regionId;
-                if (!MergeAndFilterRegions(minRegionArea, mergeRegionArea, ref chf.maxRegions, chf, srcReg, out int[] overlaps))
+                chf.MaxRegions = regionId;
+                var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, regionId, chf, srcReg, out int[] overlaps, out int maxRegionId);
+                chf.MaxRegions = maxRegionId;
+                if (!merged)
                 {
                     return false;
                 }
@@ -2517,22 +2524,22 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Write the result out.
-            for (int i = 0; i < chf.spanCount; ++i)
+            for (int i = 0; i < chf.SpanCount; ++i)
             {
-                chf.spans[i].Reg = srcReg[i];
+                chf.Spans[i].Reg = srcReg[i];
             }
 
             return true;
         }
         public static bool BuildLayerRegions(CompactHeightfield chf, int borderSize, int minRegionArea)
         {
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
             int id = 1;
 
-            int[] srcReg = new int[chf.spanCount];
+            int[] srcReg = new int[chf.SpanCount];
 
-            int nsweeps = Math.Max(chf.width, chf.height);
+            int nsweeps = Math.Max(chf.Width, chf.Height);
             SweepSpan[] sweeps = Helper.CreateArray(nsweeps, new SweepSpan());
 
             // Mark border regions.
@@ -2547,7 +2554,7 @@ namespace Engine.PathFinding.RecastNavigation
                 PaintRectRegion(0, w, 0, bh, id | RC_BORDER_REG, chf, srcReg); id++;
                 PaintRectRegion(0, w, h - bh, h, id | RC_BORDER_REG, chf, srcReg); id++;
 
-                chf.borderSize = borderSize;
+                chf.BorderSize = borderSize;
             }
 
             // Sweep one line at a time.
@@ -2559,12 +2566,12 @@ namespace Engine.PathFinding.RecastNavigation
 
                 for (int x = borderSize; x < w - borderSize; ++x)
                 {
-                    var c = chf.cells[x + y * w];
+                    var c = chf.Cells[x + y * w];
 
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
-                        if (chf.areas[i] == TileCacheAreas.RC_NULL_AREA)
+                        var s = chf.Spans[i];
+                        if (chf.Areas[i] == TileCacheAreas.RC_NULL_AREA)
                         {
                             continue;
                         }
@@ -2575,8 +2582,8 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             int ax = x + GetDirOffsetX(0);
                             int ay = y + GetDirOffsetY(0);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 0);
-                            if ((srcReg[ai] & RC_BORDER_REG) == 0 && chf.areas[i] == chf.areas[ai])
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 0);
+                            if ((srcReg[ai] & RC_BORDER_REG) == 0 && chf.Areas[i] == chf.Areas[ai])
                             {
                                 previd = srcReg[ai];
                             }
@@ -2585,9 +2592,9 @@ namespace Engine.PathFinding.RecastNavigation
                         if (previd == 0)
                         {
                             previd = rid++;
-                            sweeps[previd].rid = previd;
-                            sweeps[previd].ns = 0;
-                            sweeps[previd].nei = 0;
+                            sweeps[previd].RId = previd;
+                            sweeps[previd].NS = 0;
+                            sweeps[previd].Nei = 0;
                         }
 
                         // -y
@@ -2595,19 +2602,19 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             int ax = x + GetDirOffsetX(3);
                             int ay = y + GetDirOffsetY(3);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 3);
-                            if (srcReg[ai] != 0 && (srcReg[ai] & RC_BORDER_REG) == 0 && chf.areas[i] == chf.areas[ai])
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 3);
+                            if (srcReg[ai] != 0 && (srcReg[ai] & RC_BORDER_REG) == 0 && chf.Areas[i] == chf.Areas[ai])
                             {
                                 int nr = srcReg[ai];
-                                if (sweeps[previd].nei == 0 || sweeps[previd].nei == nr)
+                                if (sweeps[previd].Nei == 0 || sweeps[previd].Nei == nr)
                                 {
-                                    sweeps[previd].nei = nr;
-                                    sweeps[previd].ns++;
+                                    sweeps[previd].Nei = nr;
+                                    sweeps[previd].NS++;
                                     prev[nr]++;
                                 }
                                 else
                                 {
-                                    sweeps[previd].nei = RC_NULL_NEI;
+                                    sweeps[previd].Nei = RC_NULL_NEI;
                                 }
                             }
                         }
@@ -2619,28 +2626,28 @@ namespace Engine.PathFinding.RecastNavigation
                 // Create unique ID.
                 for (int i = 1; i < rid; ++i)
                 {
-                    if (sweeps[i].nei != RC_NULL_NEI &&
-                        sweeps[i].nei != 0 &&
-                        prev[sweeps[i].nei] == sweeps[i].ns)
+                    if (sweeps[i].Nei != RC_NULL_NEI &&
+                        sweeps[i].Nei != 0 &&
+                        prev[sweeps[i].Nei] == sweeps[i].NS)
                     {
-                        sweeps[i].id = sweeps[i].nei;
+                        sweeps[i].Id = sweeps[i].Nei;
                     }
                     else
                     {
-                        sweeps[i].id = id++;
+                        sweeps[i].Id = id++;
                     }
                 }
 
                 // Remap IDs
                 for (int x = borderSize; x < w - borderSize; ++x)
                 {
-                    var c = chf.cells[x + y * w];
+                    var c = chf.Cells[x + y * w];
 
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
                         if (srcReg[i] > 0 && srcReg[i] < rid)
                         {
-                            srcReg[i] = sweeps[srcReg[i]].id;
+                            srcReg[i] = sweeps[srcReg[i]].Id;
                         }
                     }
                 }
@@ -2648,17 +2655,19 @@ namespace Engine.PathFinding.RecastNavigation
 
             {
                 // Merge monotone regions to layers and remove small regions.
-                chf.maxRegions = id;
-                if (!MergeAndFilterLayerRegions(minRegionArea, ref chf.maxRegions, chf, srcReg, out int[] overlaps))
+                chf.MaxRegions = id;
+                var merged = MergeAndFilterLayerRegions(minRegionArea, id, chf, srcReg, out int[] overlaps, out int maxRegionId);
+                chf.MaxRegions = maxRegionId;
+                if (!merged)
                 {
                     return false;
                 }
             }
 
             // Store the result out.
-            for (int i = 0; i < chf.spanCount; ++i)
+            for (int i = 0; i < chf.SpanCount; ++i)
             {
-                chf.spans[i].Reg = srcReg[i];
+                chf.Spans[i].Reg = srcReg[i];
             }
 
             return true;
@@ -3128,7 +3137,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             isBorderVertex = false;
 
-            var s = chf.spans[i];
+            var s = chf.Spans[i];
             int ch = s.Y;
             int dirp = (dir + 1) & 0x3;
 
@@ -3136,42 +3145,42 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Combine region and area codes in order to prevent
             // border vertices which are in between two areas to be removed.
-            regs[0] = chf.spans[i].Reg | ((int)chf.areas[i] << 16);
+            regs[0] = chf.Spans[i].Reg | ((int)chf.Areas[i] << 16);
 
             if (GetCon(s, dir) != RC_NOT_CONNECTED)
             {
                 int ax = x + GetDirOffsetX(dir);
                 int ay = y + GetDirOffsetY(dir);
-                int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
-                var a = chf.spans[ai];
+                int ai = chf.Cells[ax + ay * chf.Width].Index + GetCon(s, dir);
+                var a = chf.Spans[ai];
                 ch = Math.Max(ch, a.Y);
-                regs[1] = chf.spans[ai].Reg | ((int)chf.areas[ai] << 16);
+                regs[1] = chf.Spans[ai].Reg | ((int)chf.Areas[ai] << 16);
                 if (GetCon(a, dirp) != RC_NOT_CONNECTED)
                 {
                     int ax2 = ax + GetDirOffsetX(dirp);
                     int ay2 = ay + GetDirOffsetY(dirp);
-                    int ai2 = chf.cells[ax2 + ay2 * chf.width].index + GetCon(a, dirp);
-                    var as2 = chf.spans[ai2];
+                    int ai2 = chf.Cells[ax2 + ay2 * chf.Width].Index + GetCon(a, dirp);
+                    var as2 = chf.Spans[ai2];
                     ch = Math.Max(ch, as2.Y);
-                    regs[2] = chf.spans[ai2].Reg | ((int)chf.areas[ai2] << 16);
+                    regs[2] = chf.Spans[ai2].Reg | ((int)chf.Areas[ai2] << 16);
                 }
             }
             if (GetCon(s, dirp) != RC_NOT_CONNECTED)
             {
                 int ax = x + GetDirOffsetX(dirp);
                 int ay = y + GetDirOffsetY(dirp);
-                int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dirp);
-                var a = chf.spans[ai];
+                int ai = chf.Cells[ax + ay * chf.Width].Index + GetCon(s, dirp);
+                var a = chf.Spans[ai];
                 ch = Math.Max(ch, a.Y);
-                regs[3] = chf.spans[ai].Reg | ((int)chf.areas[ai] << 16);
+                regs[3] = chf.Spans[ai].Reg | ((int)chf.Areas[ai] << 16);
                 if (GetCon(a, dir) != RC_NOT_CONNECTED)
                 {
                     int ax2 = ax + GetDirOffsetX(dir);
                     int ay2 = ay + GetDirOffsetY(dir);
-                    int ai2 = chf.cells[ax2 + ay2 * chf.width].index + GetCon(a, dir);
-                    var as2 = chf.spans[ai2];
+                    int ai2 = chf.Cells[ax2 + ay2 * chf.Width].Index + GetCon(a, dir);
+                    var as2 = chf.Spans[ai2];
                     ch = Math.Max(ch, as2.Y);
-                    regs[2] = chf.spans[ai2].Reg | ((int)chf.areas[ai2] << 16);
+                    regs[2] = chf.Spans[ai2].Reg | ((int)chf.Areas[ai2] << 16);
                 }
             }
 
@@ -3203,13 +3212,13 @@ namespace Engine.PathFinding.RecastNavigation
             int startDir = dir;
             int starti = i;
 
-            var ss = chf.spans[i];
+            var ss = chf.Spans[i];
             int curReg = 0;
             if (GetCon(ss, dir) != RC_NOT_CONNECTED)
             {
                 int ax = x + GetDirOffsetX(dir);
                 int ay = y + GetDirOffsetY(dir);
-                int ai = chf.cells[ax + ay * chf.width].index + GetCon(ss, dir);
+                int ai = chf.Cells[ax + ay * chf.Width].Index + GetCon(ss, dir);
                 curReg = srcReg[ai];
             }
             cont.Add(curReg);
@@ -3217,7 +3226,7 @@ namespace Engine.PathFinding.RecastNavigation
             int iter = 0;
             while (++iter < 40000)
             {
-                var s = chf.spans[i];
+                var s = chf.Spans[i];
 
                 if (IsSolidEdge(chf, srcReg, x, y, i, dir))
                 {
@@ -3227,7 +3236,7 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         int ax = x + GetDirOffsetX(dir);
                         int ay = y + GetDirOffsetY(dir);
-                        int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
+                        int ai = chf.Cells[ax + ay * chf.Width].Index + GetCon(s, dir);
                         r = srcReg[ai];
                     }
                     if (r != curReg)
@@ -3245,8 +3254,8 @@ namespace Engine.PathFinding.RecastNavigation
                     int ny = y + GetDirOffsetY(dir);
                     if (GetCon(s, dir) != RC_NOT_CONNECTED)
                     {
-                        var nc = chf.cells[nx + ny * chf.width];
-                        ni = nc.index + GetCon(s, dir);
+                        var nc = chf.Cells[nx + ny * chf.Width];
+                        ni = nc.Index + GetCon(s, dir);
                     }
                     if (ni == -1)
                     {
@@ -3783,17 +3792,17 @@ namespace Engine.PathFinding.RecastNavigation
         }
         public static bool BuildContours(CompactHeightfield chf, float maxError, int maxEdgeLen, BuildContoursFlagTypes buildFlags, out ContourSet cset)
         {
-            int w = chf.width;
-            int h = chf.height;
-            int borderSize = chf.borderSize;
-            int maxContours = Math.Max(chf.maxRegions, 8);
+            int w = chf.Width;
+            int h = chf.Height;
+            int borderSize = chf.BorderSize;
+            int maxContours = Math.Max(chf.MaxRegions, 8);
 
-            var bmin = chf.boundingBox.Minimum;
-            var bmax = chf.boundingBox.Maximum;
+            var bmin = chf.BoundingBox.Minimum;
+            var bmax = chf.BoundingBox.Maximum;
             if (borderSize > 0)
             {
                 // If the heightfield was build with bordersize, remove the offset.
-                float pad = borderSize * chf.cs;
+                float pad = borderSize * chf.CS;
                 bmin.X += pad;
                 bmin.Z += pad;
                 bmax.X -= pad;
@@ -3804,29 +3813,29 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 bmin = bmin,
                 bmax = bmax,
-                cs = chf.cs,
-                ch = chf.ch,
-                width = chf.width - chf.borderSize * 2,
-                height = chf.height - chf.borderSize * 2,
-                borderSize = chf.borderSize,
+                cs = chf.CS,
+                ch = chf.CH,
+                width = chf.Width - chf.BorderSize * 2,
+                height = chf.Height - chf.BorderSize * 2,
+                borderSize = chf.BorderSize,
                 maxError = maxError,
                 conts = new Contour[maxContours],
                 nconts = 0
             };
 
-            int[] flags = new int[chf.spanCount];
+            int[] flags = new int[chf.SpanCount];
 
             // Mark boundaries.
             for (int y = 0; y < h; ++y)
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
                         int res = 0;
-                        var s = chf.spans[i];
-                        if (chf.spans[i].Reg == 0 || (chf.spans[i].Reg & RC_BORDER_REG) != 0)
+                        var s = chf.Spans[i];
+                        if (chf.Spans[i].Reg == 0 || (chf.Spans[i].Reg & RC_BORDER_REG) != 0)
                         {
                             flags[i] = 0;
                             continue;
@@ -3838,10 +3847,10 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int ax = x + GetDirOffsetX(dir);
                                 int ay = y + GetDirOffsetY(dir);
-                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
-                                r = chf.spans[ai].Reg;
+                                int ai = chf.Cells[ax + ay * w].Index + GetCon(s, dir);
+                                r = chf.Spans[ai].Reg;
                             }
-                            if (r == chf.spans[i].Reg)
+                            if (r == chf.Spans[i].Reg)
                             {
                                 res |= (1 << dir);
                             }
@@ -3858,20 +3867,20 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
                         if (flags[i] == 0 || flags[i] == 0xf)
                         {
                             flags[i] = 0;
                             continue;
                         }
-                        int reg = chf.spans[i].Reg;
+                        int reg = chf.Spans[i].Reg;
                         if (reg == 0 || (reg & RC_BORDER_REG) != 0)
                         {
                             continue;
                         }
-                        var area = chf.areas[i];
+                        var area = chf.Areas[i];
 
                         verts.Clear();
                         simplified.Clear();
@@ -3955,7 +3964,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     // Collect outline contour and holes contours per region.
                     // We assume that there is one outline and multiple holes.
-                    int nregions = chf.maxRegions + 1;
+                    int nregions = chf.MaxRegions + 1;
                     var regions = Helper.CreateArray(nregions, () => { return new ContourRegion(); });
                     var holes = Helper.CreateArray(cset.nconts, () => { return new ContourHole(); });
 
@@ -4046,20 +4055,37 @@ namespace Engine.PathFinding.RecastNavigation
 
             return false;
         }
-        public static bool AddUnique(int[] a, ref int an, int anMax, int v)
+        public static bool AddUniqueLayer(ref LayerRegion layer, int anMax, int v)
         {
-            if (Contains(a, an, v))
+            if (Contains(layer.Layers, layer.NLayers, v))
             {
                 return true;
             }
 
-            if (an >= anMax)
+            if (layer.NLayers >= anMax)
             {
                 return false;
             }
 
-            a[an] = v;
-            an++;
+            layer.Layers[layer.NLayers] = v;
+            layer.NLayers++;
+
+            return true;
+        }
+        public static bool AddUniqueNei(ref LayerRegion layer, int anMax, int v)
+        {
+            if (Contains(layer.Neis, layer.NNeis, v))
+            {
+                return true;
+            }
+
+            if (layer.NNeis >= anMax)
+            {
+                return false;
+            }
+
+            layer.Neis[layer.NNeis] = v;
+            layer.NNeis++;
 
             return true;
         }
@@ -4067,12 +4093,12 @@ namespace Engine.PathFinding.RecastNavigation
         {
             lset = new HeightfieldLayerSet();
 
-            int w = chf.width;
-            int h = chf.height;
+            int w = chf.Width;
+            int h = chf.Height;
 
-            int[] srcReg = Helper.CreateArray(chf.spanCount, 0xff);
+            int[] srcReg = Helper.CreateArray(chf.SpanCount, 0xff);
 
-            int nsweeps = chf.width;
+            int nsweeps = chf.Width;
             LayerSweepSpan[] sweeps = Helper.CreateArray(nsweeps, new LayerSweepSpan());
 
             // Partition walkable area into monotone regions.
@@ -4085,12 +4111,12 @@ namespace Engine.PathFinding.RecastNavigation
 
                 for (int x = borderSize; x < w - borderSize; ++x)
                 {
-                    var c = chf.cells[x + y * w];
+                    var c = chf.Cells[x + y * w];
 
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
-                        if (chf.areas[i] == TileCacheAreas.RC_NULL_AREA) continue;
+                        var s = chf.Spans[i];
+                        if (chf.Areas[i] == TileCacheAreas.RC_NULL_AREA) continue;
 
                         int sid = 0xff;
 
@@ -4099,8 +4125,8 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             int ax = x + GetDirOffsetX(0);
                             int ay = y + GetDirOffsetY(0);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 0);
-                            if (chf.areas[ai] != TileCacheAreas.RC_NULL_AREA && srcReg[ai] != 0xff)
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 0);
+                            if (chf.Areas[ai] != TileCacheAreas.RC_NULL_AREA && srcReg[ai] != 0xff)
                             {
                                 sid = srcReg[ai];
                             }
@@ -4109,8 +4135,8 @@ namespace Engine.PathFinding.RecastNavigation
                         if (sid == 0xff)
                         {
                             sid = sweepId++;
-                            sweeps[sid].nei = 0xff;
-                            sweeps[sid].ns = 0;
+                            sweeps[sid].Nei = 0xff;
+                            sweeps[sid].NS = 0;
                         }
 
                         // -y
@@ -4118,25 +4144,25 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             int ax = x + GetDirOffsetX(3);
                             int ay = y + GetDirOffsetY(3);
-                            int ai = chf.cells[ax + ay * w].index + GetCon(s, 3);
+                            int ai = chf.Cells[ax + ay * w].Index + GetCon(s, 3);
                             int nr = srcReg[ai];
                             if (nr != 0xff)
                             {
                                 // Set neighbour when first valid neighbour is encoutered.
-                                if (sweeps[sid].ns == 0)
-                                    sweeps[sid].nei = nr;
+                                if (sweeps[sid].NS == 0)
+                                    sweeps[sid].Nei = nr;
 
-                                if (sweeps[sid].nei == nr)
+                                if (sweeps[sid].Nei == nr)
                                 {
                                     // Update existing neighbour
-                                    sweeps[sid].ns++;
+                                    sweeps[sid].NS++;
                                     prevCount[nr]++;
                                 }
                                 else
                                 {
                                     // This is hit if there is nore than one neighbour.
                                     // Invalidate the neighbour.
-                                    sweeps[sid].nei = 0xff;
+                                    sweeps[sid].Nei = 0xff;
                                 }
                             }
                         }
@@ -4150,9 +4176,9 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     // If the neighbour is set and there is only one continuous connection to it,
                     // the sweep will be merged with the previous one, else new region is created.
-                    if (sweeps[i].nei != 0xff && prevCount[sweeps[i].nei] == sweeps[i].ns)
+                    if (sweeps[i].Nei != 0xff && prevCount[sweeps[i].Nei] == sweeps[i].NS)
                     {
-                        sweeps[i].id = sweeps[i].nei;
+                        sweeps[i].Id = sweeps[i].Nei;
                     }
                     else
                     {
@@ -4160,19 +4186,19 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             throw new EngineException("rcBuildHeightfieldLayers: Region ID overflow.");
                         }
-                        sweeps[i].id = regId++;
+                        sweeps[i].Id = regId++;
                     }
                 }
 
                 // Remap local sweep ids to region ids.
                 for (int x = borderSize; x < w - borderSize; ++x)
                 {
-                    var c = chf.cells[x + y * w];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    var c = chf.Cells[x + y * w];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
                         if (srcReg[i] != 0xff)
                         {
-                            srcReg[i] = sweeps[srcReg[i]].id;
+                            srcReg[i] = sweeps[srcReg[i]].Id;
                         }
                     }
                 }
@@ -4187,22 +4213,22 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    var c = chf.cells[x + y * w];
+                    var c = chf.Cells[x + y * w];
 
                     int[] lregs = new int[LayerRegion.MaxLayers];
                     int nlregs = 0;
 
-                    for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = chf.spans[i];
+                        var s = chf.Spans[i];
                         int ri = srcReg[i];
                         if (ri == 0xff)
                         {
                             continue;
                         }
 
-                        regs[ri].ymin = Math.Min(regs[ri].ymin, s.Y);
-                        regs[ri].ymax = Math.Max(regs[ri].ymax, s.Y);
+                        regs[ri].YMin = Math.Min(regs[ri].YMin, s.Y);
+                        regs[ri].YMax = Math.Max(regs[ri].YMax, s.Y);
 
                         // Collect all region layers.
                         if (nlregs < LayerRegion.MaxLayers)
@@ -4217,14 +4243,14 @@ namespace Engine.PathFinding.RecastNavigation
                             {
                                 int ax = x + GetDirOffsetX(dir);
                                 int ay = y + GetDirOffsetY(dir);
-                                int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
+                                int ai = chf.Cells[ax + ay * w].Index + GetCon(s, dir);
                                 int rai = srcReg[ai];
                                 if (rai != 0xff && rai != ri)
                                 {
                                     // Don't check return value -- if we cannot add the neighbor
                                     // it will just cause a few more regions to be created, which
                                     // is fine.
-                                    AddUnique(regs[ri].neis, ref regs[ri].nneis, LayerRegion.MaxNeighbors, rai);
+                                    AddUniqueNei(ref regs[ri], LayerRegion.MaxNeighbors, rai);
                                 }
                             }
                         }
@@ -4240,8 +4266,8 @@ namespace Engine.PathFinding.RecastNavigation
                                 var ri = regs[lregs[i]];
                                 var rj = regs[lregs[j]];
 
-                                if (!AddUnique(ri.layers, ref ri.nlayers, LayerRegion.MaxLayers, lregs[j]) ||
-                                    !AddUnique(rj.layers, ref rj.nlayers, LayerRegion.MaxLayers, lregs[i]))
+                                if (!AddUniqueLayer(ref ri, LayerRegion.MaxLayers, lregs[j]) ||
+                                    !AddUniqueLayer(ref rj, LayerRegion.MaxLayers, lregs[i]))
                                 {
                                     throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                                 }
@@ -4266,14 +4292,14 @@ namespace Engine.PathFinding.RecastNavigation
                 var root = regs[i];
 
                 // Skip already visited.
-                if (root.layerId != 0xff)
+                if (root.LayerId != 0xff)
                 {
                     continue;
                 }
 
                 // Start search.
-                root.layerId = layerId;
-                root.isBase = true;
+                root.LayerId = layerId;
+                root.IsBase = true;
 
                 nstack = 0;
                 stack[nstack++] = i;
@@ -4288,27 +4314,27 @@ namespace Engine.PathFinding.RecastNavigation
                         stack[j] = stack[j + 1];
                     }
 
-                    int nneis = reg.nneis;
+                    int nneis = reg.NNeis;
                     for (int j = 0; j < nneis; ++j)
                     {
-                        int nei = reg.neis[j];
+                        int nei = reg.Neis[j];
                         var regn = regs[nei];
 
                         // Skip already visited.
-                        if (regn.layerId != 0xff)
+                        if (regn.LayerId != 0xff)
                         {
                             continue;
                         }
 
                         // Skip if the neighbour is overlapping root region.
-                        if (Contains(root.layers, root.nlayers, nei))
+                        if (Contains(root.Layers, root.NLayers, nei))
                         {
                             continue;
                         }
 
                         // Skip if the height range would become too large.
-                        int ymin = Math.Min(root.ymin, regn.ymin);
-                        int ymax = Math.Max(root.ymax, regn.ymax);
+                        int ymin = Math.Min(root.YMin, regn.YMin);
+                        int ymax = Math.Max(root.YMax, regn.YMax);
                         if ((ymax - ymin) >= 255)
                         {
                             continue;
@@ -4320,19 +4346,19 @@ namespace Engine.PathFinding.RecastNavigation
                             stack[nstack++] = nei;
 
                             // Mark layer id
-                            regn.layerId = layerId;
+                            regn.LayerId = layerId;
 
                             // Merge current layers to root.
-                            for (int k = 0; k < regn.nlayers; ++k)
+                            for (int k = 0; k < regn.NLayers; ++k)
                             {
-                                if (!AddUnique(root.layers, ref root.nlayers, LayerRegion.MaxLayers, regn.layers[k]))
+                                if (!AddUniqueLayer(ref root, LayerRegion.MaxLayers, regn.Layers[k]))
                                 {
                                     throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                                 }
                             }
 
-                            root.ymin = Math.Min(root.ymin, regn.ymin);
-                            root.ymax = Math.Max(root.ymax, regn.ymax);
+                            root.YMin = Math.Min(root.YMin, regn.YMin);
+                            root.YMax = Math.Max(root.YMax, regn.YMax);
                         }
 
                         regs[nei] = regn;
@@ -4351,12 +4377,12 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var ri = regs[i];
 
-                if (!ri.isBase)
+                if (!ri.IsBase)
                 {
                     continue;
                 }
 
-                int newId = ri.layerId;
+                int newId = ri.LayerId;
 
                 while (true)
                 {
@@ -4370,20 +4396,20 @@ namespace Engine.PathFinding.RecastNavigation
                         }
 
                         var rj = regs[j];
-                        if (!rj.isBase)
+                        if (!rj.IsBase)
                         {
                             continue;
                         }
 
                         // Skip if the regions are not close to each other.
-                        if (!OverlapRange(ri.ymin, (ri.ymax + mergeHeight), rj.ymin, (rj.ymax + mergeHeight)))
+                        if (!OverlapRange(ri.YMin, (ri.YMax + mergeHeight), rj.YMin, (rj.YMax + mergeHeight)))
                         {
                             continue;
                         }
 
                         // Skip if the height range would become too large.
-                        int ymin = Math.Min(ri.ymin, rj.ymin);
-                        int ymax = Math.Max(ri.ymax, rj.ymax);
+                        int ymin = Math.Min(ri.YMin, rj.YMin);
+                        int ymax = Math.Max(ri.YMax, rj.YMax);
                         if ((ymax - ymin) >= 255)
                         {
                             continue;
@@ -4395,14 +4421,14 @@ namespace Engine.PathFinding.RecastNavigation
                         // Iterate over all regions which have the same layerId as 'rj'
                         for (int k = 0; k < nregs; ++k)
                         {
-                            if (regs[k].layerId != rj.layerId)
+                            if (regs[k].LayerId != rj.LayerId)
                             {
                                 continue;
                             }
 
                             // Check if region 'k' is overlapping region 'ri'
                             // Index to 'regs' is the same as region id.
-                            if (Contains(ri.layers, ri.nlayers, k))
+                            if (Contains(ri.Layers, ri.NLayers, k))
                             {
                                 overlap = true;
                                 break;
@@ -4416,7 +4442,7 @@ namespace Engine.PathFinding.RecastNavigation
                         }
 
                         // Can merge i and j.
-                        oldId = rj.layerId;
+                        oldId = rj.LayerId;
                         break;
                     }
 
@@ -4431,23 +4457,23 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         var rj = regs[j];
 
-                        if (rj.layerId == oldId)
+                        if (rj.LayerId == oldId)
                         {
-                            rj.isBase = false;
+                            rj.IsBase = false;
                             // Remap layerIds.
-                            rj.layerId = newId;
+                            rj.LayerId = newId;
                             // Add overlaid layers from 'rj' to 'ri'.
-                            for (int k = 0; k < rj.nlayers; ++k)
+                            for (int k = 0; k < rj.NLayers; ++k)
                             {
-                                if (!AddUnique(ri.layers, ref ri.nlayers, LayerRegion.MaxLayers, rj.layers[k]))
+                                if (!AddUniqueLayer(ref ri, LayerRegion.MaxLayers, rj.Layers[k]))
                                 {
                                     throw new EngineException("rcBuildHeightfieldLayers: layer overflow (too many overlapping walkable platforms). Try increasing RC_MAX_LAYERS.");
                                 }
                             }
 
                             // Update height bounds.
-                            ri.ymin = Math.Min(ri.ymin, rj.ymin);
-                            ri.ymax = Math.Max(ri.ymax, rj.ymax);
+                            ri.YMin = Math.Min(ri.YMin, rj.YMin);
+                            ri.YMax = Math.Max(ri.YMax, rj.YMax);
 
                             regs[j] = rj;
                         }
@@ -4464,7 +4490,7 @@ namespace Engine.PathFinding.RecastNavigation
             layerId = 0;
             for (int i = 0; i < nregs; i++)
             {
-                remap[regs[i].layerId] = 1;
+                remap[regs[i].LayerId] = 1;
             }
 
             for (int i = 0; i < 256; i++)
@@ -4482,7 +4508,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Remap ids.
             for (int i = 0; i < nregs; ++i)
             {
-                regs[i].layerId = remap[regs[i].layerId];
+                regs[i].LayerId = remap[regs[i].LayerId];
             }
 
             // No layers, return empty.
@@ -4496,57 +4522,58 @@ namespace Engine.PathFinding.RecastNavigation
             int lh = h - borderSize * 2;
 
             // Build contracted bbox for layers.
-            Vector3 bmin = chf.boundingBox.Minimum;
-            Vector3 bmax = chf.boundingBox.Maximum;
-            bmin.X += borderSize * chf.cs;
-            bmin.Z += borderSize * chf.cs;
-            bmax.X -= borderSize * chf.cs;
-            bmax.Z -= borderSize * chf.cs;
+            Vector3 bmin = chf.BoundingBox.Minimum;
+            Vector3 bmax = chf.BoundingBox.Maximum;
+            bmin.X += borderSize * chf.CS;
+            bmin.Z += borderSize * chf.CS;
+            bmax.X -= borderSize * chf.CS;
+            bmax.Z -= borderSize * chf.CS;
 
-            lset.nlayers = layerId;
-            lset.layers = new HeightfieldLayer[layerId];
+            lset.NLayers = layerId;
+            lset.Layers = new HeightfieldLayer[layerId];
 
             // Store layers.
-            for (int i = 0; i < lset.nlayers; ++i)
+            for (int i = 0; i < lset.NLayers; ++i)
             {
                 int curId = i;
 
-                var layer = lset.layers[i];
+                var layer = lset.Layers[i];
 
                 int gridSize = lw * lh;
 
-                layer.heights = Helper.CreateArray(gridSize, 0xff);
-                layer.areas = Helper.CreateArray(gridSize, TileCacheAreas.RC_NULL_AREA);
-                layer.cons = Helper.CreateArray(gridSize, 0x00);
+                layer.Heights = Helper.CreateArray(gridSize, 0xff);
+                layer.Areas = Helper.CreateArray(gridSize, TileCacheAreas.RC_NULL_AREA);
+                layer.Cons = Helper.CreateArray(gridSize, 0x00);
 
                 // Find layer height bounds.
                 int hmin = 0, hmax = 0;
                 for (int j = 0; j < nregs; ++j)
                 {
-                    if (regs[j].isBase && regs[j].layerId == curId)
+                    if (regs[j].IsBase && regs[j].LayerId == curId)
                     {
-                        hmin = regs[j].ymin;
-                        hmax = regs[j].ymax;
+                        hmin = regs[j].YMin;
+                        hmax = regs[j].YMax;
                     }
                 }
 
-                layer.width = lw;
-                layer.height = lh;
-                layer.cs = chf.cs;
-                layer.ch = chf.ch;
+                layer.Width = lw;
+                layer.Height = lh;
+                layer.CS = chf.CS;
+                layer.CH = chf.CH;
 
                 // Adjust the bbox to fit the heightfield.
-                layer.boundingBox = new BoundingBox(bmin, bmax);
-                layer.boundingBox.Minimum.Y = bmin.Y + hmin * chf.ch;
-                layer.boundingBox.Maximum.Y = bmin.Y + hmax * chf.ch;
-                layer.hmin = hmin;
-                layer.hmax = hmax;
+                var lbbox = new BoundingBox(bmin, bmax);
+                lbbox.Minimum.Y = bmin.Y + hmin * chf.CH;
+                lbbox.Maximum.Y = bmin.Y + hmax * chf.CH;
+                layer.BoundingBox = lbbox;
+                layer.HMin = hmin;
+                layer.HMax = hmax;
 
                 // Update usable data region.
-                layer.minx = layer.width;
-                layer.maxx = 0;
-                layer.miny = layer.height;
-                layer.maxy = 0;
+                layer.MinX = layer.Width;
+                layer.MaxX = 0;
+                layer.MinY = layer.Height;
+                layer.MaxY = 0;
 
                 // Copy height and area from compact heightfield. 
                 for (int y = 0; y < lh; ++y)
@@ -4555,10 +4582,10 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         int cx = borderSize + x;
                         int cy = borderSize + y;
-                        var c = chf.cells[cx + cy * w];
-                        for (int j = c.index, nj = (c.index + c.count); j < nj; ++j)
+                        var c = chf.Cells[cx + cy * w];
+                        for (int j = c.Index, nj = (c.Index + c.Count); j < nj; ++j)
                         {
-                            var s = chf.spans[j];
+                            var s = chf.Spans[j];
                             // Skip unassigned regions.
                             if (srcReg[j] == 0xff)
                             {
@@ -4566,22 +4593,22 @@ namespace Engine.PathFinding.RecastNavigation
                             }
 
                             // Skip of does nto belong to current layer.
-                            int lid = regs[srcReg[j]].layerId;
+                            int lid = regs[srcReg[j]].LayerId;
                             if (lid != curId)
                             {
                                 continue;
                             }
 
                             // Update data bounds.
-                            layer.minx = Math.Min(layer.minx, x);
-                            layer.maxx = Math.Max(layer.maxx, x);
-                            layer.miny = Math.Min(layer.miny, y);
-                            layer.maxy = Math.Max(layer.maxy, y);
+                            layer.MinX = Math.Min(layer.MinX, x);
+                            layer.MaxX = Math.Max(layer.MaxX, x);
+                            layer.MinY = Math.Min(layer.MinY, y);
+                            layer.MaxY = Math.Max(layer.MaxY, y);
 
                             // Store height and area type.
                             int idx = x + y * lw;
-                            layer.heights[idx] = (s.Y - hmin);
-                            layer.areas[idx] = chf.areas[j];
+                            layer.Heights[idx] = (s.Y - hmin);
+                            layer.Areas[idx] = chf.Areas[j];
 
                             // Check connection.
                             int portal = 0;
@@ -4592,22 +4619,22 @@ namespace Engine.PathFinding.RecastNavigation
                                 {
                                     int ax = cx + GetDirOffsetX(dir);
                                     int ay = cy + GetDirOffsetY(dir);
-                                    int ai = chf.cells[ax + ay * w].index + GetCon(s, dir);
-                                    int alid = (srcReg[ai] != 0xff ? regs[srcReg[ai]].layerId : 0xff);
+                                    int ai = chf.Cells[ax + ay * w].Index + GetCon(s, dir);
+                                    int alid = (srcReg[ai] != 0xff ? regs[srcReg[ai]].LayerId : 0xff);
                                     // Portal mask
-                                    if (chf.areas[ai] != TileCacheAreas.RC_NULL_AREA && lid != alid)
+                                    if (chf.Areas[ai] != TileCacheAreas.RC_NULL_AREA && lid != alid)
                                     {
                                         portal |= (1 << dir);
 
                                         // Update height so that it matches on both sides of the portal.
-                                        var ass = chf.spans[ai];
+                                        var ass = chf.Spans[ai];
                                         if (ass.Y > hmin)
                                         {
-                                            layer.heights[idx] = Math.Max(layer.heights[idx], (ass.Y - hmin));
+                                            layer.Heights[idx] = Math.Max(layer.Heights[idx], (ass.Y - hmin));
                                         }
                                     }
                                     // Valid connection mask
-                                    if (chf.areas[ai] != TileCacheAreas.RC_NULL_AREA && lid == alid)
+                                    if (chf.Areas[ai] != TileCacheAreas.RC_NULL_AREA && lid == alid)
                                     {
                                         int nx = ax - borderSize;
                                         int ny = ay - borderSize;
@@ -4619,22 +4646,22 @@ namespace Engine.PathFinding.RecastNavigation
                                 }
                             }
 
-                            layer.cons[idx] = ((portal << 4) | con);
+                            layer.Cons[idx] = ((portal << 4) | con);
                         }
                     }
                 }
 
-                if (layer.minx > layer.maxx)
+                if (layer.MinX > layer.MaxX)
                 {
-                    layer.minx = layer.maxx = 0;
+                    layer.MinX = layer.MaxX = 0;
                 }
 
-                if (layer.miny > layer.maxy)
+                if (layer.MinY > layer.MaxY)
                 {
-                    layer.miny = layer.maxy = 0;
+                    layer.MinY = layer.MaxY = 0;
                 }
 
-                lset.layers[i] = layer;
+                lset.Layers[i] = layer;
             }
 
             return true;
@@ -4677,16 +4704,16 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         Edge edge = new Edge()
                         {
-                            vert = new int[2],
-                            polyEdge = new int[2],
-                            poly = new int[2],
+                            Vert = new int[2],
+                            PolyEdge = new int[2],
+                            Poly = new int[2],
                         };
-                        edge.vert[0] = v0;
-                        edge.vert[1] = v1;
-                        edge.poly[0] = i;
-                        edge.polyEdge[0] = j;
-                        edge.poly[1] = i;
-                        edge.polyEdge[1] = 0;
+                        edge.Vert[0] = v0;
+                        edge.Vert[1] = v1;
+                        edge.Poly[0] = i;
+                        edge.PolyEdge[0] = j;
+                        edge.Poly[1] = i;
+                        edge.PolyEdge[1] = 0;
                         edges[edgeCount] = edge;
                         // Insert edge
                         nextEdge[edgeCount] = firstEdge[v0];
@@ -4709,10 +4736,10 @@ namespace Engine.PathFinding.RecastNavigation
                         for (int e = firstEdge[v1]; e != RC_MESH_NULL_IDX; e = nextEdge[e])
                         {
                             Edge edge = edges[e];
-                            if (edge.vert[1] == v0 && edge.poly[0] == edge.poly[1])
+                            if (edge.Vert[1] == v0 && edge.Poly[0] == edge.Poly[1])
                             {
-                                edge.poly[1] = i;
-                                edge.polyEdge[1] = j;
+                                edge.Poly[1] = i;
+                                edge.PolyEdge[1] = j;
                                 break;
                             }
                         }
@@ -4724,12 +4751,12 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < edgeCount; ++i)
             {
                 Edge e = edges[i];
-                if (e.poly[0] != e.poly[1])
+                if (e.Poly[0] != e.Poly[1])
                 {
-                    var p0 = polys[e.poly[0]];
-                    var p1 = polys[e.poly[1]];
-                    p0[vertsPerPoly + e.polyEdge[0]] = e.poly[1];
-                    p1[vertsPerPoly + e.polyEdge[1]] = e.poly[0];
+                    var p0 = polys[e.Poly[0]];
+                    var p1 = polys[e.Poly[1]];
+                    p0[vertsPerPoly + e.PolyEdge[0]] = e.Poly[1];
+                    p1[vertsPerPoly + e.PolyEdge[1]] = e.Poly[0];
                 }
             }
 
@@ -5046,9 +5073,9 @@ namespace Engine.PathFinding.RecastNavigation
             int numRemovedVerts = 0;
             int numTouchedVerts = 0;
             int numRemainingEdges = 0;
-            for (int i = 0; i < mesh.npolys; ++i)
+            for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var p = mesh.polys[i];
+                var p = mesh.Polys[i];
                 int nv = CountPolyVerts(p);
                 int numRemoved = 0;
                 int numVerts = 0;
@@ -5082,9 +5109,9 @@ namespace Engine.PathFinding.RecastNavigation
             int nedges = 0;
             Int3[] edges = new Int3[maxEdges];
 
-            for (int i = 0; i < mesh.npolys; ++i)
+            for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var p = mesh.polys[i];
+                var p = mesh.Polys[i];
                 int nv = CountPolyVerts(p);
 
                 // Collect edges which touches the removed vertex.
@@ -5147,9 +5174,9 @@ namespace Engine.PathFinding.RecastNavigation
         {
             // Count number of polygons to remove.
             int numRemovedVerts = 0;
-            for (int i = 0; i < mesh.npolys; ++i)
+            for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var p = mesh.polys[i];
+                var p = mesh.Polys[i];
                 int nv = CountPolyVerts(p);
                 for (int j = 0; j < nv; ++j)
                 {
@@ -5169,9 +5196,9 @@ namespace Engine.PathFinding.RecastNavigation
             int nharea = 0;
             SamplePolyAreas[] harea = new SamplePolyAreas[numRemovedVerts];
 
-            for (int i = 0; i < mesh.npolys; ++i)
+            for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var p = mesh.polys[i];
+                var p = mesh.Polys[i];
                 int nv = CountPolyVerts(p);
                 bool hasRem = false;
                 for (int j = 0; j < nv; ++j)
@@ -5185,21 +5212,21 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         if (p[j] != rem && p[k] != rem)
                         {
-                            var e = new Int4(p[k], p[j], mesh.regs[i], (int)mesh.areas[i]);
+                            var e = new Int4(p[k], p[j], mesh.Regs[i], (int)mesh.Areas[i]);
                             edges[nedges] = e;
                             nedges++;
                         }
                     }
                     // Remove the polygon.
-                    var p2 = mesh.polys[mesh.npolys - 1];
+                    var p2 = mesh.Polys[mesh.NPolys - 1];
                     if (p != p2)
                     {
-                        mesh.polys[i] = mesh.polys[mesh.npolys - 1];
+                        mesh.Polys[i] = mesh.Polys[mesh.NPolys - 1];
                     }
-                    mesh.polys[mesh.npolys - 1] = null;
-                    mesh.regs[i] = mesh.regs[mesh.npolys - 1];
-                    mesh.areas[i] = mesh.areas[mesh.npolys - 1];
-                    mesh.npolys--;
+                    mesh.Polys[mesh.NPolys - 1] = null;
+                    mesh.Regs[i] = mesh.Regs[mesh.NPolys - 1];
+                    mesh.Areas[i] = mesh.Areas[mesh.NPolys - 1];
+                    mesh.NPolys--;
                     --i;
                 }
             }
@@ -5207,14 +5234,14 @@ namespace Engine.PathFinding.RecastNavigation
             // Remove vertex.
             for (int i = rem; i < mesh.nverts - 1; ++i)
             {
-                mesh.verts[i] = mesh.verts[(i + 1)];
+                mesh.Verts[i] = mesh.Verts[(i + 1)];
             }
             mesh.nverts--;
 
             // Adjust indices to match the removed vertex layout.
-            for (int i = 0; i < mesh.npolys; ++i)
+            for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var p = mesh.polys[i];
+                var p = mesh.Polys[i];
                 int nv = CountPolyVerts(p);
                 for (int j = 0; j < nv; ++j)
                 {
@@ -5288,9 +5315,9 @@ namespace Engine.PathFinding.RecastNavigation
             for (int i = 0; i < nhole; ++i)
             {
                 int pi = hole[i];
-                tverts[i].X = mesh.verts[pi].X;
-                tverts[i].Y = mesh.verts[pi].Y;
-                tverts[i].Z = mesh.verts[pi].Z;
+                tverts[i].X = mesh.Verts[pi].X;
+                tverts[i].Y = mesh.Verts[pi].Y;
+                tverts[i].Z = mesh.Verts[pi].Z;
                 tverts[i].W = 0;
                 thole[i] = i;
             }
@@ -5339,7 +5366,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Merge polygons.
-            int nvp = mesh.nvp;
+            int nvp = mesh.NVP;
             if (nvp > 3)
             {
                 while (true)
@@ -5354,7 +5381,7 @@ namespace Engine.PathFinding.RecastNavigation
                         for (int k = j + 1; k < npolys; ++k)
                         {
                             var pk = polys[k];
-                            int v = GetPolyMergeValue(pj, pk, mesh.verts, out int ea, out int eb);
+                            int v = GetPolyMergeValue(pj, pk, mesh.Verts, out int ea, out int eb);
                             if (v > bestMergeVal)
                             {
                                 bestMergeVal = v;
@@ -5390,18 +5417,18 @@ namespace Engine.PathFinding.RecastNavigation
             // Store polygons.
             for (int i = 0; i < npolys; ++i)
             {
-                if (mesh.npolys >= maxTris) break;
-                var p = mesh.polys[mesh.npolys];
+                if (mesh.NPolys >= maxTris) break;
+                var p = mesh.Polys[mesh.NPolys];
                 for (int j = 0; j < nvp; ++j)
                 {
                     p[j] = polys[i][j];
                 }
-                mesh.regs[mesh.npolys] = pregs[i];
-                mesh.areas[mesh.npolys] = pareas[i];
-                mesh.npolys++;
-                if (mesh.npolys > maxTris)
+                mesh.Regs[mesh.NPolys] = pregs[i];
+                mesh.Areas[mesh.NPolys] = pareas[i];
+                mesh.NPolys++;
+                if (mesh.NPolys > maxTris)
                 {
-                    Console.WriteLine($"removeVertex: Too many polygons {mesh.npolys} (max:{maxTris}).");
+                    Console.WriteLine($"removeVertex: Too many polygons {mesh.NPolys} (max:{maxTris}).");
                     return false;
                 }
             }
@@ -5412,12 +5439,12 @@ namespace Engine.PathFinding.RecastNavigation
         {
             mesh = new PolyMesh
             {
-                bmin = cset.bmin,
-                bmax = cset.bmax,
-                cs = cset.cs,
-                ch = cset.ch,
-                borderSize = cset.borderSize,
-                maxEdgeError = cset.maxError
+                BMin = cset.bmin,
+                BMax = cset.bmax,
+                CS = cset.cs,
+                CH = cset.ch,
+                BorderSize = cset.borderSize,
+                MaxEdgeError = cset.maxError
             };
 
             int maxVertices = 0;
@@ -5439,15 +5466,15 @@ namespace Engine.PathFinding.RecastNavigation
 
             int[] vflags = new int[maxVertices];
 
-            mesh.verts = new Int3[maxVertices];
-            mesh.polys = new Polygoni[maxTris];
-            mesh.regs = new int[maxTris];
-            mesh.areas = new SamplePolyAreas[maxTris];
+            mesh.Verts = new Int3[maxVertices];
+            mesh.Polys = new Polygoni[maxTris];
+            mesh.Regs = new int[maxTris];
+            mesh.Areas = new SamplePolyAreas[maxTris];
 
             mesh.nverts = 0;
-            mesh.npolys = 0;
-            mesh.nvp = nvp;
-            mesh.maxpolys = maxTris;
+            mesh.NPolys = 0;
+            mesh.NVP = nvp;
+            mesh.MaxPolys = maxTris;
 
             int[] nextVert = Helper.CreateArray(maxVertices, 0);
             int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, -1);
@@ -5481,7 +5508,7 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int j = 0; j < cont.nverts; ++j)
                 {
                     var v = cont.verts[j];
-                    indices[j] = AddVertex(v.X, v.Y, v.Z, mesh.verts, firstVert, nextVert, ref mesh.nverts);
+                    indices[j] = AddVertex(v.X, v.Y, v.Z, mesh.Verts, firstVert, nextVert, ref mesh.nverts);
                     if ((v.W & RC_BORDER_VERTEX) != 0)
                     {
                         // This vertex should be removed.
@@ -5524,7 +5551,7 @@ namespace Engine.PathFinding.RecastNavigation
                             for (int k = j + 1; k < npolys; ++k)
                             {
                                 var pk = polys[k];
-                                int v = GetPolyMergeValue(pj, pk, mesh.verts, out int ea, out int eb);
+                                int v = GetPolyMergeValue(pj, pk, mesh.Verts, out int ea, out int eb);
                                 if (v > bestMergeVal)
                                 {
                                     bestMergeVal = v;
@@ -5560,13 +5587,13 @@ namespace Engine.PathFinding.RecastNavigation
                     {
                         p[k] = q[k];
                     }
-                    mesh.polys[mesh.npolys] = p;
-                    mesh.regs[mesh.npolys] = cont.reg;
-                    mesh.areas[mesh.npolys] = (SamplePolyAreas)(int)cont.area;
-                    mesh.npolys++;
-                    if (mesh.npolys > maxTris)
+                    mesh.Polys[mesh.NPolys] = p;
+                    mesh.Regs[mesh.NPolys] = cont.reg;
+                    mesh.Areas[mesh.NPolys] = (SamplePolyAreas)(int)cont.area;
+                    mesh.NPolys++;
+                    if (mesh.NPolys > maxTris)
                     {
-                        throw new EngineException(string.Format("rcBuildPolyMesh: Too many polygons {0} (max:{1}).", mesh.npolys, maxTris));
+                        throw new EngineException(string.Format("rcBuildPolyMesh: Too many polygons {0} (max:{1}).", mesh.NPolys, maxTris));
                     }
                 }
             }
@@ -5597,19 +5624,19 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Calculate adjacency.
-            if (!BuildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, nvp))
+            if (!BuildMeshAdjacency(mesh.Polys, mesh.NPolys, mesh.nverts, nvp))
             {
                 throw new EngineException("Adjacency failed.");
             }
 
             // Find portal edges
-            if (mesh.borderSize > 0)
+            if (mesh.BorderSize > 0)
             {
                 int w = cset.width;
                 int h = cset.height;
-                for (int i = 0; i < mesh.npolys; ++i)
+                for (int i = 0; i < mesh.NPolys; ++i)
                 {
-                    var p = mesh.polys[i];
+                    var p = mesh.Polys[i];
                     for (int j = 0; j < nvp; ++j)
                     {
                         if (p[j] == RC_MESH_NULL_IDX)
@@ -5626,8 +5653,8 @@ namespace Engine.PathFinding.RecastNavigation
                         {
                             nj = 0;
                         }
-                        var va = mesh.verts[p[j]];
-                        var vb = mesh.verts[p[nj]];
+                        var va = mesh.Verts[p[j]];
+                        var vb = mesh.Verts[p[nj]];
 
                         if (va.X == 0 && vb.X == 0)
                         {
@@ -5650,15 +5677,15 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Just allocate the mesh flags array. The user is resposible to fill it.
-            mesh.flags = new SamplePolyFlagTypes[mesh.npolys];
+            mesh.Flags = new SamplePolyFlagTypes[mesh.NPolys];
 
             if (mesh.nverts > 0xffff)
             {
                 throw new EngineException(string.Format("The resulting mesh has too many vertices {0} (max {1}). Data can be corrupted.", mesh.nverts, 0xffff));
             }
-            if (mesh.npolys > 0xffff)
+            if (mesh.NPolys > 0xffff)
             {
-                throw new EngineException(string.Format("The resulting mesh has too many polygons {0} (max {1}). Data can be corrupted.", mesh.npolys, 0xffff));
+                throw new EngineException(string.Format("The resulting mesh has too many polygons {0} (max {1}). Data can be corrupted.", mesh.NPolys, 0xffff));
             }
 
             return true;
@@ -5674,11 +5701,11 @@ namespace Engine.PathFinding.RecastNavigation
 
             mesh = new PolyMesh
             {
-                nvp = meshes[0].nvp,
-                cs = meshes[0].cs,
-                ch = meshes[0].ch,
-                bmin = meshes[0].bmin,
-                bmax = meshes[0].bmax
+                NVP = meshes[0].NVP,
+                CS = meshes[0].CS,
+                CH = meshes[0].CH,
+                BMin = meshes[0].BMin,
+                BMax = meshes[0].BMax
             };
 
             int maxVerts = 0;
@@ -5686,20 +5713,20 @@ namespace Engine.PathFinding.RecastNavigation
             int maxVertsPerMesh = 0;
             for (int i = 0; i < nmeshes; ++i)
             {
-                mesh.bmin = Vector3.Min(mesh.bmin, meshes[i].bmin);
-                mesh.bmax = Vector3.Max(mesh.bmax, meshes[i].bmax);
+                mesh.BMin = Vector3.Min(mesh.BMin, meshes[i].BMin);
+                mesh.BMax = Vector3.Max(mesh.BMax, meshes[i].BMax);
                 maxVertsPerMesh = Math.Max(maxVertsPerMesh, meshes[i].nverts);
                 maxVerts += meshes[i].nverts;
-                maxPolys += meshes[i].npolys;
+                maxPolys += meshes[i].NPolys;
             }
 
             mesh.nverts = 0;
-            mesh.verts = new Int3[maxVerts];
-            mesh.npolys = 0;
-            mesh.polys = new Polygoni[maxPolys];
-            mesh.regs = new int[maxPolys];
-            mesh.areas = new SamplePolyAreas[maxPolys];
-            mesh.flags = new SamplePolyFlagTypes[maxPolys];
+            mesh.Verts = new Int3[maxVerts];
+            mesh.NPolys = 0;
+            mesh.Polys = new Polygoni[maxPolys];
+            mesh.Regs = new int[maxPolys];
+            mesh.Areas = new SamplePolyAreas[maxPolys];
+            mesh.Flags = new SamplePolyFlagTypes[maxPolys];
 
             int[] nextVert = Helper.CreateArray(maxVerts, 0);
             int[] firstVert = Helper.CreateArray(VERTEX_BUCKET_COUNT, -1);
@@ -5709,30 +5736,30 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 var pmesh = meshes[i];
 
-                int ox = (int)Math.Floor((pmesh.bmin.X - mesh.bmin.X) / mesh.cs + 0.5f);
-                int oz = (int)Math.Floor((pmesh.bmin.X - mesh.bmin.Z) / mesh.cs + 0.5f);
+                int ox = (int)Math.Floor((pmesh.BMin.X - mesh.BMin.X) / mesh.CS + 0.5f);
+                int oz = (int)Math.Floor((pmesh.BMin.X - mesh.BMin.Z) / mesh.CS + 0.5f);
 
                 bool isMinX = (ox == 0);
                 bool isMinZ = (oz == 0);
-                bool isMaxX = ((int)Math.Floor((mesh.bmax.X - pmesh.bmax.X) / mesh.cs + 0.5f)) == 0;
-                bool isMaxZ = ((int)Math.Floor((mesh.bmax.Z - pmesh.bmax.Z) / mesh.cs + 0.5f)) == 0;
+                bool isMaxX = ((int)Math.Floor((mesh.BMax.X - pmesh.BMax.X) / mesh.CS + 0.5f)) == 0;
+                bool isMaxZ = ((int)Math.Floor((mesh.BMax.Z - pmesh.BMax.Z) / mesh.CS + 0.5f)) == 0;
                 bool isOnBorder = (isMinX || isMinZ || isMaxX || isMaxZ);
 
                 for (int j = 0; j < pmesh.nverts; ++j)
                 {
-                    var v = pmesh.verts[j];
-                    vremap[j] = AddVertex(v[0] + ox, v[1], v[2] + oz, mesh.verts, firstVert, nextVert, ref mesh.nverts);
+                    var v = pmesh.Verts[j];
+                    vremap[j] = AddVertex(v[0] + ox, v[1], v[2] + oz, mesh.Verts, firstVert, nextVert, ref mesh.nverts);
                 }
 
-                for (int j = 0; j < pmesh.npolys; ++j)
+                for (int j = 0; j < pmesh.NPolys; ++j)
                 {
-                    var tgt = mesh.polys[mesh.npolys];
-                    var src = pmesh.polys[j];
-                    mesh.regs[mesh.npolys] = pmesh.regs[j];
-                    mesh.areas[mesh.npolys] = pmesh.areas[j];
-                    mesh.flags[mesh.npolys] = pmesh.flags[j];
-                    mesh.npolys++;
-                    for (int k = 0; k < mesh.nvp; ++k)
+                    var tgt = mesh.Polys[mesh.NPolys];
+                    var src = pmesh.Polys[j];
+                    mesh.Regs[mesh.NPolys] = pmesh.Regs[j];
+                    mesh.Areas[mesh.NPolys] = pmesh.Areas[j];
+                    mesh.Flags[mesh.NPolys] = pmesh.Flags[j];
+                    mesh.NPolys++;
+                    for (int k = 0; k < mesh.NVP; ++k)
                     {
                         if (src[k] == RC_MESH_NULL_IDX)
                         {
@@ -5743,7 +5770,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                     if (isOnBorder)
                     {
-                        for (int k = mesh.nvp; k < mesh.nvp * 2; ++k)
+                        for (int k = mesh.NVP; k < mesh.NVP * 2; ++k)
                         {
                             if ((src[k] & 0x8000) != 0 && src[k] != 0xffff)
                             {
@@ -5770,7 +5797,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Calculate adjacency.
-            if (!BuildMeshAdjacency(mesh.polys, mesh.npolys, mesh.nverts, mesh.nvp))
+            if (!BuildMeshAdjacency(mesh.Polys, mesh.NPolys, mesh.nverts, mesh.NVP))
             {
                 throw new EngineException("rcMergePolyMeshes: Adjacency failed.");
             }
@@ -5779,9 +5806,9 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 throw new EngineException(string.Format("rcMergePolyMeshes: The resulting mesh has too many vertices {0} (max {1}). Data can be corrupted.", mesh.nverts, 0xffff));
             }
-            if (mesh.npolys > 0xffff)
+            if (mesh.NPolys > 0xffff)
             {
-                throw new EngineException(string.Format("rcMergePolyMeshes: The resulting mesh has too many polygons {0} (max {1}). Data can be corrupted.", mesh.npolys, 0xffff));
+                throw new EngineException(string.Format("rcMergePolyMeshes: The resulting mesh has too many polygons {0} (max {1}). Data can be corrupted.", mesh.NPolys, 0xffff));
             }
 
             return true;
@@ -5791,27 +5818,27 @@ namespace Engine.PathFinding.RecastNavigation
             dst = new PolyMesh
             {
                 nverts = src.nverts,
-                npolys = src.npolys,
-                maxpolys = src.npolys,
-                nvp = src.nvp,
-                bmin = src.bmin,
-                bmax = src.bmax,
-                cs = src.cs,
-                ch = src.ch,
-                borderSize = src.borderSize,
-                maxEdgeError = src.maxEdgeError,
-                verts = new Int3[src.nverts],
-                polys = new Polygoni[src.npolys],
-                regs = new int[src.npolys],
-                areas = new SamplePolyAreas[src.npolys],
-                flags = new SamplePolyFlagTypes[src.npolys]
+                NPolys = src.NPolys,
+                MaxPolys = src.NPolys,
+                NVP = src.NVP,
+                BMin = src.BMin,
+                BMax = src.BMax,
+                CS = src.CS,
+                CH = src.CH,
+                BorderSize = src.BorderSize,
+                MaxEdgeError = src.MaxEdgeError,
+                Verts = new Int3[src.nverts],
+                Polys = new Polygoni[src.NPolys],
+                Regs = new int[src.NPolys],
+                Areas = new SamplePolyAreas[src.NPolys],
+                Flags = new SamplePolyFlagTypes[src.NPolys]
             };
 
-            Array.Copy(src.verts, dst.verts, src.nverts);
-            Array.Copy(src.polys, dst.polys, src.npolys);
-            Array.Copy(src.regs, dst.regs, src.npolys);
-            Array.Copy(src.areas, dst.areas, src.npolys);
-            Array.Copy(src.flags, dst.flags, src.npolys);
+            Array.Copy(src.Verts, dst.Verts, src.nverts);
+            Array.Copy(src.Polys, dst.Polys, src.NPolys);
+            Array.Copy(src.Regs, dst.Regs, src.NPolys);
+            Array.Copy(src.Areas, dst.Areas, src.NPolys);
+            Array.Copy(src.Flags, dst.Flags, src.NPolys);
 
             return true;
         }
@@ -6469,7 +6496,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             edges.Clear();
 
-            float cs = chf.cs;
+            float cs = chf.CS;
             float ics = 1.0f / cs;
 
             // Calculate minimum extents of the polygon based on input data.
@@ -6524,7 +6551,7 @@ namespace Engine.PathFinding.RecastNavigation
                             Y = vj.Y + dy * u,
                             Z = vj.Z + dz * u
                         };
-                        pos.Y = GetHeight(pos.X, pos.Y, pos.Z, cs, ics, chf.ch, heightSearchRadius, hp) * chf.ch;
+                        pos.Y = GetHeight(pos.X, pos.Y, pos.Z, cs, ics, chf.CH, heightSearchRadius, hp) * chf.CH;
                         edge[k] = pos;
                     }
                     // Simplify samples.
@@ -6647,7 +6674,7 @@ namespace Engine.PathFinding.RecastNavigation
                         samples.Add(
                             new Int4(
                                 x,
-                                GetHeight(pt.X, pt.Y, pt.Z, cs, ics, chf.ch, heightSearchRadius, hp),
+                                GetHeight(pt.X, pt.Y, pt.Z, cs, ics, chf.CH, heightSearchRadius, hp),
                                 z,
                                 0)); // Not added
                     }
@@ -6677,7 +6704,7 @@ namespace Engine.PathFinding.RecastNavigation
                         Vector3 pt = new Vector3
                         {
                             X = s.X * sampleDist + GetJitterX(i) * cs * 0.1f,
-                            Y = s.Y * chf.ch,
+                            Y = s.Y * chf.CH,
                             Z = s.Z * sampleDist + GetJitterY(i) * cs * 0.1f
                         };
                         float d = DistToTriMesh(pt, verts, nverts, tris.ToArray(), tris.Count);
@@ -6747,10 +6774,10 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
 
-                    var c = chf.cells[(ax + bs) + (az + bs) * chf.width];
-                    for (int i = c.index, ni = (c.index + c.count); i < ni && dmin > 0; ++i)
+                    var c = chf.Cells[(ax + bs) + (az + bs) * chf.Width];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni && dmin > 0; ++i)
                     {
-                        var s = chf.spans[i];
+                        var s = chf.Spans[i];
                         int d = Math.Abs(ay - s.Y);
                         if (d < dmin)
                         {
@@ -6819,7 +6846,7 @@ namespace Engine.PathFinding.RecastNavigation
                 // Push the direct dir last so we start with this on next iteration
                 Helper.Swap(ref dirs[directDir], ref dirs[3]);
 
-                var cs = chf.spans[ci];
+                var cs = chf.Spans[ci];
                 for (int i = 0; i < 4; i++)
                 {
                     int dir = dirs[i];
@@ -6846,7 +6873,7 @@ namespace Engine.PathFinding.RecastNavigation
                     hp.Data[hpx + hpy * hp.Width] = 1;
                     array.Add(newX);
                     array.Add(newY);
-                    array.Add(chf.cells[(newX + bs) + (newY + bs) * chf.width].index + GetCon(cs, dir));
+                    array.Add(chf.Cells[(newX + bs) + (newY + bs) * chf.Width].Index + GetCon(cs, dir));
                 }
 
                 Helper.Swap(ref dirs[directDir], ref dirs[3]);
@@ -6859,7 +6886,7 @@ namespace Engine.PathFinding.RecastNavigation
             array.Add(ci);
 
             hp.Data = Helper.CreateArray(hp.Width * hp.Height, 0xff);
-            var chs = chf.spans[ci];
+            var chs = chf.Spans[ci];
             hp.Data[cx - hp.Xmin + (cy - hp.Ymin) * hp.Width] = chs.Y;
         }
         public static void Push3(List<int> queue, int v1, int v2, int v3)
@@ -6892,10 +6919,10 @@ namespace Engine.PathFinding.RecastNavigation
                     for (int hx = 0; hx < hp.Width; hx++)
                     {
                         int x = hp.Xmin + hx + bs;
-                        var c = chf.cells[x + y * chf.width];
-                        for (int i = c.index, ni = (c.index + c.count); i < ni; ++i)
+                        var c = chf.Cells[x + y * chf.Width];
+                        for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                         {
-                            var s = chf.spans[i];
+                            var s = chf.Spans[i];
                             if (s.Reg == region)
                             {
                                 // Store height
@@ -6911,8 +6938,8 @@ namespace Engine.PathFinding.RecastNavigation
                                     {
                                         int ax = x + GetDirOffsetX(dir);
                                         int ay = y + GetDirOffsetY(dir);
-                                        int ai = chf.cells[ax + ay * chf.width].index + GetCon(s, dir);
-                                        var a = chf.spans[ai];
+                                        int ai = chf.Cells[ax + ay * chf.Width].Index + GetCon(s, dir);
+                                        var a = chf.Spans[ai];
                                         if (a.Reg != region)
                                         {
                                             border = true;
@@ -6961,7 +6988,7 @@ namespace Engine.PathFinding.RecastNavigation
                     queue.Clear();
                 }
 
-                var cs = chf.spans[ci];
+                var cs = chf.Spans[ci];
                 for (int dir = 0; dir < 4; ++dir)
                 {
                     if (GetCon(cs, dir) == RC_NOT_CONNECTED)
@@ -6984,8 +7011,8 @@ namespace Engine.PathFinding.RecastNavigation
                         continue;
                     }
 
-                    int ai = chf.cells[ax + ay * chf.width].index + GetCon(cs, dir);
-                    var a = chf.spans[ai];
+                    int ai = chf.Cells[ax + ay * chf.Width].Index + GetCon(cs, dir);
+                    var a = chf.Spans[ai];
 
                     hp.Data[hx + hy * hp.Width] = a.Y;
 
@@ -7019,17 +7046,17 @@ namespace Engine.PathFinding.RecastNavigation
         {
             dmesh = null;
 
-            if (mesh.nverts == 0 || mesh.npolys == 0)
+            if (mesh.nverts == 0 || mesh.NPolys == 0)
             {
                 return true;
             }
 
-            int nvp = mesh.nvp;
-            float cs = mesh.cs;
-            float ch = mesh.ch;
-            Vector3 orig = mesh.bmin;
-            int borderSize = mesh.borderSize;
-            int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.maxEdgeError));
+            int nvp = mesh.NVP;
+            float cs = mesh.CS;
+            float ch = mesh.CH;
+            Vector3 orig = mesh.BMin;
+            int borderSize = mesh.BorderSize;
+            int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.MaxEdgeError));
 
             List<int> arr = new List<int>(512);
             Vector3[] verts = new Vector3[256];
@@ -7037,21 +7064,21 @@ namespace Engine.PathFinding.RecastNavigation
             int nPolyVerts = 0;
             int maxhw = 0, maxhh = 0;
 
-            Int4[] bounds = new Int4[mesh.npolys];
+            Int4[] bounds = new Int4[mesh.NPolys];
             Vector3[] poly = new Vector3[nvp];
 
             // Find max size for a polygon area.
-            for (int i = 0; i < mesh.npolys; ++i)
+            for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var p = mesh.polys[i];
-                int xmin = chf.width;
+                var p = mesh.Polys[i];
+                int xmin = chf.Width;
                 int xmax = 0;
-                int ymin = chf.height;
+                int ymin = chf.Height;
                 int ymax = 0;
                 for (int j = 0; j < nvp; ++j)
                 {
                     if (p[j] == RC_MESH_NULL_IDX) break;
-                    var v = mesh.verts[p[j]];
+                    var v = mesh.Verts[p[j]];
                     xmin = Math.Min(xmin, v.X);
                     xmax = Math.Max(xmax, v.X);
                     ymin = Math.Min(ymin, v.Z);
@@ -7059,9 +7086,9 @@ namespace Engine.PathFinding.RecastNavigation
                     nPolyVerts++;
                 }
                 xmin = Math.Max(0, xmin - 1);
-                xmax = Math.Min(chf.width, xmax + 1);
+                xmax = Math.Min(chf.Width, xmax + 1);
                 ymin = Math.Max(0, ymin - 1);
-                ymax = Math.Min(chf.height, ymax + 1);
+                ymax = Math.Min(chf.Height, ymax + 1);
                 bounds[i] = new Int4(xmin, xmax, ymin, ymax);
                 if (xmin >= xmax || ymin >= ymax) continue;
                 maxhw = Math.Max(maxhw, xmax - xmin);
@@ -7075,24 +7102,24 @@ namespace Engine.PathFinding.RecastNavigation
 
             dmesh = new PolyMeshDetail
             {
-                nmeshes = mesh.npolys,
-                meshes = new Int4[mesh.npolys],
+                nmeshes = mesh.NPolys,
+                meshes = new Int4[mesh.NPolys],
                 ntris = 0,
                 tris = new Int4[tcap],
                 nverts = 0,
                 verts = new Vector3[vcap]
             };
 
-            for (int i = 0; i < mesh.npolys; ++i)
+            for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var p = mesh.polys[i];
+                var p = mesh.Polys[i];
 
                 // Store polygon vertices for processing.
                 int npoly = 0;
                 for (int j = 0; j < nvp; ++j)
                 {
                     if (p[j] == RC_MESH_NULL_IDX) break;
-                    var v = mesh.verts[p[j]];
+                    var v = mesh.Verts[p[j]];
                     poly[j].X = v.X * cs;
                     poly[j].Y = v.Y * ch;
                     poly[j].Z = v.Z * cs;
@@ -7104,7 +7131,7 @@ namespace Engine.PathFinding.RecastNavigation
                 hp.Ymin = bounds[i].Z;
                 hp.Width = bounds[i].Y - bounds[i].X;
                 hp.Height = bounds[i].W - bounds[i].Z;
-                GetHeightData(chf, p, npoly, mesh.verts, borderSize, hp, arr, mesh.regs[i]);
+                GetHeightData(chf, p, npoly, mesh.Verts, borderSize, hp, arr, mesh.Regs[i]);
 
                 // Build detail mesh.
                 if (!BuildPolyDetail(
@@ -7120,7 +7147,7 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int j = 0; j < nverts; ++j)
                 {
                     verts[j].X += orig.X;
-                    verts[j].Y += orig.Y + chf.ch; // Is this offset necessary?
+                    verts[j].Y += orig.Y + chf.CH; // Is this offset necessary?
                     verts[j].Z += orig.Z;
                 }
                 // Offset poly too, will be used to flag checking.

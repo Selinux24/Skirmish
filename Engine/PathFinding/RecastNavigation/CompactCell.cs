@@ -15,8 +15,8 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 return new CompactCell()
                 {
-                    index = 24,
-                    count = 8,
+                    Index = 24,
+                    Count = 8,
                 };
             }
         }
@@ -24,11 +24,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Index to the first span in the column.
         /// </summary>
-        public int index;
+        public int Index { get; set; }
         /// <summary>
         /// Number of spans in the column.
         /// </summary>
-        public int count;
+        public int Count { get; set; }
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -36,7 +36,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Index {0}; Count {1}", this.index, this.count);
+            return string.Format("Index {0}; Count {1}", this.Index, this.Count);
         }
     }
 }

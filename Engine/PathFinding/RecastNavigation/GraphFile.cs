@@ -42,7 +42,7 @@ namespace Engine.PathFinding.RecastNavigation
                     var tile = navmesh.Tiles[i];
                     if (tile != null)
                     {
-                        file.NavMeshData.Add(tile.data);
+                        file.NavMeshData.Add(tile.Data);
                     }
                 }
 
@@ -81,7 +81,7 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int i = 0; i < file.NavMeshData.Count; i++)
                 {
                     var tile = file.NavMeshData[i];
-                    if (tile == null || tile.Header.magic != Detour.DT_NAVMESH_MAGIC) continue;
+                    if (tile == null || tile.Header.Magic != Detour.DT_NAVMESH_MAGIC) continue;
 
                     navmesh.AddTile(tile, TileFlagTypes.DT_TILE_FREE_DATA, 0, out int res);
                 }

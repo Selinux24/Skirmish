@@ -425,9 +425,9 @@ namespace Engine.PathFinding.RecastNavigation
                 return npath;
             }
 
-            for (int k = poly.FirstLink; k != Detour.DT_NULL_LINK; k = tile.links[k].next)
+            for (int k = poly.FirstLink; k != Detour.DT_NULL_LINK; k = tile.Links[k].next)
             {
-                var link = tile.links[k];
+                var link = tile.Links[k];
                 if (link.nref != 0 && neis.Count < maxNeis)
                 {
                     neis.Add(link.nref);

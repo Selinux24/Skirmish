@@ -4,40 +4,40 @@ namespace Engine.PathFinding.RecastNavigation
 {
     public class TileCacheObstacle
     {
-        public CompressedTile[] touched = new CompressedTile[DetourTileCache.DT_MAX_TOUCHED_TILES];
-        public CompressedTile[] pending = new CompressedTile[DetourTileCache.DT_MAX_TOUCHED_TILES];
-        public int Salt;
-        public ObstacleType type;
-        public ObstacleState state;
-        public int ntouched;
-        public int npending;
-        public int Next;
+        public CompressedTile[] Touched = new CompressedTile[DetourTileCache.DT_MAX_TOUCHED_TILES];
+        public CompressedTile[] Pending { get; set; } = new CompressedTile[DetourTileCache.DT_MAX_TOUCHED_TILES];
+        public int Salt { get; set; }
+        public ObstacleType Type { get; set; }
+        public ObstacleState State { get; set; }
+        public int NTouched;
+        public int NPending { get; set; }
+        public int Next { get; set; }
 
-        public ObstacleCylinder cylinder;
-        public ObstacleBox box;
-        public ObstacleOrientedBox orientedBox;
+        public ObstacleCylinder Cylinder { get; set; }
+        public ObstacleBox Box { get; set; }
+        public ObstacleOrientedBox OrientedBox;
     }
 
     public struct ObstacleCylinder
     {
-        public Vector3 pos;
-        public float radius;
-        public float height;
+        public Vector3 Pos { get; set; }
+        public float Radius { get; set; }
+        public float Height { get; set; }
     }
 
     public struct ObstacleBox
     {
-        public Vector3 bmin;
-        public Vector3 bmax;
+        public Vector3 BMin { get; set; }
+        public Vector3 BMax { get; set; }
     }
 
     public struct ObstacleOrientedBox
     {
-        public Vector3 center;
-        public Vector3 halfExtents;
+        public Vector3 Center { get; set; }
+        public Vector3 HalfExtents { get; set; }
         /// <summary>
         /// { cos(0.5f*angle)*sin(-0.5f*angle); cos(0.5f*angle)*cos(0.5f*angle) - 0.5 }
         /// </summary>
-        public Vector2 rotAux;
+        public Vector2 RotAux;
     }
 }
