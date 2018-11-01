@@ -4770,14 +4770,14 @@ namespace Engine.PathFinding.RecastNavigation
             uint n = (uint)(h1 * x + h2 * y + h3 * z);
             return (int)(n & (VERTEX_BUCKET_COUNT - 1));
         }
-        public static int AddVertex(int x, int y, int z, Int3[] verts, int[] firstVert, int[] nextVert, ref int nv)
+        public static int AddVertex(int x, int y, int z, PolyMesh mesh, int[] firstVert, int[] nextVert)
         {
             int bucket = ComputeVertexHash(x, 0, z);
             int i = firstVert[bucket];
 
             while (i != -1)
             {
-                var v = verts[i];
+                var v = mesh.Verts[i];
                 if (v.X == x && (Math.Abs(v.Y - y) <= 2) && v.Z == z)
                 {
                     return i;
@@ -4786,8 +4786,8 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Could not find, create new.
-            i = nv; nv++;
-            verts[i] = new Int3(x, y, z);
+            i = mesh.NVerts; mesh.NVerts++;
+            mesh.Verts[i] = new Int3(x, y, z);
             nextVert[i] = firstVert[bucket];
             firstVert[bucket] = i;
 
@@ -5232,11 +5232,11 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Remove vertex.
-            for (int i = rem; i < mesh.nverts - 1; ++i)
+            for (int i = rem; i < mesh.NVerts - 1; ++i)
             {
                 mesh.Verts[i] = mesh.Verts[(i + 1)];
             }
-            mesh.nverts--;
+            mesh.NVerts--;
 
             // Adjust indices to match the removed vertex layout.
             for (int i = 0; i < mesh.NPolys; ++i)
@@ -5471,7 +5471,7 @@ namespace Engine.PathFinding.RecastNavigation
             mesh.Regs = new int[maxTris];
             mesh.Areas = new SamplePolyAreas[maxTris];
 
-            mesh.nverts = 0;
+            mesh.NVerts = 0;
             mesh.NPolys = 0;
             mesh.NVP = nvp;
             mesh.MaxPolys = maxTris;
@@ -5508,7 +5508,7 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int j = 0; j < cont.nverts; ++j)
                 {
                     var v = cont.verts[j];
-                    indices[j] = AddVertex(v.X, v.Y, v.Z, mesh.Verts, firstVert, nextVert, ref mesh.nverts);
+                    indices[j] = AddVertex(v.X, v.Y, v.Z, mesh, firstVert, nextVert);
                     if ((v.W & RC_BORDER_VERTEX) != 0)
                     {
                         // This vertex should be removed.
@@ -5599,7 +5599,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Remove edge vertices.
-            for (int i = 0; i < mesh.nverts; ++i)
+            for (int i = 0; i < mesh.NVerts; ++i)
             {
                 if (vflags[i] != 0)
                 {
@@ -5615,7 +5615,7 @@ namespace Engine.PathFinding.RecastNavigation
                     // Remove vertex
                     // Note: mesh.nverts is already decremented inside removeVertex()!
                     // Fixup vertex flags
-                    for (int j = i; j < mesh.nverts; ++j)
+                    for (int j = i; j < mesh.NVerts; ++j)
                     {
                         vflags[j] = vflags[j + 1];
                     }
@@ -5624,7 +5624,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Calculate adjacency.
-            if (!BuildMeshAdjacency(mesh.Polys, mesh.NPolys, mesh.nverts, nvp))
+            if (!BuildMeshAdjacency(mesh.Polys, mesh.NPolys, mesh.NVerts, nvp))
             {
                 throw new EngineException("Adjacency failed.");
             }
@@ -5679,9 +5679,9 @@ namespace Engine.PathFinding.RecastNavigation
             // Just allocate the mesh flags array. The user is resposible to fill it.
             mesh.Flags = new SamplePolyFlagTypes[mesh.NPolys];
 
-            if (mesh.nverts > 0xffff)
+            if (mesh.NVerts > 0xffff)
             {
-                throw new EngineException(string.Format("The resulting mesh has too many vertices {0} (max {1}). Data can be corrupted.", mesh.nverts, 0xffff));
+                throw new EngineException(string.Format("The resulting mesh has too many vertices {0} (max {1}). Data can be corrupted.", mesh.NVerts, 0xffff));
             }
             if (mesh.NPolys > 0xffff)
             {
@@ -5715,12 +5715,12 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 mesh.BMin = Vector3.Min(mesh.BMin, meshes[i].BMin);
                 mesh.BMax = Vector3.Max(mesh.BMax, meshes[i].BMax);
-                maxVertsPerMesh = Math.Max(maxVertsPerMesh, meshes[i].nverts);
-                maxVerts += meshes[i].nverts;
+                maxVertsPerMesh = Math.Max(maxVertsPerMesh, meshes[i].NVerts);
+                maxVerts += meshes[i].NVerts;
                 maxPolys += meshes[i].NPolys;
             }
 
-            mesh.nverts = 0;
+            mesh.NVerts = 0;
             mesh.Verts = new Int3[maxVerts];
             mesh.NPolys = 0;
             mesh.Polys = new Polygoni[maxPolys];
@@ -5745,10 +5745,10 @@ namespace Engine.PathFinding.RecastNavigation
                 bool isMaxZ = ((int)Math.Floor((mesh.BMax.Z - pmesh.BMax.Z) / mesh.CS + 0.5f)) == 0;
                 bool isOnBorder = (isMinX || isMinZ || isMaxX || isMaxZ);
 
-                for (int j = 0; j < pmesh.nverts; ++j)
+                for (int j = 0; j < pmesh.NVerts; ++j)
                 {
                     var v = pmesh.Verts[j];
-                    vremap[j] = AddVertex(v[0] + ox, v[1], v[2] + oz, mesh.Verts, firstVert, nextVert, ref mesh.nverts);
+                    vremap[j] = AddVertex(v.X + ox, v.Y, v.Z + oz, mesh, firstVert, nextVert);
                 }
 
                 for (int j = 0; j < pmesh.NPolys; ++j)
@@ -5797,14 +5797,14 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Calculate adjacency.
-            if (!BuildMeshAdjacency(mesh.Polys, mesh.NPolys, mesh.nverts, mesh.NVP))
+            if (!BuildMeshAdjacency(mesh.Polys, mesh.NPolys, mesh.NVerts, mesh.NVP))
             {
                 throw new EngineException("rcMergePolyMeshes: Adjacency failed.");
             }
 
-            if (mesh.nverts > 0xffff)
+            if (mesh.NVerts > 0xffff)
             {
-                throw new EngineException(string.Format("rcMergePolyMeshes: The resulting mesh has too many vertices {0} (max {1}). Data can be corrupted.", mesh.nverts, 0xffff));
+                throw new EngineException(string.Format("rcMergePolyMeshes: The resulting mesh has too many vertices {0} (max {1}). Data can be corrupted.", mesh.NVerts, 0xffff));
             }
             if (mesh.NPolys > 0xffff)
             {
@@ -5817,7 +5817,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             dst = new PolyMesh
             {
-                nverts = src.nverts,
+                NVerts = src.NVerts,
                 NPolys = src.NPolys,
                 MaxPolys = src.NPolys,
                 NVP = src.NVP,
@@ -5827,14 +5827,14 @@ namespace Engine.PathFinding.RecastNavigation
                 CH = src.CH,
                 BorderSize = src.BorderSize,
                 MaxEdgeError = src.MaxEdgeError,
-                Verts = new Int3[src.nverts],
+                Verts = new Int3[src.NVerts],
                 Polys = new Polygoni[src.NPolys],
                 Regs = new int[src.NPolys],
                 Areas = new SamplePolyAreas[src.NPolys],
                 Flags = new SamplePolyFlagTypes[src.NPolys]
             };
 
-            Array.Copy(src.Verts, dst.Verts, src.nverts);
+            Array.Copy(src.Verts, dst.Verts, src.NVerts);
             Array.Copy(src.Polys, dst.Polys, src.NPolys);
             Array.Copy(src.Regs, dst.Regs, src.NPolys);
             Array.Copy(src.Areas, dst.Areas, src.NPolys);
@@ -7046,7 +7046,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             dmesh = null;
 
-            if (mesh.nverts == 0 || mesh.NPolys == 0)
+            if (mesh.NVerts == 0 || mesh.NPolys == 0)
             {
                 return true;
             }

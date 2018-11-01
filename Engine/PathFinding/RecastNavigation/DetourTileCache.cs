@@ -610,7 +610,7 @@ namespace Engine.PathFinding.RecastNavigation
                 for (int j = 0; j < cont.NVerts; ++j)
                 {
                     var v = cont.Verts[j];
-                    indices[j] = AddVertex(v.X, v.Y, v.Z, mesh.Verts, firstVert, nextVert, ref mesh.NVerts);
+                    indices[j] = AddVertex(v.X, v.Y, v.Z, ref mesh, firstVert, nextVert);
                     if ((v.W & 0x80) != 0)
                     {
                         // This vertex should be removed.
@@ -1168,14 +1168,14 @@ namespace Engine.PathFinding.RecastNavigation
             uint n = (uint)(h1 * x + h2 * y + h3 * z);
             return (int)(n & (VERTEX_BUCKET_COUNT2 - 1));
         }
-        public static int AddVertex(int x, int y, int z, Int3[] verts, int[] firstVert, int[] nextVert, ref int nv)
+        public static int AddVertex(int x, int y, int z, ref TileCachePolyMesh mesh, int[] firstVert, int[] nextVert)
         {
             int bucket = ComputeVertexHash2(x, 0, z);
             int i = firstVert[bucket];
 
             while (i != DT_TILECACHE_NULL_IDX)
             {
-                var vx = verts[i];
+                var vx = mesh.Verts[i];
                 if (vx.X == x && vx.Z == z && (Math.Abs(vx.Y - y) <= 2))
                 {
                     return i;
@@ -1184,8 +1184,8 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Could not find, create new.
-            i = nv; nv++;
-            verts[i] = new Int3(x, y, z);
+            i = mesh.NVerts; mesh.NVerts++;
+            mesh.Verts[i] = new Int3(x, y, z);
             nextVert[i] = firstVert[bucket];
             firstVert[bucket] = i;
 

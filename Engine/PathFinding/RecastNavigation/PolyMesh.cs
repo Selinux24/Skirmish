@@ -30,7 +30,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// The number of vertices.
         /// </summary>
-        public int nverts;
+        public int NVerts { get; set; }
         /// <summary>
         /// The number of polygons.
         /// </summary>

@@ -185,7 +185,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var param = new NavMeshCreateParams
                 {
                     Verts = pmesh.Verts,
-                    VertCount = pmesh.nverts,
+                    VertCount = pmesh.NVerts,
                     Polys = pmesh.Polys,
                     PolyAreas = pmesh.Areas,
                     PolyFlags = pmesh.Flags,
@@ -768,7 +768,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (cfg.MaxVertsPerPoly <= Detour.DT_VERTS_PER_POLYGON)
             {
-                if (pmesh.nverts >= 0xffff)
+                if (pmesh.NVerts >= 0xffff)
                 {
                     // The vertex indices are ushorts, and cannot point to more than 0xffff vertices.
                     return null;
@@ -801,7 +801,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var param = new NavMeshCreateParams
                 {
                     Verts = pmesh.Verts,
-                    VertCount = pmesh.nverts,
+                    VertCount = pmesh.NVerts,
                     Polys = pmesh.Polys,
                     PolyAreas = pmesh.Areas,
                     PolyFlags = pmesh.Flags,
