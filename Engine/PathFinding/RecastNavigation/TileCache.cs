@@ -410,6 +410,10 @@ namespace Engine.PathFinding.RecastNavigation
                 return Status.DT_FAILURE;
             }
 
+            float coshalf = (float)Math.Cos(0.5f * yRadians);
+            float sinhalf = (float)Math.Sin(-0.5f * yRadians);
+            var rotAux = new Vector2(coshalf * sinhalf, coshalf * coshalf - 0.5f);
+
             int salt = m_obstacles[ob].Salt;
             m_obstacles[ob] = new TileCacheObstacle
             {
@@ -419,14 +423,10 @@ namespace Engine.PathFinding.RecastNavigation
                 OrientedBox = new ObstacleOrientedBox
                 {
                     Center = center,
-                    HalfExtents = halfExtents
+                    HalfExtents = halfExtents,
+                    RotAux = rotAux,
                 }
             };
-
-            float coshalf = (float)Math.Cos(0.5f * yRadians);
-            float sinhalf = (float)Math.Sin(-0.5f * yRadians);
-            m_obstacles[ob].OrientedBox.RotAux.X = coshalf * sinhalf;
-            m_obstacles[ob].OrientedBox.RotAux.Y = coshalf * coshalf - 0.5f;
 
             var req = new ObstacleRequest
             {
@@ -471,7 +471,7 @@ namespace Engine.PathFinding.RecastNavigation
             return Status.DT_FAILURE;
         }
 
-        public Status QueryTiles(Vector3 bmin, Vector3 bmax, out CompressedTile[] results, out int resultCount, int maxResults)
+        public Status QueryTiles(Vector3 bmin, Vector3 bmax, int maxResults, out CompressedTile[] results, out int resultCount)
         {
             results = new CompressedTile[maxResults];
 
@@ -537,7 +537,10 @@ namespace Engine.PathFinding.RecastNavigation
                         // Find touched tiles.
                         GetObstacleBounds(ob, out Vector3 bmin, out Vector3 bmax);
 
-                        QueryTiles(bmin, bmax, out ob.Touched, out ob.NTouched, DetourTileCache.DT_MAX_TOUCHED_TILES);
+                        QueryTiles(bmin, bmax, DetourTileCache.DT_MAX_TOUCHED_TILES, out var touched, out var nTouched);
+                        ob.Touched = touched;
+                        ob.NTouched = nTouched;
+
                         // Add tiles to update list.
                         ob.NPending = 0;
                         for (int j = 0; j < ob.NTouched; ++j)
