@@ -76,13 +76,11 @@ namespace Engine.Animation
         /// <param name="scale">Gets the interpolated scale</param>
         public void Interpolate(float time, out Vector3 translation, out Quaternion rotation, out Vector3 scale)
         {
-            if (this.Keyframes == null)
-            {
-                translation = Vector3.Zero;
-                rotation = Quaternion.Identity;
-                scale = Vector3.One;
-            }
-            else
+            translation = Vector3.Zero;
+            rotation = Quaternion.Identity;
+            scale = Vector3.One;
+
+            if (this.Keyframes != null)
             {
                 var deltaTime = 0.0f;
                 if (this.Duration > 0.0f)

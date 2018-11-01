@@ -203,60 +203,78 @@ namespace Engine.Animation
             {
                 for (int i = 0; i < this.items.Count; i++)
                 {
-                    var current = this.items[i];
-
                     //Set current item index
                     itemIndex = i;
+                    bool isLast = (i == this.items.Count - 1);
+
+                    var current = this.items[i];
 
                     //Update current item
                     current.UpdateSkinningData(skData);
 
-                    float t = current.TotalDuration;
-                    if (t == 0) continue;
-
-                    if (current.Loop)
+                    bool? continuePath = UpdateItem(current, isLast, nextTime, ref time, out atEnd, out float t);
+                    if (continuePath == false)
                     {
-                        //Adjust time in the loop
-                        float d = nextTime - time;
-                        t = d % t;
-                    }
-
-                    time += t;
-
-                    if (time - t <= nextTime && time > nextTime)
-                    {
-                        //This is the item
                         break;
                     }
-                    else if (current.Loop)
+                    if (continuePath == true)
                     {
-                        //Do loop
                         continue;
-                    }
-                    else if (nextTime >= time && i == this.items.Count - 1)
-                    {
-                        //Item passed, it's end item
-                        atEnd = true;
-                        break;
                     }
 
                     clipTime -= t;
                 }
             }
 
-            if (atEnd)
-            {
-                this.Time = time;
-            }
-            else
-            {
-                this.Time = nextTime;
-            }
-
+            this.Time = atEnd ? time : nextTime;
             this.Playing = !atEnd;
             this.TotalItemTime = clipTime;
 
             this.currentIndex = itemIndex;
+        }
+        /// <summary>
+        /// Updates the current item
+        /// </summary>
+        /// <param name="item">Item to update</param>
+        /// <param name="isLastItem">It's the last item in the path</param>
+        /// <param name="nextTime">Next time</param>
+        /// <param name="time">Current time</param>
+        /// <param name="atEnd">Returns if the path is at end</param>
+        /// <param name="t">Evaluated time</param>
+        /// <returns>Returns false if the path has to stop or true if it has to continue</returns>
+        private bool? UpdateItem(AnimationPathItem item, bool isLastItem, float nextTime, ref float time, out bool atEnd, out float t)
+        {
+            atEnd = false;
+            t = item.TotalDuration;
+            if (t == 0) return true;
+
+            if (item.Loop)
+            {
+                //Adjust time in the loop
+                float d = nextTime - time;
+                t = d % t;
+            }
+
+            time += t;
+
+            if (time - t <= nextTime && time > nextTime)
+            {
+                //This is the item, stop the path
+                return false;
+            }
+            else if (item.Loop)
+            {
+                //Do loop, continue path
+                return true;
+            }
+            else if (nextTime >= time && isLastItem /*i == this.items.Count - 1*/)
+            {
+                //Item passed, it's the end item
+                atEnd = true;
+                return false;
+            }
+
+            return null;
         }
         /// <summary>
         /// Gets the current path item
