@@ -250,100 +250,11 @@ namespace Engine
                     }
                     else
                     {
-                        #region Mouse position
+                        this.UpdateMousePositionState();
 
-                        {
-                            Point mousePos = this.form.PointToClient(Cursor.ScreenPosition);
+                        this.UpdateMouseButtonsState();
 
-                            this.MouseXDelta = mousePos.X - this.lastMousePos.X;
-                            this.MouseYDelta = mousePos.Y - this.lastMousePos.Y;
-
-                            this.MouseX = mousePos.X;
-                            this.MouseY = mousePos.Y;
-
-                            this.lastMousePos = mousePos;
-
-                            if (this.LockMouse)
-                            {
-                                this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
-                            }
-                        }
-
-                        #endregion
-
-                        #region Mouse buttons
-
-                        {
-                            this.lastMouseButtons.Clear();
-                            this.lastMouseButtons.AddRange(this.currentMouseButtons);
-                            this.currentMouseButtons.Clear();
-
-                            MouseButtons[] buttons = this.GetPressedButtons();
-                            if (buttons.Length > 0)
-                            {
-                                this.currentMouseButtons.AddRange(buttons);
-                            }
-
-                            bool prev = false;
-                            bool curr = false;
-
-                            prev = this.lastMouseButtons.Contains(MouseButtons.Left);
-                            curr = this.currentMouseButtons.Contains(MouseButtons.Left);
-                            this.LeftMouseButtonPressed = curr;
-                            this.LeftMouseButtonJustPressed = curr && !prev;
-                            this.LeftMouseButtonJustReleased = !curr && prev;
-
-                            prev = this.lastMouseButtons.Contains(MouseButtons.Right);
-                            curr = this.currentMouseButtons.Contains(MouseButtons.Right);
-                            this.RightMouseButtonPressed = curr;
-                            this.RightMouseButtonJustPressed = curr && !prev;
-                            this.RightMouseButtonJustReleased = !curr && prev;
-
-                            prev = this.lastMouseButtons.Contains(MouseButtons.Middle);
-                            curr = this.currentMouseButtons.Contains(MouseButtons.Middle);
-                            this.MiddleMouseButtonPressed = curr;
-                            this.MiddleMouseButtonJustPressed = curr && !prev;
-                            this.MiddleMouseButtonJustReleased = !curr && prev;
-
-                            prev = this.lastMouseButtons.Contains(MouseButtons.XButton1);
-                            curr = this.currentMouseButtons.Contains(MouseButtons.XButton1);
-                            this.X1MouseButtonPressed = curr;
-                            this.X1MouseButtonJustPressed = curr && !prev;
-                            this.X1MouseButtonJustReleased = !curr && prev;
-
-                            prev = this.lastMouseButtons.Contains(MouseButtons.XButton2);
-                            curr = this.currentMouseButtons.Contains(MouseButtons.XButton2);
-                            this.X2MouseButtonPressed = curr;
-                            this.X2MouseButtonJustPressed = curr && !prev;
-                            this.X2MouseButtonJustReleased = !curr && prev;
-                        }
-
-                        #endregion
-
-                        #region Mouse Wheel
-
-                        {
-                            this.MouseWheelDelta = this.mouseWheel;
-                            this.mouseWheel = 0;
-                        }
-
-                        #endregion
-
-                        #region Keyboard Keys
-
-                        {
-                            this.lastKeyboardKeys.Clear();
-                            this.lastKeyboardKeys.AddRange(this.currentKeyboardKeys);
-                            this.currentKeyboardKeys.Clear();
-
-                            Keys[] keyboard = this.GetPressedKeys();
-                            if (keyboard.Length > 0)
-                            {
-                                this.currentKeyboardKeys.AddRange(keyboard);
-                            }
-                        }
-
-                        #endregion
+                        this.UpdateKeyboardState();
                     }
                 }
                 else
@@ -352,6 +263,93 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Updates the keyboard state
+        /// </summary>
+        private void UpdateKeyboardState()
+        {
+            this.lastKeyboardKeys.Clear();
+            this.lastKeyboardKeys.AddRange(this.currentKeyboardKeys);
+            this.currentKeyboardKeys.Clear();
+
+            Keys[] keyboard = this.GetPressedKeys();
+            if (keyboard.Length > 0)
+            {
+                this.currentKeyboardKeys.AddRange(keyboard);
+            }
+        }
+        /// <summary>
+        /// Updates the mouse position state
+        /// </summary>
+        private void UpdateMousePositionState()
+        {
+            Point mousePos = this.form.PointToClient(Cursor.ScreenPosition);
+
+            this.MouseXDelta = mousePos.X - this.lastMousePos.X;
+            this.MouseYDelta = mousePos.Y - this.lastMousePos.Y;
+
+            this.MouseX = mousePos.X;
+            this.MouseY = mousePos.Y;
+
+            this.lastMousePos = mousePos;
+
+            if (this.LockMouse)
+            {
+                this.SetMousePosition(this.form.AbsoluteCenter.X, this.form.AbsoluteCenter.Y);
+            }
+        }
+        /// <summary>
+        /// Updates the mouse buttons state
+        /// </summary>
+        private void UpdateMouseButtonsState()
+        {
+            this.lastMouseButtons.Clear();
+            this.lastMouseButtons.AddRange(this.currentMouseButtons);
+            this.currentMouseButtons.Clear();
+
+            MouseButtons[] buttons = this.GetPressedButtons();
+            if (buttons.Length > 0)
+            {
+                this.currentMouseButtons.AddRange(buttons);
+            }
+
+            bool prev = false;
+            bool curr = false;
+
+            prev = this.lastMouseButtons.Contains(MouseButtons.Left);
+            curr = this.currentMouseButtons.Contains(MouseButtons.Left);
+            this.LeftMouseButtonPressed = curr;
+            this.LeftMouseButtonJustPressed = curr && !prev;
+            this.LeftMouseButtonJustReleased = !curr && prev;
+
+            prev = this.lastMouseButtons.Contains(MouseButtons.Right);
+            curr = this.currentMouseButtons.Contains(MouseButtons.Right);
+            this.RightMouseButtonPressed = curr;
+            this.RightMouseButtonJustPressed = curr && !prev;
+            this.RightMouseButtonJustReleased = !curr && prev;
+
+            prev = this.lastMouseButtons.Contains(MouseButtons.Middle);
+            curr = this.currentMouseButtons.Contains(MouseButtons.Middle);
+            this.MiddleMouseButtonPressed = curr;
+            this.MiddleMouseButtonJustPressed = curr && !prev;
+            this.MiddleMouseButtonJustReleased = !curr && prev;
+
+            prev = this.lastMouseButtons.Contains(MouseButtons.XButton1);
+            curr = this.currentMouseButtons.Contains(MouseButtons.XButton1);
+            this.X1MouseButtonPressed = curr;
+            this.X1MouseButtonJustPressed = curr && !prev;
+            this.X1MouseButtonJustReleased = !curr && prev;
+
+            prev = this.lastMouseButtons.Contains(MouseButtons.XButton2);
+            curr = this.currentMouseButtons.Contains(MouseButtons.XButton2);
+            this.X2MouseButtonPressed = curr;
+            this.X2MouseButtonJustPressed = curr && !prev;
+            this.X2MouseButtonJustReleased = !curr && prev;
+
+            this.MouseWheelDelta = this.mouseWheel;
+            this.mouseWheel = 0;
+        }
+
         /// <summary>
         /// Gets if specified key is just released
         /// </summary>

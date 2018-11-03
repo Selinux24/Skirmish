@@ -537,36 +537,26 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.swapChain != null)
+                if (this.swapChain?.IsFullScreen == true)
                 {
-                    if (this.swapChain.IsFullScreen) this.swapChain.IsFullScreen = false;
-
-                    this.swapChain.Dispose();
-                    this.swapChain = null;
+                    this.swapChain.IsFullScreen = false;
                 }
+
+                this.swapChain?.Dispose();
+                this.swapChain = null;
 
                 this.DisposeResources();
 
-                if (this.device != null)
-                {
-                    this.device.Dispose();
-                    this.device = null;
-                }
+                this.device?.Dispose();
+                this.device = null;
 
 #if DEBUG
-                if (this.deviceDebugInfoQueue != null)
-                {
-                    this.deviceDebugInfoQueue.Dispose();
-                    this.deviceDebugInfoQueue = null;
-                }
+                this.deviceDebugInfoQueue?.Dispose();
+                this.deviceDebugInfoQueue = null;
 
-                if (this.deviceDebug != null)
-                {
-                    this.deviceDebug.ReportLiveDeviceObjects(ReportingLevel.Detail);
-
-                    this.deviceDebug.Dispose();
-                    this.deviceDebug = null;
-                }
+                this.deviceDebug?.ReportLiveDeviceObjects(ReportingLevel.Detail);
+                this.deviceDebug?.Dispose();
+                this.deviceDebug = null;
 #endif
             }
         }
@@ -1061,94 +1051,43 @@ namespace Engine
         /// </summary>
         private void DisposeResources()
         {
-            if (this.renderTargetView != null)
-            {
-                this.renderTargetView.Dispose();
-                this.renderTargetView = null;
-            }
-            if (this.depthStencilView != null)
-            {
-                this.depthStencilView.Dispose();
-                this.depthStencilView = null;
-            }
+            this.renderTargetView?.Dispose();
+            this.renderTargetView = null;
+            this.depthStencilView?.Dispose();
+            this.depthStencilView = null;
 
-            if (this.depthStencilzBufferEnabled != null)
-            {
-                this.depthStencilzBufferEnabled.Dispose();
-                this.depthStencilzBufferEnabled = null;
-            }
-            if (this.depthStencilzBufferDisabled != null)
-            {
-                this.depthStencilzBufferDisabled.Dispose();
-                this.depthStencilzBufferDisabled = null;
-            }
-            if (this.depthStencilRDzBufferEnabled != null)
-            {
-                this.depthStencilRDzBufferEnabled.Dispose();
-                this.depthStencilRDzBufferEnabled = null;
-            }
-            if (this.depthStencilRDzBufferDisabled != null)
-            {
-                this.depthStencilRDzBufferDisabled.Dispose();
-                this.depthStencilRDzBufferDisabled = null;
-            }
-            if (this.depthStencilNone != null)
-            {
-                this.depthStencilNone.Dispose();
-                this.depthStencilNone = null;
-            }
-            if (this.depthStencilShadowMapping != null)
-            {
-                this.depthStencilShadowMapping.Dispose();
-                this.depthStencilShadowMapping = null;
-            }
+            this.depthStencilzBufferEnabled?.Dispose();
+            this.depthStencilzBufferEnabled = null;
+            this.depthStencilzBufferDisabled?.Dispose();
+            this.depthStencilzBufferDisabled = null;
+            this.depthStencilRDzBufferEnabled?.Dispose();
+            this.depthStencilRDzBufferEnabled = null;
+            this.depthStencilRDzBufferDisabled?.Dispose();
+            this.depthStencilRDzBufferDisabled = null;
+            this.depthStencilNone?.Dispose();
+            this.depthStencilNone = null;
+            this.depthStencilShadowMapping?.Dispose();
+            this.depthStencilShadowMapping = null;
 
-            if (this.rasterizerDefault != null)
-            {
-                this.rasterizerDefault.Dispose();
-                this.rasterizerDefault = null;
-            }
-            if (this.rasterizerWireframe != null)
-            {
-                this.rasterizerWireframe.Dispose();
-                this.rasterizerWireframe = null;
-            }
-            if (this.rasterizerNoCull != null)
-            {
-                this.rasterizerNoCull.Dispose();
-                this.rasterizerNoCull = null;
-            }
-            if (this.rasterizerCullFrontFace != null)
-            {
-                this.rasterizerCullFrontFace.Dispose();
-                this.rasterizerCullFrontFace = null;
-            }
-            if (this.rasterizerShadowMapping != null)
-            {
-                this.rasterizerShadowMapping.Dispose();
-                this.rasterizerShadowMapping = null;
-            }
+            this.rasterizerDefault?.Dispose();
+            this.rasterizerDefault = null;
+            this.rasterizerWireframe?.Dispose();
+            this.rasterizerWireframe = null;
+            this.rasterizerNoCull?.Dispose();
+            this.rasterizerNoCull = null;
+            this.rasterizerCullFrontFace?.Dispose();
+            this.rasterizerCullFrontFace = null;
+            this.rasterizerShadowMapping?.Dispose();
+            this.rasterizerShadowMapping = null;
 
-            if (this.blendDefault != null)
-            {
-                this.blendDefault.Dispose();
-                this.blendDefault = null;
-            }
-            if (this.blendDefaultAlpha != null)
-            {
-                this.blendDefaultAlpha.Dispose();
-                this.blendDefaultAlpha = null;
-            }
-            if (this.blendTransparent != null)
-            {
-                this.blendTransparent.Dispose();
-                this.blendTransparent = null;
-            }
-            if (this.blendAdditive != null)
-            {
-                this.blendAdditive.Dispose();
-                this.blendAdditive = null;
-            }
+            this.blendDefault?.Dispose();
+            this.blendDefault = null;
+            this.blendDefaultAlpha?.Dispose();
+            this.blendDefaultAlpha = null;
+            this.blendTransparent?.Dispose();
+            this.blendTransparent = null;
+            this.blendAdditive?.Dispose();
+            this.blendAdditive = null;
         }
 
         /// <summary>

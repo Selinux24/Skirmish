@@ -68,135 +68,166 @@ namespace Engine.PathFinding.RecastNavigation
             resultPath = null;
 
             navQuery.FindNearestPoly(startPos, polyPickExt, filter, out int startRef, out Vector3 nsp);
-
             navQuery.FindNearestPoly(endPos, polyPickExt, filter, out int endRef, out Vector3 nep);
 
-            Status pathFindStatus = Status.DT_SUCCESS;
+            var endPointsDefined = (startRef != 0 && endRef != 0);
+            if (!endPointsDefined)
+            {
+                return Status.DT_FAILURE;
+            }
 
             if (mode == PathFindingMode.TOOLMODE_PATHFIND_FOLLOW)
             {
-                List<Vector3> smoothPath = new List<Vector3>();
-
-                if (startRef != 0 && endRef != 0)
+                if (CalcPathFollow(navQuery, filter, startPos, endPos, startRef, endRef, out var path))
                 {
-                    navQuery.FindPath(
-                        startRef, endRef, startPos, endPos, filter,
-                        out int[] polys, out int npolys, MAX_POLYS);
+                    resultPath = path;
 
-                    if (npolys != 0)
+                    return Status.DT_SUCCESS;
+                }
+            }
+            else if (mode == PathFindingMode.TOOLMODE_PATHFIND_STRAIGHT)
+            {
+                if (CalcPathStraigh(navQuery, filter, startPos, endPos, startRef, endRef, out var path))
+                {
+                    resultPath = path;
+
+                    return Status.DT_SUCCESS;
+                }
+            }
+            else if (mode == PathFindingMode.TOOLMODE_PATHFIND_SLICED)
+            {
+                return navQuery.InitSlicedFindPath(
+                    startRef, endRef, startPos, endPos, filter,
+                    FindPathOptions.DT_FINDPATH_ANY_ANGLE);
+            }
+
+            return Status.DT_FAILURE;
+        }
+
+        private static bool CalcPathFollow(NavMeshQuery navQuery, QueryFilter filter, Vector3 startPos, Vector3 endPos, int startRef, int endRef, out Vector3[] resultPath)
+        {
+            resultPath = null;
+
+            navQuery.FindPath(
+                startRef, endRef, startPos, endPos, filter,
+                out int[] polys, out int npolys, 
+                MAX_POLYS);
+
+            if (npolys != 0)
+            {
+                // Iterate over the path to find smooth path on the detail mesh surface.
+                int[] iterPolys = new int[MAX_POLYS];
+                Array.Copy(polys, iterPolys, npolys);
+                int nIterPolys = npolys;
+
+                navQuery.ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out bool iOver);
+                navQuery.ClosestPointOnPoly(iterPolys[nIterPolys - 1], endPos, out Vector3 targetPos, out bool eOver);
+
+                float STEP_SIZE = 0.5f;
+                float SLOP = 0.01f;
+
+                List<Vector3> smoothPath = new List<Vector3>
+                {
+                    iterPos
+                };
+
+                // Move towards target a small advancement at a time until target reached or
+                // when ran out of memory to store the path.
+                while (nIterPolys != 0 && smoothPath.Count < MAX_SMOOTH)
+                {
+                    // Find location to steer towards.
+                    if (!GetSteerTarget(
+                        navQuery, iterPos, targetPos, SLOP,
+                        iterPolys, nIterPolys, out Vector3 steerPos, out StraightPathFlagTypes steerPosFlag, out int steerPosRef,
+                        out Vector3[] points, out int nPoints))
                     {
-                        // Iterate over the path to find smooth path on the detail mesh surface.
-                        int[] iterPolys = new int[MAX_POLYS];
-                        Array.Copy(polys, iterPolys, npolys);
-                        int nIterPolys = npolys;
+                        break;
+                    }
 
-                        navQuery.ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out bool iOver);
-                        navQuery.ClosestPointOnPoly(iterPolys[nIterPolys - 1], endPos, out Vector3 targetPos, out bool eOver);
+                    bool endOfPath = (steerPosFlag & StraightPathFlagTypes.DT_STRAIGHTPATH_END) != 0;
+                    bool offMeshConnection = (steerPosFlag & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0;
 
-                        float STEP_SIZE = 0.5f;
-                        float SLOP = 0.01f;
+                    // Find movement delta.
+                    Vector3 delta = Vector3.Subtract(steerPos, iterPos);
+                    float len = delta.Length();
+                    // If the steer target is end of path or off-mesh link, do not move past the location.
+                    if ((endOfPath || offMeshConnection) && len < STEP_SIZE)
+                    {
+                        len = 1;
+                    }
+                    else
+                    {
+                        len = STEP_SIZE / len;
+                    }
+                    Vector3 moveTgt = Vector3.Add(iterPos, delta * len);
 
-                        smoothPath.Add(iterPos);
+                    // Move
+                    navQuery.MoveAlongSurface(
+                        iterPolys[0], iterPos, moveTgt, filter,
+                        out Vector3 result, out int[] visited, out int nvisited, 16);
 
-                        // Move towards target a small advancement at a time until target reached or
-                        // when ran out of memory to store the path.
-                        while (nIterPolys != 0 && smoothPath.Count < MAX_SMOOTH)
+                    nIterPolys = FixupCorridor(iterPolys, nIterPolys, MAX_POLYS, visited, nvisited);
+                    nIterPolys = FixupShortcuts(iterPolys, nIterPolys, navQuery);
+
+                    navQuery.GetPolyHeight(iterPolys[0], result, out float h);
+                    result.Y = h;
+                    iterPos = result;
+
+                    // Handle end of path and off-mesh links when close enough.
+                    if (endOfPath && InRange(iterPos, steerPos, SLOP, 1.0f))
+                    {
+                        // Reached end of path.
+                        iterPos = targetPos;
+                        if (smoothPath.Count < MAX_SMOOTH)
                         {
-                            // Find location to steer towards.
-                            if (!GetSteerTarget(
-                                navQuery, iterPos, targetPos, SLOP,
-                                iterPolys, nIterPolys, out Vector3 steerPos, out StraightPathFlagTypes steerPosFlag, out int steerPosRef,
-                                out Vector3[] points, out int nPoints))
-                            {
-                                break;
-                            }
+                            smoothPath.Add(iterPos);
+                        }
+                        break;
+                    }
+                    else if (offMeshConnection && InRange(iterPos, steerPos, SLOP, 1.0f))
+                    {
+                        // Reached off-mesh connection.
 
-                            bool endOfPath = (steerPosFlag & StraightPathFlagTypes.DT_STRAIGHTPATH_END) != 0;
-                            bool offMeshConnection = (steerPosFlag & StraightPathFlagTypes.DT_STRAIGHTPATH_OFFMESH_CONNECTION) != 0;
+                        // Advance the path up to and over the off-mesh connection.
+                        int prevRef = 0;
+                        int polyRef = iterPolys[0];
+                        int npos = 0;
+                        while (npos < nIterPolys && polyRef != steerPosRef)
+                        {
+                            prevRef = polyRef;
+                            polyRef = iterPolys[npos];
+                            npos++;
+                        }
+                        for (int i = npos; i < nIterPolys; ++i)
+                        {
+                            iterPolys[i - npos] = iterPolys[i];
+                        }
+                        nIterPolys -= npos;
 
-                            // Find movement delta.
-                            Vector3 delta = Vector3.Subtract(steerPos, iterPos);
-                            float len = delta.Length();
-                            // If the steer target is end of path or off-mesh link, do not move past the location.
-                            if ((endOfPath || offMeshConnection) && len < STEP_SIZE)
-                            {
-                                len = 1;
-                            }
-                            else
-                            {
-                                len = STEP_SIZE / len;
-                            }
-                            Vector3 moveTgt = Vector3.Add(iterPos, delta * len);
-
-                            // Move
-                            navQuery.MoveAlongSurface(
-                                iterPolys[0], iterPos, moveTgt, filter,
-                                out Vector3 result, out int[] visited, out int nvisited, 16);
-
-                            nIterPolys = FixupCorridor(iterPolys, nIterPolys, MAX_POLYS, visited, nvisited);
-                            nIterPolys = FixupShortcuts(iterPolys, nIterPolys, navQuery);
-
-                            navQuery.GetPolyHeight(iterPolys[0], result, out float h);
-                            result.Y = h;
-                            iterPos = result;
-
-                            // Handle end of path and off-mesh links when close enough.
-                            if (endOfPath && InRange(iterPos, steerPos, SLOP, 1.0f))
-                            {
-                                // Reached end of path.
-                                iterPos = targetPos;
-                                if (smoothPath.Count < MAX_SMOOTH)
-                                {
-                                    smoothPath.Add(iterPos);
-                                }
-                                break;
-                            }
-                            else if (offMeshConnection && InRange(iterPos, steerPos, SLOP, 1.0f))
-                            {
-                                // Reached off-mesh connection.
-
-                                // Advance the path up to and over the off-mesh connection.
-                                int prevRef = 0;
-                                int polyRef = iterPolys[0];
-                                int npos = 0;
-                                while (npos < nIterPolys && polyRef != steerPosRef)
-                                {
-                                    prevRef = polyRef;
-                                    polyRef = iterPolys[npos];
-                                    npos++;
-                                }
-                                for (int i = npos; i < nIterPolys; ++i)
-                                {
-                                    iterPolys[i - npos] = iterPolys[i];
-                                }
-                                nIterPolys -= npos;
-
-                                // Handle the connection.
-                                if (navQuery.GetAttachedNavMesh().GetOffMeshConnectionPolyEndPoints(
-                                    prevRef, polyRef, out Vector3 sPos, out Vector3 ePos))
-                                {
-                                    if (smoothPath.Count < MAX_SMOOTH)
-                                    {
-                                        smoothPath.Add(sPos);
-                                        // Hack to make the dotted path not visible during off-mesh connection.
-                                        if ((smoothPath.Count & 1) != 0)
-                                        {
-                                            smoothPath.Add(sPos);
-                                        }
-                                    }
-                                    // Move position at the other side of the off-mesh link.
-                                    iterPos = ePos;
-                                    navQuery.GetPolyHeight(iterPolys[0], iterPos, out float eh);
-                                    iterPos.Y = eh;
-                                }
-                            }
-
-                            // Store results.
+                        // Handle the connection.
+                        if (navQuery.GetAttachedNavMesh().GetOffMeshConnectionPolyEndPoints(
+                            prevRef, polyRef, out Vector3 sPos, out Vector3 ePos))
+                        {
                             if (smoothPath.Count < MAX_SMOOTH)
                             {
-                                smoothPath.Add(iterPos);
+                                smoothPath.Add(sPos);
+                                // Hack to make the dotted path not visible during off-mesh connection.
+                                if ((smoothPath.Count & 1) != 0)
+                                {
+                                    smoothPath.Add(sPos);
+                                }
                             }
+                            // Move position at the other side of the off-mesh link.
+                            iterPos = ePos;
+                            navQuery.GetPolyHeight(iterPolys[0], iterPos, out float eh);
+                            iterPos.Y = eh;
                         }
+                    }
+
+                    // Store results.
+                    if (smoothPath.Count < MAX_SMOOTH)
+                    {
+                        smoothPath.Add(iterPos);
                     }
                 }
 
@@ -204,64 +235,47 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     resultPath = smoothPath.ToArray();
 
-                    return pathFindStatus;
+                    return true;
                 }
             }
-            else if (mode == PathFindingMode.TOOLMODE_PATHFIND_STRAIGHT)
+
+            return false;
+        }
+
+        private static bool CalcPathStraigh(NavMeshQuery navQuery, QueryFilter filter, Vector3 startPos, Vector3 endPos, int startRef, int endRef, out Vector3[] resultPath)
+        {
+            resultPath = null;
+
+            navQuery.FindPath(
+                startRef, endRef, startPos, endPos, filter,
+                out int[] polys, out int npolys, MAX_POLYS);
+
+            if (npolys != 0)
             {
-                Vector3[] straightPath = null;
-                StraightPathFlagTypes[] straightPathFlags = null;
-                int[] straightPathPolys = null;
-                int nstraightPath = 0;
-
-                StraightPathOptions m_straightPathOptions = StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS;
-
-                if (startRef != 0 && endRef != 0)
+                // In case of partial path, make sure the end point is clamped to the last polygon.
+                Vector3 epos = endPos;
+                if (polys[npolys - 1] != endRef)
                 {
-                    navQuery.FindPath(
-                        startRef, endRef, startPos, endPos, filter,
-                        out int[] polys, out int npolys, MAX_POLYS);
-
-                    nstraightPath = 0;
-                    if (npolys != 0)
-                    {
-                        // In case of partial path, make sure the end point is clamped to the last polygon.
-                        Vector3 epos = endPos;
-                        if (polys[npolys - 1] != endRef)
-                        {
-                            navQuery.ClosestPointOnPoly(polys[npolys - 1], endPos, out epos, out bool eOver);
-                        }
-
-                        navQuery.FindStraightPath(
-                            startPos, epos, polys, npolys,
-                            out straightPath, out straightPathFlags,
-                            out straightPathPolys, out nstraightPath, MAX_POLYS, m_straightPathOptions);
-                    }
+                    navQuery.ClosestPointOnPoly(polys[npolys - 1], endPos, out epos, out bool eOver);
                 }
+
+                navQuery.FindStraightPath(
+                    startPos, epos, polys, npolys,
+                    out var straightPath, out var straightPathFlags,
+                    out var straightPathPolys, out var nstraightPath, 
+                    MAX_POLYS, StraightPathOptions.DT_STRAIGHTPATH_ALL_CROSSINGS);
 
                 if (nstraightPath > 0)
                 {
-                    resultPath = new Vector3[nstraightPath];
-                    Array.Copy(straightPath, resultPath, nstraightPath);
+                    resultPath = straightPath;
 
-                    return pathFindStatus;
-                }
-            }
-            else if (mode == PathFindingMode.TOOLMODE_PATHFIND_SLICED)
-            {
-                var endPointsDefined = (startRef != 0 && endRef != 0);
-                if (endPointsDefined)
-                {
-                    pathFindStatus = navQuery.InitSlicedFindPath(
-                        startRef, endRef, startPos, endPos, filter,
-                        FindPathOptions.DT_FINDPATH_ANY_ANGLE);
-
-                    return pathFindStatus;
+                    return true;
                 }
             }
 
-            return Status.DT_FAILURE;
+            return false;
         }
+
         /// <summary>
         /// Gets a steer target
         /// </summary>

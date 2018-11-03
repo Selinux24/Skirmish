@@ -20,11 +20,11 @@ namespace Engine
         /// <summary>
         /// Resource dictionary
         /// </summary>
-        private Dictionary<string, EngineShaderResourceView> resources = new Dictionary<string, EngineShaderResourceView>();
+        private readonly Dictionary<string, EngineShaderResourceView> resources = new Dictionary<string, EngineShaderResourceView>();
         /// <summary>
         /// Global resources dictionary
         /// </summary>
-        private Dictionary<string, EngineShaderResourceView> globalResources = new Dictionary<string, EngineShaderResourceView>();
+        private readonly Dictionary<string, EngineShaderResourceView> globalResources = new Dictionary<string, EngineShaderResourceView>();
 
         /// <summary>
         /// Constructor
@@ -58,27 +58,17 @@ namespace Engine
         {
             if (disposing)
             {
-                if (resources != null)
+                foreach (var item in resources)
                 {
-                    foreach (var item in resources)
-                    {
-                        item.Value?.Dispose();
-                    }
-
-                    resources.Clear();
-                    resources = null;
+                    item.Value?.Dispose();
                 }
+                resources.Clear();
 
-                if (globalResources != null)
+                foreach (var item in globalResources)
                 {
-                    foreach (var item in globalResources)
-                    {
-                        item.Value?.Dispose();
-                    }
-
-                    globalResources.Clear();
-                    globalResources = null;
+                    item.Value?.Dispose();
                 }
+                globalResources.Clear();
             }
         }
 
@@ -89,69 +79,97 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateResource(ImageContent imageContent)
         {
-            EngineShaderResourceView view = null;
-
             if (imageContent.Stream != null)
             {
                 byte[] buffer = imageContent.Stream.GetBuffer();
 
-                view = this.Get(buffer);
+                return this.Get(buffer);
             }
             else
             {
                 if (imageContent.IsCubic)
                 {
-                    if (imageContent.IsArray)
-                    {
-                        if (imageContent.Paths != null)
-                        {
-                            view = this.GetCubic(imageContent.Paths);
-                        }
-                        else if (imageContent.Streams != null)
-                        {
-                            view = this.GetCubic(imageContent.Streams);
-                        }
-                    }
-                    else
-                    {
-                        if (imageContent.Path != null)
-                        {
-                            view = this.GetCubic(imageContent.Path);
-                        }
-                        else if (imageContent.Stream != null)
-                        {
-                            view = this.GetCubic(imageContent.Stream);
-                        }
-                    }
+                    return CreateResourceCubic(imageContent);
+                }
+                else if (imageContent.IsArray)
+                {
+                    return CreateResourceArray(imageContent);
                 }
                 else
                 {
-                    if (imageContent.IsArray)
-                    {
-                        if (imageContent.Paths != null && imageContent.Paths.Length > 0)
-                        {
-                            view = this.Get(imageContent.Paths);
-                        }
-                        else if (imageContent.Streams != null && imageContent.Streams.Length > 0)
-                        {
-                            view = this.Get(imageContent.Streams);
-                        }
-                    }
-                    else
-                    {
-                        if (imageContent.Path != null)
-                        {
-                            view = this.Get(imageContent.Path);
-                        }
-                        else if (imageContent.Stream != null)
-                        {
-                            view = this.Get(imageContent.Stream);
-                        }
-                    }
+                    return CreateResourceDefault(imageContent);
                 }
             }
 
-            return view;
+            return null;
+        }
+        /// <summary>
+        /// Creates a resource view from image content
+        /// </summary>
+        /// <param name="imageContent">Image content</param>
+        /// <returns>Returns the created resource view</returns>
+        private EngineShaderResourceView CreateResourceDefault(ImageContent imageContent)
+        {
+            if (imageContent.Path != null)
+            {
+                return this.Get(imageContent.Path);
+            }
+            else if (imageContent.Stream != null)
+            {
+                return this.Get(imageContent.Stream);
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Creates a resource view from image content array
+        /// </summary>
+        /// <param name="imageContent">Image content</param>
+        /// <returns>Returns the created resource view</returns>
+        private EngineShaderResourceView CreateResourceArray(ImageContent imageContent)
+        {
+            if (imageContent.Paths != null && imageContent.Paths.Length > 0)
+            {
+                return this.Get(imageContent.Paths);
+            }
+            else if (imageContent.Streams != null && imageContent.Streams.Length > 0)
+            {
+                return this.Get(imageContent.Streams);
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Creates a resource view from cubic image content
+        /// </summary>
+        /// <param name="imageContent">Image content</param>
+        /// <returns>Returns the created resource view</returns>
+        private EngineShaderResourceView CreateResourceCubic(ImageContent imageContent)
+        {
+            if (imageContent.IsArray)
+            {
+                if (imageContent.Paths != null)
+                {
+                    return this.GetCubic(imageContent.Paths);
+                }
+                else if (imageContent.Streams != null)
+                {
+                    return this.GetCubic(imageContent.Streams);
+                }
+            }
+            else
+            {
+                if (imageContent.Path != null)
+                {
+                    return this.GetCubic(imageContent.Path);
+                }
+                else if (imageContent.Stream != null)
+                {
+                    return this.GetCubic(imageContent.Stream);
+                }
+            }
+
+            return null;
         }
         /// <summary>
         /// Generates the resource view
