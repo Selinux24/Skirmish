@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Content
 {
@@ -129,15 +130,13 @@ namespace Engine.Content
         /// <returns>Returns true if the mesh array was optimized</returns>
         public static bool OptimizeMeshes(SubMeshContent[] meshArray, out SubMeshContent optimizedMesh)
         {
-            if (meshArray == null || meshArray.Length == 0)
-            {
-                optimizedMesh = null;
-            }
-            else if (meshArray.Length == 1)
+            optimizedMesh = null;
+
+            if (meshArray?.Length == 1)
             {
                 optimizedMesh = meshArray[0];
             }
-            else
+            else if (meshArray?.Length > 1)
             {
                 string material = meshArray[0].Material;
                 Topology topology = meshArray[0].Topology;
@@ -161,18 +160,12 @@ namespace Engine.Content
 
                     if (mesh.vertices.Count > 0)
                     {
-                        foreach (VertexData v in mesh.vertices)
-                        {
-                            verts.Add(v);
-                        }
+                        verts.AddRange(mesh.vertices);
                     }
 
                     if (mesh.indices.Count > 0)
                     {
-                        foreach (uint i in mesh.indices)
-                        {
-                            idx.Add(indexOffset + i);
-                        }
+                        idx.AddRange(mesh.indices.Select(i => i + indexOffset));
                     }
 
                     indexOffset = (uint)verts.Count;
