@@ -203,34 +203,69 @@ namespace Engine.Effects
             bool instanced,
             bool transparent)
         {
-            switch (vertexType)
+            if (!instanced)
             {
-                case VertexTypes.PositionColor:
-                    return instanced ? this.CascadedShadowMapsGenI : this.CascadedShadowMapsGen;
-                case VertexTypes.PositionColorSkinned:
-                    return instanced ? this.CascadedShadowMapsGenSkinnedI : this.CascadedShadowMapsGenSkinned;
+                switch (vertexType)
+                {
+                    case VertexTypes.PositionColor:
+                        return this.CascadedShadowMapsGen;
+                    case VertexTypes.PositionColorSkinned:
+                        return this.CascadedShadowMapsGenSkinned;
 
-                case VertexTypes.PositionTexture:
-                    return instanced ? this.CascadedShadowMapsGenI : this.CascadedShadowMapsGen;
-                case VertexTypes.PositionTextureSkinned:
-                    return instanced ? this.CascadedShadowMapsGenSkinnedI : this.CascadedShadowMapsGenSkinned;
+                    case VertexTypes.PositionTexture:
+                        return this.CascadedShadowMapsGen;
+                    case VertexTypes.PositionTextureSkinned:
+                        return this.CascadedShadowMapsGenSkinned;
 
-                case VertexTypes.PositionNormalColor:
-                    return instanced ? this.CascadedShadowMapsGenI : this.CascadedShadowMapsGen;
-                case VertexTypes.PositionNormalColorSkinned:
-                    return instanced ? this.CascadedShadowMapsGenSkinnedI : this.CascadedShadowMapsGenSkinned;
+                    case VertexTypes.PositionNormalColor:
+                        return this.CascadedShadowMapsGen;
+                    case VertexTypes.PositionNormalColorSkinned:
+                        return this.CascadedShadowMapsGenSkinned;
 
-                case VertexTypes.PositionNormalTexture:
-                    return instanced ? this.CascadedShadowMapsGenI : this.CascadedShadowMapsGen;
-                case VertexTypes.PositionNormalTextureSkinned:
-                    return instanced ? this.CascadedShadowMapsGenSkinnedI : this.CascadedShadowMapsGenSkinned;
+                    case VertexTypes.PositionNormalTexture:
+                        return this.CascadedShadowMapsGen;
+                    case VertexTypes.PositionNormalTextureSkinned:
+                        return this.CascadedShadowMapsGenSkinned;
 
-                case VertexTypes.PositionNormalTextureTangent:
-                    return instanced ? this.CascadedShadowMapsGenI : this.CascadedShadowMapsGen;
-                case VertexTypes.PositionNormalTextureTangentSkinned:
-                    return instanced ? this.CascadedShadowMapsGenSkinnedI : this.CascadedShadowMapsGenSkinned;
-                default:
-                    throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Transparent: {2}", vertexType, instanced, transparent));
+                    case VertexTypes.PositionNormalTextureTangent:
+                        return this.CascadedShadowMapsGen;
+                    case VertexTypes.PositionNormalTextureTangentSkinned:
+                        return this.CascadedShadowMapsGenSkinned;
+                    default:
+                        throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Transparent: {2}", vertexType, instanced, transparent));
+                }
+            }
+            else
+            {
+                switch (vertexType)
+                {
+                    case VertexTypes.PositionColor:
+                        return this.CascadedShadowMapsGenI;
+                    case VertexTypes.PositionColorSkinned:
+                        return this.CascadedShadowMapsGenSkinnedI;
+
+                    case VertexTypes.PositionTexture:
+                        return this.CascadedShadowMapsGenI;
+                    case VertexTypes.PositionTextureSkinned:
+                        return this.CascadedShadowMapsGenSkinnedI;
+
+                    case VertexTypes.PositionNormalColor:
+                        return this.CascadedShadowMapsGenI;
+                    case VertexTypes.PositionNormalColorSkinned:
+                        return this.CascadedShadowMapsGenSkinnedI;
+
+                    case VertexTypes.PositionNormalTexture:
+                        return this.CascadedShadowMapsGenI;
+                    case VertexTypes.PositionNormalTextureSkinned:
+                        return this.CascadedShadowMapsGenSkinnedI;
+
+                    case VertexTypes.PositionNormalTextureTangent:
+                        return this.CascadedShadowMapsGenI;
+                    case VertexTypes.PositionNormalTextureTangentSkinned:
+                        return this.CascadedShadowMapsGenSkinnedI;
+                    default:
+                        throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Transparent: {2}", vertexType, instanced, transparent));
+                }
             }
         }
 
@@ -289,16 +324,7 @@ namespace Engine.Effects
             uint textureIndex)
         {
             this.AnimationOffset = animationOffset;
-
-            if (material != null)
-            {
-                this.DiffuseMap = material.DiffuseTexture;
-            }
-            else
-            {
-                this.DiffuseMap = null;
-            }
-
+            this.DiffuseMap = material?.DiffuseTexture;
             this.TextureIndex = textureIndex;
         }
     }

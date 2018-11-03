@@ -670,18 +670,9 @@ namespace Engine.Effects
                 this.FogRange = lights.FogRange;
                 this.FogColor = lights.FogColor;
 
-                if (context.ShadowMapDirectional != null)
-                {
-                    this.ShadowMapDirectional = context.ShadowMapDirectional.Texture;
-                }
-                if (context.ShadowMapPoint != null)
-                {
-                    this.ShadowMapPoint = context.ShadowMapPoint.Texture;
-                }
-                if (context.ShadowMapSpot != null)
-                {
-                    this.ShadowMapSpot = context.ShadowMapSpot.Texture;
-                }
+                this.ShadowMapDirectional = context.ShadowMapDirectional?.Texture;
+                this.ShadowMapPoint = context.ShadowMapPoint?.Texture;
+                this.ShadowMapSpot = context.ShadowMapSpot?.Texture;
             }
             else
             {

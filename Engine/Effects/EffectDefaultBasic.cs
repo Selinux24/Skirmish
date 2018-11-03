@@ -897,30 +897,61 @@ namespace Engine.Effects
             VertexTypes vertexType,
             bool instanced)
         {
-            switch (vertexType)
+            if (!instanced)
             {
-                case VertexTypes.PositionColor:
-                    return instanced ? this.InstancingPositionColor : this.PositionColor;
-                case VertexTypes.PositionTexture:
-                    return instanced ? this.InstancingPositionTexture : this.PositionTexture;
-                case VertexTypes.PositionNormalColor:
-                    return instanced ? this.InstancingPositionNormalColor : this.PositionNormalColor;
-                case VertexTypes.PositionNormalTexture:
-                    return instanced ? this.InstancingPositionNormalTexture : this.PositionNormalTexture;
-                case VertexTypes.PositionNormalTextureTangent:
-                    return instanced ? this.InstancingPositionNormalTextureTangent : this.PositionNormalTextureTangent;
-                case VertexTypes.PositionColorSkinned:
-                    return instanced ? this.InstancingPositionColorSkinned : this.PositionColorSkinned;
-                case VertexTypes.PositionTextureSkinned:
-                    return instanced ? this.InstancingPositionTextureSkinned : this.PositionTextureSkinned;
-                case VertexTypes.PositionNormalColorSkinned:
-                    return instanced ? this.InstancingPositionNormalColorSkinned : this.PositionNormalColorSkinned;
-                case VertexTypes.PositionNormalTextureSkinned:
-                    return instanced ? this.InstancingPositionNormalTextureSkinned : this.PositionNormalTextureSkinned;
-                case VertexTypes.PositionNormalTextureTangentSkinned:
-                    return instanced ? this.InstancingPositionNormalTextureTangentSkinned : this.PositionNormalTextureTangentSkinned;
-                default:
-                    throw new EngineException(string.Format("Bad vertex type for effect: {0}", vertexType));
+                switch (vertexType)
+                {
+                    case VertexTypes.PositionColor:
+                        return this.PositionColor;
+                    case VertexTypes.PositionTexture:
+                        return this.PositionTexture;
+                    case VertexTypes.PositionNormalColor:
+                        return this.PositionNormalColor;
+                    case VertexTypes.PositionNormalTexture:
+                        return this.PositionNormalTexture;
+                    case VertexTypes.PositionNormalTextureTangent:
+                        return this.PositionNormalTextureTangent;
+                    case VertexTypes.PositionColorSkinned:
+                        return this.PositionColorSkinned;
+                    case VertexTypes.PositionTextureSkinned:
+                        return this.PositionTextureSkinned;
+                    case VertexTypes.PositionNormalColorSkinned:
+                        return this.PositionNormalColorSkinned;
+                    case VertexTypes.PositionNormalTextureSkinned:
+                        return this.PositionNormalTextureSkinned;
+                    case VertexTypes.PositionNormalTextureTangentSkinned:
+                        return this.PositionNormalTextureTangentSkinned;
+                    default:
+                        throw new EngineException(string.Format("Bad vertex type for effect: {0}", vertexType));
+                }
+            }
+            else
+            {
+                switch (vertexType)
+                {
+                    case VertexTypes.PositionColor:
+                        return this.InstancingPositionColor;
+                    case VertexTypes.PositionTexture:
+                        return this.InstancingPositionTexture;
+                    case VertexTypes.PositionNormalColor:
+                        return this.InstancingPositionNormalColor;
+                    case VertexTypes.PositionNormalTexture:
+                        return this.InstancingPositionNormalTexture;
+                    case VertexTypes.PositionNormalTextureTangent:
+                        return this.InstancingPositionNormalTextureTangent;
+                    case VertexTypes.PositionColorSkinned:
+                        return this.InstancingPositionColorSkinned;
+                    case VertexTypes.PositionTextureSkinned:
+                        return this.InstancingPositionTextureSkinned;
+                    case VertexTypes.PositionNormalColorSkinned:
+                        return this.InstancingPositionNormalColorSkinned;
+                    case VertexTypes.PositionNormalTextureSkinned:
+                        return this.InstancingPositionNormalTextureSkinned;
+                    case VertexTypes.PositionNormalTextureTangentSkinned:
+                        return this.InstancingPositionNormalTextureTangentSkinned;
+                    default:
+                        throw new EngineException(string.Format("Bad instanced vertex type for effect: {0}", vertexType));
+                }
             }
         }
 
@@ -1089,18 +1120,9 @@ namespace Engine.Effects
                 this.FogRange = lights.FogRange;
                 this.FogColor = lights.FogColor;
 
-                if (shadowMapDirectional != null)
-                {
-                    this.ShadowMapDirectional = shadowMapDirectional.Texture;
-                }
-                if (shadowMapPoint != null)
-                {
-                    this.ShadowMapPoint = shadowMapPoint.Texture;
-                }
-                if (shadowMapSpot != null)
-                {
-                    this.ShadowMapSpot = shadowMapSpot.Texture;
-                }
+                this.ShadowMapDirectional = shadowMapDirectional?.Texture;
+                this.ShadowMapPoint = shadowMapPoint?.Texture;
+                this.ShadowMapSpot = shadowMapSpot?.Texture;
             }
             else
             {

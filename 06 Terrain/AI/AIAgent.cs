@@ -15,6 +15,11 @@ namespace Terrain.AI
     public abstract class AIAgent : IUpdatable
     {
         /// <summary>
+        /// Maximum ticks looking for a route
+        /// </summary>
+        private const int MaxLookingForRouteTicks = 1000;
+
+        /// <summary>
         /// Current agent behavior
         /// </summary>
         private Behavior currentBehavior = null;
@@ -26,6 +31,10 @@ namespace Terrain.AI
         /// Looking for route
         /// </summary>
         private bool lookingForRoute = false;
+        /// <summary>
+        /// Number of ticks looking for route
+        /// </summary>
+        private int lookingForRouteTicks = 0;
 
         /// <summary>
         /// Parent brain
@@ -505,11 +514,12 @@ namespace Terrain.AI
         {
             if (this.AgentType != null && this.Parent.Scene != null)
             {
-                var refineDelta = refine ? speed * 0.1f : 0f;
-
-                if (!this.lookingForRoute)
+                if (!this.lookingForRoute || this.lookingForRouteTicks > MaxLookingForRouteTicks)
                 {
                     this.lookingForRoute = true;
+                    this.lookingForRouteTicks = 0;
+
+                    var refineDelta = refine ? speed * 0.1f : 0f;
 
                     Task.Run(async () =>
                     {
@@ -522,8 +532,11 @@ namespace Terrain.AI
                         }
 
                         this.lookingForRoute = false;
+                        this.lookingForRouteTicks = 0;
                     });
                 }
+
+                this.lookingForRouteTicks++;
             }
         }
         /// <summary>
