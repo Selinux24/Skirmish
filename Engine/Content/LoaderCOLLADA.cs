@@ -101,9 +101,9 @@ namespace Engine.Content
         /// <param name="modelContent">Model content</param>
         private static void ProcessLibraryLights(Collada dae, ModelContent modelContent)
         {
-            if (dae.LibraryLights != null && dae.LibraryLights.Length > 0)
+            if (dae.LibraryLights?.Length > 0)
             {
-                foreach (Light light in dae.LibraryLights)
+                foreach (var light in dae.LibraryLights)
                 {
                     LightContent info = null;
 
@@ -157,9 +157,9 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         private static void ProcessLibraryImages(Collada dae, ModelContent modelContent, string contentFolder)
         {
-            if (dae.LibraryImages != null && dae.LibraryImages.Length > 0)
+            if (dae.LibraryImages?.Length > 0)
             {
-                foreach (Image image in dae.LibraryImages)
+                foreach (var image in dae.LibraryImages)
                 {
                     ImageContent info = null;
 
@@ -183,15 +183,14 @@ namespace Engine.Content
         /// <param name="modelContent">Model content</param>
         private static void ProcessLibraryMaterial(Collada dae, ModelContent modelContent)
         {
-            if (dae.LibraryMaterials != null && dae.LibraryMaterials.Length > 0 &&
-                dae.LibraryEffects != null && dae.LibraryEffects.Length > 0)
+            if (dae.LibraryMaterials?.Length > 0 && dae.LibraryEffects?.Length > 0)
             {
-                foreach (Engine.Collada.Material material in dae.LibraryMaterials)
+                foreach (var material in dae.LibraryMaterials)
                 {
-                    MaterialContent info = MaterialContent.Default;
+                    var info = MaterialContent.Default;
 
                     //Find effect
-                    Effect effect = Array.Find(dae.LibraryEffects, e => e.Id == material.InstanceEffect.Url.Replace("#", ""));
+                    var effect = Array.Find(dae.LibraryEffects, e => e.Id == material.InstanceEffect.Url.Replace("#", ""));
                     if (effect != null)
                     {
                         if (effect.ProfileCG != null)
@@ -224,9 +223,9 @@ namespace Engine.Content
         /// <param name="volumes">Volume mesh names</param>
         private static void ProcessLibraryGeometries(Collada dae, ModelContent modelContent, string[] volumes)
         {
-            if (dae.LibraryGeometries != null && dae.LibraryGeometries.Length > 0)
+            if (dae.LibraryGeometries?.Length > 0)
             {
-                foreach (Geometry geometry in dae.LibraryGeometries)
+                foreach (var geometry in dae.LibraryGeometries)
                 {
                     bool isVolume = false;
                     if (volumes?.Length > 0 && Array.Exists(volumes, v => string.Equals(v, geometry.Name, StringComparison.OrdinalIgnoreCase)))
@@ -234,10 +233,10 @@ namespace Engine.Content
                         isVolume = true;
                     }
 
-                    SubMeshContent[] info = ProcessGeometry(geometry, isVolume);
-                    if (info != null && info.Length > 0)
+                    var info = ProcessGeometry(geometry, isVolume);
+                    if (info?.Length > 0)
                     {
-                        foreach (SubMeshContent subMesh in info)
+                        foreach (var subMesh in info)
                         {
                             string materialName = FindMaterialTarget(subMesh.Material, dae.LibraryVisualScenes);
                             if (!string.IsNullOrEmpty(materialName))
@@ -262,11 +261,11 @@ namespace Engine.Content
         /// <param name="modelContent">Model content</param>
         private static void ProcessLibraryControllers(Collada dae, ModelContent modelContent)
         {
-            if (dae.LibraryControllers != null && dae.LibraryControllers.Length > 0)
+            if (dae.LibraryControllers?.Length > 0)
             {
-                foreach (Controller controller in dae.LibraryControllers)
+                foreach (var controller in dae.LibraryControllers)
                 {
-                    ControllerContent info = ProcessController(controller);
+                    var info = ProcessController(controller);
                     if (info != null)
                     {
                         modelContent.Controllers[controller.Id] = info;
@@ -282,14 +281,14 @@ namespace Engine.Content
         /// <param name="animation">Animation description</param>
         private static void ProcessLibraryAnimations(Collada dae, ModelContent modelContent, AnimationDescription animation)
         {
-            if (dae.LibraryAnimations != null && dae.LibraryAnimations.Length > 0)
+            if (dae.LibraryAnimations?.Length > 0)
             {
                 for (int i = 0; i < dae.LibraryAnimations.Length; i++)
                 {
-                    Animation animationLib = dae.LibraryAnimations[i];
+                    var animationLib = dae.LibraryAnimations[i];
 
-                    AnimationContent[] info = ProcessAnimation(modelContent, animationLib);
-                    if (info != null && info.Length > 0)
+                    var info = ProcessAnimation(modelContent, animationLib);
+                    if (info?.Length > 0)
                     {
                         modelContent.Animations[animationLib.Id] = info;
                     }
@@ -339,31 +338,31 @@ namespace Engine.Content
             SubMeshContent[] res = null;
 
             //Procesar por topología
-            if (mesh.Lines != null && mesh.Lines.Length > 0)
+            if (mesh.Lines?.Length > 0)
             {
                 res = ProcessLines(mesh.Lines, mesh.Sources, isVolume);
             }
-            else if (mesh.LineStrips != null && mesh.LineStrips.Length > 0)
+            else if (mesh.LineStrips?.Length > 0)
             {
                 res = ProcessLineStrips(mesh.LineStrips, mesh.Sources, isVolume);
             }
-            else if (mesh.Triangles != null && mesh.Triangles.Length > 0)
+            else if (mesh.Triangles?.Length > 0)
             {
                 res = ProcessTriangles(mesh.Triangles, mesh.Sources, isVolume);
             }
-            else if (mesh.TriFans != null && mesh.TriFans.Length > 0)
+            else if (mesh.TriFans?.Length > 0)
             {
                 res = ProcessTriFans(mesh.TriFans, mesh.Sources, isVolume);
             }
-            else if (mesh.TriStrips != null && mesh.TriStrips.Length > 0)
+            else if (mesh.TriStrips?.Length > 0)
             {
                 res = ProcessTriStrips(mesh.TriStrips, mesh.Sources, isVolume);
             }
-            else if (mesh.PolyList != null && mesh.PolyList.Length > 0)
+            else if (mesh.PolyList?.Length > 0)
             {
                 res = ProcessPolyList(mesh.PolyList, mesh.Sources, isVolume);
             }
-            else if (mesh.Polygons != null && mesh.Polygons.Length > 0)
+            else if (mesh.Polygons?.Length > 0)
             {
                 res = ProcessPolygons(mesh.Polygons, mesh.Sources, isVolume);
             }
@@ -946,18 +945,18 @@ namespace Engine.Content
         {
             List<AnimationContent> res = new List<AnimationContent>();
 
-            foreach (Channel channel in animationLibrary.Channels)
+            foreach (var channel in animationLibrary.Channels)
             {
                 string jointName = channel.Target.Split("/".ToCharArray())[0];
 
                 if (modelContent.SkinningInfo != null && modelContent.SkinningInfo.Skeleton != null)
                 {
                     //Process only joints in the skeleton
-                    Joint j = modelContent.SkinningInfo.Skeleton[jointName];
+                    var j = modelContent.SkinningInfo.Skeleton[jointName];
                     if (j == null) continue;
                 }
 
-                foreach (Sampler sampler in animationLibrary.Samplers)
+                foreach (var sampler in animationLibrary.Samplers)
                 {
                     float[] inputs = null;
                     Matrix[] outputs = null;
@@ -1034,7 +1033,7 @@ namespace Engine.Content
 
             Skeleton.UpdateToWorldTransform(jt);
 
-            if (node.Nodes != null && node.Nodes.Length > 0)
+            if (node.Nodes?.Length > 0)
             {
                 List<Joint> childs = new List<Joint>();
 

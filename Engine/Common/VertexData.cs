@@ -446,85 +446,85 @@ namespace Engine.Common
 
             if (vertexType == VertexTypes.Position)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPosition(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(CreateVertexPosition(v)); });
             }
             else if (vertexType == VertexTypes.PositionColor)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionColor(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(CreateVertexPositionColor(v)); });
             }
             else if (vertexType == VertexTypes.PositionNormalColor)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionNormalColor(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(CreateVertexPositionNormalColor(v)); });
             }
             else if (vertexType == VertexTypes.PositionTexture)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionTexture(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(CreateVertexPositionTexture(v)); });
             }
             else if (vertexType == VertexTypes.PositionNormalTexture)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionNormalTexture(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(CreateVertexPositionNormalTexture(v)); });
             }
             else if (vertexType == VertexTypes.PositionNormalTextureTangent)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexPositionNormalTextureTangent(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(CreateVertexPositionNormalTextureTangent(v)); });
             }
             else if (vertexType == VertexTypes.PositionSkinned)
             {
                 Array.ForEach(vertices, (v) =>
                 {
-                    Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
+                    Weight[] vw = Array.FindAll(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPosition(v, vw, skinBoneNames));
+                    vertexList.Add(CreateVertexSkinnedPosition(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.PositionColorSkinned)
             {
                 Array.ForEach(vertices, (v) =>
                 {
-                    Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
+                    Weight[] vw = Array.FindAll(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPositionColor(v, vw, skinBoneNames));
+                    vertexList.Add(CreateVertexSkinnedPositionColor(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.PositionNormalColorSkinned)
             {
                 Array.ForEach(vertices, (v) =>
                 {
-                    Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
+                    Weight[] vw = Array.FindAll(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalColor(v, vw, skinBoneNames));
+                    vertexList.Add(CreateVertexSkinnedPositionNormalColor(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.PositionTextureSkinned)
             {
                 Array.ForEach(vertices, (v) =>
                 {
-                    Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
+                    Weight[] vw = Array.FindAll(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPositionTexture(v, vw, skinBoneNames));
+                    vertexList.Add(CreateVertexSkinnedPositionTexture(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
             {
                 Array.ForEach(vertices, (v) =>
                 {
-                    Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
+                    Weight[] vw = Array.FindAll(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalTexture(v, vw, skinBoneNames));
+                    vertexList.Add(CreateVertexSkinnedPositionNormalTexture(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.PositionNormalTextureTangentSkinned)
             {
                 Array.ForEach(vertices, (v) =>
                 {
-                    Weight[] vw = Array.FindAll<Weight>(weights, w => w.VertexIndex == v.VertexIndex);
+                    Weight[] vw = Array.FindAll(weights, w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(VertexData.CreateVertexSkinnedPositionNormalTextureTangent(v, vw, skinBoneNames));
+                    vertexList.Add(CreateVertexSkinnedPositionNormalTextureTangent(v, vw, skinBoneNames));
                 });
             }
             else if (vertexType == VertexTypes.Terrain)
             {
-                Array.ForEach(vertices, (v) => { vertexList.Add(VertexData.CreateVertexTerrain(v)); });
+                Array.ForEach(vertices, (v) => { vertexList.Add(CreateVertexTerrain(v)); });
             }
 
             else

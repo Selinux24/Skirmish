@@ -100,8 +100,6 @@ namespace Engine
                     return CreateResourceDefault(imageContent);
                 }
             }
-
-            return null;
         }
         /// <summary>
         /// Creates a resource view from image content
