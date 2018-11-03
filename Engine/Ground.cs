@@ -34,7 +34,7 @@ namespace Engine
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
+        public bool PickNearest(Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
             bool res = false;
 
@@ -43,7 +43,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> gResult))
+            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickNearest(ray, facingOnly, out PickingResult<Triangle> gResult))
             {
                 if (result.Distance > gResult.Distance)
                 {
@@ -62,7 +62,7 @@ namespace Engine
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
+        public bool PickFirst(Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
             bool res = false;
 
@@ -71,7 +71,7 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickFirst(ref ray, facingOnly, out PickingResult<Triangle> gResult))
+            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickFirst(ray, facingOnly, out PickingResult<Triangle> gResult))
             {
                 if (result.Distance > gResult.Distance)
                 {
@@ -90,13 +90,13 @@ namespace Engine
         /// <param name="facingOnly">Select only triangles facing to ray origin</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
+        public bool PickAll(Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
         {
             bool res = false;
 
             results = null;
 
-            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickAll(ref ray, facingOnly, out PickingResult<Triangle>[] gResults))
+            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickAll(ray, facingOnly, out PickingResult<Triangle>[] gResults))
             {
                 results = gResults;
 

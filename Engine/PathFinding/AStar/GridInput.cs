@@ -59,7 +59,7 @@ namespace Engine.PathFinding.AStar
                     };
 
                     bool intersects = Intersection.IntersectAll(
-                        ref ray, triangles, true,
+                        ray, triangles, true,
                         out Vector3[] pickedPoints,
                         out Triangle[] pickedTriangles,
                         out float[] pickedDistances);

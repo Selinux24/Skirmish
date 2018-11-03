@@ -14,7 +14,7 @@ namespace Engine
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<T> result);
+        bool PickNearest(Ray ray, bool facingOnly, out PickingResult<T> result);
         /// <summary>
         /// Gets first picking position of giving ray
         /// </summary>
@@ -23,7 +23,7 @@ namespace Engine
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
         /// <remarks>Based on geometry, not distance. For distance tests use PickNearest instead.</remarks>
-        bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<T> result);
+        bool PickFirst(Ray ray, bool facingOnly, out PickingResult<T> result);
         /// <summary>
         /// Gets all picking position of giving ray
         /// </summary>
@@ -31,7 +31,7 @@ namespace Engine
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<T>[] results);
+        bool PickAll(Ray ray, bool facingOnly, out PickingResult<T>[] results);
 
         /// <summary>
         /// Gets bounding sphere

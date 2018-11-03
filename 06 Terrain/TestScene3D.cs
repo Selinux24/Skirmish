@@ -915,7 +915,7 @@ namespace Terrain
             var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
             {
                 var ray = this.GetTopDownRay(this.heliport.Transform.Position);
-                if (this.PickNearest(ref ray, true, sceneryUsage, out PickingResult<Triangle> r))
+                if (this.PickNearest(ray, true, sceneryUsage, out PickingResult<Triangle> r))
                 {
                     this.helicopter.Transform.SetPosition(r.Position);
                     this.helicopter.Transform.SetNormal(r.Item.Normal);
@@ -985,7 +985,7 @@ namespace Terrain
 
             {
                 var ray = this.GetTopDownRay(-60, -60);
-                if (this.PickNearest(ref ray, true, sceneryUsage, out PickingResult<Triangle> r))
+                if (this.PickNearest(ray, true, sceneryUsage, out PickingResult<Triangle> r))
                 {
                     this.tankP1.Transform.SetPosition(r.Position);
                     this.tankP1.Transform.SetNormal(r.Item.Normal);
@@ -994,7 +994,7 @@ namespace Terrain
 
             {
                 var ray = this.GetTopDownRay(-70, 70);
-                if (this.PickNearest(ref ray, true, sceneryUsage, out PickingResult<Triangle> r))
+                if (this.PickNearest(ray, true, sceneryUsage, out PickingResult<Triangle> r))
                 {
                     this.tankP2.Transform.SetPosition(r.Position);
                     this.tankP2.Transform.SetNormal(r.Item.Normal);
@@ -1174,7 +1174,7 @@ namespace Terrain
         }
         private void UpdateCursor(Ray pickingRay)
         {
-            if (!this.walkMode && this.terrain.Geometry.PickNearest(ref pickingRay, true, out PickingResult<Triangle> r))
+            if (!this.walkMode && this.terrain.Geometry.PickNearest(pickingRay, true, out PickingResult<Triangle> r))
             {
                 this.cursor3D.Transform.SetPosition(r.Position);
             }
@@ -1250,7 +1250,7 @@ namespace Terrain
                         this.follow = false;
                     }
 
-                    if (this.PickNearest(ref pickingRay, 0, true, SceneObjectUsages.Agent, out SceneObject agent))
+                    if (this.PickNearest(pickingRay, 0, true, SceneObjectUsages.Agent, out SceneObject agent))
                     {
                         this.followTarget = agent;
                         this.follow = true;
@@ -1294,7 +1294,7 @@ namespace Terrain
         {
             if (this.Game.Input.LeftMouseButtonPressed)
             {
-                var picked = this.PickNearest(ref pickingRay, true, out PickingResult<Triangle> r);
+                var picked = this.PickNearest(pickingRay, true, out PickingResult<Triangle> r);
                 if (picked)
                 {
                     var t1Position = this.tankP1.Transform.Position;
@@ -1309,7 +1309,7 @@ namespace Terrain
 
             if (this.Game.Input.LeftMouseButtonJustReleased)
             {
-                var picked = this.PickNearest(ref pickingRay, true, out PickingResult<Triangle> r);
+                var picked = this.PickNearest(pickingRay, true, out PickingResult<Triangle> r);
                 if (picked)
                 {
                     var task = Task.Run(() =>
@@ -1468,7 +1468,7 @@ namespace Terrain
                 {
                     this.terrainPointDrawer.Instance.Clear();
 
-                    if (this.PickNearest(ref pickingRay, true, out PickingResult<Triangle> r))
+                    if (this.PickNearest(pickingRay, true, out PickingResult<Triangle> r))
                     {
                         this.DEBUGPickingPosition(r.Position);
                     }

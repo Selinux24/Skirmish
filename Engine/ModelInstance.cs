@@ -310,7 +310,7 @@ namespace Engine
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public virtual bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
+        public virtual bool PickNearest(Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
             {
@@ -321,7 +321,7 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles?.Length > 0 && Intersection.IntersectNearest(ref ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
+                if (triangles?.Length > 0 && Intersection.IntersectNearest(ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
                 {
                     result.Position = p;
                     result.Item = t;
@@ -340,7 +340,7 @@ namespace Engine
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public virtual bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
+        public virtual bool PickFirst(Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
             {
@@ -351,7 +351,7 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles?.Length > 0 && Intersection.IntersectFirst(ref ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
+                if (triangles?.Length > 0 && Intersection.IntersectFirst(ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
                 {
                     result.Position = p;
                     result.Item = t;
@@ -370,7 +370,7 @@ namespace Engine
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public virtual bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
+        public virtual bool PickAll(Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
         {
             results = null;
 
@@ -378,7 +378,7 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles?.Length > 0 && Intersection.IntersectAll(ref ray, triangles, facingOnly, out Vector3[] p, out Triangle[] t, out float[] d))
+                if (triangles?.Length > 0 && Intersection.IntersectAll(ray, triangles, facingOnly, out Vector3[] p, out Triangle[] t, out float[] d))
                 {
                     results = new PickingResult<Triangle>[p.Length];
                     for (int i = 0; i < results.Length; i++)

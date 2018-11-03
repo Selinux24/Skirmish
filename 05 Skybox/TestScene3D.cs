@@ -453,7 +453,7 @@ namespace Skybox
             {
                 Ray pRay = this.GetPickingRay();
 
-                if (this.ruins.Instance.PickNearest(ref pRay, true, out PickingResult<Triangle> r))
+                if (this.ruins.Instance.PickNearest(pRay, true, out PickingResult<Triangle> r))
                 {
                     this.volumesDrawer.Instance.SetTriangles(Color.White, new[] { r.Item });
                 }

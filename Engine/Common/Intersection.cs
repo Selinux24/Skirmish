@@ -243,7 +243,7 @@ namespace Engine.Common
         /// <param name="item">Result picked ray intersectable item</param>
         /// <param name="distance">Result distance to picked position</param>
         /// <returns>Returns first intersection if exists</returns>
-        public static bool IntersectFirst<T>(ref Ray ray, T[] items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
+        public static bool IntersectFirst<T>(Ray ray, T[] items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
         {
             position = Vector3.Zero;
             item = default(T);
@@ -253,7 +253,7 @@ namespace Engine.Common
             {
                 var cItem = items[i];
 
-                if (cItem.Intersects(ref ray, facingOnly, out Vector3 pos, out float d))
+                if (cItem.Intersects(ray, facingOnly, out Vector3 pos, out float d))
                 {
                     position = pos;
                     item = cItem;
@@ -275,13 +275,13 @@ namespace Engine.Common
         /// <param name="item">Result picked ray intersectable item</param>
         /// <param name="distance">Result distance to picked position</param>
         /// <returns>Returns nearest intersection if exists</returns>
-        public static bool IntersectNearest<T>(ref Ray ray, T[] items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
+        public static bool IntersectNearest<T>(Ray ray, T[] items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
         {
             position = Vector3.Zero;
             item = default(T);
             distance = float.MaxValue;
 
-            if (IntersectAll(ref ray, items, facingOnly, out Vector3[] pickedPositions, out T[] pickedTriangles, out float[] pickedDistances))
+            if (IntersectAll(ray, items, facingOnly, out Vector3[] pickedPositions, out T[] pickedTriangles, out float[] pickedDistances))
             {
                 float distanceMin = float.MaxValue;
 
@@ -312,7 +312,7 @@ namespace Engine.Common
         /// <param name="pickedItems">Picked ray intersectable item list</param>
         /// <param name="pickedDistances">Distances to picked positions</param>
         /// <returns>Returns all intersections if exists</returns>
-        public static bool IntersectAll<T>(ref Ray ray, T[] items, bool facingOnly, out Vector3[] pickedPositions, out T[] pickedItems, out float[] pickedDistances) where T : IRayIntersectable
+        public static bool IntersectAll<T>(Ray ray, T[] items, bool facingOnly, out Vector3[] pickedPositions, out T[] pickedItems, out float[] pickedDistances) where T : IRayIntersectable
         {
             SortedDictionary<float, Vector3> pickedPositionList = new SortedDictionary<float, Vector3>();
             SortedDictionary<float, T> pickedTriangleList = new SortedDictionary<float, T>();
@@ -321,7 +321,7 @@ namespace Engine.Common
             foreach (T t in items)
             {
                 //Avoid duplicate picked positions
-                var intersects = t.Intersects(ref ray, facingOnly, out Vector3 pos, out float d);
+                var intersects = t.Intersects(ray, facingOnly, out Vector3 pos, out float d);
                 if (intersects && !pickedPositionList.ContainsValue(pos))
                 {
                     float k = d;

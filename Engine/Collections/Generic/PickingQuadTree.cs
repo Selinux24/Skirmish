@@ -46,7 +46,7 @@ namespace Engine.Collections.Generic
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<T> result)
+        public bool PickNearest(Ray ray, bool facingOnly, out PickingResult<T> result)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -56,7 +56,7 @@ namespace Engine.Collections.Generic
                     Distance = float.MaxValue,
                 };
 
-                if (this.Root.PickNearest(ref ray, facingOnly, out Vector3 position, out T item, out float distance))
+                if (this.Root.PickNearest(ray, facingOnly, out Vector3 position, out T item, out float distance))
                 {
                     result.Position = position;
                     result.Item = item;
@@ -81,7 +81,7 @@ namespace Engine.Collections.Generic
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<T> result)
+        public bool PickFirst(Ray ray, bool facingOnly, out PickingResult<T> result)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -91,7 +91,7 @@ namespace Engine.Collections.Generic
                     Distance = float.MaxValue,
                 };
 
-                if (this.Root.PickFirst(ref ray, facingOnly, out Vector3 position, out T item, out float distance))
+                if (this.Root.PickFirst(ray, facingOnly, out Vector3 position, out T item, out float distance))
                 {
                     result.Position = position;
                     result.Item = item;
@@ -116,14 +116,14 @@ namespace Engine.Collections.Generic
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if picked positions found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<T>[] results)
+        public bool PickAll(Ray ray, bool facingOnly, out PickingResult<T>[] results)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
                 results = null;
 
-                if (this.Root.PickAll(ref ray, facingOnly, out Vector3[] positions, out T[] items, out float[] distances))
+                if (this.Root.PickAll(ray, facingOnly, out Vector3[] positions, out T[] items, out float[] distances))
                 {
                     results = new PickingResult<T>[positions.Length];
 

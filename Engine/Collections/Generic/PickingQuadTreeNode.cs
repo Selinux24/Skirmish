@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 namespace Engine.Collections.Generic
@@ -413,9 +414,9 @@ namespace Engine.Collections.Generic
         /// <param name="item">Hit item</param>
         /// <returns>Returns true if picked position found</returns>
         /// <remarks>By default, result is constrained to front faces only</remarks>
-        public bool PickNearest(ref Ray ray, out Vector3 position, out T item)
+        public bool PickNearest(Ray ray, out Vector3 position, out T item)
         {
-            return this.PickNearest(ref ray, true, out position, out item);
+            return this.PickNearest(ray, true, out position, out item);
         }
         /// <summary>
         /// Pick nearest position
@@ -425,9 +426,9 @@ namespace Engine.Collections.Generic
         /// <param name="position">Hit position</param>
         /// <param name="item">Hit item</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out T item)
+        public bool PickNearest(Ray ray, bool facingOnly, out Vector3 position, out T item)
         {
-            return this.PickNearest(ref ray, facingOnly, out position, out item, out float distance);
+            return this.PickNearest(ray, facingOnly, out position, out item, out float distance);
         }
         /// <summary>
         /// Pick nearest position
@@ -438,7 +439,7 @@ namespace Engine.Collections.Generic
         /// <param name="item">Hit item</param>
         /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
+        public bool PickNearest(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
             item = default(T);
@@ -446,7 +447,7 @@ namespace Engine.Collections.Generic
 
             if (this.Children == null)
             {
-                if (this.PickNearestItem(ref ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
+                if (this.PickNearestItem(ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
                 {
                     position = iPosition;
                     item = iItem;
@@ -457,7 +458,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                if (this.PickNearestNode(ref ray, facingOnly, out var nPosition, out var nItem, out var nDistance))
+                if (this.PickNearestNode(ray, facingOnly, out var nPosition, out var nItem, out var nDistance))
                 {
                     position = nPosition;
                     item = nItem;
@@ -478,7 +479,7 @@ namespace Engine.Collections.Generic
         /// <param name="item">Hit item</param>
         /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickNearestItem(ref Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
+        private bool PickNearestItem(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
             item = default(T);
@@ -489,7 +490,7 @@ namespace Engine.Collections.Generic
                 var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
                 if (inBox)
                 {
-                    var inItem = Intersection.IntersectNearest(ref ray, this.Items, facingOnly, out Vector3 pos, out T tri, out d);
+                    var inItem = Intersection.IntersectNearest(ray, this.Items, facingOnly, out Vector3 pos, out T tri, out d);
                     if (inItem)
                     {
                         position = pos;
@@ -512,7 +513,7 @@ namespace Engine.Collections.Generic
         /// <param name="item">Hit item</param>
         /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickNearestNode(ref Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
+        private bool PickNearestNode(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
             item = default(T);
@@ -551,7 +552,7 @@ namespace Engine.Collections.Generic
                 foreach (var node in boxHitsByDistance.Values)
                 {
                     // check that the intersection is closer than the nearest intersection found thus far
-                    var inNode = node.PickNearest(ref ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
+                    var inNode = node.PickNearest(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
                     if (inNode && thisD < bestD)
                     {
                         // if we have found a closer intersection store the new closest intersection
@@ -585,9 +586,9 @@ namespace Engine.Collections.Generic
         /// <param name="item">Hit item</param>
         /// <returns>Returns true if picked position found</returns>
         /// <remarks>By default, result is constrained to front faces only</remarks>
-        public bool PickFirst(ref Ray ray, out Vector3 position, out T item)
+        public bool PickFirst(Ray ray, out Vector3 position, out T item)
         {
-            return this.PickFirst(ref ray, true, out position, out item);
+            return this.PickFirst(ray, true, out position, out item);
         }
         /// <summary>
         /// Pick first position
@@ -597,9 +598,9 @@ namespace Engine.Collections.Generic
         /// <param name="position">Hit position</param>
         /// <param name="item">Hit item</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out T item)
+        public bool PickFirst(Ray ray, bool facingOnly, out Vector3 position, out T item)
         {
-            return this.PickFirst(ref ray, facingOnly, out position, out item, out float distance);
+            return this.PickFirst(ray, facingOnly, out position, out item, out float distance);
         }
         /// <summary>
         /// Pick first position
@@ -610,7 +611,7 @@ namespace Engine.Collections.Generic
         /// <param name="item">Hit item</param>
         /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
+        public bool PickFirst(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
             item = default(T);
@@ -618,7 +619,7 @@ namespace Engine.Collections.Generic
 
             if (this.Children == null)
             {
-                if (this.PickFirstItem(ref ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
+                if (this.PickFirstItem(ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
                 {
                     position = iPosition;
                     item = iItem;
@@ -629,7 +630,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                if (this.PickFirstNode(ref ray, facingOnly, out var nPosition, out var nItem, out var nDistance))
+                if (this.PickFirstNode(ray, facingOnly, out var nPosition, out var nItem, out var nDistance))
                 {
                     position = nPosition;
                     item = nItem;
@@ -650,7 +651,7 @@ namespace Engine.Collections.Generic
         /// <param name="item">Hit item</param>
         /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickFirstItem(ref Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
+        private bool PickFirstItem(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
             item = default(T);
@@ -658,14 +659,10 @@ namespace Engine.Collections.Generic
 
             if (this.Items?.Length > 0)
             {
-                #region Per bound test
-
                 var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
                 if (inBox)
                 {
-                    #region Per item test
-
-                    var inItem = Intersection.IntersectFirst(ref ray, this.Items, facingOnly, out Vector3 pos, out T tri, out d);
+                    var inItem = Intersection.IntersectFirst(ray, this.Items, facingOnly, out Vector3 pos, out T tri, out d);
                     if (inItem)
                     {
                         position = pos;
@@ -674,11 +671,7 @@ namespace Engine.Collections.Generic
 
                         return true;
                     }
-
-                    #endregion
                 }
-
-                #endregion
             }
 
             return false;
@@ -692,20 +685,18 @@ namespace Engine.Collections.Generic
         /// <param name="item">Hit item</param>
         /// <param name="distance">Distance to hit</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickFirstNode(ref Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
+        private bool PickFirstNode(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
         {
             position = Vector3.Zero;
             item = default(T);
             distance = float.MaxValue;
-
-            #region Find first hit
 
             foreach (var node in this.Children)
             {
                 var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d);
                 if (inBox)
                 {
-                    var inItem = node.PickFirst(ref ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
+                    var inItem = node.PickFirst(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
                     if (inItem)
                     {
                         position = thisHit;
@@ -716,8 +707,6 @@ namespace Engine.Collections.Generic
                     }
                 }
             }
-
-            #endregion
 
             return false;
         }
@@ -730,9 +719,9 @@ namespace Engine.Collections.Generic
         /// <param name="items">Hit items</param>
         /// <returns>Returns true if picked position found</returns>
         /// <remarks>By default, result is constrained to front faces only</remarks>
-        public bool PickAll(ref Ray ray, out Vector3[] positions, out T[] items)
+        public bool PickAll(Ray ray, out Vector3[] positions, out T[] items)
         {
-            return this.PickAll(ref ray, true, out positions, out items);
+            return this.PickAll(ray, true, out positions, out items);
         }
         /// <summary>
         /// Pick all position
@@ -742,9 +731,9 @@ namespace Engine.Collections.Generic
         /// <param name="positions">Hit positions</param>
         /// <param name="items">Hit items</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out T[] items)
+        public bool PickAll(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items)
         {
-            return this.PickAll(ref ray, facingOnly, out positions, out items, out float[] distances);
+            return this.PickAll(ray, facingOnly, out positions, out items, out float[] distances);
         }
         /// <summary>
         /// Pick all position
@@ -755,7 +744,7 @@ namespace Engine.Collections.Generic
         /// <param name="items">Hit items</param>
         /// <param name="distances">Distances to hits</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
+        public bool PickAll(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
         {
             positions = null;
             items = null;
@@ -763,7 +752,7 @@ namespace Engine.Collections.Generic
 
             if (this.Children == null)
             {
-                if (this.PickAllItem(ref ray, facingOnly, out var iPositions, out var iItems, out var iDistances))
+                if (this.PickAllItem(ray, facingOnly, out var iPositions, out var iItems, out var iDistances))
                 {
                     positions = iPositions;
                     items = iItems;
@@ -774,7 +763,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                if (this.PickAllNode(ref ray, facingOnly, out var nPositions, out var nItems, out var nDistances))
+                if (this.PickAllNode(ray, facingOnly, out var nPositions, out var nItems, out var nDistances))
                 {
                     positions = nPositions;
                     items = nItems;
@@ -795,7 +784,7 @@ namespace Engine.Collections.Generic
         /// <param name="items">Hit items</param>
         /// <param name="distances">Distances to hits</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickAllItem(ref Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
+        private bool PickAllItem(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
         {
             positions = null;
             items = null;
@@ -806,7 +795,7 @@ namespace Engine.Collections.Generic
                 var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
                 if (inBox)
                 {
-                    var inItem = Intersection.IntersectAll(ref ray, this.Items, facingOnly, out Vector3[] pos, out T[] tri, out float[] ds);
+                    var inItem = Intersection.IntersectAll(ray, this.Items, facingOnly, out Vector3[] pos, out T[] tri, out float[] ds);
                     if (inItem)
                     {
                         positions = pos;
@@ -829,7 +818,7 @@ namespace Engine.Collections.Generic
         /// <param name="items">Hit items</param>
         /// <param name="distances">Distances to hits</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickAllNode(ref Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
+        private bool PickAllNode(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
         {
             positions = null;
             items = null;
@@ -846,7 +835,7 @@ namespace Engine.Collections.Generic
                 var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d);
                 if (inBox)
                 {
-                    var inItem = node.PickAll(ref ray, facingOnly, out Vector3[] thisHits, out T[] thisTris, out float[] thisDs);
+                    var inItem = node.PickAll(ray, facingOnly, out Vector3[] thisHits, out T[] thisTris, out float[] thisDs);
                     if (inItem)
                     {
                         for (int i = 0; i < thisHits.Length; i++)
@@ -864,12 +853,9 @@ namespace Engine.Collections.Generic
                 }
             }
 
-            if (intersect)
-            {
-                positions = hits.ToArray();
-                items = tris.ToArray();
-                distances = dists.ToArray();
-            }
+            positions = hits.ToArray();
+            items = tris.ToArray();
+            distances = dists.ToArray();
 
             return intersect;
         }

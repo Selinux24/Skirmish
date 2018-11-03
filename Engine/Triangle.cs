@@ -469,9 +469,9 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(ref Ray ray)
+        public bool Intersects(Ray ray)
         {
-            return this.Intersects(ref ray, false, out Vector3 position, out float distance);
+            return this.Intersects(ray, false, out Vector3 position, out float distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -479,9 +479,9 @@ namespace Engine
         /// <param name="ray">Ray</param>
         /// <param name="distance">Distance from ray origin and intersection point, if any</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(ref Ray ray, out float distance)
+        public bool Intersects(Ray ray, out float distance)
         {
-            return this.Intersects(ref ray, false, out Vector3 position, out distance);
+            return this.Intersects(ray, false, out Vector3 position, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -490,9 +490,9 @@ namespace Engine
         /// <param name="point">Intersection point, if any</param>
         /// <param name="distance">Distance from ray origin and intersection point, if any</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(ref Ray ray, out Vector3 point, out float distance)
+        public bool Intersects(Ray ray, out Vector3 point, out float distance)
         {
-            return this.Intersects(ref ray, false, out point, out distance);
+            return this.Intersects(ray, false, out point, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -500,9 +500,9 @@ namespace Engine
         /// <param name="ray">Ray</param>
         /// <param name="facingOnly">Test facing only triangles</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(ref Ray ray, bool facingOnly)
+        public bool Intersects(Ray ray, bool facingOnly)
         {
-            return this.Intersects(ref ray, facingOnly, out Vector3 point, out float distance);
+            return this.Intersects(ray, facingOnly, out Vector3 point, out float distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -511,9 +511,9 @@ namespace Engine
         /// <param name="facingOnly">Test facing only triangles</param>
         /// <param name="distance">Distance from ray origin and intersection point, if any</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(ref Ray ray, bool facingOnly, out float distance)
+        public bool Intersects(Ray ray, bool facingOnly, out float distance)
         {
-            return this.Intersects(ref ray, facingOnly, out Vector3 point, out distance);
+            return this.Intersects(ray, facingOnly, out Vector3 point, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -523,7 +523,7 @@ namespace Engine
         /// <param name="point">Intersection point, if any</param>
         /// <param name="distance">Distance from ray origin and intersection point, if any</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(ref Ray ray, bool facingOnly, out Vector3 point, out float distance)
+        public bool Intersects(Ray ray, bool facingOnly, out Vector3 point, out float distance)
         {
             point = Vector3.Zero;
             distance = 0;

@@ -183,7 +183,7 @@ namespace Engine
                         {
                             var ray = scene.GetTopDownRay(pos);
                             bool found = scene.PickFirst(
-                                ref ray, true,
+                                ray, true,
                                 SceneObjectUsages.Ground,
                                 out PickingResult<Triangle> r);
                             if (found && r.Item.Normal.Y > 0.5f)

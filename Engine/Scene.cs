@@ -829,13 +829,13 @@ namespace Engine
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="model">Gets the resulting ray pickable object</param>
         /// <returns>Returns true if a pickable object in the ray path was found</returns>
-        public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, out SceneObject model)
+        public virtual bool PickNearest(Ray ray, float maxDistance, bool facingOnly, out SceneObject model)
         {
             var usage = SceneObjectUsages.Agent &
                 SceneObjectUsages.CoarsePathFinding &
                 SceneObjectUsages.FullPathFinding;
 
-            return this.PickNearest(ref ray, maxDistance, facingOnly, usage, out model);
+            return this.PickNearest(ray, maxDistance, facingOnly, usage, out model);
         }
         /// <summary>
         /// Gets the nearest pickable object in the ray path
@@ -846,7 +846,7 @@ namespace Engine
         /// <param name="usage">Object usage mask</param>
         /// <param name="model">Gets the resulting ray pickable object</param>
         /// <returns>Returns true if a pickable object in the ray path was found</returns>
-        public virtual bool PickNearest(ref Ray ray, float maxDistance, bool facingOnly, SceneObjectUsages usage, out SceneObject model)
+        public virtual bool PickNearest(Ray ray, float maxDistance, bool facingOnly, SceneObjectUsages usage, out SceneObject model)
         {
             model = null;
 
@@ -857,7 +857,7 @@ namespace Engine
             foreach (var obj in coarse)
             {
                 var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
-                if (pickable != null && pickable.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> r))
+                if (pickable != null && pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r))
                 {
                     model = obj.Item1;
 
@@ -875,9 +875,9 @@ namespace Engine
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
+        public bool PickNearest(Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
-            return PickNearest(ref ray, facingOnly, SceneObjectUsages.None, out result);
+            return PickNearest(ray, facingOnly, SceneObjectUsages.None, out result);
         }
         /// <summary>
         /// Gets first picking position of giving ray
@@ -886,9 +886,9 @@ namespace Engine
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, out PickingResult<Triangle> result)
+        public bool PickFirst(Ray ray, bool facingOnly, out PickingResult<Triangle> result)
         {
-            return PickFirst(ref ray, facingOnly, SceneObjectUsages.None, out result);
+            return PickFirst(ray, facingOnly, SceneObjectUsages.None, out result);
         }
         /// <summary>
         /// Gets all picking position of giving ray
@@ -897,9 +897,9 @@ namespace Engine
         /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
+        public bool PickAll(Ray ray, bool facingOnly, out PickingResult<Triangle>[] results)
         {
-            return PickAll(ref ray, facingOnly, SceneObjectUsages.None, out results);
+            return PickAll(ray, facingOnly, SceneObjectUsages.None, out results);
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -912,7 +912,7 @@ namespace Engine
         {
             var ray = this.GetTopDownRay(x, z);
 
-            return this.PickNearest(ref ray, true, GroundUsage, out result);
+            return this.PickNearest(ray, true, GroundUsage, out result);
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -925,7 +925,7 @@ namespace Engine
         {
             var ray = this.GetTopDownRay(x, z);
 
-            return this.PickFirst(ref ray, true, GroundUsage, out result);
+            return this.PickFirst(ray, true, GroundUsage, out result);
         }
         /// <summary>
         /// Gets all ground positions giving x, z coordinates
@@ -938,7 +938,7 @@ namespace Engine
         {
             var ray = this.GetTopDownRay(x, z);
 
-            return this.PickAll(ref ray, true, GroundUsage, out results);
+            return this.PickAll(ray, true, GroundUsage, out results);
         }
         /// <summary>
         /// Gets nearest ground position to "from" position
@@ -950,7 +950,7 @@ namespace Engine
         {
             var ray = this.GetTopDownRay(from.X, from.Z);
 
-            bool picked = this.PickAll(ref ray, true, GroundUsage, out PickingResult<Triangle>[] pResults);
+            bool picked = this.PickAll(ray, true, GroundUsage, out PickingResult<Triangle>[] pResults);
             if (picked)
             {
                 int index = -1;
@@ -988,7 +988,7 @@ namespace Engine
         /// <param name="usage">Component usage</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest(ref Ray ray, bool facingOnly, SceneObjectUsages usage, out PickingResult<Triangle> result)
+        public bool PickNearest(Ray ray, bool facingOnly, SceneObjectUsages usage, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
             {
@@ -1016,7 +1016,7 @@ namespace Engine
                     var pickComponents = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in pickComponents)
                     {
-                        if (pickable.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> r))
+                        if (pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r))
                         {
                             if (r.Distance < bestDistance)
                             {
@@ -1033,7 +1033,7 @@ namespace Engine
                 {
                     var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
 
-                    if (pickable.PickNearest(ref ray, facingOnly, out PickingResult<Triangle> r))
+                    if (pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r))
                     {
                         if (r.Distance < bestDistance)
                         {
@@ -1057,7 +1057,7 @@ namespace Engine
         /// <param name="usage">Component usage</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(ref Ray ray, bool facingOnly, SceneObjectUsages usage, out PickingResult<Triangle> result)
+        public bool PickFirst(Ray ray, bool facingOnly, SceneObjectUsages usage, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
             {
@@ -1077,7 +1077,7 @@ namespace Engine
                     var pickComponents = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in pickComponents)
                     {
-                        if (pickable.PickFirst(ref ray, facingOnly, out PickingResult<Triangle> r))
+                        if (pickable.PickFirst(ray, facingOnly, out PickingResult<Triangle> r))
                         {
                             result = r;
 
@@ -1089,7 +1089,7 @@ namespace Engine
                 {
                     var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
 
-                    if (pickable.PickFirst(ref ray, facingOnly, out PickingResult<Triangle> r))
+                    if (pickable.PickFirst(ray, facingOnly, out PickingResult<Triangle> r))
                     {
                         result = r;
 
@@ -1108,7 +1108,7 @@ namespace Engine
         /// <param name="usage">Component usage</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(ref Ray ray, bool facingOnly, SceneObjectUsages usage, out PickingResult<Triangle>[] results)
+        public bool PickAll(Ray ray, bool facingOnly, SceneObjectUsages usage, out PickingResult<Triangle>[] results)
         {
             results = null;
 
@@ -1127,7 +1127,7 @@ namespace Engine
                     var pickComponents = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
                     foreach (var pickable in pickComponents)
                     {
-                        if (pickable.PickAll(ref ray, facingOnly, out PickingResult<Triangle>[] r))
+                        if (pickable.PickAll(ray, facingOnly, out PickingResult<Triangle>[] r))
                         {
                             lResults.AddRange(r);
                         }
@@ -1137,7 +1137,7 @@ namespace Engine
                 {
                     var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
 
-                    if (pickable.PickAll(ref ray, facingOnly, out PickingResult<Triangle>[] r))
+                    if (pickable.PickAll(ray, facingOnly, out PickingResult<Triangle>[] r))
                     {
                         lResults.AddRange(r);
                     }
