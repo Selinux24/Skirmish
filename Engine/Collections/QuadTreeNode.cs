@@ -48,45 +48,64 @@ namespace Engine.Collections
                 }
                 else
                 {
-                    Vector3 M = bbox.Maximum;
-                    Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
-                    Vector3 m = bbox.Minimum;
-
-                    //-1-1-1   +0+1+0   -->   mmm    cMc
-                    BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-                    //-1-1+0   +0+1+1   -->   mmc    cMM
-                    BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
-                    //+0-1-1   +1+1+0   -->   cmm    MMc
-                    BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
-                    //+0-1+0   +1+1+1   -->   cmc    MMM
-                    BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
-
-                    var topLeftChild = CreatePartitions(quadTree, node, topLeftBox, maxDepth, treeDepth + 1);
-                    var topRightChild = CreatePartitions(quadTree, node, topRightBox, maxDepth, treeDepth + 1);
-                    var bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, maxDepth, treeDepth + 1);
-                    var bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, maxDepth, treeDepth + 1);
-
-                    List<QuadTreeNode> childList = new List<QuadTreeNode>();
-
-                    if (topLeftChild != null) childList.Add(topLeftChild);
-                    if (topRightChild != null) childList.Add(topRightChild);
-                    if (bottomLeftChild != null) childList.Add(bottomLeftChild);
-                    if (bottomRightChild != null) childList.Add(bottomRightChild);
-
-                    if (childList.Count > 0)
-                    {
-                        node.Children = childList.ToArray();
-                        node.TopLeftChild = topLeftChild;
-                        node.TopRightChild = topRightChild;
-                        node.BottomLeftChild = bottomLeftChild;
-                        node.BottomRightChild = bottomRightChild;
-                    }
+                    // Initialize node partitions
+                    IntializeNode(quadTree, node, bbox, maxDepth, treeDepth + 1);
                 }
 
                 return node;
             }
 
             return null;
+        }
+        /// <summary>
+        /// Initializes node partitinos
+        /// </summary>
+        /// <param name="quadTree">Quadtree</param>
+        /// <param name="node">Current node</param>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="items">Items into the node</param>
+        /// <param name="maxDepth">Maximum depth</param>
+        /// <param name="nextTreeDepth">Next depth</param>
+        private static void IntializeNode(
+            QuadTree quadTree, QuadTreeNode node,
+            BoundingBox bbox,
+            int maxDepth,
+            int nextTreeDepth)
+        {
+
+            Vector3 M = bbox.Maximum;
+            Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
+            Vector3 m = bbox.Minimum;
+
+            //-1-1-1   +0+1+0   -->   mmm    cMc
+            BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+            //-1-1+0   +0+1+1   -->   mmc    cMM
+            BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+            //+0-1-1   +1+1+0   -->   cmm    MMc
+            BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+            //+0-1+0   +1+1+1   -->   cmc    MMM
+            BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+
+            var topLeftChild = CreatePartitions(quadTree, node, topLeftBox, maxDepth, nextTreeDepth);
+            var topRightChild = CreatePartitions(quadTree, node, topRightBox, maxDepth, nextTreeDepth);
+            var bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, maxDepth, nextTreeDepth);
+            var bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, maxDepth, nextTreeDepth);
+
+            List<QuadTreeNode> childList = new List<QuadTreeNode>();
+
+            if (topLeftChild != null) childList.Add(topLeftChild);
+            if (topRightChild != null) childList.Add(topRightChild);
+            if (bottomLeftChild != null) childList.Add(bottomLeftChild);
+            if (bottomRightChild != null) childList.Add(bottomRightChild);
+
+            if (childList.Count > 0)
+            {
+                node.Children = childList.ToArray();
+                node.TopLeftChild = topLeftChild;
+                node.TopRightChild = topRightChild;
+                node.BottomLeftChild = bottomLeftChild;
+                node.BottomRightChild = bottomRightChild;
+            }
         }
 
         /// <summary>

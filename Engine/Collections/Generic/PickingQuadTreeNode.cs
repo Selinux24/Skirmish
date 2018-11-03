@@ -79,7 +79,7 @@ namespace Engine.Collections.Generic
                     else
                     {
                         // Initialize node partitions
-                        IntializeNode(quadTree, node, bbox, nodeItems, maxDepth, treeDepth + 1);
+                        InitializeNode(quadTree, node, bbox, nodeItems, maxDepth, treeDepth + 1);
                     }
 
                     return node;
@@ -97,7 +97,7 @@ namespace Engine.Collections.Generic
         /// <param name="items">Items into the node</param>
         /// <param name="maxDepth">Maximum depth</param>
         /// <param name="nextTreeDepth">Next depth</param>
-        private static void IntializeNode(
+        private static void InitializeNode(
             PickingQuadTree<T> quadTree, PickingQuadTreeNode<T> node,
             BoundingBox bbox, T[] items,
             int maxDepth,
