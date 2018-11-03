@@ -49,7 +49,7 @@ namespace Engine.Common
         {
             get
             {
-                return VertexTypes.Particle;
+                return VertexTypes.CPUParticle;
             }
         }
 

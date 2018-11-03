@@ -162,81 +162,50 @@ namespace Engine.Common
         /// <returns>Returns new buffer</returns>
         private static Buffer CreateVertexBuffer(Graphics graphics, string name, IVertexData[] vertices, bool dynamic)
         {
-            Buffer buffer = null;
-
-            if (vertices != null && vertices.Length > 0)
+            if (vertices?.Length > 0)
             {
-                if (vertices[0].VertexType == VertexTypes.Billboard)
+                var vertexType = vertices[0].VertexType;
+
+                switch (vertexType)
                 {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexBillboard>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.Particle)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexCpuParticle>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.GPUParticle)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexGpuParticle>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.Position)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPosition>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionColor)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionColor>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalColor)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionNormalColor>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionTexture)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionTexture>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalTexture)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionNormalTexture>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangent)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionNormalTextureTangent>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.Terrain)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexTerrain>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionSkinned)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPosition>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionColorSkinned)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionColor>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalColorSkinned)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionNormalColor>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionTextureSkinned)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionTexture>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureSkinned)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionNormalTexture>(vertices), dynamic);
-                }
-                else if (vertices[0].VertexType == VertexTypes.PositionNormalTextureTangentSkinned)
-                {
-                    buffer = graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionNormalTextureTangent>(vertices), dynamic);
-                }
-                else
-                {
-                    throw new EngineException(string.Format("Unknown vertex type: {0}", vertices[0].VertexType));
+                    case VertexTypes.Billboard:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexBillboard>(vertices), dynamic);
+                    case VertexTypes.CPUParticle:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexCpuParticle>(vertices), dynamic);
+                    case VertexTypes.GPUParticle:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexGpuParticle>(vertices), dynamic);
+                    case VertexTypes.Terrain:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexTerrain>(vertices), dynamic);
+                    case VertexTypes.Position:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPosition>(vertices), dynamic);
+                    case VertexTypes.PositionColor:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionColor>(vertices), dynamic);
+                    case VertexTypes.PositionTexture:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionTexture>(vertices), dynamic);
+                    case VertexTypes.PositionNormalColor:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionNormalColor>(vertices), dynamic);
+                    case VertexTypes.PositionNormalTexture:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionNormalTexture>(vertices), dynamic);
+                    case VertexTypes.PositionNormalTextureTangent:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexPositionNormalTextureTangent>(vertices), dynamic);
+                    case VertexTypes.PositionSkinned:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPosition>(vertices), dynamic);
+                    case VertexTypes.PositionColorSkinned:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionColor>(vertices), dynamic);
+                    case VertexTypes.PositionTextureSkinned:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionTexture>(vertices), dynamic);
+                    case VertexTypes.PositionNormalColorSkinned:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionNormalColor>(vertices), dynamic);
+                    case VertexTypes.PositionNormalTextureSkinned:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionNormalTexture>(vertices), dynamic);
+                    case VertexTypes.PositionNormalTextureTangentSkinned:
+                        return graphics.CreateVertexBuffer(name, VertexData.Convert<VertexSkinnedPositionNormalTextureTangent>(vertices), dynamic);
+                    default:
+                        throw new EngineException(string.Format("Unknown vertex type: {0}", vertexType));
                 }
             }
 
-            return buffer;
+            return null;
         }
         /// <summary>
         /// Creates the instancing buffer
@@ -328,7 +297,7 @@ namespace Engine.Common
         /// <summary>
         /// Input layouts by technique
         /// </summary>
-        private Dictionary<EngineEffectTechnique, InputLayout> inputLayouts = new Dictionary<EngineEffectTechnique, InputLayout>();
+        private readonly Dictionary<EngineEffectTechnique, InputLayout> inputLayouts = new Dictionary<EngineEffectTechnique, InputLayout>();
         /// <summary>
         /// Buffer allocation needed
         /// </summary>
@@ -403,38 +372,23 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.VertexBuffers != null)
+                for (int i = 0; i < this.VertexBuffers?.Length; i++)
                 {
-                    for (int i = 0; i < this.VertexBuffers.Length; i++)
-                    {
-                        this.VertexBuffers[i]?.Dispose();
-                        this.VertexBuffers[i] = null;
-                    }
-
-                    this.VertexBuffers = null;
+                    this.VertexBuffers[i]?.Dispose();
                 }
+                this.VertexBuffers = null;
 
-                if (this.IndexBuffers != null)
+                for (int i = 0; i < this.IndexBuffers?.Length; i++)
                 {
-                    for (int i = 0; i < this.IndexBuffers.Length; i++)
-                    {
-                        this.IndexBuffers[i]?.Dispose();
-                        this.IndexBuffers[i] = null;
-                    }
-
-                    this.IndexBuffers = null;
+                    this.IndexBuffers[i]?.Dispose();
                 }
+                this.IndexBuffers = null;
 
-                if (this.inputLayouts != null)
+                foreach (var item in this.inputLayouts)
                 {
-                    foreach (var item in this.inputLayouts)
-                    {
-                        item.Value?.Dispose();
-                    }
-
-                    this.inputLayouts.Clear();
-                    this.inputLayouts = null;
+                    item.Value?.Dispose();
                 }
+                this.inputLayouts.Clear();
             }
         }
 
@@ -619,66 +573,88 @@ namespace Engine.Common
         {
             if (allocationNeeded)
             {
-                bool reallocateInstances = false;
+                ReallocateVertexData(out bool reallocateInstances);
 
-                for (int i = 0; i < this.vertexData.Count; i++)
-                {
-                    var vKey = this.vertexData[i];
-
-                    if (vKey.ReallocationNeeded)
-                    {
-                        var mb = this.VertexBuffers[i];
-                        mb.Dispose();
-
-                        var buffer = CreateVertexBuffer(game.Graphics, vKey.Name, vKey.Data.ToArray(), vKey.Dynamic);
-                        var binding = new VertexBufferBinding(buffer, vKey.Data[0].GetStride(), 0);
-
-                        this.VertexBuffers[i] = buffer;
-                        this.VertexBufferBindings[i] = binding;
-
-                        vKey.AllocatedSize = vKey.Data.Count;
-
-                        if (vKey.Instances > 0)
-                        {
-                            reallocateInstances = true;
-                        }
-                    }
-                }
-
-                for (int i = 0; i < this.indexData.Count; i++)
-                {
-                    var iKey = this.indexData[i];
-
-                    if (iKey.ReallocationNeeded)
-                    {
-                        var ib = this.IndexBuffers[i];
-                        ib.Dispose();
-
-                        var buffer = CreateIndexBuffer(game.Graphics, iKey.Name, iKey.Data.ToArray(), iKey.Dynamic);
-
-                        this.IndexBuffers[i] = buffer;
-                        iKey.AllocatedSize = iKey.Data.Count;
-                    }
-                }
+                ReallocateIndexData();
 
                 if (reallocateInstances)
                 {
-                    int instances = this.TotalInstances;
-                    if (instances > 0)
-                    {
-                        var instancingBuffer = this.VertexBuffers[this.VertexBuffers.Length - 1];
-                        instancingBuffer.Dispose();
-
-                        var data = new VertexInstancingData[instances];
-                        var buffer = CreateInstancingBuffer(game.Graphics, data);
-                        var binding = new VertexBufferBinding(buffer, data[0].GetStride(), 0);
-
-                        this.VertexBuffers[this.VertexBuffers.Length - 1] = buffer;
-                        this.VertexBufferBindings[this.VertexBufferBindings.Length - 1] = binding;
-                    }
+                    ReallocateInstances();
                 }
 
                 allocationNeeded = false;
+            }
+        }
+        /// <summary>
+        /// Reallocates the vertex data
+        /// </summary>
+        /// <param name="reallocateInstances">Returns wether instance reallocation is necessary</param>
+        private void ReallocateVertexData(out bool reallocateInstances)
+        {
+            reallocateInstances = false;
+
+            for (int i = 0; i < this.vertexData.Count; i++)
+            {
+                var vKey = this.vertexData[i];
+
+                if (vKey.ReallocationNeeded)
+                {
+                    var mb = this.VertexBuffers[i];
+                    mb.Dispose();
+
+                    var buffer = CreateVertexBuffer(game.Graphics, vKey.Name, vKey.Data.ToArray(), vKey.Dynamic);
+                    var binding = new VertexBufferBinding(buffer, vKey.Data[0].GetStride(), 0);
+
+                    this.VertexBuffers[i] = buffer;
+                    this.VertexBufferBindings[i] = binding;
+
+                    vKey.AllocatedSize = vKey.Data.Count;
+
+                    if (vKey.Instances > 0)
+                    {
+                        reallocateInstances = true;
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Reallocates the index data
+        /// </summary>
+        private void ReallocateIndexData()
+        {
+            for (int i = 0; i < this.indexData.Count; i++)
+            {
+                var iKey = this.indexData[i];
+
+                if (iKey.ReallocationNeeded)
+                {
+                    var ib = this.IndexBuffers[i];
+                    ib.Dispose();
+
+                    var buffer = CreateIndexBuffer(game.Graphics, iKey.Name, iKey.Data.ToArray(), iKey.Dynamic);
+
+                    this.IndexBuffers[i] = buffer;
+                    iKey.AllocatedSize = iKey.Data.Count;
+                }
+            }
+        }
+        /// <summary>
+        /// Reallocates the instance data
+        /// </summary>
+        private void ReallocateInstances()
+        {
+            int instances = this.TotalInstances;
+            if (instances > 0)
+            {
+                var instancingBuffer = this.VertexBuffers[this.VertexBuffers.Length - 1];
+                instancingBuffer.Dispose();
+
+                var data = new VertexInstancingData[instances];
+                var buffer = CreateInstancingBuffer(game.Graphics, data);
+                var binding = new VertexBufferBinding(buffer, data[0].GetStride(), 0);
+
+                this.VertexBuffers[this.VertexBuffers.Length - 1] = buffer;
+                this.VertexBufferBindings[this.VertexBufferBindings.Length - 1] = binding;
             }
         }
 

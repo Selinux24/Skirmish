@@ -16,9 +16,9 @@ namespace Engine.Common
         /// </summary>
         Billboard,
         /// <summary>
-        /// Particle
+        /// CPU Particle
         /// </summary>
-        Particle,
+        CPUParticle,
         /// <summary>
         /// GPU Particles
         /// </summary>
