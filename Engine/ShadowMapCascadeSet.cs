@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -126,9 +126,8 @@ namespace Engine
             // Find the view matrix
             Vector3 worldCenter = camera.Position + camera.Direction * cascadeTotalRange * 0.5f;
             Vector3 pos = worldCenter;
-            Vector3 lookAt = worldCenter + lightDirection * camera.FarPlaneDistance;
-            Vector3 right = new Vector3(1.0f, 0.0f, 0.0f);
-            Vector3 up = Vector3.Normalize(Vector3.Cross(lightDirection, right));
+            Vector3 lookAt = worldCenter + (lightDirection) * camera.FarPlaneDistance;
+            Vector3 up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3.Left));
             Matrix shadowView = Matrix.LookAtLH(pos, lookAt, up);
 
             this.toCascadeOffsetX = Vector4.Zero;

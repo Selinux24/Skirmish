@@ -151,10 +151,10 @@ namespace SceneTest
         private SceneObject<Model> InitializeSphere(string name, MaterialContent material)
         {
             GeometryUtil.CreateSphere(
-                radius, stacks, stacks, 
-                out Vector3[] v, 
-                out Vector3[] n, 
-                out Vector2[] uv, 
+                radius, stacks, stacks,
+                out Vector3[] v,
+                out Vector3[] n,
+                out Vector2[] uv,
                 out uint[] ix);
 
             VertexData[] vertices = new VertexData[v.Length];

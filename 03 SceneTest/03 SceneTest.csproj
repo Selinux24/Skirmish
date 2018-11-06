@@ -150,6 +150,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="SceneCascadedShadows.cs" />
     <Compile Include="SceneLights.cs" />
     <Compile Include="SceneMaterials.cs" />
     <Compile Include="SceneStart.cs" />
@@ -159,6 +160,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="Common\buttons.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\LensFlare\lfFlare4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Common\pointer.png">

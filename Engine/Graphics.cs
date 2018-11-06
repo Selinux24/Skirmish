@@ -2390,7 +2390,7 @@ namespace Engine
                     {
                         MipLevels = 1,
                         MostDetailedMip = 0,
-                        ArraySize = arraySize,
+                        ArraySize = arraySize * mapCount,
                         FirstArraySlice = 0,
                         PlaneSlice = 0,
                     },
