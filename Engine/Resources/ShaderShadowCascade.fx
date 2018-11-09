@@ -1,3 +1,4 @@
+#include "IncLights.hlsl"
 #include "IncVertexFormats.hlsl"
 
 cbuffer cbGlobals : register(b0)
@@ -33,23 +34,32 @@ struct GSShadowMap
     uint index : SV_RENDERTARGETARRAYINDEX;
 };
 
-PSShadowMapPosition CascadedShadowGenVS(float3 positionLocal : POSITION)
+struct GSShadowMapTextured
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float4 depth : TEXCOORD0;
+    float2 tex : TEXCOORD1;
+    uint textureIndex : TEXTUREINDEX;
+    uint index : SV_RENDERTARGETARRAYINDEX;
+};
+
+PSShadowMapPosition VSSMPositionColor(VSVertexPositionColor input)
 {
     PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
-    output.positionHomogeneous = float4(positionLocal, 1.0f);
+    output.positionHomogeneous = float4(input.positionLocal, 1.0f);
 
     return output;
 }
-PSShadowMapPosition CascadedShadowGenVSI(float3 positionLocal : POSITION, row_major float4x4 localTransform : LOCALTRANSFORM)
+PSShadowMapPosition VSSMPositionColorI(VSVertexPositionColorI input)
 {
     PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
-    output.positionHomogeneous = mul(float4(positionLocal, 1), localTransform);
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), input.localTransform);
     
     return output;
 }
-PSShadowMapPosition CascadedShadowGenVSkinned(float3 positionLocal : POSITION, float3 weights : WEIGHTS, uint4 boneIndices : BONEINDICES)
+PSShadowMapPosition VSSMPositionColorSkinned(VSVertexPositionColorSkinned input)
 {
     PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
@@ -59,16 +69,16 @@ PSShadowMapPosition CascadedShadowGenVSkinned(float3 positionLocal : POSITION, f
 		gAnimationPalette,
 		gVSAnimationOffset,
 		gAnimationPaletteWidth,
-		weights,
-		boneIndices,
-		positionLocal,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
 		positionL);
 	
     output.positionHomogeneous = positionL;
 
     return output;
 }
-PSShadowMapPosition CascadedShadowGenVSkinnedI(float3 positionLocal : POSITION, row_major float4x4 localTransform : LOCALTRANSFORM, float3 weights : WEIGHTS, uint4 boneIndices : BONEINDICES, uint animationOffset : ANIMATIONOFFSET)
+PSShadowMapPosition VSSMPositionColorSkinnedI(VSVertexPositionColorSkinnedI input)
 {
     PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
@@ -76,17 +86,271 @@ PSShadowMapPosition CascadedShadowGenVSkinnedI(float3 positionLocal : POSITION, 
 	
     ComputePositionWeights(
 		gAnimationPalette,
-		animationOffset,
+		input.animationOffset,
 		gAnimationPaletteWidth,
-		weights,
-		boneIndices,
-		positionLocal,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
 		positionL);
 
-    float4 instancePosition = mul(positionL, localTransform);
-	
-    output.positionHomogeneous = instancePosition;
+    output.positionHomogeneous = mul(positionL, input.localTransform);
     
+    return output;
+}
+
+PSShadowMapPosition VSSMPositionNormalColor(VSVertexPositionNormalColor input)
+{
+    PSShadowMapPosition output = (PSShadowMapPosition) 0;
+
+    output.positionHomogeneous = float4(input.positionLocal, 1.0f);
+
+    return output;
+}
+PSShadowMapPosition VSSMPositionNormalColorI(VSVertexPositionNormalColorI input)
+{
+    PSShadowMapPosition output = (PSShadowMapPosition) 0;
+
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), input.localTransform);
+
+    return output;
+}
+PSShadowMapPosition VSSMPositionNormalColorSkinned(VSVertexPositionNormalColorSkinned input)
+{
+    PSShadowMapPosition output = (PSShadowMapPosition) 0;
+
+    float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+    ComputePositionWeights(
+		gAnimationPalette,
+		gVSAnimationOffset,
+		gAnimationPaletteWidth,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		positionL);
+	
+    output.positionHomogeneous = positionL;
+
+    return output;
+}
+PSShadowMapPosition VSSMPositionNormalColorSkinnedI(VSVertexPositionNormalColorSkinnedI input)
+{
+    PSShadowMapPosition output = (PSShadowMapPosition) 0;
+
+    float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+    ComputePositionWeights(
+		gAnimationPalette,
+		input.animationOffset,
+		gAnimationPaletteWidth,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		positionL);
+
+    output.positionHomogeneous = mul(positionL, input.localTransform);
+
+    return output;
+}
+
+PSShadowMapPositionTexture VSSMPositionTexture(VSVertexPositionTexture input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    output.positionHomogeneous = float4(input.positionLocal, 1.0f);
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = gPSTextureIndex;
+
+    return output;
+}
+PSShadowMapPositionTexture VSSMPositionTextureI(VSVertexPositionTextureI input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), input.localTransform);
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = input.textureIndex;
+
+    return output;
+}
+PSShadowMapPositionTexture VSSMPositionTextureSkinned(VSVertexPositionTextureSkinned input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+    ComputePositionWeights(
+		gAnimationPalette,
+		gVSAnimationOffset,
+		gAnimationPaletteWidth,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		positionL);
+	
+    output.positionHomogeneous = positionL;
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = gPSTextureIndex;
+
+    return output;
+}
+PSShadowMapPositionTexture VSSMPositionTextureSkinnedI(VSVertexPositionTextureSkinnedI input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+    ComputePositionWeights(
+		gAnimationPalette,
+		input.animationOffset,
+		gAnimationPaletteWidth,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		positionL);
+
+    output.positionHomogeneous = mul(positionL, input.localTransform);
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = input.textureIndex;
+
+    return output;
+}
+
+PSShadowMapPositionTexture VSSMPositionNormalTexture(VSVertexPositionNormalTexture input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    output.positionHomogeneous = float4(input.positionLocal, 1.0f);
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = gPSTextureIndex;
+
+    return output;
+}
+PSShadowMapPositionTexture VSSMPositionNormalTextureI(VSVertexPositionNormalTextureI input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), input.localTransform);
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = input.textureIndex;
+
+    return output;
+}
+PSShadowMapPositionTexture VSSMPositionNormalTextureSkinned(VSVertexPositionNormalTextureSkinned input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+	
+    float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+    ComputePositionWeights(
+		gAnimationPalette,
+		gVSAnimationOffset,
+		gAnimationPaletteWidth,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		positionL);
+	
+    output.positionHomogeneous = positionL;
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = gPSTextureIndex;
+
+    return output;
+}
+PSShadowMapPositionTexture VSSMPositionNormalTextureSkinnedI(VSVertexPositionNormalTextureSkinnedI input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+    ComputePositionWeights(
+		gAnimationPalette,
+		input.animationOffset,
+		gAnimationPaletteWidth,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		positionL);
+
+    output.positionHomogeneous = mul(positionL, input.localTransform);
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = input.textureIndex;
+
+    return output;
+}
+
+PSShadowMapPositionTexture VSSMPositionNormalTextureTangent(VSVertexPositionNormalTextureTangent input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    output.positionHomogeneous = float4(input.positionLocal, 1.0f);
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = gPSTextureIndex;
+
+    return output;
+}
+PSShadowMapPositionTexture VSSMPositionNormalTextureTangentI(VSVertexPositionNormalTextureTangentI input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), input.localTransform);
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = input.textureIndex;
+
+    return output;
+}
+PSShadowMapPositionTexture VSSMPositionNormalTextureTangentSkinned(VSVertexPositionNormalTextureTangentSkinned input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+    ComputePositionWeights(
+		gAnimationPalette,
+		gVSAnimationOffset,
+		gAnimationPaletteWidth,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		positionL);
+	
+    output.positionHomogeneous = positionL;
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = gPSTextureIndex;
+
+    return output;
+}
+PSShadowMapPositionTexture VSSMPositionNormalTextureTangentSkinnedI(VSVertexPositionNormalTextureTangentSkinnedI input)
+{
+    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+
+    float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+    ComputePositionWeights(
+		gAnimationPalette,
+		input.animationOffset,
+		gAnimationPaletteWidth,
+		input.weights,
+		input.boneIndices,
+		input.positionLocal,
+		positionL);
+
+    output.positionHomogeneous = mul(positionL, input.localTransform);
+    output.depth = output.positionHomogeneous;
+    output.tex = input.tex;
+    output.textureIndex = input.textureIndex;
+
     return output;
 }
 
@@ -109,39 +373,344 @@ void CascadedShadowMapsGenGS(triangle PSShadowMapPosition input[3] : SV_Position
     }
 }
 
-technique11 CascadedShadowMapsGen
+[maxvertexcount(9)]
+void CascadedShadowMapsTexturedGenGS(triangle PSShadowMapPositionTexture input[3] : SV_Position, inout TriangleStream<GSShadowMapTextured> outputStream)
+{
+    for (int iFace = 0; iFace < 3; iFace++)
+    {
+        GSShadowMapTextured output;
+
+        output.index = iFace;
+
+        for (int v = 0; v < 3; v++)
+        {
+            output.positionHomogeneous = mul(input[v].positionHomogeneous, gGSWorldViewProjection[iFace]);
+            output.depth = input[v].depth;
+            output.tex = input[v].tex;
+            output.textureIndex = input[v].textureIndex;
+
+            outputStream.Append(output);
+        }
+        outputStream.RestartStrip();
+    }
+}
+
+float4 PSDefault(GSShadowMapTextured input) : SV_Target
+{
+    float4 textureColor = gPSDiffuseMapArray.Sample(SamplerLinear, float3(input.tex, input.textureIndex));
+
+    if (textureColor.a > 0.8f)
+    {
+        float depthValue = input.depth.z / input.depth.w;
+
+        return float4(depthValue, depthValue, depthValue, 1.0f);
+    }
+    else
+    {
+        discard;
+
+        return 0.0f;
+    }
+}
+
+/**********************************************************************************************************
+OPAQUES
+**********************************************************************************************************/
+technique11 ShadowMapPositionColor
 {
     pass P0
     {
-        SetVertexShader(CompileShader(vs_5_0, CascadedShadowGenVS()));
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionColor()));
         SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
         SetPixelShader(NULL);
     }
 }
-technique11 CascadedShadowMapsGenI
+technique11 ShadowMapPositionColorI
 {
     pass P0
     {
-        SetVertexShader(CompileShader(vs_5_0, CascadedShadowGenVSI()));
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorI()));
         SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
         SetPixelShader(NULL);
     }
 }
-technique11 CascadedShadowMapsGenSkinned
+technique11 ShadowMapPositionColorSkinned
 {
     pass P0
     {
-        SetVertexShader(CompileShader(vs_5_0, CascadedShadowGenVSkinned()));
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorSkinned()));
         SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
         SetPixelShader(NULL);
     }
 }
-technique11 CascadedShadowMapsGenSkinnedI
+technique11 ShadowMapPositionColorSkinnedI
 {
     pass P0
     {
-        SetVertexShader(CompileShader(vs_5_0, CascadedShadowGenVSkinnedI()));
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionColorSkinnedI()));
         SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
         SetPixelShader(NULL);
+    }
+}
+
+technique11 ShadowMapPositionNormalColor
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColor()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionNormalColorI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionNormalColorSkinned
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorSkinned()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionNormalColorSkinnedI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalColorSkinnedI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+
+technique11 ShadowMapPositionTexture
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTexture()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionTextureI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionTextureSkinned
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinned()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionTextureSkinnedI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinnedI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+
+technique11 ShadowMapPositionNormalTexture
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTexture()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionNormalTextureI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionNormalTextureSkinned
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinned()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionNormalTextureSkinnedI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinnedI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+
+technique11 ShadowMapPositionNormalTextureTangent
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangent()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionNormalTextureTangentI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionNormalTextureTangentSkinned
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinned()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+technique11 ShadowMapPositionNormalTextureTangentSkinnedI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinnedI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsGenGS()));
+        SetPixelShader(NULL);
+    }
+}
+
+/**********************************************************************************************************
+TEXTURE TRANSPARENCY
+**********************************************************************************************************/
+technique11 ShadowMapPositionTextureTransparent
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTexture()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionTextureTransparentI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionTextureTransparentSkinned
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinned()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionTextureTransparentSkinnedI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionTextureSkinnedI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+
+technique11 ShadowMapPositionNormalTextureTransparent
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTexture()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTransparentI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTransparentSkinned
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinned()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTransparentSkinnedI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureSkinnedI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+
+technique11 ShadowMapPositionNormalTextureTangentTransparent
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangent()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTangentTransparentI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTangentTransparentSkinned
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinned()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
+    }
+}
+technique11 ShadowMapPositionNormalTextureTangentTransparentSkinnedI
+{
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSSMPositionNormalTextureTangentSkinnedI()));
+        SetGeometryShader(CompileShader(gs_5_0, CascadedShadowMapsTexturedGenGS()));
+        SetPixelShader(CompileShader(ps_5_0, PSDefault()));
     }
 }

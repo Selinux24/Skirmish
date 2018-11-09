@@ -12,20 +12,140 @@ namespace Engine.Effects
         #region Technique variables
 
         /// <summary>
-        /// Spot shadows
+        /// Position color drawing technique
         /// </summary>
-        protected readonly EngineEffectTechnique SpotShadowGen = null;
+        protected readonly EngineEffectTechnique ShadowMapPositionColor = null;
         /// <summary>
-        /// Point shadows
+        /// Position color drawing technique
         /// </summary>
-        protected readonly EngineEffectTechnique PointShadowGen = null;
+        protected readonly EngineEffectTechnique ShadowMapPositionColorInstanced = null;
         /// <summary>
-        /// Cascaded shadows
+        /// Position color skinned drawing technique
         /// </summary>
-        protected readonly EngineEffectTechnique CascadedShadowMapsGen = null;
-        protected readonly EngineEffectTechnique CascadedShadowMapsGenI = null;
-        protected readonly EngineEffectTechnique CascadedShadowMapsGenSkinned = null;
-        protected readonly EngineEffectTechnique CascadedShadowMapsGenSkinnedI = null;
+        protected readonly EngineEffectTechnique ShadowMapPositionColorSkinned = null;
+        /// <summary>
+        /// Position color skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionColorSkinnedInstanced = null;
+
+        /// <summary>
+        /// Position normal color drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalColor = null;
+        /// <summary>
+        /// Position normal color drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalColorInstanced = null;
+        /// <summary>
+        /// Position normal color skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalColorSkinned = null;
+        /// <summary>
+        /// Position normal color skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalColorSkinnedInstanced = null;
+
+        /// <summary>
+        /// Position texture drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionTexture = null;
+        /// <summary>
+        /// Position texture drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionTextureInstanced = null;
+        /// <summary>
+        /// Position texture skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionTextureSkinned = null;
+        /// <summary>
+        /// Position texture skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionTextureSkinnedInstanced = null;
+
+        /// <summary>
+        /// Position normal texture drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTexture = null;
+        /// <summary>
+        /// Position normal texture drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureInstanced = null;
+        /// <summary>
+        /// Position normal texture skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureSkinned = null;
+        /// <summary>
+        /// Position normal texture skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureSkinnedInstanced = null;
+
+        /// <summary>
+        /// Position normal texture tangent drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTangent = null;
+        /// <summary>
+        /// Position normal texture tangent drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTangentInstanced = null;
+        /// <summary>
+        /// Position normal texture tangent skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTangentSkinned = null;
+        /// <summary>
+        /// Position normal texture tangent skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTangentSkinnedInstanced = null;
+
+        /// <summary>
+        /// Position texture drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionTextureTransparent = null;
+        /// <summary>
+        /// Position texture drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionTextureTransparentInstanced = null;
+        /// <summary>
+        /// Position texture skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionTextureTransparentSkinned = null;
+        /// <summary>
+        /// Position texture skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionTextureTransparentSkinnedInstanced = null;
+
+        /// <summary>
+        /// Position normal texture drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTransparent = null;
+        /// <summary>
+        /// Position normal texture drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTransparentInstanced = null;
+        /// <summary>
+        /// Position normal texture skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTransparentSkinned = null;
+        /// <summary>
+        /// Position normal texture skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTransparentSkinnedInstanced = null;
+
+        /// <summary>
+        /// Position normal texture tangent drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTangentTransparent = null;
+        /// <summary>
+        /// Position normal texture tangent drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTangentTransparentInstanced = null;
+        /// <summary>
+        /// Position normal texture tangent skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTangentTransparentSkinned = null;
+        /// <summary>
+        /// Position normal texture tangent skinned drawing technique
+        /// </summary>
+        protected readonly EngineEffectTechnique ShadowMapPositionNormalTextureTangentTransparentSkinnedInstanced = null;
 
         #endregion
 
@@ -178,10 +298,45 @@ namespace Engine.Effects
         public EffectShadowCascade(Graphics graphics, byte[] effect, bool compile)
             : base(graphics, effect, compile)
         {
-            this.CascadedShadowMapsGen = this.Effect.GetTechniqueByName("CascadedShadowMapsGen");
-            this.CascadedShadowMapsGenI = this.Effect.GetTechniqueByName("CascadedShadowMapsGenI");
-            this.CascadedShadowMapsGenSkinned = this.Effect.GetTechniqueByName("CascadedShadowMapsGenSkinned");
-            this.CascadedShadowMapsGenSkinnedI = this.Effect.GetTechniqueByName("CascadedShadowMapsGenSkinnedI");
+            this.ShadowMapPositionColor = this.Effect.GetTechniqueByName("ShadowMapPositionColor");
+            this.ShadowMapPositionColorInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionColorI");
+            this.ShadowMapPositionColorSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionColorSkinned");
+            this.ShadowMapPositionColorSkinnedInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionColorSkinnedI");
+
+            this.ShadowMapPositionNormalColor = this.Effect.GetTechniqueByName("ShadowMapPositionNormalColor");
+            this.ShadowMapPositionNormalColorInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionNormalColorI");
+            this.ShadowMapPositionNormalColorSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalColorSkinned");
+            this.ShadowMapPositionNormalColorSkinnedInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionNormalColorSkinnedI");
+
+            this.ShadowMapPositionTexture = this.Effect.GetTechniqueByName("ShadowMapPositionTexture");
+            this.ShadowMapPositionTextureInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionTextureI");
+            this.ShadowMapPositionTextureSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionTextureSkinned");
+            this.ShadowMapPositionTextureSkinnedInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionTextureSkinnedI");
+
+            this.ShadowMapPositionNormalTexture = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTexture");
+            this.ShadowMapPositionNormalTextureInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureI");
+            this.ShadowMapPositionNormalTextureSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureSkinned");
+            this.ShadowMapPositionNormalTextureSkinnedInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureSkinnedI");
+
+            this.ShadowMapPositionNormalTextureTangent = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangent");
+            this.ShadowMapPositionNormalTextureTangentInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentI");
+            this.ShadowMapPositionNormalTextureTangentSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentSkinned");
+            this.ShadowMapPositionNormalTextureTangentSkinnedInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentSkinnedI");
+
+            this.ShadowMapPositionTextureTransparent = this.Effect.GetTechniqueByName("ShadowMapPositionTextureTransparent");
+            this.ShadowMapPositionTextureTransparentInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionTextureTransparentI");
+            this.ShadowMapPositionTextureTransparentSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionTextureTransparentSkinned");
+            this.ShadowMapPositionTextureTransparentSkinnedInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionTextureTransparentSkinnedI");
+
+            this.ShadowMapPositionNormalTextureTransparent = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTransparent");
+            this.ShadowMapPositionNormalTextureTransparentInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTransparentI");
+            this.ShadowMapPositionNormalTextureTransparentSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTransparentSkinned");
+            this.ShadowMapPositionNormalTextureTransparentSkinnedInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTransparentSkinnedI");
+
+            this.ShadowMapPositionNormalTextureTangentTransparent = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentTransparent");
+            this.ShadowMapPositionNormalTextureTangentTransparentInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentTransparentI");
+            this.ShadowMapPositionNormalTextureTangentTransparentSkinned = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentTransparentSkinned");
+            this.ShadowMapPositionNormalTextureTangentTransparentSkinnedInstanced = this.Effect.GetTechniqueByName("ShadowMapPositionNormalTextureTangentTransparentSkinnedI");
 
             this.animationPaletteWidth = this.Effect.GetVariableScalar("gAnimationPaletteWidth");
             this.animationPalette = this.Effect.GetVariableTexture("gAnimationPalette");
@@ -203,36 +358,55 @@ namespace Engine.Effects
             bool instanced,
             bool transparent)
         {
+            if (transparent)
+            {
+                return GetTechniqueTransparent(vertexType, instanced);
+            }
+            else
+            {
+                return GetTechniqueOpaque(vertexType, instanced);
+            }
+        }
+        /// <summary>
+        /// Get technique by vertex type for opaque objects
+        /// </summary>
+        /// <param name="vertexType">VertexType</param>
+        /// <param name="instanced">Use instancing data</param>
+        /// <returns>Returns the technique to process the specified vertex type</returns>
+        private EngineEffectTechnique GetTechniqueOpaque(
+            VertexTypes vertexType,
+            bool instanced)
+        {
             if (!instanced)
             {
                 switch (vertexType)
                 {
                     case VertexTypes.PositionColor:
-                        return this.CascadedShadowMapsGen;
+                        return this.ShadowMapPositionColor;
                     case VertexTypes.PositionColorSkinned:
-                        return this.CascadedShadowMapsGenSkinned;
+                        return this.ShadowMapPositionColorSkinned;
 
                     case VertexTypes.PositionTexture:
-                        return this.CascadedShadowMapsGen;
+                        return this.ShadowMapPositionTexture;
                     case VertexTypes.PositionTextureSkinned:
-                        return this.CascadedShadowMapsGenSkinned;
+                        return this.ShadowMapPositionTextureSkinned;
 
                     case VertexTypes.PositionNormalColor:
-                        return this.CascadedShadowMapsGen;
+                        return this.ShadowMapPositionNormalColor;
                     case VertexTypes.PositionNormalColorSkinned:
-                        return this.CascadedShadowMapsGenSkinned;
+                        return this.ShadowMapPositionNormalColorSkinned;
 
                     case VertexTypes.PositionNormalTexture:
-                        return this.CascadedShadowMapsGen;
+                        return this.ShadowMapPositionNormalTexture;
                     case VertexTypes.PositionNormalTextureSkinned:
-                        return this.CascadedShadowMapsGenSkinned;
+                        return this.ShadowMapPositionNormalTextureSkinned;
 
                     case VertexTypes.PositionNormalTextureTangent:
-                        return this.CascadedShadowMapsGen;
+                        return this.ShadowMapPositionNormalTextureTangent;
                     case VertexTypes.PositionNormalTextureTangentSkinned:
-                        return this.CascadedShadowMapsGenSkinned;
+                        return this.ShadowMapPositionNormalTextureTangentSkinned;
                     default:
-                        throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Transparent: {2}", vertexType, instanced, transparent));
+                        throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Opaque", vertexType, instanced));
                 }
             }
             else
@@ -240,31 +414,106 @@ namespace Engine.Effects
                 switch (vertexType)
                 {
                     case VertexTypes.PositionColor:
-                        return this.CascadedShadowMapsGenI;
+                        return this.ShadowMapPositionColorInstanced;
                     case VertexTypes.PositionColorSkinned:
-                        return this.CascadedShadowMapsGenSkinnedI;
+                        return this.ShadowMapPositionColorSkinnedInstanced;
 
                     case VertexTypes.PositionTexture:
-                        return this.CascadedShadowMapsGenI;
+                        return this.ShadowMapPositionTextureInstanced;
                     case VertexTypes.PositionTextureSkinned:
-                        return this.CascadedShadowMapsGenSkinnedI;
+                        return this.ShadowMapPositionTextureSkinnedInstanced;
 
                     case VertexTypes.PositionNormalColor:
-                        return this.CascadedShadowMapsGenI;
+                        return this.ShadowMapPositionNormalColorInstanced;
                     case VertexTypes.PositionNormalColorSkinned:
-                        return this.CascadedShadowMapsGenSkinnedI;
+                        return this.ShadowMapPositionNormalColorSkinnedInstanced;
 
                     case VertexTypes.PositionNormalTexture:
-                        return this.CascadedShadowMapsGenI;
+                        return this.ShadowMapPositionNormalTextureInstanced;
                     case VertexTypes.PositionNormalTextureSkinned:
-                        return this.CascadedShadowMapsGenSkinnedI;
+                        return this.ShadowMapPositionNormalTextureSkinnedInstanced;
 
                     case VertexTypes.PositionNormalTextureTangent:
-                        return this.CascadedShadowMapsGenI;
+                        return this.ShadowMapPositionNormalTextureTangentInstanced;
                     case VertexTypes.PositionNormalTextureTangentSkinned:
-                        return this.CascadedShadowMapsGenSkinnedI;
+                        return this.ShadowMapPositionNormalTextureTangentSkinnedInstanced;
                     default:
-                        throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Transparent: {2}", vertexType, instanced, transparent));
+                        throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Opaque", vertexType, instanced));
+                }
+            }
+        }
+        /// <summary>
+        /// Get technique by vertex type for transparent objects
+        /// </summary>
+        /// <param name="vertexType">VertexType</param>
+        /// <param name="instanced">Use instancing data</param>
+        /// <returns>Returns the technique to process the specified vertex type</returns>
+        private EngineEffectTechnique GetTechniqueTransparent(
+            VertexTypes vertexType,
+            bool instanced)
+        {
+            if (!instanced)
+            {
+                switch (vertexType)
+                {
+                    case VertexTypes.PositionColor:
+                        return this.ShadowMapPositionColor;
+                    case VertexTypes.PositionColorSkinned:
+                        return this.ShadowMapPositionColorSkinned;
+
+                    case VertexTypes.PositionTexture:
+                        return this.ShadowMapPositionTextureTransparent;
+                    case VertexTypes.PositionTextureSkinned:
+                        return this.ShadowMapPositionTextureTransparentSkinned;
+
+                    case VertexTypes.PositionNormalColor:
+                        return this.ShadowMapPositionNormalColor;
+                    case VertexTypes.PositionNormalColorSkinned:
+                        return this.ShadowMapPositionNormalColorSkinned;
+
+                    case VertexTypes.PositionNormalTexture:
+                        return this.ShadowMapPositionNormalTextureTransparent;
+                    case VertexTypes.PositionNormalTextureSkinned:
+                        return this.ShadowMapPositionNormalTextureTransparentSkinned;
+
+                    case VertexTypes.PositionNormalTextureTangent:
+                        return this.ShadowMapPositionNormalTextureTangentTransparent;
+                    case VertexTypes.PositionNormalTextureTangentSkinned:
+                        return this.ShadowMapPositionNormalTextureTangentTransparentSkinned;
+                    default:
+                        throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Transparent", vertexType, instanced));
+                }
+            }
+            else
+            {
+                switch (vertexType)
+                {
+                    case VertexTypes.PositionColor:
+                        return this.ShadowMapPositionColorInstanced;
+                    case VertexTypes.PositionColorSkinned:
+                        return this.ShadowMapPositionColorSkinnedInstanced;
+
+                    case VertexTypes.PositionTexture:
+                        return this.ShadowMapPositionTextureTransparentInstanced;
+                    case VertexTypes.PositionTextureSkinned:
+                        return this.ShadowMapPositionTextureTransparentSkinnedInstanced;
+
+                    case VertexTypes.PositionNormalColor:
+                        return this.ShadowMapPositionNormalColorInstanced;
+                    case VertexTypes.PositionNormalColorSkinned:
+                        return this.ShadowMapPositionNormalColorSkinnedInstanced;
+
+                    case VertexTypes.PositionNormalTexture:
+                        return this.ShadowMapPositionNormalTextureTransparentInstanced;
+                    case VertexTypes.PositionNormalTextureSkinned:
+                        return this.ShadowMapPositionNormalTextureTransparentSkinnedInstanced;
+
+                    case VertexTypes.PositionNormalTextureTangent:
+                        return this.ShadowMapPositionNormalTextureTangentTransparentInstanced;
+                    case VertexTypes.PositionNormalTextureTangentSkinned:
+                        return this.ShadowMapPositionNormalTextureTangentTransparentSkinnedInstanced;
+                    default:
+                        throw new EngineException(string.Format("Bad vertex type for effect. {0}; Instaced: {1}; Transparent", vertexType, instanced));
                 }
             }
         }

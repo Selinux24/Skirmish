@@ -520,6 +520,7 @@ namespace Heightmap
                 Name = "Grass",
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map.png",
+                CastShadow = false,
                 Material = new MaterialDescription()
                 {
                     DiffuseColor = Color.Gray,
@@ -578,6 +579,7 @@ namespace Heightmap
                 Name = "Flowers",
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map_flowers.png",
+                CastShadow = false,
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = new[] { "flower0.dds" },

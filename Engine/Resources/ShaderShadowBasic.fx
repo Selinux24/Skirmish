@@ -4,6 +4,7 @@
 cbuffer cbGlobals : register(b0)
 {
 	uint gAnimationPaletteWidth;
+    uint3 PAD01;
 };
 Texture2D gAnimationPalette : register(t0);
 
