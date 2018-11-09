@@ -220,6 +220,7 @@
     <Compile Include="Effects\EffectWaterState.cs" />
     <Compile Include="ISceneLight.cs" />
     <Compile Include="ISceneLightSpot.cs" />
+    <Compile Include="PathFinding\RecastNavigation\SteerTarget.cs" />
     <Compile Include="ShadowMapPoint.cs" />
     <Compile Include="CullingVolumeCamera.cs" />
     <Compile Include="CullingVolumeAABB.cs" />
