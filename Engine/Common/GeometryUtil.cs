@@ -73,89 +73,177 @@ namespace Engine.Common
                     uint indexCRow = (((y + 0) * offset) * (fullSide + 1)) + (x * offset);
                     uint indexNRow = (((y + 1) * offset) * (fullSide + 1)) + (x * offset);
 
+                    bool firstRow = y == 1;
+                    bool lastRow = y == side - 1;
+                    bool firstColumn = x == 1;
+                    bool lastColumn = x == side - 1;
+
                     //Top side
-                    if (y == 1 && topSide)
-                    {
-                        //Top
-                        indices.Add(indexCRow);
-                        indices.Add(indexPRow - (1 * offset));
-                        indices.Add(indexPRow + (1 * offset));
-                    }
-                    else
-                    {
-                        //Top left
-                        indices.Add(indexCRow);
-                        indices.Add(indexPRow - (1 * offset));
-                        indices.Add(indexPRow);
-                        //Top right
-                        indices.Add(indexCRow);
-                        indices.Add(indexPRow);
-                        indices.Add(indexPRow + (1 * offset));
-                    }
+                    var top = ComputeTopSide(firstRow, topSide, offset, indexPRow, indexCRow);
 
                     //Bottom side
-                    if (y == side - 1 && bottomSide)
-                    {
-                        //Bottom only
-                        indices.Add(indexCRow);
-                        indices.Add(indexNRow + (1 * offset));
-                        indices.Add(indexNRow - (1 * offset));
-                    }
-                    else
-                    {
-                        //Bottom left
-                        indices.Add(indexCRow);
-                        indices.Add(indexNRow);
-                        indices.Add(indexNRow - (1 * offset));
-                        //Bottom right
-                        indices.Add(indexCRow);
-                        indices.Add(indexNRow + (1 * offset));
-                        indices.Add(indexNRow);
-                    }
+                    var bottom = ComputeBottomSide(lastRow, bottomSide, offset, indexCRow, indexNRow);
 
                     //Left side
-                    if (x == 1 && leftSide)
-                    {
-                        //Left only
-                        indices.Add(indexCRow);
-                        indices.Add(indexNRow - (1 * offset));
-                        indices.Add(indexPRow - (1 * offset));
-                    }
-                    else
-                    {
-                        //Left top
-                        indices.Add(indexCRow);
-                        indices.Add(indexCRow - (1 * offset));
-                        indices.Add(indexPRow - (1 * offset));
-                        //Left bottom
-                        indices.Add(indexCRow);
-                        indices.Add(indexNRow - (1 * offset));
-                        indices.Add(indexCRow - (1 * offset));
-                    }
+                    var left = ComputeLeftSide(firstColumn, leftSide, offset, indexPRow, indexCRow, indexNRow);
 
                     //Right side
-                    if (x == side - 1 && rightSide)
-                    {
-                        //Right only
-                        indices.Add(indexCRow);
-                        indices.Add(indexPRow + (1 * offset));
-                        indices.Add(indexNRow + (1 * offset));
-                    }
-                    else
-                    {
-                        //Right top
-                        indices.Add(indexCRow);
-                        indices.Add(indexPRow + (1 * offset));
-                        indices.Add(indexCRow + (1 * offset));
-                        //Right bottom
-                        indices.Add(indexCRow);
-                        indices.Add(indexCRow + (1 * offset));
-                        indices.Add(indexNRow + (1 * offset));
-                    }
+                    var right = ComputeRightSide(lastColumn, rightSide, offset, indexPRow, indexCRow, indexNRow);
+
+                    indices.AddRange(top);
+                    indices.AddRange(bottom);
+                    indices.AddRange(left);
+                    indices.AddRange(right);
                 }
             }
 
             return indices.ToArray();
+        }
+        /// <summary>
+        /// Computes the top side indexes for triangle soup quad
+        /// </summary>
+        /// <param name="firstRow">It's the first row</param>
+        /// <param name="topSide">It's the top side</param>
+        /// <param name="offset">Index offset</param>
+        /// <param name="indexPRow">P index</param>
+        /// <param name="indexCRow">C index</param>
+        /// <returns>Returns the indexes list</returns>
+        private static uint[] ComputeTopSide(bool firstRow, bool topSide, uint offset, uint indexPRow, uint indexCRow)
+        {
+            if (firstRow && topSide)
+            {
+                return new[]
+                {
+                    //Top
+                    indexCRow,
+                    indexPRow - (1 * offset),
+                    indexPRow + (1 * offset),
+                };
+            }
+            else
+            {
+                return new[]
+                {
+                    //Top left
+                    indexCRow,
+                    indexPRow - (1 * offset),
+                    indexPRow,
+                    //Top right
+                    indexCRow,
+                    indexPRow,
+                    indexPRow + (1 * offset),
+                };
+            }
+        }
+        /// <summary>
+        /// Computes the bottom side indexes for triangle soup quad
+        /// </summary>
+        /// <param name="lastRow">It's the last row</param>
+        /// <param name="bottomSide">It's the bottom side</param>
+        /// <param name="offset">Index offset</param>
+        /// <param name="indexCRow">C index</param>
+        /// <param name="indexNRow">N index</param>
+        /// <returns>Returns the indexes list</returns>
+        private static uint[] ComputeBottomSide(bool lastRow, bool bottomSide, uint offset, uint indexCRow, uint indexNRow)
+        {
+            if (lastRow && bottomSide)
+            {
+                return new[]
+                {
+                    //Bottom only
+                    indexCRow,
+                    indexNRow + (1 * offset),
+                    indexNRow - (1 * offset),
+                };
+            }
+            else
+            {
+                return new[]
+                {
+                    //Bottom left
+                    indexCRow,
+                    indexNRow,
+                    indexNRow - (1 * offset),
+                    //Bottom right
+                    indexCRow,
+                    indexNRow + (1 * offset),
+                    indexNRow,
+                };
+            }
+        }
+        /// <summary>
+        /// Computes the left side indexes for triangle soup quad
+        /// </summary>
+        /// <param name="firstColumn">It's the first column</param>
+        /// <param name="leftSide">It's the left side</param>
+        /// <param name="offset">Index offset</param>
+        /// <param name="indexPRow">P index</param>
+        /// <param name="indexCRow">C index</param>
+        /// <param name="indexNRow">N index</param>
+        /// <returns>Returns the indexes list</returns>
+        private static uint[] ComputeLeftSide(bool firstColumn, bool leftSide, uint offset, uint indexPRow, uint indexCRow, uint indexNRow)
+        {
+            if (firstColumn && leftSide)
+            {
+                return new[]
+                {
+                    //Left only
+                    indexCRow,
+                    indexNRow - (1 * offset),
+                    indexPRow - (1 * offset),
+                };
+            }
+            else
+            {
+                return new[]
+                {
+                    //Left top
+                    indexCRow,
+                    indexCRow - (1 * offset),
+                    indexPRow - (1 * offset),
+                    //Left bottom
+                    indexCRow,
+                    indexNRow - (1 * offset),
+                    indexCRow - (1 * offset),
+                };
+            }
+        }
+        /// <summary>
+        /// Computes the right side indexes for triangle soup quad
+        /// </summary>
+        /// <param name="lastColumn">It's the last column</param>
+        /// <param name="rightSide">It's the right side</param>
+        /// <param name="offset">Index offset</param>
+        /// <param name="indexPRow">P index</param>
+        /// <param name="indexCRow">C index</param>
+        /// <param name="indexNRow">N index</param>
+        /// <returns>Returns the indexes list</returns>
+        private static uint[] ComputeRightSide(bool lastColumn, bool rightSide, uint offset, uint indexPRow, uint indexCRow, uint indexNRow)
+        {
+            if (lastColumn && rightSide)
+            {
+                return new[]
+                {
+                    //Right only
+                    indexCRow,
+                    indexPRow + (1 * offset),
+                    indexNRow + (1 * offset),
+                };
+            }
+            else
+            {
+                return new[]
+                {
+                    //Right top
+                    indexCRow,
+                    indexPRow + (1 * offset),
+                    indexCRow + (1 * offset),
+                    //Right bottom
+                    indexCRow,
+                    indexCRow + (1 * offset),
+                    indexNRow + (1 * offset),
+                };
+            }
         }
         /// <summary>
         /// Toggle coordinates from left-handed to right-handed and vice versa
