@@ -766,211 +766,15 @@ namespace Heightmap
         {
             Random posRnd = new Random(1024);
 
-            BoundingBox bbox = this.terrain.Instance.GetBoundingBox();
+            var bbox = this.terrain.Instance.GetBoundingBox();
 
             this.SetGround(this.terrain, true);
 
-            {
-                #region Rocks
-
-                for (int i = 0; i < this.rocks.Count; i++)
-                {
-                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
-
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
-                    {
-                        var scale = 1f;
-                        if (i < 5)
-                        {
-                            scale = posRnd.NextFloat(10f, 30f);
-                        }
-                        else if (i < 30)
-                        {
-                            scale = posRnd.NextFloat(2f, 5f);
-                        }
-                        else
-                        {
-                            scale = posRnd.NextFloat(0.1f, 1f);
-                        }
-
-                        this.rocks.Instance[i].Manipulator.SetPosition(r.Position, true);
-                        this.rocks.Instance[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
-                        this.rocks.Instance[i].Manipulator.SetScale(scale, true);
-                    }
-                }
-
-                #endregion
-            }
-
-            {
-                #region Forest
-
-                bbox = new BoundingBox(new Vector3(-400, 0, -400), new Vector3(-1000, 1000, -1000));
-
-                for (int i = 0; i < this.trees.Count; i++)
-                {
-                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
-
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
-                    {
-                        var treePosition = r.Position;
-                        treePosition.Y -= posRnd.NextFloat(1f, 5f);
-
-                        this.trees.Instance[i].Manipulator.SetPosition(treePosition, true);
-                        this.trees.Instance[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0, true);
-                        this.trees.Instance[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
-                    }
-                }
-
-                bbox = new BoundingBox(new Vector3(-300, 0, -300), new Vector3(-1000, 1000, -1000));
-
-                for (int i = 0; i < this.trees2.Count; i++)
-                {
-                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
-
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
-                    {
-                        var treePosition = r.Position;
-                        treePosition.Y -= posRnd.NextFloat(0f, 2f);
-
-                        this.trees2.Instance[i].Manipulator.SetPosition(treePosition, true);
-                        this.trees2.Instance[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.15f, MathUtil.PiOverFour * 0.15f), 0, true);
-                        this.trees2.Instance[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
-                    }
-                }
-
-                #endregion
-            }
-
-            {
-                #region Watch tower
-
-                if (this.FindTopGroundPosition(-40, -40, out PickingResult<Triangle> r))
-                {
-                    this.watchTower.Transform.SetPosition(r.Position, true);
-                    this.watchTower.Transform.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
-                    this.watchTower.Transform.SetScale(1.5f, true);
-                }
-
-                #endregion
-            }
-
-            {
-                #region Containers
-
-                var positions = new[]
-                {
-                    new Vector3(85,0,-000),
-                    new Vector3(75,0,-030),
-                    new Vector3(95,0,-060),
-                    new Vector3(75,0,-090),
-                    new Vector3(65,0,-120),
-                };
-
-                for (int i = 0; i < this.containers.Count; i++)
-                {
-                    var position = positions[i];
-
-                    if (this.FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res))
-                    {
-                        var pos = res.Position;
-                        pos.Y -= 0.5f;
-
-                        this.containers.Instance[i].Manipulator.SetScale(5);
-                        this.containers.Instance[i].Manipulator.SetPosition(pos);
-                        this.containers.Instance[i].Manipulator.SetRotation(MathUtil.Pi / 16f * (i - 2), 0, 0);
-                        this.containers.Instance[i].Manipulator.SetNormal(res.Item.Normal);
-                        this.containers.Instance[i].Manipulator.UpdateInternals(true);
-                    }
-
-                    this.containers.Instance[i].TextureIndex = (uint)i;
-                }
-
-                #endregion
-            }
-
-            {
-                #region Torchs
-
-                if (this.FindTopGroundPosition(15, 15, out PickingResult<Triangle> r))
-                {
-                    var position = r.Position;
-
-                    this.torchs.Instance[0].Manipulator.SetScale(1f, 1f, 1f, true);
-                    this.torchs.Instance[0].Manipulator.SetPosition(position, true);
-                    var tbbox = this.torchs.Instance[0].GetBoundingBox();
-
-                    position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y);
-
-                    this.spotLight1 = new SceneLightSpot(
-                        "Red Spot",
-                        true,
-                        Color.Red,
-                        Color.Red,
-                        true,
-                        position,
-                        Vector3.Normalize(Vector3.One * -1f),
-                        25,
-                        25,
-                        100);
-
-                    this.spotLight2 = new SceneLightSpot(
-                        "Blue Spot",
-                        true,
-                        Color.Blue,
-                        Color.Blue,
-                        true,
-                        position,
-                        Vector3.Normalize(Vector3.One * -1f),
-                        25,
-                        25,
-                        100);
-
-                    this.Lights.Add(this.spotLight1);
-                    this.Lights.Add(this.spotLight2);
-                }
-
-                SceneLightPoint[] torchLights = new SceneLightPoint[this.torchs.Count - 1];
-                for (int i = 1; i < this.torchs.Count; i++)
-                {
-                    Color color = new Color(
-                        rnd.NextFloat(0, 1),
-                        rnd.NextFloat(0, 1),
-                        rnd.NextFloat(0, 1),
-                        1);
-
-                    Vector3 position = new Vector3(
-                        rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
-                        0f,
-                        rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
-
-                    this.FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res);
-
-                    var pos = res.Position;
-                    this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
-                    this.torchs.Instance[i].Manipulator.SetPosition(pos, true);
-                    BoundingBox tbbox = this.torchs.Instance[i].GetBoundingBox();
-
-                    pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
-
-                    torchLights[i - 1] = new SceneLightPoint(
-                        string.Format("Torch {0}", i),
-                        true,
-                        color,
-                        color,
-                        true,
-                        pos,
-                        4f,
-                        5f);
-
-                    this.Lights.Add(torchLights[i - 1]);
-
-                    this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f });
-                    this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
-                }
-
-                #endregion
-            }
+            this.SetRocksPosition(posRnd, bbox);
+            this.SetForestPosition(posRnd);
+            this.SetWatchTowerPosition();
+            this.SetContainersPosition();
+            this.SetTorchsPosition(posRnd, bbox);
 
             this.AttachToGround(this.rocks, false);
             this.AttachToGround(this.trees, false);
@@ -978,90 +782,277 @@ namespace Heightmap
             this.AttachToGround(this.watchTower, true);
             this.AttachToGround(this.torchs, false);
 
-            //M24
-            {
-                var hPositions = new[]
-                {
-                    new Vector3(-100, -10, 0),
-                    new Vector3(-180, -10, 0),
-                    new Vector3(-260, -10, 0),
-                };
-
-                for (int i = 0; i < hPositions.Length; i++)
-                {
-                    if (this.FindTopGroundPosition(hPositions[i].X, hPositions[i].Y, out PickingResult<Triangle> r))
-                    {
-                        this.helicopterI.Instance[i].Manipulator.SetPosition(r.Position, true);
-                        this.helicopterI.Instance[i].Manipulator.SetRotation(hPositions[i].Z, 0, 0, true);
-                        this.helicopterI.Instance[i].Manipulator.SetNormal(r.Item.Normal);
-
-                        this.helicopterI.Instance[i].AnimationController.TimeDelta = 0.5f * (i + 1);
-                        this.helicopterI.Instance[i].AnimationController.AddPath(this.animations["m24_fly"]);
-                        this.helicopterI.Instance[i].AnimationController.Start();
-                    }
-                }
-            }
-
-            //Bradley
-            {
-                var bPositions = new[]
-                {
-                    new Vector3(-100, 220, MathUtil.Pi * +0.3f),
-                    new Vector3(-50, 210, MathUtil.Pi * +0.15f),
-                    new Vector3(0, 200, MathUtil.Pi * 0),
-                    new Vector3(50, 210, MathUtil.Pi * -0.15f),
-                    new Vector3(100, 220, MathUtil.Pi * -0.3f),
-                };
-
-                for (int i = 0; i < bPositions.Length; i++)
-                {
-                    if (this.FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Triangle> r))
-                    {
-                        this.bradleyI.Instance[i].Manipulator.SetScale(1.2f, true);
-                        this.bradleyI.Instance[i].Manipulator.SetPosition(r.Position, true);
-                        this.bradleyI.Instance[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
-                        this.bradleyI.Instance[i].Manipulator.SetNormal(r.Item.Normal);
-                    }
-                }
-            }
+            this.SetM24Position();
+            this.SetBradleyPosition();
 
             this.AttachToGround(this.helicopterI, true);
             this.AttachToGround(this.bradleyI, true);
 
             //Player soldier
-            {
-                if (this.FindAllGroundPosition(-40, -40, out PickingResult<Triangle>[] res))
-                {
-                    this.soldier.Transform.SetPosition(res[2].Position, true);
-                    this.soldier.Transform.SetRotation(MathUtil.Pi, 0, 0, true);
-                }
+            this.SetPlayerPosition();
 
-                this.soldier.Instance.AnimationController.AddPath(this.animations["soldier_idle"]);
-                this.soldier.Instance.AnimationController.Start();
+            //NPC soldiers
+            this.SetSoldiersPosition();
+        }
+        private void SetRocksPosition(Random posRnd, BoundingBox bbox)
+        {
+            for (int i = 0; i < this.rocks.Count; i++)
+            {
+                var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
+
+                if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                {
+                    var scale = 1f;
+                    if (i < 5)
+                    {
+                        scale = posRnd.NextFloat(10f, 30f);
+                    }
+                    else if (i < 30)
+                    {
+                        scale = posRnd.NextFloat(2f, 5f);
+                    }
+                    else
+                    {
+                        scale = posRnd.NextFloat(0.1f, 1f);
+                    }
+
+                    this.rocks.Instance[i].Manipulator.SetPosition(r.Position, true);
+                    this.rocks.Instance[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);
+                    this.rocks.Instance[i].Manipulator.SetScale(scale, true);
+                }
+            }
+        }
+        private void SetForestPosition(Random posRnd)
+        {
+            BoundingBox bbox = new BoundingBox(new Vector3(-400, 0, -400), new Vector3(-1000, 1000, -1000));
+
+            for (int i = 0; i < this.trees.Count; i++)
+            {
+                var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
+
+                if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                {
+                    var treePosition = r.Position;
+                    treePosition.Y -= posRnd.NextFloat(1f, 5f);
+
+                    this.trees.Instance[i].Manipulator.SetPosition(treePosition, true);
+                    this.trees.Instance[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.5f, MathUtil.PiOverFour * 0.5f), 0, true);
+                    this.trees.Instance[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                }
             }
 
-            //Instanced soldiers
+            bbox = new BoundingBox(new Vector3(-300, 0, -300), new Vector3(-1000, 1000, -1000));
+
+            for (int i = 0; i < this.trees2.Count; i++)
             {
-                Vector3[] iPos = new Vector3[]
+                var pos = this.GetRandomPoint(posRnd, Vector3.Zero, bbox);
+
+                if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
-                    new Vector3(4, -2, MathUtil.PiOverFour),
-                    new Vector3(5, -5, MathUtil.PiOverTwo),
-                    new Vector3(-4, -2, -MathUtil.PiOverFour),
-                    new Vector3(-5, -5, -MathUtil.PiOverTwo),
+                    var treePosition = r.Position;
+                    treePosition.Y -= posRnd.NextFloat(0f, 2f);
+
+                    this.trees2.Instance[i].Manipulator.SetPosition(treePosition, true);
+                    this.trees2.Instance[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(-MathUtil.PiOverFour * 0.15f, MathUtil.PiOverFour * 0.15f), 0, true);
+                    this.trees2.Instance[i].Manipulator.SetScale(posRnd.NextFloat(1.5f, 2.5f), true);
+                }
+            }
+        }
+        private void SetWatchTowerPosition()
+        {
+            if (this.FindTopGroundPosition(-40, -40, out PickingResult<Triangle> r))
+            {
+                this.watchTower.Transform.SetPosition(r.Position, true);
+                this.watchTower.Transform.SetRotation(MathUtil.Pi / 3f, 0, 0, true);
+                this.watchTower.Transform.SetScale(1.5f, true);
+            }
+        }
+        private void SetContainersPosition()
+        {
+            var positions = new[]
+            {
+                    new Vector3(85,0,-000),
+                    new Vector3(75,0,-030),
+                    new Vector3(95,0,-060),
+                    new Vector3(75,0,-090),
+                    new Vector3(65,0,-120),
                 };
 
-                for (int i = 0; i < 4; i++)
-                {
-                    if (this.FindTopGroundPosition(iPos[i].X, iPos[i].Y, out PickingResult<Triangle> r))
-                    {
-                        this.troops.Instance[i].Manipulator.SetPosition(r.Position, true);
-                        this.troops.Instance[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
-                        this.troops.Instance[i].TextureIndex = 1;
+            for (int i = 0; i < this.containers.Count; i++)
+            {
+                var position = positions[i];
 
-                        this.troops.Instance[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
-                        this.troops.Instance[i].AnimationController.AddPath(this.animations["soldier_idle"]);
-                        this.troops.Instance[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
-                    }
+                if (this.FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res))
+                {
+                    var pos = res.Position;
+                    pos.Y -= 0.5f;
+
+                    this.containers.Instance[i].Manipulator.SetScale(5);
+                    this.containers.Instance[i].Manipulator.SetPosition(pos);
+                    this.containers.Instance[i].Manipulator.SetRotation(MathUtil.Pi / 16f * (i - 2), 0, 0);
+                    this.containers.Instance[i].Manipulator.SetNormal(res.Item.Normal);
+                    this.containers.Instance[i].Manipulator.UpdateInternals(true);
+                }
+
+                this.containers.Instance[i].TextureIndex = (uint)i;
+            }
+        }
+        private void SetTorchsPosition(Random posRnd, BoundingBox bbox)
+        {
+            if (this.FindTopGroundPosition(15, 15, out PickingResult<Triangle> r))
+            {
+                var position = r.Position;
+
+                this.torchs.Instance[0].Manipulator.SetScale(1f, 1f, 1f, true);
+                this.torchs.Instance[0].Manipulator.SetPosition(position, true);
+                var tbbox = this.torchs.Instance[0].GetBoundingBox();
+
+                position.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y);
+
+                this.spotLight1 = new SceneLightSpot(
+                    "Red Spot",
+                    true,
+                    Color.Red,
+                    Color.Red,
+                    true,
+                    position,
+                    Vector3.Normalize(Vector3.One * -1f),
+                    25,
+                    25,
+                    100);
+
+                this.spotLight2 = new SceneLightSpot(
+                    "Blue Spot",
+                    true,
+                    Color.Blue,
+                    Color.Blue,
+                    true,
+                    position,
+                    Vector3.Normalize(Vector3.One * -1f),
+                    25,
+                    25,
+                    100);
+
+                this.Lights.Add(this.spotLight1);
+                this.Lights.Add(this.spotLight2);
+            }
+
+            SceneLightPoint[] torchLights = new SceneLightPoint[this.torchs.Count - 1];
+            for (int i = 1; i < this.torchs.Count; i++)
+            {
+                Color color = new Color(
+                    posRnd.NextFloat(0, 1),
+                    posRnd.NextFloat(0, 1),
+                    posRnd.NextFloat(0, 1),
+                    1);
+
+                Vector3 position = new Vector3(
+                    posRnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
+                    0f,
+                    posRnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
+
+                this.FindTopGroundPosition(position.X, position.Z, out PickingResult<Triangle> res);
+
+                var pos = res.Position;
+                this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
+                this.torchs.Instance[i].Manipulator.SetPosition(pos, true);
+                BoundingBox tbbox = this.torchs.Instance[i].GetBoundingBox();
+
+                pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
+
+                torchLights[i - 1] = new SceneLightPoint(
+                    string.Format("Torch {0}", i),
+                    true,
+                    color,
+                    color,
+                    true,
+                    pos,
+                    4f,
+                    5f);
+
+                this.Lights.Add(torchLights[i - 1]);
+
+                this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.1f });
+                this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, new ParticleEmitter() { Position = pos, InfiniteDuration = true, EmissionRate = 0.5f });
+            }
+        }
+        private void SetM24Position()
+        {
+            var hPositions = new[]
+            {
+                new Vector3(-100, -10, 0),
+                new Vector3(-180, -10, 0),
+                new Vector3(-260, -10, 0),
+            };
+
+            for (int i = 0; i < hPositions.Length; i++)
+            {
+                if (this.FindTopGroundPosition(hPositions[i].X, hPositions[i].Y, out PickingResult<Triangle> r))
+                {
+                    this.helicopterI.Instance[i].Manipulator.SetPosition(r.Position, true);
+                    this.helicopterI.Instance[i].Manipulator.SetRotation(hPositions[i].Z, 0, 0, true);
+                    this.helicopterI.Instance[i].Manipulator.SetNormal(r.Item.Normal);
+
+                    this.helicopterI.Instance[i].AnimationController.TimeDelta = 0.5f * (i + 1);
+                    this.helicopterI.Instance[i].AnimationController.AddPath(this.animations["m24_fly"]);
+                    this.helicopterI.Instance[i].AnimationController.Start();
+                }
+            }
+        }
+        private void SetBradleyPosition()
+        {
+            var bPositions = new[]
+            {
+                new Vector3(-100, 220, MathUtil.Pi * +0.3f),
+                new Vector3(-50, 210, MathUtil.Pi * +0.15f),
+                new Vector3(0, 200, MathUtil.Pi * 0),
+                new Vector3(50, 210, MathUtil.Pi * -0.15f),
+                new Vector3(100, 220, MathUtil.Pi * -0.3f),
+            };
+
+            for (int i = 0; i < bPositions.Length; i++)
+            {
+                if (this.FindTopGroundPosition(bPositions[i].X, bPositions[i].Y, out PickingResult<Triangle> r))
+                {
+                    this.bradleyI.Instance[i].Manipulator.SetScale(1.2f, true);
+                    this.bradleyI.Instance[i].Manipulator.SetPosition(r.Position, true);
+                    this.bradleyI.Instance[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
+                    this.bradleyI.Instance[i].Manipulator.SetNormal(r.Item.Normal);
+                }
+            }
+        }
+        private void SetPlayerPosition()
+        {
+            if (this.FindAllGroundPosition(-40, -40, out PickingResult<Triangle>[] res))
+            {
+                this.soldier.Transform.SetPosition(res[2].Position, true);
+                this.soldier.Transform.SetRotation(MathUtil.Pi, 0, 0, true);
+            }
+
+            this.soldier.Instance.AnimationController.AddPath(this.animations["soldier_idle"]);
+            this.soldier.Instance.AnimationController.Start();
+        }
+        private void SetSoldiersPosition()
+        {
+            Vector3[] iPos = new Vector3[]
+            {
+                new Vector3(4, -2, MathUtil.PiOverFour),
+                new Vector3(5, -5, MathUtil.PiOverTwo),
+                new Vector3(-4, -2, -MathUtil.PiOverFour),
+                new Vector3(-5, -5, -MathUtil.PiOverTwo),
+            };
+
+            for (int i = 0; i < 4; i++)
+            {
+                if (this.FindTopGroundPosition(iPos[i].X, iPos[i].Y, out PickingResult<Triangle> r))
+                {
+                    this.troops.Instance[i].Manipulator.SetPosition(r.Position, true);
+                    this.troops.Instance[i].Manipulator.SetRotation(iPos[i].Z, 0, 0, true);
+                    this.troops.Instance[i].TextureIndex = 1;
+
+                    this.troops.Instance[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
+                    this.troops.Instance[i].AnimationController.AddPath(this.animations["soldier_idle"]);
+                    this.troops.Instance[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
                 }
             }
         }
@@ -1161,13 +1152,14 @@ namespace Heightmap
             //Input driven
             UpdateCamera(gameTime, shift);
             UpdatePlayer();
-            UpdateDebugInfo(gameTime);
+            UpdateInputDebugInfo(gameTime);
 
             //Auto
             UpdateLights();
             UpdateWind(gameTime);
             UpdateDust(gameTime);
             UpdateGraph(gameTime);
+            UpdateDrawers();
 
             this.help.Instance.Text = string.Format(
                 "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00};",
@@ -1208,79 +1200,99 @@ namespace Heightmap
         {
             if (this.playerFlying)
             {
-#if DEBUG
-                if (this.Game.Input.RightMouseButtonPressed)
-#endif
-                {
-                    this.Camera.RotateMouse(
-                        this.Game.GameTime,
-                        this.Game.Input.MouseXDelta,
-                        this.Game.Input.MouseYDelta);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.A))
-                {
-                    this.Camera.MoveLeft(gameTime, !shift);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.D))
-                {
-                    this.Camera.MoveRight(gameTime, !shift);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.W))
-                {
-                    this.Camera.MoveForward(gameTime, !shift);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.S))
-                {
-                    this.Camera.MoveBackward(gameTime, !shift);
-                }
+                this.UpdateFlyingCamera(gameTime, shift);
             }
             else
             {
-#if DEBUG
-                if (this.Game.Input.RightMouseButtonPressed)
-#endif
-                {
-                    this.soldier.Transform.Rotate(
-                        this.Game.Input.MouseXDelta * 0.001f,
-                        0, 0);
-                }
-
-                float delta = shift ? 8 : 4;
-
-                if (this.Game.Input.KeyPressed(Keys.A))
-                {
-                    this.soldier.Transform.MoveLeft(gameTime, delta);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.D))
-                {
-                    this.soldier.Transform.MoveRight(gameTime, delta);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.W))
-                {
-                    this.soldier.Transform.MoveForward(gameTime, delta);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.S))
-                {
-                    this.soldier.Transform.MoveBackward(gameTime, delta);
-                }
-
-                if (this.FindTopGroundPosition(this.soldier.Transform.Position.X, this.soldier.Transform.Position.Z, out PickingResult<Triangle> r))
-                {
-                    this.soldier.Transform.SetPosition(r.Position);
-                }
+                this.UpdateWalkingCamera(gameTime, shift);
             }
         }
-        private void UpdateDebugInfo(GameTime gameTime)
+        private void UpdateFlyingCamera(GameTime gameTime, bool shift)
         {
-            #region Wind
+#if DEBUG
+            if (this.Game.Input.RightMouseButtonPressed)
+#endif
+            {
+                this.Camera.RotateMouse(
+                    this.Game.GameTime,
+                    this.Game.Input.MouseXDelta,
+                    this.Game.Input.MouseYDelta);
+            }
 
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                this.Camera.MoveLeft(gameTime, !shift);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                this.Camera.MoveRight(gameTime, !shift);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.W))
+            {
+                this.Camera.MoveForward(gameTime, !shift);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.S))
+            {
+                this.Camera.MoveBackward(gameTime, !shift);
+            }
+        }
+        private void UpdateWalkingCamera(GameTime gameTime, bool shift)
+        {
+#if DEBUG
+            if (this.Game.Input.RightMouseButtonPressed)
+#endif
+            {
+                this.soldier.Transform.Rotate(
+                    this.Game.Input.MouseXDelta * 0.001f,
+                    0, 0);
+            }
+
+            float delta = shift ? 8 : 4;
+
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                this.soldier.Transform.MoveLeft(gameTime, delta);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                this.soldier.Transform.MoveRight(gameTime, delta);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.W))
+            {
+                this.soldier.Transform.MoveForward(gameTime, delta);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.S))
+            {
+                this.soldier.Transform.MoveBackward(gameTime, delta);
+            }
+
+            if (this.FindTopGroundPosition(this.soldier.Transform.Position.X, this.soldier.Transform.Position.Z, out PickingResult<Triangle> r))
+            {
+                this.soldier.Transform.SetPosition(r.Position);
+            }
+        }
+        private void UpdateInputDebugInfo(GameTime gameTime)
+        {
+            this.UpdateInputWind();
+
+            this.UpdateInputDrawers();
+
+            this.UpdateInputLights();
+
+            this.UpdateInputFog();
+
+            this.UpdateInputTimeOfDay(gameTime);
+
+            this.UpdateInputLoadText();
+        }
+        private void UpdateInputWind()
+        {
             if (this.Game.Input.KeyPressed(Keys.Add))
             {
                 this.windStrength += this.windStep;
@@ -1292,11 +1304,9 @@ namespace Heightmap
                 this.windStrength -= this.windStep;
                 if (this.windStrength < 0f) this.windStrength = 0f;
             }
-
-            #endregion
-
-            #region Drawers
-
+        }
+        private void UpdateInputDrawers()
+        {
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
                 this.bboxesDrawer.Visible = !this.bboxesDrawer.Visible;
@@ -1332,6 +1342,62 @@ namespace Heightmap
                 this.graphDrawer.Visible = !this.graphDrawer.Visible;
             }
 
+
+        }
+        private void UpdateInputLights()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.G))
+            {
+                this.Lights.KeyLight.CastShadow = !this.Lights.KeyLight.CastShadow;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                this.linesDrawer.Instance.SetLines(Color.LightPink, this.lantern.GetVolume(10));
+                this.linesDrawer.Visible = true;
+            }
+        }
+        private void UpdateInputFog()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F))
+            {
+                this.ToggleFog();
+            }
+        }
+        private void UpdateInputTimeOfDay(GameTime gameTime)
+        {
+            if (this.Game.Input.KeyPressed(Keys.Left))
+            {
+                this.time -= gameTime.ElapsedSeconds * 0.1f;
+                this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Right))
+            {
+                this.time += gameTime.ElapsedSeconds * 0.1f;
+                this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
+            }
+        }
+        private void UpdateInputLoadText()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.Up))
+            {
+                initDurationIndex++;
+                initDurationIndex = initDurationIndex < 0 ? 0 : initDurationIndex;
+                initDurationIndex %= initDurationDict.Keys.Count;
+                SetLoadText(initDurationIndex);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Down))
+            {
+                initDurationIndex--;
+                initDurationIndex = initDurationIndex < 0 ? initDurationDict.Keys.Count - 1 : initDurationIndex;
+                initDurationIndex %= initDurationDict.Keys.Count;
+                SetLoadText(initDurationIndex);
+            }
+        }
+        private void UpdateDrawers()
+        {
             if (this.showSoldierDEBUG)
             {
                 Color color = new Color(Color.Red.ToColor3(), 0.6f);
@@ -1384,68 +1450,6 @@ namespace Heightmap
             {
                 this.UpdateLightCullingVolumes();
             }
-
-            #endregion
-
-            #region Lights
-
-            if (this.Game.Input.KeyJustReleased(Keys.G))
-            {
-                this.Lights.KeyLight.CastShadow = !this.Lights.KeyLight.CastShadow;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
-            {
-                this.linesDrawer.Instance.SetLines(Color.LightPink, this.lantern.GetVolume(10));
-                this.linesDrawer.Visible = true;
-            }
-
-            #endregion
-
-            #region Fog
-
-            if (this.Game.Input.KeyJustReleased(Keys.F))
-            {
-                this.ToggleFog();
-            }
-
-            #endregion
-
-            #region Time of day
-
-            if (this.Game.Input.KeyPressed(Keys.Left))
-            {
-                this.time -= gameTime.ElapsedSeconds * 0.1f;
-                this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Right))
-            {
-                this.time += gameTime.ElapsedSeconds * 0.1f;
-                this.TimeOfDay.SetTimeOfDay(this.time % 1f, false);
-            }
-
-            #endregion
-
-            #region Load duration index
-
-            if (this.Game.Input.KeyJustReleased(Keys.Up))
-            {
-                initDurationIndex++;
-                initDurationIndex = initDurationIndex < 0 ? 0 : initDurationIndex;
-                initDurationIndex %= initDurationDict.Keys.Count;
-                SetLoadText(initDurationIndex);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Down))
-            {
-                initDurationIndex--;
-                initDurationIndex = initDurationIndex < 0 ? initDurationDict.Keys.Count - 1 : initDurationIndex;
-                initDurationIndex %= initDurationDict.Keys.Count;
-                SetLoadText(initDurationIndex);
-            }
-
-            #endregion
         }
         private void UpdateWind(GameTime gameTime)
         {
