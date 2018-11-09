@@ -341,55 +341,71 @@ namespace Engine.Common
         /// <param name="cullIndex">Cull index</param>
         protected virtual void DoDirectionalShadowMapping(GameTime gameTime, Scene scene, ref int cullIndex)
         {
+            //And there were lights
             var shadowCastingLights = scene.Lights.GetDirectionalShadowCastingLights();
-            if (shadowCastingLights.Length > 0)
+            if (!shadowCastingLights.Any())
             {
-                var graphics = this.Game.Graphics;
+                return;
+            }
 
-                var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
-                if (shadowObjs.Count > 0)
+            //Objects that cast shadows
+            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+            if (!shadowObjs.Any())
+            {
+                return;
+            }
+
+            //Objects that cast shadows and suitable for culling test
+            var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+            if (toCullShadowObjs.Any())
+            {
+                //All objects suitable for culling
+                bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
+                var camVolume = this.DrawContext.CameraVolume;
+                var shadowSph = new CullingVolumeSphere(camVolume.Position, camVolume.Radius);
+                var doShadows = this.cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
+                if (allCullingObjects && !doShadows)
                 {
-                    this.DrawShadowsContext.ViewProjection = this.UpdateContext.ViewProjection;
-                    this.DrawShadowsContext.EyePosition = this.DrawContext.EyePosition;
+                    //All objects suitable for culling but no one pass the culling test
+                    return;
+                }
+            }
 
-                    var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+            this.DrawShadowsContext.ViewProjection = this.UpdateContext.ViewProjection;
+            this.DrawShadowsContext.EyePosition = this.DrawContext.EyePosition;
 
-                    int assigned = 0;
+            var graphics = this.Game.Graphics;
+            int assigned = 0;
 
-                    for (int l = 0; l < shadowCastingLights.Length; l++)
-                    {
-                        var light = shadowCastingLights[l];
-                        light.ShadowMapIndex = -1;
-                        light.ShadowMapCount = 0;
-                        light.ToShadowSpace = Matrix.Identity;
-                        light.ToCascadeOffsetX = Vector4.Zero;
-                        light.ToCascadeOffsetY = Vector4.Zero;
-                        light.ToCascadeScale = Vector4.Zero;
+            for (int l = 0; l < shadowCastingLights.Length; l++)
+            {
+                var light = shadowCastingLights[l];
+                light.ShadowMapIndex = -1;
+                light.ShadowMapCount = 0;
+                light.ToShadowSpace = Matrix.Identity;
+                light.ToCascadeOffsetX = Vector4.Zero;
+                light.ToCascadeOffsetY = Vector4.Zero;
+                light.ToCascadeScale = Vector4.Zero;
 
-                        if (assigned < MaxDirectionalShadowMaps)
-                        {
-                            var camVolume = this.DrawContext.CameraVolume;
-                            var shadowSph = new CullingVolumeSphere(camVolume.Position, camVolume.Radius);
+                if (assigned < MaxDirectionalShadowMaps)
+                {
+                    var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
 
-                            var doShadows = this.cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
-                            if (doShadows)
-                            {
-                                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
+                    shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
+                    shadowMapper.Bind(graphics, l * MaxDirectionalCascadeShadowMaps);
 
-                                shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
-                                shadowMapper.Bind(graphics, l * MaxDirectionalCascadeShadowMaps);
+                    light.ShadowMapIndex = assigned;
+                    light.ShadowMapCount++;
 
-                                light.ShadowMapIndex = assigned;
-                                light.ShadowMapCount++;
+                    this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
 
-                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
-                            }
+                    assigned++;
 
-                            assigned++;
-
-                            cullIndex++;
-                        }
-                    }
+                    cullIndex++;
+                }
+                else
+                {
+                    break;
                 }
             }
         }
@@ -401,47 +417,56 @@ namespace Engine.Common
         /// <param name="cullIndex">Cull index</param>
         protected virtual void DoPointShadowMapping(GameTime gameTime, Scene scene, ref int cullIndex)
         {
+            //And there were lights
             var shadowCastingLights = scene.Lights.GetPointShadowCastingLights(scene.Camera.Position);
-            if (shadowCastingLights.Length > 0)
+            if (!shadowCastingLights.Any())
             {
-                var graphics = this.Game.Graphics;
+                return;
+            }
 
-                //Draw components if drop shadow (opaque)
-                var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
-                if (shadowObjs.Count > 0)
+            //Draw components if drop shadow (opaque)
+            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+            if (!shadowObjs.Any())
+            {
+                return;
+            }
+
+            var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+
+            //All objects suitable for culling
+            bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
+
+            var graphics = this.Game.Graphics;
+            int assigned = 0;
+
+            for (int l = 0; l < shadowCastingLights.Length; l++)
+            {
+                var light = shadowCastingLights[l];
+                light.ShadowMapIndex = -1;
+
+                if (assigned < MaxCubicShadows)
                 {
-                    var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+                    var sph = new CullingVolumeSphere(light.Position, light.Radius);
 
-                    int assigned = 0;
-
-                    for (int l = 0; l < shadowCastingLights.Length; l++)
+                    var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+                    if (allCullingObjects && !doShadows)
                     {
-                        var light = shadowCastingLights[l];
-                        light.ShadowMapIndex = -1;
-
-                        if (assigned < MaxCubicShadows)
-                        {
-                            var sph = new CullingVolumeSphere(light.Position, light.Radius);
-
-                            var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
-
-                            if (doShadows)
-                            {
-                                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperPoint;
-
-                                shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
-                                shadowMapper.Bind(graphics, l);
-
-                                light.ShadowMapIndex = assigned;
-
-                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
-                            }
-
-                            assigned++;
-
-                            cullIndex++;
-                        }
+                        //All objects suitable for culling but no one pass the culling test
+                        continue;
                     }
+
+                    var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperPoint;
+
+                    shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
+                    shadowMapper.Bind(graphics, l);
+
+                    light.ShadowMapIndex = assigned;
+
+                    this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+
+                    assigned++;
+
+                    cullIndex++;
                 }
             }
         }
@@ -453,51 +478,60 @@ namespace Engine.Common
         /// <param name="cullIndex">Cull index</param>
         protected virtual void DoSpotShadowMapping(GameTime gameTime, Scene scene, ref int cullIndex)
         {
+            //And there were lights
             var shadowCastingLights = scene.Lights.GetSpotShadowCastingLights(scene.Camera.Position);
-            if (shadowCastingLights.Length > 0)
+            if (!shadowCastingLights.Any())
             {
-                var graphics = this.Game.Graphics;
+                return;
+            }
 
-                //Draw components if drop shadow (opaque)
-                var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
-                if (shadowObjs.Count > 0)
+            //Draw components if drop shadow (opaque)
+            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+            if (!shadowObjs.Any())
+            {
+                return;
+            }
+
+            var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+
+            //All objects suitable for culling
+            bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
+
+            var graphics = this.Game.Graphics;
+            int assigned = 0;
+
+            for (int l = 0; l < shadowCastingLights.Length; l++)
+            {
+                var light = shadowCastingLights[l];
+                light.ShadowMapIndex = -1;
+                light.ShadowMapCount = 0;
+                light.FromLightVP = new Matrix[1];
+
+                if (assigned < MaxSpotShadows)
                 {
-                    var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+                    var sph = new CullingVolumeSphere(light.Position, light.Radius);
 
-                    int assigned = 0;
-
-                    for (int l = 0; l < shadowCastingLights.Length; l++)
+                    var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+                    if (allCullingObjects && !doShadows)
                     {
-                        var light = shadowCastingLights[l];
-                        light.ShadowMapIndex = -1;
-                        light.ShadowMapCount = 0;
-                        light.FromLightVP = new Matrix[1];
-
-                        if (assigned < MaxSpotShadows)
-                        {
-                            var sph = new CullingVolumeSphere(light.Position, light.Radius);
-
-                            var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
-
-                            if (doShadows)
-                            {
-                                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperSpot;
-
-                                shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
-                                shadowMapper.Bind(graphics, l);
-
-                                light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
-                                light.ShadowMapIndex = assigned;
-                                light.ShadowMapCount = 1;
-
-                                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
-                            }
-
-                            assigned++;
-
-                            cullIndex++;
-                        }
+                        //All objects suitable for culling but no one pass the culling test
+                        continue;
                     }
+
+                    var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperSpot;
+
+                    shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
+                    shadowMapper.Bind(graphics, l);
+
+                    light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
+                    light.ShadowMapIndex = assigned;
+                    light.ShadowMapCount = 1;
+
+                    this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+
+                    assigned++;
+
+                    cullIndex++;
                 }
             }
         }
@@ -512,59 +546,81 @@ namespace Engine.Common
         {
             var graphics = this.Game.Graphics;
 
-            var objects = components.Where(c =>
+            var objects = components.Where(c => IsVisible(c, index)).ToList();
+            if (objects.Any())
             {
-                if (!c.Is<Drawable>()) return false;
+                objects.Sort((c1, c2) => Sort(c1, c2, index));
 
-                var cull = c.Get<ICullable>();
-                if (cull != null)
-                {
-                    return !this.cullManager.GetCullValue(index, cull).Culled;
-                }
-
-                return true;
-            }).ToList();
-            if (objects.Count > 0)
-            {
-                objects.Sort((c1, c2) =>
-                {
-                    int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
-                    if (res == 0)
-                    {
-                        var cull1 = c1.Get<ICullable>();
-                        var cull2 = c2.Get<ICullable>();
-
-                        var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
-                        var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
-
-                        res = -d1.CompareTo(d2);
-                    }
-
-                    if (res == 0)
-                    {
-                        res = c1.Order.CompareTo(c2.Order);
-                    }
-
-                    return res;
-                });
-
-                objects.ForEach((c) =>
-                {
-                    graphics.SetRasterizerShadowMapping();
-                    graphics.SetDepthStencilShadowMapping();
-
-                    if (c.AlphaEnabled)
-                    {
-                        graphics.SetBlendTransparent();
-                    }
-                    else
-                    {
-                        graphics.SetBlendDefault();
-                    }
-
-                    c.Get<IDrawable>().DrawShadows(context);
-                });
+                objects.ForEach((c) => DrawShadows(graphics, context, c));
             }
+        }
+        /// <summary>
+        /// Gets if the specified object is not culled by the cull index
+        /// </summary>
+        /// <param name="c">Scene object</param>
+        /// <param name="cullIndex">Cull index</param>
+        /// <returns>Returns true if the object is not culled</returns>
+        private bool IsVisible(SceneObject c, int cullIndex)
+        {
+            if (!c.Is<Drawable>()) return false;
+
+            var cull = c.Get<ICullable>();
+            if (cull != null)
+            {
+                return !this.cullManager.GetCullValue(cullIndex, cull).Culled;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Sorts an object list by distance to culling point of view
+        /// </summary>
+        /// <param name="c1">Scene object one</param>
+        /// <param name="c2">Scene object two</param>
+        /// <param name="cullIndex">Cull index</param>
+        /// <returns></returns>
+        private int Sort(SceneObject c1, SceneObject c2, int cullIndex)
+        {
+            int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+            if (res == 0)
+            {
+                var cull1 = c1.Get<ICullable>();
+                var cull2 = c2.Get<ICullable>();
+
+                var d1 = cull1 != null ? this.cullManager.GetCullValue(cullIndex, cull1).Distance : float.MaxValue;
+                var d2 = cull2 != null ? this.cullManager.GetCullValue(cullIndex, cull2).Distance : float.MaxValue;
+
+                res = -d1.CompareTo(d2);
+            }
+
+            if (res == 0)
+            {
+                res = c1.Order.CompareTo(c2.Order);
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Draws the specified object shadows
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="context">Context</param>
+        /// <param name="c">Scene object</param>
+        private void DrawShadows(Graphics graphics, DrawContextShadows context, SceneObject c)
+        {
+            graphics.SetRasterizerShadowMapping();
+            graphics.SetDepthStencilShadowMapping();
+
+            if (c.AlphaEnabled)
+            {
+                graphics.SetBlendTransparent();
+            }
+            else
+            {
+                graphics.SetBlendDefault();
+            }
+
+            c.Get<IDrawable>().DrawShadows(context);
         }
     }
 }

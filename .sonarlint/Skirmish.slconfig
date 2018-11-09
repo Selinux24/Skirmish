@@ -1,0 +1,14 @@
+{
+  "ServerUri": "https://sonarcloud.io/",
+  "Organization": {
+    "Key": "selinux24-github",
+    "Name": "Raúl"
+  },
+  "ProjectKey": "Selinux24_Skirmish",
+  "Profiles": {
+    "CSharp": {
+      "ProfileKey": "AWaQhLn9qD2OhLzHK6Zv",
+      "ProfileTimestamp": "2018-09-06T11:06:47+02:00"
+    }
+  }
+}
