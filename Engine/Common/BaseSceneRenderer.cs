@@ -368,12 +368,10 @@ namespace Engine.Common
 
                         if (assigned < MaxDirectionalShadowMaps)
                         {
-                            float distance = CascadeShadowMapsDistances.Last();
+                            var camVolume = this.DrawContext.CameraVolume;
+                            var shadowSph = new CullingVolumeSphere(camVolume.Position, camVolume.Radius);
 
-                            var sph = new CullingVolumeSphere(this.DrawContext.EyePosition, distance);
-
-                            var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
-
+                            var doShadows = this.cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
                             if (doShadows)
                             {
                                 var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;

@@ -17,6 +17,10 @@ namespace Engine
         /// Gets the view position
         /// </summary>
         public Vector3 Position { get; private set; }
+        /// <summary>
+        /// Radius
+        /// </summary>
+        public float Radius { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -37,6 +41,7 @@ namespace Engine
             this.frustum = new BoundingFrustum(viewProj);
 
             this.Position = frustum.GetCameraParams().Position;
+            this.Radius = frustum.GetCameraParams().ZFar;
         }
 
         /// <summary>
