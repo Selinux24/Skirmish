@@ -99,11 +99,6 @@ namespace SceneTest
             this.Camera.Goto(-20, 10, -40f);
             this.Camera.LookTo(0, 0, 0);
 
-            GameEnvironment.LODDistanceLow *= 5;
-            GameEnvironment.LODDistanceMedium *= 5;
-            GameEnvironment.LODDistanceHigh *= 5;
-            GameEnvironment.LODDistanceMinimum *= 5;
-
             this.InitializeTextBoxes();
             this.InitializeSkyEffects();
             this.InitializeScenery();
@@ -630,10 +625,9 @@ namespace SceneTest
         }
         private void InitializeTestCube()
         {
-            var bbox = new BoundingBox(
-                -Vector3.One + Vector3.UnitY + (Vector3.UnitX * 20),
-                +Vector3.One + Vector3.UnitY + (Vector3.UnitX * 20));
+            var bbox = new BoundingBox(Vector3.One * -0.5f, Vector3.One * 0.5f);
             var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
+            cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30, 0.5f, 0));
 
             var desc = new TriangleListDrawerDescription()
             {

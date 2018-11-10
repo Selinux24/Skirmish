@@ -215,6 +215,7 @@
     <Compile Include="Effects\EffectBillboardState.cs" />
     <Compile Include="Effects\EffectFoliageState.cs" />
     <Compile Include="Effects\EffectParticleState.cs" />
+    <Compile Include="Effects\EffectShadowBase.cs" />
     <Compile Include="Effects\EffectSkyScatterState.cs" />
     <Compile Include="Effects\EffectTerrainState.cs" />
     <Compile Include="Effects\EffectWaterState.cs" />

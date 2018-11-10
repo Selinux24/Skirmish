@@ -352,30 +352,6 @@ inline ComputeLightsOutput ComputeDirectionalLightLOD3(ComputeDirectionalLightsI
 
     return output;
 }
-inline ComputeLightsOutput ComputeDirectionalLightLOD4(ComputeDirectionalLightsInput input)
-{
-    float3 L = normalize(input.dirLight.DirToLight);
-
-    float cShadowFactor = 1;
-    [flatten]
-    if (input.dirLight.CastShadow == 1)
-    {
-        cShadowFactor = CalcCascadedShadowFactor(
-            input.pPosition,
-            input.dirLight.ToShadowSpace,
-            input.dirLight.ToCascadeOffsetX,
-            input.dirLight.ToCascadeOffsetY,
-            input.dirLight.ToCascadeScale,
-            input.shadowMap);
-    }
-
-    ComputeLightsOutput output;
-
-    output.diffuse = DiffusePass(input.dirLight.LightColor, L, input.pNormal) * cShadowFactor;
-    output.specular = 0;
-
-    return output;
-}
 inline ComputeLightsOutput ComputeDirectionalLight(ComputeDirectionalLightsInput input)
 {
     float distToEye = length(input.ePosition - input.pPosition);
@@ -388,13 +364,9 @@ inline ComputeLightsOutput ComputeDirectionalLight(ComputeDirectionalLightsInput
     {
         return ComputeDirectionalLightLOD2(input);
     }
-    else if (distToEye < input.lod.z)
-    {
-        return ComputeDirectionalLightLOD3(input);
-    }
     else
     {
-        return ComputeDirectionalLightLOD4(input);
+        return ComputeDirectionalLightLOD3(input);
     }
 }
 
@@ -773,38 +745,6 @@ inline float4 ComputeLightsLOD3(ComputeLightsInput input)
 
 	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0);
 }
-inline float4 ComputeLightsLOD4(ComputeLightsInput input)
-{
-    float4 lDiffuse = 0;
-
-	float3 lAmbient = CalcAmbient(input.hemiLight.AmbientDown.rgb, input.hemiLight.AmbientRange.rgb, input.pNormal);
-
-    uint i = 0;
-
-    for (i = 0; i < input.dirLightsCount; i++)
-    {
-        float3 L = normalize(input.dirLights[i].DirToLight);
-
-        float cShadowFactor = 1;
-        [flatten]
-        if (input.dirLights[i].CastShadow == 1)
-        {
-            cShadowFactor = CalcCascadedShadowFactor(
-                input.pPosition,
-                input.dirLights[i].ToShadowSpace,
-                input.dirLights[i].ToCascadeOffsetX,
-                input.dirLights[i].ToCascadeOffsetY,
-                input.dirLights[i].ToCascadeScale,
-                input.shadowMapDir);
-        }
-
-        float4 cDiffuse = DiffusePass(input.dirLights[i].LightColor, L, input.pNormal);
-
-        lDiffuse += (cDiffuse * cShadowFactor);
-    }
-
-	return LightEquation(input.k, lAmbient, lDiffuse, input.pColorDiffuse, 0, 0);
-}
 inline float4 ComputeLights(ComputeLightsInput input)
 {
     float distToEye = length(input.ePosition - input.pPosition);
@@ -830,13 +770,9 @@ inline float4 ComputeLights(ComputeLightsInput input)
         {
             color = ComputeLightsLOD2(input);
         }
-        else if (distToEye < input.lod.z)
-        {
-            color = ComputeLightsLOD3(input);
-        }
         else
         {
-            color = ComputeLightsLOD4(input);
+            color = ComputeLightsLOD3(input);
         }
 
 		return float4(lerp(color.rgb, input.fogColor.rgb, fog), color.a);

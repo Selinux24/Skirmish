@@ -4,12 +4,13 @@
 cbuffer cbGlobals : register(b0)
 {
 	uint gAnimationPaletteWidth;
+    uint3 PAD01;
 };
 Texture2D gAnimationPalette : register(t0);
 
-cbuffer cbGSPerFrame : register(b1)
+cbuffer cbVSPerFrame : register(b1)
 {
-	float4x4 gGSWorldViewProjection[6];
+	float4x4 gVSWorldViewProjection[6];
 };
 
 cbuffer cbVSPerInstance : register(b2)
@@ -18,6 +19,7 @@ cbuffer cbVSPerInstance : register(b2)
 	uint3 PAD21;
 };
 
+//TEXTURE VARIABLES FOR TRANSPARENCY
 Texture2DArray gPSDiffuseMapArray : register(t1);
 
 cbuffer cbPSPerInstance : register(b5)
@@ -357,7 +359,7 @@ PSShadowMapPositionTexture VSSMPositionNormalTextureTangentSkinnedI(VSVertexPosi
 
 struct GSShadowMap
 {
-    float4 position : SV_POSITION;
+    float4 positionHomogeneous : SV_POSITION;
     uint index : SV_RENDERTARGETARRAYINDEX;
 };
 
@@ -372,7 +374,7 @@ void GSPointShadowMap(triangle PSShadowMapPosition input[3] : SV_Position, inout
 
         for (int v = 0; v < 3; v++)
         {
-            output.position = mul(input[v].positionHomogeneous, gGSWorldViewProjection[iFace]);
+            output.positionHomogeneous = mul(input[v].positionHomogeneous, gVSWorldViewProjection[iFace]);
             
             outputStream.Append(output);
         }
@@ -382,7 +384,7 @@ void GSPointShadowMap(triangle PSShadowMapPosition input[3] : SV_Position, inout
 
 struct GSShadowMapTexture
 {
-    float4 position : SV_POSITION;
+    float4 positionHomogeneous : SV_POSITION;
     float4 depth : TEXCOORD0;
     float2 tex : TEXCOORD1;
     uint textureIndex : TEXTUREINDEX;
@@ -400,8 +402,8 @@ void GSPointShadowMapTexture(triangle PSShadowMapPositionTexture input[3] : SV_P
 
         for (int v = 0; v < 3; v++)
         {
-            output.position = mul(input[v].positionHomogeneous, gGSWorldViewProjection[iFace]);
-            output.depth = output.position;
+            output.positionHomogeneous = mul(input[v].positionHomogeneous, gVSWorldViewProjection[iFace]);
+            output.depth = input[v].depth;
             output.tex = input[v].tex;
             output.textureIndex = input[v].textureIndex;
             
