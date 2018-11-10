@@ -478,17 +478,11 @@ namespace Engine
 
                 if (node != null)
                 {
-                    if (direction == IndexBufferShapes.Full) nNode = node;
-
-                    else if (direction == IndexBufferShapes.CornerTopLeft) nNode = node.TopLeftNeighbor;
-                    else if (direction == IndexBufferShapes.CornerTopRight) nNode = node.TopRightNeighbor;
-                    else if (direction == IndexBufferShapes.CornerBottomLeft) nNode = node.BottomLeftNeighbor;
-                    else if (direction == IndexBufferShapes.CornerBottomRight) nNode = node.BottomRightNeighbor;
-
-                    else if (direction == IndexBufferShapes.SideTop) nNode = node.TopNeighbor;
-                    else if (direction == IndexBufferShapes.SideBottom) nNode = node.BottomNeighbor;
-                    else if (direction == IndexBufferShapes.SideLeft) nNode = node.LeftNeighbor;
-                    else if (direction == IndexBufferShapes.SideRight) nNode = node.RightNeighbor;
+                    var dir = GetNodeDirection(direction, node);
+                    if (dir != null)
+                    {
+                        nNode = dir;
+                    }
                 }
 
                 if (this.Node != nNode)
@@ -523,6 +517,28 @@ namespace Engine
                 {
                     this.IBDesc = dictIB[new MapGridShapeId() { LevelOfDetail = lod, Shape = shape }];
                 }
+            }
+            /// <summary>
+            /// Gets the node direction
+            /// </summary>
+            /// <param name="direction">Shape direction</param>
+            /// <param name="node">Current node</param>
+            /// <returns>Returns the node in the direction</returns>
+            private static QuadTreeNode<VertexData> GetNodeDirection(IndexBufferShapes direction, QuadTreeNode<VertexData> node)
+            {
+                if (direction == IndexBufferShapes.Full) return node;
+
+                else if (direction == IndexBufferShapes.CornerTopLeft) return node.TopLeftNeighbor;
+                else if (direction == IndexBufferShapes.CornerTopRight) return node.TopRightNeighbor;
+                else if (direction == IndexBufferShapes.CornerBottomLeft) return node.BottomLeftNeighbor;
+                else if (direction == IndexBufferShapes.CornerBottomRight) return node.BottomRightNeighbor;
+
+                else if (direction == IndexBufferShapes.SideTop) return node.TopNeighbor;
+                else if (direction == IndexBufferShapes.SideBottom) return node.BottomNeighbor;
+                else if (direction == IndexBufferShapes.SideLeft) return node.LeftNeighbor;
+                else if (direction == IndexBufferShapes.SideRight) return node.RightNeighbor;
+
+                return null;
             }
         }
         /// <summary>
@@ -821,48 +837,24 @@ namespace Engine
         {
             if (disposing)
             {
-                if (Map != null)
-                {
-                    Map.Dispose();
-                    Map = null;
-                }
+                Map?.Dispose();
+                Map = null;
 
-                if (heightMap != null)
-                {
-                    heightMap.Dispose();
-                    heightMap = null;
-                }
+                heightMap?.Dispose();
+                heightMap = null;
 
-                if (terrainTexturesLR != null)
-                {
-                    terrainTexturesLR.Dispose();
-                    terrainTexturesLR = null;
-                }
-                if (terrainTexturesHR != null)
-                {
-                    terrainTexturesHR.Dispose();
-                    terrainTexturesHR = null;
-                }
-                if (terrainNormalMaps != null)
-                {
-                    terrainNormalMaps.Dispose();
-                    terrainNormalMaps = null;
-                }
-                if (terrainSpecularMaps != null)
-                {
-                    terrainSpecularMaps.Dispose();
-                    terrainSpecularMaps = null;
-                }
-                if (colorTextures != null)
-                {
-                    colorTextures.Dispose();
-                    colorTextures = null;
-                }
-                if (alphaMap != null)
-                {
-                    alphaMap.Dispose();
-                    alphaMap = null;
-                }
+                terrainTexturesLR?.Dispose();
+                terrainTexturesLR = null;
+                terrainTexturesHR?.Dispose();
+                terrainTexturesHR = null;
+                terrainNormalMaps?.Dispose();
+                terrainNormalMaps = null;
+                terrainSpecularMaps?.Dispose();
+                terrainSpecularMaps = null;
+                colorTextures?.Dispose();
+                colorTextures = null;
+                alphaMap?.Dispose();
+                alphaMap = null;
             }
         }
 

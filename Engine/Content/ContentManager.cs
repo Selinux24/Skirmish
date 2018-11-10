@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Engine.Content
@@ -21,11 +22,11 @@ namespace Engine.Content
             /// </summary>
             /// <param name="file">Zip file name</param>
             /// <returns>Returns zip file entry names array</returns>
-            public static string[] ReadEntryNames(string file)
+            public static IEnumerable<string> ReadEntryNames(string file)
             {
                 List<string> files = new List<string>();
 
-                using (ZipArchive archive = ZipFile.OpenRead(file))
+                using (var archive = ZipFile.OpenRead(file))
                 {
                     foreach (var compressedFile in archive.Entries)
                     {
@@ -33,7 +34,7 @@ namespace Engine.Content
                     }
                 }
 
-                return files.ToArray();
+                return files;
             }
             /// <summary>
             /// Gets an entry name, comparing names using ordinal ignore case
@@ -43,9 +44,9 @@ namespace Engine.Content
             /// <returns>Returns entry name if exists</returns>
             public static string GetEntryName(string file, string entryName)
             {
-                string[] entries = ReadEntryNames(file);
+                var entries = ReadEntryNames(file);
 
-                return Array.Find(entries, e => e.Equals(entryName, StringComparison.OrdinalIgnoreCase));
+                return entries.FirstOrDefault(e => e.Equals(entryName, StringComparison.OrdinalIgnoreCase));
             }
             /// <summary>
             /// Gets if an entry name eixts into the zip file, comparing names using ordinal ignore case
@@ -67,9 +68,9 @@ namespace Engine.Content
             /// <returns>Returns file stream of the entry</returns>
             public static MemoryStream GetFile(string file, string entryName)
             {
-                using (ZipArchive archive = ZipFile.OpenRead(file))
+                using (var archive = ZipFile.OpenRead(file))
                 {
-                    ZipArchiveEntry entry = archive.GetEntry(GetEntryName(file, entryName));
+                    var entry = archive.GetEntry(GetEntryName(file, entryName));
 
                     using (var stream = entry.Open())
                     {
@@ -83,19 +84,19 @@ namespace Engine.Content
             /// <param name="file">Zip file name</param>
             /// <param name="pattern">Entry name</param>
             /// <returns>Returns file streams for the entry pattern</returns>
-            public static MemoryStream[] GetFiles(string file, string pattern)
+            public static IEnumerable<MemoryStream> GetFiles(string file, string pattern)
             {
                 List<MemoryStream> res = new List<MemoryStream>();
 
                 string regexMask = Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".");
 
-                using (ZipArchive archive = ZipFile.OpenRead(file))
+                using (var archive = ZipFile.OpenRead(file))
                 {
                     for (int i = 0; i < archive.Entries.Count; i++)
                     {
-                        ZipArchiveEntry entry = archive.Entries[i];
+                        var entry = archive.Entries[i];
 
-                        Match match = Regex.Match(entry.Name, regexMask);
+                        var match = Regex.Match(entry.Name, regexMask);
                         if (match.Success)
                         {
                             using (var stream = entry.Open())
@@ -106,7 +107,7 @@ namespace Engine.Content
                     }
                 }
 
-                return res.ToArray();
+                return res;
             }
         }
 
@@ -115,6 +116,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="contentSource">Content source</param>
         /// <param name="resourcePath">Resource path</param>
+        /// <param name="throwException">Sets wether throw exception or not</param>
         /// <returns>Returns resource paths found</returns>
         /// <remarks>
         /// Content source can be a folder or a zip file
@@ -126,70 +128,104 @@ namespace Engine.Content
             {
                 return new MemoryStream[] { };
             }
-            else if (File.Exists(resourcePath))
+
+            if (File.Exists(resourcePath))
             {
                 return new[] { resourcePath.WriteToMemory() };
             }
-            else
+
+            if (Directory.Exists(contentSource))
             {
-                if (Directory.Exists(contentSource))
-                {
-                    //Directory
-                    resourcePath = Path.Combine(contentSource, resourcePath);
-                    if (File.Exists(resourcePath))
-                    {
-                        return new[] { resourcePath.WriteToMemory() };
-                    }
-                    else
-                    {
-                        string[] files = Directory.GetFiles(
-                            contentSource,
-                            Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
-                        if (files != null && files.Length > 0)
-                        {
-                            MemoryStream[] msList = new MemoryStream[files.Length];
+                //Directory
+                return FindContentDirectory(contentSource, resourcePath, throwException);
+            }
 
-                            for (int i = 0; i < files.Length; i++)
-                            {
-                                msList[i] = files[i].WriteToMemory();
-                            }
+            if (File.Exists(contentSource))
+            {
+                //Compressed file
+                return FindContentZip(contentSource, resourcePath, throwException);
+            }
 
-                            return msList;
-                        }
-                        else if (throwException)
-                        {
-                            throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePath);
-                        }
-                    }
-                }
-                else if (File.Exists(contentSource))
-                {
-                    //Compressed file
-                    if (ZipManager.Contains(contentSource, resourcePath))
-                    {
-                        return new[] { ZipManager.GetFile(contentSource, resourcePath) };
-                    }
-                    else
-                    {
-                        MemoryStream[] res = ZipManager.GetFiles(contentSource, Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
-                        if (res != null && res.Length > 0)
-                        {
-                            return res;
-                        }
-                        else if (throwException)
-                        {
-                            throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePath);
-                        }
-                    }
-                }
-                else if (throwException)
-                {
-                    throw new DirectoryNotFoundException(string.Format("El origen de contenido [{0}] no existe", resourcePath));
-                }
+            if (throwException)
+            {
+                throw new DirectoryNotFoundException(string.Format("Content source [{0}] not exists", resourcePath));
             }
 
             return new MemoryStream[] { };
         }
+        /// <summary>
+        /// Finds content into directory
+        /// </summary>
+        /// <param name="contentSource">Content source</param>
+        /// <param name="resourcePath">Resource path</param>
+        /// <param name="throwException">Sets wether throw exception or not</param>
+        /// <returns>Returns resource paths found</returns>
+        /// <remarks>
+        /// Content source can be a folder or a zip file
+        /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
+        /// </remarks>
+        private static MemoryStream[] FindContentDirectory(string contentSource, string resourcePath, bool throwException)
+        {
+            var path = Path.Combine(contentSource, resourcePath);
+            if (File.Exists(path))
+            {
+                return new[] { path.WriteToMemory() };
+            }
+
+            var files = Directory.GetFiles(
+                contentSource,
+                Path.GetFileNameWithoutExtension(path) + "*" + Path.GetExtension(path));
+            if (files?.Length > 0)
+            {
+                MemoryStream[] msList = new MemoryStream[files.Length];
+
+                for (int i = 0; i < files.Length; i++)
+                {
+                    msList[i] = files[i].WriteToMemory();
+                }
+
+                return msList;
+            }
+
+            if (throwException)
+            {
+                throw new FileNotFoundException("File not found", path);
+            }
+
+            return new MemoryStream[] { };
+        }
+        /// <summary>
+        /// Finds content int zippped file
+        /// </summary>
+        /// <param name="contentSource">Content source</param>
+        /// <param name="resourcePath">Resource path</param>
+        /// <param name="throwException">Sets wether throw exception or not</param>
+        /// <returns>Returns resource paths found</returns>
+        /// <remarks>
+        /// Content source can be a folder or a zip file
+        /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
+        /// </remarks>
+        private static MemoryStream[] FindContentZip(string contentSource, string resourcePath, bool throwException)
+        {
+            if (ZipManager.Contains(contentSource, resourcePath))
+            {
+                return new[] { ZipManager.GetFile(contentSource, resourcePath) };
+            }
+
+            var res = ZipManager.GetFiles(contentSource, Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
+            if (res?.Any() == true)
+            {
+                return res.ToArray();
+            }
+
+            if (throwException)
+            {
+                throw new FileNotFoundException("File not found", resourcePath);
+            }
+
+            return new MemoryStream[] { };
+        }
+
         /// <summary>
         /// Finds content
         /// </summary>
@@ -203,18 +239,18 @@ namespace Engine.Content
         {
             List<MemoryStream> res = new List<MemoryStream>();
 
-            if (resourcePaths != null && resourcePaths.Length > 0)
+            if (resourcePaths?.Length > 0)
             {
                 for (int i = 0; i < resourcePaths.Length; i++)
                 {
                     var resourceRes = FindContent(contentSource, resourcePaths[i], throwException);
-                    if (resourceRes != null && resourceRes.Length > 0)
+                    if (resourceRes?.Any() == true)
                     {
                         res.AddRange(resourceRes);
                     }
                     else if (throwException)
                     {
-                        throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePaths[i]);
+                        throw new FileNotFoundException("File not found", resourcePaths[i]);
                     }
                 }
             }
@@ -237,44 +273,44 @@ namespace Engine.Content
             {
                 return new string[] { };
             }
-            else if (File.Exists(resourcePath))
+
+            if (File.Exists(resourcePath))
             {
                 return new[] { resourcePath };
             }
-            else
+
+            if (Directory.Exists(contentSource))
             {
-                if (Directory.Exists(contentSource))
+                //Directory
+                resourcePath = Path.Combine(contentSource, resourcePath);
+                if (File.Exists(resourcePath))
                 {
-                    //Directory
-                    resourcePath = Path.Combine(contentSource, resourcePath);
-                    if (File.Exists(resourcePath))
-                    {
-                        return new[] { resourcePath };
-                    }
-                    else
-                    {
-                        string[] files = Directory.GetFiles(
-                            contentSource,
-                            Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
-                        if (files != null && files.Length > 0)
-                        {
-                            return files;
-                        }
-                        else if (throwException)
-                        {
-                            throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePath);
-                        }
-                    }
+                    return new[] { resourcePath };
                 }
-                else if (File.Exists(contentSource))
+
+                string[] files = Directory.GetFiles(
+                    contentSource,
+                    Path.GetFileNameWithoutExtension(resourcePath) + "*" + Path.GetExtension(resourcePath));
+                if (files?.Length > 0)
                 {
-                    //Compressed file
-                    throw new NotImplementedException("Compressed files not implemented yet");
+                    return files;
                 }
-                else if (throwException)
+
+                if (throwException)
                 {
-                    throw new DirectoryNotFoundException(string.Format("El origen de contenido [{0}] no existe", resourcePath));
+                    throw new FileNotFoundException("File not found", resourcePath);
                 }
+            }
+
+            if (File.Exists(contentSource))
+            {
+                //Compressed file
+                throw new NotImplementedException("Compressed files not implemented yet");
+            }
+
+            if (throwException)
+            {
+                throw new DirectoryNotFoundException(string.Format("Content source [{0}] not exists", resourcePath));
             }
 
             return new string[] { };
@@ -292,18 +328,18 @@ namespace Engine.Content
         {
             List<string> res = new List<string>();
 
-            if (resourcePaths != null && resourcePaths.Length > 0)
+            if (resourcePaths?.Length > 0)
             {
                 for (int i = 0; i < resourcePaths.Length; i++)
                 {
                     var resourceRes = FindPaths(contentSource, resourcePaths[i], throwException);
-                    if (resourceRes != null && resourceRes.Length > 0)
+                    if (resourceRes?.Any() == true)
                     {
                         res.AddRange(resourceRes);
                     }
                     else if (throwException)
                     {
-                        throw new FileNotFoundException("El fichero especificado no se encuentra en la ruta de contenidos", resourcePaths[i]);
+                        throw new FileNotFoundException("File not found", resourcePaths[i]);
                     }
                 }
             }
