@@ -144,118 +144,43 @@ namespace Engine.Common
 
             foreach (string meshName in modelContent.Geometry.Keys)
             {
-                Dictionary<string, SubMeshContent> dictGeometry = modelContent.Geometry[meshName];
+                //Get skinning data
+                var isSkinned = ReadSkinningData(
+                    description, modelContent, meshName,
+                    out var bindShapeMatrix, out var weights, out var jointNames);
 
-                bool isSkinned = false;
-                ControllerContent cInfo = null;
-                Matrix bindShapeMatrix = Matrix.Identity;
-                VertexData[] vertices = null;
-                uint[] indices = null;
-                Weight[] weights = null;
-                string[] jointNames = null;
-                if (description.LoadAnimation && modelContent.Controllers != null && modelContent.SkinningInfo != null)
-                {
-                    cInfo = modelContent.Controllers.GetControllerForMesh(meshName);
-                    if (cInfo != null)
-                    {
-                        //Apply shape matrix if controller exists but we are not loading animation info
-                        bindShapeMatrix = cInfo.BindShapeMatrix;
-                        weights = cInfo.Weights;
-                        jointNames = modelContent.SkinningInfo.Skeleton.GetJointNames();
-
-                        isSkinned = true;
-                    }
-                }
+                //Process the mesh geometry material by material
+                var dictGeometry = modelContent.Geometry[meshName];
 
                 foreach (string material in dictGeometry.Keys)
                 {
-                    SubMeshContent geometry = dictGeometry[material];
-
+                    var geometry = dictGeometry[material];
                     if (geometry.IsVolume)
                     {
+                        //If volume, store position only
                         volumeMesh.AddRange(geometry.GetTriangles());
                     }
                     else
                     {
-                        VertexTypes vertexType = geometry.VertexType;
+                        //Get vertex type
+                        var vertexType = GetVertexType(description, drw.Materials, geometry.VertexType, isSkinned, material);
 
-                        if (isSkinned)
-                        {
-                            //Get skinned equivalent
-                            vertexType = VertexData.GetSkinnedEquivalent(vertexType);
-                        }
+                        //Process the vertex data
+                        ProcessVertexData(
+                            description, geometry, vertexType,
+                            out var vertices, out var indices);
 
-                        if (description.LoadNormalMaps &&
-                            VertexData.IsTextured(vertexType) &&
-                            !VertexData.IsTangent(vertexType))
-                        {
-                            MeshMaterial meshMaterial = drw.Materials[material];
-                            if (meshMaterial.NormalMap != null)
-                            {
-                                //Get tangent equivalent
-                                vertexType = VertexData.GetTangentEquivalent(vertexType);
-
-                                //Compute tangents
-                                geometry.ComputeTangents();
-                            }
-                        }
-
-                        vertices = geometry.Vertices;
-                        indices = geometry.Indices;
-
-                        if (description.Constraint.HasValue)
-                        {
-                            List<VertexData> tmpVertices = new List<VertexData>();
-                            List<uint> tmpIndices = new List<uint>();
-
-                            if (indices != null && indices.Length > 0)
-                            {
-                                uint index = 0;
-                                for (int i = 0; i < indices.Length; i += 3)
-                                {
-                                    if (description.Constraint.Value.Contains(vertices[indices[i + 0]].Position.Value) != ContainmentType.Disjoint ||
-                                        description.Constraint.Value.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint ||
-                                        description.Constraint.Value.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint)
-                                    {
-                                        tmpVertices.Add(vertices[indices[i + 0]]);
-                                        tmpVertices.Add(vertices[indices[i + 1]]);
-                                        tmpVertices.Add(vertices[indices[i + 2]]);
-                                        tmpIndices.Add(index++);
-                                        tmpIndices.Add(index++);
-                                        tmpIndices.Add(index++);
-                                    }
-                                }
-
-                                vertices = tmpVertices.ToArray();
-                                indices = tmpIndices.ToArray();
-                            }
-                            else
-                            {
-                                for (int i = 0; i < vertices.Length; i += 3)
-                                {
-                                    if (description.Constraint.Value.Contains(vertices[i + 0].Position.Value) != ContainmentType.Disjoint ||
-                                        description.Constraint.Value.Contains(vertices[i + 1].Position.Value) != ContainmentType.Disjoint ||
-                                        description.Constraint.Value.Contains(vertices[i + 2].Position.Value) != ContainmentType.Disjoint)
-                                    {
-                                        tmpVertices.Add(vertices[i + 0]);
-                                        tmpVertices.Add(vertices[i + 1]);
-                                        tmpVertices.Add(vertices[i + 2]);
-                                    }
-                                }
-
-                                vertices = tmpVertices.ToArray();
-                            }
-                        }
-
-                        IVertexData[] vertexList = VertexData.Convert(
+                        //Convert the vertex data to final mesh data
+                        var vertexList = VertexData.Convert(
                             vertexType,
                             vertices,
                             weights,
                             jointNames,
                             bindShapeMatrix);
 
-                        if (vertexList.Length > 0)
+                        if (vertexList?.Length > 0)
                         {
+                            //Create and store the mesh into the drawing data
                             Mesh nMesh = new Mesh(
                                 meshName,
                                 geometry.Material,
@@ -272,6 +197,169 @@ namespace Engine.Common
             }
 
             drw.VolumeMesh = volumeMesh.ToArray();
+        }
+        /// <summary>
+        /// Get vertex type from geometry
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="materials">Material dictionary</param>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="isSkinned">Sets wether the current geometry has skinning data or not</param>
+        /// <param name="material">Material name</param>
+        /// <returns>Returns the vertex type</returns>
+        private static VertexTypes GetVertexType(DrawingDataDescription description, MaterialDictionary materials, VertexTypes vertexType, bool isSkinned, string material)
+        {
+            var res = vertexType;
+            if (isSkinned)
+            {
+                //Get skinned equivalent
+                res = VertexData.GetSkinnedEquivalent(res);
+            }
+
+            if (!description.LoadNormalMaps)
+            {
+                return res;
+            }
+
+            if (VertexData.IsTextured(res) && !VertexData.IsTangent(res))
+            {
+                var meshMaterial = materials[material];
+                if (meshMaterial?.NormalMap != null)
+                {
+                    //Get tangent equivalent
+                    res = VertexData.GetTangentEquivalent(res);
+                }
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Process the vertex data
+        /// </summary>
+        /// <param name="description">Decription</param>
+        /// <param name="geometry">Geometry</param>
+        /// <param name="vertexType">Vertext type</param>
+        /// <param name="vertices">Resulting vertices</param>
+        /// <param name="indices">Resulting indices</param>
+        private static void ProcessVertexData(DrawingDataDescription description, SubMeshContent geometry, VertexTypes vertexType, out VertexData[] vertices, out uint[] indices)
+        {
+            if (VertexData.IsTangent(vertexType))
+            {
+                geometry.ComputeTangents();
+            }
+
+            if (!description.Constraint.HasValue)
+            {
+                vertices = geometry.Vertices;
+                indices = geometry.Indices;
+
+                return;
+            }
+
+            if (geometry.Indices?.Length > 0)
+            {
+                ComputeConstraintIndices(
+                    description.Constraint.Value,
+                    geometry.Vertices, geometry.Indices,
+                    out vertices, out indices);
+            }
+            else
+            {
+                ComputeConstraintVertices(
+                    description.Constraint.Value,
+                    geometry.Vertices,
+                    out vertices);
+
+                indices = new uint[] { };
+            }
+        }
+        /// <summary>
+        /// Compute constraints into vertices
+        /// </summary>
+        /// <param name="constraint">Constraint</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="res">Resulting vertices</param>
+        private static void ComputeConstraintVertices(BoundingBox constraint, VertexData[] vertices, out VertexData[] res)
+        {
+            List<VertexData> tmpVertices = new List<VertexData>();
+
+            for (int i = 0; i < vertices.Length; i += 3)
+            {
+                if (constraint.Contains(vertices[i + 0].Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(vertices[i + 1].Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(vertices[i + 2].Position.Value) != ContainmentType.Disjoint)
+                {
+                    tmpVertices.Add(vertices[i + 0]);
+                    tmpVertices.Add(vertices[i + 1]);
+                    tmpVertices.Add(vertices[i + 2]);
+                }
+            }
+
+            res = tmpVertices.ToArray();
+        }
+        /// <summary>
+        /// Compute constraints into vertices and indices
+        /// </summary>
+        /// <param name="constraint">Constraint</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="indices">Indices</param>
+        /// <param name="resVertices">Resulting vertices</param>
+        /// <param name="resIndices">Resulting indices</param>
+        private static void ComputeConstraintIndices(BoundingBox constraint, VertexData[] vertices, uint[] indices, out VertexData[] resVertices, out uint[] resIndices)
+        {
+            List<VertexData> tmpVertices = new List<VertexData>();
+            List<uint> tmpIndices = new List<uint>();
+
+            uint index = 0;
+            for (int i = 0; i < indices.Length; i += 3)
+            {
+                if (constraint.Contains(vertices[indices[i + 0]].Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(vertices[indices[i + 1]].Position.Value) != ContainmentType.Disjoint ||
+                    constraint.Contains(vertices[indices[i + 2]].Position.Value) != ContainmentType.Disjoint)
+                {
+                    tmpVertices.Add(vertices[indices[i + 0]]);
+                    tmpVertices.Add(vertices[indices[i + 1]]);
+                    tmpVertices.Add(vertices[indices[i + 2]]);
+                    tmpIndices.Add(index++);
+                    tmpIndices.Add(index++);
+                    tmpIndices.Add(index++);
+                }
+            }
+
+            resVertices = tmpVertices.ToArray();
+            resIndices = tmpIndices.ToArray();
+        }
+        /// <summary>
+        /// Reads skinning data
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="modelContent">Model content</param>
+        /// <param name="meshName">Mesh name</param>
+        /// <param name="bindShapeMatrix">Resulting bind shape matrix</param>
+        /// <param name="weights">Resulting weights</param>
+        /// <param name="jointNames">Resulting joints</param>
+        /// <returns>Returns true if the model has skinnging data</returns>
+        private static bool ReadSkinningData(DrawingDataDescription description, ModelContent modelContent, string meshName, out Matrix bindShapeMatrix, out Weight[] weights, out string[] jointNames)
+        {
+            bindShapeMatrix = Matrix.Identity;
+            weights = null;
+            jointNames = null;
+
+            if (description.LoadAnimation && modelContent.Controllers != null && modelContent.SkinningInfo != null)
+            {
+                var cInfo = modelContent.Controllers.GetControllerForMesh(meshName);
+                if (cInfo != null)
+                {
+                    //Apply shape matrix if controller exists but we are not loading animation info
+                    bindShapeMatrix = cInfo.BindShapeMatrix;
+                    weights = cInfo.Weights;
+                    jointNames = modelContent.SkinningInfo.Skeleton.GetJointNames();
+
+                    return true;
+                }
+            }
+
+            return false;
         }
         /// <summary>
         /// Initialize skinning data
@@ -444,45 +532,27 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.BufferManager != null)
+                foreach (var item in this.Meshes?.Values)
                 {
-                    //Remove data from buffer manager
-                    foreach (var dictionary in this.Meshes.Values)
+                    foreach (var mesh in item.Values)
                     {
-                        foreach (var mesh in dictionary.Values)
-                        {
-                            this.BufferManager.RemoveVertexData(mesh.VertexBuffer);
-                            this.BufferManager.RemoveIndexData(mesh.IndexBuffer);
-                        }
+                        //Remove data from buffer manager
+                        this.BufferManager?.RemoveVertexData(mesh.VertexBuffer);
+                        this.BufferManager?.RemoveIndexData(mesh.IndexBuffer);
+
+                        //Dispose the mesh
+                        mesh.Dispose();
                     }
                 }
+                this.Meshes?.Clear();
+                this.Meshes = null;
 
-                if (this.Meshes != null)
-                {
-                    foreach (var item in this.Meshes)
-                    {
-                        foreach (var value in item.Value)
-                        {
-                            value.Value?.Dispose();
-                        }
-                    }
+                this.Materials?.Clear();
+                this.Materials = null;
 
-                    this.Meshes.Clear();
-                    this.Meshes = null;
-                }
-
-                if (this.Materials != null)
-                {
-                    this.Materials.Clear();
-                    this.Materials = null;
-                }
-
-                if (this.Textures != null)
-                {
-                    //Don't dispose textures!
-                    this.Textures.Clear();
-                    this.Textures = null;
-                }
+                //Don't dispose textures!
+                this.Textures?.Clear();
+                this.Textures = null;
 
                 this.SkinningData = null;
             }
