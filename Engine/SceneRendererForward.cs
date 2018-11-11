@@ -55,6 +55,7 @@ namespace Engine
                 {
                     //Initialize context data from update context
                     this.DrawContext.GameTime = gameTime;
+                    this.DrawContext.DrawerMode = DrawerModes.Forward;
                     this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
                     this.DrawContext.CameraVolume = this.UpdateContext.CameraVolume;
                     this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
@@ -246,57 +247,6 @@ namespace Engine
                     this.Game.FrameShoot.Add(item.Key, item.Value);
                 }
             }
-        }
-   
-        /// <summary>
-        /// Draws an opaque object
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <param name="c">Component</param>
-        private void DrawOpaque(DrawContext context, SceneObject c)
-        {
-            var graphics = this.Game.Graphics;
-
-            Counters.MaxInstancesPerFrame += c.Count;
-
-            graphics.SetRasterizerDefault();
-            graphics.SetBlendDefault();
-
-            if (c.DepthEnabled)
-            {
-                graphics.SetDepthStencilZEnabled();
-            }
-            else
-            {
-                graphics.SetDepthStencilZDisabled();
-            }
-
-            c.Get<IDrawable>().Draw(context);
-        }
-        /// <summary>
-        /// Draws an transparent object
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <param name="c">Component</param>
-        private void DrawTransparent(DrawContext context, SceneObject c)
-        {
-            var graphics = this.Game.Graphics;
-
-            Counters.MaxInstancesPerFrame += c.Count;
-
-            graphics.SetRasterizerDefault();
-            graphics.SetBlendTransparent();
-
-            if (c.DepthEnabled)
-            {
-                graphics.SetDepthStencilZEnabled();
-            }
-            else
-            {
-                graphics.SetDepthStencilZDisabled();
-            }
-
-            c.Get<IDrawable>().Draw(context);
         }
     }
 }

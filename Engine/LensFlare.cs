@@ -152,7 +152,7 @@ namespace Engine
                     this.glowSprite.Update(context);
 
                     //Update flares
-                    if (this.flares?.Length <= 0)
+                    if (this.flares?.Length > 0)
                     {
                         for (int i = 0; i < this.flares.Length; i++)
                         {

@@ -226,13 +226,16 @@ namespace Engine
                 {
                     //Initialize context data from update context
                     this.DrawContext.GameTime = gameTime;
+                    this.DrawContext.DrawerMode = DrawerModes.Deferred;
                     this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
                     this.DrawContext.CameraVolume = this.UpdateContext.CameraVolume;
                     this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
                     this.DrawContext.EyeTarget = this.UpdateContext.EyeDirection;
+
                     //Initialize context data from scene
                     this.DrawContext.Lights = scene.Lights;
                     //Initialize context data from shadow mapping
+
                     this.DrawContext.ShadowMapDirectional = this.ShadowMapperDirectional;
                     this.DrawContext.ShadowMapPoint = this.ShadowMapperPoint;
                     this.DrawContext.ShadowMapSpot = this.ShadowMapperSpot;
@@ -337,7 +340,7 @@ namespace Engine
                 Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
                 //Draw scene on g-buffer render targets
-                this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, deferredEnabledComponents, true);
+                this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, deferredEnabledComponents);
 #if DEBUG
                 swGeometryBufferDraw.Stop();
 
@@ -409,7 +412,7 @@ namespace Engine
                 this.DrawContext.DrawerMode = DrawerModes.Forward;
 
                 //Draw scene
-                this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, deferredDisabledComponents, false);
+                this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, deferredDisabledComponents);
 
                 //Set deferred mode
                 this.DrawContext.DrawerMode = DrawerModes.Deferred;
@@ -673,8 +676,7 @@ namespace Engine
         /// </summary>
         /// <param name="context">Context</param>
         /// <param name="components">Components</param>
-        /// <param name="deferred">Deferred drawing</param>
-        private void DrawResultComponents(DrawContext context, int index, IEnumerable<SceneObject> components, bool deferred)
+        private void DrawResultComponents(DrawContext context, int index, IEnumerable<SceneObject> components)
         {
             //Save current drawing mode
             var mode = context.DrawerMode;
@@ -690,7 +692,7 @@ namespace Engine
                 opaques.Sort((c1, c2) => this.SortOpaques(index, c1, c2));
 
                 //Draw items
-                opaques.ForEach((c) => DrawOpaque(context, c, deferred));
+                opaques.ForEach((c) => DrawOpaque(context, c));
             }
 
             //Then transparents
@@ -704,7 +706,7 @@ namespace Engine
                 transparents.Sort((c1, c2) => this.SortTransparents(index, c1, c2));
 
                 //Draw items
-                transparents.ForEach((c) => this.DrawTransparent(context, c, deferred));
+                transparents.ForEach((c) => this.DrawTransparent(context, c));
             }
 
             //Restore drawing mode
@@ -712,70 +714,34 @@ namespace Engine
         }
 
         /// <summary>
-        /// Draws an opaque object
+        /// Sets blend state for opaques rendering
         /// </summary>
         /// <param name="context">Drawing context</param>
-        /// <param name="c">Component</param>
-        private void DrawOpaque(DrawContext context, SceneObject c, bool deferred)
+        protected override void SetBlendStateOpaque(DrawContext context)
         {
-            var graphics = this.Game.Graphics;
-
-            Counters.MaxInstancesPerFrame += c.Count;
-
-            graphics.SetRasterizerDefault();
-
-            if (deferred)
+            if (context.DrawerMode.HasFlag(DrawerModes.Deferred))
             {
                 this.SetBlendDeferredComposer();
             }
             else
             {
-                graphics.SetBlendDefault();
+                this.Game.Graphics.SetBlendDefault();
             }
-
-            if (c.DepthEnabled)
-            {
-                graphics.SetDepthStencilZEnabled();
-            }
-            else
-            {
-                graphics.SetDepthStencilZDisabled();
-            }
-
-            c.Get<IDrawable>().Draw(context);
         }
         /// <summary>
-        /// Draws an transparent object
+        /// Sets blend state for transparents rendering
         /// </summary>
         /// <param name="context">Drawing context</param>
-        /// <param name="c">Component</param>
-        private void DrawTransparent(DrawContext context, SceneObject c, bool deferred)
+        protected override void SetBlendStateTransparent(DrawContext context)
         {
-            var graphics = this.Game.Graphics;
-
-            Counters.MaxInstancesPerFrame += c.Count;
-
-            graphics.SetRasterizerDefault();
-
-            if (deferred)
+            if (context.DrawerMode.HasFlag(DrawerModes.Deferred))
             {
                 this.SetBlendDeferredComposerTransparent();
             }
             else
             {
-                graphics.SetBlendTransparent();
+                this.Game.Graphics.SetBlendTransparent();
             }
-
-            if (c.DepthEnabled)
-            {
-                graphics.SetDepthStencilZEnabled();
-            }
-            else
-            {
-                graphics.SetDepthStencilZDisabled();
-            }
-
-            c.Get<IDrawable>().Draw(context);
         }
 
         /// <summary>

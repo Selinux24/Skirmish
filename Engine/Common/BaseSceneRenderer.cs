@@ -403,6 +403,69 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Draws an opaque object
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        /// <param name="c">Component</param>
+        protected virtual void DrawOpaque(DrawContext context, SceneObject c)
+        {
+            var graphics = this.Game.Graphics;
+
+            Counters.MaxInstancesPerFrame += c.Count;
+
+            graphics.SetRasterizerDefault();
+
+            this.SetBlendStateOpaque(context);
+
+            if (c.DepthEnabled)
+            {
+                graphics.SetDepthStencilZEnabled();
+            }
+            else
+            {
+                graphics.SetDepthStencilZDisabled();
+            }
+
+            c.Get<IDrawable>().Draw(context);
+        }
+        /// <summary>
+        /// Draws an transparent object
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        /// <param name="c">Component</param>
+        protected virtual void DrawTransparent(DrawContext context, SceneObject c)
+        {
+            var graphics = this.Game.Graphics;
+
+            Counters.MaxInstancesPerFrame += c.Count;
+
+            graphics.SetRasterizerDefault();
+
+            this.SetBlendStateTransparent(context);
+
+            if (c.DepthEnabled)
+            {
+                graphics.SetDepthStencilZEnabled();
+            }
+            else
+            {
+                graphics.SetDepthStencilZDisabled();
+            }
+
+            c.Get<IDrawable>().Draw(context);
+        }
+
+        protected virtual void SetBlendStateOpaque(DrawContext context)
+        {
+            this.Game.Graphics.SetBlendDefault();
+        }
+
+        protected virtual void SetBlendStateTransparent(DrawContext context)
+        {
+            this.Game.Graphics.SetBlendTransparent();
+        }
+
+        /// <summary>
         /// Draw shadow maps
         /// </summary>
         /// <param name="gameTime">Game time</param>
