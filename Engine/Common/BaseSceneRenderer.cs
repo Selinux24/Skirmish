@@ -297,6 +297,112 @@ namespace Engine.Common
         public abstract void Draw(GameTime gameTime, Scene scene);
 
         /// <summary>
+        /// Gets opaque components
+        /// </summary>
+        /// <param name="index">Cull index</param>
+        /// <param name="components">Component list</param>
+        /// <returns>Returns the opaque components</returns>
+        protected virtual List<SceneObject> GetOpaques(int index, IEnumerable<SceneObject> components)
+        {
+            var opaques = components.Where(c =>
+            {
+                if (!c.Is<Drawable>()) return false;
+
+                var cull = c.Get<ICullable>();
+                if (cull != null)
+                {
+                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                }
+
+                return true;
+            });
+
+            return opaques.ToList();
+        }
+        /// <summary>
+        /// Sorting opaque list comparer
+        /// </summary>
+        /// <param name="index">Cull index</param>
+        /// <param name="c1">First component</param>
+        /// <param name="c2">Second component</param>
+        /// <returns>Returns sorting order (nearest first)</returns>
+        protected virtual int SortOpaques(int index, SceneObject c1, SceneObject c2)
+        {
+            int res = c1.Order.CompareTo(c2.Order);
+
+            if (res == 0)
+            {
+                res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+            }
+
+            if (res == 0)
+            {
+                var cull1 = c1.Get<ICullable>();
+                var cull2 = c2.Get<ICullable>();
+
+                var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
+                var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
+
+                res = -d1.CompareTo(d2);
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Gets transparent components
+        /// </summary>
+        /// <param name="index">Cull index</param>
+        /// <param name="components">Component list</param>
+        /// <returns>Returns the transparent components</returns>
+        protected virtual List<SceneObject> GetTransparents(int index, IEnumerable<SceneObject> components)
+        {
+            var transparents = components.Where(c =>
+            {
+                if (!c.AlphaEnabled) return false;
+
+                if (!c.Is<Drawable>()) return false;
+
+                var cull = c.Get<ICullable>();
+                if (cull != null)
+                {
+                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                }
+
+                return true;
+            });
+
+            return transparents.ToList();
+        }
+        /// <summary>
+        /// Sorting transparent list comparer
+        /// </summary>
+        /// <param name="index">Cull index</param>
+        /// <param name="c1">First component</param>
+        /// <param name="c2">Second component</param>
+        /// <returns>Returns sorting order (far first)</returns>
+        protected virtual int SortTransparents(int index, SceneObject c1, SceneObject c2)
+        {
+            int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+            if (res == 0)
+            {
+                var cull1 = c1.Get<ICullable>();
+                var cull2 = c2.Get<ICullable>();
+
+                var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
+                var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
+
+                res = -d1.CompareTo(d2);
+            }
+
+            if (res == 0)
+            {
+                res = -c1.Order.CompareTo(c2.Order);
+            }
+
+            return -res;
+        }
+
+        /// <summary>
         /// Draw shadow maps
         /// </summary>
         /// <param name="gameTime">Game time</param>
