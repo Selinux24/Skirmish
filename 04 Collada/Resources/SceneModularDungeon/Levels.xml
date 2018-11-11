@@ -166,7 +166,7 @@
       </map>
       <objects>
         <item asset_map_id="entrance" asset_id="door" id="start" type="Entrance"></item>
-        <item asset_map_id="exit" asset_id="door" id="end" type="Exit"></item>
+        <item asset_map_id="exit" asset_id="door" id="end" type="Exit" next_level="Lvl2"></item>
 
         <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
           <position>0 2 8.9</position>

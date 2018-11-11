@@ -841,12 +841,12 @@ namespace Collada
         {
             if (item != null && this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                // TODO: Set navigation between levels in levels file
-                if (this.scenery.Instance.CurrentLevel.Name == "Lvl1")
+                string nextLevel = item.Object.NextLevel;
+                if (!string.IsNullOrEmpty(nextLevel))
                 {
-                    this.ChangeToLevel("Lvl2");
+                    this.ChangeToLevel(nextLevel);
                 }
-                else if (this.scenery.Instance.CurrentLevel.Name == "Lvl2")
+                else
                 {
                     this.Game.SetScene<SceneStart>();
                 }
