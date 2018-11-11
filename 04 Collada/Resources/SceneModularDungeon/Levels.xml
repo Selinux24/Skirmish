@@ -538,6 +538,40 @@
             <velocity>0 0 0</velocity>
           </particleLight>
         </item>
+
+        <item asset_name="Dn_Jail_Wall_Base_1">
+          <position>32 0 -20</position>
+          <rotation>rot90</rotation>
+        </item>
+        <item asset_name="Dn_Jail_Wall_1">
+          <position>32 0 -20</position>
+          <rotation>rot90</rotation>
+        </item>
+        <item asset_name="Dn_Jail_Wall_Base_1">
+          <position>34 0 -20</position>
+          <rotation>rot90</rotation>
+        </item>
+        <item asset_name="Dn_Jail_Wall_2">
+          <position>34 0 -20</position>
+          <rotation>rot90</rotation>
+        </item>
+        <item asset_name="Dn_Jail_Wall_Base_1">
+          <position>36 0 -20</position>
+          <rotation>rot90</rotation>
+        </item>
+        <item asset_name="Dn_Jail_Wall_1">
+          <position>36 0 -20</position>
+          <rotation>rot90</rotation>
+        </item>
+        <item asset_name="Dn_Jail_Wall_Base_1">
+          <position>38 0 -20</position>
+          <rotation>rot90</rotation>
+        </item>
+        <item asset_name="Dn_Jail_Wall_2">
+          <position>38 0 -20</position>
+          <rotation>rot90</rotation>
+        </item>
+        
       </objects>
     </level>
     <level name="Lvl2">

@@ -39,11 +39,11 @@ namespace Engine
         /// </summary>
         /// <remarks>This box isn't transformed if position changes</remarks>
         private BoundingBox boundingBox;
-        /// <summary>
-        /// Visible flag
-        /// </summary>
-        private bool visible = false;
 
+        /// <summary>
+        /// Particle name
+        /// </summary>
+        public string Name { get; set; }
         /// <summary>
         /// Emitter position
         /// </summary>
@@ -89,17 +89,15 @@ namespace Engine
         /// <summary>
         /// Gets or sets wheter the emitter particles is visible
         /// </summary>
-        public bool Visible
-        {
-            get
-            {
-                return this.visible && (this.Distance <= this.MaximumDistance);
-            }
-            set
-            {
-                this.visible = value;
-            }
-        }
+        public bool Visible { get; set; } = true;
+        /// <summary>
+        /// Gets or sets wheter the emitter particles is culled
+        /// </summary>
+        public bool Culled { get; set; } = false;
+        /// <summary>
+        /// Gets or sets the instance with the emitter is attached to
+        /// </summary>
+        public ITransformable3D Instance { get; set; }
 
         /// <summary>
         /// Total particle system time
@@ -109,6 +107,16 @@ namespace Engine
         /// Elapsed time
         /// </summary>
         public float ElapsedTime { get; private set; }
+        /// <summary>
+        /// Returns true if the current emitter is drawable
+        /// </summary>
+        public bool IsDrawable
+        {
+            get
+            {
+                return Visible && !Culled && (Distance <= MaximumDistance);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -206,7 +214,7 @@ namespace Engine
                 distance = Vector3.DistanceSquared(volume.Position, this.Position);
             }
 
-            return !inside;
+            return this.Culled = !inside;
         }
 
         /// <summary>

@@ -300,37 +300,42 @@ namespace Engine
 
                         for (int i = 0; i < model.Instance.Count; i++)
                         {
-                            if (objList[i].LoadLights)
+                            if (!objList[i].LoadLights)
                             {
-                                var trn = model.Instance[i].Manipulator.LocalTransform;
+                                continue;
+                            }
 
-                                var lights = model.Instance[i].Lights;
-                                if (lights != null && lights.Length > 0)
+                            var instance = model.Instance[i];
+
+                            var trn = instance.Manipulator.LocalTransform;
+
+                            var lights = instance.Lights;
+                            if (lights?.Length > 0)
+                            {
+                                var emitterDesc = objList[i].ParticleLight;
+
+                                foreach (var light in lights)
                                 {
-                                    var emitterDesc = objList[i].ParticleLight;
+                                    light.CastShadow = objList[i].CastShadows;
 
-                                    foreach (var light in lights)
+                                    if (emitterDesc != null && light is SceneLightPoint pointL)
                                     {
-                                        light.CastShadow = objList[i].CastShadows;
+                                        var pos = Vector3.TransformCoordinate(pointL.Position, trn);
 
-                                        if (emitterDesc != null && light is SceneLightPoint pointL)
+                                        var emitter = new ParticleEmitter(emitterDesc)
                                         {
-                                            var pos = Vector3.TransformCoordinate(pointL.Position, trn);
+                                            Position = pos,
+                                            Instance = instance,
+                                        };
 
-                                            var emitter = new ParticleEmitter(emitterDesc)
-                                            {
-                                                Position = pos,
-                                            };
-
-                                            this.particleManager.Instance.AddParticleSystem(
-                                                ParticleSystemTypes.CPU,
-                                                this.particleDescriptors[emitterDesc.Name],
-                                                emitter);
-                                        }
+                                        this.particleManager.Instance.AddParticleSystem(
+                                            ParticleSystemTypes.CPU,
+                                            this.particleDescriptors[emitterDesc.Name],
+                                            emitter);
                                     }
-
-                                    this.Scene.Lights.AddRange(lights);
                                 }
+
+                                this.Scene.Lights.AddRange(lights);
                             }
                         }
 
@@ -352,7 +357,12 @@ namespace Engine
                     var instance = this.FindAssetInstance(obj.AssetMapId, obj.AssetId);
                     if (instance != null)
                     {
-                        this.entities.Add(new ModularSceneryItem(obj, instance));
+                        //Find emitters
+                        var emitters = this.particleManager.Instance.ParticleSystems
+                            .Where(p => p.Emitter.Instance == instance)
+                            .Select(p => p.Emitter);
+
+                        this.entities.Add(new ModularSceneryItem(obj, instance, emitters.ToArray()));
                     }
                 }
                 else
@@ -361,7 +371,12 @@ namespace Engine
                     var instance = this.FindObjectInstance(obj.AssetName, obj.Id);
                     if (instance != null)
                     {
-                        this.entities.Add(new ModularSceneryItem(obj, instance));
+                        //Find emitters
+                        var emitters = this.particleManager.Instance.ParticleSystems
+                            .Where(p => p.Emitter.Instance == instance)
+                            .Select(p => p.Emitter);
+
+                        this.entities.Add(new ModularSceneryItem(obj, instance, emitters.ToArray()));
                     }
                 }
             }
@@ -672,42 +687,49 @@ namespace Engine
         /// Gets objects into the specified volume
         /// </summary>
         /// <param name="bbox">Bounding box</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, bool sortByDistance)
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, bool useSphere, bool sortByDistance)
         {
-            return GetObjects(bbox, null, sortByDistance);
+            return GetObjects(bbox, null, useSphere, sortByDistance);
         }
         /// <summary>
         /// Gets objects into the specified volume
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <param name="filter">Filter by entity type</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, ModularSceneryObjectTypes filter, bool sortByDistance)
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
         {
-            return GetObjects(bbox, filter, sortByDistance);
+            return GetObjects(bbox, filter, useSphere, sortByDistance);
         }
         /// <summary>
         /// Gets objects into the specified volume
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <param name="filter">Filter by entity type</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private ModularSceneryItem[] GetObjects(BoundingBox bbox, ModularSceneryObjectTypes? filter, bool sortByDistance)
+        private ModularSceneryItem[] GetObjects(BoundingBox bbox, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
-            List<ModularSceneryItem> res = new List<ModularSceneryItem>();
-
-            for (int i = 0; i < entities.Count; i++)
-            {
-                var isOfType = !filter.HasValue || filter.Value.HasFlag(entities[i].Object.Type);
-                if (isOfType && bbox.Intersects(entities[i].Item.GetBoundingBox()))
+            var res = entities
+                .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
+                .Where(e =>
                 {
-                    res.Add(entities[i]);
-                }
-            }
+                    if (useSphere)
+                    {
+                        return bbox.Contains(e.Item.GetBoundingSphere()) != ContainmentType.Disjoint;
+                    }
+                    else
+                    {
+                        return bbox.Contains(e.Item.GetBoundingBox()) != ContainmentType.Disjoint;
+                    }
+                })
+                .ToList();
 
             if (sortByDistance)
             {
@@ -728,46 +750,124 @@ namespace Engine
         /// Gets objects into the specified volume
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, bool sortByDistance)
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, bool useSphere, bool sortByDistance)
         {
-            return GetObjects(sphere, null, sortByDistance);
+            return GetObjects(sphere, null, useSphere, sortByDistance);
         }
         /// <summary>
         /// Gets objects into the specified volume
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
         /// <param name="filter">Filter by entity type</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, ModularSceneryObjectTypes filter, bool sortByDistance)
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
         {
-            return GetObjects(sphere, filter, sortByDistance);
+            return GetObjects(sphere, filter, useSphere, sortByDistance);
         }
         /// <summary>
         /// Gets objects into the specified volume
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
         /// <param name="filter">Filter by entity type</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private ModularSceneryItem[] GetObjects(BoundingSphere sphere, ModularSceneryObjectTypes? filter, bool sortByDistance)
+        private ModularSceneryItem[] GetObjects(BoundingSphere sphere, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
-            List<ModularSceneryItem> res = new List<ModularSceneryItem>();
-
-            for (int i = 0; i < entities.Count; i++)
-            {
-                var isOfType = !filter.HasValue || filter.Value.HasFlag(entities[i].Object.Type);
-                if (isOfType && sphere.Intersects(entities[i].Item.GetBoundingSphere()))
+            var res = entities
+                .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
+                .Where(e =>
                 {
-                    res.Add(entities[i]);
-                }
-            }
+                    if (useSphere)
+                    {
+                        var sph = e.Item.GetBoundingSphere();
+
+                        return sphere.Contains(ref sph) != ContainmentType.Disjoint;
+                    }
+                    else
+                    {
+                        var bbox = e.Item.GetBoundingBox();
+
+                        return sphere.Contains(ref bbox) != ContainmentType.Disjoint;
+                    }
+                })
+                .ToList();
 
             if (sortByDistance)
             {
                 var center = sphere.Center;
+
+                res.Sort((a, b) =>
+                {
+                    var aPos = Vector3.DistanceSquared(a.Item.Manipulator.Position, center);
+                    var bPos = Vector3.DistanceSquared(b.Item.Manipulator.Position, center);
+
+                    return aPos.CompareTo(bPos);
+                });
+            }
+
+            return res.ToArray();
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingFrustum frustum, bool useSphere, bool sortByDistance)
+        {
+            return GetObjects(frustum, null, useSphere, sortByDistance);
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <param name="filter">Filter by entity type</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        public ModularSceneryItem[] GetObjectsInVolume(BoundingFrustum frustum, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
+        {
+            return GetObjects(frustum, filter, useSphere, sortByDistance);
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <param name="filter">Filter by entity type</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        private ModularSceneryItem[] GetObjects(BoundingFrustum frustum, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
+        {
+            var res = entities
+                .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
+                .Where(e =>
+                {
+                    if (useSphere)
+                    {
+                        var sph = e.Item.GetBoundingSphere();
+
+                        return frustum.Contains(ref sph) != ContainmentType.Disjoint;
+                    }
+                    else
+                    {
+                        var bbox = e.Item.GetBoundingBox();
+
+                        return frustum.Contains(ref bbox) != ContainmentType.Disjoint;
+                    }
+                })
+                .ToList();
+
+            if (sortByDistance)
+            {
+                var center = frustum.GetCameraParams().Position;
 
                 res.Sort((a, b) =>
                 {
@@ -875,9 +975,35 @@ namespace Engine
             /// <summary>
             /// Builds the asset map
             /// </summary>
+            /// <param name="assetConfiguration">Configuration</param>
+            /// <param name="assets">Asset list</param>
             public void Build(ModularSceneryAssetConfiguration assetConfiguration, Dictionary<string, SceneObject<ModelInstanced>> assets)
             {
-                //Fill per complex asset bounding boxex
+                //Fill per complex asset bounding boxes
+                Fill(assets);
+
+                //Find connections
+                for (int s = 0; s < this.assetMap.Count; s++)
+                {
+                    for (int t = s + 1; t < this.assetMap.Count; t++)
+                    {
+                        var source = this.assetMap[s];
+                        var target = this.assetMap[t];
+
+                        if (source.Volume.Contains(target.Volume) != ContainmentType.Disjoint)
+                        {
+                            //Find if contacted volumes has portals between them
+                            FindPortals(assetConfiguration, source, target, s, t);
+                        }
+                    }
+                }
+            }
+            /// <summary>
+            /// Fills the full bounding volume of the assets in the map
+            /// </summary>
+            /// <param name="assets">Asset list</param>
+            private void Fill(Dictionary<string, SceneObject<ModelInstanced>> assets)
+            {
                 for (int i = 0; i < this.assetMap.Count; i++)
                 {
                     var item = this.assetMap[i];
@@ -903,39 +1029,36 @@ namespace Engine
 
                     item.Volume = bbox;
                 }
-
-                //Find connections
-                for (int s = 0; s < this.assetMap.Count; s++)
+            }
+            /// <summary>
+            /// Finds portals between the specified asset items
+            /// </summary>
+            /// <param name="assetConfiguration">Configuration</param>
+            /// <param name="source">Source item</param>
+            /// <param name="target">Target item</param>
+            /// <param name="s">Source index</param>
+            /// <param name="t">Target index</param>
+            private void FindPortals(ModularSceneryAssetConfiguration assetConfiguration, AssetMapItem source, AssetMapItem target, int s, int t)
+            {
+                var sourceConf = Array.Find(assetConfiguration.Assets, (a => a.Name == source.Name));
+                if (sourceConf.Connections?.Length > 0)
                 {
-                    for (int t = s + 1; t < this.assetMap.Count; t++)
+                    var targetConf = Array.Find(assetConfiguration.Assets, (a => a.Name == target.Name));
+                    if (targetConf.Connections?.Length > 0)
                     {
-                        var source = this.assetMap[s];
-                        var target = this.assetMap[t];
+                        //Transform connection positions and directions
+                        var sourcePositions = sourceConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, source.Transform));
+                        var targetPositions = targetConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, target.Transform));
 
-                        if (source.Volume.Contains(target.Volume) != ContainmentType.Disjoint)
+                        if (sourcePositions.Any(p1 => targetPositions.Contains(p1)))
                         {
-                            //Find if contacted volumes has portals between them
-                            var sourceConf = Array.Find(assetConfiguration.Assets, (a => a.Name == source.Name));
-                            if (sourceConf.Connections != null && sourceConf.Connections.Length > 0)
-                            {
-                                var targetConf = Array.Find(assetConfiguration.Assets, (a => a.Name == target.Name));
-                                if (targetConf.Connections != null && targetConf.Connections.Length > 0)
-                                {
-                                    //Transform connection positions and directions
-                                    var sourcePositions = sourceConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, source.Transform));
-                                    var targetPositions = targetConf.Connections.Select(i => Vector3.TransformCoordinate(i.Position, target.Transform));
-
-                                    if (sourcePositions.Any(p1 => targetPositions.Contains(p1)))
-                                    {
-                                        source.Connections.Add(t);
-                                        target.Connections.Add(s);
-                                    }
-                                }
-                            }
+                            source.Connections.Add(t);
+                            target.Connections.Add(s);
                         }
                     }
                 }
             }
+
             /// <summary>
             /// Gets all complex map asset volumes
             /// </summary>

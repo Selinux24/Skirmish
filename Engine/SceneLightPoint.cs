@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -88,40 +89,16 @@ namespace Engine
         /// <param name="castShadow">Light casts shadow</param>
         /// <param name="diffuse">Diffuse color contribution</param>
         /// <param name="specular">Specular color contribution</param>
-        /// <param name="enabled">Lights is enabled</param>
-        /// <param name="position">Position</param>
-        /// <param name="radius">Radius</param>
-        /// <param name="intensity">Intensity</param>
-        public SceneLightPoint(
-            string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled,
-            Vector3 position, float radius, float intensity)
-            : base(name, castShadow, diffuse, specular, enabled)
-        {
-            this.initialTransform = Matrix.Translation(position);
-            this.initialRadius = radius;
-            this.initialIntensity = intensity;
-
-            this.UpdateLocalTransform();
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Light name</param>
-        /// <param name="castShadow">Light casts shadow</param>
-        /// <param name="diffuse">Diffuse color contribution</param>
-        /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Light is enabled</param>
-        /// <param name="transform">Initial transform</param>
-        /// <param name="radius">Radius</param>
-        /// <param name="intensity">Intensity</param>
+        /// <param name="description">Light description</param>
         public SceneLightPoint(
             string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled,
-            Matrix transform, float radius, float intensity)
+            SceneLightPointDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.initialTransform = transform;
-            this.initialRadius = radius;
-            this.initialIntensity = intensity;
+            this.initialTransform = description.Transform;
+            this.initialRadius = description.Radius;
+            this.initialIntensity = description.Intensity;
 
             this.UpdateLocalTransform();
         }
@@ -145,7 +122,7 @@ namespace Engine
         /// <param name="sliceCount">Sphere slice count (vertical subdivisions - meridians)</param>
         /// <param name="stackCount">Sphere stack count (horizontal subdivisions - parallels)</param>
         /// <returns>Returns a line list representing the light volume</returns>
-        public Line3D[] GetVolume(int sliceCount, int stackCount)
+        public IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount)
         {
             return Line3D.CreateWiredSphere(this.BoundingSphere, sliceCount, stackCount);
         }

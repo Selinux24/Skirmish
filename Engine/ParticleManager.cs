@@ -11,14 +11,14 @@ namespace Engine
     public class ParticleManager : Drawable
     {
         /// <summary>
-        /// Particle systems list
-        /// </summary>
-        private List<IParticleSystem> particleSystems = new List<IParticleSystem>();
-        /// <summary>
         /// Collection for particle system disposition
         /// </summary>
         private List<IParticleSystem> toDelete = new List<IParticleSystem>();
 
+        /// <summary>
+        /// Particle systems list
+        /// </summary>
+        public List<IParticleSystem> ParticleSystems { get; private set; } = new List<IParticleSystem>();
         /// <summary>
         /// Current particle count
         /// </summary>
@@ -30,7 +30,7 @@ namespace Engine
         {
             get
             {
-                return this.particleSystems.Count;
+                return this.ParticleSystems.Count;
             }
         }
 
@@ -59,16 +59,16 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.particleSystems != null)
+                if (this.ParticleSystems != null)
                 {
-                    for (int i = 0; i < this.particleSystems.Count; i++)
+                    for (int i = 0; i < this.ParticleSystems.Count; i++)
                     {
-                        this.particleSystems[i]?.Dispose();
-                        this.particleSystems[i] = null;
+                        this.ParticleSystems[i]?.Dispose();
+                        this.ParticleSystems[i] = null;
                     }
 
-                    this.particleSystems.Clear();
-                    this.particleSystems = null;
+                    this.ParticleSystems.Clear();
+                    this.ParticleSystems = null;
                 }
 
                 if (this.toDelete != null)
@@ -91,9 +91,9 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            if (this.particleSystems != null && this.particleSystems.Count > 0)
+            if (this.ParticleSystems?.Count > 0)
             {
-                this.particleSystems.ForEach(p =>
+                this.ParticleSystems.ForEach(p =>
                 {
                     p.Update(context);
 
@@ -107,7 +107,7 @@ namespace Engine
                 {
                     toDelete.ForEach(p =>
                     {
-                        this.particleSystems.Remove(p);
+                        this.ParticleSystems.Remove(p);
                         this.AllocatedParticleCount -= p.MaxConcurrentParticles;
                         p.Dispose();
                     });
@@ -116,7 +116,7 @@ namespace Engine
                 }
 
                 //Sort active particles (draw far away particles first)
-                this.particleSystems.Sort((p1, p2) =>
+                this.ParticleSystems.Sort((p1, p2) =>
                 {
                     return p2.Emitter.Distance.CompareTo(p1.Emitter.Distance);
                 });
@@ -128,9 +128,12 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            this.particleSystems.ForEach(p =>
+            this.ParticleSystems.ForEach(p =>
             {
-                if (p.Emitter.Visible) p.Draw(context);
+                if (p.Emitter.IsDrawable)
+                {
+                    p.Draw(context);
+                }
             });
         }
         /// <summary>
@@ -145,7 +148,7 @@ namespace Engine
             distance = float.MaxValue;
 
             float minDistance = float.MaxValue;
-            this.particleSystems.ForEach(p =>
+            this.ParticleSystems.ForEach(p =>
             {
                 var c = p.Emitter.Cull(volume, out float d);
                 if (!c)
@@ -153,8 +156,6 @@ namespace Engine
                     cull = false;
                     minDistance = Math.Min(d, minDistance);
                 }
-
-                p.Emitter.Visible = !c;
             });
 
             if (!cull)
@@ -203,7 +204,7 @@ namespace Engine
 
             this.AllocatedParticleCount += pSystem.MaxConcurrentParticles;
 
-            this.particleSystems.Add(pSystem);
+            this.ParticleSystems.Add(pSystem);
 
             return pSystem;
         }
@@ -214,7 +215,7 @@ namespace Engine
         /// <returns>Returns the particle system at specified index</returns>
         public IParticleSystem GetParticleSystem(int index)
         {
-            return index < this.particleSystems.Count ? this.particleSystems[index] : null;
+            return index < this.ParticleSystems.Count ? this.ParticleSystems[index] : null;
         }
         /// <summary>
         /// Gets a particle systema by name
@@ -225,7 +226,7 @@ namespace Engine
         {
             if (!string.IsNullOrWhiteSpace(name))
             {
-                return this.particleSystems.Find(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
+                return this.ParticleSystems.Find(p => string.Equals(p.Name, name, StringComparison.OrdinalIgnoreCase));
             }
             else
             {
@@ -237,7 +238,7 @@ namespace Engine
         /// </summary>
         public void Clear()
         {
-            this.toDelete.AddRange(this.particleSystems);
+            this.toDelete.AddRange(this.ParticleSystems);
         }
 
         /// <summary>
@@ -246,7 +247,7 @@ namespace Engine
         /// <returns>Returns the text representation of the particle manager</returns>
         public override string ToString()
         {
-            return string.Format("Particle systems: {0}; Allocated particles: {1}", particleSystems.Count, this.AllocatedParticleCount);
+            return string.Format("Particle systems: {0}; Allocated particles: {1}", ParticleSystems.Count, this.AllocatedParticleCount);
         }
     }
 }

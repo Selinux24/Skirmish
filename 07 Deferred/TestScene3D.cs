@@ -1000,11 +1000,7 @@ namespace Deferred
                             Color.Yellow,
                             Color.Yellow,
                             true,
-                            lightPosition,
-                            direction,
-                            25,
-                            25,
-                            25f);
+                            SceneLightSpotDescription.Create(lightPosition, direction, 25, 25, 25f));
 
                         this.Lights.Add(this.spotLight);
 
@@ -1038,9 +1034,7 @@ namespace Deferred
                             color,
                             color,
                             true,
-                            lightPosition,
-                            5f,
-                            10f)
+                            SceneLightPointDescription.Create(lightPosition, 5f, 10f))
                         {
                             State = rnd.NextFloat(0, 1) >= 0.5f ? 1 : -1
                         };

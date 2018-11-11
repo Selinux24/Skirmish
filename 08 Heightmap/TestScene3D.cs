@@ -707,7 +707,8 @@ namespace Heightmap
             this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
             this.ToggleFog();
 
-            this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, this.Camera.Position, this.Camera.Direction, 25f, 100, 1000);
+            var lanternDesc = SceneLightSpotDescription.Create(this.Camera.Position, this.Camera.Direction, 25f, 100, 1000);
+            this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, lanternDesc);
             this.Lights.Add(this.lantern);
 
             Task.WaitAll(new[]
@@ -915,11 +916,7 @@ namespace Heightmap
                     Color.Red,
                     Color.Red,
                     true,
-                    position,
-                    Vector3.Normalize(Vector3.One * -1f),
-                    25,
-                    25,
-                    100);
+                    SceneLightSpotDescription.Create(position, Vector3.Normalize(Vector3.One * -1f), 25, 25, 100));
 
                 this.spotLight2 = new SceneLightSpot(
                     "Blue Spot",
@@ -927,11 +924,7 @@ namespace Heightmap
                     Color.Blue,
                     Color.Blue,
                     true,
-                    position,
-                    Vector3.Normalize(Vector3.One * -1f),
-                    25,
-                    25,
-                    100);
+                    SceneLightSpotDescription.Create(position, Vector3.Normalize(Vector3.One * -1f), 25, 25, 100));
 
                 this.Lights.Add(this.spotLight1);
                 this.Lights.Add(this.spotLight2);
@@ -966,9 +959,7 @@ namespace Heightmap
                     color,
                     color,
                     true,
-                    pos,
-                    4f,
-                    5f);
+                    SceneLightPointDescription.Create(pos, 4f, 5f));
 
                 this.Lights.Add(torchLights[i - 1]);
 
@@ -1069,7 +1060,7 @@ namespace Heightmap
                     DepthEnabled = true,
                     Dynamic = true,
                     Color = new Color4(1.0f, 0.0f, 0.0f, 0.55f),
-                    Lines = listBoxes,
+                    Lines = listBoxes.ToArray(),
                 };
                 this.bboxesDrawer = this.AddComponent<LineListDrawer>(desc);
                 this.bboxesDrawer.Visible = false;
@@ -1430,7 +1421,7 @@ namespace Heightmap
                 {
                     var desc = new LineListDrawerDescription()
                     {
-                        Lines = Line3D.CreateWiredBox(bboxes),
+                        Lines = Line3D.CreateWiredBox(bboxes).ToArray(),
                         Color = color
                     };
                     this.soldierLines = this.AddComponent<LineListDrawer>(desc);

@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
@@ -44,6 +45,9 @@ namespace Collada
         private readonly float nextRatTime = 3f;
         private Vector3[] ratHoles = null;
 
+        private SceneObject<TriangleListDrawer> selectedItemDrawer = null;
+        private ModularSceneryItem selectedItem = null;
+
         private SceneObject<ModelInstanced> human = null;
 
         private SceneObject<LineListDrawer> bboxesDrawer = null;
@@ -75,7 +79,7 @@ namespace Collada
             base.Initialize();
 
 #if DEBUG
-            this.Game.VisibleMouse = false;
+            this.Game.VisibleMouse = true;
             this.Game.LockMouse = false;
 #else
             this.Game.VisibleMouse = false;
@@ -90,7 +94,6 @@ namespace Collada
             this.InitializeHuman();
             this.InitializeEnvironment();
             this.InitializeLights();
-            this.InitializeCamera();
         }
         private void InitializeEnvironment()
         {
@@ -139,7 +142,9 @@ namespace Collada
             this.Lights.FogRange = 10f;
             this.Lights.FogStart = maxDistance - 15f;
 
-            this.torch = new SceneLightPoint("player_torch", true, this.agentTorchLight, this.agentTorchLight, true, Vector3.Zero, 10f, 25f);
+            var desc = SceneLightPointDescription.Create(Vector3.Zero, 10f, 25f);
+
+            this.torch = new SceneLightPoint("player_torch", true, this.agentTorchLight, this.agentTorchLight, true, desc);
             this.Lights.Add(torch);
         }
         private void InitializeUI()
@@ -170,6 +175,16 @@ namespace Collada
             this.messages.Instance.Text = null;
             this.messages.Instance.Position = new Vector2(0, 0);
             this.messages.Visible = false;
+
+            var drawerDesc = new TriangleListDrawerDescription()
+            {
+                Name = "Seleced Items Drawer",
+                AlphaEnabled = true,
+                CastShadow = false,
+                Count = 50000,
+            };
+            this.selectedItemDrawer = this.AddComponent<TriangleListDrawer>(drawerDesc, SceneObjectUsages.UI, layerHUD);
+            this.selectedItemDrawer.Visible = true;
         }
         private void InitializeModularScenery()
         {
@@ -324,16 +339,6 @@ namespace Collada
             this.connectionDrawer = this.AddComponent<LineListDrawer>(connectionDrawerDesc);
             this.connectionDrawer.Visible = false;
         }
-        private void InitializeCamera()
-        {
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = maxDistance;
-            this.Camera.MovementDelta = this.agent.Velocity;
-            this.Camera.SlowMovementDelta = this.agent.VelocitySlow;
-            this.Camera.Mode = CameraModes.Free;
-            this.Camera.Position = new Vector3(-6, 5.5f, -26);
-            this.Camera.Interest = new Vector3(-4, 5.5f, -26);
-        }
 
         public override void Initialized()
         {
@@ -349,9 +354,21 @@ namespace Collada
                 this.AddObstacle(new BoundingCylinder(pos, 0.8f, 1.5f));
             }
 
-            this.UpdateDebug();
+            this.InitializeCamera();
+
+            this.UpdateDebugInfo();
         }
-        private void UpdateDebug()
+        private void InitializeCamera()
+        {
+            this.Camera.NearPlaneDistance = 0.1f;
+            this.Camera.FarPlaneDistance = maxDistance;
+            this.Camera.MovementDelta = this.agent.Velocity;
+            this.Camera.SlowMovementDelta = this.agent.VelocitySlow;
+            this.Camera.Mode = CameraModes.Free;
+            this.Camera.Position = new Vector3(-6, 5.5f, -26);
+            this.Camera.Interest = new Vector3(-4, 5.5f, -26);
+        }
+        private void UpdateDebugInfo()
         {
             //Graph
             this.UpdateGraphNodes(this.agent);
@@ -375,18 +392,23 @@ namespace Collada
             }
 
             //Doors
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Door), Color.LightYellow);
             UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Entrance), Color.PaleVioletRed);
             UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Exit), Color.ForestGreen);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Door), Color.LightYellow);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Light), Color.MediumPurple);
         }
         private void UpdateBoundingBoxes(ModelInstance[] items, Color color)
         {
+            List<Line3D> lines = new List<Line3D>();
+
             foreach (var item in items)
             {
                 var bbox = item.GetBoundingBox();
 
-                this.bboxesDrawer.Instance.SetLines(color, Line3D.CreateWiredBox(bbox));
+                lines.AddRange(Line3D.CreateWiredBox(bbox));
             }
+
+            this.bboxesDrawer.Instance.SetLines(color, lines);
         }
         private void UpdateGraphNodes(AgentType agent)
         {
@@ -422,86 +444,6 @@ namespace Collada
                 this.Game.SetScene<SceneStart>();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.N))
-            {
-                this.ChangeToLevel("Lvl1");
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.M))
-            {
-                this.ChangeToLevel("Lvl2");
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
-            {
-                this.graphDrawer.Visible = !this.graphDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
-            {
-                this.bboxesDrawer.Visible = !this.bboxesDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F3))
-            {
-                this.ratDrawer.Visible = !this.ratDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
-            {
-                var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
-
-                //Refresh the navigation mesh
-                if (File.Exists(fileName))
-                {
-                    File.Delete(fileName);
-                }
-
-                this.UpdateNavigationGraph();
-                this.RequestGraphUpdate(0f);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F6))
-            {
-                //Save the navigation triangles to a file
-                Task.Run(() =>
-                {
-                    if (!taskRunning)
-                    {
-                        taskRunning = true;
-
-                        var fileName = this.scenery.Instance.CurrentLevel.Name + ntFile;
-
-                        if (File.Exists(fileName))
-                        {
-                            File.Delete(fileName);
-                        }
-
-                        var loader = new LoaderObj();
-                        var tris = this.GetTrianglesForNavigationGraph();
-                        loader.Save(tris, fileName);
-
-                        taskRunning = false;
-                    }
-                });
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F8))
-            {
-                //Add obstacle
-                this.AddTestObstacles();
-
-                this.PaintObstacles();
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F9))
-            {
-                //Remove obstacle
-                this.RemoveTestObstacles();
-
-                this.PaintObstacles();
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
                 this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
@@ -509,37 +451,20 @@ namespace Collada
                     SceneModes.ForwardLigthning);
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.G))
-            {
-                this.UpdateGraphNodes(this.currentGraph == 0 ? this.agent : this.ratAgentType);
-                this.currentGraph++;
-                this.currentGraph %= 2;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.P))
-            {
-                this.rat.Visible = false;
-                this.ratActive = false;
-                this.ratController.Clear();
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.L))
-            {
-                this.torch.Enabled = !this.torch.Enabled;
-            }
-
-            this.UpdateGraph(gameTime);
-
-            this.UpdateRat(gameTime);
-
-            this.UpdateCamera();
-
+            this.UpdateGraphData(gameTime);
+            this.UpdateRatController(gameTime);
             this.UpdateEntities();
+
+            this.UpdateDebugInput();
+            this.UpdateGraphInput();
+            this.UpdateRatInput();
+            this.UpdatePlayerInput();
+            this.UpdateEntitiesInput();
 
             this.fps.Instance.Text = this.Game.RuntimeText;
             this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
         }
-        private void UpdateCamera()
+        private void UpdatePlayerInput()
         {
             bool slow = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
@@ -591,8 +516,117 @@ namespace Collada
                     (this.Camera.Direction * 0.5f) +
                     (this.Camera.Left * 0.2f);
             }
+
+            if (this.Game.Input.KeyJustReleased(Keys.L))
+            {
+                this.torch.Enabled = !this.torch.Enabled;
+            }
         }
-        private void UpdateGraph(GameTime gameTime)
+        private void UpdateDebugInput()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.graphDrawer.Visible = !this.graphDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.bboxesDrawer.Visible = !this.bboxesDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            {
+                this.ratDrawer.Visible = !this.ratDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.N))
+            {
+                this.ChangeToLevel("Lvl1");
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.M))
+            {
+                this.ChangeToLevel("Lvl2");
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F))
+            {
+                //Frustum
+                var frustum = Line3D.CreateWiredFrustum(this.Camera.Frustum);
+
+                this.bboxesDrawer.Instance.SetLines(Color.White, frustum);
+            }
+        }
+        private void UpdateGraphInput()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                //Refresh the navigation mesh
+                this.RefreshNavigation();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            {
+                //Save the navigation triangles to a file
+                this.SaveGraphToFile();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F8))
+            {
+                //Add obstacle
+                this.AddTestObstacles();
+
+                this.PaintObstacles();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F9))
+            {
+                //Remove obstacle
+                this.RemoveTestObstacles();
+
+                this.PaintObstacles();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.G))
+            {
+                this.UpdateGraphNodes(this.currentGraph == 0 ? this.agent : this.ratAgentType);
+                this.currentGraph++;
+                this.currentGraph %= 2;
+            }
+        }
+        private void UpdateRatInput()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.P))
+            {
+                this.rat.Visible = false;
+                this.ratActive = false;
+                this.ratController.Clear();
+            }
+        }
+        private void UpdateEntitiesInput()
+        {
+            if (this.selectedItem == null)
+            {
+                return;
+            }
+
+            if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Exit)
+            {
+                UpdateExit(this.selectedItem);
+            }
+
+            if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Door)
+            {
+                UpdateDoor(this.selectedItem);
+            }
+
+            if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Light)
+            {
+                UpdateLight(this.selectedItem);
+            }
+        }
+
+        private void UpdateGraphData(GameTime gameTime)
         {
             graphUpdateSeconds -= gameTime.ElapsedSeconds;
 
@@ -604,7 +638,7 @@ namespace Collada
                 this.UpdateGraphNodes(this.currentGraph == 0 ? this.ratAgentType : this.agent);
             }
         }
-        private void UpdateRat(GameTime gameTime)
+        private void UpdateRatController(GameTime gameTime)
         {
             this.ratTime -= gameTime.ElapsedSeconds;
 
@@ -661,63 +695,126 @@ namespace Collada
         {
             var sphere = new BoundingSphere(this.Camera.Position, doorDistance);
 
-            var objTypes = ModularSceneryObjectTypes.Entrance |
+            var objTypes =
+                ModularSceneryObjectTypes.Entrance |
                 ModularSceneryObjectTypes.Exit |
                 ModularSceneryObjectTypes.Door |
                 ModularSceneryObjectTypes.Light;
 
-            var items = this.scenery.Instance.GetObjectsInVolume(sphere, objTypes, true);
-            if (items != null && items.Length > 0)
-            {
-                if (items[0].Object.Type == ModularSceneryObjectTypes.Entrance)
+            var ray = this.GetPickingRay();
+            float minDist = 1.2f;
+
+            //Test items into the camera frustum and nearest to the player
+            var items =
+                this.scenery.Instance.GetObjectsInVolume(sphere, objTypes, false, true)
+                .Where(i => this.Camera.Frustum.Contains(i.Item.GetBoundingBox()) != ContainmentType.Disjoint)
+                .Where(i =>
                 {
-                    var msg = "The door locked when you closed it.\r\nYou must find an exit...";
-
-                    PrepareMessage(true, msg);
-
-                    return;
-                }
-
-                if (items[0].Object.Type == ModularSceneryObjectTypes.Exit)
-                {
-                    var msg = "Press space to exit...";
-
-                    PrepareMessage(true, msg);
-
-                    UpdateExit(items[0].Item);
-
-                    return;
-                }
-
-                if (items[0].Object.Type == ModularSceneryObjectTypes.Door)
-                {
-                    var msg = string.Format("Press space to {0} the door...", items[0].Item.Visible ? "open" : "close");
-
-                    PrepareMessage(true, msg);
-
-                    UpdateDoor(items[0].Item);
-
-                    return;
-                }
-
-                if (items[0].Object.Type == ModularSceneryObjectTypes.Light)
-                {
-                    var lights = items[0].Item.Lights;
-
-                    if (lights != null && lights.Length > 0)
+                    if (i.Item.PickNearest(ray, true, out var res))
                     {
-                        var msg = string.Format("Press space to {0} the light...", lights[0].Enabled ? "turn off" : "turn on");
-
-                        PrepareMessage(true, msg);
-
-                        UpdateLight(lights);
-
-                        return;
+                        return true;
                     }
-                }
+                    else
+                    {
+                        var bbox = i.Item.GetBoundingBox();
+                        var center = bbox.GetCenter();
+                        var extents = bbox.GetExtents();
+                        extents *= minDist;
+
+                        var sBbox = new BoundingBox(center - extents, center + extents);
+
+                        return sBbox.Intersects(ref ray);
+                    }
+                })
+                .ToList();
+
+            if (items.Any())
+            {
+                //Sort by distance to the picking ray
+                items.Sort((i1, i2) =>
+                {
+                    float d1 = CalcItemPickingDistance(ray, i1);
+                    float d2 = CalcItemPickingDistance(ray, i2);
+
+                    return d1.CompareTo(d2);
+                });
+
+                this.SetSelectedItem(items.First());
+            }
+            else
+            {
+                this.SetSelectedItem(null);
+            }
+        }
+        private float CalcItemPickingDistance(Ray ray, ModularSceneryItem item)
+        {
+            if (item.Item.PickNearest(ray, true, out var res))
+            {
+                return res.Distance;
+            }
+            else
+            {
+                var sph = item.Item.GetBoundingSphere();
+
+                return Intersection.DistanceFromPointToLine(ray, sph.Center);
+            }
+        }
+
+        private void SetSelectedItem(ModularSceneryItem item)
+        {
+            if (item == this.selectedItem)
+            {
+                return;
             }
 
-            PrepareMessage(false, null);
+            this.selectedItem = item;
+
+            if (item == null)
+            {
+                this.selectedItemDrawer.Instance.Clear();
+
+                PrepareMessage(false, null);
+
+                return;
+            }
+
+            var tris = item?.Item.GetTriangles();
+            if (tris?.Length > 0)
+            {
+                Color4 sItemColor = Color.LightGreen;
+                sItemColor.Alpha = 0.2f;
+
+                this.selectedItemDrawer.Instance.SetTriangles(sItemColor, tris);
+            }
+
+            if (item.Object.Type == ModularSceneryObjectTypes.Entrance)
+            {
+                var msg = "The door locked when you closed it.\r\nYou must find an exit...";
+
+                PrepareMessage(true, msg);
+            }
+            else if (item.Object.Type == ModularSceneryObjectTypes.Exit)
+            {
+                var msg = "Press space to exit...";
+
+                PrepareMessage(true, msg);
+            }
+            else if (item.Object.Type == ModularSceneryObjectTypes.Door)
+            {
+                var msg = string.Format("Press space to {0} the door...", item.Item.Visible ? "open" : "close");
+
+                PrepareMessage(true, msg);
+            }
+            else if (item.Object.Type == ModularSceneryObjectTypes.Light)
+            {
+                var lights = item.Item.Lights;
+                if (lights?.Length > 0)
+                {
+                    var msg = string.Format("Press space to {0} the light...", lights[0].Enabled ? "turn off" : "turn on");
+
+                    PrepareMessage(true, msg);
+                }
+            }
         }
         private void PrepareMessage(bool show, string text)
         {
@@ -740,7 +837,7 @@ namespace Collada
                 }
             }
         }
-        private void UpdateExit(ModelInstance item)
+        private void UpdateExit(ModularSceneryItem item)
         {
             if (item != null && this.Game.Input.KeyJustReleased(Keys.Space))
             {
@@ -755,35 +852,87 @@ namespace Collada
                 }
             }
         }
-        private void UpdateDoor(ModelInstance item)
+        private void UpdateDoor(ModularSceneryItem item)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            if (item != null && this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                item.Visible = !item.Visible;
+                item.Item.Visible = !item.Item.Visible;
 
-                messages.Instance.Text = string.Format("Press space to {0} the door...", item.Visible ? "open" : "close");
+                messages.Instance.Text = string.Format("Press space to {0} the door...", item.Item.Visible ? "open" : "close");
                 messages.Instance.CenterHorizontally();
                 messages.Instance.CenterVertically();
 
-                this.UpdateGraph(item.Manipulator.Position);
+                this.UpdateGraph(item.Item.Manipulator.Position);
                 this.RequestGraphUpdate(1);
             }
         }
-        private void UpdateLight(SceneLight[] lights)
+        private void UpdateLight(ModularSceneryItem item)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            if (item != null && this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                bool enabled = lights[0].Enabled;
+                bool enabled = false;
 
-                for (int i = 0; i < lights.Length; i++)
+                var lights = item.Item.Lights;
+                if (lights?.Length > 0)
                 {
-                    lights[i].Enabled = !enabled;
+                    enabled = !lights[0].Enabled;
+
+                    foreach (var light in lights)
+                    {
+                        light.Enabled = enabled;
+                    }
                 }
 
-                messages.Instance.Text = string.Format("Press space to {0} the light...", !enabled ? "turn off" : "turn on");
+                var emitters = item.Emitters;
+                if (emitters?.Length > 0)
+                {
+                    foreach (var emitter in emitters)
+                    {
+                        emitter.Visible = enabled;
+                    }
+                }
+
+                messages.Instance.Text = string.Format("Press space to {0} the light...", enabled ? "turn off" : "turn on");
                 messages.Instance.CenterHorizontally();
                 messages.Instance.CenterVertically();
             }
+        }
+
+        private void RefreshNavigation()
+        {
+            var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
+
+            //Refresh the navigation mesh
+            if (File.Exists(fileName))
+            {
+                File.Delete(fileName);
+            }
+
+            this.UpdateNavigationGraph();
+            this.RequestGraphUpdate(0f);
+        }
+        private void SaveGraphToFile()
+        {
+            Task.Run(() =>
+            {
+                if (!taskRunning)
+                {
+                    taskRunning = true;
+
+                    var fileName = this.scenery.Instance.CurrentLevel.Name + ntFile;
+
+                    if (File.Exists(fileName))
+                    {
+                        File.Delete(fileName);
+                    }
+
+                    var loader = new LoaderObj();
+                    var tris = this.GetTrianglesForNavigationGraph();
+                    loader.Save(tris, fileName);
+
+                    taskRunning = false;
+                }
+            });
         }
 
         private void ChangeToLevel(string name)
@@ -799,7 +948,7 @@ namespace Collada
             pos.Y += agent.Height;
             this.Camera.Position = pos;
             this.Camera.Interest = pos + dir;
-            this.UpdateDebug();
+            this.UpdateDebugInfo();
         }
 
         private void AddTestObstacles()
@@ -865,15 +1014,15 @@ namespace Collada
 
             foreach (var conn in conns)
             {
-                Line3D[] arclines = Line3D.CreateArc(conn.Start, conn.End, 0.25f, 8);
+                var arclines = Line3D.CreateArc(conn.Start, conn.End, 0.25f, 8);
                 this.connectionDrawer.Instance.AddLines(connectionColor, arclines);
 
-                Line3D[] cirlinesF = Line3D.CreateCircle(conn.Start, conn.Radius, 32);
+                var cirlinesF = Line3D.CreateCircle(conn.Start, conn.Radius, 32);
                 this.connectionDrawer.Instance.AddLines(connectionColor, cirlinesF);
 
                 if (conn.Direction == 1)
                 {
-                    Line3D[] cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
+                    var cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
                     this.connectionDrawer.Instance.AddLines(connectionColor, cirlinesT);
                 }
 

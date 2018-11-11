@@ -243,9 +243,7 @@ namespace Skybox
                 Color.Orange,
                 Color.Orange,
                 true,
-                Vector3.Zero,
-                15f,
-                20f);
+                SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 
             this.Lights.Add(this.movingFireLight);
 
@@ -276,9 +274,7 @@ namespace Skybox
                     color,
                     color,
                     true,
-                    firePositions3D[i],
-                    4f,
-                    20f);
+                    SceneLightPointDescription.Create(firePositions3D[i], 4f, 20f));
 
                 this.Lights.Add(torchLights[i]);
 

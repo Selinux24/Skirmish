@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -36,6 +37,11 @@ namespace Engine
         /// <returns>Returns new line</returns>
         public static Line3D Transform(Line3D line, Matrix transform)
         {
+            if (transform.IsIdentity)
+            {
+                return line;
+            }
+
             return new Line3D(
                 Vector3.TransformCoordinate(line.Point1, transform),
                 Vector3.TransformCoordinate(line.Point2, transform));
@@ -46,34 +52,39 @@ namespace Engine
         /// <param name="lines">Line list</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new line list</returns>
-        public static Line3D[] Transform(Line3D[] lines, Matrix transform)
+        public static IEnumerable<Line3D> Transform(IEnumerable<Line3D> lines, Matrix transform)
         {
-            Line3D[] trnLines = new Line3D[lines.Length];
-
-            for (int i = 0; i < lines.Length; i++)
+            if (transform.IsIdentity)
             {
-                trnLines[i] = Transform(lines[i], transform);
+                return new List<Line3D>(lines);
+            }
+
+            List<Line3D> trnLines = new List<Line3D>();
+
+            foreach (var line in lines)
+            {
+                trnLines.Add(Transform(line, transform));
             }
 
             return trnLines;
         }
 
-        public static Line3D[] CreateWiredTriangle(Triangle[] triangleList)
+        public static IEnumerable<Line3D> CreateWiredTriangle(IEnumerable<Triangle> triangleList)
         {
             List<Line3D> lines = new List<Line3D>();
 
-            for (int i = 0; i < triangleList.Length; i++)
+            foreach (var triangle in triangleList)
             {
-                lines.AddRange(CreateWiredTriangle(triangleList[i]));
+                lines.AddRange(CreateWiredTriangle(triangle));
             }
 
-            return lines.ToArray();
+            return lines;
         }
-        public static Line3D[] CreateWiredTriangle(Triangle triangle)
+        public static IEnumerable<Line3D> CreateWiredTriangle(Triangle triangle)
         {
             return CreateWiredTriangle(triangle.GetVertices());
         }
-        public static Line3D[] CreateWiredTriangle(Vector3[] corners)
+        public static IEnumerable<Line3D> CreateWiredTriangle(IEnumerable<Vector3> corners)
         {
             int[] indexes = new int[6];
 
@@ -88,7 +99,7 @@ namespace Engine
 
             return CreateFromVertices(corners, indexes);
         }
-        public static Line3D[] CreateWiredSquare(Vector3[] corners)
+        public static IEnumerable<Line3D> CreateWiredSquare(IEnumerable<Vector3> corners)
         {
             int[] indexes = new int[8];
 
@@ -106,16 +117,18 @@ namespace Engine
 
             return CreateFromVertices(corners, indexes);
         }
-        public static Line3D[] CreateWiredPolygon(Vector3[] points)
+        public static IEnumerable<Line3D> CreateWiredPolygon(IEnumerable<Vector3> points)
         {
-            int[] indexes = new int[points.Length * 2];
+            int count = points.Count();
+
+            int[] indexes = new int[count * 2];
 
             int i1 = 0;
             int i2 = 1;
-            for (int i = 0; i < points.Length; i++)
+            for (int i = 0; i < count; i++)
             {
                 indexes[i1] = i + 0;
-                indexes[i2] = i == points.Length - 1 ? 0 : i + 1;
+                indexes[i2] = i == count - 1 ? 0 : i + 1;
 
                 i1 += 2;
                 i2 += 2;
@@ -123,37 +136,37 @@ namespace Engine
 
             return CreateFromVertices(points, indexes);
         }
-        public static Line3D[] CreateWiredBox(BoundingBox[] bboxList)
+        public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<BoundingBox> bboxList)
         {
             List<Line3D> lines = new List<Line3D>();
 
-            for (int i = 0; i < bboxList.Length; i++)
+            foreach (var bbox in bboxList)
             {
-                lines.AddRange(CreateWiredBox(bboxList[i]));
+                lines.AddRange(CreateWiredBox(bbox));
             }
 
-            return lines.ToArray();
+            return lines;
         }
-        public static Line3D[] CreateWiredBox(BoundingBox bbox)
+        public static IEnumerable<Line3D> CreateWiredBox(BoundingBox bbox)
         {
             return CreateWiredBox(bbox.GetCorners());
         }
-        public static Line3D[] CreateWiredBox(OrientedBoundingBox[] obboxList)
+        public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<OrientedBoundingBox> obboxList)
         {
             List<Line3D> lines = new List<Line3D>();
 
-            for (int i = 0; i < obboxList.Length; i++)
+            foreach (var obbox in obboxList)
             {
-                lines.AddRange(CreateWiredBox(obboxList[i]));
+                lines.AddRange(CreateWiredBox(obbox));
             }
 
-            return lines.ToArray();
+            return lines;
         }
-        public static Line3D[] CreateWiredBox(OrientedBoundingBox obbox)
+        public static IEnumerable<Line3D> CreateWiredBox(OrientedBoundingBox obbox)
         {
             return CreateWiredBox(obbox.GetCorners());
         }
-        public static Line3D[] CreateWiredBox(Vector3[] corners)
+        public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<Vector3> corners)
         {
             List<int> indexes = new List<int>(24)
             {
@@ -187,22 +200,22 @@ namespace Engine
 
             return CreateFromVertices(corners, indexes.ToArray());
         }
-        public static Line3D[] CreateWiredSphere(BoundingSphere[] bsphList, int sliceCount, int stackCount)
+        public static IEnumerable<Line3D> CreateWiredSphere(IEnumerable<BoundingSphere> bsphList, int sliceCount, int stackCount)
         {
             List<Line3D> lines = new List<Line3D>();
 
-            for (int i = 0; i < bsphList.Length; i++)
+            foreach (var bsph in bsphList)
             {
-                lines.AddRange(CreateWiredSphere(bsphList[i], sliceCount, stackCount));
+                lines.AddRange(CreateWiredSphere(bsph, sliceCount, stackCount));
             }
 
-            return lines.ToArray();
+            return lines;
         }
-        public static Line3D[] CreateWiredSphere(BoundingSphere bsph, int sliceCount, int stackCount)
+        public static IEnumerable<Line3D> CreateWiredSphere(BoundingSphere bsph, int sliceCount, int stackCount)
         {
             return CreateWiredSphere(bsph.Center, bsph.Radius, sliceCount, stackCount);
         }
-        public static Line3D[] CreateWiredSphere(Vector3 center, float radius, int sliceCount, int stackCount)
+        public static IEnumerable<Line3D> CreateWiredSphere(Vector3 center, float radius, int sliceCount, int stackCount)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<int> indexList = new List<int>();
@@ -239,15 +252,15 @@ namespace Engine
             //South pole
             vertList.Add(new Vector3(0.0f, -radius, 0.0f) + center);
 
-            return CreateFromVertices(vertList.ToArray(), indexList.ToArray());
+            return CreateFromVertices(vertList, indexList);
         }
-        public static Line3D[] CreateWiredConeAngle(float cupAngle, float height, int sliceCount)
+        public static IEnumerable<Line3D> CreateWiredConeAngle(float cupAngle, float height, int sliceCount)
         {
             float baseRadius = (float)Math.Tan(cupAngle) * height;
 
             return CreateWiredConeBaseRadius(baseRadius, height, sliceCount);
         }
-        public static Line3D[] CreateWiredConeBaseRadius(float baseRadius, float height, int sliceCount)
+        public static IEnumerable<Line3D> CreateWiredConeBaseRadius(float baseRadius, float height, int sliceCount)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<int> indexList = new List<int>();
@@ -281,9 +294,9 @@ namespace Engine
                 indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
             }
 
-            return CreateFromVertices(vertList.ToArray(), indexList.ToArray());
+            return CreateFromVertices(vertList, indexList);
         }
-        public static Line3D[] CreateWiredCylinder(BoundingCylinder cylinder, int segments)
+        public static IEnumerable<Line3D> CreateWiredCylinder(BoundingCylinder cylinder, int segments)
         {
             List<Line3D> resultList = new List<Line3D>();
 
@@ -319,13 +332,13 @@ namespace Engine
                 }
             }
 
-            return resultList.ToArray();
+            return resultList;
         }
-        public static Line3D[] CreateWiredFrustum(BoundingFrustum frustum)
+        public static IEnumerable<Line3D> CreateWiredFrustum(BoundingFrustum frustum)
         {
             return CreateWiredBox(frustum.GetCorners());
         }
-        public static Line3D[] CreateWiredPyramid(BoundingFrustum frustum)
+        public static IEnumerable<Line3D> CreateWiredPyramid(BoundingFrustum frustum)
         {
             FrustumCameraParams prms = frustum.GetCameraParams();
             Vector3[] corners = frustum.GetCorners();
@@ -359,20 +372,22 @@ namespace Engine
                 1
             };
 
-            return CreateFromVertices(vertices, indexes.ToArray());
+            return CreateFromVertices(vertices, indexes);
         }
-        public static Line3D[] CreatePath(Vector3[] path)
+        public static IEnumerable<Line3D> CreatePath(IEnumerable<Vector3> path)
         {
             List<Line3D> lines = new List<Line3D>();
 
-            for (int i = 0; i < path.Length - 1; i++)
+            var tmp = path.ToArray();
+
+            for (int i = 0; i < tmp.Length - 1; i++)
             {
-                lines.Add(new Line3D(path[i], path[i + 1]));
+                lines.Add(new Line3D(tmp[i], tmp[i + 1]));
             }
 
             return lines.ToArray();
         }
-        public static Line3D[] CreateAxis(Matrix transform, float size)
+        public static IEnumerable<Line3D> CreateAxis(Matrix transform, float size)
         {
             List<Line3D> lines = new List<Line3D>();
 
@@ -393,16 +408,14 @@ namespace Engine
             lines.Add(new Line3D(forward, c1));
             lines.Add(new Line3D(forward, c2));
 
-            return lines.ToArray();
+            return lines;
         }
-        public static Line3D[] CreateCrossList(Vector3[] points, float size)
+        public static IEnumerable<Line3D> CreateCrossList(IEnumerable<Vector3> points, float size)
         {
             List<Line3D> lines = new List<Line3D>();
 
-            for (int i = 0; i < points.Length; i++)
+            foreach (var p in points)
             {
-                Vector3 p = points[i];
-
                 float h = size * 0.5f;
                 lines.Add(new Line3D(p + new Vector3(h, h, h), p - new Vector3(h, h, h)));
                 lines.Add(new Line3D(p + new Vector3(h, h, -h), p - new Vector3(h, h, -h)));
@@ -410,26 +423,28 @@ namespace Engine
                 lines.Add(new Line3D(p + new Vector3(-h, h, -h), p - new Vector3(-h, h, -h)));
             }
 
-            return lines.ToArray();
+            return lines;
         }
-        public static Line3D[] CreateLineList(Vector3[] points)
+        public static IEnumerable<Line3D> CreateLineList(IEnumerable<Vector3> points)
         {
             List<Line3D> lines = new List<Line3D>();
 
-            Vector3 p0 = points[0];
+            var tmp = points.ToArray();
 
-            for (int i = 1; i < points.Length; i++)
+            Vector3 p0 = tmp[0];
+
+            for (int i = 1; i < tmp.Length; i++)
             {
-                Vector3 p1 = points[i];
+                Vector3 p1 = tmp[i];
 
                 lines.Add(new Line3D(p0, p1));
 
                 p0 = p1;
             }
 
-            return lines.ToArray();
+            return lines;
         }
-        public static Line3D[] CreateArc(Vector3 from, Vector3 to, float h, int points)
+        public static IEnumerable<Line3D> CreateArc(Vector3 from, Vector3 to, float h, int points)
         {
             List<Line3D> lines = new List<Line3D>();
 
@@ -451,9 +466,9 @@ namespace Engine
                 prev = pt;
             }
 
-            return lines.ToArray();
+            return lines;
         }
-        public static Line3D[] CreateCircle(Vector3 center, float r, int segments)
+        public static IEnumerable<Line3D> CreateCircle(Vector3 center, float r, int segments)
         {
             List<Line3D> lines = new List<Line3D>();
 
@@ -475,9 +490,9 @@ namespace Engine
                 lines.Add(line);
             }
 
-            return lines.ToArray();
+            return lines;
         }
-        public static Line3D[] CreateArrow(Vector3 p, Vector3 q, float s)
+        public static IEnumerable<Line3D> CreateArrow(Vector3 p, Vector3 q, float s)
         {
             List<Line3D> lines = new List<Line3D>();
 
@@ -491,25 +506,28 @@ namespace Engine
                 lines.Add(new Line3D(p, new Vector3(p.X + az.X * s - ax.X * s / 3, p.Y + az.Y * s - ax.Y * s / 3, p.Z + az.Z * s - ax.Z * s / 3)));
             }
 
-            return lines.ToArray();
+            return lines;
         }
 
-        private static Line3D[] CreateFromVertices(Vector3[] vertices, int[] indices)
+        private static IEnumerable<Line3D> CreateFromVertices(IEnumerable<Vector3> vertices, IEnumerable<int> indices)
         {
             List<Line3D> lines = new List<Line3D>();
 
-            for (int i = 0; i < indices.Length; i += 2)
+            var vTmp = vertices.ToArray();
+            var iTmp = indices.ToArray();
+
+            for (int i = 0; i < iTmp.Length; i += 2)
             {
                 Line3D l = new Line3D()
                 {
-                    Point1 = vertices[indices[i + 0]],
-                    Point2 = vertices[indices[i + 1]],
+                    Point1 = vTmp[iTmp[i + 0]],
+                    Point2 = vTmp[iTmp[i + 1]],
                 };
 
                 lines.Add(l);
             }
 
-            return lines.ToArray();
+            return lines;
         }
         /// <summary>
         /// Eval arc

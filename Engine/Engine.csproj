@@ -222,6 +222,8 @@
     <Compile Include="ISceneLight.cs" />
     <Compile Include="ISceneLightSpot.cs" />
     <Compile Include="PathFinding\RecastNavigation\SteerTarget.cs" />
+    <Compile Include="SceneLightPointDescription.cs" />
+    <Compile Include="SceneLightSpotDescription.cs" />
     <Compile Include="ShadowMapPoint.cs" />
     <Compile Include="CullingVolumeCamera.cs" />
     <Compile Include="CullingVolumeAABB.cs" />

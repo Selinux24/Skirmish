@@ -95,6 +95,17 @@ namespace Engine
             return (bbox.Minimum + bbox.Maximum) * 0.5f;
         }
         /// <summary>
+        /// Gets the bounding box extents
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the bounding box extents</returns>
+        public static Vector3 GetExtents(this BoundingBox bbox)
+        {
+            var center = bbox.GetCenter();
+
+            return (bbox.Maximum - center);
+        }
+        /// <summary>
         /// Gets the x maganitude of the current bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>

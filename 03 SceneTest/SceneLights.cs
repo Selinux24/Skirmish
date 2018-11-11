@@ -211,11 +211,13 @@ namespace SceneTest
             this.Lights.FillLight.Enabled = true;
             this.Lights.FillLight.CastShadow = false;
 
-            this.Lights.Add(new SceneLightPoint("Point1", true, Color.White, Color.White, true, Vector3.Zero, 25, 25));
+            var pointDesc = SceneLightPointDescription.Create(Vector3.Zero, 25, 25);
+            this.Lights.Add(new SceneLightPoint("Point1", true, Color.White, Color.White, true, pointDesc));
 
-            this.Lights.Add(new SceneLightSpot("Spot1", true, Color.White, Color.White, true, Vector3.Zero, Vector3.Down, 50, 25, 25));
-            this.Lights.Add(new SceneLightSpot("Spot2", true, Color.White, Color.White, true, Vector3.Zero, Vector3.Down, 50, 25, 25));
-            this.Lights.Add(new SceneLightSpot("Spot3", true, Color.White, Color.White, true, Vector3.Zero, Vector3.Down, 50, 25, 25));
+            var spotDesc = SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 50, 25, 25);
+            this.Lights.Add(new SceneLightSpot("Spot1", true, Color.White, Color.White, true, spotDesc));
+            this.Lights.Add(new SceneLightSpot("Spot2", true, Color.White, Color.White, true, spotDesc));
+            this.Lights.Add(new SceneLightSpot("Spot3", true, Color.White, Color.White, true, spotDesc));
         }
         private void InitializeVolumeDrawer()
         {

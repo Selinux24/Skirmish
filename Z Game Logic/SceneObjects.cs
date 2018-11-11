@@ -120,11 +120,7 @@ namespace GameLogic
                 Color.White,
                 Color.White,
                 true,
-                Vector3.Zero,
-                Vector3.Down,
-                15f,
-                15f,
-                100f);
+                SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 15f, 15f, 100f));
 
             this.Lights.Add(this.spotLight);
 

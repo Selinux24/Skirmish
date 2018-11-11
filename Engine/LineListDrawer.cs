@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -148,9 +149,9 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Line list</param>
-        public void SetLines(Color4 color, Line3D[] lines)
+        public void SetLines(Color4 color, IEnumerable<Line3D> lines)
         {
-            if (lines != null && lines.Length > 0)
+            if (lines?.Any() == true)
             {
                 if (!this.dictionary.ContainsKey(color))
                 {
@@ -189,7 +190,7 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Line list</param>
-        public void AddLines(Color4 color, Line3D[] lines)
+        public void AddLines(Color4 color, IEnumerable<Line3D> lines)
         {
             if (!this.dictionary.ContainsKey(color))
             {
@@ -205,9 +206,9 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Triangle list</param>
-        public void SetTriangles(Color4 color, Triangle[] triangles)
+        public void SetTriangles(Color4 color, IEnumerable<Triangle> triangles)
         {
-            if (triangles != null && triangles.Length > 0)
+            if (triangles?.Any() == true)
             {
                 if (!this.dictionary.ContainsKey(color))
                 {
@@ -237,7 +238,7 @@ namespace Engine
         /// </summary>
         /// <param name="color">Color</param>
         /// <param name="lines">Triangle list</param>
-        public void AddTriangles(Color4 color, Triangle[] triangles)
+        public void AddTriangles(Color4 color, IEnumerable<Triangle> triangles)
         {
             if (!this.dictionary.ContainsKey(color))
             {

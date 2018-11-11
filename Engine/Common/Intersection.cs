@@ -358,5 +358,38 @@ namespace Engine.Common
                 return false;
             }
         }
+
+        /// <summary>
+        /// Gets the nearest point in a ray from a specified point
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="point">Point</param>
+        /// <returns>Returns the resulting point along the ray</returns>
+        public static Vector3 NearestPointOnLine(Ray ray, Vector3 point)
+        {
+            Vector3 origin = ray.Position;
+            Vector3 dir = Vector3.Normalize(ray.Direction);
+
+            //Vector from origin to point
+            var v = origin - point;
+
+            //Project v over direction vector and get the distance magnitude over dir
+            var d = Vector3.Dot(v, dir);
+
+            //Move from origin towards the resulting distance
+            return origin + (dir * d);
+        }
+        /// <summary>
+        /// Gets the distance from the nearest point in a ray from a specified point
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="point">Point</param>
+        /// <returns>Returns the resulting minimum distance from point to ray</returns>
+        public static float DistanceFromPointToLine(Ray ray, Vector3 point)
+        {
+            var linePoint = NearestPointOnLine(ray, point);
+
+            return Vector3.Distance(linePoint, point);
+        }
     }
 }

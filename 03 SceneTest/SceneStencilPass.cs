@@ -165,9 +165,9 @@ namespace SceneTest
             this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = true;
 
-            this.Lights.Add(new SceneLightPoint("Point1", false, Color.White, Color.White, true, Vector3.Zero, 5, 5));
+            this.Lights.Add(new SceneLightPoint("Point1", false, Color.White, Color.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
 
-            this.Lights.Add(new SceneLightSpot("Spot1", false, Color.White, Color.White, true, Vector3.Zero, Vector3.Down, 20, 5, 5));
+            this.Lights.Add(new SceneLightSpot("Spot1", false, Color.White, Color.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
         }
 
         public override void Update(GameTime gameTime)
@@ -323,7 +323,7 @@ namespace SceneTest
                 }
             }
 
-            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = (drawDrawVolumes|| drawCullVolumes);
+            this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = (drawDrawVolumes || drawCullVolumes);
         }
     }
 }

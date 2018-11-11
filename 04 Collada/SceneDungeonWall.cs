@@ -51,7 +51,9 @@ namespace Collada
         {
             GameEnvironment.Background = Color.Black;
 
-            this.pointLight = new SceneLightPoint("light", false, Color.White, Color.White, true, new Vector3(0, 1, -1), 10f, 10f);
+            var desc = SceneLightPointDescription.Create(new Vector3(0, 1, -1), 10f, 10f);
+
+            this.pointLight = new SceneLightPoint("light", false, Color.White, Color.White, true, desc);
 
             this.Lights.Add(this.pointLight);
         }
