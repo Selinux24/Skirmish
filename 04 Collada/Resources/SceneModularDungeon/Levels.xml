@@ -543,7 +543,7 @@
           <position>32 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_1">
+        <item asset_name="Dn_Jail_Wall_2">
           <position>32 0 -20</position>
           <rotation>rot90</rotation>
         </item>
@@ -551,7 +551,7 @@
           <position>34 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_2">
+        <item asset_name="Dn_Jail_Wall_1">
           <position>34 0 -20</position>
           <rotation>rot90</rotation>
         </item>
@@ -559,15 +559,15 @@
           <position>36 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_1">
+        <item asset_name="Dn_Jail_Wall_2">
           <position>36 0 -20</position>
-          <rotation>rot90</rotation>
+          <rotation>rot270</rotation>
         </item>
         <item asset_name="Dn_Jail_Wall_Base_1">
           <position>38 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        <item asset_name="Dn_Jail_Wall_2">
+        <item asset_name="Dn_Jail_Wall_3">
           <position>38 0 -20</position>
           <rotation>rot90</rotation>
         </item>

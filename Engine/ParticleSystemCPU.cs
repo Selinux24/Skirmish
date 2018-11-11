@@ -171,73 +171,80 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Draw(DrawContext context)
         {
+            if (this.ActiveParticles <= 0)
+            {
+                return;
+            }
+
             var mode = context.DrawerMode;
             var draw =
-                mode.HasFlag(DrawerModes.ShadowMap) ||
+                (mode.HasFlag(DrawerModes.ShadowMap)) ||
                 (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Parameters.Transparent) ||
                 (mode.HasFlag(DrawerModes.TransparentOnly) && this.Parameters.Transparent);
 
-            if (draw && this.ActiveParticles > 0)
+            if (!draw)
             {
-                var rot = this.Parameters.RotateSpeed != Vector2.Zero;
+                return;
+            }
 
-                var effect = DrawerPool.EffectDefaultCPUParticles;
-                var technique = rot ? effect.RotationDraw : effect.NonRotationDraw;
+            var rot = this.Parameters.RotateSpeed != Vector2.Zero;
 
-                if (!mode.HasFlag(DrawerModes.ShadowMap))
-                {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.ActiveParticles;
-                }
+            var effect = DrawerPool.EffectDefaultCPUParticles;
+            var technique = rot ? effect.RotationDraw : effect.NonRotationDraw;
 
-                var graphics = this.Game.Graphics;
+            if (!mode.HasFlag(DrawerModes.ShadowMap))
+            {
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += this.ActiveParticles;
+            }
 
-                graphics.IASetVertexBuffers(BufferSlot, this.buffer.VertexBufferBinding);
-                graphics.IAInputLayout = rot ? this.buffer.InputLayouts[0] : this.buffer.InputLayouts[1];
-                graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
+            var graphics = this.Game.Graphics;
 
-                graphics.SetDepthStencilRDZEnabled();
+            graphics.IASetVertexBuffers(BufferSlot, this.buffer.VertexBufferBinding);
+            graphics.IAInputLayout = rot ? this.buffer.InputLayouts[0] : this.buffer.InputLayouts[1];
+            graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
-                if (this.Parameters.Additive)
-                {
-                    graphics.SetBlendAdditive();
-                }
-                else if (this.Parameters.Transparent)
-                {
-                    graphics.SetBlendDefaultAlpha();
-                }
-                else
-                {
-                    graphics.SetBlendDefault();
-                }
+            graphics.SetDepthStencilRDZEnabled();
 
-                var state = new EffectParticleState
-                {
-                    TotalTime = this.Emitter.TotalTime,
-                    MaxDuration = this.Parameters.MaxDuration,
-                    MaxDurationRandomness = this.Parameters.MaxDurationRandomness,
-                    EndVelocity = this.Parameters.EndVelocity,
-                    Gravity = this.Parameters.Gravity,
-                    StartSize = this.Parameters.StartSize,
-                    EndSize = this.Parameters.EndSize,
-                    MinColor = this.Parameters.MinColor,
-                    MaxColor = this.Parameters.MaxColor,
-                    RotateSpeed = this.Parameters.RotateSpeed,
-                };
+            if (this.Parameters.Additive)
+            {
+                graphics.SetBlendAdditive();
+            }
+            else if (this.Parameters.Transparent)
+            {
+                graphics.SetBlendDefaultAlpha();
+            }
+            else
+            {
+                graphics.SetBlendDefault();
+            }
 
-                effect.UpdatePerFrame(
-                    context.ViewProjection,
-                    context.EyePosition,
-                    state,
-                    this.TextureCount,
-                    this.Texture);
+            var state = new EffectParticleState
+            {
+                TotalTime = this.Emitter.TotalTime,
+                MaxDuration = this.Parameters.MaxDuration,
+                MaxDurationRandomness = this.Parameters.MaxDurationRandomness,
+                EndVelocity = this.Parameters.EndVelocity,
+                Gravity = this.Parameters.Gravity,
+                StartSize = this.Parameters.StartSize,
+                EndSize = this.Parameters.EndSize,
+                MinColor = this.Parameters.MinColor,
+                MaxColor = this.Parameters.MaxColor,
+                RotateSpeed = this.Parameters.RotateSpeed,
+            };
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
+            effect.UpdatePerFrame(
+                context.ViewProjection,
+                context.EyePosition,
+                state,
+                this.TextureCount,
+                this.Texture);
 
-                    graphics.Draw(this.ActiveParticles, 0);
-                }
+            for (int p = 0; p < technique.PassCount; p++)
+            {
+                graphics.EffectPassApply(technique, p, 0);
+
+                graphics.Draw(this.ActiveParticles, 0);
             }
         }
 

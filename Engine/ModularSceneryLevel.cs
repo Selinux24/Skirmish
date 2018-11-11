@@ -209,20 +209,22 @@ namespace Engine
                 var asset = assets
                     .FirstOrDefault(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
 
-                if (asset != null)
+                if (asset == null)
                 {
-                    foreach (var a in asset.Assets)
-                    {
-                        if (string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            if (string.Equals(item.Id, assetMapId, StringComparison.OrdinalIgnoreCase) &&
-                                string.Equals(a.Id, assetId, StringComparison.OrdinalIgnoreCase))
-                            {
-                                return index;
-                            }
+                    continue;
+                }
 
-                            index++;
+                foreach (var a in asset.Assets)
+                {
+                    if (string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (string.Equals(item.Id, assetMapId, StringComparison.OrdinalIgnoreCase) &&
+                            string.Equals(a.Id, assetId, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return index;
                         }
+
+                        index++;
                     }
                 }
             }

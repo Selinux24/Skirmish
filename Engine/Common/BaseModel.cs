@@ -6,6 +6,7 @@ namespace Engine.Common
 {
     using Engine.Animation;
     using Engine.Content;
+    using Engine.Effects;
 
     /// <summary>
     /// Model basic implementation
@@ -263,6 +264,21 @@ namespace Engine.Common
                 }
 
                 lod = (LevelOfDetail)((int)lod / 2);
+            }
+
+            return null;
+        }
+
+
+        protected IGeometryDrawer GetEffect(DrawerModes mode)
+        {
+            if (mode.HasFlag(DrawerModes.Forward))
+            {
+                return DrawerPool.EffectDefaultBasic;
+            }
+            else if (mode.HasFlag(DrawerModes.Deferred))
+            {
+                return DrawerPool.EffectDeferredBasic;
             }
 
             return null;

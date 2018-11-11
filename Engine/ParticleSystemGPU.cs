@@ -346,40 +346,38 @@ namespace Engine
             var rot = this.Parameters.RotateSpeed != Vector2.Zero;
 
             var techniqueForDrawing = rot ? effect.RotationDraw : effect.NonRotationDraw;
-            if (techniqueForDrawing != null)
+
+            if (!drawerMode.HasFlag(DrawerModes.ShadowMap))
             {
-                if (!drawerMode.HasFlag(DrawerModes.ShadowMap))
-                {
-                    Counters.InstancesPerFrame++;
-                }
+                Counters.InstancesPerFrame++;
+            }
 
-                var graphics = this.Game.Graphics;
+            var graphics = this.Game.Graphics;
 
-                graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
-                graphics.IASetVertexBuffers(BufferSlot, this.drawingBinding);
-                graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
+            graphics.IAInputLayout = rot ? this.rotatingInputLayout : this.nonRotatingInputLayout;
+            graphics.IASetVertexBuffers(BufferSlot, this.drawingBinding);
+            graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
 
-                graphics.SetDepthStencilRDZEnabled();
+            graphics.SetDepthStencilRDZEnabled();
 
-                if (this.Parameters.Additive)
-                {
-                    graphics.SetBlendAdditive();
-                }
-                else if (this.Parameters.Transparent)
-                {
-                    graphics.SetBlendDefaultAlpha();
-                }
-                else
-                {
-                    graphics.SetBlendDefault();
-                }
+            if (this.Parameters.Additive)
+            {
+                graphics.SetBlendAdditive();
+            }
+            else if (this.Parameters.Transparent)
+            {
+                graphics.SetBlendDefaultAlpha();
+            }
+            else
+            {
+                graphics.SetBlendDefault();
+            }
 
-                for (int p = 0; p < techniqueForDrawing.PassCount; p++)
-                {
-                    graphics.EffectPassApply(techniqueForDrawing, p, 0);
+            for (int p = 0; p < techniqueForDrawing.PassCount; p++)
+            {
+                graphics.EffectPassApply(techniqueForDrawing, p, 0);
 
-                    graphics.DrawAuto();
-                }
+                graphics.DrawAuto();
             }
         }
 

@@ -219,45 +219,48 @@ namespace Engine
         /// <param name="context"></param>
         public override void DrawShadows(DrawContextShadows context)
         {
-            if (this.DrawingData != null)
+            if (this.DrawingData == null)
             {
-                int count = 0;
+                return;
+            }
+            int count = 0;
 
-                var effect = context.ShadowMap.GetEffect();
-                if (effect != null)
+            var effect = context.ShadowMap.GetEffect();
+            if (effect == null)
+            {
+                return;
+            }
+
+            var graphics = this.Game.Graphics;
+
+            foreach (string meshName in this.DrawingData.Meshes.Keys)
+            {
+                var dictionary = this.DrawingData.Meshes[meshName];
+
+                var localTransform = this.GetTransformByName(meshName);
+
+                effect.UpdatePerFrame(localTransform, context);
+
+                foreach (string material in dictionary.Keys)
                 {
-                    var graphics = this.Game.Graphics;
+                    var mesh = dictionary[material];
 
-                    foreach (string meshName in this.DrawingData.Meshes.Keys)
+                    var mat = this.DrawingData.Materials[material];
+
+                    effect.UpdatePerObject(this.AnimationIndex, mat, this.TextureIndex);
+
+                    this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+
+                    var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, mesh.Transparent);
+                    this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+
+                    count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+
+                    for (int p = 0; p < technique.PassCount; p++)
                     {
-                        var dictionary = this.DrawingData.Meshes[meshName];
+                        graphics.EffectPassApply(technique, p, 0);
 
-                        var localTransform = this.GetTransformByName(meshName);
-
-                        effect.UpdatePerFrame(localTransform, context);
-
-                        foreach (string material in dictionary.Keys)
-                        {
-                            var mesh = dictionary[material];
-
-                            var mat = this.DrawingData.Materials[material];
-
-                            effect.UpdatePerObject(this.AnimationIndex, mat, this.TextureIndex);
-
-                            this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
-
-                            var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, mesh.Transparent);
-                            this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
-
-                            count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
-
-                            for (int p = 0; p < technique.PassCount; p++)
-                            {
-                                graphics.EffectPassApply(technique, p, 0);
-
-                                mesh.Draw(graphics);
-                            }
-                        }
+                        mesh.Draw(graphics);
                     }
                 }
             }
@@ -268,78 +271,83 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.DrawingData != null)
+            if (this.DrawingData == null)
             {
-                int count = 0;
-                int instanceCount = 0;
-
-                instanceCount++;
-
-                var mode = context.DrawerMode;
-
-                IGeometryDrawer effect = null;
-
-                if (mode.HasFlag(DrawerModes.Forward))
-                {
-                    effect = DrawerPool.EffectDefaultBasic;
-                }
-                else if (mode.HasFlag(DrawerModes.Deferred))
-                {
-                    effect = DrawerPool.EffectDeferredBasic;
-                }
-
-                if (effect != null)
-                {
-                    var graphics = this.Game.Graphics;
-
-                    foreach (string meshName in this.DrawingData.Meshes.Keys)
-                    {
-                        var dictionary = this.DrawingData.Meshes[meshName];
-
-                        var localTransform = this.GetTransformByName(meshName);
-
-                        effect.UpdatePerFrameFull(localTransform, context);
-
-                        foreach (string material in dictionary.Keys)
-                        {
-                            var mesh = dictionary[material];
-                            bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
-
-                            if (mode.HasFlag(DrawerModes.OpaqueOnly) && transparent)
-                            {
-                                continue;
-                            }
-                            if (mode.HasFlag(DrawerModes.TransparentOnly) && !transparent)
-                            {
-                                continue;
-                            }
-
-                            effect.UpdatePerObject(
-                                this.AnimationIndex,
-                                this.DrawingData.Materials[material],
-                                this.TextureIndex,
-                                this.UseAnisotropicFiltering);
-
-                            this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
-
-                            var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced);
-                            this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
-
-                            count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
-
-                            for (int p = 0; p < technique.PassCount; p++)
-                            {
-                                graphics.EffectPassApply(technique, p, 0);
-
-                                mesh.Draw(graphics);
-                            }
-                        }
-                    }
-                }
-
-                Counters.InstancesPerFrame += instanceCount;
-                Counters.PrimitivesPerFrame += count;
+                return;
             }
+
+            var effect = this.GetEffect(context.DrawerMode);
+            if (effect == null)
+            {
+                return;
+            }
+
+            int count = 0;
+            foreach (string meshName in this.DrawingData.Meshes.Keys)
+            {
+                count += this.DrawMesh(context, effect, meshName);
+            }
+
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += count;
+        }
+        /// <summary>
+        /// Draws a mesh
+        /// </summary>
+        /// <param name="context">Context</param>
+        /// <param name="effect">Effect</param>
+        /// <param name="meshName">Mesh name</param>
+        /// <returns>Returns the number of drawn triangles</returns>
+        private int DrawMesh(DrawContext context, IGeometryDrawer effect, string meshName)
+        {
+            int count = 0;
+
+            var graphics = this.Game.Graphics;
+
+            var mode = context.DrawerMode;
+
+            var dictionary = this.DrawingData.Meshes[meshName];
+
+            var localTransform = this.GetTransformByName(meshName);
+
+            effect.UpdatePerFrameFull(localTransform, context);
+
+            foreach (string material in dictionary.Keys)
+            {
+                var mesh = dictionary[material];
+                bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
+
+                if (mode.HasFlag(DrawerModes.OpaqueOnly) && transparent)
+                {
+                    continue;
+                }
+                if (mode.HasFlag(DrawerModes.TransparentOnly) && !transparent)
+                {
+                    continue;
+                }
+
+                effect.UpdatePerObject(
+                    this.AnimationIndex,
+                    this.DrawingData.Materials[material],
+                    this.TextureIndex,
+                    this.UseAnisotropicFiltering);
+
+                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+
+                var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced);
+                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+
+                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+
+                for (int p = 0; p < technique.PassCount; p++)
+                {
+                    graphics.EffectPassApply(technique, p, 0);
+
+                    mesh.Draw(graphics);
+                }
+            }
+
+            return count;
         }
 
         /// <summary>

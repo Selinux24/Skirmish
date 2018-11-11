@@ -109,75 +109,93 @@ namespace Engine
             this.drawFlares = false;
 
             var keyLight = context.Lights.KeyLight;
-            if (keyLight != null)
+            if (keyLight?.Enabled == true)
             {
-                if (this.Scene != null)
+                if (!this.IsFlareVisible(keyLight, context.EyePosition))
                 {
-                    Vector3 lightPosition = keyLight.GetPosition(1000);
-                    Vector3 direction = Vector3.Normalize(context.EyePosition - lightPosition);
-
-                    Ray ray = new Ray(lightPosition, direction);
-
-                    if (this.Scene.PickNearest(ray, false, out PickingResult<Triangle> result) &&
-                        Vector3.Distance(lightPosition, context.EyePosition) > result.Distance)
-                    {
-                        return;
-                    }
+                    return;
                 }
 
                 float dot = Math.Max(0, Vector3.Dot(context.EyeDirection, -keyLight.Direction));
+                float scale = dot * keyLight.Brightness;
+                if (scale <= 0)
+                {
+                    return;
+                }
 
                 float transparency = dot;
-                float scale = dot * keyLight.Brightness;
-                if (scale > 0)
+
+                // Set view translation to Zero to simulate infinite
+                var infiniteView = context.View;
+                infiniteView.TranslationVector = Vector3.Zero;
+
+                // Project the light position into 2D screen space.
+                var projectedPosition = this.Game.Graphics.Viewport.Project(
+                    -keyLight.Direction * (1f + context.NearPlaneDistance), //Move position into near and far plane projection bounds
+                    context.Projection,
+                    infiniteView,
+                    Matrix.Identity);
+
+                if (projectedPosition.Z >= 0 && projectedPosition.Z <= 1)
                 {
-                    // Set view translation to Zero to simulate infinite
-                    Matrix infiniteView = context.View;
-                    infiniteView.TranslationVector = Vector3.Zero;
+                    //The light is in front of the camera.
+                    this.drawFlares = true;
 
-                    // Project the light position into 2D screen space.
-                    Vector3 projectedPosition = this.Game.Graphics.Viewport.Project(
-                        -keyLight.Direction * (1f + context.NearPlaneDistance), //Move position into near and far plane projection bounds
-                        context.Projection,
-                        infiniteView,
-                        Matrix.Identity);
+                    var lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
+                    var lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
 
-                    if (projectedPosition.Z >= 0 && projectedPosition.Z <= 1)
+                    //Update glow sprite
+                    float glowScale = 50f / this.glowSprite.Width;
+                    this.glowSprite.Color = new Color4(keyLight.DiffuseColor.RGB(), 0.25f);
+                    this.glowSprite.Manipulator.SetPosition(lightProjectedPosition - (this.glowSprite.RelativeCenter * glowScale * scale));
+                    this.glowSprite.Manipulator.SetScale(glowScale * scale);
+                    this.glowSprite.Update(context);
+
+                    //Update flares
+                    if (this.flares?.Length <= 0)
                     {
-                        //The light is in front of the camera.
-                        this.drawFlares = true;
-
-                        var lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
-                        var lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
-
-                        //Update glow sprite
-                        float glowScale = 50f / this.glowSprite.Width;
-                        this.glowSprite.Color = new Color4(keyLight.DiffuseColor.RGB(), 0.25f);
-                        this.glowSprite.Manipulator.SetPosition(lightProjectedPosition - (this.glowSprite.RelativeCenter * glowScale * scale));
-                        this.glowSprite.Manipulator.SetScale(glowScale * scale);
-                        this.glowSprite.Update(context);
-
-                        //Update flares
-                        if (this.flares != null && this.flares.Length > 0)
+                        for (int i = 0; i < this.flares.Length; i++)
                         {
-                            for (int i = 0; i < this.flares.Length; i++)
-                            {
-                                Flare flare = this.flares[i];
+                            var flare = this.flares[i];
 
-                                // Compute the position of this flare sprite.
-                                Vector2 flarePosition = (lightProjectedPosition + lightProjectedDirection * flare.Position);
+                            // Compute the position of this flare sprite.
+                            var flarePosition = (lightProjectedPosition + lightProjectedDirection * flare.Position);
 
-                                // Set the flare alpha based on the angle with view and light directions.
-                                flare.FlareSprite.Color = new Color4(flare.Color.RGB(), 0.5f * transparency);
-                                flare.FlareSprite.Manipulator.SetPosition(flarePosition - (flare.FlareSprite.RelativeCenter * flare.Scale * scale));
-                                flare.FlareSprite.Manipulator.SetScale(flare.Scale * scale);
-                                flare.FlareSprite.Update(context);
-                            }
+                            // Set the flare alpha based on the angle with view and light directions.
+                            flare.FlareSprite.Color = new Color4(flare.Color.RGB(), 0.5f * transparency);
+                            flare.FlareSprite.Manipulator.SetPosition(flarePosition - (flare.FlareSprite.RelativeCenter * flare.Scale * scale));
+                            flare.FlareSprite.Manipulator.SetScale(flare.Scale * scale);
+                            flare.FlareSprite.Update(context);
                         }
                     }
                 }
             }
         }
+        /// <summary>
+        /// Gets if the flare is visible
+        /// </summary>
+        /// <param name="light">Key light</param>
+        /// <param name="eyePosition">Eye position</param>
+        /// <returns>Returns true if the flare is visible</returns>
+        private bool IsFlareVisible(SceneLightDirectional light, Vector3 eyePosition)
+        {
+            if (this.Scene != null)
+            {
+                Vector3 lightPosition = light.GetPosition(1000);
+                Vector3 direction = Vector3.Normalize(eyePosition - lightPosition);
+
+                Ray ray = new Ray(lightPosition, direction);
+
+                if (this.Scene.PickNearest(ray, false, out PickingResult<Triangle> result) &&
+                    Vector3.Distance(lightPosition, eyePosition) > result.Distance)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// Draws flare
         /// </summary>

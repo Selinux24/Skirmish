@@ -269,81 +269,94 @@ namespace Engine
             foreach (var assetName in instances.Keys)
             {
                 var count = instances[assetName];
-                if (count > 0)
+                if (count <= 0)
                 {
-                    var modelContent = content.FilterMask(assetName);
-                    if (modelContent != null)
-                    {
-                        var masks = this.Levels.GetMasksForAsset(assetName);
-                        var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
-
-                        var model = this.Scene.AddComponent<ModelInstanced>(
-                            new ModelInstancedDescription()
-                            {
-                                Name = string.Format("{0}.{1}.{2}", this.Description.Name, assetName, level.Name),
-                                CastShadow = this.Description.CastShadow,
-                                UseAnisotropicFiltering = this.Description.UseAnisotropic,
-                                Instances = count,
-                                AlphaEnabled = this.Description.AlphaEnabled,
-                                Content = new ContentDescription()
-                                {
-                                    ModelContent = modelContent,
-                                }
-                            },
-                            SceneObjectUsages.None | (hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding));
-
-                        //Get the object list to process
-                        var objList = Array.FindAll(level.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
-
-                        //Positioning
-                        model.Instance.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
-
-                        for (int i = 0; i < model.Instance.Count; i++)
-                        {
-                            if (!objList[i].LoadLights)
-                            {
-                                continue;
-                            }
-
-                            var instance = model.Instance[i];
-
-                            var trn = instance.Manipulator.LocalTransform;
-
-                            var lights = instance.Lights;
-                            if (lights?.Length > 0)
-                            {
-                                var emitterDesc = objList[i].ParticleLight;
-
-                                foreach (var light in lights)
-                                {
-                                    light.CastShadow = objList[i].CastShadows;
-
-                                    if (emitterDesc != null && light is SceneLightPoint pointL)
-                                    {
-                                        var pos = Vector3.TransformCoordinate(pointL.Position, trn);
-
-                                        var emitter = new ParticleEmitter(emitterDesc)
-                                        {
-                                            Position = pos,
-                                            Instance = instance,
-                                        };
-
-                                        this.particleManager.Instance.AddParticleSystem(
-                                            ParticleSystemTypes.CPU,
-                                            this.particleDescriptors[emitterDesc.Name],
-                                            emitter);
-                                    }
-                                }
-
-                                this.Scene.Lights.AddRange(lights);
-                            }
-                        }
-
-                        this.objects.Add(assetName, model);
-                    }
+                    continue;
                 }
+
+                var modelContent = content.FilterMask(assetName);
+                if (modelContent == null)
+                {
+                    continue;
+                }
+
+                var masks = this.Levels.GetMasksForAsset(assetName);
+                var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
+
+                var model = this.Scene.AddComponent<ModelInstanced>(
+                    new ModelInstancedDescription()
+                    {
+                        Name = string.Format("{0}.{1}.{2}", this.Description.Name, assetName, level.Name),
+                        CastShadow = this.Description.CastShadow,
+                        UseAnisotropicFiltering = this.Description.UseAnisotropic,
+                        Instances = count,
+                        AlphaEnabled = this.Description.AlphaEnabled,
+                        Content = new ContentDescription()
+                        {
+                            ModelContent = modelContent,
+                        }
+                    },
+                    SceneObjectUsages.None | (hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding));
+
+                //Get the object list to process
+                var objList = Array.FindAll(level.Objects, o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
+
+                //Positioning
+                model.Instance.SetTransforms(objList.Select(o => o.GetTransform()).ToArray());
+
+                //Lights
+                for (int i = 0; i < model.Instance.Count; i++)
+                {
+                    this.InitializeObjectLights(objList[i], model.Instance[i]);
+                }
+
+                this.objects.Add(assetName, model);
             }
         }
+        /// <summary>
+        /// Initialize lights attached to the specified object
+        /// </summary>
+        /// <param name="obj">Object</param>
+        /// <param name="instance">Model instance</param>
+        private void InitializeObjectLights(ModularSceneryObjectReference obj, ModelInstance instance)
+        {
+            if (!obj.LoadLights)
+            {
+                return;
+            }
+
+            var trn = instance.Manipulator.LocalTransform;
+
+            var lights = instance.Lights;
+            if (lights?.Length > 0)
+            {
+                var emitterDesc = obj.ParticleLight;
+
+                foreach (var light in lights)
+                {
+                    light.CastShadow = obj.CastShadows;
+
+                    if (emitterDesc != null && light is SceneLightPoint pointL)
+                    {
+                        var pos = Vector3.TransformCoordinate(pointL.Position, trn);
+
+                        var emitter = new ParticleEmitter(emitterDesc)
+                        {
+                            Position = pos,
+                            Instance = instance,
+                        };
+
+                        this.particleManager.Instance.AddParticleSystem(
+                            ParticleSystemTypes.CPU,
+                            this.particleDescriptors[emitterDesc.Name],
+                            emitter);
+                    }
+                }
+
+                this.Scene.Lights.AddRange(lights);
+            }
+        }
+
         /// <summary>
         /// Initialize scenery entities proxy list
         /// </summary>
@@ -399,56 +412,7 @@ namespace Engine
                     throw new EngineException(string.Format("Modular Scenery asset not found: {0}", item.AssetName));
                 }
 
-                var complexAssetTransform = item.GetTransform();
-                var complexAssetRotation = item.Rotation;
-
-                AssetMapItem aMap = new AssetMapItem()
-                {
-                    Index = assetIndex,
-                    Name = item.AssetName,
-                    Transform = complexAssetTransform,
-                    Assets = new Dictionary<string, List<int>>(),
-                };
-                this.assetMap.Add(aMap);
-
-                var asset = this.AssetConfiguration.Assets[assetIndex];
-                var assetTransforms = asset.GetInstanceTransforms();
-
-                foreach (var basicAsset in assetTransforms.Keys)
-                {
-                    if (!transforms.ContainsKey(basicAsset))
-                    {
-                        transforms.Add(basicAsset, new List<Matrix>());
-                    }
-
-                    if (!aMap.Assets.ContainsKey(basicAsset))
-                    {
-                        aMap.Assets.Add(basicAsset, new List<int>());
-                    }
-
-                    //Get basic asset type
-                    var basicAssetType = Array.Find(asset.Assets, a => a.AssetName == basicAsset).Type;
-
-                    Array.ForEach(assetTransforms[basicAsset], t =>
-                    {
-                        var basicTrn = t;
-
-                        if (this.AssetConfiguration.MaintainTextureDirection)
-                        {
-                            var maintain =
-                                basicAssetType == ModularSceneryAssetTypes.Floor ||
-                                basicAssetType == ModularSceneryAssetTypes.Ceiling;
-                            if (maintain)
-                            {
-                                //Invert complex asset rotation
-                                basicTrn = Matrix.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
-                            }
-                        }
-
-                        aMap.Assets[basicAsset].Add(transforms[basicAsset].Count);
-                        transforms[basicAsset].Add(basicTrn * complexAssetTransform);
-                    });
-                }
+                this.ParseAssetReference(item, assetIndex, transforms);
             }
 
             foreach (var assetName in transforms.Keys)
@@ -457,6 +421,65 @@ namespace Engine
             }
 
             this.assetMap.Build(this.AssetConfiguration, this.assets);
+        }
+        /// <summary>
+        /// Parses the specified asset reference
+        /// </summary>
+        /// <param name="item">Reference</param>
+        /// <param name="assetIndex">Asset index</param>
+        /// <param name="transforms">Transforms dictionary</param>
+        private void ParseAssetReference(ModularSceneryAssetReference item, int assetIndex, Dictionary<string, List<Matrix>> transforms)
+        {
+            var complexAssetTransform = item.GetTransform();
+            var complexAssetRotation = item.Rotation;
+
+            AssetMapItem aMap = new AssetMapItem()
+            {
+                Index = assetIndex,
+                Name = item.AssetName,
+                Transform = complexAssetTransform,
+                Assets = new Dictionary<string, List<int>>(),
+            };
+            this.assetMap.Add(aMap);
+
+            var asset = this.AssetConfiguration.Assets[assetIndex];
+            var assetTransforms = asset.GetInstanceTransforms();
+
+            foreach (var basicAsset in assetTransforms.Keys)
+            {
+                if (!transforms.ContainsKey(basicAsset))
+                {
+                    transforms.Add(basicAsset, new List<Matrix>());
+                }
+
+                if (!aMap.Assets.ContainsKey(basicAsset))
+                {
+                    aMap.Assets.Add(basicAsset, new List<int>());
+                }
+
+                //Get basic asset type
+                var basicAssetType = Array.Find(asset.Assets, a => a.AssetName == basicAsset).Type;
+
+                Array.ForEach(assetTransforms[basicAsset], t =>
+                {
+                    var basicTrn = t;
+
+                    if (this.AssetConfiguration.MaintainTextureDirection)
+                    {
+                        var maintain =
+                            basicAssetType == ModularSceneryAssetTypes.Floor ||
+                            basicAssetType == ModularSceneryAssetTypes.Ceiling;
+                        if (maintain)
+                        {
+                            //Invert complex asset rotation
+                            basicTrn = Matrix.RotationQuaternion(Quaternion.Invert(complexAssetRotation)) * t;
+                        }
+                    }
+
+                    aMap.Assets[basicAsset].Add(transforms[basicAsset].Count);
+                    transforms[basicAsset].Add(basicTrn * complexAssetTransform);
+                });
+            }
         }
 
         /// <summary>
