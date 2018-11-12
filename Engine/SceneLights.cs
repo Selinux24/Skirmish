@@ -352,12 +352,30 @@ namespace Engine
         {
             this.visibleLights.Clear();
 
+            this.CullDirectionalLights();
+            this.CullPointLights(volume, viewerPosition);
+            this.CullSpotLights(volume, viewerPosition);
+        }
+        /// <summary>
+        /// Cull test for directional lighs
+        /// </summary>
+        /// <param name="volume">Volume</param>
+        /// <param name="viewerPosition">Viewer position</param>
+        private void CullDirectionalLights()
+        {
             var dLights = this.directionalLights.FindAll(l => l.Enabled);
             if (dLights.Count > 0)
             {
                 this.visibleLights.AddRange(dLights);
             }
-
+        }
+        /// <summary>
+        /// Cull test for point lights
+        /// </summary>
+        /// <param name="volume">Volume</param>
+        /// <param name="viewerPosition">Viewer position</param>
+        private void CullPointLights(ICullingVolume volume, Vector3 viewerPosition)
+        {
             var pLights = this.pointLights.FindAll(l =>
             {
                 if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
@@ -384,7 +402,14 @@ namespace Engine
 
                 this.visibleLights.AddRange(pLights);
             }
-
+        }
+        /// <summary>
+        /// Cull test for spot lights
+        /// </summary>
+        /// <param name="volume">Volume</param>
+        /// <param name="viewerPosition">Viewer position</param>
+        private void CullSpotLights(ICullingVolume volume, Vector3 viewerPosition)
+        {
             var sLights = this.spotLights.FindAll(l =>
             {
                 if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)

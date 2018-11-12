@@ -508,25 +508,9 @@ namespace Engine
 
                 if (list1.Count == list2.Count)
                 {
-                    if (list1.Count > 0)
+                    if (list1.Count > 0 && !IsEqual(list1, list2))
                     {
-                        bool equatable = list1[0] is IEquatable<T>;
-
-                        for (int i = 0; i < list1.Count; i++)
-                        {
-                            bool equal = false;
-
-                            if (equatable)
-                            {
-                                equal = ((IEquatable<T>)list1[i]).Equals(list2[i]);
-                            }
-                            else
-                            {
-                                equal = list1[i].Equals(list2[i]);
-                            }
-
-                            if (!equal) return false;
-                        }
+                        return false;
                     }
 
                     return true;
@@ -534,6 +518,35 @@ namespace Engine
             }
 
             return false;
+        }
+        /// <summary>
+        /// Compares two lists
+        /// </summary>
+        /// <typeparam name="T">Type of items in the list</typeparam>
+        /// <param name="list1">First list</param>
+        /// <param name="list2">Second list</param>
+        /// <returns>Returns false if the lists were not equal</returns>
+        private static bool IsEqual<T>(List<T> list1, List<T> list2)
+        {
+            bool equatable = list1[0] is IEquatable<T>;
+
+            for (int i = 0; i < list1.Count; i++)
+            {
+                bool equal = false;
+
+                if (equatable)
+                {
+                    equal = ((IEquatable<T>)list1[i]).Equals(list2[i]);
+                }
+                else
+                {
+                    equal = list1[i].Equals(list2[i]);
+                }
+
+                if (!equal) return false;
+            }
+
+            return true;
         }
 
         #endregion

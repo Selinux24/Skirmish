@@ -400,32 +400,42 @@ namespace Engine
             if (mode.HasFlag(DrawerModes.OpaqueOnly))
             {
                 var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
-                if (nodes != null && nodes.Length > 0)
+                if (nodes?.Length > 0)
                 {
-                    IGeometryDrawer sceneryEffect = null;
-
-                    if (mode.HasFlag(DrawerModes.Forward))
+                    var sceneryEffect = GetEffect(mode);
+                    if (sceneryEffect == null)
                     {
-                        sceneryEffect = DrawerPool.EffectDefaultBasic;
-                    }
-                    else if (mode.HasFlag(DrawerModes.Deferred))
-                    {
-                        sceneryEffect = DrawerPool.EffectDeferredBasic;
+                        return;
                     }
 
-                    if (sceneryEffect != null)
+                    sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
+
+                    graphics.SetBlendDefault();
+
+                    foreach (var node in nodes)
                     {
-                        sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
-
-                        graphics.SetBlendDefault();
-
-                        foreach (var node in nodes)
-                        {
-                            this.patchDictionary[node.Id].DrawScenery(sceneryEffect, this.BufferManager);
-                        }
+                        this.patchDictionary[node.Id].DrawScenery(sceneryEffect, this.BufferManager);
                     }
                 }
             }
+        }
+        /// <summary>
+        /// Gets effect for rendering based on drawing mode
+        /// </summary>
+        /// <param name="mode">Drawing mode</param>
+        /// <returns>Returns the effect for rendering</returns>
+        private IGeometryDrawer GetEffect(DrawerModes mode)
+        {
+            if (mode.HasFlag(DrawerModes.Forward))
+            {
+                return DrawerPool.EffectDefaultBasic;
+            }
+            else if (mode.HasFlag(DrawerModes.Deferred))
+            {
+                return DrawerPool.EffectDeferredBasic;
+            }
+
+            return null;
         }
 
         /// <summary>

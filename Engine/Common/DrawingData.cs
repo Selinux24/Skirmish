@@ -170,13 +170,17 @@ namespace Engine.Common
                             description, geometry, vertexType,
                             out var vertices, out var indices);
 
+                        for (int i = 0; i < vertices.Length; i++)
+                        {
+                            vertices[i] = vertices[i].Transform(bindShapeMatrix);
+                        }
+
                         //Convert the vertex data to final mesh data
                         var vertexList = VertexData.Convert(
                             vertexType,
                             vertices,
                             weights,
-                            jointNames,
-                            bindShapeMatrix);
+                            jointNames);
 
                         if (vertexList?.Length > 0)
                         {

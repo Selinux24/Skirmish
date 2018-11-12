@@ -157,7 +157,7 @@ namespace Engine
                 var nodes = this.drawingQuadTree.GetLeafNodes();
                 foreach (var node in nodes)
                 {
-                    var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null, Matrix.Identity);
+                    var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null);
 
                     this.dictVB.Add(node.Id, bufferManager.Add("", data, false, 1));
                 }

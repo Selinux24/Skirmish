@@ -354,45 +354,65 @@ namespace Engine.Common
             {
                 if (v.Normal.HasValue)
                 {
-                    if (!preferTextured && v.Color.HasValue)
-                    {
-                        return VertexTypes.PositionNormalColor;
-                    }
-                    else if (preferTextured && v.Texture.HasValue)
-                    {
-                        if (v.Tangent.HasValue)
-                        {
-                            return VertexTypes.PositionNormalTextureTangent;
-                        }
-                        else
-                        {
-                            return VertexTypes.PositionNormalTexture;
-                        }
-                    }
-                    else
-                    {
-                        return VertexTypes.PositionNormalColor;
-                    }
+                    return GetPositionNormalVariant(v, preferTextured);
                 }
                 else
                 {
-                    if (!preferTextured && v.Color.HasValue)
-                    {
-                        return VertexTypes.PositionColor;
-                    }
-                    else if (preferTextured && v.Texture.HasValue)
-                    {
-                        return VertexTypes.PositionTexture;
-                    }
-                    else
-                    {
-                        return VertexTypes.PositionColor;
-                    }
+                    return GetPositionOnlyVariant(v, preferTextured);
                 }
             }
             else
             {
                 return VertexTypes.Unknown;
+            }
+        }
+        /// <summary>
+        /// Gets the vertex type based on vertex data (Position with Normal)
+        /// </summary>
+        /// <param name="v">Vertex</param>
+        /// <param name="preferTextured">Sets wether textured formats were prefered over vertex colored formats</param>
+        /// <returns>Returns the vertex type</returns>
+        public static VertexTypes GetPositionOnlyVariant(VertexData v, bool preferTextured)
+        {
+            if (!preferTextured && v.Color.HasValue)
+            {
+                return VertexTypes.PositionColor;
+            }
+            else if (preferTextured && v.Texture.HasValue)
+            {
+                return VertexTypes.PositionTexture;
+            }
+            else
+            {
+                return VertexTypes.PositionColor;
+            }
+        }
+        /// <summary>
+        /// Gets the vertex type based on vertex data (Position without Normal)
+        /// </summary>
+        /// <param name="v">Vertex</param>
+        /// <param name="preferTextured">Sets wether textured formats were prefered over vertex colored formats</param>
+        /// <returns>Returns the vertex type</returns>
+        public static VertexTypes GetPositionNormalVariant(VertexData v, bool preferTextured)
+        {
+            if (!preferTextured && v.Color.HasValue)
+            {
+                return VertexTypes.PositionNormalColor;
+            }
+            else if (preferTextured && v.Texture.HasValue)
+            {
+                if (v.Tangent.HasValue)
+                {
+                    return VertexTypes.PositionNormalTextureTangent;
+                }
+                else
+                {
+                    return VertexTypes.PositionNormalTexture;
+                }
+            }
+            else
+            {
+                return VertexTypes.PositionNormalColor;
             }
         }
         /// <summary>
@@ -430,19 +450,10 @@ namespace Engine.Common
         /// <param name="vertexType">Vertex type</param>
         /// <param name="vertices">Helpers</param>
         /// <param name="weights">Weight information</param>
-        /// <param name="transform">Transfor to apply to all vertices</param>
         /// <returns>Returns generated vertices</returns>
-        public static IVertexData[] Convert(VertexTypes vertexType, VertexData[] vertices, Weight[] weights, string[] skinBoneNames, Matrix transform)
+        public static IVertexData[] Convert(VertexTypes vertexType, VertexData[] vertices, Weight[] weights, string[] skinBoneNames)
         {
             List<IVertexData> vertexList = new List<IVertexData>();
-
-            if (!transform.IsIdentity)
-            {
-                for (int i = 0; i < vertices.Length; i++)
-                {
-                    vertices[i] = vertices[i].Transform(transform);
-                }
-            }
 
             if (vertexType == VertexTypes.Position)
             {
@@ -526,7 +537,6 @@ namespace Engine.Common
             {
                 Array.ForEach(vertices, (v) => { vertexList.Add(CreateVertexTerrain(v)); });
             }
-
             else
             {
                 throw new EngineException(string.Format("Unknown vertex type: {0}", vertexType));
@@ -553,33 +563,32 @@ namespace Engine.Common
         public static Vector3 ApplyWeight(IVertexData vertex, Matrix[] boneTransforms)
         {
             Vector3 position = vertex.HasChannel(VertexDataChannels.Position) ? vertex.GetChannelValue<Vector3>(VertexDataChannels.Position) : Vector3.Zero;
-            if (IsSkinned(vertex.VertexType))
-            {
-                byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : null;
-                float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : null;
 
-                Vector3 t = Vector3.Zero;
-
-                for (int w = 0; w < boneIndices.Length; w++)
-                {
-                    float weight = boneWeights[w];
-                    if (weight > 0)
-                    {
-                        byte index = boneIndices[w];
-                        var boneTransform = boneTransforms != null ? boneTransforms[index] : Matrix.Identity;
-
-                        Vector3.TransformCoordinate(ref position, ref boneTransform, out Vector3 p);
-
-                        t += (p * weight);
-                    }
-                }
-
-                return t;
-            }
-            else
+            if (!IsSkinned(vertex.VertexType))
             {
                 return position;
             }
+
+            byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : null;
+            float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : null;
+
+            Vector3 t = Vector3.Zero;
+
+            for (int w = 0; w < boneIndices.Length; w++)
+            {
+                float weight = boneWeights[w];
+                if (weight > 0)
+                {
+                    byte index = boneIndices[w];
+                    var boneTransform = boneTransforms != null ? boneTransforms[index] : Matrix.Identity;
+
+                    Vector3.TransformCoordinate(ref position, ref boneTransform, out Vector3 p);
+
+                    t += (p * weight);
+                }
+            }
+
+            return t;
         }
 
         /// <summary>

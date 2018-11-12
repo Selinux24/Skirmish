@@ -146,58 +146,28 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.lightGeometryVertexBuffer != null)
-                {
-                    this.lightGeometryVertexBuffer.Dispose();
-                    this.lightGeometryVertexBuffer = null;
-                }
-                if (this.lightGeometryIndexBuffer != null)
-                {
-                    this.lightGeometryIndexBuffer.Dispose();
-                    this.lightGeometryIndexBuffer = null;
-                }
+                this.lightGeometryVertexBuffer?.Dispose();
+                this.lightGeometryVertexBuffer = null;
+                this.lightGeometryIndexBuffer?.Dispose();
+                this.lightGeometryIndexBuffer = null;
 
-                if (this.globalLightInputLayout != null)
-                {
-                    this.globalLightInputLayout.Dispose();
-                    this.globalLightInputLayout = null;
-                }
-                if (this.pointLightInputLayout != null)
-                {
-                    this.pointLightInputLayout.Dispose();
-                    this.pointLightInputLayout = null;
-                }
-                if (this.spotLightInputLayout != null)
-                {
-                    this.spotLightInputLayout.Dispose();
-                    this.spotLightInputLayout = null;
-                }
-                if (this.combineLightsInputLayout != null)
-                {
-                    this.combineLightsInputLayout.Dispose();
-                    this.combineLightsInputLayout = null;
-                }
+                this.globalLightInputLayout?.Dispose();
+                this.globalLightInputLayout = null;
+                this.pointLightInputLayout?.Dispose();
+                this.pointLightInputLayout = null;
+                this.spotLightInputLayout?.Dispose();
+                this.spotLightInputLayout = null;
+                this.combineLightsInputLayout?.Dispose();
+                this.combineLightsInputLayout = null;
 
-                if (this.rasterizerStencilPass != null)
-                {
-                    this.rasterizerStencilPass.Dispose();
-                    this.rasterizerStencilPass = null;
-                }
-                if (this.rasterizerLightingPass != null)
-                {
-                    this.rasterizerLightingPass.Dispose();
-                    this.rasterizerLightingPass = null;
-                }
-                if (this.depthStencilVolumeMarking != null)
-                {
-                    this.depthStencilVolumeMarking.Dispose();
-                    this.depthStencilVolumeMarking = null;
-                }
-                if (this.depthStencilVolumeDrawing != null)
-                {
-                    this.depthStencilVolumeDrawing.Dispose();
-                    this.depthStencilVolumeDrawing = null;
-                }
+                this.rasterizerStencilPass?.Dispose();
+                this.rasterizerStencilPass = null;
+                this.rasterizerLightingPass?.Dispose();
+                this.rasterizerLightingPass = null;
+                this.depthStencilVolumeMarking?.Dispose();
+                this.depthStencilVolumeMarking = null;
+                this.depthStencilVolumeDrawing?.Dispose();
+                this.depthStencilVolumeDrawing = null;
             }
         }
 

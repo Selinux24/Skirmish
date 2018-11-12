@@ -154,92 +154,124 @@ namespace Engine
             // The combined transformation from world to shadow space
             worldToShadowSpace = shadowView * shadowProj;
 
-            // For each cascade find the transformation from shadow to cascade space
             Matrix shadowViewInv = Matrix.Invert(shadowView);
+
+            // For each cascade find the transformation from shadow to cascade space
             for (int cascadeIdx = 0; cascadeIdx < TotalCascades; cascadeIdx++)
             {
                 Matrix cascadeTrans;
                 Matrix cascadeScale;
                 if (antiFlickerOn)
                 {
-                    // To avoid anti flickering we need to make the transformation invariant to camera rotation and translation
-                    // By encapsulating the cascade frustum with a sphere we achive the rotation invariance
-                    ExtractFrustumBoundSphere(
-                        camera,
-                        cascadeRanges[cascadeIdx],
-                        cascadeRanges[cascadeIdx + 1],
-                        out BoundingSphere newBoundingSphere);
-
-                    // Expend the radius to compensate for numerical errors
-                    cascadeBoundRadius[cascadeIdx] = Math.Max(cascadeBoundRadius[cascadeIdx], newBoundingSphere.Radius);
-
-                    // Only update the cascade bounds if it moved at least a full pixel unit
-                    // This makes the transformation invariant to translation
-                    if (CascadeNeedsUpdate(shadowView, cascadeIdx, newBoundingSphere.Center, out Vector3 offset))
-                    {
-                        // To avoid flickering we need to move the bound center in full units
-                        Vector3 offsetOut = Vector3.TransformNormal(offset, shadowViewInv);
-                        cascadeBoundCenter[cascadeIdx] += offsetOut;
-                    }
-
-                    // Get the cascade center in shadow space
-                    Vector3 cascadeCenterShadowSpace = Vector3.TransformCoordinate(cascadeBoundCenter[cascadeIdx], worldToShadowSpace);
-
-                    // Update the translation from shadow to cascade space
-                    toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
-                    toCascadeOffsetY[cascadeIdx] = -cascadeCenterShadowSpace.Y;
-                    cascadeTrans = Matrix.Translation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
-
-                    // Update the scale from shadow to cascade space
-                    toCascadeScale[cascadeIdx] = shadowBoundRadius / cascadeBoundRadius[cascadeIdx];
-                    cascadeScale = Matrix.Scaling(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
+                    this.UpdateCascadesAntiFlicker(
+                        camera, shadowView, shadowViewInv,
+                        cascadeIdx,
+                        out cascadeTrans, out cascadeScale);
                 }
                 else
                 {
-                    // Since we don't care about flickering we can make the cascade fit tightly around the frustum
-                    // Extract the bounding box
-                    ExtractFrustumPoints(
+                    this.UpdateCascadesSimple(
                         camera,
-                        cascadeRanges[cascadeIdx],
-                        cascadeRanges[cascadeIdx + 1],
-                        out Vector3[] frustumPoints);
-
-                    // Transform to shadow space and extract the minimum andn maximum
-                    Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-                    Vector3 max = new Vector3(-float.MaxValue, -float.MaxValue, -float.MaxValue);
-                    for (int i = 0; i < 8; i++)
-                    {
-                        Vector3 pointInShadowSpace = Vector3.TransformCoordinate(frustumPoints[i], worldToShadowSpace);
-
-                        for (int j = 0; j < 3; j++)
-                        {
-                            if (min[j] > pointInShadowSpace[j])
-                            {
-                                min[j] = pointInShadowSpace[j];
-                            }
-                            if (max[j] < pointInShadowSpace[j])
-                            {
-                                max[j] = pointInShadowSpace[j];
-                            }
-                        }
-                    }
-
-                    Vector3 cascadeCenterShadowSpace = 0.5f * (min + max);
-
-                    // Update the translation from shadow to cascade space
-                    toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
-                    toCascadeOffsetY[cascadeIdx] = -cascadeCenterShadowSpace.Y;
-                    cascadeTrans = Matrix.Translation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
-
-                    // Update the scale from shadow to cascade space
-                    toCascadeScale[cascadeIdx] = 2.0f / Math.Max(max.X - min.X, max.Y - min.Y);
-                    cascadeScale = Matrix.Scaling(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
+                        cascadeIdx,
+                        out cascadeTrans, out cascadeScale);
                 }
 
                 // Combine the matrices to get the transformation from world to cascade space
                 worldToCascadeProj[cascadeIdx] = worldToShadowSpace * cascadeTrans * cascadeScale;
             }
         }
+        /// <summary>
+        /// Updates the matrix set with antiflikering activated
+        /// </summary>
+        /// <param name="camera">Camera</param>
+        /// <param name="shadowView">Shadow view</param>
+        /// <param name="shadowViewInv">Inverse shadow view</param>
+        /// <param name="cascadeIdx">Cascade index</param>
+        /// <param name="cascadeTrans">Resulting cascade transform</param>
+        /// <param name="cascadeScale">Resulting cascade scale</param>
+        private void UpdateCascadesAntiFlicker(Camera camera, Matrix shadowView, Matrix shadowViewInv, int cascadeIdx, out Matrix cascadeTrans, out Matrix cascadeScale)
+        {
+            // To avoid anti flickering we need to make the transformation invariant to camera rotation and translation
+            // By encapsulating the cascade frustum with a sphere we achive the rotation invariance
+            ExtractFrustumBoundSphere(
+                camera,
+                cascadeRanges[cascadeIdx],
+                cascadeRanges[cascadeIdx + 1],
+                out BoundingSphere newBoundingSphere);
+
+            // Expend the radius to compensate for numerical errors
+            cascadeBoundRadius[cascadeIdx] = Math.Max(cascadeBoundRadius[cascadeIdx], newBoundingSphere.Radius);
+
+            // Only update the cascade bounds if it moved at least a full pixel unit
+            // This makes the transformation invariant to translation
+            if (CascadeNeedsUpdate(shadowView, cascadeIdx, newBoundingSphere.Center, out Vector3 offset))
+            {
+                // To avoid flickering we need to move the bound center in full units
+                Vector3 offsetOut = Vector3.TransformNormal(offset, shadowViewInv);
+                cascadeBoundCenter[cascadeIdx] += offsetOut;
+            }
+
+            // Get the cascade center in shadow space
+            Vector3 cascadeCenterShadowSpace = Vector3.TransformCoordinate(cascadeBoundCenter[cascadeIdx], worldToShadowSpace);
+
+            // Update the translation from shadow to cascade space
+            toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
+            toCascadeOffsetY[cascadeIdx] = -cascadeCenterShadowSpace.Y;
+            cascadeTrans = Matrix.Translation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
+
+            // Update the scale from shadow to cascade space
+            toCascadeScale[cascadeIdx] = shadowBoundRadius / cascadeBoundRadius[cascadeIdx];
+            cascadeScale = Matrix.Scaling(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
+        }
+        /// <summary>
+        /// Updates the matrix set with antiflikering deactivated
+        /// </summary>
+        /// <param name="camera">Camera</param>
+        /// <param name="cascadeIdx">Cascade index</param>
+        /// <param name="cascadeTrans">Resulting cascade transform</param>
+        /// <param name="cascadeScale">Resulting cascade scale</param>
+        private void UpdateCascadesSimple(Camera camera, int cascadeIdx, out Matrix cascadeTrans, out Matrix cascadeScale)
+        {
+            // Since we don't care about flickering we can make the cascade fit tightly around the frustum
+            // Extract the bounding box
+            ExtractFrustumPoints(
+                camera,
+                cascadeRanges[cascadeIdx],
+                cascadeRanges[cascadeIdx + 1],
+                out Vector3[] frustumPoints);
+
+            // Transform to shadow space and extract the minimum andn maximum
+            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
+            Vector3 max = new Vector3(-float.MaxValue, -float.MaxValue, -float.MaxValue);
+            for (int i = 0; i < 8; i++)
+            {
+                Vector3 pointInShadowSpace = Vector3.TransformCoordinate(frustumPoints[i], worldToShadowSpace);
+
+                for (int j = 0; j < 3; j++)
+                {
+                    if (min[j] > pointInShadowSpace[j])
+                    {
+                        min[j] = pointInShadowSpace[j];
+                    }
+                    if (max[j] < pointInShadowSpace[j])
+                    {
+                        max[j] = pointInShadowSpace[j];
+                    }
+                }
+            }
+
+            Vector3 cascadeCenterShadowSpace = 0.5f * (min + max);
+
+            // Update the translation from shadow to cascade space
+            toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
+            toCascadeOffsetY[cascadeIdx] = -cascadeCenterShadowSpace.Y;
+            cascadeTrans = Matrix.Translation(toCascadeOffsetX[cascadeIdx], toCascadeOffsetY[cascadeIdx], 0.0f);
+
+            // Update the scale from shadow to cascade space
+            toCascadeScale[cascadeIdx] = 2.0f / Math.Max(max.X - min.X, max.Y - min.Y);
+            cascadeScale = Matrix.Scaling(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
+        }
+
         /// <summary>
         /// Test if a cascade needs an update
         /// </summary>
