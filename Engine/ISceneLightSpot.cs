@@ -19,6 +19,10 @@ namespace Engine
         /// Light radius
         /// </summary>
         float Radius { get; }
+        /// <summary>
+        /// Cone angle in radians
+        /// </summary>
+        float AngleRadians { get; }
 
         /// <summary>
         /// Shadow map index
