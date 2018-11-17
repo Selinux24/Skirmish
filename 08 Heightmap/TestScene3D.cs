@@ -33,6 +33,7 @@ namespace Heightmap
         private Vector3 playerHeight = Vector3.UnitY * 5f;
         private bool playerFlying = true;
         private SceneLightSpot lantern = null;
+        private bool lanternFixed = false;
 
         private readonly Vector3 windDirection = Vector3.UnitX;
         private float windStrength = 1f;
@@ -707,7 +708,7 @@ namespace Heightmap
             this.Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
             this.ToggleFog();
 
-            var lanternDesc = SceneLightSpotDescription.Create(this.Camera.Position, this.Camera.Direction, 25f, 100, 1000);
+            var lanternDesc = SceneLightSpotDescription.Create(this.Camera.Position, this.Camera.Direction, 25f, 100, 10000);
             this.lantern = new SceneLightSpot("lantern", true, Color.White, Color.White, true, lanternDesc);
             this.Lights.Add(this.lantern);
 
@@ -1185,6 +1186,7 @@ namespace Heightmap
             if (this.Game.Input.KeyJustReleased(Keys.L))
             {
                 this.lantern.Enabled = !this.lantern.Enabled;
+                this.lanternFixed = false;
             }
         }
         private void UpdateCamera(GameTime gameTime, bool shift)
@@ -1332,8 +1334,6 @@ namespace Heightmap
             {
                 this.graphDrawer.Visible = !this.graphDrawer.Visible;
             }
-
-
         }
         private void UpdateInputLights()
         {
@@ -1344,6 +1344,7 @@ namespace Heightmap
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
+                this.lanternFixed = true;
                 this.linesDrawer.Instance.SetLines(Color.LightPink, this.lantern.GetVolume(10));
                 this.linesDrawer.Visible = true;
             }
@@ -1516,11 +1517,14 @@ namespace Heightmap
 
                 this.spotLight1.Direction = Vector3.Normalize(new Vector3(x, -1, z));
                 this.spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
+
+                this.spotLight1.Enabled = false;
+                this.spotLight2.Enabled = false;
             }
 
-            if (this.lantern.Enabled)
+            if (this.lantern.Enabled && !lanternFixed)
             {
-                this.lantern.Position = this.Camera.Position + this.Camera.Left;
+                this.lantern.Position = this.Camera.Position + (this.Camera.Left * 2);
                 this.lantern.Direction = this.Camera.Direction;
             }
         }

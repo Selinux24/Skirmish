@@ -106,11 +106,10 @@ namespace Engine
             if (light is ISceneLightSpot lightSpot)
             {
                 var near = 1f;
-                var far = Math.Max(lightSpot.Radius, camera.FarPlaneDistance);
-                var projection = Matrix.PerspectiveFovLH(lightSpot.AngleRadians * 2f, 1f, near, far);
+                var projection = Matrix.PerspectiveFovLH(lightSpot.AngleRadians * 2f, 1f, near, lightSpot.Radius);
 
                 var pos = lightSpot.Position;
-                var look = lightSpot.Position + lightSpot.Direction;
+                var look = lightSpot.Position + (lightSpot.Direction * lightSpot.Radius);
                 var view = Matrix.LookAtLH(pos, look, Vector3.Up);
 
                 FromLightViewProjectionArray = new[] { view * projection };
