@@ -172,7 +172,7 @@ inline float CalcCascadedShadowFactor(float3 position, float4x4 toShadowSpace, f
     float3 UVD;
     UVD.x = dot(posCascadeSpaceX, bestCascadeMask);
     UVD.y = dot(posCascadeSpaceY, bestCascadeMask);
-    UVD.z = posShadowSpace.z;
+    UVD.z = posShadowSpace.z - bias;
 
 	// Convert to shadow map UV values
     UVD.xy = 0.5 * UVD.xy + 0.5;
