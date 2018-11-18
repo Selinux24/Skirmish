@@ -305,11 +305,11 @@ namespace Engine.Effects
         /// <summary>
         /// Hemispheric lights
         /// </summary>
-        protected BufferHemisphericLight HemiLight
+        protected BufferLightHemispheric HemiLight
         {
             get
             {
-                return this.hemiLight.GetValue<BufferHemisphericLight>();
+                return this.hemiLight.GetValue<BufferLightHemispheric>();
             }
             set
             {
@@ -319,43 +319,43 @@ namespace Engine.Effects
         /// <summary>
         /// Directional lights
         /// </summary>
-        protected BufferDirectionalLight[] DirLights
+        protected BufferLightDirectional[] DirLights
         {
             get
             {
-                return this.dirLights.GetValue<BufferDirectionalLight>(BufferDirectionalLight.MAX);
+                return this.dirLights.GetValue<BufferLightDirectional>(BufferLightDirectional.MAX);
             }
             set
             {
-                this.dirLights.SetValue(value, BufferDirectionalLight.MAX);
+                this.dirLights.SetValue(value, BufferLightDirectional.MAX);
             }
         }
         /// <summary>
         /// Point light
         /// </summary>
-        protected BufferPointLight[] PointLights
+        protected BufferLightPoint[] PointLights
         {
             get
             {
-                return this.pointLights.GetValue<BufferPointLight>(BufferPointLight.MAX);
+                return this.pointLights.GetValue<BufferLightPoint>(BufferLightPoint.MAX);
             }
             set
             {
-                this.pointLights.SetValue(value, BufferPointLight.MAX);
+                this.pointLights.SetValue(value, BufferLightPoint.MAX);
             }
         }
         /// <summary>
         /// Spot light
         /// </summary>
-        protected BufferSpotLight[] SpotLights
+        protected BufferLightSpot[] SpotLights
         {
             get
             {
-                return this.spotLights.GetValue<BufferSpotLight>(BufferSpotLight.MAX);
+                return this.spotLights.GetValue<BufferLightSpot>(BufferLightSpot.MAX);
             }
             set
             {
-                this.spotLights.SetValue(value, BufferSpotLight.MAX);
+                this.spotLights.SetValue(value, BufferLightSpot.MAX);
             }
         }
         /// <summary>
@@ -1078,10 +1078,10 @@ namespace Engine.Effects
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
 
-            var bHemiLight = BufferHemisphericLight.Default;
-            var bDirLights = new BufferDirectionalLight[BufferDirectionalLight.MAX];
-            var bPointLights = new BufferPointLight[BufferPointLight.MAX];
-            var bSpotLights = new BufferSpotLight[BufferSpotLight.MAX];
+            var bHemiLight = BufferLightHemispheric.Default;
+            var bDirLights = new BufferLightDirectional[BufferLightDirectional.MAX];
+            var bPointLights = new BufferLightPoint[BufferLightPoint.MAX];
+            var bSpotLights = new BufferLightSpot[BufferLightSpot.MAX];
             var lCount = new[] { 0, 0, 0 };
 
             if (lights != null)
@@ -1091,30 +1091,30 @@ namespace Engine.Effects
                 var hemi = lights.GetVisibleHemisphericLight();
                 if (hemi != null)
                 {
-                    bHemiLight = new BufferHemisphericLight(hemi);
+                    bHemiLight = new BufferLightHemispheric(hemi);
                 }
 
                 var dir = lights.GetVisibleDirectionalLights();
-                for (int i = 0; i < Math.Min(dir.Length, BufferDirectionalLight.MAX); i++)
+                for (int i = 0; i < Math.Min(dir.Length, BufferLightDirectional.MAX); i++)
                 {
-                    bDirLights[i] = new BufferDirectionalLight(dir[i]);
+                    bDirLights[i] = new BufferLightDirectional(dir[i]);
                 }
 
                 var point = lights.GetVisiblePointLights();
-                for (int i = 0; i < Math.Min(point.Length, BufferPointLight.MAX); i++)
+                for (int i = 0; i < Math.Min(point.Length, BufferLightPoint.MAX); i++)
                 {
-                    bPointLights[i] = new BufferPointLight(point[i]);
+                    bPointLights[i] = new BufferLightPoint(point[i]);
                 }
 
                 var spot = lights.GetVisibleSpotLights();
-                for (int i = 0; i < Math.Min(spot.Length, BufferSpotLight.MAX); i++)
+                for (int i = 0; i < Math.Min(spot.Length, BufferLightSpot.MAX); i++)
                 {
-                    bSpotLights[i] = new BufferSpotLight(spot[i]);
+                    bSpotLights[i] = new BufferLightSpot(spot[i]);
                 }
 
-                lCount[0] = Math.Min(dir.Length, BufferDirectionalLight.MAX);
-                lCount[1] = Math.Min(point.Length, BufferPointLight.MAX);
-                lCount[2] = Math.Min(spot.Length, BufferSpotLight.MAX);
+                lCount[0] = Math.Min(dir.Length, BufferLightDirectional.MAX);
+                lCount[1] = Math.Min(point.Length, BufferLightPoint.MAX);
+                lCount[2] = Math.Min(spot.Length, BufferLightSpot.MAX);
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;

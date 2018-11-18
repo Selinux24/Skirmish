@@ -454,12 +454,18 @@ namespace Engine.Common
 
             c.Get<IDrawable>().Draw(context);
         }
-
+        /// <summary>
+        /// Sets the opaque blend state
+        /// </summary>
+        /// <param name="context">Drawing context</param>
         protected virtual void SetBlendStateOpaque(DrawContext context)
         {
             this.Game.Graphics.SetBlendDefault();
         }
-
+        /// <summary>
+        /// Sets the transparent blend state
+        /// </summary>
+        /// <param name="context">Drawing context</param>
         protected virtual void SetBlendStateTransparent(DrawContext context)
         {
             this.Game.Graphics.SetBlendTransparent();
@@ -501,7 +507,6 @@ namespace Engine.Common
                 }
             }
         }
-
         /// <summary>
         /// Draw directional shadow maps
         /// </summary>

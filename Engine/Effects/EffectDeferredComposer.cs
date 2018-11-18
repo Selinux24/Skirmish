@@ -193,11 +193,11 @@ namespace Engine.Effects
         /// <summary>
         /// Hemispheric lights
         /// </summary>
-        protected BufferHemisphericLight HemisphericLight
+        protected BufferLightHemispheric HemisphericLight
         {
             get
             {
-                return this.hemisphericLight.GetValue<BufferHemisphericLight>();
+                return this.hemisphericLight.GetValue<BufferLightHemispheric>();
             }
             set
             {
@@ -207,11 +207,11 @@ namespace Engine.Effects
         /// <summary>
         /// Directional lights
         /// </summary>
-        protected BufferDirectionalLight DirectionalLight
+        protected BufferLightDirectional DirectionalLight
         {
             get
             {
-                return this.directionalLight.GetValue<BufferDirectionalLight>();
+                return this.directionalLight.GetValue<BufferLightDirectional>();
             }
             set
             {
@@ -221,11 +221,11 @@ namespace Engine.Effects
         /// <summary>
         /// Point light
         /// </summary>
-        protected BufferPointLight PointLight
+        protected BufferLightPoint PointLight
         {
             get
             {
-                return this.pointLight.GetValue<BufferPointLight>();
+                return this.pointLight.GetValue<BufferLightPoint>();
             }
             set
             {
@@ -235,11 +235,11 @@ namespace Engine.Effects
         /// <summary>
         /// Spot light
         /// </summary>
-        protected BufferSpotLight SpotLight
+        protected BufferLightSpot SpotLight
         {
             get
             {
-                return this.spotLight.GetValue<BufferSpotLight>();
+                return this.spotLight.GetValue<BufferLightSpot>();
             }
             set
             {
@@ -576,7 +576,7 @@ namespace Engine.Effects
             SceneLightDirectional light,
             IShadowMap shadowMap)
         {
-            this.DirectionalLight = new BufferDirectionalLight(light);
+            this.DirectionalLight = new BufferLightDirectional(light);
 
             this.ShadowMapDirectional = shadowMap?.Texture;
         }
@@ -594,7 +594,7 @@ namespace Engine.Effects
             Matrix viewProjection,
             IShadowMap shadowMap)
         {
-            this.PointLight = new BufferPointLight(light);
+            this.PointLight = new BufferLightPoint(light);
 
             this.World = transform;
             this.WorldViewProjection = transform * viewProjection;
@@ -614,7 +614,7 @@ namespace Engine.Effects
             Matrix viewProjection,
             IShadowMap shadowMap)
         {
-            this.SpotLight = new BufferSpotLight(light);
+            this.SpotLight = new BufferLightSpot(light);
 
             this.World = transform;
             this.WorldViewProjection = transform * viewProjection;
@@ -643,11 +643,11 @@ namespace Engine.Effects
                 var ambientLight = lights.GetVisibleHemisphericLight();
                 if (ambientLight != null)
                 {
-                    this.HemisphericLight = new BufferHemisphericLight(ambientLight);
+                    this.HemisphericLight = new BufferLightHemispheric(ambientLight);
                 }
                 else
                 {
-                    this.HemisphericLight = BufferHemisphericLight.Default;
+                    this.HemisphericLight = BufferLightHemispheric.Default;
                 }
 
                 this.FogStart = lights.FogStart;
