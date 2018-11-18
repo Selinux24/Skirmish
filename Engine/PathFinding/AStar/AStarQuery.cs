@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
-using SharpDX;
 
 namespace Engine.PathFinding.AStar
 {
@@ -93,10 +93,10 @@ namespace Engine.PathFinding.AStar
             while (openPathsQueue.Count > 0)
             {
                 //Dequeue the node with lower priority
-                PriorityDictionaryItem<GridNode, float> item = openPathsQueue.Dequeue();
+                var item = openPathsQueue.Dequeue();
 
-                GridNode currentNode = item.Value;
-                AStarQueryData currentNodeData = nodesData[currentNode];
+                var currentNode = item.Value;
+                var currentNodeData = nodesData[currentNode];
 
                 //If the node is not closed to continue the process
                 if (currentNodeData.State != GridNodeStates.Closed)
@@ -114,51 +114,11 @@ namespace Engine.PathFinding.AStar
                     }
                     else
                     {
-                        //Search every possible direction from the current node
-                        for (int i = 1; i < currentNode.Connections.Length; i++)
-                        {
-                            GridNode nextNode = currentNode[i];
-                            if (nextNode != null)
-                            {
-                                if (!nodesData.ContainsKey(nextNode))
-                                {
-                                    nodesData.Add(nextNode, new AStarQueryData());
-                                }
-
-                                AStarQueryData nextNodeData = nodesData[nextNode];
-
-                                if (nextNode.State == GridNodeStates.Closed)
-                                {
-                                    //Impassable node
-                                    continue;
-                                }
-
-                                if (nextNodeData.State == GridNodeStates.Closed)
-                                {
-                                    //Closed node
-                                    continue;
-                                }
-
-                                float newGone = currentNode.TotalCost + ((int)nextNodeData.State);
-
-                                if (nextNodeData.State == GridNodeStates.Clear && nextNode.TotalCost < newGone)
-                                {
-                                    continue;
-                                }
-
-                                nextNodeData.NextNode = currentNode;
-                                nextNodeData.Cost = newGone;
-                                nextNodeData.State = GridNodeStates.Clear;
-
-                                //Calculate priority from next to end
-                                float heuristicValue = CalcHeuristic(
-                                    nextNode.Center,
-                                    end.Center,
-                                    heuristicMethod);
-
-                                openPathsQueue.Enqueue(nextNode, newGone + (heuristicEstimateValue * heuristicValue));
-                            }
-                        }
+                        //Process neigbors
+                        ProcessNeighbors(
+                            openPathsQueue, nodesData,
+                            currentNode, end,
+                            heuristicMethod, heuristicEstimateValue);
                     }
                 }
             }
@@ -168,7 +128,7 @@ namespace Engine.PathFinding.AStar
                 //We found a valid path
                 List<Vector3> solvedList = new List<Vector3>();
 
-                GridNode node = end;
+                var node = end;
                 while (node != null)
                 {
                     solvedList.Insert(0, node.Center);
@@ -182,6 +142,64 @@ namespace Engine.PathFinding.AStar
             {
                 //If no result...
                 return new Vector3[] { };
+            }
+        }
+        /// <summary>
+        /// Adds nodes to queue by priority, processing the specified node neighbors
+        /// </summary>
+        /// <param name="openPathsQueue">Queue</param>
+        /// <param name="nodesData">Nodes data dictionary</param>
+        /// <param name="currentNode">Current node</param>
+        /// <param name="end">End node</param>
+        /// <param name="heuristicMethod">Heuristic metod</param>
+        /// <param name="heuristicEstimateValue">Heuristic estimate value</param>
+        private static void ProcessNeighbors(PriorityDictionary<GridNode, float> openPathsQueue, Dictionary<GridNode, AStarQueryData> nodesData, GridNode currentNode, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
+        {
+            //Search every possible direction from the current node
+            for (int i = 1; i < currentNode.Connections.Length; i++)
+            {
+                var nextNode = currentNode[i];
+                if (nextNode == null)
+                {
+                    continue;
+                }
+
+                if (!nodesData.ContainsKey(nextNode))
+                {
+                    nodesData.Add(nextNode, new AStarQueryData());
+                }
+
+                if (nextNode.State == GridNodeStates.Closed)
+                {
+                    //Impassable node
+                    continue;
+                }
+
+                var nextNodeData = nodesData[nextNode];
+                if (nextNodeData.State == GridNodeStates.Closed)
+                {
+                    //Closed node
+                    continue;
+                }
+
+                float newGone = currentNode.TotalCost + ((int)nextNodeData.State);
+
+                if (nextNodeData.State == GridNodeStates.Clear && nextNode.TotalCost < newGone)
+                {
+                    continue;
+                }
+
+                nextNodeData.NextNode = currentNode;
+                nextNodeData.Cost = newGone;
+                nextNodeData.State = GridNodeStates.Clear;
+
+                //Calculate priority from next to end
+                float heuristicValue = CalcHeuristic(
+                    nextNode.Center,
+                    end.Center,
+                    heuristicMethod);
+
+                openPathsQueue.Enqueue(nextNode, newGone + (heuristicEstimateValue * heuristicValue));
             }
         }
         /// <summary>

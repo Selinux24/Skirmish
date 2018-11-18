@@ -129,7 +129,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="cost">Cost</param>
         public GridNode(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float cost)
         {
-            //Buscar mayor y menor X y Z
+            //Look for X and Z bounds
             float maxX = float.MinValue;
             float maxZ = float.MinValue;
             float minX = float.MaxValue;
@@ -155,29 +155,97 @@ namespace Engine.PathFinding.AStar
             minZ = Math.Min(minZ, p2.Z);
             minZ = Math.Min(minZ, p3.Z);
 
-            if (p0.X == maxX && p0.Z == maxZ) this.NorthEast = p0;
-            else if (p1.X == maxX && p1.Z == maxZ) this.NorthEast = p1;
-            else if (p2.X == maxX && p2.Z == maxZ) this.NorthEast = p2;
-            else if (p3.X == maxX && p3.Z == maxZ) this.NorthEast = p3;
+            var ne = GetNorthEast(maxX, maxZ, p0, p1, p2, p3);
+            if (ne.HasValue) this.NorthEast = ne.Value;
 
-            if (p0.X == minX && p0.Z == maxZ) this.NorthWest = p0;
-            else if (p1.X == minX && p1.Z == maxZ) this.NorthWest = p1;
-            else if (p2.X == minX && p2.Z == maxZ) this.NorthWest = p2;
-            else if (p3.X == minX && p3.Z == maxZ) this.NorthWest = p3;
+            var nw = GetNorthWest(minX, maxZ, p0, p1, p2, p3);
+            if (nw.HasValue) this.NorthWest = nw.Value;
 
-            if (p0.X == minX && p0.Z == minZ) this.SouthWest = p0;
-            else if (p1.X == minX && p1.Z == minZ) this.SouthWest = p1;
-            else if (p2.X == minX && p2.Z == minZ) this.SouthWest = p2;
-            else if (p3.X == minX && p3.Z == minZ) this.SouthWest = p3;
+            var sw = GetSouthWest(minX, minZ, p0, p1, p2, p3);
+            if (sw.HasValue) this.SouthWest = sw.Value;
 
-            if (p0.X == maxX && p0.Z == minZ) this.SouthEast = p0;
-            else if (p1.X == maxX && p1.Z == minZ) this.SouthEast = p1;
-            else if (p2.X == maxX && p2.Z == minZ) this.SouthEast = p2;
-            else if (p3.X == maxX && p3.Z == minZ) this.SouthEast = p3;
+            var se = GetSouthEast(maxX, minZ, p0, p1, p2, p3);
+            if (se.HasValue) this.SouthEast = se.Value;
 
             this.TotalCost = cost;
             this.State = GridNodeStates.Clear;
             this.Center = (p0 + p1 + p2 + p3) / 4f;
+        }
+        /// <summary>
+        /// Gets the north east position in the specified points
+        /// </summary>
+        /// <param name="maxX">Max X</param>
+        /// <param name="maxZ">Max Z</param>
+        /// <param name="p0">Point 1</param>
+        /// <param name="p1">Point 2</param>
+        /// <param name="p2">Point 3</param>
+        /// <param name="p3">Point 4</param>
+        /// <returns>Returns the north east position</returns>
+        private Vector3? GetNorthEast(float maxX, float maxZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            if (p0.X == maxX && p0.Z == maxZ) return p0;
+            else if (p1.X == maxX && p1.Z == maxZ) return p1;
+            else if (p2.X == maxX && p2.Z == maxZ) return p2;
+            else if (p3.X == maxX && p3.Z == maxZ) return p3;
+
+            return null;
+        }
+        /// <summary>
+        /// Gets the north west position in the specified points
+        /// </summary>
+        /// <param name="minX">Min X</param>
+        /// <param name="maxZ">Max Z</param>
+        /// <param name="p0">Point 1</param>
+        /// <param name="p1">Point 2</param>
+        /// <param name="p2">Point 3</param>
+        /// <param name="p3">Point 4</param>
+        /// <returns>Returns the north west position</returns>
+        private Vector3? GetNorthWest(float minX, float maxZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            if (p0.X == minX && p0.Z == maxZ) return p0;
+            else if (p1.X == minX && p1.Z == maxZ) return p1;
+            else if (p2.X == minX && p2.Z == maxZ) return p2;
+            else if (p3.X == minX && p3.Z == maxZ) return p3;
+
+            return null;
+        }
+        /// <summary>
+        /// Gets the south west position in the specified points
+        /// </summary>
+        /// <param name="minX">Min X</param>
+        /// <param name="minZ">Min Z</param>
+        /// <param name="p0">Point 1</param>
+        /// <param name="p1">Point 2</param>
+        /// <param name="p2">Point 3</param>
+        /// <param name="p3">Point 4</param>
+        /// <returns>Returns the south west position</returns>
+        private Vector3? GetSouthWest(float minX, float minZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            if (p0.X == minX && p0.Z == minZ) return p0;
+            else if (p1.X == minX && p1.Z == minZ) return p1;
+            else if (p2.X == minX && p2.Z == minZ) return p2;
+            else if (p3.X == minX && p3.Z == minZ) return p3;
+
+            return null;
+        }
+        /// <summary>
+        /// Gets the south east position in the specified points
+        /// </summary>
+        /// <param name="maxX">Max X</param>
+        /// <param name="minZ">Min Z</param>
+        /// <param name="p0">Point 1</param>
+        /// <param name="p1">Point 2</param>
+        /// <param name="p2">Point 3</param>
+        /// <param name="p3">Point 4</param>
+        /// <returns>Returns the south east position</returns>
+        private Vector3? GetSouthEast(float maxX, float minZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        {
+            if (p0.X == maxX && p0.Z == minZ) return p0;
+            else if (p1.X == maxX && p1.Z == minZ) return p1;
+            else if (p2.X == maxX && p2.Z == minZ) return p2;
+            else if (p3.X == maxX && p3.Z == minZ) return p3;
+
+            return null;
         }
 
         /// <summary>
@@ -214,19 +282,34 @@ namespace Engine.PathFinding.AStar
             }
             else if (connectedWithNorthWest)
             {
-                if (connectedWithNorthEast) return Headings.North;
-                else if (connectedWithSouthWest) return Headings.West;
-                else return Headings.NorthWest;
+                if (connectedWithNorthEast)
+                {
+                    return Headings.North;
+                }
+                else if (connectedWithSouthWest)
+                {
+                    return Headings.West;
+                }
+
+                return Headings.NorthWest;
             }
             else if (connectedWithNorthEast)
             {
-                if (connectedWithSouthEast) return Headings.East;
-                else return Headings.NorthEast;
+                if (connectedWithSouthEast)
+                {
+                    return Headings.East;
+                }
+
+                return Headings.NorthEast;
             }
             else if (connectedWithSouthWest)
             {
-                if (connectedWithSouthEast) return Headings.South;
-                else return Headings.SouthWest;
+                if (connectedWithSouthEast)
+                {
+                    return Headings.South;
+                }
+
+                return Headings.SouthWest;
             }
             else
             {

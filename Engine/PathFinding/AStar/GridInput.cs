@@ -36,8 +36,6 @@ namespace Engine.PathFinding.AStar
 
             var bbox = GeometryUtil.CreateBoundingBox(triangles);
 
-            List<GridNode> result = new List<GridNode>();
-
             Dictionary<Vector2, GridCollisionInfo[]> dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
 
             float fxSize = (bbox.Maximum.X - bbox.Minimum.X) / grid.BuildSettings.NodeSize;
@@ -88,7 +86,30 @@ namespace Engine.PathFinding.AStar
             dictionary.Values.CopyTo(collisionValues, 0);
 
             //Generate grid nodes
-            for (int n = 0; n < gridNodeCount; n++)
+            var result = GenerateGridNodes(gridNodeCount, xSize, zSize, grid.BuildSettings.NodeSize, collisionValues);
+
+            //Fill connections
+            FillConnections(result);
+
+            grid.Nodes = result.ToArray();
+
+            return grid;
+        }
+        /// <summary>
+        /// Generate grid nodes
+        /// </summary>
+        /// <param name="nodeCount">Node count</param>
+        /// <param name="xSize">Total X size</param>
+        /// <param name="zSize">Total Z size</param>
+        /// <param name="nodeSize">Node size</param>
+        /// <param name="collisionValues">Collision values</param>
+        /// <returns>Generates a grid node list</returns>
+        private List<GridNode> GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
+        {
+            List<GridNode> result = new List<GridNode>();
+
+            //Generate grid nodes
+            for (int n = 0; n < nodeCount; n++)
             {
                 int x = n / xSize;
                 int z = n - (x * xSize);
@@ -102,10 +123,10 @@ namespace Engine.PathFinding.AStar
                 int i2 = ((x + 1) * zSize) + (z + 0);
                 int i3 = ((x + 1) * zSize) + (z + 1);
 
-                GridCollisionInfo[] coor0 = collisionValues[i0];
-                GridCollisionInfo[] coor1 = collisionValues[i1];
-                GridCollisionInfo[] coor2 = collisionValues[i2];
-                GridCollisionInfo[] coor3 = collisionValues[i3];
+                var coor0 = collisionValues[i0];
+                var coor1 = collisionValues[i1];
+                var coor2 = collisionValues[i2];
+                var coor3 = collisionValues[i3];
 
                 int min = Helper.Min(coor0.Length, coor1.Length, coor2.Length, coor3.Length);
                 int max = Helper.Max(coor0.Length, coor1.Length, coor2.Length, coor3.Length);
@@ -113,82 +134,108 @@ namespace Engine.PathFinding.AStar
                 if (min == 0)
                 {
                     //None
+                    continue;
                 }
-                else if (max == 1 && min == 1)
+
+                if (max == 1 && min == 1)
                 {
                     //Unique collision node
-                    for (int i = 0; i < max; i++)
-                    {
-                        Vector3 va = (
-                            coor0[i].Triangle.Normal +
-                            coor1[i].Triangle.Normal +
-                            coor2[i].Triangle.Normal +
-                            coor3[i].Triangle.Normal) * 0.25f;
+                    var resUnique = UniqueCollision(coor0[0], coor1[0], coor2[0], coor3[0]);
+                    result.Add(resUnique);
 
-                        GridNode newNode = new GridNode(
-                            coor0[i].Point,
-                            coor1[i].Point,
-                            coor2[i].Point,
-                            coor3[i].Point,
-                            Helper.Angle(Vector3.Up, va));
-
-                        result.Add(newNode);
-                    }
+                    continue;
                 }
-                else
+
+                //Process multiple point nodes
+                var resMultiple = MultipleCollision(max, nodeSize, coor0, coor1, coor2, coor3);
+                if (resMultiple.Count > 0)
                 {
-                    //Process multiple point nodes
-                    for (int i = 0; i < max; i++)
-                    {
-                        GridCollisionInfo c0 = i < coor0.Length ? coor0[i] : coor0[coor0.Length - 1];
-                        GridCollisionInfo c1 = i < coor1.Length ? coor1[i] : coor1[coor1.Length - 1];
-                        GridCollisionInfo c2 = i < coor2.Length ? coor2[i] : coor2[coor2.Length - 1];
-                        GridCollisionInfo c3 = i < coor3.Length ? coor3[i] : coor3[coor3.Length - 1];
-
-                        float fmin = Helper.Min(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
-                        float fmax = Helper.Max(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
-                        float diff = Math.Abs(fmax - fmin);
-
-                        if (diff <= grid.BuildSettings.NodeSize)
-                        {
-                            Vector3 va = (
-                                c0.Triangle.Normal +
-                                c1.Triangle.Normal +
-                                c2.Triangle.Normal +
-                                c3.Triangle.Normal) * 0.25f;
-
-                            GridNode newNode = new GridNode(
-                                c0.Point,
-                                c1.Point,
-                                c2.Point,
-                                c3.Point,
-                                Helper.Angle(Vector3.Up, va));
-
-                            result.Add(newNode);
-                        }
-                    }
+                    result.AddRange(resMultiple);
                 }
             }
 
-            //Fill connections
-            for (int i = 0; i < result.Count; i++)
-            {
-                if (!result[i].FullConnected)
-                {
-                    for (int n = i + 1; n < result.Count; n++)
-                    {
-                        if (!result[n].FullConnected)
-                        {
-                            result[i].TryConnect(result[n]);
-                        }
-                    }
-                }
-            }
-
-            grid.Nodes = result.ToArray();
-
-            return grid;
+            return result;
         }
+        /// <summary>
+        /// Generates a node list from unique collision data
+        /// </summary>
+        /// <param name="c0">Collision info 1</param>
+        /// <param name="c1">Collision info 2</param>
+        /// <param name="c2">Collision info 3</param>
+        /// <param name="c3">Collision info 4</param>
+        /// <returns>Returns a node list from unique collision data</returns>
+        private GridNode UniqueCollision(GridCollisionInfo c0, GridCollisionInfo c1, GridCollisionInfo c2, GridCollisionInfo c3)
+        {
+            Vector3 va = (
+                c0.Triangle.Normal +
+                c1.Triangle.Normal +
+                c2.Triangle.Normal +
+                c3.Triangle.Normal) * 0.25f;
+
+            GridNode newNode = new GridNode(
+                c0.Point,
+                c1.Point,
+                c2.Point,
+                c3.Point,
+                Helper.Angle(Vector3.Up, va));
+
+            return newNode;
+        }
+        /// <summary>
+        /// Generates a node list from multiple collision data
+        /// </summary>
+        /// <param name="max">Maximum tests</param>
+        /// <param name="nodeSize">Node size</param>
+        /// <param name="coor0">Collision info 1</param>
+        /// <param name="coor1">Collision info 2</param>
+        /// <param name="coor2">Collision info 3</param>
+        /// <param name="coor3">Collision info 4</param>
+        /// <returns>Returns a node list from multiple collision data</returns>
+        private List<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
+        {
+            List<GridNode> result = new List<GridNode>();
+
+            for (int i = 0; i < max; i++)
+            {
+                var c0 = i < coor0.Length ? coor0[i] : coor0[coor0.Length - 1];
+                var c1 = i < coor1.Length ? coor1[i] : coor1[coor1.Length - 1];
+                var c2 = i < coor2.Length ? coor2[i] : coor2[coor2.Length - 1];
+                var c3 = i < coor3.Length ? coor3[i] : coor3[coor3.Length - 1];
+
+                float fmin = Helper.Min(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
+                float fmax = Helper.Max(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
+                float diff = Math.Abs(fmax - fmin);
+
+                if (diff <= nodeSize)
+                {
+                    var resUnique = UniqueCollision(c0, c1, c2, c3);
+                    result.Add(resUnique);
+                }
+            }
+
+            return result;
+        }
+        /// <summary>
+        /// Fill node connections
+        /// </summary>
+        /// <param name="nodes">Grid nodes</param>
+        private void FillConnections(List<GridNode> nodes)
+        {
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                if (!nodes[i].FullConnected)
+                {
+                    for (int n = i + 1; n < nodes.Count; n++)
+                    {
+                        if (!nodes[n].FullConnected)
+                        {
+                            nodes[i].TryConnect(nodes[n]);
+                        }
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Refresh
         /// </summary>
