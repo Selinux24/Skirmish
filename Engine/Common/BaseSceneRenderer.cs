@@ -561,7 +561,7 @@ namespace Engine.Common
                 //Draw shadows
                 var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
                 shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
-                shadowMapper.Bind(graphics, l * MaxDirectionalCascadeShadowMaps);
+                shadowMapper.Bind(graphics, assigned * MaxDirectionalCascadeShadowMaps);
                 this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
                 this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
                 this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
