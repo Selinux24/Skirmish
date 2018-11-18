@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
@@ -149,6 +150,64 @@ namespace Engine
         public bool Is<T>()
         {
             return (this.baseObject is T);
+        }
+
+        /// <summary>
+        /// Gets the current object triangle collection
+        /// </summary>
+        /// <param name="usage">Object usage</param>
+        /// <returns>Returns the triangle list</returns>
+        public IEnumerable<Triangle> GetTriangles(SceneObjectUsages usage)
+        {
+            List<Triangle> tris = new List<Triangle>();
+
+            List<IRayPickable<Triangle>> volumes = new List<IRayPickable<Triangle>>();
+
+            bool isComposed = this.Is<IComposed>();
+            if (!isComposed)
+            {
+                var trn = this.Get<ITransformable3D>();
+                trn?.Manipulator.UpdateInternals(true);
+
+                var pickable = this.Get<IRayPickable<Triangle>>();
+                if (pickable != null)
+                {
+                    volumes.Add(pickable);
+                }
+            }
+            else
+            {
+                var currComposed = this.Get<IComposed>();
+
+                var trnChilds = currComposed.GetComponents<ITransformable3D>();
+                if (trnChilds.Any())
+                {
+                    foreach (var child in trnChilds)
+                    {
+                        child.Manipulator.UpdateInternals(true);
+                    }
+                }
+
+                var pickableChilds = currComposed.GetComponents<IRayPickable<Triangle>>();
+                if (pickableChilds.Any())
+                {
+                    volumes.AddRange(pickableChilds);
+                }
+            }
+
+            for (int p = 0; p < volumes.Count; p++)
+            {
+                var full = usage == SceneObjectUsages.None || this.Usage.HasFlag(usage);
+
+                var vTris = volumes[p].GetVolume(full);
+                if (vTris?.Length > 0)
+                {
+                    //Use volume mesh
+                    tris.AddRange(vTris);
+                }
+            }
+
+            return tris;
         }
 
         /// <summary>

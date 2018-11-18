@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding
 {
@@ -22,14 +23,14 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="returnPath">Position list</param>
         /// <param name="normals">Normal list</param>
-        public PathFindingPath(Vector3[] returnPath, Vector3[] normals)
+        public PathFindingPath(IEnumerable<Vector3> returnPath, IEnumerable<Vector3> normals)
         {
-            if (returnPath != null && returnPath.Length > 0)
+            if (returnPath?.Any() == true)
             {
                 this.ReturnPath.AddRange(returnPath);
             }
 
-            if (normals != null && normals.Length > 0)
+            if (normals?.Any() == true)
             {
                 this.Normals.AddRange(normals);
             }

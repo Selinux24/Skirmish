@@ -103,6 +103,65 @@ namespace Engine
         /// </summary>
         private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding;
 
+        private static bool PickNearestSingle(Ray ray, bool facingOnly, SceneObject obj, float bestDistance, out PickingResult<Triangle> result)
+        {
+            bool picked = false;
+
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            float dist = bestDistance;
+
+            var pickable = obj.Get<IRayPickable<Triangle>>();
+
+            if (pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r))
+            {
+                if (r.Distance < dist)
+                {
+                    dist = r.Distance;
+
+                    result = r;
+                }
+
+                picked = true;
+            }
+
+            return picked;
+        }
+
+        private static bool PickNearestComposed(Ray ray, bool facingOnly, SceneObject obj, float bestDistance, out PickingResult<Triangle> result)
+        {
+            bool picked = false;
+
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            float dist = bestDistance;
+
+            var pickComponents = obj.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
+
+            foreach (var pickable in pickComponents)
+            {
+                if (pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r))
+                {
+                    if (r.Distance < dist)
+                    {
+                        dist = r.Distance;
+
+                        result = r;
+                    }
+
+                    picked = true;
+                }
+            }
+
+            return picked;
+        }
+
         /// <summary>
         /// Scene world matrix
         /// </summary>
@@ -901,85 +960,7 @@ namespace Engine
         {
             return PickAll(ray, facingOnly, SceneObjectUsages.None, out results);
         }
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindTopGroundPosition(float x, float z, out PickingResult<Triangle> result)
-        {
-            var ray = this.GetTopDownRay(x, z);
 
-            return this.PickNearest(ray, true, GroundUsage, out result);
-        }
-        /// <summary>
-        /// Gets ground position giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindFirstGroundPosition(float x, float z, out PickingResult<Triangle> result)
-        {
-            var ray = this.GetTopDownRay(x, z);
-
-            return this.PickFirst(ray, true, GroundUsage, out result);
-        }
-        /// <summary>
-        /// Gets all ground positions giving x, z coordinates
-        /// </summary>
-        /// <param name="x">X coordinate</param>
-        /// <param name="z">Z coordinate</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if ground positions found</returns>
-        public bool FindAllGroundPosition(float x, float z, out PickingResult<Triangle>[] results)
-        {
-            var ray = this.GetTopDownRay(x, z);
-
-            return this.PickAll(ray, true, GroundUsage, out results);
-        }
-        /// <summary>
-        /// Gets nearest ground position to "from" position
-        /// </summary>
-        /// <param name="from">Position from</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool FindNearestGroundPosition(Vector3 from, out PickingResult<Triangle> result)
-        {
-            var ray = this.GetTopDownRay(from.X, from.Z);
-
-            bool picked = this.PickAll(ray, true, GroundUsage, out PickingResult<Triangle>[] pResults);
-            if (picked)
-            {
-                int index = -1;
-                float dist = float.MaxValue;
-                for (int i = 0; i < pResults.Length; i++)
-                {
-                    float d = Vector3.DistanceSquared(from, pResults[i].Position);
-                    if (d <= dist)
-                    {
-                        dist = d;
-
-                        index = i;
-                    }
-                }
-
-                result = pResults[index];
-
-                return true;
-            }
-            else
-            {
-                result = new PickingResult<Triangle>()
-                {
-                    Distance = float.MaxValue,
-                };
-
-                return false;
-            }
-        }
         /// <summary>
         /// Gets nearest picking position of giving ray
         /// </summary>
@@ -1013,35 +994,23 @@ namespace Engine
 
                 if (obj.Item1.Is<IComposed>())
                 {
-                    var pickComponents = obj.Item1.Get<IComposed>().GetComponents<IRayPickable<Triangle>>();
-                    foreach (var pickable in pickComponents)
+                    bool pickedComposed = PickNearestComposed(ray, facingOnly, obj.Item1, bestDistance, out var r);
+                    if (pickedComposed)
                     {
-                        if (pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r))
-                        {
-                            if (r.Distance < bestDistance)
-                            {
-                                bestDistance = r.Distance;
+                        result = r;
 
-                                result = r;
-                            }
-
-                            picked = true;
-                        }
+                        bestDistance = r.Distance;
+                        picked = true;
                     }
                 }
                 else if (obj.Item1.Is<IRayPickable<Triangle>>())
                 {
-                    var pickable = obj.Item1.Get<IRayPickable<Triangle>>();
-
-                    if (pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r))
+                    bool pickedSingle = PickNearestSingle(ray, facingOnly, obj.Item1, bestDistance, out var r);
+                    if (pickedSingle)
                     {
-                        if (r.Distance < bestDistance)
-                        {
-                            bestDistance = r.Distance;
+                        result = r;
 
-                            result = r;
-                        }
-
+                        bestDistance = r.Distance;
                         picked = true;
                     }
                 }
@@ -1148,6 +1117,87 @@ namespace Engine
 
             return results.Length > 0;
         }
+
+        /// <summary>
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindTopGroundPosition(float x, float z, out PickingResult<Triangle> result)
+        {
+            var ray = this.GetTopDownRay(x, z);
+
+            return this.PickNearest(ray, true, GroundUsage, out result);
+        }
+        /// <summary>
+        /// Gets ground position giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindFirstGroundPosition(float x, float z, out PickingResult<Triangle> result)
+        {
+            var ray = this.GetTopDownRay(x, z);
+
+            return this.PickFirst(ray, true, GroundUsage, out result);
+        }
+        /// <summary>
+        /// Gets all ground positions giving x, z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="results">Picking results</param>
+        /// <returns>Returns true if ground positions found</returns>
+        public bool FindAllGroundPosition(float x, float z, out PickingResult<Triangle>[] results)
+        {
+            var ray = this.GetTopDownRay(x, z);
+
+            return this.PickAll(ray, true, GroundUsage, out results);
+        }
+        /// <summary>
+        /// Gets nearest ground position to "from" position
+        /// </summary>
+        /// <param name="from">Position from</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool FindNearestGroundPosition(Vector3 from, out PickingResult<Triangle> result)
+        {
+            var ray = this.GetTopDownRay(from.X, from.Z);
+
+            bool picked = this.PickAll(ray, true, GroundUsage, out PickingResult<Triangle>[] pResults);
+            if (picked)
+            {
+                int index = -1;
+                float dist = float.MaxValue;
+                for (int i = 0; i < pResults.Length; i++)
+                {
+                    float d = Vector3.DistanceSquared(from, pResults[i].Position);
+                    if (d <= dist)
+                    {
+                        dist = d;
+
+                        index = i;
+                    }
+                }
+
+                result = pResults[index];
+
+                return true;
+            }
+            else
+            {
+                result = new PickingResult<Triangle>()
+                {
+                    Distance = float.MaxValue,
+                };
+
+                return false;
+            }
+        }
+
         /// <summary>
         /// Gets bounding box
         /// </summary>
@@ -1296,60 +1346,14 @@ namespace Engine
 
             for (int i = 0; i < pfComponents.Count; i++)
             {
-                var curr = pfComponents[i];
-
-                List<IRayPickable<Triangle>> volumes = new List<IRayPickable<Triangle>>();
-
-                bool isComposed = curr.Is<IComposed>();
-                if (!isComposed)
+                var currTris = pfComponents[i].GetTriangles(SceneObjectUsages.FullPathFinding);
+                if (currTris.Any())
                 {
-                    var trn = curr.Get<ITransformable3D>();
-                    if (trn != null)
-                    {
-                        trn.Manipulator.UpdateInternals(true);
-                    }
-
-                    var pickable = curr.Get<IRayPickable<Triangle>>();
-                    if (pickable != null)
-                    {
-                        volumes.Add(pickable);
-                    }
-                }
-                else
-                {
-                    var currComposed = curr.Get<IComposed>();
-
-                    var trnChilds = currComposed.GetComponents<ITransformable3D>();
-                    if (trnChilds.Any())
-                    {
-                        foreach (var child in trnChilds)
-                        {
-                            child.Manipulator.UpdateInternals(true);
-                        }
-                    }
-
-                    var pickableChilds = currComposed.GetComponents<IRayPickable<Triangle>>();
-                    if (pickableChilds.Any())
-                    {
-                        volumes.AddRange(pickableChilds);
-                    }
-                }
-
-                for (int p = 0; p < volumes.Count; p++)
-                {
-                    var full = curr.Usage.HasFlag(SceneObjectUsages.FullPathFinding);
-
-                    var vTris = volumes[p].GetVolume(full);
-                    if (vTris != null && vTris.Length > 0)
-                    {
-                        //Use volume mesh
-                        tris.AddRange(vTris);
-                    }
+                    tris.AddRange(currTris);
                 }
             }
 
             var bounds = this.PathFinderDescription.Settings.Bounds;
-
             if (bounds.HasValue)
             {
                 tris = tris.FindAll(t =>
@@ -1390,74 +1394,98 @@ namespace Engine
         /// <returns>Return path if exists</returns>
         public virtual PathFindingPath FindPath(AgentType agent, Vector3 from, Vector3 to, bool useGround = false, float delta = 0f)
         {
-            List<Vector3> positions = new List<Vector3>();
-            List<Vector3> normals = new List<Vector3>();
+            List<Vector3> positions = null;
+            List<Vector3> normals = null;
 
             var path = this.NavigationGraph.FindPath(agent, from, to);
-            if (path != null && path.Length > 1)
+            if (path?.Length > 1)
             {
                 if (delta == 0)
                 {
-                    positions.AddRange(path);
-                    normals.AddRange(Helper.CreateArray(path.Length, Vector3.Up));
+                    positions = new List<Vector3>(path);
+                    normals = new List<Vector3>(Helper.CreateArray(path.Length, Vector3.Up));
                 }
                 else
                 {
-                    positions.Add(path[0]);
-                    normals.Add(Vector3.Up);
-
-                    var p0 = path[0];
-                    var p1 = path[1];
-
-                    int index = 0;
-                    while (index < path.Length - 1)
-                    {
-                        var s = p1 - p0;
-                        var v = Vector3.Normalize(s) * delta;
-                        var l = delta - s.Length();
-
-                        if (l <= 0f)
-                        {
-                            //Into de segment
-                            p0 += v;
-                        }
-                        else if (index < path.Length - 2)
-                        {
-                            //Next segment
-                            var p2 = path[index + 2];
-                            p0 = p1 + ((p2 - p1) * l);
-                            p1 = p2;
-
-                            index++;
-                        }
-                        else
-                        {
-                            //End
-                            p0 = path[index + 1];
-
-                            index++;
-                        }
-
-                        positions.Add(p0);
-                        normals.Add(Vector3.Up);
-                    }
+                    ComputePath(path, delta, out positions, out normals);
                 }
 
                 if (useGround)
                 {
-                    for (int i = 0; i < positions.Count; i++)
-                    {
-                        if (FindNearestGroundPosition(positions[i], out PickingResult<Triangle> r))
-                        {
-                            positions[i] = r.Position;
-                            normals[i] = r.Item.Normal;
-                        }
-                    }
+                    ComputeGroundPositions(positions, normals);
                 }
             }
 
-            return new PathFindingPath(positions.ToArray(), normals.ToArray());
+            return new PathFindingPath(positions, normals);
         }
+        /// <summary>
+        /// Compute path finding result
+        /// </summary>
+        /// <param name="path">Path</param>
+        /// <param name="delta">Control point path deltas</param>
+        /// <param name="positions">Resulting positions</param>
+        /// <param name="normals">Resulting normals</param>
+        private void ComputePath(Vector3[] path, float delta, out List<Vector3> positions, out List<Vector3> normals)
+        {
+            positions = new List<Vector3>();
+            normals = new List<Vector3>();
+
+            positions.Add(path[0]);
+            normals.Add(Vector3.Up);
+
+            var p0 = path[0];
+            var p1 = path[1];
+
+            int index = 0;
+            while (index < path.Length - 1)
+            {
+                var s = p1 - p0;
+                var v = Vector3.Normalize(s) * delta;
+                var l = delta - s.Length();
+
+                if (l <= 0f)
+                {
+                    //Into de segment
+                    p0 += v;
+                }
+                else if (index < path.Length - 2)
+                {
+                    //Next segment
+                    var p2 = path[index + 2];
+                    p0 = p1 + ((p2 - p1) * l);
+                    p1 = p2;
+
+                    index++;
+                }
+                else
+                {
+                    //End
+                    p0 = path[index + 1];
+
+                    index++;
+                }
+
+                positions.Add(p0);
+                normals.Add(Vector3.Up);
+            }
+        }
+        /// <summary>
+        /// Updates the path positions and normals using current ground info
+        /// </summary>
+        /// <param name="positions">Positions</param>
+        /// <param name="normals">Normals</param>
+        private void ComputeGroundPositions(List<Vector3> positions, List<Vector3> normals)
+        {
+            for (int i = 0; i < positions.Count; i++)
+            {
+                if (FindNearestGroundPosition(positions[i], out PickingResult<Triangle> r))
+                {
+                    positions[i] = r.Position;
+                    normals[i] = r.Item.Normal;
+                }
+            }
+        }
+
         /// <summary>
         /// Gets wether the specified position is walkable
         /// </summary>
@@ -1488,65 +1516,99 @@ namespace Engine
         {
             finalPosition = prevPosition;
 
-            if (prevPosition != newPosition && this.FindAllGroundPosition(newPosition.X, newPosition.Z, out PickingResult<Triangle>[] results))
+            if (prevPosition == newPosition)
             {
-                Vector3 newFeetPosition = newPosition;
-                newFeetPosition.Y -= agent.Height;
+                return false;
+            }
 
-                results = results
-                    .Where(r => Vector3.Distance(r.Position, newFeetPosition) < agent.Height)
-                    .OrderBy(r => r.Distance).ToArray();
+            bool isInGround = this.FindAllGroundPosition(newPosition.X, newPosition.Z, out PickingResult<Triangle>[] results);
+            if (!isInGround)
+            {
+                return false;
+            }
 
-                for (int i = 0; i < results.Length; i++)
+            Vector3 newFeetPosition = newPosition;
+            newFeetPosition.Y -= agent.Height;
+
+            results = results
+                .Where(r => Vector3.Distance(r.Position, newFeetPosition) < agent.Height)
+                .OrderBy(r => r.Distance).ToArray();
+
+            for (int i = 0; i < results.Length; i++)
+            {
+                if (this.IsWalkable(agent, results[i].Position, out Vector3? nearest))
                 {
-                    if (this.IsWalkable(agent, results[i].Position, out Vector3? nearest))
-                    {
-                        finalPosition = results[i].Position;
-                        finalPosition.Y += agent.Height;
+                    finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, results[i].Position);
 
-                        var moveP = newPosition - prevPosition;
-                        var moveV = finalPosition - prevPosition;
-                        if (moveV.LengthSquared() > moveP.LengthSquared())
-                        {
-                            finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
-                        }
+                    return true;
+                }
+                else if (nearest.HasValue)
+                {
+                    //Not walkable but nearest position found
+                    finalPosition = GetPositionNonWalkable(agent, prevPosition, newPosition, nearest.Value);
 
-                        return true;
-                    }
-                    else
-                    {
-                        //Not walkable but nearest position found
-                        if (nearest.HasValue)
-                        {
-                            //Find nearest ground position
-                            if (this.FindNearestGroundPosition(nearest.Value, out PickingResult<Triangle> nearestResult))
-                            {
-                                //Use nearest ground position found
-                                finalPosition = nearestResult.Position;
-                            }
-                            else
-                            {
-                                //Use nearest position provided by path finding graph
-                                finalPosition = nearest.Value;
-                            }
-
-                            //Adjust height
-                            finalPosition.Y += agent.Height;
-
-                            var moveP = newPosition - prevPosition;
-                            var moveV = finalPosition - prevPosition;
-                            if (moveV.LengthSquared() > moveP.LengthSquared())
-                            {
-                                finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
-                            }
-
-                            return true;
-                        }
-                    }
+                    return true;
                 }
             }
 
             return false;
+        }
+        /// <summary>
+        /// Gets the new agent position when target position is walkable
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="prevPosition">Previous position</param>
+        /// <param name="newPosition">New position</param>
+        /// <param name="position">Test position</param>
+        /// <returns>Returns the new agent position</returns>
+        private Vector3 GetPositionWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position)
+        {
+            Vector3 finalPosition = position;
+            finalPosition.Y += agent.Height;
+
+            var moveP = newPosition - prevPosition;
+            var moveV = finalPosition - prevPosition;
+            if (moveV.LengthSquared() > moveP.LengthSquared())
+            {
+                finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+            }
+
+            return finalPosition;
+        }
+        /// <summary>
+        /// Gets the new agent position when target position is not walkable
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="prevPosition">Previous position</param>
+        /// <param name="newPosition">New position</param>
+        /// <param name="position">Test position</param>
+        /// <returns>Returns the new agent position</returns>
+        private Vector3 GetPositionNonWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position)
+        {
+            //Find nearest ground position
+            Vector3 finalPosition;
+            if (this.FindNearestGroundPosition(position, out PickingResult<Triangle> nearestResult))
+            {
+                //Use nearest ground position found
+                finalPosition = nearestResult.Position;
+            }
+            else
+            {
+                //Use nearest position provided by path finding graph
+                finalPosition = position;
+            }
+
+            //Adjust height
+            finalPosition.Y += agent.Height;
+
+            var moveP = newPosition - prevPosition;
+            var moveV = finalPosition - prevPosition;
+            if (moveV.LengthSquared() > moveP.LengthSquared())
+            {
+                finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+            }
+
+            return finalPosition;
         }
 
         /// <summary>
