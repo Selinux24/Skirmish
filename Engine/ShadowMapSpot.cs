@@ -29,6 +29,14 @@ namespace Engine
         /// </summary>
         public EngineShaderResourceView Texture { get; protected set; }
         /// <summary>
+        /// To shadow view*projection matrix
+        /// </summary>
+        public Matrix ToShadowMatrix { get; set; }
+        /// <summary>
+        /// Light position
+        /// </summary>
+        public Vector3 LightPosition { get; set; }
+        /// <summary>
         /// From light view projection
         /// </summary>
         public Matrix[] FromLightViewProjectionArray { get; set; }
@@ -112,7 +120,11 @@ namespace Engine
                 var look = lightSpot.Position + (lightSpot.Direction * lightSpot.Radius);
                 var view = Matrix.LookAtLH(pos, look, Vector3.Up);
 
-                FromLightViewProjectionArray = new[] { view * projection };
+                var vp = view * projection;
+
+                ToShadowMatrix = vp;
+                LightPosition = lightSpot.Position;
+                FromLightViewProjectionArray = new[] { vp };
             }
         }
         /// <summary>

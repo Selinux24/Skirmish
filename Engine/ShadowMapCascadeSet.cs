@@ -24,6 +24,7 @@ namespace Engine
         private readonly Vector3[] cascadeBoundCenter;
         private readonly float[] cascadeBoundRadius;
 
+        private Vector3 lightPosition = Vector3.Zero;
         private Matrix worldToShadowSpace = Matrix.Identity;
         private readonly Matrix[] worldToCascadeProj;
 
@@ -124,11 +125,10 @@ namespace Engine
         public void Update(Camera camera, Vector3 lightDirection)
         {
             // Find the view matrix
-            Vector3 worldCenter = camera.Position + camera.Direction * cascadeTotalRange * 0.5f;
-            Vector3 pos = worldCenter;
-            Vector3 lookAt = worldCenter + (lightDirection) * camera.FarPlaneDistance;
+            lightPosition = camera.Position + camera.Direction * cascadeTotalRange * 0.5f;
+            Vector3 lookAt = lightPosition + (lightDirection) * camera.FarPlaneDistance;
             Vector3 up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3.Left));
-            Matrix shadowView = Matrix.LookAtLH(pos, lookAt, up);
+            Matrix shadowView = Matrix.LookAtLH(lightPosition, lookAt, up);
 
             this.toCascadeOffsetX = Vector4.Zero;
             this.toCascadeOffsetY = Vector4.Zero;
@@ -354,6 +354,14 @@ namespace Engine
         public Vector4 GetToCascadeScale()
         {
             return toCascadeScale;
+        }
+        /// <summary>
+        /// Gets the light position used in the view matrix calculation
+        /// </summary>
+        /// <returns>Returns the light position</returns>
+        public Vector3 GetLigthPosition()
+        {
+            return lightPosition;
         }
     }
 }

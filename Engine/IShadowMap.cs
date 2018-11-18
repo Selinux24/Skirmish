@@ -16,6 +16,14 @@ namespace Engine
         /// </summary>
         EngineShaderResourceView Texture { get; }
         /// <summary>
+        /// To shadow view*projection matrix
+        /// </summary>
+        Matrix ToShadowMatrix { get; set; }
+        /// <summary>
+        /// Light position
+        /// </summary>
+        Vector3 LightPosition { get; set; }
+        /// <summary>
         /// From light view projection
         /// </summary>
         Matrix[] FromLightViewProjectionArray { get; set; }

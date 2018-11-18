@@ -540,9 +540,6 @@ namespace Engine.Common
                 }
             }
 
-            this.DrawShadowsContext.ViewProjection = this.UpdateContext.ViewProjection;
-            this.DrawShadowsContext.EyePosition = this.DrawContext.EyePosition;
-
             var graphics = this.Game.Graphics;
             int assigned = 0;
 
@@ -565,6 +562,8 @@ namespace Engine.Common
                 var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
                 shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
                 shadowMapper.Bind(graphics, l * MaxDirectionalCascadeShadowMaps);
+                this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
+                this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
                 this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
 
                 //Assign light parameters
@@ -629,6 +628,8 @@ namespace Engine.Common
                 var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperPoint;
                 shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned);
+                this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
+                this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
                 this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
 
                 //Assign light parameters
@@ -694,6 +695,8 @@ namespace Engine.Common
                 var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperSpot;
                 shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned);
+                this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
+                this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
                 this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
 
                 //Assign light parameters

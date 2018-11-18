@@ -33,6 +33,14 @@ namespace Engine
         /// </summary>
         public EngineShaderResourceView Texture { get; protected set; }
         /// <summary>
+        /// To shadow view*projection matrix
+        /// </summary>
+        public Matrix ToShadowMatrix { get; set; }
+        /// <summary>
+        /// Light position
+        /// </summary>
+        public Vector3 LightPosition { get; set; }
+        /// <summary>
         /// From light view projection
         /// </summary>
         public Matrix[] FromLightViewProjectionArray { get; set; }
@@ -59,6 +67,7 @@ namespace Engine
             this.Texture = srv;
 
             this.FromLightViewProjectionArray = Helper.CreateArray(cascades.Length, Matrix.Identity);
+            this.LightPosition = Vector3.Zero;
 
             this.MatrixSet = new ShadowMapCascadeSet(size, 1, cascades);
         }
@@ -119,7 +128,11 @@ namespace Engine
                 lightDirectional.ToCascadeOffsetY = this.MatrixSet.GetToCascadeOffsetY();
                 lightDirectional.ToCascadeScale = this.MatrixSet.GetToCascadeScale();
 
-                this.FromLightViewProjectionArray = this.MatrixSet.GetWorldToCascadeProj();
+                var vp = this.MatrixSet.GetWorldToCascadeProj();
+
+                this.ToShadowMatrix = vp[0];
+                this.LightPosition = this.MatrixSet.GetLigthPosition();
+                this.FromLightViewProjectionArray = vp;
             }
         }
         /// <summary>
