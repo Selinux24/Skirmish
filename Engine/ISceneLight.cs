@@ -14,5 +14,10 @@ namespace Engine
         /// Shadow map index
         /// </summary>
         int ShadowMapIndex { get; set; }
+
+        /// <summary>
+        /// Clears all light shadow parameters
+        /// </summary>
+        void ClearShadowParameters();
     }
 }

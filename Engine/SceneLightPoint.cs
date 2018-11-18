@@ -69,6 +69,7 @@ namespace Engine
                 return Matrix.Scaling(this.Radius) * Matrix.Translation(this.Position);
             }
         }
+
         /// <summary>
         /// Shadow map index
         /// </summary>
@@ -114,6 +115,14 @@ namespace Engine
             this.Radius = initialRadius * scale.X;
             this.Intensity = initialIntensity * scale.X;
             this.Position = translation;
+        }
+
+        /// <summary>
+        /// Clears all light shadow parameters
+        /// </summary>
+        public void ClearShadowParameters()
+        {
+            this.ShadowMapIndex = -1;
         }
 
         /// <summary>

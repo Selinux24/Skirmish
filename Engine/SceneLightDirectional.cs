@@ -92,6 +92,7 @@ namespace Engine
                 this.UpdateLocalTransform();
             }
         }
+
         /// <summary>
         /// First shadow map index
         /// </summary>
@@ -104,11 +105,17 @@ namespace Engine
         /// From light view * projection matrix array
         /// </summary>
         public Matrix ToShadowSpace { get; set; }
-
+        /// <summary>
+        /// X cascade offset
+        /// </summary>
         public Vector4 ToCascadeOffsetX { get; set; }
-
+        /// <summary>
+        /// Y cascade offset
+        /// </summary>
         public Vector4 ToCascadeOffsetY { get; set; }
-
+        /// <summary>
+        /// Cascasde scale
+        /// </summary>
         public Vector4 ToCascadeScale { get; set; }
 
         /// <summary>
@@ -144,6 +151,19 @@ namespace Engine
         private void UpdateLocalTransform()
         {
             this.Direction = Vector3.TransformNormal(this.initialDirection, base.ParentTransform);
+        }
+
+        /// <summary>
+        /// Clears all light shadow parameters
+        /// </summary>
+        public void ClearShadowParameters()
+        {
+            this.ShadowMapIndex = -1;
+            this.ShadowMapCount = 0;
+            this.ToShadowSpace = Matrix.Identity;
+            this.ToCascadeOffsetX = Vector4.Zero;
+            this.ToCascadeOffsetY = Vector4.Zero;
+            this.ToCascadeScale = Vector4.Zero;
         }
 
         /// <summary>

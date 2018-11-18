@@ -546,12 +546,8 @@ namespace Engine.Common
             for (int l = 0; l < shadowCastingLights.Length; l++)
             {
                 var light = shadowCastingLights[l];
-                light.ShadowMapIndex = -1;
-                light.ShadowMapCount = 0;
-                light.ToShadowSpace = Matrix.Identity;
-                light.ToCascadeOffsetX = Vector4.Zero;
-                light.ToCascadeOffsetY = Vector4.Zero;
-                light.ToCascadeScale = Vector4.Zero;
+
+                light.ClearShadowParameters();
 
                 if (assigned >= MaxDirectionalShadowMaps)
                 {
@@ -608,7 +604,8 @@ namespace Engine.Common
             for (int l = 0; l < shadowCastingLights.Length; l++)
             {
                 var light = shadowCastingLights[l];
-                light.ShadowMapIndex = -1;
+
+                light.ClearShadowParameters();
 
                 if (assigned >= MaxCubicShadows)
                 {
@@ -673,9 +670,8 @@ namespace Engine.Common
             for (int l = 0; l < shadowCastingLights.Length; l++)
             {
                 var light = shadowCastingLights[l];
-                light.FromLightVP = new Matrix[1];
-                light.ShadowMapIndex = -1;
-                light.ShadowMapCount = 0;
+
+                light.ClearShadowParameters();
 
                 if (assigned >= MaxCubicShadows)
                 {
