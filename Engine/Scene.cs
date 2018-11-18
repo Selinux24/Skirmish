@@ -102,10 +102,18 @@ namespace Engine
         /// Ground usage enum for ground picking
         /// </summary>
         private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding;
-
+        /// <summary>
+        /// Gets wether the ray picks the object nearest to the specified best distance
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="obj">Object to test</param>
+        /// <param name="bestDistance">Best distance</param>
+        /// <param name="result">Resulting picking result</param>
+        /// <returns>Returns true if the ray picks the object nearest to the specified best distance</returns>
         private static bool PickNearestSingle(Ray ray, bool facingOnly, SceneObject obj, float bestDistance, out PickingResult<Triangle> result)
         {
-            bool picked = false;
+            bool pickedNearest = false;
 
             result = new PickingResult<Triangle>()
             {
@@ -116,24 +124,28 @@ namespace Engine
 
             var pickable = obj.Get<IRayPickable<Triangle>>();
 
-            if (pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r))
+            var picked = pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r);
+            if (picked && r.Distance < dist)
             {
-                if (r.Distance < dist)
-                {
-                    dist = r.Distance;
-
-                    result = r;
-                }
-
-                picked = true;
+                dist = r.Distance;
+                result = r;
+                pickedNearest = true;
             }
 
-            return picked;
+            return pickedNearest;
         }
-
+        /// <summary>
+        /// Gets wether the ray picks the object nearest to the specified best distance
+        /// </summary>
+        /// <param name="ray">Ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="obj">Object to test</param>
+        /// <param name="bestDistance">Best distance</param>
+        /// <param name="result">Resulting picking result</param>
+        /// <returns>Returns true if the ray picks the object nearest to the specified best distance</returns>
         private static bool PickNearestComposed(Ray ray, bool facingOnly, SceneObject obj, float bestDistance, out PickingResult<Triangle> result)
         {
-            bool picked = false;
+            bool pickedNearest = false;
 
             result = new PickingResult<Triangle>()
             {
@@ -146,20 +158,16 @@ namespace Engine
 
             foreach (var pickable in pickComponents)
             {
-                if (pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r))
+                var picked = pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r);
+                if (picked && r.Distance < dist)
                 {
-                    if (r.Distance < dist)
-                    {
-                        dist = r.Distance;
-
-                        result = r;
-                    }
-
-                    picked = true;
+                    dist = r.Distance;
+                    result = r;
+                    pickedNearest = true;
                 }
             }
 
-            return picked;
+            return pickedNearest;
         }
 
         /// <summary>
