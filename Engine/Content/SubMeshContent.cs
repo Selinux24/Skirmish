@@ -128,28 +128,32 @@ namespace Engine.Content
         /// <param name="meshArray">Mesh array</param>
         /// <param name="optimizedMesh">Optimized mesh result</param>
         /// <returns>Returns true if the mesh array was optimized</returns>
-        public static bool OptimizeMeshes(SubMeshContent[] meshArray, out SubMeshContent optimizedMesh)
+        public static bool OptimizeMeshes(IEnumerable<SubMeshContent> meshArray, out SubMeshContent optimizedMesh)
         {
             optimizedMesh = null;
 
-            if (meshArray?.Length == 1)
+            int? count = meshArray?.Count();
+
+            if (count == 1)
             {
-                optimizedMesh = meshArray[0];
+                optimizedMesh = meshArray.First();
             }
-            else if (meshArray?.Length > 1)
+            else if (count > 1)
             {
-                string material = meshArray[0].Material;
-                Topology topology = meshArray[0].Topology;
-                VertexTypes vertexType = meshArray[0].VertexType;
-                bool isTextured = meshArray[0].Textured;
-                bool transparent = meshArray[0].Transparent;
+                var firstMesh = meshArray.First();
+
+                string material = firstMesh.Material;
+                Topology topology = firstMesh.Topology;
+                VertexTypes vertexType = firstMesh.VertexType;
+                bool isTextured = firstMesh.Textured;
+                bool transparent = firstMesh.Transparent;
 
                 List<VertexData> verts = new List<VertexData>();
                 List<uint> idx = new List<uint>();
 
                 uint indexOffset = 0;
 
-                foreach (SubMeshContent mesh in meshArray)
+                foreach (var mesh in meshArray)
                 {
                     if (mesh.VertexType != vertexType || mesh.Topology != topology)
                     {

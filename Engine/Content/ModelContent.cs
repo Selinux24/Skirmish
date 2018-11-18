@@ -487,87 +487,111 @@ namespace Engine.Content
                     {
                         foreach (string material in this.Materials.Keys)
                         {
-                            List<SubMeshContent> skinnedM = new List<SubMeshContent>();
-
-                            var dict = this.Geometry[skin];
-
-                            if (dict.ContainsKey(material))
-                            {
-                                if (dict[material].IsVolume)
-                                {
-                                    newDict.Add(skin, material, dict[material]);
-                                }
-                                else
-                                {
-                                    skinnedM.Add(dict[material]);
-                                }
-                            }
-
-                            if (skinnedM.Count > 0)
-                            {
-                                if (SubMeshContent.OptimizeMeshes(skinnedM.ToArray(), out SubMeshContent gmesh))
-                                {
-                                    //Mesh grouped
-                                    newDict.Add(skin, material, gmesh);
-                                }
-                                else
-                                {
-                                    //Cannot group
-                                    foreach (var m in skinnedM)
-                                    {
-                                        newDict.Add(skin, material, m);
-                                    }
-                                }
-                            }
+                            this.OptimizeSkinnedMesh(newDict, skin, material);
                         }
                     }
                 }
 
                 foreach (string material in this.Materials.Keys)
                 {
-                    List<SubMeshContent> staticM = new List<SubMeshContent>();
-
-                    foreach (string mesh in this.Geometry.Keys)
-                    {
-                        if (!Array.Exists(this.Controllers.Skins, s => s == mesh))
-                        {
-                            var dict = this.Geometry[mesh];
-
-                            if (dict.ContainsKey(material))
-                            {
-                                if (dict[material].IsVolume)
-                                {
-                                    newDict.Add(StaticMesh, material, dict[material]);
-                                }
-                                else
-                                {
-                                    staticM.Add(dict[material]);
-                                }
-                            }
-                        }
-                    }
-
-                    if (staticM.Count > 0)
-                    {
-                        if (SubMeshContent.OptimizeMeshes(staticM.ToArray(), out SubMeshContent gmesh))
-                        {
-                            //Mesh grouped
-                            newDict.Add(StaticMesh, material, gmesh);
-                        }
-                        else
-                        {
-                            //Cannot group
-                            foreach (var m in staticM)
-                            {
-                                newDict.Add(StaticMesh, material, m);
-                            }
-                        }
-                    }
+                    this.OptimizeStaticMesh(newDict, material);
                 }
             }
 
             this.Geometry = newDict;
         }
+        /// <summary>
+        /// Optimizes the skinned mesh
+        /// </summary>
+        /// <param name="newDict">New geometry dictionary</param>
+        /// <param name="skin">Skin name</param>
+        /// <param name="material">Material name</param>
+        private void OptimizeSkinnedMesh(GeometryDictionary newDict, string skin, string material)
+        {
+            var skinnedM = ComputeSubmeshContent(newDict, skin, skin, material);
+            if (skinnedM != null)
+            {
+                this.OptimizeSubmeshContent(newDict, skin, material, new[] { skinnedM });
+            }
+        }
+        /// <summary>
+        /// Optimizes the static mesh
+        /// </summary>
+        /// <param name="newDict">New geometry dictionary</param>
+        /// <param name="material">Material name</param>
+        private void OptimizeStaticMesh(GeometryDictionary newDict, string material)
+        {
+            List<SubMeshContent> staticM = new List<SubMeshContent>();
+
+            foreach (string mesh in this.Geometry.Keys)
+            {
+                if (!Array.Exists(this.Controllers.Skins, s => s == mesh))
+                {
+                    var submesh = ComputeSubmeshContent(newDict, mesh, StaticMesh, material);
+                    if (submesh != null)
+                    {
+                        staticM.Add(submesh);
+                    }
+                }
+            }
+
+            if (staticM.Count > 0)
+            {
+                this.OptimizeSubmeshContent(newDict, StaticMesh, material, staticM);
+            }
+        }
+        /// <summary>
+        /// Computes the specified source mesh
+        /// </summary>
+        /// <param name="newDict">New geometry dictionary</param>
+        /// <param name="sourceMesh">Source mesh name</param>
+        /// <param name="targetMesh">Target mesh name</param>
+        /// <param name="material">Material name</param>
+        /// <returns>Returns a submesh content if source mesh isn't a volume</returns>
+        private SubMeshContent ComputeSubmeshContent(GeometryDictionary newDict, string sourceMesh, string targetMesh, string material)
+        {
+            var dict = this.Geometry[sourceMesh];
+
+            if (dict.ContainsKey(material))
+            {
+                if (dict[material].IsVolume)
+                {
+                    //Group into new dictionary
+                    newDict.Add(targetMesh, material, dict[material]);
+                }
+                else
+                {
+                    //Return the submesh content
+                    return dict[material];
+                }
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Optimizes the submesh content list
+        /// </summary>
+        /// <param name="newDict">New geometry dictionary</param>
+        /// <param name="mesh">Mesh name</param>
+        /// <param name="material">Material name</param>
+        /// <param name="meshList">Mesh list to optimize</param>
+        private void OptimizeSubmeshContent(GeometryDictionary newDict, string mesh, string material, IEnumerable<SubMeshContent> meshList)
+        {
+            if (SubMeshContent.OptimizeMeshes(meshList, out var gmesh))
+            {
+                //Mesh grouped
+                newDict.Add(mesh, material, gmesh);
+            }
+            else
+            {
+                //Cannot group
+                foreach (var m in meshList)
+                {
+                    newDict.Add(mesh, material, m);
+                }
+            }
+        }
+
         /// <summary>
         /// Gets triangle list
         /// </summary>
@@ -661,46 +685,56 @@ namespace Engine.Content
         {
             ModelContent res = null;
 
-            if (masks != null && masks.Any())
+            if (masks?.Any() == true)
             {
                 foreach (var mask in masks)
                 {
-                    var geo = this.Geometry.Where(g =>
-                        g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
-                        g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
-
-                    if (geo.Any())
-                    {
-                        if (res == null)
-                        {
-                            res = new ModelContent();
-                        }
-
-                        res.Images = this.Images;
-                        res.Materials = this.Materials;
-
-                        foreach (var g in geo)
-                        {
-                            res.Geometry.Add(g.Key, g.Value);
-                        }
-
-                        var lights = this.Lights.Where(l =>
-                            l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
-                            l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
-
-                        if (lights.Any())
-                        {
-                            foreach (var l in lights)
-                            {
-                                res.Lights.Add(l.Key, l.Value);
-                            }
-                        }
-                    }
+                    FilterMaskGeo(mask, ref res);
                 }
             }
 
             return res;
         }
+        /// <summary>
+        /// Filters the geometry dictionary
+        /// </summary>
+        /// <param name="mask">Mask</param>
+        /// <param name="res">Model content</param>
+        private void FilterMaskGeo(string mask, ref ModelContent res)
+        {
+            var geo = this.Geometry.Where(g =>
+                g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
+                g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
+
+            if (geo.Any())
+            {
+                if (res == null)
+                {
+                    res = new ModelContent();
+                }
+
+                res.Images = this.Images;
+                res.Materials = this.Materials;
+
+                foreach (var g in geo)
+                {
+                    res.Geometry.Add(g.Key, g.Value);
+                }
+
+                var lights = this.Lights.Where(l =>
+                    l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
+                    l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
+
+                if (lights.Any())
+                {
+                    foreach (var l in lights)
+                    {
+                        res.Lights.Add(l.Key, l.Value);
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Marks volume flag for all the geometry contained into the model
         /// </summary>
@@ -744,24 +778,38 @@ namespace Engine.Content
         {
             int count = 0;
 
-            if (masks != null && masks.Any())
+            if (masks?.Any() == true)
             {
                 foreach (var mask in masks)
                 {
-                    var geo = this.Geometry.Where(g =>
-                        g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
-                        g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
+                    count += SetVolumeMarkGeo(mask, isVolume);
+                }
+            }
 
-                    if (geo.Any())
+            return count;
+        }
+        /// <summary>
+        /// Marks the geometry dictionary
+        /// </summary>
+        /// <param name="mask">Mask name</param>
+        /// <param name="isVolume">Mask value</param>
+        /// <returns>Returns the number of meshes setted</returns>
+        private int SetVolumeMarkGeo(string mask, bool isVolume)
+        {
+            int count = 0;
+
+            var geo = this.Geometry.Where(g =>
+                g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
+                g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
+
+            if (geo.Any())
+            {
+                foreach (var g in geo)
+                {
+                    foreach (var s in g.Value.Values)
                     {
-                        foreach (var g in geo)
-                        {
-                            foreach (var s in g.Value.Values)
-                            {
-                                s.IsVolume = isVolume;
-                                count++;
-                            }
-                        }
+                        s.IsVolume = isVolume;
+                        count++;
                     }
                 }
             }

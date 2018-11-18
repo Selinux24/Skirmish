@@ -378,16 +378,26 @@ namespace Engine.Helpers
                         throw new EngineException("File too short");
                     }
 
-                    width = width >> 1;
-                    height = height >> 1;
-                    depth = depth >> 1;
-                    if (width == 0) width = 1;
-                    if (height == 0) height = 1;
-                    if (depth == 0) depth = 1;
+                    GetMipMapBounds(ref width, ref height, ref depth);
 
                     index++;
                 }
             }
+        }
+        /// <summary>
+        /// Gets the next cicle bounds
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="depth">Depth</param>
+        private static void GetMipMapBounds(ref int width, ref int height, ref int depth)
+        {
+            width = width >> 1;
+            height = height >> 1;
+            depth = depth >> 1;
+            if (width == 0) width = 1;
+            if (height == 0) height = 1;
+            if (depth == 0) depth = 1;
         }
     }
 }
