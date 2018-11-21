@@ -149,39 +149,59 @@ namespace Engine.Collections
             {
                 for (int x = invMinX; x <= invMaxX; x++)
                 {
-                    int hash = HashVector2(x, y, this.buckets.Length);
-                    int idx = this.buckets[hash];
-
-                    while (idx >= 0)
+                    var nFound = FindItem(x, y, values, maxVals, ref n);
+                    if (nFound)
                     {
-                        if (this.pool[idx].X == x && this.pool[idx].Y == y)
-                        {
-                            //check if the id exists already
-                            int i = 0;
-                            while (i != n && !values[i].Equals(this.pool[idx].Value))
-                            {
-                                i++;
-                            }
-
-                            //item not found, add it
-                            if (i == n)
-                            {
-                                if (n >= maxVals)
-                                {
-                                    return n;
-                                }
-
-                                values[n++] = this.pool[idx].Value;
-                            }
-                        }
-
-                        idx = this.pool[idx].Next;
+                        return n;
                     }
                 }
             }
 
             return n;
         }
+        /// <summary>
+        /// Finds if the item is in the range and adds it to the values list
+        /// </summary>
+        /// <param name="x">X</param>
+        /// <param name="y">Y</param>
+        /// <param name="values">Values list</param>
+        /// <param name="maxVals">Max values</param>
+        /// <param name="n">Index</param>
+        /// <returns>Returns true if the items limit were reached</returns>
+        private bool FindItem(int x, int y, T[] values, int maxVals, ref int n)
+        {
+            int hash = HashVector2(x, y, this.buckets.Length);
+            int idx = this.buckets[hash];
+
+            while (idx >= 0)
+            {
+                if (this.pool[idx].X == x && this.pool[idx].Y == y)
+                {
+                    //check if the id exists already
+                    int i = 0;
+                    while (i != n && !values[i].Equals(this.pool[idx].Value))
+                    {
+                        i++;
+                    }
+
+                    //item not found, add it
+                    if (i == n)
+                    {
+                        if (n >= maxVals)
+                        {
+                            return true;
+                        }
+
+                        values[n++] = this.pool[idx].Value;
+                    }
+                }
+
+                idx = this.pool[idx].Next;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Take all the items within a certain range and add their ids to an array.
         /// </summary>
