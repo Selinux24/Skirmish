@@ -140,73 +140,99 @@ namespace Engine
             /// <returns>Returns generated vertex data</returns>
             private static VertexBillboard[] PlantTask(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
             {
+                if (node == null)
+                {
+                    return new VertexBillboard[] { };
+                }
+
                 List<VertexBillboard> vertexData = new List<VertexBillboard>(MAX);
 
-                if (node != null)
+                BoundingBox gbbox = scene.GetBoundingBox();
+
+                Vector2 min = new Vector2(gbbox.Minimum.X, gbbox.Minimum.Z);
+                Vector2 max = new Vector2(gbbox.Maximum.X, gbbox.Maximum.Z);
+
+                Random rnd = new Random(description.Seed);
+                BoundingBox bbox = node.BoundingBox;
+                int count = (int)Math.Min(MAX, MAX * description.Saturation);
+                int iterations = MAX * 2;
+
+                //Number of points
+                while (count > 0 && iterations > 0)
                 {
-                    BoundingBox gbbox = scene.GetBoundingBox();
+                    iterations--;
 
-                    Vector2 min = new Vector2(gbbox.Minimum.X, gbbox.Minimum.Z);
-                    Vector2 max = new Vector2(gbbox.Maximum.X, gbbox.Maximum.Z);
+                    Vector3 pos = new Vector3(
+                        rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
+                        bbox.Maximum.Y + 1f,
+                        rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
 
-                    Random rnd = new Random(description.Seed);
-                    BoundingBox bbox = node.BoundingBox;
-                    int count = (int)Math.Min(MAX, MAX * description.Saturation);
-                    int iterations = MAX * 2;
-
-                    //Number of points
-                    while (count > 0 && iterations > 0)
+                    bool plant = false;
+                    if (map != null)
                     {
-                        iterations--;
+                        Color4 c = map.GetRelative(pos, min, max);
 
-                        Vector3 pos = new Vector3(
-                            rnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
-                            bbox.Maximum.Y + 1f,
-                            rnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
-
-                        bool plant = false;
-                        if (map != null)
+                        if (c[description.Index] > 0)
                         {
-                            Color4 c = map.GetRelative(pos, min, max);
-
-                            if (c[description.Index] > 0)
-                            {
-                                plant = rnd.NextFloat(0, 1) < (c[description.Index]);
-                            }
+                            plant = rnd.NextFloat(0, 1) < (c[description.Index]);
                         }
-                        else
-                        {
-                            plant = true;
-                        }
+                    }
+                    else
+                    {
+                        plant = true;
+                    }
 
-                        if (plant)
-                        {
-                            var ray = scene.GetTopDownRay(pos);
-                            bool found = scene.PickFirst(
-                                ray, true,
-                                SceneObjectUsages.Ground,
-                                out PickingResult<Triangle> r);
-                            if (found && r.Item.Normal.Y > 0.5f)
-                            {
-                                vertexData.Add(new VertexBillboard()
-                                {
-                                    Position = r.Position,
-                                    Size = new Vector2(
-                                        rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
-                                        rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y)),
-                                });
+                    if (plant)
+                    {
+                        var size = new Vector2(
+                            rnd.NextFloat(description.MinSize.X, description.MaxSize.X),
+                            rnd.NextFloat(description.MinSize.Y, description.MaxSize.Y));
 
-                                count--;
-                            }
-                        }
-                        else
+                        var planted = Plant(scene, pos, size, out var res);
+                        if (planted)
                         {
+                            vertexData.Add(res);
+
                             count--;
                         }
+                    }
+                    else
+                    {
+                        count--;
                     }
                 }
 
                 return vertexData.ToArray();
+            }
+            /// <summary>
+            /// Plants one item
+            /// </summary>
+            /// <param name="scene">Scene</param>
+            /// <param name="pos">Position</param>
+            /// <param name="size">Size</param>
+            /// <param name="res">Resulting item</param>
+            /// <returns>Returns true if an item has been planted</returns>
+            private static bool Plant(Scene scene, Vector3 pos, Vector2 size, out VertexBillboard res)
+            {
+                var ray = scene.GetTopDownRay(pos);
+                bool found = scene.PickFirst(
+                    ray, true,
+                    SceneObjectUsages.Ground,
+                    out PickingResult<Triangle> r);
+                if (found && r.Item.Normal.Y > 0.5f)
+                {
+                    res = new VertexBillboard()
+                    {
+                        Position = r.Position,
+                        Size = size,
+                    };
+
+                    return true;
+                }
+
+                res = new VertexBillboard();
+
+                return false;
             }
             /// <summary>
             /// Get foliage data
@@ -513,11 +539,11 @@ namespace Engine
         /// <summary>
         /// Foliage patches list
         /// </summary>
-        private Dictionary<QuadTreeNode, List<FoliagePatch>> foliagePatches = new Dictionary<QuadTreeNode, List<FoliagePatch>>();
+        private readonly Dictionary<QuadTreeNode, List<FoliagePatch>> foliagePatches = new Dictionary<QuadTreeNode, List<FoliagePatch>>();
         /// <summary>
         /// Foliage buffer list
         /// </summary>
-        private List<FoliageBuffer> foliageBuffers = new List<FoliageBuffer>();
+        private readonly List<FoliageBuffer> foliageBuffers = new List<FoliageBuffer>();
         /// <summary>
         /// Wind total time
         /// </summary>
@@ -533,7 +559,7 @@ namespace Engine
         /// <summary>
         /// Foliage map channels for vegetation planting task
         /// </summary>
-        private FoliageMapChannel[] foliageMapChannels = null;
+        private readonly List<FoliageMapChannel> foliageMapChannels = new List<FoliageMapChannel>();
         /// <summary>
         /// Material
         /// </summary>
@@ -588,95 +614,48 @@ namespace Engine
         public GroundGardener(Scene scene, GroundGardenerDescription description) :
             base(scene, description)
         {
+            if (description == null)
+            {
+                throw new EngineException("A gardener description should be specified.");
+            }
+
             this.textureRandom = this.Game.ResourceManager.CreateResource(Guid.NewGuid(), 1024, -1, 1, 24);
 
-            List<FoliageMapChannel> foliageChannels = new List<FoliageMapChannel>();
+            this.foliageSphere = new BoundingSphere(Vector3.Zero, description.VisibleRadius);
+            this.foliageNodeSize = description.NodeSize;
 
-            if (description != null)
+            //Material
+            this.material = new MeshMaterial()
             {
-                this.foliageSphere = new BoundingSphere(Vector3.Zero, description.VisibleRadius);
-                this.foliageNodeSize = description.NodeSize;
+                Material = description.Material != null ? description.Material.GetMaterial() : Material.Default
+            };
 
-                //Material
-                this.material = new MeshMaterial()
+            //Read foliage textures
+            string contentPath = description.ContentPath;
+
+            if (!string.IsNullOrEmpty(description.VegetationMap))
+            {
+                var foliageMapImage = new ImageContent()
                 {
-                    Material = description.Material != null ? description.Material.GetMaterial() : Material.Default
+                    Streams = ContentManager.FindContent(contentPath, description.VegetationMap),
                 };
+                this.foliageMap = FoliageMap.FromStream(foliageMapImage.Stream);
+            }
 
-                //Read foliage textures
-                string contentPath = description.ContentPath;
-
-                if (!string.IsNullOrEmpty(description.VegetationMap))
+            for (int i = 0; i < description.Channels.Length; i++)
+            {
+                var channelDesc = description.Channels[i];
+                if (channelDesc?.Enabled == true)
                 {
-                    var foliageMapImage = new ImageContent()
-                    {
-                        Streams = ContentManager.FindContent(contentPath, description.VegetationMap),
-                    };
-                    this.foliageMap = FoliageMap.FromStream(foliageMapImage.Stream);
+                    var newChannel = CreateChannel(channelDesc, i, contentPath);
+
+                    this.foliageMapChannels.Add(newChannel);
                 }
+            }
 
-                for (int i = 0; i < description.Channels.Length; i++)
-                {
-                    var channel = description.Channels[i];
-                    if (channel != null && channel.Enabled)
-                    {
-                        EngineShaderResourceView foliageTextures = null;
-                        EngineShaderResourceView foliageNormalMaps = null;
-                        int textureCount = channel.VegetationTextures != null ? channel.VegetationTextures.Length : 0;
-                        int normalMapCount = channel.VegetationNormalMaps != null ? channel.VegetationNormalMaps.Length : 0;
-
-                        if (normalMapCount != 0 && normalMapCount != textureCount)
-                        {
-                            throw new EngineException("Normal map arrays must have the same slices than diffuse texture arrays");
-                        }
-
-                        if (textureCount > 0)
-                        {
-                            var image = new ImageContent()
-                            {
-                                Streams = ContentManager.FindContent(contentPath, channel.VegetationTextures),
-                            };
-
-                            foliageTextures = this.Game.ResourceManager.CreateResource(image);
-                        }
-
-                        if (normalMapCount > 0)
-                        {
-                            var image = new ImageContent()
-                            {
-                                Streams = ContentManager.FindContent(contentPath, channel.VegetationNormalMaps),
-                            };
-
-                            foliageNormalMaps = this.Game.ResourceManager.CreateResource(image);
-                        }
-
-                        foliageChannels.Add(
-                            new FoliageMapChannel()
-                            {
-                                Index = i,
-                                Seed = channel.Seed,
-                                Saturation = channel.Saturation,
-                                MinSize = channel.MinSize,
-                                MaxSize = channel.MaxSize,
-                                Delta = channel.Delta,
-                                StartRadius = channel.StartRadius,
-                                EndRadius = channel.EndRadius,
-                                TextureCount = (uint)textureCount,
-                                NormalMapCount = (uint)normalMapCount,
-                                Textures = foliageTextures,
-                                NormalMaps = foliageNormalMaps,
-                                WindEffect = channel.WindEffect,
-                                Count = channel.Count,
-                            });
-                    }
-                }
-
-                this.foliageMapChannels = foliageChannels.ToArray();
-
-                for (int i = 0; i < MaxFoliageBuffers; i++)
-                {
-                    this.foliageBuffers.Add(new FoliageBuffer(this.Game, this.BufferManager, description.Name));
-                }
+            for (int i = 0; i < MaxFoliageBuffers; i++)
+            {
+                this.foliageBuffers.Add(new FoliageBuffer(this.Game, this.BufferManager, description.Name));
             }
         }
         /// <summary>
@@ -694,55 +673,93 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.foliageBuffers != null)
+                for (int i = 0; i < this.foliageBuffers.Count; i++)
                 {
-                    for (int i = 0; i < this.foliageBuffers.Count; i++)
+                    this.foliageBuffers[i]?.Dispose();
+                    this.foliageBuffers[i] = null;
+                }
+                this.foliageBuffers.Clear();
+
+                foreach (var item in this.foliagePatches.Values)
+                {
+                    foreach (var value in item)
                     {
-                        this.foliageBuffers[i]?.Dispose();
-                        this.foliageBuffers[i] = null;
+                        value?.Dispose();
                     }
-
-                    this.foliageBuffers.Clear();
-                    this.foliageBuffers = null;
                 }
+                this.foliagePatches.Clear();
 
-                if (this.foliagePatches != null)
+                this.foliageMap?.Dispose();
+                this.foliageMap = null;
+
+                for (int i = 0; i < this.foliageMapChannels.Count; i++)
                 {
-                    foreach (var item in this.foliagePatches)
-                    {
-                        foreach (var value in item.Value)
-                        {
-                            value?.Dispose();
-                        }
-                    }
-
-                    this.foliagePatches.Clear();
-                    this.foliagePatches = null;
+                    this.foliageMapChannels[i]?.Dispose();
+                    this.foliageMapChannels[i] = null;
                 }
+                this.foliageMapChannels.Clear();
 
-                if (this.foliageMap != null)
-                {
-                    this.foliageMap.Dispose();
-                    this.foliageMap = null;
-                }
-
-                if (this.foliageMapChannels != null)
-                {
-                    for (int i = 0; i < this.foliageMapChannels.Length; i++)
-                    {
-                        this.foliageMapChannels[i]?.Dispose();
-                        this.foliageMapChannels[i] = null;
-                    }
-
-                    this.foliageMapChannels = null;
-                }
-
-                if (this.textureRandom != null)
-                {
-                    this.textureRandom.Dispose();
-                    this.textureRandom = null;
-                }
+                this.textureRandom?.Dispose();
+                this.textureRandom = null;
             }
+        }
+
+        /// <summary>
+        /// Creates a map channel from the specified description
+        /// </summary>
+        /// <param name="channel">Channel description</param>
+        /// <param name="index">Channel index</param>
+        /// <param name="contentPath">Resources content path</param>
+        /// <returns>Returns the new map channel</returns>
+        private FoliageMapChannel CreateChannel(GroundGardenerDescription.Channel channel, int index, string contentPath)
+        {
+            EngineShaderResourceView foliageTextures = null;
+            EngineShaderResourceView foliageNormalMaps = null;
+            int textureCount = channel.VegetationTextures != null ? channel.VegetationTextures.Length : 0;
+            int normalMapCount = channel.VegetationNormalMaps != null ? channel.VegetationNormalMaps.Length : 0;
+
+            if (normalMapCount != 0 && normalMapCount != textureCount)
+            {
+                throw new EngineException("Normal map arrays must have the same slices than diffuse texture arrays");
+            }
+
+            if (textureCount > 0)
+            {
+                var image = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(contentPath, channel.VegetationTextures),
+                };
+
+                foliageTextures = this.Game.ResourceManager.CreateResource(image);
+            }
+
+            if (normalMapCount > 0)
+            {
+                var image = new ImageContent()
+                {
+                    Streams = ContentManager.FindContent(contentPath, channel.VegetationNormalMaps),
+                };
+
+                foliageNormalMaps = this.Game.ResourceManager.CreateResource(image);
+            }
+
+            return new FoliageMapChannel()
+            {
+                Index = index,
+                Seed = channel.Seed,
+                Saturation = channel.Saturation,
+                MinSize = channel.MinSize,
+                MaxSize = channel.MaxSize,
+                Delta = channel.Delta,
+                StartRadius = channel.StartRadius,
+                EndRadius = channel.EndRadius,
+                TextureCount = (uint)textureCount,
+                NormalMapCount = (uint)normalMapCount,
+                Textures = foliageTextures,
+                NormalMaps = foliageNormalMaps,
+                WindEffect = channel.WindEffect,
+                Count = channel.Count,
+            };
         }
 
         /// <summary>
@@ -787,119 +804,8 @@ namespace Engine
                     return transparent ? -res : res;
                 });
 
-                #region Assign foliage patches
-
-                /*
-                 * Foreach high lod visible node, look for planted foliagePatches.
-                 * - If planted, see if they were assigned to a foliageBuffer
-                 *   - If assigned, do nothing
-                 *   - If not, add to toAssign list
-                 * - If not planted, launch planting task y do nothing more. The node will be processed next time
-                 */
-
-                List<FoliagePatch> toAssign = new List<FoliagePatch>();
-
-                int count = this.foliageMapChannels.Length;
-
-                foreach (var node in this.visibleNodes)
-                {
-                    if (!this.foliagePatches.ContainsKey(node))
-                    {
-                        this.foliagePatches.Add(node, new List<FoliagePatch>());
-
-                        for (int i = 0; i < count; i++)
-                        {
-                            this.foliagePatches[node].Add(new FoliagePatch());
-                        }
-                    }
-
-                    var fPatchList = this.foliagePatches[node];
-
-                    for (int i = 0; i < fPatchList.Count; i++)
-                    {
-                        var fPatch = fPatchList[i];
-
-                        if (!fPatch.Planted)
-                        {
-                            fPatch.Plant(this.Scene, node, this.foliageMap, this.foliageMapChannels[i], i * 100);
-                        }
-                        else
-                        {
-                            if (fPatch.HasData && !this.foliageBuffers.Exists(b => b.CurrentPatch == fPatch))
-                            {
-                                toAssign.Add(fPatch);
-                            }
-                        }
-                    }
-                }
-
-                /*
-                 * For each node to assign
-                 * - Look for a free buffer. It's free if unassigned or assigned to not visible node
-                 *   - If free buffer found, assign
-                 *   - If not, look for a buffer to free, fartests from camera first
-                 */
-
-                if (toAssign.Count > 0)
-                {
-                    //Sort nearest first
-                    toAssign.Sort((f1, f2) =>
-                    {
-                        float d1 = Vector3.DistanceSquared(f1.CurrentNode.Center, context.EyePosition);
-                        float d2 = Vector3.DistanceSquared(f2.CurrentNode.Center, context.EyePosition);
-
-                        return d1.CompareTo(d2);
-                    });
-
-                    var freeBuffers = this.foliageBuffers.FindAll(b =>
-                        (b.CurrentPatch == null) ||
-                        (b.CurrentPatch != null && !Array.Exists(this.visibleNodes, n => n == b.CurrentPatch.CurrentNode)));
-
-                    if (freeBuffers.Count > 0)
-                    {
-                        //Sort free first and fartest first
-                        freeBuffers.Sort((f1, f2) =>
-                        {
-                            float d1 = f1.CurrentPatch == null ? -1 : Vector3.DistanceSquared(f1.CurrentPatch.CurrentNode.Center, context.EyePosition);
-                            float d2 = f2.CurrentPatch == null ? -1 : Vector3.DistanceSquared(f2.CurrentPatch.CurrentNode.Center, context.EyePosition);
-
-                            return -d1.CompareTo(d2);
-                        });
-
-                        while (toAssign.Count > 0 && freeBuffers.Count > 0)
-                        {
-                            freeBuffers[0].AttachFoliage(context.EyePosition, this.Description.AlphaEnabled, toAssign[0], this.BufferManager);
-
-                            toAssign.RemoveAt(0);
-                            freeBuffers.RemoveAt(0);
-                        }
-                    }
-                }
-
-                //Free unussed patches
-                if (this.foliagePatches.Keys.Count > MaxFoliagePatches)
-                {
-                    var nodes = this.foliagePatches.Keys.ToArray();
-                    var notVisible = Array.FindAll(nodes, n => !Array.Exists(this.visibleNodes, v => v == n));
-                    if (notVisible.Length > 0)
-                    {
-                        Array.Sort(notVisible, (n1, n2) =>
-                        {
-                            float d1 = Vector3.DistanceSquared(n1.Center, context.EyePosition);
-                            float d2 = Vector3.DistanceSquared(n2.Center, context.EyePosition);
-
-                            return d2.CompareTo(d1);
-                        });
-
-                        int toDelete = this.foliagePatches.Keys.Count - MaxFoliagePatches;
-                        for (int i = 0; i < toDelete; i++)
-                        {
-                            this.foliagePatches.Remove(notVisible[i]);
-                        }
-                    }
-                }
-
-                #endregion
+                //Assign foliage patches
+                this.AssignPatches(context.EyePosition);
             }
 
             this.PlantingTasks = 0;
@@ -910,12 +816,151 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Assign patches
+        /// </summary>
+        /// <param name="eyePosition">Eye position</param>
+        private void AssignPatches(Vector3 eyePosition)
+        {
+            //Find patches to assign data
+            var toAssign = this.FindAssigned();
+            if (toAssign.Count > 0)
+            {
+                //Mark patches to delete
+                this.MarkFreePatches(toAssign, eyePosition);
+            }
+
+            //Free unused patches
+            this.FreeUnusedPatches(eyePosition);
+        }
+        /// <summary>
+        /// Finds a list of patches with assigned data
+        /// </summary>
+        /// <returns>Returns a list of patches</returns>
+        /// <remarks>
+        /// Foreach high lod visible node, look for planted foliagePatches.
+        /// - If planted, see if they were assigned to a foliageBuffer
+        ///   - If assigned, do nothing
+        ///   - If not, add to toAssign list
+        /// - If not planted, launch planting task y do nothing more. The node will be processed next time
+        /// </remarks>
+        private List<FoliagePatch> FindAssigned()
+        {
+            List<FoliagePatch> toAssign = new List<FoliagePatch>();
+
+            int count = this.foliageMapChannels.Count;
+
+            foreach (var node in this.visibleNodes)
+            {
+                if (!this.foliagePatches.ContainsKey(node))
+                {
+                    this.foliagePatches.Add(node, new List<FoliagePatch>());
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        this.foliagePatches[node].Add(new FoliagePatch());
+                    }
+                }
+
+                var fPatchList = this.foliagePatches[node];
+
+                for (int i = 0; i < fPatchList.Count; i++)
+                {
+                    var fPatch = fPatchList[i];
+
+                    if (!fPatch.Planted)
+                    {
+                        fPatch.Plant(this.Scene, node, this.foliageMap, this.foliageMapChannels[i], i * 100);
+                    }
+                    else if (fPatch.HasData && !this.foliageBuffers.Exists(b => b.CurrentPatch == fPatch))
+                    {
+                        toAssign.Add(fPatch);
+                    }
+                }
+            }
+
+            return toAssign;
+        }
+        /// <summary>
+        /// Mark patches for deletion
+        /// </summary>
+        /// <param name="toAssign">To assign patches</param>
+        /// <param name="eyePosition">Eye position</param>
+        /// <remarks>
+        /// For each node to assign
+        /// - Look for a free buffer. It's free if unassigned or assigned to not visible node
+        ///   - If free buffer found, assign
+        ///   - If not, look for a buffer to free, fartests from camera first
+        /// </remarks>
+        private void MarkFreePatches(List<FoliagePatch> toAssign, Vector3 eyePosition)
+        {
+            //Sort nearest first
+            toAssign.Sort((f1, f2) =>
+            {
+                float d1 = Vector3.DistanceSquared(f1.CurrentNode.Center, eyePosition);
+                float d2 = Vector3.DistanceSquared(f2.CurrentNode.Center, eyePosition);
+
+                return d1.CompareTo(d2);
+            });
+
+            var freeBuffers = this.foliageBuffers.FindAll(b =>
+                (b.CurrentPatch == null) ||
+                (b.CurrentPatch != null && !Array.Exists(this.visibleNodes, n => n == b.CurrentPatch.CurrentNode)));
+
+            if (freeBuffers.Count > 0)
+            {
+                //Sort free first and fartest first
+                freeBuffers.Sort((f1, f2) =>
+                {
+                    float d1 = f1.CurrentPatch == null ? -1 : Vector3.DistanceSquared(f1.CurrentPatch.CurrentNode.Center, eyePosition);
+                    float d2 = f2.CurrentPatch == null ? -1 : Vector3.DistanceSquared(f2.CurrentPatch.CurrentNode.Center, eyePosition);
+
+                    return -d1.CompareTo(d2);
+                });
+
+                while (toAssign.Count > 0 && freeBuffers.Count > 0)
+                {
+                    freeBuffers[0].AttachFoliage(eyePosition, this.Description.AlphaEnabled, toAssign[0], this.BufferManager);
+
+                    toAssign.RemoveAt(0);
+                    freeBuffers.RemoveAt(0);
+                }
+            }
+        }
+        /// <summary>
+        /// Frees the unused patch data
+        /// </summary>
+        /// <param name="eyePosition">Eye position</param>
+        private void FreeUnusedPatches(Vector3 eyePosition)
+        {
+            if (this.foliagePatches.Keys.Count > MaxFoliagePatches)
+            {
+                var nodes = this.foliagePatches.Keys.ToArray();
+                var notVisible = Array.FindAll(nodes, n => !Array.Exists(this.visibleNodes, v => v == n));
+                if (notVisible.Length > 0)
+                {
+                    Array.Sort(notVisible, (n1, n2) =>
+                    {
+                        float d1 = Vector3.DistanceSquared(n1.Center, eyePosition);
+                        float d2 = Vector3.DistanceSquared(n2.Center, eyePosition);
+
+                        return d2.CompareTo(d1);
+                    });
+
+                    int toDelete = this.foliagePatches.Keys.Count - MaxFoliagePatches;
+                    for (int i = 0; i < toDelete; i++)
+                    {
+                        this.foliagePatches.Remove(notVisible[i]);
+                    }
+                }
+            }
+        }
+        /// <summary>
         /// Draws the gardener shadows
         /// </summary>
         /// <param name="context">Context</param>
         public override void DrawShadows(DrawContextShadows context)
         {
-            if (this.visibleNodes != null && this.visibleNodes.Length > 0)
+            if (this.visibleNodes?.Length > 0)
             {
                 var graphics = this.Game.Graphics;
 
@@ -923,22 +968,31 @@ namespace Engine
 
                 foreach (var item in this.visibleNodes)
                 {
-                    var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch != null && b.CurrentPatch.CurrentNode == item);
-                    if (buffers.Count > 0)
+                    this.DrawShadowsNode(context, item);
+                }
+            }
+        }
+        /// <summary>
+        /// Draws the node shadows
+        /// </summary>
+        /// <param name="context">Context</param>
+        /// <param name="item">Node</param>
+        private void DrawShadowsNode(DrawContextShadows context, QuadTreeNode item)
+        {
+            var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch?.CurrentNode == item);
+            if (buffers.Count > 0)
+            {
+                foreach (var buffer in buffers)
+                {
+                    var vegetationTechnique = this.SetTechniqueVegetationShadowMap(context, buffer.CurrentPatch.Channel);
+                    if (vegetationTechnique != null)
                     {
-                        foreach (var buffer in buffers)
-                        {
-                            var vegetationTechnique = this.SetTechniqueVegetationShadowMap(context, buffer.CurrentPatch.Channel);
-                            if (vegetationTechnique != null)
-                            {
-                                this.BufferManager.SetInputAssembler(
-                                    vegetationTechnique,
-                                    buffer.VertexBuffer.Slot,
-                                    Topology.PointList);
+                        this.BufferManager.SetInputAssembler(
+                            vegetationTechnique,
+                            buffer.VertexBuffer.Slot,
+                            Topology.PointList);
 
-                                buffer.DrawFoliageShadows(vegetationTechnique);
-                            }
-                        }
+                        buffer.DrawFoliageShadows(vegetationTechnique);
                     }
                 }
             }
@@ -961,22 +1015,31 @@ namespace Engine
 
                 foreach (var item in this.visibleNodes)
                 {
-                    var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch != null && b.CurrentPatch.CurrentNode == item);
-                    if (buffers.Count > 0)
+                    this.DrawNode(context, item);
+                }
+            }
+        }
+        /// <summary>
+        /// Draws the node
+        /// </summary>
+        /// <param name="context">Context</param>
+        /// <param name="item">Node</param>
+        private void DrawNode(DrawContext context, QuadTreeNode item)
+        {
+            var buffers = this.foliageBuffers.FindAll(b => b.CurrentPatch?.CurrentNode == item);
+            if (buffers.Count > 0)
+            {
+                foreach (var buffer in buffers)
+                {
+                    var vegetationTechnique = this.SetTechniqueVegetationDefault(context, buffer.CurrentPatch.Channel);
+                    if (vegetationTechnique != null)
                     {
-                        foreach (var buffer in buffers)
-                        {
-                            var vegetationTechnique = this.SetTechniqueVegetationDefault(context, buffer.CurrentPatch.Channel);
-                            if (vegetationTechnique != null)
-                            {
-                                this.BufferManager.SetInputAssembler(
-                                    vegetationTechnique,
-                                    buffer.VertexBuffer.Slot,
-                                    Topology.PointList);
+                        this.BufferManager.SetInputAssembler(
+                            vegetationTechnique,
+                            buffer.VertexBuffer.Slot,
+                            Topology.PointList);
 
-                                buffer.DrawFoliage(vegetationTechnique);
-                            }
-                        }
+                        buffer.DrawFoliage(vegetationTechnique);
                     }
                 }
             }
