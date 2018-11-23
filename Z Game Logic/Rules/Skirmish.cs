@@ -272,73 +272,75 @@ namespace GameLogic.Rules
         {
             if (this.CurrentPhase == Phase.End)
             {
-                #region All phases done for this team. Select next team
+                //All phases done for this team. Select next team
+                this.EndPhase();
+            }
+            else
+            {
+                //Done with current phase, next phase
+                this.OnePhase();
+            }
+        }
+        private void EndPhase()
+        {
+            //Get current
+            Team currentTeam = this.CurrentTeam;
 
-                //Get current
-                Team currentTeam = this.CurrentTeam;
+            //Mark actions done
+            this.turnInfo[currentTeam] = false;
 
-                //Mark actions done
-                this.turnInfo[currentTeam] = false;
+            //Get new current (next idle)
+            currentTeam = this.CurrentTeam;
+            if (currentTeam == null)
+            {
+                #region No idle teams, next turn
 
-                //Get new current (next idle)
-                currentTeam = this.CurrentTeam;
-                if (currentTeam == null)
+                this.currentTurn++;
+
+                //Mark all teams idle
+                this.turnInfo.Clear();
+                foreach (Team team in this.teams)
                 {
-                    #region No idle teams, next turn
+                    team.NextTurn();
 
-                    this.currentTurn++;
-
-                    //Mark all teams idle
-                    this.turnInfo.Clear();
-                    foreach (Team team in this.teams)
-                    {
-                        team.NextTurn();
-
-                        this.turnInfo.Add(team, true);
-                    }
-
-                    this.CurrentPhase = 0;
-                    this.currentSoldier = 0;
-
-                    #endregion
+                    this.turnInfo.Add(team, true);
                 }
-                else
-                {
-                    #region Next team
 
-                    this.CurrentPhase = 0;
-                    this.currentSoldier = 0;
-
-                    #endregion
-                }
+                this.CurrentPhase = 0;
+                this.currentSoldier = 0;
 
                 #endregion
             }
             else
             {
-                #region Done with current phase, next phase
+                #region Next team
 
-                if (this.CurrentPhase == Phase.Melee)
-                {
-                    //Resolve melees
-                    foreach (Melee melee in this.melees)
-                    {
-                        melee.Resolve();
-
-                        if (melee.Done)
-                        {
-                            melee.Disolve();
-                        }
-                    }
-
-                    this.melees.RemoveAll(m => m.Done);
-                }
-
-                this.CurrentPhase++;
+                this.CurrentPhase = 0;
                 this.currentSoldier = 0;
 
                 #endregion
             }
+        }
+        private void OnePhase()
+        {
+            if (this.CurrentPhase == Phase.Melee)
+            {
+                //Resolve melees
+                foreach (Melee melee in this.melees)
+                {
+                    melee.Resolve();
+
+                    if (melee.Done)
+                    {
+                        melee.Disolve();
+                    }
+                }
+
+                this.melees.RemoveAll(m => m.Done);
+            }
+
+            this.CurrentPhase++;
+            this.currentSoldier = 0;
         }
 
         public Team[] EnemyOf(Team team)

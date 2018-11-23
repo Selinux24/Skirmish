@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace GameLogic.Rules
@@ -10,42 +9,40 @@ namespace GameLogic.Rules
     {
         public static ActionSpecification[] GetActions(Phase phase, Team team, Soldier soldier, bool onMelee, ActionTypes actionType = ActionTypes.All)
         {
-            ActionSpecification[] teamActions = ActionsManager.GetListForTeam();
+            var teamActions = GetListForTeam();
 
-            teamActions = FilterTeamActions(teamActions, phase, team, actionType);
+            teamActions = FilterTeamActions(teamActions, phase, actionType);
 
-
-            ActionSpecification[] soldierActions = new ActionSpecification[] { };
+            IEnumerable<ActionSpecification> soldierActions = new ActionSpecification[] { };
 
             if (phase == Phase.Movement)
             {
-                soldierActions = ActionsManager.GetListForMovement();
+                soldierActions = GetListForMovement();
             }
             else if (phase == Phase.Shooting)
             {
-                soldierActions = ActionsManager.GetListForShooting();
+                soldierActions = GetListForShooting();
             }
             else if (phase == Phase.Melee)
             {
-                soldierActions = ActionsManager.GetListForMelee();
+                soldierActions = GetListForMelee();
             }
             else if (phase == Phase.Morale)
             {
-                soldierActions = ActionsManager.GetListForMorale();
+                soldierActions = GetListForMorale();
             }
 
             soldierActions = FilterSoldierActions(soldierActions, phase, soldier, onMelee, actionType);
 
-
             List<ActionSpecification> actions = new List<ActionSpecification>();
 
-            if (teamActions.Length > 0) actions.AddRange(teamActions);
-            if (soldierActions.Length > 0) actions.AddRange(soldierActions);
+            if (teamActions.Any()) actions.AddRange(teamActions);
+            if (soldierActions.Any()) actions.AddRange(soldierActions);
 
             return actions.ToArray();
         }
 
-        private static ActionSpecification[] FilterTeamActions(ActionSpecification[] actions, Phase phase, Team team, ActionTypes actionType)
+        private static IEnumerable<ActionSpecification> FilterTeamActions(IEnumerable<ActionSpecification> actions, Phase phase, ActionTypes actionType)
         {
             if (phase != Phase.End && actionType.HasFlag(ActionTypes.Automatic))
             {
@@ -59,26 +56,10 @@ namespace GameLogic.Rules
             return actions;
         }
 
-        private static ActionSpecification[] FilterSoldierActions(ActionSpecification[] actions, Phase phase, Soldier soldier, bool onMelee, ActionTypes actionType)
+        private static IEnumerable<ActionSpecification> FilterSoldierActions(IEnumerable<ActionSpecification> actions, Phase phase, Soldier soldier, bool onMelee, ActionTypes actionType)
         {
-            IEnumerable<ActionSpecification> filteredActions = actions;
-
-            if (phase == Phase.Movement && soldier.IdleForMovement)
-            {
-                filteredActions = actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMovingPhase);
-            }
-            else if (phase == Phase.Shooting && soldier.IdleForShooting)
-            {
-                filteredActions = actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForShootingPhase);
-            }
-            else if (phase == Phase.Melee && soldier.IdleForMelee)
-            {
-                filteredActions = actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMeleePhase);
-            }
-            else if (phase == Phase.Morale)
-            {
-                filteredActions = actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMoralePhase);
-            }
+            //Filter by phase
+            var filteredActions = FilterByPhase(actions, phase, soldier);
 
             filteredActions = filteredActions.Where(a => !a.LeadersOnly || (a.LeadersOnly && soldier.IsLeader));
 
@@ -101,9 +82,31 @@ namespace GameLogic.Rules
             return filteredActions.ToArray();
         }
 
+        private static IEnumerable<ActionSpecification> FilterByPhase(IEnumerable<ActionSpecification> actions, Phase phase, Soldier soldier)
+        {
+            if (phase == Phase.Movement && soldier.IdleForMovement)
+            {
+                return actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMovingPhase);
+            }
+            else if (phase == Phase.Shooting && soldier.IdleForShooting)
+            {
+                return actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForShootingPhase);
+            }
+            else if (phase == Phase.Melee && soldier.IdleForMelee)
+            {
+                return actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMeleePhase);
+            }
+            else if (phase == Phase.Morale)
+            {
+                return actions.Where(a => !a.ItemAction || a.ItemAction && soldier.HasItemsForMoralePhase);
+            }
+
+            return actions;
+        }
+
         #region Team actions
 
-        private static ActionSpecification[] GetListForTeam()
+        private static IEnumerable<ActionSpecification> GetListForTeam()
         {
             return new ActionSpecification[] { };
         }
@@ -112,7 +115,7 @@ namespace GameLogic.Rules
 
         #region Movement
 
-        private static ActionSpecification[] GetListForMovement()
+        private static IEnumerable<ActionSpecification> GetListForMovement()
         {
             return new[]
             {
@@ -251,7 +254,7 @@ namespace GameLogic.Rules
 
         #region Shooting
 
-        private static ActionSpecification[] GetListForShooting()
+        private static IEnumerable<ActionSpecification> GetListForShooting()
         {
             return new[]
             {
@@ -308,7 +311,7 @@ namespace GameLogic.Rules
 
         #region Melee
 
-        private static ActionSpecification[] GetListForMelee()
+        private static IEnumerable<ActionSpecification> GetListForMelee()
         {
             return new[]
             {
@@ -340,7 +343,7 @@ namespace GameLogic.Rules
 
         #region Morale
 
-        private static ActionSpecification[] GetListForMorale()
+        private static IEnumerable<ActionSpecification> GetListForMorale()
         {
             return new[]
             {

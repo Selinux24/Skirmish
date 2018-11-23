@@ -293,19 +293,10 @@ namespace Engine
             graphics.IASetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
         }
         /// <summary>
-        /// Binds the hemispheric light input layout to the input assembler
+        /// Binds the hemispheric/directional (global) light input layout to the input assembler
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public void BindHemispheric(Graphics graphics)
-        {
-            graphics.IAInputLayout = this.globalLightInputLayout;
-            Counters.IAInputLayoutSets++;
-        }
-        /// <summary>
-        /// Binds the directional light input layout to the input assembler
-        /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public void BindDirectional(Graphics graphics)
+        public void BindGobalLight(Graphics graphics)
         {
             graphics.IAInputLayout = this.globalLightInputLayout;
             Counters.IAInputLayoutSets++;

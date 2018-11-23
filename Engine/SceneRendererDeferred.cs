@@ -531,7 +531,7 @@ namespace Engine
 #endif
             if (directionalLights != null && directionalLights.Length > 0)
             {
-                this.lightDrawer.BindDirectional(graphics);
+                this.lightDrawer.BindGobalLight(graphics);
 
                 for (int i = 0; i < directionalLights.Length; i++)
                 {
