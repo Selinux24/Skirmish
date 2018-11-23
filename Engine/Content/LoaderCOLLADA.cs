@@ -949,7 +949,7 @@ namespace Engine.Content
             {
                 string jointName = channel.Target.Split("/".ToCharArray())[0];
 
-                if (modelContent.SkinningInfo != null && modelContent.SkinningInfo.Skeleton != null)
+                if (modelContent.SkinningInfo?.Skeleton != null)
                 {
                     //Process only joints in the skeleton
                     var j = modelContent.SkinningInfo.Skeleton[jointName];
@@ -1277,16 +1277,16 @@ namespace Engine.Content
         /// <returns>Returns texture name</returns>
         private static string FindBumpMap(ProfileCOMMON profile, TechniqueCOMMON technique)
         {
-            if (technique.Extras != null && technique.Extras.Length > 0)
+            if (technique.Extras?.Length > 0)
             {
                 for (int i = 0; i < technique.Extras.Length; i++)
                 {
-                    Technique[] techniques = technique.Extras[i].Techniques;
-                    if (techniques != null && techniques.Length > 0)
+                    var techniques = technique.Extras[i].Techniques;
+                    if (techniques?.Length > 0)
                     {
                         for (int t = 0; t < techniques.Length; t++)
                         {
-                            if (techniques[t].BumpMaps != null && techniques[t].BumpMaps.Length > 0)
+                            if (techniques[t].BumpMaps?.Length > 0)
                             {
                                 return FindTexture(profile, techniques[t].BumpMaps[0].Texture);
                             }
@@ -1356,7 +1356,7 @@ namespace Engine.Content
             skeleton = null;
             controllers = new string[] { };
 
-            if (nodes != null && nodes.Length > 0)
+            if (nodes?.Length > 0)
             {
                 List<string> lControllers = new List<string>();
 
@@ -1415,105 +1415,39 @@ namespace Engine.Content
 
             if (node.IsLight)
             {
-                #region Lights
-
-                if (!trn.IsIdentity && node.InstanceLight?.Length > 0)
-                {
-                    foreach (InstanceWithExtra il in node.InstanceLight)
-                    {
-                        string lightName = il.Url.Replace("#", "");
-
-                        var light = modelContent.Lights[lightName];
-
-                        light.Name = lightName;
-                        light.Transform = trn;
-                    }
-                }
-
-                #endregion
+                //Lights
+                ProcessSceneNodeLight(trn, node, modelContent);
             }
             else if (node.IsArmature)
             {
                 processChilds = false;
 
-                #region Armatures (Skeletons)
-
-                if (node.Nodes != null && node.Nodes.Length > 0)
+                //Armatures (Skeletons)
+                if (ProcessSceneNodeArmature(node, out var pSkeleton))
                 {
-                    Joint root = ProcessJoints(node.Id, null, node.Nodes[0]);
-
-                    skeleton = new Skeleton(root);
+                    skeleton = pSkeleton;
                 }
-
-                #endregion
             }
             else if (node.HasGeometry)
             {
-                #region Geometry nodes
-
-                if (!trn.IsIdentity && node.InstanceGeometry?.Length > 0)
-                {
-                    foreach (InstanceGeometry ig in node.InstanceGeometry)
-                    {
-                        string meshName = ig.Url.Replace("#", "");
-
-                        foreach (var submesh in modelContent.Geometry[meshName].Values)
-                        {
-                            submesh.Transform(trn);
-                        }
-                    }
-                }
-
-                #endregion
+                //Geometry nodes
+                ProcessSceneNodeGeometry(trn, node, modelContent);
             }
             else if (node.HasController)
             {
-                #region Controllers
-
-                if (node.InstanceController != null && node.InstanceController.Length > 0)
+                //Controllers
+                var nControllers = ProcessSceneNodeController(node);
+                if (nControllers?.Count > 0)
                 {
-                    foreach (InstanceController ic in node.InstanceController)
-                    {
-                        string controllerName = ic.Url.Replace("#", "");
-
-                        lControllers.Add(controllerName);
-                    }
+                    lControllers.AddRange(nControllers);
                 }
-
-                #endregion
             }
             else
             {
                 processChilds = false;
 
-                #region Default node
-
-                if (node.Nodes != null && node.Nodes.Length > 0)
-                {
-                    foreach (var child in node.Nodes)
-                    {
-                        Matrix childTrn = child.ReadMatrix();
-
-                        if (child.InstanceGeometry != null && child.InstanceGeometry.Length > 0)
-                        {
-                            foreach (InstanceGeometry ig in child.InstanceGeometry)
-                            {
-                                string meshName = ig.Url.Replace("#", "");
-
-                                foreach (var submesh in modelContent.Geometry[meshName].Values)
-                                {
-                                    if (!childTrn.IsIdentity)
-                                    {
-                                        submesh.Transform(childTrn);
-                                    }
-                                }
-                            }
-                        }
-
-                    }
-                }
-
-                #endregion
+                //Default node
+                ProcessSceneNodeDefault(node, modelContent);
             }
 
             if (processChilds)
@@ -1537,6 +1471,121 @@ namespace Engine.Content
             controllers = lControllers.ToArray();
 
             return result;
+        }
+        /// <summary>
+        /// Process a light node
+        /// </summary>
+        /// <param name="trn">Transform</param>
+        /// <param name="node">Node</param>
+        /// <param name="modelContent">Model content</param>
+        private static void ProcessSceneNodeLight(Matrix trn, Node node, ModelContent modelContent)
+        {
+            if (!trn.IsIdentity && node.InstanceLight?.Length > 0)
+            {
+                foreach (var il in node.InstanceLight)
+                {
+                    string lightName = il.Url.Replace("#", "");
+
+                    var light = modelContent.Lights[lightName];
+
+                    light.Name = lightName;
+                    light.Transform = trn;
+                }
+            }
+        }
+        /// <summary>
+        /// Process an armature node
+        /// </summary>
+        /// <param name="node">Node</param>
+        /// <param name="skeleton">Resulting skeleton</param>
+        /// <returns>Returns true if the node has a skeleton</returns>
+        private static bool ProcessSceneNodeArmature(Node node, out Skeleton skeleton)
+        {
+            skeleton = null;
+
+            if (node.Nodes?.Length > 0)
+            {
+                var root = ProcessJoints(node.Id, null, node.Nodes[0]);
+
+                skeleton = new Skeleton(root);
+
+                return true;
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Process a geometry node
+        /// </summary>
+        /// <param name="trn">Transform</param>
+        /// <param name="node">Node</param>
+        /// <param name="modelContent">Model content</param>
+        private static void ProcessSceneNodeGeometry(Matrix trn, Node node, ModelContent modelContent)
+        {
+            if (!trn.IsIdentity && node.InstanceGeometry?.Length > 0)
+            {
+                foreach (var ig in node.InstanceGeometry)
+                {
+                    string meshName = ig.Url.Replace("#", "");
+
+                    foreach (var submesh in modelContent.Geometry[meshName].Values)
+                    {
+                        submesh.Transform(trn);
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Process a controller node
+        /// </summary>
+        /// <param name="node">Node</param>
+        /// <returns>Returns a list of controller names</returns>
+        private static List<string> ProcessSceneNodeController(Node node)
+        {
+            List<string> lControllers = new List<string>();
+
+            if (node.InstanceController?.Length > 0)
+            {
+                foreach (var ic in node.InstanceController)
+                {
+                    string controllerName = ic.Url.Replace("#", "");
+
+                    lControllers.Add(controllerName);
+                }
+            }
+
+            return lControllers;
+        }
+        /// <summary>
+        /// Process a default node
+        /// </summary>
+        /// <param name="node">Node</param>
+        /// <param name="modelContent">Model content</param>
+        private static void ProcessSceneNodeDefault(Node node, ModelContent modelContent)
+        {
+            if (node.Nodes?.Length > 0)
+            {
+                foreach (var child in node.Nodes)
+                {
+                    Matrix childTrn = child.ReadMatrix();
+
+                    if (child.InstanceGeometry?.Length > 0)
+                    {
+                        foreach (var ig in child.InstanceGeometry)
+                        {
+                            string meshName = ig.Url.Replace("#", "");
+
+                            foreach (var submesh in modelContent.Geometry[meshName].Values)
+                            {
+                                if (!childTrn.IsIdentity)
+                                {
+                                    submesh.Transform(childTrn);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         #endregion
@@ -1676,57 +1725,83 @@ namespace Engine.Content
         {
             if (node.Matrix != null)
             {
-                Matrix m = Matrix.Identity;
-
-                BasicFloat4x4 trn = Array.Find(node.Matrix, t => string.Equals(t.SId, "transform"));
-                if (trn != null) m = trn.ToMatrix();
-
-                return Matrix.Transpose(m);
+                return ReadMatrixFromTransform(node.Matrix);
             }
             else
             {
-                Matrix finalTranslation = Matrix.Identity;
-                Matrix finalRotation = Matrix.Identity;
-                Matrix finalScale = Matrix.Identity;
-
-                if (node.Translate != null)
-                {
-                    BasicFloat3 loc = Array.Find(node.Translate, t => string.Equals(t.SId, "location"));
-                    if (loc != null) finalTranslation *= Matrix.Translation(loc.ToVector3());
-                }
-
-                if (node.Rotate != null)
-                {
-                    BasicFloat4 rotX = Array.Find(node.Rotate, t => string.Equals(t.SId, "rotationX"));
-                    if (rotX != null)
-                    {
-                        Vector4 r = rotX.ToVector4();
-                        finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
-                    }
-
-                    BasicFloat4 rotY = Array.Find(node.Rotate, t => string.Equals(t.SId, "rotationY"));
-                    if (rotY != null)
-                    {
-                        Vector4 r = rotY.ToVector4();
-                        finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
-                    }
-
-                    BasicFloat4 rotZ = Array.Find(node.Rotate, t => string.Equals(t.SId, "rotationZ"));
-                    if (rotZ != null)
-                    {
-                        Vector4 r = rotZ.ToVector4();
-                        finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
-                    }
-                }
-
-                if (node.Scale != null)
-                {
-                    BasicFloat3 sca = Array.Find(node.Scale, t => string.Equals(t.SId, "scale"));
-                    if (sca != null) finalScale *= Matrix.Scaling(sca.ToVector3());
-                }
-
-                return finalScale * finalRotation * finalTranslation;
+                return ReadMatrixLocRotScale(node.Translate, node.Rotate, node.Scale);
             }
+        }
+        /// <summary>
+        /// Reads a transform matrix (SRT) from a matrix in the Node
+        /// </summary>
+        /// <param name="matrix">Node matrix</param>
+        /// <returns>Returns the parsed matrix</returns>
+        public static Matrix ReadMatrixFromTransform(BasicFloat4x4[] matrix)
+        {
+            if (matrix != null)
+            {
+                BasicFloat4x4 trn = Array.Find(matrix, t => string.Equals(t.SId, "transform"));
+                if (trn != null)
+                {
+                    Matrix m = trn.ToMatrix();
+
+                    return Matrix.Transpose(m);
+                }
+            }
+
+            return Matrix.Identity;
+        }
+        /// <summary>
+        /// Reads a transform matrix (SRT) from the specified transforms in the Node
+        /// </summary>
+        /// <param name="translate">Translate</param>
+        /// <param name="rotate">Rotate</param>
+        /// <param name="scale">Scale</param>
+        /// <returns>Returns the parsed matrix</returns>
+        public static Matrix ReadMatrixLocRotScale(BasicFloat3[] translate, BasicFloat4[] rotate, BasicFloat3[] scale)
+        {
+            Matrix finalTranslation = Matrix.Identity;
+            Matrix finalRotation = Matrix.Identity;
+            Matrix finalScale = Matrix.Identity;
+
+            if (translate != null)
+            {
+                BasicFloat3 loc = Array.Find(translate, t => string.Equals(t.SId, "location"));
+                if (loc != null) finalTranslation *= Matrix.Translation(loc.ToVector3());
+            }
+
+            if (rotate != null)
+            {
+                BasicFloat4 rotX = Array.Find(rotate, t => string.Equals(t.SId, "rotationX"));
+                if (rotX != null)
+                {
+                    Vector4 r = rotX.ToVector4();
+                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                }
+
+                BasicFloat4 rotY = Array.Find(rotate, t => string.Equals(t.SId, "rotationY"));
+                if (rotY != null)
+                {
+                    Vector4 r = rotY.ToVector4();
+                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                }
+
+                BasicFloat4 rotZ = Array.Find(rotate, t => string.Equals(t.SId, "rotationZ"));
+                if (rotZ != null)
+                {
+                    Vector4 r = rotZ.ToVector4();
+                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                }
+            }
+
+            if (scale != null)
+            {
+                BasicFloat3 sca = Array.Find(scale, t => string.Equals(t.SId, "scale"));
+                if (sca != null) finalScale *= Matrix.Scaling(sca.ToVector3());
+            }
+
+            return finalScale * finalRotation * finalTranslation;
         }
 
         /// <summary>
