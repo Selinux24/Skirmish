@@ -146,6 +146,18 @@ namespace ModelDrawing
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
+
+            this.UpdateCamera(gameTime);
+
+            this.UpdateSystems();
+
+            if (this.pManagerLineDrawer.Visible)
+            {
+                this.DrawVolumes();
+            }
+        }
+        private void UpdateCamera(GameTime gameTime)
+        {
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
 #endif
@@ -175,7 +187,9 @@ namespace ModelDrawing
             {
                 this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
             }
-
+        }
+        private void UpdateSystems()
+        {
             if (this.Game.Input.KeyJustPressed(Keys.D1))
             {
                 this.AddSmokePlumeSystem();
@@ -205,11 +219,6 @@ namespace ModelDrawing
             if (this.Game.Input.KeyJustPressed(Keys.Space))
             {
                 this.pManager.Instance.Clear();
-            }
-
-            if (this.pManagerLineDrawer.Visible)
-            {
-                this.DrawVolumes();
             }
         }
         private void AddSystem()

@@ -177,8 +177,8 @@ namespace Collada
             }
 
             this.UpdateCamera();
-
             this.UpdateGraph();
+            this.UpdateFiles();
         }
         private void UpdateCamera()
         {
@@ -218,16 +218,6 @@ namespace Collada
         {
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
-            {
-                this.PathFinderDescription.Save(@"test.grf", this.NavigationGraph);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F6))
-            {
-                var graph = this.PathFinderDescription.Load(@"test.grf");
-                this.SetNavigationGraph(graph);
-            }
 
             bool updateGraph = false;
             bool updateGraphDrawing = false;
@@ -305,6 +295,19 @@ namespace Collada
 
                     this.graphDrawer.Instance.AddTriangles(color, tris);
                 }
+            }
+        }
+        private void UpdateFiles()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                this.PathFinderDescription.Save(@"test.grf", this.NavigationGraph);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            {
+                var graph = this.PathFinderDescription.Load(@"test.grf");
+                this.SetNavigationGraph(graph);
             }
         }
     }

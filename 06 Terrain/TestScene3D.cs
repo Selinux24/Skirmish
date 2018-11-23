@@ -774,106 +774,19 @@ namespace Terrain
             this.SetGround(this.terrain, true);
 
             //Rocks
-            {
-                for (int i = 0; i < this.rocks.Count; i++)
-                {
-                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
-
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
-                    {
-                        var scale = 1f;
-                        if (i < 5)
-                        {
-                            scale = posRnd.NextFloat(2f, 5f);
-                        }
-                        else if (i < 30)
-                        {
-                            scale = posRnd.NextFloat(0.5f, 2f);
-                        }
-                        else
-                        {
-                            scale = posRnd.NextFloat(0.1f, 0.2f);
-                        }
-
-                        var rockInstance = this.rocks.GetComponent<ITransformable3D>(i);
-
-                        rockInstance.Manipulator.SetPosition(r.Position);
-                        rockInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
-                        rockInstance.Manipulator.SetScale(scale);
-                        rockInstance.Manipulator.UpdateInternals(true);
-                    }
-                }
-            }
+            this.InitializePositionRocks(posRnd);
 
             //Trees
-            {
-                for (int i = 0; i < this.tree1.Count; i++)
-                {
-                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
-
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
-                    {
-                        var treeInstance = this.tree1.GetComponent<ITransformable3D>(i);
-
-                        treeInstance.Manipulator.SetPosition(r.Position);
-                        treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
-                        treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
-                        treeInstance.Manipulator.UpdateInternals(true);
-                    }
-                }
-
-                for (int i = 0; i < this.tree2.Count; i++)
-                {
-                    var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
-
-                    if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
-                    {
-                        var treeInstance = this.tree2.GetComponent<ITransformable3D>(i);
-
-                        treeInstance.Manipulator.SetPosition(r.Position);
-                        treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
-                        treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
-                        treeInstance.Manipulator.UpdateInternals(true);
-                    }
-                }
-            }
+            this.InitializePositionTrees(posRnd);
 
             //Heliport
-            {
-                if (this.FindTopGroundPosition(75, 75, out PickingResult<Triangle> r))
-                {
-                    this.heliport.Transform.SetPosition(r.Position);
-                    this.heliport.Transform.UpdateInternals(true);
-                }
-            }
+            this.InitializePositionHeliport();
 
             //Garage
-            {
-                if (this.FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
-                {
-                    this.garage.Transform.SetPosition(r.Position);
-                    this.garage.Transform.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
-                    this.garage.Transform.UpdateInternals(true);
-                }
-            }
+            this.InitializePositionGarage();
 
             //Obelisk
-            {
-                for (int i = 0; i < this.obelisk.Count; i++)
-                {
-                    int ox = i == 0 || i == 2 ? 1 : -1;
-                    int oy = i == 0 || i == 1 ? 1 : -1;
-
-                    if (this.FindTopGroundPosition(ox * 50, oy * 50, out PickingResult<Triangle> r))
-                    {
-                        var obeliskInstance = this.obelisk.GetComponent<ITransformable3D>(i);
-
-                        obeliskInstance.Manipulator.SetPosition(r.Position);
-                        obeliskInstance.Manipulator.SetScale(1.5f);
-                        obeliskInstance.Manipulator.UpdateInternals(true);
-                    }
-                }
-            }
+            this.InitializePositionObelisk();
 
             this.AttachToGround(this.rocks, false);
             this.AttachToGround(this.tree1, false);
@@ -894,6 +807,103 @@ namespace Terrain
 
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
+        }
+        private void InitializePositionRocks(Random posRnd)
+        {
+            for (int i = 0; i < this.rocks.Count; i++)
+            {
+                var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+
+                if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                {
+                    var scale = 1f;
+                    if (i < 5)
+                    {
+                        scale = posRnd.NextFloat(2f, 5f);
+                    }
+                    else if (i < 30)
+                    {
+                        scale = posRnd.NextFloat(0.5f, 2f);
+                    }
+                    else
+                    {
+                        scale = posRnd.NextFloat(0.1f, 0.2f);
+                    }
+
+                    var rockInstance = this.rocks.GetComponent<ITransformable3D>(i);
+
+                    rockInstance.Manipulator.SetPosition(r.Position);
+                    rockInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
+                    rockInstance.Manipulator.SetScale(scale);
+                    rockInstance.Manipulator.UpdateInternals(true);
+                }
+            }
+        }
+        private void InitializePositionTrees(Random posRnd)
+        {
+            for (int i = 0; i < this.tree1.Count; i++)
+            {
+                var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+
+                if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                {
+                    var treeInstance = this.tree1.GetComponent<ITransformable3D>(i);
+
+                    treeInstance.Manipulator.SetPosition(r.Position);
+                    treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
+                    treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
+                    treeInstance.Manipulator.UpdateInternals(true);
+                }
+            }
+
+            for (int i = 0; i < this.tree2.Count; i++)
+            {
+                var pos = this.GetRandomPoint(posRnd, Vector3.Zero);
+
+                if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                {
+                    var treeInstance = this.tree2.GetComponent<ITransformable3D>(i);
+
+                    treeInstance.Manipulator.SetPosition(r.Position);
+                    treeInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), 0, 0);
+                    treeInstance.Manipulator.SetScale(posRnd.NextFloat(0.25f, 0.75f));
+                    treeInstance.Manipulator.UpdateInternals(true);
+                }
+            }
+        }
+        private void InitializePositionHeliport()
+        {
+            if (this.FindTopGroundPosition(75, 75, out PickingResult<Triangle> r))
+            {
+                this.heliport.Transform.SetPosition(r.Position);
+                this.heliport.Transform.UpdateInternals(true);
+            }
+        }
+        private void InitializePositionGarage()
+        {
+            if (this.FindTopGroundPosition(-10, -40, out PickingResult<Triangle> r))
+            {
+                this.garage.Transform.SetPosition(r.Position);
+                this.garage.Transform.SetRotation(MathUtil.PiOverFour * 0.5f + MathUtil.Pi, 0, 0);
+                this.garage.Transform.UpdateInternals(true);
+            }
+        }
+        private void InitializePositionObelisk()
+        {
+            for (int i = 0; i < this.obelisk.Count; i++)
+            {
+                int ox = i == 0 || i == 2 ? 1 : -1;
+                int oy = i == 0 || i == 1 ? 1 : -1;
+
+                if (this.FindTopGroundPosition(ox * 50, oy * 50, out PickingResult<Triangle> r))
+                {
+                    var obeliskInstance = this.obelisk.GetComponent<ITransformable3D>(i);
+
+                    obeliskInstance.Manipulator.SetPosition(r.Position);
+                    obeliskInstance.Manipulator.SetScale(1.5f);
+                    obeliskInstance.Manipulator.UpdateInternals(true);
+                }
+            }
         }
 
         public override void Initialized()
@@ -1126,19 +1136,30 @@ namespace Terrain
                 this.Game.Exit();
             }
 
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
+            }
+
             base.Update(gameTime);
 
             var pickingRay = this.GetPickingRay();
 
-            UpdateAgent();
+            UpdateInputAgent();
+            UpdateInputCamera(gameTime, pickingRay);
+            UpdateInputDrawers();
+            UpdateInputHelicopterTexture();
+            UpdateInputDebug(pickingRay);
+            UpdateInputGraph();
+
             UpdateCursor(pickingRay);
-            UpdateCamera(gameTime, pickingRay);
             UpdateTanks(pickingRay);
             UpdateHelicopter();
-
-            UpdateDebug(pickingRay);
+            UpdateDebug();
         }
-        private void UpdateAgent()
+        private void UpdateInputAgent()
         {
             if (this.Game.Input.KeyJustReleased(Keys.Z))
             {
@@ -1172,122 +1193,247 @@ namespace Terrain
                 this.DEBUGUpdateGraphDrawer();
             }
         }
+        private void UpdateInputCamera(GameTime gameTime, Ray pickingRay)
+        {
+            if (this.walkMode)
+            {
+                this.UpdateInputWalker(gameTime);
+            }
+            else
+            {
+                this.UpdateInputFree(gameTime, pickingRay);
+            }
+        }
+        private void UpdateInputWalker(GameTime gameTime)
+        {
+#if DEBUG
+            if (this.Game.Input.RightMouseButtonPressed)
+#endif
+            {
+                this.Camera.RotateMouse(
+                    this.Game.GameTime,
+                    this.Game.Input.MouseXDelta,
+                    this.Game.Input.MouseYDelta);
+            }
+
+            var prevPos = this.Camera.Position;
+
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.W))
+            {
+                this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.S))
+            {
+                this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Walk(this.walkerAgentType, prevPos, this.Camera.Position, out Vector3 walkerPos))
+            {
+                this.Camera.Goto(walkerPos);
+            }
+            else
+            {
+                this.Camera.Goto(prevPos);
+            }
+        }
+        private void UpdateInputFree(GameTime gameTime, Ray pickingRay)
+        {
+#if DEBUG
+            if (this.Game.Input.RightMouseButtonPressed)
+#endif
+            {
+                this.Camera.RotateMouse(
+                    this.Game.GameTime,
+                    this.Game.Input.MouseXDelta,
+                    this.Game.Input.MouseYDelta);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                if (this.follow)
+                {
+                    this.followTarget = null;
+                    this.follow = false;
+                }
+
+                if (this.PickNearest(pickingRay, 0, true, SceneObjectUsages.Agent, out SceneObject agent))
+                {
+                    this.followTarget = agent;
+                    this.follow = true;
+                }
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.W))
+            {
+                this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.S))
+            {
+                this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
+            }
+
+            if (this.follow)
+            {
+                var pickable = this.followTarget.Get<IRayPickable<Triangle>>();
+                var transform = this.followTarget.Get<ITransformable3D>();
+
+                var sph = pickable.GetBoundingSphere();
+                this.Camera.LookTo(sph.Center);
+                this.Camera.Goto(sph.Center + (transform.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
+            }
+        }
+        private void UpdateInputHelicopterTexture()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.Right))
+            {
+                this.helicopter.Instance.TextureIndex++;
+                if (this.helicopter.Instance.TextureIndex > 2) this.helicopter.Instance.TextureIndex = 2;
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.Left))
+            {
+                this.helicopter.Instance.TextureIndex--;
+                if (this.helicopter.Instance.TextureIndex < 0) this.helicopter.Instance.TextureIndex = 0;
+            }
+        }
+        private void UpdateInputDebug(Ray pickingRay)
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.C))
+            {
+                this.Lights.KeyLight.CastShadow = !this.Lights.KeyLight.CastShadow;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Up) && !this.Game.Input.ShiftPressed)
+            {
+                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.Down) && !this.Game.Input.ShiftPressed)
+            {
+                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.D1))
+            {
+                this.walkMode = !this.walkMode;
+                this.DEBUGUpdateGraphDrawer();
+                this.walkMode = !this.walkMode;
+            }
+
+            if (this.Game.Input.LeftMouseButtonPressed)
+            {
+                var visible = this.terrainGraphDrawer.Visible;
+                if (visible)
+                {
+                    this.terrainPointDrawer.Instance.Clear();
+
+                    if (this.PickNearest(pickingRay, true, out PickingResult<Triangle> r))
+                    {
+                        this.DEBUGPickingPosition(r.Position);
+                    }
+                }
+            }
+        }
+        private void UpdateInputDrawers()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.terrainLineDrawer.Visible = !this.terrainLineDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.terrainGraphDrawer.Visible = !this.terrainGraphDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            {
+                this.terrainPointDrawer.Visible = !this.terrainPointDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F4))
+            {
+                this.curveLineDrawer.Visible = !this.curveLineDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                this.movingObjLineDrawer.Visible = !this.movingObjLineDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F7))
+            {
+                this.shadowMapDrawer.Visible = !this.shadowMapDrawer.Visible;
+                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F8))
+            {
+                this.useDebugTex = !this.useDebugTex;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F9))
+            {
+                this.staticObjLineDrawer.Visible = !this.staticObjLineDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F11))
+            {
+                if (!this.drawDrawVolumes && !this.drawCullVolumes)
+                {
+                    this.drawDrawVolumes = true;
+                    this.drawCullVolumes = false;
+                }
+                else if (this.drawDrawVolumes && !this.drawCullVolumes)
+                {
+                    this.drawDrawVolumes = false;
+                    this.drawCullVolumes = true;
+                }
+                else if (!this.drawDrawVolumes)
+                {
+                    this.drawDrawVolumes = false;
+                    this.drawCullVolumes = false;
+                }
+            }
+        }
+        private void UpdateInputGraph()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.Add))
+            {
+                this.graphIndex++;
+                this.DEBUGUpdateGraphDrawer();
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
+            {
+                this.graphIndex--;
+                this.DEBUGUpdateGraphDrawer();
+            }
+        }
         private void UpdateCursor(Ray pickingRay)
         {
             if (!this.walkMode && this.terrain.Geometry.PickNearest(pickingRay, true, out PickingResult<Triangle> r))
             {
                 this.cursor3D.Transform.SetPosition(r.Position);
-            }
-        }
-        private void UpdateCamera(GameTime gameTime, Ray pickingRay)
-        {
-            if (this.walkMode)
-            {
-                #region Walker
-
-#if DEBUG
-                if (this.Game.Input.RightMouseButtonPressed)
-#endif
-                {
-                    this.Camera.RotateMouse(
-                        this.Game.GameTime,
-                        this.Game.Input.MouseXDelta,
-                        this.Game.Input.MouseYDelta);
-                }
-
-                var prevPos = this.Camera.Position;
-
-                if (this.Game.Input.KeyPressed(Keys.A))
-                {
-                    this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.D))
-                {
-                    this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.W))
-                {
-                    this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.S))
-                {
-                    this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Walk(this.walkerAgentType, prevPos, this.Camera.Position, out Vector3 walkerPos))
-                {
-                    this.Camera.Goto(walkerPos);
-                }
-                else
-                {
-                    this.Camera.Goto(prevPos);
-                }
-
-                #endregion
-            }
-            else
-            {
-                #region Free Camera
-
-#if DEBUG
-                if (this.Game.Input.RightMouseButtonPressed)
-#endif
-                {
-                    this.Camera.RotateMouse(
-                        this.Game.GameTime,
-                        this.Game.Input.MouseXDelta,
-                        this.Game.Input.MouseYDelta);
-                }
-
-                if (this.Game.Input.KeyJustReleased(Keys.Space))
-                {
-                    if (this.follow)
-                    {
-                        this.followTarget = null;
-                        this.follow = false;
-                    }
-
-                    if (this.PickNearest(pickingRay, 0, true, SceneObjectUsages.Agent, out SceneObject agent))
-                    {
-                        this.followTarget = agent;
-                        this.follow = true;
-                    }
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.A))
-                {
-                    this.Camera.MoveLeft(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.D))
-                {
-                    this.Camera.MoveRight(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.W))
-                {
-                    this.Camera.MoveForward(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.S))
-                {
-                    this.Camera.MoveBackward(gameTime, this.Game.Input.ShiftPressed);
-                }
-
-                if (this.follow)
-                {
-                    var pickable = this.followTarget.Get<IRayPickable<Triangle>>();
-                    var transform = this.followTarget.Get<ITransformable3D>();
-
-                    var sph = pickable.GetBoundingSphere();
-                    this.Camera.LookTo(sph.Center);
-                    this.Camera.Goto(sph.Center + (transform.Manipulator.Backward * 15f) + (Vector3.UnitY * 5f), CameraTranslations.UseDelta);
-                }
-
-                #endregion
             }
         }
         private void UpdateTanks(Ray pickingRay)
@@ -1344,140 +1490,10 @@ namespace Terrain
 
             this.SetStatsScreenPosition(this.helicopterAgent, 4, this.hProgressBar);
         }
-        private void UpdateDebug(Ray pickingRay)
+        private void UpdateDebug()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
-            {
-                this.terrainLineDrawer.Visible = !this.terrainLineDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
-            {
-                this.terrainGraphDrawer.Visible = !this.terrainGraphDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F3))
-            {
-                this.terrainPointDrawer.Visible = !this.terrainPointDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F4))
-            {
-                this.curveLineDrawer.Visible = !this.curveLineDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
-            {
-                this.movingObjLineDrawer.Visible = !this.movingObjLineDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F6))
-            {
-                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F7))
-            {
-                this.shadowMapDrawer.Visible = !this.shadowMapDrawer.Visible;
-                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F8))
-            {
-                this.useDebugTex = !this.useDebugTex;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F9))
-            {
-                this.staticObjLineDrawer.Visible = !this.staticObjLineDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F11))
-            {
-                if (!this.drawDrawVolumes && !this.drawCullVolumes)
-                {
-                    this.drawDrawVolumes = true;
-                    this.drawCullVolumes = false;
-                }
-                else if (this.drawDrawVolumes && !this.drawCullVolumes)
-                {
-                    this.drawDrawVolumes = false;
-                    this.drawCullVolumes = true;
-                }
-                else if (!this.drawDrawVolumes && this.drawCullVolumes)
-                {
-                    this.drawDrawVolumes = false;
-                    this.drawCullVolumes = false;
-                }
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Add))
-            {
-                this.graphIndex++;
-                this.DEBUGUpdateGraphDrawer();
-            }
-            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
-            {
-                this.graphIndex--;
-                this.DEBUGUpdateGraphDrawer();
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Right))
-            {
-                this.helicopter.Instance.TextureIndex++;
-                if (this.helicopter.Instance.TextureIndex > 2) this.helicopter.Instance.TextureIndex = 2;
-            }
-            if (this.Game.Input.KeyJustReleased(Keys.Left))
-            {
-                this.helicopter.Instance.TextureIndex--;
-                if (this.helicopter.Instance.TextureIndex < 0) this.helicopter.Instance.TextureIndex = 0;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.Up) && !this.Game.Input.ShiftPressed)
-            {
-                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
-            }
-            if (this.Game.Input.KeyJustReleased(Keys.Down) && !this.Game.Input.ShiftPressed)
-            {
-                this.shadowResult = SceneRendererResults.ShadowMapDirectional;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.R))
-            {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
-                    SceneModes.DeferredLightning :
-                    SceneModes.ForwardLigthning);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.C))
-            {
-                this.Lights.KeyLight.CastShadow = !this.Lights.KeyLight.CastShadow;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.D1))
-            {
-                this.walkMode = !this.walkMode;
-                this.DEBUGUpdateGraphDrawer();
-                this.walkMode = !this.walkMode;
-            }
-
-            if (this.Game.Input.LeftMouseButtonPressed)
-            {
-                var visible = this.terrainGraphDrawer.Visible;
-                if (visible)
-                {
-                    this.terrainPointDrawer.Instance.Clear();
-
-                    if (this.PickNearest(pickingRay, true, out PickingResult<Triangle> r))
-                    {
-                        this.DEBUGPickingPosition(r.Position);
-                    }
-                }
-            }
-
             if (this.drawDrawVolumes) this.DEBUGDrawLightMarks();
             if (this.drawCullVolumes) this.DEBUGDrawLightVolumes();
-
 
             if (this.curveLineDrawer.Visible)
             {
@@ -1898,7 +1914,7 @@ namespace Terrain
             var agent = this.walkMode ? this.walkerAgentType : this.tankAgentType;
 
             var nodes = this.GetNodes(agent);
-            if (nodes != null && nodes.Length > 0)
+            if (nodes?.Length > 0)
             {
                 if (this.graphIndex <= -1)
                 {

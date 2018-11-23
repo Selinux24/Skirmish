@@ -361,11 +361,6 @@ namespace Skybox
                 this.Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Home))
-            {
-                this.InitializeCamera();
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
                 this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
@@ -373,24 +368,45 @@ namespace Skybox
                     SceneModes.ForwardLigthning);
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
-            {
-                this.volumesDrawer.Visible = !this.volumesDrawer.Visible;
+            this.UpdateInputDebug();
 
-                if (this.volumesDrawer.Visible)
+            this.UpdateInputCamera(shift);
+
+            this.UpdateInputLights();
+
+#if DEBUG
+            this.fps.Instance.Text = string.Format(
+                "Mouse (X:{0}; Y:{1}, Wheel: {2}) Absolute (X:{3}; Y:{4}) Cursor ({5})",
+                this.Game.Input.MouseXDelta,
+                this.Game.Input.MouseYDelta,
+                this.Game.Input.MouseWheelDelta,
+                this.Game.Input.MouseX,
+                this.Game.Input.MouseY,
+                this.cursor.Instance.CursorPosition);
+#else
+            this.fps.Instance.Text = this.Game.RuntimeText;
+#endif
+        }
+        private void UpdateInputCamera(bool shift)
+        {
+            if (this.Game.Input.LeftMouseButtonPressed)
+            {
+                var pRay = this.GetPickingRay();
+
+                if (this.ruins.Instance.PickNearest(pRay, true, out PickingResult<Triangle> r))
                 {
-                    this.DEBUGUpdateVolumesDrawer();
+                    this.volumesDrawer.Instance.SetTriangles(Color.White, new[] { r.Item });
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
+#if DEBUG
+            if (this.Game.Input.RightMouseButtonPressed)
+#endif
             {
-                this.graphDrawer.Visible = !this.graphDrawer.Visible;
-
-                if (this.graphDrawer.Visible)
-                {
-                    this.DEBUGUpdateGraphDrawer();
-                }
+                this.Camera.RotateMouse(
+                    this.Game.GameTime,
+                    this.Game.Input.MouseXDelta,
+                    this.Game.Input.MouseYDelta);
             }
 
             if (this.Game.Input.KeyPressed(Keys.A))
@@ -412,7 +428,9 @@ namespace Skybox
             {
                 this.Camera.MoveBackward(this.Game.GameTime, shift);
             }
-
+        }
+        private void UpdateInputLights()
+        {
             if (this.Game.Input.KeyJustReleased(Keys.Add))
             {
                 this.directionalLightCount++;
@@ -434,45 +452,39 @@ namespace Skybox
 
                 this.UpdateInputEnabledLights();
             }
-
-#if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
-#endif
-            {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
-            }
-
-            if (this.Game.Input.LeftMouseButtonPressed)
-            {
-                Ray pRay = this.GetPickingRay();
-
-                if (this.ruins.Instance.PickNearest(pRay, true, out PickingResult<Triangle> r))
-                {
-                    this.volumesDrawer.Instance.SetTriangles(Color.White, new[] { r.Item });
-                }
-            }
-
-#if DEBUG
-            this.fps.Instance.Text = string.Format(
-                "Mouse (X:{0}; Y:{1}, Wheel: {2}) Absolute (X:{3}; Y:{4}) Cursor ({5})",
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta,
-                this.Game.Input.MouseWheelDelta,
-                this.Game.Input.MouseX,
-                this.Game.Input.MouseY,
-                this.cursor.Instance.CursorPosition);
-#else
-            this.fps.Instance.Text = this.Game.RuntimeText;
-#endif
         }
         private void UpdateInputEnabledLights()
         {
             this.Lights.DirectionalLights[0].Enabled = this.directionalLightCount > 0;
             this.Lights.DirectionalLights[1].Enabled = this.directionalLightCount > 1;
             this.Lights.DirectionalLights[2].Enabled = this.directionalLightCount > 2;
+        }
+        private void UpdateInputDebug()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.Home))
+            {
+                this.InitializeCamera();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.volumesDrawer.Visible = !this.volumesDrawer.Visible;
+
+                if (this.volumesDrawer.Visible)
+                {
+                    this.DEBUGUpdateVolumesDrawer();
+                }
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.graphDrawer.Visible = !this.graphDrawer.Visible;
+
+                if (this.graphDrawer.Visible)
+                {
+                    this.DEBUGUpdateGraphDrawer();
+                }
+            }
         }
 
         private void DEBUGUpdateVolumesDrawer()

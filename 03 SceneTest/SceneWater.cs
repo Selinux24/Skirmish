@@ -15,7 +15,7 @@ namespace SceneTest
         public SceneWater(Game game)
             : base(game)
         {
-            
+
         }
 
         public override void Initialize()

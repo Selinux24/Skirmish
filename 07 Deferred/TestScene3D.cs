@@ -579,13 +579,16 @@ namespace Deferred
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
-            UpdateCamera(gameTime, shift);
+            UpdateInputCamera(gameTime, shift);
+            UpdayeInputLights(shift);
+            UpdateInputObjectsVisibility();
+            UpdateInputHelicopterTexture();
+            UpdateInputGraph();
+            UpdateInputDebug(shift);
 
-            UpdateLights(gameTime, shift);
-
-            UpdateDebug(shift);
+            UpdateLights(gameTime);
         }
-        private void UpdateCamera(GameTime gameTime, bool shift)
+        private void UpdateInputCamera(GameTime gameTime, bool shift)
         {
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
@@ -623,7 +626,7 @@ namespace Deferred
                 this.lineDrawer.Visible = true;
             }
         }
-        private void UpdateLights(GameTime gameTime, bool shift)
+        private void UpdayeInputLights(bool shift)
         {
             if (this.Game.Input.KeyJustReleased(Keys.F))
             {
@@ -648,239 +651,9 @@ namespace Deferred
             {
                 this.animateLights = !this.animateLights;
             }
-
-            if (this.spotLight != null)
-            {
-                if (this.Game.Input.KeyPressed(Keys.Left))
-                {
-                    var v = this.Camera.Left;
-                    v.Y = 0;
-                    v.Normalize();
-                    this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Right))
-                {
-                    var v = this.Camera.Right;
-                    v.Y = 0;
-                    v.Normalize();
-                    this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Up))
-                {
-                    var v = this.Camera.Forward;
-                    v.Y = 0;
-                    v.Normalize();
-                    this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Down))
-                {
-                    var v = this.Camera.Backward;
-                    v.Y = 0;
-                    v.Normalize();
-                    this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.PageUp))
-                {
-                    this.spotLight.Position += (Vector3.Up) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.PageDown))
-                {
-                    this.spotLight.Position += (Vector3.Down) * gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Add))
-                {
-                    this.spotLight.Intensity += gameTime.ElapsedSeconds * 10f;
-                }
-
-                if (this.Game.Input.KeyPressed(Keys.Subtract))
-                {
-                    this.spotLight.Intensity -= gameTime.ElapsedSeconds * 10f;
-
-                    this.spotLight.Intensity = Math.Max(0f, this.spotLight.Intensity);
-                }
-
-                this.lineDrawer.Instance.SetLines(Color.White, this.spotLight.GetVolume(10));
-            }
-            else
-            {
-                this.lineDrawer.Visible = false;
-            }
-
-            if (animateLights && this.Lights.PointLights.Length > 0)
-            {
-                for (int i = 1; i < this.Lights.PointLights.Length; i++)
-                {
-                    var l = this.Lights.PointLights[i];
-
-                    if ((int)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds * 50f);
-                    if ((int)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds * 50f);
-
-                    if (l.Radius <= 0)
-                    {
-                        l.Radius = 0;
-                        l.State = 1;
-                    }
-
-                    if (l.Radius >= 50)
-                    {
-                        l.Radius = 50;
-                        l.State = -1;
-                    }
-
-                    l.Intensity = l.Radius * 0.1f;
-                }
-            }
         }
-        private void UpdateDebug(bool shift)
+        private void UpdateInputObjectsVisibility()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.F12))
-            {
-                if (this.bufferDrawer.ScreenTransform.Position == Vector2.Zero)
-                {
-                    int width = (int)(this.Game.Form.RenderWidth * 0.33f);
-                    int height = (int)(this.Game.Form.RenderHeight * 0.33f);
-                    int smLeft = this.Game.Form.RenderWidth - width;
-                    int smTop = this.Game.Form.RenderHeight - height;
-
-                    this.bufferDrawer.ScreenTransform.SetPosition(smLeft, smTop);
-                    this.bufferDrawer.Instance.ResizeSprite(width, height);
-                }
-                else
-                {
-                    this.bufferDrawer.ScreenTransform.SetPosition(Vector2.Zero);
-                    this.bufferDrawer.Instance.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
-                }
-            }
-
-            {
-                if (this.Game.Input.KeyJustReleased(Keys.F1))
-                {
-                    var colorMap = this.Renderer.GetResource(SceneRendererResults.ColorMap);
-
-                    //Colors
-                    this.bufferDrawer.Instance.Texture = colorMap;
-                    this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
-                    this.help.Instance.Text = "Colors";
-
-                    this.bufferDrawer.Visible = true;
-                }
-
-                if (this.Game.Input.KeyJustReleased(Keys.F2))
-                {
-                    var normalMap = this.Renderer.GetResource(SceneRendererResults.NormalMap);
-
-                    if (this.bufferDrawer.Instance.Texture == normalMap &&
-                        this.bufferDrawer.Instance.Channels == SpriteTextureChannels.NoAlpha)
-                    {
-                        //Specular Power
-                        this.bufferDrawer.Instance.Texture = normalMap;
-                        this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Alpha;
-                        this.help.Instance.Text = "Specular Power";
-                    }
-                    else
-                    {
-                        //Normals
-                        this.bufferDrawer.Instance.Texture = normalMap;
-                        this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
-                        this.help.Instance.Text = "Normals";
-                    }
-                    this.bufferDrawer.Visible = true;
-                }
-
-                if (this.Game.Input.KeyJustReleased(Keys.F3))
-                {
-                    var depthMap = this.Renderer.GetResource(SceneRendererResults.DepthMap);
-
-                    if (this.bufferDrawer.Instance.Texture == depthMap &&
-                        this.bufferDrawer.Instance.Channels == SpriteTextureChannels.NoAlpha)
-                    {
-                        //Specular Factor
-                        this.bufferDrawer.Instance.Texture = depthMap;
-                        this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Alpha;
-                        this.help.Instance.Text = "Specular Intensity";
-                    }
-                    else
-                    {
-                        //Position
-                        this.bufferDrawer.Instance.Texture = depthMap;
-                        this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
-                        this.help.Instance.Text = "Position";
-                    }
-                    this.bufferDrawer.Visible = true;
-                }
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F4))
-            {
-                this.terrainGraphDrawer.Visible = !this.terrainGraphDrawer.Visible;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F5))
-            {
-                var shadowMap = this.Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
-
-                if (shadowMap != null)
-                {
-                    //Shadow map
-                    if (!this.help.Instance.Text.StartsWith("Shadow map"))
-                    {
-                        this.bufferDrawer.Instance.Texture = shadowMap;
-                        this.bufferDrawer.Instance.TextureIndex = 0;
-                        this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Red;
-                        this.bufferDrawer.Visible = true;
-                    }
-                    else
-                    {
-                        int tIndex = this.bufferDrawer.Instance.TextureIndex;
-                        if (!shift)
-                        {
-                            tIndex++;
-                            tIndex %= 6;
-                        }
-                        else
-                        {
-                            tIndex--;
-                            if (tIndex < 0)
-                            {
-                                tIndex = 5;
-                            }
-                        }
-
-                        this.bufferDrawer.Instance.TextureIndex = tIndex;
-                    }
-
-                    this.help.Instance.Text = string.Format("Shadow map {0}", this.bufferDrawer.Instance.TextureIndex);
-                }
-                else
-                {
-                    this.help.Instance.Text = "The Shadow map is empty";
-                }
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F6))
-            {
-                var lightMap = this.Renderer.GetResource(SceneRendererResults.LightMap);
-
-                if (lightMap != null)
-                {
-                    //Light map
-                    this.bufferDrawer.Instance.Texture = lightMap;
-                    this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
-                    this.bufferDrawer.Visible = true;
-                    this.help.Instance.Text = "Light map";
-                }
-                else
-                {
-                    this.help.Instance.Text = "The Light map is empty";
-                }
-            }
-
             if (this.Game.Input.KeyJustReleased(Keys.F7))
             {
                 this.bufferDrawer.Visible = !this.bufferDrawer.Visible;
@@ -907,7 +680,9 @@ namespace Deferred
             {
                 this.helicopters.Active = this.helicopters.Visible = !this.helicopters.Visible;
             }
-
+        }
+        private void UpdateInputHelicopterTexture()
+        {
             if (this.Game.Input.KeyJustReleased(Keys.Oemcomma))
             {
                 this.textIntex--;
@@ -927,6 +702,274 @@ namespace Deferred
                     //Loop
                     this.helicopter.Instance.TextureIndex = 0;
                 }
+            }
+        }
+        private void UpdateInputGraph()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F4))
+            {
+                this.terrainGraphDrawer.Visible = !this.terrainGraphDrawer.Visible;
+            }
+        }
+        private void UpdateInputDebug(bool shift)
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.UpdateDebugColorMap();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.UpdateDebugNormalMap();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            {
+                this.UpdateDebugDepthMap();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                this.UpdateDebugShadowMap(shift);
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F6))
+            {
+                this.UpdateDebugLightMap();
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F12))
+            {
+                this.UpdateDebugBufferDrawer();
+            }
+        }
+
+        private void UpdateLights(GameTime gameTime)
+        {
+            if (this.spotLight != null)
+            {
+                this.UpdateSpotlight(gameTime);
+
+                this.lineDrawer.Instance.SetLines(Color.White, this.spotLight.GetVolume(10));
+            }
+            else
+            {
+                this.lineDrawer.Visible = false;
+            }
+
+            if (this.animateLights && this.Lights.PointLights.Length > 0)
+            {
+                this.UpdatePointLightsAnimation(gameTime);
+            }
+        }
+        private void UpdateSpotlight(GameTime gameTime)
+        {
+            if (this.Game.Input.KeyPressed(Keys.Left))
+            {
+                var v = this.Camera.Left;
+                v.Y = 0;
+                v.Normalize();
+                this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Right))
+            {
+                var v = this.Camera.Right;
+                v.Y = 0;
+                v.Normalize();
+                this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Up))
+            {
+                var v = this.Camera.Forward;
+                v.Y = 0;
+                v.Normalize();
+                this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Down))
+            {
+                var v = this.Camera.Backward;
+                v.Y = 0;
+                v.Normalize();
+                this.spotLight.Position += (v) * gameTime.ElapsedSeconds * 10f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.PageUp))
+            {
+                this.spotLight.Position += (Vector3.Up) * gameTime.ElapsedSeconds * 10f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.PageDown))
+            {
+                this.spotLight.Position += (Vector3.Down) * gameTime.ElapsedSeconds * 10f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Add))
+            {
+                this.spotLight.Intensity += gameTime.ElapsedSeconds * 10f;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Subtract))
+            {
+                this.spotLight.Intensity -= gameTime.ElapsedSeconds * 10f;
+
+                this.spotLight.Intensity = Math.Max(0f, this.spotLight.Intensity);
+            }
+        }
+        private void UpdatePointLightsAnimation(GameTime gameTime)
+        {
+            for (int i = 1; i < this.Lights.PointLights.Length; i++)
+            {
+                var l = this.Lights.PointLights[i];
+
+                if ((int?)l.State == 1) l.Radius += (0.5f * gameTime.ElapsedSeconds * 50f);
+                if ((int?)l.State == -1) l.Radius -= (2f * gameTime.ElapsedSeconds * 50f);
+
+                if (l.Radius <= 0)
+                {
+                    l.Radius = 0;
+                    l.State = 1;
+                }
+
+                if (l.Radius >= 50)
+                {
+                    l.Radius = 50;
+                    l.State = -1;
+                }
+
+                l.Intensity = l.Radius * 0.1f;
+            }
+        }
+
+        private void UpdateDebugColorMap()
+        {
+            var colorMap = this.Renderer.GetResource(SceneRendererResults.ColorMap);
+
+            //Colors
+            this.bufferDrawer.Instance.Texture = colorMap;
+            this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
+            this.help.Instance.Text = "Colors";
+
+            this.bufferDrawer.Visible = true;
+        }
+        private void UpdateDebugNormalMap()
+        {
+            var normalMap = this.Renderer.GetResource(SceneRendererResults.NormalMap);
+
+            if (this.bufferDrawer.Instance.Texture == normalMap &&
+                this.bufferDrawer.Instance.Channels == SpriteTextureChannels.NoAlpha)
+            {
+                //Specular Power
+                this.bufferDrawer.Instance.Texture = normalMap;
+                this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Alpha;
+                this.help.Instance.Text = "Specular Power";
+            }
+            else
+            {
+                //Normals
+                this.bufferDrawer.Instance.Texture = normalMap;
+                this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
+                this.help.Instance.Text = "Normals";
+            }
+            this.bufferDrawer.Visible = true;
+        }
+        private void UpdateDebugDepthMap()
+        {
+            var depthMap = this.Renderer.GetResource(SceneRendererResults.DepthMap);
+
+            if (this.bufferDrawer.Instance.Texture == depthMap &&
+                this.bufferDrawer.Instance.Channels == SpriteTextureChannels.NoAlpha)
+            {
+                //Specular Factor
+                this.bufferDrawer.Instance.Texture = depthMap;
+                this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Alpha;
+                this.help.Instance.Text = "Specular Intensity";
+            }
+            else
+            {
+                //Position
+                this.bufferDrawer.Instance.Texture = depthMap;
+                this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
+                this.help.Instance.Text = "Position";
+            }
+            this.bufferDrawer.Visible = true;
+        }
+        private void UpdateDebugShadowMap(bool shift)
+        {
+            var shadowMap = this.Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
+
+            if (shadowMap != null)
+            {
+                //Shadow map
+                if (!this.help.Instance.Text.StartsWith("Shadow map"))
+                {
+                    this.bufferDrawer.Instance.Texture = shadowMap;
+                    this.bufferDrawer.Instance.TextureIndex = 0;
+                    this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Red;
+                    this.bufferDrawer.Visible = true;
+                }
+                else
+                {
+                    int tIndex = this.bufferDrawer.Instance.TextureIndex;
+                    if (!shift)
+                    {
+                        tIndex++;
+                        tIndex %= 6;
+                    }
+                    else
+                    {
+                        tIndex--;
+                        if (tIndex < 0)
+                        {
+                            tIndex = 5;
+                        }
+                    }
+
+                    this.bufferDrawer.Instance.TextureIndex = tIndex;
+                }
+
+                this.help.Instance.Text = string.Format("Shadow map {0}", this.bufferDrawer.Instance.TextureIndex);
+            }
+            else
+            {
+                this.help.Instance.Text = "The Shadow map is empty";
+            }
+        }
+        private void UpdateDebugLightMap()
+        {
+            var lightMap = this.Renderer.GetResource(SceneRendererResults.LightMap);
+
+            if (lightMap != null)
+            {
+                //Light map
+                this.bufferDrawer.Instance.Texture = lightMap;
+                this.bufferDrawer.Instance.Channels = SpriteTextureChannels.NoAlpha;
+                this.bufferDrawer.Visible = true;
+                this.help.Instance.Text = "Light map";
+            }
+            else
+            {
+                this.help.Instance.Text = "The Light map is empty";
+            }
+        }
+        private void UpdateDebugBufferDrawer()
+        {
+            if (this.bufferDrawer.ScreenTransform.Position == Vector2.Zero)
+            {
+                int width = (int)(this.Game.Form.RenderWidth * 0.33f);
+                int height = (int)(this.Game.Form.RenderHeight * 0.33f);
+                int smLeft = this.Game.Form.RenderWidth - width;
+                int smTop = this.Game.Form.RenderHeight - height;
+
+                this.bufferDrawer.ScreenTransform.SetPosition(smLeft, smTop);
+                this.bufferDrawer.Instance.ResizeSprite(width, height);
+            }
+            else
+            {
+                this.bufferDrawer.ScreenTransform.SetPosition(Vector2.Zero);
+                this.bufferDrawer.Instance.ResizeSprite(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
             }
         }
 
@@ -986,28 +1029,7 @@ namespace Deferred
 
             if (!modelsOnly)
             {
-                {
-                    if (this.FindTopGroundPosition(0, 1, out PickingResult<Triangle> r))
-                    {
-                        var lightPosition = r.Position;
-                        lightPosition.Y += 10f;
-
-                        Vector3 direction = -Vector3.Normalize(lightPosition);
-
-                        this.spotLight = new SceneLightSpot(
-                            "Spot the dog",
-                            castShadows,
-                            Color.Yellow,
-                            Color.Yellow,
-                            true,
-                            SceneLightSpotDescription.Create(lightPosition, direction, 25, 25, 25f));
-
-                        this.Lights.Add(this.spotLight);
-
-                        this.lineDrawer.Active = true;
-                        this.lineDrawer.Visible = true;
-                    }
-                }
+                this.SetLightsPosition(castShadows);
 
                 int sep = 10;
                 int f = 12;
@@ -1042,6 +1064,29 @@ namespace Deferred
                         this.Lights.Add(pointLight);
                     }
                 }
+            }
+        }
+        private void SetLightsPosition(bool castShadows)
+        {
+            if (this.FindTopGroundPosition(0, 1, out PickingResult<Triangle> r))
+            {
+                var lightPosition = r.Position;
+                lightPosition.Y += 10f;
+
+                Vector3 direction = -Vector3.Normalize(lightPosition);
+
+                this.spotLight = new SceneLightSpot(
+                    "Spot the dog",
+                    castShadows,
+                    Color.Yellow,
+                    Color.Yellow,
+                    true,
+                    SceneLightSpotDescription.Create(lightPosition, direction, 25, 25, 25f));
+
+                this.Lights.Add(this.spotLight);
+
+                this.lineDrawer.Active = true;
+                this.lineDrawer.Visible = true;
             }
         }
     }
