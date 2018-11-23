@@ -201,6 +201,8 @@ Thumbs.db
 
 #SonarQube
 /.sonarqube
+.sonarqube/
 
 #SonarLint
 /.sonarlint
+.sonarlint/
