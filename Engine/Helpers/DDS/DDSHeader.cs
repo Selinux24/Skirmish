@@ -155,16 +155,16 @@ namespace Engine.Helpers.DDS
                 return false;
             }
 
-            if (header.Flags.HasFlag(DDSFlagTypes.Depth))
+            if (header.Flags.HasFlag(DdsFlagTypes.Depth))
             {
                 resDim = ResourceDimension.Texture3D;
             }
             else
             {
-                if (header.Caps2.HasFlag(DDSCaps2.Cubemap))
+                if (header.Caps2.HasFlag(DdsCaps2.Cubemap))
                 {
                     // We require all six faces to be defined
-                    if ((header.Caps2 & DDSCaps2.AllFaces) != DDSCaps2.AllFaces)
+                    if ((header.Caps2 & DdsCaps2.AllFaces) != DdsCaps2.AllFaces)
                     {
                         return false;
                     }
@@ -190,7 +190,7 @@ namespace Engine.Helpers.DDS
         /// <param name="arraySize">Returns the texture array size</param>
         /// <param name="isCubeMap">Returns true if the texture is a cube map</param>
         /// <returns>Returns true if the texture is valid</returns>
-        private static bool ValidateTexture(DdsHeaderDX10 header, DDSFlagTypes flags, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
+        private static bool ValidateTexture(DdsHeaderDX10 header, DdsFlagTypes flags, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
         {
             depth = 0;
             format = Format.Unknown;
@@ -204,7 +204,7 @@ namespace Engine.Helpers.DDS
                 return false;
             }
 
-            if (header.MiscFlag2 != DDSFlagsDX10.AlphaModeUnknown)
+            if (header.MiscFlag2 != DdsFlagsDX10.AlphaModeUnknown)
             {
                 return false;
             }
@@ -232,7 +232,7 @@ namespace Engine.Helpers.DDS
                     break;
 
                 case ResourceDimension.Texture3D:
-                    if (!flags.HasFlag(DDSFlagTypes.Depth))
+                    if (!flags.HasFlag(DdsFlagTypes.Depth))
                     {
                         return false;
                     }
@@ -259,7 +259,7 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Flags to indicate which members contain valid data.
         /// </summary>
-        public DDSFlagTypes Flags;
+        public DdsFlagTypes Flags;
         /// <summary>
         /// Surface height (in pixels).
         /// </summary>
@@ -292,11 +292,11 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Specifies the complexity of the surfaces stored.
         /// </summary>
-        public DDSCaps Caps;
+        public DdsCaps Caps;
         /// <summary>
         /// Additional detail about the surfaces stored.
         /// </summary>
-        public DDSCaps2 Caps2;
+        public DdsCaps2 Caps2;
         /// <summary>
         /// Unused.
         /// </summary>

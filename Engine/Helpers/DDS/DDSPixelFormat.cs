@@ -256,7 +256,7 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Values which indicate what type of data is in the surface.
         /// </summary>
-        public DDSPixelFormats Flags;
+        public DdsPixelFormats Flags;
         /// <summary>
         /// Four-character codes for specifying compressed or custom formats. Possible values include: DXT1, DXT2, DXT3, DXT4, or DXT5. A FourCC of DX10 indicates the prescense of the DDS_HEADER_DXT10 extended header, and the dxgiFormat member of that structure indicates the true format. When using a four-character code, dwFlags must include DDPF_FOURCC.
         /// </summary>
@@ -288,7 +288,7 @@ namespace Engine.Helpers.DDS
         public bool IsDX10()
         {
             return
-                (this.Flags.HasFlag(DDSPixelFormats.DDPF_FOURCC)) &&
+                (this.Flags.HasFlag(DdsPixelFormats.DDPF_FOURCC)) &&
                 (MakeFourCC("DX10") == this.FourCC);
         }
         /// <summary>
@@ -297,19 +297,19 @@ namespace Engine.Helpers.DDS
         /// <returns>Returns the equivalent DXGI format</returns>
         public Format GetDXGIFormat()
         {
-            if (this.Flags.HasFlag(DDSPixelFormats.DDPF_RGB))
+            if (this.Flags.HasFlag(DdsPixelFormats.DDPF_RGB))
             {
                 return GetFormatDDPFRGB();
             }
-            else if (this.Flags.HasFlag(DDSPixelFormats.DDPF_LUMINANCE))
+            else if (this.Flags.HasFlag(DdsPixelFormats.DDPF_LUMINANCE))
             {
                 return GetFormatDDPFLuminance();
             }
-            else if (this.Flags.HasFlag(DDSPixelFormats.DDPF_ALPHA))
+            else if (this.Flags.HasFlag(DdsPixelFormats.DDPF_ALPHA))
             {
                 return GetFormatDDPFAlpha();
             }
-            else if (this.Flags.HasFlag(DDSPixelFormats.DDPF_FOURCC))
+            else if (this.Flags.HasFlag(DdsPixelFormats.DDPF_FOURCC))
             {
                 return GetFormatDDPFFOURCC();
             }

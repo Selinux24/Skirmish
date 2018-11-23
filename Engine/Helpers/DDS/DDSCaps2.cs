@@ -7,7 +7,7 @@ namespace Engine.Helpers.DDS
     /// </summary>
     /// <remarks>https://msdn.microsoft.com/es-es/library/windows/desktop/bb943982(v=vs.85).aspx</remarks>
     [Flags]
-    enum DDSCaps2
+    enum DdsCaps2
     {
         /// <summary>
         /// DDSCAPS2_CUBEMAP

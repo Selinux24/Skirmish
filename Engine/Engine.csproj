@@ -252,11 +252,11 @@
     <Compile Include="FontMapStyles.cs" />
     <Compile Include="GroundGardener.cs" />
     <Compile Include="GroundGardenerDescription.cs" />
-    <Compile Include="Helpers\DDS\DDSPixelFormats.cs" />
-    <Compile Include="Helpers\DDS\DDSCaps2.cs" />
-    <Compile Include="Helpers\DDS\DDSCaps.cs" />
-    <Compile Include="Helpers\DDS\DDSFlagsDX10.cs" />
-    <Compile Include="Helpers\DDS\DDSFlagTypes.cs" />
+    <Compile Include="Helpers\DDS\DdsPixelFormats.cs" />
+    <Compile Include="Helpers\DDS\DdsCaps2.cs" />
+    <Compile Include="Helpers\DDS\DdsCaps.cs" />
+    <Compile Include="Helpers\DDS\DdsFlagsDX10.cs" />
+    <Compile Include="Helpers\DDS\DdsFlagTypes.cs" />
     <Compile Include="Helpers\DDS\DdsHeader.cs" />
     <Compile Include="Helpers\DDS\DdsHeaderDX10.cs" />
     <Compile Include="Helpers\DDS\DdsPixelFormat.cs" />

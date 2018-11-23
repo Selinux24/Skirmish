@@ -5,7 +5,7 @@ namespace Engine.Helpers.DDS
     /// DDS Header DX10 Misc flags 2 enumeration
     /// </summary>
     /// <remarks>https://msdn.microsoft.com/es-es/library/windows/desktop/bb943983(v=vs.85).aspx</remarks>
-    enum DDSFlagsDX10
+    enum DdsFlagsDX10
     {
         /// <summary>
         /// DDS_ALPHA_MODE_UNKNOWN: Alpha channel content is unknown. This is the value for legacy files, which typically is assumed to be 'straight' alpha.

@@ -5,7 +5,7 @@ namespace Engine.Helpers.DDS
     /// DDS Flags
     /// </summary>
     /// <remarks>https://msdn.microsoft.com/es-es/library/windows/desktop/bb943982(v=vs.85).aspx</remarks>
-    enum DDSFlagTypes
+    enum DdsFlagTypes
     {
         /// <summary>
         /// DDSD_CAPS: Required in every .dds file.
