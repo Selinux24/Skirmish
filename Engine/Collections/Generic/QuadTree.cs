@@ -36,11 +36,13 @@ namespace Engine.Collections.Generic
             this.BoundingBox = bbox;
             this.BoundingSphere = bsph;
 
+            int nodeCount = 0;
             this.Root = QuadTreeNode<T>.CreatePartitions(
                 this, null,
                 bbox, items,
                 maxDepth,
-                0);
+                0,
+                ref nodeCount);
 
             this.Root.ConnectNodes();
         }

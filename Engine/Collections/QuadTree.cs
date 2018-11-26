@@ -26,11 +26,13 @@ namespace Engine.Collections
         {
             this.BoundingBox = bbox;
 
+            int nodeCount = 0;
             this.Root = QuadTreeNode.CreatePartitions(
                 this, null,
                 bbox,
                 maxDepth,
-                0);
+                0,
+                ref nodeCount);
 
             this.Root.ConnectNodes();
         }
@@ -154,6 +156,5 @@ namespace Engine.Collections
             }
         }
     }
-
 }
 

@@ -9,26 +9,7 @@ namespace Engine.Collections.Generic
     /// <summary>
     /// Quadtree node
     /// </summary>
-    public abstract class QuadTreeNode
-    {
-        /// <summary>
-        /// Static node count
-        /// </summary>
-        protected static int NodeCount { get; set; } = 0;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        protected QuadTreeNode()
-        {
-
-        }
-    }
-
-    /// <summary>
-    /// Quadtree node
-    /// </summary>
-    public class QuadTreeNode<T> : QuadTreeNode where T : IVertexList
+    public class QuadTreeNode<T> where T : IVertexList
     {
         /// <summary>
         /// Recursive partition creation
@@ -39,15 +20,15 @@ namespace Engine.Collections.Generic
         /// <param name="items">All items</param>
         /// <param name="maxDepth">Maximum depth</param>
         /// <param name="treeDepth">Current depth</param>
+        /// <param name="nodeCount">Node count</param>
         /// <returns>Returns new node</returns>
         public static QuadTreeNode<T> CreatePartitions(
             QuadTree<T> quadTree, QuadTreeNode<T> parent,
             BoundingBox bbox, T[] items,
             int maxDepth,
-            int treeDepth)
+            int treeDepth,
+            ref int nodeCount)
         {
-            if (parent == null) NodeCount = 0;
-
             if (treeDepth <= maxDepth)
             {
                 var nodeItems = Array.FindAll(items, i =>
@@ -69,13 +50,13 @@ namespace Engine.Collections.Generic
                     bool haltByDepth = treeDepth == maxDepth;
                     if (haltByDepth)
                     {
-                        node.Id = NodeCount++;
-                        node.Items = nodeItems;
+                        node.Id = nodeCount++;
+                        node.Items.AddRange(nodeItems);
                     }
                     else
                     {
                         // Initialize node partitions
-                        IntializeNode(quadTree, node, bbox, nodeItems, maxDepth, treeDepth + 1);
+                        IntializeNode(quadTree, node, bbox, nodeItems, maxDepth, treeDepth + 1, ref nodeCount);
                     }
 
                     return node;
@@ -93,13 +74,14 @@ namespace Engine.Collections.Generic
         /// <param name="items">Items into the node</param>
         /// <param name="maxDepth">Maximum depth</param>
         /// <param name="nextTreeDepth">Next depth</param>
+        /// <param name="nodeCount">Node count</param>
         private static void IntializeNode(
             QuadTree<T> quadTree, QuadTreeNode<T> node,
             BoundingBox bbox, T[] items,
             int maxDepth,
-            int nextTreeDepth)
+            int nextTreeDepth,
+            ref int nodeCount)
         {
-
             Vector3 M = bbox.Maximum;
             Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
             Vector3 m = bbox.Minimum;
@@ -113,10 +95,10 @@ namespace Engine.Collections.Generic
             //+0-1+0   +1+1+1   -->   cmc    MMM
             BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
 
-            var topLeftChild = CreatePartitions(quadTree, node, topLeftBox, items, maxDepth, nextTreeDepth);
-            var topRightChild = CreatePartitions(quadTree, node, topRightBox, items, maxDepth, nextTreeDepth);
-            var bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, items, maxDepth, nextTreeDepth);
-            var bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, items, maxDepth, nextTreeDepth);
+            var topLeftChild = CreatePartitions(quadTree, node, topLeftBox, items, maxDepth, nextTreeDepth, ref nodeCount);
+            var topRightChild = CreatePartitions(quadTree, node, topRightBox, items, maxDepth, nextTreeDepth, ref nodeCount);
+            var bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, items, maxDepth, nextTreeDepth, ref nodeCount);
+            var bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, items, maxDepth, nextTreeDepth, ref nodeCount);
 
             List<QuadTreeNode<T>> childList = new List<QuadTreeNode<T>>();
 
@@ -127,7 +109,7 @@ namespace Engine.Collections.Generic
 
             if (childList.Count > 0)
             {
-                node.Children = childList.ToArray();
+                node.Children.AddRange(childList);
                 node.TopLeftChild = topLeftChild;
                 node.TopRightChild = topRightChild;
                 node.BottomLeftChild = bottomLeftChild;
@@ -212,17 +194,17 @@ namespace Engine.Collections.Generic
         {
             get
             {
-                return (this.BoundingBox.Maximum + this.BoundingBox.Minimum) * 0.5f;
+                return this.BoundingBox.GetCenter();
             }
         }
         /// <summary>
         /// Children list
         /// </summary>
-        public QuadTreeNode<T>[] Children { get; set; }
+        public List<QuadTreeNode<T>> Children { get; private set; } = new List<QuadTreeNode<T>>();
         /// <summary>
         /// Node triangles
         /// </summary>
-        internal T[] Items;
+        public List<T> Items { get; private set; } = new List<T>();
 
         /// <summary>
         /// Constructor
@@ -249,9 +231,9 @@ namespace Engine.Collections.Generic
             this.BottomLeftNeighbor = this.BottomNeighbor?.FindNeighborNodeAtLeft();
             this.BottomRightNeighbor = this.BottomNeighbor?.FindNeighborNodeAtRight();
 
-            if (this.Children != null && this.Children.Length > 0)
+            if (this.Children?.Count > 0)
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < this.Children.Count; i++)
                 {
                     this.Children[i].ConnectNodes();
                 }
@@ -416,14 +398,14 @@ namespace Engine.Collections.Generic
                 bool haltByDepth = (maxDepth > 0 && this.Level == maxDepth);
                 if (haltByDepth)
                 {
-                    Array.ForEach(this.Children, (c) =>
+                    this.Children.ForEach((c) =>
                     {
                         bboxes.Add(c.BoundingBox);
                     });
                 }
                 else
                 {
-                    Array.ForEach(this.Children, (c) =>
+                    this.Children.ForEach((c) =>
                     {
                         bboxes.AddRange(c.GetBoundingBoxes(maxDepth));
                     });
@@ -446,7 +428,7 @@ namespace Engine.Collections.Generic
 
             if (this.Children != null)
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < this.Children.Count; i++)
                 {
                     int cLevel = this.Children[i].GetMaxLevel();
 
@@ -479,7 +461,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < this.Children.Count; i++)
                 {
                     var childNodes = this.Children[i].GetNodesInVolume(ref frustum);
                     if (childNodes.Length > 0)
@@ -509,7 +491,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < this.Children.Count; i++)
                 {
                     var childNodes = this.Children[i].GetNodesInVolume(ref bbox);
                     if (childNodes.Length > 0)
@@ -540,7 +522,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < this.Children.Count; i++)
                 {
                     var childNodes = this.Children[i].GetNodesInVolume(ref sphere);
                     if (childNodes.Length > 0)
@@ -566,7 +548,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < this.Children.Count; i++)
                 {
                     var childNodes = this.Children[i].GetLeafNodes();
                     if (childNodes.Length > 0)
@@ -594,7 +576,7 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                for (int i = 0; i < this.Children.Length; i++)
+                for (int i = 0; i < this.Children.Count; i++)
                 {
                     var childNode = this.Children[i].GetNode(position);
                     if (childNode != null)
@@ -616,12 +598,12 @@ namespace Engine.Collections.Generic
             if (this.Children == null)
             {
                 //Leaf node
-                return string.Format("QuadTreeNode {0}; Depth {1}; Items {2}", this.Id, this.Level, this.Items.Length);
+                return string.Format("QuadTreeNode {0}; Depth {1}; Items {2}", this.Id, this.Level, this.Items.Count);
             }
             else
             {
                 //Node
-                return string.Format("QuadTreeNode {0}; Depth {1}; Childs {2}", this.Id, this.Level, this.Children.Length);
+                return string.Format("QuadTreeNode {0}; Depth {1}; Childs {2}", this.Id, this.Level, this.Children.Count);
             }
         }
     }
