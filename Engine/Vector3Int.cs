@@ -17,22 +17,11 @@ namespace Engine
         /// <returns>The component-wise minimum of the two vertices.</returns>
         public static Vector3Int ComponentMin(Vector3Int a, Vector3Int b)
         {
-            ComponentMin(ref a, ref b, out Vector3Int v);
-            return v;
-        }
-        /// <summary>
-        /// Calculates the component-wise minimum of two vertices.
-        /// </summary>
-        /// <param name="a">A vertex.</param>
-        /// <param name="b">Another vertex.</param>
-        /// <param name="result">The component-wise minimum of the two vertices.</param>
-        public static void ComponentMin(ref Vector3Int a, ref Vector3Int b, out Vector3Int result)
-        {
             var x = a.X < b.X ? a.X : b.X;
             var y = a.Y < b.Y ? a.Y : b.Y;
             var z = a.Z < b.Z ? a.Z : b.Z;
 
-            result = new Vector3Int(x, y, z);
+            return new Vector3Int(x, y, z);
         }
         /// <summary>
         /// Calculates the component-wise maximum of two vertices.
@@ -42,155 +31,11 @@ namespace Engine
         /// <returns>The component-wise maximum of the two vertices.</returns>
         public static Vector3Int ComponentMax(Vector3Int a, Vector3Int b)
         {
-            ComponentMax(ref a, ref b, out Vector3Int v);
-            return v;
-        }
-        /// <summary>
-        /// Calculates the component-wise maximum of two vertices.
-        /// </summary>
-        /// <param name="a">A vertex.</param>
-        /// <param name="b">Another vertex.</param>
-        /// <param name="result">The component-wise maximum of the two vertices.</param>
-        public static void ComponentMax(ref Vector3Int a, ref Vector3Int b, out Vector3Int result)
-        {
             var x = a.X > b.X ? a.X : b.X;
             var y = a.Y > b.Y ? a.Y : b.Y;
             var z = a.Z > b.Z ? a.Z : b.Z;
 
-            result = new Vector3Int(x, y, z);
-        }
-        /// <summary>
-        /// Gets the leftness of a triangle formed from 3 contour vertices.
-        /// </summary>
-        /// <param name="aV">The first vertex.</param>
-        /// <param name="bV">The second vertex.</param>
-        /// <param name="cV">The third vertex.</param>
-        /// <returns>A value indicating the leftness of the triangle.</returns>
-        public static bool IsLeft(ref Vector3Int aV, ref Vector3Int bV, ref Vector3Int cV)
-        {
-            Area2D(ref aV, ref bV, ref cV, out int area);
-            return area < 0;
-        }
-        /// <summary>
-        /// Gets the leftness (left or on) of a triangle formed from 3 contour vertices.
-        /// </summary>
-        /// <param name="aV">The first vertex.</param>
-        /// <param name="bV">The second vertex.</param>
-        /// <param name="cV">The third vertex.</param>
-        /// <returns>A value indicating whether the triangle is left or on.</returns>
-        public static bool IsLeftOn(ref Vector3Int aV, ref Vector3Int bV, ref Vector3Int cV)
-        {
-            Area2D(ref aV, ref bV, ref cV, out int area);
-            return area <= 0;
-        }
-        /// <summary>
-        /// Compares vertex equality in 2D.
-        /// </summary>
-        /// <param name="aV">A vertex.</param>
-        /// <param name="bV">Another vertex.</param>
-        /// <returns>A value indicating whether the X and Z components of both vertices are equal.</returns>
-        public static bool Equal2D(ref Vector3Int aV, ref Vector3Int bV)
-        {
-            return aV.X == bV.X && aV.Z == bV.Z;
-        }
-        /// <summary>
-        /// True if and only if A, B, and C are collinear and point C lies on closed segment AB
-        /// </summary>
-        /// <param name="aV">Point A of segment AB.</param>
-        /// <param name="bV">Point B of segment AB.</param>
-        /// <param name="cV">Point C.</param>
-        /// <returns>A value indicating whether the three points are collinear with C in the middle.</returns>
-        public static bool IsBetween(ref Vector3Int aV, ref Vector3Int bV, ref Vector3Int cV)
-        {
-            if (!IsCollinear(ref aV, ref bV, ref cV))
-            {
-                return false;
-            }
-
-            if (aV.X != bV.X)
-            {
-                return ((aV.X <= cV.X) && (cV.X <= bV.X)) || ((aV.X >= cV.X) && (cV.X >= bV.X));
-            }
-            else
-            {
-                return ((aV.Z <= cV.Z) && (cV.Z <= bV.Z)) || ((aV.Z >= cV.Z) && (cV.Z >= bV.Z));
-            }
-        }
-        /// <summary>
-        /// True if and only if points A, B, and C are collinear.
-        /// </summary>
-        /// <param name="aV">Point A.</param>
-        /// <param name="bV">Point B.</param>
-        /// <param name="cV">Point C.</param>
-        /// <returns>A value indicating whether the points are collinear.</returns>
-        public static bool IsCollinear(ref Vector3Int aV, ref Vector3Int bV, ref Vector3Int cV)
-        {
-            Area2D(ref aV, ref bV, ref cV, out int area);
-            return area == 0;
-        }
-        /// <summary>
-        /// Gets the 2D area of the triangle ABC.
-        /// </summary>
-        /// <param name="aV">Point A of triangle ABC.</param>
-        /// <param name="bV">Point B of triangle ABC.</param>
-        /// <param name="cV">Point C of triangle ABC.</param>
-        /// <param name="area">The 2D area of the triangle.</param>
-        public static void Area2D(ref Vector3Int aV, ref Vector3Int bV, ref Vector3Int cV, out int area)
-        {
-            area = (bV.X - aV.X) * (cV.Z - aV.Z) - (cV.X - aV.X) * (bV.Z - aV.Z);
-        }
-        /// <summary>
-        /// True if and only if segments AB and CD intersect, properly or improperly.
-        /// </summary>
-        /// <param name="a">Point A of segment AB.</param>
-        /// <param name="b">Point B of segment AB.</param>
-        /// <param name="c">Point C of segment CD.</param>
-        /// <param name="d">Point D of segment CD.</param>
-        /// <returns>A value indicating whether segments AB and CD intersect.</returns>
-        public static bool Intersect(ref Vector3Int a, ref Vector3Int b, ref Vector3Int c, ref Vector3Int d)
-        {
-            if (IntersectProp(ref a, ref b, ref c, ref d))
-            {
-                return true;
-            }
-            else if (
-                IsBetween(ref a, ref b, ref c) ||
-                IsBetween(ref a, ref b, ref d) ||
-                IsBetween(ref c, ref d, ref a) ||
-                IsBetween(ref c, ref d, ref b))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-        /// <summary>
-        /// True if and only if segments AB and CD intersect properly.
-        /// </summary>
-        /// <remarks>
-        /// Proper intersection: A point interior to both segments is shared. Properness determined by strict leftness.
-        /// </remarks>
-        /// <param name="a">Point A of segment AB.</param>
-        /// <param name="b">Point B of segment AB.</param>
-        /// <param name="c">Point C of segment CD.</param>
-        /// <param name="d">Point D of segment CD.</param>
-        /// <returns>A value indicating whether segements AB and CD are intersecting properly.</returns>
-        public static bool IntersectProp(ref Vector3Int a, ref Vector3Int b, ref Vector3Int c, ref Vector3Int d)
-        {
-            //eliminate improper cases
-            if (IsCollinear(ref a, ref b, ref c) ||
-                IsCollinear(ref a, ref b, ref d) ||
-                IsCollinear(ref c, ref d, ref a) ||
-                IsCollinear(ref c, ref d, ref b))
-            {
-                return false;
-            }
-
-            return
-                (!IsLeft(ref a, ref b, ref c) ^ !IsLeft(ref a, ref b, ref d)) &&
-                (!IsLeft(ref c, ref d, ref a) ^ !IsLeft(ref c, ref d, ref b));
+            return new Vector3Int(x, y, z);
         }
 
         /// <summary>
