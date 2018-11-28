@@ -440,30 +440,11 @@ namespace Engine
         /// <param name="origin">Origin point</param>
         public void SetLOD(Vector3 origin)
         {
-            var position = Vector3.TransformCoordinate(this.coarseBoundingSphere.Center, this.Manipulator.LocalTransform);
-            var radius = this.coarseBoundingSphere.Radius * this.Manipulator.AveragingScale;
-
-            var dist = Vector3.Distance(position, origin) - radius;
-            if (dist < GameEnvironment.LODDistanceHigh)
-            {
-                this.LevelOfDetail = LevelOfDetail.High;
-            }
-            else if (dist < GameEnvironment.LODDistanceMedium)
-            {
-                this.LevelOfDetail = LevelOfDetail.Medium;
-            }
-            else if (dist < GameEnvironment.LODDistanceLow)
-            {
-                this.LevelOfDetail = LevelOfDetail.Low;
-            }
-            else if (dist < GameEnvironment.LODDistanceMinimum)
-            {
-                this.LevelOfDetail = LevelOfDetail.Minimum;
-            }
-            else
-            {
-                this.levelOfDetail = LevelOfDetail.None;
-            }
+            this.levelOfDetail = GameEnvironment.GetLOD(
+                origin,
+                this.coarseBoundingSphere,
+                this.Manipulator.LocalTransform,
+                this.Manipulator.AveragingScale);
         }
 
         /// <summary>
