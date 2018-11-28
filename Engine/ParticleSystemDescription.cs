@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Globalization;
 using System.Xml.Serialization;
 
 namespace Engine
@@ -404,12 +403,12 @@ namespace Engine
             }
             set
             {
-                var floats = this.Split(value);
-                if (floats.Length == 3)
+                var floats = value?.SplitFloats();
+                if (floats?.Length == 3)
                 {
                     Gravity = new Vector3(floats);
                 }
-                else if (floats.Length == 1)
+                else if (floats?.Length == 1)
                 {
                     Gravity = new Vector3(floats[0]);
                 }
@@ -443,12 +442,12 @@ namespace Engine
             }
             set
             {
-                var floats = this.Split(value);
-                if (floats.Length == 4)
+                var floats = value?.SplitFloats();
+                if (floats?.Length == 4)
                 {
                     MinColor = new Color(floats);
                 }
-                else if (floats.Length == 1)
+                else if (floats?.Length == 1)
                 {
                     MinColor = new Color(floats[0]);
                 }
@@ -475,12 +474,12 @@ namespace Engine
             }
             set
             {
-                var floats = this.Split(value);
-                if (floats.Length == 4)
+                var floats = value?.SplitFloats();
+                if (floats?.Length == 4)
                 {
                     MaxColor = new Color(floats);
                 }
-                else if (floats.Length == 1)
+                else if (floats?.Length == 1)
                 {
                     MaxColor = new Color(floats[0]);
                 }
@@ -617,42 +616,6 @@ namespace Engine
             this.MaxEndSize = other.MaxEndSize;
             this.Transparent = other.Transparent;
             this.EmitterVelocitySensitivity = other.EmitterVelocitySensitivity;
-        }
-
-        /// <summary>
-        /// Splits the text into a float array
-        /// </summary>
-        /// <param name="text">Text</param>
-        /// <returns>Returns a float array</returns>
-        private float[] Split(string text)
-        {
-            if (!string.IsNullOrEmpty(text))
-            {
-                var bits = text.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
-                bool allOk = true;
-                float[] res = new float[bits.Length];
-
-                for (int i = 0; i < res.Length; i++)
-                {
-                    if (float.TryParse(bits[i], NumberStyles.Float, CultureInfo.InvariantCulture, out float n))
-                    {
-                        res[i] = n;
-                    }
-                    else
-                    {
-                        allOk = false;
-                        break;
-                    }
-                }
-
-                if (allOk)
-                {
-                    return res;
-                }
-            }
-
-            return new float[] { };
         }
     }
 }

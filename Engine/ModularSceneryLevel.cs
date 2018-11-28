@@ -69,8 +69,8 @@ namespace Engine
             }
             set
             {
-                var floats = ModularSceneryExtents.Split(value);
-                if (floats.Length == 3)
+                var floats = value?.SplitFloats();
+                if (floats?.Length == 3)
                 {
                     StartPosition = new Vector3(floats);
                 }
@@ -92,8 +92,8 @@ namespace Engine
             }
             set
             {
-                var floats = ModularSceneryExtents.Split(value);
-                if (floats.Length == 3)
+                var floats = value?.SplitFloats();
+                if (floats?.Length == 3)
                 {
                     LookingVector = new Vector3(floats);
                 }

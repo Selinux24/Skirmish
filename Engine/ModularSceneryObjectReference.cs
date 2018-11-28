@@ -84,8 +84,8 @@ namespace Engine
             }
             set
             {
-                var floats = ModularSceneryExtents.Split(value);
-                if (floats.Length == 3)
+                var floats = value?.SplitFloats();
+                if (floats?.Length == 3)
                 {
                     Position = new Vector3(floats);
                 }
@@ -107,12 +107,12 @@ namespace Engine
             }
             set
             {
-                var floats = ModularSceneryExtents.Split(value);
-                if (floats.Length == 4)
+                var floats = value?.SplitFloats();
+                if (floats?.Length == 4)
                 {
                     Rotation = new Quaternion(floats);
                 }
-                else if (floats.Length == 3)
+                else if (floats?.Length == 3)
                 {
                     Rotation = Quaternion.RotationYawPitchRoll(floats[0], floats[1], floats[2]);
                 }
@@ -134,12 +134,12 @@ namespace Engine
             }
             set
             {
-                var floats = ModularSceneryExtents.Split(value);
-                if (floats.Length == 3)
+                var floats = value?.SplitFloats();
+                if (floats?.Length == 3)
                 {
                     Scale = new Vector3(floats);
                 }
-                else if (floats.Length == 1)
+                else if (floats?.Length == 1)
                 {
                     Scale = new Vector3(floats[0]);
                 }

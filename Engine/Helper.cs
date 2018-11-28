@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -547,6 +548,46 @@ namespace Engine
             }
 
             return true;
+        }
+
+        #endregion
+
+        #region Strings
+
+        /// <summary>
+        /// Splits the text into a float array
+        /// </summary>
+        /// <param name="text">Text</param>
+        /// <returns>Returns a float array</returns>
+        public static float[] SplitFloats(this string text)
+        {
+            if (!string.IsNullOrEmpty(text))
+            {
+                var bits = text.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+                bool allOk = true;
+                float[] res = new float[bits.Length];
+
+                for (int i = 0; i < res.Length; i++)
+                {
+                    if (float.TryParse(bits[i], NumberStyles.Float, CultureInfo.InvariantCulture, out float n))
+                    {
+                        res[i] = n;
+                    }
+                    else
+                    {
+                        allOk = false;
+                        break;
+                    }
+                }
+
+                if (allOk)
+                {
+                    return res;
+                }
+            }
+
+            return new float[] { };
         }
 
         #endregion

@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Globalization;
 using System.Xml.Serialization;
 
 namespace Engine
@@ -34,8 +33,8 @@ namespace Engine
             }
             set
             {
-                var floats = this.Split(value);
-                if (floats.Length == 3)
+                var floats = value?.SplitFloats();
+                if (floats?.Length == 3)
                 {
                     Position = new Vector3(floats);
                 }
@@ -62,8 +61,8 @@ namespace Engine
             }
             set
             {
-                var floats = this.Split(value);
-                if (floats.Length == 3)
+                var floats = value?.SplitFloats();
+                if (floats?.Length == 3)
                 {
                     Velocity = new Vector3(floats);
                 }
@@ -117,42 +116,6 @@ namespace Engine
             this.InfiniteDuration = false;
             this.MaximumDistance = GameEnvironment.LODDistanceLow;
             this.Distance = 0f;
-        }
-
-        /// <summary>
-        /// Splits the text into a float array
-        /// </summary>
-        /// <param name="text">Text</param>
-        /// <returns>Returns a float array</returns>
-        private float[] Split(string text)
-        {
-            if (!string.IsNullOrEmpty(text))
-            {
-                var bits = text.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
-                bool allOk = true;
-                float[] res = new float[bits.Length];
-
-                for (int i = 0; i < res.Length; i++)
-                {
-                    if (float.TryParse(bits[i], NumberStyles.Float, CultureInfo.InvariantCulture, out float n))
-                    {
-                        res[i] = n;
-                    }
-                    else
-                    {
-                        allOk = false;
-                        break;
-                    }
-                }
-
-                if (allOk)
-                {
-                    return res;
-                }
-            }
-
-            return new float[] { };
         }
     }
 }
