@@ -440,7 +440,7 @@ namespace Engine
         /// <param name="origin">Origin point</param>
         public void SetLOD(Vector3 origin)
         {
-            this.levelOfDetail = GameEnvironment.GetLOD(
+            this.LevelOfDetail = GameEnvironment.GetLOD(
                 origin,
                 this.coarseBoundingSphere,
                 this.Manipulator.LocalTransform,

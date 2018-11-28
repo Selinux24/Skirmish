@@ -233,6 +233,7 @@
     <Compile Include="PrimitiveListDrawerDescription.cs" />
     <Compile Include="SceneLightPointDescription.cs" />
     <Compile Include="SceneLightSpotDescription.cs" />
+    <Compile Include="ShadowMap.cs" />
     <Compile Include="ShadowMapPoint.cs" />
     <Compile Include="CullingVolumeCamera.cs" />
     <Compile Include="CullingVolumeAABB.cs" />
