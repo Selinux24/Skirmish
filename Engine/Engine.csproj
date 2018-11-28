@@ -229,6 +229,8 @@
     <Compile Include="ISceneLightSpot.cs" />
     <Compile Include="FrameStatsLight.cs" />
     <Compile Include="PathFinding\RecastNavigation\SteerTarget.cs" />
+    <Compile Include="PrimitiveListDrawer.cs" />
+    <Compile Include="PrimitiveListDrawerDescription.cs" />
     <Compile Include="SceneLightPointDescription.cs" />
     <Compile Include="SceneLightSpotDescription.cs" />
     <Compile Include="ShadowMapPoint.cs" />
@@ -488,7 +490,6 @@
     <Compile Include="Helpers\ResourceStatus.cs" />
     <Compile Include="Helpers\ResourceStatusItem.cs" />
     <Compile Include="LensFlareDescription.cs" />
-    <Compile Include="LineListDrawerDescription.cs" />
     <Compile Include="MinimapDescription.cs" />
     <Compile Include="ModelContentDescription.cs" />
     <Compile Include="ModelDescription.cs" />
@@ -512,7 +513,6 @@
     <Compile Include="SpriteTextureChannels.cs" />
     <Compile Include="SpriteTextureDescription.cs" />
     <Compile Include="TextDrawerDescription.cs" />
-    <Compile Include="TriangleListDrawerDescription.cs" />
     <Compile Include="Updatable.cs" />
     <Compile Include="Vector2Int.cs" />
     <Compile Include="Vector3Int.cs" />
@@ -584,7 +584,6 @@
     <Compile Include="SpriteButton.cs" />
     <Compile Include="Terrain.cs" />
     <Compile Include="GroundDescription.cs" />
-    <Compile Include="TriangleListDrawer.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
     <Compile Include="Effects\EffectDefaultGpuParticles.cs" />
     <Compile Include="Effects\IDrawer.cs" />
@@ -592,7 +591,6 @@
     <Compile Include="Helpers\NativeMethods.cs" />
     <Compile Include="Manipulator2D.cs" />
     <Compile Include="ParticleSystemGpu.cs" />
-    <Compile Include="LineListDrawer.cs" />
     <Compile Include="Cubemap.cs" />
     <Compile Include="Effects\EffectDefaultBillboard.cs" />
     <Compile Include="Effects\EffectDefaultBasic.cs" />

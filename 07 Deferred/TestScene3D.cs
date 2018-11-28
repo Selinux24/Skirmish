@@ -42,8 +42,8 @@ namespace Deferred
         private bool animateLights = false;
         private SceneLightSpot spotLight = null;
 
-        private SceneObject<LineListDrawer> lineDrawer = null;
-        private SceneObject<TriangleListDrawer> terrainGraphDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> lineDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> terrainGraphDrawer = null;
 
         private readonly Random rnd = new Random(0);
         private bool onlyModels = true;
@@ -401,21 +401,21 @@ namespace Deferred
             }
 
             {
-                var desc = new LineListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     DepthEnabled = true,
                     Count = 1000,
                 };
-                this.lineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, layerEffects);
+                this.lineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
                 this.lineDrawer.Visible = false;
             }
 
             {
-                var desc = new TriangleListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Count = MaxGridDrawer,
                 };
-                this.terrainGraphDrawer = this.AddComponent<TriangleListDrawer>(desc, SceneObjectUsages.None, layerEffects);
+                this.terrainGraphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc, SceneObjectUsages.None, layerEffects);
                 this.terrainGraphDrawer.Visible = false;
             }
         }
@@ -456,7 +456,7 @@ namespace Deferred
                     var color = node.Color;
                     var tris = node.Triangles;
 
-                    this.terrainGraphDrawer.Instance.AddTriangles(color, tris);
+                    this.terrainGraphDrawer.Instance.AddPrimitives(color, tris);
                 }
             }
         }
@@ -622,7 +622,7 @@ namespace Deferred
 
             if (this.Game.Input.KeyPressed(Keys.Space))
             {
-                this.lineDrawer.Instance.SetLines(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
+                this.lineDrawer.Instance.SetPrimitives(Color.Yellow, Line3D.CreateWiredFrustum(this.Camera.Frustum));
                 this.lineDrawer.Visible = true;
             }
         }
@@ -750,7 +750,7 @@ namespace Deferred
             {
                 this.UpdateSpotlight(gameTime);
 
-                this.lineDrawer.Instance.SetLines(Color.White, this.spotLight.GetVolume(10));
+                this.lineDrawer.Instance.SetPrimitives(Color.White, this.spotLight.GetVolume(10));
             }
             else
             {

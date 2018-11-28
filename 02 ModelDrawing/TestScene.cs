@@ -25,7 +25,7 @@ namespace ModelDrawing
         private ParticleSystemDescription pSmokeExplosion = null;
 
         private SceneObject<ParticleManager> pManager = null;
-        private SceneObject<LineListDrawer> pManagerLineDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> pManagerLineDrawer = null;
 
         private readonly Random rnd = new Random();
 
@@ -126,11 +126,11 @@ namespace ModelDrawing
         }
         private void InitializeParticleVolumeDrawer()
         {
-            var desc = new LineListDrawerDescription()
+            var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 20000
             };
-            this.pManagerLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, layerEffects);
+            this.pManagerLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
             this.pManagerLineDrawer.Visible = true;
         }
 
@@ -393,7 +393,7 @@ namespace ModelDrawing
                 lines.AddRange(Line3D.CreateWiredBox(this.pManager.Instance.GetParticleSystem(i).Emitter.GetBoundingBox()));
             }
 
-            this.pManagerLineDrawer.Instance.SetLines(Color.Red, lines.ToArray());
+            this.pManagerLineDrawer.Instance.SetPrimitives(Color.Red, lines.ToArray());
         }
 
         public override void Draw(GameTime gameTime)

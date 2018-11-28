@@ -48,7 +48,7 @@ namespace GameLogic
             }
         }
 
-        private SceneObject<LineListDrawer> lineDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> lineDrawer = null;
         private readonly Color4 bsphColor = new Color4(Color.LightYellow.ToColor3(), 0.25f);
         private readonly Color4 frstColor = new Color4(Color.Yellow.ToColor3(), 1f);
         private readonly int bsphSlices = 50;
@@ -331,7 +331,7 @@ namespace GameLogic
 
             #region DEBUG
 
-            this.lineDrawer = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { Count = 5000 });
+            this.lineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
             this.lineDrawer.Visible = false;
 
             #endregion
@@ -716,7 +716,7 @@ namespace GameLogic
 
         private void SetFrustum()
         {
-            this.lineDrawer.Instance.SetLines(this.frstColor, Line3D.CreateWiredFrustum(this.Camera.Frustum));
+            this.lineDrawer.Instance.SetPrimitives(this.frstColor, Line3D.CreateWiredFrustum(this.Camera.Frustum));
         }
 
         protected void NewGame()
@@ -844,7 +844,7 @@ namespace GameLogic
             BoundingSphere bsph = this.soldierModels[soldier].GetBoundingSphere();
 
             this.Camera.LookTo(bsph.Center, CameraTranslations.Quick);
-            this.lineDrawer.Instance.SetLines(this.bsphColor, Line3D.CreateWiredSphere(bsph, this.bsphSlices, this.bsphStacks));
+            this.lineDrawer.Instance.SetPrimitives(this.bsphColor, Line3D.CreateWiredSphere(bsph, this.bsphSlices, this.bsphStacks));
         }
         protected void UpdateSoldierStates()
         {

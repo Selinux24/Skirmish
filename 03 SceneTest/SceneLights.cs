@@ -21,7 +21,7 @@ namespace SceneTest
         private SceneObject<ModelInstanced> lightEmitters = null;
         private SceneObject<ModelInstanced> lanterns = null;
 
-        private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
@@ -221,12 +221,12 @@ namespace SceneTest
         }
         private void InitializeVolumeDrawer()
         {
-            var desc = new LineListDrawerDescription()
+            var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 DepthEnabled = true,
                 Count = 5000
             };
-            this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
+            this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
         }
         private void InitializeBufferDrawer()
         {
@@ -430,7 +430,7 @@ namespace SceneTest
 
                     var lines = spot.GetVolume(30);
 
-                    this.lightsVolumeDrawer.Instance.AddLines(color, lines);
+                    this.lightsVolumeDrawer.Instance.AddPrimitives(color, lines);
                 }
 
                 foreach (var point in this.Lights.PointLights)
@@ -439,7 +439,7 @@ namespace SceneTest
 
                     var lines = point.GetVolume(30, 30);
 
-                    this.lightsVolumeDrawer.Instance.AddLines(color, lines);
+                    this.lightsVolumeDrawer.Instance.AddPrimitives(color, lines);
                 }
             }
 
@@ -452,14 +452,14 @@ namespace SceneTest
                 {
                     var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 24, 24);
 
-                    this.lightsVolumeDrawer.Instance.AddLines(spotColor, lines);
+                    this.lightsVolumeDrawer.Instance.AddPrimitives(spotColor, lines);
                 }
 
                 foreach (var point in this.Lights.PointLights)
                 {
                     var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 24, 24);
 
-                    this.lightsVolumeDrawer.Instance.AddLines(pointColor, lines);
+                    this.lightsVolumeDrawer.Instance.AddPrimitives(pointColor, lines);
                 }
             }
 

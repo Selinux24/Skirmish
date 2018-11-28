@@ -19,7 +19,7 @@ namespace Collada
 
         private SceneObject<TextDrawer> debug = null;
 
-        private SceneObject<TriangleListDrawer> graphDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> graphDrawer = null;
 
         private SceneObject<Model> inputGeometry = null;
         private readonly BuildSettings nmsettings = BuildSettings.Default;
@@ -135,13 +135,13 @@ namespace Collada
         }
         private void InitializeDebug()
         {
-            var graphDrawerDesc = new TriangleListDrawerDescription()
+            var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Name = "DEBUG++ Graph",
                 AlphaEnabled = true,
                 Count = 50000,
             };
-            this.graphDrawer = this.AddComponent<TriangleListDrawer>(graphDrawerDesc);
+            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(graphDrawerDesc);
         }
 
         public override void Initialized()
@@ -293,7 +293,7 @@ namespace Collada
                     var color = node.Color;
                     var tris = node.Triangles;
 
-                    this.graphDrawer.Instance.AddTriangles(color, tris);
+                    this.graphDrawer.Instance.AddPrimitives(color, tris);
                 }
             }
         }

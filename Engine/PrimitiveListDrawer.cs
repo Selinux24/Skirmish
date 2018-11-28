@@ -8,9 +8,10 @@ namespace Engine
     using Engine.Effects;
 
     /// <summary>
-    /// Line list drawer
+    /// Primitive list drawer
     /// </summary>
-    public class LineListDrawer : Drawable
+    /// <typeparam name="T">Primitive list type</typeparam>
+    public class PrimitiveListDrawer<T> : Drawable where T : IVertexList
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -21,43 +22,59 @@ namespace Engine
         /// </summary>
         private int drawCount = 0;
         /// <summary>
-        /// Lines dictionary by color
+        /// Triangle dictionary by color
         /// </summary>
-        private readonly Dictionary<Color4, List<Line3D>> dictionary = new Dictionary<Color4, List<Line3D>>();
+        private readonly Dictionary<Color4, List<T>> dictionary = new Dictionary<Color4, List<T>>();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>
         private bool dictionaryChanged = false;
+        /// <summary>
+        /// Item stride
+        /// </summary>
+        private readonly int stride = 0;
+        /// <summary>
+        /// Item topology
+        /// </summary>
+        private readonly Topology topology;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Component description</param>
-        public LineListDrawer(Scene scene, LineListDrawerDescription description)
+        /// <param name="description">Description</param>
+        public PrimitiveListDrawer(Scene scene, PrimitiveListDrawerDescription<T> description)
             : base(scene, description)
         {
-            int count = 0;
-
-            if (description.Triangles != null && description.Triangles.Length > 0)
+            var vertsPerItem = default(T).GetVertices();
+            stride = vertsPerItem.Length;
+            switch (stride)
             {
-                var lines = Line3D.CreateWiredTriangle(description.Triangles);
-
-                count = description.Lines.Length * 2;
-
-                this.dictionary.Add(description.Color, new List<Line3D>(lines));
-                this.dictionaryChanged = true;
+                case 1:
+                    topology = Topology.PointList;
+                    break;
+                case 2:
+                    topology = Topology.LineList;
+                    break;
+                case 3:
+                    topology = Topology.TriangleList;
+                    break;
+                default:
+                    topology = Topology.PointList;
+                    break;
             }
-            else if (description.Lines != null && description.Lines.Length > 0)
-            {
-                count = description.Lines.Length * 2;
 
-                this.dictionary.Add(description.Color, new List<Line3D>(description.Lines));
+            int count = 0;
+            if (description.Primitives?.Length > 0)
+            {
+                count = description.Primitives.Length * stride;
+
+                this.dictionary.Add(description.Color, new List<T>(description.Primitives));
                 this.dictionaryChanged = true;
             }
             else
             {
-                count = description.Count * 2;
+                count = description.Count * stride;
 
                 this.dictionaryChanged = false;
             }
@@ -67,7 +84,7 @@ namespace Engine
         /// <summary>
         /// Destructor
         /// </summary>
-        ~LineListDrawer()
+        ~PrimitiveListDrawer()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -101,13 +118,13 @@ namespace Engine
                     var effect = DrawerPool.EffectDefaultBasic;
 
                     Counters.InstancesPerFrame += this.dictionary.Count;
-                    Counters.PrimitivesPerFrame += this.drawCount / 2;
+                    Counters.PrimitivesPerFrame += this.drawCount / this.stride;
 
                     effect.UpdatePerFrameBasic(Matrix.Identity, context);
                     effect.UpdatePerObject(0, null, 0, false);
 
                     var technique = effect.GetTechnique(VertexTypes.PositionColor, false);
-                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.LineList);
+                    this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, this.topology);
 
                     var graphics = this.Game.Graphics;
 
@@ -129,40 +146,40 @@ namespace Engine
         /// <summary>
         /// Initialize buffers
         /// </summary>
-        /// <param name="name">Buffer name</param>
+        /// <param name="name">Name</param>
         /// <param name="vertexCount">Vertex count</param>
         private void InitializeBuffers(string name, int vertexCount)
         {
             this.vertexBuffer = this.BufferManager.Add(name, new VertexPositionColor[vertexCount], true, 0);
         }
         /// <summary>
-        /// Set line
+        /// Set primitive
         /// </summary>
         /// <param name="color">Color</param>
-        /// <param name="line">Line</param>
-        public void SetLines(Color4 color, Line3D line)
+        /// <param name="primitive">Primitive</param>
+        public void SetPrimitives(Color4 color, T primitive)
         {
-            SetLines(color, new[] { line });
+            this.SetPrimitives(color, new[] { primitive });
         }
         /// <summary>
-        /// Set line list
+        /// Set primitives list
         /// </summary>
         /// <param name="color">Color</param>
-        /// <param name="lines">Line list</param>
-        public void SetLines(Color4 color, IEnumerable<Line3D> lines)
+        /// <param name="primitives">Primitives list</param>
+        public void SetPrimitives(Color4 color, IEnumerable<T> primitives)
         {
-            if (lines?.Any() == true)
+            if (primitives?.Count() > 0)
             {
                 if (!this.dictionary.ContainsKey(color))
                 {
-                    this.dictionary.Add(color, new List<Line3D>());
+                    this.dictionary.Add(color, new List<T>());
                 }
                 else
                 {
                     this.dictionary[color].Clear();
                 }
 
-                this.dictionary[color].AddRange(lines);
+                this.dictionary[color].AddRange(primitives);
 
                 this.dictionaryChanged = true;
             }
@@ -177,75 +194,27 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Add line to list
+        /// Add primitive to list
         /// </summary>
         /// <param name="color">Color</param>
-        /// <param name="line">Line</param>
-        public void AddLines(Color4 color, Line3D line)
+        /// <param name="primitive">primitive</param>
+        public void AddPrimitives(Color4 color, T primitive)
         {
-            AddLines(color, new[] { line });
+            AddPrimitives(color, new[] { primitive });
         }
         /// <summary>
-        /// Add lines to list
+        /// Add primitives to list
         /// </summary>
         /// <param name="color">Color</param>
-        /// <param name="lines">Line list</param>
-        public void AddLines(Color4 color, IEnumerable<Line3D> lines)
+        /// <param name="primitives">Primitives list</param>
+        public void AddPrimitives(Color4 color, IEnumerable<T> primitives)
         {
             if (!this.dictionary.ContainsKey(color))
             {
-                this.dictionary.Add(color, new List<Line3D>());
+                this.dictionary.Add(color, new List<T>());
             }
 
-            this.dictionary[color].AddRange(lines);
-
-            this.dictionaryChanged = true;
-        }
-        /// <summary>
-        /// Set triangle list
-        /// </summary>
-        /// <param name="color">Color</param>
-        /// <param name="lines">Triangle list</param>
-        public void SetTriangles(Color4 color, IEnumerable<Triangle> triangles)
-        {
-            if (triangles?.Any() == true)
-            {
-                if (!this.dictionary.ContainsKey(color))
-                {
-                    this.dictionary.Add(color, new List<Line3D>());
-                }
-                else
-                {
-                    this.dictionary[color].Clear();
-                }
-
-                this.dictionary[color].AddRange(Line3D.CreateWiredTriangle(triangles));
-
-                this.dictionaryChanged = true;
-            }
-            else
-            {
-                if (this.dictionary.ContainsKey(color))
-                {
-                    this.dictionary.Remove(color);
-
-                    this.dictionaryChanged = true;
-                }
-            }
-        }
-        /// <summary>
-        /// Add triangles to list
-        /// </summary>
-        /// <param name="color">Color</param>
-        /// <param name="lines">Triangle list</param>
-        public void AddTriangles(Color4 color, IEnumerable<Triangle> triangles)
-        {
-            if (!this.dictionary.ContainsKey(color))
-            {
-                this.dictionary.Add(color, new List<Line3D>());
-            }
-
-            this.dictionary[color].AddRange(Line3D.CreateWiredTriangle(triangles));
+            this.dictionary[color].AddRange(primitives);
 
             this.dictionaryChanged = true;
         }
@@ -280,15 +249,15 @@ namespace Engine
             {
                 List<VertexPositionColor> data = new List<VertexPositionColor>();
 
-                foreach (Color4 color in this.dictionary.Keys)
+                foreach (var color in this.dictionary.Keys)
                 {
-                    List<Line3D> lines = this.dictionary[color];
-                    if (lines.Count > 0)
+                    var primitives = this.dictionary[color];
+                    for (int i = 0; i < primitives.Count; i++)
                     {
-                        for (int i = 0; i < lines.Count; i++)
+                        var vList = primitives[i].GetVertices();
+                        for (int v = 0; v < vList.Length; v++)
                         {
-                            data.Add(new VertexPositionColor() { Position = lines[i].Point1, Color = color });
-                            data.Add(new VertexPositionColor() { Position = lines[i].Point2, Color = color });
+                            data.Add(new VertexPositionColor() { Position = vList[v], Color = color });
                         }
                     }
                 }

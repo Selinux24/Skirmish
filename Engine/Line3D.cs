@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// 3D Line
     /// </summary>
-    public struct Line3D
+    public struct Line3D : IVertexList
     {
         /// <summary>
         /// Start point
@@ -577,6 +577,19 @@ namespace Engine
         {
             this.Point1 = ray.Position;
             this.Point2 = ray.Position + ray.Direction;
+        }
+
+        /// <summary>
+        /// Gets vertex position list
+        /// </summary>
+        /// <returns>Returns the vertex position list</returns>
+        public Vector3[] GetVertices()
+        {
+            return new[]
+            {
+                this.Point1,
+                this.Point2,
+            };
         }
 
         /// <summary>

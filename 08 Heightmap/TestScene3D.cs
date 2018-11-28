@@ -50,8 +50,8 @@ namespace Heightmap
         private SceneObject<Terrain> terrain = null;
         private SceneObject<GroundGardener> gardener = null;
         private SceneObject<GroundGardener> gardener2 = null;
-        private SceneObject<LineListDrawer> bboxesDrawer = null;
-        private SceneObject<LineListDrawer> linesDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> bboxesDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> linesDrawer = null;
 
         private SceneObject<ModelInstanced> torchs = null;
         private SceneLightSpot spotLight1 = null;
@@ -70,8 +70,8 @@ namespace Heightmap
         private SceneObject<ModelInstanced> trees2 = null;
 
         private SceneObject<Model> soldier = null;
-        private SceneObject<TriangleListDrawer> soldierTris = null;
-        private SceneObject<LineListDrawer> soldierLines = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> soldierTris = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> soldierLines = null;
         private bool showSoldierDEBUG = false;
 
         private SceneObject<ModelInstanced> troops = null;
@@ -81,11 +81,11 @@ namespace Heightmap
         private SceneObject<Model> watchTower = null;
         private SceneObject<ModelInstanced> containers = null;
 
-        private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
-        private SceneObject<TriangleListDrawer> graphDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> graphDrawer = null;
 
         private readonly Agent agent = new Agent()
         {
@@ -722,23 +722,23 @@ namespace Heightmap
             SetPathFindingInfo();
 
             {
-                var desc = new LineListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "DEBUG++ Light Volumes",
                     DepthEnabled = true,
                     Count = 10000
                 };
-                this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
+                this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
             }
 
             {
-                var desc = new TriangleListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Name = "DEBUG++ Graph",
                     AlphaEnabled = true,
                     Count = 50000,
                 };
-                this.graphDrawer = this.AddComponent<TriangleListDrawer>(desc);
+                this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc);
                 this.graphDrawer.Visible = false;
             }
         }
@@ -1054,26 +1054,26 @@ namespace Heightmap
                 var bboxes = this.terrain.Instance.GetBoundingBoxes(5);
                 var listBoxes = Line3D.CreateWiredBox(bboxes);
 
-                var desc = new LineListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "DEBUG++ Terrain nodes bounding boxes",
                     AlphaEnabled = true,
                     DepthEnabled = true,
                     Dynamic = true,
                     Color = new Color4(1.0f, 0.0f, 0.0f, 0.55f),
-                    Lines = listBoxes.ToArray(),
+                    Primitives = listBoxes.ToArray(),
                 };
-                this.bboxesDrawer = this.AddComponent<LineListDrawer>(desc);
+                this.bboxesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
                 this.bboxesDrawer.Visible = false;
             }
 
             {
-                var desc = new LineListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     DepthEnabled = true,
                     Count = 1000,
                 };
-                this.linesDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, layerEffects);
+                this.linesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
                 this.linesDrawer.Visible = false;
             }
         }
@@ -1345,7 +1345,7 @@ namespace Heightmap
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 this.lanternFixed = true;
-                this.linesDrawer.Instance.SetLines(Color.LightPink, this.lantern.GetVolume(10));
+                this.linesDrawer.Instance.SetPrimitives(Color.LightPink, this.lantern.GetVolume(10));
                 this.linesDrawer.Visible = true;
             }
         }
@@ -1397,17 +1397,17 @@ namespace Heightmap
                 var tris = this.soldier.Instance.GetTriangles(true);
                 if (this.soldierTris == null)
                 {
-                    var desc = new TriangleListDrawerDescription()
+                    var desc = new PrimitiveListDrawerDescription<Triangle>()
                     {
                         DepthEnabled = false,
-                        Triangles = tris,
+                        Primitives = tris,
                         Color = color
                     };
-                    this.soldierTris = this.AddComponent<TriangleListDrawer>(desc);
+                    this.soldierTris = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc);
                 }
                 else
                 {
-                    this.soldierTris.Instance.SetTriangles(color, tris);
+                    this.soldierTris.Instance.SetPrimitives(color, tris);
                 }
 
                 BoundingBox[] bboxes = new BoundingBox[]
@@ -1420,16 +1420,16 @@ namespace Heightmap
                 };
                 if (this.soldierLines == null)
                 {
-                    var desc = new LineListDrawerDescription()
+                    var desc = new PrimitiveListDrawerDescription<Line3D>()
                     {
-                        Lines = Line3D.CreateWiredBox(bboxes).ToArray(),
+                        Primitives = Line3D.CreateWiredBox(bboxes).ToArray(),
                         Color = color
                     };
-                    this.soldierLines = this.AddComponent<LineListDrawer>(desc);
+                    this.soldierLines = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
                 }
                 else
                 {
-                    this.soldierLines.Instance.SetLines(color, Line3D.CreateWiredBox(bboxes));
+                    this.soldierLines.Instance.SetPrimitives(color, Line3D.CreateWiredBox(bboxes));
                 }
             }
 
@@ -1536,14 +1536,14 @@ namespace Heightmap
             {
                 var lines = spot.GetVolume(10);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
@@ -1556,14 +1556,14 @@ namespace Heightmap
             {
                 var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 12, 5);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 12, 5);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
@@ -1597,7 +1597,7 @@ namespace Heightmap
                         var color = node.Color;
                         var tris = node.Triangles;
 
-                        this.graphDrawer.Instance.AddTriangles(color, tris);
+                        this.graphDrawer.Instance.AddPrimitives(color, tris);
                     }
                 }
             }

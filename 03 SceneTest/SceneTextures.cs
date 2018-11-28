@@ -53,7 +53,7 @@ namespace SceneTest
 
         private SceneObject<Water> water = null;
 
-        private SceneObject<TriangleListDrawer> testCube = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> testCube = null;
 
         private ParticleSystemDescription pPlume = null;
         private ParticleSystemDescription pFire = null;
@@ -72,7 +72,7 @@ namespace SceneTest
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> lightsVolumeDrawer = null;
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
 
@@ -113,8 +113,8 @@ namespace SceneTest
             this.InitializeParticles();
             this.InitializeWater();
 
-            var desc = new LineListDrawerDescription() { DepthEnabled = true, Count = 10000 };
-            this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc);
+            var desc = new PrimitiveListDrawerDescription<Line3D>() { DepthEnabled = true, Count = 10000 };
+            this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(9, 00, 00), 0.1f);
         }
@@ -629,15 +629,15 @@ namespace SceneTest
             var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
             cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30, 0.5f, 0));
 
-            var desc = new TriangleListDrawerDescription()
+            var desc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Name = "Test Cube",
-                Triangles = cubeTris,
+                Primitives = cubeTris,
                 Color = Color.Red,
                 DepthEnabled = true,
             };
 
-            this.testCube = this.AddComponent<TriangleListDrawer>(desc);
+            this.testCube = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc);
         }
         private void InitializeParticles()
         {
@@ -778,14 +778,14 @@ namespace SceneTest
             {
                 var lines = spot.GetVolume(10);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
@@ -798,14 +798,14 @@ namespace SceneTest
             {
                 var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 12, 5);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 12, 5);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;

@@ -18,8 +18,8 @@ namespace Animation
 
         private SceneObject<Model> soldier = null;
         private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
-        private SceneObject<TriangleListDrawer> soldierTris = null;
-        private SceneObject<LineListDrawer> soldierLines = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> soldierTris = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> soldierLines = null;
         private readonly Color soldierTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
         private readonly Color soldierLinesColor = new Color(Color.Red.ToColor3(), 1f);
         private bool showSoldierDEBUG = false;
@@ -206,8 +206,8 @@ namespace Animation
         }
         private void InitializeDebug()
         {
-            this.soldierTris = this.AddComponent<TriangleListDrawer>(new TriangleListDrawerDescription() { Count = 5000, Color = soldierTrisColor });
-            this.soldierLines = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { Count = 1000, Color = soldierLinesColor });
+            this.soldierTris = this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = soldierTrisColor });
+            this.soldierLines = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = soldierLinesColor });
         }
 
         public override void Update(GameTime gameTime)
@@ -260,8 +260,8 @@ namespace Animation
                 Triangle[] tris = this.soldier.Instance.GetTriangles(true);
                 BoundingBox bbox = this.soldier.Instance.GetBoundingBox(true);
 
-                this.soldierTris.Instance.SetTriangles(soldierTrisColor, tris);
-                this.soldierLines.Instance.SetLines(soldierLinesColor, Line3D.CreateWiredBox(bbox));
+                this.soldierTris.Instance.SetPrimitives(soldierTrisColor, tris);
+                this.soldierLines.Instance.SetPrimitives(soldierLinesColor, Line3D.CreateWiredBox(bbox));
 
                 this.soldierTris.Active = this.soldierTris.Visible = true;
                 this.soldierLines.Active = this.soldierLines.Visible = true;

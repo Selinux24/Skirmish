@@ -45,16 +45,16 @@ namespace Collada
         private readonly float nextRatTime = 3f;
         private Vector3[] ratHoles = null;
 
-        private SceneObject<TriangleListDrawer> selectedItemDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> selectedItemDrawer = null;
         private ModularSceneryItem selectedItem = null;
 
         private SceneObject<ModelInstanced> human = null;
 
-        private SceneObject<LineListDrawer> bboxesDrawer = null;
-        private SceneObject<LineListDrawer> ratDrawer = null;
-        private SceneObject<TriangleListDrawer> graphDrawer = null;
-        private SceneObject<TriangleListDrawer> obstacleDrawer = null;
-        private SceneObject<LineListDrawer> connectionDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> bboxesDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> ratDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> graphDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> obstacleDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> connectionDrawer = null;
         private int currentGraph = 0;
         private bool graphUpdateRequested = false;
         private float graphUpdateSeconds = 0;
@@ -176,14 +176,14 @@ namespace Collada
             this.messages.Instance.Position = new Vector2(0, 0);
             this.messages.Visible = false;
 
-            var drawerDesc = new TriangleListDrawerDescription()
+            var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Name = "Seleced Items Drawer",
                 AlphaEnabled = true,
                 CastShadow = false,
                 Count = 50000,
             };
-            this.selectedItemDrawer = this.AddComponent<TriangleListDrawer>(drawerDesc, SceneObjectUsages.UI, layerHUD);
+            this.selectedItemDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(drawerDesc, SceneObjectUsages.UI, layerHUD);
             this.selectedItemDrawer.Visible = true;
         }
         private void InitializeModularScenery()
@@ -290,53 +290,53 @@ namespace Collada
         }
         private void InitializeDebug()
         {
-            var graphDrawerDesc = new TriangleListDrawerDescription()
+            var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Name = "DEBUG++ Graph",
                 AlphaEnabled = true,
                 Count = 50000,
             };
-            this.graphDrawer = this.AddComponent<TriangleListDrawer>(graphDrawerDesc);
+            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(graphDrawerDesc);
             this.graphDrawer.Visible = false;
 
-            var bboxesDrawerDesc = new LineListDrawerDescription()
+            var bboxesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Name = "DEBUG++ Bounding volumes",
                 AlphaEnabled = true,
                 Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
                 Count = 10000,
             };
-            this.bboxesDrawer = this.AddComponent<LineListDrawer>(bboxesDrawerDesc);
+            this.bboxesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(bboxesDrawerDesc);
             this.bboxesDrawer.Visible = false;
 
-            var ratDrawerDesc = new LineListDrawerDescription()
+            var ratDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Name = "DEBUG++ Rat",
                 AlphaEnabled = true,
                 Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
                 Count = 10000,
             };
-            this.ratDrawer = this.AddComponent<LineListDrawer>(ratDrawerDesc);
+            this.ratDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(ratDrawerDesc);
             this.ratDrawer.Visible = false;
 
-            var obstacleDrawerDesc = new TriangleListDrawerDescription()
+            var obstacleDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Name = "DEBUG++ Obstacles",
                 AlphaEnabled = true,
                 DepthEnabled = true,
                 Count = 1000,
             };
-            this.obstacleDrawer = this.AddComponent<TriangleListDrawer>(obstacleDrawerDesc);
+            this.obstacleDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(obstacleDrawerDesc);
             this.obstacleDrawer.Visible = true;
 
-            var connectionDrawerDesc = new LineListDrawerDescription()
+            var connectionDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Name = "DEBUG++ Connections",
                 AlphaEnabled = true,
                 Color = connectionColor,
                 Count = 1000,
             };
-            this.connectionDrawer = this.AddComponent<LineListDrawer>(connectionDrawerDesc);
+            this.connectionDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(connectionDrawerDesc);
             this.connectionDrawer.Visible = false;
         }
 
@@ -387,7 +387,7 @@ namespace Collada
                     var color = rndBoxes.NextColor().ToColor4();
                     color.Alpha = 0.40f;
 
-                    this.bboxesDrawer.Instance.SetLines(color, Line3D.CreateWiredBox(item.ToArray()));
+                    this.bboxesDrawer.Instance.SetPrimitives(color, Line3D.CreateWiredBox(item.ToArray()));
                 }
             }
 
@@ -408,7 +408,7 @@ namespace Collada
                 lines.AddRange(Line3D.CreateWiredBox(bbox));
             }
 
-            this.bboxesDrawer.Instance.SetLines(color, lines);
+            this.bboxesDrawer.Instance.SetPrimitives(color, lines);
         }
         private void UpdateGraphNodes(AgentType agent)
         {
@@ -424,7 +424,7 @@ namespace Collada
                         var color = node.Color;
                         var tris = node.Triangles;
 
-                        this.graphDrawer.Instance.AddTriangles(color, tris);
+                        this.graphDrawer.Instance.AddPrimitives(color, tris);
                     }
                 }
             }
@@ -554,7 +554,7 @@ namespace Collada
                 //Frustum
                 var frustum = Line3D.CreateWiredFrustum(this.Camera.Frustum);
 
-                this.bboxesDrawer.Instance.SetLines(Color.White, frustum);
+                this.bboxesDrawer.Instance.SetPrimitives(Color.White, frustum);
             }
         }
         private void UpdateGraphInput()
@@ -672,7 +672,7 @@ namespace Collada
                     path.ReturnPath.Add(this.ratHoles[iTo]);
                     path.Normals.Add(Vector3.Up);
 
-                    this.ratDrawer.Instance.SetLines(Color.Red, Line3D.CreateLineList(path.ReturnPath.ToArray()));
+                    this.ratDrawer.Instance.SetPrimitives(Color.Red, Line3D.CreateLineList(path.ReturnPath.ToArray()));
 
                     this.ratController.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
                     this.ratController.MaximumSpeed = this.ratAgentType.Velocity;
@@ -688,7 +688,7 @@ namespace Collada
             {
                 var bbox = this.rat.Instance.GetBoundingBox();
 
-                this.ratDrawer.Instance.SetLines(Color.White, Line3D.CreateWiredBox(bbox));
+                this.ratDrawer.Instance.SetPrimitives(Color.White, Line3D.CreateWiredBox(bbox));
             }
         }
         private void UpdateEntities()
@@ -784,7 +784,7 @@ namespace Collada
                 Color4 sItemColor = Color.LightGreen;
                 sItemColor.Alpha = 0.2f;
 
-                this.selectedItemDrawer.Instance.SetTriangles(sItemColor, tris);
+                this.selectedItemDrawer.Instance.SetPrimitives(sItemColor, tris);
             }
 
             if (item.Object.Type == ModularSceneryObjectTypes.Entrance)
@@ -1001,7 +1001,7 @@ namespace Collada
 
                 if (obstacleTris != null && obstacleTris.Length > 0)
                 {
-                    this.obstacleDrawer.Instance.AddTriangles(obstacleColor, obstacleTris);
+                    this.obstacleDrawer.Instance.AddPrimitives(obstacleColor, obstacleTris);
                 }
             }
         }
@@ -1015,15 +1015,15 @@ namespace Collada
             foreach (var conn in conns)
             {
                 var arclines = Line3D.CreateArc(conn.Start, conn.End, 0.25f, 8);
-                this.connectionDrawer.Instance.AddLines(connectionColor, arclines);
+                this.connectionDrawer.Instance.AddPrimitives(connectionColor, arclines);
 
                 var cirlinesF = Line3D.CreateCircle(conn.Start, conn.Radius, 32);
-                this.connectionDrawer.Instance.AddLines(connectionColor, cirlinesF);
+                this.connectionDrawer.Instance.AddPrimitives(connectionColor, cirlinesF);
 
                 if (conn.Direction == 1)
                 {
                     var cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
-                    this.connectionDrawer.Instance.AddLines(connectionColor, cirlinesT);
+                    this.connectionDrawer.Instance.AddPrimitives(connectionColor, cirlinesT);
                 }
 
                 this.connectionDrawer.Visible = true;

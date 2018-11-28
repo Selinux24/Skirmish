@@ -3,18 +3,18 @@
 namespace Engine
 {
     /// <summary>
-    /// Triangle drawer description
+    /// Primitive drawer description
     /// </summary>
-    public class TriangleListDrawerDescription : ModelDescription
+    public class PrimitiveListDrawerDescription<T> : ModelDescription where T : IVertexList
     {
         /// <summary>
         /// Maximum triangle count
         /// </summary>
         public int Count { get; set; }
         /// <summary>
-        /// Initial triangles
+        /// Initial primitives
         /// </summary>
-        public Triangle[] Triangles { get; set; }
+        public T[] Primitives { get; set; }
         /// <summary>
         /// Initial color
         /// </summary>
@@ -23,7 +23,7 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public TriangleListDrawerDescription()
+        public PrimitiveListDrawerDescription()
             : base()
         {
             this.Static = true;

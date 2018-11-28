@@ -39,8 +39,8 @@ namespace Skybox
         private SceneObject<TextDrawer> fps = null;
 
         private SceneObject<Scenery> ruins = null;
-        private SceneObject<LineListDrawer> volumesDrawer = null;
-        private SceneObject<TriangleListDrawer> graphDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> volumesDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> graphDrawer = null;
 
         private SceneObject<ModelInstanced> torchs = null;
 
@@ -218,10 +218,10 @@ namespace Skybox
 
             #region DEBUG drawers
 
-            this.volumesDrawer = this.AddComponent<LineListDrawer>(new LineListDrawerDescription() { AlphaEnabled = true, Count = 10000 });
+            this.volumesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
             this.volumesDrawer.Visible = false;
 
-            this.graphDrawer = this.AddComponent<TriangleListDrawer>(new TriangleListDrawerDescription() { AlphaEnabled = true, Count = 10000 });
+            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { AlphaEnabled = true, Count = 10000 });
             this.graphDrawer.Visible = false;
 
             #endregion
@@ -395,7 +395,9 @@ namespace Skybox
 
                 if (this.ruins.Instance.PickNearest(pRay, true, out PickingResult<Triangle> r))
                 {
-                    this.volumesDrawer.Instance.SetTriangles(Color.White, new[] { r.Item });
+                    var tri = Line3D.CreateWiredTriangle(r.Item);
+
+                    this.volumesDrawer.Instance.SetPrimitives(Color.White, tri);
                 }
             }
 
@@ -489,20 +491,20 @@ namespace Skybox
 
         private void DEBUGUpdateVolumesDrawer()
         {
-            this.volumesDrawer.Instance.SetLines(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.Instance.GetBoundingBox()));
+            this.volumesDrawer.Instance.SetPrimitives(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.Instance.GetBoundingBox()));
 
             List<Line3D> volumesTorchs = new List<Line3D>();
             for (int i = 0; i < this.torchs.Count; i++)
             {
                 volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs.Instance[i].GetBoundingBox()));
             }
-            this.volumesDrawer.Instance.SetLines(this.torchVolumeColor, volumesTorchs.ToArray());
+            this.volumesDrawer.Instance.SetPrimitives(this.torchVolumeColor, volumesTorchs.ToArray());
 
             for (int i = 1; i < this.Lights.PointLights.Length; i++)
             {
                 var light = this.Lights.PointLights[i];
 
-                this.volumesDrawer.Instance.SetLines(
+                this.volumesDrawer.Instance.SetPrimitives(
                     new Color4(light.DiffuseColor.RGB(), alpha),
                     Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
             }
@@ -511,7 +513,7 @@ namespace Skybox
         {
             var light = this.Lights.PointLights[0];
 
-            this.volumesDrawer.Instance.SetLines(
+            this.volumesDrawer.Instance.SetPrimitives(
                 new Color4(light.DiffuseColor.RGB(), alpha),
                 Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
         }
@@ -528,7 +530,7 @@ namespace Skybox
                     var color = node.Color;
                     var tris = node.Triangles;
 
-                    this.graphDrawer.Instance.AddTriangles(color, tris);
+                    this.graphDrawer.Instance.AddPrimitives(color, tris);
                 }
             }
         }

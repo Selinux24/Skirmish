@@ -86,13 +86,13 @@ namespace Terrain
         private readonly Color4 hAxisColor = Color.YellowGreen;
         private readonly Color4 wAxisColor = Color.White;
 
-        private SceneObject<LineListDrawer> staticObjLineDrawer = null;
-        private SceneObject<LineListDrawer> movingObjLineDrawer = null;
-        private SceneObject<LineListDrawer> lightsVolumeDrawer = null;
-        private SceneObject<LineListDrawer> curveLineDrawer = null;
-        private SceneObject<LineListDrawer> terrainLineDrawer = null;
-        private SceneObject<LineListDrawer> terrainPointDrawer = null;
-        private SceneObject<TriangleListDrawer> terrainGraphDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> staticObjLineDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> movingObjLineDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> lightsVolumeDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> curveLineDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> terrainLineDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> terrainPointDrawer = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> terrainGraphDrawer = null;
 
         private bool drawDrawVolumes = false;
         private bool drawCullVolumes = false;
@@ -307,13 +307,13 @@ namespace Terrain
             sw.Restart();
 
             {
-                var desc = new LineListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Lights",
                     DepthEnabled = true,
                     Count = 5000,
                 };
-                this.lightsVolumeDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
+                this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.lightsVolumeDrawer.Visible = false;
             }
 
@@ -342,72 +342,72 @@ namespace Terrain
 
             #region DEBUG Path finding Graph
             {
-                var desc = new TriangleListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Name = "++DEBUG++ Path finding Graph",
                     Count = MaxGridDrawer
                 };
-                this.terrainGraphDrawer = this.AddComponent<TriangleListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
+                this.terrainGraphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.terrainGraphDrawer.Visible = false;
             }
             #endregion
 
             #region DEBUG Picking test
             {
-                var desc = new LineListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Picking test",
                     Count = MaxPickingTest
                 };
-                this.terrainPointDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
+                this.terrainPointDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.terrainPointDrawer.Visible = false;
             }
             #endregion
 
             #region DEBUG Trajectory
             {
-                var desc = new LineListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Trajectory",
                     Count = 20000
                 };
-                this.curveLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
+                this.curveLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.curveLineDrawer.Visible = false;
             }
             #endregion
 
             #region DEBUG Helicopter manipulator
             {
-                var desc = new LineListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Helicopter manipulator",
                     Count = 1000
                 };
-                this.movingObjLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
+                this.movingObjLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.movingObjLineDrawer.Visible = false;
             }
             #endregion
 
             #region DEBUG static volumes
             {
-                var desc = new LineListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Static Volumes",
                     Count = 20000
                 };
-                this.staticObjLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, layerEffects);
+                this.staticObjLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
                 this.staticObjLineDrawer.Visible = false;
             }
             #endregion
 
             #region DEBUG Ground position test
             {
-                var desc = new LineListDrawerDescription()
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Ground position test",
                     Count = 10000
                 };
-                this.terrainLineDrawer = this.AddComponent<LineListDrawer>(desc, SceneObjectUsages.None, this.layerEffects);
+                this.terrainLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, this.layerEffects);
                 this.terrainLineDrawer.Visible = false;
             }
             #endregion
@@ -1116,16 +1116,16 @@ namespace Terrain
 
                 if (this.oks.Count > 0)
                 {
-                    this.terrainLineDrawer.Instance.AddLines(Color.Green, this.oks.ToArray());
+                    this.terrainLineDrawer.Instance.AddPrimitives(Color.Green, this.oks.ToArray());
                 }
                 if (this.errs.Count > 0)
                 {
-                    this.terrainLineDrawer.Instance.AddLines(Color.Red, this.errs.ToArray());
+                    this.terrainLineDrawer.Instance.AddPrimitives(Color.Red, this.errs.ToArray());
                 }
             }
 
             // Axis
-            this.curveLineDrawer.Instance.SetLines(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
+            this.curveLineDrawer.Instance.SetPrimitives(this.wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
             this.curveLineDrawer.Visible = false;
         }
 
@@ -1498,7 +1498,7 @@ namespace Terrain
             if (this.curveLineDrawer.Visible)
             {
                 Matrix rot = Matrix.RotationQuaternion(this.helicopter.Transform.Rotation) * Matrix.Translation(this.helicopter.Transform.Position);
-                this.curveLineDrawer.Instance.SetLines(this.hAxisColor, Line3D.CreateAxis(rot, 5f));
+                this.curveLineDrawer.Instance.SetPrimitives(this.hAxisColor, Line3D.CreateAxis(rot, 5f));
             }
 
             if (this.staticObjLineDrawer.Visible && objNotSet)
@@ -1861,11 +1861,11 @@ namespace Terrain
                 var positions = results.Select(r => r.Position).ToArray();
                 var triangles = results.Select(r => r.Item).ToArray();
 
-                this.terrainPointDrawer.Instance.SetLines(Color.Magenta, Line3D.CreateCrossList(positions, 1f));
-                this.terrainPointDrawer.Instance.SetLines(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
+                this.terrainPointDrawer.Instance.SetPrimitives(Color.Magenta, Line3D.CreateCrossList(positions, 1f));
+                this.terrainPointDrawer.Instance.SetPrimitives(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
                 if (positions.Length > 1)
                 {
-                    this.terrainPointDrawer.Instance.SetLines(Color.Cyan, new Line3D(positions[0], positions[positions.Length - 1]));
+                    this.terrainPointDrawer.Instance.SetPrimitives(Color.Cyan, new Line3D(positions[0], positions[positions.Length - 1]));
                 }
             }
         }
@@ -1882,9 +1882,9 @@ namespace Terrain
                 path.Add(pos);
             }
 
-            this.curveLineDrawer.Instance.SetLines(this.curvesColor, Line3D.CreatePath(path.ToArray()));
-            this.curveLineDrawer.Instance.SetLines(this.pointsColor, Line3D.CreateCrossList(curve.Points, 0.5f));
-            this.curveLineDrawer.Instance.SetLines(this.segmentsColor, Line3D.CreatePath(curve.Points));
+            this.curveLineDrawer.Instance.SetPrimitives(this.curvesColor, Line3D.CreatePath(path.ToArray()));
+            this.curveLineDrawer.Instance.SetPrimitives(this.pointsColor, Line3D.CreateCrossList(curve.Points, 0.5f));
+            this.curveLineDrawer.Instance.SetPrimitives(this.segmentsColor, Line3D.CreatePath(curve.Points));
         }
         private void DEBUGDrawTankPath(Vector3 from, PathFindingPath path)
         {
@@ -1907,7 +1907,7 @@ namespace Terrain
                 lines[i] = line;
             }
 
-            this.terrainPointDrawer.Instance.SetLines(Color.Red, lines);
+            this.terrainPointDrawer.Instance.SetPrimitives(Color.Red, lines);
         }
         private void DEBUGUpdateGraphDrawer()
         {
@@ -1928,7 +1928,7 @@ namespace Terrain
                         var color = node.Color;
                         var tris = node.Triangles;
 
-                        this.terrainGraphDrawer.Instance.AddTriangles(color, tris);
+                        this.terrainGraphDrawer.Instance.AddPrimitives(color, tris);
                     }
                 }
                 else
@@ -1946,7 +1946,7 @@ namespace Terrain
                         var color = node.Color;
                         var tris = node.Triangles;
 
-                        this.terrainGraphDrawer.Instance.SetTriangles(color, tris);
+                        this.terrainGraphDrawer.Instance.SetPrimitives(color, tris);
                     }
                 }
             }
@@ -1963,14 +1963,14 @@ namespace Terrain
             {
                 var lines = spot.GetVolume(10);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(spot.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = point.GetVolume(12, 5);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(point.DiffuseColor.RGB(), 0.15f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
@@ -1983,14 +1983,14 @@ namespace Terrain
             {
                 var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 10, 10);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in this.Lights.PointLights)
             {
                 var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 10, 10);
 
-                this.lightsVolumeDrawer.Instance.AddLines(new Color4(Color.Red.RGB(), 0.55f), lines);
+                this.lightsVolumeDrawer.Instance.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             this.lightsVolumeDrawer.Active = this.lightsVolumeDrawer.Visible = true;
@@ -2026,16 +2026,16 @@ namespace Terrain
                 lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(false)));
             }
 
-            this.staticObjLineDrawer.Instance.SetLines(objColor, lines.ToArray());
+            this.staticObjLineDrawer.Instance.SetPrimitives(objColor, lines.ToArray());
         }
         private void DEBUGDrawMovingVolumes()
         {
             var hsph = this.helicopter.Geometry.GetBoundingSphere();
-            this.movingObjLineDrawer.Instance.SetLines(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, }, 50, 20));
+            this.movingObjLineDrawer.Instance.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, }, 50, 20));
 
             var t1sph = this.tankP1.Geometry.GetBoundingBox();
             var t2sph = this.tankP2.Geometry.GetBoundingBox();
-            this.movingObjLineDrawer.Instance.SetLines(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateWiredBox(new[] { t1sph, t2sph, }));
+            this.movingObjLineDrawer.Instance.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateWiredBox(new[] { t1sph, t2sph, }));
         }
     }
 }
