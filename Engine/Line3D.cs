@@ -300,19 +300,7 @@ namespace Engine
         {
             List<Line3D> resultList = new List<Line3D>();
 
-            List<Vector3> verts = new List<Vector3>();
-
-            //verts
-            for (int i = 0; i < 2; i++)
-            {
-                for (int j = 0; j < segments; j++)
-                {
-                    float theta = ((float)j / (float)segments) * 2 * (float)Math.PI;
-                    float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
-
-                    verts.Add(cylinder.Position + new Vector3(cylinder.Radius * st, cylinder.Height * i, cylinder.Radius * ct));
-                }
-            }
+            var verts = cylinder.GetVertices(segments);
 
             for (int i = 0; i < segments; i++)
             {

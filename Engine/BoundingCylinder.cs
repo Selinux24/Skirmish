@@ -1,5 +1,6 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
+using System;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -184,6 +185,28 @@ namespace Engine
         public override int GetHashCode()
         {
             return this.Position.GetHashCode() ^ this.Radius.GetHashCode() ^ this.Height.GetHashCode();
+        }
+        /// <summary>
+        /// Gets the cylinder vertices
+        /// </summary>
+        /// <param name="segments">Vertical segments</param>
+        /// <returns>Returns a point array of vertices</returns>
+        public Vector3[] GetVertices(int segments)
+        {
+            List<Vector3> verts = new List<Vector3>();
+
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < segments; j++)
+                {
+                    float theta = ((float)j / (float)segments) * 2 * (float)Math.PI;
+                    float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
+
+                    verts.Add(this.Position + new Vector3(this.Radius * st, this.Height * i, this.Radius * ct));
+                }
+            }
+
+            return verts.ToArray();
         }
     }
 }
