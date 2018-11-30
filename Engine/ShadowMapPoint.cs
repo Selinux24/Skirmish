@@ -53,7 +53,7 @@ namespace Engine
         /// <param name="arraySize">Array size</param>
         public ShadowMapPoint(Game game, int width, int height, int arraySize) : base(game, width, height, 6)
         {
-            game.Graphics.CreateCubicShadowMapTextures(
+            game.Graphics.CreateCubicShadowMapTextureArrays(
                 width, height, arraySize,
                 out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv);
 

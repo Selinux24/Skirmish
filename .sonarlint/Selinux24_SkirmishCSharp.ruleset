@@ -64,6 +64,7 @@
     <Rule Id="S1451" Action="None" />
     <Rule Id="S1479" Action="Warning" />
     <Rule Id="S1481" Action="Warning" />
+    <Rule Id="S1523" Action="Warning" />
     <Rule Id="S1541" Action="None" />
     <Rule Id="S1607" Action="Warning" />
     <Rule Id="S1643" Action="Warning" />
@@ -89,6 +90,7 @@
     <Rule Id="S1994" Action="None" />
     <Rule Id="S2068" Action="Warning" />
     <Rule Id="S2070" Action="None" />
+    <Rule Id="S2077" Action="Warning" />
     <Rule Id="S2092" Action="None" />
     <Rule Id="S2114" Action="Warning" />
     <Rule Id="S2123" Action="Warning" />
@@ -168,6 +170,7 @@
     <Rule Id="S2997" Action="Warning" />
     <Rule Id="S3005" Action="Warning" />
     <Rule Id="S3010" Action="Warning" />
+    <Rule Id="S3011" Action="Warning" />
     <Rule Id="S3052" Action="None" />
     <Rule Id="S3060" Action="Warning" />
     <Rule Id="S3168" Action="Warning" />
@@ -317,7 +320,7 @@
     <Rule Id="S4060" Action="None" />
     <Rule Id="S4061" Action="Warning" />
     <Rule Id="S4069" Action="None" />
-    <Rule Id="S4070" Action="None" />
+    <Rule Id="S4070" Action="Warning" />
     <Rule Id="S4142" Action="None" />
     <Rule Id="S4143" Action="Warning" />
     <Rule Id="S4144" Action="Warning" />
@@ -342,10 +345,24 @@
     <Rule Id="S4456" Action="Warning" />
     <Rule Id="S4457" Action="Warning" />
     <Rule Id="S4462" Action="None" />
+    <Rule Id="S4507" Action="Warning" />
     <Rule Id="S4524" Action="Warning" />
+    <Rule Id="S4529" Action="Warning" />
     <Rule Id="S4564" Action="None" />
     <Rule Id="S4581" Action="Warning" />
     <Rule Id="S4586" Action="Warning" />
+    <Rule Id="S4721" Action="Warning" />
+    <Rule Id="S4784" Action="Warning" />
+    <Rule Id="S4787" Action="Warning" />
+    <Rule Id="S4790" Action="Warning" />
+    <Rule Id="S4792" Action="Warning" />
+    <Rule Id="S4797" Action="Warning" />
+    <Rule Id="S4817" Action="Warning" />
+    <Rule Id="S4818" Action="Warning" />
+    <Rule Id="S4823" Action="Warning" />
+    <Rule Id="S4825" Action="Warning" />
+    <Rule Id="S4829" Action="Warning" />
+    <Rule Id="S4834" Action="Warning" />
     <Rule Id="S818" Action="Warning" />
     <Rule Id="S881" Action="None" />
     <Rule Id="S907" Action="Warning" />

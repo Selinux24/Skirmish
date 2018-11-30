@@ -19,8 +19,8 @@ namespace Engine
         /// <param name="arraySize">Array size</param>
         public ShadowMapSpot(Game game, int width, int height, int arraySize) : base(game, width, height, arraySize)
         {
-            game.Graphics.CreateShadowMapTextures(
-                width, height, arraySize,
+            game.Graphics.CreateShadowMapTextureArrays(
+                width, height, 1, arraySize,
                 out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv);
 
             this.DepthMap = dsv;

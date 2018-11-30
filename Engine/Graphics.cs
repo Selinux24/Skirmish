@@ -1690,22 +1690,9 @@ namespace Engine
         {
             try
             {
-                Counters.Textures++;
-
                 var textureList = Helper.Attempt(TextureData.ReadTexture, filenames, 5);
 
-                var resource = this.CreateResource(textureList);
-
-                if (textureList != null)
-                {
-                    for (int i = 0; i < textureList.Length; i++)
-                    {
-                        textureList[i]?.Dispose();
-                        textureList[i] = null;
-                    }
-                }
-
-                return new EngineShaderResourceView(resource);
+                return LoadTextureArray(textureList);
             }
             catch (Exception ex)
             {
@@ -1721,22 +1708,9 @@ namespace Engine
         {
             try
             {
-                Counters.Textures++;
-
                 var textureList = Helper.Attempt(TextureData.ReadTexture, streams, 5);
 
-                var resource = this.CreateResource(textureList);
-
-                if (textureList != null)
-                {
-                    for (int i = 0; i < textureList.Length; i++)
-                    {
-                        textureList[i]?.Dispose();
-                        textureList[i] = null;
-                    }
-                }
-
-                return new EngineShaderResourceView(resource);
+                return LoadTextureArray(textureList);
             }
             catch (Exception ex)
             {
@@ -1744,108 +1718,23 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Loads a cube texture from file in the graphics device
+        /// Loads a texture array in the graphics device
         /// </summary>
-        /// <param name="filename">Path to file</param>
+        /// <param name="textureList">Texture array</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureCube(string filename)
+        private EngineShaderResourceView LoadTextureArray(TextureData[] textureList)
         {
-            try
+            Counters.Textures++;
+
+            var resource = this.CreateResource(textureList);
+
+            for (int i = 0; i < textureList?.Length; i++)
             {
-                Counters.Textures++;
-
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, filename, 5))
-                {
-                    return new EngineShaderResourceView(CreateResource(resource));
-                }
+                textureList[i]?.Dispose();
+                textureList[i] = null;
             }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTextureCube from filename Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a cube texture from file in the graphics device
-        /// </summary>
-        /// <param name="stream">Stream</param>
-        /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureCube(MemoryStream stream)
-        {
-            try
-            {
-                Counters.Textures++;
 
-                using (var resource = Helper.Attempt(TextureData.ReadTexture, stream, 5))
-                {
-                    return new EngineShaderResourceView(CreateResource(resource));
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTextureCube from stream Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a cube texture array from file in the graphics device
-        /// </summary>
-        /// <param name="filenames">Path file collection</param>
-        /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureCubeArray(string[] filenames)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                var textureList = Helper.Attempt(TextureData.ReadTexture, filenames, 5);
-
-                var resource = this.CreateResource(textureList);
-
-                if (textureList != null)
-                {
-                    for (int i = 0; i < textureList.Length; i++)
-                    {
-                        textureList[i]?.Dispose();
-                        textureList[i] = null;
-                    }
-                }
-
-                return new EngineShaderResourceView(resource);
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTextureCube from filename Error. See inner exception for details", ex);
-            }
-        }
-        /// <summary>
-        /// Loads a cube texture array from file in the graphics device
-        /// </summary>
-        /// <param name="streams">Stream collection</param>
-        /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureCubeArray(MemoryStream[] streams)
-        {
-            try
-            {
-                Counters.Textures++;
-
-                var textureList = Helper.Attempt(TextureData.ReadTexture, streams, 5);
-
-                var resource = this.CreateResource(textureList);
-
-                if (textureList != null)
-                {
-                    for (int i = 0; i < textureList.Length; i++)
-                    {
-                        textureList[i]?.Dispose();
-                        textureList[i] = null;
-                    }
-                }
-
-                return new EngineShaderResourceView(resource);
-            }
-            catch (Exception ex)
-            {
-                throw new EngineException("LoadTextureCube from stream Error. See inner exception for details", ex);
-            }
+            return new EngineShaderResourceView(resource);
         }
 
         /// <summary>
@@ -2034,51 +1923,10 @@ namespace Engine
                     sampleDescription = this.CurrentSampleDescription;
                 }
 
-                using (var texture = new Texture2D1(
-                    this.device,
-                    new Texture2DDescription1()
-                    {
-                        Width = width,
-                        Height = height,
-                        MipLevels = 1,
-                        ArraySize = 1,
-                        Format = format,
-                        SampleDescription = sampleDescription,
-                        Usage = ResourceUsage.Default,
-                        BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                        CpuAccessFlags = CpuAccessFlags.None,
-                        OptionFlags = ResourceOptionFlags.None
-                    }))
-                {
-                    var rtvDesc = new RenderTargetViewDescription1()
-                    {
-                        Format = format,
-                    };
-                    var srvDesc = new ShaderResourceViewDescription1()
-                    {
-                        Format = format,
-                    };
+                CreateRenderTargetTexture(format, width, height, multiSampled, sampleDescription, out var rtv1, out var srv1);
 
-                    if (multiSampled)
-                    {
-                        rtvDesc.Dimension = RenderTargetViewDimension.Texture2DMultisampled;
-                        rtvDesc.Texture2DMS = new RenderTargetViewDescription.Texture2DMultisampledResource();
-
-                        srvDesc.Dimension = ShaderResourceViewDimension.Texture2DMultisampled;
-                        srvDesc.Texture2DMS = new ShaderResourceViewDescription.Texture2DMultisampledResource();
-                    }
-                    else
-                    {
-                        rtvDesc.Dimension = RenderTargetViewDimension.Texture2D;
-                        rtvDesc.Texture2D = new RenderTargetViewDescription1.Texture2DResource();
-
-                        srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
-                        srvDesc.Texture2D = new ShaderResourceViewDescription1.Texture2DResource1() { MipLevels = 1 };
-                    }
-
-                    rtv = new EngineRenderTargetView(new RenderTargetView1(this.device, texture, rtvDesc));
-                    srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, texture, srvDesc));
-                }
+                rtv = new EngineRenderTargetView(rtv1);
+                srv = new EngineShaderResourceView(srv1);
             }
             catch (Exception ex)
             {
@@ -2114,56 +1962,73 @@ namespace Engine
 
                 for (int i = 0; i < arraySize; i++)
                 {
-                    using (var texture = new Texture2D1(
-                        this.device,
-                        new Texture2DDescription1()
-                        {
-                            Width = width,
-                            Height = height,
-                            MipLevels = 1,
-                            ArraySize = 1,
-                            Format = format,
-                            SampleDescription = sampleDescription,
-                            Usage = ResourceUsage.Default,
-                            BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
-                            CpuAccessFlags = CpuAccessFlags.None,
-                            OptionFlags = ResourceOptionFlags.None
-                        }))
-                    {
-                        var rtvDesc = new RenderTargetViewDescription1()
-                        {
-                            Format = format,
-                        };
-                        var srvDesc = new ShaderResourceViewDescription1()
-                        {
-                            Format = format,
-                        };
+                    CreateRenderTargetTexture(format, width, height, multiSampled, sampleDescription, out var rtv1, out var srv1);
 
-                        if (multiSampled)
-                        {
-                            rtvDesc.Dimension = RenderTargetViewDimension.Texture2DMultisampled;
-                            rtvDesc.Texture2DMS = new RenderTargetViewDescription.Texture2DMultisampledResource();
-
-                            srvDesc.Dimension = ShaderResourceViewDimension.Texture2DMultisampled;
-                            srvDesc.Texture2DMS = new ShaderResourceViewDescription.Texture2DMultisampledResource();
-                        }
-                        else
-                        {
-                            rtvDesc.Dimension = RenderTargetViewDimension.Texture2D;
-                            rtvDesc.Texture2D = new RenderTargetViewDescription1.Texture2DResource();
-
-                            srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
-                            srvDesc.Texture2D = new ShaderResourceViewDescription1.Texture2DResource1() { MipLevels = 1 };
-                        }
-
-                        rtv.Add(new RenderTargetView1(this.device, texture, rtvDesc));
-                        srv[i] = new EngineShaderResourceView(new ShaderResourceView1(this.device, texture, srvDesc));
-                    }
+                    rtv.Add(rtv1);
+                    srv[i] = new EngineShaderResourceView(srv1);
                 }
             }
             catch (Exception ex)
             {
                 throw new EngineException("CreateRenderTargetTexture Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Creates a render target texture and a shader resource view for the texture
+        /// </summary>
+        /// <param name="format">Format</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="multiSampled">Create a multisampled texture</param>
+        /// <param name="sampleDescription">Sample description</param>
+        /// <param name="rtv">Resulting render target view</param>
+        /// <param name="srv">Resulting shader resource view</param>
+        private void CreateRenderTargetTexture(Format format, int width, int height, bool multiSampled, SampleDescription sampleDescription, out RenderTargetView1 rtv, out ShaderResourceView1 srv)
+        {
+            using (var texture = new Texture2D1(
+                this.device,
+                new Texture2DDescription1()
+                {
+                    Width = width,
+                    Height = height,
+                    MipLevels = 1,
+                    ArraySize = 1,
+                    Format = format,
+                    SampleDescription = sampleDescription,
+                    Usage = ResourceUsage.Default,
+                    BindFlags = BindFlags.RenderTarget | BindFlags.ShaderResource,
+                    CpuAccessFlags = CpuAccessFlags.None,
+                    OptionFlags = ResourceOptionFlags.None
+                }))
+            {
+                var rtvDesc = new RenderTargetViewDescription1()
+                {
+                    Format = format,
+                };
+                var srvDesc = new ShaderResourceViewDescription1()
+                {
+                    Format = format,
+                };
+
+                if (multiSampled)
+                {
+                    rtvDesc.Dimension = RenderTargetViewDimension.Texture2DMultisampled;
+                    rtvDesc.Texture2DMS = new RenderTargetViewDescription.Texture2DMultisampledResource();
+
+                    srvDesc.Dimension = ShaderResourceViewDimension.Texture2DMultisampled;
+                    srvDesc.Texture2DMS = new ShaderResourceViewDescription.Texture2DMultisampledResource();
+                }
+                else
+                {
+                    rtvDesc.Dimension = RenderTargetViewDimension.Texture2D;
+                    rtvDesc.Texture2D = new RenderTargetViewDescription1.Texture2DResource();
+
+                    srvDesc.Dimension = ShaderResourceViewDimension.Texture2D;
+                    srvDesc.Texture2D = new ShaderResourceViewDescription1.Texture2DResource1() { MipLevels = 1 };
+                }
+
+                rtv = new RenderTargetView1(this.device, texture, rtvDesc);
+                srv = new ShaderResourceView1(this.device, texture, srvDesc);
             }
         }
         /// <summary>
@@ -2219,68 +2084,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Creates a set of texture and depth stencil view array for shadow mapping
-        /// </summary>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="arraySize">Array size</param>
-        /// <param name="dsv">Resulting Depth Stencil View array</param>
-        /// <param name="srv">Resulting Shader Resource View</param>
-        internal void CreateShadowMapTextures(int width, int height, int arraySize, out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv)
-        {
-            var depthMap = new Texture2D1(
-                this.device,
-                new Texture2DDescription1()
-                {
-                    Width = width,
-                    Height = height,
-                    MipLevels = 1,
-                    ArraySize = arraySize,
-                    Format = Format.R24G8_Typeless,
-                    SampleDescription = new SampleDescription(1, 0),
-                    Usage = ResourceUsage.Default,
-                    BindFlags = BindFlags.DepthStencil | BindFlags.ShaderResource,
-                    CpuAccessFlags = CpuAccessFlags.None,
-                    OptionFlags = ResourceOptionFlags.None
-                });
-
-            using (depthMap)
-            {
-                dsv = new EngineDepthStencilView[arraySize];
-                for (int i = 0; i < arraySize; i++)
-                {
-                    var dsDescription = new DepthStencilViewDescription
-                    {
-                        Flags = DepthStencilViewFlags.None,
-                        Format = Format.D24_UNorm_S8_UInt,
-                        Dimension = DepthStencilViewDimension.Texture2DArray,
-                        Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
-                        {
-                            ArraySize = 1,
-                            FirstArraySlice = i,
-                            MipSlice = 0,
-                        },
-                    };
-                    dsv[i] = new EngineDepthStencilView(new DepthStencilView(this.device, depthMap, dsDescription));
-                }
-
-                var rvDescription = new ShaderResourceViewDescription1
-                {
-                    Format = Format.R24_UNorm_X8_Typeless,
-                    Dimension = ShaderResourceViewDimension.Texture2DArray,
-                    Texture2DArray = new ShaderResourceViewDescription1.Texture2DArrayResource1()
-                    {
-                        MipLevels = 1,
-                        MostDetailedMip = 0,
-                        ArraySize = arraySize,
-                        FirstArraySlice = 0,
-                        PlaneSlice = 0,
-                    },
-                };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(this.device, depthMap, rvDescription));
-            }
-        }
-        /// <summary>
         /// Creates a set of texture and depth stencil view for shadow mapping
         /// </summary>
         /// <param name="width">Width</param>
@@ -2288,7 +2091,7 @@ namespace Engine
         /// <param name="mapCount">Per stencil view map count</param>
         /// <param name="dsv">Resulting Depth Stencil View</param>
         /// <param name="srv">Resulting Shader Resource View</param>
-        internal void CreateShadowMapTextureArrays(int width, int height, int mapCount, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
+        internal void CreateShadowMapTextures(int width, int height, int mapCount, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
         {
             var depthMap = new Texture2D1(
                 this.device,
@@ -2336,13 +2139,13 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Creates a set of texture and depth stencil view for shadow mapping
+        /// Creates a set of texture and depth stencil view array for shadow mapping
         /// </summary>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="mapCount">Per stencil view map count</param>
-        /// <param name="arraySize">Stencil view array size</param>
-        /// <param name="dsv">Resulting Depth Stencil View</param>
+        /// <param name="arraySize">Array size</param>
+        /// <param name="dsv">Resulting Depth Stencil View array</param>
         /// <param name="srv">Resulting Shader Resource View</param>
         internal void CreateShadowMapTextureArrays(int width, int height, int mapCount, int arraySize, out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv)
         {
@@ -2461,7 +2264,7 @@ namespace Engine
         /// <param name="arraySize">Array size</param>
         /// <param name="dsv">Resulting Depth Stencil View array</param>
         /// <param name="srv">Resulting Shader Resource View</param>
-        internal void CreateCubicShadowMapTextures(int width, int height, int arraySize, out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv)
+        internal void CreateCubicShadowMapTextureArrays(int width, int height, int arraySize, out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv)
         {
             var depthMap = new Texture2D1(
                 this.device,

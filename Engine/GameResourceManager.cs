@@ -148,22 +148,22 @@ namespace Engine
             {
                 if (imageContent.Paths != null)
                 {
-                    return this.GetCubic(imageContent.Paths);
+                    return this.Get(imageContent.Paths);
                 }
                 else if (imageContent.Streams != null)
                 {
-                    return this.GetCubic(imageContent.Streams);
+                    return this.Get(imageContent.Streams);
                 }
             }
             else
             {
                 if (imageContent.Path != null)
                 {
-                    return this.GetCubic(imageContent.Path);
+                    return this.Get(imageContent.Path);
                 }
                 else if (imageContent.Stream != null)
                 {
-                    return this.GetCubic(imageContent.Stream);
+                    return this.Get(imageContent.Stream);
                 }
             }
 
@@ -378,70 +378,6 @@ namespace Engine
             if (!this.resources.ContainsKey(md5))
             {
                 var view = this.game.Graphics.LoadTextureArray(streams);
-                this.resources.Add(md5, view);
-            }
-
-            return this.resources[md5];
-        }
-        /// <summary>
-        /// Gets the shader resource view or creates if not exists
-        /// </summary>
-        /// <param name="path">Path to file</param>
-        /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView GetCubic(string path)
-        {
-            if (!this.resources.ContainsKey(path))
-            {
-                var view = this.game.Graphics.LoadTextureCube(path);
-                this.resources.Add(path, view);
-            }
-
-            return this.resources[path];
-        }
-        /// <summary>
-        /// Gets the shader resource view or creates if not exists
-        /// </summary>
-        /// <param name="stream">Memory stream</param>
-        /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView GetCubic(MemoryStream stream)
-        {
-            string md5 = stream.GetMd5Sum();
-            if (!this.resources.ContainsKey(md5))
-            {
-                stream.Position = 0;
-                var view = this.game.Graphics.LoadTextureCube(stream);
-                this.resources.Add(md5, view);
-            }
-
-            return this.resources[md5];
-        }
-        /// <summary>
-        /// Gets the shader resource view or creates if not exists
-        /// </summary>
-        /// <param name="paths">Paths to files</param>
-        /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView GetCubic(string[] paths)
-        {
-            string md5 = paths.GetMd5Sum();
-            if (!this.resources.ContainsKey(md5))
-            {
-                var view = this.game.Graphics.LoadTextureCubeArray(paths);
-                this.resources.Add(md5, view);
-            }
-
-            return this.resources[md5];
-        }
-        /// <summary>
-        /// Gets the shader resource view or creates if not exists
-        /// </summary>
-        /// <param name="stream">Memory streams</param>
-        /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView GetCubic(MemoryStream[] streams)
-        {
-            string md5 = streams.GetMd5Sum();
-            if (!this.resources.ContainsKey(md5))
-            {
-                var view = this.game.Graphics.LoadTextureCubeArray(streams);
                 this.resources.Add(md5, view);
             }
 
