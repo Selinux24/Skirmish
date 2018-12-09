@@ -27,6 +27,9 @@ namespace Animation
         private SceneObject<Model> rat = null;
         private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
 
+        private SceneObject<Model> ladder = null;
+        private readonly Dictionary<string, AnimationPlan> ladderPaths = new Dictionary<string, AnimationPlan>();
+
         private readonly Random rnd = new Random();
 
         public TestScene3D(Game game)
@@ -41,6 +44,7 @@ namespace Animation
 
             this.InitializeSoldier();
             this.InitializeRat();
+            this.InitializeLadder();
             this.InitializeFloor();
 
             this.InitializeUI();
@@ -137,6 +141,33 @@ namespace Animation
             this.ratPaths.Add("walk", new AnimationPlan(p0));
 
             this.rat.Instance.AnimationController.AddPath(this.ratPaths["walk"]);
+        }
+        private void InitializeLadder()
+        {
+            this.ladder = this.AddComponent<Model>(
+                new ModelDescription()
+                {
+                    TextureIndex = 0,
+                    CastShadow = true,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Ladder",
+                        ModelContentFilename = "Dn_Anim_Ladder.xml",
+                    }
+                });
+
+            this.ladder.Transform.SetPosition(-2, 1, 0, true);
+
+            AnimationPath pull = new AnimationPath();
+            pull.AddLoop("pull");
+            AnimationPath push = new AnimationPath();
+            push.AddLoop("push");
+
+            this.ladderPaths.Add("pull", new AnimationPlan(pull));
+            this.ladderPaths.Add("push", new AnimationPlan(push));
+
+            this.ladder.Instance.AnimationController.AddPath(this.ladderPaths["pull"]);
         }
         private void InitializeSoldier()
         {
@@ -334,6 +365,9 @@ namespace Animation
 
                 this.rat.Instance.AnimationController.TimeDelta -= 0.1f;
                 this.rat.Instance.AnimationController.TimeDelta = Math.Max(0, this.rat.Instance.AnimationController.TimeDelta);
+
+                this.ladder.Instance.AnimationController.TimeDelta -= 0.1f;
+                this.ladder.Instance.AnimationController.TimeDelta = Math.Max(0, this.ladder.Instance.AnimationController.TimeDelta);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Right))
@@ -343,6 +377,9 @@ namespace Animation
 
                 this.rat.Instance.AnimationController.TimeDelta += 0.1f;
                 this.rat.Instance.AnimationController.TimeDelta = Math.Min(5, this.rat.Instance.AnimationController.TimeDelta);
+
+                this.ladder.Instance.AnimationController.TimeDelta += 0.1f;
+                this.ladder.Instance.AnimationController.TimeDelta = Math.Min(5, this.ladder.Instance.AnimationController.TimeDelta);
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Up))
@@ -351,11 +388,13 @@ namespace Animation
                 {
                     this.soldier.Instance.AnimationController.Start(0);
                     this.rat.Instance.AnimationController.Start(0);
+                    this.ladder.Instance.AnimationController.Start(0);
                 }
                 else
                 {
                     this.soldier.Instance.AnimationController.Resume();
                     this.rat.Instance.AnimationController.Resume();
+                    this.ladder.Instance.AnimationController.Resume();
                 }
             }
 
@@ -363,13 +402,15 @@ namespace Animation
             {
                 this.soldier.Instance.AnimationController.Pause();
                 this.rat.Instance.AnimationController.Pause();
+                this.ladder.Instance.AnimationController.Pause();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 this.soldier.Instance.AnimationController.ContinuePath(this.soldierPaths["stand"]);
                 this.rat.Instance.AnimationController.ContinuePath(this.ratPaths["walk"]);
-            }
+                this.ladder.Instance.AnimationController.ContinuePath(this.ladderPaths["pull"]);
+            } 
         }
 
         private void AnimationController_PathEnding(object sender, EventArgs e)

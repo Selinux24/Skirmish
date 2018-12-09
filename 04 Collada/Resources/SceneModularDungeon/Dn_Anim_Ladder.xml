@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModelContentDescription>
+  <model_filename>Dn_Anim_Ladder.dae</model_filename>
+  <animation_description>
+    <animations>
+      <animation name="default" from="1" to="2" />
+    </animations>
+  </animation_description>
+</ModelContentDescription>

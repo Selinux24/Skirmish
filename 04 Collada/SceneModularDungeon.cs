@@ -33,6 +33,7 @@ namespace Collada
         private SceneLightPoint torch = null;
 
         private SceneObject<ModularScenery> scenery = null;
+        private SceneObject<ModelInstanced> laders = null;
 
         private readonly float doorDistance = 3f;
         private SceneObject<TextDrawer> messages = null;
@@ -89,6 +90,7 @@ namespace Collada
             this.InitializeDebug();
             this.InitializeUI();
             this.InitializeModularScenery();
+            this.InitializeLaders();
             this.InitializePlayer();
             this.InitializeRat();
             this.InitializeHuman();
@@ -206,6 +208,48 @@ namespace Collada
             this.scenery = this.AddComponent<ModularScenery>(desc, SceneObjectUsages.Ground);
 
             this.SetGround(this.scenery, true);
+        }
+        private void InitializeLaders()
+        {
+            this.laders = this.AddComponent<ModelInstanced>(
+                new ModelInstancedDescription()
+                {
+                    CastShadow = true,
+                    UseAnisotropicFiltering = true,
+                    Instances = 2,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/SceneModularDungeon",
+                        ModelContentFilename = "Dn_Anim_Ladder.xml",
+                    }
+                });
+
+            var laderPaths = new Dictionary<string, AnimationPlan>();
+
+            AnimationPath p0 = new AnimationPath();
+            p0.AddLoop("default");
+
+            laderPaths.Add("default", new AnimationPlan(p0));
+
+            var pos = new[]
+            {
+                new Vector3(16.5f, 1.75f, -12.9f),
+                new Vector3(16.5f, 1.75f, -15.1f),
+            };
+            var rot = new[]
+            {
+                Quaternion.RotationYawPitchRoll(MathUtil.PiOverTwo * 3f, 0f, 0f),
+                Quaternion.RotationYawPitchRoll(MathUtil.PiOverTwo * 1f, 0f, 0f),
+            };
+
+            for (int i = 0; i < this.laders.Count; i++)
+            {
+                this.laders.Instance[i].Manipulator.SetPosition(pos[i]);
+                this.laders.Instance[i].Manipulator.SetRotation(rot[i]);
+                this.laders.Instance[i].AnimationController.AddPath(laderPaths["default"]);
+                this.laders.Instance[i].AnimationController.TimeDelta = 1f;
+                this.laders.Instance[i].AnimationController.Start(0);
+            }
         }
         private void InitializePlayer()
         {
@@ -896,6 +940,10 @@ namespace Collada
                 messages.Instance.CenterHorizontally();
                 messages.Instance.CenterVertically();
             }
+        }
+        private void UpdateLadder(ModelInstance item)
+        {
+            item.AnimationController.Start();
         }
 
         private void RefreshNavigation()

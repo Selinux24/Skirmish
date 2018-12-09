@@ -44,6 +44,14 @@ namespace Engine.Animation
         /// Constructor
         /// </summary>
         /// <param name="paths">Animation path list</param>
+        public AnimationPlan(params AnimationPath[] paths) : base(paths)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="paths">Animation path list</param>
         public AnimationPlan(IEnumerable<AnimationPath> paths) : base(paths)
         {
 
