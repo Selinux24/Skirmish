@@ -148,13 +148,13 @@ namespace Engine.Common
             return new VertexSkinnedPosition
             {
                 Position = v.Position ?? Vector3.Zero,
-                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
-                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
-                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
+                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
+                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
+                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -169,13 +169,13 @@ namespace Engine.Common
             {
                 Position = v.Position ?? Vector3.Zero,
                 Color = v.Color ?? Color4.White,
-                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
-                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
-                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
+                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
+                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
+                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -191,13 +191,13 @@ namespace Engine.Common
                 Position = v.Position ?? Vector3.Zero,
                 Normal = v.Normal ?? Vector3.Zero,
                 Color = v.Color ?? Color4.White,
-                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
-                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
-                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
+                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
+                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
+                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -212,13 +212,13 @@ namespace Engine.Common
             {
                 Position = v.Position ?? Vector3.Zero,
                 Texture = v.Texture ?? Vector2.Zero,
-                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
-                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
-                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
+                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
+                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
+                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -234,13 +234,13 @@ namespace Engine.Common
                 Position = v.Position ?? Vector3.Zero,
                 Normal = v.Normal ?? Vector3.Zero,
                 Texture = v.Texture ?? Vector2.Zero,
-                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
-                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
-                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
+                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
+                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
+                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -257,13 +257,13 @@ namespace Engine.Common
                 Normal = v.Normal ?? Vector3.Zero,
                 Texture = v.Texture ?? Vector2.Zero,
                 Tangent = v.Tangent ?? Vector3.UnitX,
-                Weight1 = ((vw != null) && (vw.Length > 0)) ? vw[0].WeightValue : 0f,
-                Weight2 = ((vw != null) && (vw.Length > 1)) ? vw[1].WeightValue : 0f,
-                Weight3 = ((vw != null) && (vw.Length > 2)) ? vw[2].WeightValue : 0f,
-                BoneIndex1 = ((vw != null) && (vw.Length > 0)) ? ((byte)Array.IndexOf(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = ((vw != null) && (vw.Length > 1)) ? ((byte)Array.IndexOf(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = ((vw != null) && (vw.Length > 2)) ? ((byte)Array.IndexOf(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = ((vw != null) && (vw.Length > 3)) ? ((byte)Array.IndexOf(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
+                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
+                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
+                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
+                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
+                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
+                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
             };
         }
         /// <summary>
@@ -296,7 +296,7 @@ namespace Engine.Common
                 return (byte)index;
             }
 
-            return (byte)0;
+            return 0;
         }
 
         /// <summary>

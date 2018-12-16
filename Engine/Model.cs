@@ -188,7 +188,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            if (this.DrawingData != null && this.DrawingData.SkinningData != null)
+            if (this.DrawingData?.SkinningData != null)
             {
                 this.AnimationController.Update(context.GameTime.ElapsedSeconds, this.DrawingData.SkinningData);
 
@@ -205,12 +205,9 @@ namespace Engine
                 this.Manipulator.Update(context.GameTime);
             }
 
-            if (this.Lights != null && this.Lights.Length > 0)
+            for (int i = 0; i < this.Lights?.Length; i++)
             {
-                for (int i = 0; i < this.Lights.Length; i++)
-                {
-                    this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
-                }
+                this.Lights[i].ParentTransform = this.Manipulator.LocalTransform;
             }
         }
         /// <summary>
