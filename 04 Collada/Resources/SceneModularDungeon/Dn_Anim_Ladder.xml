@@ -3,7 +3,8 @@
   <model_filename>Dn_Anim_Ladder.dae</model_filename>
   <animation_description>
     <animations>
-      <animation name="default" from="1" to="2" />
+      <animation name="pull" from="1" to="2" />
+      <animation name="push" from="2" to="3" />
     </animations>
   </animation_description>
 </ModelContentDescription>

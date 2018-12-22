@@ -123,6 +123,7 @@ namespace Animation
             this.rat = this.AddComponent<Model>(
                 new ModelDescription()
                 {
+                    Name = "Rat",
                     TextureIndex = 0,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
@@ -147,6 +148,7 @@ namespace Animation
             this.ladder = this.AddComponent<Model>(
                 new ModelDescription()
                 {
+                    Name = "Ladder",
                     TextureIndex = 0,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
@@ -159,11 +161,14 @@ namespace Animation
 
             this.ladder.Transform.SetPosition(-2, 1, 0, true);
 
+            AnimationPath def = new AnimationPath();
+            def.Add("default");
             AnimationPath pull = new AnimationPath();
-            pull.AddLoop("pull");
+            pull.Add("pull");
             AnimationPath push = new AnimationPath();
-            push.AddLoop("push");
+            push.Add("push");
 
+            this.ladderPaths.Add("default", new AnimationPlan(def));
             this.ladderPaths.Add("pull", new AnimationPlan(pull));
             this.ladderPaths.Add("push", new AnimationPlan(push));
 
@@ -174,6 +179,7 @@ namespace Animation
             this.soldier = this.AddComponent<Model>(
                 new ModelDescription()
                 {
+                    Name = "Soldier",
                     TextureIndex = 1,
                     CastShadow = true,
                     UseAnisotropicFiltering = true,
@@ -410,7 +416,7 @@ namespace Animation
                 this.soldier.Instance.AnimationController.ContinuePath(this.soldierPaths["stand"]);
                 this.rat.Instance.AnimationController.ContinuePath(this.ratPaths["walk"]);
                 this.ladder.Instance.AnimationController.ContinuePath(this.ladderPaths["pull"]);
-            } 
+            }
         }
 
         private void AnimationController_PathEnding(object sender, EventArgs e)

@@ -216,8 +216,8 @@ namespace Engine.Animation
 
             float percent = time / duration;
             int percentINT = (int)percent;
-            percent -= (float)percentINT;
-            int index = (int)((float)clipLength * percent);
+            percent -= percentINT;
+            int index = (int)(clipLength * percent);
 
             animationOffset = offset + (uint)(4 * this.skeleton.JointCount * index) + this.ResourceOffset;
         }

@@ -16,6 +16,10 @@ namespace Engine.Animation
         /// Animation active flag
         /// </summary>
         private bool active = false;
+        /// <summary>
+        /// Last animation offset
+        /// </summary>
+        private uint lastOffset = 0;
 
         /// <summary>
         /// Time delta to aply to controller time
@@ -233,7 +237,6 @@ namespace Engine.Animation
         /// <returns>Returns the current animation offset in skinning animation data</returns>
         public uint GetAnimationOffset(SkinningData skData)
         {
-            uint offset = 0;
             if (this.CurrentIndex >= 0)
             {
                 //Get the path
@@ -246,11 +249,13 @@ namespace Engine.Animation
                     skData.GetAnimationOffset(
                         path.ItemTime,
                         pathItem.ClipName,
-                        out offset);
+                        out uint offset);
+
+                    lastOffset = offset;
                 }
             }
 
-            return offset;
+            return lastOffset;
         }
         /// <summary>
         /// Gets the transformation matrix list at current time
@@ -285,12 +290,11 @@ namespace Engine.Animation
         {
             this.active = true;
 
-            if (this.CurrentIndex >= 0)
-            {
-                var path = this.animationPaths[this.CurrentIndex];
+            this.CurrentIndex = 0;
 
-                path.SetTime(time);
-            }
+            var path = this.animationPaths[this.CurrentIndex];
+
+            path.SetTime(time);
         }
         /// <summary>
         /// Stop

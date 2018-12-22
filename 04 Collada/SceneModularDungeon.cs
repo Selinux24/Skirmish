@@ -33,7 +33,7 @@ namespace Collada
         private SceneLightPoint torch = null;
 
         private SceneObject<ModularScenery> scenery = null;
-        private SceneObject<ModelInstanced> laders = null;
+        private readonly List<SceneObject<ModelInstanced>> animObjects = new List<SceneObject<ModelInstanced>>();
 
         private readonly float doorDistance = 3f;
         private SceneObject<TextDrawer> messages = null;
@@ -211,7 +211,7 @@ namespace Collada
         }
         private void InitializeLaders()
         {
-            this.laders = this.AddComponent<ModelInstanced>(
+            var laders = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     CastShadow = true,
@@ -224,12 +224,17 @@ namespace Collada
                     }
                 });
 
+            animObjects.Add(laders);
+
             var laderPaths = new Dictionary<string, AnimationPlan>();
 
             AnimationPath p0 = new AnimationPath();
-            p0.AddLoop("default");
+            p0.Add("pull");
+            AnimationPath p1 = new AnimationPath();
+            p1.Add("push");
 
-            laderPaths.Add("default", new AnimationPlan(p0));
+            laderPaths.Add("pull", new AnimationPlan(p0));
+            laderPaths.Add("push", new AnimationPlan(p1));
 
             var pos = new[]
             {
@@ -242,13 +247,13 @@ namespace Collada
                 Quaternion.RotationYawPitchRoll(MathUtil.PiOverTwo * 1f, 0f, 0f),
             };
 
-            for (int i = 0; i < this.laders.Count; i++)
+            for (int i = 0; i < laders.Count; i++)
             {
-                this.laders.Instance[i].Manipulator.SetPosition(pos[i]);
-                this.laders.Instance[i].Manipulator.SetRotation(rot[i]);
-                this.laders.Instance[i].AnimationController.AddPath(laderPaths["default"]);
-                this.laders.Instance[i].AnimationController.TimeDelta = 1f;
-                this.laders.Instance[i].AnimationController.Start(0);
+                laders.Instance[i].Manipulator.SetPosition(pos[i]);
+                laders.Instance[i].Manipulator.SetRotation(rot[i]);
+                laders.Instance[i].AnimationController.AddPath(laderPaths["pull"]);
+                laders.Instance[i].AnimationController.TimeDelta = 1f;
+                laders.Instance[i].AnimationController.Start(0);
             }
         }
         private void InitializePlayer()

@@ -110,6 +110,7 @@
     <None Include="Blender\Buildings\Watch Tower\Watch Tower.blend" />
     <None Include="Blender\Characters\Human2\Human2.blend" />
     <None Include="Blender\Characters\Rat\Rat.blend" />
+    <None Include="Blender\Characters\Rat\Rat_uv.pdn" />
     <None Include="Blender\Foliage\Foliage.blend" />
     <None Include="Blender\Furniture\Container\container.blend" />
     <None Include="Blender\Furniture\Lamps\concrete.jpg" />
@@ -128,6 +129,8 @@
     <None Include="Blender\Characters\Rat\Rat_d.png" />
     <None Include="Blender\Furniture\Container\ikube azul.png" />
     <None Include="Blender\Buildings\Watch Tower\Wood.jpg" />
+    <Content Include="Blender\Characters\Rat\rat_run.png" />
+    <Content Include="Blender\Characters\Rat\Rat_uv.png" />
     <Content Include="Blender\Scenery\Clif\dirt_2048x2048.jpg" />
     <Content Include="Blender\Scenery\Ground\buildings.png" />
     <None Include="Blender\Scenery\ModularDungeon\Assets.blend" />
