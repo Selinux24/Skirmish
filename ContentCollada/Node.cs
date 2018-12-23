@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Xml.Serialization;
 
 namespace Engine.Collada
@@ -65,6 +66,14 @@ namespace Engine.Collada
             get
             {
                 return this.InstanceController != null;
+            }
+        }
+        [XmlIgnore]
+        public string SkeletonId
+        {
+            get
+            {
+                return this.InstanceController?.FirstOrDefault()?.Skeleton?.FirstOrDefault();
             }
         }
         [XmlIgnore]

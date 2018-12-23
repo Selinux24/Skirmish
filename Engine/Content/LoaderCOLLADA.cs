@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Engine.Content
 {
@@ -1316,25 +1317,18 @@ namespace Engine.Content
                 string sceneUrl = dae.Scene.InstanceVisualScene.Url;
 
                 var vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl, StringComparison.OrdinalIgnoreCase));
-                if (vScene != null)
+                if (vScene?.Nodes.Length > 0)
                 {
-                    if (!ProcessSceneNodes(
+                    ProcessSceneNodes(
                         vScene.Nodes,
-                        transform, useControllerTransform,
-                        modelContent,
-                        out Skeleton skeleton,
-                        out string[] controllers))
-                    {
-                        throw new EngineException("Error processing scene. Bad visual scene configuration.");
-                    }
+                        transform,
+                        useControllerTransform,
+                        modelContent);
 
-                    if (skeleton != null && controllers.Length > 0)
+                    var skinningContent = ProcessSceneNodesArmature(vScene.Nodes);
+                    if (skinningContent.Length > 0)
                     {
-                        modelContent.SkinningInfo = new SkinningContent()
-                        {
-                            Controller = controllers,
-                            Skeleton = skeleton,
-                        };
+                        modelContent.SkinningInfo = skinningContent[0];
                     }
                 }
             }
@@ -1346,131 +1340,37 @@ namespace Engine.Content
         /// <param name="transform">Parent transform</param>
         /// <param name="useControllerTransform">Use parent controller transform</param>
         /// <param name="modelContent">Model content</param>
-        /// <param name="skeleton">Resulting skeleton</param>
-        /// <param name="controllers">Resulting controller names</param>
-        /// <returns>Returns true if all the nodes and child nodes were processed correctly</returns>
-        private static bool ProcessSceneNodes(Node[] nodes, Matrix transform, bool useControllerTransform, ModelContent modelContent, out Skeleton skeleton, out string[] controllers)
+        private static void ProcessSceneNodes(IEnumerable<Node> nodes, Matrix transform, bool useControllerTransform, ModelContent modelContent)
         {
-            bool result = true;
-
-            skeleton = null;
-            controllers = new string[] { };
-
-            if (nodes?.Length > 0)
+            foreach (var node in nodes.Where(n => !n.IsArmature && !n.HasController))
             {
-                List<string> lControllers = new List<string>();
+                Matrix trn = useControllerTransform ? transform * node.ReadMatrix() : transform;
 
-                foreach (Node childNode in nodes)
+                bool procChilds = true;
+
+                if (node.IsLight)
                 {
-                    if (ProcessSceneNode(
-                        childNode,
-                        transform, useControllerTransform,
-                        modelContent,
-                        out Skeleton pSkeleton, out string[] pControllers))
-                    {
-                        if (pSkeleton != null)
-                        {
-                            if (skeleton != null)
-                            {
-                                throw new EngineException("Only one armature definition per file!");
-                            }
-
-                            skeleton = pSkeleton;
-                        }
-
-                        lControllers.AddRange(pControllers);
-                    }
-                    else
-                    {
-                        result = false;
-                    }
+                    //Lights
+                    ProcessSceneNodeLight(trn, node, modelContent);
                 }
-
-                controllers = lControllers.ToArray();
-            }
-
-            return result;
-        }
-        /// <summary>
-        /// Process a node from a visual scene node list
-        /// </summary>
-        /// <param name="node">Node to process</param>
-        /// <param name="transform">Parent transform</param>
-        /// <param name="useControllerTransform">Use parent controller transform</param>
-        /// <param name="modelContent">Model content</param>
-        /// <param name="skeleton">Resulting skeleton</param>
-        /// <param name="controllers">Resulting controller names</param>
-        /// <returns>Returns true if the node and its childs were processed correctly</returns>
-        private static bool ProcessSceneNode(Node node, Matrix transform, bool useControllerTransform, ModelContent modelContent, out Skeleton skeleton, out string[] controllers)
-        {
-            bool result = true;
-
-            skeleton = null;
-            controllers = new string[] { };
-
-            Matrix trn = useControllerTransform ? transform * node.ReadMatrix() : transform;
-
-            bool processChilds = true;
-            List<string> lControllers = new List<string>();
-
-            if (node.IsLight)
-            {
-                //Lights
-                ProcessSceneNodeLight(trn, node, modelContent);
-            }
-            else if (node.IsArmature)
-            {
-                processChilds = false;
-
-                //Armatures (Skeletons)
-                if (ProcessSceneNodeArmature(node, out var pSkeleton))
+                else if (node.HasGeometry)
                 {
-                    skeleton = pSkeleton;
-                }
-            }
-            else if (node.HasGeometry)
-            {
-                //Geometry nodes
-                ProcessSceneNodeGeometry(trn, node, modelContent);
-            }
-            else if (node.HasController)
-            {
-                //Controllers
-                var nControllers = ProcessSceneNodeController(node);
-                if (nControllers?.Count > 0)
-                {
-                    lControllers.AddRange(nControllers);
-                }
-            }
-            else
-            {
-                processChilds = false;
-
-                //Default node
-                ProcessSceneNodeDefault(node, modelContent);
-            }
-
-            if (processChilds)
-            {
-                if (ProcessSceneNodes(
-                    node.Nodes,
-                    trn, true,
-                    modelContent,
-                    out Skeleton pSkeleton,
-                    out string[] pControllers))
-                {
-                    if (pSkeleton != null) skeleton = pSkeleton;
-                    lControllers.AddRange(pControllers);
+                    //Geometry nodes
+                    ProcessSceneNodeGeometry(trn, node, modelContent);
                 }
                 else
                 {
-                    result = false;
+                    procChilds = false;
+
+                    //Default node
+                    ProcessSceneNodeDefault(trn, node, modelContent);
+                }
+
+                if (procChilds && node.Nodes?.Length > 0)
+                {
+                    ProcessSceneNodes(node.Nodes, trn, true, modelContent);
                 }
             }
-
-            controllers = lControllers.ToArray();
-
-            return result;
         }
         /// <summary>
         /// Process a light node
@@ -1480,7 +1380,7 @@ namespace Engine.Content
         /// <param name="modelContent">Model content</param>
         private static void ProcessSceneNodeLight(Matrix trn, Node node, ModelContent modelContent)
         {
-            if (!trn.IsIdentity && node.InstanceLight?.Length > 0)
+            if (node.InstanceLight?.Length > 0)
             {
                 foreach (var il in node.InstanceLight)
                 {
@@ -1492,27 +1392,6 @@ namespace Engine.Content
                     light.Transform = trn;
                 }
             }
-        }
-        /// <summary>
-        /// Process an armature node
-        /// </summary>
-        /// <param name="node">Node</param>
-        /// <param name="skeleton">Resulting skeleton</param>
-        /// <returns>Returns true if the node has a skeleton</returns>
-        private static bool ProcessSceneNodeArmature(Node node, out Skeleton skeleton)
-        {
-            skeleton = null;
-
-            if (node.Nodes?.Length > 0)
-            {
-                var root = ProcessJoints(node.Id, null, node.Nodes[0]);
-
-                skeleton = new Skeleton(root);
-
-                return true;
-            }
-
-            return false;
         }
         /// <summary>
         /// Process a geometry node
@@ -1536,11 +1415,95 @@ namespace Engine.Content
             }
         }
         /// <summary>
+        /// Process a default node
+        /// </summary>
+        /// <param name="trn">Transform</param>
+        /// <param name="node">Node</param>
+        /// <param name="modelContent">Model content</param>
+        private static void ProcessSceneNodeDefault(Matrix trn, Node node, ModelContent modelContent)
+        {
+            if (node.Nodes?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var child in node.Nodes)
+            {
+                Matrix childTrn = trn * child.ReadMatrix();
+
+                if (!childTrn.IsIdentity && child.InstanceGeometry?.Length > 0)
+                {
+                    foreach (var ig in child.InstanceGeometry)
+                    {
+                        string meshName = ig.Url.Replace("#", "");
+
+                        foreach (var submesh in modelContent.Geometry[meshName].Values)
+                        {
+                            submesh.Transform(childTrn);
+                        }
+                    }
+                }
+            }
+        }
+        /// <summary>
+        /// Process a node from a visual scene node list
+        /// </summary>
+        /// <param name="nodes">Node list</param>
+        /// <returns>Returns the resulting skinning content</returns>
+        private static SkinningContent[] ProcessSceneNodesArmature(IEnumerable<Node> nodes)
+        {
+            List<SkinningContent> lSkinningContent = new List<SkinningContent>();
+
+            foreach (var node in nodes.Where(n => n.IsArmature))
+            {
+                //Armatures (Skeletons)
+                var skeleton = ProcessSceneNodeArmature(node);
+                if (skeleton != null)
+                {
+                    List<string> lControllers = new List<string>();
+
+                    //Armature controllers
+                    var controllerNodes = nodes.Where(n => n.HasController && string.Equals(n.SkeletonId, $"#{skeleton.Root.Name}", StringComparison.OrdinalIgnoreCase));
+                    foreach (var controller in controllerNodes)
+                    {
+                        //Controllers
+                        var nControllers = ProcessSceneNodeController(controller);
+
+                        lControllers.AddRange(nControllers);
+                    }
+
+                    lSkinningContent.Add(new SkinningContent
+                    {
+                        Skeleton = skeleton,
+                        Controller = lControllers.ToArray(),
+                    });
+                }
+            }
+
+            return lSkinningContent.ToArray();
+        }
+        /// <summary>
+        /// Process an armature node
+        /// </summary>
+        /// <param name="node">Node</param>
+        /// <returns>Returns the resulting skeleton</returns>
+        private static Skeleton ProcessSceneNodeArmature(Node node)
+        {
+            if (node.Nodes?.Length > 0)
+            {
+                var root = ProcessJoints(node.Id, null, node.Nodes[0]);
+
+                return new Skeleton(root);
+            }
+
+            return null;
+        }
+        /// <summary>
         /// Process a controller node
         /// </summary>
         /// <param name="node">Node</param>
         /// <returns>Returns a list of controller names</returns>
-        private static List<string> ProcessSceneNodeController(Node node)
+        private static string[] ProcessSceneNodeController(Node node)
         {
             List<string> lControllers = new List<string>();
 
@@ -1554,38 +1517,7 @@ namespace Engine.Content
                 }
             }
 
-            return lControllers;
-        }
-        /// <summary>
-        /// Process a default node
-        /// </summary>
-        /// <param name="node">Node</param>
-        /// <param name="modelContent">Model content</param>
-        private static void ProcessSceneNodeDefault(Node node, ModelContent modelContent)
-        {
-            if (node.Nodes?.Length > 0)
-            {
-                foreach (var child in node.Nodes)
-                {
-                    Matrix childTrn = child.ReadMatrix();
-
-                    if (child.InstanceGeometry?.Length > 0)
-                    {
-                        foreach (var ig in child.InstanceGeometry)
-                        {
-                            string meshName = ig.Url.Replace("#", "");
-
-                            foreach (var submesh in modelContent.Geometry[meshName].Values)
-                            {
-                                if (!childTrn.IsIdentity)
-                                {
-                                    submesh.Transform(childTrn);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            return lControllers.ToArray();
         }
 
         #endregion

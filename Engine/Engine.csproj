@@ -165,6 +165,7 @@
     <Compile Include="Animation\AnimationPathItem.cs" />
     <Compile Include="AnimationClipDescription.cs" />
     <Compile Include="Animation\AnimationPlan.cs" />
+    <Compile Include="Animation\Armature.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="BoundingRectangleInt.cs" />
