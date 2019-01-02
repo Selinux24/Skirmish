@@ -41,8 +41,11 @@ namespace Engine.Content
             }
 
             return Load(
-                contentFolder, content.ModelFileName,
-                transform, content.UseControllerTransform,
+                contentFolder,
+                content.ModelFileName,
+                transform,
+                content.ArmatureName,
+                content.UseControllerTransform,
                 content.VolumeMeshes,
                 content.Animation);
         }
@@ -56,12 +59,12 @@ namespace Engine.Content
         /// <param name="useControllerTransform">Use controller transform</param>
         /// <param name="transform">Transform</param>
         /// <returns>Returns the loaded contents</returns>
-        private ModelContent[] Load(string contentFolder, string fileName, Matrix transform, bool useControllerTransform, string[] volumes, AnimationDescription animation)
+        private ModelContent[] Load(string contentFolder, string fileName, Matrix transform, string armatureName, bool useControllerTransform, string[] volumes, AnimationDescription animation)
         {
-            MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (modelList != null && modelList.Length > 0)
+            var modelList = ContentManager.FindContent(contentFolder, fileName);
+            if (modelList?.Length > 0)
             {
-                ModelContent[] res = new ModelContent[modelList.Length];
+                List<ModelContent> res = new List<ModelContent>();
 
                 for (int i = 0; i < modelList.Length; i++)
                 {
@@ -82,10 +85,16 @@ namespace Engine.Content
                     //Animations
                     ProcessLibraryAnimations(dae, modelContent, animation);
 
-                    res[i] = modelContent;
+                    //Filter by armature name
+                    if (modelContent.SkinningInfo.Count > 0 && !string.IsNullOrEmpty(armatureName))
+                    {
+                        modelContent = modelContent.FilterArmature(armatureName);
+                    }
+
+                    res.Add(modelContent);
                 }
 
-                return res;
+                return res.ToArray();
             }
             else
             {
@@ -246,7 +255,6 @@ namespace Engine.Content
 
                                 subMesh.Material = materialName;
                                 subMesh.Textured = (mat.DiffuseTexture != null);
-                                subMesh.Transparent = mat.Transparent != Color.Transparent;
                             }
 
                             modelContent.Geometry.Add(geometry.Id, subMesh.Material, subMesh);
@@ -766,13 +774,15 @@ namespace Engine.Content
         {
             ControllerContent res = null;
 
+            string armatureName = controller.Name.Replace(".", "_");
+
             if (controller.Skin != null)
             {
-                res = ProcessSkin(controller.Name, controller.Skin);
+                res = ProcessSkin(armatureName, controller.Skin);
             }
             else if (controller.Morph != null)
             {
-                res = ProcessMorph(controller.Name, controller.Morph);
+                res = ProcessMorph(armatureName, controller.Morph);
             }
 
             return res;
@@ -789,7 +799,7 @@ namespace Engine.Content
             {
                 BindShapeMatrix = Matrix.Transpose(skin.BindShapeMatrix.ToMatrix()),
                 Skin = skin.SourceUri.Replace("#", ""),
-                Armature = name
+                Armature = name,
             };
 
             if (skin.VertexWeights != null)
@@ -950,11 +960,10 @@ namespace Engine.Content
             {
                 string jointName = channel.Target.Split("/".ToCharArray())[0];
 
-                if (modelContent.SkinningInfo?.Skeleton != null)
+                if (!modelContent.SkinningInfo.HasJointData(jointName))
                 {
                     //Process only joints in the skeleton
-                    var j = modelContent.SkinningInfo.Skeleton[jointName];
-                    if (j == null) continue;
+                    continue;
                 }
 
                 foreach (var sampler in animationLibrary.Samplers)
@@ -1324,12 +1333,6 @@ namespace Engine.Content
                         transform,
                         useControllerTransform,
                         modelContent);
-
-                    var skinningContent = ProcessSceneNodesArmature(vScene.Nodes);
-                    if (skinningContent.Length > 0)
-                    {
-                        modelContent.SkinningInfo = skinningContent[0];
-                    }
                 }
             }
         }
@@ -1370,6 +1373,11 @@ namespace Engine.Content
                 {
                     ProcessSceneNodes(node.Nodes, trn, true, modelContent);
                 }
+            }
+
+            if (nodes.Any(n => n.IsArmature || n.HasController))
+            {
+                ProcessSceneNodesArmature(nodes, modelContent);
             }
         }
         /// <summary>
@@ -1450,10 +1458,8 @@ namespace Engine.Content
         /// </summary>
         /// <param name="nodes">Node list</param>
         /// <returns>Returns the resulting skinning content</returns>
-        private static SkinningContent[] ProcessSceneNodesArmature(IEnumerable<Node> nodes)
+        private static void ProcessSceneNodesArmature(IEnumerable<Node> nodes, ModelContent modelContent)
         {
-            List<SkinningContent> lSkinningContent = new List<SkinningContent>();
-
             foreach (var node in nodes.Where(n => n.IsArmature))
             {
                 //Armatures (Skeletons)
@@ -1462,8 +1468,10 @@ namespace Engine.Content
                 {
                     List<string> lControllers = new List<string>();
 
+                    string skeletonName = $"#{skeleton.Root.Name}";
+
                     //Armature controllers
-                    var controllerNodes = nodes.Where(n => n.HasController && string.Equals(n.SkeletonId, $"#{skeleton.Root.Name}", StringComparison.OrdinalIgnoreCase));
+                    var controllerNodes = nodes.Where(n => n.HasController && string.Equals(n.SkeletonId, skeletonName, StringComparison.OrdinalIgnoreCase));
                     foreach (var controller in controllerNodes)
                     {
                         //Controllers
@@ -1472,15 +1480,15 @@ namespace Engine.Content
                         lControllers.AddRange(nControllers);
                     }
 
-                    lSkinningContent.Add(new SkinningContent
-                    {
-                        Skeleton = skeleton,
-                        Controller = lControllers.ToArray(),
-                    });
+                    modelContent.SkinningInfo.Add(
+                        node.Id,
+                        new SkinningContent
+                        {
+                            Skeleton = skeleton,
+                            Controllers = lControllers.ToArray(),
+                        });
                 }
             }
-
-            return lSkinningContent.ToArray();
         }
         /// <summary>
         /// Process an armature node

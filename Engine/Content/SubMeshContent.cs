@@ -117,10 +117,6 @@ namespace Engine.Content
                 }
             }
         }
-        /// <summary>
-        /// Gets or sest wether the submesh has attached a transparency enabled material
-        /// </summary>
-        public bool Transparent { get; set; }
 
         /// <summary>
         /// Submesh grouping optimization
@@ -146,7 +142,6 @@ namespace Engine.Content
                 Topology topology = firstMesh.Topology;
                 VertexTypes vertexType = firstMesh.VertexType;
                 bool isTextured = firstMesh.Textured;
-                bool transparent = firstMesh.Transparent;
 
                 List<VertexData> verts = new List<VertexData>();
                 List<uint> idx = new List<uint>();
@@ -184,7 +179,6 @@ namespace Engine.Content
                     indices = idx,
                     vertices = verts,
                     textured = isTextured,
-                    Transparent = transparent,
                 };
             }
 

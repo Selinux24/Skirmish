@@ -9,8 +9,8 @@ namespace Engine.Common
     public interface IUseSkinningData
     {
         /// <summary>
-        /// Gets the skinning list used by the current drawing data
+        /// Gets the skinning data used by the current drawing data
         /// </summary>
-        SkinningData[] SkinningData { get; }
+        SkinningData SkinningData { get; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.Content
 {
     public interface ILoader

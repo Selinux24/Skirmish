@@ -54,25 +54,11 @@ namespace Engine.Common
         /// <summary>
         /// Gets the skinning list used by the current drawing data
         /// </summary>
-        public SkinningData[] SkinningData
+        public SkinningData SkinningData
         {
             get
             {
-                List<SkinningData> skList = new List<SkinningData>();
-
-                var drawingData = this.GetDrawingData(LevelOfDetail.High);
-                if (drawingData != null)
-                {
-                    foreach (var meshMaterial in drawingData.Materials.Keys)
-                    {
-                        if (drawingData.SkinningData != null)
-                        {
-                            skList.Add(drawingData.SkinningData);
-                        }
-                    }
-                }
-
-                return skList.ToArray();
+                return this.GetDrawingData(LevelOfDetail.High)?.SkinningData;
             }
         }
         /// <summary>
@@ -269,7 +255,11 @@ namespace Engine.Common
             return null;
         }
 
-
+        /// <summary>
+        /// Gets the drawing effect for the current instance
+        /// </summary>
+        /// <param name="mode">Drawing mode</param>
+        /// <returns>Returns the drawing effect</returns>
         protected IGeometryDrawer GetEffect(DrawerModes mode)
         {
             if (mode.HasFlag(DrawerModes.Forward))

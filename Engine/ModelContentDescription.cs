@@ -34,6 +34,11 @@ namespace Engine
         [XmlElement("scale")]
         public float Scale { get; set; } = 1f;
         /// <summary>
+        /// Armature name
+        /// </summary>
+        [XmlElement("armature_name")]
+        public string ArmatureName { get; set; } = null;
+        /// <summary>
         /// Use controller transforms
         /// </summary>
         [XmlElement("use_controller_transform")]

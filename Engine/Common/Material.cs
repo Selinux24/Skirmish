@@ -37,6 +37,10 @@ namespace Engine.Common
         /// Shininess
         /// </summary>
         public float Shininess;
+        /// <summary>
+        /// Transparent
+        /// </summary>
+        public bool IsTransparent;
 
         /// <summary>
         /// Constructor
@@ -49,6 +53,7 @@ namespace Engine.Common
             this.DiffuseColor = effect.DiffuseColor;
             this.SpecularColor = effect.SpecularColor;
             this.Shininess = effect.Shininess;
+            this.IsTransparent = effect.IsTransparent;
         }
 
         /// <summary>

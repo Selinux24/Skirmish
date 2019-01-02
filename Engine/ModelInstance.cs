@@ -203,7 +203,7 @@ namespace Engine
             if (refresh || this.updatePoints)
             {
                 var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
-                if (drawingData.SkinningData != null)
+                if (drawingData.SkinningData != null && this.AnimationController.Playing)
                 {
                     this.positionCache = drawingData.GetPoints(
                         this.Manipulator.LocalTransform,
@@ -230,7 +230,7 @@ namespace Engine
             if (refresh || this.updateTriangles)
             {
                 var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
-                if (drawingData.SkinningData != null)
+                if (drawingData.SkinningData != null && this.AnimationController.Playing)
                 {
                     this.triangleCache = drawingData.GetTriangles(
                         this.Manipulator.LocalTransform,

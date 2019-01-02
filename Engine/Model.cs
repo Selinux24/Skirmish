@@ -51,10 +51,6 @@ namespace Engine
         /// </summary>
         protected DrawingData DrawingData { get; private set; }
         /// <summary>
-        /// Animation index
-        /// </summary>
-        protected uint AnimationIndex = 0;
-        /// <summary>
         /// Model parts collection
         /// </summary>
         protected List<ModelPart> ModelParts = new List<ModelPart>();
@@ -83,6 +79,10 @@ namespace Engine
         /// Texture index
         /// </summary>
         public uint TextureIndex { get; set; }
+        /// <summary>
+        /// Animation palette offset
+        /// </summary>
+        public uint AnimationOffset { get; set; }
         /// <summary>
         /// Level of detail
         /// </summary>
@@ -191,8 +191,8 @@ namespace Engine
             if (this.DrawingData?.SkinningData != null)
             {
                 this.AnimationController.Update(context.GameTime.ElapsedSeconds, this.DrawingData.SkinningData);
+                this.AnimationOffset = this.AnimationController.GetAnimationOffset(this.DrawingData.SkinningData);
 
-                this.AnimationIndex = this.AnimationController.GetAnimationOffset(this.DrawingData.SkinningData);
                 this.InvalidateCache();
             }
 
@@ -232,23 +232,22 @@ namespace Engine
 
             foreach (string meshName in this.DrawingData.Meshes.Keys)
             {
-                var dictionary = this.DrawingData.Meshes[meshName];
+                var meshDict = this.DrawingData.Meshes[meshName];
 
                 var localTransform = this.GetTransformByName(meshName);
 
                 effect.UpdatePerFrame(localTransform, context);
 
-                foreach (string material in dictionary.Keys)
+                foreach (string materialName in meshDict.Keys)
                 {
-                    var mesh = dictionary[material];
+                    var mesh = meshDict[materialName];
+                    var material = this.DrawingData.Materials[materialName];
 
-                    var mat = this.DrawingData.Materials[material];
-
-                    effect.UpdatePerObject(this.AnimationIndex, mat, this.TextureIndex);
+                    effect.UpdatePerObject(this.AnimationOffset, material, this.TextureIndex);
 
                     this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                    var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, mesh.Transparent);
+                    var technique = effect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
                     this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                     count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
@@ -300,19 +299,20 @@ namespace Engine
             int count = 0;
 
             var graphics = this.Game.Graphics;
-
             var mode = context.DrawerMode;
 
-            var dictionary = this.DrawingData.Meshes[meshName];
+            var meshDict = this.DrawingData.Meshes[meshName];
 
             var localTransform = this.GetTransformByName(meshName);
 
             effect.UpdatePerFrameFull(localTransform, context);
 
-            foreach (string material in dictionary.Keys)
+            foreach (string materialName in meshDict.Keys)
             {
-                var mesh = dictionary[material];
-                bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
+                var mesh = meshDict[materialName];
+                var material = this.DrawingData.Materials[materialName];
+
+                bool transparent = material.Material.IsTransparent && this.Description.AlphaEnabled;
 
                 if (mode.HasFlag(DrawerModes.OpaqueOnly) && transparent)
                 {
@@ -323,15 +323,11 @@ namespace Engine
                     continue;
                 }
 
-                effect.UpdatePerObject(
-                    this.AnimationIndex,
-                    this.DrawingData.Materials[material],
-                    this.TextureIndex,
-                    this.UseAnisotropicFiltering);
+                effect.UpdatePerObject(this.AnimationOffset, material, this.TextureIndex, this.UseAnisotropicFiltering);
 
                 this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced);
+                var technique = effect.GetTechnique(mesh.VertextType, false);
                 this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                 count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;

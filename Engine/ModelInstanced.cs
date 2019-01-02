@@ -132,7 +132,6 @@ namespace Engine
                         if (drawingData?.SkinningData != null)
                         {
                             current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
-
                             this.instancingData[instanceIndex].AnimationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
 
                             current.InvalidateCache();
@@ -236,7 +235,7 @@ namespace Engine
 
                         this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                        var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced, mesh.Transparent);
+                        var technique = effect.GetTechnique(mesh.VertextType, true, mat.Material.IsTransparent);
                         this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                         for (int p = 0; p < technique.PassCount; p++)
@@ -349,13 +348,14 @@ namespace Engine
 
             var graphics = this.Game.Graphics;
 
-            var dictionary = drawingData.Meshes[meshName];
+            var meshDict = drawingData.Meshes[meshName];
 
-            foreach (string material in dictionary.Keys)
+            foreach (string materialName in meshDict.Keys)
             {
-                var mesh = dictionary[material];
+                var mesh = meshDict[materialName];
+                var material = drawingData.Materials[materialName];
 
-                bool transparent = mesh.Transparent && this.Description.AlphaEnabled;
+                bool transparent = material.Material.IsTransparent && this.Description.AlphaEnabled;
                 if (mode.HasFlag(DrawerModes.OpaqueOnly) && transparent)
                 {
                     continue;
@@ -367,15 +367,11 @@ namespace Engine
 
                 count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
 
-                effect.UpdatePerObject(
-                    0,
-                    drawingData.Materials[material],
-                    0,
-                    this.UseAnisotropicFiltering);
+                effect.UpdatePerObject(0, material, 0, this.UseAnisotropicFiltering);
 
                 this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
-                var technique = effect.GetTechnique(mesh.VertextType, mesh.Instanced);
+                var technique = effect.GetTechnique(mesh.VertextType, true);
                 this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                 for (int p = 0; p < technique.PassCount; p++)

@@ -13,24 +13,24 @@ namespace Animation
     {
         private const int layerHUD = 99;
 
+        private readonly Random rnd = new Random();
+
         private SceneObject<TextDrawer> runtime = null;
         private SceneObject<TextDrawer> animText = null;
 
-        private SceneObject<Model> soldier = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> itemTris = null;
+        private SceneObject<PrimitiveListDrawer<Line3D>> itemLines = null;
+        private readonly Color itemTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
+        private readonly Color itemLinesColor = new Color(Color.Red.ToColor3(), 1f);
+        private bool showItemDEBUG = false;
+        private bool showItem = true;
+        private int itemIndex = 0;
+
+        private readonly List<SceneObject<Model>> animObjects = new List<SceneObject<Model>>();
+
         private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
-        private SceneObject<PrimitiveListDrawer<Triangle>> soldierTris = null;
-        private SceneObject<PrimitiveListDrawer<Line3D>> soldierLines = null;
-        private readonly Color soldierTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
-        private readonly Color soldierLinesColor = new Color(Color.Red.ToColor3(), 1f);
-        private bool showSoldierDEBUG = false;
-
-        private SceneObject<Model> rat = null;
         private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
-
-        private SceneObject<Model> ladder = null;
         private readonly Dictionary<string, AnimationPlan> ladderPaths = new Dictionary<string, AnimationPlan>();
-
-        private readonly Random rnd = new Random();
 
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -42,9 +42,9 @@ namespace Animation
         {
             base.Initialize();
 
+            this.InitializeLadder();
             this.InitializeSoldier();
             this.InitializeRat();
-            this.InitializeLadder();
             this.InitializeFloor();
 
             this.InitializeUI();
@@ -118,34 +118,9 @@ namespace Animation
 
             this.AddComponent<Model>(desc);
         }
-        private void InitializeRat()
-        {
-            this.rat = this.AddComponent<Model>(
-                new ModelDescription()
-                {
-                    Name = "Rat",
-                    TextureIndex = 0,
-                    CastShadow = true,
-                    UseAnisotropicFiltering = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources/Rat",
-                        ModelContentFilename = "rat.xml",
-                    }
-                });
-
-            this.rat.Transform.SetPosition(2, 0, 0, true);
-
-            AnimationPath p0 = new AnimationPath();
-            p0.AddLoop("walk");
-
-            this.ratPaths.Add("walk", new AnimationPlan(p0));
-
-            this.rat.Instance.AnimationController.AddPath(this.ratPaths["walk"]);
-        }
         private void InitializeLadder()
         {
-            this.ladder = this.AddComponent<Model>(
+            var ladder = this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     Name = "Ladder",
@@ -159,7 +134,22 @@ namespace Animation
                     }
                 });
 
-            this.ladder.Transform.SetPosition(-2, 1, 0, true);
+            var ladder2 = this.AddComponent<Model>(
+                new ModelDescription()
+                {
+                    Name = "Ladder",
+                    TextureIndex = 0,
+                    CastShadow = true,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Ladder",
+                        ModelContentFilename = "Dn_Anim_Ladder2.xml",
+                    }
+                });
+
+            ladder.Transform.SetPosition(-3f, 1, 0, true);
+            ladder2.Transform.SetPosition(-2, 1, 0, true);
 
             AnimationPath def = new AnimationPath();
             def.Add("default");
@@ -172,11 +162,15 @@ namespace Animation
             this.ladderPaths.Add("pull", new AnimationPlan(pull));
             this.ladderPaths.Add("push", new AnimationPlan(push));
 
-            this.ladder.Instance.AnimationController.AddPath(this.ladderPaths["pull"]);
+            ladder.Instance.AnimationController.AddPath(this.ladderPaths["pull"]);
+            ladder2.Instance.AnimationController.AddPath(this.ladderPaths["push"]);
+
+            this.animObjects.Add(ladder);
+            this.animObjects.Add(ladder2);
         }
         private void InitializeSoldier()
         {
-            this.soldier = this.AddComponent<Model>(
+            var soldier = this.AddComponent<Model>(
                 new ModelDescription()
                 {
                     Name = "Soldier",
@@ -190,9 +184,9 @@ namespace Animation
                     }
                 });
 
-            this.soldier.Transform.SetPosition(0, 0, 0, true);
+            soldier.Transform.SetPosition(0, 0, 0, true);
 
-            this.soldier.Instance.AnimationController.PathEnding += AnimationController_PathEnding;
+            soldier.Instance.AnimationController.PathEnding += SoldierControllerPathEnding;
 
             AnimationPath p0 = new AnimationPath();
             p0.Add("idle1");
@@ -220,7 +214,36 @@ namespace Animation
             this.soldierPaths.Add("idle2", new AnimationPlan(p2));
             this.soldierPaths.Add("stand", new AnimationPlan(p3));
 
-            this.soldier.Instance.AnimationController.AddPath(this.soldierPaths["complex"]);
+            soldier.Instance.AnimationController.AddPath(this.soldierPaths["complex"]);
+
+            this.animObjects.Add(soldier);
+        }
+        private void InitializeRat()
+        {
+            var rat = this.AddComponent<Model>(
+                new ModelDescription()
+                {
+                    Name = "Rat",
+                    TextureIndex = 0,
+                    CastShadow = true,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Rat",
+                        ModelContentFilename = "rat.xml",
+                    }
+                });
+
+            rat.Transform.SetPosition(2, 0, 0, true);
+
+            AnimationPath p0 = new AnimationPath();
+            p0.AddLoop("walk");
+
+            this.ratPaths.Add("walk", new AnimationPlan(p0));
+
+            rat.Instance.AnimationController.AddPath(this.ratPaths["walk"]);
+
+            this.animObjects.Add(rat);
         }
         private void InitializeEnvironment()
         {
@@ -233,7 +256,11 @@ namespace Animation
             this.Lights.FillLight.Enabled = false;
             this.Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
 
-            var bbox = this.soldier.Instance.GetBoundingBox();
+            BoundingBox bbox = new BoundingBox();
+            animObjects.ForEach(item =>
+            {
+                bbox = BoundingBox.Merge(bbox, item.Instance.GetBoundingBox());
+            });
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
 
             this.Camera.NearPlaneDistance = 0.1f;
@@ -243,8 +270,8 @@ namespace Animation
         }
         private void InitializeDebug()
         {
-            this.soldierTris = this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = soldierTrisColor });
-            this.soldierLines = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = soldierLinesColor });
+            this.itemTris = this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
+            this.itemLines = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
         }
 
         public override void Update(GameTime gameTime)
@@ -256,81 +283,27 @@ namespace Animation
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
 
-            #region Camera
-
-            this.UpdateCamera(gameTime, shift);
-
-            #endregion
-
-            #region Animation control
-
-            this.UpdateAnimation();
-
-            #endregion
-
-            #region Debug
-
-            if (this.Game.Input.KeyJustReleased(Keys.R))
-            {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
-                    SceneModes.DeferredLightning :
-                    SceneModes.ForwardLigthning);
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.C))
-            {
-                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
-            {
-                this.showSoldierDEBUG = !this.showSoldierDEBUG;
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
-            {
-                this.soldier.Visible = !this.soldier.Visible;
-            }
-
-            if (this.showSoldierDEBUG)
-            {
-                Triangle[] tris = this.soldier.Instance.GetTriangles(true);
-                BoundingBox bbox = this.soldier.Instance.GetBoundingBox(true);
-
-                this.soldierTris.Instance.SetPrimitives(soldierTrisColor, tris);
-                this.soldierLines.Instance.SetPrimitives(soldierLinesColor, Line3D.CreateWiredBox(bbox));
-
-                this.soldierTris.Active = this.soldierTris.Visible = true;
-                this.soldierLines.Active = this.soldierLines.Visible = true;
-            }
-            else
-            {
-                if (this.soldierTris != null)
-                {
-                    this.soldierTris.Active = this.soldierTris.Visible = false;
-                }
-
-                if (this.soldierLines != null)
-                {
-                    this.soldierLines.Active = this.soldierLines.Visible = false;
-                }
-            }
-
-            #endregion
+            this.UpdateInputCamera(gameTime, shift);
+            this.UpdateInputAnimation();
+            this.UpdateInputDebug();
 
             base.Update(gameTime);
+
+            this.UpdateDebugData();
+
+            var itemController = animObjects[itemIndex].Instance.AnimationController;
 
             this.runtime.Instance.Text = this.Game.RuntimeText;
             this.animText.Instance.Text = string.Format(
                 "Paths: {0:00}; Delta: {1:0.0}; Index: {2}; Clip: {3}; Time: {4:0.00}; Item Time: {5:0.00}",
-                this.soldier.Instance.AnimationController.PathCount,
-                this.soldier.Instance.AnimationController.TimeDelta,
-                this.soldier.Instance.AnimationController.CurrentIndex,
-                this.soldier.Instance.AnimationController.CurrentPathItemClip,
-                this.soldier.Instance.AnimationController.CurrentPathTime,
-                this.soldier.Instance.AnimationController.CurrentPathItemTime);
+                itemController.PathCount,
+                itemController.TimeDelta,
+                itemController.CurrentIndex,
+                itemController.CurrentPathItemClip,
+                itemController.CurrentPathTime,
+                itemController.CurrentPathItemTime);
         }
-        private void UpdateCamera(GameTime gameTime, bool shift)
+        private void UpdateInputCamera(GameTime gameTime, bool shift)
         {
 #if DEBUG
             if (this.Game.Input.RightMouseButtonPressed)
@@ -362,64 +335,124 @@ namespace Animation
                 this.Camera.MoveBackward(gameTime, shift);
             }
         }
-        private void UpdateAnimation()
+        private void UpdateInputAnimation()
         {
             if (this.Game.Input.KeyJustReleased(Keys.Left))
             {
-                this.soldier.Instance.AnimationController.TimeDelta -= 0.1f;
-                this.soldier.Instance.AnimationController.TimeDelta = Math.Max(0, this.soldier.Instance.AnimationController.TimeDelta);
-
-                this.rat.Instance.AnimationController.TimeDelta -= 0.1f;
-                this.rat.Instance.AnimationController.TimeDelta = Math.Max(0, this.rat.Instance.AnimationController.TimeDelta);
-
-                this.ladder.Instance.AnimationController.TimeDelta -= 0.1f;
-                this.ladder.Instance.AnimationController.TimeDelta = Math.Max(0, this.ladder.Instance.AnimationController.TimeDelta);
+                animObjects.ForEach(item =>
+                {
+                    item.Instance.AnimationController.TimeDelta -= 0.1f;
+                    item.Instance.AnimationController.TimeDelta = Math.Max(0, item.Instance.AnimationController.TimeDelta);
+                });
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Right))
             {
-                this.soldier.Instance.AnimationController.TimeDelta += 0.1f;
-                this.soldier.Instance.AnimationController.TimeDelta = Math.Min(5, this.soldier.Instance.AnimationController.TimeDelta);
-
-                this.rat.Instance.AnimationController.TimeDelta += 0.1f;
-                this.rat.Instance.AnimationController.TimeDelta = Math.Min(5, this.rat.Instance.AnimationController.TimeDelta);
-
-                this.ladder.Instance.AnimationController.TimeDelta += 0.1f;
-                this.ladder.Instance.AnimationController.TimeDelta = Math.Min(5, this.ladder.Instance.AnimationController.TimeDelta);
+                animObjects.ForEach(item =>
+                {
+                    item.Instance.AnimationController.TimeDelta += 0.1f;
+                    item.Instance.AnimationController.TimeDelta = Math.Min(5, item.Instance.AnimationController.TimeDelta);
+                });
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Up))
             {
                 if (this.Game.Input.KeyPressed(Keys.ShiftKey))
                 {
-                    this.soldier.Instance.AnimationController.Start(0);
-                    this.rat.Instance.AnimationController.Start(0);
-                    this.ladder.Instance.AnimationController.Start(0);
+                    animObjects.ForEach(item =>
+                    {
+                        item.Instance.AnimationController.Start(0);
+                    });
                 }
                 else
                 {
-                    this.soldier.Instance.AnimationController.Resume();
-                    this.rat.Instance.AnimationController.Resume();
-                    this.ladder.Instance.AnimationController.Resume();
+                    animObjects.ForEach(item =>
+                    {
+                        item.Instance.AnimationController.Resume();
+                    });
                 }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.Down))
             {
-                this.soldier.Instance.AnimationController.Pause();
-                this.rat.Instance.AnimationController.Pause();
-                this.ladder.Instance.AnimationController.Pause();
+                animObjects.ForEach(item =>
+                {
+                    item.Instance.AnimationController.Pause();
+                });
+            }
+        }
+        private void UpdateInputDebug()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                    SceneModes.DeferredLightning :
+                    SceneModes.ForwardLigthning);
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            if (this.Game.Input.KeyJustReleased(Keys.C))
             {
-                this.soldier.Instance.AnimationController.ContinuePath(this.soldierPaths["stand"]);
-                this.rat.Instance.AnimationController.ContinuePath(this.ratPaths["walk"]);
-                this.ladder.Instance.AnimationController.ContinuePath(this.ladderPaths["pull"]);
+                this.Lights.DirectionalLights[0].CastShadow = !this.Lights.DirectionalLights[0].CastShadow;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            {
+                this.showItemDEBUG = !this.showItemDEBUG;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            {
+                this.itemIndex--;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F3))
+            {
+                this.itemIndex++;
+            }
+
+            this.itemIndex %= animObjects.Count;
+            if (this.itemIndex < 0) this.itemIndex = animObjects.Count - 1;
+
+            if (this.Game.Input.KeyJustReleased(Keys.F5))
+            {
+                this.showItem = !this.showItem;
+            }
+        }
+        private void UpdateDebugData()
+        {
+            var selectedItem = animObjects[itemIndex];
+
+            animObjects.ForEach(item =>
+            {
+                item.Visible = !this.showItemDEBUG || this.showItem || (item != selectedItem);
+            });
+
+            if (this.showItemDEBUG)
+            {
+                var tris = selectedItem.Instance.GetTriangles(true);
+                var bbox = selectedItem.Instance.GetBoundingBox(true);
+
+                this.itemTris.Instance.SetPrimitives(itemTrisColor, tris);
+                this.itemLines.Instance.SetPrimitives(itemLinesColor, Line3D.CreateWiredBox(bbox));
+
+                this.itemTris.Active = this.itemTris.Visible = true;
+                this.itemLines.Active = this.itemLines.Visible = true;
+            }
+            else
+            {
+                if (this.itemTris != null)
+                {
+                    this.itemTris.Active = this.itemTris.Visible = false;
+                }
+
+                if (this.itemLines != null)
+                {
+                    this.itemLines.Active = this.itemLines.Visible = false;
+                }
             }
         }
 
-        private void AnimationController_PathEnding(object sender, EventArgs e)
+        private void SoldierControllerPathEnding(object sender, EventArgs e)
         {
             var keys = this.soldierPaths.Keys.ToArray();
 

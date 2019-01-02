@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModelContentDescription>
   <model_filename>Dn_Anim_Ladder.dae</model_filename>
-  <armature_name>Armature</armature_name>
+  <armature_name>Armature_001</armature_name>
   <animation_description>
     <animations>
       <animation name="default" from="0" to="1" />

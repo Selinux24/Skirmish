@@ -1,4 +1,6 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Content
 {
@@ -96,11 +98,38 @@ namespace Engine.Content
         /// Transparent color
         /// </summary>
         public Color4 Transparent { get; set; }
-
         /// <summary>
         /// Normal map texture
         /// </summary>
         public string NormalMapTexture { get; set; }
+        /// <summary>
+        /// Gets whether that material is transparent or not
+        /// </summary>
+        public bool IsTransparent
+        {
+            get
+            {
+                return Transparent != Color.Transparent;
+            }
+        }
+
+        /// <summary>
+        /// Gets the material content image names
+        /// </summary>
+        /// <returns>Returns a collection of distinct image names used in the material</returns>
+        public string[] GetImages()
+        {
+            List<string> images = new List<string>();
+
+            if (EmissionTexture != null) images.Add(EmissionTexture);
+            if (AmbientTexture != null) images.Add(AmbientTexture);
+            if (DiffuseTexture != null) images.Add(DiffuseTexture);
+            if (SpecularTexture != null) images.Add(SpecularTexture);
+            if (ReflectiveTexture != null) images.Add(ReflectiveTexture);
+            if (NormalMapTexture != null) images.Add(NormalMapTexture);
+
+            return images.Distinct().ToArray();
+        }
 
         /// <summary>
         /// Gets text representation of instance

@@ -727,7 +727,7 @@ namespace Engine
             foreach (var component in matComponents)
             {
                 var matList = component.Get<IUseMaterials>().Materials;
-                if (matList != null && matList.Length > 0)
+                if (matList?.Length > 0)
                 {
                     mats.AddRange(matList);
                 }
@@ -780,10 +780,10 @@ namespace Engine
 
             foreach (var component in skComponents)
             {
-                var skList = component.Get<IUseSkinningData>().SkinningData;
-                if (skList != null && skList.Length > 0)
+                var cmpSkData = component.Get<IUseSkinningData>().SkinningData;
+                if (cmpSkData != null)
                 {
-                    skData.AddRange(skList);
+                    skData.Add(cmpSkData);
                 }
             }
 

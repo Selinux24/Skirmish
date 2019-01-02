@@ -120,17 +120,16 @@ namespace Engine
 
                 foreach (string meshName in this.DrawingData.Meshes.Keys)
                 {
-                    var dictionary = this.DrawingData.Meshes[meshName];
+                    var meshDict = this.DrawingData.Meshes[meshName];
 
-                    foreach (string material in dictionary.Keys)
+                    foreach (string materialName in meshDict.Keys)
                     {
-                        var mesh = dictionary[material];
+                        var mesh = meshDict[materialName];
+                        var material = this.DrawingData.Materials[materialName];
 
-                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced, mesh.Transparent);
+                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
 
-                        var mat = this.DrawingData.Materials[material];
-
-                        sceneryEffect.UpdatePerObject(0, mat, 0);
+                        sceneryEffect.UpdatePerObject(0, material, 0);
 
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
@@ -157,19 +156,16 @@ namespace Engine
 
                 foreach (string meshName in this.DrawingData.Meshes.Keys)
                 {
-                    var dictionary = this.DrawingData.Meshes[meshName];
+                    var meshDict = this.DrawingData.Meshes[meshName];
 
-                    foreach (string material in dictionary.Keys)
+                    foreach (string materialName in meshDict.Keys)
                     {
-                        var mesh = dictionary[material];
+                        var mesh = meshDict[materialName];
+                        var material = this.DrawingData.Materials[materialName];
 
-                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, mesh.Instanced);
+                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, false);
 
-                        sceneryEffect.UpdatePerObject(
-                            0,
-                            this.DrawingData.Materials[material],
-                            0,
-                            true);
+                        sceneryEffect.UpdatePerObject(0, material, 0, true);
 
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
@@ -370,7 +366,7 @@ namespace Engine
         public override void DrawShadows(DrawContextShadows context)
         {
             var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
-            if (nodes != null && nodes.Length > 0)
+            if (nodes?.Length > 0)
             {
                 var graphics = this.Game.Graphics;
 

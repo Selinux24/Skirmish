@@ -15,9 +15,9 @@ namespace Engine.Content
         private readonly List<string> controllers = new List<string>();
 
         /// <summary>
-        /// Controller name
+        /// Controller names
         /// </summary>
-        public string[] Controller
+        public string[] Controllers
         {
             get
             {
@@ -62,13 +62,13 @@ namespace Engine.Content
         /// <returns>Returns text representation of instance</returns>
         public override string ToString()
         {
-            if (this.Controller != null && this.Controller.Length == 1)
+            if (this.Controllers != null && this.Controllers.Length == 1)
             {
-                return string.Format("{0}", this.Controller[0]);
+                return string.Format("{0}", this.Controllers[0]);
             }
-            else if (this.Controller != null && this.Controller.Length > 1)
+            else if (this.Controllers != null && this.Controllers.Length > 1)
             {
-                return string.Format("{0}", string.Join(", ", this.Controller));
+                return string.Format("{0}", string.Join(", ", this.Controllers));
             }
             else
             {

@@ -70,7 +70,7 @@ namespace Engine.Common
             InitializeGeometry(ref res, modelContent, description);
 
             //Update meshes into device
-            InitializeMeshes(ref res, bufferManager, description.Instances);
+            InitializeMeshes(ref res, bufferManager, description.Instanced ? description.Instances : 0);
 
             //Lights
             InitializeLights(ref res, modelContent);
@@ -110,26 +110,22 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         private static void InitializeMaterials(ref DrawingData drw, ModelContent modelContent)
         {
-            if (modelContent.Materials != null)
+            foreach (string mat in modelContent.Materials?.Keys)
             {
-                foreach (string mat in modelContent.Materials.Keys)
+                var effectInfo = modelContent.Materials[mat];
+
+                MeshMaterial meshMaterial = new MeshMaterial()
                 {
-                    MaterialContent effectInfo = modelContent.Materials[mat];
+                    Material = new Material(effectInfo),
+                    EmissionTexture = drw.Textures[effectInfo.EmissionTexture],
+                    AmbientTexture = drw.Textures[effectInfo.AmbientTexture],
+                    DiffuseTexture = drw.Textures[effectInfo.DiffuseTexture],
+                    SpecularTexture = drw.Textures[effectInfo.SpecularTexture],
+                    ReflectiveTexture = drw.Textures[effectInfo.ReflectiveTexture],
+                    NormalMap = drw.Textures[effectInfo.NormalMapTexture],
+                };
 
-                    MeshMaterial meshMaterial = new MeshMaterial()
-                    {
-                        Material = new Material(effectInfo),
-
-                        EmissionTexture = drw.Textures[effectInfo.EmissionTexture],
-                        AmbientTexture = drw.Textures[effectInfo.AmbientTexture],
-                        DiffuseTexture = drw.Textures[effectInfo.DiffuseTexture],
-                        SpecularTexture = drw.Textures[effectInfo.SpecularTexture],
-                        ReflectiveTexture = drw.Textures[effectInfo.ReflectiveTexture],
-                        NormalMap = drw.Textures[effectInfo.NormalMapTexture],
-                    };
-
-                    drw.Materials.Add(mat, meshMaterial);
-                }
+                drw.Materials.Add(mat, meshMaterial);
             }
         }
         /// <summary>
@@ -187,12 +183,9 @@ namespace Engine.Common
                             //Create and store the mesh into the drawing data
                             Mesh nMesh = new Mesh(
                                 meshName,
-                                geometry.Material,
-                                geometry.Transparent,
                                 geometry.Topology,
                                 vertexList,
-                                indices,
-                                description.Instanced);
+                                indices);
 
                             drw.Meshes.Add(meshName, geometry.Material, nMesh);
                         }
@@ -357,7 +350,10 @@ namespace Engine.Common
                     //Apply shape matrix if controller exists but we are not loading animation info
                     bindShapeMatrix = cInfo.BindShapeMatrix;
                     weights = cInfo.Weights;
-                    jointNames = modelContent.SkinningInfo.Skeleton.GetJointNames();
+
+                    //Find skeleton for controller
+                    var sInfo = modelContent.SkinningInfo[cInfo.Armature];
+                    jointNames = sInfo.Skeleton.GetJointNames();
 
                     return true;
                 }
@@ -375,14 +371,20 @@ namespace Engine.Common
             if (modelContent.SkinningInfo != null)
             {
                 //Use the definition to read animation data into a clip dictionary
-                List<JointAnimation> animations = new List<JointAnimation>();
+                foreach (var sInfo in modelContent.SkinningInfo.Values)
+                {
+                    if (drw.SkinningData != null)
+                    {
+                        continue;
+                    }
 
-                InitializeJoints(modelContent, modelContent.SkinningInfo.Skeleton.Root, animations);
+                    var animations = InitializeJoints(modelContent, sInfo.Skeleton.Root, sInfo.Controllers);
 
-                drw.SkinningData = new SkinningData(
-                    modelContent.SkinningInfo.Skeleton,
-                    animations.ToArray(),
-                    modelContent.Animations.Definition);
+                    drw.SkinningData = new SkinningData(
+                        sInfo.Skeleton,
+                        animations,
+                        modelContent.Animations.Definition);
+                }
             }
         }
         /// <summary>
@@ -391,8 +393,10 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         /// <param name="joint">Joint to initialize</param>
         /// <param name="animations">Animation list to feed</param>
-        private static void InitializeJoints(ModelContent modelContent, Joint joint, List<JointAnimation> animations)
+        private static JointAnimation[] InitializeJoints(ModelContent modelContent, Joint joint, string[] skinController)
         {
+            List<JointAnimation> animations = new List<JointAnimation>();
+
             List<JointAnimation> boneAnimations = new List<JointAnimation>();
 
             //Find keyframes for current bone
@@ -412,7 +416,7 @@ namespace Engine.Common
                 animations.Add(boneAnimations[0]);
             }
 
-            foreach (string controllerName in modelContent.SkinningInfo.Controller)
+            foreach (string controllerName in skinController)
             {
                 var controller = modelContent.Controllers[controllerName];
 
@@ -426,13 +430,17 @@ namespace Engine.Common
                 joint.Offset = ibm;
             }
 
-            if (joint.Childs != null && joint.Childs.Length > 0)
+            if (joint.Childs?.Length > 0)
             {
                 foreach (var child in joint.Childs)
                 {
-                    InitializeJoints(modelContent, child, animations);
+                    var ja = InitializeJoints(modelContent, child, skinController);
+
+                    animations.AddRange(ja);
                 }
             }
+
+            return animations.ToArray();
         }
         /// <summary>
         /// Initialize mesh buffers in the graphics device
@@ -441,12 +449,12 @@ namespace Engine.Common
         /// <param name="game">Game</param>
         private static void InitializeMeshes(ref DrawingData drw, BufferManager bufferManager, int instances)
         {
-            foreach (MeshMaterialsDictionary dictionary in drw.Meshes.Values)
+            foreach (var dictionary in drw.Meshes.Values)
             {
-                foreach (Mesh mesh in dictionary.Values)
+                foreach (var mesh in dictionary.Values)
                 {
                     //Vertices
-                    mesh.VertexBuffer = bufferManager.Add(mesh.Name, mesh.Vertices, false, mesh.Instanced ? instances : 0);
+                    mesh.VertexBuffer = bufferManager.Add(mesh.Name, mesh.Vertices, false, instances);
 
                     if (mesh.Indexed)
                     {

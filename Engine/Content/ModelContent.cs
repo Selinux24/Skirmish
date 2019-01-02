@@ -1,13 +1,12 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 
 namespace Engine.Content
 {
     using Engine.Common;
-    using System.Security.Permissions;
 
     /// <summary>
     /// Model content
@@ -150,6 +149,28 @@ namespace Engine.Content
         public class MaterialDictionary : Dictionary<string, MaterialContent>
         {
             /// <summary>
+            /// Images name list
+            /// </summary>
+            public string[] Images
+            {
+                get
+                {
+                    List<string> images = new List<string>();
+
+                    foreach (var item in this.Values)
+                    {
+                        var itemImages = item.GetImages();
+                        foreach (var image in itemImages)
+                        {
+                            if (!images.Contains(image)) images.Add(image);
+                        }
+                    }
+
+                    return images.ToArray();
+                }
+            }
+
+            /// <summary>
             /// Constructor
             /// </summary>
             public MaterialDictionary()
@@ -175,6 +196,27 @@ namespace Engine.Content
         [Serializable]
         public class GeometryDictionary : Dictionary<string, Dictionary<string, SubMeshContent>>
         {
+            /// <summary>
+            /// Materials name list
+            /// </summary>
+            public string[] Materials
+            {
+                get
+                {
+                    List<string> materials = new List<string>();
+
+                    foreach (var meshDict in this.Values)
+                    {
+                        foreach (var subMesh in meshDict.Values)
+                        {
+                            if (!materials.Contains(subMesh.Material)) materials.Add(subMesh.Material);
+                        }
+                    }
+
+                    return materials.ToArray();
+                }
+            }
+
             /// <summary>
             /// Constructor
             /// </summary>
@@ -246,9 +288,9 @@ namespace Engine.Content
                 {
                     List<string> skins = new List<string>();
 
-                    foreach (ControllerContent controller in this.Values)
+                    foreach (var item in this.Values)
                     {
-                        if (!skins.Contains(controller.Skin)) skins.Add(controller.Skin);
+                        if (!skins.Contains(item.Skin)) skins.Add(item.Skin);
                     }
 
                     return skins.ToArray();
@@ -287,6 +329,42 @@ namespace Engine.Content
                 }
 
                 return null;
+            }
+        }
+
+        [Serializable]
+        public class SkinningDictionary : Dictionary<string, SkinningContent>
+        {
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            public SkinningDictionary()
+                : base()
+            {
+
+            }
+            /// <summary>
+            /// Constructor de serialización
+            /// </summary>
+            /// <param name="info">Info</param>
+            /// <param name="context">Context</param>
+            protected SkinningDictionary(SerializationInfo info, StreamingContext context)
+                : base(info, context)
+            {
+
+            }
+
+            public bool HasJointData(string jointName)
+            {
+                foreach (var value in this.Values)
+                {
+                    if (value.Skeleton.GetJointNames().Any(j => j == jointName))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
         }
         /// <summary>
@@ -330,6 +408,33 @@ namespace Engine.Content
 
                 base.GetObjectData(info, context);
             }
+
+            /// <summary>
+            /// Gets the animation list for the specified skin content
+            /// </summary>
+            /// <param name="skInfo">Skin content</param>
+            /// <returns>Returns the list of animations for the specified skin content</returns>
+            public string[] GetAnimationsForSkin(SkinningContent skInfo)
+            {
+                List<string> result = new List<string>();
+
+                var jointNames = skInfo.Skeleton.GetJointNames();
+
+                foreach (var animation in this)
+                {
+                    if (result.Contains(animation.Key))
+                    {
+                        continue;
+                    }
+
+                    if (animation.Value.Any(a => Array.Exists(jointNames, j => j == a.Joint)))
+                    {
+                        result.Add(animation.Key);
+                    }
+                }
+
+                return result.ToArray();
+            }
         }
 
         #endregion
@@ -361,7 +466,7 @@ namespace Engine.Content
         /// <summary>
         /// Skinning information
         /// </summary>
-        public SkinningContent SkinningInfo { get; set; }
+        public SkinningDictionary SkinningInfo { get; set; } = new SkinningDictionary();
         /// <summary>
         /// Generate triangle list model content from scratch
         /// </summary>
@@ -394,7 +499,6 @@ namespace Engine.Content
 
             var materialName = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial;
             var textured = modelContent.Materials[materialName].DiffuseTexture != null;
-            var transparent = modelContent.Materials[materialName].Transparent != Color.Transparent;
 
             SubMeshContent geo = new SubMeshContent()
             {
@@ -403,7 +507,6 @@ namespace Engine.Content
                 Indices = indices,
                 Material = materialName,
                 Textured = textured,
-                Transparent = transparent,
             };
 
             modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
@@ -452,7 +555,6 @@ namespace Engine.Content
                 Vertices = vertices,
                 Indices = indices,
                 Textured = true,
-                Transparent = false,
             };
 
             modelContent.Images.Add(texureName, textureImage);
@@ -733,6 +835,71 @@ namespace Engine.Content
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Creates a new content filtering with the specified armature name
+        /// </summary>
+        /// <param name="armatureName">Armature name</param>
+        /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
+        public ModelContent FilterArmature(string armatureName)
+        {
+            ModelContent newModel = new ModelContent();
+
+            if (!SkinningInfo.Any(s => s.Key == armatureName))
+            {
+                return newModel;
+            }
+
+            //Skinning info
+            var skInfo = SkinningInfo[armatureName];
+            newModel.SkinningInfo.Add(armatureName, skInfo);
+
+            //Animation definition
+            newModel.Animations.Definition = Animations.Definition;
+
+            //Animation list
+            foreach (var animationName in this.Animations.GetAnimationsForSkin(skInfo))
+            {
+                var animation = Animations[animationName];
+                newModel.Animations.Add(animationName, animation);
+            }
+
+            //Controllers
+            foreach (var controllerName in skInfo.Controllers)
+            {
+                var controller = Controllers[controllerName];
+                newModel.Controllers.Add(controllerName, controller);
+            }
+
+            //Geometry
+            foreach (var skinName in newModel.Controllers.Skins)
+            {
+                var geometry = Geometry[skinName];
+                newModel.Geometry.Add(skinName, geometry);
+            }
+
+            //Materials
+            foreach (var materialName in newModel.Geometry.Materials)
+            {
+                var material = Materials[materialName];
+                newModel.Materials.Add(materialName, material);
+            }
+
+            //Images
+            foreach (var imageName in newModel.Materials.Images)
+            {
+                var image = Images[imageName];
+                newModel.Images.Add(imageName, image);
+            }
+
+            //Lights (always copy all lights)
+            foreach (var light in Lights)
+            {
+                newModel.Lights.Add(light.Key, light.Value);
+            }
+
+            return newModel;
         }
 
         /// <summary>

@@ -54,37 +54,13 @@ namespace Engine.Common
         /// </summary>
         public string Name { get; private set; }
         /// <summary>
-        /// Material name
-        /// </summary>
-        public string Material { get; private set; }
-        /// <summary>
         /// Vertex type
         /// </summary>
         public VertexTypes VertextType { get; private set; }
         /// <summary>
-        /// Has skin
-        /// </summary>
-        public bool Skinned { get; private set; }
-        /// <summary>
-        /// Has textures
-        /// </summary>
-        public bool Textured { get; private set; }
-        /// <summary>
-        /// Has transparency
-        /// </summary>
-        public bool Transparent { get; private set; }
-        /// <summary>
         /// Topology
         /// </summary>
         public Topology Topology { get; private set; }
-        /// <summary>
-        /// Stride
-        /// </summary>
-        public int VertexBufferStride { get; internal set; }
-        /// <summary>
-        /// Is instanced
-        /// </summary>
-        public bool Instanced { get; protected set; }
 
         /// <summary>
         /// Vertex buffer descriptor
@@ -99,29 +75,18 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="name">Mesh name</param>
-        /// <param name="material">Material name</param>
-        /// <param name="isTransparent">Has transparency</param>
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
-        /// <param name="instanced">Instanced</param>
-        public Mesh(string name, string material, bool isTransparent, Topology topology, IVertexData[] vertices, uint[] indices, bool instanced)
+        public Mesh(string name, Topology topology, IVertexData[] vertices, uint[] indices)
         {
-            var vFirst = vertices[0];
-
             this.Id = GetNextId();
             this.Name = name;
-            this.Material = material;
             this.Topology = topology;
             this.Vertices = vertices;
-            this.Indexed = (indices != null && indices.Length > 0);
+            this.VertextType = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
             this.Indices = indices;
-            this.VertextType = vFirst.VertexType;
-            this.VertexBufferStride = vFirst.GetStride();
-            this.Textured = VertexData.IsTextured(vFirst.VertexType);
-            this.Transparent = isTransparent;
-            this.Skinned = VertexData.IsSkinned(vFirst.VertexType);
-            this.Instanced = instanced;
+            this.Indexed = indices?.Length > 0;
         }
         /// <summary>
         /// Destructor
