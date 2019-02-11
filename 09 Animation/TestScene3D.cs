@@ -31,6 +31,7 @@ namespace Animation
         private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
         private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
         private readonly Dictionary<string, AnimationPlan> ladderPaths = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> ladder2Paths = new Dictionary<string, AnimationPlan>();
 
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -43,6 +44,7 @@ namespace Animation
             base.Initialize();
 
             this.InitializeLadder();
+            this.InitializeLadder2();
             this.InitializeSoldier();
             this.InitializeRat();
             this.InitializeFloor();
@@ -134,22 +136,8 @@ namespace Animation
                     }
                 });
 
-            var ladder2 = this.AddComponent<Model>(
-                new ModelDescription()
-                {
-                    Name = "Ladder",
-                    TextureIndex = 0,
-                    CastShadow = true,
-                    UseAnisotropicFiltering = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources/Ladder",
-                        ModelContentFilename = "Dn_Anim_Ladder2.xml",
-                    }
-                });
-
-            ladder.Transform.SetPosition(-3f, 1, 0, true);
-            ladder2.Transform.SetPosition(-2, 1, 0, true);
+            ladder.Transform.SetPosition(-4f, 1, 0, true);
+            ladder.Transform.SetRotation(MathUtil.PiOverTwo, 0, 0);
 
             AnimationPath def = new AnimationPath();
             def.Add("default");
@@ -163,7 +151,57 @@ namespace Animation
             this.ladderPaths.Add("push", new AnimationPlan(push));
 
             ladder.Instance.AnimationController.AddPath(this.ladderPaths["pull"]);
-            ladder2.Instance.AnimationController.AddPath(this.ladderPaths["push"]);
+
+            this.animObjects.Add(ladder);
+        }
+        private void InitializeLadder2()
+        {
+            var ladder = this.AddComponent<Model>(
+                new ModelDescription()
+                {
+                    Name = "Ladder2",
+                    TextureIndex = 0,
+                    CastShadow = true,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Ladder",
+                        ModelContentFilename = "Dn_Anim_Ladder_2.xml",
+                    }
+                });
+
+            var ladder2 = this.AddComponent<Model>(
+                new ModelDescription()
+                {
+                    Name = "Ladder22",
+                    TextureIndex = 0,
+                    CastShadow = true,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Ladder",
+                        ModelContentFilename = "Dn_Anim_Ladder_22.xml",
+                    }
+                });
+
+            ladder.Transform.SetPosition(-3f, 1, 0, true);
+            ladder.Transform.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            ladder2.Transform.SetPosition(-2f, 1, 0, true);
+            ladder2.Transform.SetRotation(MathUtil.PiOverTwo, 0, 0);
+
+            AnimationPath def = new AnimationPath();
+            def.Add("default");
+            AnimationPath pull = new AnimationPath();
+            pull.Add("pull");
+            AnimationPath push = new AnimationPath();
+            push.Add("push");
+
+            this.ladder2Paths.Add("default", new AnimationPlan(def));
+            this.ladder2Paths.Add("pull", new AnimationPlan(pull));
+            this.ladder2Paths.Add("push", new AnimationPlan(push));
+
+            ladder.Instance.AnimationController.AddPath(this.ladder2Paths["pull"]);
+            ladder2.Instance.AnimationController.AddPath(this.ladder2Paths["push"]);
 
             this.animObjects.Add(ladder);
             this.animObjects.Add(ladder2);
