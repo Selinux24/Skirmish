@@ -368,7 +368,7 @@ namespace Engine.Common
         /// <param name="modelContent">Model content</param>
         private static void InitializeSkinningData(ref DrawingData drw, ModelContent modelContent)
         {
-            if (modelContent.SkinningInfo != null)
+            if (modelContent.SkinningInfo?.Count > 0)
             {
                 //Use the definition to read animation data into a clip dictionary
                 foreach (var sInfo in modelContent.SkinningInfo.Values)
@@ -378,10 +378,11 @@ namespace Engine.Common
                         continue;
                     }
 
+                    drw.SkinningData = new SkinningData(sInfo.Skeleton);
+
                     var animations = InitializeJoints(modelContent, sInfo.Skeleton.Root, sInfo.Controllers);
 
-                    drw.SkinningData = new SkinningData(
-                        sInfo.Skeleton,
+                    drw.SkinningData.Initialize(
                         animations,
                         modelContent.Animations.Definition);
                 }

@@ -56,12 +56,18 @@ namespace Engine.Animation
         /// Constructor
         /// </summary>
         /// <param name="skeleton">Skeleton</param>
-        /// <param name="jointAnimations">Animation list</param>
-        /// <param name="animationDescription">Animation description</param>
-        public SkinningData(Skeleton skeleton, JointAnimation[] jointAnimations, AnimationDescription animationDescription)
+        public SkinningData(Skeleton skeleton)
         {
             this.skeleton = skeleton;
+        }
 
+        /// <summary>
+        /// Initialize the drawing data instance
+        /// </summary>
+        /// <param name="jointAnimations">Joint animation list</param>
+        /// <param name="animationDescription">Animation description</param>
+        public void Initialize(JointAnimation[] jointAnimations, AnimationDescription animationDescription)
+        {
             if (animationDescription != null)
             {
                 Dictionary<string, JointAnimation[]> dictAnimations = new Dictionary<string, JointAnimation[]>();
@@ -103,8 +109,8 @@ namespace Engine.Animation
             }
             else
             {
-                this.animations.Add(new AnimationClip(SkinningData.DefaultClip, jointAnimations));
-                this.clips.Add(SkinningData.DefaultClip);
+                this.animations.Add(new AnimationClip(DefaultClip, jointAnimations));
+                this.clips.Add(DefaultClip);
             }
 
             //Initialize offsets for animation process with animation palette

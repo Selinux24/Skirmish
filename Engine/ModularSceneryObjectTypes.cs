@@ -44,5 +44,9 @@ namespace Engine
         /// Wall trap
         /// </summary>
         TrapWall = 256,
+        /// <summary>
+        /// Trigger
+        /// </summary>
+        Trigger = 512,
     }
 }

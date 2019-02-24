@@ -792,6 +792,7 @@ namespace Engine.Content
                 foreach (var mask in masks)
                 {
                     FilterMaskGeo(mask, ref res);
+                    FilterMaskSkin(mask, ref res);
                 }
             }
 
@@ -834,6 +835,60 @@ namespace Engine.Content
                         res.Lights.Add(l.Key, l.Value);
                     }
                 }
+            }
+        }
+        /// <summary>
+        /// Filters the skins and animations dictionary
+        /// </summary>
+        /// <param name="mask">Mask</param>
+        /// <param name="res">Model content</param>
+        private void FilterMaskSkin(string mask, ref ModelContent res)
+        {
+            var controllers = this.Controllers.Where(g =>
+                g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
+                g.Key.EndsWith("-skin", StringComparison.OrdinalIgnoreCase));
+
+            if (controllers.Any())
+            {
+                foreach (var c in controllers)
+                {
+                    res.Controllers.Add(c.Key, c.Value);
+                }
+            }
+
+            var skins = this.SkinningInfo.Where(g =>
+                g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase));
+
+            if (skins.Any())
+            {
+                foreach (var s in skins)
+                {
+                    res.SkinningInfo.Add(s.Key, s.Value);
+                }
+            }
+
+            var animations = this.Animations.Where(g =>
+                g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase));
+
+            if (animations.Any())
+            {
+                foreach (var a in animations)
+                {
+                    res.Animations.Add(a.Key, a.Value);
+                }
+            }
+
+            if (res.Animations.Definition == null)
+            {
+                res.Animations.Definition = new AnimationDescription();
+            }
+
+            var clips = this.Animations.Definition.Clips.Where(c =>
+                skins.Any(s => s.Key == c.Skeleton));
+
+            if (clips.Any())
+            {
+                res.Animations.Definition.Clips.AddRange(clips);
             }
         }
 

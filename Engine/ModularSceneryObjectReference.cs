@@ -36,6 +36,11 @@ namespace Engine
         [XmlAttribute("type")]
         public ModularSceneryObjectTypes Type { get; set; } = ModularSceneryObjectTypes.Default;
         /// <summary>
+        /// Object id
+        /// </summary>
+        [XmlAttribute("object_id")]
+        public string ObjectId { get; set; }
+        /// <summary>
         /// Next level
         /// </summary>
         /// <remarks>Only for exit doors</remarks>

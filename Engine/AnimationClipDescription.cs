@@ -24,5 +24,10 @@ namespace Engine
         /// </summary>
         [XmlAttribute("to")]
         public int To { get; set; }
+        /// <summary>
+        /// Skeleton name
+        /// </summary>
+        [XmlAttribute("skeleton")]
+        public string Skeleton { get; set; }
     }
 }
