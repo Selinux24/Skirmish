@@ -590,14 +590,14 @@ namespace Engine.Common
         {
             List<Vector3> points = new List<Vector3>();
 
-            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+            foreach (var dictionary in this.Meshes.Values)
             {
-                foreach (Mesh mesh in dictionary.Values)
+                foreach (var mesh in dictionary.Values)
                 {
-                    Vector3[] meshPoints = mesh.GetPoints(refresh);
+                    var meshPoints = mesh.GetPoints(refresh);
                     if (meshPoints != null && meshPoints.Length > 0)
                     {
-                        Vector3[] trnPoints = new Vector3[meshPoints.Length];
+                        var trnPoints = new Vector3[meshPoints.Length];
                         Vector3.TransformCoordinate(meshPoints, ref transform, trnPoints);
                         points.AddRange(trnPoints);
                     }
@@ -627,14 +627,14 @@ namespace Engine.Common
         {
             List<Vector3> points = new List<Vector3>();
 
-            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+            foreach (var dictionary in this.Meshes.Values)
             {
-                foreach (Mesh mesh in dictionary.Values)
+                foreach (var mesh in dictionary.Values)
                 {
-                    Vector3[] meshPoints = mesh.GetPoints(boneTransforms, refresh);
+                    var meshPoints = mesh.GetPoints(boneTransforms, refresh);
                     if (meshPoints != null && meshPoints.Length > 0)
                     {
-                        Vector3[] trnPoints = new Vector3[meshPoints.Length];
+                        var trnPoints = new Vector3[meshPoints.Length];
                         Vector3.TransformCoordinate(meshPoints, ref transform, trnPoints);
                         points.AddRange(trnPoints);
                     }
@@ -662,11 +662,11 @@ namespace Engine.Common
         {
             List<Triangle> triangles = new List<Triangle>();
 
-            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+            foreach (var dictionary in this.Meshes.Values)
             {
-                foreach (Mesh mesh in dictionary.Values)
+                foreach (var mesh in dictionary.Values)
                 {
-                    Triangle[] meshTriangles = mesh.GetTriangles(refresh);
+                    var meshTriangles = mesh.GetTriangles(refresh);
                     meshTriangles = Triangle.Transform(meshTriangles, transform);
                     triangles.AddRange(meshTriangles);
                 }
@@ -695,11 +695,11 @@ namespace Engine.Common
         {
             List<Triangle> triangles = new List<Triangle>();
 
-            foreach (MeshMaterialsDictionary dictionary in this.Meshes.Values)
+            foreach (var dictionary in this.Meshes.Values)
             {
-                foreach (Mesh mesh in dictionary.Values)
+                foreach (var mesh in dictionary.Values)
                 {
-                    Triangle[] meshTriangles = mesh.GetTriangles(boneTransforms, refresh);
+                    var meshTriangles = mesh.GetTriangles(boneTransforms, refresh);
                     meshTriangles = Triangle.Transform(meshTriangles, transform);
                     triangles.AddRange(meshTriangles);
                 }

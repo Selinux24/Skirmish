@@ -272,6 +272,14 @@ namespace Engine.Animation
         }
 
         /// <summary>
+        /// Gets the base pose transformation list
+        /// </summary>
+        /// <returns>Returns the base transformation list</returns>
+        public Matrix[] GetPoseBase()
+        {
+            return Helper.CreateArray(this.skeleton.JointCount, Matrix.Identity);
+        }
+        /// <summary>
         /// Gets the transform list of the pose at specified time
         /// </summary>
         /// <param name="time">Time</param>
@@ -283,7 +291,7 @@ namespace Engine.Animation
 
             if (clipIndex < 0)
             {
-                return Helper.CreateArray<Matrix>(this.skeleton.JointCount, Matrix.Identity);
+                return Helper.CreateArray(this.skeleton.JointCount, Matrix.Identity);
             }
             else if (clipIndex < this.animations.Count)
             {

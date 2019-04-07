@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Engine
@@ -395,16 +396,18 @@ namespace Engine
             {
                 for (int i = 0; i < this.instances.Length; i++)
                 {
+                    var instance = this.instances[i];
+
                     if (i < positions.Length)
                     {
-                        this.instances[i].Manipulator.SetPosition(positions[i], true);
-                        this.instances[i].Active = true;
-                        this.instances[i].Visible = true;
+                        instance.Manipulator.SetPosition(positions[i], true);
+                        instance.Active = true;
+                        instance.Visible = true;
                     }
                     else
                     {
-                        this.instances[i].Active = false;
-                        this.instances[i].Visible = false;
+                        instance.Active = false;
+                        instance.Visible = false;
                     }
                 }
             }
@@ -419,16 +422,18 @@ namespace Engine
             {
                 for (int i = 0; i < this.instances.Length; i++)
                 {
+                    var instance = this.instances[i];
+
                     if (i < transforms.Length)
                     {
-                        this.instances[i].Manipulator.SetTransform(transforms[i]);
-                        this.instances[i].Active = true;
-                        this.instances[i].Visible = true;
+                        instance.Manipulator.SetTransform(transforms[i]);
+                        instance.Active = true;
+                        instance.Visible = true;
                     }
                     else
                     {
-                        this.instances[i].Active = false;
-                        this.instances[i].Visible = false;
+                        instance.Active = false;
+                        instance.Visible = false;
                     }
                 }
             }
@@ -437,9 +442,9 @@ namespace Engine
         /// Gets the instance list
         /// </summary>
         /// <returns>Returns an array with the instance list</returns>
-        public ModelInstance[] GetInstances()
+        public IEnumerable<ModelInstance> GetInstances()
         {
-            return this.instances;
+            return new ReadOnlyCollection<ModelInstance>(this.instances);
         }
         /// <summary>
         /// Gets all components
@@ -447,17 +452,7 @@ namespace Engine
         /// <returns>Returns a collection of components</returns>
         public IEnumerable<T> GetComponents<T>()
         {
-            List<T> res = new List<T>();
-
-            for (int i = 0; i < this.Count; i++)
-            {
-                if (this.instances[i].Visible && this.instances[i] is T)
-                {
-                    res.Add((T)(object)this.instances[i]);
-                }
-            }
-
-            return res;
+            return new ReadOnlyCollection<T>(this.instances.Where(i => i.Visible).OfType<T>().ToArray());
         }
 
         /// <summary>
@@ -468,7 +463,7 @@ namespace Engine
         /// <returns>Returns true if all of the instances were outside of the frustum</returns>
         public override bool Cull(ICullingVolume volume, out float distance)
         {
-            if (this.instancesTmp != null && this.instancesTmp.Length > 0)
+            if (this.instancesTmp?.Length > 0)
             {
                 var item = this.instancesTmp.FirstOrDefault(i =>
                 {

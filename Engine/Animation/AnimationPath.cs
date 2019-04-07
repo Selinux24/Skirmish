@@ -80,6 +80,7 @@ namespace Engine.Animation
         {
             this.Time = time;
             this.TotalItemTime = time;
+            this.Playing = true;
         }
         /// <summary>
         /// Adds a new animation item to the animation path

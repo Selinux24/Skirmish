@@ -2,6 +2,7 @@
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -370,6 +371,11 @@ namespace Engine
         /// <returns>Returns new triangle list</returns>
         public static Triangle[] Transform(Triangle[] triangles, Matrix transform)
         {
+            if (triangles?.Any() == false)
+            {
+                return triangles;
+            }
+
             Triangle[] trnTriangles = new Triangle[triangles.Length];
 
             for (int i = 0; i < triangles.Length; i++)

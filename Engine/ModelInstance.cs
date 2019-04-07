@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
 
 namespace Engine
 {
@@ -129,19 +130,16 @@ namespace Engine
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
 
+            this.coarseBoundingSphere = BoundingSphere.FromPoints(this.GetPoints());
+
             var drawData = model.GetDrawingData(LevelOfDetail.High);
-            if (drawData != null)
+            if (drawData?.Lights?.Length > 0)
             {
-                this.coarseBoundingSphere = BoundingSphere.FromPoints(drawData.GetPoints(true));
+                this.Lights = new SceneLight[drawData.Lights.Length];
 
-                if (drawData.Lights != null && drawData.Lights.Length > 0)
+                for (int l = 0; l < drawData.Lights.Length; l++)
                 {
-                    this.Lights = new SceneLight[drawData.Lights.Length];
-
-                    for (int l = 0; l < drawData.Lights.Length; l++)
-                    {
-                        this.Lights[l] = drawData.Lights[l].Clone();
-                    }
+                    this.Lights[l] = drawData.Lights[l].Clone();
                 }
             }
         }
@@ -203,16 +201,18 @@ namespace Engine
             if (refresh || this.updatePoints)
             {
                 var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
-                if (drawingData.SkinningData != null && this.AnimationController.Playing)
+                if (drawingData.SkinningData != null)
                 {
                     this.positionCache = drawingData.GetPoints(
                         this.Manipulator.LocalTransform,
                         this.AnimationController.GetCurrentPose(drawingData.SkinningData),
-                        refresh);
+                        true);
                 }
                 else
                 {
-                    this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform);
+                    this.positionCache = drawingData.GetPoints(
+                        this.Manipulator.LocalTransform, 
+                        true);
                 }
 
                 this.updatePoints = false;
@@ -230,16 +230,18 @@ namespace Engine
             if (refresh || this.updateTriangles)
             {
                 var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
-                if (drawingData.SkinningData != null && this.AnimationController.Playing)
+                if (drawingData.SkinningData != null)
                 {
                     this.triangleCache = drawingData.GetTriangles(
                         this.Manipulator.LocalTransform,
                         this.AnimationController.GetCurrentPose(drawingData.SkinningData),
-                        refresh);
+                        true);
                 }
                 else
                 {
-                    this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform);
+                    this.triangleCache = drawingData.GetTriangles(
+                        this.Manipulator.LocalTransform,
+                        true);
                 }
 
                 this.updateTriangles = false;
@@ -291,7 +293,7 @@ namespace Engine
             if (refresh || this.boundingBox == new BoundingBox())
             {
                 var points = this.GetPoints(refresh);
-                if (points != null && points.Length > 0)
+                if (points?.Any() == true)
                 {
                     this.boundingBox = BoundingBox.FromPoints(points);
                 }

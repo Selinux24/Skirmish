@@ -213,15 +213,16 @@ namespace Engine.Animation
             if (this.active && this.CurrentIndex >= 0)
             {
                 var path = this.animationPaths[this.CurrentIndex];
-
                 if (!path.Playing)
                 {
-                    this.CurrentIndex++;
-                    if (this.CurrentIndex >= this.animationPaths.Count)
+                    if (this.CurrentIndex < this.animationPaths.Count - 1)
+                    {
+                        //Go to next path
+                        this.CurrentIndex++;
+                    }
+                    else
                     {
                         //No paths to do
-                        this.CurrentIndex = -1;
-
                         this.PathEnding?.Invoke(this, new EventArgs());
                     }
                 }
@@ -241,17 +242,19 @@ namespace Engine.Animation
             {
                 //Get the path
                 var path = this.animationPaths[this.CurrentIndex];
-
-                //Get the path item
-                var pathItem = path.GetCurrentItem();
-                if (pathItem != null)
+                if (path.Playing)
                 {
-                    skData.GetAnimationOffset(
-                        path.ItemTime,
-                        pathItem.ClipName,
-                        out uint offset);
+                    //Get the path item
+                    var pathItem = path.GetCurrentItem();
+                    if (pathItem != null)
+                    {
+                        skData.GetAnimationOffset(
+                            path.ItemTime,
+                            pathItem.ClipName,
+                            out uint offset);
 
-                    lastOffset = offset;
+                        lastOffset = offset;
+                    }
                 }
             }
 
@@ -279,7 +282,7 @@ namespace Engine.Animation
                 }
             }
 
-            return new Matrix[] { };
+            return skData.GetPoseBase();
         }
 
         /// <summary>

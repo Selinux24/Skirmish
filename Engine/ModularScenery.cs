@@ -364,33 +364,27 @@ namespace Engine
         {
             foreach (var obj in level.Objects)
             {
+                ModelInstance instance;
+
                 if (string.IsNullOrEmpty(obj.AssetName))
                 {
                     // Adding object with referenced geometry
-                    var instance = this.FindAssetInstance(obj.AssetMapId, obj.AssetId);
-                    if (instance != null)
-                    {
-                        //Find emitters
-                        var emitters = this.particleManager.Instance.ParticleSystems
-                            .Where(p => p.Emitter.Instance == instance)
-                            .Select(p => p.Emitter);
-
-                        this.entities.Add(new ModularSceneryItem(obj, instance, emitters.ToArray()));
-                    }
+                    instance = this.FindAssetInstance(obj.AssetMapId, obj.AssetId);
                 }
                 else
                 {
                     // Adding object with it's own geometry
-                    var instance = this.FindObjectInstance(obj.AssetName, obj.Id);
-                    if (instance != null)
-                    {
-                        //Find emitters
-                        var emitters = this.particleManager.Instance.ParticleSystems
-                            .Where(p => p.Emitter.Instance == instance)
-                            .Select(p => p.Emitter);
+                    instance = this.FindObjectInstance(obj.AssetName, obj.Id);
+                }
 
-                        this.entities.Add(new ModularSceneryItem(obj, instance, emitters.ToArray()));
-                    }
+                if (instance != null)
+                {
+                    //Find emitters
+                    var emitters = this.particleManager.Instance.ParticleSystems
+                        .Where(p => p.Emitter.Instance == instance)
+                        .Select(p => p.Emitter);
+
+                    this.entities.Add(new ModularSceneryItem(obj, instance, emitters.ToArray()));
                 }
             }
         }
@@ -604,12 +598,11 @@ namespace Engine
 
             foreach (var asset in this.assets.Values)
             {
-                foreach (var instance in asset.Instance.GetInstances())
+                var instances = asset.Instance.GetInstances().Where(i => i.Visible);
+
+                foreach (var instance in instances)
                 {
-                    if (instance.Visible)
-                    {
-                        triangles.AddRange(instance.GetTriangles());
-                    }
+                    triangles.AddRange(instance.GetTriangles());
                 }
             }
 

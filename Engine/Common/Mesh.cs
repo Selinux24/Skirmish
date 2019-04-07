@@ -182,7 +182,7 @@ namespace Engine.Common
             {
                 var positionList = new List<Vector3>();
 
-                if (this.Vertices?.Length > 0 && this.Vertices[0].HasChannel(VertexDataChannels.Position))
+                if (this.Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Position))
                 {
                     this.Vertices.ToList().ForEach(v =>
                     {
@@ -205,14 +205,19 @@ namespace Engine.Common
         {
             if (refresh || this.positionCache == null)
             {
-                var res = new List<Vector3>();
+                var positionList = new List<Vector3>();
 
-                foreach (var v in this.Vertices)
+                if (this.Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Position) &&
+                    this.Vertices.FirstOrDefault().HasChannel(VertexDataChannels.BoneIndices) &&
+                    this.Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Weights))
                 {
-                    res.Add(VertexData.ApplyWeight(v, boneTransforms));
+                    this.Vertices.ToList().ForEach(v =>
+                    {
+                        positionList.Add(VertexData.ApplyWeight(v, boneTransforms));
+                    });
                 }
 
-                this.positionCache = res.ToArray();
+                this.positionCache = positionList.ToArray();
             }
 
             return this.positionCache;
@@ -227,9 +232,9 @@ namespace Engine.Common
             if (refresh || this.triangleCache == null)
             {
                 var positions = this.GetPoints(refresh);
-                if (positions != null && positions.Length > 0)
+                if (positions.Length > 0)
                 {
-                    if (this.Indices != null && this.Indices.Length > 0)
+                    if (this.Indices?.Length > 0)
                     {
                         this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
                     }
@@ -237,6 +242,10 @@ namespace Engine.Common
                     {
                         this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions);
                     }
+                }
+                else
+                {
+                    this.triangleCache = new Triangle[] { };
                 }
             }
 
@@ -253,14 +262,20 @@ namespace Engine.Common
             if (refresh || this.triangleCache == null)
             {
                 var positions = this.GetPoints(boneTransforms, refresh);
-
-                if (this.Indices != null && this.Indices.Length > 0)
+                if (positions.Length > 0)
                 {
-                    this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
+                    if (this.Indices?.Length > 0)
+                    {
+                        this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
+                    }
+                    else
+                    {
+                        this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions);
+                    }
                 }
                 else
                 {
-                    this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions);
+                    this.triangleCache = new Triangle[] { };
                 }
             }
 

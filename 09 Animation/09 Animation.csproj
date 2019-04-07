@@ -157,6 +157,7 @@
     </Content>
     <Content Include="Resources\Ladder\Dn_Anim_Ladder.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
     <Content Include="Resources\Ladder\Dn_Anim_Ladder_22.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

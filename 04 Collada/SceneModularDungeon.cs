@@ -33,7 +33,6 @@ namespace Collada
         private SceneLightPoint torch = null;
 
         private SceneObject<ModularScenery> scenery = null;
-        private readonly List<SceneObject<ModelInstanced>> animObjects = new List<SceneObject<ModelInstanced>>();
 
         private readonly float doorDistance = 3f;
         private SceneObject<TextDrawer> messages = null;
@@ -348,6 +347,24 @@ namespace Collada
             //Rat holes
             this.ratHoles = this.scenery.Instance.GetObjectsPositionsByAssetName("Dn_Rat_Hole_1");
 
+            //Ladders
+            var ladders = this.scenery.Instance.GetObjectsByName("Dn_Anim_Ladder");
+
+            Dictionary<string, AnimationPlan> ladderPaths = new Dictionary<string, AnimationPlan>();
+            AnimationPath pull = new AnimationPath();
+            pull.Add("pull");
+            AnimationPath push = new AnimationPath();
+            push.Add("push");
+
+            ladderPaths.Add("pull", new AnimationPlan(pull));
+            ladderPaths.Add("push", new AnimationPlan(push));
+
+            foreach (var ladder in ladders)
+            {
+                ladder.AnimationController.SetPath(ladderPaths["pull"]);
+                ladder.InvalidateCache();
+            }
+
             //Human obstacles
             for (int i = 0; i < this.human.Count; i++)
             {
@@ -356,8 +373,6 @@ namespace Collada
             }
 
             this.InitializeCamera();
-
-            this.UpdateDebugInfo();
         }
         private void InitializeCamera()
         {
@@ -392,9 +407,10 @@ namespace Collada
                 }
             }
 
-            //Doors
+            //Objects
             UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Entrance), Color.PaleVioletRed);
             UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Exit), Color.ForestGreen);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Trigger), Color.Cyan);
             UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Door), Color.LightYellow);
             UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Light), Color.MediumPurple);
         }
@@ -613,17 +629,22 @@ namespace Collada
 
             if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Exit)
             {
-                UpdateExit(this.selectedItem);
+                UpdateEntityExit(this.selectedItem);
             }
 
             if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Door)
             {
-                UpdateDoor(this.selectedItem);
+                UpdateEntityDoor(this.selectedItem);
+            }
+
+            if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Trigger)
+            {
+                UpdateEntityTrigger(this.selectedItem);
             }
 
             if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Light)
             {
-                UpdateLight(this.selectedItem);
+                UpdateEntityLight(this.selectedItem);
             }
         }
 
@@ -637,6 +658,8 @@ namespace Collada
                 graphUpdateSeconds = 0;
 
                 this.UpdateGraphNodes(this.currentGraph == 0 ? this.ratAgentType : this.agent);
+
+                this.UpdateDebugInfo();
             }
         }
         private void UpdateRatController(GameTime gameTime)
@@ -685,7 +708,7 @@ namespace Collada
                 }
             }
 
-            if (this.rat.Visible)
+            if (this.rat.Visible && this.ratDrawer.Visible)
             {
                 var bbox = this.rat.Instance.GetBoundingBox();
 
@@ -700,6 +723,7 @@ namespace Collada
                 ModularSceneryObjectTypes.Entrance |
                 ModularSceneryObjectTypes.Exit |
                 ModularSceneryObjectTypes.Door |
+                ModularSceneryObjectTypes.Trigger |
                 ModularSceneryObjectTypes.Light;
 
             var ray = this.GetPickingRay();
@@ -806,6 +830,12 @@ namespace Collada
 
                 PrepareMessage(true, msg);
             }
+            else if (item.Object.Type == ModularSceneryObjectTypes.Trigger)
+            {
+                var msg = "Press space to activate the trigger...";
+
+                PrepareMessage(true, msg);
+            }
             else if (item.Object.Type == ModularSceneryObjectTypes.Light)
             {
                 var lights = item.Item.Lights;
@@ -838,9 +868,9 @@ namespace Collada
                 }
             }
         }
-        private void UpdateExit(ModularSceneryItem item)
+        private void UpdateEntityExit(ModularSceneryItem item)
         {
-            if (item != null && this.Game.Input.KeyJustReleased(Keys.Space))
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 string nextLevel = item.Object.NextLevel;
                 if (!string.IsNullOrEmpty(nextLevel))
@@ -853,9 +883,9 @@ namespace Collada
                 }
             }
         }
-        private void UpdateDoor(ModularSceneryItem item)
+        private void UpdateEntityDoor(ModularSceneryItem item)
         {
-            if (item != null && this.Game.Input.KeyJustReleased(Keys.Space))
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 item.Item.Visible = !item.Item.Visible;
 
@@ -867,9 +897,16 @@ namespace Collada
                 this.RequestGraphUpdate(1);
             }
         }
-        private void UpdateLight(ModularSceneryItem item)
+        private void UpdateEntityTrigger(ModularSceneryItem item)
         {
-            if (item != null && this.Game.Input.KeyJustReleased(Keys.Space))
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            {
+                item.Item.AnimationController.Resume();
+            }
+        }
+        private void UpdateEntityLight(ModularSceneryItem item)
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
                 bool enabled = false;
 
@@ -897,10 +934,6 @@ namespace Collada
                 messages.Instance.CenterHorizontally();
                 messages.Instance.CenterVertically();
             }
-        }
-        private void UpdateLadder(ModelInstance item)
-        {
-            item.AnimationController.Start();
         }
 
         private void RefreshNavigation()
