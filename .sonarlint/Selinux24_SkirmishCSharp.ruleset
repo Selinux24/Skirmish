@@ -56,7 +56,7 @@
     <Rule Id="S1301" Action="None" />
     <Rule Id="S1309" Action="None" />
     <Rule Id="S131" Action="None" />
-    <Rule Id="S1313" Action="None" />
+    <Rule Id="S1313" Action="Warning" />
     <Rule Id="S134" Action="None" />
     <Rule Id="S138" Action="None" />
     <Rule Id="S1449" Action="None" />
@@ -91,7 +91,7 @@
     <Rule Id="S2068" Action="Warning" />
     <Rule Id="S2070" Action="None" />
     <Rule Id="S2077" Action="Warning" />
-    <Rule Id="S2092" Action="None" />
+    <Rule Id="S2092" Action="Warning" />
     <Rule Id="S2114" Action="Warning" />
     <Rule Id="S2123" Action="Warning" />
     <Rule Id="S2148" Action="None" />
@@ -202,7 +202,7 @@
     <Rule Id="S3263" Action="Warning" />
     <Rule Id="S3264" Action="Warning" />
     <Rule Id="S3265" Action="Warning" />
-    <Rule Id="S3330" Action="None" />
+    <Rule Id="S3330" Action="Warning" />
     <Rule Id="S3343" Action="Warning" />
     <Rule Id="S3346" Action="Warning" />
     <Rule Id="S3353" Action="None" />
@@ -376,5 +376,10 @@
     <Rule Id="S2091" Action="Warning" />
     <Rule Id="S2631" Action="Warning" />
     <Rule Id="S3649" Action="Warning" />
+    <Rule Id="S5131" Action="Warning" />
+    <Rule Id="S5144" Action="Warning" />
+    <Rule Id="S5145" Action="Warning" />
+    <Rule Id="S5146" Action="Warning" />
+    <Rule Id="S5167" Action="Warning" />
   </Rules>
 </RuleSet>

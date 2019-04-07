@@ -7,6 +7,7 @@ namespace Engine
     using Engine.Animation;
     using Engine.Common;
     using Engine.Effects;
+    using System.Linq;
 
     /// <summary>
     /// Basic Model
@@ -32,7 +33,7 @@ namespace Engine
         /// <summary>
         /// Coarse bounding sphere
         /// </summary>
-        private readonly BoundingSphere coarseBoundingSphere;
+        private BoundingSphere coarseBoundingSphere;
         /// <summary>
         /// Bounding sphere
         /// </summary>
@@ -135,7 +136,7 @@ namespace Engine
         {
             this.TextureIndex = description.TextureIndex;
 
-            if (description.TransformDependences != null && description.TransformDependences.Length > 0)
+            if (description.TransformDependences?.Any() == true)
             {
                 var parents = Array.FindAll(description.TransformDependences, i => i == -1);
                 if (parents == null || parents.Length != 1)
@@ -174,12 +175,7 @@ namespace Engine
             }
 
             var drawData = this.GetDrawingData(LevelOfDetail.High);
-            if (drawData != null)
-            {
-                this.coarseBoundingSphere = BoundingSphere.FromPoints(drawData.GetPoints(true));
-
-                this.Lights = drawData.Lights;
-            }
+            this.Lights = drawData?.Lights?.Select(l => l.Clone()).ToArray();
         }
 
         /// <summary>
@@ -406,6 +402,8 @@ namespace Engine
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
             this.InvalidateCache();
+
+            this.coarseBoundingSphere = this.GetBoundingSphere();
         }
 
         /// <summary>
@@ -447,16 +445,18 @@ namespace Engine
             if (refresh || this.updatePoints)
             {
                 var drawingData = this.GetDrawingData(this.GetLODMinimum());
-                if (drawingData.SkinningData != null && this.AnimationController.Playing)
+                if (drawingData.SkinningData != null)
                 {
                     this.positionCache = drawingData.GetPoints(
                         this.Manipulator.LocalTransform,
                         this.AnimationController.GetCurrentPose(drawingData.SkinningData),
-                        true);
+                        refresh);
                 }
                 else
                 {
-                    this.positionCache = drawingData.GetPoints(this.Manipulator.LocalTransform);
+                    this.positionCache = drawingData.GetPoints(
+                        this.Manipulator.LocalTransform,
+                        refresh);
                 }
 
                 this.updatePoints = false;
@@ -474,7 +474,7 @@ namespace Engine
             if (refresh || this.updateTriangles)
             {
                 var drawingData = this.GetDrawingData(this.GetLODMinimum());
-                if (drawingData.SkinningData != null && this.AnimationController.Playing)
+                if (drawingData.SkinningData != null)
                 {
                     this.triangleCache = drawingData.GetTriangles(
                         this.Manipulator.LocalTransform,
@@ -483,7 +483,9 @@ namespace Engine
                 }
                 else
                 {
-                    this.triangleCache = drawingData.GetTriangles(this.Manipulator.LocalTransform);
+                    this.triangleCache = drawingData.GetTriangles(
+                        this.Manipulator.LocalTransform,
+                        refresh);
                 }
 
                 this.updateTriangles = false;

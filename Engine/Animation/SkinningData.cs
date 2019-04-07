@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Animation
 {
@@ -277,7 +278,14 @@ namespace Engine.Animation
         /// <returns>Returns the base transformation list</returns>
         public Matrix[] GetPoseBase()
         {
-            return Helper.CreateArray(this.skeleton.JointCount, Matrix.Identity);
+            if (this.animations.Any())
+            {
+                return this.GetPoseAtTime(0, 0);
+            }
+            else
+            {
+                return Helper.CreateArray(this.skeleton.JointCount, Matrix.Identity);
+            }
         }
         /// <summary>
         /// Gets the transform list of the pose at specified time
@@ -291,7 +299,7 @@ namespace Engine.Animation
 
             if (clipIndex < 0)
             {
-                return Helper.CreateArray(this.skeleton.JointCount, Matrix.Identity);
+                return this.GetPoseBase();
             }
             else if (clipIndex < this.animations.Count)
             {

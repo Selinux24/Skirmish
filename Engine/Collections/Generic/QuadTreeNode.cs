@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Collections.Generic
 {
@@ -542,7 +543,7 @@ namespace Engine.Collections.Generic
         {
             List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
 
-            if (this.Children == null)
+            if (this.Children?.Any() == false)
             {
                 nodes.Add(this);
             }

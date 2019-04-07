@@ -48,7 +48,7 @@ namespace Engine
         /// <summary>
         /// Coarse bounding sphere
         /// </summary>
-        private readonly BoundingSphere coarseBoundingSphere;
+        private BoundingSphere coarseBoundingSphere = new BoundingSphere();
         /// <summary>
         /// Bounding sphere
         /// </summary>
@@ -130,18 +130,8 @@ namespace Engine
             this.Manipulator = new Manipulator3D();
             this.Manipulator.Updated += new EventHandler(ManipulatorUpdated);
 
-            this.coarseBoundingSphere = BoundingSphere.FromPoints(this.GetPoints());
-
             var drawData = model.GetDrawingData(LevelOfDetail.High);
-            if (drawData?.Lights?.Length > 0)
-            {
-                this.Lights = new SceneLight[drawData.Lights.Length];
-
-                for (int l = 0; l < drawData.Lights.Length; l++)
-                {
-                    this.Lights[l] = drawData.Lights[l].Clone();
-                }
-            }
+            this.Lights = drawData?.Lights?.Select(l => l.Clone()).ToArray();
         }
 
         /// <summary>
@@ -178,6 +168,8 @@ namespace Engine
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
             this.InvalidateCache();
+
+            this.coarseBoundingSphere = this.GetBoundingSphere();
         }
 
         /// <summary>
@@ -206,13 +198,13 @@ namespace Engine
                     this.positionCache = drawingData.GetPoints(
                         this.Manipulator.LocalTransform,
                         this.AnimationController.GetCurrentPose(drawingData.SkinningData),
-                        true);
+                        refresh);
                 }
                 else
                 {
                     this.positionCache = drawingData.GetPoints(
-                        this.Manipulator.LocalTransform, 
-                        true);
+                        this.Manipulator.LocalTransform,
+                        refresh);
                 }
 
                 this.updatePoints = false;
@@ -235,13 +227,13 @@ namespace Engine
                     this.triangleCache = drawingData.GetTriangles(
                         this.Manipulator.LocalTransform,
                         this.AnimationController.GetCurrentPose(drawingData.SkinningData),
-                        true);
+                        refresh);
                 }
                 else
                 {
                     this.triangleCache = drawingData.GetTriangles(
                         this.Manipulator.LocalTransform,
-                        true);
+                        refresh);
                 }
 
                 this.updateTriangles = false;
