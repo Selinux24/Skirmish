@@ -171,14 +171,18 @@
         <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_1" type="Trigger">
           <position>16.5 1.75 -12.9</position>
           <rotation>rot270</rotation>
-          <animations>
+          <animation_plans>
             <plan name="pull">
-              <path name="pull"></path>
+              <paths>
+                <path name="pull"></path>
+              </paths>
             </plan>
             <plan name="push">
-              <path name="push"></path>
+              <paths>
+                <path name="push"></path>
+              </paths>
             </plan>
-          </animations>
+          </animation_plans>
           <actions>
             <action name="pull">
               <items>
@@ -195,18 +199,23 @@
               </items>
             </action>
           </actions>
-        </item>
+        
+      </item>
         <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_2" type="Trigger">
           <position>16.5 1.75 -15.1</position>
           <rotation>rot90</rotation>
-          <animations>
+          <animation_plans>
             <plan name="pull">
-              <path name="pull"></path>
+              <paths>
+                <path name="pull"></path>
+              </paths>
             </plan>
             <plan name="push">
-              <path name="push"></path>
+              <paths>
+                <path name="push"></path>
+              </paths>
             </plan>
-          </animations>
+          </animation_plans>
           <actions>
             <action name="pull">
               <items>
@@ -223,7 +232,8 @@
               </items>
             </action>
           </actions>
-        </item>
+        
+      </item>
 
         <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
           <position>0 2 8.9</position>
@@ -477,14 +487,18 @@
         <item asset_name="Dn_Jail_1" id="jail_door" type="Door">
           <position>18 0 -15</position>
           <rotation>rot270</rotation>
-          <animations>
+          <animation_plans>
             <plan name="open">
-              <path name="open"></path>
+              <paths>
+                <path name="open"></path>
+              </paths>
             </plan>
             <plan name="close">
-              <path name="close"></path>
+              <paths>
+                <path name="close"></path>
+              </paths>
             </plan>
-          </animations>
+          </animation_plans>
         </item>
 
         <item asset_name="Dn_Rat_Hole_1">

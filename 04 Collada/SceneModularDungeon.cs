@@ -901,7 +901,9 @@ namespace Collada
         {
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                item.Item.AnimationController.Resume();
+                //TODO: Select available triggers and list in UI
+                var trigger = this.scenery.Instance.GetTriggersByObject(item.Item)?.FirstOrDefault();
+                trigger?.Activate();
             }
         }
         private void UpdateEntityLight(ModularSceneryItem item)

@@ -6,6 +6,7 @@ using System.Linq;
 
 namespace Engine
 {
+    using Engine.Animation;
     using Engine.Common;
     using Engine.Content;
 
@@ -38,6 +39,14 @@ namespace Engine
         /// Scenery entities
         /// </summary>
         private readonly List<ModularSceneryItem> entities = new List<ModularSceneryItem>();
+        /// <summary>
+        /// Triggers list by instance
+        /// </summary>
+        private readonly Dictionary<ModelInstance, List<ModularSceneryTrigger>> triggers = new Dictionary<ModelInstance, List<ModularSceneryTrigger>>();
+        /// <summary>
+        /// Animations plan dictionary by instance
+        /// </summary>
+        private readonly Dictionary<ModelInstance, Dictionary<string, AnimationPlan>> animations = new Dictionary<ModelInstance, Dictionary<string, AnimationPlan>>();
 
         /// <summary>
         /// Gets the assets description
@@ -185,6 +194,7 @@ namespace Engine
             this.ParseAssetsMap(level);
 
             this.InitializeEntities(level);
+            this.InitializeTriggers();
         }
         /// <summary>
         /// Initialize the particle system and the particle descriptions
@@ -358,23 +368,69 @@ namespace Engine
                 this.Scene.Lights.AddRange(lights);
             }
         }
-
+        /// <summary>
+        /// Initialize animations and triggers
+        /// </summary>
+        /// <param name="obj">Object</param>
+        /// <param name="instance">Model instance</param>
         private void InitializeObjectAnimations(ModularSceneryObjectReference obj, ModelInstance instance)
         {
-            //Actions
-            for (int a = 0; a < obj.Actions?.Length; a++)
+            Dictionary<string, AnimationPlan> animationDict = new Dictionary<string, AnimationPlan>();
+
+            //Plans
+            for (int i = 0; i < obj.AnimationPlans?.Length; i++)
             {
-                List<ModularSceneryAction> actionList = new List<ModularSceneryAction>();
+                var dPlan = obj.AnimationPlans[i];
 
-                foreach (var actionItem in obj.Actions[a].Items)
+                AnimationPlan plan = new AnimationPlan();
+
+                for (int a = 0; a < dPlan.Paths?.Length; a++)
                 {
-                    ModularSceneryAction action = new ModularSceneryAction();
-                    action.AddController(instance.AnimationController, null);
+                    var dPath = dPlan.Paths[a];
 
-                    actionList.Add(action);
+                    AnimationPath path = new AnimationPath();
+                    path.Add(dPath.Name);
+
+                    plan.Add(path);
                 }
 
-                this.actions.Add(obj.Actions[a].Name, actionList);
+                animationDict.Add(dPlan.Name, plan);
+            }
+
+            if (animationDict.Count > 0)
+            {
+                this.animations.Add(instance, animationDict);
+            }
+
+            List<ModularSceneryTrigger> instanceTriggers = new List<ModularSceneryTrigger>();
+
+            //Actions
+            for (int i = 0; i < obj.Actions?.Length; i++)
+            {
+                var action = obj.Actions[i];
+
+                ModularSceneryTrigger trigger = new ModularSceneryTrigger()
+                {
+                    Name = action.Name,
+                };
+
+                foreach (var actionItem in action.Items)
+                {
+                    string refInstanceId = actionItem.Id;
+                    string refActionName = actionItem.Name;
+
+                    ModularSceneryAction act = new ModularSceneryAction();
+                    act.Add(refInstanceId, refActionName);
+
+                    trigger.Actions.Add(act);
+                }
+
+                instanceTriggers.Add(trigger);
+            }
+
+            if (instanceTriggers.Count > 0)
+            {
+                this.triggers.Add(instance, instanceTriggers);
             }
         }
 
@@ -406,6 +462,39 @@ namespace Engine
                         .Select(p => p.Emitter);
 
                     this.entities.Add(new ModularSceneryItem(obj, instance, emitters.ToArray()));
+                }
+            }
+        }
+        /// <summary>
+        /// Initialize scenery triggers list
+        /// </summary>
+        private void InitializeTriggers()
+        {
+            foreach (var triggerList in triggers.Values)
+            {
+                foreach (var trigger in triggerList)
+                {
+                    foreach (var action in trigger.Actions)
+                    {
+                        foreach (var controller in action.Controllers)
+                        {
+                            //Find instance
+                            var instance = GetObjectById(controller.InstanceId);
+                            if (instance == null)
+                            {
+                                throw new ModularSceneryException($"Bad instance reference. Reference not found: {trigger.Name}.{controller.InstanceId}");
+                            }
+
+                            //Find Plan
+                            var plan = animations[instance]?.FirstOrDefault(p => string.Equals(p.Key, controller.AnimationPlanName, StringComparison.OrdinalIgnoreCase)).Value;
+                            if (plan == null)
+                            {
+                                throw new ModularSceneryException($"Bad animation reference. Reference not found: {trigger.Name}.{controller.AnimationPlanName}");
+                            }
+
+                            controller.Initialize(instance, plan);
+                        }
+                    }
                 }
             }
         }
@@ -695,6 +784,18 @@ namespace Engine
             return namedAssets.Select(a => a.Manipulator.Position).ToArray();
         }
         /// <summary>
+        /// Gets the specified object by id
+        /// </summary>
+        /// <param name="id">Object id</param>
+        /// <returns>Returns the specified object by id</returns>
+        public ModelInstance GetObjectById(string id)
+        {
+            var obj = this.entities
+                .FirstOrDefault(o => string.Equals(o.Object.Id, id, StringComparison.OrdinalIgnoreCase));
+
+            return obj?.Item;
+        }
+        /// <summary>
         /// Get objects by name
         /// </summary>
         /// <param name="name">Object name</param>
@@ -918,6 +1019,15 @@ namespace Engine
             return res.ToArray();
         }
 
+        /// <summary>
+        /// Gets the triggers for the specified object
+        /// </summary>
+        /// <param name="instance">Instance</param>
+        /// <returns>Returns a list of triggers</returns>
+        public ModularSceneryTrigger[] GetTriggersByObject(ModelInstance instance)
+        {
+            return this.triggers[instance]?.ToArray();
+        }
         /// <summary>
         /// Gets the culling volume for scene culling tests
         /// </summary>

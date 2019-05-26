@@ -3,6 +3,9 @@ using System.Xml.Serialization;
 
 namespace Engine
 {
+    /// <summary>
+    /// Modular scenery object action
+    /// </summary>
     [Serializable]
     public class ModularSceneryObjectAction
     {

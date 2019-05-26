@@ -3,6 +3,10 @@ using System.Xml.Serialization;
 
 namespace Engine
 {
+    /// <summary>
+    /// Object action item
+    /// </summary>
+    /// <remarks>Designates the action by name to activate in the referenced object by id</remarks>
     [Serializable]
     public class ModularSceneryObjectActionItem
     {

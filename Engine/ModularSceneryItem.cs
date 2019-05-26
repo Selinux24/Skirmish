@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-
+﻿
 namespace Engine
 {
     /// <summary>
@@ -7,11 +6,6 @@ namespace Engine
     /// </summary>
     public class ModularSceneryItem
     {
-        /// <summary>
-        /// Objects action dictionary
-        /// </summary>
-        private readonly Dictionary<string, List<ModularSceneryAction>> actions = new Dictionary<string, List<ModularSceneryAction>>();
-
         /// <summary>
         /// Object
         /// </summary>
@@ -37,17 +31,6 @@ namespace Engine
             this.Object = obj;
             this.Item = item;
             this.Emitters = emitters;
-        }
-
-
-        public void ActivateTrigger(string actionName)
-        {
-            var actionList = actions[actionName];
-
-            foreach (var a in actionList)
-            {
-                a.Start();
-            }
         }
     }
 }

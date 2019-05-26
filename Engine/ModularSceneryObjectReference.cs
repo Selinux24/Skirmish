@@ -36,6 +36,12 @@ namespace Engine
         [XmlAttribute("type")]
         public ModularSceneryObjectTypes Type { get; set; } = ModularSceneryObjectTypes.Default;
         /// <summary>
+        /// Animation plan list
+        /// </summary>
+        [XmlArray("animation_plans")]
+        [XmlArrayItem("plan", typeof(ModularSceneryObjectAnimationPlan))]
+        public ModularSceneryObjectAnimationPlan[] AnimationPlans { get; set; } = null;
+        /// <summary>
         /// Action list
         /// </summary>
         [XmlArray("actions")]
