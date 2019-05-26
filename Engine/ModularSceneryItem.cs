@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Engine
 {
     /// <summary>
@@ -6,6 +7,11 @@ namespace Engine
     /// </summary>
     public class ModularSceneryItem
     {
+        /// <summary>
+        /// Objects action dictionary
+        /// </summary>
+        private readonly Dictionary<string, List<ModularSceneryAction>> actions = new Dictionary<string, List<ModularSceneryAction>>();
+
         /// <summary>
         /// Object
         /// </summary>
@@ -25,11 +31,23 @@ namespace Engine
         /// <param name="obj">Object</param>
         /// <param name="item">Scene object</param>
         /// <param name="emitters">Particle emitters list</param>
+        /// <param name="actions">Actions</param>
         public ModularSceneryItem(ModularSceneryObjectReference obj, ModelInstance item, ParticleEmitter[] emitters)
         {
             this.Object = obj;
             this.Item = item;
             this.Emitters = emitters;
+        }
+
+
+        public void ActivateTrigger(string actionName)
+        {
+            var actionList = actions[actionName];
+
+            foreach (var a in actionList)
+            {
+                a.Start();
+            }
         }
     }
 }

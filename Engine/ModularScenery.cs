@@ -308,6 +308,8 @@ namespace Engine
                 for (int i = 0; i < model.Instance.Count; i++)
                 {
                     this.InitializeObjectLights(objList[i], model.Instance[i]);
+
+                    this.InitializeObjectAnimations(objList[i], model.Instance[i]);
                 }
 
                 this.objects.Add(assetName, model);
@@ -354,6 +356,25 @@ namespace Engine
                 }
 
                 this.Scene.Lights.AddRange(lights);
+            }
+        }
+
+        private void InitializeObjectAnimations(ModularSceneryObjectReference obj, ModelInstance instance)
+        {
+            //Actions
+            for (int a = 0; a < obj.Actions?.Length; a++)
+            {
+                List<ModularSceneryAction> actionList = new List<ModularSceneryAction>();
+
+                foreach (var actionItem in obj.Actions[a].Items)
+                {
+                    ModularSceneryAction action = new ModularSceneryAction();
+                    action.AddController(instance.AnimationController, null);
+
+                    actionList.Add(action);
+                }
+
+                this.actions.Add(obj.Actions[a].Name, actionList);
             }
         }
 

@@ -168,13 +168,61 @@
         <item asset_map_id="entrance" asset_id="door" id="start" type="Entrance"></item>
         <item asset_map_id="exit" asset_id="door" id="end" type="Exit" next_level="Lvl2"></item>
 
-        <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_1" type="Trigger" object_id="jail_door">
+        <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_1" type="Trigger">
           <position>16.5 1.75 -12.9</position>
           <rotation>rot270</rotation>
+          <animations>
+            <plan name="pull">
+              <path name="pull"></path>
+            </plan>
+            <plan name="push">
+              <path name="push"></path>
+            </plan>
+          </animations>
+          <actions>
+            <action name="pull">
+              <items>
+                <item id="jail_door" name="open"></item>
+                <item id="door_trigger_1" name="pull"></item>
+                <item id="door_trigger_2" name="pull"></item>
+              </items>
+            </action>
+            <action name="push">
+              <items>
+                <item id="jail_door" name="close"></item>
+                <item id="door_trigger_1" name="push"></item>
+                <item id="door_trigger_2" name="push"></item>
+              </items>
+            </action>
+          </actions>
         </item>
-        <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_2" type="Trigger" object_id="jail_door">
+        <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_2" type="Trigger">
           <position>16.5 1.75 -15.1</position>
           <rotation>rot90</rotation>
+          <animations>
+            <plan name="pull">
+              <path name="pull"></path>
+            </plan>
+            <plan name="push">
+              <path name="push"></path>
+            </plan>
+          </animations>
+          <actions>
+            <action name="pull">
+              <items>
+                <item id="jail_door" name="open"></item>
+                <item id="door_trigger_1" name="pull"></item>
+                <item id="door_trigger_2" name="pull"></item>
+              </items>
+            </action>
+            <action name="push">
+              <items>
+                <item id="jail_door" name="close"></item>
+                <item id="door_trigger_1" name="push"></item>
+                <item id="door_trigger_2" name="push"></item>
+              </items>
+            </action>
+          </actions>
         </item>
 
         <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
@@ -429,6 +477,14 @@
         <item asset_name="Dn_Jail_1" id="jail_door" type="Door">
           <position>18 0 -15</position>
           <rotation>rot270</rotation>
+          <animations>
+            <plan name="open">
+              <path name="open"></path>
+            </plan>
+            <plan name="close">
+              <path name="close"></path>
+            </plan>
+          </animations>
         </item>
 
         <item asset_name="Dn_Rat_Hole_1">
@@ -580,7 +636,7 @@
           <position>38 0 -20</position>
           <rotation>rot90</rotation>
         </item>
-        
+
       </objects>
     </level>
     <level name="Lvl2">

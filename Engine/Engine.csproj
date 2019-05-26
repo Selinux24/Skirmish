@@ -229,6 +229,9 @@
     <Compile Include="ISceneLight.cs" />
     <Compile Include="ISceneLightSpot.cs" />
     <Compile Include="FrameStatsLight.cs" />
+    <Compile Include="ModularSceneryAction.cs" />
+    <Compile Include="ModularSceneryObjectAction.cs" />
+    <Compile Include="ModularSceneryObjectActionItem.cs" />
     <Compile Include="PathFinding\RecastNavigation\SteerTarget.cs" />
     <Compile Include="PrimitiveListDrawer.cs" />
     <Compile Include="PrimitiveListDrawerDescription.cs" />
