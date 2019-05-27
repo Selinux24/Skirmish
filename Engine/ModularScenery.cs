@@ -194,7 +194,6 @@ namespace Engine
             this.ParseAssetsMap(level);
 
             this.InitializeEntities(level);
-            this.InitializeTriggers();
         }
         /// <summary>
         /// Initialize the particle system and the particle descriptions
@@ -405,22 +404,25 @@ namespace Engine
             List<ModularSceneryTrigger> instanceTriggers = new List<ModularSceneryTrigger>();
 
             //Actions
-            for (int i = 0; i < obj.Actions?.Length; i++)
+            for (int a = 0; a < obj.Actions?.Length; a++)
             {
-                var action = obj.Actions[i];
+                var action = obj.Actions[a];
 
                 ModularSceneryTrigger trigger = new ModularSceneryTrigger()
                 {
                     Name = action.Name,
+                    StateFrom = action.StateFrom,
+                    StateTo = action.StateTo,
+                    AnimationPlan = action.AnimationPlan,
                 };
 
-                foreach (var actionItem in action.Items)
+                for (int i = 0; i < action.Items?.Length; i++)
                 {
-                    string refInstanceId = actionItem.Id;
-                    string refActionName = actionItem.Name;
-
-                    ModularSceneryAction act = new ModularSceneryAction();
-                    act.Add(refInstanceId, refActionName);
+                    ModularSceneryAction act = new ModularSceneryAction()
+                    {
+                        ItemId = action.Items[i].Id,
+                        ItemAction = action.Items[i].Action,
+                    };
 
                     trigger.Actions.Add(act);
                 }
@@ -459,45 +461,17 @@ namespace Engine
                     //Find emitters
                     var emitters = this.particleManager.Instance.ParticleSystems
                         .Where(p => p.Emitter.Instance == instance)
-                        .Select(p => p.Emitter);
+                        .Select(p => p.Emitter)
+                        .ToArray();
 
-                    this.entities.Add(new ModularSceneryItem(obj, instance, emitters.ToArray()));
+                    //Find first state
+                    var defaultState = obj.States?.FirstOrDefault()?.Name;
+
+                    this.entities.Add(new ModularSceneryItem(obj, instance, emitters, defaultState));
                 }
             }
         }
-        /// <summary>
-        /// Initialize scenery triggers list
-        /// </summary>
-        private void InitializeTriggers()
-        {
-            foreach (var triggerList in triggers.Values)
-            {
-                foreach (var trigger in triggerList)
-                {
-                    foreach (var action in trigger.Actions)
-                    {
-                        foreach (var controller in action.Controllers)
-                        {
-                            //Find instance
-                            var instance = GetObjectById(controller.InstanceId);
-                            if (instance == null)
-                            {
-                                throw new ModularSceneryException($"Bad instance reference. Reference not found: {trigger.Name}.{controller.InstanceId}");
-                            }
 
-                            //Find Plan
-                            var plan = animations[instance]?.FirstOrDefault(p => string.Equals(p.Key, controller.AnimationPlanName, StringComparison.OrdinalIgnoreCase)).Value;
-                            if (plan == null)
-                            {
-                                throw new ModularSceneryException($"Bad animation reference. Reference not found: {trigger.Name}.{controller.AnimationPlanName}");
-                            }
-
-                            controller.Initialize(instance, plan);
-                        }
-                    }
-                }
-            }
-        }
         /// <summary>
         /// Parse the assets map to set the assets transforms
         /// </summary>
@@ -788,12 +762,12 @@ namespace Engine
         /// </summary>
         /// <param name="id">Object id</param>
         /// <returns>Returns the specified object by id</returns>
-        public ModelInstance GetObjectById(string id)
+        public ModularSceneryItem GetObjectById(string id)
         {
             var obj = this.entities
                 .FirstOrDefault(o => string.Equals(o.Object.Id, id, StringComparison.OrdinalIgnoreCase));
 
-            return obj?.Item;
+            return obj;
         }
         /// <summary>
         /// Get objects by name
@@ -1020,14 +994,70 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets the triggers for the specified object
+        /// Gets the available triggers for the specified object
         /// </summary>
-        /// <param name="instance">Instance</param>
+        /// <param name="item">Scenery item</param>
         /// <returns>Returns a list of triggers</returns>
-        public ModularSceneryTrigger[] GetTriggersByObject(ModelInstance instance)
+        public ModularSceneryTrigger[] GetTriggersByObject(ModularSceneryItem item)
         {
-            return this.triggers[instance]?.ToArray();
+            if (!triggers.ContainsKey(item.Item))
+            {
+                return new ModularSceneryTrigger[] { };
+            }
+
+            return this.triggers[item.Item]?
+                .Where(t => string.Equals(t.StateFrom, item.CurrentState, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
         }
+        /// <summary>
+        /// Executes the specified trigger
+        /// </summary>
+        /// <param name="item">Triggered item</param>
+        /// <param name="trigger">Trigger to execute</param>
+        public void ExecuteTrigger(ModularSceneryItem item, ModularSceneryTrigger trigger)
+        {
+            //Validate item state
+            if (item.CurrentState != trigger.StateFrom)
+            {
+                return;
+            }
+
+            //Execute the action in the item first
+            var plan = animations[item.Item]?[trigger.AnimationPlan];
+            if (plan != null)
+            {
+                item.Item.AnimationController.SetPath(plan);
+                item.Item.AnimationController.Start();
+                item.CurrentState = trigger.StateTo;
+            }
+
+            //Find the referenced items and execute actions recursively
+            foreach (var action in trigger.Actions)
+            {
+                //Find item
+                var refItem = GetObjectById(action.ItemId);
+                if (refItem == null)
+                {
+                    continue;
+                }
+
+                //Find trigger collection
+                if (!triggers.ContainsKey(refItem.Item))
+                {
+                    continue;
+                }
+
+                //Find trigger
+                var refTrigger = triggers[refItem.Item].FirstOrDefault(t => string.Equals(t.Name, action.ItemAction, StringComparison.OrdinalIgnoreCase));
+                if (refTrigger == null)
+                {
+                    continue;
+                }
+
+                ExecuteTrigger(refItem, refTrigger);
+            }
+        }
+
         /// <summary>
         /// Gets the culling volume for scene culling tests
         /// </summary>

@@ -15,6 +15,21 @@ namespace Engine
         [XmlAttribute("name")]
         public string Name { get; set; }
         /// <summary>
+        /// State from name
+        /// </summary>
+        [XmlAttribute("state_from")]
+        public string StateFrom { get; set; }
+        /// <summary>
+        /// State to name
+        /// </summary>
+        [XmlAttribute("state_to")]
+        public string StateTo { get; set; }
+        /// <summary>
+        /// Animation plan name
+        /// </summary>
+        [XmlAttribute("animation_plan")]
+        public string AnimationPlan { get; set; }
+        /// <summary>
         /// Triggered item list
         /// </summary>
         [XmlArray("items")]

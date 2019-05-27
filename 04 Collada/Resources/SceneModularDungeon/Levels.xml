@@ -184,23 +184,33 @@
             </plan>
           </animation_plans>
           <actions>
-            <action name="pull">
+            <action name="pull" state_from="up" state_to="down" animation_plan="pull">
               <items>
-                <item id="jail_door" name="open"></item>
-                <item id="door_trigger_1" name="pull"></item>
-                <item id="door_trigger_2" name="pull"></item>
+                <item id="jail_door" action="open"></item>
+                <item id="door_trigger_2" action="pull"></item>
               </items>
             </action>
-            <action name="push">
+            <action name="push" state_from="down" state_to="up" animation_plan="push">
               <items>
-                <item id="jail_door" name="close"></item>
-                <item id="door_trigger_1" name="push"></item>
-                <item id="door_trigger_2" name="push"></item>
+                <item id="jail_door" action="close"></item>
+                <item id="door_trigger_2" action="push"></item>
               </items>
             </action>
           </actions>
-        
-      </item>
+          <states>
+            <state name="up">
+              <transitions>
+                <transition state="down" />
+              </transitions>
+            </state>
+            <state name="down">
+              <transitions>
+                <transition state="up" />
+              </transitions>
+            </state>
+          </states>
+        </item>
+
         <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_2" type="Trigger">
           <position>16.5 1.75 -15.1</position>
           <rotation>rot90</rotation>
@@ -217,23 +227,32 @@
             </plan>
           </animation_plans>
           <actions>
-            <action name="pull">
+            <action name="pull" state_from="up" state_to="down" animation_plan="pull">
               <items>
-                <item id="jail_door" name="open"></item>
-                <item id="door_trigger_1" name="pull"></item>
-                <item id="door_trigger_2" name="pull"></item>
+                <item id="jail_door" action="open"></item>
+                <item id="door_trigger_1" action="pull"></item>
               </items>
             </action>
-            <action name="push">
+            <action name="push" state_from="down" state_to="up" animation_plan="push">
               <items>
-                <item id="jail_door" name="close"></item>
-                <item id="door_trigger_1" name="push"></item>
-                <item id="door_trigger_2" name="push"></item>
+                <item id="jail_door" action="close"></item>
+                <item id="door_trigger_1" action="push"></item>
               </items>
             </action>
           </actions>
-        
-      </item>
+          <states>
+            <state name="up">
+              <transitions>
+                <transition state="down" />
+              </transitions>
+            </state>
+            <state name="down">
+              <transitions>
+                <transition state="up" />
+              </transitions>
+            </state>
+          </states>
+        </item>
 
         <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
           <position>0 2 8.9</position>
@@ -499,6 +518,24 @@
               </paths>
             </plan>
           </animation_plans>
+          <actions>
+            <action name="open" state_from="close" state_to="open" animation_plan="open">
+            </action>
+            <action name="close" state_from="open" state_to="close" animation_plan="close">
+            </action>
+          </actions>
+          <states>
+            <state name="open">
+              <transitions>
+                <transition state="close" />
+              </transitions>
+            </state>
+            <state name="close">
+              <transitions>
+                <transition state="open" />
+              </transitions>
+            </state>
+          </states>
         </item>
 
         <item asset_name="Dn_Rat_Hole_1">

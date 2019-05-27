@@ -229,6 +229,8 @@
     <Compile Include="ISceneLight.cs" />
     <Compile Include="ISceneLightSpot.cs" />
     <Compile Include="FrameStatsLight.cs" />
+    <Compile Include="ModularSceneryObjectState.cs" />
+    <Compile Include="ModularSceneryObjectStateTransition.cs" />
     <Compile Include="ModularSceneryAction.cs" />
     <Compile Include="ModularSceneryException.cs" />
     <Compile Include="ModularSceneryObjectAction.cs" />

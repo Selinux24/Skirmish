@@ -11,14 +11,14 @@ namespace Engine
     public class ModularSceneryObjectActionItem
     {
         /// <summary>
-        /// Item name
-        /// </summary>
-        [XmlAttribute("name")]
-        public string Name { get; set; }
-        /// <summary>
         /// Object Id
         /// </summary>
         [XmlAttribute("id")]
         public string Id { get; set; }
+        /// <summary>
+        /// Action name
+        /// </summary>
+        [XmlAttribute("action")]
+        public string Action { get; set; }
     }
 }

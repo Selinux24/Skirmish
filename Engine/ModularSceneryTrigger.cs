@@ -12,22 +12,20 @@ namespace Engine
         /// </summary>
         public string Name { get; set; }
         /// <summary>
+        /// State from
+        /// </summary>
+        public string StateFrom { get; set; }
+        /// <summary>
+        /// State to
+        /// </summary>
+        public string StateTo { get; set; }
+        /// <summary>
+        /// Animation plan
+        /// </summary>
+        public string AnimationPlan { get; set; }
+        /// <summary>
         /// List of actions referenced by the trigger
         /// </summary>
         public List<ModularSceneryAction> Actions { get; set; } = new List<ModularSceneryAction>();
-
-        /// <summary>
-        /// Activates the trigger
-        /// </summary>
-        public void Activate()
-        {
-            if (Actions?.Count > 0)
-            {
-                foreach (var action in Actions)
-                {
-                    action.Start();
-                }
-            }
-        }
     }
 }

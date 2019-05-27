@@ -48,6 +48,12 @@ namespace Engine
         [XmlArrayItem("action", typeof(ModularSceneryObjectAction))]
         public ModularSceneryObjectAction[] Actions { get; set; } = null;
         /// <summary>
+        /// States list
+        /// </summary>
+        [XmlArray("states")]
+        [XmlArrayItem("state", typeof(ModularSceneryObjectState))]
+        public ModularSceneryObjectState[] States { get; set; } = null;
+        /// <summary>
         /// Next level
         /// </summary>
         /// <remarks>Only for exit doors</remarks>
@@ -170,7 +176,6 @@ namespace Engine
         {
             return ModularSceneryExtents.Transformation(this.Position, this.Rotation, this.Scale);
         }
-
         /// <summary>
         /// Gets the text representation of the instance
         /// </summary>
