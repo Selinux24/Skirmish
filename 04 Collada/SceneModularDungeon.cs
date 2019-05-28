@@ -832,19 +832,32 @@ namespace Collada
             }
             else if (item.Object.Type == ModularSceneryObjectTypes.Trigger)
             {
-                var msg = "Press space to activate the trigger...";
-
-                PrepareMessage(true, msg);
+                SetSelectedItemTrigger(item);
             }
             else if (item.Object.Type == ModularSceneryObjectTypes.Light)
             {
-                var lights = item.Item.Lights;
-                if (lights?.Length > 0)
-                {
-                    var msg = string.Format("Press space to {0} the light...", lights[0].Enabled ? "turn off" : "turn on");
+                SetSelectedItemLight(item);
+            }
+        }
+        private void SetSelectedItemTrigger(ModularSceneryItem item)
+        {
+            var triggers = this.scenery.Instance.GetTriggersByObject(item);
+            if (triggers.Any())
+            {
+                int index = 1;
+                var msg = string.Join(", ", triggers.Select(t => $"Press {index++} to {t.Name} the {item.Object.Id}"));
 
-                    PrepareMessage(true, msg);
-                }
+                PrepareMessage(true, msg);
+            }
+        }
+        private void SetSelectedItemLight(ModularSceneryItem item)
+        {
+            var lights = item.Item.Lights;
+            if (lights?.Length > 0)
+            {
+                var msg = string.Format("Press space to {0} the light...", lights[0].Enabled ? "turn off" : "turn on");
+
+                PrepareMessage(true, msg);
             }
         }
         private void PrepareMessage(bool show, string text)
@@ -899,12 +912,14 @@ namespace Collada
         }
         private void UpdateEntityTrigger(ModularSceneryItem item)
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
+            var triggers = this.scenery.Instance.GetTriggersByObject(item);
+            if (triggers.Any())
             {
-                //TODO: Select available triggers and list in UI
-                var triggers = this.scenery.Instance.GetTriggersByObject(item);
-
-                this.scenery.Instance.ExecuteTrigger(item, triggers?.FirstOrDefault());
+                int keyIndex = ReadKeyIndex();
+                if (keyIndex > 0 && keyIndex <= triggers.Length)
+                {
+                    this.scenery.Instance.ExecuteTrigger(item, triggers[keyIndex - 1]);
+                }
             }
         }
         private void UpdateEntityLight(ModularSceneryItem item)
@@ -937,6 +952,26 @@ namespace Collada
                 messages.Instance.CenterHorizontally();
                 messages.Instance.CenterVertically();
             }
+        }
+
+        /// <summary>
+        /// Reads the keyboard looking for the first numeric key pressed
+        /// </summary>
+        /// <returns>Returns the first just released numeric key value</returns>
+        private int ReadKeyIndex()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.D0)) return 0;
+            if (this.Game.Input.KeyJustReleased(Keys.D1)) return 1;
+            if (this.Game.Input.KeyJustReleased(Keys.D2)) return 2;
+            if (this.Game.Input.KeyJustReleased(Keys.D3)) return 3;
+            if (this.Game.Input.KeyJustReleased(Keys.D4)) return 4;
+            if (this.Game.Input.KeyJustReleased(Keys.D5)) return 5;
+            if (this.Game.Input.KeyJustReleased(Keys.D6)) return 6;
+            if (this.Game.Input.KeyJustReleased(Keys.D7)) return 7;
+            if (this.Game.Input.KeyJustReleased(Keys.D8)) return 8;
+            if (this.Game.Input.KeyJustReleased(Keys.D9)) return 9;
+
+            return -1;
         }
 
         private void RefreshNavigation()

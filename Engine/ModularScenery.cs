@@ -1005,7 +1005,7 @@ namespace Engine
                 return new ModularSceneryTrigger[] { };
             }
 
-            return this.triggers[item.Item]?
+            return this.triggers[item.Item]
                 .Where(t => string.Equals(t.StateFrom, item.CurrentState, StringComparison.OrdinalIgnoreCase))
                 .ToArray();
         }
@@ -1022,13 +1022,16 @@ namespace Engine
                 return;
             }
 
+            item.CurrentState = trigger.StateTo;
+
             //Execute the action in the item first
-            var plan = animations[item.Item]?[trigger.AnimationPlan];
-            if (plan != null)
+            if (animations.ContainsKey(item.Item) && animations[item.Item].ContainsKey(trigger.AnimationPlan))
             {
+                var plan = animations[item.Item]?[trigger.AnimationPlan];
+
                 item.Item.AnimationController.SetPath(plan);
                 item.Item.AnimationController.Start();
-                item.CurrentState = trigger.StateTo;
+                item.Item.InvalidateCache();
             }
 
             //Find the referenced items and execute actions recursively
