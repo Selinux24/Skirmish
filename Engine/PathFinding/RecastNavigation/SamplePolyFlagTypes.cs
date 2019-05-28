@@ -25,9 +25,5 @@ namespace Engine.PathFinding.RecastNavigation
         /// Disabled polygon
         /// </summary>
         SAMPLE_POLYFLAGS_DISABLED = 0x10,
-        /// <summary>
-        /// All abilities.
-        /// </summary>
-        SAMPLE_POLYFLAGS_ALL = 0xffff
     }
 }

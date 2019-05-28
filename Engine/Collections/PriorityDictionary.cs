@@ -281,7 +281,7 @@ namespace Engine.Collections
             PriorityDictionaryItem<TValue, TPriority> o = items[index];
             PriorityDictionaryItem<TValue, TPriority> tmp = items[this.Count - 1];
 
-            items[--this.Count] = default;
+            items[--this.Count] = default(PriorityDictionaryItem<TValue, TPriority>);
             if (this.Count > 0)
             {
                 int i = index;
