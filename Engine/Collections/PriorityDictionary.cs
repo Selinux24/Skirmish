@@ -24,7 +24,7 @@ namespace Engine.Collections
         {
             get
             {
-                return items.Length;
+                return this.capacity;
             }
             set
             {
@@ -41,6 +41,7 @@ namespace Engine.Collections
                 }
 
                 this.capacity = newCap;
+
                 if (items == null)
                 {
                     items = new PriorityDictionaryItem<TValue, TPriority>[newCap];
@@ -67,7 +68,7 @@ namespace Engine.Collections
         /// Constructor
         /// </summary>
         /// <param name="initialCapacity">Initial capacity</param>
-        public PriorityDictionary(Int32 initialCapacity)
+        public PriorityDictionary(int initialCapacity)
             : this(initialCapacity, Comparer<TPriority>.Default)
         {
         }
@@ -275,12 +276,12 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns the node removed</returns>
-        private PriorityDictionaryItem<TValue, TPriority> RemoveAt(Int32 index)
+        private PriorityDictionaryItem<TValue, TPriority> RemoveAt(int index)
         {
             PriorityDictionaryItem<TValue, TPriority> o = items[index];
             PriorityDictionaryItem<TValue, TPriority> tmp = items[this.Count - 1];
 
-            items[--this.Count] = default(PriorityDictionaryItem<TValue, TPriority>);
+            items[--this.Count] = default;
             if (this.Count > 0)
             {
                 int i = index;

@@ -26,20 +26,6 @@ namespace Engine.Content
         }
 
         /// <summary>
-        /// Vertices
-        /// </summary>
-        private List<VertexData> vertices = new List<VertexData>();
-        /// <summary>
-        /// Indices
-        /// </summary>
-        private List<uint> indices = new List<uint>();
-        /// <summary>
-        /// The submesh has attached a textured material
-        /// </summary>
-        /// <remarks>It's used for vertex type calculation</remarks>
-        private bool textured = false;
-
-        /// <summary>
         /// Submesh id
         /// </summary>
         public int Id { get; private set; }
@@ -50,46 +36,19 @@ namespace Engine.Content
         /// <summary>
         /// Vertex type
         /// </summary>
-        public VertexTypes VertexType { get; private set; }
+        public VertexTypes VertexType { get; private set; } = VertexTypes.Unknown;
+        /// <summary>
+        /// Gets or sets wether the submesh has attached a textured material
+        /// </summary>
+        public bool Textured { get; private set; } = false;
         /// <summary>
         /// Vertices
         /// </summary>
-        public VertexData[] Vertices
-        {
-            get
-            {
-                return this.vertices.ToArray();
-            }
-            set
-            {
-                this.VertexType = VertexTypes.Unknown;
-
-                this.vertices.Clear();
-                if (value != null && value.Length > 0)
-                {
-                    this.vertices.AddRange(value);
-                    this.VertexType = VertexData.GetVertexType(this.vertices[0], this.textured);
-                }
-            }
-        }
+        public VertexData[] Vertices { get; private set; } = new VertexData[] { };
         /// <summary>
         /// Indices
         /// </summary>
-        public uint[] Indices
-        {
-            get
-            {
-                return this.indices.ToArray();
-            }
-            set
-            {
-                this.indices.Clear();
-                if (value != null && value.Length > 0)
-                {
-                    this.indices.AddRange(value);
-                }
-            }
-        }
+        public uint[] Indices { get; private set; } = new uint[] { };
         /// <summary>
         /// Material
         /// </summary>
@@ -98,25 +57,6 @@ namespace Engine.Content
         /// Gets or sets whether the current submesh content is a volume mesh
         /// </summary>
         public bool IsVolume { get; set; }
-        /// <summary>
-        /// Gets or sets wether the submesh has attached a textured material
-        /// </summary>
-        public bool Textured
-        {
-            get
-            {
-                return this.textured;
-            }
-            set
-            {
-                this.textured = value;
-
-                if (this.vertices != null && this.vertices.Count > 0)
-                {
-                    this.VertexType = VertexData.GetVertexType(this.vertices[0], this.textured);
-                }
-            }
-        }
 
         /// <summary>
         /// Submesh grouping optimization
@@ -157,29 +97,23 @@ namespace Engine.Content
                         return false;
                     }
 
-                    if (mesh.vertices.Count > 0)
+                    if (mesh.Vertices.Length > 0)
                     {
-                        verts.AddRange(mesh.vertices);
+                        verts.AddRange(mesh.Vertices);
                     }
 
-                    if (mesh.indices.Count > 0)
+                    if (mesh.Indices.Length > 0)
                     {
-                        idx.AddRange(mesh.indices.Select(i => i + indexOffset));
+                        idx.AddRange(mesh.Indices.Select(i => i + indexOffset));
                     }
 
                     indexOffset = (uint)verts.Count;
                 }
 
-                optimizedMesh = new SubMeshContent()
-                {
-                    Material = material,
-                    Topology = topology,
-                    VertexType = vertexType,
+                optimizedMesh = new SubMeshContent(topology, material, isTextured, false);
 
-                    indices = idx,
-                    vertices = verts,
-                    textured = isTextured,
-                };
+                optimizedMesh.SetVertices(verts);
+                optimizedMesh.SetIndices(idx);
             }
 
             return true;
@@ -188,9 +122,60 @@ namespace Engine.Content
         /// <summary>
         /// Constructor
         /// </summary>
-        public SubMeshContent()
+        /// <param name="topology">Submesh topology</param>
+        /// <param name="material">Material name</param>
+        /// <param name="isTextured">Textured mesh</param>
+        /// <param name="isVolume">Volume mesh</param>
+        public SubMeshContent(Topology topology, string material, bool isTextured, bool isVolume)
         {
             this.Id = GetNextId();
+
+            Topology = topology;
+            Material = material;
+            Textured = isTextured;
+            IsVolume = isVolume;
+        }
+
+        /// <summary>
+        /// Sets the submesh vertex list
+        /// </summary>
+        /// <param name="vertices">Vertex list</param>
+        public void SetVertices(IEnumerable<VertexData> vertices)
+        {
+            this.Vertices = new VertexData[] { };
+            this.VertexType = VertexTypes.Unknown;
+
+            if (vertices?.Any() == true)
+            {
+                this.Vertices = new List<VertexData>(vertices).ToArray();
+                this.VertexType = VertexData.GetVertexType(this.Vertices[0], this.Textured);
+            }
+        }
+        /// <summary>
+        /// Sets the submesh index list
+        /// </summary>
+        /// <param name="indices">Index list</param>
+        public void SetIndices(IEnumerable<uint> indices)
+        {
+            this.Indices = new uint[] { };
+
+            if (indices?.Any() == true)
+            {
+                this.Indices = new List<uint>(indices).ToArray();
+            }
+        }
+        /// <summary>
+        /// Sets whether the submesh is textured or not
+        /// </summary>
+        /// <param name="isTextured"></param>
+        public void SetTextured(bool isTextured)
+        {
+            this.Textured = isTextured;
+
+            if (this.Vertices?.Length > 0)
+            {
+                this.VertexType = VertexData.GetVertexType(this.Vertices[0], this.Textured);
+            }
         }
 
         /// <summary>
@@ -198,15 +183,15 @@ namespace Engine.Content
         /// </summary>
         public void ComputeTangents()
         {
-            if (this.vertices.Count > 0)
+            if (this.Vertices.Length > 0)
             {
-                if (this.indices.Count > 0)
+                if (this.Indices.Length > 0)
                 {
-                    for (int i = 0; i < this.indices.Count; i += 3)
+                    for (int i = 0; i < this.Indices.Length; i += 3)
                     {
-                        var v0 = this.vertices[(int)this.indices[i + 0]];
-                        var v1 = this.vertices[(int)this.indices[i + 1]];
-                        var v2 = this.vertices[(int)this.indices[i + 2]];
+                        var v0 = this.Vertices[(int)this.Indices[i + 0]];
+                        var v1 = this.Vertices[(int)this.Indices[i + 1]];
+                        var v2 = this.Vertices[(int)this.Indices[i + 2]];
 
                         GeometryUtil.ComputeNormals(
                             v0.Position.Value, v1.Position.Value, v2.Position.Value,
@@ -221,18 +206,18 @@ namespace Engine.Content
                         v1.BiNormal = binormal;
                         v2.BiNormal = binormal;
 
-                        this.vertices[(int)this.indices[i + 0]] = v0;
-                        this.vertices[(int)this.indices[i + 1]] = v1;
-                        this.vertices[(int)this.indices[i + 2]] = v2;
+                        this.Vertices[(int)this.Indices[i + 0]] = v0;
+                        this.Vertices[(int)this.Indices[i + 1]] = v1;
+                        this.Vertices[(int)this.Indices[i + 2]] = v2;
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < this.vertices.Count; i += 3)
+                    for (int i = 0; i < this.Vertices.Length; i += 3)
                     {
-                        var v0 = this.vertices[i + 0];
-                        var v1 = this.vertices[i + 1];
-                        var v2 = this.vertices[i + 2];
+                        var v0 = this.Vertices[i + 0];
+                        var v1 = this.Vertices[i + 1];
+                        var v2 = this.Vertices[i + 2];
 
                         GeometryUtil.ComputeNormals(
                             v0.Position.Value, v1.Position.Value, v2.Position.Value,
@@ -247,13 +232,13 @@ namespace Engine.Content
                         v1.BiNormal = binormal;
                         v2.BiNormal = binormal;
 
-                        this.vertices[i + 0] = v0;
-                        this.vertices[i + 1] = v1;
-                        this.vertices[i + 2] = v2;
+                        this.Vertices[i + 0] = v0;
+                        this.Vertices[i + 1] = v1;
+                        this.Vertices[i + 2] = v2;
                     }
                 }
 
-                this.VertexType = VertexData.GetVertexType(this.vertices[0], this.textured);
+                this.VertexType = VertexData.GetVertexType(this.Vertices[0], this.Textured);
             }
         }
         /// <summary>
@@ -266,24 +251,24 @@ namespace Engine.Content
             {
                 List<Triangle> triangles = new List<Triangle>();
 
-                if (this.indices.Count > 0)
+                if (this.Indices.Length > 0)
                 {
-                    for (int i = 0; i < this.indices.Count; i += 3)
+                    for (int i = 0; i < this.Indices.Length; i += 3)
                     {
                         triangles.Add(new Triangle(
-                            this.vertices[(int)this.indices[i + 0]].Position.Value,
-                            this.vertices[(int)this.indices[i + 1]].Position.Value,
-                            this.vertices[(int)this.indices[i + 2]].Position.Value));
+                            this.Vertices[(int)this.Indices[i + 0]].Position.Value,
+                            this.Vertices[(int)this.Indices[i + 1]].Position.Value,
+                            this.Vertices[(int)this.Indices[i + 2]].Position.Value));
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < this.vertices.Count; i += 3)
+                    for (int i = 0; i < this.Vertices.Length; i += 3)
                     {
                         triangles.Add(new Triangle(
-                            this.vertices[i + 0].Position.Value,
-                            this.vertices[i + 1].Position.Value,
-                            this.vertices[i + 2].Position.Value));
+                            this.Vertices[i + 0].Position.Value,
+                            this.Vertices[i + 1].Position.Value,
+                            this.Vertices[i + 2].Position.Value));
                     }
                 }
 
@@ -300,9 +285,9 @@ namespace Engine.Content
         /// <param name="transform">Transform to apply</param>
         public void Transform(Matrix transform)
         {
-            for (int i = 0; i < this.vertices.Count; i++)
+            for (int i = 0; i < this.Vertices.Length; i++)
             {
-                this.vertices[i] = this.vertices[i].Transform(transform);
+                this.Vertices[i] = this.Vertices[i].Transform(transform);
             }
         }
 

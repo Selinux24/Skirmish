@@ -254,7 +254,7 @@ namespace Engine.Content
                                 var mat = modelContent.Materials[materialName];
 
                                 subMesh.Material = materialName;
-                                subMesh.Textured = (mat.DiffuseTexture != null);
+                                subMesh.SetTextured(mat.DiffuseTexture != null);
                             }
 
                             modelContent.Geometry.Add(geometry.Id, subMesh.Material, subMesh);
@@ -493,13 +493,9 @@ namespace Engine.Content
                     data[i + 2] = verts[i + 1];
                 }
 
-                SubMeshContent meshInfo = new SubMeshContent()
-                {
-                    Topology = Topology.TriangleList,
-                    Vertices = data,
-                    Material = triangle.Material,
-                    IsVolume = isVolume,
-                };
+                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, triangle.Material, false, isVolume);
+
+                meshInfo.SetVertices(data);
 
                 res.Add(meshInfo);
             }
@@ -612,13 +608,9 @@ namespace Engine.Content
                     data[i + 2] = verts[i + 1];
                 }
 
-                SubMeshContent meshInfo = new SubMeshContent()
-                {
-                    Topology = Topology.TriangleList,
-                    Vertices = data,
-                    Material = polyList.Material,
-                    IsVolume = isVolume,
-                };
+                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polyList.Material, false, isVolume);
+
+                meshInfo.SetVertices(data);
 
                 res.Add(meshInfo);
             }
@@ -701,13 +693,9 @@ namespace Engine.Content
                     data[i + 2] = verts[i + 1];
                 }
 
-                SubMeshContent meshInfo = new SubMeshContent()
-                {
-                    Topology = Topology.TriangleList,
-                    Vertices = data,
-                    Material = polygon.Material,
-                    IsVolume = isVolume,
-                };
+                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polygon.Material, false, isVolume);
+
+                meshInfo.SetVertices(data);
 
                 res.Add(meshInfo);
             }

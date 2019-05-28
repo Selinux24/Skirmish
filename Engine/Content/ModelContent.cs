@@ -500,14 +500,10 @@ namespace Engine.Content
             var materialName = material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial;
             var textured = modelContent.Materials[materialName].DiffuseTexture != null;
 
-            SubMeshContent geo = new SubMeshContent()
-            {
-                Topology = topology,
-                Vertices = vertices,
-                Indices = indices,
-                Material = materialName,
-                Textured = textured,
-            };
+            SubMeshContent geo = new SubMeshContent(topology, materialName, textured, false);
+
+            geo.SetVertices(vertices);
+            geo.SetIndices(indices);
 
             modelContent.Geometry.Add(ModelContent.StaticMesh, material != null ? ModelContent.DefaultMaterial : ModelContent.NoMaterial, geo);
             modelContent.Optimize();
@@ -548,14 +544,10 @@ namespace Engine.Content
 
             hm.BuildGeometry(cellSize, cellHeight, out VertexData[] vertices, out uint[] indices);
 
-            SubMeshContent geo = new SubMeshContent()
-            {
-                Topology = Topology.TriangleList,
-                Material = materialName,
-                Vertices = vertices,
-                Indices = indices,
-                Textured = true,
-            };
+            SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
+
+            geo.SetVertices(vertices);
+            geo.SetIndices(indices);
 
             modelContent.Images.Add(texureName, textureImage);
             modelContent.Materials.Add(materialName, material);
