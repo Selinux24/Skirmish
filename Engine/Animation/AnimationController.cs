@@ -38,7 +38,7 @@ namespace Engine.Animation
         /// <summary>
         /// Gets the current clip in the clip collection
         /// </summary>
-        public int CurrentIndex { get; private set; } = -1;
+        public int CurrentIndex { get; private set; } = 0;
         /// <summary>
         /// Current path time
         /// </summary>
@@ -158,8 +158,8 @@ namespace Engine.Animation
 
             if (this.animationPaths.Count > 0)
             {
-                AnimationPath last = null;
-                AnimationPath next = null;
+                AnimationPath last;
+                AnimationPath next;
 
                 if (flags == AppendFlagTypes.ClearCurrent)
                 {
@@ -238,7 +238,7 @@ namespace Engine.Animation
         /// <returns>Returns the current animation offset in skinning animation data</returns>
         public uint GetAnimationOffset(SkinningData skData)
         {
-            if (this.CurrentIndex >= 0)
+            if (this.animationPaths.Count > 0 && this.CurrentIndex >= 0)
             {
                 //Get the path
                 var path = this.animationPaths[this.CurrentIndex];
@@ -267,7 +267,7 @@ namespace Engine.Animation
         /// <returns>Returns the transformation matrix list at current time</returns>
         public Matrix[] GetCurrentPose(SkinningData skData)
         {
-            if (this.CurrentIndex >= 0)
+            if (this.animationPaths.Count > 0 && this.CurrentIndex >= 0)
             {
                 //Get the path
                 var path = this.animationPaths[this.CurrentIndex];

@@ -89,6 +89,8 @@ namespace Animation
         private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
         private readonly Dictionary<string, AnimationPlan> ladderPaths = new Dictionary<string, AnimationPlan>();
         private readonly Dictionary<string, AnimationPlan> ladder2Paths = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> doorsPaths = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> jailsPaths = new Dictionary<string, AnimationPlan>();
 
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -104,6 +106,8 @@ namespace Animation
             this.InitializeLadder2();
             this.InitializeSoldier();
             this.InitializeRat();
+            this.InitializeDoors();
+            this.InitializeJails();
             this.InitializeFloor();
 
             this.InitializeUI();
@@ -359,6 +363,85 @@ namespace Animation
 
             this.animObjects.Add(rat);
         }
+        private void InitializeDoors()
+        {
+            var doors = this.AddComponent<ModelInstanced>(
+                new ModelInstancedDescription()
+                {
+                    Name = "Doors",
+                    CastShadow = true,
+                    Instances = 1,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Doors",
+                        ModelContentFilename = "Dn_Doors.xml",
+                    },
+                });
+
+            doors.Instance[0].Manipulator.SetPosition(-10, 0, 8, true);
+            doors.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            doors.Instance[0].Manipulator.SetScale(2.5f);
+
+            //AnimationPath def = new AnimationPath();
+            //def.Add("default");
+            //AnimationPath open = new AnimationPath();
+            //open.Add("open");
+            //AnimationPath close = new AnimationPath();
+            //close.Add("close");
+            //AnimationPath rep = new AnimationPath();
+            //rep.Add("open");
+            //rep.Add("close");
+
+            //this.doorsPaths.Add("default", new AnimationPlan(def));
+            //this.doorsPaths.Add("open", new AnimationPlan(open));
+            //this.doorsPaths.Add("close", new AnimationPlan(close));
+            //this.doorsPaths.Add("rep", new AnimationPlan(rep));
+
+            //doors.Instance[0].AnimationController.AddPath(this.doorsPaths["rep"]);
+
+            this.animObjects.Add(doors);
+        }
+        private void InitializeJails()
+        {
+            var doors = this.AddComponent<ModelInstanced>(
+                new ModelInstancedDescription()
+                {
+                    Name = "Jails",
+                    CastShadow = true,
+                    Instances = 1,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Doors",
+                        ModelContentFilename = "Dn_Jails.xml",
+                    }
+                });
+
+            doors.Instance[0].Manipulator.SetPosition(10, 0, 8, true);
+            doors.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            doors.Instance[0].Manipulator.SetScale(2.5f);
+
+            AnimationPath def = new AnimationPath();
+            def.Add("default");
+            AnimationPath open = new AnimationPath();
+            open.Add("open");
+            AnimationPath close = new AnimationPath();
+            close.Add("close");
+            AnimationPath rep = new AnimationPath();
+            rep.Add("open");
+            rep.Add("close");
+
+            this.jailsPaths.Add("default", new AnimationPlan(def));
+            this.jailsPaths.Add("open", new AnimationPlan(open));
+            this.jailsPaths.Add("close", new AnimationPlan(close));
+            this.jailsPaths.Add("rep", new AnimationPlan(rep));
+
+            doors.Instance[0].AnimationController.AddPath(this.jailsPaths["rep"]);
+
+            this.animObjects.Add(doors);
+        }
+
         private void InitializeEnvironment()
         {
             GameEnvironment.Background = Color.CornflowerBlue;

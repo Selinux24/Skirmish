@@ -525,14 +525,14 @@
             </action>
           </actions>
           <states>
-            <state name="open">
-              <transitions>
-                <transition state="close" />
-              </transitions>
-            </state>
             <state name="close">
               <transitions>
                 <transition state="open" />
+              </transitions>
+            </state>
+            <state name="open">
+              <transitions>
+                <transition state="close" />
               </transitions>
             </state>
           </states>

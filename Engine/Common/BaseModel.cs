@@ -84,8 +84,7 @@ namespace Engine.Common
                 DynamicBuffers = description.Dynamic,
             };
 
-            ModelContent[] geo = null;
-
+            ModelContent[] geo;
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
                 var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));

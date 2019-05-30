@@ -347,22 +347,46 @@ namespace Collada
             //Rat holes
             this.ratHoles = this.scenery.Instance.GetObjectsPositionsByAssetName("Dn_Rat_Hole_1");
 
-            //Ladders
-            var ladders = this.scenery.Instance.GetObjectsByName("Dn_Anim_Ladder");
-
-            Dictionary<string, AnimationPlan> ladderPaths = new Dictionary<string, AnimationPlan>();
-            AnimationPath pull = new AnimationPath();
-            pull.Add("pull");
-            AnimationPath push = new AnimationPath();
-            push.Add("push");
-
-            ladderPaths.Add("pull", new AnimationPlan(pull));
-            ladderPaths.Add("push", new AnimationPlan(push));
-
-            foreach (var ladder in ladders)
+            //Jails
             {
-                ladder.AnimationController.SetPath(ladderPaths["pull"]);
-                ladder.InvalidateCache();
+                var jails = this.scenery.Instance.GetObjectsByName("Dn_Jail_1");
+
+                AnimationPath def = new AnimationPath();
+                def.Add("default");
+
+                foreach (var jail in jails)
+                {
+                    jail.AnimationController.SetPath(new AnimationPlan(def));
+                    jail.InvalidateCache();
+                }
+            }
+
+            //Doors
+            {
+                var doors = this.scenery.Instance.GetObjectsByName("Dn_Door_1");
+
+                AnimationPath def = new AnimationPath();
+                def.Add("default");
+
+                foreach (var door in doors)
+                {
+                    door.AnimationController.SetPath(new AnimationPlan(def));
+                    door.InvalidateCache();
+                }
+            }
+
+            //Ladders
+            {
+                var ladders = this.scenery.Instance.GetObjectsByName("Dn_Anim_Ladder");
+
+                AnimationPath def = new AnimationPath();
+                def.Add("pull");
+
+                foreach (var ladder in ladders)
+                {
+                    ladder.AnimationController.SetPath(new AnimationPlan(def));
+                    ladder.InvalidateCache();
+                }
             }
 
             //Human obstacles
@@ -918,7 +942,11 @@ namespace Collada
                 int keyIndex = ReadKeyIndex();
                 if (keyIndex > 0 && keyIndex <= triggers.Length)
                 {
-                    this.scenery.Instance.ExecuteTrigger(item, triggers[keyIndex - 1]);
+                    var affectedItems = this.scenery.Instance.ExecuteTrigger(item, triggers[keyIndex - 1]);
+                    if (affectedItems.Any())
+                    {
+                        Task res = UpdateGraphAsync(affectedItems);
+                    }
                 }
             }
         }
@@ -952,6 +980,18 @@ namespace Collada
                 messages.Instance.CenterHorizontally();
                 messages.Instance.CenterVertically();
             }
+        }
+
+        private async Task UpdateGraphAsync(ModularSceneryItem[] items)
+        {
+            await Task.Delay(2000);
+
+            foreach (var affectedItem in items)
+            {
+                this.UpdateGraph(affectedItem.Item.Manipulator.Position);
+            }
+
+            this.RequestGraphUpdate(1);
         }
 
         /// <summary>

@@ -576,6 +576,9 @@
     <Content Include="Collada\Scenery\ModularDungeon\Dn_Anim_Ladder_2.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Collada\Scenery\ModularDungeon\Dn_Doors.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Collada\Tests\AniCube\aniCube.dae" />
     <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_diffuse.dds" />
     <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_normal.dds" />

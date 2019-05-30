@@ -248,6 +248,7 @@ namespace Engine
                                 CastShadow = this.Description.CastShadow,
                                 UseAnisotropicFiltering = this.Description.UseAnisotropic,
                                 Instances = count,
+                                LoadAnimation = false,
                                 Content = new ContentDescription()
                                 {
                                     ModelContent = modelContent,
@@ -1014,13 +1015,19 @@ namespace Engine
         /// </summary>
         /// <param name="item">Triggered item</param>
         /// <param name="trigger">Trigger to execute</param>
-        public void ExecuteTrigger(ModularSceneryItem item, ModularSceneryTrigger trigger)
+        /// <returns>Returns the affected items</returns>
+        public ModularSceneryItem[] ExecuteTrigger(ModularSceneryItem item, ModularSceneryTrigger trigger)
         {
             //Validate item state
             if (item.CurrentState != trigger.StateFrom)
             {
-                return;
+                return new ModularSceneryItem[] { };
             }
+
+            List<ModularSceneryItem> resultItems = new List<ModularSceneryItem>()
+            {
+                item,
+            };
 
             item.CurrentState = trigger.StateTo;
 
@@ -1057,8 +1064,10 @@ namespace Engine
                     continue;
                 }
 
-                ExecuteTrigger(refItem, refTrigger);
+                resultItems.AddRange(ExecuteTrigger(refItem, refTrigger));
             }
+
+            return resultItems.Distinct().ToArray();
         }
 
         /// <summary>
