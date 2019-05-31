@@ -934,7 +934,7 @@ namespace Collada
                     var affectedItems = this.scenery.Instance.ExecuteTrigger(item, triggers[keyIndex - 1]);
                     if (affectedItems.Any())
                     {
-                        Task res = UpdateGraphAsync(affectedItems);
+                        Task res = UpdateGraphAsync(affectedItems, 1000);
                     }
                 }
             }
@@ -971,13 +971,13 @@ namespace Collada
             }
         }
 
-        private async Task UpdateGraphAsync(ModularSceneryItem[] items)
+        private async Task<bool> UpdateGraphAsync(ModularSceneryItem[] items, int delay)
         {
-            await Task.Delay(1000);
+            await Task.Delay(delay);
 
             this.UpdateGraph(items?.Select(i => i.Item.Manipulator.Position));
 
-            this.RequestGraphUpdate(0.2f);
+            return true;
         }
 
         /// <summary>

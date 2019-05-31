@@ -43,11 +43,10 @@ namespace Engine
         /// </summary>
         /// <param name="position">Position</param>
         /// <param name="interest">Interest</param>
-        /// <param name="up">Up vector</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <returns>Returns new 2D camera</returns>
-        public static Camera CreateOrtho(Vector3 position, Vector3 interest, Vector3 up, int width, int height)
+        public static Camera CreateOrtho(Vector3 position, Vector3 interest, int width, int height)
         {
             Camera camera = new Camera
             {
@@ -574,7 +573,7 @@ namespace Engine
             if (this.mode == CameraModes.FreeIsometric)
             {
                 int current = (int)this.isometricAxis;
-                int previous = 0;
+                int previous;
 
                 if (current <= 0)
                 {
@@ -596,7 +595,7 @@ namespace Engine
             if (this.mode == CameraModes.FreeIsometric)
             {
                 int current = (int)this.isometricAxis;
-                int next = 0;
+                int next;
 
                 if (current >= 3)
                 {

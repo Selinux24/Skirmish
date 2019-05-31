@@ -571,10 +571,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="position">Position</param>
         public void BuildTile(Vector3 position)
         {
+            this.Updating?.Invoke(this, new EventArgs());
+
             foreach (var agent in MeshQueryDictionary.Keys)
             {
                 MeshQueryDictionary[agent].GetAttachedNavMesh().BuildTile(position, Input, Settings, agent);
             }
+
+            this.Updated?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Removes the tile in the specified position
@@ -582,10 +586,14 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="position">Position</param>
         public void RemoveTile(Vector3 position)
         {
+            this.Updating?.Invoke(this, new EventArgs());
+
             foreach (var agent in MeshQueryDictionary.Keys)
             {
                 MeshQueryDictionary[agent].GetAttachedNavMesh().RemoveTile(position, Input, Settings);
             }
+
+            this.Updated?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Updates the graph at specified position
