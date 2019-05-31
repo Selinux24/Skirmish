@@ -87,10 +87,6 @@ namespace Animation
 
         private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
         private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
-        private readonly Dictionary<string, AnimationPlan> ladderPaths = new Dictionary<string, AnimationPlan>();
-        private readonly Dictionary<string, AnimationPlan> ladder2Paths = new Dictionary<string, AnimationPlan>();
-        private readonly Dictionary<string, AnimationPlan> doorsPaths = new Dictionary<string, AnimationPlan>();
-        private readonly Dictionary<string, AnimationPlan> jailsPaths = new Dictionary<string, AnimationPlan>();
 
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -210,12 +206,15 @@ namespace Animation
             AnimationPath push = new AnimationPath();
             push.Add("push");
 
-            this.ladderPaths.Add("default", new AnimationPlan(def));
-            this.ladderPaths.Add("pull", new AnimationPlan(pull));
-            this.ladderPaths.Add("push", new AnimationPlan(push));
+            Dictionary<string, AnimationPlan> ladderPaths = new Dictionary<string, AnimationPlan>
+            {
+                { "default", new AnimationPlan(def) },
+                { "pull", new AnimationPlan(pull) },
+                { "push", new AnimationPlan(push) }
+            };
 
-            ladder.Instance[0].AnimationController.AddPath(this.ladderPaths["pull"]);
-            ladder.Instance[1].AnimationController.AddPath(this.ladderPaths["pull"]);
+            ladder.Instance[0].AnimationController.AddPath(ladderPaths["pull"]);
+            ladder.Instance[1].AnimationController.AddPath(ladderPaths["pull"]);
 
             this.animObjects.Add(ladder);
         }
@@ -268,15 +267,18 @@ namespace Animation
             AnimationPath push = new AnimationPath();
             push.Add("push");
 
-            this.ladder2Paths.Add("default", new AnimationPlan(def));
-            this.ladder2Paths.Add("pull", new AnimationPlan(pull));
-            this.ladder2Paths.Add("push", new AnimationPlan(push));
+            Dictionary<string, AnimationPlan> ladder2Paths = new Dictionary<string, AnimationPlan>
+            {
+                { "default", new AnimationPlan(def) },
+                { "pull", new AnimationPlan(pull) },
+                { "push", new AnimationPlan(push) }
+            };
 
-            ladder.Instance[0].AnimationController.AddPath(this.ladder2Paths["pull"]);
-            ladder.Instance[1].AnimationController.AddPath(this.ladder2Paths["pull"]);
+            ladder.Instance[0].AnimationController.AddPath(ladder2Paths["pull"]);
+            ladder.Instance[1].AnimationController.AddPath(ladder2Paths["pull"]);
 
-            ladder2.Instance[0].AnimationController.AddPath(this.ladder2Paths["push"]);
-            ladder2.Instance[1].AnimationController.AddPath(this.ladder2Paths["push"]);
+            ladder2.Instance[0].AnimationController.AddPath(ladder2Paths["push"]);
+            ladder2.Instance[1].AnimationController.AddPath(ladder2Paths["push"]);
 
             this.animObjects.Add(ladder);
             this.animObjects.Add(ladder2);
@@ -383,22 +385,25 @@ namespace Animation
             doors.Instance[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             doors.Instance[0].Manipulator.SetScale(2.5f);
 
-            //AnimationPath def = new AnimationPath();
-            //def.Add("default");
-            //AnimationPath open = new AnimationPath();
-            //open.Add("open");
-            //AnimationPath close = new AnimationPath();
-            //close.Add("close");
-            //AnimationPath rep = new AnimationPath();
-            //rep.Add("open");
-            //rep.Add("close");
+            AnimationPath def = new AnimationPath();
+            def.Add("default");
+            AnimationPath open = new AnimationPath();
+            open.Add("open");
+            AnimationPath close = new AnimationPath();
+            close.Add("close");
+            AnimationPath rep = new AnimationPath();
+            rep.Add("open");
+            rep.Add("close");
 
-            //this.doorsPaths.Add("default", new AnimationPlan(def));
-            //this.doorsPaths.Add("open", new AnimationPlan(open));
-            //this.doorsPaths.Add("close", new AnimationPlan(close));
-            //this.doorsPaths.Add("rep", new AnimationPlan(rep));
+            Dictionary<string, AnimationPlan> doorsPaths = new Dictionary<string, AnimationPlan>
+            {
+                { "default", new AnimationPlan(def) },
+                { "open", new AnimationPlan(open) },
+                { "close", new AnimationPlan(close) },
+                { "rep", new AnimationPlan(rep) }
+            };
 
-            //doors.Instance[0].AnimationController.AddPath(this.doorsPaths["rep"]);
+            doors.Instance[0].AnimationController.AddPath(doorsPaths["rep"]);
 
             this.animObjects.Add(doors);
         }
@@ -432,12 +437,15 @@ namespace Animation
             rep.Add("open");
             rep.Add("close");
 
-            this.jailsPaths.Add("default", new AnimationPlan(def));
-            this.jailsPaths.Add("open", new AnimationPlan(open));
-            this.jailsPaths.Add("close", new AnimationPlan(close));
-            this.jailsPaths.Add("rep", new AnimationPlan(rep));
+            Dictionary<string, AnimationPlan> jailsPaths = new Dictionary<string, AnimationPlan>
+            {
+                { "default", new AnimationPlan(def) },
+                { "open", new AnimationPlan(open) },
+                { "close", new AnimationPlan(close) },
+                { "rep", new AnimationPlan(rep) }
+            };
 
-            doors.Instance[0].AnimationController.AddPath(this.jailsPaths["rep"]);
+            doors.Instance[0].AnimationController.AddPath(jailsPaths["rep"]);
 
             this.animObjects.Add(doors);
         }

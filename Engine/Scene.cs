@@ -93,7 +93,7 @@ namespace Engine
             int texHeight = 1;
             while (texHeight < texWidth)
             {
-                texHeight = texHeight << 1;
+                texHeight <<= 1;
             }
 
             return texHeight;
@@ -120,14 +120,11 @@ namespace Engine
                 Distance = float.MaxValue,
             };
 
-            float dist = bestDistance;
-
             var pickable = obj.Get<IRayPickable<Triangle>>();
 
             var picked = pickable.PickNearest(ray, facingOnly, out PickingResult<Triangle> r);
-            if (picked && r.Distance < dist)
+            if (picked && r.Distance < bestDistance)
             {
-                dist = r.Distance;
                 result = r;
                 pickedNearest = true;
             }
@@ -1685,6 +1682,22 @@ namespace Engine
             this.PathFinderDescription.Input.Refresh();
 
             this.NavigationGraph.UpdateAt(position);
+        }
+        /// <summary>
+        /// Updates the graph at positions list
+        /// </summary>
+        /// <param name="positions">Positions list</param>
+        public virtual void UpdateGraph(IEnumerable<Vector3> positions)
+        {
+            if (positions?.Any() == true)
+            {
+                this.PathFinderDescription.Input.Refresh();
+
+                foreach (var position in positions)
+                {
+                    this.NavigationGraph.UpdateAt(position);
+                }
+            }
         }
 
         /// <summary>

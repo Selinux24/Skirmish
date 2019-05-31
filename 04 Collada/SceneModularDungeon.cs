@@ -496,6 +496,7 @@ namespace Collada
             this.UpdateRatController(gameTime);
             this.UpdateEntities();
 
+            this.UpdateSelection();
             this.UpdateDebugInput();
             this.UpdateGraphInput();
             this.UpdateRatInput();
@@ -656,11 +657,6 @@ namespace Collada
                 UpdateEntityExit(this.selectedItem);
             }
 
-            if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Door)
-            {
-                UpdateEntityDoor(this.selectedItem);
-            }
-
             if (this.selectedItem.Object.Type == ModularSceneryObjectTypes.Trigger)
             {
                 UpdateEntityTrigger(this.selectedItem);
@@ -672,6 +668,22 @@ namespace Collada
             }
         }
 
+        private void UpdateSelection()
+        {
+            if (this.selectedItem == null)
+            {
+                return;
+            }
+
+            var tris = this.selectedItem?.Item.GetTriangles(true);
+            if (tris?.Length > 0)
+            {
+                Color4 sItemColor = Color.LightYellow;
+                sItemColor.Alpha = 0.3333f;
+
+                this.selectedItemDrawer.Instance.SetPrimitives(sItemColor, tris);
+            }
+        }
         private void UpdateGraphData(GameTime gameTime)
         {
             graphUpdateSeconds -= gameTime.ElapsedSeconds;
@@ -827,15 +839,6 @@ namespace Collada
                 return;
             }
 
-            var tris = item?.Item.GetTriangles();
-            if (tris?.Length > 0)
-            {
-                Color4 sItemColor = Color.LightGreen;
-                sItemColor.Alpha = 0.2f;
-
-                this.selectedItemDrawer.Instance.SetPrimitives(sItemColor, tris);
-            }
-
             if (item.Object.Type == ModularSceneryObjectTypes.Entrance)
             {
                 var msg = "The door locked when you closed it.\r\nYou must find an exit...";
@@ -920,20 +923,6 @@ namespace Collada
                 }
             }
         }
-        private void UpdateEntityDoor(ModularSceneryItem item)
-        {
-            if (this.Game.Input.KeyJustReleased(Keys.Space))
-            {
-                item.Item.Visible = !item.Item.Visible;
-
-                messages.Instance.Text = string.Format("Press space to {0} the door...", item.Item.Visible ? "open" : "close");
-                messages.Instance.CenterHorizontally();
-                messages.Instance.CenterVertically();
-
-                this.UpdateGraph(item.Item.Manipulator.Position);
-                this.RequestGraphUpdate(1);
-            }
-        }
         private void UpdateEntityTrigger(ModularSceneryItem item)
         {
             var triggers = this.scenery.Instance.GetTriggersByObject(item);
@@ -984,14 +973,11 @@ namespace Collada
 
         private async Task UpdateGraphAsync(ModularSceneryItem[] items)
         {
-            await Task.Delay(2000);
+            await Task.Delay(1000);
 
-            foreach (var affectedItem in items)
-            {
-                this.UpdateGraph(affectedItem.Item.Manipulator.Position);
-            }
+            this.UpdateGraph(items?.Select(i => i.Item.Manipulator.Position));
 
-            this.RequestGraphUpdate(1);
+            this.RequestGraphUpdate(0.2f);
         }
 
         /// <summary>

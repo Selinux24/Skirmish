@@ -17,6 +17,14 @@ namespace Engine.Animation
         /// </summary>
         private bool active = false;
         /// <summary>
+        /// Last item time
+        /// </summary>
+        private float lastItemTime = 0;
+        /// <summary>
+        /// Last clip name
+        /// </summary>
+        private string lastClipName = null;
+        /// <summary>
         /// Last animation offset
         /// </summary>
         private uint lastOffset = 0;
@@ -32,7 +40,7 @@ namespace Engine.Animation
         {
             get
             {
-                return this.CurrentIndex >= 0;
+                return (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count);
             }
         }
         /// <summary>
@@ -46,7 +54,7 @@ namespace Engine.Animation
         {
             get
             {
-                if (this.CurrentIndex >= 0)
+                if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
                 {
                     var path = this.animationPaths[this.CurrentIndex];
 
@@ -63,7 +71,7 @@ namespace Engine.Animation
         {
             get
             {
-                if (this.CurrentIndex >= 0)
+                if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
                 {
                     var path = this.animationPaths[this.CurrentIndex];
 
@@ -80,7 +88,7 @@ namespace Engine.Animation
         {
             get
             {
-                if (this.CurrentIndex >= 0)
+                if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
                 {
                     var path = this.animationPaths[this.CurrentIndex];
 
@@ -169,13 +177,13 @@ namespace Engine.Animation
                     //Clear all paths
                     this.animationPaths.Clear();
                 }
-                else if (flags == AppendFlagTypes.EndsCurrent)
+                else if (flags == AppendFlagTypes.EndsCurrent && this.CurrentIndex < this.animationPaths.Count)
                 {
                     last = this.animationPaths[this.CurrentIndex];
                     next = clonedPaths[0];
 
                     //Remove all paths from current to end
-                    if (this.animationPaths.Count > this.CurrentIndex + 1)
+                    if (this.CurrentIndex + 1 < this.animationPaths.Count)
                     {
                         this.animationPaths.RemoveRange(
                             this.CurrentIndex + 1,
@@ -210,7 +218,7 @@ namespace Engine.Animation
         /// <param name="skData">Skinning data</param>
         public void Update(float time, SkinningData skData)
         {
-            if (this.active && this.CurrentIndex >= 0)
+            if (this.active && this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
             {
                 var path = this.animationPaths[this.CurrentIndex];
                 if (!path.Playing)
@@ -238,24 +246,16 @@ namespace Engine.Animation
         /// <returns>Returns the current animation offset in skinning animation data</returns>
         public uint GetAnimationOffset(SkinningData skData)
         {
-            if (this.animationPaths.Count > 0 && this.CurrentIndex >= 0)
+            if (GetClipAndTime(out string clipName, out float time))
             {
-                //Get the path
-                var path = this.animationPaths[this.CurrentIndex];
-                if (path.Playing)
-                {
-                    //Get the path item
-                    var pathItem = path.GetCurrentItem();
-                    if (pathItem != null)
-                    {
-                        skData.GetAnimationOffset(
-                            path.ItemTime,
-                            pathItem.ClipName,
-                            out uint offset);
+                skData.GetAnimationOffset(
+                    time,
+                    clipName,
+                    out uint offset);
 
-                        lastOffset = offset;
-                    }
-                }
+                lastItemTime = time;
+                lastClipName = clipName;
+                lastOffset = offset;
             }
 
             return lastOffset;
@@ -267,22 +267,45 @@ namespace Engine.Animation
         /// <returns>Returns the transformation matrix list at current time</returns>
         public Matrix[] GetCurrentPose(SkinningData skData)
         {
-            if (this.animationPaths.Count > 0 && this.CurrentIndex >= 0)
+            if (GetClipAndTime(out string clipName, out float time))
+            {
+                return skData.GetPoseAtTime(time, clipName);
+            }
+
+            return skData.GetPoseAtTime(
+                lastItemTime,
+                lastClipName);
+        }
+        /// <summary>
+        /// Gets the current clip name and time
+        /// </summary>
+        /// <param name="clipName">Clip name</param>
+        /// <param name="time">Time</param>
+        /// <returns>Returns true if the controller is currently playing a clip</returns>
+        private bool GetClipAndTime(out string clipName, out float time)
+        {
+            clipName = null;
+            time = 0;
+
+            if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
             {
                 //Get the path
                 var path = this.animationPaths[this.CurrentIndex];
-
-                //Get the path item
-                var pathItem = path.GetCurrentItem();
-                if (pathItem != null)
+                if (path.Playing)
                 {
-                    return skData.GetPoseAtTime(
-                        path.ItemTime,
-                        pathItem.ClipName);
+                    //Get the path item
+                    var pathItem = path.GetCurrentItem();
+                    if (pathItem != null)
+                    {
+                        time = path.ItemTime;
+                        clipName = pathItem.ClipName;
+
+                        return true;
+                    }
                 }
             }
 
-            return skData.GetPoseBase();
+            return false;
         }
 
         /// <summary>
@@ -295,9 +318,10 @@ namespace Engine.Animation
 
             this.CurrentIndex = 0;
 
-            var path = this.animationPaths[this.CurrentIndex];
-
-            path.SetTime(time);
+            if (this.animationPaths.Count > 0)
+            {
+                this.animationPaths[this.CurrentIndex].SetTime(time);
+            }
         }
         /// <summary>
         /// Stop
@@ -307,11 +331,9 @@ namespace Engine.Animation
         {
             this.active = false;
 
-            if (this.CurrentIndex >= 0)
+            if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
             {
-                var path = this.animationPaths[this.CurrentIndex];
-
-                path.SetTime(time);
+                this.animationPaths[this.CurrentIndex].SetTime(time);
             }
         }
         /// <summary>
@@ -337,7 +359,7 @@ namespace Engine.Animation
         {
             string res = "Inactive";
 
-            if (this.CurrentIndex >= 0)
+            if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
             {
                 res = string.Format("{0}", this.animationPaths[this.CurrentIndex].GetItemList().Join(", "));
                 if (this.CurrentIndex + 1 < this.animationPaths.Count)

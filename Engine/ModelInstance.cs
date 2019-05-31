@@ -397,7 +397,7 @@ namespace Engine
         /// <returns>Returns true if the object is outside of the frustum</returns>
         public virtual bool Cull(ICullingVolume volume, out float distance)
         {
-            var cull = true;
+            bool cull;
             distance = float.MaxValue;
 
             if (this.HasVolumes)
