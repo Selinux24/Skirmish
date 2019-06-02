@@ -20,7 +20,7 @@ namespace Engine
         /// <summary>
         /// Button text drawer
         /// </summary>
-        private TextDrawer text = null;
+        private TextDrawer textDrawer = null;
 
         /// <summary>
         /// Left scale
@@ -58,18 +58,13 @@ namespace Engine
         {
             get
             {
-                if (this.text != null)
-                {
-                    return this.text.Text;
-                }
-
-                return null;
+                return this.textDrawer?.Text;
             }
             set
             {
-                if (this.text != null)
+                if (this.textDrawer != null)
                 {
-                    this.text.Text = value;
+                    this.textDrawer.Text = value;
                 }
             }
         }
@@ -112,7 +107,7 @@ namespace Engine
 
             if (description.TextDescription != null)
             {
-                this.text = new TextDrawer(
+                this.textDrawer = new TextDrawer(
                     scene,
                     description.TextDescription);
             }
@@ -149,10 +144,10 @@ namespace Engine
                     right.Dispose();
                     right = null;
                 }
-                if (text != null)
+                if (textDrawer != null)
                 {
-                    text.Dispose();
-                    text = null;
+                    textDrawer.Dispose();
+                    textDrawer = null;
                 }
             }
         }
@@ -174,13 +169,13 @@ namespace Engine
             if (!string.IsNullOrEmpty(this.Text))
             {
                 //Center text
-                float leftmove = ((float)this.Width * 0.5f) - ((float)this.text.Width * 0.5f);
-                float topmove = ((float)this.Height * 0.5f) - ((float)this.text.Height * 0.5f);
+                float leftmove = ((float)this.Width * 0.5f) - ((float)this.textDrawer.Width * 0.5f);
+                float topmove = ((float)this.Height * 0.5f) - ((float)this.textDrawer.Height * 0.5f);
 
-                this.text.Left = this.Left + (int)leftmove;
-                this.text.Top = this.Top + (int)topmove;
+                this.textDrawer.Left = this.Left + (int)leftmove;
+                this.textDrawer.Top = this.Top + (int)topmove;
 
-                this.text.Update(context);
+                this.textDrawer.Update(context);
             }
 
             this.left.Update(context);
@@ -204,7 +199,7 @@ namespace Engine
 
             if (!string.IsNullOrEmpty(this.Text))
             {
-                this.text.Draw(context);
+                this.textDrawer.Draw(context);
             }
         }
         /// <summary>
@@ -214,7 +209,7 @@ namespace Engine
         {
             if (this.left != null) this.left.Resize();
             if (this.right != null) this.right.Resize();
-            if (this.text != null) this.text.Resize();
+            if (this.textDrawer != null) this.textDrawer.Resize();
         }
     }
 }

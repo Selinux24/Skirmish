@@ -14,6 +14,9 @@ namespace Engine
     /// </summary>
     public class ParticleSystemGpu : IParticleSystem
     {
+        /// <summary>
+        /// Assigned buffer slot
+        /// </summary>
         public static int BufferSlot { get; set; } = 0;
 
         /// <summary>
@@ -152,9 +155,7 @@ namespace Engine
                 EmissionTime = this.Emitter.Duration,
             });
 
-            //TODO: should be another method for this
-            int size = (int)(this.MaxConcurrentParticles * (this.Emitter.Duration == 0 ? 60 : this.Emitter.Duration));
-            size = Math.Min(size, 5000);
+            int size = this.GetBufferSize();
 
             this.emittersBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
             this.drawingBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
@@ -225,6 +226,18 @@ namespace Engine
                     nonRotatingInputLayout = null;
                 }
             }
+        }
+
+        /// <summary>
+        /// Estimates the size of the buffer based on the maximum number of particles, and the maximum duration of each particle
+        /// </summary>
+        /// <returns>Returns the estimated buffer size</returns>
+        /// <remarks>The maximum size of the buffer is 5000</remarks>
+        protected int GetBufferSize()
+        {
+            int size = (int)(this.MaxConcurrentParticles * (this.Emitter.Duration == 0 ? 60 : this.Emitter.Duration));
+
+            return Math.Min(size, 5000);
         }
 
         /// <summary>

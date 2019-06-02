@@ -77,10 +77,6 @@ namespace Engine
             {
                 return this.localTransform;
             }
-            set
-            {
-                this.SetLocalTransform(value);
-            }
         }
         /// <summary>
         /// Gets final transform of controller
@@ -89,14 +85,7 @@ namespace Engine
         {
             get
             {
-                if (this.Parent == null)
-                {
-                    return this.localTransform;
-                }
-                else
-                {
-                    return this.localTransform * this.Parent.FinalTransform;
-                }
+                return this.localTransform * (this.Parent?.FinalTransform ?? Matrix.Identity);
             }
         }
         /// <summary>

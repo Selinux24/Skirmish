@@ -25,10 +25,11 @@ namespace Engine
                 SceneLightDirectional.BackLight,
             };
 
-            return new SceneLights()
-            {
-                DirectionalLights = lights,
-            };
+            var defLights = new SceneLights();
+
+            defLights.AddRange(lights);
+
+            return defLights;
         }
 
         #endregion
@@ -63,15 +64,6 @@ namespace Engine
             {
                 return this.directionalLights.ToArray();
             }
-            set
-            {
-                this.directionalLights.Clear();
-
-                if (value != null && value.Length > 0)
-                {
-                    this.directionalLights.AddRange(value);
-                }
-            }
         }
         /// <summary>
         /// Gets or sets point lights
@@ -82,15 +74,6 @@ namespace Engine
             {
                 return this.pointLights.ToArray();
             }
-            set
-            {
-                this.pointLights.Clear();
-
-                if (value != null && value.Length > 0)
-                {
-                    this.pointLights.AddRange(value);
-                }
-            }
         }
         /// <summary>
         /// Gets or sets spot lights
@@ -100,15 +83,6 @@ namespace Engine
             get
             {
                 return this.spotLights.ToArray();
-            }
-            set
-            {
-                this.spotLights.Clear();
-
-                if (value != null && value.Length > 0)
-                {
-                    this.spotLights.AddRange(value);
-                }
             }
         }
         /// <summary>
