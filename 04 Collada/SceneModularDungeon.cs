@@ -56,8 +56,6 @@ namespace Collada
         private SceneObject<PrimitiveListDrawer<Triangle>> obstacleDrawer = null;
         private SceneObject<PrimitiveListDrawer<Line3D>> connectionDrawer = null;
         private int currentGraph = 0;
-        private bool graphUpdateRequested = false;
-        private float graphUpdateSeconds = 0;
 
         private readonly string nmFile = "nm.graph";
         private readonly string ntFile = "nm.obj";
@@ -67,6 +65,14 @@ namespace Collada
         private readonly Color obstacleColor = new Color(Color.Pink.ToColor3(), 1f);
 
         private readonly Color connectionColor = new Color(Color.LightBlue.ToColor3(), 1f);
+
+        private AgentType CurrentAgent
+        {
+            get
+            {
+                return this.currentGraph == 0 ? this.ratAgentType : this.agent;
+            }
+        }
 
         public SceneModularDungeon(Game game)
             : base(game, SceneModes.DeferredLightning)
@@ -411,7 +417,6 @@ namespace Collada
         private void UpdateDebugInfo()
         {
             //Graph
-            this.UpdateGraphNodes(this.agent);
             this.currentGraph++;
 
             this.bboxesDrawer.Instance.Clear();
@@ -451,30 +456,6 @@ namespace Collada
 
             this.bboxesDrawer.Instance.SetPrimitives(color, lines);
         }
-        private void UpdateGraphNodes(AgentType agent)
-        {
-            var nodes = this.GetNodes(agent);
-            if (nodes != null && nodes.Length > 0)
-            {
-                this.graphDrawer.Instance.Clear();
-
-                for (int i = 0; i < nodes.Length; i++)
-                {
-                    if (nodes[i] is GraphNode node)
-                    {
-                        var color = node.Color;
-                        var tris = node.Triangles;
-
-                        this.graphDrawer.Instance.AddPrimitives(color, tris);
-                    }
-                }
-            }
-        }
-        private void RequestGraphUpdate(float seconds)
-        {
-            graphUpdateRequested = true;
-            graphUpdateSeconds = seconds;
-        }
 
         public override void Update(GameTime gameTime)
         {
@@ -492,7 +473,6 @@ namespace Collada
                     SceneModes.ForwardLigthning);
             }
 
-            this.UpdateGraphData(gameTime);
             this.UpdateRatController(gameTime);
             this.UpdateEntities();
 
@@ -631,7 +611,7 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.G))
             {
-                this.UpdateGraphNodes(this.currentGraph == 0 ? this.agent : this.ratAgentType);
+                this.UpdateGraphDebug(this.CurrentAgent).ConfigureAwait(true);
                 this.currentGraph++;
                 this.currentGraph %= 2;
             }
@@ -682,20 +662,6 @@ namespace Collada
                 sItemColor.Alpha = 0.3333f;
 
                 this.selectedItemDrawer.Instance.SetPrimitives(sItemColor, tris);
-            }
-        }
-        private void UpdateGraphData(GameTime gameTime)
-        {
-            graphUpdateSeconds -= gameTime.ElapsedSeconds;
-
-            if (graphUpdateRequested && graphUpdateSeconds <= 0f)
-            {
-                graphUpdateRequested = false;
-                graphUpdateSeconds = 0;
-
-                this.UpdateGraphNodes(this.currentGraph == 0 ? this.ratAgentType : this.agent);
-
-                this.UpdateDebugInfo();
             }
         }
         private void UpdateRatController(GameTime gameTime)
@@ -934,7 +900,7 @@ namespace Collada
                     var affectedItems = this.scenery.Instance.ExecuteTrigger(item, triggers[keyIndex - 1]);
                     if (affectedItems.Any())
                     {
-                        Task res = UpdateGraphAsync(affectedItems, 1000);
+                        UpdateGraph(affectedItems, 1000).ConfigureAwait(false);
                     }
                 }
             }
@@ -971,14 +937,6 @@ namespace Collada
             }
         }
 
-        private async Task<bool> UpdateGraphAsync(ModularSceneryItem[] items, int delay)
-        {
-            await Task.Delay(delay);
-
-            this.UpdateGraph(items?.Select(i => i.Item.Manipulator.Position));
-
-            return true;
-        }
 
         /// <summary>
         /// Reads the keyboard looking for the first numeric key pressed
@@ -1011,7 +969,6 @@ namespace Collada
             }
 
             this.UpdateNavigationGraph();
-            this.RequestGraphUpdate(0f);
         }
         private void SaveGraphToFile()
         {
@@ -1050,7 +1007,6 @@ namespace Collada
             pos.Y += agent.Height;
             this.Camera.Position = pos;
             this.Camera.Interest = pos + dir;
-            this.UpdateDebugInfo();
         }
 
         private void AddTestObstacles()
@@ -1132,7 +1088,7 @@ namespace Collada
             }
         }
 
-        public override void UpdateNavigationGraph()
+        public override void UpdateNavigationGraphAsync()
         {
             var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
 
@@ -1152,12 +1108,56 @@ namespace Collada
                 }
             }
 
-            base.UpdateNavigationGraph();
+            base.UpdateNavigationGraphAsync();
+
             this.PathFinderDescription.Save(fileName, this.NavigationGraph);
         }
         public override void NavigationGraphUpdated()
         {
-            this.RequestGraphUpdate(0.2f);
+            this.UpdateGraphDebug(this.CurrentAgent).ConfigureAwait(false);
+        }
+
+        private async Task UpdateGraph(ModularSceneryItem[] items, int delay)
+        {
+            await Task.Delay(delay);
+
+            this.UpdateGraph(items?.Select(i => i.Item.Manipulator.Position));
+        }
+        private async Task UpdateGraphDebug(AgentType agent)
+        {
+            var nodes = await this.BuildGraphNodeDebugAreas(agent);
+
+            this.graphDrawer.Instance.SetPrimitives(nodes);
+
+            this.UpdateDebugInfo();
+        }
+        private async Task<Dictionary<Color4, IEnumerable<Triangle>>> BuildGraphNodeDebugAreas(AgentType agent)
+        {
+            Dictionary<Color4, IEnumerable<Triangle>> res = new Dictionary<Color4, IEnumerable<Triangle>>();
+
+            var nodes = this.GetNodes(agent);
+            if (nodes != null && nodes.Length > 0)
+            {
+                for (int i = 0; i < nodes.Length; i++)
+                {
+                    if (nodes[i] is GraphNode node)
+                    {
+                        var color = node.Color;
+                        var tris = node.Triangles;
+
+                        if (!res.ContainsKey(color))
+                        {
+                            res.Add(color, new List<Triangle>(tris));
+                        }
+                        else
+                        {
+                            ((List<Triangle>)res[color]).AddRange(tris);
+                        }
+                    }
+                }
+            }
+
+            return await Task.FromResult(res);
         }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -1295,6 +1296,22 @@ namespace Engine
                 this.NavigationGraphUpdated();
             }
         }
+
+        public virtual async void UpdateNavigationGraphAsync()
+        {
+            if (this.PathFinderDescription != null)
+            {
+                await Task.Run(() =>
+                {
+                    var graph = this.PathFinderDescription.Build();
+
+                    this.SetNavigationGraph(graph);
+
+                    this.NavigationGraphUpdated();
+                }).ConfigureAwait(false);
+            }
+        }
+
         /// <summary>
         /// Graph updating event
         /// </summary>
@@ -1677,26 +1694,32 @@ namespace Engine
         /// Updates the graph at position
         /// </summary>
         /// <param name="position">Position</param>
-        public virtual void UpdateGraph(Vector3 position)
+        public virtual async void UpdateGraph(Vector3 position)
         {
-            this.PathFinderDescription.Input.Refresh();
+            await Task.Run(() =>
+            {
+                this.PathFinderDescription.Input.Refresh();
 
-            this.NavigationGraph.UpdateAt(position);
+                this.NavigationGraph.UpdateAt(position);
+            }).ConfigureAwait(false);
         }
         /// <summary>
         /// Updates the graph at positions list
         /// </summary>
         /// <param name="positions">Positions list</param>
-        public virtual void UpdateGraph(IEnumerable<Vector3> positions)
+        public virtual async void UpdateGraph(IEnumerable<Vector3> positions)
         {
             if (positions?.Any() == true)
             {
-                this.PathFinderDescription.Input.Refresh();
-
-                foreach (var position in positions)
+                await Task.Run(() =>
                 {
-                    this.NavigationGraph.UpdateAt(position);
-                }
+                    this.PathFinderDescription.Input.Refresh();
+
+                    foreach (var position in positions)
+                    {
+                        this.NavigationGraph.UpdateAt(position);
+                    }
+                }).ConfigureAwait(false);
             }
         }
 

@@ -64,7 +64,7 @@ namespace Engine
                     break;
             }
 
-            int count = 0;
+            int count;
             if (description.Primitives?.Length > 0)
             {
                 count = description.Primitives.Length * stride;
@@ -194,6 +194,17 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Set primitives list
+        /// </summary>
+        /// <param name="primitivesDict">Primitives by color dictionary</param>
+        public void SetPrimitives(Dictionary<Color4, IEnumerable<T>> primitivesDict)
+        {
+            foreach (var primitive in primitivesDict)
+            {
+                SetPrimitives(primitive.Key, primitive.Value);
+            }
+        }
+        /// <summary>
         /// Add primitive to list
         /// </summary>
         /// <param name="color">Color</param>
@@ -217,6 +228,17 @@ namespace Engine
             this.dictionary[color].AddRange(primitives);
 
             this.dictionaryChanged = true;
+        }
+        /// <summary>
+        /// Add primitives to list
+        /// </summary>
+        /// <param name="primitivesDict">Primitives by color dictionary</param>
+        public void AddPrimitives(Dictionary<Color4, IEnumerable<T>> primitivesDict)
+        {
+            foreach (var primitive in primitivesDict)
+            {
+                AddPrimitives(primitive.Key, primitive.Value);
+            }
         }
         /// <summary>
         /// Remove by color
