@@ -693,7 +693,12 @@ namespace SceneTest
                 new Vector3(-d,0,+d),
                 new Vector3(-d,0,-d),
             };
+
+            var bbox = new BoundingBox(Vector3.One * -2.5f, Vector3.One * 2.5f);
+            var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
+
             this.particlePlumes = new IParticleSystem[positions.Length];
+            List<Triangle> markers = new List<Triangle>();
             for (int i = 0; i < positions.Length; i++)
             {
                 this.particlePlumes[i] = this.pManager.AddParticleSystem(
@@ -706,7 +711,19 @@ namespace SceneTest
                         EmissionRate = 0.05f,
                         MaximumDistance = 1000f,
                     });
+
+                markers.AddRange(Triangle.Transform(cubeTris, Matrix.Translation(positions[i])));
             }
+
+            var desc = new PrimitiveListDrawerDescription<Triangle>()
+            {
+                Name = "Marker Cubes",
+                Primitives = markers.ToArray(),
+                Color = new Color4(Color.Yellow.ToColor3(), 0.3333f),
+                DepthEnabled = false,
+                AlphaEnabled = true,
+            };
+            this.AddComponent<PrimitiveListDrawer<Triangle>>(desc);
         }
 
         public override void Initialized()
@@ -754,7 +771,7 @@ namespace SceneTest
         }
         private void UpdateCamera(GameTime gameTime, bool shift)
         {
-            if(!cursor.Visible)
+            if (!cursor.Visible)
             {
                 this.Camera.RotateMouse(
                     gameTime,
