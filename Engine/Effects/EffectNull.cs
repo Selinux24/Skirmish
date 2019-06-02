@@ -17,7 +17,7 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
 
         /// <summary>
         /// World view projection matrix
@@ -26,11 +26,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjection.GetMatrix();
+                return this.worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjection.SetMatrix(value);
+                this.worldViewProjectionVar.SetMatrix(value);
             }
         }
 
@@ -45,7 +45,7 @@ namespace Engine.Effects
         {
             this.Null = this.Effect.GetTechniqueByName("Null");
 
-            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
         }
 
         /// <summary>

@@ -21,64 +21,64 @@ namespace Engine.Effects
         /// <summary>
         /// World effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix worldVar = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector eyePositionWorld = null;
+        private readonly EngineEffectVariableVector eyePositionWorldVar = null;
         /// <summary>
         /// Game time effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar totalTime = null;
+        private readonly EngineEffectVariableScalar totalTimeVar = null;
         /// <summary>
         /// Texture count effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar textureCount = null;
+        private readonly EngineEffectVariableScalar textureCountVar = null;
         /// <summary>
         /// Textures effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture textureArray = null;
+        private readonly EngineEffectVariableTexture textureArrayVar = null;
 
         /// <summary>
         /// Maximum particle duration variable
         /// </summary>
-        private readonly EngineEffectVariableScalar maxDuration = null;
+        private readonly EngineEffectVariableScalar maxDurationVar = null;
         /// <summary>
         /// Maximum particle duration randomness variable
         /// </summary>
-        private readonly EngineEffectVariableScalar maxDurationRandomness = null;
+        private readonly EngineEffectVariableScalar maxDurationRandomnessVar = null;
         /// <summary>
         /// End velocity variable
         /// </summary>
-        private readonly EngineEffectVariableScalar endVelocity = null;
+        private readonly EngineEffectVariableScalar endVelocityVar = null;
         /// <summary>
         /// Gravity variable
         /// </summary>
-        private readonly EngineEffectVariableVector gravity = null;
+        private readonly EngineEffectVariableVector gravityVar = null;
         /// <summary>
         /// Starting size variable
         /// </summary>
-        private readonly EngineEffectVariableVector startSize = null;
+        private readonly EngineEffectVariableVector startSizeVar = null;
         /// <summary>
         /// Ending size variable
         /// </summary>
-        private readonly EngineEffectVariableVector endSize = null;
+        private readonly EngineEffectVariableVector endSizeVar = null;
         /// <summary>
         /// Minimum color variable
         /// </summary>
-        private readonly EngineEffectVariableVector minColor = null;
+        private readonly EngineEffectVariableVector minColorVar = null;
         /// <summary>
         /// Maximum color variable
         /// </summary>
-        private readonly EngineEffectVariableVector maxColor = null;
+        private readonly EngineEffectVariableVector maxColorVar = null;
         /// <summary>
         /// Rotation speed variable
         /// </summary>
-        private readonly EngineEffectVariableVector rotateSpeed = null;
+        private readonly EngineEffectVariableVector rotateSpeedVar = null;
 
         /// <summary>
         /// Current texture array
@@ -92,11 +92,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.world.GetMatrix();
+                return this.worldVar.GetMatrix();
             }
             set
             {
-                this.world.SetMatrix(value);
+                this.worldVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -106,11 +106,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjection.GetMatrix();
+                return this.worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjection.SetMatrix(value);
+                this.worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -120,11 +120,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.eyePositionWorld.GetVector<Vector3>();
+                return this.eyePositionWorldVar.GetVector<Vector3>();
             }
             set
             {
-                this.eyePositionWorld.Set(value);
+                this.eyePositionWorldVar.Set(value);
             }
         }
         /// <summary>
@@ -134,11 +134,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.totalTime.GetFloat();
+                return this.totalTimeVar.GetFloat();
             }
             set
             {
-                this.totalTime.Set(value);
+                this.totalTimeVar.Set(value);
             }
         }
         /// <summary>
@@ -148,11 +148,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureCount.GetUInt();
+                return this.textureCountVar.GetUInt();
             }
             set
             {
-                this.textureCount.Set(value);
+                this.textureCountVar.Set(value);
             }
         }
         /// <summary>
@@ -162,13 +162,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureArray.GetResource();
+                return this.textureArrayVar.GetResource();
             }
             set
             {
                 if (this.currentTextureArray != value)
                 {
-                    this.textureArray.SetResource(value);
+                    this.textureArrayVar.SetResource(value);
 
                     this.currentTextureArray = value;
 
@@ -184,11 +184,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.maxDuration.GetFloat();
+                return this.maxDurationVar.GetFloat();
             }
             set
             {
-                this.maxDuration.Set(value);
+                this.maxDurationVar.Set(value);
             }
         }
         /// <summary>
@@ -198,11 +198,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.maxDurationRandomness.GetFloat();
+                return this.maxDurationRandomnessVar.GetFloat();
             }
             set
             {
-                this.maxDurationRandomness.Set(value);
+                this.maxDurationRandomnessVar.Set(value);
             }
         }
         /// <summary>
@@ -212,11 +212,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.endVelocity.GetFloat();
+                return this.endVelocityVar.GetFloat();
             }
             set
             {
-                this.endVelocity.Set(value);
+                this.endVelocityVar.Set(value);
             }
         }
         /// <summary>
@@ -226,11 +226,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.gravity.GetVector<Vector3>();
+                return this.gravityVar.GetVector<Vector3>();
             }
             set
             {
-                this.gravity.Set(value);
+                this.gravityVar.Set(value);
             }
         }
         /// <summary>
@@ -240,11 +240,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.startSize.GetVector<Vector2>();
+                return this.startSizeVar.GetVector<Vector2>();
             }
             set
             {
-                this.startSize.Set(value);
+                this.startSizeVar.Set(value);
             }
         }
         /// <summary>
@@ -254,11 +254,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.endSize.GetVector<Vector2>();
+                return this.endSizeVar.GetVector<Vector2>();
             }
             set
             {
-                this.endSize.Set(value);
+                this.endSizeVar.Set(value);
             }
         }
         /// <summary>
@@ -268,11 +268,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.minColor.GetVector<Color4>();
+                return this.minColorVar.GetVector<Color4>();
             }
             set
             {
-                this.minColor.Set(value);
+                this.minColorVar.Set(value);
             }
         }
         /// <summary>
@@ -282,11 +282,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.maxColor.GetVector<Color4>();
+                return this.maxColorVar.GetVector<Color4>();
             }
             set
             {
-                this.maxColor.Set(value);
+                this.maxColorVar.Set(value);
             }
         }
         /// <summary>
@@ -296,11 +296,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.rotateSpeed.GetVector<Vector2>();
+                return this.rotateSpeedVar.GetVector<Vector2>();
             }
             set
             {
-                this.rotateSpeed.Set(value);
+                this.rotateSpeedVar.Set(value);
             }
         }
 
@@ -316,22 +316,22 @@ namespace Engine.Effects
             this.NonRotationDraw = this.Effect.GetTechniqueByName("NonRotationParticle");
             this.RotationDraw = this.Effect.GetTechniqueByName("RotationParticle");
 
-            this.world = this.Effect.GetVariableMatrix("gWorld");
-            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.eyePositionWorld = this.Effect.GetVariableVector("gEyePositionWorld");
-            this.totalTime = this.Effect.GetVariableScalar("gTotalTime");
-            this.textureCount = this.Effect.GetVariableScalar("gTextureCount");
-            this.textureArray = this.Effect.GetVariableTexture("gTextureArray");
+            this.worldVar = this.Effect.GetVariableMatrix("gWorld");
+            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.eyePositionWorldVar = this.Effect.GetVariableVector("gEyePositionWorld");
+            this.totalTimeVar = this.Effect.GetVariableScalar("gTotalTime");
+            this.textureCountVar = this.Effect.GetVariableScalar("gTextureCount");
+            this.textureArrayVar = this.Effect.GetVariableTexture("gTextureArray");
 
-            this.maxDuration = this.Effect.GetVariableScalar("gMaxDuration");
-            this.maxDurationRandomness = this.Effect.GetVariableScalar("gMaxDurationRandomness");
-            this.endVelocity = this.Effect.GetVariableScalar("gEndVelocity");
-            this.gravity = this.Effect.GetVariableVector("gGravity");
-            this.startSize = this.Effect.GetVariableVector("gStartSize");
-            this.endSize = this.Effect.GetVariableVector("gEndSize");
-            this.minColor = this.Effect.GetVariableVector("gMinColor");
-            this.maxColor = this.Effect.GetVariableVector("gMaxColor");
-            this.rotateSpeed = this.Effect.GetVariableVector("gRotateSpeed");
+            this.maxDurationVar = this.Effect.GetVariableScalar("gMaxDuration");
+            this.maxDurationRandomnessVar = this.Effect.GetVariableScalar("gMaxDurationRandomness");
+            this.endVelocityVar = this.Effect.GetVariableScalar("gEndVelocity");
+            this.gravityVar = this.Effect.GetVariableVector("gGravity");
+            this.startSizeVar = this.Effect.GetVariableVector("gStartSize");
+            this.endSizeVar = this.Effect.GetVariableVector("gEndSize");
+            this.minColorVar = this.Effect.GetVariableVector("gMinColor");
+            this.maxColorVar = this.Effect.GetVariableVector("gMaxColor");
+            this.rotateSpeedVar = this.Effect.GetVariableVector("gRotateSpeed");
         }
 
         /// <summary>

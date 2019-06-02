@@ -17,31 +17,31 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector eyePositionWorld = null;
+        private readonly EngineEffectVariableVector eyePositionWorldVar = null;
         /// <summary>
         /// Start radius
         /// </summary>
-        private readonly EngineEffectVariableScalar startRadius = null;
+        private readonly EngineEffectVariableScalar startRadiusVar = null;
         /// <summary>
         /// End radius
         /// </summary>
-        private readonly EngineEffectVariableScalar endRadius = null;
+        private readonly EngineEffectVariableScalar endRadiusVar = null;
         /// <summary>
         /// Texture count variable
         /// </summary>
-        private readonly EngineEffectVariableScalar textureCount = null;
+        private readonly EngineEffectVariableScalar textureCountVar = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture textures = null;
+        private readonly EngineEffectVariableTexture texturesVar = null;
         /// <summary>
         /// Random texture effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture textureRandom = null;
+        private readonly EngineEffectVariableTexture textureRandomVar = null;
 
         /// <summary>
         /// Current texture array
@@ -59,11 +59,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjection.GetMatrix();
+                return this.worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjection.SetMatrix(value);
+                this.worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -73,11 +73,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.eyePositionWorld.GetVector<Vector3>();
+                return this.eyePositionWorldVar.GetVector<Vector3>();
             }
             set
             {
-                this.eyePositionWorld.Set(value);
+                this.eyePositionWorldVar.Set(value);
             }
         }
         /// <summary>
@@ -87,11 +87,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.startRadius.GetFloat();
+                return this.startRadiusVar.GetFloat();
             }
             set
             {
-                this.startRadius.Set(value);
+                this.startRadiusVar.Set(value);
             }
         }
         /// <summary>
@@ -101,11 +101,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.endRadius.GetFloat();
+                return this.endRadiusVar.GetFloat();
             }
             set
             {
-                this.endRadius.Set(value);
+                this.endRadiusVar.Set(value);
             }
         }
         /// <summary>
@@ -115,11 +115,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureCount.GetUInt();
+                return this.textureCountVar.GetUInt();
             }
             set
             {
-                this.textureCount.Set(value);
+                this.textureCountVar.Set(value);
             }
         }
         /// <summary>
@@ -129,13 +129,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textures.GetResource();
+                return this.texturesVar.GetResource();
             }
             set
             {
                 if (this.currentTextures != value)
                 {
-                    this.textures.SetResource(value);
+                    this.texturesVar.SetResource(value);
 
                     this.currentTextures = value;
 
@@ -150,13 +150,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureRandom.GetResource();
+                return this.textureRandomVar.GetResource();
             }
             set
             {
                 if (this.currentTextureRandom != value)
                 {
-                    this.textureRandom.SetResource(value);
+                    this.textureRandomVar.SetResource(value);
 
                     this.currentTextureRandom = value;
 
@@ -176,14 +176,14 @@ namespace Engine.Effects
         {
             this.ShadowMapBillboard = this.Effect.GetTechniqueByName("ShadowMapBillboard");
 
-            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.eyePositionWorld = this.Effect.GetVariableVector("gEyePositionWorld");
-            this.startRadius = this.Effect.GetVariableScalar("gStartRadius");
-            this.endRadius = this.Effect.GetVariableScalar("gEndRadius");
-            this.textureCount = this.Effect.GetVariableScalar("gTextureCount");
-            this.textures = this.Effect.GetVariableTexture("gTextureArray");
+            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.eyePositionWorldVar = this.Effect.GetVariableVector("gEyePositionWorld");
+            this.startRadiusVar = this.Effect.GetVariableScalar("gStartRadius");
+            this.endRadiusVar = this.Effect.GetVariableScalar("gEndRadius");
+            this.textureCountVar = this.Effect.GetVariableScalar("gTextureCount");
+            this.texturesVar = this.Effect.GetVariableTexture("gTextureArray");
 
-            this.textureRandom = this.Effect.GetVariableTexture("gTextureRandom");
+            this.textureRandomVar = this.Effect.GetVariableTexture("gTextureRandom");
         }
 
         /// <summary>

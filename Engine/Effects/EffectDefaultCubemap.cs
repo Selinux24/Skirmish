@@ -17,11 +17,11 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture cubeTexture = null;
+        private readonly EngineEffectVariableTexture cubeTextureVar = null;
 
         /// <summary>
         /// Current cube texture
@@ -35,11 +35,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjection.GetMatrix();
+                return this.worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjection.SetMatrix(value);
+                this.worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -49,13 +49,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.cubeTexture.GetResource();
+                return this.cubeTextureVar.GetResource();
             }
             set
             {
                 if (this.currentCubeTexture != value)
                 {
-                    this.cubeTexture.SetResource(value);
+                    this.cubeTextureVar.SetResource(value);
 
                     this.currentCubeTexture = value;
 
@@ -75,8 +75,8 @@ namespace Engine.Effects
         {
             this.ForwardCubemap = this.Effect.GetTechniqueByName("ForwardCubemap");
 
-            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.cubeTexture = this.Effect.GetVariableTexture("gCubemap");
+            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.cubeTextureVar = this.Effect.GetVariableTexture("gCubemap");
         }
 
         /// <summary>

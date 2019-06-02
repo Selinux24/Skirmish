@@ -25,59 +25,59 @@ namespace Engine.Effects
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix worldVar = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
         /// Texture resolution effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar textureResolution = null;
+        private readonly EngineEffectVariableScalar textureResolutionVar = null;
         /// <summary>
         /// Low resolution textures effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture diffuseMapLR = null;
+        private readonly EngineEffectVariableTexture diffuseMapLRVar = null;
         /// <summary>
         /// High resolution textures effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture diffuseMapHR = null;
+        private readonly EngineEffectVariableTexture diffuseMapHRVar = null;
         /// <summary>
         /// Normal map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture normalMap = null;
+        private readonly EngineEffectVariableTexture normalMapVar = null;
         /// <summary>
         /// Specular map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture specularMap = null;
+        private readonly EngineEffectVariableTexture specularMapVar = null;
         /// <summary>
         /// Color texture array effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture colorTextures = null;
+        private readonly EngineEffectVariableTexture colorTexturesVar = null;
         /// <summary>
         /// Alpha map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture alphaMap = null;
+        private readonly EngineEffectVariableTexture alphaMapVar = null;
         /// <summary>
         /// Slope ranges effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector parameters = null;
+        private readonly EngineEffectVariableVector parametersVar = null;
         /// <summary>
         /// Material index effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar materialIndex = null;
+        private readonly EngineEffectVariableScalar materialIndexVar = null;
         /// <summary>
         /// Sampler for diffuse maps
         /// </summary>
-        private readonly EngineEffectVariableSampler samplerDiffuse = null;
+        private readonly EngineEffectVariableSampler samplerDiffuseVar = null;
         /// <summary>
         /// Sampler for normal maps
         /// </summary>
-        private readonly EngineEffectVariableSampler samplerNormal = null;
+        private readonly EngineEffectVariableSampler samplerNormalVar = null;
         /// <summary>
         /// Sampler for specular maps
         /// </summary>
-        private readonly EngineEffectVariableSampler samplerSpecular = null;
+        private readonly EngineEffectVariableSampler samplerSpecularVar = null;
 
         /// <summary>
         /// Current low resolution diffuse map
@@ -128,11 +128,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.world.GetMatrix();
+                return this.worldVar.GetMatrix();
             }
             set
             {
-                this.world.SetMatrix(value);
+                this.worldVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -142,11 +142,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjection.GetMatrix();
+                return this.worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjection.SetMatrix(value);
+                this.worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -156,11 +156,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureResolution.GetFloat();
+                return this.textureResolutionVar.GetFloat();
             }
             set
             {
-                this.textureResolution.Set(value);
+                this.textureResolutionVar.Set(value);
             }
         }
         /// <summary>
@@ -170,13 +170,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.diffuseMapLR.GetResource();
+                return this.diffuseMapLRVar.GetResource();
             }
             set
             {
                 if (this.currentDiffuseMapLR != value)
                 {
-                    this.diffuseMapLR.SetResource(value);
+                    this.diffuseMapLRVar.SetResource(value);
 
                     this.currentDiffuseMapLR = value;
 
@@ -191,13 +191,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.diffuseMapHR.GetResource();
+                return this.diffuseMapHRVar.GetResource();
             }
             set
             {
                 if (this.currentDiffuseMapHR != value)
                 {
-                    this.diffuseMapHR.SetResource(value);
+                    this.diffuseMapHRVar.SetResource(value);
 
                     this.currentDiffuseMapHR = value;
 
@@ -212,13 +212,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.normalMap.GetResource();
+                return this.normalMapVar.GetResource();
             }
             set
             {
                 if (this.currentNormalMap != value)
                 {
-                    this.normalMap.SetResource(value);
+                    this.normalMapVar.SetResource(value);
 
                     this.currentNormalMap = value;
 
@@ -233,13 +233,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.specularMap.GetResource();
+                return this.specularMapVar.GetResource();
             }
             set
             {
                 if (this.currentSpecularMap != value)
                 {
-                    this.specularMap.SetResource(value);
+                    this.specularMapVar.SetResource(value);
 
                     this.currentSpecularMap = value;
 
@@ -254,13 +254,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.colorTextures.GetResource();
+                return this.colorTexturesVar.GetResource();
             }
             set
             {
                 if (this.currentColorTextures != value)
                 {
-                    this.colorTextures.SetResource(value);
+                    this.colorTexturesVar.SetResource(value);
 
                     this.currentColorTextures = value;
 
@@ -275,13 +275,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.alphaMap.GetResource();
+                return this.alphaMapVar.GetResource();
             }
             set
             {
                 if (this.currentAlphaMap != value)
                 {
-                    this.alphaMap.SetResource(value);
+                    this.alphaMapVar.SetResource(value);
 
                     this.currentAlphaMap = value;
 
@@ -296,11 +296,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.parameters.GetVector<Vector4>();
+                return this.parametersVar.GetVector<Vector4>();
             }
             set
             {
-                this.parameters.Set(value);
+                this.parametersVar.Set(value);
             }
         }
         /// <summary>
@@ -310,11 +310,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.materialIndex.GetUInt();
+                return this.materialIndexVar.GetUInt();
             }
             set
             {
-                this.materialIndex.Set(value);
+                this.materialIndexVar.Set(value);
             }
         }
         /// <summary>
@@ -336,9 +336,9 @@ namespace Engine.Effects
                         this.samplerAnisotropic.GetSamplerState() :
                         this.samplerLinear.GetSamplerState();
 
-                    this.samplerDiffuse.SetValue(0, sampler);
-                    this.samplerNormal.SetValue(0, sampler);
-                    this.samplerSpecular.SetValue(0, sampler);
+                    this.samplerDiffuseVar.SetValue(0, sampler);
+                    this.samplerNormalVar.SetValue(0, sampler);
+                    this.samplerSpecularVar.SetValue(0, sampler);
                 }
             }
         }
@@ -356,23 +356,23 @@ namespace Engine.Effects
             this.TerrainSlopesDeferred = this.Effect.GetTechniqueByName("TerrainSlopesDeferred");
             this.TerrainFullDeferred = this.Effect.GetTechniqueByName("TerrainFullDeferred");
 
-            this.world = this.Effect.GetVariableMatrix("gVSWorld");
-            this.worldViewProjection = this.Effect.GetVariableMatrix("gVSWorldViewProjection");
-            this.textureResolution = this.Effect.GetVariableScalar("gVSTextureResolution");
+            this.worldVar = this.Effect.GetVariableMatrix("gVSWorld");
+            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gVSWorldViewProjection");
+            this.textureResolutionVar = this.Effect.GetVariableScalar("gVSTextureResolution");
 
-            this.diffuseMapLR = this.Effect.GetVariableTexture("gPSDiffuseMapLRArray");
-            this.diffuseMapHR = this.Effect.GetVariableTexture("gPSDiffuseMapHRArray");
-            this.normalMap = this.Effect.GetVariableTexture("gPSNormalMapArray");
-            this.specularMap = this.Effect.GetVariableTexture("gPSSpecularMapArray");
-            this.colorTextures = this.Effect.GetVariableTexture("gPSColorTextureArray");
-            this.alphaMap = this.Effect.GetVariableTexture("gPSAlphaTexture");
-            this.parameters = this.Effect.GetVariableVector("gPSParams");
-            this.materialIndex = this.Effect.GetVariableScalar("gPSMaterialIndex");
+            this.diffuseMapLRVar = this.Effect.GetVariableTexture("gPSDiffuseMapLRArray");
+            this.diffuseMapHRVar = this.Effect.GetVariableTexture("gPSDiffuseMapHRArray");
+            this.normalMapVar = this.Effect.GetVariableTexture("gPSNormalMapArray");
+            this.specularMapVar = this.Effect.GetVariableTexture("gPSSpecularMapArray");
+            this.colorTexturesVar = this.Effect.GetVariableTexture("gPSColorTextureArray");
+            this.alphaMapVar = this.Effect.GetVariableTexture("gPSAlphaTexture");
+            this.parametersVar = this.Effect.GetVariableVector("gPSParams");
+            this.materialIndexVar = this.Effect.GetVariableScalar("gPSMaterialIndex");
 
             //Samplers
-            this.samplerDiffuse = this.Effect.GetVariableSampler("SamplerDiffuse");
-            this.samplerSpecular = this.Effect.GetVariableSampler("SamplerSpecular");
-            this.samplerNormal = this.Effect.GetVariableSampler("SamplerNormal");
+            this.samplerDiffuseVar = this.Effect.GetVariableSampler("SamplerDiffuse");
+            this.samplerSpecularVar = this.Effect.GetVariableSampler("SamplerSpecular");
+            this.samplerNormalVar = this.Effect.GetVariableSampler("SamplerNormal");
 
             //Initialize states
             this.samplerPoint = EngineSamplerState.Point(graphics);

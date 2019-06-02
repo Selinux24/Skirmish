@@ -41,23 +41,23 @@ namespace Engine.Effects
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix worldVar = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
         /// Texture index effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar textureIndex = null;
+        private readonly EngineEffectVariableScalar textureIndexVar = null;
         /// <summary>
         /// Color effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector color = null;
+        private readonly EngineEffectVariableVector colorVar = null;
         /// <summary>
         /// Texture effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture textures = null;
+        private readonly EngineEffectVariableTexture texturesVar = null;
 
         /// <summary>
         /// Current texture array
@@ -71,11 +71,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.world.GetMatrix();
+                return this.worldVar.GetMatrix();
             }
             set
             {
-                this.world.SetMatrix(value);
+                this.worldVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -85,11 +85,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjection.GetMatrix();
+                return this.worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjection.SetMatrix(value);
+                this.worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -99,11 +99,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureIndex.GetInt();
+                return this.textureIndexVar.GetInt();
             }
             set
             {
-                this.textureIndex.Set(value);
+                this.textureIndexVar.Set(value);
             }
         }
         /// <summary>
@@ -113,11 +113,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.color.GetVector<Color4>();
+                return this.colorVar.GetVector<Color4>();
             }
             set
             {
-                this.color.Set(value);
+                this.colorVar.Set(value);
             }
         }
         /// <summary>
@@ -127,13 +127,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textures.GetResource();
+                return this.texturesVar.GetResource();
             }
             set
             {
                 if (this.currentTextures != value)
                 {
-                    this.textures.SetResource(value);
+                    this.texturesVar.SetResource(value);
 
                     this.currentTextures = value;
 
@@ -159,11 +159,11 @@ namespace Engine.Effects
             this.PositionTextureBLUE = this.Effect.GetTechniqueByName("PositionTextureBLUE");
             this.PositionTextureALPHA = this.Effect.GetTechniqueByName("PositionTextureALPHA");
 
-            this.world = this.Effect.GetVariableMatrix("gWorld");
-            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.textureIndex = this.Effect.GetVariableScalar("gTextureIndex");
-            this.color = this.Effect.GetVariableVector("gColor");
-            this.textures = this.Effect.GetVariableTexture("gTextureArray");
+            this.worldVar = this.Effect.GetVariableMatrix("gWorld");
+            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.textureIndexVar = this.Effect.GetVariableScalar("gTextureIndex");
+            this.colorVar = this.Effect.GetVariableVector("gColor");
+            this.texturesVar = this.Effect.GetVariableTexture("gTextureArray");
         }
 
         /// <summary>

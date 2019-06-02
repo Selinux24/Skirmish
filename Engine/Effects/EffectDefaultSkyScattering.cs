@@ -25,35 +25,35 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
         /// Sphere radii effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector sphereRadii = null;
+        private readonly EngineEffectVariableVector sphereRadiiVar = null;
         /// <summary>
         /// 
         /// </summary>
-        private readonly EngineEffectVariableVector scatteringCoefficients = null;
+        private readonly EngineEffectVariableVector scatteringCoefficientsVar = null;
         /// <summary>
         /// 
         /// </summary>
-        private readonly EngineEffectVariableVector inverseWaveLength = null;
+        private readonly EngineEffectVariableVector inverseWaveLengthVar = null;
         /// <summary>
         /// 
         /// </summary>
-        private readonly EngineEffectVariableVector misc = null;
+        private readonly EngineEffectVariableVector miscVar = null;
         /// <summary>
         /// Back color variable
         /// </summary>
-        private readonly EngineEffectVariableVector backColor = null;
+        private readonly EngineEffectVariableVector backColorVar = null;
         /// <summary>
         /// Light direction effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector lightDirectionWorld = null;
+        private readonly EngineEffectVariableVector lightDirectionWorldVar = null;
         /// <summary>
         /// HDR exposure effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar hdrExposure = null;
+        private readonly EngineEffectVariableScalar hdrExposureVar = null;
 
         /// <summary>
         /// World view projection matrix
@@ -62,11 +62,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjection.GetMatrix();
+                return this.worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjection.SetMatrix(value);
+                this.worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -76,11 +76,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.sphereRadii.GetVector<Vector4>();
+                return this.sphereRadiiVar.GetVector<Vector4>();
             }
             set
             {
-                this.sphereRadii.Set(value);
+                this.sphereRadiiVar.Set(value);
             }
         }
         /// <summary>
@@ -90,11 +90,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.scatteringCoefficients.GetVector<Vector4>();
+                return this.scatteringCoefficientsVar.GetVector<Vector4>();
             }
             set
             {
-                this.scatteringCoefficients.Set(value);
+                this.scatteringCoefficientsVar.Set(value);
             }
         }
         /// <summary>
@@ -104,11 +104,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.inverseWaveLength.GetVector<Vector4>();
+                return this.inverseWaveLengthVar.GetVector<Vector4>();
             }
             set
             {
-                this.inverseWaveLength.Set(value);
+                this.inverseWaveLengthVar.Set(value);
             }
         }
         /// <summary>
@@ -118,11 +118,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.misc.GetVector<Vector4>();
+                return this.miscVar.GetVector<Vector4>();
             }
             set
             {
-                this.misc.Set(value);
+                this.miscVar.Set(value);
             }
         }
         /// <summary>
@@ -132,11 +132,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.backColor.GetVector<Color4>();
+                return this.backColorVar.GetVector<Color4>();
             }
             set
             {
-                this.backColor.Set(value);
+                this.backColorVar.Set(value);
             }
         }
         /// <summary>
@@ -146,11 +146,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.lightDirectionWorld.GetVector<Vector3>();
+                return this.lightDirectionWorldVar.GetVector<Vector3>();
             }
             set
             {
-                this.lightDirectionWorld.Set(value);
+                this.lightDirectionWorldVar.Set(value);
             }
         }
         /// <summary>
@@ -160,11 +160,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.hdrExposure.GetFloat();
+                return this.hdrExposureVar.GetFloat();
             }
             set
             {
-                this.hdrExposure.Set(value);
+                this.hdrExposureVar.Set(value);
             }
         }
 
@@ -181,14 +181,14 @@ namespace Engine.Effects
             this.SkyScatteringMedium = this.Effect.GetTechniqueByName("SkyScatteringMedium");
             this.SkyScatteringHigh = this.Effect.GetTechniqueByName("SkyScatteringHigh");
 
-            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.sphereRadii = this.Effect.GetVariableVector("gSphereRadii");
-            this.scatteringCoefficients = this.Effect.GetVariableVector("gScatteringCoeffs");
-            this.inverseWaveLength = this.Effect.GetVariableVector("gInvWaveLength");
-            this.misc = this.Effect.GetVariableVector("gMisc");
-            this.backColor = this.Effect.GetVariableVector("gBackColor");
-            this.lightDirectionWorld = this.Effect.GetVariableVector("gLightDirection");
-            this.hdrExposure = this.Effect.GetVariableScalar("gHDRExposure");
+            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.sphereRadiiVar = this.Effect.GetVariableVector("gSphereRadii");
+            this.scatteringCoefficientsVar = this.Effect.GetVariableVector("gScatteringCoeffs");
+            this.inverseWaveLengthVar = this.Effect.GetVariableVector("gInvWaveLength");
+            this.miscVar = this.Effect.GetVariableVector("gMisc");
+            this.backColorVar = this.Effect.GetVariableVector("gBackColor");
+            this.lightDirectionWorldVar = this.Effect.GetVariableVector("gLightDirection");
+            this.hdrExposureVar = this.Effect.GetVariableScalar("gHDRExposure");
         }
 
         /// <summary>

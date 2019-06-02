@@ -17,19 +17,19 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
         /// Blur direction effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector blurDirection = null;
+        private readonly EngineEffectVariableVector blurDirectionVar = null;
         /// <summary>
         /// Texture size effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector textureSize = null;
+        private readonly EngineEffectVariableVector textureSizeVar = null;
         /// <summary>
         /// Diffuse map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture diffuseMap = null;
+        private readonly EngineEffectVariableTexture diffuseMapVar = null;
 
         /// <summary>
         /// Current diffuse map
@@ -43,11 +43,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjection.GetMatrix();
+                return this.worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjection.SetMatrix(value);
+                this.worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -57,11 +57,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.blurDirection.GetVector<Vector2>();
+                return this.blurDirectionVar.GetVector<Vector2>();
             }
             set
             {
-                this.blurDirection.Set(value);
+                this.blurDirectionVar.Set(value);
             }
         }
         /// <summary>
@@ -71,11 +71,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.textureSize.GetVector<Vector2>();
+                return this.textureSizeVar.GetVector<Vector2>();
             }
             set
             {
-                this.textureSize.Set(value);
+                this.textureSizeVar.Set(value);
             }
         }
         /// <summary>
@@ -85,13 +85,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.diffuseMap.GetResource();
+                return this.diffuseMapVar.GetResource();
             }
             set
             {
                 if (this.currentDiffuseMap != value)
                 {
-                    this.diffuseMap.SetResource(value);
+                    this.diffuseMapVar.SetResource(value);
 
                     this.currentDiffuseMap = value;
 
@@ -111,10 +111,10 @@ namespace Engine.Effects
         {
             this.Blur = this.Effect.GetTechniqueByName("Blur");
 
-            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.blurDirection = this.Effect.GetVariableVector("gBlurDirection");
-            this.textureSize = this.Effect.GetVariableVector("gTextureSize");
-            this.diffuseMap = this.Effect.GetVariableTexture("gDiffuseMap");
+            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.blurDirectionVar = this.Effect.GetVariableVector("gBlurDirection");
+            this.textureSizeVar = this.Effect.GetVariableVector("gTextureSize");
+            this.diffuseMapVar = this.Effect.GetVariableTexture("gDiffuseMap");
         }
 
         /// <summary>

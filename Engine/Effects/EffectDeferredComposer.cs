@@ -37,83 +37,83 @@ namespace Engine.Effects
         /// <summary>
         /// World matrix effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix world = null;
+        private readonly EngineEffectVariableMatrix worldVar = null;
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
         /// Eye position effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector eyePositionWorld = null;
+        private readonly EngineEffectVariableVector eyePositionWorldVar = null;
         /// <summary>
         /// Hemispheric light effect variable
         /// </summary>
-        private readonly EngineEffectVariable hemisphericLight = null;
+        private readonly EngineEffectVariable hemisphericLightVar = null;
         /// <summary>
         /// Directional light effect variable
         /// </summary>
-        private readonly EngineEffectVariable directionalLight = null;
+        private readonly EngineEffectVariable directionalLightVar = null;
         /// <summary>
         /// Point light effect variable
         /// </summary>
-        private readonly EngineEffectVariable pointLight = null;
+        private readonly EngineEffectVariable pointLightVar = null;
         /// <summary>
         /// Spot light effect variable
         /// </summary>
-        private readonly EngineEffectVariable spotLight = null;
+        private readonly EngineEffectVariable spotLightVar = null;
         /// <summary>
         /// Fog start effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar fogStart = null;
+        private readonly EngineEffectVariableScalar fogStartVar = null;
         /// <summary>
         /// Fog range effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar fogRange = null;
+        private readonly EngineEffectVariableScalar fogRangeVar = null;
         /// <summary>
         /// Fog color effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector fogColor = null;
+        private readonly EngineEffectVariableVector fogColorVar = null;
         /// <summary>
         /// Color Map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture tg1Map = null;
+        private readonly EngineEffectVariableTexture tg1MapVar = null;
         /// <summary>
         /// Normal Map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture tg2Map = null;
+        private readonly EngineEffectVariableTexture tg2MapVar = null;
         /// <summary>
         /// Depth Map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture tg3Map = null;
+        private readonly EngineEffectVariableTexture tg3MapVar = null;
         /// <summary>
         /// Light Map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture lightMap = null;
+        private readonly EngineEffectVariableTexture lightMapVar = null;
         /// <summary>
         /// Material palette width effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar materialPaletteWidth = null;
+        private readonly EngineEffectVariableScalar materialPaletteWidthVar = null;
         /// <summary>
         /// Materials palette
         /// </summary>
-        private readonly EngineEffectVariableTexture materialPalette = null;
+        private readonly EngineEffectVariableTexture materialPaletteVar = null;
         /// <summary>
         /// Level of detail ranges effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector lod = null;
+        private readonly EngineEffectVariableVector lodVar = null;
         /// <summary>
         /// Directional shadow map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture shadowMapDirectional = null;
+        private readonly EngineEffectVariableTexture shadowMapDirectionalVar = null;
         /// <summary>
         /// Point light shadows map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture shadowMapPoint = null;
+        private readonly EngineEffectVariableTexture shadowMapPointVar = null;
         /// <summary>
         /// Spot light shadows map effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture shadowMapSpot = null;
+        private readonly EngineEffectVariableTexture shadowMapSpotVar = null;
 
         /// <summary>
         /// Current target 1
@@ -155,11 +155,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.world.GetMatrix();
+                return this.worldVar.GetMatrix();
             }
             set
             {
-                this.world.SetMatrix(value);
+                this.worldVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -169,11 +169,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjection.GetMatrix();
+                return this.worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjection.SetMatrix(value);
+                this.worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -183,11 +183,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.eyePositionWorld.GetVector<Vector3>();
+                return this.eyePositionWorldVar.GetVector<Vector3>();
             }
             set
             {
-                this.eyePositionWorld.Set(value);
+                this.eyePositionWorldVar.Set(value);
             }
         }
         /// <summary>
@@ -197,11 +197,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.hemisphericLight.GetValue<BufferLightHemispheric>();
+                return this.hemisphericLightVar.GetValue<BufferLightHemispheric>();
             }
             set
             {
-                this.hemisphericLight.SetValue(value);
+                this.hemisphericLightVar.SetValue(value);
             }
         }
         /// <summary>
@@ -211,11 +211,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.directionalLight.GetValue<BufferLightDirectional>();
+                return this.directionalLightVar.GetValue<BufferLightDirectional>();
             }
             set
             {
-                this.directionalLight.SetValue(value);
+                this.directionalLightVar.SetValue(value);
             }
         }
         /// <summary>
@@ -225,11 +225,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.pointLight.GetValue<BufferLightPoint>();
+                return this.pointLightVar.GetValue<BufferLightPoint>();
             }
             set
             {
-                this.pointLight.SetValue(value);
+                this.pointLightVar.SetValue(value);
             }
         }
         /// <summary>
@@ -239,11 +239,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.spotLight.GetValue<BufferLightSpot>();
+                return this.spotLightVar.GetValue<BufferLightSpot>();
             }
             set
             {
-                this.spotLight.SetValue(value);
+                this.spotLightVar.SetValue(value);
             }
         }
         /// <summary>
@@ -253,11 +253,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.fogStart.GetFloat();
+                return this.fogStartVar.GetFloat();
             }
             set
             {
-                this.fogStart.Set(value);
+                this.fogStartVar.Set(value);
             }
         }
         /// <summary>
@@ -267,11 +267,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.fogRange.GetFloat();
+                return this.fogRangeVar.GetFloat();
             }
             set
             {
-                this.fogRange.Set(value);
+                this.fogRangeVar.Set(value);
             }
         }
         /// <summary>
@@ -281,11 +281,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.fogColor.GetVector<Color4>();
+                return this.fogColorVar.GetVector<Color4>();
             }
             set
             {
-                this.fogColor.Set(value);
+                this.fogColorVar.Set(value);
             }
         }
         /// <summary>
@@ -295,13 +295,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.tg1Map.GetResource();
+                return this.tg1MapVar.GetResource();
             }
             set
             {
                 if (this.currentTG1Map != value)
                 {
-                    this.tg1Map.SetResource(value);
+                    this.tg1MapVar.SetResource(value);
 
                     this.currentTG1Map = value;
 
@@ -316,13 +316,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.tg2Map.GetResource();
+                return this.tg2MapVar.GetResource();
             }
             set
             {
                 if (this.currentTG2Map != value)
                 {
-                    this.tg2Map.SetResource(value);
+                    this.tg2MapVar.SetResource(value);
 
                     this.currentTG2Map = value;
 
@@ -337,13 +337,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.tg3Map.GetResource();
+                return this.tg3MapVar.GetResource();
             }
             set
             {
                 if (this.currentTG3Map != value)
                 {
-                    this.tg3Map.SetResource(value);
+                    this.tg3MapVar.SetResource(value);
 
                     this.currentTG3Map = value;
 
@@ -358,13 +358,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.lightMap.GetResource();
+                return this.lightMapVar.GetResource();
             }
             set
             {
                 if (this.currentLightMap != value)
                 {
-                    this.lightMap.SetResource(value);
+                    this.lightMapVar.SetResource(value);
 
                     this.currentLightMap = value;
 
@@ -379,11 +379,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.materialPaletteWidth.GetUInt();
+                return this.materialPaletteWidthVar.GetUInt();
             }
             set
             {
-                this.materialPaletteWidth.Set(value);
+                this.materialPaletteWidthVar.Set(value);
             }
         }
         /// <summary>
@@ -393,13 +393,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.materialPalette.GetResource();
+                return this.materialPaletteVar.GetResource();
             }
             set
             {
                 if (this.currentMaterialPalette != value)
                 {
-                    this.materialPalette.SetResource(value);
+                    this.materialPaletteVar.SetResource(value);
 
                     this.currentMaterialPalette = value;
 
@@ -414,11 +414,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.lod.GetVector<Vector3>();
+                return this.lodVar.GetVector<Vector3>();
             }
             set
             {
-                this.lod.Set(value);
+                this.lodVar.Set(value);
             }
         }
         /// <summary>
@@ -428,13 +428,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.shadowMapDirectional.GetResource();
+                return this.shadowMapDirectionalVar.GetResource();
             }
             set
             {
                 if (this.currentShadowMapDirectional != value)
                 {
-                    this.shadowMapDirectional.SetResource(value);
+                    this.shadowMapDirectionalVar.SetResource(value);
 
                     this.currentShadowMapDirectional = value;
 
@@ -449,13 +449,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.shadowMapPoint.GetResource();
+                return this.shadowMapPointVar.GetResource();
             }
             set
             {
                 if (this.currentShadowMapPoint != value)
                 {
-                    this.shadowMapPoint.SetResource(value);
+                    this.shadowMapPointVar.SetResource(value);
 
                     this.currentShadowMapPoint = value;
 
@@ -470,13 +470,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.shadowMapSpot.GetResource();
+                return this.shadowMapSpotVar.GetResource();
             }
             set
             {
                 if (this.currentShadowMapSpot != value)
                 {
-                    this.shadowMapSpot.SetResource(value);
+                    this.shadowMapSpotVar.SetResource(value);
 
                     this.currentShadowMapSpot = value;
 
@@ -501,26 +501,26 @@ namespace Engine.Effects
             this.DeferredSpotLight = this.Effect.GetTechniqueByName("DeferredSpotLight");
             this.DeferredCombineLights = this.Effect.GetTechniqueByName("DeferredCombineLights");
 
-            this.world = this.Effect.GetVariableMatrix("gWorld");
-            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.eyePositionWorld = this.Effect.GetVariableVector("gEyePositionWorld");
-            this.directionalLight = this.Effect.GetVariable("gDirLight");
-            this.pointLight = this.Effect.GetVariable("gPointLight");
-            this.spotLight = this.Effect.GetVariable("gSpotLight");
-            this.hemisphericLight = this.Effect.GetVariable("gHemiLight");
-            this.fogStart = this.Effect.GetVariableScalar("gFogStart");
-            this.fogRange = this.Effect.GetVariableScalar("gFogRange");
-            this.fogColor = this.Effect.GetVariableVector("gFogColor");
-            this.tg1Map = this.Effect.GetVariableTexture("gTG1Map");
-            this.tg2Map = this.Effect.GetVariableTexture("gTG2Map");
-            this.tg3Map = this.Effect.GetVariableTexture("gTG3Map");
-            this.lightMap = this.Effect.GetVariableTexture("gLightMap");
-            this.materialPaletteWidth = this.Effect.GetVariableScalar("gMaterialPaletteWidth");
-            this.materialPalette = this.Effect.GetVariableTexture("gMaterialPalette");
-            this.lod = this.Effect.GetVariableVector("gLOD");
-            this.shadowMapDirectional = this.Effect.GetVariableTexture("gShadowMapDir");
-            this.shadowMapPoint = this.Effect.GetVariableTexture("gShadowMapPoint");
-            this.shadowMapSpot = this.Effect.GetVariableTexture("gShadowMapSpot");
+            this.worldVar = this.Effect.GetVariableMatrix("gWorld");
+            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.eyePositionWorldVar = this.Effect.GetVariableVector("gEyePositionWorld");
+            this.directionalLightVar = this.Effect.GetVariable("gDirLight");
+            this.pointLightVar = this.Effect.GetVariable("gPointLight");
+            this.spotLightVar = this.Effect.GetVariable("gSpotLight");
+            this.hemisphericLightVar = this.Effect.GetVariable("gHemiLight");
+            this.fogStartVar = this.Effect.GetVariableScalar("gFogStart");
+            this.fogRangeVar = this.Effect.GetVariableScalar("gFogRange");
+            this.fogColorVar = this.Effect.GetVariableVector("gFogColor");
+            this.tg1MapVar = this.Effect.GetVariableTexture("gTG1Map");
+            this.tg2MapVar = this.Effect.GetVariableTexture("gTG2Map");
+            this.tg3MapVar = this.Effect.GetVariableTexture("gTG3Map");
+            this.lightMapVar = this.Effect.GetVariableTexture("gLightMap");
+            this.materialPaletteWidthVar = this.Effect.GetVariableScalar("gMaterialPaletteWidth");
+            this.materialPaletteVar = this.Effect.GetVariableTexture("gMaterialPalette");
+            this.lodVar = this.Effect.GetVariableVector("gLOD");
+            this.shadowMapDirectionalVar = this.Effect.GetVariableTexture("gShadowMapDir");
+            this.shadowMapPointVar = this.Effect.GetVariableTexture("gShadowMapPoint");
+            this.shadowMapSpotVar = this.Effect.GetVariableTexture("gShadowMapSpot");
         }
 
         /// <summary>

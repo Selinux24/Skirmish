@@ -21,44 +21,44 @@ namespace Engine.Effects
         /// <summary>
         /// World view projection effect variable
         /// </summary>
-        private readonly EngineEffectVariableMatrix worldViewProjection = null;
+        private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
         /// First layer texture effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture firstTexture = null;
+        private readonly EngineEffectVariableTexture firstTextureVar = null;
         /// <summary>
         /// Second layer texture effect variable
         /// </summary>
-        private readonly EngineEffectVariableTexture secondTexture = null;
+        private readonly EngineEffectVariableTexture secondTextureVar = null;
         /// <summary>
         /// Brightness
         /// </summary>
-        private readonly EngineEffectVariableScalar brightness = null;
+        private readonly EngineEffectVariableScalar brightnessVar = null;
         /// <summary>
         /// Clouds fadding distance effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar fadingDistance = null;
+        private readonly EngineEffectVariableScalar fadingDistanceVar = null;
         /// <summary>
         /// Cloud color effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector color = null;
+        private readonly EngineEffectVariableVector colorVar = null;
 
         /// <summary>
         /// First layer translation effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector firstTranslation = null;
+        private readonly EngineEffectVariableVector firstTranslationVar = null;
         /// <summary>
         /// Second layer translation effect variable
         /// </summary>
-        private readonly EngineEffectVariableVector secondTranslation = null;
+        private readonly EngineEffectVariableVector secondTranslationVar = null;
         /// <summary>
         /// Clouds translation effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar translation = null;
+        private readonly EngineEffectVariableScalar translationVar = null;
         /// <summary>
         /// Clouds scale effect variable
         /// </summary>
-        private readonly EngineEffectVariableScalar scale = null;
+        private readonly EngineEffectVariableScalar scaleVar = null;
 
         /// <summary>
         /// Current first texture
@@ -76,11 +76,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.worldViewProjection.GetMatrix();
+                return this.worldViewProjectionVar.GetMatrix();
             }
             set
             {
-                this.worldViewProjection.SetMatrix(value);
+                this.worldViewProjectionVar.SetMatrix(value);
             }
         }
         /// <summary>
@@ -90,13 +90,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.firstTexture.GetResource();
+                return this.firstTextureVar.GetResource();
             }
             set
             {
                 if (this.currentFirstTexture != value)
                 {
-                    this.firstTexture.SetResource(value);
+                    this.firstTextureVar.SetResource(value);
 
                     this.currentFirstTexture = value;
 
@@ -111,13 +111,13 @@ namespace Engine.Effects
         {
             get
             {
-                return this.secondTexture.GetResource();
+                return this.secondTextureVar.GetResource();
             }
             set
             {
                 if (this.currentSecondTexture != value)
                 {
-                    this.secondTexture.SetResource(value);
+                    this.secondTextureVar.SetResource(value);
 
                     this.currentSecondTexture = value;
 
@@ -132,11 +132,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.brightness.GetFloat();
+                return this.brightnessVar.GetFloat();
             }
             set
             {
-                this.brightness.Set(value);
+                this.brightnessVar.Set(value);
             }
         }
         /// <summary>
@@ -146,11 +146,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.color.GetVector<Color3>();
+                return this.colorVar.GetVector<Color3>();
             }
             set
             {
-                this.color.Set(value);
+                this.colorVar.Set(value);
             }
         }
         /// <summary>
@@ -160,11 +160,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.fadingDistance.GetFloat();
+                return this.fadingDistanceVar.GetFloat();
             }
             set
             {
-                this.fadingDistance.Set(value);
+                this.fadingDistanceVar.Set(value);
             }
         }
         /// <summary>
@@ -174,11 +174,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.firstTranslation.GetVector<Vector2>();
+                return this.firstTranslationVar.GetVector<Vector2>();
             }
             set
             {
-                this.firstTranslation.Set(value);
+                this.firstTranslationVar.Set(value);
             }
         }
         /// <summary>
@@ -188,11 +188,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.secondTranslation.GetVector<Vector2>();
+                return this.secondTranslationVar.GetVector<Vector2>();
             }
             set
             {
-                this.secondTranslation.Set(value);
+                this.secondTranslationVar.Set(value);
             }
         }
         /// <summary>
@@ -202,11 +202,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.translation.GetFloat();
+                return this.translationVar.GetFloat();
             }
             set
             {
-                this.translation.Set(value);
+                this.translationVar.Set(value);
             }
         }
         /// <summary>
@@ -216,11 +216,11 @@ namespace Engine.Effects
         {
             get
             {
-                return this.scale.GetFloat();
+                return this.scaleVar.GetFloat();
             }
             set
             {
-                this.scale.Set(value);
+                this.scaleVar.Set(value);
             }
         }
 
@@ -236,19 +236,19 @@ namespace Engine.Effects
             this.CloudsStatic = this.Effect.GetTechniqueByName("CloudsStatic");
             this.CloudsPerturbed = this.Effect.GetTechniqueByName("CloudsPerturbed");
 
-            this.firstTexture = this.Effect.GetVariableTexture("gCloudTexture1");
-            this.secondTexture = this.Effect.GetVariableTexture("gCloudTexture2");
+            this.firstTextureVar = this.Effect.GetVariableTexture("gCloudTexture1");
+            this.secondTextureVar = this.Effect.GetVariableTexture("gCloudTexture2");
 
-            this.worldViewProjection = this.Effect.GetVariableMatrix("gWorldViewProjection");
-            this.brightness = this.Effect.GetVariableScalar("gBrightness");
-            this.color = this.Effect.GetVariableVector("gColor");
-            this.fadingDistance = this.Effect.GetVariableScalar("gFadingDistance");
+            this.worldViewProjectionVar = this.Effect.GetVariableMatrix("gWorldViewProjection");
+            this.brightnessVar = this.Effect.GetVariableScalar("gBrightness");
+            this.colorVar = this.Effect.GetVariableVector("gColor");
+            this.fadingDistanceVar = this.Effect.GetVariableScalar("gFadingDistance");
 
-            this.firstTranslation = this.Effect.GetVariableVector("gFirstTranslation");
-            this.secondTranslation = this.Effect.GetVariableVector("gSecondTranslation");
+            this.firstTranslationVar = this.Effect.GetVariableVector("gFirstTranslation");
+            this.secondTranslationVar = this.Effect.GetVariableVector("gSecondTranslation");
 
-            this.translation = this.Effect.GetVariableScalar("gTranslation");
-            this.scale = this.Effect.GetVariableScalar("gScale");
+            this.translationVar = this.Effect.GetVariableScalar("gTranslation");
+            this.scaleVar = this.Effect.GetVariableScalar("gScale");
         }
 
         /// <summary>
