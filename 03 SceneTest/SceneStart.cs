@@ -9,16 +9,15 @@ namespace SceneTest
         private const int layerHUD = 99;
         private const int layerCursor = 100;
 
-        private SceneObject<Cursor> cursor = null;
-        private SceneObject<Model> backGround = null;
-        private SceneObject<TextDrawer> title = null;
-        private SceneObject<SpriteButton> sceneMaterialsButton = null;
-        private SceneObject<SpriteButton> sceneWaterButton = null;
-        private SceneObject<SpriteButton> sceneStencilPassButton = null;
-        private SceneObject<SpriteButton> sceneLightsButton = null;
-        private SceneObject<SpriteButton> sceneCascadedShadowsButton = null;
-        private SceneObject<SpriteButton> sceneTexturesButton = null;
-        private SceneObject<SpriteButton> exitButton = null;
+        private Model backGround = null;
+        private TextDrawer title = null;
+        private SpriteButton sceneMaterialsButton = null;
+        private SpriteButton sceneWaterButton = null;
+        private SpriteButton sceneStencilPassButton = null;
+        private SpriteButton sceneLightsButton = null;
+        private SpriteButton sceneCascadedShadowsButton = null;
+        private SpriteButton sceneTestButton = null;
+        private SpriteButton exitButton = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.CornflowerBlue, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.Orange, 1.5f);
@@ -50,14 +49,14 @@ namespace SceneTest
                 Delta = new Vector2(-14, -6),
                 Color = Color.White,
             };
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
+            this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerCursor);
 
             #endregion
 
             #region Background
 
             var backGroundDesc = ModelDescription.FromXml("Background", "SceneStart", "SkyPlane.xml");
-            this.backGround = this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI);
+            this.backGround = this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI).Instance;
 
             #endregion
 
@@ -73,7 +72,7 @@ namespace SceneTest
                 ShadowColor = new Color4(Color.LightYellow.RGB(), 0.55f),
                 ShadowDelta = new Vector2(4, -4),
             };
-            this.title = this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD);
+            this.title = this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD).Instance;
 
             #endregion
 
@@ -104,12 +103,12 @@ namespace SceneTest
                     TextColor = Color.Gold,
                 }
             };
-            this.sceneMaterialsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneWaterButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneStencilPassButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneLightsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneCascadedShadowsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneTexturesButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneMaterialsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.sceneWaterButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.sceneStencilPassButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.sceneLightsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.sceneCascadedShadowsButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.sceneTestButton = this.AddComponent<SpriteButton>(startButtonDesc, SceneObjectUsages.UI, layerHUD).Instance;
 
             #endregion
 
@@ -140,7 +139,7 @@ namespace SceneTest
                     TextColor = Color.Gold,
                 }
             };
-            this.exitButton = this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.exitButton = this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD).Instance;
 
             #endregion
         }
@@ -148,25 +147,25 @@ namespace SceneTest
         {
             base.Initialized();
 
-            this.backGround.Transform.SetScale(1.5f, 1.25f, 1.5f);
+            this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
-            this.title.Instance.Text = "Scene Manager Test";
-            this.sceneMaterialsButton.Instance.Text = "Materials";
-            this.sceneWaterButton.Instance.Text = "Water";
-            this.sceneStencilPassButton.Instance.Text = "Stencil Pass";
-            this.sceneLightsButton.Instance.Text = "Lights";
-            this.sceneCascadedShadowsButton.Instance.Text = "Cascaded";
-            this.sceneTexturesButton.Instance.Text = "Textures";
-            this.exitButton.Instance.Text = "Exit";
+            this.title.Text = "Scene Manager Test";
+            this.sceneMaterialsButton.Text = "Materials";
+            this.sceneWaterButton.Text = "Water";
+            this.sceneStencilPassButton.Text = "Stencil Pass";
+            this.sceneLightsButton.Text = "Lights";
+            this.sceneCascadedShadowsButton.Text = "Cascaded";
+            this.sceneTestButton.Text = "Test";
+            this.exitButton.Text = "Exit";
 
             var sceneButtons = new[]
             {
-                this.sceneMaterialsButton.Instance,
-                this.sceneWaterButton.Instance,
-                this.sceneStencilPassButton.Instance,
-                this.sceneLightsButton.Instance,
-                this.sceneCascadedShadowsButton.Instance,
-                this.sceneTexturesButton.Instance,
+                this.sceneMaterialsButton,
+                this.sceneWaterButton,
+                this.sceneStencilPassButton,
+                this.sceneLightsButton,
+                this.sceneCascadedShadowsButton,
+                this.sceneTestButton,
             };
 
             int numButtons = sceneButtons.Length + 1;
@@ -174,19 +173,19 @@ namespace SceneTest
             int h = 4;
             int hv = h - 1;
 
-            this.title.Instance.CenterHorizontally();
-            this.title.Instance.Top = this.Game.Form.RenderHeight / h;
+            this.title.CenterHorizontally();
+            this.title.Top = this.Game.Form.RenderHeight / h;
 
             for (int i = 0; i < sceneButtons.Length; i++)
             {
-                sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1)) - (this.sceneMaterialsButton.Instance.Width / 2);
-                sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv - (this.sceneMaterialsButton.Instance.Height / 2);
+                sceneButtons[i].Left = ((this.Game.Form.RenderWidth / div) * (i + 1)) - (this.sceneMaterialsButton.Width / 2);
+                sceneButtons[i].Top = (this.Game.Form.RenderHeight / h) * hv - (this.sceneMaterialsButton.Height / 2);
                 sceneButtons[i].Click += SceneButtonClick;
             }
 
-            this.exitButton.Instance.Left = (this.Game.Form.RenderWidth / div) * numButtons - (this.exitButton.Instance.Width / 2);
-            this.exitButton.Instance.Top = (this.Game.Form.RenderHeight / h) * hv - (this.exitButton.Instance.Height / 2);
-            this.exitButton.Instance.Click += ExitButtonClick;
+            this.exitButton.Left = (this.Game.Form.RenderWidth / div) * numButtons - (this.exitButton.Width / 2);
+            this.exitButton.Top = (this.Game.Form.RenderHeight / h) * hv - (this.exitButton.Height / 2);
+            this.exitButton.Click += ExitButtonClick;
         }
         public override void Update(GameTime gameTime)
         {
@@ -209,29 +208,29 @@ namespace SceneTest
 
         private void SceneButtonClick(object sender, EventArgs e)
         {
-            if (sender == this.sceneMaterialsButton.Instance)
+            if (sender == this.sceneMaterialsButton)
             {
                 this.Game.SetScene<SceneMaterials>();
             }
-            else if (sender == this.sceneWaterButton.Instance)
+            else if (sender == this.sceneWaterButton)
             {
                 this.Game.SetScene<SceneWater>();
             }
-            else if (sender == this.sceneStencilPassButton.Instance)
+            else if (sender == this.sceneStencilPassButton)
             {
                 this.Game.SetScene<SceneStencilPass>();
             }
-            else if (sender == this.sceneLightsButton.Instance)
+            else if (sender == this.sceneLightsButton)
             {
                 this.Game.SetScene<SceneLights>();
             }
-            else if (sender == this.sceneCascadedShadowsButton.Instance)
+            else if (sender == this.sceneCascadedShadowsButton)
             {
                 this.Game.SetScene<SceneCascadedShadows>();
             }
-            else if (sender == this.sceneTexturesButton.Instance)
+            else if (sender == this.sceneTestButton)
             {
-                this.Game.SetScene<SceneTextures>();
+                this.Game.SetScene<SceneTest>();
             }
         }
         private void ExitButtonClick(object sender, EventArgs e)

@@ -3,6 +3,7 @@ using SharpDX.Windows;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -128,11 +129,18 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Takes a shoot of the frame
+        /// Takes a shoot of the game status in the next frame
         /// </summary>
-        public bool TakeFrameShoot { get; set; }
+        public bool CollectGameStatus { get; set; }
+        /// <summary>
+        /// Game status
+        /// </summary>
+        internal readonly Dictionary<string, double> GameStatus = new Dictionary<string, double>();
 
-        internal Dictionary<string, double> FrameShoot = new Dictionary<string, double>();
+        /// <summary>
+        /// Game status collected event
+        /// </summary>
+        public event GameStatusCollectedHandler GameStatusCollected;
 
         /// <summary>
         /// Gets desktop mode description
@@ -349,12 +357,12 @@ namespace Engine
             pSW.Start();
             this.Input.Update(this.GameTime);
             pSW.Stop();
-            FrameShoot.Add("Input", pSW.Elapsed.TotalMilliseconds);
+            GameStatus.Add("Input", pSW.Elapsed.TotalMilliseconds);
 
             pSW.Restart();
             this.Graphics.Begin();
             pSW.Stop();
-            FrameShoot.Add("Begin", pSW.Elapsed.TotalMilliseconds);
+            GameStatus.Add("Begin", pSW.Elapsed.TotalMilliseconds);
 
             for (int i = 0; i < this.scenes.Count; i++)
             {
@@ -363,22 +371,22 @@ namespace Engine
                     pSW.Restart();
                     this.scenes[i].Update(this.GameTime);
                     pSW.Stop();
-                    FrameShoot.Add($"Scene {i} Update", pSW.Elapsed.TotalMilliseconds);
+                    GameStatus.Add($"Scene {i} Update", pSW.Elapsed.TotalMilliseconds);
 
                     pSW.Restart();
                     this.scenes[i].Draw(this.GameTime);
                     pSW.Stop();
-                    FrameShoot.Add($"Scene {i} Draw", pSW.Elapsed.TotalMilliseconds);
+                    GameStatus.Add($"Scene {i} Draw", pSW.Elapsed.TotalMilliseconds);
                 }
             }
 
             pSW.Restart();
             this.Graphics.End();
             pSW.Stop();
-            FrameShoot.Add("End", pSW.Elapsed.TotalMilliseconds);
+            GameStatus.Add("End", pSW.Elapsed.TotalMilliseconds);
 
             gSW.Stop();
-            FrameShoot.Add("TOTAL", gSW.Elapsed.TotalMilliseconds);
+            GameStatus.Add("TOTAL", gSW.Elapsed.TotalMilliseconds);
 
             Counters.FrameCount++;
             Counters.FrameTime += this.GameTime.ElapsedSeconds;
@@ -405,19 +413,19 @@ namespace Engine
                 Counters.FrameTime = 0f;
             }
 
-            if (TakeFrameShoot)
+            if (CollectGameStatus)
             {
-                ShootTakenEventArgs e = new ShootTakenEventArgs()
+                GameStatusCollectedEventArgs e = new GameStatusCollectedEventArgs()
                 {
-                    Trace = new Dictionary<string, double>(FrameShoot),
+                    Trace = new Dictionary<string, double>(GameStatus),
                 };
 
-                ShootTaken?.Invoke(this, e);
+                GameStatusCollected?.Invoke(this, e);
 
-                TakeFrameShoot = false;
+                CollectGameStatus = false;
             }
 
-            FrameShoot.Clear();
+            GameStatus.Clear();
 
             Counters.ClearFrame();
 
@@ -444,24 +452,19 @@ namespace Engine
             }
 
             List<Scene> toDispose = new List<Scene>(this.scenes);
-            foreach (var s in toDispose)
+            Task.Run(() =>
             {
-                s.Dispose();
-            }
-            toDispose.Clear();
+                foreach (var s in toDispose)
+                {
+                    s.Dispose();
+                }
+
+                toDispose.Clear();
+            }).ConfigureAwait(false);
 
             this.scenes.Clear();
             this.AddScene(sceneToLoad);
             sceneToLoad.Active = true;
         }
-
-        public event ShootTakenEventHandler ShootTaken;
     }
-
-    public class ShootTakenEventArgs : EventArgs
-    {
-        public Dictionary<string, double> Trace { get; set; } = new Dictionary<string, double>();
-    }
-
-    public delegate void ShootTakenEventHandler(object sender, ShootTakenEventArgs e);
 }

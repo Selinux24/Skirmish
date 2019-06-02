@@ -240,11 +240,11 @@ namespace Engine
             //Reset drawer mode
             context.DrawerMode = mode;
 
-            if (this.Game.TakeFrameShoot)
+            if (this.Game.CollectGameStatus)
             {
                 foreach (var item in dict)
                 {
-                    this.Game.FrameShoot.Add(item.Key, item.Value);
+                    this.Game.GameStatus.Add(item.Key, item.Value);
                 }
             }
         }

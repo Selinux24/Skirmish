@@ -499,11 +499,11 @@ namespace Engine.Common
             stopwatch.Stop();
             dict.Add("DoSpotShadowMapping", stopwatch.Elapsed.TotalMilliseconds);
 
-            if (this.Game.TakeFrameShoot)
+            if (this.Game.CollectGameStatus)
             {
                 foreach (var item in dict)
                 {
-                    this.Game.FrameShoot.Add(item.Key, item.Value);
+                    this.Game.GameStatus.Add(item.Key, item.Value);
                 }
             }
         }

@@ -226,6 +226,8 @@
     <Compile Include="Effects\EffectTerrainState.cs" />
     <Compile Include="Effects\EffectWaterState.cs" />
     <Compile Include="FrameStatsForward.cs" />
+    <Compile Include="GameStatusCollectedEventArgs.cs" />
+    <Compile Include="GameStatusCollectedHandler.cs" />
     <Compile Include="ISceneLight.cs" />
     <Compile Include="ISceneLightSpot.cs" />
     <Compile Include="FrameStatsLight.cs" />
