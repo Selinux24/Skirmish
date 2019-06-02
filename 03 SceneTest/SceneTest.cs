@@ -101,7 +101,6 @@ namespace SceneTest
             this.InitializeContainers();
             this.InitializeTestCube();
             this.InitializeParticles();
-            this.InitializeWater();
 
             var desc = new PrimitiveListDrawerDescription<Line3D>() { DepthEnabled = true, Count = 10000 };
             this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
@@ -708,11 +707,6 @@ namespace SceneTest
                         MaximumDistance = 1000f,
                     });
             }
-        }
-        private void InitializeWater()
-        {
-            WaterDescription waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -100f);
-            this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
         }
 
         public override void Initialized()
