@@ -19,11 +19,12 @@ namespace SceneTest
 
         private readonly Random rnd = new Random();
 
+        private SceneObject<Cursor> cursor = null;
+        private SceneObject<SpriteButton> butClose = null;
+
         private Sprite spr = null;
         private TextDrawer title = null;
         private TextDrawer runtime = null;
-
-        private SpriteButton butClose = null;
 
         private ModelInstanced floorAsphaltI = null;
 
@@ -86,6 +87,7 @@ namespace SceneTest
             this.Camera.Goto(-20, 10, -40f);
             this.Camera.LookTo(0, 0, 0);
 
+            this.InitializeCursor();
             this.InitializeTextBoxes();
             this.InitializeSpriteButtons();
             this.InitializeSkyEffects();
@@ -105,6 +107,22 @@ namespace SceneTest
             this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
 
             this.TimeOfDay.BeginAnimation(new TimeSpan(9, 00, 00), 0.1f);
+        }
+        private void InitializeCursor()
+        {
+            var cursorDesc = new CursorDescription()
+            {
+                Name = "Cursor",
+                ContentPath = "Common",
+                Textures = new[] { "pointer.png" },
+                Height = 48,
+                Width = 48,
+                Centered = false,
+                Delta = new Vector2(-14, -6),
+                Color = Color.White,
+            };
+            cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, 100);
+            cursor.Visible = false;
         }
         private void InitializeTextBoxes()
         {
@@ -131,8 +149,10 @@ namespace SceneTest
         {
             this.butClose = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
-                TextureReleased = "SceneTest/UI/button_on.png",
-                TexturePressed = "SceneTest/UI/button_off.png",
+                TwoStateButton = true,
+                TextureReleased = "SceneTest/UI/button_off.png",
+                TexturePressed = "SceneTest/UI/button_on.png",
+
                 Width = 100,
                 Height = 40,
                 TextDescription = new TextDrawerDescription()
@@ -143,9 +163,10 @@ namespace SceneTest
                     ShadowColor = Color.Orange,
                 },
                 Text = "Close",
-            }, SceneObjectUsages.UI, layerHUD).Instance;
+            }, SceneObjectUsages.UI, layerHUD);
 
-            this.butClose.Click += (sender, eventArgs) => { this.Game.SetScene<SceneStart>(); };
+            this.butClose.Instance.Click += (sender, eventArgs) => { this.Game.SetScene<SceneStart>(); };
+            this.butClose.Visible = false;
         }
         private void InitializeSkyEffects()
         {
@@ -707,8 +728,8 @@ namespace SceneTest
             this.spr.Width = this.Game.Form.RenderWidth;
             this.spr.Height = this.runtime.Top + this.runtime.Height + 3;
 
-            this.butClose.Top = 1;
-            this.butClose.Left = this.Game.Form.RenderWidth - this.butClose.Width - 1;
+            this.butClose.Instance.Top = 1;
+            this.butClose.Instance.Left = this.Game.Form.RenderWidth - this.butClose.Instance.Width - 1;
         }
 
         public override void Update(GameTime gameTime)
@@ -728,9 +749,8 @@ namespace SceneTest
             base.Update(gameTime);
 
             bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
-            bool rightBtn = this.Game.Input.RightMouseButtonPressed;
 
-            this.UpdateCamera(gameTime, shift, rightBtn);
+            this.UpdateCamera(gameTime, shift);
             this.UpdateWind(gameTime);
             this.UpdateSkyEffects();
             this.UpdateParticles();
@@ -738,11 +758,9 @@ namespace SceneTest
 
             this.runtime.Text = this.Game.RuntimeText;
         }
-        private void UpdateCamera(GameTime gameTime, bool shift, bool rightBtn)
+        private void UpdateCamera(GameTime gameTime, bool shift)
         {
-#if DEBUG
-            if (rightBtn)
-#endif
+            if(!cursor.Visible)
             {
                 this.Camera.RotateMouse(
                     gameTime,
@@ -864,6 +882,14 @@ namespace SceneTest
             if (this.Game.Input.KeyJustReleased(Keys.F6))
             {
                 this.Game.CollectGameStatus = true;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.Tab))
+            {
+                this.cursor.Visible = !cursor.Visible;
+                this.butClose.Visible = cursor.Visible;
+
+                this.Game.Input.LockMouse = !cursor.Visible;
             }
 
             if (this.drawDrawVolumes)

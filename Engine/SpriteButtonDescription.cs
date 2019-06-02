@@ -78,6 +78,8 @@ namespace Engine
             this.TwoStateButton = false;
             this.ColorReleased = new Color4(1f, 1f, 1f, 1f);
             this.ColorPressed = new Color4(1f, 1f, 1f, 1f);
+            this.TextureReleasedUVMap = new Vector4(0, 0, 1, 1);
+            this.TexturePressedUVMap = new Vector4(0, 0, 1, 1);
         }
     }
 }
