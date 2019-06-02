@@ -223,6 +223,7 @@ namespace GameLogic
 
             this.butClose = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
+                TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
                 Width = 60,
