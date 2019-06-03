@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
 
 namespace Engine.Common
 {
@@ -47,6 +48,26 @@ namespace Engine.Common
             get
             {
                 return this.path != null && this.path.Length > 0;
+            }
+        }
+        /// <summary>
+        /// First point
+        /// </summary>
+        public Vector3 First
+        {
+            get
+            {
+                return path.First;
+            }
+        }
+        /// <summary>
+        /// Last point
+        /// </summary>
+        public Vector3 Last
+        {
+            get
+            {
+                return path.Last;
             }
         }
 

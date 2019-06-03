@@ -71,6 +71,26 @@ namespace Engine
                 return 0;
             }
         }
+        /// <summary>
+        /// First point
+        /// </summary>
+        public Vector3 First
+        {
+            get
+            {
+                return this.Start.Value;
+            }
+        }
+        /// <summary>
+        /// Last point
+        /// </summary>
+        public Vector3 Last
+        {
+            get
+            {
+                return this.End.Value;
+            }
+        }
 
         /// <summary>
         /// Gets the starting key

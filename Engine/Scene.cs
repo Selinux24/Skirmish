@@ -1283,7 +1283,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Updates navigation graph
+        /// Updates the navigation graph
         /// </summary>
         public virtual void UpdateNavigationGraph()
         {
@@ -1296,7 +1296,9 @@ namespace Engine
                 this.NavigationGraphUpdated();
             }
         }
-
+        /// <summary>
+        /// Updates the navigation graph asynchronously
+        /// </summary>
         public virtual async void UpdateNavigationGraphAsync()
         {
             if (this.PathFinderDescription != null)

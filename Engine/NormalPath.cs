@@ -15,6 +15,27 @@ namespace Engine
         /// Path surface normals
         /// </summary>
         private readonly Vector3[] normals = null;
+
+        /// <summary>
+        /// First point
+        /// </summary>
+        public Vector3 First
+        {
+            get
+            {
+                return this.checkPoints[0];
+            }
+        }
+        /// <summary>
+        /// Last point
+        /// </summary>
+        public Vector3 Last
+        {
+            get
+            {
+                return this.checkPoints[this.checkPoints.Length - 1];
+            }
+        }
         /// <summary>
         /// Gets the total length of the path
         /// </summary>

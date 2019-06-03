@@ -36,13 +36,7 @@ namespace Engine.Animation
         /// <summary>
         /// Gets wheter the controller is currently playing an animation
         /// </summary>
-        public bool Playing
-        {
-            get
-            {
-                return (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count);
-            }
-        }
+        public bool Playing { get; private set; } = false;
         /// <summary>
         /// Gets the current clip in the clip collection
         /// </summary>
@@ -300,10 +294,14 @@ namespace Engine.Animation
                         time = path.ItemTime;
                         clipName = pathItem.ClipName;
 
+                        this.Playing = true;
+
                         return true;
                     }
                 }
             }
+
+            this.Playing = false;
 
             return false;
         }

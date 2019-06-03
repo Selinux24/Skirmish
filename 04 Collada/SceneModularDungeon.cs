@@ -350,6 +350,8 @@ namespace Collada
         {
             base.Initialized();
 
+            this.scenery.Instance.TriggerEnd += TriggerEnds;
+
             //Rat holes
             this.ratHoles = this.scenery.Instance.GetObjectsPositionsByAssetName("Dn_Rat_Hole_1");
 
@@ -455,6 +457,13 @@ namespace Collada
             }
 
             this.bboxesDrawer.Instance.SetPrimitives(color, lines);
+        }
+        private void TriggerEnds(object sender, ModularSceneryTriggerEventArgs e)
+        {
+            if (e.Items.Any())
+            {
+                this.UpdateGraph(e.Items?.Select(i => i.Item.Manipulator.Position));
+            }
         }
 
         public override void Update(GameTime gameTime)
@@ -689,25 +698,7 @@ namespace Collada
                 var from = this.ratHoles[iFrom];
                 var to = this.ratHoles[iTo];
 
-                var path = this.FindPath(this.ratAgentType, from, to);
-                if (path != null && path.ReturnPath.Count > 0)
-                {
-                    path.ReturnPath.Insert(0, this.ratHoles[iFrom]);
-                    path.Normals.Insert(0, Vector3.Up);
-
-                    path.ReturnPath.Add(this.ratHoles[iTo]);
-                    path.Normals.Add(Vector3.Up);
-
-                    this.ratDrawer.Instance.SetPrimitives(Color.Red, Line3D.CreateLineList(path.ReturnPath.ToArray()));
-
-                    this.ratController.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
-                    this.ratController.MaximumSpeed = this.ratAgentType.Velocity;
-                    this.rat.Visible = true;
-                    this.rat.Instance.AnimationController.Start(0);
-
-                    this.ratActive = true;
-                    this.ratTime = this.nextRatTime;
-                }
+                CalcPath(this.ratAgentType, from, to);
             }
 
             if (this.rat.Visible && this.ratDrawer.Visible)
@@ -715,6 +706,28 @@ namespace Collada
                 var bbox = this.rat.Instance.GetBoundingBox();
 
                 this.ratDrawer.Instance.SetPrimitives(Color.White, Line3D.CreateWiredBox(bbox));
+            }
+        }
+        private void CalcPath(AgentType agent, Vector3 from, Vector3 to)
+        {
+            var path = this.FindPath(agent, from, to);
+            if (path != null && path.ReturnPath.Count > 0)
+            {
+                path.ReturnPath.Insert(0, from);
+                path.Normals.Insert(0, Vector3.Up);
+
+                path.ReturnPath.Add(to);
+                path.Normals.Add(Vector3.Up);
+
+                this.ratDrawer.Instance.SetPrimitives(Color.Red, Line3D.CreateLineList(path.ReturnPath.ToArray()));
+
+                this.ratController.Follow(new NormalPath(path.ReturnPath.ToArray(), path.Normals.ToArray()));
+                this.ratController.MaximumSpeed = this.ratAgentType.Velocity;
+                this.rat.Visible = true;
+                this.rat.Instance.AnimationController.Start(0);
+
+                this.ratActive = true;
+                this.ratTime = this.nextRatTime;
             }
         }
         private void UpdateEntities()
@@ -897,11 +910,7 @@ namespace Collada
                 int keyIndex = ReadKeyIndex();
                 if (keyIndex > 0 && keyIndex <= triggers.Length)
                 {
-                    var affectedItems = this.scenery.Instance.ExecuteTrigger(item, triggers[keyIndex - 1]);
-                    if (affectedItems.Any())
-                    {
-                        UpdateGraph(affectedItems, 1000).ConfigureAwait(false);
-                    }
+                    this.scenery.Instance.ExecuteTrigger(item, triggers[keyIndex - 1]);
                 }
             }
         }
@@ -1114,15 +1123,18 @@ namespace Collada
         }
         public override void NavigationGraphUpdated()
         {
+            //Update active paths with the new graph configuration
+            if (this.ratController.HasPath)
+            {
+                Vector3 from = this.rat.Transform.Position;
+                Vector3 to = this.ratController.Last;
+
+                CalcPath(this.ratAgentType, from, to);
+            }
+
             this.UpdateGraphDebug(this.CurrentAgent).ConfigureAwait(false);
         }
 
-        private async Task UpdateGraph(ModularSceneryItem[] items, int delay)
-        {
-            await Task.Delay(delay);
-
-            this.UpdateGraph(items?.Select(i => i.Item.Manipulator.Position));
-        }
         private async Task UpdateGraphDebug(AgentType agent)
         {
             var nodes = await this.BuildGraphNodeDebugAreas(agent);

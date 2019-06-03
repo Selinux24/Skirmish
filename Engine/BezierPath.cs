@@ -82,6 +82,26 @@ namespace Engine
             }
         }
         /// <summary>
+        /// First point
+        /// </summary>
+        public Vector3 First
+        {
+            get
+            {
+                return this.Points[0];
+            }
+        }
+        /// <summary>
+        /// Last point
+        /// </summary>
+        public Vector3 Last
+        {
+            get
+            {
+                return this.Points[this.Points.Length - 1];
+            }
+        }
+        /// <summary>
         /// Number of segments in the path
         /// </summary>
         public int PositionCount { get; private set; }

@@ -8,6 +8,14 @@ namespace Engine
     public interface IControllerPath
     {
         /// <summary>
+        /// First point
+        /// </summary>
+        Vector3 First { get; }
+        /// <summary>
+        /// Last point
+        /// </summary>
+        Vector3 Last { get; }
+        /// <summary>
         /// Total length of path
         /// </summary>
         float Length { get; }

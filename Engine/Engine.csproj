@@ -240,6 +240,9 @@
     <Compile Include="ModularSceneryObjectAnimationPath.cs" />
     <Compile Include="ModularSceneryObjectAnimationPlan.cs" />
     <Compile Include="ModularSceneryTrigger.cs" />
+    <Compile Include="ModularSceneryTriggerEndHandler.cs" />
+    <Compile Include="ModularSceneryTriggerEventArgs.cs" />
+    <Compile Include="ModularSceneryTriggerStartHandler.cs" />
     <Compile Include="PathFinding\RecastNavigation\SteerTarget.cs" />
     <Compile Include="PrimitiveListDrawer.cs" />
     <Compile Include="PrimitiveListDrawerDescription.cs" />

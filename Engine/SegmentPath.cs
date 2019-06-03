@@ -12,6 +12,27 @@ namespace Engine
         /// Path
         /// </summary>
         private Vector3[] path = null;
+
+        /// <summary>
+        /// First point
+        /// </summary>
+        public Vector3 First
+        {
+            get
+            {
+                return this.path[0];
+            }
+        }
+        /// <summary>
+        /// Last point
+        /// </summary>
+        public Vector3 Last
+        {
+            get
+            {
+                return this.path[this.path.Length - 1];
+            }
+        }
         /// <summary>
         /// Gets the total length of the path
         /// </summary>

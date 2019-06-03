@@ -47,6 +47,10 @@ namespace Engine
         /// Animations plan dictionary by instance
         /// </summary>
         private readonly Dictionary<ModelInstance, Dictionary<string, AnimationPlan>> animations = new Dictionary<ModelInstance, Dictionary<string, AnimationPlan>>();
+        /// <summary>
+        /// Active trigger callbacks
+        /// </summary>
+        private readonly List<TriggerCallback> activeCallbacks = new List<TriggerCallback>();
 
         /// <summary>
         /// Gets the assets description
@@ -61,7 +65,6 @@ namespace Engine
         /// Current level
         /// </summary>
         public ModularSceneryLevel CurrentLevel { get; set; }
-
         /// <summary>
         /// Gets the description
         /// </summary>
@@ -72,6 +75,15 @@ namespace Engine
                 return base.Description as ModularSceneryDescription;
             }
         }
+
+        /// <summary>
+        /// Trigger starts it's execution event
+        /// </summary>
+        public event ModularSceneryTriggerStartHandler TriggerStart;
+        /// <summary>
+        /// Trigger ends it's execution event
+        /// </summary>
+        public event ModularSceneryTriggerEndHandler TriggerEnd;
 
         /// <summary>
         /// Constructor
@@ -607,6 +619,31 @@ namespace Engine
         public override void Update(UpdateContext context)
         {
             this.assetMap.Update(context.CameraVolume);
+
+            if (this.activeCallbacks.Any())
+            {
+                UpdateTriggers();
+            }
+        }
+        /// <summary>
+        /// Verifies the active triggers states and fires the ending events
+        /// </summary>
+        private void UpdateTriggers()
+        {
+            this.activeCallbacks.ForEach(c =>
+            {
+                if (!c.Waiting)
+                {
+                    TriggerEnd?.Invoke(this, new ModularSceneryTriggerEventArgs()
+                    {
+                        StarterTrigger = c.Trigger,
+                        StarterItem = c.Item,
+                        Items = c.Items,
+                    });
+                }
+            });
+
+            this.activeCallbacks.RemoveAll(c => !c.Waiting);
         }
 
         /// <summary>
@@ -1011,23 +1048,41 @@ namespace Engine
                 .ToArray();
         }
         /// <summary>
+        /// Executes the specified callback
+        /// </summary>
+        /// <param name="staterItem">Starter item</param>
+        /// <param name="starterTrigger">Starter trigger</param>
+        public void ExecuteTrigger(ModularSceneryItem staterItem, ModularSceneryTrigger starterTrigger)
+        {
+            var callback = new TriggerCallback(starterTrigger, staterItem);
+
+            ExecuteTriggerInternal(callback, staterItem, starterTrigger);
+
+            TriggerStart?.Invoke(this, new ModularSceneryTriggerEventArgs()
+            {
+                StarterTrigger = starterTrigger,
+                StarterItem = staterItem,
+                Items = callback.Items,
+            });
+
+            activeCallbacks.Add(callback);
+        }
+        /// <summary>
         /// Executes the specified trigger
         /// </summary>
+        /// <param name="callback">Trigger callback</param>
         /// <param name="item">Triggered item</param>
-        /// <param name="trigger">Trigger to execute</param>
+        /// <param name="trigger">Trigger</param>
         /// <returns>Returns the affected items</returns>
-        public ModularSceneryItem[] ExecuteTrigger(ModularSceneryItem item, ModularSceneryTrigger trigger)
+        private void ExecuteTriggerInternal(TriggerCallback callback, ModularSceneryItem item, ModularSceneryTrigger trigger)
         {
             //Validate item state
             if (item.CurrentState != trigger.StateFrom)
             {
-                return new ModularSceneryItem[] { };
+                return;
             }
 
-            List<ModularSceneryItem> resultItems = new List<ModularSceneryItem>()
-            {
-                item,
-            };
+            callback.Items.Add(item);
 
             item.CurrentState = trigger.StateTo;
 
@@ -1064,10 +1119,8 @@ namespace Engine
                     continue;
                 }
 
-                resultItems.AddRange(ExecuteTrigger(refItem, refTrigger));
+                ExecuteTriggerInternal(callback, refItem, refTrigger);
             }
-
-            return resultItems.Distinct().ToArray();
         }
 
         /// <summary>
@@ -1319,7 +1372,6 @@ namespace Engine
                 }
             }
         }
-
         /// <summary>
         /// Asset map item
         /// </summary>
@@ -1357,6 +1409,46 @@ namespace Engine
             public override string ToString()
             {
                 return string.Format("{0}; Index: {1}; Connections: {2};", this.Name, this.Index, this.Connections.Count);
+            }
+        }
+        /// <summary>
+        /// Trigger callback
+        /// </summary>
+        /// <remarks>Helper class to test when all items affected by a trigger were done with their actions</remarks>
+        class TriggerCallback
+        {
+            /// <summary>
+            /// Starter trigger
+            /// </summary>
+            public ModularSceneryTrigger Trigger { get; set; }
+            /// <summary>
+            /// Starter item
+            /// </summary>
+            public ModularSceneryItem Item { get; set; }
+
+            /// <summary>
+            /// Affected items
+            /// </summary>
+            public List<ModularSceneryItem> Items { get; set; } = new List<ModularSceneryItem>();
+            /// <summary>
+            /// Returns true if any item is performing actions
+            /// </summary>
+            public bool Waiting
+            {
+                get
+                {
+                    return Items.Any(i => i.Item.AnimationController?.Playing == true);
+                }
+            }
+
+            /// <summary>
+            /// Constructor
+            /// </summary>
+            /// <param name="trigger">Trigger</param>
+            public TriggerCallback(ModularSceneryTrigger trigger, ModularSceneryItem item)
+            {
+                Trigger = trigger;
+                Item = item;
             }
         }
     }
