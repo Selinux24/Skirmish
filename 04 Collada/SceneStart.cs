@@ -1,6 +1,8 @@
 ﻿using Engine;
+using Engine.Audio;
 using SharpDX;
 using System;
+using System.Linq;
 
 namespace Collada
 {
@@ -9,16 +11,24 @@ namespace Collada
         private const int layerHUD = 99;
         private const int layerCursor = 100;
 
-        SceneObject<Model> backGround = null;
-        SceneObject<TextDrawer> title = null;
-        SceneObject<SpriteButton> sceneDungeonWallButton = null;
-        SceneObject<SpriteButton> sceneNavMeshTestButton = null;
-        SceneObject<SpriteButton> sceneDungeonButton = null;
-        SceneObject<SpriteButton> sceneModularDungeonButton = null;
-        SceneObject<SpriteButton> exitButton = null;
+        Model backGround = null;
+        TextDrawer title = null;
+        SpriteButton sceneDungeonWallButton = null;
+        SpriteButton sceneNavMeshTestButton = null;
+        SpriteButton sceneDungeonButton = null;
+        SpriteButton sceneModularDungeonButton = null;
+        SpriteButton exitButton = null;
 
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
+
+        private readonly string[] audios = new string[]
+        {
+            "Electro_1.wav",
+            "HipHoppy_1.wav",
+        };
+        private int audioIndex = 0;
+        private GameAudio currentAudio = null;
 
         public SceneStart(Game game) : base(game)
         {
@@ -53,7 +63,7 @@ namespace Collada
             #region Background
 
             var backGroundDesc = ModelDescription.FromXml("Background", "Resources/SceneStart", "SkyPlane.xml");
-            this.backGround = this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI);
+            this.backGround = this.AddComponent<Model>(backGroundDesc, SceneObjectUsages.UI).Instance;
 
             #endregion
 
@@ -69,7 +79,7 @@ namespace Collada
                 ShadowColor = new Color4(Color.Brown.RGB(), 0.55f),
                 ShadowDelta = new Vector2(2, -3),
             };
-            this.title = this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD);
+            this.title = this.AddComponent<TextDrawer>(titleDesc, SceneObjectUsages.UI, layerHUD).Instance;
 
             #endregion
 
@@ -100,10 +110,10 @@ namespace Collada
                     TextColor = Color.Gold,
                 }
             };
-            this.sceneDungeonWallButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneNavMeshTestButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD);
-            this.sceneModularDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD);
+            this.sceneDungeonWallButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.sceneNavMeshTestButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.sceneDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD).Instance;
+            this.sceneModularDungeonButton = this.AddComponent<SpriteButton>(buttonDesc, SceneObjectUsages.UI, layerHUD).Instance;
 
             #endregion
 
@@ -134,10 +144,11 @@ namespace Collada
                     TextColor = Color.Gold,
                 }
             };
-            this.exitButton = this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD);
+            this.exitButton = this.AddComponent<SpriteButton>(exitButtonDesc, SceneObjectUsages.UI, layerHUD).Instance;
 
             #endregion
         }
+
         public override void Initialized()
         {
             base.Initialized();
@@ -145,53 +156,80 @@ namespace Collada
             this.Camera.Position = Vector3.BackwardLH * 8f;
             this.Camera.Interest = Vector3.Zero;
 
-            this.backGround.Transform.SetScale(1.5f, 1.25f, 1.5f);
+            this.backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
-            this.title.Instance.Text = "Collada Loader Test";
-            this.title.Instance.CenterHorizontally();
-            this.title.Instance.Top = this.Game.Form.RenderHeight / 4;
+            this.title.Text = "Collada Loader Test";
+            this.title.CenterHorizontally();
+            this.title.Top = this.Game.Form.RenderHeight / 4;
 
-            this.sceneDungeonWallButton.Instance.Text = "Dungeon Wall";
-            this.sceneDungeonWallButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 1) - (this.sceneDungeonWallButton.Instance.Width / 2);
-            this.sceneDungeonWallButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonWallButton.Instance.Height / 2);
-            this.sceneDungeonWallButton.Instance.Click += SceneButtonClick;
+            this.sceneDungeonWallButton.Text = "Dungeon Wall";
+            this.sceneDungeonWallButton.Left = ((this.Game.Form.RenderWidth / 6) * 1) - (this.sceneDungeonWallButton.Width / 2);
+            this.sceneDungeonWallButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonWallButton.Height / 2);
+            this.sceneDungeonWallButton.Click += SceneButtonClick;
 
-            this.sceneNavMeshTestButton.Instance.Text = "Navmesh Test";
-            this.sceneNavMeshTestButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 2) - (this.sceneNavMeshTestButton.Instance.Width / 2);
-            this.sceneNavMeshTestButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneNavMeshTestButton.Instance.Height / 2);
-            this.sceneNavMeshTestButton.Instance.Click += SceneButtonClick;
+            this.sceneNavMeshTestButton.Text = "Navmesh Test";
+            this.sceneNavMeshTestButton.Left = ((this.Game.Form.RenderWidth / 6) * 2) - (this.sceneNavMeshTestButton.Width / 2);
+            this.sceneNavMeshTestButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneNavMeshTestButton.Height / 2);
+            this.sceneNavMeshTestButton.Click += SceneButtonClick;
 
-            this.sceneDungeonButton.Instance.Text = "Dungeon";
-            this.sceneDungeonButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 3) - (this.sceneDungeonButton.Instance.Width / 2);
-            this.sceneDungeonButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonButton.Instance.Height / 2);
-            this.sceneDungeonButton.Instance.Click += SceneButtonClick;
+            this.sceneDungeonButton.Text = "Dungeon";
+            this.sceneDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 3) - (this.sceneDungeonButton.Width / 2);
+            this.sceneDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneDungeonButton.Height / 2);
+            this.sceneDungeonButton.Click += SceneButtonClick;
 
-            this.sceneModularDungeonButton.Instance.Text = "Modular Dungeon";
-            this.sceneModularDungeonButton.Instance.Left = ((this.Game.Form.RenderWidth / 6) * 4) - (this.sceneModularDungeonButton.Instance.Width / 2);
-            this.sceneModularDungeonButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneModularDungeonButton.Instance.Height / 2);
-            this.sceneModularDungeonButton.Instance.Click += SceneButtonClick;
+            this.sceneModularDungeonButton.Text = "Modular Dungeon";
+            this.sceneModularDungeonButton.Left = ((this.Game.Form.RenderWidth / 6) * 4) - (this.sceneModularDungeonButton.Width / 2);
+            this.sceneModularDungeonButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.sceneModularDungeonButton.Height / 2);
+            this.sceneModularDungeonButton.Click += SceneButtonClick;
 
-            this.exitButton.Instance.Text = "Exit";
-            this.exitButton.Instance.Left = (this.Game.Form.RenderWidth / 6) * 5 - (this.exitButton.Instance.Width / 2);
-            this.exitButton.Instance.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Instance.Height / 2);
-            this.exitButton.Instance.Click += ExitButtonClick;
+            this.exitButton.Text = "Exit";
+            this.exitButton.Left = (this.Game.Form.RenderWidth / 6) * 5 - (this.exitButton.Width / 2);
+            this.exitButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Height / 2);
+            this.exitButton.Click += ExitButtonClick;
+
+            PlayAudio();
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            if (this.Game.Input.KeyJustReleased(Keys.S))
+            {
+                if (currentAudio?.Playing == true)
+                {
+                    currentAudio?.Stop();
+                }
+                else
+                {
+                    currentAudio?.Resume();
+                }
+            }
         }
 
         private void SceneButtonClick(object sender, EventArgs e)
         {
-            if (sender == this.sceneDungeonWallButton.Instance)
+            if (currentAudio != null)
+            {
+                this.Game.AudioManager.RemoveAudio(currentAudio);
+
+                currentAudio.AudioEnd -= AudioManager_AudioEnd;
+                currentAudio = null;
+            }
+
+            if (sender == this.sceneDungeonWallButton)
             {
                 this.Game.SetScene<SceneDungeonWall>();
             }
-            else if (sender == this.sceneNavMeshTestButton.Instance)
+            else if (sender == this.sceneNavMeshTestButton)
             {
                 this.Game.SetScene<SceneNavmeshTest>();
             }
-            else if (sender == this.sceneDungeonButton.Instance)
+            else if (sender == this.sceneDungeonButton)
             {
                 this.Game.SetScene<SceneDungeon>();
             }
-            else if (sender == this.sceneModularDungeonButton.Instance)
+            else if (sender == this.sceneModularDungeonButton)
             {
                 this.Game.SetScene<SceneModularDungeon>();
             }
@@ -199,6 +237,27 @@ namespace Collada
         private void ExitButtonClick(object sender, EventArgs e)
         {
             this.Game.Exit();
+        }
+
+        private void PlayAudio()
+        {
+            if (currentAudio != null)
+            {
+                currentAudio.AudioEnd -= AudioManager_AudioEnd;
+                currentAudio = null;
+            }
+
+            audioIndex++;
+            audioIndex %= audios.Length;
+
+            currentAudio = this.Game.AudioManager.CreateAudio("Resources/Common", audios[audioIndex]).FirstOrDefault();
+            currentAudio.AudioEnd += AudioManager_AudioEnd;
+            currentAudio.Play();
+        }
+
+        private void AudioManager_AudioEnd(object sender, GameAudioEventArgs e)
+        {
+            PlayAudio();
         }
     }
 }

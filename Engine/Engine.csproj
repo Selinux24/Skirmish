@@ -18,6 +18,7 @@
     </TargetFrameworkProfile>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -150,6 +151,9 @@
       <HintPath>..\packages\SharpDX.Mathematics.4.0.1\lib\net45\SharpDX.Mathematics.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="SharpDX.XAudio2, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpDX.XAudio2.4.0.1\lib\net45\SharpDX.XAudio2.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Compression" />
@@ -168,6 +172,10 @@
     <Compile Include="Animation\Armature.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
+    <Compile Include="GameAudioManager.cs" />
+    <Compile Include="Audio\GameAudio.cs" />
+    <Compile Include="Audio\GameAudioEventArgs.cs" />
+    <Compile Include="Audio\GameAudioHandler.cs" />
     <Compile Include="BoundingRectangleInt.cs" />
     <Compile Include="Collections\FixedArray.cs" />
     <Compile Include="Collections\ProximityGridItem.cs" />
