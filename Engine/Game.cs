@@ -37,10 +37,6 @@ namespace Engine
         /// </summary>
         public GameResourceManager ResourceManager { get; private set; }
         /// <summary>
-        /// Audio manager
-        /// </summary>
-        public GameAudioManager AudioManager { get; private set; }
-        /// <summary>
         /// Game form
         /// </summary>
         public EngineForm Form { get; private set; }
@@ -184,8 +180,6 @@ namespace Engine
 
             this.ResourceManager = new GameResourceManager(this);
 
-            this.AudioManager = new GameAudioManager();
-
             this.CPUStats = new PerformanceCounter("Processor", "% Processor Time", "_Total");
 
             #region Form
@@ -263,9 +257,6 @@ namespace Engine
 
                 ResourceManager?.Dispose();
                 ResourceManager = null;
-
-                AudioManager?.Dispose();
-                AudioManager = null;
 
                 Graphics?.Dispose();
                 Graphics = null;

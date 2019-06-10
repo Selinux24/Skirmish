@@ -55,6 +55,15 @@ namespace Engine
         }
 
         /// <summary>
+        /// Updates the game audio manager internal state
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
+        {
+            audioList.ForEach(a => a.Update(gameTime));
+        }
+
+        /// <summary>
         /// Creates a list of game audios
         /// </summary>
         /// <param name="contentFolder">Content folder</param>
@@ -69,7 +78,10 @@ namespace Engine
             {
                 foreach (var filename in paths)
                 {
-                    res.Add(new GameAudio(filename));
+                    var audio = new GameAudio();
+                    audio.Load(filename);
+
+                    res.Add(audio);
                 }
 
                 //Add audios to internal "to dispose" list

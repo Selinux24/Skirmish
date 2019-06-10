@@ -19,6 +19,8 @@ namespace Collada
         SpriteButton sceneModularDungeonButton = null;
         SpriteButton exitButton = null;
 
+        Vector3 listenerPosition = Vector3.Zero;
+
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
 
@@ -194,16 +196,66 @@ namespace Collada
         {
             base.Update(gameTime);
 
+            UpdateAudioInput(gameTime);
+        }
+        private void UpdateAudioInput(GameTime gameTime)
+        {
+            if (currentAudio == null)
+            {
+                return;
+            }
+
             if (this.Game.Input.KeyJustReleased(Keys.S))
             {
-                if (currentAudio?.Playing == true)
+                if (currentAudio.Playing)
                 {
-                    currentAudio?.Stop();
+                    currentAudio.Pause();
                 }
                 else
                 {
-                    currentAudio?.Resume();
+                    currentAudio.Resume();
                 }
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.L))
+            {
+                currentAudio.UseMasteringLimiter = !currentAudio.UseMasteringLimiter;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.R))
+            {
+                currentAudio.UseReverb = !currentAudio.UseReverb;
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.H))
+            {
+                currentAudio.ReverbPreset = ReverbPresets.Default;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.P))
+            {
+                currentAudio.UseAudio3D = !currentAudio.UseAudio3D;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Subtract))
+            {
+                currentAudio.MasterVolume -= gameTime.ElapsedSeconds;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Add))
+            {
+                currentAudio.MasterVolume += gameTime.ElapsedSeconds;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Left) && currentAudio.UseAudio3D)
+            {
+                listenerPosition -= Vector3.Left * gameTime.ElapsedSeconds;
+                currentAudio.UpdateListener(listenerPosition, Vector3.ForwardLH);
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.Right) && currentAudio.UseAudio3D)
+            {
+                listenerPosition -= Vector3.Right * gameTime.ElapsedSeconds;
+                currentAudio.UpdateListener(listenerPosition, Vector3.ForwardLH);
             }
         }
 
@@ -211,7 +263,7 @@ namespace Collada
         {
             if (currentAudio != null)
             {
-                this.Game.AudioManager.RemoveAudio(currentAudio);
+                this.AudioManager.RemoveAudio(currentAudio);
 
                 currentAudio.AudioEnd -= AudioManager_AudioEnd;
                 currentAudio = null;
@@ -250,7 +302,7 @@ namespace Collada
             audioIndex++;
             audioIndex %= audios.Length;
 
-            currentAudio = this.Game.AudioManager.CreateAudio("Resources/Common", audios[audioIndex]).FirstOrDefault();
+            currentAudio = this.AudioManager.CreateAudio("Resources/Common", audios[audioIndex]).FirstOrDefault();
             currentAudio.AudioEnd += AudioManager_AudioEnd;
             currentAudio.Play();
         }

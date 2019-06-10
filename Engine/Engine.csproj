@@ -172,6 +172,9 @@
     <Compile Include="Animation\Armature.cs" />
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
+    <Compile Include="Audio\GameAudioPresets.cs" />
+    <Compile Include="Audio\GameAudioState.cs" />
+    <Compile Include="Audio\ReverbPresets.cs" />
     <Compile Include="GameAudioManager.cs" />
     <Compile Include="Audio\GameAudio.cs" />
     <Compile Include="Audio\GameAudioEventArgs.cs" />

@@ -218,6 +218,10 @@ namespace Engine
         /// Graph used for pathfinding
         /// </summary>
         protected IGraph NavigationGraph { get; private set; }
+        /// <summary>
+        /// Audio manager
+        /// </summary>
+        protected GameAudioManager AudioManager { get; private set; }
 
         /// <summary>
         /// Camera
@@ -257,6 +261,8 @@ namespace Engine
             this.BufferManager = new BufferManager(game);
 
             this.TimeOfDay = new TimeOfDay();
+
+            this.AudioManager = new GameAudioManager();
 
             this.Camera = Camera.CreateFree(
                 new Vector3(0.0f, 0.0f, -10.0f),
@@ -301,23 +307,17 @@ namespace Engine
         {
             if (disposing)
             {
-                if (BufferManager != null)
-                {
-                    BufferManager.Dispose();
-                    BufferManager = null;
-                }
+                BufferManager?.Dispose();
+                BufferManager = null;
 
-                if (Renderer != null)
-                {
-                    Renderer.Dispose();
-                    Renderer = null;
-                }
+                Renderer?.Dispose();
+                Renderer = null;
 
-                if (Camera != null)
-                {
-                    Camera.Dispose();
-                    Camera = null;
-                }
+                AudioManager?.Dispose();
+                AudioManager = null;
+
+                Camera?.Dispose();
+                Camera = null;
 
                 if (components != null)
                 {
@@ -331,11 +331,8 @@ namespace Engine
                     components = null;
                 }
 
-                if (NavigationGraph != null)
-                {
-                    NavigationGraph.Dispose();
-                    NavigationGraph = null;
-                }
+                NavigationGraph?.Dispose();
+                NavigationGraph = null;
             }
         }
 
@@ -378,6 +375,8 @@ namespace Engine
             this.Camera?.Update(gameTime);
 
             this.TimeOfDay?.Update(gameTime);
+
+            this.AudioManager?.Update(gameTime);
 
             this.NavigationGraph?.Update(gameTime);
 
