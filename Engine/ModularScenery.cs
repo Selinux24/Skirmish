@@ -618,9 +618,9 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            this.assetMap.Update(context.CameraVolume);
+            this.assetMap?.Update(context.CameraVolume);
 
-            if (this.activeCallbacks.Any())
+            if (this.activeCallbacks?.Any() == true)
             {
                 UpdateTriggers();
             }

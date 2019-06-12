@@ -2,7 +2,7 @@
 using Engine.Audio;
 using SharpDX;
 using System;
-using System.Linq;
+using System.Threading.Tasks;
 
 namespace Collada
 {
@@ -19,10 +19,10 @@ namespace Collada
         SpriteButton sceneModularDungeonButton = null;
         SpriteButton exitButton = null;
 
-        Vector3 listenerPosition = Vector3.Zero;
-
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
+
+        private GameAudioEffect pushButton = null;
 
         private readonly string[] audios = new string[]
         {
@@ -30,7 +30,9 @@ namespace Collada
             "HipHoppy_1.wav",
         };
         private int audioIndex = 0;
+        private int audioLoops = 0;
         private GameAudio currentAudio = null;
+        private GameAudioEffectInstance currentEffectInstance = null;
 
         public SceneStart(Game game) : base(game)
         {
@@ -189,7 +191,10 @@ namespace Collada
             this.exitButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Height / 2);
             this.exitButton.Click += ExitButtonClick;
 
-            PlayAudio();
+            var effects = this.AudioManager.CreateAudio("effects");
+            effects.MasterVolume = 0.5f;
+            effects.UseMasteringLimiter = true;
+            this.pushButton = this.AudioManager.CreateEffect("effects", "push", "Resources/Common", "push.wav");
         }
 
         public override void Update(GameTime gameTime)
@@ -197,6 +202,8 @@ namespace Collada
             base.Update(gameTime);
 
             UpdateAudioInput(gameTime);
+
+            PlayAudio();
         }
         private void UpdateAudioInput(GameTime gameTime)
         {
@@ -207,13 +214,13 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.S))
             {
-                if (currentAudio.Playing)
+                if (currentEffectInstance.State == AudioState.Playing)
                 {
-                    currentAudio.Pause();
+                    currentEffectInstance.Pause();
                 }
                 else
                 {
-                    currentAudio.Resume();
+                    currentEffectInstance.Resume();
                 }
             }
 
@@ -238,78 +245,100 @@ namespace Collada
 
             if (this.Game.Input.KeyPressed(Keys.Subtract))
             {
-                currentAudio.MasterVolume -= gameTime.ElapsedSeconds;
+                currentAudio.MasterVolume -= gameTime.ElapsedSeconds / 10;
             }
 
             if (this.Game.Input.KeyPressed(Keys.Add))
             {
-                currentAudio.MasterVolume += gameTime.ElapsedSeconds;
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Left) && currentAudio.UseAudio3D)
-            {
-                listenerPosition -= Vector3.Left * gameTime.ElapsedSeconds;
-                currentAudio.UpdateListener(listenerPosition, Vector3.ForwardLH);
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.Right) && currentAudio.UseAudio3D)
-            {
-                listenerPosition -= Vector3.Right * gameTime.ElapsedSeconds;
-                currentAudio.UpdateListener(listenerPosition, Vector3.ForwardLH);
+                currentAudio.MasterVolume += gameTime.ElapsedSeconds / 10;
             }
         }
 
         private void SceneButtonClick(object sender, EventArgs e)
         {
-            if (currentAudio != null)
+            Task.Run(async () =>
             {
-                this.AudioManager.RemoveAudio(currentAudio);
+                this.pushButton.Create().Play();
 
-                currentAudio.AudioEnd -= AudioManager_AudioEnd;
-                currentAudio = null;
-            }
+                await Task.Delay(this.pushButton.Duration);
 
-            if (sender == this.sceneDungeonWallButton)
-            {
-                this.Game.SetScene<SceneDungeonWall>();
-            }
-            else if (sender == this.sceneNavMeshTestButton)
-            {
-                this.Game.SetScene<SceneNavmeshTest>();
-            }
-            else if (sender == this.sceneDungeonButton)
-            {
-                this.Game.SetScene<SceneDungeon>();
-            }
-            else if (sender == this.sceneModularDungeonButton)
-            {
-                this.Game.SetScene<SceneModularDungeon>();
-            }
+                if (sender == this.sceneDungeonWallButton)
+                {
+                    this.Game.SetScene<SceneDungeonWall>();
+                }
+                else if (sender == this.sceneNavMeshTestButton)
+                {
+                    this.Game.SetScene<SceneNavmeshTest>();
+                }
+                else if (sender == this.sceneDungeonButton)
+                {
+                    this.Game.SetScene<SceneDungeon>();
+                }
+                else if (sender == this.sceneModularDungeonButton)
+                {
+                    this.Game.SetScene<SceneModularDungeon>();
+                }
+            });
         }
         private void ExitButtonClick(object sender, EventArgs e)
         {
-            this.Game.Exit();
+            Task.Run(async () =>
+            {
+                this.pushButton.Create().Play();
+
+                await Task.Delay(this.pushButton.Duration);
+
+                this.Game.Exit();
+            });
         }
 
         private void PlayAudio()
         {
-            if (currentAudio != null)
+            if (currentEffectInstance != null)
             {
-                currentAudio.AudioEnd -= AudioManager_AudioEnd;
-                currentAudio = null;
+                return;
             }
 
             audioIndex++;
             audioIndex %= audios.Length;
 
-            currentAudio = this.AudioManager.CreateAudio("Resources/Common", audios[audioIndex]).FirstOrDefault();
-            currentAudio.AudioEnd += AudioManager_AudioEnd;
-            currentAudio.Play();
+            if (currentAudio == null)
+            {
+                currentAudio = this.AudioManager.CreateAudio("music");
+
+                currentAudio.UseMasteringLimiter = true;
+                currentAudio.SetMasteringLimit(8, 900);
+
+                currentAudio.UseReverb = true;
+                currentAudio.UseReverbFilter = true;
+
+                currentAudio.MasterVolume = 0.01f;
+            }
+
+            var effect = this.AudioManager.CreateEffect("music", $"Music{audioIndex}", "Resources/Common", audios[audioIndex]);
+            currentEffectInstance = effect.Create();
+            currentEffectInstance.IsLooped = true;
+
+            currentEffectInstance.AudioEnd += AudioManager_AudioEnd;
+            currentEffectInstance.LoopEnd += AudioManager_LoopEnd;
+            currentEffectInstance.Play();
         }
 
         private void AudioManager_AudioEnd(object sender, GameAudioEventArgs e)
         {
-            PlayAudio();
+            currentEffectInstance = null;
+        }
+        private void AudioManager_LoopEnd(object sender, GameAudioEventArgs e)
+        {
+            audioLoops++;
+
+            if (audioLoops > 4)
+            {
+                audioLoops = 0;
+
+                currentEffectInstance.Stop(true);
+                currentEffectInstance = null;
+            }
         }
     }
 }

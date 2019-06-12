@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
@@ -66,6 +67,9 @@ namespace Collada
 
         private readonly Color connectionColor = new Color(Color.LightBlue.ToColor3(), 1f);
 
+        private GameAudioEffect soundDoor = null;
+        private GameAudioEffect soundLadder = null;
+
         private AgentType CurrentAgent
         {
             get
@@ -100,6 +104,7 @@ namespace Collada
             this.InitializeHuman();
             this.InitializeEnvironment();
             this.InitializeLights();
+            this.InitializeAudio();
         }
         private void InitializeEnvironment()
         {
@@ -344,6 +349,16 @@ namespace Collada
             };
             this.connectionDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(connectionDrawerDesc);
             this.connectionDrawer.Visible = false;
+        }
+        private void InitializeAudio()
+        {
+            var effects = this.AudioManager.CreateAudio("effects");
+            effects.EnableAudio3D();
+            effects.MasterVolume = 0.25f;
+            effects.UseMasteringLimiter = true;
+
+            this.soundDoor = this.AudioManager.CreateEffect("effects", "door", "Resources/SceneModularDungeon/Audio", "door.wav");
+            this.soundLadder = this.AudioManager.CreateEffect("effects", "ladder", "Resources/SceneModularDungeon/Audio", "ladder.wav");
         }
 
         public override void Initialized()
@@ -891,15 +906,22 @@ namespace Collada
         {
             if (this.Game.Input.KeyJustReleased(Keys.Space))
             {
-                string nextLevel = item.Object.NextLevel;
-                if (!string.IsNullOrEmpty(nextLevel))
+                Task.Run(async () =>
                 {
-                    this.ChangeToLevel(nextLevel);
-                }
-                else
-                {
-                    this.Game.SetScene<SceneStart>();
-                }
+                    this.soundDoor.Create().Play();
+
+                    await Task.Delay(this.soundDoor.Duration);
+
+                    string nextLevel = item.Object.NextLevel;
+                    if (!string.IsNullOrEmpty(nextLevel))
+                    {
+                        this.ChangeToLevel(nextLevel);
+                    }
+                    else
+                    {
+                        this.Game.SetScene<SceneStart>();
+                    }
+                });
             }
         }
         private void UpdateEntityTrigger(ModularSceneryItem item)
@@ -910,6 +932,7 @@ namespace Collada
                 int keyIndex = ReadKeyIndex();
                 if (keyIndex > 0 && keyIndex <= triggers.Length)
                 {
+                    this.soundLadder.Create().Play();
                     this.scenery.Instance.ExecuteTrigger(item, triggers[keyIndex - 1]);
                 }
             }

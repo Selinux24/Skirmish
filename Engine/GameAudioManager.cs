@@ -13,9 +13,9 @@ namespace Engine
     public class GameAudioManager : IDisposable
     {
         /// <summary>
-        /// Audio list
+        /// Game audios dictionary
         /// </summary>
-        private readonly List<GameAudio> audioList = new List<GameAudio>();
+        private readonly Dictionary<string, GameAudio> gameAudios = new Dictionary<string, GameAudio>();
 
         /// <summary>
         /// Constructor
@@ -48,19 +48,9 @@ namespace Engine
         {
             if (disposing)
             {
-                audioList.ForEach(a => a.Dispose());
-                audioList.Clear();
-
+                gameAudios.Values.ToList().ForEach(a => a.Dispose());
+                gameAudios.Clear();
             }
-        }
-
-        /// <summary>
-        /// Updates the game audio manager internal state
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
-        {
-            audioList.ForEach(a => a.Update(gameTime));
         }
 
         /// <summary>
@@ -69,52 +59,46 @@ namespace Engine
         /// <param name="contentFolder">Content folder</param>
         /// <param name="fileName">Resource file name</param>
         /// <returns>Returns a list of game audios</returns>
-        public IEnumerable<GameAudio> CreateAudio(string contentFolder, string fileName)
+        public GameAudio CreateAudio(string name)
         {
-            List<GameAudio> res = new List<GameAudio>();
-
-            var paths = ContentManager.FindPaths(contentFolder, fileName);
-            if (paths.Any())
+            if (gameAudios.ContainsKey(name))
             {
-                foreach (var filename in paths)
-                {
-                    var audio = new GameAudio();
-                    audio.Load(filename);
-
-                    res.Add(audio);
-                }
-
-                //Add audios to internal "to dispose" list
-                audioList.AddRange(res);
+                return gameAudios[name];
             }
 
-            return res;
+            var audio = new GameAudio();
+
+            gameAudios.Add(name, audio);
+
+            return audio;
         }
+        /// <summary>
+        /// Creates a new effect
+        /// </summary>
+        /// <param name="audioName">Audio name</param>
+        /// <param name="effectName">Effect name</param>
+        /// <param name="contentFolder">Conten folder</param>
+        /// <param name="fileName">File name</param>
+        /// <returns></returns>
+        public GameAudioEffect CreateEffect(string audioName, string effectName, string contentFolder, string fileName)
+        {
+            var audio = gameAudios[audioName];
+
+            var paths = ContentManager.FindPaths(contentFolder, fileName);
+
+            return audio.GetEffect(effectName, paths.FirstOrDefault());
+        }
+
         /// <summary>
         /// Removes a single audio
         /// </summary>
-        /// <param name="audio">Audio to remove</param>
-        public void RemoveAudio(GameAudio audio)
+        /// <param name="name">Audio to remove</param>
+        public void RemoveAudio(string name)
         {
-            if (audioList.Contains(audio))
+            if (gameAudios.ContainsKey(name))
             {
-                audioList.Remove(audio);
-            }
-
-            audio.Dispose();
-        }
-        /// <summary>
-        /// Removes an audio list
-        /// </summary>
-        /// <param name="audios">Audio list to remove</param>
-        public void RemoveAudio(IEnumerable<GameAudio> audios)
-        {
-            if (audios?.Any() == true)
-            {
-                foreach (var audio in audios)
-                {
-                    RemoveAudio(audio);
-                }
+                gameAudios[name].Dispose();
+                gameAudios.Remove(name);
             }
         }
     }

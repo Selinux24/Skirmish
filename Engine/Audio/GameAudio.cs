@@ -4,7 +4,8 @@ using SharpDX.X3DAudio;
 using SharpDX.XAudio2;
 using SharpDX.XAudio2.Fx;
 using System;
-using System.IO;
+using System.Collections.Generic;
+using System.Linq;
 using MasteringLimiter = SharpDX.XAPO.Fx.MasteringLimiter;
 using MasteringLimiterParameters = SharpDX.XAPO.Fx.MasteringLimiterParameters;
 
@@ -16,18 +17,26 @@ namespace Engine.Audio
     public class GameAudio : IDisposable
     {
         /// <summary>
-        /// Input channels
+        /// Gets or sets the distance scaling ratio. Default is 1f.
         /// </summary>
-        private const int INPUTCHANNELS = 1;
+        public static float DistanceScale { get; set; } = 1f;
+        /// <summary>
+        /// Gets or sets the Doppler effect scale ratio. Default is 1f.
+        /// </summary>
+        public static float DopplerScale { get; set; } = 1f;
 
         /// <summary>
-        /// Game audio state
+        /// Device
         /// </summary>
-        private GameAudioState audioState;
+        private readonly XAudio2 device = null;
         /// <summary>
-        /// Source vouice events attached flag
+        /// 3D audio instance
         /// </summary>
-        private bool eventsAttached = false;
+        private X3DAudio x3DInstance = null;
+        /// <summary>
+        /// Mastering limiter
+        /// </summary>
+        private MasteringLimiter masteringLimiter = null;
         /// <summary>
         /// Master volume (from 0 to 1)
         /// </summary>
@@ -48,11 +57,28 @@ namespace Engine.Audio
         /// Audio 3D flag
         /// </summary>
         private bool useAudio3D = false;
+        /// <summary>
+        /// Effects dictionary
+        /// </summary>
+        private readonly Dictionary<string, GameAudioEffect> effects = new Dictionary<string, GameAudioEffect>();
 
         /// <summary>
-        /// Gets whether the audio is playing or not
+        /// Mastering voice
         /// </summary>
-        public bool Playing { get; private set; }
+        internal MasteringVoice MasteringVoice { get; set; }
+        /// <summary>
+        /// Reverb voice
+        /// </summary>
+        internal SubmixVoice ReverbVoice { get; set; }
+        /// <summary>
+        /// Reverb effect
+        /// </summary>
+        internal Reverb ReverbEffect { get; set; }
+        /// <summary>
+        /// Speakers
+        /// </summary>
+        internal Speakers Speakers { get; set; }
+
         /// <summary>
         /// Gets or sets the master volume value
         /// </summary>
@@ -74,7 +100,7 @@ namespace Engine.Audio
 
                 masterVolume = value;
 
-                audioState.MasteringVoice?.SetVolume(masterVolume);
+                this.MasteringVoice?.SetVolume(masterVolume);
             }
         }
         /// <summary>
@@ -92,11 +118,11 @@ namespace Engine.Audio
 
                 if (useMasteringLimiter)
                 {
-                    EnableMasteringLimiter();
+                    this.EnableMasteringLimiter();
                 }
                 else
                 {
-                    DisableMasteringLimiter();
+                    this.DisableMasteringLimiter();
                 }
             }
         }
@@ -115,14 +141,18 @@ namespace Engine.Audio
 
                 if (useReverb)
                 {
-                    EnableReverb();
+                    this.EnableReverb();
                 }
                 else
                 {
-                    DisableReverb();
+                    this.DisableReverb();
                 }
             }
         }
+        /// <summary>
+        /// Gets or sets whether the reverb effect use filters or not
+        /// </summary>
+        public bool UseReverbFilter { get; set; }
         /// <summary>
         /// Gets or sets the current reverb preset configuration
         /// </summary>
@@ -134,7 +164,7 @@ namespace Engine.Audio
             }
             set
             {
-                if (audioState.ReverbEffect == null || reverbPreset == value)
+                if (this.ReverbEffect == null || reverbPreset == value)
                 {
                     return;
                 }
@@ -143,7 +173,7 @@ namespace Engine.Audio
 
                 var reverbParam = GameAudioPresets.Convert(reverbPreset ?? ReverbPresets.Default);
 
-                audioState.ReverbVoice?.SetEffectParameters(0, reverbParam);
+                this.ReverbVoice?.SetEffectParameters(0, reverbParam);
             }
         }
         /// <summary>
@@ -161,35 +191,17 @@ namespace Engine.Audio
 
                 if (useAudio3D)
                 {
-                    EnableAudio3D();
+                    this.EnableAudio3D();
                 }
             }
         }
-
-        /// <summary>
-        /// Event fired when the audio starts
-        /// </summary>
-        public event GameAudioHandler AudioStart;
-        /// <summary>
-        /// Event fired when the audio ends
-        /// </summary>
-        public event GameAudioHandler AudioEnd;
-        /// <summary>
-        /// Event fired when a loop ends
-        /// </summary>
-        public event GameAudioHandler LoopEnd;
 
         /// <summary>
         /// Constructor
         /// </summary>
         internal GameAudio()
         {
-            audioState = new GameAudioState
-            {
-                EmitterAzimuths = new float[INPUTCHANNELS],
-            };
-
-            audioState.XAudio2 = new XAudio2();
+            this.device = new XAudio2();
 
 #if DEBUG
             DebugConfiguration debugConfiguration = new DebugConfiguration()
@@ -197,74 +209,15 @@ namespace Engine.Audio
                 TraceMask = (int)(LogType.Errors | LogType.Warnings),
                 BreakMask = (int)(LogType.Errors),
             };
-            audioState.XAudio2.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
+            this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
 #endif
 
+            this.MasteringVoice = new MasteringVoice(this.device);
 
+            this.MasteringVoice.GetChannelMask(out int channelMask);
+            this.Speakers = (Speakers)channelMask;
 
-
-            audioState.MasteringVoice = new MasteringVoice(audioState.XAudio2);
-
-            var voiceDetails = audioState.MasteringVoice.VoiceDetails;
-
-            audioState.MasteringVoice.GetChannelMask(out int channelMask);
-            audioState.Speakers = (Speakers)channelMask;
-
-            audioState.MasteringVoice.SetVolume(MasterVolume);
-
-
-
-            audioState.ReverbVoice = new SubmixVoice(
-                audioState.XAudio2,
-                INPUTCHANNELS,
-                voiceDetails.InputSampleRate,
-                SubmixVoiceFlags.UseFilter,
-                0);
-
-
-
-            audioState.UseRedirectToLFE = audioState.Speakers.HasFlag(Speakers.LowFrequency);
-
-            audioState.ListenerPos = Vector3.Zero;
-            audioState.ListenerOrientation = Vector3.ForwardLH;
-            audioState.Listener = new Listener
-            {
-                Position = audioState.ListenerPos,
-
-                OrientFront = audioState.ListenerOrientation,
-                OrientTop = Vector3.Up,
-
-                Cone = GameAudioPresets.DefaultListenerDirectionalCone,
-            };
-
-            audioState.EmitterPos = Vector3.ForwardLH * 10.0f;
-            audioState.EmitterOrientation = Vector3.ForwardLH;
-            audioState.Emitter = new Emitter
-            {
-                Cone = null,
-
-                Position = audioState.EmitterPos,
-
-                OrientFront = audioState.EmitterOrientation,
-                OrientTop = Vector3.Up,
-
-                ChannelCount = INPUTCHANNELS,
-                ChannelRadius = 1.0f,
-                ChannelAzimuths = audioState.EmitterAzimuths,
-
-                InnerRadius = 2.0f,
-                InnerRadiusAngle = MathUtil.PiOverFour,
-
-                VolumeCurve = GameAudioPresets.DefaultLinearCurve,
-                LfeCurve = GameAudioPresets.DefaultEmitterLfeCurve,
-                LpfDirectCurve = null, // use default curve
-                LpfReverbCurve = null, // use default curve
-                ReverbCurve = GameAudioPresets.DefaultEmitterReverbCurve,
-                CurveDistanceScaler = 14.0f,
-                DopplerScaler = 1.0f,
-            };
-
-            audioState.DspSettings = new DspSettings(INPUTCHANNELS, voiceDetails.InputChannelCount);
+            this.MasteringVoice.SetVolume(this.MasterVolume);
         }
         /// <summary>
         /// Destructor
@@ -290,234 +243,61 @@ namespace Engine.Audio
         {
             if (disposing)
             {
-                audioState.SourceVoice.DestroyVoice();
-                audioState.SourceVoice.Dispose();
+                this.effects.Values.ToList().ForEach(e => e.Dispose());
+                this.effects.Clear();
 
-                audioState.ReverbVoice.DestroyVoice();
-                audioState.ReverbVoice.Dispose();
+                this.x3DInstance = null;
 
-                audioState.MasteringVoice.DestroyVoice();
-                audioState.MasteringVoice.Dispose();
+                this.ReverbVoice?.DestroyVoice();
+                this.ReverbVoice?.Dispose();
+                this.ReverbVoice = null;
+                this.ReverbEffect?.Dispose();
+                this.ReverbEffect = null;
 
-                audioState.XAudio2.StopEngine();
-                audioState.XAudio2.Dispose();
+                this.MasteringVoice?.DestroyVoice();
+                this.MasteringVoice?.Dispose();
+                this.MasteringVoice = null;
 
-                audioState.ReverbEffect?.Dispose();
-                audioState.MasteringLimiter?.Dispose();
+                this.masteringLimiter?.Dispose();
+                this.masteringLimiter = null;
+
+                this.device?.StopEngine();
+                this.device?.Dispose();
             }
         }
 
         /// <summary>
-        /// Loads a file in the audio buffer
+        /// Gets an effect from de audio
         /// </summary>
+        /// <param name="name">Effect name</param>
         /// <param name="fileName">File name</param>
-        public void Load(string fileName)
+        /// <returns>Returns the new created effect</returns>
+        internal GameAudioEffect GetEffect(string name, string fileName)
         {
-            if (audioState.SourceVoice != null)
+            if (effects.ContainsKey(name))
             {
-                audioState.SourceVoice.Stop(0);
-
-                if (eventsAttached)
-                {
-                    audioState.SourceVoice.BufferStart -= SourceVoice_BufferStart;
-                    audioState.SourceVoice.BufferEnd -= SourceVoice_BufferEnd;
-                    audioState.SourceVoice.LoopEnd -= SourceVoice_LoopEnd;
-
-                    eventsAttached = false;
-                }
-
-                audioState.SourceVoice.DestroyVoice();
-                audioState.SourceVoice = null;
+                return effects[name];
             }
 
-            using (var stream = new SoundStream(File.OpenRead(fileName)))
-            {
-                var waveFormat = stream.Format;
-                var decodedPacketsInfo = stream.DecodedPacketsInfo;
-                var buffer = new AudioBuffer
-                {
-                    Stream = stream.ToDataStream(),
-                    AudioBytes = (int)stream.Length,
-                    Flags = BufferFlags.EndOfStream
-                };
+            var effect = GameAudioEffect.Load(this, name, fileName);
 
-                audioState.SourceVoice = new SourceVoice(audioState.XAudio2, waveFormat, VoiceFlags.UseFilter, true);
+            effects.Add(name, effect);
 
-                VoiceSendDescriptor[] sendDescriptors = new VoiceSendDescriptor[]
-                {
-                    new  VoiceSendDescriptor(VoiceSendFlags.UseFilter, audioState.MasteringVoice),
-                    new  VoiceSendDescriptor(VoiceSendFlags.UseFilter, audioState.ReverbVoice),
-                };
-                audioState.SourceVoice.SetOutputVoices(sendDescriptors);
-
-                if (!eventsAttached)
-                {
-                    audioState.SourceVoice.BufferStart += SourceVoice_BufferStart;
-                    audioState.SourceVoice.BufferEnd += SourceVoice_BufferEnd;
-                    audioState.SourceVoice.LoopEnd += SourceVoice_LoopEnd;
-
-                    eventsAttached = true;
-                }
-
-                audioState.SourceVoice.SubmitSourceBuffer(buffer, decodedPacketsInfo);
-                audioState.FrameToApply3DAudio = 0;
-            }
+            return effect;
         }
 
         /// <summary>
-        /// Updates the game audio
+        /// Creates a new source voice
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        public void Update(GameTime gameTime)
+        /// <param name="format">Voice format</param>
+        /// <returns>Returns the new voice</returns>
+        internal SourceVoice CreateVoice(WaveFormat format)
         {
-            if (useAudio3D)
-            {
-                if (audioState.FrameToApply3DAudio == 0)
-                {
-                    this.UpdateState(gameTime);
-                }
-
-                audioState.FrameToApply3DAudio++;
-                audioState.FrameToApply3DAudio &= 1;
-            }
-        }
-        /// <summary>
-        /// Updates the 3D audio state
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        private void UpdateState(GameTime gameTime)
-        {
-            // Calculate listener orientation in x-z plane
-            Vector3 pListenerPos = audioState.ListenerPos;
-            Vector3 listenerPos = audioState.Listener.Position;
-
-            if (pListenerPos.XZ() != listenerPos.XZ())
-            {
-                var v1 = pListenerPos;
-                var v2 = listenerPos;
-
-                var vDelta = v1 - v2;
-                vDelta.Y = 0.0f;
-                vDelta.Normalize();
-
-                audioState.Listener.OrientFront = new Vector3(vDelta.X, 0.0f, vDelta.Z);
-            }
-
-            audioState.Emitter.InnerRadius = 2.0f;
-            audioState.Emitter.InnerRadiusAngle = MathUtil.PiOverFour;
-
-            if (gameTime.ElapsedSeconds > 0)
-            {
-                var v1 = audioState.ListenerPos;
-                var v2 = audioState.Listener.Position;
-
-                var lVelocity = (v1 - v2) / gameTime.ElapsedSeconds;
-                audioState.Listener.Position = audioState.ListenerPos;
-
-                audioState.Listener.Velocity = lVelocity;
-
-                v1 = audioState.EmitterPos;
-                v2 = audioState.Emitter.Position;
-
-                var eVelocity = (v1 - v2) / gameTime.ElapsedSeconds;
-                audioState.Emitter.Position = audioState.EmitterPos;
-
-                audioState.Emitter.Velocity = eVelocity;
-            }
-
-            var calcFlags =
-                CalculateFlags.Matrix |
-                CalculateFlags.Doppler |
-                CalculateFlags.LpfDirect |
-                CalculateFlags.LpfReverb |
-                CalculateFlags.Reverb;
-
-            if (audioState.UseRedirectToLFE)
-            {
-                // On devices with an LFE channel, allow the mono source data
-                // to be routed to the LFE destination channel.
-                calcFlags |= CalculateFlags.RedirectToLfe;
-            }
-
-            audioState.X3DInstance.Calculate(
-                audioState.Listener,
-                audioState.Emitter,
-                calcFlags,
-                audioState.DspSettings);
-
-            var voice = audioState.SourceVoice;
-            if (voice != null)
-            {
-                // Apply X3DAudio generated DSP settings to XAudio2
-                voice.SetFrequencyRatio(audioState.DspSettings.DopplerFactor);
-
-                voice.SetOutputMatrix(
-                    audioState.MasteringVoice,
-                    audioState.DspSettings.SourceChannelCount,
-                    audioState.DspSettings.DestinationChannelCount,
-                    audioState.DspSettings.MatrixCoefficients);
-
-                if (useReverb)
-                {
-                    voice.SetOutputMatrix(
-                        audioState.ReverbVoice,
-                        INPUTCHANNELS,
-                        1,
-                        new float[]
-                        {
-                            audioState.DspSettings.ReverbLevel
-                        });
-
-                    FilterParameters filterDirect = new FilterParameters()
-                    {
-                        Type = FilterType.LowPassFilter,
-                        Frequency = 2.0f * (float)Math.Sin(MathUtil.Pi / 6.0f * audioState.DspSettings.LpfDirectCoefficient),
-                        OneOverQ = 1.0f,
-                    };
-                    voice.SetOutputFilterParameters(audioState.MasteringVoice, filterDirect);
-
-                    FilterParameters filterReverb = new FilterParameters()
-                    {
-                        Type = FilterType.LowPassFilter,
-                        Frequency = 2.0f * (float)Math.Sin(MathUtil.Pi / 6.0f * audioState.DspSettings.LpfReverbCoefficient),
-                        OneOverQ = 1.0f
-                    };
-                    voice.SetOutputFilterParameters(audioState.ReverbVoice, filterReverb);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Play audio
-        /// </summary>
-        public void Play()
-        {
-            Playing = true;
-            audioState.SourceVoice.Start(0);
-        }
-        /// <summary>
-        /// Stop audio
-        /// </summary>
-        public void Stop()
-        {
-            Playing = false;
-            audioState.SourceVoice.Stop(0);
-        }
-        /// <summary>
-        /// Pause audio
-        /// </summary>
-        public void Pause()
-        {
-            Playing = false;
-            audioState.XAudio2.StopEngine();
-        }
-        /// <summary>
-        /// Resume audio
-        /// </summary>
-        public void Resume()
-        {
-            Playing = true;
-            audioState.XAudio2.StartEngine();
+            return new SourceVoice(
+                this.device,
+                format,
+                VoiceFlags.None,
+                XAudio2.MaximumFrequencyRatio);
         }
 
         /// <summary>
@@ -545,50 +325,28 @@ namespace Engine.Audio
                     Release = release
                 };
 
-                audioState.MasteringVoice?.SetEffectParameters(0, parameters);
+                this.MasteringVoice?.SetEffectParameters(0, parameters);
             }
         }
-
-        /// <summary>
-        /// Updates the emitter position and orientation
-        /// </summary>
-        /// <param name="position">Position coordinate</param>
-        /// <param name="orientation">Orientation vector</param>
-        public void UpdateEmitter(Vector3 position, Vector3 orientation)
-        {
-            audioState.EmitterPos = position;
-            audioState.EmitterOrientation = orientation;
-        }
-        /// <summary>
-        /// Updates the listener position and orientation
-        /// </summary>
-        /// <param name="position">Position coordinate</param>
-        /// <param name="orientation">Orientation vector</param>
-        public void UpdateListener(Vector3 position, Vector3 orientation)
-        {
-            audioState.ListenerPos = position;
-            audioState.ListenerOrientation = orientation;
-        }
-
         /// <summary>
         /// Enables the mastering limiter
         /// </summary>
         private void EnableMasteringLimiter()
         {
-            if (audioState.MasteringLimiter == null)
+            if (this.masteringLimiter == null)
             {
-                audioState.MasteringLimiter = new MasteringLimiter(audioState.XAudio2);
-                audioState.MasteringVoice.SetEffectChain(new EffectDescriptor(audioState.MasteringLimiter));
+                this.masteringLimiter = new MasteringLimiter(this.device);
+                this.MasteringVoice.SetEffectChain(new EffectDescriptor(this.masteringLimiter));
             }
 
-            audioState.MasteringVoice?.EnableEffect(0);
+            this.MasteringVoice?.EnableEffect(0);
         }
         /// <summary>
         /// Disables the mastering limiter
         /// </summary>
         private void DisableMasteringLimiter()
         {
-            audioState.MasteringVoice?.DisableEffect(0);
+            this.MasteringVoice?.DisableEffect(0);
         }
 
         /// <summary>
@@ -596,78 +354,49 @@ namespace Engine.Audio
         /// </summary>
         private void EnableReverb()
         {
-            if (audioState.ReverbEffect == null)
+            if (this.ReverbVoice == null)
             {
-                audioState.ReverbEffect = new Reverb(audioState.XAudio2);
-                audioState.ReverbVoice.SetEffectChain(new EffectDescriptor(audioState.ReverbEffect, 1));
+                var masterDetails = this.MasteringVoice.VoiceDetails;
+                var sendFlags = this.UseReverbFilter ? SubmixVoiceFlags.UseFilter : SubmixVoiceFlags.None;
+                this.ReverbVoice = new SubmixVoice(this.device, 1, masterDetails.InputSampleRate, sendFlags, 0);
             }
 
-            audioState.ReverbVoice?.EnableEffect(0);
+            if (this.ReverbEffect == null)
+            {
+                this.ReverbEffect = new Reverb(this.device);
+                this.ReverbVoice.SetEffectChain(new EffectDescriptor(this.ReverbEffect, 1));
+            }
+
+            this.ReverbVoice.EnableEffect(0);
         }
         /// <summary>
         /// Disables the reverb effect
         /// </summary>
         private void DisableReverb()
         {
-            audioState.ReverbVoice?.DisableEffect(0);
+            this.ReverbVoice?.DisableEffect(0);
         }
+
         /// <summary>
         /// Enables the 3D audio instance
         /// </summary>
         public void EnableAudio3D(float speedOfSound = X3DAudio.SpeedOfSound)
         {
-            if (audioState.X3DInstance == null)
+            if (this.x3DInstance == null)
             {
-                audioState.X3DInstance = new X3DAudio(audioState.Speakers, speedOfSound);
+                this.x3DInstance = new X3DAudio(this.Speakers, speedOfSound);
             }
         }
-
         /// <summary>
-        /// Internal buffer starts handler
+        /// Calculates the 3D audio effect
         /// </summary>
-        /// <param name="obj">Pointer</param>
-        private void SourceVoice_BufferStart(IntPtr obj)
+        /// <param name="listener">Listener</param>
+        /// <param name="emitter">Emitter</param>
+        /// <param name="flags">Calculate flags</param>
+        /// <param name="dspSettings">DSP settings</param>
+        internal void Calculate3D(Listener listener, Emitter emitter, CalculateFlags flags, DspSettings dspSettings)
         {
-            FireAudioStart();
-        }
-        /// <summary>
-        /// Internal buffer ends handler
-        /// </summary>
-        /// <param name="obj">Pointer</param>
-        private void SourceVoice_BufferEnd(IntPtr obj)
-        {
-            FireAudioEnd();
-        }
-        /// <summary>
-        /// Internal loop ends handler
-        /// </summary>
-        /// <param name="obj">Pointer</param>
-        private void SourceVoice_LoopEnd(IntPtr obj)
-        {
-            FireLoopEnd();
-        }
-        /// <summary>
-        /// Fires the audio start event
-        /// </summary>
-        private void FireAudioStart()
-        {
-            Playing = true;
-            AudioStart?.Invoke(this, new GameAudioEventArgs());
-        }
-        /// <summary>
-        /// Fires the audio end event
-        /// </summary>
-        private void FireAudioEnd()
-        {
-            Playing = false;
-            AudioEnd?.Invoke(this, new GameAudioEventArgs());
-        }
-        /// <summary>
-        /// Fires the loop end event
-        /// </summary>
-        private void FireLoopEnd()
-        {
-            LoopEnd?.Invoke(this, new GameAudioEventArgs());
+            this.x3DInstance?.Calculate(listener, emitter, flags, dspSettings);
         }
     }
 }
