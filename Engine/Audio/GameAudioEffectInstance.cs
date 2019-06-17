@@ -122,6 +122,9 @@ namespace Engine.Audio
             }
         }
 
+        public GameAudioAgent EmitterAgent { get; set; }
+        public GameAudioAgent ListenerAgent { get; set; }
+
         /// <summary>
         /// Gets the current audio buffer.
         /// </summary>
@@ -216,71 +219,10 @@ namespace Engine.Audio
         }
 
         /// <summary>
-        /// Applies the 2D effect to the current sound effect instance.
+        /// Updates internal state
         /// </summary>
-        /// <param name="listener">The listener position.</param>
-        /// <param name="listenerVelocity">The listener velocity.</param>
-        /// <param name="emitter">The emitter position.</param>
-        /// <param name="emitterVelocity">The emitter velocity.</param>
-        public void Apply2D(Vector2 listener, Vector2 listenerVelocity, Vector2 emitter, Vector2 emitterVelocity)
+        public void Update()
         {
-            var listenerAgent = new GameAudioAgent
-            {
-                Forward = Vector3.ForwardLH,
-                Up = Vector3.Up,
-                Position = new Vector3(listener, 0),
-                Velocity = new Vector3(listenerVelocity, 0),
-            };
-
-            var emitterAgent = new GameAudioAgent
-            {
-                Forward = Vector3.ForwardLH,
-                Up = Vector3.Up,
-                Position = new Vector3(emitter, 0),
-                Velocity = new Vector3(emitterVelocity, 0),
-            };
-
-            Apply3D(listenerAgent, emitterAgent);
-        }
-        /// <summary>
-        /// Applies the 3D effect to the current sound effect instance.
-        /// </summary>
-        /// <param name="listenerWorld">The listener world matrix.</param>
-        /// <param name="listenerVelocity">The listener velocity.</param>
-        /// <param name="emitterWorld">The emitter world matrix.</param>
-        /// <param name="emitterVelocity">The emitter velocity.</param>
-        public void Apply3D(Matrix listenerWorld, Vector3 listenerVelocity, Matrix emitterWorld, Vector3 emitterVelocity)
-        {
-            var listenerAgent = new GameAudioAgent
-            {
-                Forward = listenerWorld.Forward,
-                Up = listenerWorld.Up,
-                Position = listenerWorld.TranslationVector,
-                Velocity = listenerVelocity,
-            };
-
-            var emitterAgent = new GameAudioAgent
-            {
-                Forward = emitterWorld.Forward,
-                Up = emitterWorld.Up,
-                Position = emitterWorld.TranslationVector,
-                Velocity = emitterVelocity,
-            };
-
-            Apply3D(listenerAgent, emitterAgent);
-        }
-        /// <summary>
-        /// Applies the 3D effect to the current sound effect instance.
-        /// </summary>
-        /// <param name="listenerAgent">Listener</param>
-        /// <param name="emitterAgent">Emitter</param>
-        private void Apply3D(GameAudioAgent listenerAgent, GameAudioAgent emitterAgent)
-        {
-            if (!this.Effect.GameAudio.UseAudio3D)
-            {
-                return;
-            }
-
             if (this.Effect.GameAudio.UseReverb && !isReverbSubmixEnabled)
             {
                 var sendFlags = this.Effect.GameAudio.UseReverbFilter ?
@@ -298,8 +240,71 @@ namespace Engine.Audio
                 isReverbSubmixEnabled = true;
             }
 
-            UpdateListener(listenerAgent);
-            UpdateEmitter(emitterAgent);
+            if (this.Effect.GameAudio.UseAudio3D)
+            {
+                this.Apply3D();
+            }
+        }
+
+        /// <summary>
+        /// Applies the 2D effect to the current sound effect instance.
+        /// </summary>
+        /// <param name="listener">The listener position.</param>
+        /// <param name="listenerVelocity">The listener velocity.</param>
+        /// <param name="emitter">The emitter position.</param>
+        /// <param name="emitterVelocity">The emitter velocity.</param>
+        public void Apply2D(Vector2 listener, Vector2 listenerVelocity, Vector2 emitter, Vector2 emitterVelocity)
+        {
+            ListenerAgent = new GameAudioAgent
+            {
+                Forward = Vector3.ForwardLH,
+                Up = Vector3.Up,
+                Position = new Vector3(listener, 0),
+                Velocity = new Vector3(listenerVelocity, 0),
+            };
+
+            EmitterAgent = new GameAudioAgent
+            {
+                Forward = Vector3.ForwardLH,
+                Up = Vector3.Up,
+                Position = new Vector3(emitter, 0),
+                Velocity = new Vector3(emitterVelocity, 0),
+            };
+        }
+        /// <summary>
+        /// Applies the 3D effect to the current sound effect instance.
+        /// </summary>
+        /// <param name="listenerWorld">The listener world matrix.</param>
+        /// <param name="listenerVelocity">The listener velocity.</param>
+        /// <param name="emitterWorld">The emitter world matrix.</param>
+        /// <param name="emitterVelocity">The emitter velocity.</param>
+        public void Apply3D(Matrix listenerWorld, Vector3 listenerVelocity, Matrix emitterWorld, Vector3 emitterVelocity)
+        {
+            ListenerAgent = new GameAudioAgent
+            {
+                Forward = listenerWorld.Forward,
+                Up = listenerWorld.Up,
+                Position = listenerWorld.TranslationVector,
+                Velocity = listenerVelocity,
+            };
+
+            EmitterAgent = new GameAudioAgent
+            {
+                Forward = emitterWorld.Forward,
+                Up = emitterWorld.Up,
+                Position = emitterWorld.TranslationVector,
+                Velocity = emitterVelocity,
+            };
+        }
+        /// <summary>
+        /// Applies the 3D effect to the current sound effect instance.
+        /// </summary>
+        /// <param name="listenerAgent">Listener</param>
+        /// <param name="emitterAgent">Emitter</param>
+        private void Apply3D()
+        {
+            UpdateListener(ListenerAgent);
+            UpdateEmitter(EmitterAgent);
 
             var flags = Calculate3DFlags();
 

@@ -15,7 +15,7 @@ namespace Engine
         /// <summary>
         /// Game audios dictionary
         /// </summary>
-        private readonly Dictionary<string, GameAudio> gameAudios = new Dictionary<string, GameAudio>();
+        private readonly Dictionary<string, GameAudio> gameAudioList = new Dictionary<string, GameAudio>();
 
         /// <summary>
         /// Constructor
@@ -48,8 +48,8 @@ namespace Engine
         {
             if (disposing)
             {
-                gameAudios.Values.ToList().ForEach(a => a.Dispose());
-                gameAudios.Clear();
+                gameAudioList.Values.ToList().ForEach(a => a.Dispose());
+                gameAudioList.Clear();
             }
         }
 
@@ -61,14 +61,14 @@ namespace Engine
         /// <returns>Returns a list of game audios</returns>
         public GameAudio CreateAudio(string name)
         {
-            if (gameAudios.ContainsKey(name))
+            if (gameAudioList.ContainsKey(name))
             {
-                return gameAudios[name];
+                return gameAudioList[name];
             }
 
             var audio = new GameAudio();
 
-            gameAudios.Add(name, audio);
+            gameAudioList.Add(name, audio);
 
             return audio;
         }
@@ -82,7 +82,7 @@ namespace Engine
         /// <returns></returns>
         public GameAudioEffect CreateEffect(string audioName, string effectName, string contentFolder, string fileName)
         {
-            var audio = gameAudios[audioName];
+            var audio = gameAudioList[audioName];
 
             var paths = ContentManager.FindPaths(contentFolder, fileName);
 
@@ -95,10 +95,10 @@ namespace Engine
         /// <param name="name">Audio to remove</param>
         public void RemoveAudio(string name)
         {
-            if (gameAudios.ContainsKey(name))
+            if (gameAudioList.ContainsKey(name))
             {
-                gameAudios[name].Dispose();
-                gameAudios.Remove(name);
+                gameAudioList[name].Dispose();
+                gameAudioList.Remove(name);
             }
         }
     }

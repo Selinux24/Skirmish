@@ -22,17 +22,19 @@ namespace Collada
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.RosyBrown, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
 
-        private GameAudioEffect pushButton = null;
-
-        private readonly string[] audios = new string[]
+        private GameAudio music = null;
+        private GameAudioEffect musicEffect = null;
+        private GameAudioEffectInstance currentMusic = null;
+        private readonly string[] musicList = new string[]
         {
             "Electro_1.wav",
             "HipHoppy_1.wav",
         };
-        private int audioIndex = 0;
-        private int audioLoops = 0;
-        private GameAudio currentAudio = null;
-        private GameAudioEffectInstance currentEffectInstance = null;
+        private int musicIndex = 0;
+        private int musicLoops = 0;
+
+        private GameAudio effects = null;
+        private GameAudioEffect pushButtonEffect = null;
 
         public SceneStart(Game game) : base(game)
         {
@@ -191,10 +193,9 @@ namespace Collada
             this.exitButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Height / 2);
             this.exitButton.Click += ExitButtonClick;
 
-            var effects = this.AudioManager.CreateAudio("effects");
-            effects.MasterVolume = 0.5f;
-            effects.UseMasteringLimiter = true;
-            this.pushButton = this.AudioManager.CreateEffect("effects", "push", "Resources/Common", "push.wav");
+            this.effects = this.AudioManager.CreateAudio("effects");
+            this.effects.MasterVolume = 0.25f;
+            this.pushButtonEffect = this.AudioManager.CreateEffect("effects", "push", "Resources/Common", "push.wav");
         }
 
         public override void Update(GameTime gameTime)
@@ -204,53 +205,56 @@ namespace Collada
             UpdateAudioInput(gameTime);
 
             PlayAudio();
+
+            this.musicEffect.Update();
+            this.pushButtonEffect.Update();
         }
         private void UpdateAudioInput(GameTime gameTime)
         {
-            if (currentAudio == null)
+            if (music == null)
             {
                 return;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.S))
             {
-                if (currentEffectInstance.State == AudioState.Playing)
+                if (currentMusic.State == AudioState.Playing)
                 {
-                    currentEffectInstance.Pause();
+                    currentMusic.Pause();
                 }
                 else
                 {
-                    currentEffectInstance.Resume();
+                    currentMusic.Resume();
                 }
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.L))
             {
-                currentAudio.UseMasteringLimiter = !currentAudio.UseMasteringLimiter;
+                music.UseMasteringLimiter = !music.UseMasteringLimiter;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.R))
             {
-                currentAudio.UseReverb = !currentAudio.UseReverb;
+                music.UseReverb = !music.UseReverb;
             }
             if (this.Game.Input.KeyJustReleased(Keys.H))
             {
-                currentAudio.ReverbPreset = ReverbPresets.Default;
+                music.ReverbPreset = ReverbPresets.Forest;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.P))
             {
-                currentAudio.UseAudio3D = !currentAudio.UseAudio3D;
+                music.UseAudio3D = !music.UseAudio3D;
             }
 
             if (this.Game.Input.KeyPressed(Keys.Subtract))
             {
-                currentAudio.MasterVolume -= gameTime.ElapsedSeconds / 10;
+                music.MasterVolume -= gameTime.ElapsedSeconds / 10;
             }
 
             if (this.Game.Input.KeyPressed(Keys.Add))
             {
-                currentAudio.MasterVolume += gameTime.ElapsedSeconds / 10;
+                music.MasterVolume += gameTime.ElapsedSeconds / 10;
             }
         }
 
@@ -258,9 +262,9 @@ namespace Collada
         {
             Task.Run(async () =>
             {
-                this.pushButton.Create().Play();
+                this.pushButtonEffect.Create().Play();
 
-                await Task.Delay(this.pushButton.Duration);
+                await Task.Delay(this.pushButtonEffect.Duration);
 
                 if (sender == this.sceneDungeonWallButton)
                 {
@@ -284,9 +288,9 @@ namespace Collada
         {
             Task.Run(async () =>
             {
-                this.pushButton.Create().Play();
+                this.pushButtonEffect.Create().Play();
 
-                await Task.Delay(this.pushButton.Duration);
+                await Task.Delay(this.pushButtonEffect.Duration);
 
                 this.Game.Exit();
             });
@@ -294,50 +298,46 @@ namespace Collada
 
         private void PlayAudio()
         {
-            if (currentEffectInstance != null)
+            if (currentMusic != null)
             {
                 return;
             }
 
-            audioIndex++;
-            audioIndex %= audios.Length;
+            musicIndex++;
+            musicIndex %= musicList.Length;
 
-            if (currentAudio == null)
+            if (music == null)
             {
-                currentAudio = this.AudioManager.CreateAudio("music");
+                music = this.AudioManager.CreateAudio("music");
 
-                currentAudio.UseMasteringLimiter = true;
-                currentAudio.SetMasteringLimit(8, 900);
-
-                currentAudio.UseReverb = true;
-                currentAudio.UseReverbFilter = true;
-
-                currentAudio.MasterVolume = 0.01f;
+                music.UseMasteringLimiter = true;
+                music.SetMasteringLimit(8, 900);
+                music.MasterVolume = 0.01f;
             }
 
-            var effect = this.AudioManager.CreateEffect("music", $"Music{audioIndex}", "Resources/Common", audios[audioIndex]);
-            currentEffectInstance = effect.Create();
-            currentEffectInstance.IsLooped = true;
+            this.musicEffect = this.AudioManager.CreateEffect("music", $"Music{musicIndex}", "Resources/Common", musicList[musicIndex]);
+            currentMusic = this.musicEffect.Create();
+            currentMusic.IsLooped = true;
 
-            currentEffectInstance.AudioEnd += AudioManager_AudioEnd;
-            currentEffectInstance.LoopEnd += AudioManager_LoopEnd;
-            currentEffectInstance.Play();
+            currentMusic.AudioEnd += AudioManager_AudioEnd;
+            currentMusic.LoopEnd += AudioManager_LoopEnd;
+            currentMusic.Play();
         }
 
         private void AudioManager_AudioEnd(object sender, GameAudioEventArgs e)
         {
-            currentEffectInstance = null;
+            currentMusic = null;
         }
         private void AudioManager_LoopEnd(object sender, GameAudioEventArgs e)
         {
-            audioLoops++;
+            musicLoops++;
 
-            if (audioLoops > 4)
+            if (musicLoops > 4)
             {
-                audioLoops = 0;
+                musicLoops = 0;
 
-                currentEffectInstance.Stop(true);
-                currentEffectInstance = null;
+                currentMusic.Stop(true);
+                currentMusic = null;
             }
         }
     }

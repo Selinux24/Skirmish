@@ -16,12 +16,33 @@ namespace Engine.Audio
         /// </summary>
         private readonly List<GameAudioEffectInstance> toDelete = new List<GameAudioEffectInstance>();
 
+        /// <summary>
+        /// Game audio
+        /// </summary>
         public GameAudio GameAudio { get; set; }
+        /// <summary>
+        /// Effect name
+        /// </summary>
         public string Name { get; set; }
+        /// <summary>
+        /// Wave format
+        /// </summary>
         public WaveFormat WaveFormat { get; set; }
+        /// <summary>
+        /// Decoded packets info
+        /// </summary>
         public uint[] DecodedPacketsInfo { get; set; }
+        /// <summary>
+        /// Default audio buffer
+        /// </summary>
         public AudioBuffer AudioBuffer { get; set; }
+        /// <summary>
+        /// Looped audio buffer
+        /// </summary>
         public AudioBuffer LoopedAudioBuffer { get; set; }
+        /// <summary>
+        /// Effect duration
+        /// </summary>
         public TimeSpan Duration { get; set; }
 
         /// <summary>
@@ -115,12 +136,29 @@ namespace Engine.Audio
         }
 
         /// <summary>
+        /// Updates internal state
+        /// </summary>
+        public void Update()
+        {
+            toDelete.ForEach(i =>
+            {
+                if (i.State == AudioState.Playing)
+                {
+                    i.Update();
+                }
+            });
+        }
+
+        /// <summary>
         /// Creates a new effect instance
         /// </summary>
+        /// <param name="useFilters">Sets whether the source voice use voice filters or not</param>
         /// <returns>Returns the new created instance</returns>
-        public GameAudioEffectInstance Create()
+        public GameAudioEffectInstance Create(bool useFilters = true)
         {
-            var sourceVoice = this.GameAudio.CreateVoice(this.WaveFormat);
+            var sourceVoice = this.GameAudio.CreateVoice(
+                this.WaveFormat,
+                useFilters ? VoiceFlags.UseFilter : VoiceFlags.None);
 
             var instance = new GameAudioEffectInstance(this, sourceVoice);
 

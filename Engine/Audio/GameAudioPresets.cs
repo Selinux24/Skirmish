@@ -53,7 +53,10 @@ namespace Engine.Audio
         /// <returns>Returns the ReverbParameters type</returns>
         public static ReverbParameters Convert(ReverbPresets preset)
         {
-            return (ReverbParameters)reverbPresetsList[(int)(preset)];
+            var reverbPreset = reverbPresetsList[(int)(preset)];
+            var reverbParams = (ReverbParameters)reverbPreset;
+
+            return reverbParams;
         }
 
         /// <summary>

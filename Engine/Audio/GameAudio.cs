@@ -152,7 +152,7 @@ namespace Engine.Audio
         /// <summary>
         /// Gets or sets whether the reverb effect use filters or not
         /// </summary>
-        public bool UseReverbFilter { get; set; }
+        public bool UseReverbFilter { get; set; } = true;
         /// <summary>
         /// Gets or sets the current reverb preset configuration
         /// </summary>
@@ -171,9 +171,14 @@ namespace Engine.Audio
 
                 reverbPreset = value;
 
+                if (this.ReverbVoice == null)
+                {
+                    return;
+                }
+
                 var reverbParam = GameAudioPresets.Convert(reverbPreset ?? ReverbPresets.Default);
 
-                this.ReverbVoice?.SetEffectParameters(0, reverbParam);
+                this.ReverbVoice.SetEffectParameters(0, reverbParam);
             }
         }
         /// <summary>
@@ -210,6 +215,8 @@ namespace Engine.Audio
                 BreakMask = (int)(LogType.Errors),
             };
             this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
+
+            this.device.CriticalError += Device_CriticalError;
 #endif
 
             this.MasteringVoice = new MasteringVoice(this.device);
@@ -219,6 +226,12 @@ namespace Engine.Audio
 
             this.MasteringVoice.SetVolume(this.MasterVolume);
         }
+
+        private void Device_CriticalError(object sender, ErrorEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Destructor
         /// </summary>
@@ -290,13 +303,14 @@ namespace Engine.Audio
         /// Creates a new source voice
         /// </summary>
         /// <param name="format">Voice format</param>
+        /// <param name="voiceFlags">Voice flags</param>
         /// <returns>Returns the new voice</returns>
-        internal SourceVoice CreateVoice(WaveFormat format)
+        internal SourceVoice CreateVoice(WaveFormat format, VoiceFlags voiceFlags)
         {
             return new SourceVoice(
                 this.device,
                 format,
-                VoiceFlags.None,
+                voiceFlags,
                 XAudio2.MaximumFrequencyRatio);
         }
 
