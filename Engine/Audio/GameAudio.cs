@@ -215,8 +215,6 @@ namespace Engine.Audio
                 BreakMask = (int)(LogType.Errors),
             };
             this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
-
-            this.device.CriticalError += Device_CriticalError;
 #endif
 
             this.MasteringVoice = new MasteringVoice(this.device);
@@ -225,11 +223,6 @@ namespace Engine.Audio
             this.Speakers = (Speakers)channelMask;
 
             this.MasteringVoice.SetVolume(this.MasterVolume);
-        }
-
-        private void Device_CriticalError(object sender, ErrorEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
