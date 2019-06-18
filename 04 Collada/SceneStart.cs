@@ -36,8 +36,8 @@ namespace Collada
         private GameAudio effects = null;
         private GameAudioEffect pushButtonEffect = null;
 
-        private Vector3 emitterPosition = Vector3.Zero;
-        private Vector3 listenerPosition = Vector3.Zero;
+        private readonly Manipulator3D emitterPosition = new Manipulator3D();
+        private readonly Manipulator3D listenerPosition = new Manipulator3D();
 
         public SceneStart(Game game) : base(game)
         {
@@ -265,25 +265,28 @@ namespace Collada
                 return;
             }
 
+            bool shift = this.Game.Input.KeyPressed(Keys.Shift);
+
+            var agentPosition = shift ? emitterPosition : listenerPosition;
+
             if (this.Game.Input.KeyPressed(Keys.W))
             {
-                listenerPosition += Vector3.ForwardLH * gameTime.ElapsedSeconds;
+                agentPosition.MoveForward(gameTime);
             }
             if (this.Game.Input.KeyPressed(Keys.S))
             {
-                listenerPosition += Vector3.BackwardLH * gameTime.ElapsedSeconds;
+                agentPosition.MoveBackward(gameTime);
             }
             if (this.Game.Input.KeyPressed(Keys.A))
             {
-                listenerPosition += Vector3.Left * gameTime.ElapsedSeconds;
+                agentPosition.MoveRight(gameTime);
             }
             if (this.Game.Input.KeyPressed(Keys.D))
             {
-                listenerPosition += Vector3.Right * gameTime.ElapsedSeconds;
+                agentPosition.MoveLeft(gameTime);
             }
 
-            currentMusic.EmitterAgent.Apply3D(Matrix.Translation(emitterPosition), Vector3.Zero);
-            currentMusic.ListenerAgent.Apply3D(Matrix.Translation(listenerPosition), Vector3.Zero);
+            agentPosition.Update(gameTime);
         }
 
         private void SceneButtonClick(object sender, EventArgs e)
@@ -347,6 +350,9 @@ namespace Collada
             this.musicEffect = this.AudioManager.CreateEffect("music", $"Music{musicIndex}", "Resources/Common", musicList[musicIndex]);
             currentMusic = this.musicEffect.Create();
             currentMusic.IsLooped = true;
+
+            currentMusic.EmitterAgent.SetManipulator(emitterPosition);
+            currentMusic.ListenerAgent.SetManipulator(listenerPosition);
 
             currentMusic.AudioEnd += AudioManager_AudioEnd;
             currentMusic.LoopEnd += AudioManager_LoopEnd;

@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// 3D manipulator
     /// </summary>
-    public class Manipulator3D
+    public class Manipulator3D : IManipulator
     {
         /// <summary>
         /// State updated event

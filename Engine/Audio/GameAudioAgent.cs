@@ -8,45 +8,52 @@ namespace Engine.Audio
     public class GameAudioAgent
     {
         /// <summary>
+        /// Agent's manipulator
+        /// </summary>
+        private IManipulator manipulator;
+
+        /// <summary>
         /// Forward vector
         /// </summary>
-        public Vector3 Forward { get; set; } = Vector3.ForwardLH;
+        public Vector3 Forward
+        {
+            get
+            {
+                return manipulator?.FinalTransform.Forward ?? Vector3.ForwardLH;
+            }
+        }
         /// <summary>
         /// Up vector
         /// </summary>
-        public Vector3 Up { get; set; } = Vector3.BackwardLH;
+        public Vector3 Up
+        {
+            get
+            {
+                return manipulator?.FinalTransform.Up ?? Vector3.Up;
+            }
+        }
         /// <summary>
         /// Position coordinate
         /// </summary>
-        public Vector3 Position { get; set; } = Vector3.Zero;
+        public Vector3 Position
+        {
+            get
+            {
+                return manipulator?.FinalTransform.TranslationVector ?? Vector3.Zero;
+            }
+        }
         /// <summary>
         /// Velocity vector
         /// </summary>
         public Vector3 Velocity { get; set; } = Vector3.Zero;
 
         /// <summary>
-        /// Applies the 2D parameters to the game audio agent.
+        /// Sets the game audio agent's manipulator
         /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="velocity">Velocity</param>
-        public void Apply2D(Vector2 position, Vector2 velocity)
+        /// <param name="manipulator">Manipulator instace</param>
+        public void SetManipulator(IManipulator manipulator)
         {
-            Forward = Vector3.ForwardLH;
-            Up = Vector3.Up;
-            Position = new Vector3(position, 0);
-            Velocity = new Vector3(velocity, 0);
-        }
-        /// <summary>
-        /// Applies the 3D parameters to the game audio agent.
-        /// </summary>
-        /// <param name="world">World</param>
-        /// <param name="velocity">Velocity</param>
-        public void Apply3D(Matrix world, Vector3 velocity)
-        {
-            Forward = world.Forward;
-            Up = world.Up;
-            Position = world.TranslationVector;
-            Velocity = velocity;
+            this.manipulator = manipulator;
         }
     }
 }
