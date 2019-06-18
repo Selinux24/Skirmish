@@ -273,6 +273,16 @@ namespace Engine.Audio
         }
 
         /// <summary>
+        /// Updates the internal state
+        /// </summary>
+        internal void Update()
+        {
+            effects?
+                .ToList()
+                .ForEach(e => e.Value?.Update());
+        }
+
+        /// <summary>
         /// Gets an effect from de audio
         /// </summary>
         /// <param name="name">Effect name</param>

@@ -376,6 +376,8 @@ namespace Engine
 
             this.TimeOfDay?.Update(gameTime);
 
+            this.AudioManager?.Update();
+            
             this.NavigationGraph?.Update(gameTime);
 
             this.Lights?.UpdateLights(this.TimeOfDay);

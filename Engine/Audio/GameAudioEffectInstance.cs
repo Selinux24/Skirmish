@@ -121,8 +121,13 @@ namespace Engine.Audio
                 voice.SetVolume(volume);
             }
         }
-
+        /// <summary>
+        /// Emitter
+        /// </summary>
         public GameAudioAgent EmitterAgent { get; set; }
+        /// <summary>
+        /// Listener
+        /// </summary>
         public GameAudioAgent ListenerAgent { get; set; }
 
         /// <summary>
@@ -221,7 +226,7 @@ namespace Engine.Audio
         /// <summary>
         /// Updates internal state
         /// </summary>
-        public void Update()
+        internal void Update()
         {
             if (this.Effect.GameAudio.UseReverb && !isReverbSubmixEnabled)
             {
@@ -246,56 +251,6 @@ namespace Engine.Audio
             }
         }
 
-        /// <summary>
-        /// Applies the 2D effect to the current sound effect instance.
-        /// </summary>
-        /// <param name="listener">The listener position.</param>
-        /// <param name="listenerVelocity">The listener velocity.</param>
-        /// <param name="emitter">The emitter position.</param>
-        /// <param name="emitterVelocity">The emitter velocity.</param>
-        public void Apply2D(Vector2 listener, Vector2 listenerVelocity, Vector2 emitter, Vector2 emitterVelocity)
-        {
-            ListenerAgent = new GameAudioAgent
-            {
-                Forward = Vector3.ForwardLH,
-                Up = Vector3.Up,
-                Position = new Vector3(listener, 0),
-                Velocity = new Vector3(listenerVelocity, 0),
-            };
-
-            EmitterAgent = new GameAudioAgent
-            {
-                Forward = Vector3.ForwardLH,
-                Up = Vector3.Up,
-                Position = new Vector3(emitter, 0),
-                Velocity = new Vector3(emitterVelocity, 0),
-            };
-        }
-        /// <summary>
-        /// Applies the 3D effect to the current sound effect instance.
-        /// </summary>
-        /// <param name="listenerWorld">The listener world matrix.</param>
-        /// <param name="listenerVelocity">The listener velocity.</param>
-        /// <param name="emitterWorld">The emitter world matrix.</param>
-        /// <param name="emitterVelocity">The emitter velocity.</param>
-        public void Apply3D(Matrix listenerWorld, Vector3 listenerVelocity, Matrix emitterWorld, Vector3 emitterVelocity)
-        {
-            ListenerAgent = new GameAudioAgent
-            {
-                Forward = listenerWorld.Forward,
-                Up = listenerWorld.Up,
-                Position = listenerWorld.TranslationVector,
-                Velocity = listenerVelocity,
-            };
-
-            EmitterAgent = new GameAudioAgent
-            {
-                Forward = emitterWorld.Forward,
-                Up = emitterWorld.Up,
-                Position = emitterWorld.TranslationVector,
-                Velocity = emitterVelocity,
-            };
-        }
         /// <summary>
         /// Applies the 3D effect to the current sound effect instance.
         /// </summary>
@@ -645,13 +600,5 @@ namespace Engine.Audio
         {
             LoopEnd?.Invoke(this, new GameAudioEventArgs());
         }
-    }
-
-    public struct GameAudioAgent
-    {
-        public Vector3 Forward { get; set; }
-        public Vector3 Up { get; set; }
-        public Vector3 Position { get; set; }
-        public Vector3 Velocity { get; set; }
     }
 }

@@ -138,7 +138,7 @@ namespace Engine.Audio
         /// <summary>
         /// Updates internal state
         /// </summary>
-        public void Update()
+        internal void Update()
         {
             toDelete.ForEach(i =>
             {

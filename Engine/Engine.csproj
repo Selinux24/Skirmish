@@ -173,6 +173,7 @@
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Audio\AudioState.cs" />
+    <Compile Include="Audio\GameAudioAgent.cs" />
     <Compile Include="Audio\GameAudioEffect.cs" />
     <Compile Include="Audio\GameAudioEffectInstance.cs" />
     <Compile Include="Audio\GameAudioPresets.cs" />

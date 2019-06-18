@@ -54,6 +54,16 @@ namespace Engine
         }
 
         /// <summary>
+        /// Updates the internal state
+        /// </summary>
+        public void Update()
+        {
+            gameAudioList?
+                .ToList()
+                .ForEach(a => a.Value?.Update());
+        }
+
+        /// <summary>
         /// Creates a list of game audios
         /// </summary>
         /// <param name="contentFolder">Content folder</param>

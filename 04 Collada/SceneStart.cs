@@ -205,9 +205,6 @@ namespace Collada
             UpdateAudioInput(gameTime);
 
             PlayAudio();
-
-            this.musicEffect.Update();
-            this.pushButtonEffect.Update();
         }
         private void UpdateAudioInput(GameTime gameTime)
         {
