@@ -124,11 +124,11 @@ namespace Engine.Audio
         /// <summary>
         /// Emitter
         /// </summary>
-        public GameAudioAgent EmitterAgent { get; set; }
+        public GameAudioAgent EmitterAgent { get; private set; }
         /// <summary>
         /// Listener
         /// </summary>
-        public GameAudioAgent ListenerAgent { get; set; }
+        public GameAudioAgent ListenerAgent { get; private set; }
 
         /// <summary>
         /// Gets the current audio buffer.
@@ -174,6 +174,9 @@ namespace Engine.Audio
             pan = 0.0f;
             pitch = 0.0f;
             outputMatrix = null;
+
+            EmitterAgent = new GameAudioAgent();
+            ListenerAgent = new GameAudioAgent();
 
             voice.BufferStart += SourceVoice_BufferStart;
             voice.BufferEnd += SourceVoice_BufferEnd;
@@ -280,44 +283,45 @@ namespace Engine.Audio
                 dspSettings.DestinationChannelCount,
                 dspSettings.MatrixCoefficients);
 
-            if (this.Effect.GameAudio.UseReverb)
+            if (!this.Effect.GameAudio.UseReverb)
             {
-                if (reverbLevels?.Length != this.Effect.WaveFormat.Channels)
-                {
-                    reverbLevels = new float[this.Effect.WaveFormat.Channels];
-                }
-
-                for (int i = 0; i < reverbLevels.Length; i++)
-                {
-                    reverbLevels[i] = dspSettings.ReverbLevel;
-                }
-
-                voice.SetOutputMatrix(this.Effect.GameAudio.ReverbVoice, this.Effect.WaveFormat.Channels, 1, reverbLevels);
+                return;
             }
 
-            if (this.Effect.GameAudio.UseReverbFilter)
+            if (reverbLevels?.Length != this.Effect.WaveFormat.Channels)
             {
-                var filterDirect = new FilterParameters
-                {
-                    Type = FilterType.LowPassFilter,
-                    Frequency = 2.0f * (float)Math.Sin(MathUtil.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
-                    OneOverQ = 1.0f
-                };
-
-                voice.SetOutputFilterParameters(this.Effect.GameAudio.MasteringVoice, filterDirect);
-
-                if (this.Effect.GameAudio.UseReverb)
-                {
-                    var filterReverb = new FilterParameters
-                    {
-                        Type = FilterType.LowPassFilter,
-                        Frequency = 2.0f * (float)Math.Sin(MathUtil.Pi / 6.0f * dspSettings.LpfReverbCoefficient),
-                        OneOverQ = 1.0f
-                    };
-
-                    voice.SetOutputFilterParameters(this.Effect.GameAudio.ReverbVoice, filterReverb);
-                }
+                reverbLevels = new float[this.Effect.WaveFormat.Channels];
             }
+
+            for (int i = 0; i < reverbLevels.Length; i++)
+            {
+                reverbLevels[i] = dspSettings.ReverbLevel;
+            }
+
+            voice.SetOutputMatrix(this.Effect.GameAudio.ReverbVoice, this.Effect.WaveFormat.Channels, 1, reverbLevels);
+
+            if (!this.Effect.GameAudio.UseReverbFilter)
+            {
+                return;
+            }
+
+            var filterDirect = new FilterParameters
+            {
+                Type = FilterType.LowPassFilter,
+                Frequency = 2.0f * (float)Math.Sin(MathUtil.Pi / 6.0f * dspSettings.LpfDirectCoefficient),
+                OneOverQ = 1.0f
+            };
+
+            voice.SetOutputFilterParameters(this.Effect.GameAudio.MasteringVoice, filterDirect);
+
+            var filterReverb = new FilterParameters
+            {
+                Type = FilterType.LowPassFilter,
+                Frequency = 2.0f * (float)Math.Sin(MathUtil.Pi / 6.0f * dspSettings.LpfReverbCoefficient),
+                OneOverQ = 1.0f
+            };
+
+            voice.SetOutputFilterParameters(this.Effect.GameAudio.ReverbVoice, filterReverb);
         }
         /// <summary>
         /// Updates listener state

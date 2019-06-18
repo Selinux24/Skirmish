@@ -36,6 +36,9 @@ namespace Collada
         private GameAudio effects = null;
         private GameAudioEffect pushButtonEffect = null;
 
+        private Vector3 emitterPosition = Vector3.Zero;
+        private Vector3 listenerPosition = Vector3.Zero;
+
         public SceneStart(Game game) : base(game)
         {
 
@@ -203,6 +206,7 @@ namespace Collada
             base.Update(gameTime);
 
             UpdateAudioInput(gameTime);
+            UpdateListenerInput(gameTime);
 
             PlayAudio();
         }
@@ -213,7 +217,7 @@ namespace Collada
                 return;
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.S))
+            if (this.Game.Input.KeyJustReleased(Keys.Z))
             {
                 if (currentMusic.State == AudioState.Playing)
                 {
@@ -253,6 +257,33 @@ namespace Collada
             {
                 music.MasterVolume += gameTime.ElapsedSeconds / 10;
             }
+        }
+        private void UpdateListenerInput(GameTime gameTime)
+        {
+            if (music == null)
+            {
+                return;
+            }
+
+            if (this.Game.Input.KeyPressed(Keys.W))
+            {
+                listenerPosition += Vector3.ForwardLH * gameTime.ElapsedSeconds;
+            }
+            if (this.Game.Input.KeyPressed(Keys.S))
+            {
+                listenerPosition += Vector3.BackwardLH * gameTime.ElapsedSeconds;
+            }
+            if (this.Game.Input.KeyPressed(Keys.A))
+            {
+                listenerPosition += Vector3.Left * gameTime.ElapsedSeconds;
+            }
+            if (this.Game.Input.KeyPressed(Keys.D))
+            {
+                listenerPosition += Vector3.Right * gameTime.ElapsedSeconds;
+            }
+
+            currentMusic.EmitterAgent.Apply3D(Matrix.Translation(emitterPosition), Vector3.Zero);
+            currentMusic.ListenerAgent.Apply3D(Matrix.Translation(listenerPosition), Vector3.Zero);
         }
 
         private void SceneButtonClick(object sender, EventArgs e)
@@ -310,6 +341,7 @@ namespace Collada
                 music.UseMasteringLimiter = true;
                 music.SetMasteringLimit(8, 900);
                 music.MasterVolume = 0.01f;
+                music.UseAudio3D = true;
             }
 
             this.musicEffect = this.AudioManager.CreateEffect("music", $"Music{musicIndex}", "Resources/Common", musicList[musicIndex]);

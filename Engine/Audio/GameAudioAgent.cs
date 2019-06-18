@@ -5,24 +5,24 @@ namespace Engine.Audio
     /// <summary>
     /// Game audio agent
     /// </summary>
-    public struct GameAudioAgent
+    public class GameAudioAgent
     {
         /// <summary>
         /// Forward vector
         /// </summary>
-        public Vector3 Forward { get; set; }
+        public Vector3 Forward { get; set; } = Vector3.ForwardLH;
         /// <summary>
         /// Up vector
         /// </summary>
-        public Vector3 Up { get; set; }
+        public Vector3 Up { get; set; } = Vector3.BackwardLH;
         /// <summary>
         /// Position coordinate
         /// </summary>
-        public Vector3 Position { get; set; }
+        public Vector3 Position { get; set; } = Vector3.Zero;
         /// <summary>
         /// Velocity vector
         /// </summary>
-        public Vector3 Velocity { get; set; }
+        public Vector3 Velocity { get; set; } = Vector3.Zero;
 
         /// <summary>
         /// Applies the 2D parameters to the game audio agent.
