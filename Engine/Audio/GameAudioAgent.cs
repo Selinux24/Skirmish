@@ -50,10 +50,26 @@ namespace Engine.Audio
         /// <summary>
         /// Sets the game audio agent's manipulator
         /// </summary>
-        /// <param name="manipulator">Manipulator instace</param>
+        /// <param name="manipulator">Manipulator instance</param>
         public void SetManipulator(IManipulator manipulator)
         {
             this.manipulator = manipulator;
+        }
+        /// <summary>
+        /// Sets the game audio agent's manipulator
+        /// </summary>
+        /// <param name="manipulator">Transformable instance</param>
+        public void SetManipulator(ITransformable3D transformable)
+        {
+            this.manipulator = transformable.Manipulator;
+        }
+        /// <summary>
+        /// Sets the game audio agent's manipulator
+        /// </summary>
+        /// <param name="manipulator">Transformable instance</param>
+        public void SetManipulator(ITransformable2D transformable)
+        {
+            this.manipulator = transformable.Manipulator;
         }
     }
 }
