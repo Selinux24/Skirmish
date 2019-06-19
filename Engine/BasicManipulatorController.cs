@@ -35,8 +35,8 @@ namespace Engine
                     var next = this.path.GetPosition(this.pathTime);
                     this.Velocity = next - position;
 
-                    manipulator.SetPosition(next);
-                    manipulator.LookAt(next + this.Velocity, false);
+                    manipulator.SetPosition(next, true);
+                    manipulator.LookAt(next + this.Velocity, false, 0, true);
                 }
                 else
                 {

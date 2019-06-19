@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Camera 3D
     /// </summary>
-    public class Camera : IDisposable
+    public class Camera : IManipulator, IDisposable
     {
         /// <summary>
         /// Creates an isometric camera
@@ -484,6 +484,26 @@ namespace Engine
         /// Gets or sets whether the camera must invert the Y-delta mouse coordinate
         /// </summary>
         public bool InvertY { get; set; }
+        /// <summary>
+        /// Local transform
+        /// </summary>
+        public Matrix LocalTransform
+        {
+            get
+            {
+                return Matrix.AffineTransformation(1, Quaternion.Identity, this.Position);
+            }
+        }
+        /// <summary>
+        /// Final transform
+        /// </summary>
+        public Matrix FinalTransform
+        {
+            get
+            {
+                return LocalTransform;
+            }
+        }
 
         /// <summary>
         /// Constructor

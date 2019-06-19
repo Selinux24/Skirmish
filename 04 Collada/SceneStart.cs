@@ -23,7 +23,6 @@ namespace Collada
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
 
         private GameAudio music = null;
-        private GameAudioEffect musicEffect = null;
         private GameAudioEffectInstance currentMusic = null;
         private readonly string[] musicList = new string[]
         {
@@ -33,7 +32,6 @@ namespace Collada
         private int musicIndex = 0;
         private int musicLoops = 0;
 
-        private GameAudio effects = null;
         private GameAudioEffect pushButtonEffect = null;
 
         private readonly Manipulator3D emitterPosition = new Manipulator3D();
@@ -196,8 +194,8 @@ namespace Collada
             this.exitButton.Top = (this.Game.Form.RenderHeight / 4) * 3 - (this.exitButton.Height / 2);
             this.exitButton.Click += ExitButtonClick;
 
-            this.effects = this.AudioManager.CreateAudio("effects");
-            this.effects.MasterVolume = 0.25f;
+            var effects = this.AudioManager.CreateAudio("effects");
+            effects.MasterVolume = 0.25f;
             this.pushButtonEffect = this.AudioManager.CreateEffect("effects", "push", "Resources/Common", "push.wav");
         }
 
@@ -347,8 +345,8 @@ namespace Collada
                 music.UseAudio3D = true;
             }
 
-            this.musicEffect = this.AudioManager.CreateEffect("music", $"Music{musicIndex}", "Resources/Common", musicList[musicIndex]);
-            currentMusic = this.musicEffect.Create();
+            var musicEffect = this.AudioManager.CreateEffect("music", $"Music{musicIndex}", "Resources/Common", musicList[musicIndex]);
+            currentMusic = musicEffect.Create();
             currentMusic.IsLooped = true;
 
             currentMusic.EmitterAgent.SetManipulator(emitterPosition);

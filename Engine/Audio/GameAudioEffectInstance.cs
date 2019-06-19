@@ -23,6 +23,7 @@ namespace Engine.Audio
         private float pitch;
         private float volume;
         private SourceVoice voice;
+        private readonly bool destroyWhenFinished;
 
         /// <summary>
         /// Gets the base sound effect.
@@ -129,6 +130,10 @@ namespace Engine.Audio
         /// Listener
         /// </summary>
         public GameAudioAgent ListenerAgent { get; private set; }
+        /// <summary>
+        /// The instance is due to dispose
+        /// </summary>
+        public bool DueToDispose { get; private set; } = false;
 
         /// <summary>
         /// Gets the current audio buffer.
@@ -164,7 +169,13 @@ namespace Engine.Audio
         /// </summary>
         /// <param name="soundEffect">Sound effect</param>
         /// <param name="sourceVoice">Source voice</param>
-        internal GameAudioEffectInstance(GameAudioEffect soundEffect, SourceVoice sourceVoice)
+        /// <param name="emitterDescription">Emitter description</param>
+        /// <param name="destroyWhenFinished">Sets whether the instance must be disposed after it's finished</param>
+        internal GameAudioEffectInstance(
+            GameAudioEffect soundEffect,
+            SourceVoice sourceVoice,
+            GameAudioAgentDescription emitterDescription,
+            bool destroyWhenFinished)
         {
             Effect = soundEffect;
             voice = sourceVoice;
@@ -175,12 +186,14 @@ namespace Engine.Audio
             pitch = 0.0f;
             outputMatrix = null;
 
-            EmitterAgent = new GameAudioAgent();
+            EmitterAgent = new GameAudioAgent(emitterDescription);
             ListenerAgent = new GameAudioAgent();
 
             voice.BufferStart += SourceVoice_BufferStart;
             voice.BufferEnd += SourceVoice_BufferEnd;
             voice.LoopEnd += SourceVoice_LoopEnd;
+
+            this.destroyWhenFinished = destroyWhenFinished;
         }
         /// <summary>
         /// Destructor
@@ -350,18 +363,27 @@ namespace Engine.Audio
                 emitter = new Emitter();
             }
 
+            emitter.Position = emitterAgent.Position;
             emitter.OrientFront = emitterAgent.Forward;
             emitter.OrientTop = emitterAgent.Up;
-            emitter.Position = emitterAgent.Position;
             emitter.Velocity = emitterAgent.Velocity;
-            emitter.DopplerScaler = GameAudio.DopplerScale;
-            emitter.CurveDistanceScaler = GameAudio.DistanceScale;
-            emitter.ChannelCount = this.Effect.WaveFormat.Channels;
 
+            emitter.ChannelCount = this.Effect.WaveFormat.Channels;
+            emitter.ChannelRadius = 1;
             if (emitter.ChannelCount > 1)
             {
                 emitter.ChannelAzimuths = new float[emitter.ChannelCount];
             }
+
+            emitter.InnerRadius = 2;
+            emitter.InnerRadiusAngle = MathUtil.PiOverFour;
+
+            emitter.VolumeCurve = GameAudioPresets.DefaultLinearCurve;
+            emitter.LfeCurve = GameAudioPresets.DefaultEmitterLfeCurve;
+            emitter.ReverbCurve = GameAudioPresets.DefaultEmitterReverbCurve;
+
+            emitter.CurveDistanceScaler = GameAudio.DistanceScale * emitterAgent.Radius;
+            emitter.DopplerScaler = GameAudio.DopplerScale;
         }
         /// <summary>
         /// Gets the 3D calculate flags
@@ -391,7 +413,6 @@ namespace Engine.Audio
         /// <summary>
         /// Pauses the playback of the current instance.
         /// </summary>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
         public void Pause()
         {
             voice.Stop();
@@ -400,7 +421,6 @@ namespace Engine.Audio
         /// <summary>
         /// Plays the current instance. If it is already playing - the call is ignored.
         /// </summary>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
         public void Play()
         {
             if (State == AudioState.Playing)
@@ -415,6 +435,9 @@ namespace Engine.Audio
             }
 
             voice.SubmitSourceBuffer(CurrentAudioBuffer, Effect.DecodedPacketsInfo);
+
+            this.Update();
+
             voice.Start();
 
             paused = false;
@@ -432,7 +455,6 @@ namespace Engine.Audio
         /// <summary>
         /// Resumes playback of the current instance.
         /// </summary>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
         public void Resume()
         {
             if (!IsLooped && voice.State.BuffersQueued == 0)
@@ -448,35 +470,27 @@ namespace Engine.Audio
         /// <summary>
         /// Stops the playback of the current instance.
         /// </summary>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
         public void Stop()
         {
             voice.Stop(0);
             voice.FlushSourceBuffers();
 
             paused = false;
+
+            FireAudioEnd();
         }
         /// <summary>
         /// Stops the playback of the current instance indicating whether the stop should occur immediately of at the end of the sound.
         /// </summary>
         /// <param name="immediate">A value indicating whether the playback should be stopped immediately or at the end of the sound.</param>
-        /// <exception cref="ObjectDisposedException">Is thrown if the current instance was already disposed.</exception>
         public void Stop(bool immediate)
         {
-            if (immediate)
-            {
-                voice.Stop(0);
-            }
-            else if (IsLooped)
+            if (immediate && IsLooped)
             {
                 voice.ExitLoop();
             }
-            else
-            {
-                voice.Stop((int)PlayFlags.Tails);
-            }
 
-            paused = false;
+            Stop();
         }
 
         /// <summary>
@@ -596,6 +610,11 @@ namespace Engine.Audio
         private void FireAudioEnd()
         {
             AudioEnd?.Invoke(this, new GameAudioEventArgs());
+
+            if (destroyWhenFinished)
+            {
+                this.DueToDispose = true;
+            }
         }
         /// <summary>
         /// Fires the loop end event

@@ -3,6 +3,7 @@ using SharpDX.XAudio2;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Engine.Audio
 {
@@ -140,6 +141,14 @@ namespace Engine.Audio
         /// </summary>
         internal void Update()
         {
+            var toDispose = toDelete.FindAll(i => i.DueToDispose);
+            if (toDispose.Any())
+            {
+                toDelete.RemoveAll(i => i.DueToDispose);
+                toDispose.ForEach(i => i.Dispose());
+                toDispose.Clear();
+            }
+
             toDelete.ForEach(i =>
             {
                 if (i.State == AudioState.Playing)
@@ -152,15 +161,23 @@ namespace Engine.Audio
         /// <summary>
         /// Creates a new effect instance
         /// </summary>
-        /// <param name="useFilters">Sets whether the source voice use voice filters or not</param>
+        /// <param name="destroyWhenFinished">Sets whether the new instance must be disposed after it's play</param>
         /// <returns>Returns the new created instance</returns>
-        public GameAudioEffectInstance Create(bool useFilters = true)
+        public GameAudioEffectInstance Create(bool destroyWhenFinished = true)
         {
-            var sourceVoice = this.GameAudio.CreateVoice(
-                this.WaveFormat,
-                useFilters ? VoiceFlags.UseFilter : VoiceFlags.None);
+            return Create(new GameAudioAgentDescription() { Radius = float.MaxValue }, destroyWhenFinished);
+        }
+        /// <summary>
+        /// Creates a new effect instance
+        /// </summary>
+        /// <param name="emitterDescription">Emitter description</param>
+        /// <param name="destroyWhenFinished">Sets whether the new instance must be disposed after it's play</param>
+        /// <returns>Returns the new created instance</returns>
+        public GameAudioEffectInstance Create(GameAudioAgentDescription emitterDescription, bool destroyWhenFinished = true)
+        {
+            var sourceVoice = this.GameAudio.CreateVoice(this.WaveFormat, VoiceFlags.None);
 
-            var instance = new GameAudioEffectInstance(this, sourceVoice);
+            var instance = new GameAudioEffectInstance(this, sourceVoice, emitterDescription, destroyWhenFinished);
 
             toDelete.Add(instance);
 

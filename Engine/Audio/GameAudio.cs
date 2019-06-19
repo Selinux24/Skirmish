@@ -397,7 +397,7 @@ namespace Engine.Audio
         /// <summary>
         /// Enables the 3D audio instance
         /// </summary>
-        public void EnableAudio3D(float speedOfSound = X3DAudio.SpeedOfSound)
+        private void EnableAudio3D(float speedOfSound = X3DAudio.SpeedOfSound)
         {
             if (this.x3DInstance == null)
             {

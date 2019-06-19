@@ -46,6 +46,26 @@ namespace Engine.Audio
         /// Velocity vector
         /// </summary>
         public Vector3 Velocity { get; set; } = Vector3.Zero;
+        /// <summary>
+        /// Sound radius
+        /// </summary>
+        public float Radius { get; set; } = 1;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public GameAudioAgent()
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="emitterDescription">Emitter description</param>
+        public GameAudioAgent(GameAudioAgentDescription emitterDescription) : base()
+        {
+            Radius = emitterDescription.Radius;
+        }
 
         /// <summary>
         /// Sets the game audio agent's manipulator
