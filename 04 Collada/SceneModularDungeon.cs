@@ -29,6 +29,21 @@ namespace Collada
         private readonly Color ambientUp = new Color(137, 116, 104, 255);
 
         private Player agent = null;
+        private readonly GameAudioSourceDescription agentListener = new GameAudioSourceDescription()
+        {
+            Radius = 30,
+            Cone = new GameAudioConeDescription()
+            {
+                InnerAngle = MathUtil.Pi * 5.0f / 6.0f,
+                OuterAngle = MathUtil.Pi * 11.0f / 6.0f,
+                InnerVolume = 1.0f,
+                OuterVolume = 0.75f,
+                InnerLpf = 0.0f,
+                OuterLpf = 0.25f,
+                InnerReverb = 0.708f,
+                OuterReverb = 1.0f
+            }
+        };
         private readonly Color agentTorchLight = new Color(255, 249, 224, 255);
 
         private SceneLightPoint torch = null;
@@ -363,7 +378,7 @@ namespace Collada
         {
             var effects = this.AudioManager.CreateAudio("effects");
             effects.UseAudio3D = true;
-            effects.MasterVolume = 1;
+            effects.MasterVolume = 0.25f;
             effects.UseMasteringLimiter = true;
             effects.SetMasteringLimit(15, 1500);
 
@@ -442,11 +457,11 @@ namespace Collada
 
                 foreach (var item in torchs)
                 {
-                    var efTorch = this.soundTorch.Create(new GameAudioAgentDescription() { Radius = 3 });
-                    efTorch.Volume = 0.005f;
+                    var efTorch = this.soundTorch.Create(new GameAudioSourceDescription() { Radius = 15 }, agentListener);
+                    efTorch.Volume = 1f;
                     efTorch.IsLooped = true;
-                    efTorch.EmitterAgent.SetManipulator(item.Manipulator);
-                    efTorch.ListenerAgent.SetManipulator(this.Camera);
+                    efTorch.Emitter.SetSource(item);
+                    efTorch.Listener.SetSource(this.Camera);
                     efTorch.Play();
                 }
             }
@@ -459,22 +474,22 @@ namespace Collada
 
                 foreach (var item in fires)
                 {
-                    var efFire = this.soundTorch.Create(new GameAudioAgentDescription() { Radius = 10 });
-                    efFire.Volume = 0.05f;
+                    var efFire = this.soundTorch.Create(new GameAudioSourceDescription() { Radius = 25 }, agentListener);
+                    efFire.Volume = 1f;
                     efFire.IsLooped = true;
-                    efFire.EmitterAgent.SetManipulator(item.Manipulator);
-                    efFire.ListenerAgent.SetManipulator(this.Camera);
+                    efFire.Emitter.SetSource(item);
+                    efFire.Listener.SetSource(this.Camera);
                     efFire.Play();
                 }
             }
 
             //Rat
             {
-                this.ratSoundInstance = ratSoundMove.Create(new GameAudioAgentDescription() { Radius = 3 }, false);
-                this.ratSoundInstance.Volume = 0.05f;
+                this.ratSoundInstance = ratSoundMove.Create(new GameAudioSourceDescription() { Radius = 15 }, agentListener, false);
+                this.ratSoundInstance.Volume = 1f;
                 this.ratSoundInstance.IsLooped = true;
-                this.ratSoundInstance.EmitterAgent.SetManipulator(this.rat.Instance.Manipulator);
-                this.ratSoundInstance.ListenerAgent.SetManipulator(this.Camera);
+                this.ratSoundInstance.Emitter.SetSource(this.rat);
+                this.ratSoundInstance.Listener.SetSource(this.Camera);
             }
 
             this.InitializeCamera();
@@ -829,9 +844,9 @@ namespace Collada
         }
         private void RatTalkPlay()
         {
-            var instance = this.ratSoundTalk.Create(new GameAudioAgentDescription() { Radius = 3 });
-            instance.EmitterAgent.SetManipulator(this.rat.Instance.Manipulator);
-            instance.ListenerAgent.SetManipulator(this.Camera);
+            var instance = this.ratSoundTalk.Create(new GameAudioSourceDescription() { Radius = 3 }, agentListener);
+            instance.Emitter.SetSource(this.rat.Instance.Manipulator);
+            instance.Listener.SetSource(this.Camera);
             instance.Play();
         }
         private void UpdateEntities()
@@ -1293,9 +1308,9 @@ namespace Collada
             float durationVariation = this.rnd.NextFloat(0.5f, 1.0f);
             int duration = (int)(soundEffect.Duration.TotalMilliseconds * durationVariation);
 
-            var windInstance = soundEffect.Create(new GameAudioAgentDescription() { Radius = 15 });
-            windInstance.EmitterAgent.SetManipulator(man);
-            windInstance.ListenerAgent.SetManipulator(this.Camera);
+            var windInstance = soundEffect.Create(new GameAudioSourceDescription() { Radius = 15 }, agentListener);
+            windInstance.Emitter.SetSource(man);
+            windInstance.Listener.SetSource(this.Camera);
             windInstance.Volume = 1;
             windInstance.Play();
 

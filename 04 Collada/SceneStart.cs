@@ -349,8 +349,8 @@ namespace Collada
             currentMusic = musicEffect.Create();
             currentMusic.IsLooped = true;
 
-            currentMusic.EmitterAgent.SetManipulator(emitterPosition);
-            currentMusic.ListenerAgent.SetManipulator(listenerPosition);
+            currentMusic.Emitter.SetSource(emitterPosition);
+            currentMusic.Listener.SetSource(listenerPosition);
 
             currentMusic.AudioEnd += AudioManager_AudioEnd;
             currentMusic.LoopEnd += AudioManager_LoopEnd;

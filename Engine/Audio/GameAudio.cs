@@ -6,6 +6,7 @@ using SharpDX.XAudio2.Fx;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using MasteringLimiter = SharpDX.XAPO.Fx.MasteringLimiter;
 using MasteringLimiterParameters = SharpDX.XAPO.Fx.MasteringLimiterParameters;
 
@@ -91,9 +92,9 @@ namespace Engine.Audio
             }
             set
             {
-                value = MathUtil.Clamp(value, 0, 1);
+                value = MathUtil.Clamp(value, 0.0f, 1.0f);
 
-                if (masterVolume == value)
+                if (MathUtil.NearEqual(masterVolume, value))
                 {
                     return;
                 }

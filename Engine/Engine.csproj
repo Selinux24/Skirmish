@@ -173,11 +173,14 @@
     <Compile Include="Animation\Skeleton.cs" />
     <Compile Include="Animation\Transition.cs" />
     <Compile Include="Audio\AudioState.cs" />
-    <Compile Include="Audio\GameAudioAgent.cs" />
-    <Compile Include="Audio\GameAudioAgentDescription.cs" />
+    <Compile Include="Audio\GameAudioConeDescription.cs" />
+    <Compile Include="Audio\GameAudioEmitter.cs" />
+    <Compile Include="Audio\GameAudioSourceDescription.cs" />
     <Compile Include="Audio\GameAudioEffect.cs" />
     <Compile Include="Audio\GameAudioEffectInstance.cs" />
+    <Compile Include="Audio\GameAudioListener.cs" />
     <Compile Include="Audio\GameAudioPresets.cs" />
+    <Compile Include="Audio\GameAudioSource.cs" />
     <Compile Include="Audio\ReverbPresets.cs" />
     <Compile Include="GameAudioManager.cs" />
     <Compile Include="Audio\GameAudio.cs" />

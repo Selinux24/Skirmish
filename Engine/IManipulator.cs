@@ -8,12 +8,36 @@ namespace Engine
     public interface IManipulator
     {
         /// <summary>
-        /// Gets the local transform
+        /// Forward vector
         /// </summary>
-        Matrix LocalTransform { get; }
+        Vector3 Forward { get; }
         /// <summary>
-        /// Gets the final transform
+        /// Backward vector
         /// </summary>
-        Matrix FinalTransform { get; }
+        Vector3 Backward { get; }
+        /// <summary>
+        /// Left vector
+        /// </summary>
+        Vector3 Left { get; }
+        /// <summary>
+        /// Right vector
+        /// </summary>
+        Vector3 Right { get; }
+        /// <summary>
+        /// Up vector
+        /// </summary>
+        Vector3 Up { get; }
+        /// <summary>
+        /// Down vector
+        /// </summary>
+        Vector3 Down { get; }
+        /// <summary>
+        /// Position
+        /// </summary>
+        Vector3 Position { get; }
+        /// <summary>
+        /// Velocity
+        /// </summary>
+        Vector3 Velocity { get; }
     }
 }

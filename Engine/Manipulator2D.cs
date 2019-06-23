@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// 2D manipulator
     /// </summary>
-    public class Manipulator2D : IManipulator
+    public class Manipulator2D
     {
         /// <summary>
         /// Position component
@@ -30,16 +30,6 @@ namespace Engine
         /// Gets final transform of controller
         /// </summary>
         public Matrix LocalTransform { get; private set; } = Matrix.Identity;
-        /// <summary>
-        /// Gets the final transform
-        /// </summary>
-        public Matrix FinalTransform
-        {
-            get
-            {
-                return LocalTransform;
-            }
-        }
         /// <summary>
         /// Linear velocity modifier
         /// </summary>

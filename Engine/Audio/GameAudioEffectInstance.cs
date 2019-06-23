@@ -26,6 +26,22 @@ namespace Engine.Audio
         private readonly bool destroyWhenFinished;
 
         /// <summary>
+        /// Gets the current audio buffer.
+        /// </summary>
+        protected AudioBuffer CurrentAudioBuffer
+        {
+            get
+            {
+                if (this.Effect == null || this.Effect.AudioBuffer == null)
+                {
+                    return null;
+                }
+
+                return this.IsLooped ? this.Effect.LoopedAudioBuffer : this.Effect.AudioBuffer;
+            }
+        }
+
+        /// <summary>
         /// Gets the base sound effect.
         /// </summary>
         public GameAudioEffect Effect { get; private set; }
@@ -46,12 +62,14 @@ namespace Engine.Audio
             }
             set
             {
+                value = MathUtil.Clamp(value, -1.0f, 1.0f);
+
                 if (MathUtil.NearEqual(pan, value))
                 {
                     return;
                 }
 
-                pan = MathUtil.Clamp(value, -1.0f, 1.0f);
+                pan = value;
 
                 SetPanOutputMatrix();
             }
@@ -69,12 +87,14 @@ namespace Engine.Audio
             }
             set
             {
+                value = MathUtil.Clamp(value, -1.0f, 1.0f);
+
                 if (MathUtil.NearEqual(pitch, value))
                 {
                     return;
                 }
 
-                pitch = MathUtil.Clamp(value, -1.0f, 1.0f);
+                pitch = value;
 
                 voice.SetFrequencyRatio(XAudio2.SemitonesToFrequencyRatio(pitch));
             }
@@ -112,12 +132,14 @@ namespace Engine.Audio
             }
             set
             {
+                value = MathUtil.Clamp(value, 0.0f, 1.0f);
+
                 if (MathUtil.NearEqual(volume, value))
                 {
                     return;
                 }
 
-                volume = MathUtil.Clamp(value, 0.0f, 1.0f);
+                volume = value;
 
                 voice.SetVolume(volume);
             }
@@ -125,31 +147,15 @@ namespace Engine.Audio
         /// <summary>
         /// Emitter
         /// </summary>
-        public GameAudioAgent EmitterAgent { get; private set; }
+        public GameAudioEmitter Emitter { get; private set; }
         /// <summary>
         /// Listener
         /// </summary>
-        public GameAudioAgent ListenerAgent { get; private set; }
+        public GameAudioListener Listener { get; private set; }
         /// <summary>
         /// The instance is due to dispose
         /// </summary>
         public bool DueToDispose { get; private set; } = false;
-
-        /// <summary>
-        /// Gets the current audio buffer.
-        /// </summary>
-        protected AudioBuffer CurrentAudioBuffer
-        {
-            get
-            {
-                if (this.Effect == null || this.Effect.AudioBuffer == null)
-                {
-                    return null;
-                }
-
-                return this.IsLooped ? this.Effect.LoopedAudioBuffer : this.Effect.AudioBuffer;
-            }
-        }
 
         /// <summary>
         /// Event fired when the audio starts
@@ -170,11 +176,13 @@ namespace Engine.Audio
         /// <param name="soundEffect">Sound effect</param>
         /// <param name="sourceVoice">Source voice</param>
         /// <param name="emitterDescription">Emitter description</param>
+        /// <param name="listenerDescription">Listener description</param>
         /// <param name="destroyWhenFinished">Sets whether the instance must be disposed after it's finished</param>
         internal GameAudioEffectInstance(
             GameAudioEffect soundEffect,
             SourceVoice sourceVoice,
-            GameAudioAgentDescription emitterDescription,
+            GameAudioSourceDescription emitterDescription,
+            GameAudioSourceDescription listenerDescription,
             bool destroyWhenFinished)
         {
             Effect = soundEffect;
@@ -186,8 +194,8 @@ namespace Engine.Audio
             pitch = 0.0f;
             outputMatrix = null;
 
-            EmitterAgent = new GameAudioAgent(emitterDescription);
-            ListenerAgent = new GameAudioAgent();
+            Emitter = new GameAudioEmitter(emitterDescription);
+            Listener = new GameAudioListener(listenerDescription);
 
             voice.BufferStart += SourceVoice_BufferStart;
             voice.BufferEnd += SourceVoice_BufferEnd;
@@ -274,8 +282,8 @@ namespace Engine.Audio
         /// <param name="emitterAgent">Emitter</param>
         private void Apply3D()
         {
-            UpdateListener(ListenerAgent);
-            UpdateEmitter(EmitterAgent);
+            UpdateListener(Listener);
+            UpdateEmitter(Emitter);
 
             var flags = Calculate3DFlags();
 
@@ -339,34 +347,52 @@ namespace Engine.Audio
         /// <summary>
         /// Updates listener state
         /// </summary>
-        /// <param name="listenerAgent">Listener state</param>
-        private void UpdateListener(GameAudioAgent listenerAgent)
+        /// <param name="audioListener">Listener state</param>
+        private void UpdateListener(GameAudioListener audioListener)
         {
             if (listener == null)
             {
                 listener = new Listener();
             }
 
-            listener.OrientFront = listenerAgent.Forward;
-            listener.OrientTop = listenerAgent.Up;
-            listener.Position = listenerAgent.Position;
-            listener.Velocity = listenerAgent.Velocity;
+            listener.OrientFront = audioListener.Forward;
+            listener.OrientTop = audioListener.Up;
+            listener.Position = audioListener.Position;
+            listener.Velocity = audioListener.Velocity;
+
+            if (audioListener.Cone.HasValue)
+            {
+                if (listener.Cone == null)
+                {
+                    listener.Cone = new Cone();
+                }
+
+                listener.Cone.InnerAngle = audioListener.Cone.Value.InnerAngle;
+                listener.Cone.InnerVolume = audioListener.Cone.Value.InnerVolume;
+                listener.Cone.InnerLpf = audioListener.Cone.Value.InnerLpf;
+                listener.Cone.InnerReverb = audioListener.Cone.Value.InnerReverb;
+
+                listener.Cone.OuterAngle = audioListener.Cone.Value.OuterAngle;
+                listener.Cone.OuterVolume = audioListener.Cone.Value.OuterVolume;
+                listener.Cone.OuterLpf = audioListener.Cone.Value.OuterLpf;
+                listener.Cone.OuterReverb = audioListener.Cone.Value.OuterReverb;
+            }
         }
         /// <summary>
         /// Updates emitter state
         /// </summary>
-        /// <param name="emitterAgent">Emitter state</param>
-        private void UpdateEmitter(GameAudioAgent emitterAgent)
+        /// <param name="audioEmitter">Emitter state</param>
+        private void UpdateEmitter(GameAudioEmitter audioEmitter)
         {
             if (emitter == null)
             {
                 emitter = new Emitter();
             }
 
-            emitter.Position = emitterAgent.Position;
-            emitter.OrientFront = emitterAgent.Forward;
-            emitter.OrientTop = emitterAgent.Up;
-            emitter.Velocity = emitterAgent.Velocity;
+            emitter.Position = audioEmitter.Position;
+            emitter.OrientFront = audioEmitter.Forward;
+            emitter.OrientTop = audioEmitter.Up;
+            emitter.Velocity = audioEmitter.Velocity;
 
             emitter.ChannelCount = this.Effect.WaveFormat.Channels;
             emitter.ChannelRadius = 1;
@@ -382,8 +408,26 @@ namespace Engine.Audio
             emitter.LfeCurve = GameAudioPresets.DefaultEmitterLfeCurve;
             emitter.ReverbCurve = GameAudioPresets.DefaultEmitterReverbCurve;
 
-            emitter.CurveDistanceScaler = GameAudio.DistanceScale * emitterAgent.Radius;
+            emitter.CurveDistanceScaler = GameAudio.DistanceScale * audioEmitter.Radius;
             emitter.DopplerScaler = GameAudio.DopplerScale;
+
+            if (audioEmitter.Cone.HasValue)
+            {
+                if (emitter.Cone == null)
+                {
+                    emitter.Cone = new Cone();
+                }
+
+                emitter.Cone.InnerAngle = audioEmitter.Cone.Value.InnerAngle;
+                emitter.Cone.InnerVolume = audioEmitter.Cone.Value.InnerVolume;
+                emitter.Cone.InnerLpf = audioEmitter.Cone.Value.InnerLpf;
+                emitter.Cone.InnerReverb = audioEmitter.Cone.Value.InnerReverb;
+
+                emitter.Cone.OuterAngle = audioEmitter.Cone.Value.OuterAngle;
+                emitter.Cone.OuterVolume = audioEmitter.Cone.Value.OuterVolume;
+                emitter.Cone.OuterLpf = audioEmitter.Cone.Value.OuterLpf;
+                emitter.Cone.OuterReverb = audioEmitter.Cone.Value.OuterReverb;
+            }
         }
         /// <summary>
         /// Gets the 3D calculate flags

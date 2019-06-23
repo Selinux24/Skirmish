@@ -113,6 +113,10 @@ namespace Engine
         /// </summary>
         public Vector3 Down { get; private set; }
         /// <summary>
+        /// Gets the velocity vector
+        /// </summary>
+        public Vector3 Velocity { get; private set; }
+        /// <summary>
         /// Returns the average scale magnitude (x+y+z)/3
         /// </summary>
         public float AveragingScale
@@ -161,6 +165,9 @@ namespace Engine
         /// </summary>
         protected void UpdateLocalTransform()
         {
+            Vector3 prePos = this.localTransform.TranslationVector;
+            this.Velocity = this.position - prePos;
+
             if (this.transformUpdateNeeded)
             {
                 Matrix sca = Matrix.Scaling(this.scaling);

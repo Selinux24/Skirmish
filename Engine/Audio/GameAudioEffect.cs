@@ -165,19 +165,26 @@ namespace Engine.Audio
         /// <returns>Returns the new created instance</returns>
         public GameAudioEffectInstance Create(bool destroyWhenFinished = true)
         {
-            return Create(new GameAudioAgentDescription() { Radius = float.MaxValue }, destroyWhenFinished);
+            return Create(
+                new GameAudioSourceDescription() { Radius = float.MaxValue },
+                new GameAudioSourceDescription() { Radius = float.MaxValue },
+                destroyWhenFinished);
         }
         /// <summary>
         /// Creates a new effect instance
         /// </summary>
         /// <param name="emitterDescription">Emitter description</param>
+        /// <param name="listenerDescription">Listener description</param>
         /// <param name="destroyWhenFinished">Sets whether the new instance must be disposed after it's play</param>
         /// <returns>Returns the new created instance</returns>
-        public GameAudioEffectInstance Create(GameAudioAgentDescription emitterDescription, bool destroyWhenFinished = true)
+        public GameAudioEffectInstance Create(
+            GameAudioSourceDescription emitterDescription,
+            GameAudioSourceDescription listenerDescription,
+            bool destroyWhenFinished = true)
         {
             var sourceVoice = this.GameAudio.CreateVoice(this.WaveFormat, VoiceFlags.None);
 
-            var instance = new GameAudioEffectInstance(this, sourceVoice, emitterDescription, destroyWhenFinished);
+            var instance = new GameAudioEffectInstance(this, sourceVoice, emitterDescription, listenerDescription, destroyWhenFinished);
 
             toDelete.Add(instance);
 

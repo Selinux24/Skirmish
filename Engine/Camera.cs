@@ -248,6 +248,10 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Velocity vector
+        /// </summary>
+        public Vector3 Velocity { get; private set; }
 
         #region Isometric
 
@@ -484,26 +488,6 @@ namespace Engine
         /// Gets or sets whether the camera must invert the Y-delta mouse coordinate
         /// </summary>
         public bool InvertY { get; set; }
-        /// <summary>
-        /// Local transform
-        /// </summary>
-        public Matrix LocalTransform
-        {
-            get
-            {
-                return Matrix.AffineTransformation(1, Quaternion.Identity, this.Position);
-            }
-        }
-        /// <summary>
-        /// Final transform
-        /// </summary>
-        public Matrix FinalTransform
-        {
-            get
-            {
-                return LocalTransform;
-            }
-        }
 
         /// <summary>
         /// Constructor
@@ -923,11 +907,11 @@ namespace Engine
 
             float delta = (slow) ? this.SlowMovementDelta : this.MovementDelta;
 
-            Vector3 movingVector = vector * delta * gameTime.ElapsedSeconds;
-            if (movingVector != Vector3.Zero)
+            this.Velocity = vector * delta * gameTime.ElapsedSeconds;
+            if (this.Velocity != Vector3.Zero)
             {
-                this.Position += movingVector;
-                this.Interest += movingVector;
+                this.Position += this.Velocity;
+                this.Interest += this.Velocity;
             }
         }
         /// <summary>
