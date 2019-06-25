@@ -570,17 +570,21 @@ namespace Collada
                     SceneModes.ForwardLigthning);
             }
 
-            this.UpdateRatController(gameTime);
-            this.UpdateEntities();
-
-            this.UpdateSelection();
             this.UpdateDebugInput();
             this.UpdateGraphInput();
             this.UpdateRatInput();
             this.UpdatePlayerInput();
             this.UpdateEntitiesInput();
 
-            this.UpdateWind();
+            var asyncTasks = new[]
+            {
+                Task.Run(() => { this.UpdateRatController(gameTime); }),
+                Task.Run(() => { this.UpdateEntities(); }),
+                Task.Run(() => { this.UpdateSelection(); }),
+                Task.Run(() => { this.UpdateWind(); })
+            };
+
+            Task.WaitAll(asyncTasks);
 
             this.fps.Instance.Text = this.Game.RuntimeText;
             this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
@@ -746,6 +750,9 @@ namespace Collada
                 UpdateEntityLight(this.selectedItem);
             }
         }
+
+
+
         private void UpdateWind()
         {
             if (!windCreated)

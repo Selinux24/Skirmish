@@ -85,7 +85,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void Update(UpdateContext context)
         {
-            if (this.instances?.Length > 0)
+            if (this.instances.Any())
             {
                 Array.ForEach(this.instances, i =>
                 {
@@ -108,7 +108,7 @@ namespace Engine
         /// <param name="context">Update context</param>
         private void UpdateInstancingData(UpdateContext context)
         {
-            if (this.instancesTmp?.Length > 0)
+            if (this.instancesTmp.Any())
             {
                 this.SortInstances(context.EyePosition);
 
@@ -119,6 +119,7 @@ namespace Engine
                 for (int i = 0; i < this.instancesTmp.Length; i++)
                 {
                     var current = this.instancesTmp[i];
+
                     if (current != null)
                     {
                         if (lastLod != current.LevelOfDetail)

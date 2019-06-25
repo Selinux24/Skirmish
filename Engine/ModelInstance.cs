@@ -193,6 +193,11 @@ namespace Engine
             if (refresh || this.updatePoints)
             {
                 var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
+                if (drawingData == null)
+                {
+                    return new Vector3[] { };
+                }
+
                 if (drawingData.SkinningData != null)
                 {
                     this.positionCache = drawingData.GetPoints(
@@ -222,6 +227,11 @@ namespace Engine
             if (refresh || this.updateTriangles)
             {
                 var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
+                if (drawingData == null)
+                {
+                    return new Triangle[] { };
+                }
+
                 if (drawingData.SkinningData != null)
                 {
                     this.triangleCache = drawingData.GetTriangles(
@@ -259,7 +269,7 @@ namespace Engine
             if (refresh || this.boundingSphere == new BoundingSphere())
             {
                 var points = this.GetPoints(refresh);
-                if (points != null && points.Length > 0)
+                if (points.Any())
                 {
                     this.boundingSphere = BoundingSphere.FromPoints(points);
                 }
@@ -285,7 +295,7 @@ namespace Engine
             if (refresh || this.boundingBox == new BoundingBox())
             {
                 var points = this.GetPoints(refresh);
-                if (points?.Any() == true)
+                if (points.Any())
                 {
                     this.boundingBox = BoundingBox.FromPoints(points);
                 }
@@ -312,7 +322,7 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles?.Length > 0 && Intersection.IntersectNearest(ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
+                if (triangles.Any() && Intersection.IntersectNearest(ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
                 {
                     result.Position = p;
                     result.Item = t;
@@ -342,7 +352,7 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles?.Length > 0 && Intersection.IntersectFirst(ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
+                if (triangles.Any() && Intersection.IntersectFirst(ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
                 {
                     result.Position = p;
                     result.Item = t;
@@ -369,7 +379,7 @@ namespace Engine
             if (bsph.Intersects(ref ray))
             {
                 var triangles = this.GetTriangles();
-                if (triangles?.Length > 0 && Intersection.IntersectAll(ray, triangles, facingOnly, out Vector3[] p, out Triangle[] t, out float[] d))
+                if (triangles.Any() && Intersection.IntersectAll(ray, triangles, facingOnly, out Vector3[] p, out Triangle[] t, out float[] d))
                 {
                     results = new PickingResult<Triangle>[p.Length];
                     for (int i = 0; i < results.Length; i++)
@@ -446,23 +456,26 @@ namespace Engine
         public Triangle[] GetVolume(bool full)
         {
             var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
+            if (drawingData == null)
+            {
+                return new Triangle[] { };
+            }
+
             if (full)
             {
+                //Returns the actual triangles (yet transformed)
                 return this.GetTriangles(true);
+            }
+            else if (drawingData.VolumeMesh != null)
+            {
+                //Transforms the volume mesh
+                return Triangle.Transform(drawingData.VolumeMesh, this.Manipulator.LocalTransform);
             }
             else
             {
-                if (drawingData.VolumeMesh != null)
-                {
-                    return Triangle.Transform(drawingData.VolumeMesh, this.Manipulator.LocalTransform);
-                }
-                else
-                {
-                    //Generate cylinder
-                    var cylinder = BoundingCylinder.FromPoints(this.GetPoints());
-                    return Triangle.ComputeTriangleList(Topology.TriangleList, cylinder, 8);
-                }
-
+                //Generates a cylinder from actual points (yet transformed)
+                var cylinder = BoundingCylinder.FromPoints(this.GetPoints());
+                return Triangle.ComputeTriangleList(Topology.TriangleList, cylinder, 8);
             }
         }
 

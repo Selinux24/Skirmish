@@ -158,6 +158,11 @@ namespace Engine.Common
         /// <returns>Returns the nearest level of detail for the specified level of detail</returns>
         internal LevelOfDetail GetLODNearest(LevelOfDetail lod)
         {
+            if (this.meshesByLOD == null)
+            {
+                return LevelOfDetail.None;
+            }
+
             if (this.meshesByLOD.Keys.Count == 0)
             {
                 return this.defaultLevelOfDetail;
@@ -190,6 +195,11 @@ namespace Engine.Common
         /// <returns>Returns the minimum level of detail</returns>
         internal LevelOfDetail GetLODMinimum()
         {
+            if (this.meshesByLOD == null)
+            {
+                return LevelOfDetail.None;
+            }
+
             int l = int.MaxValue;
 
             foreach (var lod in this.meshesByLOD.Keys)
@@ -208,6 +218,11 @@ namespace Engine.Common
         /// <returns>Returns the maximum level of detail</returns>
         internal LevelOfDetail GetLODMaximum()
         {
+            if (this.meshesByLOD == null)
+            {
+                return LevelOfDetail.None;
+            }
+
             int l = int.MinValue;
 
             foreach (var lod in this.meshesByLOD.Keys)
@@ -227,6 +242,11 @@ namespace Engine.Common
         /// <returns>Returns the drawing data object</returns>
         internal DrawingData GetDrawingData(LevelOfDetail lod)
         {
+            if (this.meshesByLOD == null)
+            {
+                return null;
+            }
+
             if (this.meshesByLOD.ContainsKey(lod))
             {
                 return this.meshesByLOD[lod];
@@ -241,6 +261,11 @@ namespace Engine.Common
         /// <returns>Returns the first available level of detail drawing data</returns>
         internal DrawingData GetFirstDrawingData(LevelOfDetail lod)
         {
+            if (this.meshesByLOD == null)
+            {
+                return null;
+            }
+
             while (lod > LevelOfDetail.None)
             {
                 if (this.meshesByLOD.ContainsKey(lod))

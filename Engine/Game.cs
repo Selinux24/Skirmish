@@ -358,15 +358,17 @@ namespace Engine
             {
                 if (this.scenes[i].Active)
                 {
-                    pSW.Restart();
+                    Stopwatch uSW = new Stopwatch();
+                    uSW.Start();
                     this.scenes[i].Update(this.GameTime);
-                    pSW.Stop();
-                    GameStatus.Add($"Scene {i} Update", pSW.Elapsed.TotalMilliseconds);
+                    uSW.Stop();
+                    GameStatus.Add($"Scene {i} {this.scenes[i].GetType()}.Update", uSW.Elapsed.TotalMilliseconds);
 
-                    pSW.Restart();
+                    Stopwatch dSW = new Stopwatch();
+                    dSW.Start();
                     this.scenes[i].Draw(this.GameTime);
-                    pSW.Stop();
-                    GameStatus.Add($"Scene {i} Draw", pSW.Elapsed.TotalMilliseconds);
+                    dSW.Stop();
+                    GameStatus.Add($"Scene {i} {this.scenes[i].GetType()}.Draw", dSW.Elapsed.TotalMilliseconds);
                 }
             }
 
