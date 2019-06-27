@@ -138,6 +138,7 @@
     <None Include="Blender\Scenery\ModularDungeon\Dn_Anim_Ladder.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Anim_Ladder_2.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Beams.blend" />
+    <None Include="Blender\Scenery\ModularDungeon\Dn_Bridges.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Ceilings.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Columns.blend" />
     <None Include="Blender\Scenery\ModularDungeon\Dn_Doors.blend" />

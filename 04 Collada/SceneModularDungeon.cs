@@ -378,9 +378,9 @@ namespace Collada
         {
             var effects = this.AudioManager.CreateAudio("effects");
             effects.UseAudio3D = true;
-            effects.MasterVolume = 0.25f;
-            effects.UseMasteringLimiter = true;
-            effects.SetMasteringLimit(15, 1500);
+            effects.MasterVolume = 0.005f;
+            //effects.UseMasteringLimiter = true;
+            //effects.SetMasteringLimit(15, 1500);
 
             this.soundDoor = this.AudioManager.CreateEffect("effects", "door", "Resources/SceneModularDungeon/Audio/Effects", "door.wav");
             this.soundLadder = this.AudioManager.CreateEffect("effects", "ladder", "Resources/SceneModularDungeon/Audio/Effects", "ladder.wav");

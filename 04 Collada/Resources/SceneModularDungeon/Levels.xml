@@ -163,6 +163,15 @@
         <item asset_name="Room5x5_2">
           <position>18 0 -20</position>
         </item>
+
+        <item asset_name="Cliff1">
+          <position>59 0 -30</position>
+          <rotation>rot180</rotation>
+        </item>
+        <item asset_name="Cliff1">
+          <position>59 0 -12</position>
+          <rotation>rot180</rotation>
+        </item>
       </map>
       <objects>
         <item asset_map_id="entrance" asset_id="door" id="start" type="Entrance"></item>
@@ -690,6 +699,38 @@
         <item asset_name="Dn_Jail_Wall_3">
           <position>38 0 -20</position>
           <rotation>rot90</rotation>
+        </item>
+
+
+        <item asset_name="Dn_Bridge_Stairs_1">
+          <position>54 0 -12</position>
+          <rotation>rot90</rotation>
+        </item>
+        <item asset_name="Dn_Bridge_Stairs_Foundation_2">
+          <position>54 0 -12</position>
+          <rotation>rot90</rotation>
+        </item>
+
+        <item asset_name="Dn_Bridge_2">
+          <position>55 0 -12</position>
+          <rotation>rot90</rotation>
+        </item>
+        <item asset_name="Dn_Bridge_Arch_1">
+          <position>56 0 -12</position>
+          <rotation>rot90</rotation>
+        </item>
+        <item asset_name="Dn_Bridge_2">
+          <position>57 0 -12</position>
+          <rotation>rot90</rotation>
+        </item>
+
+        <item asset_name="Dn_Bridge_Stairs_1">
+          <position>58 0 -12</position>
+          <rotation>rot270</rotation>
+        </item>
+        <item asset_name="Dn_Bridge_Stairs_Foundation_1">
+          <position>58 0 -12</position>
+          <rotation>rot270</rotation>
         </item>
 
       </objects>

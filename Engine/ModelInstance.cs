@@ -304,6 +304,18 @@ namespace Engine
             return this.boundingBox;
         }
 
+
+        private Triangle[] TryGetVolumes()
+        {
+            var triangles = this.GetVolume(false);
+            if (triangles.Any())
+            {
+                return triangles;
+            }
+
+            return this.GetTriangles(); 
+        }
+
         /// <summary>
         /// Gets nearest picking position of giving ray
         /// </summary>
@@ -321,7 +333,7 @@ namespace Engine
             var bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
-                var triangles = this.GetTriangles();
+                var triangles = this.TryGetVolumes();
                 if (triangles.Any() && Intersection.IntersectNearest(ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
                 {
                     result.Position = p;
@@ -351,7 +363,7 @@ namespace Engine
             var bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
-                var triangles = this.GetTriangles();
+                var triangles = this.TryGetVolumes();
                 if (triangles.Any() && Intersection.IntersectFirst(ray, triangles, facingOnly, out Vector3 p, out Triangle t, out float d))
                 {
                     result.Position = p;
@@ -378,7 +390,7 @@ namespace Engine
             var bsph = this.GetBoundingSphere();
             if (bsph.Intersects(ref ray))
             {
-                var triangles = this.GetTriangles();
+                var triangles = this.TryGetVolumes();
                 if (triangles.Any() && Intersection.IntersectAll(ray, triangles, facingOnly, out Vector3[] p, out Triangle[] t, out float[] d))
                 {
                     results = new PickingResult<Triangle>[p.Length];

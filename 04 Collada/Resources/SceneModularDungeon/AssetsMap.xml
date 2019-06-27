@@ -2329,13 +2329,13 @@
     <asset>
       <name>Cliff1</name>
       <references>
-        <asset asset_name="Dn_Cliff_1" type="Floor">
+        <asset asset_name="Dn_Cliff_1">
           <position>0 0 6</position>
         </asset>
-        <asset asset_name="Dn_Cliff_3" type="Floor">
+        <asset asset_name="Dn_Cliff_3">
           <position>0 0 0</position>
         </asset>
-        <asset asset_name="Dn_Cliff_2" type="Floor">
+        <asset asset_name="Dn_Cliff_2">
           <position>0 0 -6</position>
         </asset>
       </references>

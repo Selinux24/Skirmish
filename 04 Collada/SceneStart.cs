@@ -338,9 +338,6 @@ namespace Collada
             if (music == null)
             {
                 music = this.AudioManager.CreateAudio("music");
-
-                music.UseMasteringLimiter = true;
-                music.SetMasteringLimit(8, 900);
                 music.MasterVolume = 0.01f;
                 music.UseAudio3D = true;
             }

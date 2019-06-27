@@ -296,6 +296,7 @@ namespace Engine
                     continue;
                 }
 
+                // TODO: filter the content properly, use the relations, not by mask
                 var modelContent = content.FilterMask(assetName);
                 if (modelContent == null)
                 {

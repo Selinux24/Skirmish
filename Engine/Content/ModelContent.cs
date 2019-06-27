@@ -644,6 +644,11 @@ namespace Engine.Content
         /// <returns>Returns a submesh content if source mesh isn't a volume</returns>
         private SubMeshContent ComputeSubmeshContent(GeometryDictionary newDict, string sourceMesh, string targetMesh, string material)
         {
+            if (!this.Geometry.ContainsKey(sourceMesh))
+            {
+                return null;
+            }
+
             var dict = this.Geometry[sourceMesh];
 
             if (dict.ContainsKey(material))
