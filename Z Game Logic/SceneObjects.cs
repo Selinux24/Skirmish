@@ -365,7 +365,7 @@ namespace GameLogic
                 bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey) || this.Game.Input.KeyPressed(Keys.RShiftKey);
 
                 Ray cursorRay = this.GetPickingRay();
-                bool picked = this.PickNearest(cursorRay, true, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
+                bool picked = this.PickNearest(cursorRay, RayPickingParams.Default, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
 
                 //DEBUG
                 this.UpdateDebug();
@@ -1202,7 +1202,7 @@ namespace GameLogic
             {
                 foreach (var soldierC in team.Soldiers)
                 {
-                    var picked = this.soldierModels[soldierC].PickAll(cursorRay, true, out PickingResult<Triangle>[] r);
+                    var picked = this.soldierModels[soldierC].PickAll(cursorRay, out PickingResult<Triangle>[] r);
                     if (picked && r?.Length > 0)
                     {
                         if (r.Length > 1)

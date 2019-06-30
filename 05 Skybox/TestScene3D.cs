@@ -393,7 +393,7 @@ namespace Skybox
             {
                 var pRay = this.GetPickingRay();
 
-                if (this.ruins.Instance.PickNearest(pRay, true, out PickingResult<Triangle> r))
+                if (this.ruins.Instance.PickNearest(pRay, out PickingResult<Triangle> r))
                 {
                     var tri = Line3D.CreateWiredTriangle(r.Item);
 

@@ -108,44 +108,50 @@ namespace Engine
         /// <param name="context">Update context</param>
         private void UpdateInstancingData(UpdateContext context)
         {
-            if (this.instancesTmp.Any())
+            if (!this.instancesTmp.Any())
             {
-                this.SortInstances(context.EyePosition);
+                return;
+            }
 
-                LevelOfDetail lastLod = LevelOfDetail.None;
-                DrawingData drawingData = null;
-                int instanceIndex = 0;
+            this.SortInstances(context.EyePosition);
 
-                for (int i = 0; i < this.instancesTmp.Length; i++)
+            LevelOfDetail lastLod = LevelOfDetail.None;
+            DrawingData drawingData = null;
+            int instanceIndex = 0;
+
+            for (int i = 0; i < this.instancesTmp.Length; i++)
+            {
+                var current = this.instancesTmp[i];
+                if (current == null)
                 {
-                    var current = this.instancesTmp[i];
-
-                    if (current != null)
-                    {
-                        if (lastLod != current.LevelOfDetail)
-                        {
-                            lastLod = current.LevelOfDetail;
-                            drawingData = this.GetDrawingData(lastLod);
-                        }
-
-                        this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
-                        this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
-
-                        if (drawingData?.SkinningData != null)
-                        {
-                            current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
-                            this.instancingData[instanceIndex].AnimationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
-
-                            current.InvalidateCache();
-                        }
-
-                        instanceIndex++;
-                    }
+                    continue;
                 }
 
-                //Mark to write instancing data
-                hasDataToWrite = instanceIndex > 0;
+                if (lastLod != current.LevelOfDetail)
+                {
+                    lastLod = current.LevelOfDetail;
+                    drawingData = this.GetDrawingData(lastLod);
+                }
+
+                this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
+                this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
+
+                if (drawingData?.SkinningData != null)
+                {
+                    if (current.AnimationController.Playing)
+                    {
+                        current.InvalidateCache();
+                    }
+
+                    current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
+                    this.instancingData[instanceIndex].AnimationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
+                }
+
+                instanceIndex++;
             }
+
+            //Mark to write instancing data
+            hasDataToWrite = instanceIndex > 0;
         }
         /// <summary>
         /// Updates the instances order

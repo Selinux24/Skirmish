@@ -186,7 +186,7 @@ namespace Engine
 
                 Ray ray = new Ray(lightPosition, direction);
 
-                if (this.Scene.PickNearest(ray, false, out PickingResult<Triangle> result) &&
+                if (this.Scene.PickNearest(ray, RayPickingParams.Perfect, out PickingResult<Triangle> result) &&
                     Vector3.Distance(lightPosition, eyePosition) > result.Distance)
                 {
                     return false;

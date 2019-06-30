@@ -265,6 +265,7 @@
     <Compile Include="PathFinding\RecastNavigation\SteerTarget.cs" />
     <Compile Include="PrimitiveListDrawer.cs" />
     <Compile Include="PrimitiveListDrawerDescription.cs" />
+    <Compile Include="RayPickingFlags.cs" />
     <Compile Include="SceneLightPointDescription.cs" />
     <Compile Include="SceneLightSpotDescription.cs" />
     <Compile Include="ShadowMap.cs" />
