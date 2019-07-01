@@ -219,7 +219,6 @@
             </state>
           </states>
         </item>
-
         <item asset_name="Dn_Anim_Ladder" asset_id="ladder" id="door_trigger_2" type="Trigger">
           <position>16.5 1.75 -15.1</position>
           <rotation>rot90</rotation>
@@ -263,6 +262,12 @@
           </states>
         </item>
 
+        <item asset_name="Dn_Rug_2">
+          <position>0 0 6</position>
+          <rotation>rot90</rotation>
+          <scale>2</scale>
+        </item>
+        
         <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
           <position>0 2 8.9</position>
           <rotation>rot90</rotation>
