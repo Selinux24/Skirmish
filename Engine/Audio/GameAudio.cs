@@ -6,7 +6,6 @@ using SharpDX.XAudio2.Fx;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using MasteringLimiter = SharpDX.XAPO.Fx.MasteringLimiter;
 using MasteringLimiterParameters = SharpDX.XAPO.Fx.MasteringLimiterParameters;
 
@@ -179,7 +178,7 @@ namespace Engine.Audio
 
                 var reverbParam = GameAudioPresets.Convert(reverbPreset ?? ReverbPresets.Default);
 
-                this.ReverbVoice.SetEffectParameters(0, reverbParam);
+                this.ReverbVoice.SetEffectParameters(0, reverbParam, 0);
             }
         }
         /// <summary>
@@ -372,17 +371,33 @@ namespace Engine.Audio
         /// </summary>
         private void EnableReverb()
         {
+            if (this.ReverbEffect == null)
+            {
+#if DEBUG
+                this.ReverbEffect = new Reverb(this.device, true);
+#else
+                this.ReverbEffect = new Reverb(this.device);
+#endif
+            }
+
             if (this.ReverbVoice == null)
             {
                 var masterDetails = this.MasteringVoice.VoiceDetails;
                 var sendFlags = this.UseReverbFilter ? SubmixVoiceFlags.UseFilter : SubmixVoiceFlags.None;
-                this.ReverbVoice = new SubmixVoice(this.device, 1, masterDetails.InputSampleRate, sendFlags, 0);
-            }
 
-            if (this.ReverbEffect == null)
-            {
-                this.ReverbEffect = new Reverb(this.device);
-                this.ReverbVoice.SetEffectChain(new EffectDescriptor(this.ReverbEffect, 1));
+                var effectDescriptor = new EffectDescriptor(this.ReverbEffect)
+                {
+                    InitialState = true,
+                    OutputChannelCount = masterDetails.InputChannelCount,
+                };
+
+                this.ReverbVoice = new SubmixVoice(
+                    this.device,
+                    masterDetails.InputChannelCount,
+                    masterDetails.InputSampleRate,
+                    sendFlags,
+                    0,
+                    new EffectDescriptor[] { effectDescriptor });
             }
 
             this.ReverbVoice.EnableEffect(0);

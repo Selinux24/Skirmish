@@ -182,7 +182,7 @@ namespace Engine.Audio
             GameAudioSourceDescription listenerDescription,
             bool destroyWhenFinished = true)
         {
-            var sourceVoice = this.GameAudio.CreateVoice(this.WaveFormat, VoiceFlags.None);
+            var sourceVoice = this.GameAudio.CreateVoice(this.WaveFormat, VoiceFlags.UseFilter);
 
             var instance = new GameAudioEffectInstance(this, sourceVoice, emitterDescription, listenerDescription, destroyWhenFinished);
 
