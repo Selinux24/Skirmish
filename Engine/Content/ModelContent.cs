@@ -788,20 +788,70 @@ namespace Engine.Content
             {
                 foreach (var mask in masks)
                 {
-                    FilterMaskGeo(mask, ref res);
-                    FilterMaskSkin(mask, ref res);
+                    if (string.IsNullOrWhiteSpace(mask))
+                    {
+                        continue;
+                    }
+
+                    if (FilterMaskByController(mask, ref res))
+                    {
+                        continue;
+                    }
+
+                    FilterMaskByMesh(mask, ref res);
                 }
             }
 
             return res;
         }
         /// <summary>
+        /// Creates a new content filtering with the specified armature name
+        /// </summary>
+        /// <param name="armatureName">Armature name</param>
+        /// <param name="modelContent">Model content</param>
+        /// <returns>Returns true if the new model content was created</returns>
+        public bool FilterByArmature(string armatureName, out ModelContent modelContent)
+        {
+            modelContent = null;
+
+            if (string.IsNullOrWhiteSpace(armatureName))
+            {
+                return false;
+            }
+
+            if (!this.SkinningInfo.ContainsKey(armatureName))
+            {
+                return false;
+            }
+
+            modelContent = new ModelContent();
+
+            var controllers = this.SkinningInfo[armatureName].Controllers;
+
+            foreach (var controller in controllers)
+            {
+                TryAddController(controller, ref modelContent);
+            }
+
+            foreach (var mesh in modelContent.Geometry.Keys)
+            {
+                TryAddLights(mesh.Replace("-mesh", ""), ref modelContent);
+            }
+
+            return true;
+        }
+        /// <summary>
         /// Filters the geometry dictionary
         /// </summary>
         /// <param name="mask">Mask</param>
         /// <param name="res">Model content</param>
-        private void FilterMaskGeo(string mask, ref ModelContent res)
+        private void FilterMaskByMesh(string mask, ref ModelContent res)
         {
+            if (string.IsNullOrWhiteSpace(mask))
+            {
+                return;
+            }
+
             var geo = this.Geometry.Where(g =>
                 g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                 g.Key.EndsWith("-mesh", StringComparison.OrdinalIgnoreCase));
@@ -813,59 +863,105 @@ namespace Engine.Content
                     res = new ModelContent();
                 }
 
-                res.Images = this.Images;
-                res.Materials = this.Materials;
-
                 foreach (var g in geo)
                 {
-                    res.Geometry.Add(g.Key, g.Value);
+                    TryAddGeometry(g.Key, ref res);
                 }
 
-                var lights = this.Lights.Where(l =>
-                    l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
-                    l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
-
-                if (lights.Any())
-                {
-                    foreach (var l in lights)
-                    {
-                        res.Lights.Add(l.Key, l.Value);
-                    }
-                }
+                TryAddLights(mask, ref res);
             }
         }
         /// <summary>
-        /// Filters the skins and animations dictionary
+        /// Filters the controllers dictionary
         /// </summary>
         /// <param name="mask">Mask</param>
         /// <param name="res">Model content</param>
-        private void FilterMaskSkin(string mask, ref ModelContent res)
+        private bool FilterMaskByController(string mask, ref ModelContent res)
         {
+            if (string.IsNullOrWhiteSpace(mask))
+            {
+                return false;
+            }
+
             var controllers = this.Controllers.Where(g =>
                 g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                 g.Key.EndsWith("-skin", StringComparison.OrdinalIgnoreCase));
 
             if (controllers.Any())
             {
+                if (res == null)
+                {
+                    res = new ModelContent();
+                }
+
                 foreach (var c in controllers)
                 {
-                    res.Controllers.Add(c.Key, c.Value);
+                    //Add controller
+                    TryAddController(c.Key, ref res);
+
+                    //Add lights
+                    TryAddLights(mask, ref res);
                 }
+
+                return true;
             }
 
-            var skins = this.SkinningInfo.Where(g =>
-                g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase));
-
-            if (skins.Any())
+            return false;
+        }
+        /// <summary>
+        /// Try to add the controller to the result content
+        /// </summary>
+        /// <param name="controllerName">Controller name</param>
+        /// <param name="res">Result content</param>
+        private void TryAddController(string controllerName, ref ModelContent res)
+        {
+            if (string.IsNullOrWhiteSpace(controllerName))
             {
-                foreach (var s in skins)
-                {
-                    res.SkinningInfo.Add(s.Key, s.Value);
-                }
+                return;
             }
 
+            if (res.SkinningInfo.ContainsKey(controllerName))
+            {
+                return;
+            }
+
+            var c = this.Controllers[controllerName];
+
+            res.Controllers.Add(controllerName, c);
+
+            //Add skins
+            TryAddSkin(c.Armature, ref res);
+
+            //Add meshes
+            TryAddGeometry(c.Skin, ref res);
+        }
+        /// <summary>
+        /// Try to add a skin to the result content
+        /// </summary>
+        /// <param name="controllerName">Controller name</param>
+        /// <param name="res">Result content</param>
+        private void TryAddSkin(string armatureName, ref ModelContent res)
+        {
+            if (string.IsNullOrWhiteSpace(armatureName))
+            {
+                return;
+            }
+
+            if (res.SkinningInfo.ContainsKey(armatureName))
+            {
+                return;
+            }
+
+            var s = this.SkinningInfo[armatureName];
+
+            res.SkinningInfo.Add(armatureName, s);
+
+            //Add animations
             var animations = this.Animations.Where(g =>
-                g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase));
+            {
+                return s.Skeleton.GetJointNames()
+                    .Any(j => g.Key.StartsWith($"{j}_pose_matrix", StringComparison.OrdinalIgnoreCase));
+            });
 
             if (animations.Any())
             {
@@ -875,83 +971,122 @@ namespace Engine.Content
                 }
             }
 
-            if (res.Animations.Definition == null)
-            {
-                res.Animations.Definition = new AnimationDescription();
-            }
-
-            var clips = this.Animations.Definition.Clips.Where(c =>
-                skins.Any(s => s.Key == c.Skeleton));
+            var clips = this.Animations.Definition.Clips
+                .Where(c => string.Equals(armatureName, c.Skeleton, StringComparison.OrdinalIgnoreCase));
 
             if (clips.Any())
             {
+                if (res.Animations.Definition == null)
+                {
+                    res.Animations.Definition = new AnimationDescription();
+                }
+
                 res.Animations.Definition.Clips.AddRange(clips);
             }
         }
-
         /// <summary>
-        /// Creates a new content filtering with the specified armature name
+        /// Try to add geometry to the result content
         /// </summary>
-        /// <param name="armatureName">Armature name</param>
-        /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
-        public ModelContent FilterArmature(string armatureName)
+        /// <param name="controllerName">Controller name</param>
+        /// <param name="res">Result content</param>
+        private void TryAddGeometry(string meshName, ref ModelContent res)
         {
-            ModelContent newModel = new ModelContent();
-
-            if (!SkinningInfo.Any(s => s.Key == armatureName))
+            if (string.IsNullOrWhiteSpace(meshName))
             {
-                return newModel;
+                return;
             }
 
-            //Skinning info
-            var skInfo = SkinningInfo[armatureName];
-            newModel.SkinningInfo.Add(armatureName, skInfo);
-
-            //Animation definition
-            newModel.Animations.Definition = Animations.Definition;
-
-            //Animation list
-            foreach (var animationName in this.Animations.GetAnimationsForSkin(skInfo))
+            if (res.Geometry.ContainsKey(meshName))
             {
-                var animation = Animations[animationName];
-                newModel.Animations.Add(animationName, animation);
+                return;
             }
 
-            //Controllers
-            foreach (var controllerName in skInfo.Controllers)
+            var g = this.Geometry[meshName];
+
+            res.Geometry.Add(meshName, g);
+
+            foreach (var sm in g.Values)
             {
-                var controller = Controllers[controllerName];
-                newModel.Controllers.Add(controllerName, controller);
+                //Add materials
+                TryAddMaterial(sm.Material, ref res);
+            }
+        }
+        /// <summary>
+        /// Try to add materials to the result content
+        /// </summary>
+        /// <param name="controllerName">Controller name</param>
+        /// <param name="res">Result content</param>
+        private void TryAddMaterial(string materialName, ref ModelContent res)
+        {
+            if (string.IsNullOrWhiteSpace(materialName))
+            {
+                return;
             }
 
-            //Geometry
-            foreach (var skinName in newModel.Controllers.Skins)
+            if (res.Materials.ContainsKey(materialName))
             {
-                var geometry = Geometry[skinName];
-                newModel.Geometry.Add(skinName, geometry);
+                return;
             }
 
-            //Materials
-            foreach (var materialName in newModel.Geometry.Materials)
+            var mat = this.Materials[materialName];
+
+            res.Materials.Add(materialName, mat);
+
+            //Add textures
+            TryAddImage(mat.AmbientTexture, ref res);
+            TryAddImage(mat.DiffuseTexture, ref res);
+            TryAddImage(mat.EmissionTexture, ref res);
+            TryAddImage(mat.NormalMapTexture, ref res);
+            TryAddImage(mat.ReflectiveTexture, ref res);
+            TryAddImage(mat.SpecularTexture, ref res);
+        }
+        /// <summary>
+        /// Try to add an image to the result content
+        /// </summary>
+        /// <param name="controllerName">Controller name</param>
+        /// <param name="res">Result content</param>
+        private void TryAddImage(string textureName, ref ModelContent res)
+        {
+            if (string.IsNullOrWhiteSpace(textureName))
             {
-                var material = Materials[materialName];
-                newModel.Materials.Add(materialName, material);
+                return;
             }
 
-            //Images
-            foreach (var imageName in newModel.Materials.Images)
+            if (res.Images.ContainsKey(textureName))
             {
-                var image = Images[imageName];
-                newModel.Images.Add(imageName, image);
+                return;
             }
 
-            //Lights (always copy all lights)
-            foreach (var light in Lights)
+            res.Images.Add(textureName, this.Images[textureName]);
+        }
+        /// <summary>
+        /// Try to add the lights to the result content
+        /// </summary>
+        /// <param name="controllerName">Controller name</param>
+        /// <param name="res">Result content</param>
+        private void TryAddLights(string mask, ref ModelContent res)
+        {
+            if (string.IsNullOrWhiteSpace(mask))
             {
-                newModel.Lights.Add(light.Key, light.Value);
+                return;
             }
 
-            return newModel;
+            var lights = this.Lights.Where(l =>
+                l.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
+                l.Key.EndsWith("-light", StringComparison.OrdinalIgnoreCase));
+
+            if (lights.Any())
+            {
+                foreach (var l in lights)
+                {
+                    if (res.Lights.ContainsKey(l.Key))
+                    {
+                        continue;
+                    }
+
+                    res.Lights.Add(l.Key, l.Value);
+                }
+            }
         }
 
         /// <summary>

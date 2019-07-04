@@ -4,9 +4,9 @@
   <armature_name>Armature_001</armature_name>
   <animation_description>
     <animations>
-      <animation name="default" from="0" to="1" />
-      <animation name="pull" from="1" to="2" />
-      <animation name="push" from="2" to="3" />
+      <animation name="default" skeleton="Armature_001" from="0" to="1" />
+      <animation name="pull" skeleton="Armature_001" from="1" to="2" />
+      <animation name="push" skeleton="Armature_001" from="2" to="3" />
     </animations>
   </animation_description>
 </ModelContentDescription>

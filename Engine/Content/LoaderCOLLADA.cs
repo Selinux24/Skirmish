@@ -86,9 +86,10 @@ namespace Engine.Content
                     ProcessLibraryAnimations(dae, modelContent, animation);
 
                     //Filter by armature name
-                    if (modelContent.SkinningInfo.Count > 0 && !string.IsNullOrEmpty(armatureName))
+                    if (!string.IsNullOrWhiteSpace(armatureName) &&
+                        modelContent.FilterByArmature(armatureName, out var armatureModel))
                     {
-                        modelContent = modelContent.FilterArmature(armatureName);
+                        modelContent = armatureModel;
                     }
 
                     res.Add(modelContent);
