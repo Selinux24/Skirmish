@@ -133,8 +133,7 @@ namespace Engine
                     drawingData = this.GetDrawingData(lastLod);
                 }
 
-                this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
-                this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
+                uint animationOffset = 0;
 
                 if (drawingData?.SkinningData != null)
                 {
@@ -144,8 +143,12 @@ namespace Engine
                     }
 
                     current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
-                    this.instancingData[instanceIndex].AnimationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
+                    animationOffset = current.AnimationController.GetAnimationOffset(drawingData.SkinningData);
                 }
+
+                this.instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
+                this.instancingData[instanceIndex].TextureIndex = current.TextureIndex;
+                this.instancingData[instanceIndex].AnimationOffset = animationOffset;
 
                 instanceIndex++;
             }
