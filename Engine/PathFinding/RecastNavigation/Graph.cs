@@ -686,11 +686,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Adds a cylinder obstacle
         /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
+        /// <param name="cylinder">Bounding Cylinder</param>
         /// <returns>Returns the obstacle id</returns>
-        public int AddObstacle(Vector3 position, float radius, float height)
+        public int AddObstacle(BoundingCylinder cylinder)
         {
             this.updated = false;
 
@@ -701,45 +699,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
                 if (cache != null)
                 {
-                    cache.AddObstacle(position, radius, height, out int res);
-
-                    obstacles.Add(new Tuple<Agent, int>(agent, res));
-                }
-            }
-
-            if (obstacles.Count > 0)
-            {
-                var o = new GraphItem()
-                {
-                    Indices = obstacles.ToArray()
-                };
-
-                itemIndices.Add(o);
-
-                return o.Id;
-            }
-
-            return -1;
-        }
-        /// <summary>
-        /// Adds a oriented bounding box obstacle
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="halfExtents">half extent vectors</param>
-        /// <param name="yRotation">Rotation in the y axis</param>
-        /// <returns>Returns the obstacle id</returns>
-        public int AddObstacle(Vector3 position, Vector3 halfExtents, float yRotation)
-        {
-            this.updated = false;
-
-            List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
-
-            foreach (var agent in MeshQueryDictionary.Keys)
-            {
-                var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
-                if (cache != null)
-                {
-                    cache.AddBoxObstacle(position, halfExtents, yRotation, out int res);
+                    cache.AddObstacle(cylinder.Position, cylinder.Radius, cylinder.Height, out int res);
 
                     obstacles.Add(new Tuple<Agent, int>(agent, res));
                 }
@@ -762,10 +722,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Adds a bounding box obstacle
         /// </summary>
-        /// <param name="minimum">Minimum corner</param>
-        /// <param name="maximum">Maximum corner</param>
+        /// <param name="bbox">Bounding Box</param>
         /// <returns>Returns the obstacle id</returns>
-        public int AddObstacle(Vector3 minimum, Vector3 maximum)
+        public int AddObstacle(BoundingBox bbox)
         {
             this.updated = false;
 
@@ -776,7 +735,7 @@ namespace Engine.PathFinding.RecastNavigation
                 var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
                 if (cache != null)
                 {
-                    cache.AddBoxObstacle(minimum, maximum, out int res);
+                    cache.AddBoxObstacle(bbox.Minimum, bbox.Maximum, out int res);
 
                     obstacles.Add(new Tuple<Agent, int>(agent, res));
                 }
@@ -795,6 +754,92 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             return -1;
+        }
+        /// <summary>
+        /// Adds a oriented bounding box obstacle
+        /// </summary>
+        /// <param name="obb">Oriented Bounding Box</param>
+        /// <returns>Returns the obstacle id</returns>
+        /// <remarks>Only applies rotation if the obb's transform has rotation in the Y axis</remarks>
+        public int AddObstacle(OrientedBoundingBox obb)
+        {
+            this.updated = false;
+
+            List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
+
+            var position = obb.Center;
+            var halfExtents = obb.Extents;
+            var yRotation = GetYRotation(obb.Transformation);
+
+            foreach (var agent in MeshQueryDictionary.Keys)
+            {
+                var cache = MeshQueryDictionary[agent].GetAttachedNavMesh().TileCache;
+                if (cache == null)
+                {
+                    continue;
+                }
+
+                cache.AddBoxObstacle(position, halfExtents, yRotation, out int res);
+
+                obstacles.Add(new Tuple<Agent, int>(agent, res));
+            }
+
+            if (obstacles.Count == 0)
+            {
+                return -1;
+            }
+
+            var o = new GraphItem()
+            {
+                Indices = obstacles.ToArray()
+            };
+
+            itemIndices.Add(o);
+
+            return o.Id;
+        }
+        /// <summary>
+        /// Gets the Y axis rotation from a transform matrix
+        /// </summary>
+        /// <param name="transform">Transform matrix</param>
+        /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
+        private static float GetYRotation(Matrix transform)
+        {
+            if (transform.Decompose(out var scale, out var rotation, out var translation))
+            {
+                return GetYRotation(rotation);
+            }
+            else
+            {
+                throw new ArgumentException("Bad transform. Cannot decompose.", nameof(transform));
+            }
+        }
+        /// <summary>
+        /// Gets the Y axis rotation from a rotation quaternion
+        /// </summary>
+        /// <param name="rotation">Rotation Quaternion</param>
+        /// <returns>Returns the Y axis angle, only if the rotation is in the Y axis</returns>
+        private static float GetYRotation(Quaternion rotation)
+        {
+            var yRotation = 0f;
+
+            // Validates the angle and axis
+            if (rotation.Angle != 0)
+            {
+                Vector3 epsilon = Vector3.Up * 0.0001f;
+
+                if (Vector3.NearEqual(rotation.Axis, Vector3.Up, epsilon))
+                {
+                    yRotation = rotation.Angle;
+                }
+
+                if (Vector3.NearEqual(rotation.Axis, Vector3.Down, epsilon))
+                {
+                    yRotation = -rotation.Angle;
+                }
+            }
+
+            return yRotation;
         }
         /// <summary>
         /// Removes an obstacle by obstacle id

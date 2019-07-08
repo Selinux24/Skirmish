@@ -260,6 +260,18 @@ namespace Engine
             {
                 Vector3[] v = obb.GetCorners();
 
+                float deltaY = obb.Extents.Y;
+                if (!MathUtil.NearEqual(obb.Transformation.ScaleVector.Y, 1f))
+                {
+                    // Adjust scaled height
+                    deltaY *= obb.Transformation.ScaleVector.Y;
+                }
+
+                for (int i = 0; i < v.Length; i++)
+                {
+                    v[i].Y += deltaY;
+                }
+
                 // Fill in the front face index data
                 triangleList.Add(new Triangle(v[0], v[1], v[2]));
                 triangleList.Add(new Triangle(v[0], v[2], v[3]));

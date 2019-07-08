@@ -264,8 +264,8 @@
 
         <item asset_name="Dn_Rug_2">
           <position>0 0 6</position>
-          <rotation>rot90</rotation>
-          <scale>2</scale>
+          <rotation>rot99</rotation>
+          <scale>1.9</scale>
         </item>
         
         <item asset_name="Dn_Torch" type="Light" cast_shadows="false">
@@ -427,6 +427,7 @@
         <item asset_name="Dn_Barrel" type="Furniture">
           <position>10 0 4</position>
           <scale>0.75</scale>
+          <rotation>rot12</rotation>
         </item>
         <item asset_name="Dn_Barrel" type="Furniture">
           <position>11 0 4.25</position>

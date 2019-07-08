@@ -1913,8 +1913,8 @@ namespace Terrain
         {
             var agent = this.walkMode ? this.walkerAgentType : this.tankAgentType;
 
-            var nodes = this.GetNodes(agent);
-            if (nodes?.Length > 0)
+            var nodes = this.GetNodes(agent).OfType<GraphNode>();
+            if (nodes.Any())
             {
                 if (this.graphIndex <= -1)
                 {
@@ -1922,31 +1922,25 @@ namespace Terrain
 
                     this.terrainGraphDrawer.Instance.Clear();
 
-                    for (int i = 0; i < nodes.Length; i++)
+                    foreach (var node in nodes)
                     {
-                        var node = (GraphNode)nodes[i];
-                        var color = node.Color;
-                        var tris = node.Triangles;
-
-                        this.terrainGraphDrawer.Instance.AddPrimitives(color, tris);
+                        this.terrainGraphDrawer.Instance.AddPrimitives(node.Color, node.Triangles);
                     }
                 }
                 else
                 {
-                    if (this.graphIndex >= nodes.Length)
+                    if (this.graphIndex >= nodes.Count())
                     {
-                        this.graphIndex = nodes.Length - 1;
+                        this.graphIndex = nodes.Count() - 1;
                     }
 
-                    if (this.graphIndex < nodes.Length)
+                    if (this.graphIndex < nodes.Count())
                     {
                         this.terrainGraphDrawer.Instance.Clear();
 
-                        var node = (GraphNode)nodes[this.graphIndex];
-                        var color = node.Color;
-                        var tris = node.Triangles;
+                        var node = nodes.ToArray()[this.graphIndex];
 
-                        this.terrainGraphDrawer.Instance.SetPrimitives(color, tris);
+                        this.terrainGraphDrawer.Instance.SetPrimitives(node.Color, node.Triangles);
                     }
                 }
             }

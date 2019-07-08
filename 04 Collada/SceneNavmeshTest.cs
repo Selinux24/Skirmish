@@ -5,6 +5,7 @@ using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Collada
 {
@@ -282,18 +283,14 @@ namespace Collada
         }
         private void UpdateGraphNodes(AgentType agent)
         {
-            var nodes = this.GetNodes(agent);
-            if (nodes != null && nodes.Length > 0)
+            var nodes = this.GetNodes(agent).OfType<GraphNode>();
+            if (nodes.Any())
             {
                 this.graphDrawer.Instance.Clear();
 
-                for (int i = 0; i < nodes.Length; i++)
+                foreach (var node in nodes)
                 {
-                    var node = (GraphNode)nodes[i];
-                    var color = node.Color;
-                    var tris = node.Triangles;
-
-                    this.graphDrawer.Instance.AddPrimitives(color, tris);
+                    this.graphDrawer.Instance.AddPrimitives(node.Color, node.Triangles);
                 }
             }
         }

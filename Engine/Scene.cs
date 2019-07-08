@@ -1395,16 +1395,9 @@ namespace Engine
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <returns>Returns the path finder grid nodes</returns>
-        public virtual IGraphNode[] GetNodes(AgentType agent)
+        public virtual IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
-            IGraphNode[] nodes = null;
-
-            if (this.NavigationGraph != null)
-            {
-                nodes = this.NavigationGraph.GetNodes(agent);
-            }
-
-            return nodes;
+            return this.NavigationGraph?.GetNodes(agent) ?? new IGraphNode[] { };
         }
         /// <summary>
         /// Find path from point to point
@@ -1641,7 +1634,7 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(BoundingCylinder cylinder)
         {
-            return this.NavigationGraph.AddObstacle(cylinder.Position, cylinder.Radius, cylinder.Height);
+            return this.NavigationGraph.AddObstacle(cylinder);
         }
         /// <summary>
         /// Adds AABB obstacle
@@ -1650,18 +1643,16 @@ namespace Engine
         /// <returns>Returns the obstacle Id</returns>
         public virtual int AddObstacle(BoundingBox bbox)
         {
-            return this.NavigationGraph.AddObstacle(bbox.Minimum, bbox.Maximum);
+            return this.NavigationGraph.AddObstacle(bbox);
         }
         /// <summary>
-        /// Adds OBB
+        /// Adds OBB obstacle
         /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="halfExtents">Half extents</param>
-        /// <param name="yRotation">Rotation in the Y axis</param>
+        /// <param name="obb">OBB</param>
         /// <returns>Returns the obstacle Id</returns>
-        public virtual int AddObstacle(Vector3 position, Vector3 halfExtents, float yRotation)
+        public virtual int AddObstacle(OrientedBoundingBox obb)
         {
-            return this.NavigationGraph.AddObstacle(position, halfExtents, yRotation);
+            return this.NavigationGraph.AddObstacle(obb);
         }
         /// <summary>
         /// Removes obstable by id
@@ -1705,7 +1696,7 @@ namespace Engine
             }).ConfigureAwait(false);
         }
         /// <summary>
-        /// Updates the graph at positions list
+        /// Updates the graph at positions in the specified list
         /// </summary>
         /// <param name="positions">Positions list</param>
         public virtual async void UpdateGraph(IEnumerable<Vector3> positions)

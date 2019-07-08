@@ -5,6 +5,7 @@ using Engine.PathFinding.RecastNavigation;
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Skybox
 {
@@ -519,18 +520,14 @@ namespace Skybox
         }
         private void DEBUGUpdateGraphDrawer()
         {
-            var nodes = this.GetNodes(this.walker);
-            if (nodes != null && nodes.Length > 0)
+            var nodes = this.GetNodes(this.walker).OfType<GraphNode>();
+            if (nodes.Any())
             {
                 this.graphDrawer.Instance.Clear();
 
-                for (int i = 0; i < nodes.Length; i++)
+                foreach (var node in nodes)
                 {
-                    var node = (GraphNode)nodes[i];
-                    var color = node.Color;
-                    var tris = node.Triangles;
-
-                    this.graphDrawer.Instance.AddPrimitives(color, tris);
+                    this.graphDrawer.Instance.AddPrimitives(node.Color, node.Triangles);
                 }
             }
         }

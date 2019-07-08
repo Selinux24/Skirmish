@@ -653,24 +653,28 @@ namespace Engine
         public override BoundingSphere GetBoundingSphere()
         {
             var res = new BoundingSphere();
+            bool initialized = false;
 
             foreach (var item in this.objects.Keys)
             {
                 var model = this.objects[item];
-                if (model != null)
+                if (model == null)
                 {
-                    for (int i = 0; i < model.Instance.Count; i++)
-                    {
-                        var bsph = model.Instance[i].GetBoundingSphere();
+                    continue;
+                }
 
-                        if (res == new BoundingSphere())
-                        {
-                            res = bsph;
-                        }
-                        else
-                        {
-                            res = BoundingSphere.Merge(res, bsph);
-                        }
+                for (int i = 0; i < model.Instance.Count; i++)
+                {
+                    var bsph = model.Instance[i].GetBoundingSphere();
+
+                    if (!initialized)
+                    {
+                        res = bsph;
+                        initialized = true;
+                    }
+                    else
+                    {
+                        res = BoundingSphere.Merge(res, bsph);
                     }
                 }
             }
@@ -684,24 +688,28 @@ namespace Engine
         public override BoundingBox GetBoundingBox()
         {
             var res = new BoundingBox();
+            bool initialized = false;
 
             foreach (var item in this.objects.Keys)
             {
                 var model = this.objects[item];
-                if (model != null)
+                if (model == null)
                 {
-                    for (int i = 0; i < model.Instance.Count; i++)
-                    {
-                        var bbox = model.Instance[i].GetBoundingBox();
+                    continue;
+                }
 
-                        if (res == new BoundingBox())
-                        {
-                            res = bbox;
-                        }
-                        else
-                        {
-                            res = BoundingBox.Merge(res, bbox);
-                        }
+                for (int i = 0; i < model.Instance.Count; i++)
+                {
+                    var bbox = model.Instance[i].GetBoundingBox();
+
+                    if (!initialized)
+                    {
+                        res = bbox;
+                        initialized = true;
+                    }
+                    else
+                    {
+                        res = BoundingBox.Merge(res, bbox);
                     }
                 }
             }
@@ -724,6 +732,7 @@ namespace Engine
 
                 foreach (var instance in instances)
                 {
+                    // Call to GetTriangles instead of GetVolumes to take coarse volumes in the first place
                     triangles.AddRange(instance.GetTriangles());
                 }
             }
@@ -785,17 +794,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets a position array of the specified object instances
-        /// </summary>
-        /// <param name="name">Object name</param>
-        /// <returns>Returns a position array of the specified object instances</returns>
-        public Vector3[] GetObjectsPositionsByAssetName(string name)
-        {
-            var namedAssets = this.GetObjectsByName(name);
-
-            return namedAssets.Select(a => a.Manipulator.Position).ToArray();
-        }
-        /// <summary>
         /// Gets the specified object by id
         /// </summary>
         /// <param name="id">Object id</param>
@@ -807,32 +805,32 @@ namespace Engine
 
             return obj;
         }
+
         /// <summary>
         /// Get objects by name
         /// </summary>
         /// <param name="name">Object name</param>
         /// <returns>Returns a list of objects by name</returns>
-        public ModelInstance[] GetObjectsByName(string name)
+        public IEnumerable<ModularSceneryItem> GetObjectsByName(string name)
         {
-            var objs = this.entities
-                .Where(o => string.Equals(o.Object.AssetName, name, StringComparison.OrdinalIgnoreCase))
-                .Select(o => o.Item);
+            var res = this.entities
+                .Where(o => string.Equals(o.Object.AssetName, name, StringComparison.OrdinalIgnoreCase));
 
-            return objs.ToArray();
+            return res.ToArray();
         }
         /// <summary>
         /// Gets objects by type
         /// </summary>
         /// <param name="objectType">Object type</param>
         /// <returns>Returns a list of objects of the specified type</returns>
-        public ModelInstance[] GetObjectsByType(ModularSceneryObjectTypes objectType)
+        public IEnumerable<ModularSceneryItem> GetObjectsByType(ModularSceneryObjectTypes objectType)
         {
-            var objs = this.entities
-                .Where(o => o.Object.Type == objectType)
-                .Select(o => o.Item);
+            var res = this.entities
+                .Where(o => o.Object.Type == objectType);
 
-            return objs.ToArray();
+            return res.ToArray();
         }
+
         /// <summary>
         /// Gets objects into the specified volume
         /// </summary>
@@ -840,7 +838,7 @@ namespace Engine
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, bool useSphere, bool sortByDistance)
+        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingBox bbox, bool useSphere, bool sortByDistance)
         {
             return GetObjects(bbox, null, useSphere, sortByDistance);
         }
@@ -852,7 +850,7 @@ namespace Engine
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingBox bbox, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
+        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingBox bbox, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
         {
             return GetObjects(bbox, filter, useSphere, sortByDistance);
         }
@@ -864,7 +862,7 @@ namespace Engine
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private ModularSceneryItem[] GetObjects(BoundingBox bbox, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private IEnumerable<ModularSceneryItem> GetObjects(BoundingBox bbox, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
                 .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
@@ -896,6 +894,7 @@ namespace Engine
 
             return res.ToArray();
         }
+
         /// <summary>
         /// Gets objects into the specified volume
         /// </summary>
@@ -903,7 +902,7 @@ namespace Engine
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, bool useSphere, bool sortByDistance)
+        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingSphere sphere, bool useSphere, bool sortByDistance)
         {
             return GetObjects(sphere, null, useSphere, sortByDistance);
         }
@@ -915,7 +914,7 @@ namespace Engine
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingSphere sphere, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
+        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingSphere sphere, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
         {
             return GetObjects(sphere, filter, useSphere, sortByDistance);
         }
@@ -927,7 +926,7 @@ namespace Engine
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private ModularSceneryItem[] GetObjects(BoundingSphere sphere, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private IEnumerable<ModularSceneryItem> GetObjects(BoundingSphere sphere, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
                 .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
@@ -963,6 +962,7 @@ namespace Engine
 
             return res.ToArray();
         }
+
         /// <summary>
         /// Gets objects into the specified volume
         /// </summary>
@@ -970,7 +970,7 @@ namespace Engine
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingFrustum frustum, bool useSphere, bool sortByDistance)
+        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingFrustum frustum, bool useSphere, bool sortByDistance)
         {
             return GetObjects(frustum, null, useSphere, sortByDistance);
         }
@@ -982,7 +982,7 @@ namespace Engine
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public ModularSceneryItem[] GetObjectsInVolume(BoundingFrustum frustum, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
+        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingFrustum frustum, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
         {
             return GetObjects(frustum, filter, useSphere, sortByDistance);
         }
@@ -994,7 +994,7 @@ namespace Engine
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private ModularSceneryItem[] GetObjects(BoundingFrustum frustum, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private IEnumerable<ModularSceneryItem> GetObjects(BoundingFrustum frustum, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
                 .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
@@ -1036,7 +1036,7 @@ namespace Engine
         /// </summary>
         /// <param name="item">Scenery item</param>
         /// <returns>Returns a list of triggers</returns>
-        public ModularSceneryTrigger[] GetTriggersByObject(ModularSceneryItem item)
+        public IEnumerable<ModularSceneryTrigger> GetTriggersByObject(ModularSceneryItem item)
         {
             if (!triggers.ContainsKey(item.Item))
             {
@@ -1047,6 +1047,7 @@ namespace Engine
                 .Where(t => string.Equals(t.StateFrom, item.CurrentState, StringComparison.OrdinalIgnoreCase))
                 .ToArray();
         }
+
         /// <summary>
         /// Executes the specified callback
         /// </summary>

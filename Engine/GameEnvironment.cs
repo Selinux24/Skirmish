@@ -41,12 +41,18 @@ namespace Engine
         /// <param name="localTransform">Local transform</param>
         /// <param name="averagingScale">Averaging scale</param>
         /// <returns>Returns the level of detail</returns>
-        public static LevelOfDetail GetLOD(Vector3 origin, BoundingSphere coarseBoundingSphere, Matrix localTransform, float averagingScale)
+        public static LevelOfDetail GetLOD(Vector3 origin, BoundingSphere? coarseBoundingSphere, Matrix localTransform, float averagingScale)
         {
-            var position = Vector3.TransformCoordinate(coarseBoundingSphere.Center, localTransform);
-            var radius = coarseBoundingSphere.Radius * averagingScale;
+            Vector3 position = localTransform.TranslationVector;
+            float radius = 0f;
 
-            var dist = Vector3.Distance(position, origin) - radius;
+            if (coarseBoundingSphere.HasValue)
+            {
+                position = Vector3.TransformCoordinate(coarseBoundingSphere.Value.Center, localTransform);
+                radius = coarseBoundingSphere.Value.Radius * averagingScale;
+            }
+
+            float dist = Vector3.Distance(position, origin) - radius;
             if (dist < LODDistanceHigh)
             {
                 return LevelOfDetail.High;

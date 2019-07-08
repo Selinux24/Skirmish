@@ -78,7 +78,7 @@ namespace Collada
         private bool taskRunning = false;
 
         private readonly Dictionary<int, object> obstacles = new Dictionary<int, object>();
-        private readonly Color obstacleColor = new Color(Color.Pink.ToColor3(), 1f);
+        private readonly Color obstacleColor = new Color(Color.Pink.ToColor3(), 0.5f);
 
         private readonly Color connectionColor = new Color(Color.LightBlue.ToColor3(), 1f);
 
@@ -358,18 +358,18 @@ namespace Collada
             {
                 Name = "DEBUG++ Obstacles",
                 AlphaEnabled = true,
-                DepthEnabled = true,
-                Count = 1000,
+                DepthEnabled = false,
+                Count = 10000,
             };
             this.obstacleDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(obstacleDrawerDesc);
-            this.obstacleDrawer.Visible = true;
+            this.obstacleDrawer.Visible = false;
 
             var connectionDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Name = "DEBUG++ Connections",
                 AlphaEnabled = true,
                 Color = connectionColor,
-                Count = 1000,
+                Count = 10000,
             };
             this.connectionDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(connectionDrawerDesc);
             this.connectionDrawer.Visible = false;
@@ -400,11 +400,16 @@ namespace Collada
             this.scenery.Instance.TriggerEnd += TriggerEnds;
 
             //Rat holes
-            this.ratHoles = this.scenery.Instance.GetObjectsPositionsByAssetName("Dn_Rat_Hole_1");
+            this.ratHoles = this.scenery.Instance
+                .GetObjectsByName("Dn_Rat_Hole_1")
+                .Select(o => o.Item.Manipulator.Position)
+                .ToArray();
 
             //Jails
             {
-                var jails = this.scenery.Instance.GetObjectsByName("Dn_Jail_1");
+                var jails = this.scenery.Instance
+                    .GetObjectsByName("Dn_Jail_1")
+                    .Select(o => o.Item);
 
                 AnimationPath def = new AnimationPath();
                 def.Add("default");
@@ -418,7 +423,9 @@ namespace Collada
 
             //Doors
             {
-                var doors = this.scenery.Instance.GetObjectsByName("Dn_Door_1");
+                var doors = this.scenery.Instance
+                    .GetObjectsByName("Dn_Door_1")
+                    .Select(o => o.Item);
 
                 AnimationPath def = new AnimationPath();
                 def.Add("default");
@@ -432,7 +439,9 @@ namespace Collada
 
             //Ladders
             {
-                var ladders = this.scenery.Instance.GetObjectsByName("Dn_Anim_Ladder");
+                var ladders = this.scenery.Instance
+                    .GetObjectsByName("Dn_Anim_Ladder")
+                    .Select(o => o.Item);
 
                 AnimationPath def = new AnimationPath();
                 def.Add("pull");
@@ -444,16 +453,11 @@ namespace Collada
                 }
             }
 
-            //Human obstacles
-            for (int i = 0; i < this.human.Count; i++)
-            {
-                var pos = this.human.Instance[i].Manipulator.Position;
-                this.AddObstacle(new BoundingCylinder(pos, 0.8f, 1.5f));
-            }
-
             //Torchs
             {
-                var torchs = this.scenery.Instance.GetObjectsByName("Dn_Torch");
+                var torchs = this.scenery.Instance
+                    .GetObjectsByName("Dn_Torch")
+                    .Select(o => o.Item);
 
                 foreach (var item in torchs)
                 {
@@ -469,8 +473,8 @@ namespace Collada
             //Big fires
             {
                 List<ModelInstance> fires = new List<ModelInstance>();
-                fires.AddRange(this.scenery.Instance.GetObjectsByName("Dn_Temple_Fire_1"));
-                fires.AddRange(this.scenery.Instance.GetObjectsByName("Dn_Big_Lamp_1"));
+                fires.AddRange(this.scenery.Instance.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
+                fires.AddRange(this.scenery.Instance.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Item));
 
                 foreach (var item in fires)
                 {
@@ -492,7 +496,38 @@ namespace Collada
                 this.ratSoundInstance.Listener.SetSource(this.Camera);
             }
 
+            this.InitializeObstacles();
+
             this.InitializeCamera();
+        }
+        private void InitializeObstacles()
+        {
+            //Furniture obstacles
+            var furnitures = this.scenery.Instance
+                .GetObjectsByType(ModularSceneryObjectTypes.Furniture)
+                .Select(o => o.Item);
+
+            foreach (var item in furnitures)
+            {
+                var obb = OrientedBoundingBoxExtensions.FromPoints(item.GetPoints(), item.Manipulator.FinalTransform);
+
+                int index = this.AddObstacle(obb);
+
+                obstacles.Add(index, obb);
+            }
+
+            //Human obstacles
+            for (int i = 0; i < this.human.Count; i++)
+            {
+                var pos = this.human.Instance[i].Manipulator.Position;
+                var bc = new BoundingCylinder(pos, 0.8f, 1.5f);
+
+                int index = this.AddObstacle(bc);
+
+                obstacles.Add(index, bc);
+            }
+
+            PaintObstacles();
         }
         private void InitializeCamera()
         {
@@ -527,13 +562,13 @@ namespace Collada
             }
 
             //Objects
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Entrance), Color.PaleVioletRed);
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Exit), Color.ForestGreen);
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Trigger), Color.Cyan);
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Door), Color.LightYellow);
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Light), Color.MediumPurple);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Entrance).Select(o => o.Item), Color.PaleVioletRed);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Exit).Select(o => o.Item), Color.ForestGreen);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Trigger).Select(o => o.Item), Color.Cyan);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Door).Select(o => o.Item), Color.LightYellow);
+            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Light).Select(o => o.Item), Color.MediumPurple);
         }
-        private void UpdateBoundingBoxes(ModelInstance[] items, Color color)
+        private void UpdateBoundingBoxes(IEnumerable<ModelInstance> items, Color color)
         {
             List<Line3D> lines = new List<Line3D>();
 
@@ -661,6 +696,11 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.F3))
             {
+                this.obstacleDrawer.Visible = !this.obstacleDrawer.Visible;
+            }
+
+            if (this.Game.Input.KeyJustReleased(Keys.F4))
+            {
                 this.ratDrawer.Visible = !this.ratDrawer.Visible;
             }
 
@@ -694,22 +734,6 @@ namespace Collada
             {
                 //Save the navigation triangles to a file
                 this.SaveGraphToFile();
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F8))
-            {
-                //Add obstacle
-                this.AddTestObstacles();
-
-                this.PaintObstacles();
-            }
-
-            if (this.Game.Input.KeyJustReleased(Keys.F9))
-            {
-                //Remove obstacle
-                this.RemoveTestObstacles();
-
-                this.PaintObstacles();
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.G))
@@ -750,8 +774,6 @@ namespace Collada
                 UpdateEntityLight(this.selectedItem);
             }
         }
-
-
 
         private void UpdateWind()
         {
@@ -1037,7 +1059,10 @@ namespace Collada
         }
         private void UpdateEntityTrigger(ModularSceneryItem item)
         {
-            var triggers = this.scenery.Instance.GetTriggersByObject(item);
+            var triggers = this.scenery.Instance
+                .GetTriggersByObject(item)
+                .ToArray();
+
             if (triggers.Any())
             {
                 int keyIndex = ReadKeyIndex();
@@ -1151,31 +1176,6 @@ namespace Collada
             this.Camera.Interest = pos + dir;
         }
 
-        private void AddTestObstacles()
-        {
-            var bc1 = new BoundingCylinder(new Vector3(-1.21798706f, 3.50000000f, -26.1250477f), 0.8f, 2);
-            obstacles.Add(this.AddObstacle(bc1), bc1);
-
-            var bc2 = new BoundingBox(
-                new Vector3(-3.71798706f, 4.0f, -26.6250477f),
-                new Vector3(-2.71798706f, 5.0f, -25.6250477f));
-            obstacles.Add(this.AddObstacle(bc2), bc2);
-
-            var r3 = MathUtil.PiOverFour;
-            var c3 = (new Vector3(-3.71798706f, 4.0f, -26.6250477f) + new Vector3(-2.71798706f, 5.0f, -25.6250477f)) * 0.5f;
-            var bc3 = new OrientedBoundingBox(-Vector3.One * 0.5f, Vector3.One * 0.5f);
-            bc3.Transform(Matrix.RotationY(r3) * Matrix.Translation(c3));
-            obstacles.Add(this.AddObstacle(bc3.Center, bc3.Extents, r3), bc3);
-        }
-        private void RemoveTestObstacles()
-        {
-            if (obstacles.Count > 0)
-            {
-                int obstacleIndex = obstacles.Keys.First();
-                obstacles.Remove(obstacleIndex);
-                this.RemoveObstacle(obstacleIndex);
-            }
-        }
         private void PaintObstacles()
         {
             this.obstacleDrawer.Instance.Clear(obstacleColor);
@@ -1186,26 +1186,25 @@ namespace Collada
 
                 Triangle[] obstacleTris = null;
 
-                if (obstacle is BoundingCylinder)
+                if (obstacle is BoundingCylinder bc)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, (BoundingCylinder)obstacle, 32);
+                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, bc, 32);
                 }
-                else if (obstacle is BoundingBox)
+                else if (obstacle is BoundingBox bbox)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, (BoundingBox)obstacle);
+                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
                 }
-                else if (obstacle is OrientedBoundingBox)
+                else if (obstacle is OrientedBoundingBox obb)
                 {
-                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, (OrientedBoundingBox)obstacle);
+                    obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, obb);
                 }
 
-                if (obstacleTris != null && obstacleTris.Length > 0)
+                if (obstacleTris?.Length > 0)
                 {
                     this.obstacleDrawer.Instance.AddPrimitives(obstacleColor, obstacleTris);
                 }
             }
         }
-
         private void PaintConnections()
         {
             this.connectionDrawer.Instance.Clear(connectionColor);
@@ -1280,24 +1279,21 @@ namespace Collada
         {
             Dictionary<Color4, IEnumerable<Triangle>> res = new Dictionary<Color4, IEnumerable<Triangle>>();
 
-            var nodes = this.GetNodes(agent);
-            if (nodes != null && nodes.Length > 0)
+            var nodes = this.GetNodes(agent).OfType<GraphNode>();
+            if (nodes.Any())
             {
-                for (int i = 0; i < nodes.Length; i++)
+                foreach (var node in nodes)
                 {
-                    if (nodes[i] is GraphNode node)
-                    {
-                        var color = node.Color;
-                        var tris = node.Triangles;
+                    var color = node.Color;
+                    var tris = node.Triangles;
 
-                        if (!res.ContainsKey(color))
-                        {
-                            res.Add(color, new List<Triangle>(tris));
-                        }
-                        else
-                        {
-                            ((List<Triangle>)res[color]).AddRange(tris);
-                        }
+                    if (!res.ContainsKey(color))
+                    {
+                        res.Add(color, new List<Triangle>(tris));
+                    }
+                    else
+                    {
+                        ((List<Triangle>)res[color]).AddRange(tris);
                     }
                 }
             }

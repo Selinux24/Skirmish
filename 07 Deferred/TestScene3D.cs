@@ -6,6 +6,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Deferred
 {
@@ -440,23 +441,19 @@ namespace Deferred
         }
         private void StartNodes()
         {
-            var nodes = this.GetNodes(this.tankAgentType);
-            if (nodes != null && nodes.Length > 0)
+            var nodes = this.GetNodes(this.tankAgentType).OfType<GraphNode>();
+            if (nodes.Any())
             {
                 Random clrRnd = new Random(1);
-                Color[] regions = new Color[nodes.Length];
-                for (int i = 0; i < nodes.Length; i++)
+                Color[] regions = new Color[nodes.Count()];
+                for (int i = 0; i < nodes.Count(); i++)
                 {
                     regions[i] = new Color(clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), clrRnd.NextFloat(0, 1), 0.55f);
                 }
 
-                for (int i = 0; i < nodes.Length; i++)
+                foreach (var node in nodes)
                 {
-                    var node = (GraphNode)nodes[i];
-                    var color = node.Color;
-                    var tris = node.Triangles;
-
-                    this.terrainGraphDrawer.Instance.AddPrimitives(color, tris);
+                    this.terrainGraphDrawer.Instance.AddPrimitives(node.Color, node.Triangles);
                 }
             }
         }

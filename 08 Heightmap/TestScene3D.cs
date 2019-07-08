@@ -1585,20 +1585,14 @@ namespace Heightmap
         private float graphUpdateSeconds = 0;
         private void UpdateGraphNodes(AgentType agent)
         {
-            var nodes = this.GetNodes(agent);
-            if (nodes != null && nodes.Length > 0)
+            var nodes = this.GetNodes(agent).OfType<GraphNode>();
+            if (nodes.Any())
             {
                 this.graphDrawer.Instance.Clear();
 
-                for (int i = 0; i < nodes.Length; i++)
+                foreach (var node in nodes)
                 {
-                    if (nodes[i] is GraphNode node)
-                    {
-                        var color = node.Color;
-                        var tris = node.Triangles;
-
-                        this.graphDrawer.Instance.AddPrimitives(color, tris);
-                    }
+                    this.graphDrawer.Instance.AddPrimitives(node.Color, node.Triangles);
                 }
             }
         }

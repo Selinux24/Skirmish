@@ -40,26 +40,22 @@ namespace Engine.PathFinding
         /// <summary>
         /// Adds a cylinder obstacle
         /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="radius">Radius</param>
-        /// <param name="height">Height</param>
+        /// <param name="cylinder">Bounding Cylinder</param>
         /// <returns>Returns the obstacle id</returns>
-        int AddObstacle(Vector3 position, float radius, float height);
-        /// <summary>
-        /// Adds a oriented bounding box obstacle
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <param name="halfExtents">half extent vectors</param>
-        /// <param name="yRotation">Rotation in the y axis</param>
-        /// <returns>Returns the obstacle id</returns>
-        int AddObstacle(Vector3 position, Vector3 halfExtents, float yRotation);
+        int AddObstacle(BoundingCylinder cylinder);
         /// <summary>
         /// Adds a bounding box obstacle
         /// </summary>
-        /// <param name="minimum">Minimum corner</param>
-        /// <param name="maximum">Maximum corner</param>
+        /// <param name="bbox">Bounding Box</param>
         /// <returns>Returns the obstacle id</returns>
-        int AddObstacle(Vector3 minimum, Vector3 maximum);
+        int AddObstacle(BoundingBox bbox);
+        /// <summary>
+        /// Adds a oriented bounding box obstacle
+        /// </summary>
+        /// <param name="obb">Oriented Bounding Box</param>
+        /// <returns>Returns the obstacle id</returns>
+        /// <remarks>Only applies rotation if the obb's transform has rotation in the Y axis</remarks>
+        int AddObstacle(OrientedBoundingBox obb);
         /// <summary>
         /// Removes an obstacle by obstacle id
         /// </summary>

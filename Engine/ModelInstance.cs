@@ -48,15 +48,15 @@ namespace Engine
         /// <summary>
         /// Coarse bounding sphere
         /// </summary>
-        private BoundingSphere coarseBoundingSphere = new BoundingSphere();
+        private BoundingSphere? coarseBoundingSphere = null;
         /// <summary>
         /// Bounding sphere
         /// </summary>
-        private BoundingSphere boundingSphere;
+        private BoundingSphere? boundingSphere = null;
         /// <summary>
         /// Bounding box
         /// </summary>
-        private BoundingBox boundingBox;
+        private BoundingBox? boundingBox = null;
         /// <summary>
         /// Level of detail
         /// </summary>
@@ -178,8 +178,8 @@ namespace Engine
             this.updatePoints = true;
             this.updateTriangles = true;
 
-            this.boundingSphere = new BoundingSphere();
-            this.boundingBox = new BoundingBox();
+            this.boundingSphere = null;
+            this.boundingBox = null;
         }
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -213,7 +213,7 @@ namespace Engine
                 this.updatePoints = false;
             }
 
-            return this.positionCache;
+            return this.positionCache ?? new Vector3[] { };
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -247,7 +247,7 @@ namespace Engine
                 this.updateTriangles = false;
             }
 
-            return this.triangleCache;
+            return this.triangleCache ?? new Triangle[] { };
         }
         /// <summary>
         /// Gets bounding sphere
@@ -264,7 +264,7 @@ namespace Engine
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere(bool refresh)
         {
-            if (refresh || this.boundingSphere == new BoundingSphere())
+            if (refresh || this.boundingSphere == null)
             {
                 var points = this.GetPoints(refresh);
                 if (points.Any())
@@ -273,7 +273,7 @@ namespace Engine
                 }
             }
 
-            return this.boundingSphere;
+            return this.boundingSphere ?? new BoundingSphere();
         }
         /// <summary>
         /// Gets bounding box
@@ -290,7 +290,7 @@ namespace Engine
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox(bool refresh)
         {
-            if (refresh || this.boundingBox == new BoundingBox())
+            if (refresh || this.boundingBox == null)
             {
                 var points = this.GetPoints(refresh);
                 if (points.Any())
@@ -299,7 +299,7 @@ namespace Engine
                 }
             }
 
-            return this.boundingBox;
+            return this.boundingBox ?? new BoundingBox();
         }
 
         /// <summary>
