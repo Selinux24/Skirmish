@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Engine.Collections.Generic
@@ -28,7 +29,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="items">Partitioning items</param>
         /// <param name="maxDepth">Maximum depth</param>
-        public QuadTree(T[] items, int maxDepth)
+        public QuadTree(IEnumerable<T> items, int maxDepth)
         {
             var bbox = GeometryUtil.CreateBoundingBox(items);
             var bsph = GeometryUtil.CreateBoundingSphere(items);
@@ -52,7 +53,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
         /// <returns>Returns bounding boxes of specified depth</returns>
-        public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
             return this.Root.GetBoundingBoxes(maxDepth);
         }
@@ -61,7 +62,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
         /// <returns>Returns the nodes contained into the frustum</returns>
-        public QuadTreeNode<T>[] GetNodesInVolume(ref BoundingFrustum frustum)
+        public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingFrustum frustum)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -80,7 +81,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns the nodes contained into the bounding box</returns>
-        public QuadTreeNode<T>[] GetNodesInVolume(ref BoundingBox bbox)
+        public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingBox bbox)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -99,7 +100,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
         /// <returns>Returns the nodes contained into the bounding sphere</returns>
-        public QuadTreeNode<T>[] GetNodesInVolume(ref BoundingSphere sphere)
+        public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingSphere sphere)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -117,7 +118,7 @@ namespace Engine.Collections.Generic
         /// Gets all leaf nodes
         /// </summary>
         /// <returns>Returns all leaf nodel</returns>
-        public QuadTreeNode<T>[] GetLeafNodes()
+        public IEnumerable<QuadTreeNode<T>> GetLeafNodes()
         {
             return this.Root.GetLeafNodes();
         }
@@ -129,20 +130,19 @@ namespace Engine.Collections.Generic
         public QuadTreeNode<T> FindNode(Vector3 position)
         {
             var node = this.Root.GetNode(position);
-
             if (node == null)
             {
                 //Look for the closest node
                 var leafNodes = this.GetLeafNodes();
 
                 float dist = float.MaxValue;
-                for (int i = 0; i < leafNodes.Length; i++)
+                foreach (var leafNode in leafNodes)
                 {
-                    float d = Vector3.DistanceSquared(position, leafNodes[i].Center);
+                    float d = Vector3.DistanceSquared(position, leafNode.Center);
                     if (d < dist)
                     {
                         dist = d;
-                        node = leafNodes[i];
+                        node = leafNode;
                     }
                 }
             }

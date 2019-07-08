@@ -787,9 +787,9 @@ namespace Engine
 
             this.foliageSphere.Center = context.EyePosition;
 
-            this.visibleNodes = this.GetFoliageNodes(context.CameraVolume, this.foliageSphere);
+            this.visibleNodes = this.GetFoliageNodes(context.CameraVolume, this.foliageSphere).ToArray();
 
-            if (this.visibleNodes != null && this.visibleNodes.Length > 0)
+            if (this.visibleNodes.Length > 0)
             {
                 bool transparent = this.Description.AlphaEnabled;
 
@@ -1142,12 +1142,12 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="sph">Foliagle bounding sphere</param>
         /// <returns>Returns a node list</returns>
-        private QuadTreeNode[] GetFoliageNodes(ICullingVolume volume, BoundingSphere sph)
+        private IEnumerable<QuadTreeNode> GetFoliageNodes(ICullingVolume volume, BoundingSphere sph)
         {
             var nodes = this.foliageQuadtree.GetNodesInVolume(ref sph);
-            if (nodes?.Length > 0)
+            if (nodes?.Any() == true)
             {
-                return Array.FindAll(nodes, n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint);
+                return nodes.Where(n => volume.Contains(n.BoundingBox) != ContainmentType.Disjoint);
             }
 
             return new QuadTreeNode[] { };

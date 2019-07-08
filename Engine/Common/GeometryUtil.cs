@@ -1084,22 +1084,21 @@ namespace Engine.Common
         public static BoundingBox CreateBoundingBox<T>(IEnumerable<T> vertexListItems) where T : IVertexList
         {
             var bbox = new BoundingBox();
+            bool initialized = false;
 
-            int index = 0;
             foreach (var item in vertexListItems)
             {
                 var tbox = BoundingBox.FromPoints(item.GetVertices());
 
-                if (index == 0)
+                if (!initialized)
                 {
                     bbox = tbox;
+                    initialized = true;
                 }
                 else
                 {
                     bbox = BoundingBox.Merge(bbox, tbox);
                 }
-
-                index++;
             }
 
             return bbox;
@@ -1109,17 +1108,19 @@ namespace Engine.Common
         /// </summary>
         /// <param name="vertexListItems">Vertex list item list</param>
         /// <returns>Returns the minimum bounding sphere that contains all the specified vertex list item list</returns>
-        public static BoundingSphere CreateBoundingSphere<T>(T[] vertexListItems) where T : IVertexList
+        public static BoundingSphere CreateBoundingSphere<T>(IEnumerable<T> vertexListItems) where T : IVertexList
         {
             BoundingSphere bsph = new BoundingSphere();
+            bool initialized = false;
 
-            for (int i = 0; i < vertexListItems.Length; i++)
+            foreach (var vertexItem in vertexListItems)
             {
-                BoundingSphere tsph = BoundingSphere.FromPoints(vertexListItems[i].GetVertices());
+                BoundingSphere tsph = BoundingSphere.FromPoints(vertexItem.GetVertices());
 
-                if (i == 0)
+                if (!initialized)
                 {
                     bsph = tsph;
+                    initialized = true;
                 }
                 else
                 {

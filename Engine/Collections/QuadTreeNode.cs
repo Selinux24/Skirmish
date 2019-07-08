@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Collections
 {
@@ -371,11 +372,11 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
         /// <returns>Returns bounding boxes of specified depth</returns>
-        public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
             List<BoundingBox> bboxes = new List<BoundingBox>();
 
-            if (this.Children != null)
+            if (this.Children?.Any() == true)
             {
                 if (maxDepth > 0 && this.Level == maxDepth)
                 {
@@ -407,7 +408,7 @@ namespace Engine.Collections
         {
             int level = 0;
 
-            if (this.Children != null)
+            if (this.Children?.Any() == true)
             {
                 for (int i = 0; i < this.Children.Count; i++)
                 {
@@ -429,26 +430,26 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
         /// <returns>Returns the leaf nodes contained into the frustum</returns>
-        public QuadTreeNode[] GetNodesInVolume(ref BoundingFrustum frustum)
+        public IEnumerable<QuadTreeNode> GetNodesInVolume(ref BoundingFrustum frustum)
         {
             List<QuadTreeNode> nodes = new List<QuadTreeNode>();
 
-            if (this.Children == null)
-            {
-                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
-                {
-                    nodes.Add(this);
-                }
-            }
-            else
+            if (this.Children?.Any() == true)
             {
                 for (int i = 0; i < this.Children.Count; i++)
                 {
                     var childNodes = this.Children[i].GetNodesInVolume(ref frustum);
-                    if (childNodes.Length > 0)
+                    if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
                     }
+                }
+            }
+            else
+            {
+                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
+                {
+                    nodes.Add(this);
                 }
             }
 
@@ -459,26 +460,26 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns the leaf nodes contained into the bounding box</returns>
-        public QuadTreeNode[] GetNodesInVolume(ref BoundingBox bbox)
+        public IEnumerable<QuadTreeNode> GetNodesInVolume(ref BoundingBox bbox)
         {
             List<QuadTreeNode> nodes = new List<QuadTreeNode>();
 
-            if (this.Children == null)
-            {
-                if (bbox.Contains(this.BoundingBox) != ContainmentType.Disjoint)
-                {
-                    nodes.Add(this);
-                }
-            }
-            else
+            if (this.Children?.Any() == true)
             {
                 for (int i = 0; i < this.Children.Count; i++)
                 {
                     var childNodes = this.Children[i].GetNodesInVolume(ref bbox);
-                    if (childNodes.Length > 0)
+                    if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
                     }
+                }
+            }
+            else
+            {
+                if (bbox.Contains(this.BoundingBox) != ContainmentType.Disjoint)
+                {
+                    nodes.Add(this);
                 }
             }
 
@@ -489,27 +490,27 @@ namespace Engine.Collections
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
         /// <returns>Returns the leaf nodes contained into the bounding sphere</returns>
-        public QuadTreeNode[] GetNodesInVolume(ref BoundingSphere sphere)
+        public IEnumerable<QuadTreeNode> GetNodesInVolume(ref BoundingSphere sphere)
         {
             List<QuadTreeNode> nodes = new List<QuadTreeNode>();
 
-            if (this.Children == null)
+            if (this.Children?.Any() == true)
+            {
+                for (int i = 0; i < this.Children.Count; i++)
+                {
+                    var childNodes = this.Children[i].GetNodesInVolume(ref sphere);
+                    if (childNodes.Any())
+                    {
+                        nodes.AddRange(childNodes);
+                    }
+                }
+            }
+            else
             {
                 var bbox = this.BoundingBox;
                 if (sphere.Contains(ref bbox) != ContainmentType.Disjoint)
                 {
                     nodes.Add(this);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < this.Children.Count; i++)
-                {
-                    var childNodes = this.Children[i].GetNodesInVolume(ref sphere);
-                    if (childNodes.Length > 0)
-                    {
-                        nodes.AddRange(childNodes);
-                    }
                 }
             }
 
@@ -519,24 +520,18 @@ namespace Engine.Collections
         /// Gets all leaf nodes
         /// </summary>
         /// <returns>Returns all leaf nodes</returns>
-        public QuadTreeNode[] GetLeafNodes()
+        public IEnumerable<QuadTreeNode> GetLeafNodes()
         {
             List<QuadTreeNode> nodes = new List<QuadTreeNode>();
 
-            if (this.Children == null)
+            if (this.Children?.Any() == true)
             {
-                nodes.Add(this);
+                var leafNodes = this.Children.SelectMany(c => c.GetLeafNodes());
+                nodes.AddRange(leafNodes);
             }
             else
             {
-                for (int i = 0; i < this.Children.Count; i++)
-                {
-                    var childNodes = this.Children[i].GetLeafNodes();
-                    if (childNodes.Length > 0)
-                    {
-                        nodes.AddRange(childNodes);
-                    }
-                }
+                nodes.Add(this);
             }
 
             return nodes.ToArray();

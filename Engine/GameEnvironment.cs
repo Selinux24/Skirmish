@@ -48,8 +48,8 @@ namespace Engine
 
             if (coarseBoundingSphere.HasValue)
             {
-                position = Vector3.TransformCoordinate(coarseBoundingSphere.Value.Center, localTransform);
-                radius = coarseBoundingSphere.Value.Radius * averagingScale;
+                position = coarseBoundingSphere.Value.Center;
+                radius = coarseBoundingSphere.Value.Radius;
             }
 
             float dist = Vector3.Distance(position, origin) - radius;

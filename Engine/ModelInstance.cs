@@ -273,7 +273,7 @@ namespace Engine
                 }
             }
 
-            return this.boundingSphere ?? new BoundingSphere();
+            return this.boundingSphere ?? new BoundingSphere(this.Manipulator.Position, 0);
         }
         /// <summary>
         /// Gets bounding box
@@ -299,7 +299,7 @@ namespace Engine
                 }
             }
 
-            return this.boundingBox ?? new BoundingBox();
+            return this.boundingBox ?? new BoundingBox(this.Manipulator.Position, this.Manipulator.Position);
         }
 
         /// <summary>

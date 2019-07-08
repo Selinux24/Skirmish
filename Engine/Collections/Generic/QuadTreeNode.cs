@@ -25,21 +25,21 @@ namespace Engine.Collections.Generic
         /// <returns>Returns new node</returns>
         public static QuadTreeNode<T> CreatePartitions(
             QuadTree<T> quadTree, QuadTreeNode<T> parent,
-            BoundingBox bbox, T[] items,
+            BoundingBox bbox, IEnumerable<T> items,
             int maxDepth,
             int treeDepth,
             ref int nodeCount)
         {
             if (treeDepth <= maxDepth)
             {
-                var nodeItems = Array.FindAll(items, i =>
+                var nodeItems = items.Where(i =>
                 {
                     var tbox = BoundingBox.FromPoints(i.GetVertices());
 
                     return Intersection.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
                 });
 
-                if (nodeItems.Length > 0)
+                if (nodeItems.Any())
                 {
                     var node = new QuadTreeNode<T>(quadTree, parent)
                     {
@@ -78,7 +78,7 @@ namespace Engine.Collections.Generic
         /// <param name="nodeCount">Node count</param>
         private static void IntializeNode(
             QuadTree<T> quadTree, QuadTreeNode<T> node,
-            BoundingBox bbox, T[] items,
+            BoundingBox bbox, IEnumerable<T> items,
             int maxDepth,
             int nextTreeDepth,
             ref int nodeCount)
@@ -390,11 +390,11 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
         /// <returns>Returns bounding boxes of specified depth</returns>
-        public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
             List<BoundingBox> bboxes = new List<BoundingBox>();
 
-            if (this.Children != null)
+            if (this.Children?.Any() == true)
             {
                 bool haltByDepth = (maxDepth > 0 && this.Level == maxDepth);
                 if (haltByDepth)
@@ -427,7 +427,7 @@ namespace Engine.Collections.Generic
         {
             int level = 0;
 
-            if (this.Children != null)
+            if (this.Children?.Any() == true)
             {
                 for (int i = 0; i < this.Children.Count; i++)
                 {
@@ -449,26 +449,26 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="frustum">Bounding frustum</param>
         /// <returns>Returns the leaf nodes contained into the frustum</returns>
-        public QuadTreeNode<T>[] GetNodesInVolume(ref BoundingFrustum frustum)
+        public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingFrustum frustum)
         {
             List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
 
-            if (this.Children == null)
-            {
-                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
-                {
-                    nodes.Add(this);
-                }
-            }
-            else
+            if (this.Children?.Any() == true)
             {
                 for (int i = 0; i < this.Children.Count; i++)
                 {
                     var childNodes = this.Children[i].GetNodesInVolume(ref frustum);
-                    if (childNodes.Length > 0)
+                    if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
                     }
+                }
+            }
+            else
+            {
+                if (frustum.Contains(this.BoundingBox) != ContainmentType.Disjoint)
+                {
+                    nodes.Add(this);
                 }
             }
 
@@ -479,26 +479,26 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns the leaf nodes contained into the bounding box</returns>
-        public QuadTreeNode<T>[] GetNodesInVolume(ref BoundingBox bbox)
+        public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingBox bbox)
         {
             List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
 
-            if (this.Children == null)
-            {
-                if (bbox.Contains(this.BoundingBox) != ContainmentType.Disjoint)
-                {
-                    nodes.Add(this);
-                }
-            }
-            else
+            if (this.Children?.Any() == true)
             {
                 for (int i = 0; i < this.Children.Count; i++)
                 {
                     var childNodes = this.Children[i].GetNodesInVolume(ref bbox);
-                    if (childNodes.Length > 0)
+                    if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
                     }
+                }
+            }
+            else
+            {
+                if (bbox.Contains(this.BoundingBox) != ContainmentType.Disjoint)
+                {
+                    nodes.Add(this);
                 }
             }
 
@@ -509,27 +509,27 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="sphere">Bounding sphere</param>
         /// <returns>Returns the leaf nodes contained into the bounding sphere</returns>
-        public QuadTreeNode<T>[] GetNodesInVolume(ref BoundingSphere sphere)
+        public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingSphere sphere)
         {
             List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
 
-            if (this.Children == null)
+            if (this.Children?.Any() == true)
+            {
+                for (int i = 0; i < this.Children.Count; i++)
+                {
+                    var childNodes = this.Children[i].GetNodesInVolume(ref sphere);
+                    if (childNodes.Any())
+                    {
+                        nodes.AddRange(childNodes);
+                    }
+                }
+            }
+            else
             {
                 var bbox = this.BoundingBox;
                 if (sphere.Contains(ref bbox) != ContainmentType.Disjoint)
                 {
                     nodes.Add(this);
-                }
-            }
-            else
-            {
-                for (int i = 0; i < this.Children.Count; i++)
-                {
-                    var childNodes = this.Children[i].GetNodesInVolume(ref sphere);
-                    if (childNodes.Length > 0)
-                    {
-                        nodes.AddRange(childNodes);
-                    }
                 }
             }
 
@@ -539,24 +539,18 @@ namespace Engine.Collections.Generic
         /// Gets all leaf nodes
         /// </summary>
         /// <returns>Returns all leaf nodes</returns>
-        public QuadTreeNode<T>[] GetLeafNodes()
+        public IEnumerable<QuadTreeNode<T>> GetLeafNodes()
         {
             List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
 
-            if (this.Children?.Any() == false)
+            if (this.Children?.Any() == true)
             {
-                nodes.Add(this);
+                var leafNodes = this.Children.SelectMany(c => c.GetLeafNodes());
+                nodes.AddRange(leafNodes);
             }
             else
             {
-                for (int i = 0; i < this.Children.Count; i++)
-                {
-                    var childNodes = this.Children[i].GetLeafNodes();
-                    if (childNodes.Length > 0)
-                    {
-                        nodes.AddRange(childNodes);
-                    }
-                }
+                nodes.Add(this);
             }
 
             return nodes.ToArray();
