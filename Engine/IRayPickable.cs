@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -71,6 +72,6 @@ namespace Engine
         /// </summary>
         /// <param name="full">Gets full geometry</param>
         /// <returns>Returns the volume geometry of the instance</returns>
-        Triangle[] GetVolume(bool full);
+        IEnumerable<Triangle> GetVolume(bool full);
     }
 }

@@ -48,7 +48,7 @@ namespace Collada
 
         private SceneLightPoint torch = null;
 
-        private SceneObject<ModularScenery> scenery = null;
+        private ModularScenery scenery = null;
 
         private readonly float doorDistance = 3f;
         private SceneObject<TextDrawer> messages = null;
@@ -238,9 +238,11 @@ namespace Collada
                 LevelsFile = "levels.xml",
             };
 
-            this.scenery = this.AddComponent<ModularScenery>(desc, SceneObjectUsages.Ground);
+            var sceneryObject = this.AddComponent<ModularScenery>(desc, SceneObjectUsages.Ground);
 
-            this.SetGround(this.scenery, true);
+            this.SetGround(sceneryObject, true);
+
+            this.scenery = sceneryObject.Instance;
         }
         private void InitializePlayer()
         {
@@ -397,17 +399,17 @@ namespace Collada
         {
             base.Initialized();
 
-            this.scenery.Instance.TriggerEnd += TriggerEnds;
+            this.scenery.TriggerEnd += TriggerEnds;
 
             //Rat holes
-            this.ratHoles = this.scenery.Instance
+            this.ratHoles = this.scenery
                 .GetObjectsByName("Dn_Rat_Hole_1")
                 .Select(o => o.Item.Manipulator.Position)
                 .ToArray();
 
             //Jails
             {
-                var jails = this.scenery.Instance
+                var jails = this.scenery
                     .GetObjectsByName("Dn_Jail_1")
                     .Select(o => o.Item);
 
@@ -423,7 +425,7 @@ namespace Collada
 
             //Doors
             {
-                var doors = this.scenery.Instance
+                var doors = this.scenery
                     .GetObjectsByName("Dn_Door_1")
                     .Select(o => o.Item);
 
@@ -439,7 +441,7 @@ namespace Collada
 
             //Ladders
             {
-                var ladders = this.scenery.Instance
+                var ladders = this.scenery
                     .GetObjectsByName("Dn_Anim_Ladder")
                     .Select(o => o.Item);
 
@@ -455,7 +457,7 @@ namespace Collada
 
             //Torchs
             {
-                var torchs = this.scenery.Instance
+                var torchs = this.scenery
                     .GetObjectsByName("Dn_Torch")
                     .Select(o => o.Item);
 
@@ -473,8 +475,8 @@ namespace Collada
             //Big fires
             {
                 List<ModelInstance> fires = new List<ModelInstance>();
-                fires.AddRange(this.scenery.Instance.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
-                fires.AddRange(this.scenery.Instance.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Item));
+                fires.AddRange(this.scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
+                fires.AddRange(this.scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Item));
 
                 foreach (var item in fires)
                 {
@@ -503,7 +505,7 @@ namespace Collada
         private void InitializeObstacles()
         {
             //Furniture obstacles
-            var furnitures = this.scenery.Instance
+            var furnitures = this.scenery
                 .GetObjectsByType(ModularSceneryObjectTypes.Furniture)
                 .Select(o => o.Item);
 
@@ -550,7 +552,7 @@ namespace Collada
             {
                 Random rndBoxes = new Random(1);
 
-                var dict = this.scenery.Instance.GetMapVolumes();
+                var dict = this.scenery.GetMapVolumes();
 
                 foreach (var item in dict.Values)
                 {
@@ -562,11 +564,11 @@ namespace Collada
             }
 
             //Objects
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Entrance).Select(o => o.Item), Color.PaleVioletRed);
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Exit).Select(o => o.Item), Color.ForestGreen);
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Trigger).Select(o => o.Item), Color.Cyan);
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Door).Select(o => o.Item), Color.LightYellow);
-            UpdateBoundingBoxes(this.scenery.Instance.GetObjectsByType(ModularSceneryObjectTypes.Light).Select(o => o.Item), Color.MediumPurple);
+            UpdateBoundingBoxes(this.scenery.GetObjectsByType(ModularSceneryObjectTypes.Entrance).Select(o => o.Item), Color.PaleVioletRed);
+            UpdateBoundingBoxes(this.scenery.GetObjectsByType(ModularSceneryObjectTypes.Exit).Select(o => o.Item), Color.ForestGreen);
+            UpdateBoundingBoxes(this.scenery.GetObjectsByType(ModularSceneryObjectTypes.Trigger).Select(o => o.Item), Color.Cyan);
+            UpdateBoundingBoxes(this.scenery.GetObjectsByType(ModularSceneryObjectTypes.Door).Select(o => o.Item), Color.LightYellow);
+            UpdateBoundingBoxes(this.scenery.GetObjectsByType(ModularSceneryObjectTypes.Light).Select(o => o.Item), Color.MediumPurple);
         }
         private void UpdateBoundingBoxes(IEnumerable<ModelInstance> items, Color color)
         {
@@ -711,7 +713,7 @@ namespace Collada
 
             if (this.Game.Input.KeyJustReleased(Keys.M))
             {
-                this.ChangeToLevel("Lvl2");
+                this.ChangeToLevel("Lvl3");
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F))
@@ -894,7 +896,7 @@ namespace Collada
 
             //Test items into the camera frustum and nearest to the player
             var items =
-                this.scenery.Instance.GetObjectsInVolume(sphere, objTypes, false, true)
+                this.scenery.GetObjectsInVolume(sphere, objTypes, false, true)
                 .Where(i => this.Camera.Frustum.Contains(i.Item.GetBoundingBox()) != ContainmentType.Disjoint)
                 .Where(i =>
                 {
@@ -995,7 +997,7 @@ namespace Collada
         }
         private void SetSelectedItemTrigger(ModularSceneryItem item)
         {
-            var triggers = this.scenery.Instance.GetTriggersByObject(item);
+            var triggers = this.scenery.GetTriggersByObject(item);
             if (triggers.Any())
             {
                 int index = 1;
@@ -1059,7 +1061,7 @@ namespace Collada
         }
         private void UpdateEntityTrigger(ModularSceneryItem item)
         {
-            var triggers = this.scenery.Instance
+            var triggers = this.scenery
                 .GetTriggersByObject(item)
                 .ToArray();
 
@@ -1069,7 +1071,7 @@ namespace Collada
                 if (keyIndex > 0 && keyIndex <= triggers.Length)
                 {
                     this.soundLadder.Create().Play();
-                    this.scenery.Instance.ExecuteTrigger(item, triggers[keyIndex - 1]);
+                    this.scenery.ExecuteTrigger(item, triggers[keyIndex - 1]);
                 }
             }
         }
@@ -1127,7 +1129,7 @@ namespace Collada
 
         private void RefreshNavigation()
         {
-            var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
+            var fileName = this.scenery.CurrentLevel.Name + nmFile;
 
             //Refresh the navigation mesh
             if (File.Exists(fileName))
@@ -1145,7 +1147,7 @@ namespace Collada
                 {
                     taskRunning = true;
 
-                    var fileName = this.scenery.Instance.CurrentLevel.Name + ntFile;
+                    var fileName = this.scenery.CurrentLevel.Name + ntFile;
 
                     if (File.Exists(fileName))
                     {
@@ -1165,12 +1167,12 @@ namespace Collada
         {
             this.Lights.ClearPointLights();
             this.Lights.ClearSpotLights();
-            this.scenery.Instance.LoadLevel(name);
+            this.scenery.LoadLevel(name);
             this.Lights.Add(this.torch);
 
             this.UpdateNavigationGraph();
-            var pos = this.scenery.Instance.CurrentLevel.StartPosition;
-            var dir = this.scenery.Instance.CurrentLevel.LookingVector;
+            var pos = this.scenery.CurrentLevel.StartPosition;
+            var dir = this.scenery.CurrentLevel.LookingVector;
             pos.Y += agent.Height;
             this.Camera.Position = pos;
             this.Camera.Interest = pos + dir;
@@ -1231,7 +1233,7 @@ namespace Collada
 
         public override void UpdateNavigationGraphAsync()
         {
-            var fileName = this.scenery.Instance.CurrentLevel.Name + nmFile;
+            var fileName = this.scenery.CurrentLevel.Name + nmFile;
 
             if (File.Exists(fileName))
             {
@@ -1271,6 +1273,7 @@ namespace Collada
         {
             var nodes = await this.BuildGraphNodeDebugAreas(agent);
 
+            this.graphDrawer.Instance.Clear();
             this.graphDrawer.Instance.SetPrimitives(nodes);
 
             this.UpdateDebugInfo();

@@ -200,7 +200,7 @@ namespace Engine
                 var full = usage == SceneObjectUsages.None || this.Usage.HasFlag(usage);
 
                 var vTris = volumes[p].GetVolume(full);
-                if (vTris?.Length > 0)
+                if (vTris.Any())
                 {
                     //Use volume mesh
                     tris.AddRange(vTris);

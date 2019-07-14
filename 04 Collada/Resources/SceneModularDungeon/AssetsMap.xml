@@ -2503,5 +2503,244 @@
         </connection>
       </connections>
     </asset>
+
+    <asset>
+      <name>Stairs2</name>
+      <references>
+        <asset asset_name="Dn_Stairs_2" type="Stairs">
+          <position>2 0 0</position>
+          <rotation>rot180</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Step_1">
+          <position>4 2 0</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Stairs_2" type="Stairs">
+          <position>4 2 2</position>
+          <rotation>rot90</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Step_2">
+          <position>4 4 4</position>
+        </asset>
+        <asset asset_name="Dn_Stairs_2" type="Stairs">
+          <position>2 4 4</position>
+        </asset>
+
+        <asset asset_name="Dn_Step_1">
+          <position>0 6 4</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Stairs_2" type="Stairs">
+          <position>0 6 2</position>
+          <rotation>rot270</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Step_1">
+          <position>0 8 0</position>
+          <rotation>rot180</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>0 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>2 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>4 0 0</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>0 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>2 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>4 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>0 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>2 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Floor_1" type="Floor">
+          <position>4 0 4</position>
+        </asset>
+
+        <asset asset_name="Dn_Ceiling_1" type="Floor">
+          <position>0 8 0</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Floor">
+          <position>2 8 0</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Floor">
+          <position>4 8 0</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Floor">
+          <position>0 8 2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Floor">
+          <position>2 8 2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Floor">
+          <position>4 8 2</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Floor">
+          <position>0 8 4</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Floor">
+          <position>2 8 4</position>
+        </asset>
+        <asset asset_name="Dn_Ceiling_1" type="Floor">
+          <position>4 8 4</position>
+        </asset>
+
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>0 0 -1</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>0 4 -1</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>0 8 -1</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>2 0 -1</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>2 4 -1</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>2 8 -1</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>4 0 -1</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>4 4 -1</position>
+          <rotation>rot270</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>4 8 -1</position>
+          <rotation>rot270</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 0 0</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 4 0</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 8 0</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 0 2</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 4 2</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 8 2</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 0 4</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 4 4</position>
+          <rotation>rot180</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>5 8 4</position>
+          <rotation>rot180</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>0 0 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>0 4 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>0 8 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>2 0 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>2 4 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>2 8 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>4 0 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>4 4 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>4 8 5</position>
+          <rotation>rot90</rotation>
+        </asset>
+
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-1 4 0</position>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-1 0 2</position>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-1 4 2</position>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-1 8 2</position>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-1 0 4</position>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-1 4 4</position>
+        </asset>
+        <asset asset_name="Dn_Wall_1" type="Wall">
+          <position>-1 8 4</position>
+        </asset>
+      </references>
+      <connections>
+        <connection>
+          <position>0 0 -1</position>
+          <direction>Backward</direction>
+        </connection>
+        <connection>
+          <position>0 8 -1</position>
+          <direction>Backward</direction>
+        </connection>
+      </connections>
+    </asset>
   </assets>
 </ModularSceneryAssetConfiguration>

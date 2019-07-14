@@ -722,7 +722,7 @@ namespace Engine
         /// </summary>
         /// <param name="full"></param>
         /// <returns>Returns all the triangles of the ground</returns>
-        public override Triangle[] GetVolume(bool full)
+        public override IEnumerable<Triangle> GetVolume(bool full)
         {
             List<Triangle> triangles = new List<Triangle>();
 
@@ -732,8 +732,7 @@ namespace Engine
 
                 foreach (var instance in instances)
                 {
-                    // Call to GetTriangles instead of GetVolumes to take coarse volumes in the first place
-                    triangles.AddRange(instance.GetTriangles());
+                    triangles.AddRange(instance.GetVolume(false));
                 }
             }
 

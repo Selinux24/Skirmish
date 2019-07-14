@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
@@ -487,7 +488,7 @@ namespace Engine
         /// </summary>
         /// <param name="full"></param>
         /// <returns>Returns internal volume</returns>
-        public Triangle[] GetVolume(bool full)
+        public IEnumerable<Triangle> GetVolume(bool full)
         {
             var drawingData = this.model.GetDrawingData(this.model.GetLODMinimum());
             if (!full && drawingData?.VolumeMesh?.Any() == true)

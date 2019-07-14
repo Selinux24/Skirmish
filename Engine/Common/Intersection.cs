@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Common
 {
@@ -212,16 +213,18 @@ namespace Engine.Common
         /// <param name="point">A point.</param>
         /// <param name="vertices">A set of vertices that define a polygon.</param>
         /// <returns>A value indicating whether the point is contained within the polygon.</returns>
-        public static bool PointInPoly(Vector3 point, Vector3[] vertices)
+        public static bool PointInPoly(Vector3 point, IEnumerable<Vector3> vertices)
         {
             bool c = false;
 
-            int nverts = vertices.Length;
+            var vertsArray = vertices.ToArray();
+
+            int nverts = vertsArray.Length;
 
             for (int i = 0, j = nverts - 1; i < nverts; j = i++)
             {
-                Vector3 vi = vertices[i];
-                Vector3 vj = vertices[j];
+                Vector3 vi = vertsArray[i];
+                Vector3 vj = vertsArray[j];
 
                 if (((vi.Z > point.Z) != (vj.Z > point.Z)) &&
                     (point.X < (vj.X - vi.X) * (point.Z - vi.Z) / (vj.Z - vi.Z) + vi.X))
@@ -243,16 +246,14 @@ namespace Engine.Common
         /// <param name="item">Result picked ray intersectable item</param>
         /// <param name="distance">Result distance to picked position</param>
         /// <returns>Returns first intersection if exists</returns>
-        public static bool IntersectFirst<T>(Ray ray, T[] items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
+        public static bool IntersectFirst<T>(Ray ray, IEnumerable<T> items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
         {
             position = Vector3.Zero;
-            item = default(T);
+            item = default;
             distance = float.MaxValue;
 
-            for (int i = 0; i < items.Length; i++)
+            foreach (var cItem in items)
             {
-                var cItem = items[i];
-
                 if (cItem.Intersects(ray, facingOnly, out Vector3 pos, out float d))
                 {
                     position = pos;
@@ -275,10 +276,10 @@ namespace Engine.Common
         /// <param name="item">Result picked ray intersectable item</param>
         /// <param name="distance">Result distance to picked position</param>
         /// <returns>Returns nearest intersection if exists</returns>
-        public static bool IntersectNearest<T>(Ray ray, T[] items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
+        public static bool IntersectNearest<T>(Ray ray, IEnumerable<T> items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
         {
             position = Vector3.Zero;
-            item = default(T);
+            item = default;
             distance = float.MaxValue;
 
             if (IntersectAll(ray, items, facingOnly, out Vector3[] pickedPositions, out T[] pickedTriangles, out float[] pickedDistances))
@@ -312,7 +313,7 @@ namespace Engine.Common
         /// <param name="pickedItems">Picked ray intersectable item list</param>
         /// <param name="pickedDistances">Distances to picked positions</param>
         /// <returns>Returns all intersections if exists</returns>
-        public static bool IntersectAll<T>(Ray ray, T[] items, bool facingOnly, out Vector3[] pickedPositions, out T[] pickedItems, out float[] pickedDistances) where T : IRayIntersectable
+        public static bool IntersectAll<T>(Ray ray, IEnumerable<T> items, bool facingOnly, out Vector3[] pickedPositions, out T[] pickedItems, out float[] pickedDistances) where T : IRayIntersectable
         {
             SortedDictionary<float, Vector3> pickedPositionList = new SortedDictionary<float, Vector3>();
             SortedDictionary<float, T> pickedTriangleList = new SortedDictionary<float, T>();

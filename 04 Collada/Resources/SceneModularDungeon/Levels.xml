@@ -822,5 +822,14 @@
         </item>
       </objects>
     </level>
+    <level name="Lvl3">
+      <start>0 0 0</start>
+      <look>1 0 0</look>
+      <map>
+        <item asset_name="Stairs2">
+          <position>0 0 0</position>
+        </item>
+      </map>
+    </level>
   </levels>
 </ModularSceneryLevels>

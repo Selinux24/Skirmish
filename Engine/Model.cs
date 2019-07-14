@@ -607,7 +607,7 @@ namespace Engine
                 bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
                 var triangles = this.GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
 
-                if (triangles?.Length > 0 && Intersection.IntersectNearest(ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
+                if (triangles.Any() && Intersection.IntersectNearest(ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
                 {
                     result.Position = pos;
                     result.Item = tri;
@@ -639,7 +639,7 @@ namespace Engine
                 bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
                 var triangles = this.GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
 
-                if (triangles?.Length > 0 && Intersection.IntersectFirst(ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
+                if (triangles.Any() && Intersection.IntersectFirst(ray, triangles, facingOnly, out Vector3 pos, out Triangle tri, out float d))
                 {
                     result.Position = pos;
                     result.Item = tri;
@@ -668,7 +668,7 @@ namespace Engine
                 bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
                 var triangles = this.GetVolume(rayPickingParams.HasFlag(RayPickingParams.Geometry));
 
-                if (triangles?.Length > 0 && Intersection.IntersectAll(ray, triangles, facingOnly, out Vector3[] pos, out Triangle[] tri, out float[] ds))
+                if (triangles.Any() && Intersection.IntersectAll(ray, triangles, facingOnly, out Vector3[] pos, out Triangle[] tri, out float[] ds))
                 {
                     results = new PickingResult<Triangle>[pos.Length];
 
@@ -694,7 +694,7 @@ namespace Engine
         /// </summary>
         /// <param name="full"></param>
         /// <returns>Returns internal volume</returns>
-        public Triangle[] GetVolume(bool full)
+        public IEnumerable<Triangle> GetVolume(bool full)
         {
             if (!full && this.DrawingData?.VolumeMesh?.Any() == true)
             {

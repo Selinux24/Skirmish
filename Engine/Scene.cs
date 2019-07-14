@@ -1279,6 +1279,11 @@ namespace Engine
                 this.NavigationGraph = graph;
                 this.NavigationGraph.Updating += GraphUpdating;
                 this.NavigationGraph.Updated += GraphUpdated;
+
+                if (this.PathFinderDescription != null)
+                {
+                    this.boundingBox = this.PathFinderDescription.Input.BoundingBox;
+                }
             }
         }
         /// <summary>
@@ -1329,11 +1334,6 @@ namespace Engine
         /// <param name="e">Event args</param>
         private void GraphUpdated(object sender, EventArgs e)
         {
-            if (this.PathFinderDescription != null)
-            {
-                this.boundingBox = this.PathFinderDescription.Input.BoundingBox;
-            }
-
             NavigationGraphUpdated();
         }
         /// <summary>
