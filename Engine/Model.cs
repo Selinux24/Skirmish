@@ -1,13 +1,13 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
     using Engine.Animation;
     using Engine.Common;
     using Engine.Effects;
-    using System.Linq;
 
     /// <summary>
     /// Basic Model

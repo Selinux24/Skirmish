@@ -168,13 +168,13 @@ namespace Engine
                 var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(Description.Content.ContentFolder, Description.Content.ModelContentFilename));
                 var loader = contentDesc.GetLoader();
                 var t = loader.Load(Description.Content.ContentFolder, contentDesc);
-                content = t[0];
+                content = t.First();
             }
             else if (Description.Content.ModelContentDescription != null)
             {
                 var loader = Description.Content.ModelContentDescription.GetLoader();
                 var t = loader.Load(Description.Content.ContentFolder, Description.Content.ModelContentDescription);
-                content = t[0];
+                content = t.First();
             }
             else if (Description.Content.HeightmapDescription != null)
             {

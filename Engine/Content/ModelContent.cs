@@ -474,7 +474,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ModelContent GenerateTriangleList(VertexData[] vertices, uint[] indices, MaterialContent material = null)
+        public static ModelContent GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent material = null)
         {
             return Generate(Topology.TriangleList, vertices, indices, material);
         }
@@ -486,7 +486,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        private static ModelContent Generate(Topology topology, VertexData[] vertices, uint[] indices, MaterialContent material = null)
+        private static ModelContent Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent material = null)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -519,7 +519,7 @@ namespace Engine.Content
         /// <param name="cellSize">Cell size</param>
         /// <param name="cellHeight">Cell height</param>
         /// <returns>Returns a new model content</returns>
-        public static ModelContent FromHeightmap(string contentFolder, string heightMap, string[] textures, float cellSize, float cellHeight)
+        public static ModelContent FromHeightmap(string contentFolder, string heightMap, IEnumerable<string> textures, float cellSize, float cellHeight)
         {
             ModelContent modelContent = new ModelContent();
 
@@ -542,7 +542,7 @@ namespace Engine.Content
 
             HeightMap hm = HeightMap.FromStream(heightMapImage.Stream, null);
 
-            hm.BuildGeometry(cellSize, cellHeight, out VertexData[] vertices, out uint[] indices);
+            hm.BuildGeometry(cellSize, cellHeight, out var vertices, out var indices);
 
             SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
 

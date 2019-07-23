@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Engine
 {
@@ -271,13 +272,13 @@ namespace Engine
                 var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
                 var loader = contentDesc.GetLoader();
                 var t = loader.Load(description.Content.ContentFolder, contentDesc);
-                content = t[0];
+                content = t.First();
             }
             else if (description.Content.ModelContentDescription != null)
             {
                 var loader = description.Content.ModelContentDescription.GetLoader();
                 var t = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
-                content = t[0];
+                content = t.First();
             }
             else if (description.Content.HeightmapDescription != null)
             {

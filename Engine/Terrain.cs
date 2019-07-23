@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine
@@ -95,7 +96,7 @@ namespace Engine
             /// <param name="vertices">Vertices to map</param>
             /// <param name="trianglesPerNode">Triangles per terrain node</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public MapGrid(Game game, BufferManager bufferManager, VertexData[] vertices, int trianglesPerNode)
+            public MapGrid(Game game, BufferManager bufferManager, IEnumerable<VertexData> vertices, int trianglesPerNode)
             {
                 this.Game = game;
                 this.BufferManager = bufferManager;
@@ -797,16 +798,19 @@ namespace Engine
             this.useAnisotropic = description.UseAnisotropic;
 
             //Get vertices and indices from heightmap
-            this.BuildGeometry(out VertexData[] vertices, out uint[] indices);
+            this.BuildGeometry(out var vertices, out var indices);
+
+            var tmpVerts = vertices.ToArray();
+            var tmpIndex = indices.ToArray();
 
             List<Triangle> tris = new List<Triangle>();
 
-            for (int i = 0; i < indices.Length; i += 3)
+            for (int i = 0; i < tmpIndex.Length; i += 3)
             {
                 tris.Add(new Triangle(
-                    vertices[indices[i + 0]].Position.Value,
-                    vertices[indices[i + 2]].Position.Value,
-                    vertices[indices[i + 1]].Position.Value));
+                    tmpVerts[tmpIndex[i + 0]].Position.Value,
+                    tmpVerts[tmpIndex[i + 2]].Position.Value,
+                    tmpVerts[tmpIndex[i + 1]].Position.Value));
             }
 
             //Initialize quadtree for ray picking
@@ -987,7 +991,7 @@ namespace Engine
         /// </summary>
         /// <param name="vertices">Geometry vertices</param>
         /// <param name="indices">Geometry indices</param>
-        private void BuildGeometry(out VertexData[] vertices, out uint[] indices)
+        private void BuildGeometry(out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
         {
             this.heightMap.BuildGeometry(
                 this.heightMapCellSize,

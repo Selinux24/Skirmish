@@ -251,10 +251,12 @@ namespace Engine
         /// </summary>
         /// <param name="content">String list</param>
         /// <returns>Returns the md5 sum string of the specified string</returns>
-        public static string GetMd5Sum(this string[] content)
+        public static string GetMd5Sum(this IEnumerable<string> content)
         {
             string md5 = null;
-            Array.ForEach(content, p => md5 += p.GetMd5Sum());
+            content
+                .ToList()
+                .ForEach(p => md5 += p.GetMd5Sum());
 
             return md5;
         }
@@ -272,10 +274,12 @@ namespace Engine
         /// </summary>
         /// <param name="streams">Stream list</param>
         /// <returns>Returns the md5 sum string of the specified stream list</returns>
-        public static string GetMd5Sum(this MemoryStream[] streams)
+        public static string GetMd5Sum(this IEnumerable<MemoryStream> streams)
         {
             string md5 = null;
-            Array.ForEach(streams, p => md5 += p.GetMd5Sum());
+            streams
+                .ToList()
+                .ForEach(p => md5 += p.GetMd5Sum());
 
             return md5;
         }

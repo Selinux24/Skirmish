@@ -31,7 +31,7 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Conten description</param>
         /// <returns>Returns the loaded contents</returns>
-        public ModelContent[] Load(string contentFolder, ModelContentDescription content)
+        public IEnumerable<ModelContent> Load(string contentFolder, ModelContentDescription content)
         {
             Matrix transform = Matrix.Identity;
 
@@ -59,16 +59,16 @@ namespace Engine.Content
         /// <param name="useControllerTransform">Use controller transform</param>
         /// <param name="transform">Transform</param>
         /// <returns>Returns the loaded contents</returns>
-        private ModelContent[] Load(string contentFolder, string fileName, Matrix transform, string armatureName, bool useControllerTransform, string[] volumes, AnimationDescription animation)
+        private IEnumerable<ModelContent> Load(string contentFolder, string fileName, Matrix transform, string armatureName, bool useControllerTransform, string[] volumes, AnimationDescription animation)
         {
             var modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (modelList?.Length > 0)
+            if (modelList?.Any() == true)
             {
                 List<ModelContent> res = new List<ModelContent>();
 
-                for (int i = 0; i < modelList.Length; i++)
+                foreach (var model in modelList)
                 {
-                    var dae = Collada.Load(modelList[i]);
+                    var dae = Collada.Load(model);
 
                     var modelContent = new ModelContent();
 

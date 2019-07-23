@@ -99,7 +99,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // (Optional) Mark areas.
-            var vols = geometry.GetAreas();
+            var vols = geometry.GetAreas().ToArray();
             for (int i = 0; i < geometry.GetAreaCount(); ++i)
             {
                 Recast.MarkConvexPolyArea(
@@ -196,7 +196,7 @@ namespace Engine.PathFinding.RecastNavigation
                     detailVertsCount = dmesh.nverts,
                     detailTris = dmesh.tris,
                     detailTriCount = dmesh.ntris,
-                    offMeshCon = geometry.GetConnections(),
+                    offMeshCon = geometry.GetConnections().ToArray(),
                     offMeshConCount = geometry.GetConnectionCount(),
                     walkableHeight = agent.Height,
                     walkableRadius = agent.Radius,
@@ -455,7 +455,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // (Optional) Mark areas.
-            var vols = geometry.GetAreas();
+            var vols = geometry.GetAreas().ToArray();
             for (int i = 0; i < geometry.GetAreaCount(); ++i)
             {
                 Recast.MarkConvexPolyArea(
@@ -675,7 +675,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // (Optional) Mark areas.
-            var vols = geometry.GetAreas();
+            var vols = geometry.GetAreas().ToArray();
             for (int i = 0; i < geometry.GetAreaCount(); ++i)
             {
                 Recast.MarkConvexPolyArea(
@@ -812,7 +812,7 @@ namespace Engine.PathFinding.RecastNavigation
                     detailVertsCount = dmesh.nverts,
                     detailTris = dmesh.tris,
                     detailTriCount = dmesh.ntris,
-                    offMeshCon = geometry.GetConnections(),
+                    offMeshCon = geometry.GetConnections().ToArray(),
                     offMeshConCount = geometry.GetConnectionCount(),
                     walkableHeight = agent.Height,
                     walkableRadius = agent.Radius,

@@ -122,7 +122,7 @@ namespace Engine.Content
         /// Content source can be a folder or a zip file
         /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
         /// </remarks>
-        public static MemoryStream[] FindContent(string contentSource, string resourcePath, bool throwException = true)
+        public static IEnumerable<MemoryStream> FindContent(string contentSource, string resourcePath, bool throwException = true)
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
@@ -164,7 +164,7 @@ namespace Engine.Content
         /// Content source can be a folder or a zip file
         /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
         /// </remarks>
-        private static MemoryStream[] FindContentDirectory(string contentSource, string resourcePath, bool throwException)
+        private static IEnumerable<MemoryStream> FindContentDirectory(string contentSource, string resourcePath, bool throwException)
         {
             var path = Path.Combine(contentSource, resourcePath);
             if (File.Exists(path))
@@ -205,7 +205,7 @@ namespace Engine.Content
         /// Content source can be a folder or a zip file
         /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
         /// </remarks>
-        private static MemoryStream[] FindContentZip(string contentSource, string resourcePath, bool throwException)
+        private static IEnumerable<MemoryStream> FindContentZip(string contentSource, string resourcePath, bool throwException)
         {
             if (ZipManager.Contains(contentSource, resourcePath))
             {
@@ -235,22 +235,22 @@ namespace Engine.Content
         /// <remarks>
         /// Content source can be a folder or a zip file
         /// </remarks>
-        public static MemoryStream[] FindContent(string contentSource, string[] resourcePaths, bool throwException = true)
+        public static IEnumerable<MemoryStream> FindContent(string contentSource, IEnumerable<string> resourcePaths, bool throwException = true)
         {
             List<MemoryStream> res = new List<MemoryStream>();
 
-            if (resourcePaths?.Length > 0)
+            if (resourcePaths.Any())
             {
-                for (int i = 0; i < resourcePaths.Length; i++)
+                foreach (var resourcePath in resourcePaths)
                 {
-                    var resourceRes = FindContent(contentSource, resourcePaths[i], throwException);
+                    var resourceRes = FindContent(contentSource, resourcePath, throwException);
                     if (resourceRes?.Any() == true)
                     {
                         res.AddRange(resourceRes);
                     }
                     else if (throwException)
                     {
-                        throw new FileNotFoundException("File not found", resourcePaths[i]);
+                        throw new FileNotFoundException("File not found", resourcePath);
                     }
                 }
             }
@@ -267,7 +267,7 @@ namespace Engine.Content
         /// Content source can be a folder or a zip file
         /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
         /// </remarks>
-        public static string[] FindPaths(string contentSource, string resourcePath, bool throwException = true)
+        public static IEnumerable<string> FindPaths(string contentSource, string resourcePath, bool throwException = true)
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
@@ -324,22 +324,22 @@ namespace Engine.Content
         /// <remarks>
         /// Content source can be a folder or a zip file
         /// </remarks>
-        public static string[] FindPaths(string contentSource, string[] resourcePaths, bool throwException = true)
+        public static IEnumerable<string> FindPaths(string contentSource, IEnumerable<string> resourcePaths, bool throwException = true)
         {
             List<string> res = new List<string>();
 
-            if (resourcePaths?.Length > 0)
+            if (resourcePaths.Any())
             {
-                for (int i = 0; i < resourcePaths.Length; i++)
+                foreach (var resourcePath in resourcePaths)
                 {
-                    var resourceRes = FindPaths(contentSource, resourcePaths[i], throwException);
+                    var resourceRes = FindPaths(contentSource, resourcePath, throwException);
                     if (resourceRes?.Any() == true)
                     {
                         res.AddRange(resourceRes);
                     }
                     else if (throwException)
                     {
-                        throw new FileNotFoundException("File not found", resourcePaths[i]);
+                        throw new FileNotFoundException("File not found", resourcePath);
                     }
                 }
             }

@@ -1389,9 +1389,10 @@ namespace Engine
         /// </summary>
         /// <param name="descriptions">Texture description list</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ShaderResourceView1 CreateResource(TextureData[] descriptions)
+        private ShaderResourceView1 CreateResource(IEnumerable<TextureData> descriptions)
         {
-            var description = descriptions[0];
+            var description = descriptions.First();
+            int count = descriptions.Count();
 
             bool mipAutogen = false;
 
@@ -1408,28 +1409,28 @@ namespace Engine
 
                 if (description.IsCubeMap)
                 {
-                    textureArray = this.CreateTexture2DCube(description.Width, description.Height, description.Format, descriptions.Length, mipAutogen);
+                    textureArray = this.CreateTexture2DCube(description.Width, description.Height, description.Format, count, mipAutogen);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = description.Format,
                         Dimension = ShaderResourceViewDimension.TextureCubeArray,
                         TextureCubeArray = new ShaderResourceViewDescription.TextureCubeArrayResource()
                         {
-                            CubeCount = descriptions.Length,
+                            CubeCount = count,
                             MipLevels = -1,
                         }
                     };
                 }
                 else
                 {
-                    textureArray = this.CreateTexture2D(description.Width, description.Height, description.Format, descriptions.Length, mipAutogen);
+                    textureArray = this.CreateTexture2D(description.Width, description.Height, description.Format, count, mipAutogen);
                     desc = new ShaderResourceViewDescription1()
                     {
                         Format = description.Format,
                         Dimension = ShaderResourceViewDimension.Texture2DArray,
                         Texture2DArray = new ShaderResourceViewDescription1.Texture2DArrayResource1()
                         {
-                            ArraySize = descriptions.Length,
+                            ArraySize = count,
                             MipLevels = -1,
                         },
                     };
@@ -1439,11 +1440,12 @@ namespace Engine
                 {
                     var result = new ShaderResourceView1(this.device, textureArray, desc);
 
-                    for (int i = 0; i < descriptions.Length; i++)
+                    int i = 0;
+                    foreach (var currentDesc in descriptions)
                     {
-                        var index = textureArray.CalculateSubResourceIndex(0, i, out int mipSize);
+                        var index = textureArray.CalculateSubResourceIndex(0, i++, out int mipSize);
 
-                        this.deviceContext.UpdateSubresource(descriptions[i].GetDataBox(0, 0), textureArray, index);
+                        this.deviceContext.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
                     }
 
                     this.deviceContext.GenerateMips(result);
@@ -1457,12 +1459,12 @@ namespace Engine
                 var height = description.Height;
                 var format = description.Format;
                 var mipMaps = description.MipMaps;
-                var arraySize = descriptions.Length;
+                var arraySize = count;
                 var data = new List<DataBox>();
 
-                for (int i = 0; i < descriptions.Length; i++)
+                foreach (var currentDesc in descriptions)
                 {
-                    data.AddRange(descriptions[i].GetDataBoxes());
+                    data.AddRange(currentDesc.GetDataBoxes());
                 }
 
                 Texture2D1 textureArray = null;
@@ -1686,7 +1688,7 @@ namespace Engine
         /// </summary>
         /// <param name="filenames">Path file collection</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureArray(string[] filenames)
+        internal EngineShaderResourceView LoadTextureArray(IEnumerable<string> filenames)
         {
             try
             {
@@ -1704,7 +1706,7 @@ namespace Engine
         /// </summary>
         /// <param name="streams">Stream collection</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureArray(MemoryStream[] streams)
+        internal EngineShaderResourceView LoadTextureArray(IEnumerable<MemoryStream> streams)
         {
             try
             {
@@ -1722,16 +1724,15 @@ namespace Engine
         /// </summary>
         /// <param name="textureList">Texture array</param>
         /// <returns>Returns the resource view</returns>
-        private EngineShaderResourceView LoadTextureArray(TextureData[] textureList)
+        private EngineShaderResourceView LoadTextureArray(IEnumerable<TextureData> textureList)
         {
             Counters.Textures++;
 
             var resource = this.CreateResource(textureList);
 
-            for (int i = 0; i < textureList?.Length; i++)
+            foreach (var item in textureList)
             {
-                textureList[i]?.Dispose();
-                textureList[i] = null;
+                item?.Dispose();
             }
 
             return new EngineShaderResourceView(resource);
@@ -1743,13 +1744,13 @@ namespace Engine
         /// <param name="size">Texture size</param>
         /// <param name="values">Color values</param>
         /// <returns>Returns created texture</returns>
-        internal EngineShaderResourceView CreateTexture1D(int size, Vector4[] values)
+        internal EngineShaderResourceView CreateTexture1D(int size, IEnumerable<Vector4> values)
         {
             try
             {
                 Counters.Textures++;
 
-                using (var str = DataStream.Create(values, false, false))
+                using (var str = DataStream.Create(values.ToArray(), false, false))
                 {
                     using (var randTex = new Texture1D(
                         this.device,
@@ -1781,14 +1782,14 @@ namespace Engine
         /// <param name="size">Texture size</param>
         /// <param name="values">Color values</param>
         /// <returns>Returns created texture</returns>
-        internal EngineShaderResourceView CreateTexture2D(int size, Vector4[] values)
+        internal EngineShaderResourceView CreateTexture2D(int size, IEnumerable<Vector4> values)
         {
             try
             {
                 Counters.Textures++;
 
                 var tmp = new Vector4[size * size];
-                Array.Copy(values, tmp, values.Length);
+                Array.Copy(values.ToArray(), tmp, values.Count());
 
                 using (var str = DataStream.Create(tmp, false, false))
                 {

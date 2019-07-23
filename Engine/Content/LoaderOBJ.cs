@@ -14,14 +14,26 @@ namespace Engine.Content
     /// </summary>
     public class LoaderObj : ILoader
     {
+        /// <summary>
+        /// Default locale
+        /// </summary>
         public static CultureInfo Locale { get; set; } = CultureInfo.InvariantCulture;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public LoaderObj()
         {
 
         }
 
-        public ModelContent[] Load(string contentFolder, ModelContentDescription content)
+        /// <summary>
+        /// Loads a model content list from resources
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="content">Content description</param>
+        /// <returns>Returns a list of model contents</returns>
+        public IEnumerable<ModelContent> Load(string contentFolder, ModelContentDescription content)
         {
             Matrix transform = Matrix.Identity;
 
@@ -32,76 +44,42 @@ namespace Engine.Content
 
             return Load(contentFolder, content.ModelFileName, transform);
         }
-
-        private ModelContent[] Load(string contentFolder, string fileName, Matrix transform)
+        /// <summary>
+        /// Loads a model content list from resources
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="fileName">File name</param>
+        /// <param name="transform">Transform</param>
+        /// <returns>Returns a list of model contents</returns>
+        private IEnumerable<ModelContent> Load(string contentFolder, string fileName, Matrix transform)
         {
-            MemoryStream[] modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (modelList != null && modelList.Length > 0)
+            var modelList = ContentManager.FindContent(contentFolder, fileName);
+            if (modelList.Any())
             {
-                ModelContent[] res = new ModelContent[modelList.Length];
+                List<ModelContent> res = new List<ModelContent>();
 
-                for (int i = 0; i < modelList.Length; i++)
+                foreach (var model in modelList)
                 {
-                    LoadObj(modelList[i], transform, out VertexData[] vertices, out uint[] indices);
+                    LoadObj(model, transform, out var vertices, out var indices);
 
-                    res[i] = ModelContent.GenerateTriangleList(vertices, indices);
+                    res.Add(ModelContent.GenerateTriangleList(vertices, indices));
                 }
 
-                return res;
+                return res.ToArray();
             }
             else
             {
                 throw new EngineException(string.Format("Model not found: {0}", fileName));
             }
         }
-
-        public void Save(Triangle[] triangles, string fileName)
-        {
-            List<Vector3> points = new List<Vector3>();
-            List<Int3> indices = new List<Int3>();
-
-            // Extract data from triangles
-            for (int i = 0; i < triangles.Length; i++)
-            {
-                var p1Index = points.IndexOf(triangles[i].Point1);
-                var p2Index = points.IndexOf(triangles[i].Point2);
-                var p3Index = points.IndexOf(triangles[i].Point3);
-
-                if (p1Index < 0)
-                {
-                    p1Index = points.Count;
-                    points.Add(triangles[i].Point1);
-                }
-                if (p2Index < 0)
-                {
-                    p2Index = points.Count;
-                    points.Add(triangles[i].Point2);
-                }
-                if (p3Index < 0)
-                {
-                    p3Index = points.Count;
-                    points.Add(triangles[i].Point3);
-                }
-
-                indices.Add(new Int3(p1Index, p2Index, p3Index));
-            }
-
-            // Write the file
-            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
-            {
-                foreach (var point in points)
-                {
-                    wr.WriteLine(string.Format(Locale, "v {0:0.000000000} {1:0.000000000} {2:0.000000000}", point.X, point.Y, point.Z));
-                }
-
-                foreach (var triIndex in indices)
-                {
-                    wr.WriteLine(string.Format(Locale, "f {0} {1} {2}", triIndex.X + 1, triIndex.Y + 1, triIndex.Z + 1));
-                }
-            }
-        }
-
-        private static void LoadObj(Stream stream, Matrix transform, out VertexData[] vertices, out uint[] indices)
+        /// <summary>
+        /// Loads an obj file from a stream
+        /// </summary>
+        /// <param name="stream">Stream</param>
+        /// <param name="transform">Transform to apply to all vertices</param>
+        /// <param name="vertices">Resulting vertex list</param>
+        /// <param name="indices">Resulting index list</param>
+        private static void LoadObj(Stream stream, Matrix transform, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
         {
             List<VertexData> vertList = new List<VertexData>();
             List<uint> indexList = new List<uint>();
@@ -171,6 +149,59 @@ namespace Engine.Content
 
             indices = indexList.ToArray();
             vertices = vertList.ToArray();
+        }
+
+        /// <summary>
+        /// Saves a triangle list in a file
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="fileName">File name</param>
+        public void Save(IEnumerable<Triangle> triangles, string fileName)
+        {
+            List<Vector3> points = new List<Vector3>();
+            List<Int3> indices = new List<Int3>();
+
+            Triangle[] tris = triangles.ToArray();
+
+            // Extract data from triangles
+            for (int i = 0; i < tris.Length; i++)
+            {
+                var p1Index = points.IndexOf(tris[i].Point1);
+                var p2Index = points.IndexOf(tris[i].Point2);
+                var p3Index = points.IndexOf(tris[i].Point3);
+
+                if (p1Index < 0)
+                {
+                    p1Index = points.Count;
+                    points.Add(tris[i].Point1);
+                }
+                if (p2Index < 0)
+                {
+                    p2Index = points.Count;
+                    points.Add(tris[i].Point2);
+                }
+                if (p3Index < 0)
+                {
+                    p3Index = points.Count;
+                    points.Add(tris[i].Point3);
+                }
+
+                indices.Add(new Int3(p1Index, p2Index, p3Index));
+            }
+
+            // Write the file
+            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
+            {
+                foreach (var point in points)
+                {
+                    wr.WriteLine(string.Format(Locale, "v {0:0.000000000} {1:0.000000000} {2:0.000000000}", point.X, point.Y, point.Z));
+                }
+
+                foreach (var triIndex in indices)
+                {
+                    wr.WriteLine(string.Format(Locale, "f {0} {1} {2}", triIndex.X + 1, triIndex.Y + 1, triIndex.Z + 1));
+                }
+            }
         }
     }
 }

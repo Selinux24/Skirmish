@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding
 {
@@ -23,7 +24,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Get triangle function
         /// </summary>
-        private readonly Func<Triangle[]> getTrianglesFnc = null;
+        private readonly Func<IEnumerable<Triangle>> getTrianglesFnc = null;
         /// <summary>
         /// Area list
         /// </summary>
@@ -41,7 +42,7 @@ namespace Engine.PathFinding
         /// Constructor
         /// </summary>
         /// <param name="fnc">Get triangle function</param>
-        protected PathFinderInput(Func<Triangle[]> fnc)
+        protected PathFinderInput(Func<IEnumerable<Triangle>> fnc)
         {
             getTrianglesFnc = fnc;
         }
@@ -50,7 +51,7 @@ namespace Engine.PathFinding
         /// Gets the triangle list
         /// </summary>
         /// <returns></returns>
-        public Triangle[] GetTriangles()
+        public IEnumerable<Triangle> GetTriangles()
         {
             if (getTrianglesFnc != null)
             {
@@ -58,7 +59,7 @@ namespace Engine.PathFinding
 
                 BoundingBox = GeometryUtil.CreateBoundingBox(tris);
 
-                return tris;
+                return tris ?? new Triangle[] { };
             }
             else
             {
@@ -74,13 +75,13 @@ namespace Engine.PathFinding
         /// <param name="minh">Minimum height</param>
         /// <param name="maxh">Maximum height</param>
         /// <param name="area">Area type</param>
-        public void AddArea(Vector3[] verts, int nverts, float minh, float maxh, GraphAreaTypes area)
+        public void AddArea(IEnumerable<Vector3> verts, int nverts, float minh, float maxh, GraphAreaTypes area)
         {
             if (areas.Count >= MaxAreas) return;
 
             areas.Add(new GraphArea
             {
-                Vertices = verts,
+                Vertices = verts?.ToArray(),
                 VertexCount = nverts,
                 MinHeight = minh,
                 MaxHeight = maxh,
@@ -99,7 +100,7 @@ namespace Engine.PathFinding
         /// Gets area list
         /// </summary>
         /// <returns>Returns the area list</returns>
-        public IGraphArea[] GetAreas()
+        public IEnumerable<IGraphArea> GetAreas()
         {
             return areas.ToArray();
         }
@@ -147,7 +148,7 @@ namespace Engine.PathFinding
         /// Gets the connection list
         /// </summary>
         /// <returns>Returns the connection list</returns>
-        public IGraphConnection[] GetConnections()
+        public IEnumerable<IGraphConnection> GetConnections()
         {
             return connections.ToArray();
         }

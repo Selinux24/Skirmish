@@ -2,6 +2,7 @@
 using SharpDX.DXGI;
 using SharpDX.WIC;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Engine.Helpers
@@ -161,13 +162,13 @@ namespace Engine.Helpers
         /// </summary>
         /// <param name="filenames">File name list</param>
         /// <returns>Returns the texture data list</returns>
-        public static TextureData[] ReadTexture(string[] filenames)
+        public static IEnumerable<TextureData> ReadTexture(IEnumerable<string> filenames)
         {
-            TextureData[] textureList = new TextureData[filenames.Length];
+            List<TextureData> textureList = new List<TextureData>();
 
-            for (int i = 0; i < filenames.Length; i++)
+            foreach (var file in filenames)
             {
-                textureList[i] = ReadTexture(filenames[i]);
+                textureList.Add(ReadTexture(file));
             }
 
             return textureList;
@@ -177,13 +178,13 @@ namespace Engine.Helpers
         /// </summary>
         /// <param name="streams">Stream list</param>
         /// <returns>Returns the texture data list</returns>
-        public static TextureData[] ReadTexture(MemoryStream[] streams)
+        public static IEnumerable<TextureData> ReadTexture(IEnumerable<MemoryStream> streams)
         {
-            TextureData[] textureList = new TextureData[streams.Length];
+            List<TextureData> textureList = new List<TextureData>();
 
-            for (int i = 0; i < streams.Length; i++)
+            foreach (var stream in streams)
             {
-                textureList[i] = ReadTexture(streams[i]);
+                textureList.Add(ReadTexture(stream));
             }
 
             return textureList;

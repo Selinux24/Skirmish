@@ -23,15 +23,15 @@ namespace Engine.Content
         /// </summary>
         /// <param name="geo">Model content list</param>
         /// <param name="optimize">Sets whether the content must be optimized or not</param>
-        public LevelOfDetailModelContent(ModelContent[] geo, bool optimize)
+        public LevelOfDetailModelContent(IEnumerable<ModelContent> geo, bool optimize)
             : base()
         {
             int lastLod = 1;
-            for (int i = 0; i < geo.Length; i++)
+            foreach (var iGeo in geo)
             {
-                if (optimize) geo[i].Optimize();
+                if (optimize) iGeo.Optimize();
 
-                this.Add((LevelOfDetail)lastLod, geo[i]);
+                this.Add((LevelOfDetail)lastLod, iGeo);
 
                 lastLod = Helper.NextPowerOfTwo(lastLod + 1);
             }

@@ -1,4 +1,5 @@
-﻿
+﻿using System.Linq;
+
 namespace Engine.PathFinding.RecastNavigation
 {
     public class TileCacheMeshProcess
@@ -39,7 +40,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Pass in off-mesh connections.
             if (m_geom != null)
             {
-                param.offMeshCon = m_geom.GetConnections();
+                param.offMeshCon = m_geom.GetConnections().ToArray();
                 param.offMeshConCount = m_geom.GetConnectionCount();
             }
         }

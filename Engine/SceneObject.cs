@@ -135,9 +135,9 @@ namespace Engine
         /// <returns>Returns the instance as type</returns>
         public T Get<T>()
         {
-            if (this.baseObject is T)
+            if (this.baseObject is T typedObject)
             {
-                return (T)this.baseObject;
+                return typedObject;
             }
 
             return default(T);

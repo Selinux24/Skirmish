@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Engine
 {
@@ -108,7 +109,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         private EngineShaderResourceView CreateResourceDefault(ImageContent imageContent)
         {
-            if (imageContent.Path != null)
+            if (!string.IsNullOrWhiteSpace(imageContent.Path))
             {
                 return this.Get(imageContent.Path);
             }
@@ -126,11 +127,11 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         private EngineShaderResourceView CreateResourceArray(ImageContent imageContent)
         {
-            if (imageContent.Paths != null && imageContent.Paths.Length > 0)
+            if (imageContent.Paths.Any())
             {
                 return this.Get(imageContent.Paths);
             }
-            else if (imageContent.Streams != null && imageContent.Streams.Length > 0)
+            else if (imageContent.Streams.Any())
             {
                 return this.Get(imageContent.Streams);
             }
@@ -146,18 +147,18 @@ namespace Engine
         {
             if (imageContent.IsArray)
             {
-                if (imageContent.Paths != null)
+                if (imageContent.Paths.Any())
                 {
                     return this.Get(imageContent.Paths);
                 }
-                else if (imageContent.Streams != null)
+                else if (imageContent.Streams.Any())
                 {
                     return this.Get(imageContent.Streams);
                 }
             }
             else
             {
-                if (imageContent.Path != null)
+                if (!string.IsNullOrWhiteSpace(imageContent.Path))
                 {
                     return this.Get(imageContent.Path);
                 }
@@ -210,7 +211,7 @@ namespace Engine
         /// <param name="values">Values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateResource(Guid identifier, Vector4[] values, int size)
+        public EngineShaderResourceView CreateResource(Guid identifier, IEnumerable<Vector4> values, int size)
         {
             string md5 = identifier.ToByteArray().GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -248,7 +249,7 @@ namespace Engine
         /// <param name="values">Values</param>
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResourceTexture2D(string name, Vector4[] values, int size)
+        public EngineShaderResourceView CreateGlobalResourceTexture2D(string name, IEnumerable<Vector4> values, int size)
         {
             var view = this.game.Graphics.CreateTexture2D(size, values);
             this.SetGlobalResource(name, view);
@@ -356,7 +357,7 @@ namespace Engine
         /// </summary>
         /// <param name="paths">Path list</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView Get(string[] paths)
+        private EngineShaderResourceView Get(IEnumerable<string> paths)
         {
             string md5 = paths.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
@@ -372,7 +373,7 @@ namespace Engine
         /// </summary>
         /// <param name="streams">Stream list</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView Get(MemoryStream[] streams)
+        private EngineShaderResourceView Get(IEnumerable<MemoryStream> streams)
         {
             string md5 = streams.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))

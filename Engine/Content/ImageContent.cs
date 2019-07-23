@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Engine.Content
 {
@@ -8,28 +10,30 @@ namespace Engine.Content
     public class ImageContent
     {
         /// <summary>
-        /// Path list
-        /// </summary>
-        private string[] paths = null;
-
-        /// <summary>
         /// Image data in stream
         /// </summary>
         public MemoryStream Stream
         {
             get
             {
-                return this.Streams != null && this.Streams.Length == 1 ? this.Streams[0] : null;
+                return this.Streams.FirstOrDefault();
             }
             set
             {
-                this.Streams = new[] { value };
+                if (value == null)
+                {
+                    this.Streams = new MemoryStream[] { };
+                }
+                else
+                {
+                    this.Streams = new[] { value };
+                }
             }
         }
         /// <summary>
         /// Image array streams
         /// </summary>
-        public MemoryStream[] Streams { get; set; } = null;
+        public IEnumerable<MemoryStream> Streams { get; set; } = new MemoryStream[] { };
         /// <summary>
         /// Image path
         /// </summary>
@@ -37,27 +41,24 @@ namespace Engine.Content
         {
             get
             {
-                return this.paths != null && this.paths.Length == 1 ? this.paths[0] : null;
+                return this.Paths.FirstOrDefault();
             }
             set
             {
-                this.paths = new[] { value };
+                if (value == null)
+                {
+                    this.Paths = new string[] { };
+                }
+                else
+                {
+                    this.Paths = new[] { value };
+                }
             }
         }
         /// <summary>
         /// Image array paths
         /// </summary>
-        public string[] Paths
-        {
-            get
-            {
-                return this.paths != null && this.paths.Length > 1 ? this.paths : null;
-            }
-            set
-            {
-                this.paths = value;
-            }
-        }
+        public IEnumerable<string> Paths { get; set; } = new string[] { };
         /// <summary>
         /// Gets whether the image content is an image array
         /// </summary>
@@ -65,9 +66,7 @@ namespace Engine.Content
         {
             get
             {
-                return
-                    (this.paths != null && this.paths.Length > 1) ||
-                    (this.Streams != null && this.Streams.Length > 1);
+                return (this.Paths.Count() > 1) || (this.Streams.Count() > 1);
             }
         }
         /// <summary>
@@ -81,14 +80,7 @@ namespace Engine.Content
         {
             get
             {
-                if (this.paths != null || this.Streams != null)
-                {
-                    return this.paths != null ? this.paths.Length : this.Streams.Length;
-                }
-                else
-                {
-                    return 0;
-                }
+                return this.Paths.Count() + this.Streams.Count();
             }
         }
 
@@ -125,7 +117,7 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="textures">Paths to textures</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Array(string contentFolder, string[] textures)
+        public static ImageContent Array(string contentFolder, IEnumerable<string> textures)
         {
             var p = ContentManager.FindPaths(contentFolder, textures);
 
@@ -139,7 +131,7 @@ namespace Engine.Content
         /// </summary>
         /// <param name="textures">Texture streams</param>
         /// <returns>Returns content</returns>
-        public static ImageContent Array(MemoryStream[] textures)
+        public static ImageContent Array(IEnumerable<MemoryStream> textures)
         {
             return new ImageContent()
             {
@@ -182,21 +174,21 @@ namespace Engine.Content
         /// <returns>Returns text representation of instance</returns>
         public override string ToString()
         {
-            if (!string.IsNullOrEmpty(this.Path))
+            if (!string.IsNullOrWhiteSpace(this.Path))
             {
                 return string.Format("Path: {0}; ", this.Path);
             }
-            if (this.Paths != null && this.Paths.Length > 0)
+            if (this.Paths.Any())
             {
-                return string.Format("Path array: {0}; ", this.Paths.Length);
+                return string.Format("Path array: {0}; ", this.Paths.Count());
             }
             else if (this.Stream != null)
             {
                 return string.Format("Stream: {0} bytes; ", this.Stream.Length);
             }
-            else if (this.Streams != null && this.Streams.Length > 0)
+            else if (this.Streams.Any())
             {
-                return string.Format("Stream array: {0}; ", this.Streams.Length);
+                return string.Format("Stream array: {0}; ", this.Streams.Count());
             }
             else
             {

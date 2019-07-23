@@ -1,9 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation
 {
-    using Engine.Helpers;
-
     /// <summary>
     /// Input geometry
     /// </summary>
@@ -18,9 +17,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// Constructor
         /// </summary>
         /// <param name="fnc">Triangle function</param>
-        public InputGeometry(Func<Triangle[]> fnc) : base(fnc)
+        public InputGeometry(Func<IEnumerable<Triangle>> fnc) : base(fnc)
         {
-            
+
         }
 
         /// <summary>

@@ -1,12 +1,12 @@
-﻿using System;
+﻿using SharpDX;
+using SharpDX.Direct3D;
+using System;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
-    using SharpDX;
-    using SharpDX.Direct3D;
 
     /// <summary>
     /// CPU particle system

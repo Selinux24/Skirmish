@@ -69,7 +69,7 @@ namespace Engine.PathFinding.RecastNavigation
         public static ChunkyTriMesh Build(InputGeometry input)
         {
             var triangles = input.GetTriangles();
-            if (triangles?.Length > 0 && CreateChunkyTriMesh(triangles, 256, out ChunkyTriMesh chunkyMesh))
+            if (triangles.Any() && CreateChunkyTriMesh(triangles, 256, out ChunkyTriMesh chunkyMesh))
             {
                 return chunkyMesh;
             }
@@ -80,12 +80,13 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Creates a new chunky mesh
         /// </summary>
-        /// <param name="tris">Triangles</param>
+        /// <param name="triangles">Triangles</param>
         /// <param name="trisPerChunk">Triangles per chunk</param>
         /// <param name="cm">The resulting chunky mesh</param>
         /// <returns>Returns true if the chunky mesh were correctly created</returns>
-        private static bool CreateChunkyTriMesh(Triangle[] tris, int trisPerChunk, out ChunkyTriMesh cm)
+        private static bool CreateChunkyTriMesh(IEnumerable<Triangle> triangles, int trisPerChunk, out ChunkyTriMesh cm)
         {
+            Triangle[] tris = triangles.ToArray();
             int ntris = tris.Count();
             int nchunks = (ntris + trisPerChunk - 1) / trisPerChunk;
 

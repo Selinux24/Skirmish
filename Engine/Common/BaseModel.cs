@@ -84,7 +84,7 @@ namespace Engine.Common
                 DynamicBuffers = description.Dynamic,
             };
 
-            ModelContent[] geo;
+            IEnumerable<ModelContent> geo;
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
                 var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
@@ -105,11 +105,13 @@ namespace Engine.Common
                 throw new EngineException("No geometry found in description.");
             }
 
-            if (geo.Length == 1)
+            if (geo.Count() == 1)
             {
-                if (description.Optimize) geo[0].Optimize();
+                var iGeo = geo.First();
 
-                var drawable = DrawingData.Build(this.Game, this.BufferManager, geo[0], desc);
+                if (description.Optimize) iGeo.Optimize();
+
+                var drawable = DrawingData.Build(this.Game, this.BufferManager, iGeo, desc);
 
                 this.meshesByLOD.Add(LevelOfDetail.High, drawable);
             }

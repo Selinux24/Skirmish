@@ -1,8 +1,8 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -283,7 +283,7 @@ namespace Engine
         /// <param name="cellHeight">Cell height</param>
         /// <param name="vertices">Result vertices</param>
         /// <param name="indices">Result indices</param>
-        public void BuildGeometry(float cellSize, float cellHeight, out VertexData[] vertices, out uint[] indices)
+        public void BuildGeometry(float cellSize, float cellHeight, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
         {
             float totalWidth = cellSize * (this.Width - 1);
             float totalDepth = cellSize * (this.Depth - 1);
@@ -291,7 +291,7 @@ namespace Engine
             long vertexCountX = this.Width;
             long vertexCountZ = this.Depth;
 
-            vertices = new VertexData[vertexCountX * vertexCountZ];
+            VertexData[] vertArray = new VertexData[vertexCountX * vertexCountZ];
 
             long vertexCount = 0;
 
@@ -313,7 +313,7 @@ namespace Engine
                         Color = this.m_ColorData[depth, width],
                     };
 
-                    vertices[vertexCount++] = newVertex;
+                    vertArray[vertexCount++] = newVertex;
                 }
             }
 
@@ -338,9 +338,10 @@ namespace Engine
                 }
             }
 
-            indices = indexList.ToArray();
+            ComputeHeightMapNormals(vertArray, this.Width, this.Depth);
 
-            ComputeHeightMapNormals(vertices, this.Width, this.Depth);
+            vertices = vertArray;
+            indices = indexList;
         }
         /// <summary>
         /// Gets the number of triangles of the note for the specified partition level

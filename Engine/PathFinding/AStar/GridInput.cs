@@ -14,7 +14,7 @@ namespace Engine.PathFinding.AStar
         /// Constructor
         /// </summary>
         /// <param name="fnc">Get triangles function</param>
-        public GridInput(Func<Triangle[]> fnc) : base(fnc)
+        public GridInput(Func<IEnumerable<Triangle>> fnc) : base(fnc)
         {
 
         }

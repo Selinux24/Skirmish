@@ -1355,7 +1355,7 @@ namespace Engine
         /// Gets the objects triangle list for navigation graph construction
         /// </summary>
         /// <returns>Returns a triangle list</returns>
-        public virtual Triangle[] GetTrianglesForNavigationGraph()
+        public virtual IEnumerable<Triangle> GetTrianglesForNavigationGraph()
         {
             List<Triangle> tris = new List<Triangle>();
 
