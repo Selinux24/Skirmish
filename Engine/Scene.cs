@@ -186,9 +186,13 @@ namespace Engine
         /// </summary>
         private SceneModes sceneMode = SceneModes.Unknown;
         /// <summary>
-        /// Scene bounding box
+        /// Ground bounding box
         /// </summary>
-        private BoundingBox boundingBox;
+        private BoundingBox? groundBoundingBox;
+        /// <summary>
+        /// Navigation bounding box
+        /// </summary>
+        private BoundingBox? navigationBoundingBox;
 
         /// <summary>
         /// Game class
@@ -443,36 +447,30 @@ namespace Engine
         /// <returns>Returns true if the renderer changes correctly</returns>
         public bool SetRenderMode(SceneModes mode)
         {
-            bool isValid = false;
-
             var graphics = this.Game.Graphics;
 
-            ISceneRenderer renderer = null;
+            ISceneRenderer renderer;
 
             if (mode == SceneModes.ForwardLigthning && SceneRendererForward.Validate(graphics))
             {
                 renderer = new SceneRendererForward(this.Game);
-                isValid = true;
             }
             else if (mode == SceneModes.DeferredLightning && SceneRendererDeferred.Validate(graphics))
             {
                 renderer = new SceneRendererDeferred(this.Game);
-                isValid = true;
             }
-
-            if (isValid)
+            else
             {
-                if (this.Renderer != null)
-                {
-                    this.Renderer.Dispose();
-                    this.Renderer = null;
-                }
-                Counters.ClearAll();
-                this.Renderer = renderer;
-                this.sceneMode = mode;
+                return false;
             }
 
-            return isValid;
+            this.Renderer?.Dispose();
+            this.Renderer = renderer;
+            this.sceneMode = mode;
+
+            Counters.ClearAll();
+
+            return true;
         }
 
         /// <summary>
@@ -724,7 +722,7 @@ namespace Engine
             foreach (var component in matComponents)
             {
                 var matList = component.Get<IUseMaterials>().Materials;
-                if (matList?.Length > 0)
+                if (matList.Any())
                 {
                     mats.AddRange(matList);
                 }
@@ -876,11 +874,13 @@ namespace Engine
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
         public Ray GetTopDownRay(float x, float z)
         {
-            BoundingBox bbox = this.GetBoundingBox();
+            var bbox = this.GetGroundBoundingBox();
+
+            float maxY = (bbox?.Maximum.Y + 1.0f) ?? float.MaxValue;
 
             return new Ray()
             {
-                Position = new Vector3(x, bbox.Maximum.Y + 0.1f, z),
+                Position = new Vector3(x, maxY, z),
                 Direction = Vector3.Down,
             };
         }
@@ -1204,12 +1204,20 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets bounding box
+        /// Gets the whole ground bounding box
         /// </summary>
-        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox()
+        /// <returns>Returns the whole ground bounding box.</returns>
+        public BoundingBox? GetGroundBoundingBox()
         {
-            return this.boundingBox;
+            return this.groundBoundingBox;
+        }
+        /// <summary>
+        /// Gets the current navigation bounding box
+        /// </summary>
+        /// <returns>Returns the current navigation bounding box.</returns>
+        public BoundingBox? GetNavigationBoundingBox()
+        {
+            return this.navigationBoundingBox;
         }
 
         /// <summary>
@@ -1238,7 +1246,7 @@ namespace Engine
         /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or volumes for navigation graphs</param>
         public void SetGround(SceneObject obj, bool fullGeometryPathFinding)
         {
-            this.boundingBox = obj.Get<IRayPickable<Triangle>>().GetBoundingBox();
+            this.groundBoundingBox = obj.Get<IRayPickable<Triangle>>().GetBoundingBox();
 
             obj.Usage |= SceneObjectUsages.Ground;
             obj.Usage |= (fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding);
@@ -1271,7 +1279,7 @@ namespace Engine
                 this.NavigationGraph.Dispose();
                 this.NavigationGraph = null;
 
-                this.boundingBox = new BoundingBox();
+                this.navigationBoundingBox = new BoundingBox();
             }
 
             if (graph != null)
@@ -1282,7 +1290,7 @@ namespace Engine
 
                 if (this.PathFinderDescription != null)
                 {
-                    this.boundingBox = this.PathFinderDescription.Input.BoundingBox;
+                    this.navigationBoundingBox = this.PathFinderDescription.Input.BoundingBox;
                 }
             }
         }
@@ -1723,7 +1731,12 @@ namespace Engine
         /// <returns>Returns a position over the ground</returns>
         public Vector3 GetRandomPoint(Random rnd, Vector3 offset)
         {
-            return GetRandomPoint(rnd, offset, this.boundingBox);
+            if (!this.groundBoundingBox.HasValue)
+            {
+                throw new EngineException($"A ground must be defined into the scene in the first place.");
+            }
+
+            return GetRandomPoint(rnd, offset, this.groundBoundingBox.Value);
         }
         /// <summary>
         /// Gets a random point over the ground

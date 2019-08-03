@@ -105,8 +105,9 @@ namespace Engine
             /// <param name="node">Foliage Node</param>
             /// <param name="map">Foliage map</param>
             /// <param name="description">Terrain vegetation description</param>
+            /// <param name="gbbox">Relative bounding box to plant</param>
             /// <param name="delay">Task delay</param>
-            public void Plant(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, int delay)
+            public void Plant(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox, int delay)
             {
                 if (!this.Planting)
                 {
@@ -119,7 +120,7 @@ namespace Engine
                     {
                         await Task.Delay(delay);
 
-                        return PlantTask(scene, node, map, description);
+                        return PlantTask(scene, node, map, description, gbbox);
                     });
 
                     task.ContinueWith((t) =>
@@ -137,8 +138,9 @@ namespace Engine
             /// <param name="node">Node to process</param>
             /// <param name="map">Foliage map</param>
             /// <param name="description">Vegetation task</param>
+            /// <param name="gbbox">Relative bounding box to plant</param>
             /// <returns>Returns generated vertex data</returns>
-            private static VertexBillboard[] PlantTask(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description)
+            private static VertexBillboard[] PlantTask(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox)
             {
                 if (node == null)
                 {
@@ -147,13 +149,11 @@ namespace Engine
 
                 List<VertexBillboard> vertexData = new List<VertexBillboard>(MAX);
 
-                BoundingBox gbbox = scene.GetBoundingBox();
-
                 Vector2 min = new Vector2(gbbox.Minimum.X, gbbox.Minimum.Z);
                 Vector2 max = new Vector2(gbbox.Maximum.X, gbbox.Maximum.Z);
 
                 Random rnd = new Random(description.Seed);
-                BoundingBox bbox = node.BoundingBox;
+                var bbox = node.BoundingBox;
                 int count = (int)Math.Min(MAX, MAX * description.Saturation);
                 int iterations = MAX * 2;
 
@@ -170,7 +170,7 @@ namespace Engine
                     bool plant = false;
                     if (map != null)
                     {
-                        Color4 c = map.GetRelative(pos, min, max);
+                        var c = map.GetRelative(pos, min, max);
 
                         if (c[description.Index] > 0)
                         {
@@ -215,10 +215,13 @@ namespace Engine
             private static bool Plant(Scene scene, Vector3 pos, Vector2 size, out VertexBillboard res)
             {
                 var ray = scene.GetTopDownRay(pos);
+
                 bool found = scene.PickFirst(
-                    ray, RayPickingParams.FacingOnly | RayPickingParams.Geometry,
+                    ray, 
+                    RayPickingParams.FacingOnly | RayPickingParams.Geometry,
                     SceneObjectUsages.Ground,
-                    out PickingResult<Triangle> r);
+                    out var r);
+
                 if (found && r.Item.Normal.Y > 0.5f)
                 {
                     res = new VertexBillboard()
@@ -584,7 +587,7 @@ namespace Engine
         /// <summary>
         /// Material
         /// </summary>
-        public MeshMaterial[] Materials
+        public IEnumerable<MeshMaterial> Materials
         {
             get
             {
@@ -770,19 +773,23 @@ namespace Engine
         {
             this.windTime += context.GameTime.ElapsedSeconds * this.WindStrength;
 
+            var bbox = this.Scene.GetGroundBoundingBox();
+            if (!bbox.HasValue)
+            {
+                return;
+            }
+
             if (this.foliageQuadtree == null)
             {
-                BoundingBox bbox = this.Scene.GetBoundingBox();
-
-                float x = bbox.GetX();
-                float z = bbox.GetZ();
+                float x = bbox.Value.GetX();
+                float z = bbox.Value.GetZ();
 
                 float max = x < z ? z : x;
 
                 int levels = Math.Max(1, (int)(max / this.foliageNodeSize));
                 levels = Math.Min(6, levels);
 
-                this.foliageQuadtree = new QuadTree(bbox, levels);
+                this.foliageQuadtree = new QuadTree(bbox.Value, levels);
             }
 
             this.foliageSphere.Center = context.EyePosition;
@@ -805,7 +812,7 @@ namespace Engine
                 });
 
                 //Assign foliage patches
-                this.AssignPatches(context.EyePosition);
+                this.AssignPatches(context.EyePosition, bbox.Value);
             }
 
             this.PlantingTasks = 0;
@@ -819,10 +826,11 @@ namespace Engine
         /// Assign patches
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
-        private void AssignPatches(Vector3 eyePosition)
+        /// <param name="bbox">Relative bounding box to plant</param>
+        private void AssignPatches(Vector3 eyePosition, BoundingBox bbox)
         {
             //Find patches to assign data
-            var toAssign = this.FindAssigned();
+            var toAssign = this.FindAssigned(bbox);
             if (toAssign.Count > 0)
             {
                 //Mark patches to delete
@@ -835,6 +843,7 @@ namespace Engine
         /// <summary>
         /// Finds a list of patches with assigned data
         /// </summary>
+        /// <param name="bbox">Relative bounding box to plant</param>
         /// <returns>Returns a list of patches</returns>
         /// <remarks>
         /// Foreach high lod visible node, look for planted foliagePatches.
@@ -843,7 +852,7 @@ namespace Engine
         ///   - If not, add to toAssign list
         /// - If not planted, launch planting task y do nothing more. The node will be processed next time
         /// </remarks>
-        private List<FoliagePatch> FindAssigned()
+        private List<FoliagePatch> FindAssigned(BoundingBox bbox)
         {
             List<FoliagePatch> toAssign = new List<FoliagePatch>();
 
@@ -869,7 +878,7 @@ namespace Engine
 
                     if (!fPatch.Planted)
                     {
-                        fPatch.Plant(this.Scene, node, this.foliageMap, this.foliageMapChannels[i], i * 100);
+                        fPatch.Plant(this.Scene, node, this.foliageMap, this.foliageMapChannels[i], bbox, i * 100);
                     }
                     else if (fPatch.HasData && !this.foliageBuffers.Exists(b => b.CurrentPatch == fPatch))
                     {

@@ -29,7 +29,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets the material list used by the current drawing data
         /// </summary>
-        public MeshMaterial[] Materials
+        public IEnumerable<MeshMaterial> Materials
         {
             get
             {

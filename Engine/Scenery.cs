@@ -222,7 +222,7 @@ namespace Engine
         /// <summary>
         /// Gets the used material list
         /// </summary>
-        public virtual MeshMaterial[] Materials
+        public virtual IEnumerable<MeshMaterial> Materials
         {
             get
             {
@@ -265,7 +265,7 @@ namespace Engine
         public Scenery(Scene scene, GroundDescription description)
             : base(scene, description)
         {
-            ModelContent content = null;
+            ModelContent content;
 
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {

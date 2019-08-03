@@ -565,7 +565,7 @@ namespace Engine.Common
                 shadowMapper.Bind(graphics, assigned * MaxDirectionalCascadeShadowMaps);
                 this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
                 this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+                this.DrawShadowComponents(this.DrawShadowsContext, cullIndex, shadowObjs);
 
                 //Assign light parameters
                 light.ShadowMapIndex = assigned;
@@ -632,7 +632,7 @@ namespace Engine.Common
                 shadowMapper.Bind(graphics, assigned);
                 this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
                 this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+                this.DrawShadowComponents(this.DrawShadowsContext, cullIndex, shadowObjs);
 
                 //Assign light parameters
                 light.ShadowMapIndex = assigned;
@@ -698,7 +698,7 @@ namespace Engine.Common
                 shadowMapper.Bind(graphics, assigned);
                 this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
                 this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                this.DrawShadowComponents(gameTime, this.DrawShadowsContext, cullIndex, shadowObjs);
+                this.DrawShadowComponents(this.DrawShadowsContext, cullIndex, shadowObjs);
 
                 //Assign light parameters
                 light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
@@ -714,10 +714,10 @@ namespace Engine.Common
         /// <summary>
         /// Draw components for shadow mapping
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="context">Context</param>
-        /// <param name="components">Components</param>
-        protected void DrawShadowComponents(GameTime gameTime, DrawContextShadows context, int index, IEnumerable<SceneObject> components)
+        /// <param name="index">Culling index</param>
+        /// <param name="components">Components to draw</param>
+        protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<SceneObject> components)
         {
             var graphics = this.Game.Graphics;
 

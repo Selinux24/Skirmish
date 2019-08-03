@@ -1,4 +1,5 @@
-﻿
+﻿using System.Collections.Generic;
+
 namespace Engine.Common
 {
     /// <summary>
@@ -9,6 +10,6 @@ namespace Engine.Common
         /// <summary>
         /// Gets the instance materials list
         /// </summary>
-        MeshMaterial[] Materials { get; }
+        IEnumerable<MeshMaterial> Materials { get; }
     }
 }

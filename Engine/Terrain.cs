@@ -696,7 +696,7 @@ namespace Engine
         /// <summary>
         /// Gets the used material list
         /// </summary>
-        public virtual MeshMaterial[] Materials
+        public virtual IEnumerable<MeshMaterial> Materials
         {
             get
             {
