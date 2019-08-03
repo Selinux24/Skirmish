@@ -27,10 +27,6 @@ namespace Engine
         /// </summary>
         private ModelInstance[] instancesTmp = null;
         /// <summary>
-        /// Counter of the elapsed seconds between the last instance sorting
-        /// </summary>
-        private float lastSortingElapsedSeconds = 0f;
-        /// <summary>
         /// Write instancing data to graphics flag
         /// </summary>
         private bool hasDataToWrite = false;
@@ -117,7 +113,7 @@ namespace Engine
                 return;
             }
 
-            this.SortInstances(context.GameTime, context.EyePosition);
+            this.SortInstances(context.EyePosition);
 
             LevelOfDetail lastLod = LevelOfDetail.None;
             DrawingData drawingData = null;
@@ -163,20 +159,9 @@ namespace Engine
         /// <summary>
         /// Updates the instances order
         /// </summary>
-        /// <param name="gameTime">Game time</param>
         /// <param name="eyePosition">Eye position</param>
-        /// <remarks>Sorts instances every second</remarks>
-        private void SortInstances(GameTime gameTime, Vector3 eyePosition)
+        private void SortInstances(Vector3 eyePosition)
         {
-            lastSortingElapsedSeconds += gameTime.ElapsedSeconds;
-
-            if (lastSortingElapsedSeconds < 1f)
-            {
-                return;
-            }
-
-            lastSortingElapsedSeconds = 0f;
-
             //Sort by LOD, distance and id
             Array.Sort(this.instancesTmp, (i1, i2) =>
             {

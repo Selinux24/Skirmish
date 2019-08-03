@@ -32,6 +32,10 @@ namespace Engine
             /// Foliage generated data
             /// </summary>
             private VertexBillboard[] foliageData = null;
+            /// <summary>
+            /// Counter of the elapsed seconds between the last node sorting
+            /// </summary>
+            private float lastSortingElapsedSeconds = 0;
 
             /// <summary>
             /// Foliage populating flag
@@ -240,12 +244,22 @@ namespace Engine
             /// <summary>
             /// Get foliage data
             /// </summary>
+            /// <param name="gameTime">Game time</param>
             /// <param name="eyePosition">Eye position</param>
             /// <param name="transparent">Use transparency</param>
             /// <returns>Returns the foliage data ordered by distance to eye position. Far first if transparency specified, near first otherwise</returns>
             /// <remarks>Returns the foliage data</remarks>
-            public VertexBillboard[] GetData(Vector3 eyePosition, bool transparent)
+            public VertexBillboard[] GetData(GameTime gameTime, Vector3 eyePosition, bool transparent)
             {
+                lastSortingElapsedSeconds += gameTime.ElapsedSeconds;
+
+                if (lastSortingElapsedSeconds < 1f)
+                {
+                    return this.foliageData;
+                }
+
+                lastSortingElapsedSeconds = 0f;
+
                 //Sort data
                 Array.Sort(this.foliageData, (f1, f2) =>
                 {
@@ -453,11 +467,12 @@ namespace Engine
             /// <summary>
             /// Attachs the specified patch to buffer
             /// </summary>
+            /// <param name="gameTime">Game time</param>
             /// <param name="eyePosition">Eye position</param>
             /// <param name="transparent">The billboards were transparent</param>
             /// <param name="patch">Patch</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void AttachFoliage(Vector3 eyePosition, bool transparent, FoliagePatch patch, BufferManager bufferManager)
+            public void AttachFoliage(GameTime gameTime, Vector3 eyePosition, bool transparent, FoliagePatch patch, BufferManager bufferManager)
             {
                 this.vertexDrawCount = 0;
                 this.Attached = false;
@@ -465,7 +480,7 @@ namespace Engine
 
                 if (patch.HasData)
                 {
-                    var data = patch.GetData(eyePosition, transparent);
+                    var data = patch.GetData(gameTime, eyePosition, transparent);
 
                     //Attach data
                     bufferManager.WriteBuffer(
@@ -795,7 +810,7 @@ namespace Engine
                 this.SortVisibleNodes(context.GameTime, context.EyePosition, this.Description.AlphaEnabled);
 
                 //Assign foliage patches
-                this.AssignPatches(context.EyePosition, bbox.Value);
+                this.AssignPatches(context.GameTime, context.EyePosition, bbox.Value);
             }
 
             this.PlantingTasks = 0;
@@ -856,16 +871,17 @@ namespace Engine
         /// <summary>
         /// Assign patches
         /// </summary>
+        /// <param name="gameTime">Game time</param>
         /// <param name="eyePosition">Eye position</param>
         /// <param name="bbox">Relative bounding box to plant</param>
-        private void AssignPatches(Vector3 eyePosition, BoundingBox bbox)
+        private void AssignPatches(GameTime gameTime, Vector3 eyePosition, BoundingBox bbox)
         {
             //Find patches to assign data
             var toAssign = this.FindAssigned(bbox);
             if (toAssign.Count > 0)
             {
                 //Mark patches to delete
-                this.MarkFreePatches(toAssign, eyePosition);
+                this.MarkFreePatches(gameTime, eyePosition, toAssign);
             }
 
             //Free unused patches
@@ -923,15 +939,16 @@ namespace Engine
         /// <summary>
         /// Mark patches for deletion
         /// </summary>
-        /// <param name="toAssign">To assign patches</param>
+        /// <param name="gameTime">Game time</param>
         /// <param name="eyePosition">Eye position</param>
+        /// <param name="toAssign">To assign patches</param>
         /// <remarks>
         /// For each node to assign
         /// - Look for a free buffer. It's free if unassigned or assigned to not visible node
         ///   - If free buffer found, assign
         ///   - If not, look for a buffer to free, farthests from camera first
         /// </remarks>
-        private void MarkFreePatches(List<FoliagePatch> toAssign, Vector3 eyePosition)
+        private void MarkFreePatches(GameTime gameTime, Vector3 eyePosition, List<FoliagePatch> toAssign)
         {
             //Sort nearest first
             toAssign.Sort((f1, f2) =>
@@ -959,7 +976,7 @@ namespace Engine
 
                 while (toAssign.Count > 0 && freeBuffers.Count > 0)
                 {
-                    freeBuffers[0].AttachFoliage(eyePosition, this.Description.AlphaEnabled, toAssign[0], this.BufferManager);
+                    freeBuffers[0].AttachFoliage(gameTime, eyePosition, this.Description.AlphaEnabled, toAssign[0], this.BufferManager);
 
                     toAssign.RemoveAt(0);
                     freeBuffers.RemoveAt(0);
