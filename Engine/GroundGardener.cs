@@ -217,7 +217,7 @@ namespace Engine
                 var ray = scene.GetTopDownRay(pos);
 
                 bool found = scene.PickFirst(
-                    ray, 
+                    ray,
                     RayPickingParams.FacingOnly | RayPickingParams.Geometry,
                     SceneObjectUsages.Ground,
                     out var r);
@@ -583,6 +583,10 @@ namespace Engine
         /// Last visible node collection
         /// </summary>
         private QuadTreeNode[] visibleNodes;
+        /// <summary>
+        /// Counter of the elapsed seconds between the last node sorting
+        /// </summary>
+        private float lastSortingElapsedSeconds = 0;
 
         /// <summary>
         /// Material
@@ -779,18 +783,7 @@ namespace Engine
                 return;
             }
 
-            if (this.foliageQuadtree == null)
-            {
-                float x = bbox.Value.GetX();
-                float z = bbox.Value.GetZ();
-
-                float max = x < z ? z : x;
-
-                int levels = Math.Max(1, (int)(max / this.foliageNodeSize));
-                levels = Math.Min(6, levels);
-
-                this.foliageQuadtree = new QuadTree(bbox.Value, levels);
-            }
+            this.BuildQuadtree(bbox.Value);
 
             this.foliageSphere.Center = context.EyePosition;
 
@@ -798,18 +791,8 @@ namespace Engine
 
             if (this.visibleNodes.Length > 0)
             {
-                bool transparent = this.Description.AlphaEnabled;
-
-                //Sort fartest first
-                Array.Sort(this.visibleNodes, (f1, f2) =>
-                {
-                    float d1 = Vector3.DistanceSquared(f1.Center, context.EyePosition);
-                    float d2 = Vector3.DistanceSquared(f2.Center, context.EyePosition);
-
-                    var res = d1.CompareTo(d2);
-
-                    return transparent ? -res : res;
-                });
+                //Sort nodes by distance from camera position
+                this.SortVisibleNodes(context.GameTime, context.EyePosition, this.Description.AlphaEnabled);
 
                 //Assign foliage patches
                 this.AssignPatches(context.EyePosition, bbox.Value);
@@ -821,6 +804,54 @@ namespace Engine
             {
                 this.PlantingTasks += q.Value.FindAll(f => f.Planting).Count;
             }
+        }
+        /// <summary>
+        /// Builds the quadtree from the specified bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        private void BuildQuadtree(BoundingBox bbox)
+        {
+            if (this.foliageQuadtree == null)
+            {
+                float x = bbox.GetX();
+                float z = bbox.GetZ();
+
+                float max = x < z ? z : x;
+
+                int levels = Math.Max(1, (int)(max / this.foliageNodeSize));
+                levels = Math.Min(6, levels);
+
+                this.foliageQuadtree = new QuadTree(bbox, levels);
+            }
+        }
+        /// <summary>
+        /// Sorts the visible nodes
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="eyePosition">Eye position</param>
+        /// <param name="transparent">Specifies wether the billboards are transparent or not</param>
+        /// <remarks>Sorts nodes every second</remarks>
+        private void SortVisibleNodes(GameTime gameTime, Vector3 eyePosition, bool transparent)
+        {
+            lastSortingElapsedSeconds += gameTime.ElapsedSeconds;
+
+            if (lastSortingElapsedSeconds < 1f)
+            {
+                return;
+            }
+
+            lastSortingElapsedSeconds = 0f;
+
+            Array.Sort(this.visibleNodes, (f1, f2) =>
+            {
+                float d1 = Vector3.DistanceSquared(f1.Center, eyePosition);
+                float d2 = Vector3.DistanceSquared(f2.Center, eyePosition);
+
+                var res = d1.CompareTo(d2);
+
+                //If transparent, farthest first
+                return transparent ? -res : res;
+            });
         }
         /// <summary>
         /// Assign patches
@@ -898,7 +929,7 @@ namespace Engine
         /// For each node to assign
         /// - Look for a free buffer. It's free if unassigned or assigned to not visible node
         ///   - If free buffer found, assign
-        ///   - If not, look for a buffer to free, fartests from camera first
+        ///   - If not, look for a buffer to free, farthests from camera first
         /// </remarks>
         private void MarkFreePatches(List<FoliagePatch> toAssign, Vector3 eyePosition)
         {
@@ -917,7 +948,7 @@ namespace Engine
 
             if (freeBuffers.Count > 0)
             {
-                //Sort free first and fartest first
+                //Sort free first and farthest first
                 freeBuffers.Sort((f1, f2) =>
                 {
                     float d1 = f1.CurrentPatch == null ? -1 : Vector3.DistanceSquared(f1.CurrentPatch.CurrentNode.Center, eyePosition);
