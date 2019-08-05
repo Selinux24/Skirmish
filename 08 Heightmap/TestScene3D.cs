@@ -50,8 +50,12 @@ namespace Heightmap
         private SceneObject<Terrain> terrain = null;
         private SceneObject<GroundGardener> gardener = null;
         private SceneObject<GroundGardener> gardener2 = null;
+        private SceneObject<PrimitiveListDrawer<Triangle>> bboxesTriDrawer = null;
         private SceneObject<PrimitiveListDrawer<Line3D>> bboxesDrawer = null;
         private SceneObject<PrimitiveListDrawer<Line3D>> linesDrawer = null;
+        private const float gardenerAreaSize = 2048;
+        private readonly BoundingBox? gardenerArea = new BoundingBox(new Vector3(-gardenerAreaSize * 2, -gardenerAreaSize, -gardenerAreaSize), new Vector3(-0.01f, gardenerAreaSize, gardenerAreaSize));
+        private readonly BoundingBox? gardenerArea2 = new BoundingBox(new Vector3(0.01f, -gardenerAreaSize, -gardenerAreaSize), new Vector3(gardenerAreaSize * 2, gardenerAreaSize, gardenerAreaSize));
 
         private SceneObject<ModelInstanced> torchs = null;
         private SceneLightSpot spotLight1 = null;
@@ -521,6 +525,7 @@ namespace Heightmap
                 Name = "Grass",
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map.png",
+                PlantingArea = gardenerArea,
                 CastShadow = false,
                 Material = new MaterialDescription()
                 {
@@ -529,39 +534,39 @@ namespace Heightmap
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = new[] { "grass_v.dds" },
-                    Saturation = 0.05f,
+                    Saturation = 1f,
                     StartRadius = 0f,
                     EndRadius = 100f,
                     MinSize = new Vector2(0.5f, 0.5f),
                     MaxSize = new Vector2(1.5f, 1.5f),
                     Seed = 1,
-                    WindEffect = 0.3f,
+                    WindEffect = 1f,
                     Count = 4,
                 },
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = new[] { "grass_d.dds" },
                     VegetationNormalMaps = new[] { "grass_n.dds" },
-                    Saturation = 10f,
+                    Saturation = 1f,
                     StartRadius = 0f,
                     EndRadius = 100f,
                     MinSize = new Vector2(0.5f, 0.5f),
                     MaxSize = new Vector2(1f, 1f),
                     Seed = 2,
-                    WindEffect = 0.2f,
+                    WindEffect = 1f,
                     Count = 4,
                 },
                 ChannelBlue = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = new[] { "grass1.png" },
-                    Saturation = 0.005f,
+                    Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
                     MinSize = new Vector2(0.5f, 0.5f),
                     MaxSize = new Vector2(1f, 1f),
                     Delta = new Vector3(0, -0.05f, 0),
                     Seed = 3,
-                    WindEffect = 0.3f,
+                    WindEffect = 1f,
                     Count = 1,
                 },
             };
@@ -580,17 +585,18 @@ namespace Heightmap
                 Name = "Flowers",
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map_flowers.png",
+                PlantingArea = gardenerArea2,
                 CastShadow = false,
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = new[] { "flower0.dds" },
-                    Saturation = 0.1f,
+                    Saturation = 1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
-                    MinSize = new Vector2(1f, 1f) * 0.5f,
-                    MaxSize = new Vector2(1.5f, 1.5f) * 0.5f,
+                    MinSize = new Vector2(1f, 1f) * 0.15f,
+                    MaxSize = new Vector2(1.5f, 1.5f) * 0.25f,
                     Seed = 1,
-                    WindEffect = 0.5f,
+                    WindEffect = 1f,
                 },
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
@@ -598,10 +604,10 @@ namespace Heightmap
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 150f,
-                    MinSize = new Vector2(1f, 1f) * 0.5f,
-                    MaxSize = new Vector2(1.5f, 1.5f) * 0.5f,
+                    MinSize = new Vector2(1f, 1f) * 0.15f,
+                    MaxSize = new Vector2(1.5f, 1.5f) * 0.25f,
                     Seed = 2,
-                    WindEffect = 0.5f,
+                    WindEffect = 1f,
                 },
                 ChannelBlue = new GroundGardenerDescription.Channel()
                 {
@@ -609,10 +615,10 @@ namespace Heightmap
                     Saturation = 0.1f,
                     StartRadius = 0f,
                     EndRadius = 140f,
-                    MinSize = new Vector2(1f, 1f) * 0.5f,
+                    MinSize = new Vector2(1f, 1f) * 0.15f,
                     MaxSize = new Vector2(1.5f, 1.5f) * 0.5f,
                     Seed = 3,
-                    WindEffect = 0.5f,
+                    WindEffect = 1f,
                 },
             };
             this.gardener2 = this.AddComponent<GroundGardener>(vDesc2, SceneObjectUsages.None, layerFoliage);
@@ -1051,8 +1057,8 @@ namespace Heightmap
         private void SetDebugInfo()
         {
             {
-                var bboxes = this.terrain.Instance.GetBoundingBoxes(5);
-                var listBoxes = Line3D.CreateWiredBox(bboxes);
+                var boxes = this.terrain.Instance.GetBoundingBoxes(5);
+                var listBoxes = Line3D.CreateWiredBox(boxes);
 
                 var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
@@ -1060,11 +1066,34 @@ namespace Heightmap
                     AlphaEnabled = true,
                     DepthEnabled = true,
                     Dynamic = true,
-                    Color = new Color4(1.0f, 0.0f, 0.0f, 0.55f),
-                    Primitives = listBoxes.ToArray(),
+                    Count = 50000,
                 };
                 this.bboxesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
                 this.bboxesDrawer.Visible = false;
+                this.bboxesDrawer.Instance.AddPrimitives(new Color4(1.0f, 0.0f, 0.0f, 0.55f), listBoxes);
+                this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.55f), Line3D.CreateWiredBox(gardenerArea.Value));
+                this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.55f), Line3D.CreateWiredBox(gardenerArea2.Value));
+            }
+
+            {
+                var desc = new PrimitiveListDrawerDescription<Triangle>()
+                {
+                    Name = "DEBUG++ Terrain nodes bounding boxes faces",
+                    AlphaEnabled = true,
+                    DepthEnabled = true,
+                    Count = 1000,
+                };
+                this.bboxesTriDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc, SceneObjectUsages.None, layerEffects);
+                this.bboxesTriDrawer.Visible = false;
+
+                var tris1 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea.Value);
+                var tris2 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea2.Value);
+
+                this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), tris1);
+                this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), Triangle.Reverse(tris1));
+
+                this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), tris2);
+                this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.Reverse(tris2));
             }
 
             {
@@ -1303,6 +1332,7 @@ namespace Heightmap
             if (this.Game.Input.KeyJustReleased(Keys.F1))
             {
                 this.bboxesDrawer.Visible = !this.bboxesDrawer.Visible;
+                this.bboxesTriDrawer.Visible = !this.bboxesTriDrawer.Visible;
             }
 
             if (this.Game.Input.KeyJustReleased(Keys.F2))

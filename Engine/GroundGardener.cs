@@ -31,7 +31,7 @@ namespace Engine
             /// <summary>
             /// Foliage generated data
             /// </summary>
-            private VertexBillboard[] foliageData = null;
+            private IEnumerable<VertexBillboard> foliageData = new VertexBillboard[] { };
             /// <summary>
             /// Counter of the elapsed seconds between the last node sorting
             /// </summary>
@@ -60,7 +60,7 @@ namespace Engine
             {
                 get
                 {
-                    return this.foliageData != null && this.foliageData.Length > 0;
+                    return this.foliageData.Any();
                 }
             }
 
@@ -120,19 +120,19 @@ namespace Engine
                     this.Channel = description.Index;
                     this.Planting = true;
 
-                    var task = Task.Run(async () =>
-                    {
-                        await Task.Delay(delay);
+                    Task
+                        .Run(async () =>
+                        {
+                            await Task.Delay(delay);
 
-                        return PlantTask(scene, node, map, description, gbbox);
-                    });
-
-                    task.ContinueWith((t) =>
-                    {
-                        this.Planting = false;
-                        this.Planted = true;
-                        this.foliageData = t.Result;
-                    });
+                            return PlantTask(scene, node, map, description, gbbox);
+                        })
+                        .ContinueWith((t) =>
+                        {
+                            this.Planting = false;
+                            this.Planted = true;
+                            this.foliageData = t.Result;
+                        });
                 }
             }
             /// <summary>
@@ -144,7 +144,7 @@ namespace Engine
             /// <param name="description">Vegetation task</param>
             /// <param name="gbbox">Relative bounding box to plant</param>
             /// <returns>Returns generated vertex data</returns>
-            private static VertexBillboard[] PlantTask(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox)
+            private static IEnumerable<VertexBillboard> PlantTask(Scene scene, QuadTreeNode node, FoliageMap map, FoliageMapChannel description, BoundingBox gbbox)
             {
                 if (node == null)
                 {
@@ -249,7 +249,7 @@ namespace Engine
             /// <param name="transparent">Use transparency</param>
             /// <returns>Returns the foliage data ordered by distance to eye position. Far first if transparency specified, near first otherwise</returns>
             /// <remarks>Returns the foliage data</remarks>
-            public VertexBillboard[] GetData(GameTime gameTime, Vector3 eyePosition, bool transparent)
+            public IEnumerable<VertexBillboard> GetData(GameTime gameTime, Vector3 eyePosition, bool transparent)
             {
                 lastSortingElapsedSeconds += gameTime.ElapsedSeconds;
 
@@ -261,17 +261,8 @@ namespace Engine
                 lastSortingElapsedSeconds = 0f;
 
                 //Sort data
-                Array.Sort(this.foliageData, (f1, f2) =>
-                {
-                    float d1 = Vector3.DistanceSquared(f1.Position, eyePosition);
-                    float d2 = Vector3.DistanceSquared(f2.Position, eyePosition);
-
-                    var res = d1.CompareTo(d2);
-
-                    return transparent ? -res : res;
-                });
-
-                return this.foliageData;
+                return this.foliageData
+                    .OrderBy(obj => (transparent ? -1 : 1) * Vector3.DistanceSquared(obj.Position, eyePosition));
             }
         }
         /// <summary>
@@ -486,9 +477,9 @@ namespace Engine
                     bufferManager.WriteBuffer(
                         this.VertexBuffer.Slot,
                         this.VertexBuffer.Offset,
-                        data);
+                        data.ToArray());
 
-                    this.vertexDrawCount = data.Length;
+                    this.vertexDrawCount = data.Count();
                     this.Attached = true;
                     this.CurrentPatch = patch;
                 }
@@ -587,21 +578,28 @@ namespace Engine
         /// </summary>
         private BoundingSphere foliageSphere;
         /// <summary>
-        /// Foliage node size
-        /// </summary>
-        private readonly float foliageNodeSize;
-        /// <summary>
         /// Foliage quadtree
         /// </summary>
         private QuadTree foliageQuadtree;
         /// <summary>
         /// Last visible node collection
         /// </summary>
-        private QuadTreeNode[] visibleNodes;
+        private IEnumerable<QuadTreeNode> visibleNodes = new QuadTreeNode[] { };
         /// <summary>
         /// Counter of the elapsed seconds between the last node sorting
         /// </summary>
         private float lastSortingElapsedSeconds = 0;
+
+        /// <summary>
+        /// Gets the ground gardener descrition
+        /// </summary>
+        protected new GroundGardenerDescription Description
+        {
+            get
+            {
+                return base.Description as GroundGardenerDescription;
+            }
+        }
 
         /// <summary>
         /// Material
@@ -644,7 +642,6 @@ namespace Engine
             this.textureRandom = this.Game.ResourceManager.CreateResource(Guid.NewGuid(), 1024, -1, 1, 24);
 
             this.foliageSphere = new BoundingSphere(Vector3.Zero, description.VisibleRadius);
-            this.foliageNodeSize = description.NodeSize;
 
             //Material
             this.material = new MeshMaterial()
@@ -792,19 +789,18 @@ namespace Engine
         {
             this.windTime += context.GameTime.ElapsedSeconds * this.WindStrength;
 
-            var bbox = this.Scene.GetGroundBoundingBox();
+            var bbox = this.Description.PlantingArea ?? this.Scene.GetGroundBoundingBox();
             if (!bbox.HasValue)
             {
                 return;
             }
 
-            this.BuildQuadtree(bbox.Value);
+            this.BuildQuadtree(bbox.Value, this.Description.NodeSize);
 
             this.foliageSphere.Center = context.EyePosition;
 
-            this.visibleNodes = this.GetFoliageNodes(context.CameraVolume, this.foliageSphere).ToArray();
-
-            if (this.visibleNodes.Length > 0)
+            this.visibleNodes = this.GetFoliageNodes(context.CameraVolume, this.foliageSphere);
+            if (this.visibleNodes.Any())
             {
                 //Sort nodes by distance from camera position
                 this.SortVisibleNodes(context.GameTime, context.EyePosition, this.Description.AlphaEnabled);
@@ -824,17 +820,14 @@ namespace Engine
         /// Builds the quadtree from the specified bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
-        private void BuildQuadtree(BoundingBox bbox)
+        /// <param name="nodeSize">Maximum quadtree node size</param>
+        private void BuildQuadtree(BoundingBox bbox, float nodeSize)
         {
             if (this.foliageQuadtree == null)
             {
-                float x = bbox.GetX();
-                float z = bbox.GetZ();
+                float sizeParts = Math.Max(bbox.GetX(), bbox.GetZ()) / nodeSize;
 
-                float max = x < z ? z : x;
-
-                int levels = Math.Max(1, (int)(max / this.foliageNodeSize));
-                levels = Math.Min(6, levels);
+                int levels = Math.Max(1, (int)Math.Log(sizeParts, 2));
 
                 this.foliageQuadtree = new QuadTree(bbox, levels);
             }
@@ -857,16 +850,8 @@ namespace Engine
 
             lastSortingElapsedSeconds = 0f;
 
-            Array.Sort(this.visibleNodes, (f1, f2) =>
-            {
-                float d1 = Vector3.DistanceSquared(f1.Center, eyePosition);
-                float d2 = Vector3.DistanceSquared(f2.Center, eyePosition);
-
-                var res = d1.CompareTo(d2);
-
-                //If transparent, farthest first
-                return transparent ? -res : res;
-            });
+            this.visibleNodes = this.visibleNodes
+                .OrderBy(obj => (transparent ? -1 : 1) * Vector3.DistanceSquared(obj.Center, eyePosition));
         }
         /// <summary>
         /// Assign patches
@@ -961,7 +946,7 @@ namespace Engine
 
             var freeBuffers = this.foliageBuffers.FindAll(b =>
                 (b.CurrentPatch == null) ||
-                (b.CurrentPatch != null && !Array.Exists(this.visibleNodes, n => n == b.CurrentPatch.CurrentNode)));
+                (b.CurrentPatch != null && !this.visibleNodes.Any(n => n == b.CurrentPatch.CurrentNode)));
 
             if (freeBuffers.Count > 0)
             {
@@ -992,7 +977,7 @@ namespace Engine
             if (this.foliagePatches.Keys.Count > MaxFoliagePatches)
             {
                 var nodes = this.foliagePatches.Keys.ToArray();
-                var notVisible = Array.FindAll(nodes, n => !Array.Exists(this.visibleNodes, v => v == n));
+                var notVisible = Array.FindAll(nodes, n => !this.visibleNodes.Any(v => v == n));
                 if (notVisible.Length > 0)
                 {
                     Array.Sort(notVisible, (n1, n2) =>
@@ -1004,7 +989,7 @@ namespace Engine
                     });
 
                     int toDelete = this.foliagePatches.Keys.Count - MaxFoliagePatches;
-                    for (int i = 0; i < toDelete; i++)
+                    for (int i = 0; i < Math.Min(notVisible.Length, toDelete); i++)
                     {
                         this.foliagePatches.Remove(notVisible[i]);
                     }
@@ -1017,7 +1002,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public override void DrawShadows(DrawContextShadows context)
         {
-            if (this.visibleNodes?.Length > 0)
+            if (this.visibleNodes.Any())
             {
                 var graphics = this.Game.Graphics;
 
@@ -1061,13 +1046,19 @@ namespace Engine
         public override void Draw(DrawContext context)
         {
             var mode = context.DrawerMode;
-            var graphics = this.Game.Graphics;
             var draw =
                 (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
                 (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
 
-            if (draw && this.visibleNodes?.Length > 0)
+            if (!draw)
             {
+                return;
+            }
+
+            if (this.visibleNodes.Any())
+            {
+                var graphics = this.Game.Graphics;
+
                 graphics.SetBlendDefaultAlpha();
 
                 foreach (var item in this.visibleNodes)

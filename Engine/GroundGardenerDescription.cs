@@ -91,9 +91,9 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Node size
+        /// Quadtree maximum node size
         /// </summary>
-        public float NodeSize { get; set; } = 640f;
+        public float NodeSize { get; set; } = 128f;
         /// <summary>
         /// Material
         /// </summary>
@@ -127,6 +127,10 @@ namespace Engine
                 return channels.ToArray();
             }
         }
+        /// <summary>
+        /// Planting area
+        /// </summary>
+        public BoundingBox? PlantingArea { get; set; }
 
         /// <summary>
         /// Constructor

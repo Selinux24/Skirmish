@@ -397,6 +397,22 @@ namespace Engine
 
             return trnTriangles;
         }
+        /// <summary>
+        /// Reverses the normal of all the triangles of the list
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <returns>Returns a new triangle list</returns>
+        public static Triangle[] Reverse(Triangle[] triangles)
+        {
+            List<Triangle> res = new List<Triangle>();
+
+            for (int i = 0; i < triangles.Length; i++)
+            {
+                res.Add(triangles[i].ReverseNormal());
+            }
+
+            return res.ToArray();
+        }
 
         /// <summary>
         /// Constructor
@@ -564,6 +580,15 @@ namespace Engine
                 this.Point2,
                 this.Point3,
             };
+        }
+
+        /// <summary>
+        /// Gets a new triangle with reversed normal vector
+        /// </summary>
+        /// <returns>Returns a new revered normal triangle</returns>
+        public Triangle ReverseNormal()
+        {
+            return new Triangle(Point1, Point3, Point2);
         }
     }
 }
