@@ -160,7 +160,7 @@ namespace Engine
                 {
                     var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null);
 
-                    this.dictVB.Add(node.Id, bufferManager.Add("", data, false, 1));
+                    this.dictVB.Add(node.Id, bufferManager.Add("", data.ToArray(), false, 1));
                 }
             }
             /// <summary>

@@ -452,7 +452,7 @@ namespace Engine.Common
         /// <param name="vertices">Helpers</param>
         /// <param name="weights">Weight information</param>
         /// <returns>Returns generated vertices</returns>
-        public static IVertexData[] Convert(VertexTypes vertexType, IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
+        public static IEnumerable<IVertexData> Convert(VertexTypes vertexType, IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
         {
             List<IVertexData> vertexList = new List<IVertexData>();
 
@@ -561,7 +561,7 @@ namespace Engine.Common
         /// <param name="vertex">Vertex data</param>
         /// <param name="boneTransforms">Bone transforms list</param>
         /// <returns>Returns the weighted position</returns>
-        public static Vector3 ApplyWeight(IVertexData vertex, Matrix[] boneTransforms)
+        public static Vector3 ApplyWeight(IVertexData vertex, IEnumerable<Matrix> boneTransforms)
         {
             Vector3 position = vertex.HasChannel(VertexDataChannels.Position) ? vertex.GetChannelValue<Vector3>(VertexDataChannels.Position) : Vector3.Zero;
 
@@ -572,6 +572,7 @@ namespace Engine.Common
 
             byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : null;
             float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : null;
+            Matrix[] transforms = boneTransforms.ToArray();
 
             Vector3 t = Vector3.Zero;
 
@@ -581,7 +582,7 @@ namespace Engine.Common
                 if (weight > 0)
                 {
                     byte index = boneIndices[w];
-                    var boneTransform = boneTransforms != null ? boneTransforms[index] : Matrix.Identity;
+                    var boneTransform = transforms != null ? transforms[index] : Matrix.Identity;
 
                     Vector3.TransformCoordinate(ref position, ref boneTransform, out Vector3 p);
 

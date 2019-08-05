@@ -26,11 +26,11 @@ namespace Engine.Common
         /// <summary>
         /// Position list cache
         /// </summary>
-        private Vector3[] positionCache = null;
+        private IEnumerable<Vector3> positionCache = null;
         /// <summary>
         /// Triangle list cache
         /// </summary>
-        private Triangle[] triangleCache = null;
+        private IEnumerable<Triangle> triangleCache = null;
 
         /// <summary>
         /// Mesh id
@@ -193,7 +193,7 @@ namespace Engine.Common
                 this.positionCache = positionList.ToArray();
             }
 
-            return this.positionCache;
+            return this.positionCache?.ToArray();
         }
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -220,7 +220,7 @@ namespace Engine.Common
                 this.positionCache = positionList.ToArray();
             }
 
-            return this.positionCache;
+            return this.positionCache?.ToArray();
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -249,7 +249,7 @@ namespace Engine.Common
                 }
             }
 
-            return this.triangleCache;
+            return this.triangleCache?.ToArray();
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -279,7 +279,7 @@ namespace Engine.Common
                 }
             }
 
-            return this.triangleCache;
+            return this.triangleCache?.ToArray();
         }
     }
 }

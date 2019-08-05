@@ -660,7 +660,7 @@ namespace SceneTest
             var desc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Name = "Test Cube",
-                Primitives = cubeTris,
+                Primitives = cubeTris.ToArray(),
                 Color = Color.Red,
                 DepthEnabled = true,
             };

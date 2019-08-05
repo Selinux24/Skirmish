@@ -104,18 +104,20 @@ namespace Engine
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(Topology topology, Vector3[] vertices)
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, IEnumerable<Vector3> vertices)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
             if (topology == Topology.TriangleList)
             {
-                for (int i = 0; i < vertices.Length; i += 3)
+                var tmpVerts = vertices.ToArray();
+
+                for (int i = 0; i < tmpVerts.Length; i += 3)
                 {
                     Triangle tri = new Triangle(
-                        vertices[i + 0],
-                        vertices[i + 1],
-                        vertices[i + 2]);
+                        tmpVerts[i + 0],
+                        tmpVerts[i + 1],
+                        tmpVerts[i + 2]);
 
                     triangleList.Add(tri);
                 }
@@ -134,18 +136,21 @@ namespace Engine
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(Topology topology, Vector3[] vertices, uint[] indices)
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, IEnumerable<Vector3> vertices, IEnumerable<uint> indices)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
             if (topology == Topology.TriangleList)
             {
-                for (int i = 0; i < indices.Length; i += 3)
+                var tmpVerts = vertices.ToArray();
+                var tmpIndxs = indices.ToArray();
+
+                for (int i = 0; i < tmpVerts.Length; i += 3)
                 {
                     Triangle tri = new Triangle(
-                        vertices[indices[i + 0]],
-                        vertices[indices[i + 1]],
-                        vertices[indices[i + 2]]);
+                        tmpVerts[tmpIndxs[i + 0]],
+                        tmpVerts[tmpIndxs[i + 1]],
+                        tmpVerts[tmpIndxs[i + 2]]);
 
                     triangleList.Add(tri);
                 }
@@ -163,7 +168,7 @@ namespace Engine
         /// <param name="topology">Topology</param>
         /// <param name="bbox">AABB</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(Topology topology, BoundingBox bbox)
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingBox bbox)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
@@ -252,7 +257,7 @@ namespace Engine
         /// <param name="topology">Topology</param>
         /// <param name="obb">OBB</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(Topology topology, OrientedBoundingBox obb)
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, OrientedBoundingBox obb)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
@@ -310,7 +315,7 @@ namespace Engine
         /// <param name="cylinder">Cylinder</param>
         /// <param name="segments">Number of segments</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(Topology topology, BoundingCylinder cylinder, int segments)
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingCylinder cylinder, int segments)
         {
             List<Triangle> triangleList = new List<Triangle>();
 
@@ -351,7 +356,7 @@ namespace Engine
         /// <param name="topology">Topology</param>
         /// <param name="poly">Polygon</param>
         /// <returns>Returns the triangle list</returns>
-        public static Triangle[] ComputeTriangleList(Topology topology, Polygon poly)
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, Polygon poly)
         {
             if (topology == Topology.TriangleList)
             {
@@ -381,34 +386,39 @@ namespace Engine
         /// <param name="triangles">Triangle list</param>
         /// <param name="transform">Transformation</param>
         /// <returns>Returns new triangle list</returns>
-        public static Triangle[] Transform(Triangle[] triangles, Matrix transform)
+        public static IEnumerable<Triangle> Transform(IEnumerable<Triangle> triangles, Matrix transform)
         {
             if (triangles?.Any() == false)
             {
                 return triangles;
             }
 
-            Triangle[] trnTriangles = new Triangle[triangles.Length];
+            List<Triangle> res = new List<Triangle>(triangles.Count());
 
-            for (int i = 0; i < triangles.Length; i++)
+            foreach (var tri in triangles)
             {
-                trnTriangles[i] = Transform(triangles[i], transform);
+                res.Add(Transform(tri, transform));
             }
 
-            return trnTriangles;
+            return res;
         }
         /// <summary>
         /// Reverses the normal of all the triangles of the list
         /// </summary>
         /// <param name="triangles">Triangle list</param>
         /// <returns>Returns a new triangle list</returns>
-        public static Triangle[] Reverse(Triangle[] triangles)
+        public static IEnumerable<Triangle> Reverse(IEnumerable<Triangle> triangles)
         {
-            List<Triangle> res = new List<Triangle>();
-
-            for (int i = 0; i < triangles.Length; i++)
+            if (triangles?.Any() == false)
             {
-                res.Add(triangles[i].ReverseNormal());
+                return triangles;
+            }
+
+            List<Triangle> res = new List<Triangle>(triangles.Count());
+
+            foreach (var tri in triangles)
+            {
+                res.Add(tri.ReverseNormal());
             }
 
             return res.ToArray();

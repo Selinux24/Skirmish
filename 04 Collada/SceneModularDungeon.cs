@@ -1186,7 +1186,7 @@ namespace Collada
             {
                 var obstacle = item.Value;
 
-                Triangle[] obstacleTris = null;
+                IEnumerable<Triangle> obstacleTris = null;
 
                 if (obstacle is BoundingCylinder bc)
                 {
@@ -1201,7 +1201,7 @@ namespace Collada
                     obstacleTris = Triangle.ComputeTriangleList(Topology.TriangleList, obb);
                 }
 
-                if (obstacleTris?.Length > 0)
+                if (obstacleTris?.Any() == true)
                 {
                     this.obstacleDrawer.Instance.AddPrimitives(obstacleColor, obstacleTris);
                 }

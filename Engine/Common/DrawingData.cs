@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Common
 {
@@ -178,13 +179,13 @@ namespace Engine.Common
                             weights,
                             jointNames);
 
-                        if (vertexList?.Length > 0)
+                        if (vertexList.Any())
                         {
                             //Create and store the mesh into the drawing data
                             Mesh nMesh = new Mesh(
                                 meshName,
                                 geometry.Topology,
-                                vertexList,
+                                vertexList.ToArray(),
                                 indices);
 
                             drw.Meshes.Add(meshName, geometry.Material, nMesh);
@@ -667,8 +668,7 @@ namespace Engine.Common
                 foreach (var mesh in dictionary.Values)
                 {
                     var meshTriangles = mesh.GetTriangles(refresh);
-                    meshTriangles = Triangle.Transform(meshTriangles, transform);
-                    triangles.AddRange(meshTriangles);
+                    triangles.AddRange(Triangle.Transform(meshTriangles, transform));
                 }
             }
 
@@ -700,8 +700,7 @@ namespace Engine.Common
                 foreach (var mesh in dictionary.Values)
                 {
                     var meshTriangles = mesh.GetTriangles(boneTransforms, refresh);
-                    meshTriangles = Triangle.Transform(meshTriangles, transform);
-                    triangles.AddRange(meshTriangles);
+                    triangles.AddRange(Triangle.Transform(meshTriangles, transform));
                 }
             }
 
