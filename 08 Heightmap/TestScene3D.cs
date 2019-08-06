@@ -102,6 +102,8 @@ namespace Heightmap
         private readonly Dictionary<string, double> initDurationDict = new Dictionary<string, double>();
         private int initDurationIndex = 0;
 
+        private SceneObject<SpriteTexture> bufferDrawer = null;
+
         public TestScene3D(Game game)
             : base(game, SceneModes.ForwardLigthning)
         {
@@ -111,6 +113,8 @@ namespace Heightmap
         public override void Initialize()
         {
             base.Initialize();
+
+            InitializeDebug();
 
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
@@ -690,6 +694,24 @@ namespace Heightmap
 
             return Task.FromResult(sw.Elapsed.TotalSeconds);
         }
+        private void InitializeDebug()
+        {
+            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
+            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
+            int smLeft = this.Game.Form.RenderWidth - width;
+            int smTop = this.Game.Form.RenderHeight - height;
+
+            var desc = new SpriteTextureDescription()
+            {
+                Left = smLeft,
+                Top = smTop,
+                Width = width,
+                Height = height,
+                Channel = SpriteTextureChannels.NoAlpha,
+            };
+            this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
+            this.bufferDrawer.Visible = false;
+        }
 
         public override void Initialized()
         {
@@ -1174,6 +1196,7 @@ namespace Heightmap
             UpdateCamera(gameTime, shift);
             UpdatePlayer();
             UpdateInputDebugInfo(gameTime);
+            UpdateInputBuffers(shift);
 
             //Auto
             UpdateLights();
@@ -1416,6 +1439,33 @@ namespace Heightmap
                 initDurationIndex = initDurationIndex < 0 ? initDurationDict.Keys.Count - 1 : initDurationIndex;
                 initDurationIndex %= initDurationDict.Keys.Count;
                 SetLoadText(initDurationIndex);
+            }
+        }
+        private void UpdateInputBuffers(bool shift)
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.F8))
+            {
+                var shadowMap = this.Renderer.GetResource(SceneRendererResults.ShadowMapDirectional);
+                if (shadowMap != null)
+                {
+                    this.bufferDrawer.Instance.Texture = shadowMap;
+                    this.bufferDrawer.Instance.Channels = SpriteTextureChannels.Red;
+
+                    if (shift)
+                    {
+                        int tIndex = this.bufferDrawer.Instance.TextureIndex;
+
+                        tIndex++;
+                        tIndex %= 3;
+
+                        this.bufferDrawer.Instance.TextureIndex = tIndex;
+                    }
+                    else
+                    {
+                        this.bufferDrawer.Visible = !this.bufferDrawer.Visible;
+                        this.bufferDrawer.Instance.TextureIndex = 0;
+                    }
+                }
             }
         }
         private void UpdateDrawers()
