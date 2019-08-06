@@ -43,7 +43,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns new node</returns>
         public static PickingQuadTreeNode<T> CreatePartitions(
             PickingQuadTree<T> quadTree, PickingQuadTreeNode<T> parent,
-            BoundingBox bbox, T[] items,
+            BoundingBox bbox, IEnumerable<T> items,
             int maxDepth,
             int treeDepth)
         {
@@ -52,14 +52,16 @@ namespace Engine.Collections.Generic
             if (treeDepth <= maxDepth)
             {
                 //Find triangles into the bounding box
-                var nodeItems = Array.FindAll(items, t =>
-                {
-                    var tbox = BoundingBox.FromPoints(t.GetVertices());
+                var nodeItems = items
+                    .Where(t =>
+                    {
+                        var tbox = BoundingBox.FromPoints(t.GetVertices());
 
-                    return Intersection.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
-                });
+                        return Intersection.BoxContainsBox(ref bbox, ref tbox) != ContainmentType.Disjoint;
+                    })
+                    .ToList(); //Break the reference
 
-                if (nodeItems.Length > 0)
+                if (nodeItems.Any())
                 {
                     // Creates a new node
                     var node = new PickingQuadTreeNode<T>(quadTree, parent)
@@ -99,7 +101,7 @@ namespace Engine.Collections.Generic
         /// <param name="nextTreeDepth">Next depth</param>
         private static void InitializeNode(
             PickingQuadTree<T> quadTree, PickingQuadTreeNode<T> node,
-            BoundingBox bbox, T[] items,
+            BoundingBox bbox, IEnumerable<T> items,
             int maxDepth,
             int nextTreeDepth)
         {
@@ -226,7 +228,7 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Node items
         /// </summary>
-        internal T[] Items { get; set; }
+        internal IEnumerable<T> Items { get; set; }
 
         /// <summary>
         /// Constructor
@@ -485,7 +487,7 @@ namespace Engine.Collections.Generic
             item = default(T);
             distance = float.MaxValue;
 
-            if (this.Items?.Length > 0)
+            if (this.Items.Any())
             {
                 var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
                 if (inBox)
@@ -657,7 +659,7 @@ namespace Engine.Collections.Generic
             item = default(T);
             distance = float.MaxValue;
 
-            if (this.Items?.Length > 0)
+            if (this.Items.Any())
             {
                 var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
                 if (inBox)
@@ -790,7 +792,7 @@ namespace Engine.Collections.Generic
             items = null;
             distances = null;
 
-            if (this.Items?.Length > 0)
+            if (this.Items.Any())
             {
                 var inBox = Intersection.RayIntersectsBox(ray, this.BoundingBox, out float d);
                 if (inBox)
@@ -865,7 +867,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
         /// <returns>Returns bounding boxes of specified depth</returns>
-        public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
             List<BoundingBox> bboxes = new List<BoundingBox>();
 
@@ -924,7 +926,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <returns>Returns the leaf nodes contained into the volume</returns>
-        public PickingQuadTreeNode<T>[] GetNodesInVolume(ICullingVolume volume)
+        public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(ICullingVolume volume)
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
@@ -940,7 +942,7 @@ namespace Engine.Collections.Generic
                 for (int i = 0; i < this.Children.Length; i++)
                 {
                     var childNodes = this.Children[i].GetNodesInVolume(volume);
-                    if (childNodes.Length > 0)
+                    if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
                     }
@@ -953,7 +955,7 @@ namespace Engine.Collections.Generic
         /// Gets all leaf nodes
         /// </summary>
         /// <returns>Returns all leaf nodes</returns>
-        public PickingQuadTreeNode<T>[] GetLeafNodes()
+        public IEnumerable<PickingQuadTreeNode<T>> GetLeafNodes()
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
@@ -966,7 +968,7 @@ namespace Engine.Collections.Generic
                 for (int i = 0; i < this.Children.Length; i++)
                 {
                     var childNodes = this.Children[i].GetLeafNodes();
-                    if (childNodes.Length > 0)
+                    if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
                     }
@@ -1013,7 +1015,7 @@ namespace Engine.Collections.Generic
             if (this.Children == null)
             {
                 //Leaf node
-                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Items {2}", this.Id, this.Level, this.Items.Length);
+                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Items {2}", this.Id, this.Level, this.Items.Count());
             }
             else
             {

@@ -174,9 +174,9 @@ namespace Engine
 
             var leafNodes = this.groundPickingQuadtree.GetLeafNodes();
 
-            for (int i = 0; i < leafNodes.Length; i++)
+            foreach (var node in leafNodes)
             {
-                res.AddRange(leafNodes[i].Items);
+                res.AddRange(node.Items);
             }
 
             return res.ToArray();

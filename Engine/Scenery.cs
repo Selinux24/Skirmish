@@ -367,7 +367,7 @@ namespace Engine
         public override void DrawShadows(DrawContextShadows context)
         {
             var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
-            if (nodes?.Length > 0)
+            if (nodes?.Any() == true)
             {
                 var graphics = this.Game.Graphics;
 
@@ -397,7 +397,7 @@ namespace Engine
             if (mode.HasFlag(DrawerModes.OpaqueOnly))
             {
                 var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
-                if (nodes?.Length > 0)
+                if (nodes?.Any() == true)
                 {
                     var sceneryEffect = GetEffect(mode);
                     if (sceneryEffect == null)
@@ -443,7 +443,7 @@ namespace Engine
         /// <returns>Returns true if the object is outside of the frustum</returns>
         public override bool Cull(ICullingVolume volume, out float distance)
         {
-            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(volume);
+            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(volume).ToArray();
 
             return this.CullNodes(volume.Position, out distance);
         }
@@ -488,7 +488,7 @@ namespace Engine
         /// </summary>
         /// <param name="level">Level</param>
         /// <returns>Returns terrain bounding boxes</returns>
-        public BoundingBox[] GetBoundingBoxes(int level = 0)
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
         {
             return this.groundPickingQuadtree.GetBoundingBoxes(level);
         }

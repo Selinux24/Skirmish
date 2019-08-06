@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace Engine.Collections.Generic
@@ -24,7 +25,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="items">Partitioning items</param>
         /// <param name="maxDepth">Maximum depth</param>
-        public PickingQuadTree(T[] items, int maxDepth)
+        public PickingQuadTree(IEnumerable<T> items, int maxDepth)
         {
             var bbox = GeometryUtil.CreateBoundingBox(items);
 
@@ -154,7 +155,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="maxDepth">Maximum depth (if zero there is no limit)</param>
         /// <returns>Returns bounding boxes of specified depth</returns>
-        public BoundingBox[] GetBoundingBoxes(int maxDepth = 0)
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
             return this.Root.GetBoundingBoxes(maxDepth);
         }
@@ -163,7 +164,7 @@ namespace Engine.Collections.Generic
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <returns>Returns the nodes contained into the volume</returns>
-        public PickingQuadTreeNode<T>[] GetNodesInVolume(ICullingVolume volume)
+        public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(ICullingVolume volume)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -181,7 +182,7 @@ namespace Engine.Collections.Generic
         /// Gets all leaf nodes
         /// </summary>
         /// <returns>Returns all leaf nodel</returns>
-        public PickingQuadTreeNode<T>[] GetLeafNodes()
+        public IEnumerable<PickingQuadTreeNode<T>> GetLeafNodes()
         {
             return this.Root.GetLeafNodes();
         }
@@ -200,13 +201,13 @@ namespace Engine.Collections.Generic
                 var leafNodes = this.GetLeafNodes();
 
                 float dist = float.MaxValue;
-                for (int i = 0; i < leafNodes.Length; i++)
+                foreach (var leafNode in leafNodes)
                 {
-                    float d = Vector3.DistanceSquared(position, leafNodes[i].Center);
+                    float d = Vector3.DistanceSquared(position, leafNode.Center);
                     if (d < dist)
                     {
                         dist = d;
-                        node = leafNodes[i];
+                        node = leafNode;
                     }
                 }
             }

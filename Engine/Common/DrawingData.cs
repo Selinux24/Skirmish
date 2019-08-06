@@ -456,12 +456,12 @@ namespace Engine.Common
                 foreach (var mesh in dictionary.Values)
                 {
                     //Vertices
-                    mesh.VertexBuffer = bufferManager.Add(mesh.Name, mesh.Vertices, false, instances);
+                    mesh.VertexBuffer = bufferManager.Add(mesh.Name, mesh.Vertices.ToArray(), false, instances);
 
                     if (mesh.Indexed)
                     {
                         //Indices
-                        mesh.IndexBuffer = bufferManager.Add(mesh.Name, mesh.Indices, false);
+                        mesh.IndexBuffer = bufferManager.Add(mesh.Name, mesh.Indices.ToArray(), false);
                     }
                     else
                     {

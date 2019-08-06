@@ -814,9 +814,7 @@ namespace Engine
             }
 
             //Initialize quadtree for ray picking
-            this.groundPickingQuadtree = new PickingQuadTree<Triangle>(
-                tris.ToArray(),
-                description.Quadtree.MaximumDepth);
+            this.groundPickingQuadtree = new PickingQuadTree<Triangle>(tris, description.Quadtree.MaximumDepth);
 
             if (this.Map == null)
             {
@@ -1004,7 +1002,7 @@ namespace Engine
         /// </summary>
         /// <param name="level">Level</param>
         /// <returns>Returns terrain bounding boxes</returns>
-        public BoundingBox[] GetBoundingBoxes(int level = 0)
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
         {
             return this.groundPickingQuadtree.GetBoundingBoxes(level);
         }

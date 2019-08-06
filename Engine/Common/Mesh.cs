@@ -39,7 +39,7 @@ namespace Engine.Common
         /// <summary>
         /// Vertices cache
         /// </summary>
-        public IVertexData[] Vertices { get; set; } = null;
+        public IEnumerable<IVertexData> Vertices { get; set; }
         /// <summary>
         /// Indexed model
         /// </summary>
@@ -47,7 +47,7 @@ namespace Engine.Common
         /// <summary>
         /// Indices cache
         /// </summary>
-        public uint[] Indices { get; set; } = null;
+        public IEnumerable<uint> Indices { get; set; }
 
         /// <summary>
         /// Name
@@ -78,15 +78,15 @@ namespace Engine.Common
         /// <param name="topology">Topology</param>
         /// <param name="vertices">Vertices</param>
         /// <param name="indices">Indices</param>
-        public Mesh(string name, Topology topology, IVertexData[] vertices, uint[] indices)
+        public Mesh(string name, Topology topology, IEnumerable<IVertexData> vertices, IEnumerable<uint> indices)
         {
             this.Id = GetNextId();
             this.Name = name;
             this.Topology = topology;
-            this.Vertices = vertices;
+            this.Vertices = vertices ?? new IVertexData[] { };
             this.VertextType = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
-            this.Indices = indices;
-            this.Indexed = indices?.Length > 0;
+            this.Indices = indices ?? new uint[] { };
+            this.Indexed = indices?.Any() == true;
         }
         /// <summary>
         /// Destructor
@@ -234,7 +234,7 @@ namespace Engine.Common
                 var positions = this.GetPoints(refresh);
                 if (positions.Length > 0)
                 {
-                    if (this.Indices?.Length > 0)
+                    if (this.Indices.Any())
                     {
                         this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
                     }
@@ -264,7 +264,7 @@ namespace Engine.Common
                 var positions = this.GetPoints(boneTransforms, refresh);
                 if (positions.Length > 0)
                 {
-                    if (this.Indices?.Length > 0)
+                    if (this.Indices.Any())
                     {
                         this.triangleCache = Triangle.ComputeTriangleList(this.Topology, positions, this.Indices);
                     }
