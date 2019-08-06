@@ -823,8 +823,9 @@ namespace Engine
         /// <param name="nodeSize">Maximum quadtree node size</param>
         private void BuildQuadtree(BoundingBox bbox, float nodeSize)
         {
-            if (this.foliageQuadtree == null)
+            if (this.foliageQuadtree == null || this.foliageQuadtree.BoundingBox != bbox)
             {
+                //Creates the quadtree if not exists, or if the reference bounding box has changed
                 float sizeParts = Math.Max(bbox.GetX(), bbox.GetZ()) / nodeSize;
 
                 int levels = Math.Max(1, (int)Math.Log(sizeParts, 2));
