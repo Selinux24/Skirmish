@@ -246,7 +246,7 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
-                    count += this.DrawMesh(effect, drawingData, meshName, index, length);
+                    count += this.DrawMeshShadow(effect, drawingData, meshName, index, length);
                     count *= instanceCount;
                 }
             }
@@ -334,6 +334,47 @@ namespace Engine
                 this.Count;
         }
         /// <summary>
+        /// Draws a mesh with a shadow map drawer
+        /// </summary>
+        /// <param name="effect">Effect</param>
+        /// <param name="drawingData">Drawing data</param>
+        /// <param name="meshName">Mesh name</param>
+        /// <param name="index">Instance buffer index</param>
+        /// <param name="length">Instance buffer length</param>
+        /// <returns>Returns the number of drawn triangles</returns>
+        private int DrawMeshShadow(IShadowMapDrawer effect, DrawingData drawingData, string meshName, int index, int length)
+        {
+            int count = 0;
+
+            var graphics = this.Game.Graphics;
+
+            var meshDict = drawingData.Meshes[meshName];
+
+            foreach (string materialName in meshDict.Keys)
+            {
+                var mesh = meshDict[materialName];
+                var material = drawingData.Materials[materialName];
+
+                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+
+                effect.UpdatePerObject(0, material, 0);
+
+                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+
+                var technique = effect.GetTechnique(mesh.VertextType, true, material.Material.IsTransparent);
+                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+
+                for (int p = 0; p < technique.PassCount; p++)
+                {
+                    graphics.EffectPassApply(technique, p, 0);
+
+                    mesh.Draw(graphics, index, length);
+                }
+            }
+
+            return count;
+        }
+        /// <summary>
         /// Draws a mesh with a geometry drawer
         /// </summary>
         /// <param name="effect">Effect</param>
@@ -373,47 +414,6 @@ namespace Engine
                 this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
 
                 var technique = effect.GetTechnique(mesh.VertextType, true);
-                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
-
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    mesh.Draw(graphics, index, length);
-                }
-            }
-
-            return count;
-        }
-        /// <summary>
-        /// Draws a mesh with a shadow map drawer
-        /// </summary>
-        /// <param name="effect">Effect</param>
-        /// <param name="drawingData">Drawing data</param>
-        /// <param name="meshName">Mesh name</param>
-        /// <param name="index">Instance buffer index</param>
-        /// <param name="length">Instance buffer length</param>
-        /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(IShadowMapDrawer effect, DrawingData drawingData, string meshName, int index, int length)
-        {
-            int count = 0;
-
-            var graphics = this.Game.Graphics;
-
-            var meshDict = drawingData.Meshes[meshName];
-
-            foreach (string materialName in meshDict.Keys)
-            {
-                var mesh = meshDict[materialName];
-                var material = drawingData.Materials[materialName];
-
-                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
-
-                effect.UpdatePerObject(0, material, 0);
-
-                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
-
-                var technique = effect.GetTechnique(mesh.VertextType, true, material.Material.IsTransparent);
                 this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
 
                 for (int p = 0; p < technique.PassCount; p++)

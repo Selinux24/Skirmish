@@ -1018,6 +1018,8 @@ namespace Heightmap
                     this.helicopterI.Instance[i].AnimationController.Start();
                 }
             }
+
+
         }
         private void SetBradleyPosition()
         {
@@ -1197,6 +1199,7 @@ namespace Heightmap
             UpdatePlayer();
             UpdateInputDebugInfo(gameTime);
             UpdateInputBuffers(shift);
+            UpdateInputObjects();
 
             //Auto
             UpdateLights();
@@ -1206,11 +1209,12 @@ namespace Heightmap
             UpdateDrawers();
 
             this.help.Instance.Text = string.Format(
-                "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00};",
+                "{0}. Wind {1} {2:0.000} - Next {3:0.000}; {4} Light brightness: {5:0.00}; CamPos {6}; CamDir {7};",
                 this.Renderer,
                 this.windDirection, this.windStrength, this.windNextStrength,
                 this.TimeOfDay,
-                this.Lights.KeyLight.Brightness);
+                this.Lights.KeyLight.Brightness,
+                this.Camera.Position, this.Camera.Direction);
 
             this.help2.Instance.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}; PlantingTaks: {6:000}",
                 Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
@@ -1335,6 +1339,31 @@ namespace Heightmap
             this.UpdateInputTimeOfDay(gameTime);
 
             this.UpdateInputLoadText();
+        }
+        private void UpdateInputObjects()
+        {
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad1))
+            {
+                this.helicopterI.Visible = !this.helicopterI.Visible;
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad2))
+            {
+                this.trees.Visible = !this.trees.Visible;
+                this.trees2.Visible = !this.trees2.Visible;
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad3))
+            {
+                this.rocks.Visible = !this.rocks.Visible;
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad4))
+            {
+                this.containers.Visible = !this.containers.Visible;
+            }
+            if (this.Game.Input.KeyJustReleased(Keys.NumPad5))
+            {
+                this.bradleyI.Visible = !this.bradleyI.Visible;
+            }
+
         }
         private void UpdateInputWind()
         {

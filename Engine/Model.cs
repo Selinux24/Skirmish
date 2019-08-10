@@ -217,7 +217,6 @@ namespace Engine
             {
                 return;
             }
-            int count = 0;
 
             var effect = context.ShadowMap.GetEffect();
             if (effect == null)
@@ -225,37 +224,10 @@ namespace Engine
                 return;
             }
 
-            var graphics = this.Game.Graphics;
-
+            int count = 0;
             foreach (string meshName in this.DrawingData.Meshes.Keys)
             {
-                var meshDict = this.DrawingData.Meshes[meshName];
-
-                var localTransform = this.GetTransformByName(meshName);
-
-                effect.UpdatePerFrame(localTransform, context);
-
-                foreach (string materialName in meshDict.Keys)
-                {
-                    var mesh = meshDict[materialName];
-                    var material = this.DrawingData.Materials[materialName];
-
-                    effect.UpdatePerObject(this.AnimationOffset, material, this.TextureIndex);
-
-                    this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
-
-                    var technique = effect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
-                    this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
-
-                    count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
-
-                    for (int p = 0; p < technique.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(technique, p, 0);
-
-                        mesh.Draw(graphics);
-                    }
-                }
+                count += DrawMeshShadow(context, effect, meshName);
             }
         }
         /// <summary>
@@ -283,6 +255,49 @@ namespace Engine
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += count;
+        }
+        /// <summary>
+        /// Draws a mesh shadow
+        /// </summary>
+        /// <param name="context">Context</param>
+        /// <param name="effect">Effect</param>
+        /// <param name="meshName">Mesh name</param>
+        /// <returns>Returns the number of drawn triangles</returns>
+        private int DrawMeshShadow(DrawContextShadows context, IShadowMapDrawer effect, string meshName)
+        {
+            int count = 0;
+
+            var graphics = this.Game.Graphics;
+
+            var meshDict = this.DrawingData.Meshes[meshName];
+
+            var localTransform = this.GetTransformByName(meshName);
+
+            effect.UpdatePerFrame(localTransform, context);
+
+            foreach (string materialName in meshDict.Keys)
+            {
+                var mesh = meshDict[materialName];
+                var material = this.DrawingData.Materials[materialName];
+
+                effect.UpdatePerObject(this.AnimationOffset, material, this.TextureIndex);
+
+                this.BufferManager.SetIndexBuffer(mesh.IndexBuffer.Slot);
+
+                var technique = effect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
+                this.BufferManager.SetInputAssembler(technique, mesh.VertexBuffer.Slot, mesh.Topology);
+
+                count += mesh.IndexBuffer.Count > 0 ? mesh.IndexBuffer.Count / 3 : mesh.VertexBuffer.Count / 3;
+
+                for (int p = 0; p < technique.PassCount; p++)
+                {
+                    graphics.EffectPassApply(technique, p, 0);
+
+                    mesh.Draw(graphics);
+                }
+            }
+
+            return count;
         }
         /// <summary>
         /// Draws a mesh

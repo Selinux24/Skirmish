@@ -18,7 +18,6 @@ namespace Engine
         private readonly int shadowMapSize;
         private readonly float cascadeTotalRange;
         private readonly float[] cascadeRanges;
-        private bool antiFlickerOn = true;
 
         private float shadowBoundRadius = 0;
         private readonly Vector3[] cascadeBoundCenter;
@@ -31,6 +30,11 @@ namespace Engine
         private Vector4 toCascadeOffsetX;
         private Vector4 toCascadeOffsetY;
         private Vector4 toCascadeScale;
+
+        /// <summary>
+        /// Gets or sets the anti-flicker flag
+        /// </summary>
+        public bool AntiFlicker { get; set; } = false;
 
         /// <summary>
         /// Extract the frustum corners for the given near and far values
@@ -130,10 +134,6 @@ namespace Engine
             Vector3 up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3.Left));
             Matrix shadowView = Matrix.LookAtLH(lightPosition, lookAt, up);
 
-            this.toCascadeOffsetX = Vector4.Zero;
-            this.toCascadeOffsetY = Vector4.Zero;
-            this.toCascadeScale = Vector4.Zero;
-
             // Get the bounds for the shadow space
             ExtractFrustumBoundSphere(
                 camera,
@@ -141,7 +141,7 @@ namespace Engine
                 cascadeRanges.Last(),
                 out BoundingSphere boundingSphere);
 
-            // Expend the radius to compensate for numerical errors
+            // Expand the radius to compensate for numerical errors
             shadowBoundRadius = Math.Max(shadowBoundRadius, boundingSphere.Radius);
 
             // Find the projection matrix
@@ -154,27 +154,35 @@ namespace Engine
             // The combined transformation from world to shadow space
             worldToShadowSpace = shadowView * shadowProj;
 
+            toCascadeOffsetX = Vector4.Zero;
+            toCascadeOffsetY = Vector4.Zero;
+            toCascadeScale = Vector4.Zero;
+
+            if (this.AntiFlicker)
+            {
+                UpdateAntiFlicker(camera, shadowView);
+            }
+            else
+            {
+                UpdateSimple(camera);
+            }
+        }
+        /// <summary>
+        /// Updates the matrix set with anti flicker
+        /// </summary>
+        /// <param name="camera">Camera</param>
+        /// <param name="shadowView">Shadow view</param>
+        private void UpdateAntiFlicker(Camera camera, Matrix shadowView)
+        {
             Matrix shadowViewInv = Matrix.Invert(shadowView);
 
             // For each cascade find the transformation from shadow to cascade space
             for (int cascadeIdx = 0; cascadeIdx < TotalCascades; cascadeIdx++)
             {
-                Matrix cascadeTrans;
-                Matrix cascadeScale;
-                if (antiFlickerOn)
-                {
-                    this.UpdateCascadesAntiFlicker(
-                        camera, shadowView, shadowViewInv,
-                        cascadeIdx,
-                        out cascadeTrans, out cascadeScale);
-                }
-                else
-                {
-                    this.UpdateCascadesSimple(
-                        camera,
-                        cascadeIdx,
-                        out cascadeTrans, out cascadeScale);
-                }
+                this.UpdateCascadesAntiFlicker(
+                    camera, shadowView, shadowViewInv,
+                    cascadeIdx,
+                    out var cascadeTrans, out var cascadeScale);
 
                 // Combine the matrices to get the transformation from world to cascade space
                 worldToCascadeProj[cascadeIdx] = worldToShadowSpace * cascadeTrans * cascadeScale;
@@ -189,10 +197,13 @@ namespace Engine
         /// <param name="cascadeIdx">Cascade index</param>
         /// <param name="cascadeTrans">Resulting cascade transform</param>
         /// <param name="cascadeScale">Resulting cascade scale</param>
+        /// <remarks>
+        /// To avoid anti flickering we need to make the transformation invariant to camera rotation and translation.
+        /// By encapsulating the cascade frustum with a sphere we achive the rotation invariance.
+        /// </remarks>
         private void UpdateCascadesAntiFlicker(Camera camera, Matrix shadowView, Matrix shadowViewInv, int cascadeIdx, out Matrix cascadeTrans, out Matrix cascadeScale)
         {
-            // To avoid anti flickering we need to make the transformation invariant to camera rotation and translation
-            // By encapsulating the cascade frustum with a sphere we achive the rotation invariance
+            // Extract the bounding box
             ExtractFrustumBoundSphere(
                 camera,
                 cascadeRanges[cascadeIdx],
@@ -224,15 +235,34 @@ namespace Engine
             cascadeScale = Matrix.Scaling(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
         }
         /// <summary>
+        /// Updates the matrix set, the cheaper option
+        /// </summary>
+        /// <param name="camera">Camera</param>
+        private void UpdateSimple(Camera camera)
+        {
+            for (int cascadeIdx = 0; cascadeIdx < TotalCascades; cascadeIdx++)
+            {
+                this.UpdateCascadesSimple(
+                    camera,
+                    cascadeIdx,
+                    out var cascadeTrans, out var cascadeScale);
+
+                // Combine the matrices to get the transformation from world to cascade space
+                worldToCascadeProj[cascadeIdx] = worldToShadowSpace * cascadeTrans * cascadeScale;
+            }
+        }
+        /// <summary>
         /// Updates the matrix set with antiflikering deactivated
         /// </summary>
         /// <param name="camera">Camera</param>
         /// <param name="cascadeIdx">Cascade index</param>
         /// <param name="cascadeTrans">Resulting cascade transform</param>
         /// <param name="cascadeScale">Resulting cascade scale</param>
+        /// <remarks>
+        /// Since we don't care about flickering we can make the cascade fit tightly around the frustum
+        /// </remarks>
         private void UpdateCascadesSimple(Camera camera, int cascadeIdx, out Matrix cascadeTrans, out Matrix cascadeScale)
         {
-            // Since we don't care about flickering we can make the cascade fit tightly around the frustum
             // Extract the bounding box
             ExtractFrustumPoints(
                 camera,
@@ -240,10 +270,10 @@ namespace Engine
                 cascadeRanges[cascadeIdx + 1],
                 out Vector3[] frustumPoints);
 
-            // Transform to shadow space and extract the minimum andn maximum
-            Vector3 min = new Vector3(float.MaxValue, float.MaxValue, float.MaxValue);
-            Vector3 max = new Vector3(-float.MaxValue, -float.MaxValue, -float.MaxValue);
-            for (int i = 0; i < 8; i++)
+            // Transform to shadow space and extract the minimum and maximum
+            Vector3 min = new Vector3(float.MaxValue);
+            Vector3 max = new Vector3(float.MinValue);
+            for (int i = 0; i < frustumPoints.Length; i++)
             {
                 Vector3 pointInShadowSpace = Vector3.TransformCoordinate(frustumPoints[i], worldToShadowSpace);
 
@@ -306,14 +336,6 @@ namespace Engine
             }
 
             return needUpdate;
-        }
-        /// <summary>
-        /// Change the antiflicker state
-        /// </summary>
-        /// <param name="bIsOn">State</param>
-        public void SetAntiFlicker(bool bIsOn)
-        {
-            antiFlickerOn = bIsOn;
         }
         /// <summary>
         /// Gets the world to shadow space matrix
