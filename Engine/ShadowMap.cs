@@ -40,6 +40,10 @@ namespace Engine
         /// From light view projection
         /// </summary>
         public Matrix[] FromLightViewProjectionArray { get; set; }
+        /// <summary>
+        /// Gets or sets the high resolution map flag (if available)
+        /// </summary>
+        public virtual bool HighResolutionMap { get; set; }
 
         /// <summary>
         /// Constructor

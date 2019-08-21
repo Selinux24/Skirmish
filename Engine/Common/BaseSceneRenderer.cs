@@ -26,7 +26,12 @@ namespace Engine.Common
         /// <summary>
         /// Shadow map sampling distances
         /// </summary>
-        public static float[] CascadeShadowMapsDistances { get; set; } = new[] { 10f, 25f, 50f };
+        public static float[] CascadeShadowMapsDistances { get; set; } = new[] 
+        {
+            GameEnvironment.ShadowDistanceHigh,
+            GameEnvironment.ShadowDistanceMedium,
+            GameEnvironment.ShadowDistanceLow,
+        };
 
         /// <summary>
         /// Cubic shadow map size
@@ -158,17 +163,26 @@ namespace Engine.Common
             this.ShadowMapperDirectional = new ShadowMapCascade(game,
                 DirectionalShadowMapSize,
                 MaxDirectionalCascadeShadowMaps, MaxDirectionalShadowMaps,
-                CascadeShadowMapsDistances);
+                CascadeShadowMapsDistances)
+            {
+                HighResolutionMap = true
+            };
 
             // Point shadow mapper
             this.ShadowMapperPoint = new ShadowMapPoint(game,
                 CubicShadowMapSize, CubicShadowMapSize,
-                MaxCubicShadows);
+                MaxCubicShadows)
+            {
+                HighResolutionMap = true
+            };
 
             // Spot shadow mapper
             this.ShadowMapperSpot = new ShadowMapSpot(game,
                 SpotShadowMapSize, SpotShadowMapSize,
-                MaxSpotShadows);
+                MaxSpotShadows)
+            {
+                HighResolutionMap = true
+            };
 
             this.cullManager = new SceneCullManager();
 

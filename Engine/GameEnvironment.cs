@@ -74,5 +74,10 @@ namespace Engine
                 return LevelOfDetail.None;
             }
         }
+
+
+        public static float ShadowDistanceHigh { get; set; } = 10f;
+        public static float ShadowDistanceMedium { get; set; } = 25f;
+        public static float ShadowDistanceLow { get; set; } = 50f;
     }
 }

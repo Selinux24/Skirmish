@@ -27,6 +27,10 @@ namespace Engine
         /// From light view projection
         /// </summary>
         Matrix[] FromLightViewProjectionArray { get; set; }
+        /// <summary>
+        /// Gets or sets the high resolution map flag (if available)
+        /// </summary>
+        bool HighResolutionMap { get; set; }
 
         /// <summary>
         /// Updates the from light view projection

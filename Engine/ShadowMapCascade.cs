@@ -13,6 +13,27 @@ namespace Engine
         /// Cascade matrix set
         /// </summary>
         protected ShadowMapCascadeSet MatrixSet { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the high resolution map flag
+        /// </summary>
+        /// <remarks>This property is directly mapped to the AntiFlicker matrix set property</remarks>
+        public override bool HighResolutionMap
+        {
+            get
+            {
+                return base.HighResolutionMap;
+            }
+            set
+            {
+                base.HighResolutionMap = value;
+
+                if (MatrixSet != null)
+                {
+                    MatrixSet.AntiFlicker = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor

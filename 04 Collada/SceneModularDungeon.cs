@@ -617,11 +617,12 @@ namespace Collada
             {
                 Task.Run(() => { this.UpdateRatController(gameTime); }),
                 Task.Run(() => { this.UpdateEntities(); }),
-                Task.Run(() => { this.UpdateSelection(); }),
                 Task.Run(() => { this.UpdateWind(); })
             };
 
             Task.WaitAll(asyncTasks);
+
+            this.UpdateSelection();
 
             this.fps.Instance.Text = this.Game.RuntimeText;
             this.info.Instance.Text = string.Format("{0}", this.GetRenderMode());
