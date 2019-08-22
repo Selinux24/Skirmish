@@ -85,7 +85,12 @@ namespace Engine
         {
             get
             {
-                return this.localTransform * (this.Parent?.FinalTransform ?? Matrix.Identity);
+                if (this.Parent != null)
+                {
+                    return this.localTransform * this.Parent.FinalTransform;
+                }
+
+                return this.localTransform;
             }
         }
         /// <summary>

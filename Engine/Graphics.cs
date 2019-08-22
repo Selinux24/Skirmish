@@ -284,8 +284,8 @@ namespace Engine
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="refreshRate">Refresh date</param>
-        /// <returns>Returns found mode description</returns>
-        private static ModeDescription1 FindModeDescription(Device3 device, Format format, int width, int height, int refreshRate)
+        /// <param name="mode">Returns found mode description</param>
+        private static void FindModeDescription(Device3 device, Format format, int width, int height, int refreshRate, out ModeDescription1 mode)
         {
 #if DEBUG
             using (var tmpFactory = new Factory2(true))
@@ -300,9 +300,6 @@ namespace Engine
                     using (var tmpOutput = adapter.GetOutput(0))
                     using (var output = tmpOutput.QueryInterface<Output6>())
                     {
-                        ModeDescription1 result = new ModeDescription1();
-                        bool found = false;
-
                         try
                         {
                             var displayModeList = output.GetDisplayModeList1(
@@ -336,50 +333,36 @@ namespace Engine
                                     });
                                 }
 
-                                result = displayModeList[0];
-                                found = true;
+                                mode = displayModeList[0];
+
+                                return;
                             }
+
+                            ModeDescription1 desc = new ModeDescription1()
+                            {
+                                Width = width,
+                                Height = height,
+                                Format = format,
+                            };
+                            output.FindClosestMatchingMode1(
+                                ref desc,
+                                out mode,
+                                device);
+
+                            mode.Width = width;
+                            mode.Height = height;
+
+                            return;
                         }
                         catch
                         {
                             // Display mode not found
                         }
-
-                        if (!found)
-                        {
-                            try
-                            {
-                                ModeDescription1 desc = new ModeDescription1()
-                                {
-                                    Width = width,
-                                    Height = height,
-                                    Format = format,
-                                };
-                                output.FindClosestMatchingMode1(
-                                    ref desc,
-                                    out result,
-                                    device);
-
-                                result.Width = width;
-                                result.Height = height;
-
-                                found = true;
-                            }
-                            catch
-                            {
-                                // Display mode not found
-                            }
-                        }
-
-                        if (found)
-                        {
-                            return result;
-                        }
                     }
                 }
             }
 
-            return new ModeDescription1()
+            mode = new ModeDescription1()
             {
                 Width = width,
                 Height = height,
@@ -423,12 +406,13 @@ namespace Engine
         /// <param name="multiSampling">Enable multisampling</param>
         public Graphics(EngineForm form, bool vsyncEnabled = false, int refreshRate = 0, int multiSampling = 0)
         {
-            var displayMode = FindModeDescription(
+            FindModeDescription(
                 this.device,
                 this.BufferFormat,
                 form.RenderWidth,
                 form.RenderHeight,
-                refreshRate);
+                refreshRate,
+                out var displayMode);
 
             this.vsyncEnabled = vsyncEnabled && displayMode.RefreshRate != new Rational(0, 1);
 
