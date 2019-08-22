@@ -87,7 +87,8 @@ namespace Engine.Common
             IEnumerable<ModelContent> geo;
             if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
             {
-                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename));
+                string contentFile = Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename);
+                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(contentFile);
                 var loader = contentDesc.GetLoader();
                 geo = loader.Load(description.Content.ContentFolder, contentDesc);
             }

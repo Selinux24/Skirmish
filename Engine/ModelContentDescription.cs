@@ -18,6 +18,13 @@ namespace Engine
         [XmlElement("model_filename")]
         public string ModelFileName { get; set; } = null;
         /// <summary>
+        /// Meshes by level of detail in the file
+        /// </summary>
+        /// <remarks>For model files containing several levels of details for the same model</remarks>
+        [XmlArray("LOD_meshes")]
+        [XmlArrayItem("mesh", typeof(string))]
+        public string[] LODMeshes { get; set; } = null;
+        /// <summary>
         /// Volume meshes collection
         /// </summary>
         [XmlArray("volumes")]

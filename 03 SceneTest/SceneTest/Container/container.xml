@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModelContentDescription>
   <model_filename>container.dae</model_filename>
+  <LOD_meshes>
+    <mesh>Container.H</mesh>
+    <mesh>Container.M</mesh>
+    <mesh>Container.L</mesh>
+  </LOD_meshes>
+  <use_controller_transform>false</use_controller_transform>
 </ModelContentDescription>

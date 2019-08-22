@@ -40,27 +40,13 @@ namespace Engine.Content
                 transform = Matrix.Scaling(content.Scale);
             }
 
-            return Load(
-                contentFolder,
-                content.ModelFileName,
-                transform,
-                content.ArmatureName,
-                content.UseControllerTransform,
-                content.VolumeMeshes,
-                content.Animation);
-        }
-        /// <summary>
-        /// Load a collada model
-        /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="fileName">Collada model</param>
-        /// <param name="volumes">Volume mesh names</param>
-        /// <param name="animation">Animation description</param>
-        /// <param name="useControllerTransform">Use controller transform</param>
-        /// <param name="transform">Transform</param>
-        /// <returns>Returns the loaded contents</returns>
-        private IEnumerable<ModelContent> Load(string contentFolder, string fileName, Matrix transform, string armatureName, bool useControllerTransform, string[] volumes, AnimationDescription animation)
-        {
+            string fileName = content.ModelFileName;
+            string armatureName = content.ArmatureName;
+            string[] volumes = content.VolumeMeshes;
+            string[] meshesByLOD = content.LODMeshes;
+            var animation = content.Animation;
+            bool useControllerTransform = content.UseControllerTransform;
+
             var modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList?.Any() == true)
             {
@@ -70,7 +56,7 @@ namespace Engine.Content
                 {
                     var dae = Collada.Load(model);
 
-                    var modelContent = new ModelContent();
+                    ModelContent modelContent = new ModelContent();
 
                     //Scene Objects
                     ProcessLibraryLights(dae, modelContent);
@@ -85,14 +71,12 @@ namespace Engine.Content
                     //Animations
                     ProcessLibraryAnimations(dae, modelContent, animation);
 
-                    //Filter by armature name
-                    if (!string.IsNullOrWhiteSpace(armatureName) &&
-                        modelContent.FilterByArmature(armatureName, out var armatureModel))
-                    {
-                        modelContent = armatureModel;
-                    }
+                    //Filter the resulting model content
+                    res.AddRange(FilterGeometry(modelContent, armatureName, meshesByLOD));
 
-                    res.Add(modelContent);
+                    //Release the stream
+                    model.Flush();
+                    model.Dispose();
                 }
 
                 return res.ToArray();
@@ -101,6 +85,44 @@ namespace Engine.Content
             {
                 throw new EngineException(string.Format("Model not found: {0}", fileName));
             }
+        }
+        /// <summary>
+        /// Filters the loaded geometry by armature name and level of detail meshes (if any)
+        /// </summary>
+        /// <param name="modelContent">Model content to filter</param>
+        /// <param name="armatureName">Armature name</param>
+        /// <param name="meshesByLOD">Level of detail meshes</param>
+        /// <returns>Returns the filtered model content parts</returns>
+        private static IEnumerable<ModelContent> FilterGeometry(ModelContent modelContent, string armatureName, string[] meshesByLOD)
+        {
+            bool filterByArmature = !string.IsNullOrWhiteSpace(armatureName);
+            bool filterByMeshes = meshesByLOD?.Length > 0;
+
+            if (!filterByArmature && !filterByMeshes)
+            {
+                //Nothing to filter
+                return new[] { modelContent };
+            }
+
+            List<ModelContent> res = new List<ModelContent>();
+
+            //Filter by armature name
+            if (filterByArmature &&
+                modelContent.FilterByArmature(armatureName, out var armatureModel))
+            {
+                res.Add(armatureModel);
+            }
+
+            //Filter by level of detail meshes
+            if (filterByMeshes)
+            {
+                for (int i = 0; i < meshesByLOD.Length; i++)
+                {
+                    res.Add(modelContent.Filter(meshesByLOD[i].Replace('.', '_')));
+                }
+            }
+
+            return res;
         }
 
         #region Dictionary loaders
