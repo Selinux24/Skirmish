@@ -266,6 +266,27 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Creates a new UV map from parameters
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="texU">Texture U</param>
+        /// <param name="texV">Texture V</param>
+        /// <param name="texWidth">Texture total width</param>
+        /// <param name="texHeight">Texture total height</param>
+        /// <returns>Returns the new UP map for the sprite</returns>
+        public static Vector4 CreateUVMap(float width, float height, float texU, float texV, float texWidth, float texHeight)
+        {
+            //Texture map
+            float u0 = texWidth > 0 ? (texU) / texWidth : 0;
+            float v0 = texHeight > 0 ? (texV) / texHeight : 0;
+            float u1 = texWidth > 0 ? (texU + width) / texWidth : 1;
+            float v1 = texHeight > 0 ? (texV + height) / texHeight : 1;
+
+            return new Vector4(u0, v0, u1, v1);
+        }
+
+        /// <summary>
         /// Creates a line list
         /// </summary>
         /// <param name="lines">Line list</param>
@@ -410,7 +431,7 @@ namespace Engine.Common
         /// <param name="indices">Result indices</param>
         public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out Vector3[] vertices, out uint[] indices)
         {
-            CreateSprite(position, width, height, formWidth, formHeight, 0, 0, 0, out vertices, out Vector2[] uvs, out indices);
+            CreateSprite(position, width, height, formWidth, formHeight, new Vector4(0, 0, 1, 1), out vertices, out Vector2[] uvs, out indices);
         }
         /// <summary>
         /// Creates a sprite of VertexPositionTexture VertexData
@@ -425,59 +446,7 @@ namespace Engine.Common
         /// <param name="uvs">Result texture uvs</param>
         public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
         {
-            CreateSprite(position, width, height, formWidth, formHeight, 0, 0, 0, out vertices, out uvs, out indices);
-        }
-        /// <summary>
-        /// Creates a sprite of VertexPositionTexture VertexData
-        /// </summary>
-        /// <param name="position">Sprite position</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        /// <param name="formWidth">Render form width</param>
-        /// <param name="formHeight">Render form height</param>
-        /// <param name="texU">Texture U</param>
-        /// <param name="texV">Texture V</param>
-        /// <param name="texSize">Texture total size</param>
-        /// <param name="vertices">Result vertices</param>
-        /// <param name="indices">Result indices</param>
-        /// <param name="uvs">Result texture uvs</param>
-        public static void CreateSprite(Vector2 position, float width, float height, float formWidth, float formHeight, float texU, float texV, float texSize, out Vector3[] vertices, out Vector2[] uvs, out uint[] indices)
-        {
-            vertices = new Vector3[4];
-            uvs = new Vector2[4];
-
-            float left = (formWidth * 0.5f * -1f) + position.X;
-            float right = left + width;
-            float top = (formHeight * 0.5f) - position.Y;
-            float bottom = top - height;
-
-            //Texture map
-            float u0 = texSize > 0 ? (texU) / texSize : 0;
-            float v0 = texSize > 0 ? (texV) / texSize : 0;
-            float u1 = texSize > 0 ? (texU + width) / texSize : 1;
-            float v1 = texSize > 0 ? (texV + height) / texSize : 1;
-
-            vertices[0] = new Vector3(left, top, 0.0f);
-            uvs[0] = new Vector2(u0, v0);
-
-            vertices[1] = new Vector3(right, bottom, 0.0f);
-            uvs[1] = new Vector2(u1, v1);
-
-            vertices[2] = new Vector3(left, bottom, 0.0f);
-            uvs[2] = new Vector2(u0, v1);
-
-            vertices[3] = new Vector3(right, top, 0.0f);
-            uvs[3] = new Vector2(u1, v0);
-
-            indices = new uint[6];
-
-            indices[0] = 0;
-            indices[1] = 1;
-            indices[2] = 2;
-
-            indices[3] = 0;
-            indices[4] = 3;
-            indices[5] = 1;
+            CreateSprite(position, width, height, formWidth, formHeight, new Vector4(0, 0, 1, 1), out vertices, out uvs, out indices);
         }
         /// <summary>
         /// Creates a sprite of VertexPositionTexture VertexData

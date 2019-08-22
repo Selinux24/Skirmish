@@ -1269,12 +1269,13 @@ namespace Engine
         /// Creates a resource view from a texture description
         /// </summary>
         /// <param name="description">Texture description</param>
+        /// <param name="tryMipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ShaderResourceView1 CreateResource(TextureData description)
+        private ShaderResourceView1 CreateResource(TextureData description, bool tryMipAutogen)
         {
             bool mipAutogen = false;
 
-            if (description.MipMaps == 1)
+            if (tryMipAutogen && description.MipMaps == 1)
             {
                 var fmtSupport = this.device.CheckFormatSupport(description.Format);
                 mipAutogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
@@ -1282,9 +1283,9 @@ namespace Engine
 
             if (mipAutogen)
             {
-                Texture2D1 texture = null;
                 ShaderResourceViewDescription1 desc;
 
+                Texture2D1 texture;
                 if (description.IsCubeMap)
                 {
                     texture = this.CreateTexture2DCube(description.Width, description.Height, description.Format, 1, mipAutogen);
@@ -1372,15 +1373,16 @@ namespace Engine
         /// Creates a resource view from a texture description list
         /// </summary>
         /// <param name="descriptions">Texture description list</param>
+        /// <param name="tryMipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the new shader resource view</returns>
-        private ShaderResourceView1 CreateResource(IEnumerable<TextureData> descriptions)
+        private ShaderResourceView1 CreateResource(IEnumerable<TextureData> descriptions, bool tryMipAutogen)
         {
             var description = descriptions.First();
             int count = descriptions.Count();
 
             bool mipAutogen = false;
 
-            if (description.MipMaps == 1)
+            if (tryMipAutogen && description.MipMaps == 1)
             {
                 var fmtSupport = this.device.CheckFormatSupport(description.Format);
                 mipAutogen = fmtSupport.HasFlag(FormatSupport.MipAutogen);
@@ -1608,8 +1610,9 @@ namespace Engine
         /// Loads a texture from memory in the graphics device
         /// </summary>
         /// <param name="buffer">Data buffer</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTexture(byte[] buffer)
+        internal EngineShaderResourceView LoadTexture(byte[] buffer, bool mipAutogen)
         {
             try
             {
@@ -1617,7 +1620,7 @@ namespace Engine
 
                 using (var resource = Helper.Attempt(TextureData.ReadTexture, buffer, 5))
                 {
-                    return new EngineShaderResourceView(CreateResource(resource));
+                    return new EngineShaderResourceView(CreateResource(resource, mipAutogen));
                 }
             }
             catch (Exception ex)
@@ -1629,8 +1632,9 @@ namespace Engine
         /// Loads a texture from file in the graphics device
         /// </summary>
         /// <param name="filename">Path to file</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTexture(string filename)
+        internal EngineShaderResourceView LoadTexture(string filename, bool mipAutogen)
         {
             try
             {
@@ -1638,7 +1642,7 @@ namespace Engine
 
                 using (var resource = Helper.Attempt(TextureData.ReadTexture, filename, 5))
                 {
-                    return new EngineShaderResourceView(CreateResource(resource));
+                    return new EngineShaderResourceView(CreateResource(resource, mipAutogen));
                 }
             }
             catch (Exception ex)
@@ -1650,8 +1654,9 @@ namespace Engine
         /// Loads a texture from file in the graphics device
         /// </summary>
         /// <param name="stream">Stream</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTexture(MemoryStream stream)
+        internal EngineShaderResourceView LoadTexture(MemoryStream stream, bool mipAutogen)
         {
             try
             {
@@ -1659,7 +1664,7 @@ namespace Engine
 
                 using (var resource = Helper.Attempt(TextureData.ReadTexture, stream, 5))
                 {
-                    return new EngineShaderResourceView(CreateResource(resource));
+                    return new EngineShaderResourceView(CreateResource(resource, mipAutogen));
                 }
             }
             catch (Exception ex)
@@ -1671,14 +1676,15 @@ namespace Engine
         /// Loads a texture array from a file collection in the graphics device
         /// </summary>
         /// <param name="filenames">Path file collection</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureArray(IEnumerable<string> filenames)
+        internal EngineShaderResourceView LoadTextureArray(IEnumerable<string> filenames, bool mipAutogen)
         {
             try
             {
                 var textureList = Helper.Attempt(TextureData.ReadTexture, filenames, 5);
 
-                return LoadTextureArray(textureList);
+                return LoadTextureArray(textureList, mipAutogen);
             }
             catch (Exception ex)
             {
@@ -1689,14 +1695,15 @@ namespace Engine
         /// Loads a texture array from a file collection in the graphics device
         /// </summary>
         /// <param name="streams">Stream collection</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the resource view</returns>
-        internal EngineShaderResourceView LoadTextureArray(IEnumerable<MemoryStream> streams)
+        internal EngineShaderResourceView LoadTextureArray(IEnumerable<MemoryStream> streams, bool mipAutogen)
         {
             try
             {
                 var textureList = Helper.Attempt(TextureData.ReadTexture, streams, 5);
 
-                return LoadTextureArray(textureList);
+                return LoadTextureArray(textureList, mipAutogen);
             }
             catch (Exception ex)
             {
@@ -1707,12 +1714,13 @@ namespace Engine
         /// Loads a texture array in the graphics device
         /// </summary>
         /// <param name="textureList">Texture array</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the resource view</returns>
-        private EngineShaderResourceView LoadTextureArray(IEnumerable<TextureData> textureList)
+        private EngineShaderResourceView LoadTextureArray(IEnumerable<TextureData> textureList, bool mipAutogen)
         {
             Counters.Textures++;
 
-            var resource = this.CreateResource(textureList);
+            var resource = this.CreateResource(textureList, mipAutogen);
 
             foreach (var item in textureList)
             {

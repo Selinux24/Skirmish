@@ -77,28 +77,29 @@ namespace Engine
         /// Generates the resource view
         /// </summary>
         /// <param name="imageContent">Image content</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateResource(ImageContent imageContent)
+        public EngineShaderResourceView CreateResource(ImageContent imageContent, bool mipAutogen = true)
         {
             if (imageContent.Stream != null)
             {
                 byte[] buffer = imageContent.Stream.GetBuffer();
 
-                return this.Get(buffer);
+                return this.Get(buffer, mipAutogen);
             }
             else
             {
                 if (imageContent.IsCubic)
                 {
-                    return CreateResourceCubic(imageContent);
+                    return CreateResourceCubic(imageContent, mipAutogen);
                 }
                 else if (imageContent.IsArray)
                 {
-                    return CreateResourceArray(imageContent);
+                    return CreateResourceArray(imageContent, mipAutogen);
                 }
                 else
                 {
-                    return CreateResourceDefault(imageContent);
+                    return CreateResourceDefault(imageContent, mipAutogen);
                 }
             }
         }
@@ -106,16 +107,17 @@ namespace Engine
         /// Creates a resource view from image content
         /// </summary>
         /// <param name="imageContent">Image content</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView CreateResourceDefault(ImageContent imageContent)
+        private EngineShaderResourceView CreateResourceDefault(ImageContent imageContent, bool mipAutogen = true)
         {
             if (!string.IsNullOrWhiteSpace(imageContent.Path))
             {
-                return this.Get(imageContent.Path);
+                return this.Get(imageContent.Path, mipAutogen);
             }
             else if (imageContent.Stream != null)
             {
-                return this.Get(imageContent.Stream);
+                return this.Get(imageContent.Stream, mipAutogen);
             }
 
             return null;
@@ -124,16 +126,17 @@ namespace Engine
         /// Creates a resource view from image content array
         /// </summary>
         /// <param name="imageContent">Image content</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView CreateResourceArray(ImageContent imageContent)
+        private EngineShaderResourceView CreateResourceArray(ImageContent imageContent, bool mipAutogen = true)
         {
             if (imageContent.Paths.Any())
             {
-                return this.Get(imageContent.Paths);
+                return this.Get(imageContent.Paths, mipAutogen);
             }
             else if (imageContent.Streams.Any())
             {
-                return this.Get(imageContent.Streams);
+                return this.Get(imageContent.Streams, mipAutogen);
             }
 
             return null;
@@ -142,29 +145,30 @@ namespace Engine
         /// Creates a resource view from cubic image content
         /// </summary>
         /// <param name="imageContent">Image content</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView CreateResourceCubic(ImageContent imageContent)
+        private EngineShaderResourceView CreateResourceCubic(ImageContent imageContent, bool mipAutogen = true)
         {
             if (imageContent.IsArray)
             {
                 if (imageContent.Paths.Any())
                 {
-                    return this.Get(imageContent.Paths);
+                    return this.Get(imageContent.Paths, mipAutogen);
                 }
                 else if (imageContent.Streams.Any())
                 {
-                    return this.Get(imageContent.Streams);
+                    return this.Get(imageContent.Streams, mipAutogen);
                 }
             }
             else
             {
                 if (!string.IsNullOrWhiteSpace(imageContent.Path))
                 {
-                    return this.Get(imageContent.Path);
+                    return this.Get(imageContent.Path, mipAutogen);
                 }
                 else if (imageContent.Stream != null)
                 {
-                    return this.Get(imageContent.Stream);
+                    return this.Get(imageContent.Stream, mipAutogen);
                 }
             }
 
@@ -174,31 +178,34 @@ namespace Engine
         /// Generates the resource view
         /// </summary>
         /// <param name="path">Path to file</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateResource(string path)
+        public EngineShaderResourceView CreateResource(string path, bool mipAutogen = true)
         {
-            return this.Get(path);
+            return this.Get(path, mipAutogen);
         }
         /// <summary>
         /// Generates the resource view
         /// </summary>
         /// <param name="stream">Memory stream</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateResource(MemoryStream stream)
+        public EngineShaderResourceView CreateResource(MemoryStream stream, bool mipAutogen = true)
         {
-            return this.Get(stream);
+            return this.Get(stream, mipAutogen);
         }
         /// <summary>
         /// Creates a 2d texture of byte values
         /// </summary>
         /// <param name="values">Values</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateResource(byte[] values)
+        public EngineShaderResourceView CreateResource(byte[] values, bool mipAutogen = true)
         {
             string md5 = values.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.LoadTexture(values);
+                var view = this.game.Graphics.LoadTexture(values, mipAutogen);
                 this.resources.Add(md5, view);
             }
 
@@ -246,12 +253,12 @@ namespace Engine
         /// Creates a new global resource by name
         /// </summary>
         /// <param name="name">Resource name</param>
-        /// <param name="values">Values</param>
-        /// <param name="size">Texture size (total pixels = size * size)</param>
-        /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResourceTexture2D(string name, IEnumerable<Vector4> values, int size)
+        /// <param name="bytes">Resource bytes</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <returns></returns>
+        public EngineShaderResourceView CreateGlobalResourceTexture(string name, byte[] bytes, bool mipAutogen = true)
         {
-            var view = this.game.Graphics.CreateTexture2D(size, values);
+            var view = this.game.Graphics.LoadTexture(bytes, mipAutogen);
             this.SetGlobalResource(name, view);
             return view;
         }
@@ -259,11 +266,12 @@ namespace Engine
         /// Creates a new global resource by name
         /// </summary>
         /// <param name="name">Resource name</param>
-        /// <param name="bytes">Resource bytes</param>
-        /// <returns></returns>
-        public EngineShaderResourceView CreateGlobalResourceTexture2D(string name, byte[] bytes)
+        /// <param name="values">Values</param>
+        /// <param name="size">Texture size (total pixels = size * size)</param>
+        /// <returns>Returns the created resource view</returns>
+        public EngineShaderResourceView CreateGlobalResourceTexture2D(string name, IEnumerable<Vector4> values, int size)
         {
-            var view = this.game.Graphics.LoadTexture(bytes);
+            var view = this.game.Graphics.CreateTexture2D(size, values);
             this.SetGlobalResource(name, view);
             return view;
         }
@@ -282,6 +290,7 @@ namespace Engine
             this.SetGlobalResource(name, view);
             return view;
         }
+
         /// <summary>
         /// Set global resource by name
         /// </summary>
@@ -308,13 +317,14 @@ namespace Engine
         /// Gets the shader resource view or creates if not exists
         /// </summary>
         /// <param name="buffer">Buffer</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView Get(byte[] buffer)
+        private EngineShaderResourceView Get(byte[] buffer, bool mipAutogen)
         {
             string md5 = buffer.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.LoadTexture(buffer);
+                var view = this.game.Graphics.LoadTexture(buffer, mipAutogen);
                 this.resources.Add(md5, view);
             }
 
@@ -324,12 +334,13 @@ namespace Engine
         /// Gets the shader resource view or creates if not exists
         /// </summary>
         /// <param name="path">Path to file</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView Get(string path)
+        private EngineShaderResourceView Get(string path, bool mipAutogen)
         {
             if (!this.resources.ContainsKey(path))
             {
-                var view = this.game.Graphics.LoadTexture(path);
+                var view = this.game.Graphics.LoadTexture(path, mipAutogen);
                 this.resources.Add(path, view);
             }
 
@@ -339,14 +350,15 @@ namespace Engine
         /// Gets the shader resource view or creates if not exists
         /// </summary>
         /// <param name="stream">Memory stream</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView Get(MemoryStream stream)
+        private EngineShaderResourceView Get(MemoryStream stream, bool mipAutogen)
         {
             string md5 = stream.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
                 stream.Position = 0;
-                var view = this.game.Graphics.LoadTexture(stream);
+                var view = this.game.Graphics.LoadTexture(stream, mipAutogen);
                 this.resources.Add(md5, view);
             }
 
@@ -356,13 +368,14 @@ namespace Engine
         /// Gets the shader resource view or creates if not exists
         /// </summary>
         /// <param name="paths">Path list</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView Get(IEnumerable<string> paths)
+        private EngineShaderResourceView Get(IEnumerable<string> paths, bool mipAutogen)
         {
             string md5 = paths.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.LoadTextureArray(paths);
+                var view = this.game.Graphics.LoadTextureArray(paths, mipAutogen);
                 this.resources.Add(md5, view);
             }
 
@@ -372,13 +385,14 @@ namespace Engine
         /// Gets the shader resource view or creates if not exists
         /// </summary>
         /// <param name="streams">Stream list</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <returns>Returns the created resource view</returns>
-        private EngineShaderResourceView Get(IEnumerable<MemoryStream> streams)
+        private EngineShaderResourceView Get(IEnumerable<MemoryStream> streams, bool mipAutogen)
         {
             string md5 = streams.GetMd5Sum();
             if (!this.resources.ContainsKey(md5))
             {
-                var view = this.game.Graphics.LoadTextureArray(streams);
+                var view = this.game.Graphics.LoadTextureArray(streams, mipAutogen);
                 this.resources.Add(md5, view);
             }
 

@@ -17,14 +17,14 @@ namespace Engine.Common
         /// <summary>
         /// Font cache
         /// </summary>
-        private static List<FontMap> gCache = new List<FontMap>();
+        private static readonly List<FontMap> gCache = new List<FontMap>();
 
         /// <summary>
         /// Clears and dispose font cache
         /// </summary>
         internal static void ClearCache()
         {
-            foreach (FontMap fmap in gCache)
+            foreach (var fmap in gCache)
             {
                 fmap.Dispose();
             }
@@ -37,9 +37,9 @@ namespace Engine.Common
         /// </summary>
         public const int MAXTEXTLENGTH = 1024;
         /// <summary>
-        /// Texture size
+        /// Maximum texture size
         /// </summary>
-        public const int TEXTURESIZE = 2048;
+        public const int MAXTEXTURESIZE = 1024 * 8;
         /// <summary>
         /// Key codes
         /// </summary>
@@ -53,6 +53,15 @@ namespace Engine.Common
         /// Bitmap stream
         /// </summary>
         private MemoryStream bitmapStream = null;
+
+        /// <summary>
+        /// Texure width
+        /// </summary>
+        protected int TextureWidth = 0;
+        /// <summary>
+        /// Texture height
+        /// </summary>
+        protected int TextureHeight = 0;
 
         /// <summary>
         /// Font name
@@ -108,6 +117,10 @@ namespace Engine.Common
             var fMap = gCache.Find(f => f.Font == font && f.Size == size && f.Style == style);
             if (fMap == null)
             {
+                //Calc the destination texture width and height
+                MeasureMap(font, size, style, out int width, out int height);
+
+                //Calc the delta value for margins an new lines
                 float delta = (float)Math.Sqrt(size) + (size / 40f);
 
                 fMap = new FontMap()
@@ -116,75 +129,115 @@ namespace Engine.Common
                     Size = size,
                     Style = style,
                     Delta = (int)delta,
+                    TextureWidth = width,
+                    TextureHeight = height,
                 };
 
-                using (var bmp = new Bitmap(TEXTURESIZE, TEXTURESIZE))
+                using (var bmp = new Bitmap(width, height))
                 using (var gra = System.Drawing.Graphics.FromImage(bmp))
+                using (var fmt = StringFormat.GenericDefault)
+                using (var fnt = new Font(font, size, (FontStyle)style, GraphicsUnit.Pixel))
                 {
                     gra.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
 
                     gra.FillRegion(
                         Brushes.Transparent,
-                        new Region(new System.Drawing.RectangleF(0, 0, TEXTURESIZE, TEXTURESIZE)));
+                        new Region(new System.Drawing.RectangleF(0, 0, width, height)));
 
-                    using (var fmt = StringFormat.GenericDefault)
-                    using (var fnt = new Font(font, size, (FontStyle)style, GraphicsUnit.Pixel))
+                    float left = fMap.Delta;
+                    float top = 0f;
+
+                    for (int i = 0; i < ValidKeys.Length; i++)
                     {
-                        float left = fMap.Delta;
-                        float top = 0f;
+                        char c = ValidKeys[i];
 
-                        for (int i = 0; i < ValidKeys.Length; i++)
+                        var s = gra.MeasureString(
+                            c.ToString(),
+                            fnt,
+                            int.MaxValue,
+                            fmt);
+
+                        if (c == ' ')
                         {
-                            char c = ValidKeys[i];
-
-                            var s = gra.MeasureString(
-                                c.ToString(),
-                                fnt,
-                                int.MaxValue,
-                                fmt);
-
-                            if (c == ' ')
-                            {
-                                s.Width = fnt.SizeInPoints;
-                            }
-
-                            if (left + (int)s.Width + fMap.Delta + fMap.Delta >= TEXTURESIZE)
-                            {
-                                left = fMap.Delta;
-                                top += (int)s.Height + 1;
-                            }
-
-                            gra.DrawString(
-                                c.ToString(),
-                                fnt,
-                                Brushes.White,
-                                left,
-                                top,
-                                fmt);
-
-                            var chr = new FontMapChar()
-                            {
-                                X = left,
-                                Y = top,
-                                Width = s.Width,
-                                Height = s.Height,
-                            };
-
-                            fMap.map.Add(c, chr);
-
-                            left += (int)s.Width + fMap.Delta + fMap.Delta;
+                            //White space
+                            s.Width = fnt.SizeInPoints;
                         }
+
+                        if (left + (int)s.Width + fMap.Delta + fMap.Delta >= width)
+                        {
+                            //Next texture line
+                            left = fMap.Delta;
+                            top += (int)s.Height + fMap.Delta;
+                        }
+
+                        gra.DrawString(
+                            c.ToString(),
+                            fnt,
+                            Brushes.White,
+                            left,
+                            top,
+                            fmt);
+
+                        var chr = new FontMapChar()
+                        {
+                            X = left,
+                            Y = top,
+                            Width = s.Width,
+                            Height = s.Height + (fMap.Delta / 2),
+                        };
+
+                        fMap.map.Add(c, chr);
+
+                        left += (int)s.Width + fMap.Delta + fMap.Delta;
                     }
 
+                    //Generate the texture
                     fMap.bitmapStream = new MemoryStream();
-                    bmp.Save(fMap.bitmapStream, ImageFormat.Tiff);
-                    fMap.Texture = game.ResourceManager.CreateResource(fMap.bitmapStream);
+                    bmp.Save(fMap.bitmapStream, ImageFormat.Png);
+                    fMap.Texture = game.ResourceManager.CreateResource(fMap.bitmapStream, false);
                 }
 
+                //Add map to the font cache
                 gCache.Add(fMap);
             }
 
             return fMap;
+        }
+        /// <summary>
+        /// Measures the map to return the destination width and height of the texture
+        /// </summary>
+        /// <param name="font">Font name</param>
+        /// <param name="size">Font size</param>
+        /// <param name="style">Font Style</param>
+        /// <param name="width">Resulting width</param>
+        /// <param name="height">Resulting height</param>
+        public static void MeasureMap(string font, float size, FontMapStyles style, out int width, out int height)
+        {
+            using (var bmp = new Bitmap(100, 100))
+            using (var gra = System.Drawing.Graphics.FromImage(bmp))
+            using (var fmt = StringFormat.GenericDefault)
+            using (var fnt = new Font(font, size, (FontStyle)style, GraphicsUnit.Pixel))
+            {
+                string str = new string(ValidKeys);
+
+                var s = gra.MeasureString(
+                    str,
+                    fnt,
+                    int.MaxValue,
+                    fmt);
+
+                if (s.Width <= MAXTEXTURESIZE)
+                {
+                    width = (int)s.Width + 1;
+                    height = (int)s.Height + 1;
+                }
+                else
+                {
+                    width = MAXTEXTURESIZE;
+                    int a = (int)s.Width / MAXTEXTURESIZE;
+                    height = ((int)s.Height + 1) * (a + 1);
+                }
+            }
         }
 
         /// <summary>
@@ -219,23 +272,14 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (Texture != null)
-                {
-                    Texture.Dispose();
-                    Texture = null;
-                }
+                Texture?.Dispose();
+                Texture = null;
 
-                if (map != null)
-                {
-                    map.Clear();
-                    map = null;
-                }
+                map?.Clear();
+                map = null;
 
-                if (this.bitmapStream != null)
-                {
-                    this.bitmapStream.Dispose();
-                    this.bitmapStream = null;
-                }
+                bitmapStream?.Dispose();
+                bitmapStream = null;
             }
         }
 
@@ -276,11 +320,15 @@ namespace Engine.Common
                 {
                     var chr = this.map[c];
 
+                    var uv = GeometryUtil.CreateUVMap(
+                        chr.Width, chr.Height,
+                        chr.X, chr.Y,
+                        TextureWidth, TextureHeight);
+
                     GeometryUtil.CreateSprite(
                         pos,
                         chr.Width, chr.Height, 0, 0,
-                        chr.X, chr.Y,
-                        TEXTURESIZE,
+                        uv,
                         out Vector3[] cv, out Vector2[] cuv, out uint[] ci);
 
                     ci.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });

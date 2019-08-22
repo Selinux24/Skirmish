@@ -46,7 +46,7 @@ namespace Engine
         /// <summary>
         /// Font map
         /// </summary>
-        private readonly FontMap fontMap = null;
+        private FontMap fontMap = null;
         /// <summary>
         /// View * projection matrix
         /// </summary>
@@ -224,6 +224,9 @@ namespace Engine
                 //Remove data from buffer manager
                 this.BufferManager?.RemoveVertexData(this.vertexBuffer);
                 this.BufferManager?.RemoveIndexData(this.indexBuffer);
+
+                //Remove the font map reference
+                this.fontMap = null;
             }
         }
         /// <summary>
