@@ -104,10 +104,12 @@
     <None Include="Blender\Buildings\Dungeon\Dungeon.blend" />
     <None Include="Blender\Buildings\Dungeon\Room1.blend" />
     <None Include="Blender\Buildings\Dungeon\Room2.blend" />
+    <None Include="Blender\Buildings\Imperial\Imperial_1.blend" />
     <None Include="Blender\Buildings\Obelisk\diffus.dds" />
     <None Include="Blender\Buildings\Obelisk\normal.dds" />
     <None Include="Blender\Buildings\Obelisk\specular.dds" />
     <None Include="Blender\Buildings\Garage\concrete.jpg" />
+    <None Include="Blender\Buildings\Space Ship\Assets.blend" />
     <None Include="Blender\Buildings\Watch Tower\Watch Tower.blend" />
     <None Include="Blender\Characters\Human2\Human2.blend" />
     <None Include="Blender\Characters\Rat\Rat.blend" />
@@ -576,6 +578,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Buildings\Watch Tower\Watch Tower.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Buildings\Imperial\Imperial_1.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Buildings\Space Ship\Assets.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="Collada\Tests\AniCube\aniCube.dae" />
