@@ -226,20 +226,13 @@ namespace Engine
         {
             get
             {
-                List<MeshMaterial> matList = new List<MeshMaterial>();
-
                 var nodes = this.groundPickingQuadtree.GetLeafNodes();
 
-                foreach (var node in nodes)
-                {
-                    var mats = this.patchDictionary[node.Id].GetMaterials();
-                    if (mats != null)
-                    {
-                        matList.AddRange(mats);
-                    }
-                }
+                var matList = nodes
+                    .SelectMany(n => this.patchDictionary[n.Id].GetMaterials())
+                    .ToArray();
 
-                return matList.ToArray();
+                return matList;
             }
         }
         /// <summary>
@@ -361,13 +354,50 @@ namespace Engine
         }
 
         /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="volume">Culling volume</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public override bool Cull(ICullingVolume volume, out float distance)
+        {
+            distance = float.MaxValue;
+
+            if (base.Cull(volume, out distance))
+            {
+                return true;
+            }
+
+            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(volume).ToArray();
+            if (!this.visibleNodes.Any())
+            {
+                return true;
+            }
+
+            if (this.visibleNodes.Length > 1)
+            {
+                //Sort nodes by center distance to the culling volume position - nearest nodes first
+                Array.Sort(this.visibleNodes, (n1, n2) =>
+                {
+                    float d1 = (n1.Center - volume.Position).LengthSquared();
+                    float d2 = (n2.Center - volume.Position).LengthSquared();
+
+                    return d1.CompareTo(d2);
+                });
+            }
+
+            distance = Vector3.DistanceSquared(volume.Position, this.visibleNodes[0].Center);
+
+            return false;
+        }
+
+        /// <summary>
         /// Draw shadows
         /// </summary>
         /// <param name="context">Context</param>
         public override void DrawShadows(DrawContextShadows context)
         {
-            var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
-            if (nodes?.Any() == true)
+            if (this.visibleNodes.Any())
             {
                 var graphics = this.Game.Graphics;
 
@@ -378,8 +408,9 @@ namespace Engine
 
                     graphics.SetBlendDefault();
 
-                    foreach (var node in nodes)
+                    foreach (var node in visibleNodes)
                     {
+                        this.patchDictionary[node.Id].Current = node;
                         this.patchDictionary[node.Id].DrawSceneryShadows(sceneryEffect, this.BufferManager);
                     }
                 }
@@ -394,25 +425,22 @@ namespace Engine
             var mode = context.DrawerMode;
             var graphics = this.Game.Graphics;
 
-            if (mode.HasFlag(DrawerModes.OpaqueOnly))
+            if (mode.HasFlag(DrawerModes.OpaqueOnly) && visibleNodes.Any())
             {
-                var nodes = this.visibleNodes.Length > 0 ? this.visibleNodes : this.groundPickingQuadtree.GetLeafNodes();
-                if (nodes?.Any() == true)
+                var sceneryEffect = GetEffect(mode);
+                if (sceneryEffect == null)
                 {
-                    var sceneryEffect = GetEffect(mode);
-                    if (sceneryEffect == null)
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
+                sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
 
-                    graphics.SetBlendDefault();
+                graphics.SetBlendDefault();
 
-                    foreach (var node in nodes)
-                    {
-                        this.patchDictionary[node.Id].DrawScenery(sceneryEffect, this.BufferManager);
-                    }
+                foreach (var node in visibleNodes)
+                {
+                    this.patchDictionary[node.Id].Current = node;
+                    this.patchDictionary[node.Id].DrawScenery(sceneryEffect, this.BufferManager);
                 }
             }
         }
@@ -433,64 +461,6 @@ namespace Engine
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the frustum</returns>
-        public override bool Cull(ICullingVolume volume, out float distance)
-        {
-            this.visibleNodes = this.groundPickingQuadtree.GetNodesInVolume(volume).ToArray();
-
-            return this.CullNodes(volume.Position, out distance);
-        }
-        /// <summary>
-        /// Node culling
-        /// </summary>
-        /// <param name="pov">Point of view</param>
-        /// <param name="distance">Returns the distance to the nearest visible node</param>
-        /// <returns>Returns true if the object is culled</returns>
-        private bool CullNodes(Vector3 pov, out float distance)
-        {
-            distance = float.MaxValue;
-
-            if (this.visibleNodes != null && this.visibleNodes.Length > 0)
-            {
-                //Sort nodes - draw nearest nodes first
-                Array.Sort(this.visibleNodes, (n1, n2) =>
-                {
-                    float d1 = (n1.Center - pov).LengthSquared();
-                    float d2 = (n2.Center - pov).LengthSquared();
-
-                    return d1.CompareTo(d2);
-                });
-
-                foreach (var node in this.visibleNodes)
-                {
-                    this.patchDictionary[node.Id].Current = node;
-                }
-
-                distance = Vector3.DistanceSquared(pov, this.visibleNodes[0].Center);
-
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// Gets terrain bounding boxes at specified level
-        /// </summary>
-        /// <param name="level">Level</param>
-        /// <returns>Returns terrain bounding boxes</returns>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
-        {
-            return this.groundPickingQuadtree.GetBoundingBoxes(level);
         }
     }
 }

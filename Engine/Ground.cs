@@ -28,6 +28,30 @@ namespace Engine
         }
 
         /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="volume">Culling volume</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public override bool Cull(ICullingVolume volume, out float distance)
+        {
+            distance = float.MaxValue;
+
+            if (groundPickingQuadtree == null)
+            {
+                return false;
+            }
+
+            bool cull = volume.Contains(groundPickingQuadtree.BoundingBox) == ContainmentType.Disjoint;
+            if (!cull)
+            {
+                distance = 0;
+            }
+
+            return cull;
+        }
+
+        /// <summary>
         /// Gets nearest picking position of giving ray
         /// </summary>
         /// <param name="ray">Picking ray</param>
@@ -161,6 +185,16 @@ namespace Engine
             return this.groundPickingQuadtree != null ?
                 this.groundPickingQuadtree.BoundingBox :
                 new BoundingBox();
+        }
+
+        /// <summary>
+        /// Gets bounding boxes at specified level
+        /// </summary>
+        /// <param name="level">Level</param>
+        /// <returns>Returns a bounding boxes array</returns>
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
+        {
+            return this.groundPickingQuadtree.GetBoundingBoxes(level);
         }
 
         /// <summary>

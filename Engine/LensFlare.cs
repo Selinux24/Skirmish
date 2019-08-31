@@ -202,16 +202,18 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         public override void Draw(DrawContext context)
         {
-            if (this.drawFlares)
+            var mode = context.DrawerMode;
+
+            if (mode.HasFlag(DrawerModes.TransparentOnly) && this.drawFlares)
             {
                 // Draw the sprite using additive blending.
                 this.Game.Graphics.SetBlendAdditive();
 
                 // Draw glow
-                this.glowSprite.Draw(context);
+                this.glowSprite?.Draw(context);
 
                 //Draw flares if any
-                if (this.flares != null && this.flares.Length > 0)
+                if (this.flares?.Length > 0)
                 {
                     for (int i = 0; i < this.flares.Length; i++)
                     {

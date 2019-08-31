@@ -53,9 +53,9 @@ namespace Heightmap
         private SceneObject<PrimitiveListDrawer<Triangle>> bboxesTriDrawer = null;
         private SceneObject<PrimitiveListDrawer<Line3D>> bboxesDrawer = null;
         private SceneObject<PrimitiveListDrawer<Line3D>> linesDrawer = null;
-        private const float gardenerAreaSize = 2048;
-        private readonly BoundingBox? gardenerArea = new BoundingBox(new Vector3(-gardenerAreaSize * 2, -gardenerAreaSize, -gardenerAreaSize), new Vector3(-0.01f, gardenerAreaSize, gardenerAreaSize));
-        private readonly BoundingBox? gardenerArea2 = new BoundingBox(new Vector3(0.01f, -gardenerAreaSize, -gardenerAreaSize), new Vector3(gardenerAreaSize * 2, gardenerAreaSize, gardenerAreaSize));
+        private const float gardenerAreaSize = 512;
+        private readonly BoundingBox? gardenerArea = new BoundingBox(new Vector3(-gardenerAreaSize * 2, -gardenerAreaSize, -gardenerAreaSize), new Vector3(0, gardenerAreaSize, gardenerAreaSize));
+        private readonly BoundingBox? gardenerArea2 = new BoundingBox(new Vector3(0, -gardenerAreaSize, -gardenerAreaSize), new Vector3(gardenerAreaSize * 2, gardenerAreaSize, gardenerAreaSize));
 
         private SceneObject<ModelInstanced> torchs = null;
         private SceneLightSpot spotLight1 = null;
@@ -1081,9 +1081,6 @@ namespace Heightmap
         private void SetDebugInfo()
         {
             {
-                var boxes = this.terrain.Instance.GetBoundingBoxes(5);
-                var listBoxes = Line3D.CreateWiredBox(boxes);
-
                 var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "DEBUG++ Terrain nodes bounding boxes",
@@ -1094,9 +1091,17 @@ namespace Heightmap
                 };
                 this.bboxesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
                 this.bboxesDrawer.Visible = false;
+
+                var boxes = this.terrain.Instance.GetBoundingBoxes(5);
+                var listBoxes = Line3D.CreateWiredBox(boxes);
+
                 this.bboxesDrawer.Instance.AddPrimitives(new Color4(1.0f, 0.0f, 0.0f, 0.55f), listBoxes);
-                this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.55f), Line3D.CreateWiredBox(gardenerArea.Value));
-                this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.55f), Line3D.CreateWiredBox(gardenerArea2.Value));
+
+                var a1Lines = Line3D.CreateWiredBox(gardenerArea.Value);
+                var a2Lines = Line3D.CreateWiredBox(gardenerArea2.Value);
+
+                this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.55f), a1Lines);
+                this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.55f), a2Lines);
             }
 
             {

@@ -996,15 +996,5 @@ namespace Engine
                 this.heightMapHeight,
                 out vertices, out indices);
         }
-
-        /// <summary>
-        /// Gets terrain bounding boxes at specified level
-        /// </summary>
-        /// <param name="level">Level</param>
-        /// <returns>Returns terrain bounding boxes</returns>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
-        {
-            return this.groundPickingQuadtree.GetBoundingBoxes(level);
-        }
     }
 }

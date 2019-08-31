@@ -1095,6 +1095,31 @@ namespace Engine
         }
 
         /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="volume">Culling volume</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public override bool Cull(ICullingVolume volume, out float distance)
+        {
+            distance = float.MaxValue;
+
+            if (foliageQuadtree == null)
+            {
+                return false;
+            }
+
+            bool cull = volume.Contains(foliageQuadtree.BoundingBox) == ContainmentType.Disjoint;
+
+            if (!cull)
+            {
+                distance = 0;
+            }
+
+            return cull;
+        }
+
+        /// <summary>
         /// Sets thecnique for vegetation drawing with forward renderer
         /// </summary>
         /// <param name="context">Drawing context</param>
