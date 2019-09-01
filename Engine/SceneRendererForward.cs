@@ -242,10 +242,7 @@ namespace Engine
 
             if (this.Game.CollectGameStatus)
             {
-                foreach (var item in dict)
-                {
-                    this.Game.GameStatus.Add(item.Key, item.Value);
-                }
+                this.Game.GameStatus.Add(dict);
             }
         }
     }

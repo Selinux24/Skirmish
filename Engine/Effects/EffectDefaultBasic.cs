@@ -867,21 +867,14 @@ namespace Engine.Effects
         {
             if (disposing)
             {
-                if (this.samplerPoint != null)
-                {
-                    this.samplerPoint.Dispose();
-                    this.samplerPoint = null;
-                }
-                if (this.samplerLinear != null)
-                {
-                    this.samplerLinear.Dispose();
-                    this.samplerLinear = null;
-                }
-                if (this.samplerAnisotropic != null)
-                {
-                    this.samplerAnisotropic.Dispose();
-                    this.samplerAnisotropic = null;
-                }
+                this.samplerPoint?.Dispose();
+                this.samplerPoint = null;
+
+                this.samplerLinear?.Dispose();
+                this.samplerLinear = null;
+
+                this.samplerAnisotropic?.Dispose();
+                this.samplerAnisotropic = null;
             }
 
             base.Dispose(disposing);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace Engine
 {
@@ -9,8 +8,8 @@ namespace Engine
     public class GameStatusCollectedEventArgs : EventArgs
     {
         /// <summary>
-        /// Time trace dictionary
+        /// Time trace status
         /// </summary>
-        public Dictionary<string, double> Trace { get; set; } = new Dictionary<string, double>();
+        public GameStatus Trace { get; set; } = new GameStatus();
     }
 }

@@ -135,7 +135,7 @@ namespace Engine
         /// <summary>
         /// Game status
         /// </summary>
-        internal readonly Dictionary<string, double> GameStatus = new Dictionary<string, double>();
+        internal readonly GameStatus GameStatus = new GameStatus();
 
         /// <summary>
         /// Game status collected event
@@ -343,16 +343,21 @@ namespace Engine
             Stopwatch gSW = new Stopwatch();
             gSW.Start();
 
-            Stopwatch pSW = new Stopwatch();
-            pSW.Start();
-            this.Input.Update(this.GameTime);
-            pSW.Stop();
-            GameStatus.Add("Input", pSW.Elapsed.TotalMilliseconds);
+            {
+                Stopwatch pSW = new Stopwatch();
+                pSW.Start();
+                this.Input.Update(this.GameTime);
+                pSW.Stop();
+                GameStatus.Add("Input", pSW);
+            }
 
-            pSW.Restart();
-            this.Graphics.Begin();
-            pSW.Stop();
-            GameStatus.Add("Begin", pSW.Elapsed.TotalMilliseconds);
+            {
+                Stopwatch pSW = new Stopwatch();
+                pSW.Start();
+                this.Graphics.Begin();
+                pSW.Stop();
+                GameStatus.Add("Begin", pSW);
+            }
 
             for (int i = 0; i < this.scenes.Count; i++)
             {
@@ -362,23 +367,26 @@ namespace Engine
                     uSW.Start();
                     this.scenes[i].Update(this.GameTime);
                     uSW.Stop();
-                    GameStatus.Add($"Scene {i} {this.scenes[i].GetType()}.Update", uSW.Elapsed.TotalMilliseconds);
+                    GameStatus.Add($"Scene {i} {this.scenes[i].GetType()}.Update", uSW);
 
                     Stopwatch dSW = new Stopwatch();
                     dSW.Start();
                     this.scenes[i].Draw(this.GameTime);
                     dSW.Stop();
-                    GameStatus.Add($"Scene {i} {this.scenes[i].GetType()}.Draw", dSW.Elapsed.TotalMilliseconds);
+                    GameStatus.Add($"Scene {i} {this.scenes[i].GetType()}.Draw", dSW);
                 }
             }
 
-            pSW.Restart();
-            this.Graphics.End();
-            pSW.Stop();
-            GameStatus.Add("End", pSW.Elapsed.TotalMilliseconds);
+            {
+                Stopwatch pSW = new Stopwatch();
+                pSW.Start();
+                this.Graphics.End();
+                pSW.Stop();
+                GameStatus.Add("End", pSW);
+            }
 
             gSW.Stop();
-            GameStatus.Add("TOTAL", gSW.Elapsed.TotalMilliseconds);
+            GameStatus.Add("TOTAL", gSW);
 
             Counters.FrameCount++;
             Counters.FrameTime += this.GameTime.ElapsedSeconds;
@@ -409,7 +417,7 @@ namespace Engine
             {
                 GameStatusCollectedEventArgs e = new GameStatusCollectedEventArgs()
                 {
-                    Trace = new Dictionary<string, double>(GameStatus),
+                    Trace = GameStatus.Copy(),
                 };
 
                 GameStatusCollected?.Invoke(this, e);

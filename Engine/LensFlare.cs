@@ -181,19 +181,32 @@ namespace Engine
         {
             if (this.Scene != null)
             {
-                Vector3 lightPosition = light.GetPosition(1000);
-                Vector3 direction = Vector3.Normalize(eyePosition - lightPosition);
+                var frustum = this.Scene.Camera.Frustum;
+                float maxZ = this.Scene.Camera.FarPlaneDistance;
 
-                Ray ray = new Ray(lightPosition, direction);
+                Vector3 lPositionUnit = eyePosition - light.Direction;
 
-                if (this.Scene.PickNearest(ray, RayPickingParams.Perfect, out PickingResult<Triangle> result) &&
-                    Vector3.Distance(lightPosition, eyePosition) > result.Distance)
+                //Is the light into the vision cone?
+                if (frustum.Contains(lPositionUnit) != ContainmentType.Disjoint)
                 {
-                    return false;
+                    //Calculate the ray from light to position
+                    Vector3 lightPosition = light.GetPosition(maxZ);
+                    Ray ray = new Ray(lightPosition, -light.Direction);
+
+                    if (!this.Scene.PickNearest(ray, RayPickingParams.Coarse, out var res))
+                    {
+                        return true;
+                    }
+
+                    if (this.Scene.PickNearest(ray, RayPickingParams.Perfect, out PickingResult<Triangle> result) &&
+                        Vector3.Distance(lightPosition, eyePosition) > result.Distance)
+                    {
+                        return false;
+                    }
                 }
             }
 
-            return true;
+            return false;
         }
 
         /// <summary>

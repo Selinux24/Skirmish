@@ -471,10 +471,20 @@ namespace Engine
         /// <returns>Returns a light collection</returns>
         public ISceneLightPoint[] GetPointShadowCastingLights(Vector3 eyePosition)
         {
+            float lDistanceSquared = GameEnvironment.LODDistanceMedium * GameEnvironment.LODDistanceMedium;
+
             return this.visibleLights
-                .Where(l => l.CastShadow && l is SceneLightPoint)
-                .Select(l => (SceneLightPoint)l)
-                .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
+                .Where(l =>
+                {
+                    if (l.CastShadow && l is ISceneLightPoint lPoint)
+                    {
+                        return Vector3.DistanceSquared(lPoint.Position, eyePosition) < lDistanceSquared;
+                    }
+
+                    return false;
+                })
+                .Cast<ISceneLightPoint>()
+                .OrderBy(lPoint => Vector3.DistanceSquared(lPoint.Position, eyePosition))
                 .ToArray();
         }
         /// <summary>
@@ -484,10 +494,20 @@ namespace Engine
         /// <returns>Returns a light collection</returns>
         public ISceneLightSpot[] GetSpotShadowCastingLights(Vector3 eyePosition)
         {
+            float lDistanceSquared = GameEnvironment.LODDistanceMedium * GameEnvironment.LODDistanceMedium;
+
             return this.visibleLights
-                .Where(l => l.CastShadow && l is ISceneLightSpot)
-                .Select(l => (ISceneLightSpot)l)
-                .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
+                .Where(l =>
+                {
+                    if (l.CastShadow && l is ISceneLightSpot lSpot)
+                    {
+                        return Vector3.DistanceSquared(lSpot.Position, eyePosition) < lDistanceSquared;
+                    }
+
+                    return false;
+                })
+                .Cast<ISceneLightSpot>()
+                .OrderBy(lSpot => Vector3.DistanceSquared(lSpot.Position, eyePosition))
                 .ToArray();
         }
 

@@ -92,6 +92,7 @@ namespace SceneTest
             this.InitializeSpriteButtons();
             this.InitializeSkyEffects();
             this.InitializeScenery();
+            this.InitializeTrees();
             this.InitializeFloorAsphalt();
             this.InitializeBuildingObelisk();
             this.InitializeCharacterSoldier();
@@ -215,6 +216,57 @@ namespace SceneTest
                         ModelContentFilename = "Clif.xml",
                     }
                 });
+        }
+        private void InitializeTrees()
+        {
+            var tree = this.AddComponent<Model>(
+                new ModelDescription()
+                {
+                    Name = "Tree",
+                    CastShadow = true,
+                    Static = true,
+                    SphericVolume = false,
+                    UseAnisotropicFiltering = true,
+                    AlphaEnabled = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTest/Trees",
+                        ModelContentFilename = "Tree.xml",
+                    }
+                }).Instance;
+
+            tree.Manipulator.SetPosition(350, baseHeight, 350);
+            tree.Manipulator.SetScale(2);
+
+            var trees = this.AddComponent<ModelInstanced>(
+                new ModelInstancedDescription()
+                {
+                    Name = "TreeI",
+                    CastShadow = true,
+                    Static = true,
+                    SphericVolume = false,
+                    UseAnisotropicFiltering = true,
+                    AlphaEnabled = true,
+                    Instances = 50,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "SceneTest/Trees",
+                        ModelContentFilename = "Tree.xml",
+                    }
+                }).Instance;
+
+            float r = 0;
+            foreach (var t in trees.GetInstances())
+            {
+                float px = Helper.RandomGenerator.NextFloat(400, 600);
+                float pz = Helper.RandomGenerator.NextFloat(400, 600);
+                r += 0.01f;
+                float s = Helper.RandomGenerator.NextFloat(1.8f, 2.5f);
+
+                t.Manipulator.SetPosition(px, baseHeight, pz);
+                t.Manipulator.SetRotation(r, 0.001f, 0.001f);
+                t.Manipulator.SetScale(s);
+            }
         }
         private void InitializeFloorAsphalt()
         {
@@ -921,10 +973,13 @@ namespace SceneTest
 
         private void GameStatusCollected(object sender, GameStatusCollectedEventArgs e)
         {
-            var lines = e.Trace.Select((i) => $"{i.Key}: {i.Value:0.00}");
-            var file = $"frame.{this.Game.GameTime.Ticks}.txt";
+            var lines = e.Trace.ReadStatus();
+            if (lines.Any())
+            {
+                var file = $"frame.{this.Game.GameTime.Ticks}.txt";
 
-            File.WriteAllLines(file, lines);
+                File.WriteAllLines(file, lines);
+            }
         }
     }
 }

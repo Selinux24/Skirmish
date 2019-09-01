@@ -13,7 +13,6 @@ namespace SceneTest
         private const int layerEffects = 2;
         private const float spaceSize = 80;
 
-        private SceneObject<Model> floorAsphalt = null;
         private SceneObject<ModelInstanced> buildingObelisks = null;
         private SceneObject<SpriteTexture> bufferDrawer = null;
 
@@ -45,6 +44,7 @@ namespace SceneTest
 
             this.InitializeFloorAsphalt();
             this.InitializeBuildingObelisk();
+            this.InitializeTree();
             this.InitializeSkyEffects();
             this.InitializeLights();
             this.InitializeDebug();
@@ -91,14 +91,14 @@ namespace SceneTest
                 }
             };
 
-            this.floorAsphalt = this.AddComponent<Model>(desc);
+            this.AddComponent<Model>(desc);
         }
         private void InitializeBuildingObelisk()
         {
             var desc = new ModelInstancedDescription()
             {
                 Name = "Obelisk",
-                Instances = 5,
+                Instances = 4,
                 CastShadow = true,
                 Static = true,
                 UseAnisotropicFiltering = true,
@@ -110,6 +110,24 @@ namespace SceneTest
             };
 
             this.buildingObelisks = this.AddComponent<ModelInstanced>(desc);
+        }
+        private void InitializeTree()
+        {
+            var desc = new ModelDescription()
+            {
+                Name = "Tree",
+                CastShadow = true,
+                Static = true,
+                UseAnisotropicFiltering = true,
+                AlphaEnabled = true,
+                Content = new ContentDescription()
+                {
+                    ContentFolder = "SceneLights/trees",
+                    ModelContentFilename = "Tree.xml",
+                }
+            };
+
+            this.AddComponent<Model>(desc);
         }
         private void InitializeSkyEffects()
         {
@@ -138,10 +156,10 @@ namespace SceneTest
 
             this.Lights.KeyLight.Enabled = true;
             this.Lights.KeyLight.CastShadow = true;
+            this.Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-1, -1, -3));
+
             this.Lights.BackLight.Enabled = true;
-            this.Lights.BackLight.CastShadow = false;
             this.Lights.FillLight.Enabled = true;
-            this.Lights.FillLight.CastShadow = false;
         }
         private void InitializeDebug()
         {
@@ -166,11 +184,10 @@ namespace SceneTest
         {
             base.Initialized();
 
-            this.buildingObelisks.Instance[0].Manipulator.SetPosition(0, 0, 0);
-            this.buildingObelisks.Instance[1].Manipulator.SetPosition(+5, 0, +5);
-            this.buildingObelisks.Instance[2].Manipulator.SetPosition(+5, 0, -5);
-            this.buildingObelisks.Instance[3].Manipulator.SetPosition(-5, 0, +5);
-            this.buildingObelisks.Instance[4].Manipulator.SetPosition(-5, 0, -5);
+            this.buildingObelisks.Instance[0].Manipulator.SetPosition(+5, 0, +5);
+            this.buildingObelisks.Instance[1].Manipulator.SetPosition(+5, 0, -5);
+            this.buildingObelisks.Instance[2].Manipulator.SetPosition(-5, 0, +5);
+            this.buildingObelisks.Instance[3].Manipulator.SetPosition(-5, 0, -5);
         }
 
         public override void Update(GameTime gameTime)
