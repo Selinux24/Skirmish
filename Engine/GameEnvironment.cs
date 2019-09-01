@@ -75,9 +75,17 @@ namespace Engine
             }
         }
 
-
+        /// <summary>
+        /// Maximum distance for High level detailed shadows
+        /// </summary>
         public static float ShadowDistanceHigh { get; set; } = 10f;
+        /// <summary>
+        /// Maximum distance for Medium level detailed shadows
+        /// </summary>
         public static float ShadowDistanceMedium { get; set; } = 25f;
+        /// <summary>
+        /// Maximum distance for Low level detailed shadows
+        /// </summary>
         public static float ShadowDistanceLow { get; set; } = 50f;
     }
 }

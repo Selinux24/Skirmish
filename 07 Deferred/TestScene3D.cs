@@ -985,7 +985,7 @@ namespace Deferred
                 this.Lights.DirectionalLights.Length,
                 this.Lights.PointLights.Length,
                 this.Lights.SpotLights.Length,
-                this.Lights.GetDirectionalShadowCastingLights().Length);
+                this.Lights.GetDirectionalShadowCastingLights().Count());
 
             if (Counters.Statistics.Length == 0)
             {
