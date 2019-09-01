@@ -249,7 +249,16 @@ namespace Engine.Content
                     this.Add(meshName, new Dictionary<string, SubMeshContent>());
                 }
 
-                this[meshName].Add(string.IsNullOrEmpty(materialName) ? ModelContent.NoMaterial : materialName, meshContent);
+                var matDict = this[meshName];
+
+                string matKey = string.IsNullOrEmpty(materialName) ? ModelContent.NoMaterial : materialName;
+
+                if (matDict.ContainsKey(matKey))
+                {
+                    throw new EngineException($"{matKey} already exists for {meshName}");
+                }
+
+                matDict.Add(matKey, meshContent);
             }
             /// <summary>
             /// Gets all meshes with the specified material

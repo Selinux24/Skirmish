@@ -447,13 +447,17 @@ namespace Engine
 
             if (this.HasVolumes)
             {
-                if (this.model.SphericVolume)
+                if (this.coarseBoundingSphere.HasValue)
                 {
-                    cull = volume.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
+                    cull = volume.Contains(this.coarseBoundingSphere.Value) == ContainmentType.Disjoint;
+                }
+                else if (this.model.SphericVolume)
+                {
+                    cull = volume.Contains(this.GetBoundingSphere(false)) == ContainmentType.Disjoint;
                 }
                 else
                 {
-                    cull = volume.Contains(this.GetBoundingBox()) == ContainmentType.Disjoint;
+                    cull = volume.Contains(this.GetBoundingBox(false)) == ContainmentType.Disjoint;
                 }
             }
             else

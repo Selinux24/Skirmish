@@ -368,7 +368,11 @@ namespace Engine
 
             if (this.HasVolumes)
             {
-                if (this.SphericVolume)
+                if (this.coarseBoundingSphere.HasValue)
+                {
+                    cull = volume.Contains(this.coarseBoundingSphere.Value) == ContainmentType.Disjoint;
+                }
+                else if (this.SphericVolume)
                 {
                     cull = volume.Contains(this.GetBoundingSphere()) == ContainmentType.Disjoint;
                 }

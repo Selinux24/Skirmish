@@ -2,6 +2,6 @@
 <ModelContentDescription>
   <model_filename>tree.dae</model_filename>
   <volumes>
-    <volume>col</volume>
+    <volume>Volume</volume>
   </volumes>
 </ModelContentDescription>

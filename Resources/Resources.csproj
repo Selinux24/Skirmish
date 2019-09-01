@@ -109,6 +109,13 @@
     <None Include="Blender\Buildings\Obelisk\normal.dds" />
     <None Include="Blender\Buildings\Obelisk\specular.dds" />
     <None Include="Blender\Buildings\Garage\concrete.jpg" />
+    <None Include="Blender\Environment\Trees\Tree0\tree_1.blend" />
+    <None Include="Blender\Environment\Trees\Tree0\tree_2.blend" />
+    <None Include="Blender\Environment\Trees\Tree0\tree_3.blend" />
+    <None Include="Blender\Environment\Trees\Tree1\trees.blend" />
+    <None Include="Blender\Environment\Trees\Tree1\tree_1.blend" />
+    <None Include="Blender\Environment\Trees\Tree1\tree_2.blend" />
+    <None Include="Blender\Environment\Trees\Tree1\tree_3.blend" />
     <None Include="Blender\Scenery\ModularSpaceShip\Assets.blend" />
     <None Include="Blender\Buildings\Watch Tower\Watch Tower.blend" />
     <None Include="Blender\Characters\Human2\Human2.blend" />
@@ -134,6 +141,10 @@
     <None Include="Blender\Buildings\Watch Tower\Wood.jpg" />
     <Content Include="Blender\Characters\Rat\rat_run.png" />
     <Content Include="Blender\Characters\Rat\Rat_uv.png" />
+    <None Include="Blender\Environment\Trees\Tree0\Brown_Bark_1_diffuse.PNG" />
+    <None Include="Blender\Environment\Trees\Tree0\Dead_Branch_diffuse.PNG" />
+    <None Include="Blender\Environment\Trees\Tree1\Brown_Bark_1_diffuse.PNG" />
+    <None Include="Blender\Environment\Trees\Tree1\Sycamore_Maple_diffuse.PNG" />
     <Content Include="Blender\Scenery\Clif\dirt_2048x2048.jpg" />
     <Content Include="Blender\Scenery\Ground\buildings.png" />
     <None Include="Blender\Scenery\ModularDungeon\Assets.blend" />
@@ -235,6 +246,18 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Characters\Soldier\soldier_anim2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree0\Bark_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree0\Leafs_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree1\Bark_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree1\Leafs_d.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Furniture\Container\ikube azul-1.png">
@@ -524,9 +547,8 @@
     <None Include="Blender\Vehicles\Tank\tank.blend" />
     <None Include="Blender\Scenery\Terrain\terrain.blend" />
     <None Include="Blender\Furniture\Torch\torch.blend" />
-    <None Include="Blender\Environment\Trees\Tree1\tree1_1.blend" />
-    <None Include="Blender\Environment\Trees\Tree1\tree1_2.blend" />
-    <None Include="Blender\Environment\Trees\Tree2\tree2.blend" />
+    <None Include="Blender\Environment\Trees\Tree2\tree.blend" />
+    <None Include="Blender\Environment\Trees\Tree3\tree.blend" />
     <None Include="Blender\Environment\Trees\Birch\birch_a.blend" />
     <None Include="Blender\Scenery\TwoLevels\two_levels.blend" />
     <Content Include="Collada\Environment\Trees\Birch\birch_b.dae">
@@ -586,6 +608,36 @@
     <Content Include="Collada\Scenery\ModularSpaceShip\Assets.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Collada\Environment\Trees\Tree0\tree_1.dae">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree0\tree_2.dae">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree0\tree_3.dae">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree1\trees.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree1\tree_1.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree1\tree_2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree1\tree_3.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree2\tree.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Collada\Environment\Trees\Tree3\tree.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Include="Collada\Tests\AniCube\aniCube.dae" />
     <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_diffuse.dds" />
     <None Include="Blender\Environment\Rocks\boulder_granite_grey_01_normal.dds" />
@@ -606,46 +658,37 @@
     <Content Include="Collada\Environment\Trees\Birch\birch_01_leaves_normal.dds">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Environment\Trees\Tree1\leafs1.png">
+    <Content Include="Collada\Environment\Trees\Tree2\leafs1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Environment\Trees\Tree1\leafs1a.png">
+    <Content Include="Collada\Environment\Trees\Tree2\leafs1a.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Environment\Trees\Tree1\wood.jpg">
+    <Content Include="Collada\Environment\Trees\Tree2\wood.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Environment\Trees\Tree2\bark_albedo.png">
+    <Content Include="Collada\Environment\Trees\Tree3\bark_albedo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Environment\Trees\Tree2\bark_normal.png">
+    <Content Include="Collada\Environment\Trees\Tree3\bark_normal.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Environment\Trees\Tree2\bark_specular.png">
+    <Content Include="Collada\Environment\Trees\Tree3\bark_specular.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Environment\Trees\Tree2\bushes_albedo.png">
+    <Content Include="Collada\Environment\Trees\Tree3\bushes_albedo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Environment\Trees\Tree2\bushes_normal.png">
+    <Content Include="Collada\Environment\Trees\Tree3\bushes_normal.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Collada\Environment\Trees\Tree2\bushes_specular.png">
+    <Content Include="Collada\Environment\Trees\Tree3\bushes_specular.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Vehicles\Helicopter\helicopter.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Environment\Trees\Birch\birch_a.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Collada\Environment\Trees\Tree1\tree1_1.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Collada\Environment\Trees\Tree1\tree1_2.dae">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Collada\Environment\Trees\Tree2\tree2.dae">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Collada\Vehicles\CapitalShip\capital ship.dae">
@@ -736,13 +779,13 @@
     <None Include="Blender\Characters\Soldier\soldier.jpg" />
     <None Include="Blender\Scenery\Terrain\terrain.png" />
     <None Include="Blender\Scenery\Terrain\terrain_nmap.png" />
-    <None Include="Blender\Environment\Trees\Tree2\tree2_bark_albedo.png" />
-    <None Include="Blender\Environment\Trees\Tree2\tree2_bark_normal.png" />
-    <None Include="Blender\Environment\Trees\Tree2\tree2_bark_specular.png" />
-    <None Include="Blender\Environment\Trees\Tree2\tree2_bushes_albedo.png" />
-    <None Include="Blender\Environment\Trees\Tree2\tree2_bushes_normal.png" />
-    <None Include="Blender\Environment\Trees\Tree2\tree2_bushes_specular.png" />
-    <None Include="Blender\Environment\Trees\Tree1\wood.jpg" />
+    <None Include="Blender\Environment\Trees\Tree3\bark_albedo.png" />
+    <None Include="Blender\Environment\Trees\Tree3\bark_normal.png" />
+    <None Include="Blender\Environment\Trees\Tree3\bark_specular.png" />
+    <None Include="Blender\Environment\Trees\Tree3\bushes_albedo.png" />
+    <None Include="Blender\Environment\Trees\Tree3\bushes_normal.png" />
+    <None Include="Blender\Environment\Trees\Tree3\bushes_specular.png" />
+    <None Include="Blender\Environment\Trees\Tree2\wood.jpg" />
     <None Include="Collada\Tests\AniCube\aniCube.png" />
     <Content Include="Collada\Scenery\Ground\ground.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -788,8 +831,8 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Blender\Environment\Trees\Tree1\leafs1.png" />
-    <None Include="Blender\Environment\Trees\Tree1\leafs1a.png" />
+    <None Include="Blender\Environment\Trees\Tree2\leafs1.png" />
+    <None Include="Blender\Environment\Trees\Tree2\leafs1a.png" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Collada\Scenery\TwoLevels\terrain.png">
@@ -814,6 +857,7 @@
   <ItemGroup>
     <Reference Include="System" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

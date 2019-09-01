@@ -93,10 +93,10 @@ namespace Engine.Content
         /// <param name="armatureName">Armature name</param>
         /// <param name="meshesByLOD">Level of detail meshes</param>
         /// <returns>Returns the filtered model content parts</returns>
-        private static IEnumerable<ModelContent> FilterGeometry(ModelContent modelContent, string armatureName, string[] meshesByLOD)
+        private static IEnumerable<ModelContent> FilterGeometry(ModelContent modelContent, string armatureName, IEnumerable<string> meshesByLOD)
         {
             bool filterByArmature = !string.IsNullOrWhiteSpace(armatureName);
-            bool filterByMeshes = meshesByLOD?.Length > 0;
+            bool filterByMeshes = meshesByLOD?.Any() == true;
 
             if (!filterByArmature && !filterByMeshes)
             {
@@ -116,13 +116,24 @@ namespace Engine.Content
             //Filter by level of detail meshes
             if (filterByMeshes)
             {
-                for (int i = 0; i < meshesByLOD.Length; i++)
-                {
-                    res.Add(modelContent.Filter(meshesByLOD[i].Replace('.', '_')));
-                }
+                var contents = meshesByLOD
+                    .Select(lodMeshName => modelContent.Filter(lodMeshName.Replace('.', '_')))
+                    .Where(mContent => mContent != null);
+
+                res.AddRange(contents);
             }
 
             return res;
+        }
+        /// <summary>
+        /// Gets whether the specified geometry name is a marked volume
+        /// </summary>
+        /// <param name="geometryName">Geometry name</param>
+        /// <param name="volumes">List of volumen name prefixes</param>
+        /// <returns>Returns true if the geometry name starts with any of the volume names in the collection</returns>
+        private static bool IsVolume(string geometryName, IEnumerable<string> volumes)
+        {
+            return volumes?.Any(v => geometryName.StartsWith(v, StringComparison.OrdinalIgnoreCase)) == true;
         }
 
         #region Dictionary loaders
@@ -254,17 +265,13 @@ namespace Engine.Content
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="volumes">Volume mesh names</param>
-        private static void ProcessLibraryGeometries(Collada dae, ModelContent modelContent, string[] volumes)
+        private static void ProcessLibraryGeometries(Collada dae, ModelContent modelContent, IEnumerable<string> volumes)
         {
             if (dae.LibraryGeometries?.Length > 0)
             {
                 foreach (var geometry in dae.LibraryGeometries)
                 {
-                    bool isVolume = false;
-                    if (volumes?.Length > 0 && Array.Exists(volumes, v => string.Equals(v, geometry.Name, StringComparison.OrdinalIgnoreCase)))
-                    {
-                        isVolume = true;
-                    }
+                    bool isVolume = IsVolume(geometry.Name, volumes);
 
                     var info = ProcessGeometry(geometry, isVolume);
                     if (info?.Length > 0)
@@ -272,7 +279,7 @@ namespace Engine.Content
                         foreach (var subMesh in info)
                         {
                             string materialName = FindMaterialTarget(subMesh.Material, dae.LibraryVisualScenes);
-                            if (!string.IsNullOrEmpty(materialName))
+                            if (!string.IsNullOrWhiteSpace(materialName))
                             {
                                 var mat = modelContent.Materials[materialName];
 
