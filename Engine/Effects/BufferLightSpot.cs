@@ -1,4 +1,7 @@
 ﻿using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.Effects
@@ -13,6 +16,44 @@ namespace Engine.Effects
         /// Maximum light count
         /// </summary>
         public const int MAX = 16;
+
+        /// <summary>
+        /// Default buffer collection
+        /// </summary>
+        public static BufferLightSpot[] Default
+        {
+            get
+            {
+                return new BufferLightSpot[MAX];
+            }
+        }
+        /// <summary>
+        /// Builds a light buffer collection
+        /// </summary>
+        /// <param name="lights">Light list</param>
+        /// <param name="lightCount">Returns the assigned light count</param>
+        /// <returns>Returns a light buffer collection</returns>
+        public static BufferLightSpot[] Build(IEnumerable<SceneLightSpot> lights, out int lightCount)
+        {
+            if (!lights.Any())
+            {
+                lightCount = 0;
+
+                return Default;
+            }
+
+            var bSpotLights = Default;
+
+            var spot = lights.ToArray();
+            for (int i = 0; i < Math.Min(spot.Length, MAX); i++)
+            {
+                bSpotLights[i] = new BufferLightSpot(spot[i]);
+            }
+
+            lightCount = Math.Min(spot.Length, MAX);
+
+            return bSpotLights;
+        }
 
         /// <summary>
         /// Diffuse color

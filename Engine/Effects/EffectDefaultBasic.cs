@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Effects
 {
@@ -1071,43 +1070,15 @@ namespace Engine.Effects
             this.World = world;
             this.WorldViewProjection = world * viewProjection;
 
-            var bHemiLight = BufferLightHemispheric.Default;
-            var bDirLights = new BufferLightDirectional[BufferLightDirectional.MAX];
-            var bPointLights = new BufferLightPoint[BufferLightPoint.MAX];
-            var bSpotLights = new BufferLightSpot[BufferLightSpot.MAX];
-            var lCount = new[] { 0, 0, 0 };
-
             if (lights != null)
             {
                 this.EyePositionWorld = eyePositionWorld;
 
-                var hemi = lights.GetVisibleHemisphericLight();
-                if (hemi != null)
-                {
-                    bHemiLight = new BufferLightHemispheric(hemi);
-                }
-
-                var dir = lights.GetVisibleDirectionalLights();
-                for (int i = 0; i < Math.Min(dir.Length, BufferLightDirectional.MAX); i++)
-                {
-                    bDirLights[i] = new BufferLightDirectional(dir[i]);
-                }
-
-                var point = lights.GetVisiblePointLights();
-                for (int i = 0; i < Math.Min(point.Length, BufferLightPoint.MAX); i++)
-                {
-                    bPointLights[i] = new BufferLightPoint(point[i]);
-                }
-
-                var spot = lights.GetVisibleSpotLights();
-                for (int i = 0; i < Math.Min(spot.Length, BufferLightSpot.MAX); i++)
-                {
-                    bSpotLights[i] = new BufferLightSpot(spot[i]);
-                }
-
-                lCount[0] = Math.Min(dir.Length, BufferLightDirectional.MAX);
-                lCount[1] = Math.Min(point.Length, BufferLightPoint.MAX);
-                lCount[2] = Math.Min(spot.Length, BufferLightSpot.MAX);
+                this.HemiLight = BufferLightHemispheric.Build(lights.GetVisibleHemisphericLight());
+                this.DirLights = BufferLightDirectional.Build(lights.GetVisibleDirectionalLights(), out int dirLength);
+                this.PointLights = BufferLightPoint.Build(lights.GetVisiblePointLights(), out int pointLength);
+                this.SpotLights = BufferLightSpot.Build(lights.GetVisibleSpotLights(), out int spotLength);
+                this.LightCount = new[] { dirLength, pointLength, spotLength };
 
                 this.FogStart = lights.FogStart;
                 this.FogRange = lights.FogRange;
@@ -1121,6 +1092,12 @@ namespace Engine.Effects
             {
                 this.EyePositionWorld = Vector3.Zero;
 
+                this.HemiLight = BufferLightHemispheric.Default;
+                this.DirLights = BufferLightDirectional.Default;
+                this.PointLights = BufferLightPoint.Default;
+                this.SpotLights = BufferLightSpot.Default;
+                this.LightCount = new[] { 0, 0, 0 };
+
                 this.FogStart = 0;
                 this.FogRange = 0;
                 this.FogColor = Color.Transparent;
@@ -1129,12 +1106,6 @@ namespace Engine.Effects
                 this.ShadowMapPoint = null;
                 this.ShadowMapSpot = null;
             }
-
-            this.HemiLight = bHemiLight;
-            this.DirLights = bDirLights;
-            this.PointLights = bPointLights;
-            this.SpotLights = bSpotLights;
-            this.LightCount = lCount;
         }
     }
 }

@@ -28,6 +28,20 @@ namespace Engine.Effects
                 };
             }
         }
+        /// <summary>
+        /// Builds a hemispheric light buffer
+        /// </summary>
+        /// <param name="light">Light</param>
+        /// <returns>Returns the new buffer</returns>
+        public static BufferLightHemispheric Build(SceneLightHemispheric light)
+        {
+            if (light != null)
+            {
+                return new BufferLightHemispheric(light);
+            }
+
+            return Default;
+        }
 
         /// <summary>
         /// Ambient Up

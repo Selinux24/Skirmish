@@ -529,14 +529,14 @@ namespace Engine
 #if DEBUG
             Stopwatch swDirectional = Stopwatch.StartNew();
 #endif
-            if (directionalLights != null && directionalLights.Length > 0)
+            if (directionalLights.Any())
             {
                 this.lightDrawer.BindGobalLight(graphics);
 
-                for (int i = 0; i < directionalLights.Length; i++)
+                foreach (var light in directionalLights)
                 {
                     effect.UpdatePerLight(
-                        directionalLights[i],
+                        light,
                         context.ShadowMapDirectional);
 
                     this.lightDrawer.DrawDirectional(graphics, effect);
@@ -551,16 +551,16 @@ namespace Engine
 #if DEBUG
             Stopwatch swPoint = Stopwatch.StartNew();
 #endif
-            if (pointLights != null && pointLights.Length > 0)
+            if (pointLights.Any())
             {
                 this.lightDrawer.BindPoint(graphics);
 
-                for (int i = 0; i < pointLights.Length; i++)
+                foreach (var light in pointLights)
                 {
                     //Draw Pass
                     effect.UpdatePerLight(
-                        pointLights[i],
-                        pointLights[i].Local,
+                        light,
+                        light.Local,
                         context.ViewProjection,
                         context.ShadowMapPoint);
 
@@ -576,14 +576,12 @@ namespace Engine
 #if DEBUG
             Stopwatch swSpot = Stopwatch.StartNew();
 #endif
-            if (spotLights != null && spotLights.Length > 0)
+            if (spotLights.Any())
             {
                 this.lightDrawer.BindSpot(graphics);
 
-                for (int i = 0; i < spotLights.Length; i++)
+                foreach (var light in spotLights)
                 {
-                    var light = spotLights[i];
-
                     //Draw Pass
                     effect.UpdatePerLight(
                         light,
@@ -606,9 +604,9 @@ namespace Engine
             this.lightStats.Directional = swDirectional.ElapsedTicks;
             this.lightStats.Point = swPoint.ElapsedTicks;
             this.lightStats.Spot = swSpot.ElapsedTicks;
-            this.lightStats.DirectionalLights = directionalLights?.Length ?? 0;
-            this.lightStats.PointLights = pointLights?.Length ?? 0;
-            this.lightStats.SpotLights = spotLights?.Length ?? 0;
+            this.lightStats.DirectionalLights = directionalLights?.Count() ?? 0;
+            this.lightStats.PointLights = pointLights?.Count() ?? 0;
+            this.lightStats.SpotLights = spotLights?.Count() ?? 0;
 
             this.lightStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif

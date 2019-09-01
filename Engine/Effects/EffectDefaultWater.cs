@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Effects
 {
@@ -319,18 +318,10 @@ namespace Engine.Effects
             this.TotalTime = state.TotalTime;
             this.IterParams = new Int3(state.Steps, state.GeometryIterations, state.ColorIterations);
 
-            var bDirLights = new BufferLightDirectional[BufferLightDirectional.MAX];
-            int lCount = 0;
-
             if (lights != null)
             {
-                var dir = lights.GetVisibleDirectionalLights();
-                for (int i = 0; i < Math.Min(dir.Length, BufferLightDirectional.MAX); i++)
-                {
-                    bDirLights[i] = new BufferLightDirectional(dir[i]);
-                }
-
-                lCount = Math.Min(dir.Length, BufferLightDirectional.MAX);
+                this.DirLights = BufferLightDirectional.Build(lights.GetVisibleDirectionalLights(), out int dirLength);
+                this.LightCount = dirLength;
 
                 this.Ambient = lights.Intensity;
 
@@ -340,13 +331,15 @@ namespace Engine.Effects
             }
             else
             {
+                this.DirLights = BufferLightDirectional.Default;
+                this.LightCount = 0;
+
+                this.Ambient = 1;
+
                 this.FogStart = 0;
                 this.FogRange = 0;
                 this.FogColor = Color.Transparent.RGB();
             }
-
-            this.DirLights = bDirLights;
-            this.LightCount = lCount;
         }
     }
 }

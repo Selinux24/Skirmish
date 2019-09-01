@@ -578,10 +578,9 @@ namespace Engine.Common
             var graphics = this.Game.Graphics;
             int assigned = 0;
 
-            for (int l = 0; l < shadowCastingLights.Length; l++)
+            int l = 0;
+            foreach (var light in shadowCastingLights)
             {
-                var light = shadowCastingLights[l];
-
                 light.ClearShadowParameters();
 
                 if (assigned >= MaxDirectionalShadowMaps)
@@ -607,6 +606,8 @@ namespace Engine.Common
                 assigned++;
 
                 cullIndex++;
+
+                l++;
             }
 
             gStopwatch.Stop();
@@ -662,10 +663,9 @@ namespace Engine.Common
             var graphics = this.Game.Graphics;
             int assigned = 0;
 
-            for (int l = 0; l < shadowCastingLights.Length; l++)
+            int l = 0;
+            foreach (var light in shadowCastingLights)
             {
-                var light = shadowCastingLights[l];
-
                 light.ClearShadowParameters();
 
                 if (assigned >= MaxCubicShadows)
@@ -703,6 +703,8 @@ namespace Engine.Common
                 assigned++;
 
                 cullIndex++;
+
+                l++;
             }
 
             gStopwatch.Stop();
@@ -759,10 +761,9 @@ namespace Engine.Common
             var graphics = this.Game.Graphics;
             int assigned = 0;
 
-            for (int l = 0; l < shadowCastingLights.Length; l++)
+            int l = 0;
+            foreach (var light in shadowCastingLights)
             {
-                var light = shadowCastingLights[l];
-
                 light.ClearShadowParameters();
 
                 if (assigned >= MaxCubicShadows)
@@ -802,6 +803,8 @@ namespace Engine.Common
                 assigned++;
 
                 cullIndex++;
+
+                l++;
             }
 
             gStopwatch.Stop();

@@ -423,7 +423,7 @@ namespace Engine
         /// Gets the visible directional lights
         /// </summary>
         /// <returns>Returns the visible directional lights array</returns>
-        public SceneLightDirectional[] GetVisibleDirectionalLights()
+        public IEnumerable<SceneLightDirectional> GetVisibleDirectionalLights()
         {
             return this.visibleLights
                 .FindAll(l => l is SceneLightDirectional)
@@ -434,7 +434,7 @@ namespace Engine
         /// Gets the visible point lights
         /// </summary>
         /// <returns>Returns the visible point lights array</returns>
-        public SceneLightPoint[] GetVisiblePointLights()
+        public IEnumerable<SceneLightPoint> GetVisiblePointLights()
         {
             return this.visibleLights
                 .FindAll(l => l is SceneLightPoint)
@@ -445,7 +445,7 @@ namespace Engine
         /// Gets the visible spot lights
         /// </summary>
         /// <returns>Returns the visible spot lights array</returns>
-        public SceneLightSpot[] GetVisibleSpotLights()
+        public IEnumerable<SceneLightSpot> GetVisibleSpotLights()
         {
             return this.visibleLights
                 .FindAll(l => l is SceneLightSpot)
@@ -457,7 +457,7 @@ namespace Engine
         /// Gets a collection of directional lights that cast shadow
         /// </summary>
         /// <returns>Returns a light collection</returns>
-        public ISceneLightDirectional[] GetDirectionalShadowCastingLights()
+        public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights()
         {
             return this.visibleLights
                 .Where(l => l.CastShadow && l is SceneLightDirectional)
@@ -469,7 +469,7 @@ namespace Engine
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public ISceneLightPoint[] GetPointShadowCastingLights(Vector3 eyePosition)
+        public IEnumerable<ISceneLightPoint> GetPointShadowCastingLights(Vector3 eyePosition)
         {
             float lDistanceSquared = GameEnvironment.LODDistanceMedium * GameEnvironment.LODDistanceMedium;
 
@@ -492,7 +492,7 @@ namespace Engine
         /// </summary>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public ISceneLightSpot[] GetSpotShadowCastingLights(Vector3 eyePosition)
+        public IEnumerable<ISceneLightSpot> GetSpotShadowCastingLights(Vector3 eyePosition)
         {
             float lDistanceSquared = GameEnvironment.LODDistanceMedium * GameEnvironment.LODDistanceMedium;
 

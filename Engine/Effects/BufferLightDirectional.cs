@@ -1,4 +1,7 @@
 ﻿using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.Effects
@@ -13,6 +16,44 @@ namespace Engine.Effects
         /// Maximum light count
         /// </summary>
         public const int MAX = 3;
+
+        /// <summary>
+        /// Default buffer collection
+        /// </summary>
+        public static BufferLightDirectional[] Default
+        {
+            get
+            {
+                return new BufferLightDirectional[MAX];
+            }
+        }
+        /// <summary>
+        /// Builds a light buffer collection
+        /// </summary>
+        /// <param name="lights">Light list</param>
+        /// <param name="lightCount">Returns the assigned light count</param>
+        /// <returns>Returns a light buffer collection</returns>
+        public static BufferLightDirectional[] Build(IEnumerable<SceneLightDirectional> lights, out int lightCount)
+        {
+            if (!lights.Any())
+            {
+                lightCount = 0;
+
+                return Default;
+            }
+
+            var bDirLights = Default;
+
+            var dir = lights.ToArray();
+            for (int i = 0; i < Math.Min(dir.Length, MAX); i++)
+            {
+                bDirLights[i] = new BufferLightDirectional(dir[i]);
+            }
+
+            lightCount = Math.Min(dir.Length, MAX);
+
+            return bDirLights;
+        }
 
         /// <summary>
         /// Light direction vector
