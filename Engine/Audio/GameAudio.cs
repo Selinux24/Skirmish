@@ -206,19 +206,23 @@ namespace Engine.Audio
         /// </summary>
         internal GameAudio()
         {
-            this.device = new XAudio2();
+            XAudio2Flags audio2Flags = XAudio2Flags.None;
+#if DEBUG
+            audio2Flags = XAudio2Flags.DebugEngine;
+#endif
+
+            this.device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor);
 
 #if DEBUG
-            DebugConfiguration debugConfiguration = new DebugConfiguration()
-            {
-                TraceMask = (int)(LogType.Errors | LogType.Warnings),
-                BreakMask = (int)(LogType.Errors),
-            };
-            this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
+            //DebugConfiguration debugConfiguration = new DebugConfiguration()
+            //{
+            //    TraceMask = (int)(LogType.Errors | LogType.Warnings),
+            //    BreakMask = (int)(LogType.Errors),
+            //};
+            //this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
 #endif
 
             this.MasteringVoice = new MasteringVoice(this.device);
-
             this.MasteringVoice.GetChannelMask(out int channelMask);
             this.Speakers = (Speakers)channelMask;
 

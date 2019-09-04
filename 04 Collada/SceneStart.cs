@@ -255,6 +255,18 @@ namespace Collada
             {
                 music.MasterVolume += gameTime.ElapsedSeconds / 10;
             }
+
+            if (this.Game.Input.KeyPressed(Keys.ControlKey))
+            {
+                if (this.Game.Input.KeyJustReleased(Keys.Left))
+                {
+                    currentMusic.Pan = -1;
+                }
+                if (this.Game.Input.KeyJustReleased(Keys.Right))
+                {
+                    currentMusic.Pan = 1;
+                }
+            }
         }
         private void UpdateListenerInput(GameTime gameTime)
         {

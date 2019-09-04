@@ -273,6 +273,8 @@ namespace Engine.Audio
             {
                 this.Apply3D();
             }
+
+            this.SetPanOutputMatrix();
         }
 
         /// <summary>
@@ -453,6 +455,21 @@ namespace Engine.Audio
 
             return flags;
         }
+        /// <summary>
+        /// Gets the destination voice
+        /// </summary>
+        /// <returns>Returns the destination voice</returns>
+        private Voice GetDestinationVoice()
+        {
+            if (this.Effect.GameAudio.UseReverb)
+            {
+                return this.Effect.GameAudio.ReverbVoice;
+            }
+            else
+            {
+                return this.Effect.GameAudio.MasteringVoice;
+            }
+        }
 
         /// <summary>
         /// Pauses the playback of the current instance.
@@ -480,9 +497,9 @@ namespace Engine.Audio
 
             voice.SubmitSourceBuffer(CurrentAudioBuffer, Effect.DecodedPacketsInfo);
 
-            this.Update();
-
             voice.Start();
+
+            this.Update();
 
             paused = false;
         }
@@ -544,8 +561,10 @@ namespace Engine.Audio
         /// <param name="sourceChannels">Resulting source channels</param>
         private void InitializeOutputMatrix(out int destinationChannels, out int sourceChannels)
         {
-            destinationChannels = this.Effect.GameAudio.MasteringVoice.VoiceDetails.InputChannelCount;
-            sourceChannels = this.Effect.WaveFormat.Channels;
+            var voiceDst = this.GetDestinationVoice();
+
+            destinationChannels = voiceDst.VoiceDetails.InputChannelCount;
+            sourceChannels = this.voice.VoiceDetails.InputChannelCount;
 
             var outputMatrixSize = destinationChannels * sourceChannels;
 
@@ -567,54 +586,50 @@ namespace Engine.Audio
         {
             InitializeOutputMatrix(out int destinationChannels, out int sourceChannels);
 
-            if (pan != 0.0f)
+            float panLeft = 0.5f - (pan * 0.5f);
+            float panRight = 0.5f + (pan * 0.5f);
+
+            //The level sent from source channel S to destination channel D is specified in the form outputMatrix[SourceChannels × D + S]
+            for (int s = 0; s < sourceChannels; s++)
             {
-                var panLeft = 1.0f - pan;
-                var panRight = 1.0f + pan;
-
-                //The level sent from source channel S to destination channel D is specified in the form outputMatrix[SourceChannels × D + S]
-                for (int S = 0; S < sourceChannels; S++)
+                switch ((AudioSpeakers)this.Effect.GameAudio.Speakers)
                 {
-                    switch (this.Effect.GameAudio.Speakers)
-                    {
-                        case Speakers.Stereo:
-                        case Speakers.TwoPointOne:
-                        case Speakers.Surround:
-                            outputMatrix[(sourceChannels * 0) + S] = panLeft;
-                            outputMatrix[(sourceChannels * 1) + S] = panRight;
-                            break;
+                    case AudioSpeakers.Mono:
+                        outputMatrix[(sourceChannels * 0) + s] = 1;
+                        break;
 
-                        case Speakers.Quad:
-                            outputMatrix[(sourceChannels * 0) + S] = outputMatrix[(sourceChannels * 2) + S] = panLeft;
-                            outputMatrix[(sourceChannels * 1) + S] = outputMatrix[(sourceChannels * 3) + S] = panRight;
-                            break;
+                    case AudioSpeakers.Stereo:
+                    case AudioSpeakers.Surround:
+                        outputMatrix[(sourceChannels * 0) + s] = panLeft;
+                        outputMatrix[(sourceChannels * 1) + s] = panRight;
+                        break;
 
-                        case Speakers.FourPointOne:
-                            outputMatrix[(sourceChannels * 0) + S] = outputMatrix[(sourceChannels * 3) + S] = panLeft;
-                            outputMatrix[(sourceChannels * 1) + S] = outputMatrix[(sourceChannels * 4) + S] = panRight;
-                            break;
+                    case AudioSpeakers.Quad:
+                        outputMatrix[(sourceChannels * 0) + s] = outputMatrix[(sourceChannels * 2) + s] = panLeft;
+                        outputMatrix[(sourceChannels * 1) + s] = outputMatrix[(sourceChannels * 3) + s] = panRight;
+                        break;
 
-                        case Speakers.FivePointOne:
-                        case Speakers.SevenPointOne:
-                        case Speakers.FivePointOneSurround:
-                            outputMatrix[(sourceChannels * 0) + S] = outputMatrix[(sourceChannels * 4) + S] = panLeft;
-                            outputMatrix[(sourceChannels * 1) + S] = outputMatrix[(sourceChannels * 5) + S] = panRight;
-                            break;
+                    case AudioSpeakers.FivePointOne:
+                    case AudioSpeakers.FivePointOneSurround:
+                    case AudioSpeakers.SevenPointOne:
+                        outputMatrix[(sourceChannels * 0) + s] = outputMatrix[(sourceChannels * 4) + s] = panLeft;
+                        outputMatrix[(sourceChannels * 1) + s] = outputMatrix[(sourceChannels * 5) + s] = panRight;
+                        break;
 
-                        case Speakers.SevenPointOneSurround:
-                            outputMatrix[(sourceChannels * 0) + S] = outputMatrix[(sourceChannels * 4) + S] = outputMatrix[(sourceChannels * 6) + S] = panLeft;
-                            outputMatrix[(sourceChannels * 1) + S] = outputMatrix[(sourceChannels * 5) + S] = outputMatrix[(sourceChannels * 7) + S] = panRight;
-                            break;
+                    case AudioSpeakers.SevenPointOneSurround:
+                        outputMatrix[(sourceChannels * 0) + s] = outputMatrix[(sourceChannels * 4) + s] = outputMatrix[(sourceChannels * 6) + s] = panLeft;
+                        outputMatrix[(sourceChannels * 1) + s] = outputMatrix[(sourceChannels * 5) + s] = outputMatrix[(sourceChannels * 7) + s] = panRight;
+                        break;
 
-                        case Speakers.Mono:
-                        default:
-                            // don't do any panning here
-                            break;
-                    }
+                    default:
+                        // don't do any panning here
+                        break;
                 }
             }
 
-            voice.SetOutputMatrix(sourceChannels, destinationChannels, outputMatrix);
+            var voiceDst = this.GetDestinationVoice();
+
+            voice.SetOutputMatrix(voiceDst, sourceChannels, destinationChannels, outputMatrix);
         }
 
         /// <summary>
