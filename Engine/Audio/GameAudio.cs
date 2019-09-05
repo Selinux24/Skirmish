@@ -71,10 +71,6 @@ namespace Engine.Audio
         /// </summary>
         internal SubmixVoice ReverbVoice { get; set; }
         /// <summary>
-        /// Reverb effect
-        /// </summary>
-        internal Reverb ReverbEffect { get; set; }
-        /// <summary>
         /// Speakers
         /// </summary>
         internal Speakers Speakers { get; set; }
@@ -164,7 +160,7 @@ namespace Engine.Audio
             }
             set
             {
-                if (this.ReverbEffect == null || reverbPreset == value)
+                if (reverbPreset == value)
                 {
                     return;
                 }
@@ -214,12 +210,12 @@ namespace Engine.Audio
             this.device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor);
 
 #if DEBUG
-            //DebugConfiguration debugConfiguration = new DebugConfiguration()
-            //{
-            //    TraceMask = (int)(LogType.Errors | LogType.Warnings),
-            //    BreakMask = (int)(LogType.Errors),
-            //};
-            //this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
+            DebugConfiguration debugConfiguration = new DebugConfiguration()
+            {
+                TraceMask = (int)(LogType.Errors | LogType.Warnings),
+                BreakMask = (int)(LogType.Errors),
+            };
+            this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
 #endif
 
             this.MasteringVoice = new MasteringVoice(this.device);
@@ -261,8 +257,6 @@ namespace Engine.Audio
                 this.ReverbVoice?.DestroyVoice();
                 this.ReverbVoice?.Dispose();
                 this.ReverbVoice = null;
-                this.ReverbEffect?.Dispose();
-                this.ReverbEffect = null;
 
                 this.MasteringVoice?.DestroyVoice();
                 this.MasteringVoice?.Dispose();
@@ -375,33 +369,30 @@ namespace Engine.Audio
         /// </summary>
         private void EnableReverb()
         {
-            if (this.ReverbEffect == null)
-            {
-#if DEBUG
-                this.ReverbEffect = new Reverb(this.device, true);
-#else
-                this.ReverbEffect = new Reverb(this.device);
-#endif
-            }
-
             if (this.ReverbVoice == null)
             {
-                var masterDetails = this.MasteringVoice.VoiceDetails;
-                var sendFlags = this.UseReverbFilter ? SubmixVoiceFlags.UseFilter : SubmixVoiceFlags.None;
-
-                var effectDescriptor = new EffectDescriptor(this.ReverbEffect)
+#if DEBUG
+                var reverbEffect = new Reverb(this.device, true);
+#else
+                var reverbEffect = new Reverb(this.device);
+#endif
+                using (reverbEffect)
                 {
-                    InitialState = true,
-                    OutputChannelCount = masterDetails.InputChannelCount,
-                };
+                    var masterDetails = this.MasteringVoice.VoiceDetails;
+                    var sendFlags = this.UseReverbFilter ? SubmixVoiceFlags.UseFilter : SubmixVoiceFlags.None;
 
-                this.ReverbVoice = new SubmixVoice(
-                    this.device,
-                    masterDetails.InputChannelCount,
-                    masterDetails.InputSampleRate,
-                    sendFlags,
-                    0,
-                    new EffectDescriptor[] { effectDescriptor });
+                    this.ReverbVoice = new SubmixVoice(
+                        this.device,
+                        masterDetails.InputChannelCount,
+                        masterDetails.InputSampleRate,
+                        sendFlags,
+                        0);
+
+                    this.ReverbVoice.SetEffectChain(new EffectDescriptor(reverbEffect, masterDetails.InputChannelCount)
+                    {
+                        InitialState = true,
+                    });
+                }
             }
 
             this.ReverbVoice.EnableEffect(0);
