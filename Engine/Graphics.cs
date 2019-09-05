@@ -617,7 +617,11 @@ namespace Engine
             this.deviceDebugInfoQueue = this.deviceDebug.QueryInterface<InfoQueue>();
 
             var severityFilter = new InfoQueueFilter()
-            {
+            { 
+                AllowList = new InfoQueueFilterDescription()
+                {
+
+                },
                 DenyList = new InfoQueueFilterDescription()
                 {
                     Severities = new MessageSeverity[]
@@ -630,6 +634,10 @@ namespace Engine
 
             var idFilter = new InfoQueueFilter()
             {
+                AllowList = new InfoQueueFilterDescription()
+                {
+
+                },
                 DenyList = new InfoQueueFilterDescription()
                 {
                     Ids = new MessageId[]
