@@ -41,6 +41,9 @@ namespace Instancing
             //Troops
             InitializeTroops();
 
+            //Wall
+            InitializeWall();
+
             this.Camera.Goto(new Vector3(-45, 17, -30));
             this.Camera.LookTo(Vector3.Zero);
             this.Camera.FarPlaneDistance = 250;
@@ -238,6 +241,49 @@ namespace Instancing
                     x = 0;
                     y++;
                 }
+            }
+        }
+        private void InitializeWall()
+        {
+            var wall = this.AddComponent<ModelInstanced>(
+                new ModelInstancedDescription()
+                {
+                    Name = "wall",
+                    Instances = 40,
+                    CastShadow = true,
+                    UseAnisotropicFiltering = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources/Wall",
+                        ModelContentFilename = "wall.xml",
+                    }
+                }).Instance;
+
+            BoundingBox bbox = wall[0].GetBoundingBox();
+
+            float x = bbox.GetX() * (10f / 11f);
+
+            for (int i = 0; i < 10; i++)
+            {
+                wall[i].Manipulator.SetPosition(new Vector3((i - 5) * x, 0.01f, 60));
+            }
+
+            for (int i = 10; i < 20; i++)
+            {
+                wall[i].Manipulator.SetPosition(new Vector3(60, 0, (i - 9 - 5) * x));
+                wall[i].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
+            }
+
+            for (int i = 20; i < 30; i++)
+            {
+                wall[i].Manipulator.SetPosition(new Vector3((i - 19 - 5) * x, 0.01f, -60));
+                wall[i].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
+            }
+
+            for (int i = 30; i < 40; i++)
+            {
+                wall[i].Manipulator.SetPosition(new Vector3(-60, 0, (i - 30 - 5) * x));
+                wall[i].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
             }
         }
 

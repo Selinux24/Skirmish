@@ -11,34 +11,34 @@
     <up_axis>Z_UP</up_axis>
   </asset>
   <library_images>
-    <image id="Concrete_15_UV_H_CM_1_jpg" name="Concrete_15_UV_H_CM_1_jpg">
-      <init_from>Concrete_15_UV_H_CM_1.jpg</init_from>
+    <image id="diffuse" name="diffuse">
+      <init_from>diffuse.dds</init_from>
     </image>
-    <image id="NormalMap" name="NormalMap">
-      <init_from>NormalMap.bmp</init_from>
+    <image id="normal" name="normal">
+      <init_from>normal.bmp</init_from>
     </image>
   </library_images>
   <library_effects>
     <effect id="Low_Poly_Material-effect">
       <profile_COMMON>
-        <newparam sid="Concrete_15_UV_H_CM_1_jpg-surface">
+        <newparam sid="diffuse-surface">
           <surface type="2D">
-            <init_from>Concrete_15_UV_H_CM_1_jpg</init_from>
+            <init_from>diffuse</init_from>
           </surface>
         </newparam>
-        <newparam sid="Concrete_15_UV_H_CM_1_jpg-sampler">
+        <newparam sid="diffuse-sampler">
           <sampler2D>
-            <source>Concrete_15_UV_H_CM_1_jpg-surface</source>
+            <source>diffuse-surface</source>
           </sampler2D>
         </newparam>
-        <newparam sid="NormalMap-surface">
+        <newparam sid="normal-surface">
           <surface type="2D">
-            <init_from>NormalMap</init_from>
+            <init_from>normal</init_from>
           </surface>
         </newparam>
-        <newparam sid="NormalMap-sampler">
+        <newparam sid="normal-sampler">
           <sampler2D>
-            <source>NormalMap-surface</source>
+            <source>normal-surface</source>
           </sampler2D>
         </newparam>
         <technique sid="common">
@@ -50,7 +50,7 @@
               <color sid="ambient">0 0 0 1</color>
             </ambient>
             <diffuse>
-              <texture texture="Concrete_15_UV_H_CM_1_jpg-sampler" texcoord="UVMap"/>
+              <texture texture="diffuse-sampler" texcoord="UVMap"/>
             </diffuse>
             <specular>
               <color sid="specular">0.01324503 0.01324503 0.01324503 1</color>
@@ -65,7 +65,7 @@
           <extra>
             <technique profile="FCOLLADA">
               <bump>
-                <texture texture="NormalMap-sampler" texcoord="UVMap"/>
+                <texture texture="normal-sampler" texcoord="UVMap"/>
               </bump>
             </technique>
           </extra>
