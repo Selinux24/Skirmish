@@ -11,29 +11,103 @@ namespace Engine
     public class ParticleEmitter : ICullable
     {
         /// <summary>
-        /// Creates a maximum bounding box for a particle emitter
+        /// Samples a bounding box for the current emitter at the specified time
         /// </summary>
-        /// <param name="maxParticleDuration">Particle duration</param>
-        /// <param name="size">Particle size</param>
-        /// <param name="hVel">Particle horizontal velocity</param>
-        /// <param name="vVel">Particle vertical velocity</param>
-        /// <returns>Returns the created bounding box</returns>
-        public static BoundingBox GenerateBBox(float maxParticleDuration, Vector2 size, Vector2 hVel, Vector2 vVel)
+        /// <param name="emitter">Emitter</param>
+        /// <param name="systemParams">Particle system parameters</param>
+        /// <param name="time">Time</param>
+        /// <returns>Returns the sampled bounding box</returns>
+        private static BoundingBox SampleBBox(ParticleEmitter emitter, ParticleSystemParams systemParams, float time)
         {
-            var hDist = Math.Max(Math.Abs(hVel.X), Math.Abs(hVel.Y)) * maxParticleDuration;
-            var vDist = (Math.Max(Math.Abs(vVel.X), Math.Abs(vVel.Y)) * maxParticleDuration) + (size.Y * 0.5f);
+            //Initial position
+            Vector3 initialPos = Vector3.Zero;
+            Vector3 velocity = emitter.Velocity * systemParams.EmitterVelocitySensitivity;
+            float horizontalVelocity = Math.Max(systemParams.HorizontalVelocity.X, systemParams.HorizontalVelocity.Y);
 
-            var dMax = new Vector3(hDist, vDist, hDist);
-            var dMin = new Vector3(-hDist, 0, -hDist);
+            //Max v velocity
+            Vector3 vVelocity = velocity;
+            vVelocity.Y *= Math.Max(systemParams.VerticalVelocity.X, systemParams.VerticalVelocity.Y);
 
-            return new BoundingBox(dMin, dMax);
+            //Max h velocity
+            Vector3 hVelocity1 = velocity;
+            hVelocity1.X *= horizontalVelocity * (float)Math.Cos(0);
+            hVelocity1.Z *= horizontalVelocity * (float)Math.Sin(0);
+
+            Vector3 hVelocity2 = velocity;
+            hVelocity2.X *= horizontalVelocity * (float)Math.Cos(1);
+            hVelocity2.Z *= horizontalVelocity * (float)Math.Sin(1);
+
+            //Final positions
+            Vector3 finalPosV = ComputeParticlePosition(
+                initialPos,
+                vVelocity,
+                systemParams.EndVelocity,
+                systemParams.MaxDuration * time,
+                time,
+                systemParams.Gravity);
+
+            Vector3 finalPosH1 = ComputeParticlePosition(
+                initialPos,
+                hVelocity1,
+                systemParams.EndVelocity,
+                systemParams.MaxDuration * time,
+                time,
+                systemParams.Gravity);
+
+            Vector3 finalPosH2 = ComputeParticlePosition(
+                initialPos,
+                hVelocity2,
+                systemParams.EndVelocity,
+                systemParams.MaxDuration * time,
+                time,
+                systemParams.Gravity);
+
+            float startSize = systemParams.MaxStartSize * 0.5f;
+
+            BoundingSphere initial = new BoundingSphere(initialPos + new Vector3(0, startSize, 0), startSize * 0.5f);
+
+            float endSize = systemParams.MaxEndSize * 0.5f;
+
+            BoundingSphere finalV = new BoundingSphere(finalPosV + new Vector3(0, endSize, 0), endSize * 0.5f);
+            BoundingSphere finalH1 = new BoundingSphere(finalPosH1 + new Vector3(0, endSize, 0), endSize * 0.5f);
+            BoundingSphere finalH2 = new BoundingSphere(finalPosH2 + new Vector3(0, endSize, 0), endSize * 0.5f);
+
+            var bbox = BoundingBox.FromSphere(initial);
+            bbox = BoundingBox.Merge(bbox, BoundingBox.FromSphere(finalV));
+            bbox = BoundingBox.Merge(bbox, BoundingBox.FromSphere(finalH1));
+            bbox = BoundingBox.Merge(bbox, BoundingBox.FromSphere(finalH2));
+
+            return bbox;
+        }
+        /// <summary>
+        /// Computes a particle position
+        /// </summary>
+        /// <param name="position">Initial position</param>
+        /// <param name="velocity">Initial velocity</param>
+        /// <param name="endVelocityMag">End velocity magnitude</param>
+        /// <param name="age">Age</param>
+        /// <param name="normalizedAge">Normalized age</param>
+        /// <param name="gravity">Gravity force vector</param>
+        /// <returns>Returns the resulting particle position</returns>
+        private static Vector3 ComputeParticlePosition(Vector3 position, Vector3 velocity, float endVelocityMag, float age, float normalizedAge, Vector3 gravity)
+        {
+            float startVelocityMag = velocity.Length();
+            float totalVelocityMag = startVelocityMag * endVelocityMag;
+            float velocityIntegral = (startVelocityMag * normalizedAge) + (totalVelocityMag - startVelocityMag) * normalizedAge * normalizedAge * 0.5f;
+
+            Vector3 finalVelocity = Vector3.Normalize(velocity) * velocityIntegral;
+            Vector3 finalGravity = gravity * age * normalizedAge;
+
+            Vector3 p = finalVelocity + finalGravity;
+
+            return position + p;
         }
 
         /// <summary>
-        /// Current emitter bounding box
+        /// Merged emitter bounding box
         /// </summary>
         /// <remarks>The box grows when position changes</remarks>
-        private BoundingBox? currentBoundingBox;
+        private BoundingBox? mergedBoundingBox;
         /// <summary>
         /// Original bounding box
         /// </summary>
@@ -172,16 +246,46 @@ namespace Engine
         /// </summary>
         protected virtual void UpdateBoundingBox()
         {
-            var tmp = currentBoundingBox;
+            var tmp = mergedBoundingBox;
 
-            currentBoundingBox = new BoundingBox(
+            mergedBoundingBox = new BoundingBox(
                 this.boundingBox.Minimum + this.Position,
                 this.boundingBox.Maximum + this.Position);
 
             if (tmp != null)
             {
-                currentBoundingBox = BoundingBox.Merge(tmp.Value, currentBoundingBox.Value);
+                mergedBoundingBox = BoundingBox.Merge(tmp.Value, mergedBoundingBox.Value);
             }
+        }
+
+        /// <summary>
+        /// Calculates the initial velocity for a particle
+        /// </summary>
+        /// <param name="parameters">Particle system parameters</param>
+        /// <param name="hVelVariance">Horizontal velocity variance</param>
+        /// <param name="vVelVariance">Vertical velocity variance</param>
+        /// <param name="hAngleVariance">Horizontal angle variance</param>
+        /// <returns>Returns the initial velocity vector with magnitude</returns>
+        public Vector3 CalcInitialVelocity(ParticleSystemParams parameters, float hVelVariance, float vVelVariance, float hAngleVariance)
+        {
+            Vector3 velocity = this.Velocity * parameters.EmitterVelocitySensitivity;
+
+            float horizontalVelocity = MathUtil.Lerp(
+                parameters.HorizontalVelocity.X,
+                parameters.HorizontalVelocity.Y,
+                hVelVariance);
+
+            float horizontalAngle = hAngleVariance * MathUtil.TwoPi;
+
+            velocity.X += horizontalVelocity * (float)Math.Cos(horizontalAngle);
+            velocity.Z += horizontalVelocity * (float)Math.Sin(horizontalAngle);
+
+            velocity.Y += MathUtil.Lerp(
+                parameters.VerticalVelocity.X,
+                parameters.VerticalVelocity.Y,
+                vVelVariance);
+
+            return velocity;
         }
 
         /// <summary>
@@ -224,7 +328,7 @@ namespace Engine
         public void SetBoundingBox(BoundingBox bbox)
         {
             this.boundingBox = bbox;
-            this.currentBoundingBox = null;
+            this.mergedBoundingBox = null;
         }
         /// <summary>
         /// Gets the internal bounding box updated with position
@@ -232,7 +336,21 @@ namespace Engine
         /// <returns>Returns the internal bounding box for culling tests</returns>
         public virtual BoundingBox GetBoundingBox()
         {
-            return currentBoundingBox ?? new BoundingBox();
+            return mergedBoundingBox ?? new BoundingBox(
+                this.boundingBox.Minimum + this.Position,
+                this.boundingBox.Maximum + this.Position);
+        }
+        /// <summary>
+        /// Updates the particle emitter bounds
+        /// </summary>
+        /// <param name="systemParams">System parameters</param>
+        public void UpdateBounds(ParticleSystemParams systemParams)
+        {
+            var bbox = SampleBBox(this, systemParams, 0.33f);
+            bbox = BoundingBox.Merge(bbox, SampleBBox(this, systemParams, 0.66f));
+            bbox = BoundingBox.Merge(bbox, SampleBBox(this, systemParams, 1f));
+
+            this.SetBoundingBox(bbox);
         }
     }
 }

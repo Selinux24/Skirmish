@@ -128,7 +128,8 @@ namespace ModelDrawing
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                Count = 20000
+                Count = 20000,
+                DepthEnabled = true,
             };
             this.pManagerLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
             this.pManagerLineDrawer.Visible = true;
@@ -208,7 +209,11 @@ namespace ModelDrawing
             }
             if (this.Game.Input.KeyJustPressed(Keys.D6))
             {
-                this.AddSmokePlumeSystemGPU();
+                this.AddSmokePlumeSystemGPU(new Vector3(5, 0, 0), new Vector3(-5, 0, 0));
+            }
+            if (this.Game.Input.KeyJustPressed(Keys.D7))
+            {
+                this.AddSmokePlumeSystemWithWind(Vector3.Normalize(new Vector3(1, 0, 1)), 20f);
             }
 
             if (this.Game.Input.KeyJustPressed(Keys.P))
@@ -328,49 +333,47 @@ namespace ModelDrawing
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pFire, emitter1);
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter2);
         }
-        private void AddSmokePlumeSystemGPU()
+        private void AddSmokePlumeSystemGPU(Vector3 positionCPU, Vector3 positionGPU)
         {
-            Vector3 position = new Vector3(-5, 0, 0);
             Vector3 velocity = Vector3.Up;
             float duration = 60;
-            float rate = 0.1f;
+            float fireRate = 0.05f;
+            float smokeRate = 0.1f;
 
             var emitter11 = new ParticleEmitter()
             {
-                Position = position,
+                Position = positionCPU,
                 Velocity = velocity,
                 Duration = duration,
-                EmissionRate = rate,
+                EmissionRate = fireRate,
                 InfiniteDuration = false,
                 MaximumDistance = 100f,
             };
             var emitter21 = new ParticleEmitter()
             {
-                Position = position,
+                Position = positionCPU + (Vector3.Up * 0.5f),
                 Velocity = velocity,
                 Duration = duration,
-                EmissionRate = rate,
+                EmissionRate = smokeRate,
                 InfiniteDuration = false,
                 MaximumDistance = 500f,
             };
 
-            position = new Vector3(5, 0, 0);
-
             var emitter12 = new ParticleEmitter()
             {
-                Position = position,
+                Position = positionGPU,
                 Velocity = velocity,
                 Duration = duration,
-                EmissionRate = rate,
+                EmissionRate = fireRate,
                 InfiniteDuration = false,
                 MaximumDistance = 100f,
             };
             var emitter22 = new ParticleEmitter()
             {
-                Position = position,
+                Position = positionGPU + (Vector3.Up * 0.5f),
                 Velocity = velocity,
                 Duration = duration,
-                EmissionRate = rate,
+                EmissionRate = smokeRate,
                 InfiniteDuration = false,
                 MaximumDistance = 500f,
             };
@@ -380,6 +383,25 @@ namespace ModelDrawing
 
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter21);
             this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.GPU, this.pPlume, emitter22);
+        }
+        private void AddSmokePlumeSystemWithWind(Vector3 wind, float force)
+        {
+            var emitter = new ParticleEmitter()
+            {
+                Position = new Vector3(0, 0, 0),
+                Velocity = Vector3.Up,
+                InfiniteDuration = true,
+                EmissionRate = 0.001f,
+                MaximumDistance = 1000f,
+            };
+
+            var pSystem = this.pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, this.pPlume, emitter);
+
+            var parameters = pSystem.GetParameters();
+
+            parameters.Gravity = wind * force;
+
+            pSystem.SetParameters(parameters);
         }
 
         private readonly List<Line3D> lines = new List<Line3D>();

@@ -67,6 +67,10 @@ namespace Engine
         /// Random instance
         /// </summary>
         private readonly Random rnd = new Random();
+        /// <summary>
+        /// Particle parameters
+        /// </summary>
+        private ParticleSystemParams parameters;
 
         /// <summary>
         /// Game instance
@@ -99,10 +103,6 @@ namespace Engine
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// Particle system parameters
-        /// </summary>
-        public ParticleSystemParams Parameters { get; set; }
-        /// <summary>
         /// Particle emitter
         /// </summary>
         public ParticleEmitter Emitter { get; private set; }
@@ -129,7 +129,7 @@ namespace Engine
             this.Game = game;
             this.Name = name;
 
-            this.Parameters = new ParticleSystemParams(description) * emitter.Scale;
+            this.parameters = new ParticleSystemParams(description) * emitter.Scale;
 
             var imgContent = new ImageContent()
             {
@@ -139,10 +139,10 @@ namespace Engine
             this.TextureCount = (uint)imgContent.Count;
 
             this.Emitter = emitter;
-            this.Emitter.SetBoundingBox(ParticleEmitter.GenerateBBox(description.MaxDuration, this.Parameters.EndSize, this.Parameters.HorizontalVelocity, this.Parameters.VerticalVelocity));
+            this.Emitter.UpdateBounds(this.parameters);
             this.MaxConcurrentParticles = this.Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
 
-            this.TimeToEnd = this.Emitter.Duration + this.Parameters.MaxDuration;
+            this.TimeToEnd = this.Emitter.Duration + this.parameters.MaxDuration;
 
             var data = Helper.CreateArray(1, new VertexGpuParticle()
             {
@@ -258,8 +258,8 @@ namespace Engine
         {
             var drawerMode = context.DrawerMode;
 
-            if ((drawerMode.HasFlag(DrawerModes.OpaqueOnly) && !this.Parameters.Transparent) ||
-                (drawerMode.HasFlag(DrawerModes.TransparentOnly) && this.Parameters.Transparent))
+            if ((drawerMode.HasFlag(DrawerModes.OpaqueOnly) && !this.parameters.Transparent) ||
+                (drawerMode.HasFlag(DrawerModes.TransparentOnly) && this.parameters.Transparent))
             {
                 var effect = DrawerPool.EffectDefaultGPUParticles;
 
@@ -270,19 +270,19 @@ namespace Engine
                     TotalTime = this.Emitter.TotalTime,
                     ElapsedTime = this.Emitter.ElapsedTime,
                     EmissionRate = this.Emitter.EmissionRate,
-                    VelocitySensitivity = this.Parameters.EmitterVelocitySensitivity,
-                    HorizontalVelocity = this.Parameters.HorizontalVelocity,
-                    VerticalVelocity = this.Parameters.VerticalVelocity,
+                    VelocitySensitivity = this.parameters.EmitterVelocitySensitivity,
+                    HorizontalVelocity = this.parameters.HorizontalVelocity,
+                    VerticalVelocity = this.parameters.VerticalVelocity,
                     RandomValues = this.rnd.NextVector4(Vector4.Zero, Vector4.One),
-                    MaxDuration = this.Parameters.MaxDuration,
-                    MaxDurationRandomness = this.Parameters.MaxDurationRandomness,
-                    EndVelocity = this.Parameters.EndVelocity,
-                    Gravity = this.Parameters.Gravity,
-                    StartSize = this.Parameters.StartSize,
-                    EndSize = this.Parameters.EndSize,
-                    MinColor = this.Parameters.MinColor,
-                    MaxColor = this.Parameters.MaxColor,
-                    RotateSpeed = this.Parameters.RotateSpeed,
+                    MaxDuration = this.parameters.MaxDuration,
+                    MaxDurationRandomness = this.parameters.MaxDurationRandomness,
+                    EndVelocity = this.parameters.EndVelocity,
+                    Gravity = this.parameters.Gravity,
+                    StartSize = this.parameters.StartSize,
+                    EndSize = this.parameters.EndSize,
+                    MinColor = this.parameters.MinColor,
+                    MaxColor = this.parameters.MaxColor,
+                    RotateSpeed = this.parameters.RotateSpeed,
                 };
 
                 effect.UpdatePerFrame(
@@ -300,6 +300,25 @@ namespace Engine
 
                 this.Draw(effect, context.DrawerMode);
             }
+        }
+
+        /// <summary>
+        /// Gets current particle system parameters
+        /// </summary>
+        /// <returns>Returns the particle system parameters configuration</returns>
+        public ParticleSystemParams GetParameters()
+        {
+            return parameters;
+        }
+        /// <summary>
+        /// Sets the particle system parameters
+        /// </summary>
+        /// <param name="particleParameters">Particle system parameters</param>
+        public void SetParameters(ParticleSystemParams particleParameters)
+        {
+            parameters = particleParameters;
+
+            this.Emitter?.UpdateBounds(particleParameters);
         }
 
         /// <summary>
@@ -356,7 +375,7 @@ namespace Engine
         /// <param name="drawerMode">Drawe mode</param>
         private void Draw(EffectDefaultGpuParticles effect, DrawerModes drawerMode)
         {
-            var rot = this.Parameters.RotateSpeed != Vector2.Zero;
+            var rot = this.parameters.RotateSpeed != Vector2.Zero;
 
             var techniqueForDrawing = rot ? effect.RotationDraw : effect.NonRotationDraw;
 
@@ -373,11 +392,11 @@ namespace Engine
 
             graphics.SetDepthStencilRDZEnabled();
 
-            if (this.Parameters.Additive)
+            if (this.parameters.Additive)
             {
                 graphics.SetBlendAdditive();
             }
-            else if (this.Parameters.Transparent)
+            else if (this.parameters.Transparent)
             {
                 graphics.SetBlendDefaultAlpha();
             }

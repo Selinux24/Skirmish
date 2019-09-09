@@ -13,6 +13,9 @@ namespace Engine
     /// </summary>
     public class ParticleSystemCpu : IParticleSystem
     {
+        /// <summary>
+        /// Assigned buffer slot
+        /// </summary>
         public static int BufferSlot { get; set; } = 0;
 
         /// <summary>
@@ -35,6 +38,10 @@ namespace Engine
         /// Time to next particle emission
         /// </summary>
         private float timeToNextParticle = 0;
+        /// <summary>
+        /// Particle parameters
+        /// </summary>
+        private ParticleSystemParams parameters;
 
         /// <summary>
         /// Game instance
@@ -67,10 +74,6 @@ namespace Engine
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// Particle system parameters
-        /// </summary>
-        public ParticleSystemParams Parameters { get; set; }
-        /// <summary>
         /// Particle emitter
         /// </summary>
         public ParticleEmitter Emitter { get; private set; }
@@ -97,7 +100,7 @@ namespace Engine
             this.Game = game;
             this.Name = name;
 
-            this.Parameters = new ParticleSystemParams(description) * emitter.Scale;
+            this.parameters = new ParticleSystemParams(description) * emitter.Scale;
 
             var imgContent = new ImageContent()
             {
@@ -107,7 +110,7 @@ namespace Engine
             this.TextureCount = (uint)imgContent.Count;
 
             this.Emitter = emitter;
-            this.Emitter.SetBoundingBox(ParticleEmitter.GenerateBBox(description.MaxDuration, this.Parameters.EndSize, this.Parameters.HorizontalVelocity, this.Parameters.VerticalVelocity));
+            this.Emitter.UpdateBounds(this.parameters);
             this.MaxConcurrentParticles = this.Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
 
             this.particles = new VertexCpuParticle[this.MaxConcurrentParticles];
@@ -116,7 +119,7 @@ namespace Engine
             buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
             buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
 
-            this.TimeToEnd = this.Emitter.Duration + this.Parameters.MaxDuration;
+            this.TimeToEnd = this.Emitter.Duration + this.parameters.MaxDuration;
         }
         /// <summary>
         /// Destructor
@@ -179,15 +182,15 @@ namespace Engine
             var mode = context.DrawerMode;
             var draw =
                 (mode.HasFlag(DrawerModes.ShadowMap)) ||
-                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Parameters.Transparent) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Parameters.Transparent);
+                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.parameters.Transparent) ||
+                (mode.HasFlag(DrawerModes.TransparentOnly) && this.parameters.Transparent);
 
             if (!draw)
             {
                 return;
             }
 
-            var rot = this.Parameters.RotateSpeed != Vector2.Zero;
+            var rot = this.parameters.RotateSpeed != Vector2.Zero;
 
             var effect = DrawerPool.EffectDefaultCPUParticles;
             var technique = rot ? effect.RotationDraw : effect.NonRotationDraw;
@@ -206,11 +209,11 @@ namespace Engine
 
             graphics.SetDepthStencilRDZEnabled();
 
-            if (this.Parameters.Additive)
+            if (this.parameters.Additive)
             {
                 graphics.SetBlendAdditive();
             }
-            else if (this.Parameters.Transparent)
+            else if (this.parameters.Transparent)
             {
                 graphics.SetBlendDefaultAlpha();
             }
@@ -222,15 +225,15 @@ namespace Engine
             var state = new EffectParticleState
             {
                 TotalTime = this.Emitter.TotalTime,
-                MaxDuration = this.Parameters.MaxDuration,
-                MaxDurationRandomness = this.Parameters.MaxDurationRandomness,
-                EndVelocity = this.Parameters.EndVelocity,
-                Gravity = this.Parameters.Gravity,
-                StartSize = this.Parameters.StartSize,
-                EndSize = this.Parameters.EndSize,
-                MinColor = this.Parameters.MinColor,
-                MaxColor = this.Parameters.MaxColor,
-                RotateSpeed = this.Parameters.RotateSpeed,
+                MaxDuration = this.parameters.MaxDuration,
+                MaxDurationRandomness = this.parameters.MaxDurationRandomness,
+                EndVelocity = this.parameters.EndVelocity,
+                Gravity = this.parameters.Gravity,
+                StartSize = this.parameters.StartSize,
+                EndSize = this.parameters.EndSize,
+                MinColor = this.parameters.MinColor,
+                MaxColor = this.parameters.MaxColor,
+                RotateSpeed = this.parameters.RotateSpeed,
             };
 
             effect.UpdatePerFrame(
@@ -246,6 +249,25 @@ namespace Engine
 
                 graphics.Draw(this.ActiveParticles, 0);
             }
+        }
+
+        /// <summary>
+        /// Gets current particle system parameters
+        /// </summary>
+        /// <returns>Returns the particle system parameters configuration</returns>
+        public ParticleSystemParams GetParameters()
+        {
+            return parameters;
+        }
+        /// <summary>
+        /// Sets the particle system parameters
+        /// </summary>
+        /// <param name="particleParameters">Particle system parameters</param>
+        public void SetParameters(ParticleSystemParams particleParameters)
+        {
+            parameters = particleParameters;
+
+            this.Emitter?.UpdateBounds(particleParameters);
         }
 
         /// <summary>
@@ -265,18 +287,11 @@ namespace Engine
                 nextFreeParticle = 0;
             }
 
-            Vector3 velocity = this.Emitter.Velocity * this.Parameters.EmitterVelocitySensitivity;
-
-            float horizontalVelocity = MathUtil.Lerp(
-                this.Parameters.HorizontalVelocity.X,
-                this.Parameters.HorizontalVelocity.Y,
+            Vector3 velocity = this.Emitter.CalcInitialVelocity(
+                this.parameters,
+                this.rnd.NextFloat(0, 1),
+                this.rnd.NextFloat(0, 1),
                 this.rnd.NextFloat(0, 1));
-
-            double horizontalAngle = this.rnd.NextDouble() * MathUtil.TwoPi;
-
-            velocity.X += horizontalVelocity * (float)Math.Cos(horizontalAngle);
-            velocity.Z += horizontalVelocity * (float)Math.Sin(horizontalAngle);
-            velocity.Y += MathUtil.Lerp(this.Parameters.VerticalVelocity.X, this.Parameters.VerticalVelocity.Y, this.rnd.NextFloat(0, 1));
 
             Vector4 randomValues = this.rnd.NextVector4(Vector4.Zero, Vector4.One);
 

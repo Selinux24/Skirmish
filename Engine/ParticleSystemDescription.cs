@@ -119,22 +119,24 @@ namespace Engine
                 MaxDuration = 2,
                 MaxDurationRandomness = 1,
 
-                MinHorizontalVelocity = 0,
-                MaxHorizontalVelocity = 1.5f,
+                MinHorizontalVelocity = -1f,
+                MaxHorizontalVelocity = +1f,
 
-                MinVerticalVelocity = -1,
-                MaxVerticalVelocity = 1,
+                MinVerticalVelocity = -1f,
+                MaxVerticalVelocity = 1f,
 
-                Gravity = new Vector3(0, 1, 0),
+                Gravity = new Vector3(0, 0, 0),
 
-                MinColor = new Color(1f, 1f, 1f, 0.55f),
+                MinColor = new Color(1f, 1f, 1f, 0.85f),
                 MaxColor = new Color(1f, 1f, 1f, 1f),
 
-                MinStartSize = 0.5f,
-                MaxStartSize = 1,
+                MinStartSize = 0.1f,
+                MaxStartSize = 0.5f,
 
                 MinEndSize = 2.5f,
-                MaxEndSize = 4f,
+                MaxEndSize = 5f,
+
+                EmitterVelocitySensitivity = 1f,
 
                 Transparent = true,
                 Additive = true
@@ -162,24 +164,28 @@ namespace Engine
 
                 MaxDuration = 10,
 
-                MinHorizontalVelocity = 0,
-                MaxHorizontalVelocity = 0.5f,
+                MinHorizontalVelocity = -1.0f,
+                MaxHorizontalVelocity = +1.0f,
 
-                MinVerticalVelocity = 1.0f,
-                MaxVerticalVelocity = 2.0f,
+                MinVerticalVelocity = -1.0f,
+                MaxVerticalVelocity = +1.0f,
 
-                Gravity = new Vector3(0.0f, 0.5f, 0.0f),
+                Gravity = Vector3.Zero,
 
                 EndVelocity = 0.75f,
 
-                MinRotateSpeed = -1f,
-                MaxRotateSpeed = 1f,
+                MinRotateSpeed = 0.5f,
+                MaxRotateSpeed = 1.0f,
 
-                MinStartSize = 1,
-                MaxStartSize = 2,
+                MinStartSize = 1f,
+                MaxStartSize = 2f,
 
-                MinEndSize = 5,
-                MaxEndSize = 20,
+                MinEndSize = 5f,
+                MaxEndSize = 20f,
+
+                MaxDurationRandomness = 1f,
+
+                EmitterVelocitySensitivity = 1f,
 
                 Transparent = true,
                 Additive = false

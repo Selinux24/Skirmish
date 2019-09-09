@@ -22,10 +22,6 @@ namespace Engine
         /// </summary>
         int MaxConcurrentParticles { get; }
         /// <summary>
-        /// Particle system parameters
-        /// </summary>
-        ParticleSystemParams Parameters { get; set; }
-        /// <summary>
         /// Gets the particle emitter reference
         /// </summary>
         ParticleEmitter Emitter { get; }
@@ -40,5 +36,16 @@ namespace Engine
         /// </summary>
         /// <param name="context">Drawing context</param>
         void Draw(DrawContext context);
+
+        /// <summary>
+        /// Gets current particle system parameters
+        /// </summary>
+        /// <returns>Returns the particle system parameters configuration</returns>
+        ParticleSystemParams GetParameters();
+        /// <summary>
+        /// Sets the particle system parameters
+        /// </summary>
+        /// <param name="particleParameters">Particle system parameters</param>
+        void SetParameters(ParticleSystemParams particleParameters);
     }
 }
