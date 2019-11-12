@@ -48,7 +48,7 @@ namespace Engine
         /// <param name="min">Minimum</param>
         /// <param name="max">Maximum</param>
         /// <returns>Returns the relative value</returns>
-        public static float GetRelative(float n, float size, float min, float max)
+        public static float ConvertRelative(float n, float size, float min, float max)
         {
             float f = size / (max - min);
 
@@ -117,8 +117,8 @@ namespace Engine
         {
             if (this.m_Data != null)
             {
-                float pX = GetRelative(x, this.MaxX, 0, 1);
-                float pZ = GetRelative(y, this.MaxY, 0, 1);
+                float pX = ConvertRelative(x, this.MaxX, 0, 1);
+                float pZ = ConvertRelative(y, this.MaxY, 0, 1);
 
                 return this.m_Data[(int)pX, (int)pZ];
             }
@@ -151,8 +151,8 @@ namespace Engine
         {
             if (this.m_Data != null)
             {
-                float x = GetRelative(pos.X, this.MaxX, min.X, max.X);
-                float z = GetRelative(pos.Z, this.MaxY, min.Y, max.Y);
+                float x = ConvertRelative(pos.X, this.MaxX, min.X, max.X);
+                float z = ConvertRelative(pos.Z, this.MaxY, min.Y, max.Y);
 
                 return this.m_Data[(int)x, (int)z];
             }

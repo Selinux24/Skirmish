@@ -388,7 +388,7 @@ namespace Engine
         /// <returns>Returns new triangle list</returns>
         public static IEnumerable<Triangle> Transform(IEnumerable<Triangle> triangles, Matrix transform)
         {
-            if (triangles?.Any() == false)
+            if (triangles?.Any() != true)
             {
                 return triangles;
             }
@@ -409,7 +409,7 @@ namespace Engine
         /// <returns>Returns a new triangle list</returns>
         public static IEnumerable<Triangle> Reverse(IEnumerable<Triangle> triangles)
         {
-            if (triangles?.Any() == false)
+            if (triangles?.Any() != true)
             {
                 return triangles;
             }

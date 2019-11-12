@@ -359,6 +359,20 @@ namespace Engine
             return null;
         }
         /// <summary>
+        /// Gets statistic value by index
+        /// </summary>
+        /// <param name="index">Index</param>
+        /// <returns>Return statistic value by index</returns>
+        public static object GetStatistics(int index)
+        {
+            if (index >= 0 && index < StatisticsCount)
+            {
+                return gData[Statistics[index]];
+            }
+
+            return null;
+        }
+        /// <summary>
         /// Sets statistic value by key
         /// </summary>
         /// <param name="key">Key</param>
@@ -375,20 +389,6 @@ namespace Engine
             }
 
             RefreshDataKeys(key, global);
-        }
-        /// <summary>
-        /// Gets statistic value by index
-        /// </summary>
-        /// <param name="index">Index</param>
-        /// <returns>Return statistic value by index</returns>
-        public static object GetStatistics(int index)
-        {
-            if (index >= 0 && index < StatisticsCount)
-            {
-                return gData[Statistics[index]];
-            }
-
-            return null;
         }
         /// <summary>
         /// Refreshing of data keys

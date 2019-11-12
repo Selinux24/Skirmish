@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Linq;
 
 namespace Engine.Common
 {

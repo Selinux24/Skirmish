@@ -1675,94 +1675,6 @@ namespace Engine.Content
         }
 
         /// <summary>
-        /// Reads a transform matrix (SRT) from a Node
-        /// </summary>
-        /// <param name="node">Node</param>
-        /// <returns>Returns the parsed matrix</returns>
-        public static Matrix ReadMatrix(this Node node)
-        {
-            if (node.Matrix != null)
-            {
-                return ReadMatrixFromTransform(node.Matrix);
-            }
-            else
-            {
-                return ReadMatrixLocRotScale(node.Translate, node.Rotate, node.Scale);
-            }
-        }
-        /// <summary>
-        /// Reads a transform matrix (SRT) from a matrix in the Node
-        /// </summary>
-        /// <param name="matrix">Node matrix</param>
-        /// <returns>Returns the parsed matrix</returns>
-        public static Matrix ReadMatrixFromTransform(BasicFloat4x4[] matrix)
-        {
-            if (matrix != null)
-            {
-                BasicFloat4x4 trn = Array.Find(matrix, t => string.Equals(t.SId, "transform"));
-                if (trn != null)
-                {
-                    Matrix m = trn.ToMatrix();
-
-                    return Matrix.Transpose(m);
-                }
-            }
-
-            return Matrix.Identity;
-        }
-        /// <summary>
-        /// Reads a transform matrix (SRT) from the specified transforms in the Node
-        /// </summary>
-        /// <param name="translate">Translate</param>
-        /// <param name="rotate">Rotate</param>
-        /// <param name="scale">Scale</param>
-        /// <returns>Returns the parsed matrix</returns>
-        public static Matrix ReadMatrixLocRotScale(BasicFloat3[] translate, BasicFloat4[] rotate, BasicFloat3[] scale)
-        {
-            Matrix finalTranslation = Matrix.Identity;
-            Matrix finalRotation = Matrix.Identity;
-            Matrix finalScale = Matrix.Identity;
-
-            if (translate != null)
-            {
-                BasicFloat3 loc = Array.Find(translate, t => string.Equals(t.SId, "location"));
-                if (loc != null) finalTranslation *= Matrix.Translation(loc.ToVector3());
-            }
-
-            if (rotate != null)
-            {
-                BasicFloat4 rotX = Array.Find(rotate, t => string.Equals(t.SId, "rotationX"));
-                if (rotX != null)
-                {
-                    Vector4 r = rotX.ToVector4();
-                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
-                }
-
-                BasicFloat4 rotY = Array.Find(rotate, t => string.Equals(t.SId, "rotationY"));
-                if (rotY != null)
-                {
-                    Vector4 r = rotY.ToVector4();
-                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
-                }
-
-                BasicFloat4 rotZ = Array.Find(rotate, t => string.Equals(t.SId, "rotationZ"));
-                if (rotZ != null)
-                {
-                    Vector4 r = rotZ.ToVector4();
-                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
-                }
-            }
-
-            if (scale != null)
-            {
-                BasicFloat3 sca = Array.Find(scale, t => string.Equals(t.SId, "scale"));
-                if (sca != null) finalScale *= Matrix.Scaling(sca.ToVector3());
-            }
-
-            return finalScale * finalRotation * finalTranslation;
-        }
-
-        /// <summary>
         /// Reads a float array from a source
         /// </summary>
         /// <param name="source">Source</param>
@@ -2069,6 +1981,94 @@ namespace Engine.Content
             }
 
             return mats.ToArray();
+        }
+
+        /// <summary>
+        /// Reads a transform matrix (SRT) from a Node
+        /// </summary>
+        /// <param name="node">Node</param>
+        /// <returns>Returns the parsed matrix</returns>
+        public static Matrix ReadMatrix(this Node node)
+        {
+            if (node.Matrix != null)
+            {
+                return ReadMatrixFromTransform(node.Matrix);
+            }
+            else
+            {
+                return ReadMatrixLocRotScale(node.Translate, node.Rotate, node.Scale);
+            }
+        }
+        /// <summary>
+        /// Reads a transform matrix (SRT) from a matrix in the Node
+        /// </summary>
+        /// <param name="matrix">Node matrix</param>
+        /// <returns>Returns the parsed matrix</returns>
+        public static Matrix ReadMatrixFromTransform(BasicFloat4x4[] matrix)
+        {
+            if (matrix != null)
+            {
+                BasicFloat4x4 trn = Array.Find(matrix, t => string.Equals(t.SId, "transform"));
+                if (trn != null)
+                {
+                    Matrix m = trn.ToMatrix();
+
+                    return Matrix.Transpose(m);
+                }
+            }
+
+            return Matrix.Identity;
+        }
+        /// <summary>
+        /// Reads a transform matrix (SRT) from the specified transforms in the Node
+        /// </summary>
+        /// <param name="translate">Translate</param>
+        /// <param name="rotate">Rotate</param>
+        /// <param name="scale">Scale</param>
+        /// <returns>Returns the parsed matrix</returns>
+        public static Matrix ReadMatrixLocRotScale(BasicFloat3[] translate, BasicFloat4[] rotate, BasicFloat3[] scale)
+        {
+            Matrix finalTranslation = Matrix.Identity;
+            Matrix finalRotation = Matrix.Identity;
+            Matrix finalScale = Matrix.Identity;
+
+            if (translate != null)
+            {
+                BasicFloat3 loc = Array.Find(translate, t => string.Equals(t.SId, "location"));
+                if (loc != null) finalTranslation *= Matrix.Translation(loc.ToVector3());
+            }
+
+            if (rotate != null)
+            {
+                BasicFloat4 rotX = Array.Find(rotate, t => string.Equals(t.SId, "rotationX"));
+                if (rotX != null)
+                {
+                    Vector4 r = rotX.ToVector4();
+                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                }
+
+                BasicFloat4 rotY = Array.Find(rotate, t => string.Equals(t.SId, "rotationY"));
+                if (rotY != null)
+                {
+                    Vector4 r = rotY.ToVector4();
+                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                }
+
+                BasicFloat4 rotZ = Array.Find(rotate, t => string.Equals(t.SId, "rotationZ"));
+                if (rotZ != null)
+                {
+                    Vector4 r = rotZ.ToVector4();
+                    finalRotation *= Matrix.RotationAxis(new Vector3(r.X, r.Y, r.Z), r.W);
+                }
+            }
+
+            if (scale != null)
+            {
+                BasicFloat3 sca = Array.Find(scale, t => string.Equals(t.SId, "scale"));
+                if (sca != null) finalScale *= Matrix.Scaling(sca.ToVector3());
+            }
+
+            return finalScale * finalRotation * finalTranslation;
         }
     }
 }

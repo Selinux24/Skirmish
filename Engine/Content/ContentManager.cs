@@ -112,48 +112,6 @@ namespace Engine.Content
         }
 
         /// <summary>
-        /// Finds content
-        /// </summary>
-        /// <param name="contentSource">Content source</param>
-        /// <param name="resourcePath">Resource path</param>
-        /// <param name="throwException">Sets wether throw exception or not</param>
-        /// <returns>Returns resource paths found</returns>
-        /// <remarks>
-        /// Content source can be a folder or a zip file
-        /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
-        /// </remarks>
-        public static IEnumerable<MemoryStream> FindContent(string contentSource, string resourcePath, bool throwException = true)
-        {
-            if (string.IsNullOrEmpty(resourcePath))
-            {
-                return new MemoryStream[] { };
-            }
-
-            if (File.Exists(resourcePath))
-            {
-                return new[] { resourcePath.WriteToMemory() };
-            }
-
-            if (Directory.Exists(contentSource))
-            {
-                //Directory
-                return FindContentDirectory(contentSource, resourcePath, throwException);
-            }
-
-            if (File.Exists(contentSource))
-            {
-                //Compressed file
-                return FindContentZip(contentSource, resourcePath, throwException);
-            }
-
-            if (throwException)
-            {
-                throw new DirectoryNotFoundException(string.Format("Content source [{0}] not exists", resourcePath));
-            }
-
-            return new MemoryStream[] { };
-        }
-        /// <summary>
         /// Finds content into directory
         /// </summary>
         /// <param name="contentSource">Content source</param>
@@ -226,6 +184,48 @@ namespace Engine.Content
             return new MemoryStream[] { };
         }
 
+        /// <summary>
+        /// Finds content
+        /// </summary>
+        /// <param name="contentSource">Content source</param>
+        /// <param name="resourcePath">Resource path</param>
+        /// <param name="throwException">Sets wether throw exception or not</param>
+        /// <returns>Returns resource paths found</returns>
+        /// <remarks>
+        /// Content source can be a folder or a zip file
+        /// If not unique file found, searchs pattern "[filename]*[extension]" and returns result array
+        /// </remarks>
+        public static IEnumerable<MemoryStream> FindContent(string contentSource, string resourcePath, bool throwException = true)
+        {
+            if (string.IsNullOrEmpty(resourcePath))
+            {
+                return new MemoryStream[] { };
+            }
+
+            if (File.Exists(resourcePath))
+            {
+                return new[] { resourcePath.WriteToMemory() };
+            }
+
+            if (Directory.Exists(contentSource))
+            {
+                //Directory
+                return FindContentDirectory(contentSource, resourcePath, throwException);
+            }
+
+            if (File.Exists(contentSource))
+            {
+                //Compressed file
+                return FindContentZip(contentSource, resourcePath, throwException);
+            }
+
+            if (throwException)
+            {
+                throw new DirectoryNotFoundException(string.Format("Content source [{0}] not exists", resourcePath));
+            }
+
+            return new MemoryStream[] { };
+        }
         /// <summary>
         /// Finds content
         /// </summary>
