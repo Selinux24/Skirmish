@@ -467,7 +467,7 @@ namespace Engine.Common
 
             float left = (formWidth * 0.5f * -1f) + position.X;
             float right = left + width;
-            float top = (formHeight * 0.5f) - position.Y;
+            float top = (formHeight * 0.5f) + position.Y;
             float bottom = top - height;
 
             //Texture map

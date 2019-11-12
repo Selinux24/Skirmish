@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -9,6 +8,8 @@ using System.Linq;
 
 namespace Engine.Common
 {
+    using SharpDX;
+
     /// <summary>
     /// Font map
     /// </summary>
@@ -287,64 +288,195 @@ namespace Engine.Common
         /// Maps a sentence
         /// </summary>
         /// <param name="text">Sentence text</param>
+        /// <param name="textArea">Rectangle area</param>
         /// <param name="vertices">Gets generated vertices</param>
         /// <param name="indices">Gets generated indices</param>
         /// <param name="size">Gets generated sentence total size</param>
         public void MapSentence(
             string text,
+            RectangleF? textArea,
             out VertexPositionTexture[] vertices,
             out uint[] indices,
             out Vector2 size)
         {
             size = Vector2.Zero;
+            vertices = null;
+            indices = null;
 
-            Vector2 pos = Vector2.Zero;
+            var words = ParseSentence(text);
+            if (!words.Any())
+            {
+                return;
+            }
 
             List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
             List<uint> indexList = new List<uint>();
 
-            if (string.IsNullOrWhiteSpace(text))
-            {
-                text = string.Empty.PadRight(MAXTEXTLENGTH);
-            }
-            else if (text.Length > MAXTEXTLENGTH)
-            {
-                text = text.Substring(0, MAXTEXTLENGTH);
-            }
+            var spaceSize = MapSpace();
+            Vector2 pos = Vector2.Zero;
 
-            float height = 0;
-
-            foreach (char c in text)
+            foreach (var word in words)
             {
-                if (this.map.ContainsKey(c))
+                if (string.IsNullOrEmpty(word))
                 {
-                    var chr = this.map[c];
-
-                    var uv = GeometryUtil.CreateUVMap(
-                        chr.Width, chr.Height,
-                        chr.X, chr.Y,
-                        TextureWidth, TextureHeight);
-
-                    GeometryUtil.CreateSprite(
-                        pos,
-                        chr.Width, chr.Height, 0, 0,
-                        uv,
-                        out Vector3[] cv, out Vector2[] cuv, out uint[] ci);
-
-                    ci.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
-
-                    vertList.AddRange(VertexPositionTexture.Generate(cv, cuv));
-
-                    pos.X += chr.Width - (chr.Width * 0.3333f);
-                    if (chr.Height > height) height = chr.Height;
+                    //Discard empty words
+                    continue;
                 }
-            }
 
-            pos.Y = height;
+                if (word == Environment.NewLine)
+                {
+                    //Move the position to the new line
+                    pos.X = 0;
+                    pos.Y -= spaceSize.Y;
+
+                    continue;
+                }
+
+                if (word == " ")
+                {
+                    //Add a space
+                    pos.X += spaceSize.X;
+
+                    continue;
+                }
+
+                //Store previous cursor position
+                var prevPos = pos;
+
+                //Map the word
+                MapWord(word, ref pos, out var wVerts, out var wIndices, out var wHeight);
+
+                //Store the indices adding last vertext index in the list
+                wIndices.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
+
+                if (textArea.HasValue && pos.X > textArea.Value.Width)
+                {
+                    //Move the position to the last character of the new line
+                    pos.X -= prevPos.X;
+                    pos.Y -= wHeight;
+
+                    //Move the word to the next line
+                    Vector3 diff = new Vector3(prevPos.X, wHeight, 0);
+                    for (int i = 0; i < wVerts.Length; i++)
+                    {
+                        wVerts[i].Position -= diff;
+                    }
+                }
+
+                vertList.AddRange(wVerts);
+            }
 
             vertices = vertList.ToArray();
             indices = indexList.ToArray();
             size = pos;
+        }
+        /// <summary>
+        /// Maps a space
+        /// </summary>
+        /// <returns>Returns the space size</returns>
+        private Vector2 MapSpace()
+        {
+            Vector2 tmpPos = Vector2.Zero;
+            MapWord(" ", ref tmpPos, out var tmpVerts, out var tmpIndices, out var tmpHeight);
+
+            return new Vector2(tmpPos.X, tmpHeight);
+        }
+        /// <summary>
+        /// Parses a sentence
+        /// </summary>
+        /// <param name="text">Text to parse</param>
+        /// <returns>Returns a list of words</returns>
+        private static string[] ParseSentence(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return new[] { string.Empty.PadRight(MAXTEXTLENGTH) };
+            }
+
+            if (text.Length > MAXTEXTLENGTH)
+            {
+                text = text.Substring(0, MAXTEXTLENGTH);
+            }
+
+            List<string> sentenceParts = new List<string>();
+
+            //Find lines
+            var lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+            foreach (var line in lines)
+            {
+                if (!string.IsNullOrEmpty(line))
+                {
+                    var words = line.Split(new[] { " " }, StringSplitOptions.None);
+                    foreach (var word in words)
+                    {
+                        sentenceParts.Add(word);
+                        sentenceParts.Add(" ");
+                    }
+                }
+
+                sentenceParts.Add(Environment.NewLine);
+            }
+
+            return sentenceParts.ToArray();
+        }
+        /// <summary>
+        /// Maps a word
+        /// </summary>
+        /// <param name="word">Word to map</param>
+        /// <param name="pos">Position</param>
+        /// <param name="vertices">Gets generated vertices</param>
+        /// <param name="indices">Gets generated indices</param>
+        /// <param name="height">Gets generated word height</param>
+        private void MapWord(
+            string word,
+            ref Vector2 pos,
+            out VertexPositionTexture[] vertices,
+            out uint[] indices,
+            out float height)
+        {
+            List<VertexPositionTexture> vertList = new List<VertexPositionTexture>();
+            List<uint> indexList = new List<uint>();
+
+            height = 0;
+
+            foreach (char c in word)
+            {
+                if (!this.map.ContainsKey(c))
+                {
+                    //Discard unmapped characters
+                    continue;
+                }
+
+                var chr = this.map[c];
+
+                //Creates the texture UVMap
+                var uv = GeometryUtil.CreateUVMap(
+                    chr.Width, chr.Height,
+                    chr.X, chr.Y,
+                    TextureWidth, TextureHeight);
+
+                //Creates the sprite
+                GeometryUtil.CreateSprite(
+                    pos,
+                    chr.Width, chr.Height, 0, 0,
+                    uv,
+                    out Vector3[] cv, out Vector2[] cuv, out uint[] ci);
+
+                //Add indices to word index list
+                ci.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
+
+                //Store the vertices
+                vertList.AddRange(VertexPositionTexture.Generate(cv, cuv));
+
+                //Move the cursor position to the next character
+                pos.X += chr.Width - (chr.Width * 0.3333f);
+
+                //Store maximum height
+                height = Math.Max(height, chr.Height);
+            }
+
+            vertices = vertList.ToArray();
+            indices = indexList.ToArray();
         }
     }
 }

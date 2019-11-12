@@ -56,6 +56,10 @@ namespace Engine
         /// </summary>
         private Vector2 position = Vector2.Zero;
         /// <summary>
+        /// Text area rectangle
+        /// </summary>
+        private RectangleF? rectangle = null;
+        /// <summary>
         /// The text draws vertically centered on screen
         /// </summary>
         private bool centerVertically = false;
@@ -134,6 +138,13 @@ namespace Engine
             {
                 this.position = value;
 
+                if (this.rectangle.HasValue)
+                {
+                    var rect = this.rectangle.Value;
+                    rect.Left = this.position.X;
+                    rect.Top = this.position.Y;
+                }
+
                 this.UpdatePosition();
             }
         }
@@ -149,6 +160,12 @@ namespace Engine
             set
             {
                 this.position.X = value;
+
+                if (this.rectangle.HasValue)
+                {
+                    var rect = this.rectangle.Value;
+                    rect.Left = this.position.X;
+                }
 
                 this.UpdatePosition();
             }
@@ -166,6 +183,12 @@ namespace Engine
             {
                 this.position.Y = value;
 
+                if (this.rectangle.HasValue)
+                {
+                    var rect = this.rectangle.Value;
+                    rect.Top = this.position.Y;
+                }
+
                 this.UpdatePosition();
             }
         }
@@ -177,6 +200,32 @@ namespace Engine
         /// Gets text height
         /// </summary>
         public int Height { get; private set; }
+        /// <summary>
+        /// Gets or sets the rectangle were the text must be drawn
+        /// </summary>
+        public RectangleF? Rectangle
+        {
+            get
+            {
+                return this.rectangle;
+            }
+            set
+            {
+                this.rectangle = value;
+
+                if (rectangle.HasValue)
+                {
+                    position = new Vector2(rectangle.Value.Left, rectangle.Value.Top);
+                }
+                else
+                {
+                    position = Vector2.Zero;
+                }
+
+                this.MapText();
+                this.UpdatePosition();
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -325,6 +374,7 @@ namespace Engine
         {
             this.fontMap.MapSentence(
                 this.text,
+                this.Rectangle,
                 out this.vertices, out this.indices, out Vector2 size);
 
             this.Width = (int)size.X;
