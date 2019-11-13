@@ -931,7 +931,6 @@ namespace Engine
 
             return false;
         }
-
         /// <summary>
         /// Gets nearest picking position of giving ray
         /// </summary>
@@ -943,29 +942,6 @@ namespace Engine
         {
             return PickNearest(ray, rayPickingParams, SceneObjectUsages.None, out result);
         }
-        /// <summary>
-        /// Gets first picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
-        {
-            return PickFirst(ray, rayPickingParams, SceneObjectUsages.None, out result);
-        }
-        /// <summary>
-        /// Gets all picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle>[] results)
-        {
-            return PickAll(ray, rayPickingParams, SceneObjectUsages.None, out results);
-        }
-
         /// <summary>
         /// Gets nearest picking position of giving ray
         /// </summary>
@@ -1028,6 +1004,17 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool PickFirst(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
+        {
+            return PickFirst(ray, rayPickingParams, SceneObjectUsages.None, out result);
+        }
+        /// <summary>
+        /// Gets first picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="usage">Component usage</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
@@ -1073,6 +1060,17 @@ namespace Engine
             }
 
             return false;
+        }
+        /// <summary>
+        /// Gets all picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="facingOnly">Select only facing triangles</param>
+        /// <param name="results">Picking results</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle>[] results)
+        {
+            return PickAll(ray, rayPickingParams, SceneObjectUsages.None, out results);
         }
         /// <summary>
         /// Gets all picking position of giving ray

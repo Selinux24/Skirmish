@@ -2,8 +2,9 @@
 
 namespace Engine.PathFinding
 {
-    using Engine.Common;
-
+    /// <summary>
+    /// Graph node
+    /// </summary>
     public interface IGraphNode : IValueWithCost
     {
         /// <summary>

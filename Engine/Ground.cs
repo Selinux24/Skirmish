@@ -62,26 +62,6 @@ namespace Engine
             return PickNearest(ray, RayPickingParams.Default, out result);
         }
         /// <summary>
-        /// Gets first picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(Ray ray, out PickingResult<Triangle> result)
-        {
-            return PickFirst(ray, RayPickingParams.Default, out result);
-        }
-        /// <summary>
-        /// Get all picking positions of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(Ray ray, out PickingResult<Triangle>[] results)
-        {
-            return PickAll(ray, RayPickingParams.Default, out results);
-        }
-        /// <summary>
         /// Pick ground nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
@@ -112,6 +92,16 @@ namespace Engine
             return res;
         }
         /// <summary>
+        /// Gets first picking position of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool PickFirst(Ray ray, out PickingResult<Triangle> result)
+        {
+            return PickFirst(ray, RayPickingParams.Default, out result);
+        }
+        /// <summary>
         /// Pick ground first position
         /// </summary>
         /// <param name="ray">Ray</param>
@@ -140,6 +130,16 @@ namespace Engine
             }
 
             return res;
+        }
+        /// <summary>
+        /// Get all picking positions of giving ray
+        /// </summary>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="results">Picking results</param>
+        /// <returns>Returns true if ground position found</returns>
+        public bool PickAll(Ray ray, out PickingResult<Triangle>[] results)
+        {
+            return PickAll(ray, RayPickingParams.Default, out results);
         }
         /// <summary>
         /// Pick ground positions

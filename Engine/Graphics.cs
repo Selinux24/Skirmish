@@ -617,7 +617,7 @@ namespace Engine
             this.deviceDebugInfoQueue = this.deviceDebug.QueryInterface<InfoQueue>();
 
             var severityFilter = new InfoQueueFilter()
-            { 
+            {
                 AllowList = new InfoQueueFilterDescription()
                 {
 
@@ -710,6 +710,14 @@ namespace Engine
             this.deviceContext.Rasterizer.SetViewport(viewport);
         }
         /// <summary>
+        /// Sets viewport
+        /// </summary>
+        /// <param name="viewport">Viewport</param>
+        public void SetViewport(ViewportF viewport)
+        {
+            this.deviceContext.Rasterizer.SetViewport(viewport);
+        }
+        /// <summary>
         /// Sets viewports
         /// </summary>
         /// <param name="viewports">Viewports</param>
@@ -718,14 +726,6 @@ namespace Engine
             var rawVpArray = viewports.Select(v => (SharpDX.Mathematics.Interop.RawViewportF)v).ToArray();
 
             this.deviceContext.Rasterizer.SetViewports(rawVpArray);
-        }
-        /// <summary>
-        /// Sets viewport
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
-        public void SetViewport(ViewportF viewport)
-        {
-            this.deviceContext.Rasterizer.SetViewport(viewport);
         }
         /// <summary>
         /// Sets viewports
@@ -2607,18 +2607,6 @@ namespace Engine
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="deviceContext">Graphic context</param>
         /// <param name="buffer">Buffer</param>
-        /// <param name="data">Complete data</param>
-        internal void WriteNoOverwriteBuffer<T>(Buffer buffer, params T[] data)
-            where T : struct
-        {
-            WriteNoOverwriteBuffer<T>(buffer, 0, data);
-        }
-        /// <summary>
-        /// Writes data into buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="deviceContext">Graphic context</param>
-        /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
         internal void WriteDiscardBuffer<T>(Buffer buffer, long offset, params T[] data)
@@ -2636,6 +2624,18 @@ namespace Engine
                 }
                 this.deviceContext.UnmapSubresource(buffer, 0);
             }
+        }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="data">Complete data</param>
+        internal void WriteNoOverwriteBuffer<T>(Buffer buffer, params T[] data)
+            where T : struct
+        {
+            WriteNoOverwriteBuffer<T>(buffer, 0, data);
         }
         /// <summary>
         /// Writes data into buffer

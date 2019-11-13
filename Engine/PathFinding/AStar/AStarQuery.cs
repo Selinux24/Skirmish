@@ -5,7 +5,6 @@ using System.Collections.Generic;
 namespace Engine.PathFinding.AStar
 {
     using Engine.Collections;
-    using Engine.PathFinding;
 
     /// <summary>
     /// Path finder class

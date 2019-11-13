@@ -856,6 +856,52 @@ namespace Engine
         /// <summary>
         /// Gets objects into the specified volume
         /// </summary>
+        /// <param name="sphere">Bounding sphere</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingSphere sphere, bool useSphere, bool sortByDistance)
+        {
+            return GetObjects(sphere, null, useSphere, sortByDistance);
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="sphere">Bounding sphere</param>
+        /// <param name="filter">Filter by entity type</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingSphere sphere, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
+        {
+            return GetObjects(sphere, filter, useSphere, sortByDistance);
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingFrustum frustum, bool useSphere, bool sortByDistance)
+        {
+            return GetObjects(frustum, null, useSphere, sortByDistance);
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <param name="filter">Filter by entity type</param>
+        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
+        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
+        /// <returns>Gets an array of objects into the specified volume</returns>
+        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingFrustum frustum, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
+        {
+            return GetObjects(frustum, filter, useSphere, sortByDistance);
+        }
+        /// <summary>
+        /// Gets objects into the specified volume
+        /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <param name="filter">Filter by entity type</param>
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
@@ -892,30 +938,6 @@ namespace Engine
             }
 
             return res.ToArray();
-        }
-
-        /// <summary>
-        /// Gets objects into the specified volume
-        /// </summary>
-        /// <param name="sphere">Bounding sphere</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
-        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
-        /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingSphere sphere, bool useSphere, bool sortByDistance)
-        {
-            return GetObjects(sphere, null, useSphere, sortByDistance);
-        }
-        /// <summary>
-        /// Gets objects into the specified volume
-        /// </summary>
-        /// <param name="sphere">Bounding sphere</param>
-        /// <param name="filter">Filter by entity type</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
-        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
-        /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingSphere sphere, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
-        {
-            return GetObjects(sphere, filter, useSphere, sortByDistance);
         }
         /// <summary>
         /// Gets objects into the specified volume
@@ -960,30 +982,6 @@ namespace Engine
             }
 
             return res.ToArray();
-        }
-
-        /// <summary>
-        /// Gets objects into the specified volume
-        /// </summary>
-        /// <param name="frustum">Bounding frustum</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
-        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
-        /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingFrustum frustum, bool useSphere, bool sortByDistance)
-        {
-            return GetObjects(frustum, null, useSphere, sortByDistance);
-        }
-        /// <summary>
-        /// Gets objects into the specified volume
-        /// </summary>
-        /// <param name="frustum">Bounding frustum</param>
-        /// <param name="filter">Filter by entity type</param>
-        /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
-        /// <param name="sortByDistance">Sorts the resulting array by distance</param>
-        /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingFrustum frustum, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
-        {
-            return GetObjects(frustum, filter, useSphere, sortByDistance);
         }
         /// <summary>
         /// Gets objects into the specified volume

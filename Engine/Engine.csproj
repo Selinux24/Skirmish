@@ -373,7 +373,6 @@
     <Compile Include="PathFinding\RecastNavigation\GraphFile.cs" />
     <Compile Include="PathFinding\RecastNavigation\GraphNode.cs" />
     <Compile Include="PathFinding\RecastNavigation\InputGeometry.cs" />
-    <Compile Include="PathFinding\RecastNavigation\NavMeshUtils.cs" />
     <Compile Include="PathFinding\RecastNavigation\ObstacleRequest.cs" />
     <Compile Include="PathFinding\RecastNavigation\ObstacleRequestAction.cs" />
     <Compile Include="PathFinding\RecastNavigation\PathFindingMode.cs" />

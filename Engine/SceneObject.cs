@@ -119,7 +119,7 @@ namespace Engine
         {
             if (disposing)
             {
-                if (this.baseObject != null && this.baseObject is IDisposable disposable)
+                if (this.baseObject is IDisposable disposable)
                 {
                     disposable.Dispose();
                 }
