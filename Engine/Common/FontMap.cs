@@ -368,7 +368,17 @@ namespace Engine.Common
 
             vertices = vertList.ToArray();
             indices = indexList.ToArray();
-            size = pos;
+
+            float maxX = float.MinValue;
+            float maxY = float.MaxValue;
+            foreach (var v in vertices)
+            {
+                var p = v.Position;
+                maxX = Math.Max(maxX, p.X);
+                maxY = Math.Min(maxY, p.Y);
+            }
+
+            size = new Vector2(maxX, -maxY);
         }
         /// <summary>
         /// Maps a space

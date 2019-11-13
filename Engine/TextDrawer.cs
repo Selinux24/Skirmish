@@ -372,9 +372,11 @@ namespace Engine
         /// </summary>
         private void MapText()
         {
+            var rect = rectangle ?? new RectangleF(0, 0, this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+
             this.fontMap.MapSentence(
                 this.text,
-                this.Rectangle,
+                rect,
                 out this.vertices, out this.indices, out Vector2 size);
 
             this.Width = (int)size.X;
@@ -387,9 +389,7 @@ namespace Engine
         /// </summary>
         private void UpdatePosition()
         {
-            float x = 0;
-            float y = 0;
-
+            float x;
             if (this.centerHorizontally)
             {
                 x = -(this.Width * 0.5f);
@@ -399,6 +399,7 @@ namespace Engine
                 x = +this.position.X - this.Game.Form.RelativeCenter.X;
             }
 
+            float y;
             if (this.centerVertically)
             {
                 y = +(this.Height * 0.5f);

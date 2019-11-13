@@ -89,7 +89,7 @@ namespace SpriteDrawing
 
             textBackPanel.Manipulator.SetPosition(700, 100);
             textDrawer.Rectangle = new RectangleF(780, 140, 650, 550);
-            textDrawer.Text = "";
+            textDrawer.Text = null;
         }
 
         public override void Update(GameTime gameTime)
