@@ -714,83 +714,79 @@ namespace Engine
         {
             #region Read heightmap
 
+            string hmContentPath = description.Content.HeightmapDescription.ContentPath;
+
+            var heightMapImage = new ImageContent()
             {
-                string contentPath = description.Content.HeightmapDescription.ContentPath;
+                Streams = ContentManager.FindContent(hmContentPath, description.Content.HeightmapDescription.HeightmapFileName),
+            };
+            var colorMapImage = new ImageContent()
+            {
+                Streams = ContentManager.FindContent(hmContentPath, description.Content.HeightmapDescription.ColormapFileName),
+            };
 
-                var heightMapImage = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.HeightmapFileName),
-                };
-                var colorMapImage = new ImageContent()
-                {
-                    Streams = ContentManager.FindContent(contentPath, description.Content.HeightmapDescription.ColormapFileName),
-                };
-
-                this.heightMap = HeightMap.FromStream(heightMapImage.Stream, colorMapImage.Stream);
-                this.heightMapCellSize = description.Content.HeightmapDescription.CellSize;
-                this.heightMapHeight = description.Content.HeightmapDescription.MaximumHeight;
-                this.textureResolution = description.Content.HeightmapDescription.TextureResolution;
-            }
+            this.heightMap = HeightMap.FromStream(heightMapImage.Stream, colorMapImage.Stream);
+            this.heightMapCellSize = description.Content.HeightmapDescription.CellSize;
+            this.heightMapHeight = description.Content.HeightmapDescription.MaximumHeight;
+            this.textureResolution = description.Content.HeightmapDescription.TextureResolution;
 
             #endregion
 
             #region Read terrain data
 
+            string tContentPath = Path.Combine(description.Content.HeightmapDescription.ContentPath, description.Content.HeightmapDescription.Textures.ContentPath);
+
+            this.terrainMaterial = new MeshMaterial()
             {
-                string contentPath = Path.Combine(description.Content.HeightmapDescription.ContentPath, description.Content.HeightmapDescription.Textures.ContentPath);
+                Material = description.Content.HeightmapDescription.Material != null ? description.Content.HeightmapDescription.Material.GetMaterial() : Material.Default
+            };
 
-                this.terrainMaterial = new MeshMaterial()
+            var normalMapTextures = new ImageContent()
+            {
+                Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.NormalMaps),
+            };
+            this.terrainNormalMaps = this.Game.ResourceManager.CreateResource(normalMapTextures);
+
+            var specularMapTextures = new ImageContent()
+            {
+                Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.SpecularMaps),
+            };
+            this.terrainSpecularMaps = this.Game.ResourceManager.CreateResource(specularMapTextures);
+
+            if (description.Content.HeightmapDescription.Textures.UseSlopes)
+            {
+                var texturesLR = new ImageContent()
                 {
-                    Material = description.Content.HeightmapDescription.Material != null ? description.Content.HeightmapDescription.Material.GetMaterial() : Material.Default
+                    Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.TexturesLR),
+                };
+                var texturesHR = new ImageContent()
+                {
+                    Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.TexturesHR),
                 };
 
-                var normalMapTextures = new ImageContent()
-                {
-                    Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.NormalMaps),
-                };
-                this.terrainNormalMaps = this.Game.ResourceManager.CreateResource(normalMapTextures);
-
-                var specularMapTextures = new ImageContent()
-                {
-                    Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.SpecularMaps),
-                };
-                this.terrainSpecularMaps = this.Game.ResourceManager.CreateResource(specularMapTextures);
-
-                if (description.Content.HeightmapDescription.Textures.UseSlopes)
-                {
-                    var texturesLR = new ImageContent()
-                    {
-                        Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.TexturesLR),
-                    };
-                    var texturesHR = new ImageContent()
-                    {
-                        Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.TexturesHR),
-                    };
-
-                    this.terrainTexturesLR = this.Game.ResourceManager.CreateResource(texturesLR);
-                    this.terrainTexturesHR = this.Game.ResourceManager.CreateResource(texturesHR);
-                    this.slopeRanges = description.Content.HeightmapDescription.Textures.SlopeRanges;
-                }
-
-                if (description.Content.HeightmapDescription.Textures.UseAlphaMapping)
-                {
-                    var colors = new ImageContent()
-                    {
-                        Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.ColorTextures),
-                    };
-                    var aMap = new ImageContent()
-                    {
-                        Paths = ContentManager.FindPaths(contentPath, description.Content.HeightmapDescription.Textures.AlphaMap),
-                    };
-
-                    this.colorTextures = this.Game.ResourceManager.CreateResource(colors);
-                    this.alphaMap = this.Game.ResourceManager.CreateResource(aMap);
-                }
-
-                this.useAlphaMap = description.Content.HeightmapDescription.Textures.UseAlphaMapping;
-                this.useSlopes = description.Content.HeightmapDescription.Textures.UseSlopes;
-                this.proportion = description.Content.HeightmapDescription.Textures.Proportion;
+                this.terrainTexturesLR = this.Game.ResourceManager.CreateResource(texturesLR);
+                this.terrainTexturesHR = this.Game.ResourceManager.CreateResource(texturesHR);
+                this.slopeRanges = description.Content.HeightmapDescription.Textures.SlopeRanges;
             }
+
+            if (description.Content.HeightmapDescription.Textures.UseAlphaMapping)
+            {
+                var colors = new ImageContent()
+                {
+                    Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.ColorTextures),
+                };
+                var aMap = new ImageContent()
+                {
+                    Paths = ContentManager.FindPaths(tContentPath, description.Content.HeightmapDescription.Textures.AlphaMap),
+                };
+
+                this.colorTextures = this.Game.ResourceManager.CreateResource(colors);
+                this.alphaMap = this.Game.ResourceManager.CreateResource(aMap);
+            }
+
+            this.useAlphaMap = description.Content.HeightmapDescription.Textures.UseAlphaMapping;
+            this.useSlopes = description.Content.HeightmapDescription.Textures.UseSlopes;
+            this.proportion = description.Content.HeightmapDescription.Textures.Proportion;
 
             #endregion
 

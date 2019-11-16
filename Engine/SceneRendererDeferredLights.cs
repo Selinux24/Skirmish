@@ -182,71 +182,11 @@ namespace Engine
             List<VertexPosition> verts = new List<VertexPosition>();
             List<uint> indx = new List<uint>();
 
-            {
-                GeometryUtil.CreateScreen(
-                    width, height,
-                    out Vector3[] cv,
-                    out uint[] indices);
-                var vertices = new VertexPosition[cv.Length];
-                for (int i = 0; i < vertices.Length; i++)
-                {
-                    vertices[i] = new VertexPosition() { Position = cv[i] };
-                }
+            CreateScreen(verts, indx, width, height);
 
-                this.screenGeometry.Offset = indx.Count;
-                this.screenGeometry.IndexCount = indices.Length;
+            CreatePointLight(verts, indx);
 
-                verts.AddRange(vertices);
-                indx.AddRange(indices);
-            }
-
-            {
-                GeometryUtil.CreateSphere(
-                    1, 16, 16,
-                    out Vector3[] cv,
-                    out uint[] indices);
-                var vertices = new VertexPosition[cv.Length];
-                for (int i = 0; i < vertices.Length; i++)
-                {
-                    vertices[i] = new VertexPosition() { Position = cv[i] };
-                }
-
-                this.pointLightGeometry.Offset = indx.Count;
-                this.pointLightGeometry.IndexCount = indices.Length;
-
-                //Sum offsets
-                for (int i = 0; i < indices.Length; i++)
-                {
-                    indices[i] += (uint)verts.Count;
-                }
-
-                verts.AddRange(vertices);
-                indx.AddRange(indices);
-            }
-
-            {
-                GeometryUtil.CreateSphere(
-                    1, 16, 16,
-                    out Vector3[] cv,
-                    out uint[] indices);
-                var vertices = new VertexPosition[cv.Length];
-                for (int i = 0; i < vertices.Length; i++)
-                {
-                    vertices[i] = new VertexPosition() { Position = cv[i] };
-                }
-
-                this.spotLightGeometry.Offset = indx.Count;
-                this.spotLightGeometry.IndexCount = indices.Length;
-
-                //Sum offsets
-                for (int i = 0; i < indices.Length; i++)
-                {
-                    indices[i] += (uint)verts.Count;
-                }
-
-                verts.AddRange(vertices);
-                indx.AddRange(indices);
-            }
+            CreateSpotLight(verts, indx);
 
             if (this.lightGeometryVertexBuffer == null)
             {
@@ -267,6 +207,90 @@ namespace Engine
                 graphics.WriteDiscardBuffer(this.lightGeometryIndexBuffer, indx.ToArray());
             }
         }
+        /// <summary>
+        /// Creates the geometry to draw the screen
+        /// </summary>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="indx">Index list</param>
+        /// <param name="width">Screen width</param>
+        /// <param name="height">Screen height</param>
+        private void CreateScreen(List<VertexPosition> verts, List<uint> indx, int width, int height)
+        {
+            GeometryUtil.CreateScreen(
+                width, height,
+                out Vector3[] cv,
+                out uint[] indices);
+            var vertices = new VertexPosition[cv.Length];
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = new VertexPosition() { Position = cv[i] };
+            }
+
+            this.screenGeometry.Offset = indx.Count;
+            this.screenGeometry.IndexCount = indices.Length;
+
+            verts.AddRange(vertices);
+            indx.AddRange(indices);
+        }
+        /// <summary>
+        /// Creates the geometry to draw a point light
+        /// </summary>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="indx">Index list</param>
+        private void CreatePointLight(List<VertexPosition> verts, List<uint> indx)
+        {
+            GeometryUtil.CreateSphere(
+                1, 16, 16,
+                out Vector3[] cv,
+                out uint[] indices);
+            var vertices = new VertexPosition[cv.Length];
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = new VertexPosition() { Position = cv[i] };
+            }
+
+            this.pointLightGeometry.Offset = indx.Count;
+            this.pointLightGeometry.IndexCount = indices.Length;
+
+            //Sum offsets
+            for (int i = 0; i < indices.Length; i++)
+            {
+                indices[i] += (uint)verts.Count;
+            }
+
+            verts.AddRange(vertices);
+            indx.AddRange(indices);
+        }
+        /// <summary>
+        /// Creates the geometry to draw a spot light
+        /// </summary>
+        /// <param name="verts">Vertex list</param>
+        /// <param name="indx">Index list</param>
+        private void CreateSpotLight(List<VertexPosition> verts, List<uint> indx)
+        {
+            GeometryUtil.CreateSphere(
+                1, 16, 16,
+                out Vector3[] cv,
+                out uint[] indices);
+            var vertices = new VertexPosition[cv.Length];
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i] = new VertexPosition() { Position = cv[i] };
+            }
+
+            this.spotLightGeometry.Offset = indx.Count;
+            this.spotLightGeometry.IndexCount = indices.Length;
+
+            //Sum offsets
+            for (int i = 0; i < indices.Length; i++)
+            {
+                indices[i] += (uint)verts.Count;
+            }
+
+            verts.AddRange(vertices);
+            indx.AddRange(indices);
+        }
+
         /// <summary>
         /// Draws a single light
         /// </summary>

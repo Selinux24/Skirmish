@@ -9,6 +9,7 @@ namespace Engine
 {
     using Engine.Common;
     using Engine.Effects;
+    using System.Linq;
 
     /// <summary>
     /// Game class
@@ -234,6 +235,9 @@ namespace Engine
         {
             if (disposing)
             {
+                //Remove scene reference
+                this.nextScene = null;
+
                 if (this.scenes != null)
                 {
                     for (int i = 0; i < this.scenes.Count; i++)
@@ -343,47 +347,18 @@ namespace Engine
             Stopwatch gSW = new Stopwatch();
             gSW.Start();
 
+            FrameInput();
+
+            FrameBegin();
+
+            foreach (var scene in scenes.Where(s => s.Active))
             {
-                Stopwatch pSW = new Stopwatch();
-                pSW.Start();
-                this.Input.Update(this.GameTime);
-                pSW.Stop();
-                GameStatus.Add("Input", pSW);
+                FrameSceneUpdate(scene);
+
+                FrameSceneDraw(scene);
             }
 
-            {
-                Stopwatch pSW = new Stopwatch();
-                pSW.Start();
-                this.Graphics.Begin();
-                pSW.Stop();
-                GameStatus.Add("Begin", pSW);
-            }
-
-            for (int i = 0; i < this.scenes.Count; i++)
-            {
-                if (this.scenes[i].Active)
-                {
-                    Stopwatch uSW = new Stopwatch();
-                    uSW.Start();
-                    this.scenes[i].Update(this.GameTime);
-                    uSW.Stop();
-                    GameStatus.Add($"Scene {i} {this.scenes[i].GetType()}.Update", uSW);
-
-                    Stopwatch dSW = new Stopwatch();
-                    dSW.Start();
-                    this.scenes[i].Draw(this.GameTime);
-                    dSW.Stop();
-                    GameStatus.Add($"Scene {i} {this.scenes[i].GetType()}.Draw", dSW);
-                }
-            }
-
-            {
-                Stopwatch pSW = new Stopwatch();
-                pSW.Start();
-                this.Graphics.End();
-                pSW.Stop();
-                GameStatus.Add("End", pSW);
-            }
+            FrameEnd();
 
             gSW.Stop();
             GameStatus.Add("TOTAL", gSW);
@@ -393,36 +368,12 @@ namespace Engine
 
             if (Counters.FrameTime >= 1.0f)
             {
-                this.RuntimeText = string.Format(
-                    "{0} - {1} - FPS: {2:000} Draw C/D: {3:00}:{4:00} Inst: {5:00} U: {6:00} S: {7}:{8}:{9} F. Time: {10:0.0000} (secs) T. Time: {11:0000} (secs) CPU: {12:0.00}%",
-                    this.Graphics.DeviceDescription,
-                    this.Name,
-                    Counters.FrameCount,
-                    Counters.DrawCallsPerFrame,
-                    Counters.InstancesPerFrame,
-                    Counters.MaxInstancesPerFrame,
-                    Counters.UpdatesPerFrame,
-                    Counters.RasterizerStateChanges, Counters.BlendStateChanges, Counters.DepthStencilStateChanges,
-                    this.GameTime.ElapsedSeconds,
-                    this.GameTime.TotalSeconds,
-                    this.CPUStats.NextValue());
-#if DEBUG
-                this.Form.Text = this.RuntimeText;
-#endif
-                Counters.FrameCount = 0;
-                Counters.FrameTime = 0f;
+                FrameRefreshCounters();
             }
 
             if (CollectGameStatus)
             {
-                GameStatusCollectedEventArgs e = new GameStatusCollectedEventArgs()
-                {
-                    Trace = GameStatus.Copy(),
-                };
-
-                GameStatusCollected?.Invoke(this, e);
-
-                CollectGameStatus = false;
+                FrameCollectGameStatus();
             }
 
             GameStatus.Clear();
@@ -440,6 +391,102 @@ namespace Engine
                 this.nextScene = null;
             }
         }
+        /// <summary>
+        /// Update input
+        /// </summary>
+        private void FrameInput()
+        {
+            Stopwatch pSW = new Stopwatch();
+            pSW.Start();
+            this.Input.Update(this.GameTime);
+            pSW.Stop();
+            GameStatus.Add("Input", pSW);
+        }
+        /// <summary>
+        /// Begin frame
+        /// </summary>
+        private void FrameBegin()
+        {
+            Stopwatch pSW = new Stopwatch();
+            pSW.Start();
+            this.Graphics.Begin();
+            pSW.Stop();
+            GameStatus.Add("Begin", pSW);
+        }
+        /// <summary>
+        /// Update scene state
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        private void FrameSceneUpdate(Scene scene)
+        {
+            Stopwatch uSW = new Stopwatch();
+            uSW.Start();
+            scene.Update(this.GameTime);
+            uSW.Stop();
+            GameStatus.Add($"Scene {scene}.Update", uSW);
+        }
+        /// <summary>
+        /// Draw scene
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        private void FrameSceneDraw(Scene scene)
+        {
+            Stopwatch dSW = new Stopwatch();
+            dSW.Start();
+            scene.Draw(this.GameTime);
+            dSW.Stop();
+            GameStatus.Add($"Scene {scene}.Draw", dSW);
+        }
+        /// <summary>
+        /// End frame
+        /// </summary>
+        private void FrameEnd()
+        {
+            Stopwatch pSW = new Stopwatch();
+            pSW.Start();
+            this.Graphics.End();
+            pSW.Stop();
+            GameStatus.Add("End", pSW);
+        }
+        /// <summary>
+        /// Refreshes frame counters
+        /// </summary>
+        private void FrameRefreshCounters()
+        {
+            this.RuntimeText = string.Format(
+                "{0} - {1} - FPS: {2:000} Draw C/D: {3:00}:{4:00} Inst: {5:00} U: {6:00} S: {7}:{8}:{9} F. Time: {10:0.0000} (secs) T. Time: {11:0000} (secs) CPU: {12:0.00}%",
+                this.Graphics.DeviceDescription,
+                this.Name,
+                Counters.FrameCount,
+                Counters.DrawCallsPerFrame,
+                Counters.InstancesPerFrame,
+                Counters.MaxInstancesPerFrame,
+                Counters.UpdatesPerFrame,
+                Counters.RasterizerStateChanges, Counters.BlendStateChanges, Counters.DepthStencilStateChanges,
+                this.GameTime.ElapsedSeconds,
+                this.GameTime.TotalSeconds,
+                this.CPUStats.NextValue());
+#if DEBUG
+            this.Form.Text = this.RuntimeText;
+#endif
+            Counters.FrameCount = 0;
+            Counters.FrameTime = 0f;
+        }
+        /// <summary>
+        /// Collects frame status
+        /// </summary>
+        private void FrameCollectGameStatus()
+        {
+            GameStatusCollectedEventArgs e = new GameStatusCollectedEventArgs()
+            {
+                Trace = GameStatus.Copy(),
+            };
+
+            GameStatusCollected?.Invoke(this, e);
+
+            CollectGameStatus = false;
+        }
+
         /// <summary>
         /// Unloads the current scenes and loads the specified scene
         /// </summary>

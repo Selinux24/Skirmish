@@ -313,8 +313,8 @@ namespace Engine
                 this.currentMouseButtons.AddRange(buttons);
             }
 
-            bool prev = false;
-            bool curr = false;
+            bool prev;
+            bool curr;
 
             prev = this.lastMouseButtons.Contains(MouseButtons.Left);
             curr = this.currentMouseButtons.Contains(MouseButtons.Left);
@@ -404,60 +404,52 @@ namespace Engine
         {
             #region Mouse position
 
-            {
-                this.MouseXDelta = 0;
-                this.MouseYDelta = 0;
+            this.MouseXDelta = 0;
+            this.MouseYDelta = 0;
 
-                this.MouseX = this.lastMousePos.X;
-                this.MouseY = this.lastMousePos.Y;
-            }
+            this.MouseX = this.lastMousePos.X;
+            this.MouseY = this.lastMousePos.Y;
 
             #endregion
 
             #region Mouse buttons
 
-            {
-                this.LeftMouseButtonPressed = false;
-                this.LeftMouseButtonJustPressed = false;
-                this.LeftMouseButtonJustReleased = false;
+            this.LeftMouseButtonPressed = false;
+            this.LeftMouseButtonJustPressed = false;
+            this.LeftMouseButtonJustReleased = false;
 
-                this.RightMouseButtonPressed = false;
-                this.RightMouseButtonJustPressed = false;
-                this.RightMouseButtonJustReleased = false;
+            this.RightMouseButtonPressed = false;
+            this.RightMouseButtonJustPressed = false;
+            this.RightMouseButtonJustReleased = false;
 
-                this.MiddleMouseButtonPressed = false;
-                this.MiddleMouseButtonJustPressed = false;
-                this.MiddleMouseButtonJustReleased = false;
+            this.MiddleMouseButtonPressed = false;
+            this.MiddleMouseButtonJustPressed = false;
+            this.MiddleMouseButtonJustReleased = false;
 
-                this.X1MouseButtonPressed = false;
-                this.X1MouseButtonJustPressed = false;
-                this.X1MouseButtonJustReleased = false;
+            this.X1MouseButtonPressed = false;
+            this.X1MouseButtonJustPressed = false;
+            this.X1MouseButtonJustReleased = false;
 
-                this.X2MouseButtonPressed = false;
-                this.X2MouseButtonJustPressed = false;
-                this.X2MouseButtonJustReleased = false;
+            this.X2MouseButtonPressed = false;
+            this.X2MouseButtonJustPressed = false;
+            this.X2MouseButtonJustReleased = false;
 
-                this.lastMouseButtons.Clear();
-                this.currentMouseButtons.Clear();
-            }
+            this.lastMouseButtons.Clear();
+            this.currentMouseButtons.Clear();
 
             #endregion
 
             #region Mouse Wheel
 
-            {
-                this.MouseWheelDelta = 0;
-                this.mouseWheel = 0;
-            }
+            this.MouseWheelDelta = 0;
+            this.mouseWheel = 0;
 
             #endregion
 
             #region Keyboard keys
 
-            {
-                this.lastKeyboardKeys.Clear();
-                this.currentKeyboardKeys.Clear();
-            }
+            this.lastKeyboardKeys.Clear();
+            this.currentKeyboardKeys.Clear();
 
             #endregion
         }
