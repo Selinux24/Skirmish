@@ -46,7 +46,6 @@ namespace Deferred
         private SceneObject<PrimitiveListDrawer<Line3D>> lineDrawer = null;
         private SceneObject<PrimitiveListDrawer<Triangle>> terrainGraphDrawer = null;
 
-        private readonly Random rnd = new Random(0);
         private bool onlyModels = true;
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
@@ -1045,7 +1044,7 @@ namespace Deferred
                             lightPosition.Y += 1f;
                         }
 
-                        var color = new Color4(rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), rnd.NextFloat(0, 1), 1.0f);
+                        var color = new Color4(Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), 1.0f);
 
                         var pointLight = new SceneLightPoint(
                             string.Format("Point {0}", this.Lights.PointLights.Length),
@@ -1055,7 +1054,7 @@ namespace Deferred
                             true,
                             SceneLightPointDescription.Create(lightPosition, 5f, 10f))
                         {
-                            State = rnd.NextFloat(0, 1) >= 0.5f ? 1 : -1
+                            State = Helper.RandomGenerator.NextFloat(0, 1) >= 0.5f ? 1 : -1
                         };
 
                         this.Lights.Add(pointLight);

@@ -1,6 +1,5 @@
 ﻿using Engine;
 using SharpDX;
-using System;
 
 namespace SpriteDrawing
 {
@@ -13,11 +12,10 @@ namespace SpriteDrawing
         private Sprite textBackPanel = null;
         private TextDrawer textDrawer = null;
 
-        private readonly Random rnd = new Random();
         private readonly string allText = Properties.Resources.Lorem;
         private string currentText = "";
         private float textTime = 0;
-        private float textInterval = 100f;
+        private float textInterval = 200f;
 
         public TestScene(Game game)
             : base(game)
@@ -144,8 +142,8 @@ namespace SpriteDrawing
             {
                 textTime = 0;
 
-                textInterval = rnd.NextFloat(50, 100);
-                int chars = rnd.Next(1, 5);
+                textInterval = Helper.RandomGenerator.NextFloat(50, 200);
+                int chars = Helper.RandomGenerator.Next(1, 5);
 
                 //Add text
                 if (allText.Length >= currentText.Length + chars)

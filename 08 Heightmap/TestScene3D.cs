@@ -26,8 +26,6 @@ namespace Heightmap
         private const int layerHUD = 99;
         private const int layerCursor = 100;
 
-        private readonly Random rnd = new Random();
-
         private float time = 0.23f;
 
         private Vector3 playerHeight = Vector3.UnitY * 5f;
@@ -1074,7 +1072,7 @@ namespace Heightmap
 
                     this.troops.Instance[i].AnimationController.TimeDelta = (i + 1) * 0.2f;
                     this.troops.Instance[i].AnimationController.AddPath(this.animations["soldier_idle"]);
-                    this.troops.Instance[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
+                    this.troops.Instance[i].AnimationController.Start(Helper.RandomGenerator.NextFloat(0f, 8f));
                 }
             }
         }
@@ -1564,7 +1562,7 @@ namespace Heightmap
             {
                 this.windDuration = 0;
 
-                this.windNextStrength = this.windStrength + this.rnd.NextFloat(-0.5f, +0.5f);
+                this.windNextStrength = this.windStrength + Helper.RandomGenerator.NextFloat(-0.5f, +0.5f);
                 if (this.windNextStrength > 100f) this.windNextStrength = 100f;
                 if (this.windNextStrength < 0f) this.windNextStrength = 0f;
             }
@@ -1597,9 +1595,9 @@ namespace Heightmap
 
                 hbsph.Radius *= 0.8f;
 
-                this.GenerateDust(this.rnd, hbsph);
-                this.GenerateDust(this.rnd, hbsph);
-                this.GenerateDust(this.rnd, hbsph);
+                this.GenerateDust(Helper.RandomGenerator, hbsph);
+                this.GenerateDust(Helper.RandomGenerator, hbsph);
+                this.GenerateDust(Helper.RandomGenerator, hbsph);
             }
         }
         private void GenerateDust(Random rnd, BoundingSphere bsph)

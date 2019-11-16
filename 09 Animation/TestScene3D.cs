@@ -13,8 +13,6 @@ namespace Animation
     {
         private const int layerHUD = 99;
 
-        private readonly Random rnd = new Random();
-
         private SceneObject<TextDrawer> runtime = null;
         private SceneObject<TextDrawer> animText = null;
 
@@ -650,7 +648,7 @@ namespace Animation
         {
             var keys = this.soldierPaths.Keys.ToArray();
 
-            int index = Math.Min(this.rnd.Next(1, 3), keys.Length - 1);
+            int index = Math.Min(Helper.RandomGenerator.Next(1, 3), keys.Length - 1);
 
             var key = keys[index];
 

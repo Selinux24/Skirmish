@@ -133,7 +133,7 @@ namespace Engine
         /// <returns>Returns the function execution result</returns>
         public static TResult Attempt<T, TResult>(Func<T, TResult> func, T input, int attempts, TimeSpan delay)
         {
-            Exception lastEx = null;
+            Exception lastEx;
 
             do
             {
@@ -537,7 +537,7 @@ namespace Engine
 
             for (int i = 0; i < list1.Count; i++)
             {
-                bool equal = false;
+                bool equal;
 
                 if (equatable)
                 {

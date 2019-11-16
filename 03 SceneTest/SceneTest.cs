@@ -17,8 +17,6 @@ namespace SceneTest
         private readonly float baseHeight = 0.1f;
         private readonly float spaceSize = 40;
 
-        private readonly Random rnd = new Random();
-
         private SceneObject<Cursor> cursor = null;
         private SceneObject<SpriteButton> butClose = null;
 
@@ -857,10 +855,10 @@ namespace SceneTest
         {
             if (this.nextWindChange <= 0)
             {
-                this.nextWindChange = this.rnd.NextFloat(0, 120);
+                this.nextWindChange = Helper.RandomGenerator.NextFloat(0, 120);
 
                 var limits = Vector2.One * 100f;
-                this.nextWind = this.rnd.NextVector2(-limits, limits);
+                this.nextWind = Helper.RandomGenerator.NextVector2(-limits, limits);
             }
 
             if (this.wind != this.nextWind)

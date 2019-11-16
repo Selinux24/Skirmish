@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System;
+﻿using Engine;
+using System.Collections.Generic;
 
 namespace GameLogic.Rules
 {
@@ -101,9 +101,7 @@ namespace GameLogic.Rules
             Soldier[] enemyList = this.soldiers.FindAll(s => s.Team.Faction != soldier.Team.Faction).ToArray();
             if (enemyList.Length > 0)
             {
-                Random rnd = new Random();
-
-                return enemyList[rnd.Next(0, enemyList.Length - 1)];
+                return enemyList[Helper.RandomGenerator.Next(0, enemyList.Length - 1)];
             }
 
             return null;

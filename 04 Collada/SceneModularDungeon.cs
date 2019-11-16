@@ -20,8 +20,6 @@ namespace Collada
 
         private const float maxDistance = 35;
 
-        private readonly Random rnd = new Random();
-
         private SceneObject<TextDrawer> fps = null;
         private SceneObject<TextDrawer> info = null;
 
@@ -825,8 +823,8 @@ namespace Collada
 
             if (!this.ratActive && this.ratTime <= 0)
             {
-                var iFrom = rnd.Next(0, this.ratHoles.Length);
-                var iTo = rnd.Next(0, this.ratHoles.Length);
+                var iFrom = Helper.RandomGenerator.Next(0, this.ratHoles.Length);
+                var iTo = Helper.RandomGenerator.Next(0, this.ratHoles.Length);
                 if (iFrom == iTo) return;
 
                 var from = this.ratHoles[iFrom];
@@ -1312,7 +1310,7 @@ namespace Collada
 
             var soundEffect = this.soundWinds[index];
 
-            float durationVariation = this.rnd.NextFloat(0.5f, 1.0f);
+            float durationVariation = Helper.RandomGenerator.NextFloat(0.5f, 1.0f);
             int duration = (int)(soundEffect.Duration.TotalMilliseconds * durationVariation);
 
             var windInstance = soundEffect.Create(new GameAudioSourceDescription() { Radius = 15 }, agentListener);
@@ -1321,7 +1319,7 @@ namespace Collada
             windInstance.Volume = 1;
             windInstance.Play();
 
-            index = this.rnd.Next(0, soundWinds.Length + 1);
+            index = Helper.RandomGenerator.Next(0, soundWinds.Length + 1);
             index %= soundWinds.Length;
 
             Task.Run(async () =>

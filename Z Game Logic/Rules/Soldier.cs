@@ -1,4 +1,4 @@
-﻿using System;
+﻿using Engine;
 
 namespace GameLogic.Rules
 {
@@ -433,9 +433,7 @@ namespace GameLogic.Rules
         {
             this.ConsumeActionPoints(points);
 
-            Random rnd = new Random();
-
-            return (rnd.Next(0, 6) >= 4);
+            return (Helper.RandomGenerator.Next(0, 6) >= 4);
         }
         public void SupportTest()
         {
@@ -445,22 +443,16 @@ namespace GameLogic.Rules
         {
             this.ConsumeActionPoints(points);
 
-            Random rnd = new Random();
-
-            return (rnd.Next(0, 6) > 5);
+            return (Helper.RandomGenerator.Next(0, 6) > 5);
         }
 
         public bool FightingTest()
         {
-            Random rnd = new Random();
-
-            return (rnd.Next(0, 6) >= 4);
+            return (Helper.RandomGenerator.Next(0, 6) >= 4);
         }
         public bool LeaveMeleeTest()
         {
-            Random rnd = new Random();
-
-            if (rnd.Next(0, 6) > 4)
+            if (Helper.RandomGenerator.Next(0, 6) > 4)
             {
                 this.canFight = false;
                 this.onMelee = false;
@@ -473,9 +465,7 @@ namespace GameLogic.Rules
 
         public void TakeControlTest()
         {
-            Random rnd = new Random();
-
-            if (rnd.Next(0, 6) > 2)
+            if (Helper.RandomGenerator.Next(0, 6) > 2)
             {
                 this.canMove = true;
                 this.canShoot = true;
@@ -515,15 +505,11 @@ namespace GameLogic.Rules
 
         public void HitTest(Weapon weapon)
         {
-            Random rnd = new Random();
-
-            this.wounds += (rnd.Next(0, weapon.Damage) + weapon.Penetration);
+            this.wounds += (Helper.RandomGenerator.Next(0, weapon.Damage) + weapon.Penetration);
         }
         public void HealingTest(int hability)
         {
-            Random rnd = new Random();
-
-            this.wounds -= (rnd.Next(-25, 25) + hability);
+            this.wounds -= (Helper.RandomGenerator.Next(-25, 25) + hability);
         }
 
         private void ConsumeMovingCapacity(int points)

@@ -19,10 +19,6 @@ namespace Engine
         public static int BufferSlot { get; set; } = 0;
 
         /// <summary>
-        /// Random instance
-        /// </summary>
-        private readonly Random rnd = new Random();
-        /// <summary>
         /// Particle list
         /// </summary>
         private readonly VertexCpuParticle[] particles;
@@ -289,11 +285,11 @@ namespace Engine
 
             Vector3 velocity = this.Emitter.CalcInitialVelocity(
                 this.parameters,
-                this.rnd.NextFloat(0, 1),
-                this.rnd.NextFloat(0, 1),
-                this.rnd.NextFloat(0, 1));
+                Helper.RandomGenerator.NextFloat(0, 1),
+                Helper.RandomGenerator.NextFloat(0, 1),
+                Helper.RandomGenerator.NextFloat(0, 1));
 
-            Vector4 randomValues = this.rnd.NextVector4(Vector4.Zero, Vector4.One);
+            Vector4 randomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One);
 
             this.particles[this.currentParticleIndex].Position = this.Emitter.Position;
             this.particles[this.currentParticleIndex].Velocity = velocity;

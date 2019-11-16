@@ -2,7 +2,6 @@
 using Engine.Common;
 using Engine.Content;
 using SharpDX;
-using System;
 using System.Collections.Generic;
 
 namespace ModelDrawing
@@ -26,8 +25,6 @@ namespace ModelDrawing
 
         private SceneObject<ParticleManager> pManager = null;
         private SceneObject<PrimitiveListDrawer<Line3D>> pManagerLineDrawer = null;
-
-        private readonly Random rnd = new Random();
 
         public TestScene(Game game)
             : base(game, SceneModes.ForwardLigthning)
@@ -228,7 +225,7 @@ namespace ModelDrawing
         }
         private void AddSystem()
         {
-            float percent = this.rnd.NextFloat(0, 1);
+            float percent = Helper.RandomGenerator.NextFloat(0, 1);
             if (percent <= 0.25f)
             {
                 AddExplosionSystem();
@@ -250,7 +247,7 @@ namespace ModelDrawing
         }
         private void AddExplosionSystem()
         {
-            Vector3 position = new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10));
+            Vector3 position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
             Vector3 velocity = Vector3.Up;
             float duration = 0.5f;
             float rate = 0.1f;
@@ -282,8 +279,8 @@ namespace ModelDrawing
             var emitter = new MovingEmitter()
             {
                 EmissionRate = 0.005f,
-                AngularVelocity = this.rnd.NextFloat(3, 10),
-                Radius = this.rnd.NextFloat(5, 10),
+                AngularVelocity = Helper.RandomGenerator.NextFloat(3, 10),
+                Radius = Helper.RandomGenerator.NextFloat(5, 10),
                 Duration = 3,
                 MaximumDistance = 100f,
             };
@@ -295,8 +292,8 @@ namespace ModelDrawing
             var emitter = new MovingEmitter()
             {
                 EmissionRate = 0.1f,
-                AngularVelocity = this.rnd.NextFloat(0, 1),
-                Radius = this.rnd.NextFloat(1, 10),
+                AngularVelocity = Helper.RandomGenerator.NextFloat(0, 1),
+                Radius = Helper.RandomGenerator.NextFloat(1, 10),
                 Duration = 5,
                 MaximumDistance = 250f,
             };
@@ -305,10 +302,10 @@ namespace ModelDrawing
         }
         private void AddSmokePlumeSystem()
         {
-            Vector3 position = new Vector3(this.rnd.NextFloat(-10, 10), 0, this.rnd.NextFloat(-10, 10));
+            Vector3 position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
             Vector3 velocity = Vector3.Up;
-            float duration = this.rnd.NextFloat(10, 60);
-            float rate = this.rnd.NextFloat(0.1f, 1f);
+            float duration = Helper.RandomGenerator.NextFloat(10, 60);
+            float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
 
             var emitter1 = new ParticleEmitter()
             {

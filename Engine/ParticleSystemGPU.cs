@@ -64,10 +64,6 @@ namespace Engine
         /// </summary>
         private bool firstRun = true;
         /// <summary>
-        /// Random instance
-        /// </summary>
-        private readonly Random rnd = new Random();
-        /// <summary>
         /// Particle parameters
         /// </summary>
         private ParticleSystemParams parameters;
@@ -273,7 +269,7 @@ namespace Engine
                     VelocitySensitivity = this.parameters.EmitterVelocitySensitivity,
                     HorizontalVelocity = this.parameters.HorizontalVelocity,
                     VerticalVelocity = this.parameters.VerticalVelocity,
-                    RandomValues = this.rnd.NextVector4(Vector4.Zero, Vector4.One),
+                    RandomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One),
                     MaxDuration = this.parameters.MaxDuration,
                     MaxDurationRandomness = this.parameters.MaxDurationRandomness,
                     EndVelocity = this.parameters.EndVelocity,

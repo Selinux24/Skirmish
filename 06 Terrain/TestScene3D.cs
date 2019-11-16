@@ -29,8 +29,6 @@ namespace Terrain
         private readonly int layerTerrain = 1;
         private readonly int layerEffects = 2;
 
-        private readonly Random rnd = new Random();
-
         private bool walkMode = false;
         private readonly float walkerVelocity = 8f;
         private SceneObject followTarget;
@@ -1614,13 +1612,11 @@ namespace Terrain
 
             Vector3[] cPoints = new Vector3[15];
 
-            Random hrnd = new Random();
-
             if (this.helicopterController != null && this.helicopterController.HasPath)
             {
                 for (int i = 0; i < cPoints.Length - 2; i++)
                 {
-                    cPoints[i] = this.GetRandomPoint(hrnd, this.helicopterHeightOffset);
+                    cPoints[i] = this.GetRandomPoint(Helper.RandomGenerator, this.helicopterHeightOffset);
                 }
             }
             else
@@ -1630,7 +1626,7 @@ namespace Terrain
 
                 for (int i = 2; i < cPoints.Length - 2; i++)
                 {
-                    cPoints[i] = this.GetRandomPoint(hrnd, this.helicopterHeightOffset);
+                    cPoints[i] = this.GetRandomPoint(Helper.RandomGenerator, this.helicopterHeightOffset);
                 }
             }
 
@@ -1760,8 +1756,8 @@ namespace Terrain
                 plumeSmoke = this.pManager.Instance.GetParticleSystem("plumeSmoke");
             }
 
-            float duration = this.rnd.NextFloat(6, 36);
-            float rate = this.rnd.NextFloat(0.1f, 1f);
+            float duration = Helper.RandomGenerator.NextFloat(6, 36);
+            float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
 
             if (plumeFire == null)
             {
@@ -1810,7 +1806,7 @@ namespace Terrain
                 smoke = this.pManager.Instance.GetParticleSystem(smokeSystemName);
             }
 
-            float duration = this.rnd.NextFloat(5, 15);
+            float duration = Helper.RandomGenerator.NextFloat(5, 15);
 
             if (smoke == null)
             {
@@ -1818,7 +1814,7 @@ namespace Terrain
                 {
                     Velocity = Vector3.Up,
                     Duration = duration + (duration * 0.1f),
-                    EmissionRate = this.rnd.NextFloat(0.1f, 1f),
+                    EmissionRate = Helper.RandomGenerator.NextFloat(0.1f, 1f),
                     InfiniteDuration = false,
                     MaximumDistance = 500f,
                 };
@@ -1843,7 +1839,7 @@ namespace Terrain
         }
         private void AddProjectileTrailSystem(AIAgent agent, AIAgent target, float speed)
         {
-            var targetDelta = this.rnd.NextVector3(-Vector3.One, Vector3.One);
+            var targetDelta = Helper.RandomGenerator.NextVector3(-Vector3.One, Vector3.One);
 
             var emitter = new LinealEmitter(agent.Manipulator.Position, target.Manipulator.Position + targetDelta, speed)
             {
