@@ -1341,7 +1341,7 @@ namespace Engine
                 var arraySize = description.ArraySize;
                 var data = description.GetDataBoxes();
 
-                Texture2D1 texture = null;
+                Texture2D1 texture;
                 ShaderResourceViewDescription1 desc;
 
                 if (description.IsCubeMap)
@@ -1398,7 +1398,7 @@ namespace Engine
 
             if (mipAutogen)
             {
-                Texture2D1 textureArray = null;
+                Texture2D1 textureArray;
                 ShaderResourceViewDescription1 desc;
 
                 if (description.IsCubeMap)
@@ -1461,7 +1461,7 @@ namespace Engine
                     data.AddRange(currentDesc.GetDataBoxes());
                 }
 
-                Texture2D1 textureArray = null;
+                Texture2D1 textureArray;
                 ShaderResourceViewDescription1 desc;
 
                 if (description.IsCubeMap)

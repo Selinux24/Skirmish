@@ -77,12 +77,14 @@ namespace Engine.Content
         /// <returns>Returns the new generate spot light</returns>
         public SceneLightSpot CreateSpotLight()
         {
+            Vector3 direction = Vector3.TransformNormal(Vector3.Up, Matrix.RotationQuaternion(this.Rotation));
             float radius = this.GetRadius(this.QuadraticAttenuation, 0.5f);
             float intensity = this.ConstantAttenuation * radius;
 
             var desc = new SceneLightSpotDescription
             {
-                Transform = this.Transform,
+                Position = this.Position,
+                Direction = direction,
                 Angle = this.FallOffAngle,
                 Radius = radius,
                 Intensity = intensity,

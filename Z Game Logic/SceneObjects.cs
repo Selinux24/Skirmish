@@ -16,26 +16,26 @@ namespace GameLogic
     {
         private const int layerHUD = 99;
 
-        private SceneObject<TextDrawer> txtTitle = null;
-        private SceneObject<TextDrawer> txtGame = null;
-        private SceneObject<TextDrawer> txtTeam = null;
-        private SceneObject<TextDrawer> txtSoldier = null;
-        private SceneObject<TextDrawer> txtActionList = null;
-        private SceneObject<TextDrawer> txtAction = null;
+        private TextDrawer txtTitle = null;
+        private TextDrawer txtGame = null;
+        private TextDrawer txtTeam = null;
+        private TextDrawer txtSoldier = null;
+        private TextDrawer txtActionList = null;
+        private TextDrawer txtAction = null;
 
         private readonly string fontName = "Lucida Sans";
-        private SceneObject<SpriteButton> butClose = null;
-        private SceneObject<SpriteButton> butNext = null;
-        private SceneObject<SpriteButton> butPrevSoldier = null;
-        private SceneObject<SpriteButton> butNextSoldier = null;
-        private SceneObject<SpriteButton> butPrevAction = null;
-        private SceneObject<SpriteButton> butNextAction = null;
+        private SpriteButton butClose = null;
+        private SpriteButton butNext = null;
+        private SpriteButton butPrevSoldier = null;
+        private SpriteButton butNextSoldier = null;
+        private SpriteButton butPrevAction = null;
+        private SpriteButton butNextAction = null;
 
-        private SceneObject<Model> cursor3D = null;
+        private Model cursor3D = null;
 
         private SceneLightSpot spotLight = null;
 
-        private SceneObject<ModelInstanced> soldier = null;
+        private ModelInstanced troops = null;
         private readonly GridAgentType soldierAgent = null;
         private readonly Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
         private readonly Dictionary<Soldier, ManipulatorController> soldierControllers = new Dictionary<Soldier, ManipulatorController>();
@@ -54,7 +54,7 @@ namespace GameLogic
         private readonly int bsphSlices = 50;
         private readonly int bsphStacks = 25;
 
-        private SceneObject<Scenery> terrain = null;
+        private Scenery terrain = null;
 
         private int actionIndex = 0;
         private ActionSpecification[] currentActions = null;
@@ -105,8 +105,6 @@ namespace GameLogic
 
         public override void Initialize()
         {
-            base.Initialize();
-
             GameEnvironment.Background = Color.Black;
 
             this.Camera.FarPlaneDistance = 1000f;
@@ -124,8 +122,22 @@ namespace GameLogic
 
             this.Lights.Add(this.spotLight);
 
-            #region 3D models
+            this.InitializeModels();
 
+            this.InitializeHUD();
+
+            this.UpdateLayout();
+
+            this.InitializeAnimations();
+
+            this.InitializePositions();
+
+            this.InitializeDebug();
+
+            this.GoToSoldier(this.skirmishGame.CurrentSoldier);
+        }
+        private void InitializeModels()
+        {
             this.cursor3D = this.AddComponent<Model>(
                 new ModelDescription()
                 {
@@ -138,21 +150,9 @@ namespace GameLogic
                     }
                 },
                 SceneObjectUsages.UI,
-                layerHUD);
+                layerHUD).Instance;
 
-            this.terrain = this.AddComponent<Scenery>(
-                new GroundDescription()
-                {
-                    CastShadow = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources3D",
-                        ModelContentFilename = "terrain.xml",
-                    }
-                },
-                SceneObjectUsages.Ground);
-
-            this.soldier = this.AddComponent<ModelInstanced>(
+            var troopsObj = this.AddComponent<ModelInstanced>(
                 new ModelInstancedDescription()
                 {
                     Instances = this.skirmishGame.AllSoldiers.Length,
@@ -165,9 +165,50 @@ namespace GameLogic
                 },
                 SceneObjectUsages.Agent);
 
-            #endregion
+            this.troops = troopsObj.Instance;
 
-            this.SetGround(this.terrain, true);
+            var terrainObj = this.AddComponent<Scenery>(
+                new GroundDescription()
+                {
+                    CastShadow = true,
+                    Content = new ContentDescription()
+                    {
+                        ContentFolder = "Resources3D",
+                        ModelContentFilename = "terrain.xml",
+                    }
+                },
+                SceneObjectUsages.Ground);
+
+            this.terrain = terrainObj.Instance;
+
+            int minimapHeight = (this.Game.Form.RenderHeight / 4) - 8;
+            int minimapWidth = minimapHeight;
+            var topLeft = new Vector2(593, 443);
+            var bottomRight = new Vector2(789, 590);
+            var tRes = new Vector2(800, 600);
+            var wRes = new Vector2(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
+            var pTopLeft = wRes / tRes * topLeft;
+            var pBottomRight = wRes / tRes * bottomRight;
+            var q = pTopLeft + ((pBottomRight - pTopLeft - new Vector2(minimapWidth, minimapHeight)) * 0.5f);
+
+            this.AddComponent<Minimap>(
+                new MinimapDescription()
+                {
+                    Top = (int)q.Y,
+                    Left = (int)q.X,
+                    Width = minimapWidth,
+                    Height = minimapHeight,
+                    Drawables = new SceneObject[]
+                    {
+                        terrainObj,
+                        troopsObj,
+                    },
+                    MinimapArea = terrainObj.Instance.GetBoundingBox(),
+                },
+                SceneObjectUsages.UI,
+                layerHUD);
+
+            this.SetGround(terrainObj, true);
 
             GridInput input = new GridInput(GetTrianglesForNavigationGraph);
             GridGenerationSettings settings = new GridGenerationSettings()
@@ -175,9 +216,9 @@ namespace GameLogic
                 NodeSize = 5f,
             };
             this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(settings, input);
-
-            #region HUD
-
+        }
+        private void InitializeHUD()
+        {
             SpriteBackgroundDescription bkDesc = new SpriteBackgroundDescription()
             {
                 ContentPath = "Resources",
@@ -186,40 +227,12 @@ namespace GameLogic
             };
             this.AddComponent<Sprite>(bkDesc, SceneObjectUsages.UI, layerHUD - 1);
 
-            int minimapHeight = (this.Game.Form.RenderHeight / 4) - 8;
-            int minimapWidth = minimapHeight;
-
-            var topLeft = new Vector2(593, 443);
-            var bottomRight = new Vector2(789, 590);
-            var tRes = new Vector2(800, 600);
-            var wRes = new Vector2(this.Game.Form.RenderWidth, this.Game.Form.RenderHeight);
-
-            var pTopLeft = wRes / tRes * topLeft;
-            var pBottomRight = wRes / tRes * bottomRight;
-
-            var q = pTopLeft + ((pBottomRight - pTopLeft - new Vector2(minimapWidth, minimapHeight)) * 0.5f);
-
-            MinimapDescription minimapDesc = new MinimapDescription()
-            {
-                Top = (int)q.Y,
-                Left = (int)q.X,
-                Width = minimapWidth,
-                Height = minimapHeight,
-                Drawables = new SceneObject[]
-                {
-                    this.terrain,
-                    this.soldier,
-                },
-                MinimapArea = this.terrain.Instance.GetBoundingBox(),
-            };
-            this.AddComponent<Minimap>(minimapDesc, SceneObjectUsages.UI, layerHUD);
-
-            this.txtTitle = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsages.UI, layerHUD);
-            this.txtGame = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsages.UI, layerHUD);
-            this.txtTeam = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.txtSoldier = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.txtActionList = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.txtAction = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            this.txtTitle = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 24, Color.White, Color.Gray), SceneObjectUsages.UI, layerHUD).Instance;
+            this.txtGame = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.LightBlue, Color.DarkBlue), SceneObjectUsages.UI, layerHUD).Instance;
+            this.txtTeam = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
+            this.txtSoldier = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
+            this.txtActionList = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
+            this.txtAction = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate(this.fontName, 12, Color.Yellow), SceneObjectUsages.UI, layerHUD).Instance;
 
             this.butClose = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
@@ -236,10 +249,11 @@ namespace GameLogic
                     ShadowColor = Color.Orange,
                 },
                 Text = "EXIT",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD).Instance;
 
             this.butNext = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
+                TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
                 Width = 60,
@@ -251,10 +265,11 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD).Instance;
 
             this.butPrevSoldier = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
+                TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
                 Width = 90,
@@ -266,10 +281,11 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Soldier",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD).Instance;
 
             this.butNextSoldier = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
+                TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
                 Width = 90,
@@ -281,10 +297,11 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Soldier",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD).Instance;
 
             this.butPrevAction = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
+                TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
                 Width = 90,
@@ -296,10 +313,11 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Prev.Action",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD).Instance;
 
             this.butNextAction = this.AddComponent<SpriteButton>(new SpriteButtonDescription()
             {
+                TwoStateButton = true,
                 TextureReleased = "button_on.png",
                 TexturePressed = "button_off.png",
                 Width = 90,
@@ -311,34 +329,23 @@ namespace GameLogic
                     TextColor = Color.Yellow,
                 },
                 Text = "Next Action",
-            }, SceneObjectUsages.UI, layerHUD);
+            }, SceneObjectUsages.UI, layerHUD).Instance;
 
-            this.butClose.Instance.Click += (sender, eventArgs) => { this.Game.Exit(); };
-            this.butNext.Instance.Click += (sender, eventArgs) => { this.NextPhase(); };
-            this.butPrevSoldier.Instance.Click += (sender, eventArgs) => { this.PrevSoldier(true); };
-            this.butNextSoldier.Instance.Click += (sender, eventArgs) => { this.NextSoldier(true); };
-            this.butPrevAction.Instance.Click += (sender, eventArgs) => { this.PrevAction(); };
-            this.butNextAction.Instance.Click += (sender, eventArgs) => { this.NextAction(); };
+            this.butClose.Click += (sender, eventArgs) => { this.Game.Exit(); };
+            this.butNext.Click += (sender, eventArgs) => { this.NextPhase(); };
+            this.butPrevSoldier.Click += (sender, eventArgs) => { this.PrevSoldier(true); };
+            this.butNextSoldier.Click += (sender, eventArgs) => { this.NextSoldier(true); };
+            this.butPrevAction.Click += (sender, eventArgs) => { this.PrevAction(); };
+            this.butNextAction.Click += (sender, eventArgs) => { this.NextAction(); };
 
-            this.txtTitle.Instance.Text = "Game Logic";
-
-            #endregion
-
-            this.UpdateLayout();
-
-            this.InitializeAnimations();
-
-            this.InitializePositions();
-
-            #region DEBUG
-
+            this.txtTitle.Text = "Game Logic";
+        }
+        private void InitializeDebug()
+        {
             this.lineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
             this.lineDrawer.Visible = false;
-
-            #endregion
-
-            this.GoToSoldier(this.skirmishGame.CurrentSoldier);
         }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -421,18 +428,18 @@ namespace GameLogic
 
             if (!this.gameFinished)
             {
-                this.txtGame.Instance.Text = string.Format("{0}", this.skirmishGame);
-                this.txtTeam.Instance.Text = string.Format("{0}", this.skirmishGame.CurrentTeam);
-                this.txtSoldier.Instance.Text = string.Format("{0}", this.skirmishGame.CurrentSoldier);
-                this.txtActionList.Instance.Text = string.Format("{0}", this.currentActions.Join(" | "));
-                this.txtAction.Instance.Text = string.Format("{0}", this.CurrentAction);
+                this.txtGame.Text = string.Format("{0}", this.skirmishGame);
+                this.txtTeam.Text = string.Format("{0}", this.skirmishGame.CurrentTeam);
+                this.txtSoldier.Text = string.Format("{0}", this.skirmishGame.CurrentSoldier);
+                this.txtActionList.Text = string.Format("{0}", this.currentActions.Join(" | "));
+                this.txtAction.Text = string.Format("{0}", this.CurrentAction);
             }
         }
         private void Update3D(GameTime gameTime, bool shift, Ray cursorRay, bool picked, PickingResult<Triangle> r)
         {
             if (picked)
             {
-                this.cursor3D.Transform.SetPosition(r.Position);
+                this.cursor3D.Manipulator.SetPosition(r.Position);
             }
 
             if (this.Game.Input.KeyJustReleased(this.keyCAMNextIsometric))
@@ -594,63 +601,51 @@ namespace GameLogic
         }
         private void UpdateLayout()
         {
-            this.txtTitle.Instance.Top = 0;
-            this.txtTitle.Instance.Left = 5;
-            this.txtGame.Instance.Top = this.txtTitle.Instance.Top + this.txtTitle.Instance.Height + 1;
-            this.txtGame.Instance.Left = 10;
-            this.txtTeam.Instance.Top = this.txtGame.Instance.Top + this.txtGame.Instance.Height + 1;
-            this.txtTeam.Instance.Left = this.txtGame.Instance.Left;
+            this.txtTitle.Top = 0;
+            this.txtTitle.Left = 5;
+            this.txtGame.Top = this.txtTitle.Top + this.txtTitle.Height + 1;
+            this.txtGame.Left = 10;
+            this.txtTeam.Top = this.txtGame.Top + this.txtGame.Height + 1;
+            this.txtTeam.Left = this.txtGame.Left;
 
-            this.butClose.Instance.Top = 1;
-            this.butClose.Instance.Left = this.Game.Form.RenderWidth - 60 - 1;
+            this.butClose.Top = 1;
+            this.butClose.Left = this.Game.Form.RenderWidth - 60 - 1;
 
-            this.butNext.Instance.Top = (int)((float)this.Game.Form.RenderHeight * 0.85f);
-            this.butNext.Instance.Left = 10;
-            this.butPrevSoldier.Instance.Top = this.butNext.Instance.Top;
-            this.butPrevSoldier.Instance.Left = this.butNext.Instance.Left + this.butNext.Instance.Width + 25;
-            this.butNextSoldier.Instance.Top = this.butNext.Instance.Top;
-            this.butNextSoldier.Instance.Left = this.butPrevSoldier.Instance.Left + this.butPrevSoldier.Instance.Width + 10;
-            this.butPrevAction.Instance.Top = this.butNext.Instance.Top;
-            this.butPrevAction.Instance.Left = this.butNextSoldier.Instance.Left + this.butNextSoldier.Instance.Width + 25;
-            this.butNextAction.Instance.Top = this.butNext.Instance.Top;
-            this.butNextAction.Instance.Left = this.butPrevAction.Instance.Left + this.butPrevAction.Instance.Width + 10;
+            this.butNext.Top = (int)((float)this.Game.Form.RenderHeight * 0.85f);
+            this.butNext.Left = 10;
+            this.butPrevSoldier.Top = this.butNext.Top;
+            this.butPrevSoldier.Left = this.butNext.Left + this.butNext.Width + 25;
+            this.butNextSoldier.Top = this.butNext.Top;
+            this.butNextSoldier.Left = this.butPrevSoldier.Left + this.butPrevSoldier.Width + 10;
+            this.butPrevAction.Top = this.butNext.Top;
+            this.butPrevAction.Left = this.butNextSoldier.Left + this.butNextSoldier.Width + 25;
+            this.butNextAction.Top = this.butNext.Top;
+            this.butNextAction.Left = this.butPrevAction.Left + this.butPrevAction.Width + 10;
 
-            this.txtSoldier.Instance.Top = this.butNext.Instance.Top + this.butNext.Instance.Height + 1;
-            this.txtSoldier.Instance.Left = 10;
-            this.txtActionList.Instance.Top = this.txtSoldier.Instance.Top + this.txtSoldier.Instance.Height + 1;
-            this.txtActionList.Instance.Left = this.txtSoldier.Instance.Left;
-            this.txtAction.Instance.Top = this.txtActionList.Instance.Top + this.txtActionList.Instance.Height + 1;
-            this.txtAction.Instance.Left = this.txtSoldier.Instance.Left;
+            this.txtSoldier.Top = this.butNext.Top + this.butNext.Height + 1;
+            this.txtSoldier.Left = 10;
+            this.txtActionList.Top = this.txtSoldier.Top + this.txtSoldier.Height + 1;
+            this.txtActionList.Left = this.txtSoldier.Left;
+            this.txtAction.Top = this.txtActionList.Top + this.txtActionList.Height + 1;
+            this.txtAction.Left = this.txtSoldier.Left;
         }
 
         private void InitializeAnimations()
         {
-            {
-                AnimationPath p = new AnimationPath();
-                p.AddLoop("idle");
-
-                this.animations.Add("idle", new AnimationPlan(p));
-            }
-            {
-                AnimationPath p = new AnimationPath();
-                p.AddLoop("stand");
-
-                this.animations.Add("stand", new AnimationPlan(p));
-            }
-            {
-                AnimationPath p = new AnimationPath();
-                p.AddLoop("walk");
-                this.animations.Add("walk", new AnimationPlan(p));
-            }
-            {
-                AnimationPath p = new AnimationPath();
-                p.AddLoop("run");
-                this.animations.Add("run", new AnimationPlan(p));
-            }
+            AddAnimation("idle", "idle");
+            AddAnimation("stand", "stand");
+            AddAnimation("walk", "walk");
+            AddAnimation("run", "run");
+        }
+        private void AddAnimation(string clipName, string animationName)
+        {
+            AnimationPath p = new AnimationPath();
+            p.AddLoop(clipName);
+            this.animations.Add(animationName, new AnimationPlan(p));
         }
         private void InitializePositions()
         {
-            BoundingBox bbox = this.terrain.Instance.GetBoundingBox();
+            BoundingBox bbox = this.terrain.GetBoundingBox();
 
             float terrainHeight = bbox.Maximum.Z - bbox.Minimum.Z;
             float gameWidth = terrainHeight / (this.skirmishGame.Teams.Length + 1);
@@ -666,19 +661,19 @@ namespace GameLogic
                 int soldierIndex = 0;
                 foreach (var soldierC in team.Soldiers)
                 {
-                    ModelInstance instance = this.soldier.Instance[instanceIndex++];
+                    var soldier = this.troops[instanceIndex++];
 
-                    instance.TextureIndex = teamIndex;
-                    instance.AnimationController.AddPath(this.animations["stand"]);
-                    instance.AnimationController.Start(soldierIndex);
-                    instance.AnimationController.TimeDelta = 0.20f;
+                    soldier.TextureIndex = teamIndex;
+                    soldier.AnimationController.AddPath(this.animations["stand"]);
+                    soldier.AnimationController.Start(soldierIndex);
+                    soldier.AnimationController.TimeDelta = 0.20f;
 
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
                     float z = (teamIndex * teamSeparation) - (gameWidth * 0.5f);
 
                     if (this.FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                     {
-                        instance.Manipulator.SetPosition(r.Position, true);
+                        soldier.Manipulator.SetPosition(r.Position, true);
                     }
                     else
                     {
@@ -687,10 +682,10 @@ namespace GameLogic
 
                     if (teamIndex == 0)
                     {
-                        instance.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
+                        soldier.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
                     }
 
-                    this.soldierModels.Add(soldierC, instance);
+                    this.soldierModels.Add(soldierC, soldier);
                     var controller = new BasicManipulatorController();
                     controller.PathEnd += Controller_PathEnd;
                     this.soldierControllers.Add(soldierC, controller);
@@ -832,11 +827,11 @@ namespace GameLogic
             {
                 this.gameFinished = true;
 
-                this.txtGame.Instance.Text = string.Format("{0}", v);
-                this.txtTeam.Instance.Text = "";
-                this.txtSoldier.Instance.Text = "";
-                this.txtActionList.Instance.Text = "";
-                this.txtAction.Instance.Text = "";
+                this.txtGame.Text = string.Format("{0}", v);
+                this.txtTeam.Text = "";
+                this.txtSoldier.Text = "";
+                this.txtActionList.Text = "";
+                this.txtAction.Text = "";
             }
         }
 

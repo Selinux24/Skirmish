@@ -113,6 +113,19 @@ namespace Engine
         public Matrix[] FromLightVP { get; set; }
 
         /// <summary>
+        /// Creates the transform matrix from the specified position and direction
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="direction">Direction</param>
+        /// <returns>Returns the transform matrix</returns>
+        public static Matrix CreateFromPositionDirection(Vector3 position, Vector3 direction)
+        {
+            float f = Math.Abs(Vector3.Dot(direction, Vector3.Up));
+            Vector3 up = f == 1 ? Vector3.ForwardLH : Vector3.Up;
+            return Helper.CreateWorld(position, direction, up);
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         protected SceneLightSpot()
@@ -134,13 +147,15 @@ namespace Engine
             SceneLightSpotDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.initialTransform = description.Transform;
+            this.Position = description.Position;
+            this.Direction = description.Direction;
+            this.Angle = description.Angle;
+            this.Radius = description.Radius;
+            this.Intensity = description.Intensity;
+
+            this.initialTransform = CreateFromPositionDirection(this.Position, this.Direction);
             this.initialRadius = description.Radius;
             this.initialIntensity = description.Intensity;
-
-            this.Angle = description.Angle;
-
-            this.UpdateLocalTransform();
         }
 
         /// <summary>
@@ -153,7 +168,7 @@ namespace Engine
             trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
             this.Radius = this.initialRadius * scale.X;
             this.Intensity = this.initialIntensity * scale.X;
-            this.Direction = Matrix.RotationQuaternion(rotation).Down;
+            this.Direction = Matrix.RotationQuaternion(rotation).Backward;
             this.Position = translation;
         }
 

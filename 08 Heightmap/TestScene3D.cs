@@ -97,7 +97,7 @@ namespace Heightmap
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        private readonly Dictionary<string, double> initDurationDict = new Dictionary<string, double>();
+        private Dictionary<string, double> initDurationDict = new Dictionary<string, double>();
         private int initDurationIndex = 0;
 
         private SceneObject<SpriteTexture> bufferDrawer = null;
@@ -110,61 +110,62 @@ namespace Heightmap
 
         public override void Initialize()
         {
-            base.Initialize();
+            var loadTask = Task.Run(async () =>
+            {
+                await InitializeDebug();
 
-            InitializeDebug();
+                Stopwatch sw = Stopwatch.StartNew();
+                sw.Start();
 
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Restart();
+                List<Task<double>> loadTasks = new List<Task<double>>()
+                {
+                    InitializeUI(),
+                    InitializeRocks(),
+                    InitializeTrees(),
+                    InitializeTrees2(),
+                    InitializeSoldier(),
+                    InitializeTroops(),
+                    InitializeM24(),
+                    InitializeBradley(),
+                    InitializeWatchTower(),
+                    InitializeContainers(),
+                    InitializeTorchs(),
+                    InitializeTerrain(),
+                    InitializeGardener(),
+                    InitializeGardener2(),
+                    InitializeLensFlare(),
+                    InitializeSkydom(),
+                    InitializeClouds(),
+                    InitializeParticles(),
+                };
 
-            var taskUI = InitializeUI();
-            var taskRocks = InitializeRocks();
-            var taskTrees = InitializeTrees();
-            var taskTrees2 = InitializeTrees2();
-            var taskSoldier = InitializeSoldier();
-            var taskTroops = InitializeTroops();
-            var taskM24 = InitializeM24();
-            var taskBradley = InitializeBradley();
-            var taskWatchTower = InitializeWatchTower();
-            var taskContainers = InitializeContainers();
-            var taskTorchs = InitializeTorchs();
-            var taskTerrain = InitializeTerrain();
-            var taskGardener = InitializeGardener();
-            var taskGardener2 = InitializeGardener2();
-            var taskLensFlare = InitializeLensFlare();
-            var taskSkydom = InitializeSkydom();
-            var taskClouds = InitializeClouds();
-            var taskParticles = InitializeParticles();
+                Dictionary<string, double> dict = new Dictionary<string, double>();
+                int total = loadTasks.Count;
+                float percent = 0;
+                while (loadTasks.Any())
+                {
+                    var task = await Task.WhenAny(loadTasks.ToArray());
 
-            initDurationDict.Add("UI", taskUI.Result);
-            initDurationDict.Add("Rocks", taskRocks.Result);
-            initDurationDict.Add("Trees", taskTrees.Result);
-            initDurationDict.Add("Trees2", taskTrees2.Result);
-            initDurationDict.Add("Soldier", taskSoldier.Result);
-            initDurationDict.Add("Troops", taskTroops.Result);
-            initDurationDict.Add("M24", taskM24.Result);
-            initDurationDict.Add("Bradley", taskBradley.Result);
-            initDurationDict.Add("Watch Tower", taskWatchTower.Result);
-            initDurationDict.Add("Containers", taskContainers.Result);
-            initDurationDict.Add("Torchs", taskTorchs.Result);
-            initDurationDict.Add("Terrain", taskTerrain.Result);
-            initDurationDict.Add("Gardener", taskGardener.Result);
-            initDurationDict.Add("Gardener2", taskGardener2.Result);
-            initDurationDict.Add("LensFlare", taskLensFlare.Result);
-            initDurationDict.Add("Skydom", taskSkydom.Result);
-            initDurationDict.Add("Clouds", taskClouds.Result);
-            initDurationDict.Add("Particles", taskParticles.Result);
+                    loadTasks.Remove(task);
 
-            sw.Stop();
+                    percent = (1f - ((float)loadTasks.Count / total)) * 100f;
 
-            initDurationDict.Add("TOTAL", initDurationDict.Select(i => i.Value).Sum());
-            initDurationDict.Add("REAL", sw.Elapsed.TotalSeconds);
+                    this.load.Instance.Text = $"{percent}%";
+                }
 
+                sw.Stop();
+
+                dict.Add("TOTAL", dict.Select(i => i.Value).Sum());
+                dict.Add("REAL", sw.Elapsed.TotalSeconds);
+
+                return dict;
+            });
+
+            initDurationDict = loadTask.Result;
             initDurationIndex = initDurationDict.Keys.Count - 2;
-
             SetLoadText(initDurationIndex);
         }
-        private Task<double> InitializeUI()
+        private async Task<double> InitializeUI()
         {
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
@@ -218,9 +219,9 @@ namespace Heightmap
             #endregion
 
             sw.Stop();
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeRocks()
+        private async Task<double> InitializeRocks()
         {
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
@@ -239,9 +240,9 @@ namespace Heightmap
             this.rocks = this.AddComponent<ModelInstanced>(rDesc, SceneObjectUsages.None, layerObjects);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeTrees()
+        private async Task<double> InitializeTrees()
         {
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
@@ -261,9 +262,9 @@ namespace Heightmap
             this.trees = this.AddComponent<ModelInstanced>(treeDesc, SceneObjectUsages.None, layerTerrain);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeTrees2()
+        private async Task<double> InitializeTrees2()
         {
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
@@ -283,9 +284,9 @@ namespace Heightmap
             this.trees2 = this.AddComponent<ModelInstanced>(tree2Desc, SceneObjectUsages.None, layerTerrain);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeSoldier()
+        private async Task<double> InitializeSoldier()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -304,9 +305,9 @@ namespace Heightmap
             this.soldier = this.AddComponent<Model>(sDesc, SceneObjectUsages.Agent, layerObjects);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeTroops()
+        private async Task<double> InitializeTroops()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -325,9 +326,9 @@ namespace Heightmap
             this.troops = this.AddComponent<ModelInstanced>(tDesc, SceneObjectUsages.Agent, layerObjects);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeM24()
+        private async Task<double> InitializeM24()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -350,9 +351,9 @@ namespace Heightmap
             }
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeBradley()
+        private async Task<double> InitializeBradley()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -375,9 +376,9 @@ namespace Heightmap
             }
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeWatchTower()
+        private async Task<double> InitializeWatchTower()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -395,9 +396,9 @@ namespace Heightmap
             this.watchTower = this.AddComponent<Model>(mDesc, SceneObjectUsages.None, layerObjects);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeContainers()
+        private async Task<double> InitializeContainers()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -418,9 +419,9 @@ namespace Heightmap
                 });
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeTorchs()
+        private async Task<double> InitializeTorchs()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -439,9 +440,9 @@ namespace Heightmap
             this.torchs = this.AddComponent<ModelInstanced>(tcDesc, SceneObjectUsages.None, layerObjects);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeParticles()
+        private async Task<double> InitializeParticles()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -461,9 +462,9 @@ namespace Heightmap
             this.pDust.MaxEndSize = 20f;
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeTerrain()
+        private async Task<double> InitializeTerrain()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -515,9 +516,9 @@ namespace Heightmap
             this.terrain = this.AddComponent<Terrain>(gDesc, SceneObjectUsages.None, layerTerrain);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeGardener()
+        private async Task<double> InitializeGardener()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -575,9 +576,9 @@ namespace Heightmap
             this.gardener = this.AddComponent<GroundGardener>(vDesc, SceneObjectUsages.None, layerFoliage);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeGardener2()
+        private async Task<double> InitializeGardener2()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -626,9 +627,9 @@ namespace Heightmap
             this.gardener2 = this.AddComponent<GroundGardener>(vDesc2, SceneObjectUsages.None, layerFoliage);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeLensFlare()
+        private async Task<double> InitializeLensFlare()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -657,9 +658,9 @@ namespace Heightmap
             this.AddComponent<LensFlare>(lfDesc, SceneObjectUsages.None, layerEffects);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeSkydom()
+        private async Task<double> InitializeSkydom()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -671,9 +672,9 @@ namespace Heightmap
             this.skydom = this.AddComponent<SkyScattering>(skDesc);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private Task<double> InitializeClouds()
+        private async Task<double> InitializeClouds()
         {
             Stopwatch sw = Stopwatch.StartNew();
 
@@ -690,9 +691,9 @@ namespace Heightmap
             this.AddComponent<SkyPlane>(scDesc);
             sw.Stop();
 
-            return Task.FromResult(sw.Elapsed.TotalSeconds);
+            return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
-        private void InitializeDebug()
+        private async Task InitializeDebug()
         {
             int width = (int)(this.Game.Form.RenderWidth * 0.33f);
             int height = (int)(this.Game.Form.RenderHeight * 0.33f);
@@ -709,6 +710,8 @@ namespace Heightmap
             };
             this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
             this.bufferDrawer.Visible = false;
+
+            await Task.CompletedTask;
         }
 
         public override void Initialized()
@@ -747,26 +750,22 @@ namespace Heightmap
 
             SetPathFindingInfo();
 
-            {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+            this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "DEBUG++ Light Volumes",
                     DepthEnabled = true,
                     Count = 10000
-                };
-                this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
-            }
+                });
 
-            {
-                var desc = new PrimitiveListDrawerDescription<Triangle>()
+            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(
+                new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Name = "DEBUG++ Graph",
                     AlphaEnabled = true,
                     Count = 50000,
-                };
-                this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc);
-                this.graphDrawer.Visible = false;
-            }
+                });
+            this.graphDrawer.Visible = false;
         }
         private void SetAnimationDictionaries()
         {
@@ -830,7 +829,7 @@ namespace Heightmap
 
                 if (this.FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
-                    var scale = 1f;
+                    float scale;
                     if (i < 5)
                     {
                         scale = posRnd.NextFloat(10f, 30f);
@@ -1078,60 +1077,58 @@ namespace Heightmap
         }
         private void SetDebugInfo()
         {
-            {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+            this.bboxesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "DEBUG++ Terrain nodes bounding boxes",
                     AlphaEnabled = true,
                     DepthEnabled = true,
                     Dynamic = true,
                     Count = 50000,
-                };
-                this.bboxesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc);
-                this.bboxesDrawer.Visible = false;
+                });
+            this.bboxesDrawer.Visible = false;
 
-                var boxes = this.terrain.Instance.GetBoundingBoxes(5);
-                var listBoxes = Line3D.CreateWiredBox(boxes);
+            var boxes = this.terrain.Instance.GetBoundingBoxes(5);
+            var listBoxes = Line3D.CreateWiredBox(boxes);
 
-                this.bboxesDrawer.Instance.AddPrimitives(new Color4(1.0f, 0.0f, 0.0f, 0.55f), listBoxes);
+            this.bboxesDrawer.Instance.AddPrimitives(new Color4(1.0f, 0.0f, 0.0f, 0.55f), listBoxes);
 
-                var a1Lines = Line3D.CreateWiredBox(gardenerArea.Value);
-                var a2Lines = Line3D.CreateWiredBox(gardenerArea2.Value);
+            var a1Lines = Line3D.CreateWiredBox(gardenerArea.Value);
+            var a2Lines = Line3D.CreateWiredBox(gardenerArea2.Value);
 
-                this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.55f), a1Lines);
-                this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.55f), a2Lines);
-            }
+            this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.55f), a1Lines);
+            this.bboxesDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.55f), a2Lines);
 
-            {
-                var desc = new PrimitiveListDrawerDescription<Triangle>()
+            this.bboxesTriDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(
+                new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Name = "DEBUG++ Terrain nodes bounding boxes faces",
                     AlphaEnabled = true,
                     DepthEnabled = true,
                     Count = 1000,
-                };
-                this.bboxesTriDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc, SceneObjectUsages.None, layerEffects);
-                this.bboxesTriDrawer.Visible = false;
+                },
+                SceneObjectUsages.None,
+                layerEffects);
+            this.bboxesTriDrawer.Visible = false;
 
-                var tris1 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea.Value);
-                var tris2 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea2.Value);
+            var tris1 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea.Value);
+            var tris2 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea2.Value);
 
-                this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), tris1);
-                this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), Triangle.Reverse(tris1));
+            this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), tris1);
+            this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), Triangle.Reverse(tris1));
 
-                this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), tris2);
-                this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.Reverse(tris2));
-            }
+            this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), tris2);
+            this.bboxesTriDrawer.Instance.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.Reverse(tris2));
 
-            {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+            this.linesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
                 {
                     DepthEnabled = true,
                     Count = 1000,
-                };
-                this.linesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
-                this.linesDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.None,
+                layerEffects);
+            this.linesDrawer.Visible = false;
         }
         private void SetPathFindingInfo()
         {
@@ -1620,19 +1617,17 @@ namespace Heightmap
         }
         private void UpdateLights()
         {
-            {
-                float d = 1f;
-                float v = 5f;
+            float d = 1f;
+            float v = 5f;
 
-                var x = d * (float)Math.Cos(v * this.Game.GameTime.TotalSeconds);
-                var z = d * (float)Math.Sin(v * this.Game.GameTime.TotalSeconds);
+            var x = d * (float)Math.Cos(v * this.Game.GameTime.TotalSeconds);
+            var z = d * (float)Math.Sin(v * this.Game.GameTime.TotalSeconds);
 
-                this.spotLight1.Direction = Vector3.Normalize(new Vector3(x, -1, z));
-                this.spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
+            this.spotLight1.Direction = Vector3.Normalize(new Vector3(x, -1, z));
+            this.spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
 
-                this.spotLight1.Enabled = false;
-                this.spotLight2.Enabled = false;
-            }
+            this.spotLight1.Enabled = false;
+            this.spotLight2.Enabled = false;
 
             if (this.lantern.Enabled && !lanternFixed)
             {

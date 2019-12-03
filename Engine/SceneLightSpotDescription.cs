@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine
 {
@@ -19,12 +18,10 @@ namespace Engine
         /// <returns>Returns the new description</returns>
         public static SceneLightSpotDescription Create(Vector3 position, Vector3 direction, float angle, float radius, float intensity)
         {
-            float f = Math.Abs(Vector3.Dot(direction, Vector3.Up));
-            var transform = Helper.CreateWorld(position, direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
-
             return new SceneLightSpotDescription
             {
-                Transform = transform,
+                Position = position,
+                Direction = direction,
                 Angle = angle,
                 Radius = radius,
                 Intensity = intensity,
@@ -32,9 +29,13 @@ namespace Engine
         }
 
         /// <summary>
-        /// Light transform
+        /// Cone apex position
         /// </summary>
-        public Matrix Transform { get; set; }
+        public Vector3 Position { get; set; }
+        /// <summary>
+        /// Cone direction
+        /// </summary>
+        public Vector3 Direction { get; set; }
         /// <summary>
         /// Fall-of angle
         /// </summary>

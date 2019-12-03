@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Deferred
 {
@@ -58,110 +59,6 @@ namespace Deferred
 
         public override void Initialize()
         {
-            base.Initialize();
-
-            InitializeCursor();
-
-            InitializeUI();
-
-            #region Models
-
-            Stopwatch sw = Stopwatch.StartNew();
-
-            string loadingText = null;
-
-            #region Skydom
-            {
-                sw.Restart();
-
-                InitializeSkydom();
-
-                sw.Stop();
-                loadingText += string.Format("skydom: {0} ", sw.Elapsed.TotalSeconds);
-            }
-            #endregion
-
-            #region Helicopter
-            {
-                sw.Restart();
-
-                InitializeHelicopter();
-
-                sw.Stop();
-                loadingText += string.Format("helicopter: {0} ", sw.Elapsed.TotalSeconds);
-            }
-            #endregion
-
-            #region Helicopters
-            {
-                sw.Restart();
-
-                InitializeHelicopters();
-
-                sw.Stop();
-                loadingText += string.Format("helicopters: {0} ", sw.Elapsed.TotalSeconds);
-            }
-            #endregion
-
-            #region Tank
-            {
-                sw.Restart();
-
-                InitializeTanks();
-
-                sw.Stop();
-                loadingText += string.Format("tank: {0} ", sw.Elapsed.TotalSeconds);
-            }
-            #endregion
-
-            #region Terrain
-            {
-                sw.Restart();
-
-                InitializeTerrain();
-
-                sw.Stop();
-                loadingText += string.Format("terrain: {0} ", sw.Elapsed.TotalSeconds);
-            }
-            #endregion
-
-            #region Gardener
-            {
-                sw.Restart();
-
-                InitializeGardener();
-
-                sw.Stop();
-                loadingText += string.Format("gardener: {0} ", sw.Elapsed.TotalSeconds);
-            }
-            #endregion
-
-            #region Tree
-            {
-                sw.Restart();
-
-                InitializeTree();
-
-                sw.Stop();
-                loadingText += string.Format("tree: {0} ", sw.Elapsed.TotalSeconds);
-            }
-            #endregion
-
-            #region Trees
-            {
-                sw.Restart();
-
-                InitializeTrees();
-
-                sw.Stop();
-                loadingText += string.Format("trees: {0} ", sw.Elapsed.TotalSeconds);
-            }
-            #endregion
-
-            #endregion
-
-            #region Lights
-
             this.Lights.KeyLight.Enabled = false;
             this.Lights.BackLight.Enabled = false;
             this.Lights.FillLight.Enabled = true;
@@ -170,20 +67,53 @@ namespace Deferred
             this.Lights.BackLight.CastShadow = false;
             this.Lights.FillLight.CastShadow = false;
 
-            #endregion
+            var loadTask = Task.Run(async () =>
+            {
+                await InitializeCursor();
+                await InitializeUI();
 
-            InitializeDebug();
+                var skydomTask = InitializeAndTrace(InitializeSkydom);
+                var helicopterTask = InitializeAndTrace(InitializeHelicopter);
+                var helicoptersTask = InitializeAndTrace(InitializeHelicopters);
+                var tanksTask = InitializeAndTrace(InitializeTanks);
+                var terrainTask = InitializeAndTrace(InitializeTerrain);
+                var gardenerTask = InitializeAndTrace(InitializeGardener);
+                var treeTask = InitializeAndTrace(InitializeTree);
+                var treesTask = InitializeAndTrace(InitializeTrees);
+
+                string loadingText = null;
+                loadingText += string.Format("skydom: {0} ", await skydomTask);
+                loadingText += string.Format("helicopter: {0} ", await helicopterTask);
+                loadingText += string.Format("helicopters: {0} ", await helicoptersTask);
+                loadingText += string.Format("tank: {0} ", await tanksTask);
+                loadingText += string.Format("terrain: {0} ", await terrainTask);
+                loadingText += string.Format("gardener: {0} ", await gardenerTask);
+                loadingText += string.Format("tree: {0} ", await treeTask);
+                loadingText += string.Format("trees: {0} ", await treesTask);
+
+                await InitializeDebug();
+
+                return loadingText;
+            });
+
+            this.title.Instance.Text = "Deferred Ligthning test";
+            this.load.Instance.Text = loadTask.Result;
+            this.help.Instance.Text = "";
+            this.statistics.Instance.Text = "";
 
             this.SetGround(this.terrain, true);
             this.AttachToGround(this.tree, false);
             this.AttachToGround(this.trees, false);
-
-            this.title.Instance.Text = "Deferred Ligthning test";
-            this.load.Instance.Text = loadingText;
-            this.help.Instance.Text = "";
-            this.statistics.Instance.Text = "";
         }
-        private void InitializeCursor()
+        private async Task<double> InitializeAndTrace(Func<Task> action)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Start();
+            await action();
+            sw.Stop();
+            return sw.Elapsed.TotalSeconds;
+        }
+        private async Task InitializeCursor()
         {
             var cursorDesc = new CursorDescription()
             {
@@ -192,8 +122,10 @@ namespace Deferred
                 Height = 16,
             };
             this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
+
+            await Task.CompletedTask;
         }
-        private void InitializeSkydom()
+        private async Task InitializeSkydom()
         {
             var desc = new SkydomDescription()
             {
@@ -203,8 +135,10 @@ namespace Deferred
                 Texture = "sunset.dds",
             };
             this.AddComponent<Skydom>(desc);
+
+            await Task.CompletedTask;
         }
-        private void InitializeHelicopter()
+        private async Task InitializeHelicopter()
         {
             var desc = new ModelDescription()
             {
@@ -219,8 +153,10 @@ namespace Deferred
             };
             this.helicopter = this.AddComponent<Model>(desc);
             this.Lights.AddRange(this.helicopter.Instance.Lights);
+
+            await Task.CompletedTask;
         }
-        private void InitializeHelicopters()
+        private async Task InitializeHelicopters()
         {
             var desc = new ModelInstancedDescription()
             {
@@ -238,8 +174,10 @@ namespace Deferred
             {
                 this.Lights.AddRange(this.helicopters.Instance[i].Lights);
             }
+
+            await Task.CompletedTask;
         }
-        private void InitializeTanks()
+        private async Task InitializeTanks()
         {
             var desc = new ModelDescription()
             {
@@ -284,8 +222,10 @@ namespace Deferred
 
             this.Lights.AddRange(this.tankAgent1.Instance.Lights);
             this.Lights.AddRange(this.tankAgent2.Instance.Lights);
+
+            await Task.CompletedTask;
         }
-        private void InitializeTerrain()
+        private async Task InitializeTerrain()
         {
             var desc = new GroundDescription()
             {
@@ -301,8 +241,10 @@ namespace Deferred
                 }
             };
             this.terrain = this.AddComponent<Scenery>(desc);
+
+            await Task.CompletedTask;
         }
-        private void InitializeGardener()
+        private async Task InitializeGardener()
         {
             var desc = new GroundGardenerDescription()
             {
@@ -318,8 +260,10 @@ namespace Deferred
                 }
             };
             this.AddComponent<GroundGardener>(desc);
+
+            await Task.CompletedTask;
         }
-        private void InitializeTree()
+        private async Task InitializeTree()
         {
             var desc = new ModelDescription()
             {
@@ -335,8 +279,10 @@ namespace Deferred
                 }
             };
             this.tree = this.AddComponent<Model>(desc);
+
+            await Task.CompletedTask;
         }
-        private void InitializeTrees()
+        private async Task InitializeTrees()
         {
             var desc = new ModelInstancedDescription()
             {
@@ -353,8 +299,10 @@ namespace Deferred
                 }
             };
             this.trees = this.AddComponent<ModelInstanced>(desc);
+
+            await Task.CompletedTask;
         }
-        private void InitializeUI()
+        private async Task InitializeUI()
         {
             var dTitle = TextDrawerDescription.Generate("Tahoma", 18, Color.White);
             var dLoad = TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow);
@@ -379,45 +327,49 @@ namespace Deferred
                 Color = new Color4(0, 0, 0, 0.75f),
             };
             this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
-        }
-        private void InitializeDebug()
-        {
-            {
-                int width = (int)(this.Game.Form.RenderWidth * 0.33f);
-                int height = (int)(this.Game.Form.RenderHeight * 0.33f);
-                int smLeft = this.Game.Form.RenderWidth - width;
-                int smTop = this.Game.Form.RenderHeight - height;
 
-                var desc = new SpriteTextureDescription()
+            await Task.CompletedTask;
+        }
+        private async Task InitializeDebug()
+        {
+            int width = (int)(this.Game.Form.RenderWidth * 0.33f);
+            int height = (int)(this.Game.Form.RenderHeight * 0.33f);
+            int smLeft = this.Game.Form.RenderWidth - width;
+            int smTop = this.Game.Form.RenderHeight - height;
+
+            this.bufferDrawer = this.AddComponent<SpriteTexture>(
+                new SpriteTextureDescription()
                 {
                     Left = smLeft,
                     Top = smTop,
                     Width = width,
                     Height = height,
                     Channel = SpriteTextureChannels.NoAlpha,
-                };
-                this.bufferDrawer = this.AddComponent<SpriteTexture>(desc, SceneObjectUsages.UI, layerEffects);
-                this.bufferDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.UI,
+                layerEffects);
+            this.bufferDrawer.Visible = false;
 
-            {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+            this.lineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
                 {
                     DepthEnabled = true,
                     Count = 1000,
-                };
-                this.lineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
-                this.lineDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.None,
+                layerEffects);
+            this.lineDrawer.Visible = false;
 
-            {
-                var desc = new PrimitiveListDrawerDescription<Triangle>()
+            this.terrainGraphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(
+                new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Count = MaxGridDrawer,
-                };
-                this.terrainGraphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc, SceneObjectUsages.None, layerEffects);
-                this.terrainGraphDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.None,
+                layerEffects);
+            this.terrainGraphDrawer.Visible = false;
+
+            await Task.CompletedTask;
         }
 
         public override void Initialized()
@@ -464,22 +416,18 @@ namespace Deferred
         }
         private void StartTerrain()
         {
+            if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> treePos))
             {
-                if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> r))
-                {
-                    this.tree.Transform.SetPosition(r.Position);
-                    this.tree.Transform.SetScale(0.5f);
-                }
+                this.tree.Transform.SetPosition(treePos.Position);
+                this.tree.Transform.SetScale(0.5f);
             }
 
+            for (int i = 0; i < this.trees.Count; i++)
             {
-                for (int i = 0; i < this.trees.Count; i++)
+                if (this.FindTopGroundPosition((i * 10) - 35, 17, out PickingResult<Triangle> pos))
                 {
-                    if (this.FindTopGroundPosition((i * 10) - 35, 17, out PickingResult<Triangle> r))
-                    {
-                        this.trees.Instance[i].Manipulator.SetScale(0.5f, true);
-                        this.trees.Instance[i].Manipulator.SetPosition(r.Position, true);
-                    }
+                    this.trees.Instance[i].Manipulator.SetScale(0.5f, true);
+                    this.trees.Instance[i].Manipulator.SetPosition(pos.Position, true);
                 }
             }
 
@@ -495,66 +443,52 @@ namespace Deferred
             cameraPosition = Vector3.Zero;
             modelCount = 0;
 
-            #region Tanks
+            if (this.FindTopGroundPosition(20, 40, out PickingResult<Triangle> t1Pos))
             {
-                if (this.FindTopGroundPosition(20, 40, out PickingResult<Triangle> r))
-                {
-                    this.tankAgent1.Transform.SetPosition(r.Position);
-                    this.tankAgent1.Transform.SetNormal(r.Item.Normal);
-                    cameraPosition += r.Position;
-                    modelCount++;
-                }
+                this.tankAgent1.Transform.SetPosition(t1Pos.Position);
+                this.tankAgent1.Transform.SetNormal(t1Pos.Item.Normal);
+                cameraPosition += t1Pos.Position;
+                modelCount++;
             }
 
+            if (this.FindTopGroundPosition(15, 35, out PickingResult<Triangle> t2Pos))
             {
-                if (this.FindTopGroundPosition(15, 35, out PickingResult<Triangle> r))
-                {
-                    this.tankAgent2.Transform.SetPosition(r.Position);
-                    this.tankAgent2.Transform.SetNormal(r.Item.Normal);
-                    cameraPosition += r.Position;
-                    modelCount++;
-                }
+                this.tankAgent2.Transform.SetPosition(t2Pos.Position);
+                this.tankAgent2.Transform.SetNormal(t2Pos.Item.Normal);
+                cameraPosition += t2Pos.Position;
+                modelCount++;
             }
-            #endregion
 
-            #region Helicopter
+            if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> hPos))
             {
-                if (this.FindTopGroundPosition(20, -20, out PickingResult<Triangle> r))
+                var p = hPos.Position;
+                p.Y += 10f;
+                this.helicopter.Transform.SetPosition(p, true);
+                this.helicopter.Transform.SetScale(0.15f, true);
+                cameraPosition += p;
+                modelCount++;
+            }
+
+            this.helicopter.Instance.AnimationController.AddPath(this.animations["default"]);
+            this.helicopter.Instance.AnimationController.TimeDelta = 3f;
+            this.helicopter.Instance.AnimationController.Start();
+
+            for (int i = 0; i < this.helicopters.Count; i++)
+            {
+                if (this.FindTopGroundPosition((i * 10) - 20, 20, out PickingResult<Triangle> r))
                 {
                     var p = r.Position;
                     p.Y += 10f;
-                    this.helicopter.Transform.SetPosition(p, true);
-                    this.helicopter.Transform.SetScale(0.15f, true);
+                    this.helicopters.Instance[i].Manipulator.SetPosition(p, true);
+                    this.helicopters.Instance[i].Manipulator.SetScale(0.15f, true);
                     cameraPosition += p;
                     modelCount++;
                 }
 
-                this.helicopter.Instance.AnimationController.AddPath(this.animations["default"]);
-                this.helicopter.Instance.AnimationController.TimeDelta = 3f;
-                this.helicopter.Instance.AnimationController.Start();
+                this.helicopters.Instance[i].AnimationController.AddPath(this.animations["default"]);
+                this.helicopters.Instance[i].AnimationController.TimeDelta = 3f;
+                this.helicopters.Instance[i].AnimationController.Start();
             }
-            #endregion
-
-            #region Helicopters
-            {
-                for (int i = 0; i < this.helicopters.Count; i++)
-                {
-                    if (this.FindTopGroundPosition((i * 10) - 20, 20, out PickingResult<Triangle> r))
-                    {
-                        var p = r.Position;
-                        p.Y += 10f;
-                        this.helicopters.Instance[i].Manipulator.SetPosition(p, true);
-                        this.helicopters.Instance[i].Manipulator.SetScale(0.15f, true);
-                        cameraPosition += p;
-                        modelCount++;
-                    }
-
-                    this.helicopters.Instance[i].AnimationController.AddPath(this.animations["default"]);
-                    this.helicopters.Instance[i].AnimationController.TimeDelta = 3f;
-                    this.helicopters.Instance[i].AnimationController.Start();
-                }
-            }
-            #endregion
         }
 
         public override void Update(GameTime gameTime)
@@ -1069,15 +1003,13 @@ namespace Deferred
                 var lightPosition = r.Position;
                 lightPosition.Y += 10f;
 
-                Vector3 direction = -Vector3.Normalize(lightPosition);
-
                 this.spotLight = new SceneLightSpot(
                     "Spot the dog",
                     castShadows,
                     Color.Yellow,
                     Color.Yellow,
                     true,
-                    SceneLightSpotDescription.Create(lightPosition, direction, 25, 25, 25f));
+                    SceneLightSpotDescription.Create(lightPosition, Vector3.Down, 25, 25, 25f));
 
                 this.Lights.Add(this.spotLight);
 
