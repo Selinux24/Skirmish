@@ -1,0 +1,405 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>SceneTest</AssemblyName>
+    <RootNamespace>SceneTest</RootNamespace>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CodeAnalysisRuleSet />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Common\buttons.png" />
+    <None Remove="Common\LensFlare\lfFlare1.png" />
+    <None Remove="Common\LensFlare\lfFlare2.png" />
+    <None Remove="Common\LensFlare\lfFlare3.png" />
+    <None Remove="Common\LensFlare\lfFlare4.png" />
+    <None Remove="Common\LensFlare\lfGlow.png" />
+    <None Remove="Common\pointer.png" />
+    <None Remove="SceneLights\Buildings\Obelisk\diffus.dds" />
+    <None Remove="SceneLights\Buildings\Obelisk\normal.dds" />
+    <None Remove="SceneLights\Buildings\Obelisk\obelisk.dae" />
+    <None Remove="SceneLights\Buildings\Obelisk\obelisk.xml" />
+    <None Remove="SceneLights\Buildings\Obelisk\specular.dds" />
+    <None Remove="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="SceneLights\Trees\bark_albedo.png" />
+    <None Remove="SceneLights\Trees\bark_normal.png" />
+    <None Remove="SceneLights\Trees\bark_specular.png" />
+    <None Remove="SceneLights\Trees\bushes_albedo.png" />
+    <None Remove="SceneLights\Trees\bushes_normal.png" />
+    <None Remove="SceneLights\Trees\bushes_specular.png" />
+    <None Remove="SceneLights\Trees\tree.dae" />
+    <None Remove="SceneLights\Trees\tree.xml" />
+    <None Remove="SceneMaterials\floor.png" />
+    <None Remove="SceneMaterials\nmap1.jpg" />
+    <None Remove="SceneMaterials\nmap2.png" />
+    <None Remove="SceneMaterials\white.png" />
+    <None Remove="SceneStart\backGround.jpg" />
+    <None Remove="SceneStart\SkyPlane.dae" />
+    <None Remove="SceneStart\SkyPlane.xml" />
+    <None Remove="SceneStencilPass\Buildings\Obelisk\diffus.dds" />
+    <None Remove="SceneStencilPass\Buildings\Obelisk\normal.dds" />
+    <None Remove="SceneStencilPass\Buildings\Obelisk\obelisk.dae" />
+    <None Remove="SceneStencilPass\Buildings\Obelisk\obelisk.xml" />
+    <None Remove="SceneStencilPass\Buildings\Obelisk\specular.dds" />
+    <None Remove="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="SceneTest\Buildings\Obelisk\diffus.dds" />
+    <None Remove="SceneTest\Buildings\Obelisk\normal.dds" />
+    <None Remove="SceneTest\Buildings\Obelisk\obelisk.dae" />
+    <None Remove="SceneTest\Buildings\Obelisk\obelisk.xml" />
+    <None Remove="SceneTest\Buildings\Obelisk\specular.dds" />
+    <None Remove="SceneTest\Character\Soldier\soldier0.jpg" />
+    <None Remove="SceneTest\Character\Soldier\Soldier1.jpg" />
+    <None Remove="SceneTest\Character\Soldier\soldier_anim2.dae" />
+    <None Remove="SceneTest\Character\Soldier\soldier_anim2.xml" />
+    <None Remove="SceneTest\Container\container.dae" />
+    <None Remove="SceneTest\Container\container.xml" />
+    <None Remove="SceneTest\Container\ikube azul-1.png" />
+    <None Remove="SceneTest\Container\ikube azul-2.png" />
+    <None Remove="SceneTest\Container\ikube azul-3.png" />
+    <None Remove="SceneTest\Container\ikube azul-4.png" />
+    <None Remove="SceneTest\Container\ikube azul-5.png" />
+    <None Remove="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="SceneTest\Lamps\concrete.jpg" />
+    <None Remove="SceneTest\Lamps\Lamp.dae" />
+    <None Remove="SceneTest\Lamps\Lamp.png" />
+    <None Remove="SceneTest\Lamps\Lamp.xml" />
+    <None Remove="SceneTest\Lamps\metallic.jpg" />
+    <None Remove="SceneTest\Lamps\StreetLamp.dae" />
+    <None Remove="SceneTest\Lamps\StreetLamp.xml" />
+    <None Remove="SceneTest\Particles\explosion.png" />
+    <None Remove="SceneTest\Particles\fire.dds" />
+    <None Remove="SceneTest\Particles\fire.png" />
+    <None Remove="SceneTest\Particles\floor.png" />
+    <None Remove="SceneTest\Particles\smoke.png" />
+    <None Remove="SceneTest\Scenery\clif.dae" />
+    <None Remove="SceneTest\Scenery\clif.xml" />
+    <None Remove="SceneTest\Scenery\Diffuse.jpg" />
+    <None Remove="SceneTest\Scenery\Normal.jpg" />
+    <None Remove="SceneTest\Sky\cloud001.dds" />
+    <None Remove="SceneTest\Sky\perturb001.dds" />
+    <None Remove="SceneTest\Trees\Bark_d.png" />
+    <None Remove="SceneTest\Trees\Leafs_d.png" />
+    <None Remove="SceneTest\Trees\Tree.xml" />
+    <None Remove="SceneTest\Trees\tree_1.dae" />
+    <None Remove="SceneTest\Trees\tree_2.dae" />
+    <None Remove="SceneTest\Trees\tree_3.dae" />
+    <None Remove="SceneTest\UI\button_off.png" />
+    <None Remove="SceneTest\UI\button_on.png" />
+    <None Remove="SceneTest\Vehicles\Challenger\Challenger.bmp" />
+    <None Remove="SceneTest\Vehicles\Challenger\challenger.dae" />
+    <None Remove="SceneTest\Vehicles\Challenger\challenger.xml" />
+    <None Remove="SceneTest\Vehicles\Leopard\Leopard.bmp" />
+    <None Remove="SceneTest\Vehicles\Leopard\Leopard.dae" />
+    <None Remove="SceneTest\Vehicles\Leopard\Leopard.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Common\buttons.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\LensFlare\lfFlare1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\LensFlare\lfFlare2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\LensFlare\lfFlare3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\LensFlare\lfFlare4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\LensFlare\lfGlow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Common\pointer.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Buildings\Obelisk\diffus.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Buildings\Obelisk\normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Buildings\Obelisk\obelisk.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="SceneLights\Buildings\Obelisk\obelisk.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Buildings\Obelisk\specular.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Trees\bark_albedo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Trees\bark_normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Trees\bark_specular.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Trees\bushes_albedo.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Trees\bushes_normal.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Trees\bushes_specular.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Trees\tree.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneLights\Trees\tree.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneMaterials\floor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneMaterials\nmap1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneMaterials\nmap2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneMaterials\white.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\backGround.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\SkyPlane.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\SkyPlane.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStencilPass\Buildings\Obelisk\diffus.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStencilPass\Buildings\Obelisk\normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStencilPass\Buildings\Obelisk\obelisk.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="SceneStencilPass\Buildings\Obelisk\obelisk.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStencilPass\Buildings\Obelisk\specular.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Buildings\Obelisk\diffus.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Buildings\Obelisk\normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Buildings\Obelisk\obelisk.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Buildings\Obelisk\obelisk.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Buildings\Obelisk\specular.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Character\Soldier\soldier0.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Character\Soldier\Soldier1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Character\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Character\Soldier\soldier_anim2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Container\container.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Container\container.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Container\ikube azul-1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Container\ikube azul-2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Container\ikube azul-3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Container\ikube azul-4.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Container\ikube azul-5.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Lamps\concrete.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Lamps\Lamp.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Lamps\Lamp.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Lamps\Lamp.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Lamps\metallic.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Lamps\StreetLamp.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="SceneTest\Lamps\StreetLamp.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Particles\explosion.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Particles\fire.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Particles\fire.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Particles\floor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Particles\smoke.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Scenery\clif.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Scenery\clif.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Scenery\Diffuse.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Scenery\Normal.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Sky\cloud001.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Sky\perturb001.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Trees\Bark_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Trees\Leafs_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Trees\Tree.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Trees\tree_1.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Trees\tree_2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Trees\tree_3.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\UI\button_off.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\UI\button_on.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Challenger\Challenger.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Challenger\challenger.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Challenger\challenger.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Leopard\Leopard.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Leopard\Leopard.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneTest\Vehicles\Leopard\Leopard.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Engine\Engine.csproj" />
+  </ItemGroup>
+
+</Project>

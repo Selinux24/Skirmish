@@ -1,0 +1,314 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>Collada</RootNamespace>
+    <AssemblyName>Collada</AssemblyName>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet>04 Collada.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <CodeAnalysisRuleSet>04 Collada.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CodeAnalysisRuleSet>04 Collada.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet>04 Collada.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <CodeAnalysisRuleSet>04 Collada.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CodeAnalysisRuleSet>04 Collada.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Common\buttons.png" />
+    <None Remove="Resources\Common\Electro_1.wav" />
+    <None Remove="Resources\Common\HipHoppy_1.wav" />
+    <None Remove="Resources\Common\pointer.png" />
+    <None Remove="Resources\Common\push.wav" />
+    <None Remove="Resources\SceneDungeonWall\diffuse.dds" />
+    <None Remove="Resources\SceneDungeonWall\normal.bmp" />
+    <None Remove="Resources\SceneDungeonWall\Wall.dae" />
+    <None Remove="Resources\SceneDungeonWall\Wall.xml" />
+    <None Remove="Resources\SceneDungeon\Dungeon.dae" />
+    <None Remove="Resources\SceneDungeon\Dungeon.xml" />
+    <None Remove="Resources\SceneModularDungeon\Assets.dae" />
+    <None Remove="Resources\SceneModularDungeon\Assets.xml" />
+    <None Remove="Resources\SceneModularDungeon\AssetsMap.xml" />
+    <None Remove="Resources\SceneModularDungeon\atlas1.jpg" />
+    <None Remove="Resources\SceneModularDungeon\Audio\Effects\door.wav" />
+    <None Remove="Resources\SceneModularDungeon\Audio\Effects\ladder.wav" />
+    <None Remove="Resources\SceneModularDungeon\Audio\Effects\loop_torch.wav" />
+    <None Remove="Resources\SceneModularDungeon\Audio\Effects\mouse1.wav" />
+    <None Remove="Resources\SceneModularDungeon\Audio\Effects\mouse2.wav" />
+    <None Remove="Resources\SceneModularDungeon\Audio\Effects\Wind1_S.wav" />
+    <None Remove="Resources\SceneModularDungeon\Audio\Effects\Wind2_S.wav" />
+    <None Remove="Resources\SceneModularDungeon\Audio\Effects\Wind3_S.wav" />
+    <None Remove="Resources\SceneModularDungeon\bark_d.dds" />
+    <None Remove="Resources\SceneModularDungeon\bark_n.dds" />
+    <None Remove="Resources\SceneModularDungeon\brick_d.png" />
+    <None Remove="Resources\SceneModularDungeon\brick_n.png" />
+    <None Remove="Resources\SceneModularDungeon\bronze_d.jpg" />
+    <None Remove="Resources\SceneModularDungeon\bronze_n.jpg" />
+    <None Remove="Resources\SceneModularDungeon\candleLight.png" />
+    <None Remove="Resources\SceneModularDungeon\Characters\Human2\Human2.dae" />
+    <None Remove="Resources\SceneModularDungeon\Characters\Human2\Human2.xml" />
+    <None Remove="Resources\SceneModularDungeon\Characters\Rat\Rat.dae" />
+    <None Remove="Resources\SceneModularDungeon\Characters\Rat\Rat.xml" />
+    <None Remove="Resources\SceneModularDungeon\Characters\Rat\Rat_d.png" />
+    <None Remove="Resources\SceneModularDungeon\crate_d.jpg" />
+    <None Remove="Resources\SceneModularDungeon\crate_n.png" />
+    <None Remove="Resources\SceneModularDungeon\fire.png" />
+    <None Remove="Resources\SceneModularDungeon\floor_d.jpg" />
+    <None Remove="Resources\SceneModularDungeon\floor_n.jpg" />
+    <None Remove="Resources\SceneModularDungeon\furniture_atlas_1.png" />
+    <None Remove="Resources\SceneModularDungeon\green-algae.png" />
+    <None Remove="Resources\SceneModularDungeon\jewels_d.png" />
+    <None Remove="Resources\SceneModularDungeon\lava_d.jpg" />
+    <None Remove="Resources\SceneModularDungeon\lava_n.jpg" />
+    <None Remove="Resources\SceneModularDungeon\Levels.xml" />
+    <None Remove="Resources\SceneModularDungeon\marble_d.png" />
+    <None Remove="Resources\SceneModularDungeon\metal_rust_d.jpg" />
+    <None Remove="Resources\SceneModularDungeon\oil_d.jpg" />
+    <None Remove="Resources\SceneModularDungeon\rag_d.png" />
+    <None Remove="Resources\SceneModularDungeon\rock_d.jpg" />
+    <None Remove="Resources\SceneModularDungeon\rock_n.jpg" />
+    <None Remove="Resources\SceneModularDungeon\rug.jpg" />
+    <None Remove="Resources\SceneModularDungeon\stuff_map.png" />
+    <None Remove="Resources\SceneModularDungeon\torch.jpg" />
+    <None Remove="Resources\SceneModularDungeon\treasure_d.jpg" />
+    <None Remove="Resources\SceneModularDungeon\wall_d.jpg" />
+    <None Remove="Resources\SceneModularDungeon\wall_n.jpg" />
+    <None Remove="Resources\SceneModularDungeon\wood_d.jpg" />
+    <None Remove="Resources\SceneNavmeshTest\modular_dungeon.obj" />
+    <None Remove="Resources\SceneNavmeshTest\modular_dungeon.xml" />
+    <None Remove="Resources\SceneStart\backGround.jpg" />
+    <None Remove="Resources\SceneStart\SkyPlane.dae" />
+    <None Remove="Resources\SceneStart\SkyPlane.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Common\buttons.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Common\Electro_1.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Common\HipHoppy_1.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Common\pointer.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Common\push.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneDungeonWall\diffuse.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneDungeonWall\normal.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneDungeonWall\Wall.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\SceneDungeonWall\Wall.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneDungeon\Dungeon.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\SceneDungeon\Dungeon.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Assets.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Assets.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\AssetsMap.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\atlas1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Audio\Effects\door.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Audio\Effects\ladder.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Audio\Effects\loop_torch.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Audio\Effects\mouse1.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Audio\Effects\mouse2.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Audio\Effects\Wind1_S.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Audio\Effects\Wind2_S.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Audio\Effects\Wind3_S.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\bark_d.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\bark_n.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\brick_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\brick_n.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\bronze_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\bronze_n.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\candleLight.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Characters\Human2\Human2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Characters\Human2\Human2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Characters\Rat\Rat.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Characters\Rat\Rat.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Characters\Rat\Rat_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\crate_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\crate_n.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\fire.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\floor_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\floor_n.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\furniture_atlas_1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\green-algae.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\jewels_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\lava_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\lava_n.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\Levels.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\marble_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\metal_rust_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\oil_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\rag_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\rock_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\rock_n.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\rug.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\stuff_map.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\torch.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\treasure_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\wall_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\wall_n.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneModularDungeon\wood_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneNavmeshTest\modular_dungeon.obj">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneNavmeshTest\modular_dungeon.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\SceneStart\backGround.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneStart\SkyPlane.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\SceneStart\SkyPlane.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Resources\SceneModularDungeon\Audio\Music\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Engine\Engine.csproj" />
+  </ItemGroup>
+
+</Project>

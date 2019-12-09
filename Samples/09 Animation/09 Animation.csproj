@@ -1,0 +1,150 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>Animation</RootNamespace>
+    <AssemblyName>Animation</AssemblyName>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Doors\atlas1.jpg" />
+    <None Remove="Resources\Doors\bronze_n.jpg" />
+    <None Remove="Resources\Doors\Dn_Doors.dae" />
+    <None Remove="Resources\Doors\Dn_Doors.xml" />
+    <None Remove="Resources\Doors\Dn_Jails.xml" />
+    <None Remove="Resources\Doors\metal_rust_d.jpg" />
+    <None Remove="Resources\Doors\wall_d.jpg" />
+    <None Remove="Resources\Doors\wall_n.jpg" />
+    <None Remove="Resources\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="Resources\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="Resources\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="Resources\Ladder\bronze_n.jpg" />
+    <None Remove="Resources\Ladder\Dn_Anim_Ladder.dae" />
+    <None Remove="Resources\Ladder\Dn_Anim_Ladder.xml" />
+    <None Remove="Resources\Ladder\Dn_Anim_Ladder_2.dae" />
+    <None Remove="Resources\Ladder\Dn_Anim_Ladder_2.xml" />
+    <None Remove="Resources\Ladder\Dn_Anim_Ladder_22.xml" />
+    <None Remove="Resources\Ladder\metal_rust_d.jpg" />
+    <None Remove="Resources\Rat\Rat.dae" />
+    <None Remove="Resources\Rat\Rat.xml" />
+    <None Remove="Resources\Rat\Rat_d.png" />
+    <None Remove="Resources\Soldier\soldier0.jpg" />
+    <None Remove="Resources\Soldier\Soldier1.jpg" />
+    <None Remove="Resources\Soldier\soldier_anim2.dae" />
+    <None Remove="Resources\Soldier\soldier_anim2.xml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Doors\atlas1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Doors\bronze_n.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Doors\Dn_Doors.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Doors\Dn_Doors.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\Doors\Dn_Jails.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\Doors\metal_rust_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Doors\wall_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Doors\wall_n.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Ladder\bronze_n.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Ladder\Dn_Anim_Ladder.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Ladder\Dn_Anim_Ladder.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\Ladder\Dn_Anim_Ladder_2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Ladder\Dn_Anim_Ladder_2.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Ladder\Dn_Anim_Ladder_22.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Ladder\metal_rust_d.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rat\Rat.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rat\Rat.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Resources\Rat\Rat_d.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Soldier\soldier0.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Soldier\Soldier1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Soldier\soldier_anim2.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Engine\Engine.csproj" />
+  </ItemGroup>
+
+</Project>

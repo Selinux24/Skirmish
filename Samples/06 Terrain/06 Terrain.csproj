@@ -1,0 +1,286 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>Terrain</AssemblyName>
+    <RootNamespace>Terrain</RootNamespace>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <CodeAnalysisRuleSet>06 Terrain.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <CodeAnalysisRuleSet>06 Terrain.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <CodeAnalysisRuleSet>06 Terrain.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <CodeAnalysisRuleSet>06 Terrain.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <CodeAnalysisRuleSet>06 Terrain.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <CodeAnalysisRuleSet>06 Terrain.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources\Clouds\cloud001.dds" />
+    <None Remove="Resources\Clouds\perturb001.dds" />
+    <None Remove="Resources\Cursor\cursor.dae" />
+    <None Remove="Resources\Cursor\cursor.xml" />
+    <None Remove="Resources\Cursor\target.png" />
+    <None Remove="Resources\Flare\lfFlare1.png" />
+    <None Remove="Resources\Flare\lfFlare2.png" />
+    <None Remove="Resources\Flare\lfFlare3.png" />
+    <None Remove="Resources\Flare\lfGlow.png" />
+    <None Remove="Resources\Garage\concrete.jpg" />
+    <None Remove="Resources\Garage\garage.dae" />
+    <None Remove="Resources\Garage\garage.xml" />
+    <None Remove="Resources\Helicopter\m24 - 1.dds" />
+    <None Remove="Resources\Helicopter\m24 - 2.dds" />
+    <None Remove="Resources\Helicopter\m24 - 3.dds" />
+    <None Remove="Resources\Helicopter\m24.dae" />
+    <None Remove="Resources\Helicopter\m24.xml" />
+    <None Remove="Resources\Heliport\concrete.jpg" />
+    <None Remove="Resources\Heliport\heliport.dae" />
+    <None Remove="Resources\Heliport\heliport.png" />
+    <None Remove="Resources\Heliport\heliport.xml" />
+    <None Remove="Resources\Leopard\Leopard.dae" />
+    <None Remove="Resources\Leopard\Leopard.xml" />
+    <None Remove="Resources\Leopard\Leopard_0.bmp" />
+    <None Remove="Resources\Leopard\Leopard_1.bmp" />
+    <None Remove="Resources\Leopard\Leopard_2.bmp" />
+    <None Remove="Resources\Obelisk\diffus.dds" />
+    <None Remove="Resources\Obelisk\normal.dds" />
+    <None Remove="Resources\Obelisk\obelisk.dae" />
+    <None Remove="Resources\Obelisk\obelisk.xml" />
+    <None Remove="Resources\Obelisk\specular.dds" />
+    <None Remove="Resources\Particles\explosion.png" />
+    <None Remove="Resources\Particles\fire.dds" />
+    <None Remove="Resources\Particles\fire.png" />
+    <None Remove="Resources\Particles\floor.png" />
+    <None Remove="Resources\Particles\smoke.png" />
+    <None Remove="Resources\Rocks\boulder.xml" />
+    <None Remove="Resources\Rocks\boulder_1.dae" />
+    <None Remove="Resources\Rocks\boulder_2.dae" />
+    <None Remove="Resources\Rocks\boulder_3.dae" />
+    <None Remove="Resources\Rocks\boulder_granite_grey_01_diffuse.dds" />
+    <None Remove="Resources\Rocks\boulder_granite_grey_01_normal.dds" />
+    <None Remove="Resources\Rocks\boulder_granite_grey_01_specular.dds" />
+    <None Remove="Resources\Skydom\sunset.dds" />
+    <None Remove="Resources\Terrain\Foliage\Billboard\grass_v0.dds" />
+    <None Remove="Resources\Terrain\Foliage\Billboard\grass_v1.dds" />
+    <None Remove="Resources\Terrain\Foliage\Billboard\grass_v2.dds" />
+    <None Remove="Resources\Terrain\terrain.png" />
+    <None Remove="Resources\Terrain\terrain_nmap.png" />
+    <None Remove="Resources\Terrain\two_levels.dae" />
+    <None Remove="Resources\Terrain\two_levels.xml" />
+    <None Remove="Resources\Trees\birch_01_bark_diffuse.dds" />
+    <None Remove="Resources\Trees\birch_01_bark_normal.dds" />
+    <None Remove="Resources\Trees\birch_01_leaves_diffuse.dds" />
+    <None Remove="Resources\Trees\birch_01_leaves_normal.dds" />
+    <None Remove="Resources\Trees\birch_a.dae" />
+    <None Remove="Resources\Trees\birch_a.xml" />
+    <None Remove="Resources\Trees\birch_b.dae" />
+    <None Remove="Resources\Trees\birch_b.xml" />
+    <None Remove="Resources\uvtest.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\Clouds\cloud001.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Clouds\perturb001.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Cursor\cursor.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Cursor\cursor.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Cursor\target.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Flare\lfFlare1.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Flare\lfFlare2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Flare\lfFlare3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Flare\lfGlow.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Garage\concrete.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Garage\garage.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Garage\garage.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Helicopter\m24 - 1.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Helicopter\m24 - 2.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Helicopter\m24 - 3.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Helicopter\m24.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Helicopter\m24.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Heliport\concrete.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Heliport\heliport.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Heliport\heliport.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Heliport\heliport.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Leopard\Leopard.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Leopard\Leopard.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Leopard\Leopard_0.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Leopard\Leopard_1.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Leopard\Leopard_2.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Obelisk\diffus.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Obelisk\normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Obelisk\obelisk.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Obelisk\obelisk.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Obelisk\specular.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Particles\explosion.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Particles\fire.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Particles\fire.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Particles\floor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Particles\smoke.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rocks\boulder.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rocks\boulder_1.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rocks\boulder_2.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rocks\boulder_3.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rocks\boulder_granite_grey_01_diffuse.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rocks\boulder_granite_grey_01_normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Rocks\boulder_granite_grey_01_specular.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skydom\sunset.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Terrain\Foliage\Billboard\grass_v0.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Terrain\Foliage\Billboard\grass_v1.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Terrain\Foliage\Billboard\grass_v2.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Terrain\terrain.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Terrain\terrain_nmap.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Terrain\two_levels.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Terrain\two_levels.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Trees\birch_01_bark_diffuse.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Trees\birch_01_bark_normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Trees\birch_01_leaves_diffuse.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Trees\birch_01_leaves_normal.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Trees\birch_a.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Trees\birch_a.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Trees\birch_b.dae">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Trees\birch_b.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\uvtest.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Engine\Engine.csproj" />
+  </ItemGroup>
+
+</Project>
