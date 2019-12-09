@@ -190,21 +190,21 @@ namespace Engine
 
             if (this.lightGeometryVertexBuffer == null)
             {
-                this.lightGeometryVertexBuffer = graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", verts.ToArray(), true);
+                this.lightGeometryVertexBuffer = graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", verts, true);
                 this.lightGeometryVertexBufferBinding = new VertexBufferBinding(this.lightGeometryVertexBuffer, verts[0].GetStride(), 0);
             }
             else
             {
-                graphics.WriteDiscardBuffer(this.lightGeometryVertexBuffer, verts.ToArray());
+                graphics.WriteDiscardBuffer(this.lightGeometryVertexBuffer, verts);
             }
 
             if (this.lightGeometryIndexBuffer == null)
             {
-                this.lightGeometryIndexBuffer = graphics.CreateIndexBuffer("Deferred Redenderer Light Geometry", indx.ToArray(), true);
+                this.lightGeometryIndexBuffer = graphics.CreateIndexBuffer("Deferred Redenderer Light Geometry", indx, true);
             }
             else
             {
-                graphics.WriteDiscardBuffer(this.lightGeometryIndexBuffer, indx.ToArray());
+                graphics.WriteDiscardBuffer(this.lightGeometryIndexBuffer, indx);
             }
         }
         /// <summary>

@@ -1,20 +1,21 @@
-﻿namespace Engine.Common
+﻿
+namespace Engine.Common
 {
     /// <summary>
-    /// Vertex buffer description
+    /// Buffer descriptor into the BufferManager
     /// </summary>
     public class BufferDescriptor
     {
         /// <summary>
-        /// Vertex buffer slot
+        /// Buffer slot index
         /// </summary>
         public int Slot { get; set; }
         /// <summary>
-        /// Vertex buffer offset
+        /// Buffer index offset
         /// </summary>
         public int Offset { get; set; }
         /// <summary>
-        /// Vertices count
+        /// Item Count
         /// </summary>
         public int Count { get; set; }
 

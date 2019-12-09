@@ -150,6 +150,10 @@ namespace Engine.Common
         {
             if (disposing)
             {
+                foreach (var mesh in this.meshesByLOD)
+                {
+                    mesh.Value?.Dispose();
+                }
                 this.meshesByLOD = null;
             }
         }

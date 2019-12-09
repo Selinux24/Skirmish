@@ -31,9 +31,9 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="data">Data</param>
         /// <param name="dynamic">Dynamic flag</param>
-        public EngineBuffer(Graphics graphics, string name, T[] data, bool dynamic)
+        public EngineBuffer(Graphics graphics, string name, IEnumerable<T> data, bool dynamic)
         {
-            this.VertexBuffer = graphics.CreateVertexBuffer<T>(name, data, dynamic);
+            this.VertexBuffer = graphics.CreateVertexBuffer(name, data, dynamic);
 
             this.VertexBufferBinding = new[]
             {

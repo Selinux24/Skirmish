@@ -1168,7 +1168,7 @@ namespace Engine
         /// <param name="data">Data to write in the buffer</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        internal Buffer CreateIndexBuffer<T>(string name, T[] data, bool dynamic)
+        internal Buffer CreateIndexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
             where T : struct
         {
             return CreateBuffer<T>(
@@ -1186,7 +1186,25 @@ namespace Engine
         /// <param name="data">Data to write in the buffer</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateVertexBuffer<T>(string name, T[] data, bool dynamic)
+        internal Buffer CreateVertexBuffer<T>(string name, IEnumerable<IVertexData> data, bool dynamic)
+            where T : struct
+        {
+            return CreateBuffer<T>(
+                name,
+                data.OfType<T>(),
+                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                BindFlags.VertexBuffer,
+                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+        }
+        /// <summary>
+        /// Creates a vertex buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="name">Buffer name</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        internal Buffer CreateVertexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
             where T : struct
         {
             return CreateBuffer<T>(
@@ -1237,16 +1255,16 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateBuffer<T>(string name, T[] data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        internal Buffer CreateBuffer<T>(string name, IEnumerable<T> data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
             where T : struct
         {
-            int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Length;
+            int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Count();
 
-            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, data.Length);
+            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, data.Count());
 
             using (var dstr = new DataStream(sizeInBytes, true, true))
             {
-                dstr.WriteRange(data);
+                dstr.WriteRange(data.ToArray());
                 dstr.Position = 0;
 
                 var description = new BufferDescription()
@@ -2596,10 +2614,10 @@ namespace Engine
         /// <param name="deviceContext">Graphic context</param>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        internal void WriteDiscardBuffer<T>(Buffer buffer, params T[] data)
+        internal void WriteDiscardBuffer<T>(Buffer buffer, IEnumerable<T> data)
             where T : struct
         {
-            WriteDiscardBuffer<T>(buffer, 0, data);
+            WriteDiscardBuffer(buffer, 0, data);
         }
         /// <summary>
         /// Writes data into buffer
@@ -2609,18 +2627,18 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        internal void WriteDiscardBuffer<T>(Buffer buffer, long offset, params T[] data)
+        internal void WriteDiscardBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
             Counters.BufferWrites++;
 
-            if (data != null && data.Length > 0)
+            if (data?.Any() == true)
             {
                 this.deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
                 using (stream)
                 {
                     stream.Position = Marshal.SizeOf(default(T)) * offset;
-                    stream.WriteRange(data);
+                    stream.WriteRange(data.ToArray());
                 }
                 this.deviceContext.UnmapSubresource(buffer, 0);
             }
@@ -2632,10 +2650,10 @@ namespace Engine
         /// <param name="deviceContext">Graphic context</param>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        internal void WriteNoOverwriteBuffer<T>(Buffer buffer, params T[] data)
+        internal void WriteNoOverwriteBuffer<T>(Buffer buffer, IEnumerable<T> data)
             where T : struct
         {
-            WriteNoOverwriteBuffer<T>(buffer, 0, data);
+            WriteNoOverwriteBuffer(buffer, 0, data);
         }
         /// <summary>
         /// Writes data into buffer
@@ -2645,18 +2663,18 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        internal void WriteNoOverwriteBuffer<T>(Buffer buffer, long offset, params T[] data)
+        internal void WriteNoOverwriteBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
             Counters.BufferWrites++;
 
-            if (data != null && data.Length > 0)
+            if (data?.Any() == true)
             {
                 this.deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
                 using (stream)
                 {
                     stream.Position = Marshal.SizeOf(default(T)) * offset;
-                    stream.WriteRange(data);
+                    stream.WriteRange(data.ToArray());
                 }
                 this.deviceContext.UnmapSubresource(buffer, 0);
             }
