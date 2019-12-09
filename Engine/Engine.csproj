@@ -9,6 +9,8 @@
     <RootNamespace>Engine</RootNamespace>
     <AssemblyName>Engine</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
+    <PackageIcon>engine.ico</PackageIcon>
+    <PackageIconUrl />
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -63,6 +65,10 @@
     </None>
     <None Update="sharpdx_direct3d11_effects_x86.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="engine.ico">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
 
