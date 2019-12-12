@@ -150,9 +150,11 @@ namespace Collada
                 this.Camera.MoveBackward(this.Game.GameTime, slow);
             }
 
+            bool rotateCamera = true;
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            rotateCamera = this.Game.Input.RightMouseButtonPressed;
 #endif
+            if (rotateCamera)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,

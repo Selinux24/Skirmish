@@ -1824,7 +1824,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Merge too small regions to neighbour regions.
-            int mergeCount = 0;
+            int mergeCount;
             do
             {
                 mergeCount = 0;
@@ -2225,23 +2225,20 @@ namespace Engine.PathFinding.RecastNavigation
             chf.Dist = null;
 
             int[] src = new int[chf.SpanCount];
-            {
-                CalculateDistanceField(chf, src, out var maxDistance);
 
-                chf.MaxDistance = maxDistance;
-            }
+            CalculateDistanceField(chf, src, out var maxDistance);
+            chf.MaxDistance = maxDistance;
 
             int[] dst = new int[chf.SpanCount];
-            {
-                // Blur
-                if (BoxBlur(chf, 1, src, dst) != src)
-                {
-                    Helper.Swap(ref src, ref dst);
-                }
 
-                // Store distance.
-                chf.Dist = src;
+            // Blur
+            if (BoxBlur(chf, 1, src, dst) != src)
+            {
+                Helper.Swap(ref src, ref dst);
             }
+
+            // Store distance.
+            chf.Dist = src;
 
             return true;
         }
@@ -2385,19 +2382,17 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
+            // Merge regions and filter out small regions.
+            chf.MaxRegions = id;
+            var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, id, chf, srcReg, out int[] overlaps, out var maxRegionId);
+            chf.MaxRegions = maxRegionId;
+
+            if (!merged)
             {
-                // Merge regions and filter out small regions.
-                chf.MaxRegions = id;
-                var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, id, chf, srcReg, out int[] overlaps, out var maxRegionId);
-                chf.MaxRegions = maxRegionId;
-
-                if (!merged)
-                {
-                    return false;
-                }
-
-                // Monotone partitioning does not generate overlapping regions.
+                return false;
             }
+
+            // Monotone partitioning does not generate overlapping regions.
 
             // Store the result out.
             for (int i = 0; i < chf.SpanCount; ++i)
@@ -2466,34 +2461,30 @@ namespace Engine.PathFinding.RecastNavigation
                     AppendStacks(lvlStacks[sId - 1], lvlStacks[sId], srcReg); // copy left overs from last level
                 }
 
+                // Expand current regions until no empty connected cells found.
+                if (ExpandRegions(expandIters, level, chf, srcReg, srcDist, dstReg, dstDist, lvlStacks[sId], false) != srcReg)
                 {
-                    // Expand current regions until no empty connected cells found.
-                    if (ExpandRegions(expandIters, level, chf, srcReg, srcDist, dstReg, dstDist, lvlStacks[sId], false) != srcReg)
-                    {
-                        Helper.Swap(ref srcReg, ref dstReg);
-                        Helper.Swap(ref srcDist, ref dstDist);
-                    }
+                    Helper.Swap(ref srcReg, ref dstReg);
+                    Helper.Swap(ref srcDist, ref dstDist);
                 }
 
+                // Mark new regions with IDs.
+                for (int j = 0; j < lvlStacks[sId].Count; j += 3)
                 {
-                    // Mark new regions with IDs.
-                    for (int j = 0; j < lvlStacks[sId].Count; j += 3)
+                    int x = lvlStacks[sId][j];
+                    int y = lvlStacks[sId][j + 1];
+                    int i = lvlStacks[sId][j + 2];
+                    if (i >= 0 && srcReg[i] == 0)
                     {
-                        int x = lvlStacks[sId][j];
-                        int y = lvlStacks[sId][j + 1];
-                        int i = lvlStacks[sId][j + 2];
-                        if (i >= 0 && srcReg[i] == 0)
+                        var floodRes = FloodRegion(x, y, i, level, regionId, chf, srcReg, srcDist, stack);
+                        if (floodRes)
                         {
-                            var floodRes = FloodRegion(x, y, i, level, regionId, chf, srcReg, srcDist, stack);
-                            if (floodRes)
+                            if (regionId == 0xFFFF)
                             {
-                                if (regionId == 0xFFFF)
-                                {
-                                    throw new EngineException("rcBuildRegions: Region ID overflow");
-                                }
-
-                                regionId++;
+                                throw new EngineException("rcBuildRegions: Region ID overflow");
                             }
+
+                            regionId++;
                         }
                     }
                 }
@@ -2506,21 +2497,19 @@ namespace Engine.PathFinding.RecastNavigation
                 Helper.Swap(ref srcDist, ref dstDist);
             }
 
+            // Merge regions and filter out smalle regions.
+            chf.MaxRegions = regionId;
+            var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, regionId, chf, srcReg, out int[] overlaps, out int maxRegionId);
+            chf.MaxRegions = maxRegionId;
+            if (!merged)
             {
-                // Merge regions and filter out smalle regions.
-                chf.MaxRegions = regionId;
-                var merged = MergeAndFilterRegions(minRegionArea, mergeRegionArea, regionId, chf, srcReg, out int[] overlaps, out int maxRegionId);
-                chf.MaxRegions = maxRegionId;
-                if (!merged)
-                {
-                    return false;
-                }
+                return false;
+            }
 
-                // If overlapping regions were found during merging, split those regions.
-                if (overlaps.Length > 0)
-                {
-                    throw new EngineException(string.Format("rcBuildRegions: {0} overlapping regions", overlaps.Length));
-                }
+            // If overlapping regions were found during merging, split those regions.
+            if (overlaps.Length > 0)
+            {
+                throw new EngineException(string.Format("rcBuildRegions: {0} overlapping regions", overlaps.Length));
             }
 
             // Write the result out.
@@ -2653,15 +2642,13 @@ namespace Engine.PathFinding.RecastNavigation
                 }
             }
 
+            // Merge monotone regions to layers and remove small regions.
+            chf.MaxRegions = id;
+            var merged = MergeAndFilterLayerRegions(minRegionArea, id, chf, srcReg, out int[] overlaps, out int maxRegionId);
+            chf.MaxRegions = maxRegionId;
+            if (!merged)
             {
-                // Merge monotone regions to layers and remove small regions.
-                chf.MaxRegions = id;
-                var merged = MergeAndFilterLayerRegions(minRegionArea, id, chf, srcReg, out int[] overlaps, out int maxRegionId);
-                chf.MaxRegions = maxRegionId;
-                if (!merged)
-                {
-                    return false;
-                }
+                return false;
             }
 
             // Store the result out.
@@ -6473,9 +6460,6 @@ namespace Engine.PathFinding.RecastNavigation
         }
         private static bool BuildPolyDetail(Vector3[] inp, int ninp, float sampleDist, float sampleMaxError, int heightSearchRadius, CompactHeightfield chf, HeightPatch hp, Vector3[] verts, out int nverts, out Int4[] outTris)
         {
-            nverts = 0;
-            outTris = null;
-
             List<Int4> edges = new List<Int4>();
             List<Int4> samples = new List<Int4>();
             List<Int4> tris = new List<Int4>();

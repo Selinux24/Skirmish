@@ -319,15 +319,13 @@ namespace Skybox
 
             #region Walk
 
+            if (this.Walk(this.walker, previousPosition, this.Camera.Position, out Vector3 walkerPosition))
             {
-                if (this.Walk(this.walker, previousPosition, this.Camera.Position, out Vector3 walkerPosition))
-                {
-                    this.Camera.Goto(walkerPosition);
-                }
-                else
-                {
-                    this.Camera.Goto(previousPosition);
-                }
+                this.Camera.Goto(walkerPosition);
+            }
+            else
+            {
+                this.Camera.Goto(previousPosition);
             }
 
             #endregion
@@ -402,9 +400,11 @@ namespace Skybox
                 }
             }
 
+            bool rotateCamera = true;
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            rotateCamera = this.Game.Input.RightMouseButtonPressed;
 #endif
+            if (rotateCamera)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,

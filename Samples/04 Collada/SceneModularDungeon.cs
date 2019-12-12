@@ -406,101 +406,109 @@ namespace Collada
                 .ToArray();
 
             //Jails
-            {
-                var jails = this.scenery
-                    .GetObjectsByName("Dn_Jail_1")
-                    .Select(o => o.Item);
-
-                AnimationPath def = new AnimationPath();
-                def.Add("default");
-
-                foreach (var jail in jails)
-                {
-                    jail.AnimationController.SetPath(new AnimationPlan(def));
-                    jail.InvalidateCache();
-                }
-            }
+            this.StartJails();
 
             //Doors
-            {
-                var doors = this.scenery
-                    .GetObjectsByName("Dn_Door_1")
-                    .Select(o => o.Item);
-
-                AnimationPath def = new AnimationPath();
-                def.Add("default");
-
-                foreach (var door in doors)
-                {
-                    door.AnimationController.SetPath(new AnimationPlan(def));
-                    door.InvalidateCache();
-                }
-            }
+            this.StartDoors();
 
             //Ladders
-            {
-                var ladders = this.scenery
-                    .GetObjectsByName("Dn_Anim_Ladder")
-                    .Select(o => o.Item);
-
-                AnimationPath def = new AnimationPath();
-                def.Add("pull");
-
-                foreach (var ladder in ladders)
-                {
-                    ladder.AnimationController.SetPath(new AnimationPlan(def));
-                    ladder.InvalidateCache();
-                }
-            }
+            this.StartLadders();
 
             //Torchs
-            {
-                var torchs = this.scenery
-                    .GetObjectsByName("Dn_Torch")
-                    .Select(o => o.Item);
-
-                foreach (var item in torchs)
-                {
-                    var efTorch = this.soundTorch.Create(new GameAudioSourceDescription() { Radius = 15 }, agentListener);
-                    efTorch.Volume = 1f;
-                    efTorch.IsLooped = true;
-                    efTorch.Emitter.SetSource(item);
-                    efTorch.Listener.SetSource(this.Camera);
-                    efTorch.Play();
-                }
-            }
+            this.StartTorchs();
 
             //Big fires
-            {
-                List<ModelInstance> fires = new List<ModelInstance>();
-                fires.AddRange(this.scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
-                fires.AddRange(this.scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Item));
+            this.StartBigFires();
 
-                foreach (var item in fires)
-                {
-                    var efFire = this.soundTorch.Create(new GameAudioSourceDescription() { Radius = 25 }, agentListener);
-                    efFire.Volume = 1f;
-                    efFire.IsLooped = true;
-                    efFire.Emitter.SetSource(item);
-                    efFire.Listener.SetSource(this.Camera);
-                    efFire.Play();
-                }
-            }
+            //Rat sound
+            this.ratSoundInstance = ratSoundMove.Create(new GameAudioSourceDescription() { Radius = 15 }, agentListener, false);
+            this.ratSoundInstance.Volume = 1f;
+            this.ratSoundInstance.IsLooped = true;
+            this.ratSoundInstance.Emitter.SetSource(this.rat);
+            this.ratSoundInstance.Listener.SetSource(this.Camera);
 
-            //Rat
-            {
-                this.ratSoundInstance = ratSoundMove.Create(new GameAudioSourceDescription() { Radius = 15 }, agentListener, false);
-                this.ratSoundInstance.Volume = 1f;
-                this.ratSoundInstance.IsLooped = true;
-                this.ratSoundInstance.Emitter.SetSource(this.rat);
-                this.ratSoundInstance.Listener.SetSource(this.Camera);
-            }
+            this.StartObstacles();
 
-            this.InitializeObstacles();
-
-            this.InitializeCamera();
+            this.StartCamera();
         }
-        private void InitializeObstacles()
+        private void StartJails()
+        {
+            var jails = this.scenery
+                .GetObjectsByName("Dn_Jail_1")
+                .Select(o => o.Item);
+
+            AnimationPath def = new AnimationPath();
+            def.Add("default");
+
+            foreach (var jail in jails)
+            {
+                jail.AnimationController.SetPath(new AnimationPlan(def));
+                jail.InvalidateCache();
+            }
+        }
+        private void StartDoors()
+        {
+            var doors = this.scenery
+                .GetObjectsByName("Dn_Door_1")
+                .Select(o => o.Item);
+
+            AnimationPath def = new AnimationPath();
+            def.Add("default");
+
+            foreach (var door in doors)
+            {
+                door.AnimationController.SetPath(new AnimationPlan(def));
+                door.InvalidateCache();
+            }
+        }
+        private void StartLadders()
+        {
+            var ladders = this.scenery
+                .GetObjectsByName("Dn_Anim_Ladder")
+                .Select(o => o.Item);
+
+            AnimationPath def = new AnimationPath();
+            def.Add("pull");
+
+            foreach (var ladder in ladders)
+            {
+                ladder.AnimationController.SetPath(new AnimationPlan(def));
+                ladder.InvalidateCache();
+            }
+        }
+        private void StartTorchs()
+        {
+            var torchs = this.scenery
+                .GetObjectsByName("Dn_Torch")
+                .Select(o => o.Item);
+
+            foreach (var item in torchs)
+            {
+                var efTorch = this.soundTorch.Create(new GameAudioSourceDescription() { Radius = 15 }, agentListener);
+                efTorch.Volume = 1f;
+                efTorch.IsLooped = true;
+                efTorch.Emitter.SetSource(item);
+                efTorch.Listener.SetSource(this.Camera);
+                efTorch.Play();
+            }
+        }
+        private void StartBigFires()
+        {
+            List<ModelInstance> fires = new List<ModelInstance>();
+            fires.AddRange(this.scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
+            fires.AddRange(this.scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Item));
+
+            foreach (var item in fires)
+            {
+                var efFire = this.soundTorch.Create(new GameAudioSourceDescription() { Radius = 25 }, agentListener);
+                efFire.Volume = 1f;
+                efFire.IsLooped = true;
+                efFire.Emitter.SetSource(item);
+                efFire.Listener.SetSource(this.Camera);
+                efFire.Play();
+            }
+        }
+        private void StartObstacles()
         {
             //Furniture obstacles
             var furnitures = this.scenery
@@ -529,7 +537,7 @@ namespace Collada
 
             PaintObstacles();
         }
-        private void InitializeCamera()
+        private void StartCamera()
         {
             this.Camera.NearPlaneDistance = 0.1f;
             this.Camera.FarPlaneDistance = maxDistance;
@@ -547,18 +555,16 @@ namespace Collada
             this.bboxesDrawer.Instance.Clear();
 
             //Boxes
+            Random rndBoxes = new Random(1);
+
+            var dict = this.scenery.GetMapVolumes();
+
+            foreach (var item in dict.Values)
             {
-                Random rndBoxes = new Random(1);
+                var color = rndBoxes.NextColor().ToColor4();
+                color.Alpha = 0.40f;
 
-                var dict = this.scenery.GetMapVolumes();
-
-                foreach (var item in dict.Values)
-                {
-                    var color = rndBoxes.NextColor().ToColor4();
-                    color.Alpha = 0.40f;
-
-                    this.bboxesDrawer.Instance.SetPrimitives(color, Line3D.CreateWiredBox(item.ToArray()));
-                }
+                this.bboxesDrawer.Instance.SetPrimitives(color, Line3D.CreateWiredBox(item.ToArray()));
             }
 
             //Objects
@@ -651,9 +657,11 @@ namespace Collada
                 this.Camera.MoveBackward(this.Game.GameTime, slow);
             }
 
+            bool rotateCamera = true;
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            rotateCamera = this.Game.Input.RightMouseButtonPressed;
 #endif
+            if (rotateCamera)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,

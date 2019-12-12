@@ -1258,9 +1258,11 @@ namespace Heightmap
         }
         private void UpdateFlyingCamera(GameTime gameTime, bool shift)
         {
+            bool rotateCamera = true;
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            rotateCamera = this.Game.Input.RightMouseButtonPressed;
 #endif
+            if (rotateCamera)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
@@ -1290,9 +1292,11 @@ namespace Heightmap
         }
         private void UpdateWalkingCamera(GameTime gameTime, bool shift)
         {
+            bool rotateCamera = true;
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            rotateCamera = this.Game.Input.RightMouseButtonPressed;
 #endif
+            if (rotateCamera)
             {
                 this.soldier.Transform.Rotate(
                     this.Game.Input.MouseXDelta * 0.001f,

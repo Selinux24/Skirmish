@@ -193,14 +193,12 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
-            {
-                float denom = 1.0f / (va + vb + vc);
-                float v = vb * denom;
-                float w = vc * denom;
-                closest.X = a.X + ab.X * v + ac.X * w;
-                closest.Y = a.Y + ab.Y * v + ac.Y * w;
-                closest.Z = a.Z + ab.Z * v + ac.Z * w;
-            }
+            float denom = 1.0f / (va + vb + vc);
+            float closestV = vb * denom;
+            float closestW = vc * denom;
+            closest.X = a.X + ab.X * closestV + ac.X * closestW;
+            closest.Y = a.Y + ab.Y * closestV + ac.Y * closestW;
+            closest.Z = a.Z + ab.Z * closestV + ac.Z * closestW;
         }
         /// <summary>
         /// Derives the y-axis height of the closest point on the triangle from the specified reference point.
@@ -841,7 +839,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Find unique detail vertices.
             int uniqueDetailVertCount = 0;
-            int detailTriCount = 0;
+            int detailTriCount;
             if (param.detailMeshes != null)
             {
                 // Has detail mesh, count unique detail vertex count and use input detail tri count.

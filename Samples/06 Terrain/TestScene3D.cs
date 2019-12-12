@@ -197,88 +197,82 @@ namespace Terrain
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
+            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, this.layerHud);
+            this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
+            this.stats = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
+            this.counters1 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
+            this.counters2 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
+
+            title.Instance.Text = "Terrain collision and trajectories test";
+            this.load.Instance.Text = "";
+            this.stats.Instance.Text = "";
+            this.counters1.Instance.Text = "";
+            this.counters2.Instance.Text = "";
+
+            title.Instance.Position = Vector2.Zero;
+            this.load.Instance.Position = new Vector2(0, 24);
+            this.stats.Instance.Position = new Vector2(0, 46);
+            this.counters1.Instance.Position = new Vector2(0, 68);
+            this.counters2.Instance.Position = new Vector2(0, 90);
+
+            var spDesc = new SpriteDescription()
             {
-                var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, this.layerHud);
-                this.load = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
-                this.stats = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, this.layerHud);
-                this.counters1 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
-                this.counters2 = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 10, Color.GreenYellow), SceneObjectUsages.UI, this.layerHud);
+                Name = "Back Pannel",
+                AlphaEnabled = true,
+                Width = this.Game.Form.RenderWidth,
+                Height = this.counters2.Instance.Top + this.counters2.Instance.Height + 3,
+                Color = new Color4(0, 0, 0, 0.75f),
+            };
 
-                title.Instance.Text = "Terrain collision and trajectories test";
-                this.load.Instance.Text = "";
-                this.stats.Instance.Text = "";
-                this.counters1.Instance.Text = "";
-                this.counters2.Instance.Text = "";
+            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHud - 1);
 
-                title.Instance.Position = Vector2.Zero;
-                this.load.Instance.Position = new Vector2(0, 24);
-                this.stats.Instance.Position = new Vector2(0, 46);
-                this.counters1.Instance.Position = new Vector2(0, 68);
-                this.counters2.Instance.Position = new Vector2(0, 90);
-
-                var spDesc = new SpriteDescription()
-                {
-                    Name = "Back Pannel",
-                    AlphaEnabled = true,
-                    Width = this.Game.Form.RenderWidth,
-                    Height = this.counters2.Instance.Top + this.counters2.Instance.Height + 3,
-                    Color = new Color4(0, 0, 0, 0.75f),
-                };
-
-                this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHud - 1);
-
-                var spbDesc = new SpriteProgressBarDescription()
-                {
-                    Name = "Progress bar",
-                    Width = 50,
-                    Height = 5,
-                    BaseColor = Color.Red,
-                    ProgressColor = Color.Green,
-                };
-
-                this.hProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsages.UI, layerGameHud);
-                this.t1ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsages.UI, layerGameHud);
-                this.t2ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsages.UI, layerGameHud);
-
-                this.hProgressBar.Instance.Top = 120;
-                this.t1ProgressBar.Instance.Top = 120;
-                this.t2ProgressBar.Instance.Top = 120;
-
-                this.hProgressBar.Instance.Left = 5;
-                this.t1ProgressBar.Instance.Left = 135;
-                this.t2ProgressBar.Instance.Left = 270;
-            }
-
+            var spbDesc = new SpriteProgressBarDescription()
             {
-                var c3DDesc = new ModelDescription()
-                {
-                    Name = "Cursor3D",
-                    DeferredEnabled = false,
-                    CastShadow = false,
-                    DepthEnabled = false,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "resources/cursor",
-                        ModelContentFilename = "cursor.xml",
-                    }
-                };
-                this.cursor3D = this.AddComponent<Model>(c3DDesc, SceneObjectUsages.UI, this.layerHud);
-            }
+                Name = "Progress bar",
+                Width = 50,
+                Height = 5,
+                BaseColor = Color.Red,
+                ProgressColor = Color.Green,
+            };
 
+            this.hProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsages.UI, layerGameHud);
+            this.t1ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsages.UI, layerGameHud);
+            this.t2ProgressBar = this.AddComponent<SpriteProgressBar>(spbDesc, SceneObjectUsages.UI, layerGameHud);
+
+            this.hProgressBar.Instance.Top = 120;
+            this.t1ProgressBar.Instance.Top = 120;
+            this.t2ProgressBar.Instance.Top = 120;
+
+            this.hProgressBar.Instance.Left = 5;
+            this.t1ProgressBar.Instance.Left = 135;
+            this.t2ProgressBar.Instance.Left = 270;
+
+            var c3DDesc = new ModelDescription()
             {
-                var c2DDesc = new CursorDescription()
+                Name = "Cursor3D",
+                DeferredEnabled = false,
+                CastShadow = false,
+                DepthEnabled = false,
+                Content = new ContentDescription()
                 {
-                    Name = "Cursor2D",
-                    ContentPath = "resources/Cursor",
-                    Textures = new[] { "target.png" },
-                    Color = Color.Red,
-                    Width = 16,
-                    Height = 16,
-                };
-                this.cursor2D = this.AddComponent<Cursor>(c2DDesc, SceneObjectUsages.UI, this.layerHud + 1);
-                this.cursor2D.Instance.Color = Color.Red;
-                this.cursor2D.Visible = false;
-            }
+                    ContentFolder = "resources/cursor",
+                    ModelContentFilename = "cursor.xml",
+                }
+            };
+            this.cursor3D = this.AddComponent<Model>(c3DDesc, SceneObjectUsages.UI, this.layerHud);
+
+            var c2DDesc = new CursorDescription()
+            {
+                Name = "Cursor2D",
+                ContentPath = "resources/Cursor",
+                Textures = new[] { "target.png" },
+                Color = Color.Red,
+                Width = 16,
+                Height = 16,
+            };
+            this.cursor2D = this.AddComponent<Cursor>(c2DDesc, SceneObjectUsages.UI, this.layerHud + 1);
+            this.cursor2D.Instance.Color = Color.Red;
+            this.cursor2D.Visible = false;
 
             sw.Stop();
             return Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -304,110 +298,122 @@ namespace Terrain
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+            this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Lights",
                     DepthEnabled = true,
                     Count = 5000,
-                };
-                this.lightsVolumeDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, this.layerEffects);
-                this.lightsVolumeDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.None,
+                this.layerEffects);
+            this.lightsVolumeDrawer.Visible = false;
 
             #region DEBUG Shadow Map
-            {
-                int width = 300;
-                int height = 300;
-                int smLeft = this.Game.Form.RenderWidth - width;
-                int smTop = this.Game.Form.RenderHeight - height;
-                var stDescription = new SpriteTextureDescription()
-                {
-                    Name = "++DEBUG++ Shadow Map",
-                    Left = smLeft,
-                    Top = smTop,
-                    Width = width,
-                    Height = height,
-                    Channel = SpriteTextureChannels.Red,
-                };
-                this.shadowMapDrawer = this.AddComponent<SpriteTexture>(stDescription, SceneObjectUsages.UI, this.layerHud);
-                this.shadowMapDrawer.Visible = false;
-                this.shadowMapDrawer.DeferredEnabled = false;
 
-                this.debugTex = this.Game.ResourceManager.CreateResource(@"Resources\uvtest.png");
-            }
+            int width = 300;
+            int height = 300;
+            int smLeft = this.Game.Form.RenderWidth - width;
+            int smTop = this.Game.Form.RenderHeight - height;
+            var stDescription = new SpriteTextureDescription()
+            {
+                Name = "++DEBUG++ Shadow Map",
+                Left = smLeft,
+                Top = smTop,
+                Width = width,
+                Height = height,
+                Channel = SpriteTextureChannels.Red,
+            };
+            this.shadowMapDrawer = this.AddComponent<SpriteTexture>(stDescription, SceneObjectUsages.UI, this.layerHud);
+            this.shadowMapDrawer.Visible = false;
+            this.shadowMapDrawer.DeferredEnabled = false;
+
+            this.debugTex = this.Game.ResourceManager.CreateResource(@"Resources\uvtest.png");
+
             #endregion
 
             #region DEBUG Path finding Graph
-            {
-                var desc = new PrimitiveListDrawerDescription<Triangle>()
+
+            this.terrainGraphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(
+                new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Name = "++DEBUG++ Path finding Graph",
                     Count = MaxGridDrawer
-                };
-                this.terrainGraphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(desc, SceneObjectUsages.None, this.layerEffects);
-                this.terrainGraphDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.None,
+                this.layerEffects);
+            this.terrainGraphDrawer.Visible = false;
+
             #endregion
 
             #region DEBUG Picking test
-            {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+
+            this.terrainPointDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Picking test",
                     Count = MaxPickingTest
-                };
-                this.terrainPointDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, this.layerEffects);
-                this.terrainPointDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.None,
+                this.layerEffects);
+            this.terrainPointDrawer.Visible = false;
+
             #endregion
 
             #region DEBUG Trajectory
-            {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+
+            this.curveLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Trajectory",
                     Count = 20000
-                };
-                this.curveLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, this.layerEffects);
-                this.curveLineDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.None,
+                this.layerEffects);
+            this.curveLineDrawer.Visible = false;
+
             #endregion
 
             #region DEBUG Helicopter manipulator
-            {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+
+            this.movingObjLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Helicopter manipulator",
                     Count = 1000
-                };
-                this.movingObjLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, this.layerEffects);
-                this.movingObjLineDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.None,
+                this.layerEffects);
+            this.movingObjLineDrawer.Visible = false;
+
             #endregion
 
             #region DEBUG static volumes
-            {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+
+            this.staticObjLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Static Volumes",
                     Count = 20000
-                };
-                this.staticObjLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, layerEffects);
-                this.staticObjLineDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.None,
+                layerEffects);
+            this.staticObjLineDrawer.Visible = false;
+
             #endregion
 
             #region DEBUG Ground position test
-            {
-                var desc = new PrimitiveListDrawerDescription<Line3D>()
+
+            this.terrainLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(
+                new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Name = "++DEBUG++ Ground position test",
                     Count = 10000
-                };
-                this.terrainLineDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(desc, SceneObjectUsages.None, this.layerEffects);
-                this.terrainLineDrawer.Visible = false;
-            }
+                },
+                SceneObjectUsages.None,
+                this.layerEffects);
+            this.terrainLineDrawer.Visible = false;
+
             #endregion
 
             sw.Stop();
@@ -921,18 +927,16 @@ namespace Terrain
         {
             // Set position
             var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
+            var ray = this.GetTopDownRay(this.heliport.Transform.Position);
+            if (this.PickNearest(ray, RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r))
             {
-                var ray = this.GetTopDownRay(this.heliport.Transform.Position);
-                if (this.PickNearest(ray, RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r))
-                {
-                    this.helicopter.Transform.SetPosition(r.Position);
-                    this.helicopter.Transform.SetNormal(r.Item.Normal);
-                }
-
-                var hp = new AnimationPath();
-                hp.AddLoop("roll");
-                this.animations.Add("heli_default", new AnimationPlan(hp));
+                this.helicopter.Transform.SetPosition(r.Position);
+                this.helicopter.Transform.SetNormal(r.Item.Normal);
             }
+
+            var hp = new AnimationPath();
+            hp.AddLoop("roll");
+            this.animations.Add("heli_default", new AnimationPlan(hp));
 
             // Register animation paths
             AnimationPath ap = new AnimationPath();
@@ -991,22 +995,16 @@ namespace Terrain
         {
             var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
 
+            if (this.PickNearest(this.GetTopDownRay(-60, -60), RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r1))
             {
-                var ray = this.GetTopDownRay(-60, -60);
-                if (this.PickNearest(ray, RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r))
-                {
-                    this.tankP1.Transform.SetPosition(r.Position);
-                    this.tankP1.Transform.SetNormal(r.Item.Normal);
-                }
+                this.tankP1.Transform.SetPosition(r1.Position);
+                this.tankP1.Transform.SetNormal(r1.Item.Normal);
             }
 
+            if (this.PickNearest(this.GetTopDownRay(-70, 70), RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r2))
             {
-                var ray = this.GetTopDownRay(-70, 70);
-                if (this.PickNearest(ray, RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r))
-                {
-                    this.tankP2.Transform.SetPosition(r.Position);
-                    this.tankP2.Transform.SetNormal(r.Item.Normal);
-                }
+                this.tankP2.Transform.SetPosition(r2.Position);
+                this.tankP2.Transform.SetNormal(r2.Item.Normal);
             }
 
             // Define weapons
@@ -1093,33 +1091,31 @@ namespace Terrain
         private void StartDebug()
         {
             // Ground position test
-            {
-                var bbox = this.terrain.Geometry.GetBoundingBox();
+            var bbox = this.terrain.Geometry.GetBoundingBox();
 
-                float sep = 2.1f;
-                for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
+            float sep = 2.1f;
+            for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
+            {
+                for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
                 {
-                    for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
+                    if (this.FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                     {
-                        if (this.FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
-                        {
-                            this.oks.Add(new Line3D(r.Position, r.Position + Vector3.Up));
-                        }
-                        else
-                        {
-                            this.errs.Add(new Line3D(x, 10, z, x, -10, z));
-                        }
+                        this.oks.Add(new Line3D(r.Position, r.Position + Vector3.Up));
+                    }
+                    else
+                    {
+                        this.errs.Add(new Line3D(x, 10, z, x, -10, z));
                     }
                 }
+            }
 
-                if (this.oks.Count > 0)
-                {
-                    this.terrainLineDrawer.Instance.AddPrimitives(Color.Green, this.oks.ToArray());
-                }
-                if (this.errs.Count > 0)
-                {
-                    this.terrainLineDrawer.Instance.AddPrimitives(Color.Red, this.errs.ToArray());
-                }
+            if (this.oks.Count > 0)
+            {
+                this.terrainLineDrawer.Instance.AddPrimitives(Color.Green, this.oks.ToArray());
+            }
+            if (this.errs.Count > 0)
+            {
+                this.terrainLineDrawer.Instance.AddPrimitives(Color.Red, this.errs.ToArray());
             }
 
             // Axis
@@ -1204,9 +1200,11 @@ namespace Terrain
         }
         private void UpdateInputWalker(GameTime gameTime)
         {
+            bool rotateCamera = true;
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            rotateCamera = this.Game.Input.RightMouseButtonPressed;
 #endif
+            if (rotateCamera)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
@@ -1247,9 +1245,11 @@ namespace Terrain
         }
         private void UpdateInputFree(GameTime gameTime, Ray pickingRay)
         {
+            bool rotateCamera = true;
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            rotateCamera = this.Game.Input.RightMouseButtonPressed;
 #endif
+            if (rotateCamera)
             {
                 this.Camera.RotateMouse(
                     this.Game.GameTime,
